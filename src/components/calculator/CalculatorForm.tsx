@@ -131,9 +131,23 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     setCatSlug(entry.categorySlug);
     entry.loader().then(({ default: cfg }) => {
       if (cancelled) return;
+      // Seed initial values so the form shows a real answer on load. Mirrors the
+      // build-time ExampleResult logic (see [calculator]/index.astro) so the live
+      // form matches the crawlable example: explicit defaultValue → first select
+      // option → a number parsed from a numeric placeholder. Text/textarea inputs
+      // (e.g. "paste your JSON") stay empty.
       const defaults: Record<string, string> = {};
       for (const input of cfg.inputs) {
-        defaults[input.id] = String(input.defaultValue ?? '');
+        if (input.defaultValue !== undefined && input.defaultValue !== '') {
+          defaults[input.id] = String(input.defaultValue);
+        } else if (input.type === 'select' && input.options?.length) {
+          defaults[input.id] = input.options[0].value;
+        } else if ((input.type === 'number' || input.type === 'percentage') && input.placeholder) {
+          const m = input.placeholder.replace(/,/g, '').match(/-?\d+\.?\d*/);
+          defaults[input.id] = m ? m[0] : '';
+        } else {
+          defaults[input.id] = '';
+        }
       }
       // Overlay a shared scenario from the URL (?loanAmount=25000&…) onto defaults.
       let seeded = defaults;
