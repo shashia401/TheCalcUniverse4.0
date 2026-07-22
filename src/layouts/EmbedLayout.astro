@@ -1,0 +1,51 @@
+---
+// Minimal shell for /embed/* — the calculator, framed by other sites. No site
+// header/footer/nav; just the tool + a "Powered by" attribution that links back
+// to the full page. noindex (it's a framing surface, not a page to rank).
+import '../styles/global.css';
+import { SITE_NAME } from '../config/constants';
+
+interface Props {
+  title: string;
+  fullUrl: string;
+}
+const { title, fullUrl } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    {/* Apply saved theme before first paint — prevents light/dark flash */}
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-[var(--surface-body)] font-sans antialiased text-[var(--surface-text)]">
+    <main class="min-h-screen flex flex-col">
+      <div class="flex-1 p-3 sm:p-4">
+        <slot />
+      </div>
+      <div class="shrink-0 border-t border-[var(--border-warm)] bg-[var(--surface-card)] py-2.5 text-center">
+        <a
+          href={fullUrl}
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-1 text-xs text-[var(--surface-text-muted)] transition-colors hover:text-[var(--brand-default)]"
+        >
+          Powered by <span class="font-bold text-[var(--surface-text)]">{SITE_NAME}</span> ↗
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,106 @@
+---
+// "Embed this calculator" — the iframe snippet + copy + preview. Vanilla (no
+// React island). The attribution link sits OUTSIDE the iframe on purpose:
+// links inside an iframe pass no SEO equity, so the crawlable backlink to the
+// full page comes from the <p> in the embedding site's own HTML.
+import { BASE_URL } from '../../config/constants';
+
+interface Props {
+  categorySlug: string;
+  id: string;
+  title: string;
+}
+const { categorySlug, id, title } = Astro.props;
+const embedUrl = `${BASE_URL}/embed/${categorySlug}/${id}/`;
+const fullUrl = `${BASE_URL}/${categorySlug}/${id}/`;
+
+const iframeCode = [
+  `<iframe src="${embedUrl}"`,
+  `  width="100%" height="620" frameborder="0" loading="lazy"`,
+  `  title="${title}"`,
+  `  style="border:none;max-width:640px;margin:0 auto;display:block;">`,
+  `</iframe>`,
+  `<p style="text-align:center;font-size:12px;margin:4px auto;max-width:640px;">`,
+  `  Calculator by <a href="${fullUrl}">${title} — TheCalcUniverse</a>`,
+  `</p>`,
+].join('\n');
+
+const uid = `embed-${id}`;
+---
+
+<details class="group rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] print:hidden">
+  <summary class="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-semibold text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]">
+    <span class="flex items-center gap-2">
+      <span class="h-3.5 w-1 rounded-full bg-[var(--accent-amber)]" aria-hidden="true"></span>
+      Embed this calculator on your site
+    </span>
+    <span class="text-[var(--surface-text-muted)] transition-transform group-open:rotate-180" aria-hidden="true">▾</span>
+  </summary>
+
+  <div class="space-y-3 border-t border-[var(--border-warm)] p-4">
+    <p class="text-xs text-[var(--surface-text-secondary)]">
+      Free to embed. Paste this into any HTML page — it stays up to date automatically.
+    </p>
+    <textarea
+      id={`${uid}-code`}
+      readonly
+      rows="6"
+      class="w-full resize-y rounded-lg border border-[var(--border-warm)] bg-[var(--surface-bg)] p-3 font-mono text-xs text-[var(--surface-text-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-default)]"
+      aria-label="Embed iframe code"
+    >{iframeCode}</textarea>
+    <div class="flex flex-wrap items-center gap-2">
+      <button
+        id={`${uid}-copy`}
+        type="button"
+        class="rounded-lg bg-[var(--brand-default)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-default)]"
+      >
+        Copy embed code
+      </button>
+      <button
+        id={`${uid}-preview-btn`}
+        type="button"
+        class="rounded-lg border border-[var(--border-warm)] px-3 py-1.5 text-xs font-medium text-[var(--surface-text-secondary)] transition-colors hover:border-[var(--brand-default)] hover:text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+      >
+        Preview
+      </button>
+      <a
+        href={embedUrl}
+        target="_blank"
+        rel="noopener"
+        class="text-xs font-medium text-[var(--brand-default)] hover:underline"
+      >
+        Open embed ↗
+      </a>
+    </div>
+    <div id={`${uid}-preview`} hidden class="overflow-hidden rounded-lg border border-[var(--border-warm)]">
+      <iframe src={embedUrl} title={`${title} — preview`} loading="lazy" class="h-[420px] w-full border-0"></iframe>
+    </div>
+  </div>
+</details>
+
+<script is:inline define:vars={{ uid }}>
+  (function () {
+    var copyBtn = document.getElementById(uid + '-copy');
+    var ta = document.getElementById(uid + '-code');
+    var prevBtn = document.getElementById(uid + '-preview-btn');
+    var prev = document.getElementById(uid + '-preview');
+    if (copyBtn && ta) {
+      copyBtn.addEventListener('click', function () {
+        var done = function () {
+          var t = copyBtn.textContent;
+          copyBtn.textContent = 'Copied ✓';
+          setTimeout(function () { copyBtn.textContent = t; }, 2000);
+        };
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(ta.value).then(done).catch(function () { ta.select(); });
+        } else {
+          ta.select();
+          try { document.execCommand('copy'); done(); } catch (e) {}
+        }
+      });
+    }
+    if (prevBtn && prev) {
+      prevBtn.addEventListener('click', function () { prev.hidden = !prev.hidden; });
+    }
+  })();
+</script>

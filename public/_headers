@@ -1,0 +1,24 @@
+# Cloudflare Pages security headers — applied to every response.
+# CSP notes: 'unsafe-inline' script is required for Astro island hydration
+# bootstrap + JSON-LD; fonts come from Google Fonts until Phase 3 self-hosts them.
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+
+# Embed route must be frameable by other sites — that's the whole point.
+# Overrides the global X-Frame-Options: DENY / frame-ancestors 'none' for /embed/*.
+# X-Frame-Options has no standard "allow any origin" value, so we set an invalid
+# token (modern browsers ignore it) and rely on CSP frame-ancestors * for the
+# actual allow. Verify framing on the live host after deploy.
+/embed/*
+  X-Frame-Options: ALLOWALL
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors *; base-uri 'self'
+
+# Immutable caching for hashed build assets
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

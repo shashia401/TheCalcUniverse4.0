@@ -1,0 +1,28 @@
+---
+// Embeddable calculator — /embed/{category}/{id}/. Rendered inside other sites'
+// iframes (see EmbedCode.astro for the snippet). Full tool, minimal chrome.
+import type { CalculatorEntry } from '../../../types/calculator';
+import EmbedLayout from '../../../layouts/EmbedLayout.astro';
+import CalculatorForm from '../../../components/calculator/CalculatorForm';
+import { calculatorRegistry } from '../../../lib/registry';
+import { SITE_NAME, BASE_URL } from '../../../config/constants';
+
+export async function getStaticPaths() {
+  return calculatorRegistry.map((entry) => ({
+    params: { category: entry.categorySlug, calculator: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CalculatorEntry;
+}
+const { entry } = Astro.props;
+const shortName = entry.shortTitle ?? entry.title;
+const fullUrl = `${BASE_URL}/${entry.categorySlug}/${entry.id}/`;
+---
+
+<EmbedLayout title={`${entry.title} | ${SITE_NAME}`} fullUrl={fullUrl}>
+  <h1 class="mb-3 text-lg font-bold text-[var(--surface-text)]">{shortName}</h1>
+  <CalculatorForm client:load calculatorId={entry.id} />
+</EmbedLayout>

@@ -9,6 +9,7 @@ import ExampleResult from '../../../components/calculator/ExampleResult.astro';
 import FormulaCard from '../../../components/calculator/FormulaCard.astro';
 import TableOfContents from '../../../components/calculator/TableOfContents.astro';
 import Cite from '../../../components/calculator/Cite.astro';
+import EmbedCode from '../../../components/calculator/EmbedCode.astro';
 import HelpfulFeedback from '../../../components/calculator/HelpfulFeedback';
 import { calculatorRegistry, getCalculatorById, getCalculatorsByCategory } from '../../../lib/registry';
 import { getBlogPostBySlug } from '../../../lib/blog';
@@ -173,10 +174,11 @@ const tocItems = [
             </section>
           )}
 
-          {/* Engagement + citation */}
+          {/* Engagement + citation + embed */}
           <div class="mt-8 flex flex-col gap-4 border-t border-[var(--border-warm)] pt-6">
             <HelpfulFeedback client:visible calculatorId={entry.id} />
             <Cite title={entry.title} url={canonicalUrl} updated={entry.lastVerified} />
+            <EmbedCode categorySlug={entry.categorySlug} id={entry.id} title={entry.title} />
           </div>
 
           {related.length > 0 && (
