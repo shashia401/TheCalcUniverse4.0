@@ -1,34 +1,20 @@
 {
+  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "jsxImportSource": "react",
+    "resolveJsonModule": true,
+    // astro/tsconfigs/strict turns this on, which makes esbuild (dev) keep
+    // `import { SomeType }` value-imports of type-only symbols and then fail at
+    // runtime ("does not provide an export named …"), breaking island hydration
+    // in `astro dev`. Off = esbuild elides type-only imports per binding; the
+    // production build is unaffected (rollup tree-shakes either way).
+    "verbatimModuleSyntax": false,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
-  ],
-  "exclude": ["node_modules"]
+  "include": [".astro/types.d.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

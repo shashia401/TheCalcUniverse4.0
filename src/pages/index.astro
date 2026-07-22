@@ -178,8 +178,10 @@ const schemas = [
                   Full calculator →
                 </a>
               </div>
-              {/* CalculatorForm renders its own card — no outer card, so no nesting */}
-              <CalculatorForm client:visible calculatorId={demo.id} compact />
+              {/* Hero tool is above the fold — hydrate on load, not on scroll-into-view
+                  (client:visible's IntersectionObserver is unreliable for a display:contents
+                  island sitting at the top of the page). */}
+              <CalculatorForm client:load calculatorId={demo.id} compact />
             </div>
           )}
         </div>
