@@ -252,7 +252,9 @@ export default function CalculatorForm({ calculatorId, compact = false }: Props)
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {results.map((r) => (
+            {/* Compact hero embed shows only the two headline results (e.g. BMI
+                Prime + BMI Score); the full breakdown lives on the calc page. */}
+            {(compact ? results.slice(0, 2) : results).map((r) => (
               <div
                 key={r.id}
                 className={`rounded-xl p-4 ${
@@ -266,7 +268,7 @@ export default function CalculatorForm({ calculatorId, compact = false }: Props)
                   {r.value}
                   {r.unit && <span className="ml-1 text-sm font-normal opacity-75">{r.unit}</span>}
                 </p>
-                {r.interpretation && (
+                {!compact && r.interpretation && (
                   <p className="text-xs opacity-80 mt-1">{r.interpretation}</p>
                 )}
               </div>
