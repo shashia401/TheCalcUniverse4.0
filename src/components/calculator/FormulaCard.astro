@@ -1,0 +1,67 @@
+---
+// Rich "The formula" card — formula expression + variable legend (symbol = name)
+// + a worked-example result. Static (built once), so the result line is the
+// example scenario, not the visitor's live inputs (those update in the results
+// block above). Rendered in the calculator page's sticky rail and, on mobile,
+// under the tool.
+interface Variable {
+  symbol: string;
+  name: string;
+  description?: string;
+}
+interface Props {
+  formula: string;
+  variables?: Variable[];
+  scenario?: string;
+  resultLabel?: string;
+  resultValue?: string;
+  resultUnit?: string;
+  class?: string;
+}
+const {
+  formula,
+  variables = [],
+  scenario,
+  resultLabel,
+  resultValue,
+  resultUnit,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class={`rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-5 shadow-card ${className}`}>
+  <div class="flex items-center gap-2 mb-4">
+    <span class="h-3.5 w-1 rounded-full bg-[var(--accent-amber)]" aria-hidden="true"></span>
+    <h3 class="text-sm font-bold text-[var(--surface-text)]">The formula</h3>
+  </div>
+
+  <div class="rounded-lg border border-[var(--border-warm)] bg-[var(--surface-bg)] p-4">
+    <p class="font-mono text-sm text-[var(--surface-text)] whitespace-pre-line overflow-x-auto">{formula}</p>
+
+    {variables.length > 0 && (
+      <dl class="mt-3 space-y-1.5 text-xs">
+        {variables.map((v) => (
+          <div class="flex gap-2">
+            <dt class="w-10 shrink-0 font-mono font-bold text-[var(--brand-default)]">{v.symbol}</dt>
+            <dd class="text-[var(--surface-text-secondary)]">{v.name}</dd>
+          </div>
+        ))}
+      </dl>
+    )}
+  </div>
+
+  {resultLabel && resultValue && (
+    <div class="mt-3 border-t border-[var(--border-warm)] pt-3">
+      <p class="mb-1 text-tiny font-semibold uppercase tracking-wider text-[var(--surface-text-muted)]">
+        Worked example{scenario ? ` — ${scenario}` : ''}
+      </p>
+      <p class="font-mono text-sm font-bold text-[var(--brand-default)]">
+        {resultLabel} = {resultValue}{resultUnit ? ` ${resultUnit}` : ''}
+      </p>
+    </div>
+  )}
+
+  <a href="#how-it-works" class="mt-3 inline-block text-xs font-medium text-[var(--brand-default)] hover:underline">
+    Full explanation ↓
+  </a>
+</div>

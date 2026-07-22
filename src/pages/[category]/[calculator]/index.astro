@@ -6,6 +6,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import CalculatorForm from '../../../components/calculator/CalculatorForm';
 import EducationalSection from '../../../components/calculator/EducationalSection';
 import ExampleResult from '../../../components/calculator/ExampleResult.astro';
+import FormulaCard from '../../../components/calculator/FormulaCard.astro';
 import TableOfContents from '../../../components/calculator/TableOfContents.astro';
 import Cite from '../../../components/calculator/Cite.astro';
 import HelpfulFeedback from '../../../components/calculator/HelpfulFeedback';
@@ -79,6 +80,8 @@ const scenario = config.inputs
   .slice(0, 4)
   .map((i) => `${i.label} ${sampleValues[i.id]}${i.unit ? ' ' + i.unit : ''}`)
   .join(', ');
+// Headline result for the formula card's worked-example line
+const sampleHighlight = sampleResults.find((r) => r.highlight) ?? sampleResults[0];
 
 const canonicalUrl = `${BASE_URL}/${entry.categorySlug}/${entry.id}/`;
 const tocItems = [
@@ -153,13 +156,15 @@ const tocItems = [
               lives in the sticky sidebar instead (see aside), so this copy is
               mobile-only to avoid showing it twice. */}
           {config.educational?.formula && (
-            <div class="mt-6 rounded-r-xl border-l-4 border-[var(--accent-amber)] bg-[var(--surface-card)] px-4 py-3 shadow-card lg:hidden">
-              <p class="text-tiny font-bold uppercase tracking-[0.18em] text-[var(--surface-text-muted)] mb-1">The formula</p>
-              <p class="font-mono text-sm text-[var(--surface-text)] whitespace-pre-line line-clamp-3">{config.educational.formula}</p>
-              <a href="#how-it-works" class="text-xs font-medium text-[var(--brand-default)] hover:underline">
-                Full explanation below ↓
-              </a>
-            </div>
+            <FormulaCard
+              class="mt-6 lg:hidden"
+              formula={config.educational.formula}
+              variables={config.educational.variables}
+              scenario={scenario}
+              resultLabel={sampleHighlight?.label}
+              resultValue={sampleHighlight ? String(sampleHighlight.value) : undefined}
+              resultUnit={sampleHighlight?.unit}
+            />
           )}
 
           {config.educational && (
@@ -216,13 +221,14 @@ const tocItems = [
           <aside class="hidden lg:block">
             <div class="lg:sticky lg:top-20 space-y-4">
               {config.educational?.formula && (
-                <div class="rounded-r-xl border-l-4 border-[var(--accent-amber)] bg-[var(--surface-card)] px-4 py-3 shadow-card">
-                  <p class="text-tiny font-bold uppercase tracking-[0.18em] text-[var(--surface-text-muted)] mb-1">The formula</p>
-                  <p class="font-mono text-sm text-[var(--surface-text)] whitespace-pre-line">{config.educational.formula}</p>
-                  <a href="#how-it-works" class="text-xs font-medium text-[var(--brand-default)] hover:underline">
-                    Full explanation ↓
-                  </a>
-                </div>
+                <FormulaCard
+                  formula={config.educational.formula}
+                  variables={config.educational.variables}
+                  scenario={scenario}
+                  resultLabel={sampleHighlight?.label}
+                  resultValue={sampleHighlight ? String(sampleHighlight.value) : undefined}
+                  resultUnit={sampleHighlight?.unit}
+                />
               )}
               {tocItems.length > 1 && <TableOfContents items={tocItems} />}
             </div>
