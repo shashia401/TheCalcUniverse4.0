@@ -145,6 +145,11 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
         } else if ((input.type === 'number' || input.type === 'percentage') && input.placeholder) {
           const m = input.placeholder.replace(/,/g, '').match(/-?\d+\.?\d*/);
           defaults[input.id] = m ? m[0] : '';
+        } else if ((input.type === 'text' || input.type === 'textarea') && input.placeholder) {
+          // Seed a sample data list from placeholders like "Enter numbers: 1, 2, 3"
+          // (stats/vector calcs) — but NOT paste prompts ("Paste your JSON here").
+          const list = input.placeholder.match(/-?\d[\d\s,.\-]*\d/);
+          defaults[input.id] = list && (list[0].match(/\d+/g)?.length ?? 0) >= 2 ? list[0].trim() : '';
         } else {
           defaults[input.id] = '';
         }

@@ -68,6 +68,12 @@ for (const inp of config.inputs) {
     // numeric placeholders, without per-calc editing.
     const m = inp.placeholder.replace(/,/g, '').match(/-?\d+\.?\d*/);
     if (m) sampleValues[inp.id] = m[0];
+  } else if ((inp.type === 'text' || inp.type === 'textarea') && inp.placeholder) {
+    // Sample data list from placeholders like "Enter numbers: 1, 2, 3" (stats/
+    // vector calcs) — but not paste prompts ("Paste your JSON here"). Kept in
+    // sync with the same rule in CalculatorForm's live seeding.
+    const list = inp.placeholder.match(/-?\d[\d\s,.\-]*\d/);
+    if (list && (list[0].match(/\d+/g)?.length ?? 0) >= 2) sampleValues[inp.id] = list[0].trim();
   }
 }
 let sampleResults: CalculatorResult[] = [];
