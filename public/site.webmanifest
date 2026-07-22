@@ -1,0 +1,23 @@
+{
+  "name": "TheCalcUniverse",
+  "short_name": "TheCalcUniverse",
+  "description": "Free online calculators for finance, math, health, science, and everyday life.",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#0f172a",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}

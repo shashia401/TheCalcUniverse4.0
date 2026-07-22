@@ -1,0 +1,91 @@
+---
+// Site footer — fully static. Category links = internal-linking surface on every page.
+import { getCategories, calculatorRegistry } from '../../lib/registry';
+
+const categories = getCategories()
+  .filter((c) => c.count > 0)
+  .sort((a, b) => a.name.localeCompare(b.name));
+const total = calculatorRegistry.length;
+
+const company = [
+  { label: 'About', href: '/about/' },
+  { label: 'Blog', href: '/blog/' },
+  { label: 'Glossary', href: '/glossary/' },
+  { label: 'Search', href: '/search/' },
+  { label: 'Privacy Policy', href: '/privacy/' },
+  { label: 'Terms of Use', href: '/terms/' },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-16 bg-[var(--surface-bg)] print:hidden">
+  <div class="h-px bg-gradient-to-r from-transparent via-[var(--accent-amber)]/30 to-transparent"></div>
+  <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-10">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <a
+          href="/"
+          class="inline-flex items-center gap-2.5 mb-3 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+        >
+          <img src="/android-chrome-96x96.png" alt="" width="32" height="32" class="w-8 h-8 rounded-[9px] shadow-card" />
+          <span class="font-black tracking-tight leading-none text-[18px]">
+            <span class="text-[var(--surface-text)]">TheCalc</span><span class="text-[var(--accent-rust)]">Universe</span>
+          </span>
+        </a>
+        <p class="text-sm leading-relaxed text-[var(--surface-text-muted)] max-w-xs">
+          {total}+ free, precise calculators for finance, math, health, science, and everyday life.
+          No account needed.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-[var(--surface-text-muted)] font-bold text-xxs uppercase tracking-[0.18em] mb-2">Categories</h2>
+        <div class="h-px w-8 bg-[var(--accent-amber)]/30 mb-3"></div>
+        <ul class="space-y-1.5 list-none p-0">
+          {categories.map((c) => (
+            <li>
+              <a href={`/${c.slug}/`} class="text-sm text-[var(--surface-text-muted)] transition-colors hover:text-[var(--surface-text)]">
+                {c.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-[var(--surface-text-muted)] font-bold text-xxs uppercase tracking-[0.18em] mb-2">Company</h2>
+        <div class="h-px w-8 bg-[var(--accent-amber)]/30 mb-3"></div>
+        <ul class="space-y-1.5 list-none p-0">
+          {company.map((item) => (
+            <li>
+              <a href={item.href} class="text-sm text-[var(--surface-text-muted)] transition-colors hover:text-[var(--surface-text)]">
+                {item.label}
+              </a>
+            </li>
+          ))}
+          <li>
+            <a href="mailto:contact@thecalcuniverse.com" class="text-sm text-[var(--surface-text-muted)] transition-colors hover:text-[var(--surface-text)]">
+              Report an issue
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-10 pt-6 border-t border-[var(--border-warm)] space-y-3">
+      <p class="text-xs text-[var(--surface-text-muted)] leading-relaxed">
+        <strong class="text-[var(--surface-text-secondary)]">Medical Disclaimer:</strong> The health and fitness calculators on this site are for informational and educational purposes only. They are not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider with any questions about your health.
+      </p>
+      <p class="text-xs text-[var(--surface-text-muted)] leading-relaxed">
+        <strong class="text-[var(--surface-text-secondary)]">Financial Disclaimer:</strong> The finance calculators on this site are for informational purposes only and do not constitute financial advice. Results are estimates based on the inputs provided and may vary. Consult a qualified financial advisor before making investment or financial decisions.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3">
+        <p class="text-xs text-[var(--surface-text-muted)]">
+          &copy; {year} TheCalcUniverse. All results are for informational purposes only.
+        </p>
+        <p class="text-xs text-[var(--surface-text-secondary)] font-medium">Fast, free, and privacy-first.</p>
+      </div>
+    </div>
+  </div>
+</footer>
