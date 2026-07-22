@@ -512,7 +512,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #94a3b8;
+    color: #64748b; /* slate-500 — WCAG AA (4.6:1) on white; slate-400 failed */
   }
 
   .dark .panel-section-title {
@@ -819,4 +819,12 @@
 @media print {
   .print-only { display: block !important; }
   .print-actions, .bmi-action-btn { display: none !important; }
+}
+
+/* A11y (WCAG 1.4.1): links sitting inside a block of text must be
+   distinguishable without relying on color alone. Breadcrumb trails read as
+   text, so underline their links. */
+nav[aria-label='Breadcrumb'] a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }

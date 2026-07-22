@@ -423,13 +423,13 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                     : 'bg-[var(--surface-bg)] border border-[var(--border-warm)]'
                 }`}
               >
-                <p className="text-xs font-medium opacity-75 mb-0.5">{r.label}</p>
+                <p className={`text-xs font-medium mb-0.5 ${r.highlight ? 'text-white/90' : 'text-[var(--surface-text-muted)]'}`}>{r.label}</p>
                 <p className={`text-xl font-bold ${!r.highlight && r.color ? resultColorClasses[r.color] ?? '' : ''}`}>
                   {r.value}
-                  {r.unit && <span className="ml-1 text-sm font-normal opacity-75">{r.unit}</span>}
+                  {r.unit && <span className={`ml-1 text-sm font-normal ${r.highlight ? 'text-white/90' : 'opacity-75'}`}>{r.unit}</span>}
                 </p>
                 {!compact && r.interpretation && (
-                  <p className="text-xs opacity-80 mt-1">{r.interpretation}</p>
+                  <p className={`text-xs mt-1 ${r.highlight ? 'text-white/90' : 'text-[var(--surface-text-secondary)]'}`}>{r.interpretation}</p>
                 )}
               </div>
             ))}
