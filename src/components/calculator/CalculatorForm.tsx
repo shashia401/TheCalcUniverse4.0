@@ -36,6 +36,9 @@ const resultColorClasses: Record<string, string> = {
   negative: 'text-accent-rose-600',
 };
 
+const actionBtnCls =
+  'text-xs font-medium text-[var(--brand-default)] rounded px-2 py-1 transition-colors hover:bg-[var(--surface-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-70';
+
 export default function CalculatorForm({ calculatorId, compact = false, visibleInputIds }: Props) {
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [catSlug, setCatSlug] = useState('');
@@ -81,6 +84,41 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
       .catch(() => {
         // clipboard unavailable (permissions/http) — button simply does nothing
       });
+  };
+
+  const printResult = () => {
+    if (typeof window !== 'undefined') window.print();
+  };
+
+  // Export the current results as CSV (a small table of label/value/unit).
+  const downloadCsv = () => {
+    if (!results.length) return;
+    const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
+    const rows = [
+      ['Metric', 'Value', 'Unit'],
+      ...results.map((r) => [r.label, String(r.value), r.unit ?? '']),
+    ];
+    const csv = rows.map((row) => row.map((c) => esc(String(c))).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${calculatorId}-results.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // Native share sheet on mobile (includes email, messages, etc.); on desktop
+  // where the API is absent, fall back to copying the shareable link.
+  const shareResult = () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({ title: document.title, url }).catch(() => {});
+    } else {
+      copyLink();
+    }
   };
 
   useEffect(() => {
@@ -252,27 +290,29 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
 
       {results.length > 0 && (
         <div className="border-t border-[var(--border-warm)] pt-5">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h2 className="text-sm font-semibold text-[var(--surface-text-muted)] uppercase tracking-wide">
               Results
             </h2>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={copyLink}
-                title="Copy a link to this exact scenario"
-                className="text-xs font-medium text-[var(--brand-default)] rounded px-2 py-1 transition-colors hover:bg-[var(--surface-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-70"
-              >
-                {linkCopied ? 'Link copied ✓' : 'Copy link'}
-              </button>
-              <button
-                type="button"
-                onClick={copyResults}
-                className="text-xs font-medium text-[var(--brand-default)] rounded px-2 py-1 transition-colors hover:bg-[var(--surface-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-70"
-              >
-                {copied ? 'Copied ✓' : 'Copy results'}
-              </button>
-            </div>
+            {!compact && (
+              <div className="flex flex-wrap items-center gap-1 print:hidden">
+                <button type="button" onClick={copyLink} title="Copy a link to this exact scenario" className={actionBtnCls}>
+                  {linkCopied ? 'Link copied ✓' : 'Copy link'}
+                </button>
+                <button type="button" onClick={copyResults} className={actionBtnCls}>
+                  {copied ? 'Copied ✓' : 'Copy results'}
+                </button>
+                <button type="button" onClick={printResult} title="Print — or save as PDF" className={actionBtnCls}>
+                  Print
+                </button>
+                <button type="button" onClick={downloadCsv} title="Download results as CSV" className={actionBtnCls}>
+                  CSV
+                </button>
+                <button type="button" onClick={shareResult} title="Share this result" className={actionBtnCls}>
+                  Share
+                </button>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Compact hero embed shows only the two headline results (e.g. BMI

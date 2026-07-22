@@ -149,9 +149,11 @@ const tocItems = [
             </div>
           )}
 
-          {/* Signature: the work, right under the answer */}
+          {/* Signature: the work, right under the answer. On desktop the formula
+              lives in the sticky sidebar instead (see aside), so this copy is
+              mobile-only to avoid showing it twice. */}
           {config.educational?.formula && (
-            <div class="mt-6 rounded-r-xl border-l-4 border-[var(--accent-amber)] bg-[var(--surface-card)] px-4 py-3 shadow-card">
+            <div class="mt-6 rounded-r-xl border-l-4 border-[var(--accent-amber)] bg-[var(--surface-card)] px-4 py-3 shadow-card lg:hidden">
               <p class="text-tiny font-bold uppercase tracking-[0.18em] text-[var(--surface-text-muted)] mb-1">The formula</p>
               <p class="font-mono text-sm text-[var(--surface-text)] whitespace-pre-line line-clamp-3">{config.educational.formula}</p>
               <a href="#how-it-works" class="text-xs font-medium text-[var(--brand-default)] hover:underline">
@@ -173,8 +175,8 @@ const tocItems = [
           </div>
 
           {related.length > 0 && (
-            <section aria-label="Related calculators" class="mt-12">
-              <h2 class="text-lg font-bold text-[var(--surface-text)] mb-4">Related calculators</h2>
+            <section aria-label="You may also like" class="mt-12">
+              <h2 class="text-lg font-bold text-[var(--surface-text)] mb-4">You may also like</h2>
               <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 list-none p-0">
                 {related.slice(0, 4).map((r) => (
                   <li>
@@ -207,12 +209,22 @@ const tocItems = [
           )}
         </div>
 
-        {/* STICKY RAIL — on-page contents; desktop only (mobile leads with the
-            tool and uses the educational headings to navigate). */}
-        {tocItems.length > 1 && (
+        {/* STICKY RAIL — the formula (visible while you use the tool) + on-page
+            contents. Desktop only; mobile shows the formula under the tool and
+            navigates via the educational headings. */}
+        {(config.educational?.formula || tocItems.length > 1) && (
           <aside class="hidden lg:block">
-            <div class="lg:sticky lg:top-20">
-              <TableOfContents items={tocItems} />
+            <div class="lg:sticky lg:top-20 space-y-4">
+              {config.educational?.formula && (
+                <div class="rounded-r-xl border-l-4 border-[var(--accent-amber)] bg-[var(--surface-card)] px-4 py-3 shadow-card">
+                  <p class="text-tiny font-bold uppercase tracking-[0.18em] text-[var(--surface-text-muted)] mb-1">The formula</p>
+                  <p class="font-mono text-sm text-[var(--surface-text)] whitespace-pre-line">{config.educational.formula}</p>
+                  <a href="#how-it-works" class="text-xs font-medium text-[var(--brand-default)] hover:underline">
+                    Full explanation ↓
+                  </a>
+                </div>
+              )}
+              {tocItems.length > 1 && <TableOfContents items={tocItems} />}
             </div>
           </aside>
         )}
