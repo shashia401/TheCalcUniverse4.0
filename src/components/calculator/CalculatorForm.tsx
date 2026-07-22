@@ -46,6 +46,15 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   const [values, setValues] = useState<Record<string, string>>({});
   const [showSticky, setShowSticky] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  // Saved scenarios for side-by-side comparison (e.g. loan A vs loan B). Local
+  // to the session; no backend. Capped so the table stays readable.
+  const [scenarios, setScenarios] = useState<{ id: number; results: CalculatorResult[] }[]>([]);
+  const scenarioId = useRef(0);
+  const addScenario = () => {
+    if (!results.length) return;
+    setScenarios((prev) => [...prev, { id: ++scenarioId.current, results: results.map((r) => ({ ...r })) }].slice(-4));
+  };
+  const removeScenario = (id: number) => setScenarios((prev) => prev.filter((s) => s.id !== id));
   const [results, setResults] = useState<CalculatorResult[]>([]);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -378,6 +387,9 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                 <button type="button" onClick={shareResult} title="Share this result" className={actionBtnCls}>
                   Share
                 </button>
+                <button type="button" onClick={addScenario} title="Save this result to compare side by side" className={actionBtnCls}>
+                  + Compare
+                </button>
               </div>
             )}
           </div>
@@ -490,6 +502,62 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           See the full breakdown with your numbers
           <span aria-hidden="true">→</span>
         </a>
+      )}
+
+      {/* Compare saved scenarios side by side (e.g. loan A vs loan B) */}
+      {!compact && scenarios.length > 0 && (
+        <div className="mt-6 border-t border-[var(--border-warm)] pt-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--surface-text-muted)]">
+              Compare scenarios ({scenarios.length})
+            </h2>
+            <button type="button" onClick={() => setScenarios([])} className={actionBtnCls}>
+              Clear
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[420px] border-collapse text-sm">
+              <thead>
+                <tr>
+                  <th className="p-2 text-left font-medium text-[var(--surface-text-muted)]">Metric</th>
+                  {scenarios.map((sc, i) => (
+                    <th key={sc.id} className="p-2 text-right">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="font-semibold text-[var(--surface-text)]">#{i + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeScenario(sc.id)}
+                          aria-label={`Remove scenario ${i + 1}`}
+                          className="text-[var(--surface-text-muted)] transition-colors hover:text-accent-rose-600"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((r) => (
+                  <tr key={r.id} className="border-t border-[var(--border-warm)]">
+                    <td className="p-2 text-[var(--surface-text-secondary)]">{r.label}</td>
+                    {scenarios.map((sc) => {
+                      const m = sc.results.find((x) => x.id === r.id);
+                      return (
+                        <td key={sc.id} className="p-2 text-right font-mono font-medium text-[var(--surface-text)]">
+                          {m ? `${m.value}${m.unit ? ` ${m.unit}` : ''}` : '—'}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-tiny text-[var(--surface-text-muted)]">
+            Change your inputs above, then press “+ Compare” again to add another column.
+          </p>
+        </div>
       )}
 
       {/* Live worked solution — the user's own numbers, step by step */}
