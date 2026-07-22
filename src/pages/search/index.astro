@@ -2,7 +2,9 @@
 // Search page — noindex (mirrors v2 policy). The island gets a slim prebuilt index.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SearchBox from '../../components/SearchBox';
-import { calculatorRegistry } from '../../lib/registry';
+import CategoryIcon from '../../components/CategoryIcon.astro';
+import { calculatorRegistry, getCategories } from '../../lib/registry';
+import { accentFor } from '../../lib/categoryAccent';
 import { SITE_NAME } from '../../config/constants';
 
 const index = calculatorRegistry.map((entry) => ({
@@ -10,6 +12,8 @@ const index = calculatorRegistry.map((entry) => ({
   p: `/${entry.categorySlug}/${entry.id}/`,
   c: entry.category,
 }));
+
+const categories = getCategories().filter((c) => c.count > 0);
 ---
 
 <BaseLayout
@@ -25,8 +29,34 @@ const index = calculatorRegistry.map((entry) => ({
         <span class="mx-2" aria-hidden="true">›</span>
         <span>Search</span>
       </nav>
-      <h1 class="text-2xl font-bold text-[var(--surface-text)] mb-6">Search</h1>
+      <h1 class="text-2xl font-bold text-[var(--surface-text)] mb-2">Search {index.length} calculators</h1>
+      <p class="text-sm text-[var(--surface-text-secondary)] mb-6">Type a name, or browse a category below.</p>
       <SearchBox client:load index={index} />
+
+      <section aria-label="Browse by category" class="mt-10">
+        <h2 class="text-xs font-bold uppercase tracking-[0.16em] text-[var(--surface-text-muted)] mb-3">Or browse by category</h2>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 list-none p-0">
+          {categories.map((cat) => {
+            const a = accentFor(cat.slug);
+            return (
+              <li>
+                <a
+                  href={`/${cat.slug}/`}
+                  class={`flex items-center gap-3 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-3 shadow-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-card-hover motion-reduce:transform-none motion-reduce:transition-none ${a.border} focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]`}
+                >
+                  <span class={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${a.tint} ${a.text}`}>
+                    <CategoryIcon slug={cat.slug} size={18} />
+                  </span>
+                  <span class="min-w-0">
+                    <span class="block font-semibold text-sm text-[var(--surface-text)]">{cat.name}</span>
+                    <span class="block text-tiny text-[var(--surface-text-muted)]">{cat.count} calculators</span>
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
     </div>
   </main>
 </BaseLayout>
