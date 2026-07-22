@@ -5,7 +5,8 @@
 // The config is loaded here via the registry's dynamic import, which Vite splits
 // into a per-calculator chunk — a page only ever downloads its own logic.
 
-import { useEffect, useState, type HTMLAttributes } from 'react';
+import { useEffect, useRef, useState, type HTMLAttributes } from 'react';
+import { createPortal } from 'react-dom';
 import type { CalculatorConfig, CalculatorResult, InputField } from '../../types/calculator';
 import { getCalculatorById } from '../../calculators/registry/index';
 import MiniAreaChart from './MiniAreaChart';
@@ -43,6 +44,8 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [catSlug, setCatSlug] = useState('');
   const [values, setValues] = useState<Record<string, string>>({});
+  const [showSticky, setShowSticky] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [results, setResults] = useState<CalculatorResult[]>([]);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -162,6 +165,22 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     };
   }, [calculatorId]);
 
+  // Sticky result bar — appears once the calculator card has scrolled above the
+  // viewport, keeping the headline answer + a jump back to the inputs in view.
+  // Full page only (not the compact hero embed).
+  useEffect(() => {
+    if (compact) return;
+    const onScroll = () => {
+      const el = cardRef.current;
+      if (!el) return;
+      // Show once the inputs + headline result have scrolled up out of view.
+      setShowSticky(el.getBoundingClientRect().top < -240);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [compact]);
+
   if (!config) {
     // Reserve close to the real form's height so the skeleton→form swap on
     // hydration doesn't cause a layout shift (CWV/CLS). Most calculator forms
@@ -255,9 +274,11 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   };
 
   const activeShape = values.shape || config.shapeTabs?.[0]?.value;
+  const stickyResult = results.find((r) => r.highlight) ?? results[0];
 
   return (
-    <div className="bg-[var(--surface-card)] border border-[var(--border-warm)] rounded-2xl p-6 md:p-8">
+    <>
+    <div ref={cardRef} className="bg-[var(--surface-card)] border border-[var(--border-warm)] rounded-2xl p-6 md:p-8">
       {/* Variant/shape tabs — switch which set of inputs (and formula) applies.
           Writes to values.shape, which each calc's inputs read via showWhen. */}
       {config.shapeTabs && config.shapeTabs.length > 0 && (
@@ -341,6 +362,24 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
               </div>
             )}
           </div>
+          {!compact && results.some((r) => r.warning) && (
+            <div className="mb-3 space-y-2">
+              {results
+                .filter((r) => r.warning)
+                .map((r) => (
+                  <div
+                    key={r.id}
+                    role="alert"
+                    className="flex items-start gap-2 rounded-xl border border-accent-amber-400/50 bg-accent-amber-50 px-4 py-3 text-sm dark:bg-transparent"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-accent-amber-600" aria-hidden="true">
+                      <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><line x1="12" x2="12" y1="9" y2="13" /><line x1="12" x2="12.01" y1="17" y2="17" />
+                    </svg>
+                    <p className="font-medium text-accent-amber-700">{r.warning}</p>
+                  </div>
+                ))}
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Compact hero embed shows only the two headline results (e.g. BMI
                 Prime + BMI Score); the full breakdown lives on the calc page. */}
@@ -477,5 +516,32 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
         <div className="mt-6">{config.extraPanel(values, results)}</div>
       )}
     </div>
+
+    {/* Sticky result bar — keeps the headline answer in view after you scroll
+        past the calculator, with a jump back to the inputs. Portaled to <body>
+        so an ancestor's transform/contain can't break position:fixed. */}
+    {!compact && showSticky && stickyResult && typeof document !== 'undefined' &&
+      createPortal(
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--border-warm)] bg-[var(--surface-card)] px-4 py-3 shadow-card-hover print:hidden">
+          <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4">
+            <p className="min-w-0 truncate text-sm">
+              <span className="font-medium text-[var(--surface-text-muted)]">{stickyResult.label}: </span>
+              <span className="font-bold text-[var(--surface-text)]">
+                {stickyResult.value}
+                {stickyResult.unit ? ` ${stickyResult.unit}` : ''}
+              </span>
+            </p>
+            <button
+              type="button"
+              onClick={() => cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="shrink-0 rounded-lg bg-[var(--brand-default)] px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-default)]"
+            >
+              Edit inputs
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
