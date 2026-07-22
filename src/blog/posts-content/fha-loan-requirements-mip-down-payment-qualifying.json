@@ -1,0 +1,104 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "An FHA loan can get you into a house with as little as 3. 5% down. For first-time buyers or anyone with less-than-perfect credit, that's a game changer."
+    },
+    {
+      "type": "paragraph",
+      "text": "But those low upfront requirements come with real costs you need to understand before signing."
+    },
+    {
+      "type": "paragraph",
+      "text": "FHA loans are insured by the Federal Housing Administration and issued by approved lenders. They exist to help lower-income and first-time buyers access homeownership. The trade-off?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Mandatory mortgage insurance — and it works differently than conventional PMI."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What are the FHA down payment requirements?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The minimum down payment depends on your credit score. With a score of **580 or higher**, you can put down just **3. 5%**."
+    },
+    {
+      "type": "paragraph",
+      "text": "With a score between **500 and 579**, you need **10% down**. Scores below 500 aren't eligible for FHA financing."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Individual lenders can set higher requirements than the FHA minimums — these are called overlay requirements. Even if the FHA approves a 580 score, your lender might require 620 or higher. Always check with multiple lenders."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How does FHA MIP work?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Every FHA loan requires Mortgage Insurance Premiums (MIP). There are two components. First, an **upfront MIP of 1."
+    },
+    {
+      "type": "paragraph",
+      "text": "75%** of the loan amount — this is usually financed into the loan itself. Second, an **annual MIP of 0. 50% to 0."
+    },
+    {
+      "type": "paragraph",
+      "text": "55%** paid in monthly installments."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's what MIP looks like on a **$300,000 home purchase with 3.5% down at 6.8%**:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Component",
+        "Amount",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Upfront MIP (1.75%)",
+          "$5,066",
+          "Financed into the loan"
+        ],
+        [
+          "Annual MIP rate",
+          "0.55%",
+          "$1,592 per year"
+        ],
+        [
+          "Monthly MIP payment",
+          "$133",
+          "Added to your monthly payment"
+        ],
+        [
+          "MIP duration",
+          "Life of loan",
+          "Can't cancel with <10% down"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate your full FHA loan payment",
+      "body": "See your total monthly payment including principal, interest, and both MIP components. Compare down payment options and see how MIP changes over time.",
+      "buttonLabel": "Use the FHA Loan Calculator",
+      "path": "/finance/fha-loan-calculator/"
+    }
+  ],
+  "keywords": [
+    "fha loan calculator",
+    "fha mortgage calculator",
+    "fha mip calculator",
+    "fha loan payment",
+    "fha mortgage insurance premium",
+    "fha monthly payment"
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "The Pythagorean theorem is one of the oldest and most widely used relationships in all of mathematics. Over 3,500 years old, it bridges ancient geometry with modern technology — from building pyramids to rendering 3D graphics and navigating with GPS. And it all starts with one simple equation: **a² + b² = c²**."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What does a² + b² = c² actually mean?"
+    },
+    {
+      "type": "paragraph",
+      "text": "In any right triangle (a triangle with one **90-degree angle**), the two shorter sides are called **legs** (a and b), and the longest side opposite the right angle is the **hypotenuse** (c). The theorem says that the square of the hypotenuse equals the sum of the squares of the two legs. Picture a square built on each side of the triangle, and the area of the square on the hypotenuse equals the combined area of the squares on the two legs."
+    },
+    {
+      "type": "paragraph",
+      "text": "That geometric insight is the core of the theorem. You don't need to be a mathematician to use it — that's the beauty of it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How do you use the theorem to solve for any side?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula rearranges depending on what you need. To find the hypotenuse: **c = √(a² + b²)**. To find a missing leg: **a = √(c² - b²)** or **b = √(c² - a²)**."
+    },
+    {
+      "type": "paragraph",
+      "text": "For the classic 3-4-5 triangle, a = 3 and b = 4, so c = √(9 + 16) = √25 = **5**. The Right Triangle Calculator on this site also uses SOH CAH TOA trigonometry to find the two acute angles of the triangle — not just the side lengths — giving you a complete picture of every measurement."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "The theorem only works for right triangles. For non-right triangles, use the Law of Cosines: c² = a² + b² − 2ab·cos(C). When C = 90°, cos(90°) = 0, and the Law of Cosines simplifies right back to the Pythagorean theorem."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What are Pythagorean triples and why do they matter?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A Pythagorean triple is a set of three positive integers that satisfy a² + b² = c² exactly. The most famous is **3-4-5**: 9 + 16 = 25. Any multiple of a triple is also a triple: 6-8-10, 9-12-15, 12-16-20 all work."
+    },
+    {
+      "type": "paragraph",
+      "text": "These triples were known to Babylonian mathematicians over a thousand years before Pythagoras was born, and they appear on ancient clay tablets. There are infinitely many triples, and Euclid described a formula to generate them."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Triple",
+        "a² + b²",
+        "c²",
+        "Common Use"
+      ],
+      "rows": [
+        [
+          "3-4-5",
+          "9 + 16 = 25",
+          "25",
+          "Squaring corners in construction"
+        ],
+        [
+          "5-12-13",
+          "25 + 144 = 169",
+          "169",
+          "Navigation and surveying"
+        ],
+        [
+          "8-15-17",
+          "64 + 225 = 289",
+          "289",
+          "Engineering calculations"
+        ],
+        [
+          "7-24-25",
+          "49 + 576 = 625",
+          "625",
+          "Architecture and design"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Solve any right triangle instantly",
+      "body": "Use our Right Triangle Calculator to find the hypotenuse, legs, area, perimeter, and angles — all with step-by-step SOH CAH TOA trigonometry, plus a dynamic SVG diagram.",
+      "buttonLabel": "Try the Right Triangle Calculator",
+      "path": "/math/pythagorean-theorem-calculator/"
+    }
+  ],
+  "keywords": [
+    "right triangle calculator",
+    "pythagorean theorem calculator",
+    "hypotenuse calculator",
+    "SOH CAH TOA",
+    "triangle angles calculator",
+    "triangle solver",
+    "a squared plus b squared",
+    "pythagorean triples"
+  ]
+}

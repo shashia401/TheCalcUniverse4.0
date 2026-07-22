@@ -1,0 +1,219 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Normal GFR for Your Age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "GFR naturally declines as you get older. A healthy 25-year-old typically has an eGFR of 90-130 mL/min/1.73m². A healthy 75-year-old may have an eGFR of 50-80 mL/min/1.73m². Both can have perfectly normal kidney function for their age — and both can have kidney disease if their eGFR falls below the expected range for their age group."
+    },
+    {
+      "type": "paragraph",
+      "text": "The critical question is not simply \"Is my eGFR above 60?\" but rather \"Is my eGFR appropriate for my age, and is it stable or declining?\" Understanding age-normal ranges prevents two common problems: unnecessary worry about age-appropriate numbers, and missing early disease in older adults whose eGFR may look \"normal\" by young-adult standards."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "eGFR Ranges by Age: Complete Chart"
+    },
+    {
+      "type": "paragraph",
+      "text": "The following table shows typical eGFR ranges for healthy adults across different age groups. These are general guidelines — individual variation exists based on baseline kidney function, genetics, and overall health."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Age Group",
+        "Typical eGFR Range",
+        "Average eGFR",
+        "Interpretation"
+      ],
+      "rows": [
+        [
+          "20-29",
+          "90-130",
+          "116",
+          "Optimal kidney function"
+        ],
+        [
+          "30-39",
+          "85-125",
+          "110",
+          "Normal — minor age-related decline begins"
+        ],
+        [
+          "40-49",
+          "80-120",
+          "104",
+          "Normal — gradual decline continues"
+        ],
+        [
+          "50-59",
+          "70-110",
+          "97",
+          "Normal — more variable between individuals"
+        ],
+        [
+          "60-69",
+          "60-100",
+          "89",
+          "Decline more noticeable; lifestyle factors matter more"
+        ],
+        [
+          "70-79",
+          "50-90",
+          "81",
+          "Greater variability; distinguish aging from disease"
+        ],
+        [
+          "80+",
+          "45-80",
+          "74",
+          "Some decline expected; eGFR < 45 warrants investigation"
+        ]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Important: These ranges apply to people without known kidney disease, diabetes, or hypertension. If you have any of these conditions, your target eGFR may be different and should be discussed with your doctor."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Does GFR Decline with Age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Kidney aging involves several structural and functional changes. The number of functional nephrons decreases progressively after age 30-40 — some sources estimate a loss of 10% of functioning nephrons per decade after age 40. The remaining nephrons may become less efficient. Blood flow to the kidneys decreases by approximately 10% per decade due to vascular changes."
+    },
+    {
+      "type": "paragraph",
+      "text": "The glomerular basement membrane thickens, reducing filtration efficiency. There is increased glomerulosclerosis — scarring of the glomeruli — even in healthy older adults. The kidney's ability to concentrate urine and conserve water declines, which is why older adults are more prone to dehydration."
+    },
+    {
+      "type": "paragraph",
+      "text": "Critically, this natural decline means that by age 70, even a healthy person has approximately 50% fewer functioning nephrons than they did at age 25. The remaining nephrons compensate through hyperfiltration to maintain adequate total filtration — which is why eGFR does not decline quite as fast as nephron number."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When Is a Low GFR Just Aging vs. Kidney Disease?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Distinguishing normal age-related GFR decline from early kidney disease is one of the most common clinical challenges, especially in primary care. Here is the framework doctors use:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Rate of decline: Normal aging = 0.5-1% per year. Disease-related decline = 2-5% per year or faster. A drop of more than 5 mL/min in one year warrants investigation.",
+        "Absolute threshold: eGFR persistently below 60 for 3+ months triggers CKD diagnosis regardless of age. Even a 75-year-old with eGFR 55 has Stage 3a CKD.",
+        "Other damage markers: Protein in urine (albuminuria), blood in urine (hematuria), or abnormal kidney imaging suggest disease rather than aging.",
+        "Risk factors: Diabetes, hypertension, cardiovascular disease, or family history of kidney failure make disease more likely.",
+        "Recoverability: Age-related decline is gradual and irreversible. Acute drops that partially recover are more consistent with disease exacerbation."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "In practice, many older adults fall into a gray zone where they have mild CKD (Stage 3a, eGFR 45-59) that represents a combination of aging and early disease. The good news is that Stage 3a CKD in someone over 70 typically progresses very slowly, and the focus is on managing cardiovascular risk factors rather than preparing for kidney failure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Can You Slow Age-Related GFR Decline?"
+    },
+    {
+      "type": "paragraph",
+      "text": "While you cannot stop kidney aging entirely, several strategies can slow the rate of decline significantly. The most important is blood pressure control. The SPRINT trial showed that intensive blood pressure treatment (target <120 mmHg systolic) reduced the risk of adverse kidney outcomes by approximately 30% compared to standard treatment."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Maintain blood pressure below 130/80 (or 120/80 if you have diabetes or CKD)",
+        "Control blood sugar if diabetic — each 1% reduction in HbA1c reduces kidney disease risk by 35%",
+        "Stay well hydrated — but avoid excessive water intake (more than 3L/day does not help)",
+        "Avoid NSAIDs (ibuprofen, naproxen, celecoxib) — use acetaminophen for pain instead",
+        "Limit dietary sodium to under 2,000 mg per day",
+        "Exercise regularly — moderate activity reduces cardiovascular strain on kidneys",
+        "Do not smoke — smoking accelerates kidney function decline by 30-40%",
+        "Maintain healthy body weight — obesity increases CKD risk by 50-100%"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These strategies are additive — each one independently slows kidney aging. Combining them can reduce the rate of GFR decline from 1% per year to 0.3-0.5% per year, adding years of preserved kidney function."
+    },
+    {
+      "type": "cta",
+      "heading": "Check Your eGFR for Your Age",
+      "body": "Our free GFR calculator shows your exact eGFR and CKD stage. Enter your creatinine, age, and sex for an instant result.",
+      "buttonLabel": "Calculate Your eGFR",
+      "path": "/health/gfr-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a normal GFR for a 60-year-old?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A normal eGFR for a 60-year-old typically ranges from 60-100 mL/min/1.73m². Values between 60-89 are common and may reflect normal aging rather than disease, especially in the absence of other damage markers like proteinuria. An eGFR consistently below 60 for 3+ months would be classified as Stage 3a CKD regardless of age."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a normal GFR for a 70-year-old?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A normal eGFR for a 70-year-old ranges from approximately 50-90 mL/min/1.73m². The wide range reflects variability in baseline kidney function and health status. Values as low as 50 may be normal for a healthy 70-year-old, but should still be monitored annually to track the rate of decline."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a normal GFR for an 80-year-old?"
+    },
+    {
+      "type": "paragraph",
+      "text": "An 80-year-old with good general health may have an eGFR of 45-80 mL/min/1.73m². An eGFR below 45 in an 80-year-old warrants further investigation, while values above 60 are excellent for that age. The diagnostic threshold remains the same: eGFR below 60 for 3+ months means Stage 3a CKD, even at age 80."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can your GFR be too high?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes. An eGFR above 120-130 in a non-pregnant adult can indicate glomerular hyperfiltration, which is often an early sign of kidney stress. Hyperfiltration is common in early diabetes, obesity, and high-protein diets. It represents the kidneys working under increased pressure, which can damage the filtering units over time."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "At what age does GFR start to decline?"
+    },
+    {
+      "type": "paragraph",
+      "text": "GFR begins a gradual decline starting around age 30-40. The decline accelerates slightly after age 50-60. However, the rate of decline varies enormously between individuals based on genetics, lifestyle, blood pressure, and underlying health conditions."
+    }
+  ],
+  "keywords": [
+    "normal gfr by age",
+    "egfr normal range",
+    "gfr levels by age",
+    "normal kidney function by age",
+    "gfr 90 at 70",
+    "egfr 60 at 80",
+    "age-related gfr decline",
+    "normal egfr for 60 year old"
+  ]
+}

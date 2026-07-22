@@ -1,0 +1,95 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is BMI?"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMI stands for Body Mass Index. It's your weight in kilograms divided by your height in meters squared. That simple formula gives you a number that places you in one of four WHO categories: underweight, normal, overweight, or obese."
+    },
+    {
+      "type": "paragraph",
+      "text": "It's been used for decades because it only requires two measurements — weight and height — and it works reasonably well at the population level."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "BMI Range",
+        "Health Risk"
+      ],
+      "rows": [
+        [
+          "Underweight",
+          "Below **18.5**",
+          "Increased (malnutrition, bone loss)"
+        ],
+        [
+          "Normal Weight",
+          "**18.5** – **24.9**",
+          "Lowest risk"
+        ],
+        [
+          "Overweight",
+          "**25.0** – **29.9**",
+          "Increased (heart disease, diabetes)"
+        ],
+        [
+          "Obese (Class I–III)",
+          "**30.0** and above",
+          "High to very high risk"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Where Does BMI Get It Wrong?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "It can't tell muscle from fat. A bodybuilder at 12% body fat can have the same BMI as someone at 30% body fat.",
+        "It ignores where you store fat. Visceral belly fat is far riskier than subcutaneous fat, but BMI treats all weight the same.",
+        "Ethnicity matters. Asian populations develop metabolic complications at lower BMIs; the WHO recommends a cutoff of 23 for overweight instead of 25.",
+        "It doesn't account for age. Older adults lose muscle and bone density, so a \"normal\" BMI can mask sarcopenic obesity."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "A 5'10\" athlete weighing 190 lbs with 12% body fat has a BMI of 27.3 — technically overweight. But their health profile is excellent. A sedentary person with the same BMI but 30% body fat has a  different risk profile. BMI alone can't tell the difference."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Are Better Alternatives to BMI?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Waist-to-height ratio (WHtR) is a strong alternative — keep your waist circumference below half your height for low cardiometabolic risk. Body fat percentage gives you your actual composition breakdown. Waist circumference alone is also useful, especially for tracking visceral fat changes."
+    },
+    {
+      "type": "paragraph",
+      "text": "None of these are perfect on their own, which is why using multiple metrics beats relying on any single number."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your BMI and Healthy Weight Range",
+      "body": "Use our BMI & Ideal Weight Calculator to see your WHO category, healthy weight range, and Devine ideal body weight. It takes 30 seconds.",
+      "buttonLabel": "Calculate BMI Now",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "bmi guide",
+    "what is bmi",
+    "bmi limitations",
+    "healthy bmi range",
+    "body fat vs bmi",
+    "waist to height ratio",
+    "bmi calculator online"
+  ]
+}

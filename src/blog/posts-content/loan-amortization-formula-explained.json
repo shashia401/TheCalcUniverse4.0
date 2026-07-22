@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Formula"
+    },
+    {
+      "type": "paragraph",
+      "text": "M = P [ r(1+r)^n ] / [ (1+r)^n - 1 ] where M is the monthly payment, P is the principal, r is the monthly interest rate (annual rate / 12), and n is the number of payments (loan term in months). For a $300,000 mortgage at 6% for 30 years: P = 300,000, r = 0.005, n = 360. This gives M = 300,000 [ 0.005(1.005)^360 ] / [ (1.005)^360 - 1 ] = $1,798.65."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Each Variable Does"
+    },
+    {
+      "type": "paragraph",
+      "text": "A higher principal (P) increases the payment proportionally. A higher rate (r) increases both the payment and the total interest dramatically. A longer term (n) reduces the payment but increases total interest paid. Doubling the rate from 4% to 8% increases the payment by about 45% but doubles the total interest."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Payment",
+      "body": "Use our amortization calculator to see the formula in action.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "amortization formula",
+    "loan payment formula",
+    "how to calculate monthly payment",
+    "pmt formula explained",
+    "mortgage payment math",
+    "amortization calculation"
+  ]
+}

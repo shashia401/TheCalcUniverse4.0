@@ -1,0 +1,99 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Fractions are everywhere — recipes use half-cups, carpenters work in sixteenths of an inch, and finance deals in stock splits. If you've ever struggled with adding or dividing fractions, you're not alone. The good news is that fraction arithmetic follows a handful of simple rules, and once you learn them, they click forever."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What exactly is a fraction telling you?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A fraction has two parts: the **numerator** (top number) tells you how many pieces you've, and the **denominator** (bottom number) tells you how many equal pieces make up one whole. If you've three-quarters of a pizza, the numerator is **3** and the denominator is **4** — three pieces out of four total. That simple idea of \"parts of a whole\" is the foundation for everything that follows."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How do you add and subtract fractions?"
+    },
+    {
+      "type": "paragraph",
+      "text": "You can only add or subtract fractions directly when they share the same denominator. When they don't, you need to find the **least common multiple** (LCM) of the two denominators — the smallest number both divide into evenly. For one-third plus one-quarter, the LCM of 3 and 4 is **12**."
+    },
+    {
+      "type": "paragraph",
+      "text": "You convert each fraction to an equivalent over 12: 1/3 becomes 4/12 and 1/4 becomes 3/12, giving you **7/12**."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Think of denominators as different-sized slices. You can't directly combine half-pizza slices with quarter-pizza slices. you've to cut them all into the same size first — that's what finding a common denominator does."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How do you multiply and divide fractions?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Multiplication is the simplest operation: multiply the numerators together and the denominators together. **1/2 × 3/4 = 3/8**. No common denominator needed."
+    },
+    {
+      "type": "paragraph",
+      "text": "Division adds one extra step: flip the second fraction upside down (its reciprocal) and then multiply. **1/2 ÷ 3/4** becomes **1/2 × 4/3 = 4/6**, which simplifies to **2/3**. that's why it's sometimes called \"keep, change, flip\" — keep the first fraction, change division to multiplication, flip the second."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Operation",
+        "Rule",
+        "Example",
+        "Result"
+      ],
+      "rows": [
+        [
+          "Addition",
+          "Find LCM, then add numerators",
+          "1/3 + 1/4",
+          "7/12"
+        ],
+        [
+          "Subtraction",
+          "Find LCM, then subtract numerators",
+          "3/4 - 1/2",
+          "1/4"
+        ],
+        [
+          "Multiplication",
+          "Multiply numerators and denominators",
+          "2/3 × 3/5",
+          "2/5"
+        ],
+        [
+          "Division",
+          "Multiply by the reciprocal",
+          "2/3 ÷ 3/4",
+          "8/9"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Need to add, subtract, multiply, or divide fractions?",
+      "body": "Our Fraction Calculator handles all four operations with step-by-step solutions, LCM and GCD breakdowns, and decimal equivalents for every result.",
+      "buttonLabel": "Try the Fraction Calculator",
+      "path": "/math/fraction-calculator/"
+    }
+  ],
+  "keywords": [
+    "fraction calculator",
+    "add fractions",
+    "subtract fractions",
+    "multiply fractions",
+    "divide fractions",
+    "fraction solver",
+    "fraction arithmetic"
+  ]
+}

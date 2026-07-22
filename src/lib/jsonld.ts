@@ -25,7 +25,9 @@ export function buildCalculatorSchemas(entry: CalculatorEntry, config: Calculato
       url,
       provider: { '@type': 'Organization', name: SITE_NAME, url: BASE_URL },
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-      ...(entry.reviewedBy ? { reviewedBy: { '@type': 'Person', name: entry.reviewedBy } } : {}),
+      // NOTE: no `reviewedBy` Person — we don't emit expert-review structured
+      // data unless a real, verifiable review exists. Fabricated E-E-A-T signals
+      // are a penalty risk and deceptive on YMYL topics.
     },
     {
       '@context': 'https://schema.org',

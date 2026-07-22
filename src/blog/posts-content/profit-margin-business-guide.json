@@ -1,0 +1,102 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "A 50% markup doesn't equal a 50% margin. Confusing these two numbers is one of the most expensive pricing mistakes you can make. Here's the difference, why it matters, and how to set prices that protect your bottom line."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What's the Difference Between Margin and Markup?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Margin is your profit as a percentage of the selling price. Markup is your profit as a percentage of the cost. If your cost is **$100** and you sell for **$150**, your markup is **50%** but your margin is only **33%**."
+    },
+    {
+      "type": "paragraph",
+      "text": "The denominators are different, so the percentages are always different for the same profit in dollars."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Margin vs. Markup Conversion"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Markup %",
+        "Selling Price ($100 Cost)",
+        "Resulting Margin %"
+      ],
+      "rows": [
+        [
+          "25%",
+          "$125",
+          "20%"
+        ],
+        [
+          "50%",
+          "$150",
+          "33.3%"
+        ],
+        [
+          "75%",
+          "$175",
+          "42.9%"
+        ],
+        [
+          "100%",
+          "$200",
+          "50%"
+        ],
+        [
+          "150%",
+          "$250",
+          "60%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The quick conversion formula: Margin = Markup / (100 + Markup). If you want a **40% margin**, you need a **66. 7% markup**."
+    },
+    {
+      "type": "paragraph",
+      "text": "If you use a **40% markup**, you'll only get a **28. 6% margin**. This distinction is critical when negotiating wholesale pricing or setting retail prices."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Gross Margin vs. Net Margin: What's the Difference?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Gross margin only subtracts the cost of goods sold from your revenue. Net margin subtracts everything -- COGS, salaries, rent, marketing, platform fees, and shipping. A business can show **60% gross margin** but only **3% net margin** if overhead is high."
+    },
+    {
+      "type": "paragraph",
+      "text": "You need both numbers for a complete profitability picture."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Industry benchmarks: Retail gross margins typically range from 20-60%. Grocery stores operate on 1-5% net margins. Apparel brands see 50-60% gross margins. SaaS businesses can exceed 70-80% gross margins. Luxury goods often hit 60-80% gross margins due to brand premium."
+    },
+    {
+      "type": "cta",
+      "heading": "Need to set your prices right?",
+      "body": "Use the Profit Margin & Markup Calculator to convert between margin and markup, calculate selling prices, and see your exact profit per unit.",
+      "buttonLabel": "Calculate Your Margins",
+      "path": "/ecommerce/profit-margin-calculator/"
+    }
+  ],
+  "keywords": [
+    "profit margin calculator",
+    "markup calculator",
+    "gross margin calculator",
+    "profit calculator",
+    "selling price calculator",
+    "margin vs markup"
+  ]
+}

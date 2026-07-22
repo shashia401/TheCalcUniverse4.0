@@ -1,0 +1,45 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Amortization in Plain English"
+    },
+    {
+      "type": "paragraph",
+      "text": "Amortization is a fancy word for a simple concept: a loan that gets paid off with equal payments over time. Each payment is the same amount, but what that payment covers changes. Think of it like a see-saw. At the beginning, the interest side is heavy and the principal side is light. Over time, they balance out. By the end, the principal side is heavy and the interest side is light."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Simple Example"
+    },
+    {
+      "type": "paragraph",
+      "text": "A $10,000 loan at 5% interest for 3 years (36 months). Monthly payment: $299.71. Month 1: $41.67 interest + $258.04 principal = $299.71. Month 12: $28.73 interest + $270.98 principal. Month 36: $1.24 interest + $298.47 principal."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Your Lender Uses Amortization"
+    },
+    {
+      "type": "paragraph",
+      "text": "Amortization ensures the lender gets most of their interest early when the risk is highest (the full balance is outstanding). It also ensures the loan is fully paid by the end of the term. The monthly payment stays predictable, making it easier for borrowers to budget. Without amortization, loans would either have variable payments or large final balloon payments."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Amortization Calculator",
+      "body": "See how your specific loan amortizes with our free calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "what is amortization",
+    "amortization definition",
+    "loan amortization for beginners",
+    "how amortized loans work",
+    "amortization simple explanation"
+  ]
+}

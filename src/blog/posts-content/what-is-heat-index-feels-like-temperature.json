@@ -1,0 +1,45 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Simple Explanation"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your body cools itself through sweating. When sweat evaporates, it takes heat with it. High humidity means the air is already full of water vapor, so sweat cannot evaporate as efficiently. Your body keeps producing heat but cannot release it. The heat index quantifies this effect. It was developed by Robert Steadman in 1979 and later refined by NOAA. In simple terms: the heat index is what the temperature feels like to the human body."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Temperature + Humidity = Heat Index"
+    },
+    {
+      "type": "paragraph",
+      "text": "When humidity is low (under 40%), the heat index is close to the actual temperature. As humidity rises above 50%, the heat index starts climbing faster than the temperature. At 80°F with 40% humidity: heat index 80°F. At 80°F with 80% humidity: heat index 84°F. At 95°F with 50% humidity: heat index 107°F."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Check the Heat Index"
+    },
+    {
+      "type": "paragraph",
+      "text": "Above 80°F, the heat index starts to matter. Check it before planning outdoor exercise, sports practices, yard work, or any extended time outside. Many weather apps now show heat index alongside temperature. Our calculator lets you check specific combinations and understand the risk level."
+    },
+    {
+      "type": "cta",
+      "heading": "Check the Heat Index",
+      "body": "Our free heat index calculator shows the feels-like temperature instantly.",
+      "buttonLabel": "Open Calculator",
+      "path": "/everyday/heat-index-calculator/"
+    }
+  ],
+  "keywords": [
+    "what is heat index",
+    "apparent temperature",
+    "feels like temperature",
+    "heat index definition",
+    "why humidity makes it feel hotter"
+  ]
+}

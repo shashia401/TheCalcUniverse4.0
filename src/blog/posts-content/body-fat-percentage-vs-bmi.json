@@ -1,0 +1,107 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Core Difference"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMI tells you your weight relative to your height. Body fat percentage tells you what proportion of that weight is fat versus everything else (muscle, bone, organs, water). Two people with a BMI of 27 can have body fat percentages of 12% (athlete) and 30% (overfat). They would get the same BMI result but have completely different health profiles. The athlete likely has excellent metabolic health while the overfat individual may be at risk for diabetes and heart disease."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Healthy Body Fat Ranges"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Women",
+        "Men"
+      ],
+      "rows": [
+        [
+          "Essential fat",
+          "10-13%",
+          "2-5%"
+        ],
+        [
+          "Athletes",
+          "14-20%",
+          "6-13%"
+        ],
+        [
+          "Fitness",
+          "21-24%",
+          "14-17%"
+        ],
+        [
+          "Acceptable",
+          "25-31%",
+          "18-24%"
+        ],
+        [
+          "Obese",
+          "32%+",
+          "25%+"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Methods of Measuring Body Fat"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "DEXA scan: Most accurate, uses X-ray technology. Expensive but gold standard.",
+        "Hydrostatic weighing: Measures displacement. Very accurate but inconvenient.",
+        "Skinfold calipers: Good accuracy with experienced practitioner. Inexpensive.",
+        "Bioelectrical impedance (BIA): Found on many smart scales. Convenient but accuracy varies with hydration.",
+        "Navy circumference method: Uses tape measurements. Our body fat calculator uses this — decent accuracy, free, instant."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What body fat percentage is considered obese?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Body fat percentage above 25% for men and 32% for women is generally considered obese. Compare this to BMI obesity threshold which is a BMI of 30. Body fat percentage is more directly linked to health outcomes than BMI."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I have a normal BMI but high body fat?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes — this is called normal weight obesity. This occurs when someone has low muscle mass and high body fat despite a normal BMI. It is estimated that 15-30% of people with a normal BMI have normal weight obesity, and they face increased metabolic health risks despite appearing to be at a healthy weight."
+    },
+    {
+      "type": "cta",
+      "heading": "Measure Your Body Fat",
+      "body": "Use our free body fat calculator to get your body composition estimate.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/body-fat-calculator/"
+    }
+  ],
+  "keywords": [
+    "body fat percentage vs bmi",
+    "bmi vs body fat",
+    "body composition",
+    "lean body mass",
+    "body fat measurement",
+    "bmi accuracy"
+  ]
+}

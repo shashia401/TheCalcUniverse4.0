@@ -1,0 +1,99 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the 8-Glasses-a-Day Rule doesn't Fit Everyone"
+    },
+    {
+      "type": "paragraph",
+      "text": "you've heard it your whole life: drink eight glasses of water a day. it's one of the most repeated health rules — and also one of the least accurate. Your water needs are as individual as your fingerprint, depending on your body weight, activity level, and climate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Much Water Does Your Body Actually Need?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The most widely cited evidence-based baseline is **0. 5 ounces of water per pound of body weight**. For a 150 lb person, that works out to about **75 ounces (2."
+    },
+    {
+      "type": "paragraph",
+      "text": "2 liters)** per day. And that's just the starting point — physical activity and your environment add more to that number."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Body Weight",
+        "Baseline (oz/day)",
+        "Baseline (L/day)"
+      ],
+      "rows": [
+        [
+          "120 lbs (54 kg)",
+          "60 oz",
+          "1.8 L"
+        ],
+        [
+          "150 lbs (68 kg)",
+          "75 oz",
+          "2.2 L"
+        ],
+        [
+          "180 lbs (82 kg)",
+          "90 oz",
+          "2.7 L"
+        ],
+        [
+          "200 lbs (91 kg)",
+          "100 oz",
+          "3.0 L"
+        ],
+        [
+          "250 lbs (113 kg)",
+          "125 oz",
+          "3.7 L"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Factors Push Your Daily Needs Higher?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Exercise can add **8 to 32 ounces** depending on intensity and duration. Hot or humid weather adds **16 to 24 ounces**, and high-altitude environments increase respiratory water loss. A solid daily water intake target accounts for all of these variables, which is why a personalized **hydration calculator** gives you a much more accurate number than a generic rule."
+    },
+    {
+      "type": "list",
+      "items": [
+        "Dark yellow urine, thirst, dry mouth, and fatigue are early signs of dehydration",
+        "Dehydration of just **1–2% of body weight** impairs cognitive function, mood, and physical performance",
+        "Older adults have reduced thirst sensation and should be more intentional about regular drinking",
+        "Athletes should weigh before and after workouts — drink **16–24 oz per pound lost** during exercise"
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Coffee and tea count toward your hydration total. Despite being mild diuretics, caffeinated beverages still provide net hydration at normal consumption levels. Roughly **20% of your daily water intake** also comes from food, especially fruits and vegetables like watermelon, cucumbers, and oranges."
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Exact Daily Water Intake",
+      "body": "Stop guessing with generic rules. Use our Water Intake Calculator to get a personalized hydration target based on your body weight, activity level, and climate.",
+      "buttonLabel": "Calculate Your Water Intake",
+      "path": "/health/water-intake-calculator/"
+    }
+  ],
+  "keywords": [
+    "water intake calculator",
+    "how much water should i drink",
+    "daily water intake",
+    "hydration calculator",
+    "water consumption calculator",
+    "how much water per day"
+  ]
+}

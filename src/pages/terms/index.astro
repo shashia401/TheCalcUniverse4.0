@@ -1,0 +1,113 @@
+---
+// Terms of Use — content ported verbatim from v2 (TermsPage.tsx), now static HTML.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE_NAME, BASE_URL } from '../../config/constants';
+
+const LAST_UPDATED = 'April 19, 2026';
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+    { '@type': 'ListItem', position: 2, name: 'Terms of Use', item: `${BASE_URL}/terms/` },
+  ],
+};
+---
+
+<BaseLayout
+  title={`Terms of Use | ${SITE_NAME}`}
+  description="Terms of use for TheCalcUniverse — free online calculators for informational purposes. No professional advice. Read our full terms."
+  canonicalPath="/terms/"
+  schemas={[breadcrumb]}
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-3xl mx-auto px-4 md:px-8 py-14">
+      <header class="mb-10">
+        <h1 class="text-3xl font-black tracking-tight text-[var(--surface-text)] mb-2">Terms of Use</h1>
+        <p class="text-sm text-[var(--surface-text-muted)]">Last updated: {LAST_UPDATED}</p>
+      </header>
+
+      <div class="rounded-2xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-6 mb-10">
+        <p class="text-sm font-semibold text-[var(--surface-text)] mb-1">Plain-English summary</p>
+        <p class="text-sm text-[var(--surface-text-secondary)] leading-relaxed">
+          Use the calculators freely for personal or professional reference. Don't rely on them as
+          a substitute for qualified advice. Don't try to break or scrape the site. That's pretty much it.
+        </p>
+      </div>
+
+      <div class="space-y-10 text-base-md text-[var(--surface-text-secondary)] leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[var(--surface-text)] [&_h2]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_p]:mb-3">
+        <section>
+          <h2>1. Acceptance of terms</h2>
+          <p>By accessing or using TheCalcUniverse (<strong>"the Service"</strong>), you agree to be bound by these Terms of Use. If you do not agree, please do not use the site.</p>
+          <p>We may update these terms from time to time. Changes are effective when posted. Continuing to use the Service after changes are posted means you accept the revised terms.</p>
+        </section>
+
+        <section>
+          <h2>2. Permitted use</h2>
+          <p>You are welcome to:</p>
+          <ul>
+            <li>Use any calculator on this site for personal, educational, or professional reference purposes, free of charge.</li>
+            <li>Share links to calculator pages or results with others.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>3. Prohibited use</h2>
+          <p>You may not:</p>
+          <ul>
+            <li>Scrape, crawl, or systematically download content from the site in bulk without prior written permission.</li>
+            <li>Attempt to reverse-engineer, decompile, or extract proprietary logic beyond what is publicly available in the open-source repository.</li>
+            <li>Use the site to distribute spam, malware, or any content that is illegal, harmful, or deceptive.</li>
+            <li>Impersonate TheCalcUniverse or imply any endorsement or partnership that does not exist.</li>
+            <li>Reproduce the entire site or substantial portions of it under a different brand without permission.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. Informational purposes only — no professional advice</h2>
+          <p>All results produced by calculators on TheCalcUniverse are for <strong>informational and educational purposes only</strong>. They do not constitute professional financial, medical, legal, engineering, or any other regulated advice.</p>
+          <ul>
+            <li><strong>Financial calculators</strong> (mortgage, loan, retirement, etc.) produce estimates based on the inputs you provide. Actual loan terms, tax obligations, and investment outcomes will differ. Consult a licensed financial advisor before making major financial decisions.</li>
+            <li><strong>Health calculators</strong> (BMI, calories, heart rate, etc.) produce general reference values. They are not a substitute for medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional for health-related decisions.</li>
+            <li><strong>Engineering calculators</strong> produce theoretical values. Real-world applications require proper professional engineering assessment. Do not use results in structural, electrical, or safety-critical designs without independent verification.</li>
+          </ul>
+          <p>By using any calculator on this site, you acknowledge and accept that results are approximate and may not reflect your specific circumstances.</p>
+        </section>
+
+        <section>
+          <h2>5. Accuracy and availability</h2>
+          <p>We make every reasonable effort to ensure our calculators use correct formulas and up-to-date reference data. However, we make no warranty — express or implied — that results are free of errors, complete, or suitable for any particular purpose.</p>
+          <p>The Service is provided "as is" and "as available". We do not guarantee that the site will be uninterrupted, error-free, or available at all times. We reserve the right to modify, suspend, or discontinue any calculator or feature at any time without notice.</p>
+        </section>
+
+        <section>
+          <h2>6. Intellectual property</h2>
+          <p>The design, brand name ("TheCalcUniverse"), original written content, and underlying source code on this site are the property of TheCalcUniverse. All rights are reserved. You may not copy, reproduce, or republish substantial portions of the site or its code without prior written permission.</p>
+          <p>Mathematical formulas, unit conversion factors, and scientific constants themselves are facts and are not subject to copyright. The implementation, presentation, and curation of those formulas on this site, however, are protected.</p>
+        </section>
+
+        <section>
+          <h2>7. Limitation of liability</h2>
+          <p>To the fullest extent permitted by applicable law, TheCalcUniverse and its operators shall not be liable for any direct, indirect, incidental, special, or consequential damages arising from your use of or reliance on the Service, even if we have been advised of the possibility of such damages.</p>
+          <p>This includes — without limitation — financial losses, medical decisions, structural failures, or any other harm resulting from acting on calculator outputs.</p>
+        </section>
+
+        <section>
+          <h2>8. External links</h2>
+          <p>The site may contain links to third-party websites. These are provided for convenience only. We have no control over and accept no responsibility for the content, privacy practices, or availability of external sites.</p>
+        </section>
+
+        <section>
+          <h2>9. Governing law</h2>
+          <p>These Terms of Use are governed by and construed in accordance with applicable law. Any disputes arising in connection with the Service shall be handled in accordance with the laws of the jurisdiction in which the operator is based.</p>
+        </section>
+
+        <section>
+          <h2>10. Contact</h2>
+          <p>For questions about these Terms, please reach out via the contact email at <strong>contact@thecalcuniverse.com</strong>.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

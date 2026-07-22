@@ -1,0 +1,32 @@
+---
+// Server-rendered lucide icon per category — static SVG, zero JS.
+import {
+  TrendingUp, Heart, Calculator, ShoppingCart, BarChart3,
+  Wrench, Car, Zap, Gauge, Code2, Home,
+} from 'lucide-react';
+
+interface Props {
+  slug: string;
+  size?: number;
+  class?: string;
+}
+
+const icons: Record<string, typeof Calculator> = {
+  finance: TrendingUp,
+  health: Heart,
+  everyday: Calculator,
+  ecommerce: ShoppingCart,
+  math: BarChart3,
+  diy: Wrench,
+  automotive: Car,
+  engineering: Zap,
+  industrial: Gauge,
+  devtools: Code2,
+  realestate: Home,
+};
+
+const { slug, size = 18, class: className } = Astro.props;
+const Icon = icons[slug] ?? Calculator;
+---
+
+<Icon size={size} className={className} />

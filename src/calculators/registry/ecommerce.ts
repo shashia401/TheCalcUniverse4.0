@@ -15,7 +15,6 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'margin_% = (revenue - cost) / revenue × 100 | markup_% = (price - cost) / cost × 100 | gross profit margin and markup percentage',
     lastVerified: '2026-05-17',
     relatedPosts: ['profit-margin-business-guide'],
-    reviewedBy: 'E-commerce pricing consultant',
     loader: () => import('../ecommerce/profit-margin/index'),
   },
   {
@@ -47,7 +46,6 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'BEP_units = fixed_costs / (price - variable_cost_per_unit) | break-even point in units and revenue',
     lastVerified: '2026-05-17',
     relatedPosts: ['profit-margin-business-guide'],
-    reviewedBy: 'Financial analyst',
     loader: () => import('../ecommerce/break-even/index'),
   },
   {
@@ -80,7 +78,6 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'ROAS = revenue / ad_spend | break_even_ROAS = 1 / gross_margin_pct | return on ad spend',
     lastVerified: '2026-05-17',
     relatedPosts: ['profit-margin-business-guide'],
-    reviewedBy: 'Digital marketing strategist',
     loader: () => import('../ecommerce/roas/index'),
   },
   {
@@ -97,7 +94,6 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'CAC = total_marketing_cost / new_customers | LTV:CAC = LTV / CAC | customer acquisition cost and unit economics',
     lastVerified: '2026-05-17',
     relatedPosts: ['profit-margin-business-guide'],
-    reviewedBy: 'Growth marketing consultant',
     loader: () => import('../ecommerce/cac/index'),
   },
   {
@@ -114,7 +110,6 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'margin_% = (selling_price - cost) / selling_price × 100 | gross margin percentage and markup',
     lastVerified: '2026-05-17',
     relatedPosts: ['profit-margin-business-guide'],
-    reviewedBy: 'Pricing strategist',
     loader: () => import('../ecommerce/margin-calculator/index'),
   },
   {
@@ -147,7 +142,6 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'Fee = Amount x Rate + FixedFee | Net = Amount - Fee | EffectiveRate = Fee / Amount',
     lastVerified: '2026-05-17',
     relatedPosts: ['profit-margin-business-guide', 'amazon-fba-fees-explained-profit'],
-    reviewedBy: 'E-commerce pricing consultant',
     loader: () => import('../ecommerce/payment-fees/index'),
   },
   {
@@ -163,7 +157,6 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     relatedIds: ['engagement-rate-calculator', 'cpm-cpc-calculator', 'etsy-fees-calculator', 'payment-fees-calculator'],
     mathSolverExpression: 'Revenue = (Views / 1000) x CPM | NetPayout = Revenue x (1 - 0.45) | RPM = Revenue / Views x 1000',
     lastVerified: '2026-05-18',
-    reviewedBy: 'YouTube content monetization expert',
     loader: () => import('../ecommerce/youtube-revenue/index'),
   },
   {
@@ -178,7 +171,6 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     schema: 'both',
     relatedIds: ['amazon-fba-calculator', 'payment-fees-calculator', 'youtube-revenue-calculator', 'engagement-rate-calculator'],
     mathSolverExpression: 'TotalFees = Listing + (Price x TransactionRate) + (Price x PaymentRate + Fixed) + OffsiteAdsFee | Net = Price - TotalFees',
-    reviewedBy: 'E-commerce & digital marketing strategist',
     relatedPosts: ['profit-margin-business-guide'],
     lastVerified: '2026-01-15',
     loader: () => import('../ecommerce/etsy-fees/index'),
@@ -211,7 +203,6 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     relatedIds: ['cpm-cpc-calculator', 'youtube-revenue-calculator', 'etsy-fees-calculator', 'cac-calculator'],
     mathSolverExpression: 'ER = TotalEngagements / Followers x 100 | Instagram ER = (Likes + Comments) / Followers x 100',
     lastVerified: '2026-01-15',
-    reviewedBy: 'Social media marketing strategist',
     relatedPosts: ['profit-margin-business-guide', 'amazon-fba-fees-explained-profit'],
     loader: () => import('../ecommerce/engagement-rate/index'),
   },

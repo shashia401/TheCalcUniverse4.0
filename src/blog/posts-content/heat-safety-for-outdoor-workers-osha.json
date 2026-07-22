@@ -1,0 +1,100 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "OSHA Heat Safety Recommendations"
+    },
+    {
+      "type": "paragraph",
+      "text": "OSHA recommends heat safety programs for any workplace where employees may be exposed to heat indexes above 80°F. Key elements include: acclimatization (gradual exposure over 7-14 days), water availability (8 oz every 20 minutes), rest breaks in shaded or air-conditioned areas, heat illness training for all employees, and emergency response planning."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Work/Rest Ratios by Heat Index"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Heat Index",
+        "Work/Rest Ratio (Light)",
+        "Work/Rest Ratio (Heavy)",
+        "Water per Hour"
+      ],
+      "rows": [
+        [
+          "80-90°F",
+          "Normal, watch for symptoms",
+          "50 min work, 10 min rest",
+          "32 oz"
+        ],
+        [
+          "90-100°F",
+          "40 min work, 20 min rest",
+          "30 min work, 30 min rest",
+          "48 oz"
+        ],
+        [
+          "100-105°F",
+          "30 min work, 30 min rest",
+          "15 min work, 45 min rest",
+          "64 oz"
+        ],
+        [
+          "105°F+",
+          "Suspended",
+          "Suspended",
+          "N/A"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Employer Responsibilities"
+    },
+    {
+      "type": "paragraph",
+      "text": "Employers should monitor weather forecasts, check heat index before shifts, provide cool water and shaded rest areas, train workers on heat illness symptoms, implement buddy systems, and have a heat illness emergency plan. Several states (California, Oregon, Washington, Minnesota) have specific heat safety regulations that go beyond federal OSHA guidelines."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is acclimatization and why does it matter?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Acclimatization is the process where your body adapts to working in heat over 7-14 days. New workers and workers returning from breaks of 2+ weeks are most vulnerable to heat illness. OSHA recommends starting new workers at 20% exposure and increasing by 20% each day."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can workers be fired for refusing to work in extreme heat?"
+    },
+    {
+      "type": "paragraph",
+      "text": "OSHA protects workers who refuse to work in conditions they reasonably believe pose an imminent danger. If there is no time to fix the hazard through normal OSHA enforcement channels, and the worker has asked the employer to fix it with no result, they may be protected in refusing to work in dangerously hot conditions."
+    },
+    {
+      "type": "cta",
+      "heading": "Check Heat Index for Your Worksite",
+      "body": "Use our heat index calculator to plan work/rest schedules.",
+      "buttonLabel": "Open Calculator",
+      "path": "/everyday/heat-index-calculator/"
+    }
+  ],
+  "keywords": [
+    "heat safety outdoor workers",
+    "osha heat guidelines",
+    "occupational heat safety",
+    "work rest ratio heat",
+    "heat index for workers",
+    "outdoor worker safety heat"
+  ]
+}

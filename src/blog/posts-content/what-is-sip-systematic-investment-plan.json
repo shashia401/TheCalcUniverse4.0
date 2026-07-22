@@ -1,0 +1,43 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How SIP Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "You choose a mutual fund scheme, decide a fixed amount to invest monthly (e.g., ₹5,000), and provide your bank mandate. Every month, the amount is auto-debited and units of the mutual fund are purchased at the prevailing NAV. Over time, you accumulate units. When you redeem, you get the prevailing NAV times your total units. SIP is available for most mutual fund schemes — equity, debt, hybrid, and even ETFs."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Benefits of SIP"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Discipline: Automated investing removes emotion from your investment decisions.",
+        "Rupee cost averaging: Buy more when markets are low, less when high.",
+        "Power of compounding: Returns earn returns over time.",
+        "Low entry barrier: Start with as little as ₹500 per month.",
+        "Flexibility: Increase, decrease, stop, or restart anytime."
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SIP Calculator",
+      "body": "Calculate your systematic investment plan returns with our free SIP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/sip-calculator/"
+    }
+  ],
+  "keywords": [
+    "what is sip",
+    "systematic investment plan",
+    "how sip works",
+    "sip mutual fund basics",
+    "start sip investing"
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Diet Matters for Kidney Health"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your kidneys process everything you eat and drink. They filter waste products, balance minerals and electrolytes, and maintain fluid balance. When kidney function declines, the kidneys cannot keep up with certain nutrients, which build up in the blood and cause complications. A kidney-friendly diet reduces the workload on your kidneys by limiting the nutrients that are hardest for damaged kidneys to process."
+    },
+    {
+      "type": "paragraph",
+      "text": "The four nutrients most important to manage in CKD are sodium, protein, potassium, and phosphorus. The amount of restriction needed depends on your CKD stage. In early stages (1-3a), moderate sodium restriction and a heart-healthy diet may be sufficient. In later stages (3b-5), more targeted restrictions become necessary."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Sodium: The Universal Restriction"
+    },
+    {
+      "type": "paragraph",
+      "text": "Sodium restriction is recommended for all CKD patients regardless of stage. Excess sodium causes fluid retention, raises blood pressure, increases proteinuria, and accelerates GFR decline. The general recommendation is to limit sodium to <2,000 mg per day — roughly one teaspoon of salt."
+    },
+    {
+      "type": "paragraph",
+      "text": "Most sodium in the American diet comes from processed and restaurant foods, not the salt shaker. Bread, cold cuts, canned soups, frozen dinners, fast food, and sauces are major sources. Cooking from scratch with herbs, spices, and salt-free seasoning blends is the most effective way to control sodium intake."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Read nutrition labels carefully. Look for \"no salt added,\" \"low sodium\" (<140 mg per serving), or \"reduced sodium\" items. Avoid anything with more sodium than calories per serving — that is a sign of a high-sodium food."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Protein: Quality over Quantity"
+    },
+    {
+      "type": "paragraph",
+      "text": "Protein metabolism produces urea and other waste products that must be filtered by the kidneys. High protein intake increases the workload on damaged kidneys and accelerates GFR decline. Moderate protein intake is recommended for CKD patients not on dialysis."
+    },
+    {
+      "type": "paragraph",
+      "text": "Recommended protein intake varies by CKD stage. For Stage 1-2 CKD, 0.8-1.0 g/kg body weight per day is typical. For Stage 3-5 CKD not on dialysis, 0.6-0.8 g/kg/day. For dialysis patients, higher protein intake (1.2-1.5 g/kg/day) is needed because dialysis removes amino acids."
+    },
+    {
+      "type": "paragraph",
+      "text": "Plant-based proteins (beans, lentils, tofu, quinoa) produce less acid load than animal proteins and may be gentler on kidneys. The DASH diet, modified for CKD, emphasizes plant-based proteins, whole grains, and vegetables while limiting red meat and processed foods."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Potassium: Stage-Dependent Management"
+    },
+    {
+      "type": "paragraph",
+      "text": "Potassium management depends on your CKD stage and whether you take certain medications. In advanced CKD, the kidneys cannot excrete excess potassium effectively, and hyperkalemia (high potassium) becomes a dangerous risk that can cause cardiac arrhythmias."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "CKD Stage",
+        "Potassium Risk",
+        "Typical Recommendation"
+      ],
+      "rows": [
+        [
+          "Stage 1-2",
+          "Low risk",
+          "No restriction needed. Eat potassium-rich foods normally (fruits, vegetables)."
+        ],
+        [
+          "Stage 3a",
+          "Low to moderate risk",
+          "Monitor potassium levels. Avoid excessive high-potassium foods if levels are elevated."
+        ],
+        [
+          "Stage 3b",
+          "Moderate risk",
+          "Limit high-potassium foods (bananas, oranges, potatoes, tomatoes, spinach)."
+        ],
+        [
+          "Stage 4",
+          "High risk",
+          "Active potassium restriction. Discuss specific limits with your dietitian."
+        ],
+        [
+          "Stage 5 / Dialysis",
+          "Very high risk",
+          "Strict potassium restriction. Regular monitoring essential."
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Note that many blood pressure medications (ACE inhibitors, ARBs, spironolactone) can raise potassium levels, so dietary potassium restriction may be needed even at earlier stages if you take these medications."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Phosphorus: The Hidden Danger"
+    },
+    {
+      "type": "paragraph",
+      "text": "Phosphorus is abundant in processed foods, dairy, nuts, seeds, and dark sodas. In advanced CKD, phosphorus builds up in the blood, leading to bone disease and cardiovascular calcification. Dietary phosphorus restriction becomes important starting around Stage 3b."
+    },
+    {
+      "type": "paragraph",
+      "text": "The highest sources of phosphorus in the modern diet are preservatives in processed foods. Limiting processed foods automatically reduces phosphorus intake. Avoid dark colas and sodas — they contain phosphoric acid. Limit dairy products to one serving per day. Nuts, seeds, organ meats, and whole grains are also high in phosphorus."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Kidney-Friendly Foods by Category"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Best Choices",
+        "Limit or Avoid"
+      ],
+      "rows": [
+        [
+          "Vegetables",
+          "Cauliflower, cabbage, carrots, green beans, bell peppers, onions, zucchini",
+          "Potatoes, tomatoes, spinach, avocado (high potassium)"
+        ],
+        [
+          "Fruits",
+          "Apples, berries, grapes, cherries, pineapple, watermelon",
+          "Bananas, oranges, melons, kiwis (high potassium)"
+        ],
+        [
+          "Proteins",
+          "Lean poultry, fish, eggs, tofu, legumes",
+          "Red meat, organ meats, processed meats (bacon, sausage)"
+        ],
+        [
+          "Grains",
+          "White rice, pasta, refined bread, couscous",
+          "Whole grains (high phosphorus), bran cereals"
+        ],
+        [
+          "Dairy",
+          "Rice milk, unsalted butter (limit to 1 serving/day)",
+          "Milk, yogurt, cheese (high phosphorus)"
+        ],
+        [
+          "Drinks",
+          "Water, clear sodas, lemonade",
+          "Dark colas (phosphoric acid), orange juice (potassium)"
+        ],
+        [
+          "Snacks",
+          "Unsalted crackers, popcorn, hard candies, jelly beans",
+          "Nuts, seeds, chocolate, potato chips, pretzels"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Meal Pattern for Kidney Health"
+    },
+    {
+      "type": "paragraph",
+      "text": "A typical kidney-friendly day might look like this:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Breakfast: Oatmeal made with rice milk, topped with blueberries and a boiled egg. Herbal tea.",
+        "Lunch: Grilled chicken salad with lettuce, cucumber, bell peppers, and olive oil dressing. White bread on the side. Apple for dessert.",
+        "Dinner: Baked salmon with lemon and herbs, steamed green beans, white rice. Unsalted butter and herbs for flavor. Water.",
+        "Snack: Unsalted rice crackers with a small amount of unsalted peanut butter. Handful of grapes.",
+        "Total: ~1,800 mg sodium, 55g protein, moderate potassium, controlled phosphorus."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This is a sample only. Dietary needs vary by CKD stage, medications, and individual lab values. Work with a renal dietitian to create a personalized meal plan that meets your specific requirements."
+    },
+    {
+      "type": "cta",
+      "heading": "Know Your Numbers First",
+      "body": "Check your eGFR and CKD stage with our free calculator before making dietary changes. Different stages require different approaches.",
+      "buttonLabel": "Calculate eGFR",
+      "path": "/health/gfr-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can a kidney-friendly diet reverse CKD?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Diet cannot reverse established chronic kidney disease, but it can significantly slow progression, reduce symptoms, and delay the need for dialysis. In early CKD (Stage 1-2), dietary changes combined with medication can sometimes stabilize kidney function for years or decades."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is the DASH diet good for kidneys?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The DASH diet (Dietary Approaches to Stop Hypertension) is an excellent starting point for CKD patients because it emphasizes low sodium, fruits, vegetables, and lean proteins. However, standard DASH is too high in potassium and phosphorus for advanced CKD. A modified DASH diet with lower potassium fruits and vegetables works well."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should I take a renal vitamin?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Standard multivitamins may contain too much vitamin A, which can accumulate in CKD. A specially formulated renal vitamin (available by prescription) provides the right amounts of water-soluble vitamins. Do not take vitamin or herbal supplements without checking with your nephrologist."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How much water should I drink with CKD?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For early-stage CKD, drink when you are thirsty — typically 6-8 cups per day. There is no evidence that drinking more water than usual improves kidney function or slows CKD progression. In advanced CKD (Stage 4-5), fluid restriction may be needed to prevent fluid overload."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Do I need to avoid all high-potassium foods?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Not necessarily. If your blood potassium is normal, you do not need to restrict potassium. Even with some elevation, you may only need to limit — not eliminate — high-potassium foods. Work with your doctor and dietitian to determine your individual potassium target based on your lab results and medications."
+    }
+  ],
+  "keywords": [
+    "kidney friendly diet",
+    "ckd diet",
+    "what to eat with kidney disease",
+    "renal diet",
+    "low sodium kidney diet",
+    "kidney disease foods to avoid",
+    "dash diet ckd",
+    "chronic kidney disease nutrition",
+    "renal diet food list"
+  ]
+}

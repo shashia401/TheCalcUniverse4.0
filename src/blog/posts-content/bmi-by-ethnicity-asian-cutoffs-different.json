@@ -1,0 +1,109 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Ethnicity Matters for BMI"
+    },
+    {
+      "type": "paragraph",
+      "text": "The standard BMI cutoffs (overweight at 25, obese at 30) were developed primarily using data from white European populations. Research has consistently shown that people of Asian descent tend to have higher body fat percentages and greater cardiometabolic risk at lower BMIs compared to white populations. A person of Chinese descent with a BMI of 24 may have similar metabolic health risks as a white person with a BMI of 28."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "WHO Asian-Specific BMI Recommendations"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Standard BMI",
+        "Asian BMI",
+        "Difference"
+      ],
+      "rows": [
+        [
+          "Underweight",
+          "Under 18.5",
+          "Under 18.5",
+          "Same"
+        ],
+        [
+          "Normal",
+          "18.5-24.9",
+          "18.5-22.9",
+          "Lower top end"
+        ],
+        [
+          "Overweight",
+          "25.0-29.9",
+          "23.0-27.4",
+          "2 points lower"
+        ],
+        [
+          "Obese",
+          "30.0+",
+          "27.5+",
+          "2.5 points lower"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What This Means for Your Health Assessment"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you are of Asian descent and your BMI is 24, under standard charts you would be considered normal weight. Under Asian-specific cutoffs, you are overweight and may benefit from metabolic screening. This is not about body image — it is about catching elevated diabetes and cardiovascular risk early. Studies show that Asian populations develop type 2 diabetes at significantly lower BMIs than white populations. Our BMI calculator includes a toggle for Asian-adjusted categories that uses these modified thresholds."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Other Ethnicity Considerations"
+    },
+    {
+      "type": "paragraph",
+      "text": "Research also suggests that Black populations may have slightly lower health risks at higher BMIs, though standardized cutoff adjustments for Black individuals are not as widely adopted as Asian cutoffs. Hispanic and Indigenous populations also show different risk patterns. The key takeaway: BMI is a population screening tool, not an individual diagnostic instrument. Your personal health assessment should include blood work, blood pressure, and body composition, not just BMI."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Does the BMI calculator support Asian cutoffs?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes. Our BMI calculator includes an Asian-adjusted mode that uses WHO-recommended lower thresholds. Simply toggle the setting to see your BMI classified under both standard and Asian-specific cutoffs."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Are there different cutoffs for South Asian vs East Asian?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The WHO recommends the same adjusted cutoffs for all Asian subpopulations, but some studies suggest South Asians (Indian, Pakistani, Bangladeshi) may be at even higher risk than East Asians at the same BMI. If you are South Asian, consider being especially vigilant about metabolic health screening even at BMIs in the normal range."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the BMI Calculator",
+      "body": "Includes Asian-adjusted BMI categories for more accurate health assessment.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "bmi by ethnicity",
+    "asian bmi cutoff",
+    "bmi for asian population",
+    "ethnicity bmi",
+    "who asian bmi",
+    "bmi different ethnicities"
+  ]
+}

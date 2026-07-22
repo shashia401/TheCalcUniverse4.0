@@ -1,0 +1,58 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Factors Affecting Corpus Longevity"
+    },
+    {
+      "type": "paragraph",
+      "text": "Four variables determine how long your money lasts: the size of your initial corpus, how much you withdraw monthly, the rate of return your investments earn, and inflation eroding your purchasing power."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Withdrawal Rate",
+        "Corpus Lasts at 8%",
+        "Corpus Lasts at 6%"
+      ],
+      "rows": [
+        [
+          "4%",
+          "30+ years",
+          "28 years"
+        ],
+        [
+          "5%",
+          "25 years",
+          "20 years"
+        ],
+        [
+          "6%",
+          "20 years",
+          "16 years"
+        ],
+        [
+          "8%",
+          "14 years",
+          "11 years"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SWP Calculator",
+      "body": "Plan your retirement withdrawals with our free SWP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/swp-calculator/"
+    }
+  ],
+  "keywords": [
+    "how long corpus lasts",
+    "retirement corpus longevity",
+    "corpus depletion",
+    "when will corpus run out",
+    "sustainable withdrawal period",
+    "longevity calculator retirement"
+  ]
+}

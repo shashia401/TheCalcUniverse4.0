@@ -1,0 +1,82 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Dew Point vs Relative Humidity"
+    },
+    {
+      "type": "paragraph",
+      "text": "Relative humidity changes with temperature — warm air can hold more water vapor than cool air. This means a 50% humidity reading at 80°F contains much more water than 50% at 60°F. Dew point is the temperature at which air would need to be cooled to reach 100% humidity. It is an absolute measure of moisture content. A dew point of 60°F feels the same regardless of whether the air temperature is 70°F or 95°F. This makes dew point a more consistent measure of mugginess."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Dew Point Comfort Scale"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Dew Point",
+        "Comfort Level",
+        "Heat Index Effect"
+      ],
+      "rows": [
+        [
+          "Below 50°F",
+          "Very comfortable",
+          "Minimal effect on heat index"
+        ],
+        [
+          "50-55°F",
+          "Comfortable",
+          "Slight increase"
+        ],
+        [
+          "55-60°F",
+          "Slightly humid",
+          "Noticeable increase"
+        ],
+        [
+          "60-65°F",
+          "Humid",
+          "Heat index 5-10°F above air temp"
+        ],
+        [
+          "65-70°F",
+          "Very humid, uncomfortable",
+          "Heat index 10-15°F above"
+        ],
+        [
+          "70°F+",
+          "Oppressive",
+          "Heat index 15-20°F+ above, dangerous"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why This Matters for the Heat Index"
+    },
+    {
+      "type": "paragraph",
+      "text": "The heat index rises sharply as dew point increases. A 90°F day with dew point 60°F (moderate humidity) gives a heat index of about 97°F. The same 90°F with dew point 75°F (extreme humidity, typical of tropical regions or after heavy rain) gives a heat index above 115°F. This is why the combination of high temperature and high dew point is uniquely dangerous."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Heat Index",
+      "body": "Use our heat index and dew point calculators to understand current conditions.",
+      "buttonLabel": "Open Calculator",
+      "path": "/everyday/heat-index-calculator/"
+    }
+  ],
+  "keywords": [
+    "dew point vs humidity",
+    "how humidity affects heat index",
+    "what is dew point",
+    "muggy vs humid",
+    "heat index humidity",
+    "dew point comfort level"
+  ]
+}

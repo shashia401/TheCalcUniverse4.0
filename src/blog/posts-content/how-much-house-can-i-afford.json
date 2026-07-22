@@ -1,0 +1,97 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "you've probably heard the rule of thumb — spend no more than 28% of your income on housing. But lenders don't just look at your mortgage payment. They look at *all* your debts through the **debt-to-income (DTI) ratio**, and that single number determines exactly how much house you can afford."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is the 28/36 Rule?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The 28/36 rule is the lending industry's standard framework. Your monthly housing costs — principal, interest, taxes, and insurance, or **PITI** — shouldn't exceed 28% of your gross monthly income. Your total debt payments, housing plus car loans, student loans, and credit cards, should stay under 36%."
+    },
+    {
+      "type": "paragraph",
+      "text": "Lenders use the 36% back-end ratio as their hard ceiling, with FHA and Fannie Mae allowing up to 43% in some cases. here's the counterintuitive part: lenders start with your income, not the home price. They multiply your monthly income by the DTI limit, subtract your existing debts, deduct a buffer for taxes and insurance (roughly 20% of PITI), and then reverse-engineer the mortgage formula to find your maximum loan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Your Down Payment Changes the Equation"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your down payment affects three things: the loan amount you need, whether you'll pay **PMI (Private Mortgage Insurance)**, and your monthly payment. Put down less than 20%, and you'll typically pay 0. 5–1."
+    },
+    {
+      "type": "paragraph",
+      "text": "5% of the loan amount per year in PMI — money that protects the lender, not you. PMI automatically drops off once your loan-to-value ratio reaches 78%, but a 20% down payment eliminates it from day one. PMI isn't the same as homeowners insurance; PMI covers the lender if you default, while homeowners insurance covers you."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Should You Buy the Most Expensive House the Bank Approves?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Probably not. The bank's maximum is based solely on DTI ratios, not your lifestyle. If you max out at 43% DTI, you'll have less room for retirement savings, travel, emergencies, and everyday flexibility."
+    },
+    {
+      "type": "paragraph",
+      "text": "Most financial advisors recommend targeting **28–33%** back-end DTI for a comfortable financial cushion. To find your real number: calculate your gross monthly income and total debts, choose your DTI target, estimate your down payment, enter the current mortgage rate, and use the calculator below."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "DTI Target",
+        "Max Housing Payment",
+        "Existing Debts",
+        "Available for PITI",
+        "Est. Max Home Price"
+      ],
+      "rows": [
+        [
+          "28% (Conservative)",
+          "$2,333/mo",
+          "$500/mo",
+          "$1,833/mo",
+          "~$273,000"
+        ],
+        [
+          "36% (Moderate)",
+          "$3,000/mo",
+          "$500/mo",
+          "$2,500/mo",
+          "~$388,000"
+        ],
+        [
+          "43% (Aggressive)",
+          "$3,583/mo",
+          "$500/mo",
+          "$3,083/mo",
+          "~$490,000"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Number",
+      "body": "Ready to get your personalized maximum home price? The House Affordability Calculator walks through the same math lenders use, including DTI limits, PMI estimates, and your specific max home price.",
+      "buttonLabel": "Calculate Your Affordability",
+      "path": "/finance/house-affordability-calculator/"
+    }
+  ],
+  "keywords": [
+    "how much house can i afford",
+    "house affordability calculator",
+    "home affordability calculator",
+    "28/36 rule",
+    "mortgage DTI ratio",
+    "mortgage affordability",
+    "home buying budget",
+    "PMI explained"
+  ]
+}

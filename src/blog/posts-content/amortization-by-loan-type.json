@@ -1,0 +1,81 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Different Loans Amortize"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Loan Type",
+        "Amortization Method",
+        "Early Interest",
+        "Prepayment Penalty?"
+      ],
+      "rows": [
+        [
+          "Mortgage (fixed)",
+          "Full amortization",
+          "Very high (80%+ in year 1)",
+          "Usually no"
+        ],
+        [
+          "Auto loan",
+          "Simple interest",
+          "High (50-70% in year 1)",
+          "Usually no"
+        ],
+        [
+          "Personal loan",
+          "Fixed installment",
+          "Moderate (40-60% in year 1)",
+          "Sometimes"
+        ],
+        [
+          "Student loan (fed)",
+          "Standard or graduated",
+          "Moderate",
+          "No"
+        ],
+        [
+          "Credit card",
+          "Revolving (no amortization)",
+          "N/A (pays interest on daily balance)",
+          "No"
+        ],
+        [
+          "Interest-only",
+          "No principal paid initially",
+          "100% of payment",
+          "Varies"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Loan Type Matters for Extra Payments"
+    },
+    {
+      "type": "paragraph",
+      "text": "Extra payments on a fully amortizing loan (mortgage, auto, personal) reduce future interest charges by lowering the principal balance earlier. The sooner you make extra payments in the loan term, the greater the savings. On simple interest loans (most auto loans), interest is calculated daily, so extra payments save interest immediately. Our amortization calculator works for any loan type and shows you the exact savings."
+    },
+    {
+      "type": "cta",
+      "heading": "Compare Amortization Scenarios",
+      "body": "Use our amortization calculator to see how different loan types and extra payments affect your total cost.",
+      "buttonLabel": "Calculate Now",
+      "path": "/finance/mortgage-amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "amortization by loan type",
+    "mortgage amortization",
+    "auto loan amortization",
+    "personal loan amortization",
+    "student loan amortization",
+    "simple interest loan",
+    "precomputed loan"
+  ]
+}

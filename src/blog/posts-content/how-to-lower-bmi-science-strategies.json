@@ -1,0 +1,76 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Math of Lowering Your BMI"
+    },
+    {
+      "type": "paragraph",
+      "text": "Since BMI = weight in kg / height in meters squared, and height is fixed, the only way to lower BMI is to reduce weight. But losing weight is not the same as losing fat. Rapid weight loss causes muscle loss, which lowers metabolism and leads to rebound weight gain. The goal is fat loss with muscle preservation. A realistic target: lower your BMI by 0.5-1 point per month through a moderate calorie deficit of 300-500 calories per day combined with strength training."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Strategies That Work"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Calorie deficit: Eat 300-500 calories below your TDEE. Use our TDEE calculator to find your maintenance level.",
+        "Protein priority: Eat 1.6-2.2g of protein per kg of body weight per day. Protein preserves muscle during weight loss.",
+        "Strength training: Lift weights 3-4 times per week. This signals your body to keep muscle while losing fat.",
+        "Sleep: Poor sleep increases cravings and reduces willpower. Aim for 7-9 hours per night.",
+        "Consistency: The best diet is the one you can stick to. Aim for 80% compliance — perfection is not required."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Expected Timeline"
+    },
+    {
+      "type": "paragraph",
+      "text": "With a 500-calorie daily deficit, expect to lose about 1 lb per week. For someone with a BMI of 30, this means 2-3 months to reach the overweight range, then another 2-4 months to reach the top of the healthy range. The weight comes off faster initially (water weight) then slows down. Do not get discouraged by the slowdown — it is normal and expected. Use measurements other than BMI to track progress: how your clothes fit, your waist measurement, and body fat percentage."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I lower my BMI without losing weight?"
+    },
+    {
+      "type": "paragraph",
+      "text": "No — BMI only considers weight and height. However, you can improve your metabolic health without changing your BMI by losing fat and gaining muscle. This is called body recomposition and it is possible with strength training and adequate protein, especially if you are new to exercise."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How much do I need to lose to lower my BMI by 1 point?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For a person 5'9\" (175 cm, ~3.06 m²), each BMI point represents about 3 kg (6.6 lbs). So to go from BMI 30 to BMI 25, you would need to lose about 15 kg (33 lbs). Use our BMI calculator to see exactly how your weight changes affect your BMI number."
+    },
+    {
+      "type": "cta",
+      "heading": "Track Your Progress",
+      "body": "Use our free BMI calculator and calorie calculator to plan your weight loss journey.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "how to lower bmi",
+    "reduce bmi",
+    "bmi weight loss",
+    "healthy bmi tips",
+    "lower body mass index",
+    "sustainable weight loss bmi"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Pay Off Your Mortgage Early?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your mortgage is likely your largest debt. Paying it off early saves the interest you would have paid over the remaining years. On a $300,000 mortgage at 6.5%, you will pay approximately $383,000 in interest over 30 years. By paying just $200 extra each month, you can save over $100,000 in interest and own your home 9 years sooner."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Extra Payment Strategies"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Monthly extra payments: Add $100-$500 to each monthly payment. Even small amounts compound significantly.",
+        "Bi-weekly payments: Pay half your monthly payment every two weeks. This results in 26 half-payments (13 full payments per year) without feeling the pinch.",
+        "Annual lump sums: Apply bonuses, tax refunds, or gifts as one-time principal reductions.",
+        "Mortgage recasting: Make a large lump sum payment and recast to lower your monthly payment.",
+        "Refinance to a shorter term: Switch from a 30-year to a 15-year mortgage when rates are favorable."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Each strategy has different tradeoffs. Bi-weekly plans are easy to automate and cost nothing extra beyond your regular budget. Lump sums require cash availability but have the most dramatic impact. The best strategy is the one you can stick with consistently."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Extra Payments Save Interest"
+    },
+    {
+      "type": "paragraph",
+      "text": "Mortgage interest is front-loaded — in the early years, most of your payment goes to interest, not principal. In year one of a 30-year mortgage at 6.5%, roughly 80% of each payment goes to interest. Extra payments made early in the loan term have the highest impact because they reduce the principal that future interest is calculated on."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "A $200 monthly extra payment on a $300,000 mortgage at 6.5% saves approximately $105,000 in interest and pays off the loan 9 years early. Use our mortgage payoff calculator to see your exact numbers."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Is Paying Off Early Always Best?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Paying off your mortgage early is not always the optimal financial move. Consider these alternatives: investing extra cash may earn higher returns than your mortgage rate (historically, the S&P 500 averages 8-10% annually). Mortgage interest may be tax-deductible if you itemize. Having a cash emergency fund is more important than accelerating mortgage payments. High-interest debt (credit cards, personal loans) should be paid first."
+    },
+    {
+      "type": "paragraph",
+      "text": "A balanced approach: maintain 3-6 months of emergency savings, pay off high-interest debt, contribute enough to retirement accounts to get the full employer match, then consider extra mortgage payments. Our mortgage payoff calculator helps you compare the scenarios side by side."
+    },
+    {
+      "type": "cta",
+      "heading": "See Your Mortgage Payoff Savings",
+      "body": "Use our free mortgage payoff calculator. Enter your loan details and extra payment amount to see exactly how much time and interest you save.",
+      "buttonLabel": "Calculate Now",
+      "path": "/finance/mortgage-payoff-calculator/"
+    }
+  ],
+  "keywords": [
+    "mortgage payoff",
+    "pay off mortgage early",
+    "mortgage payoff calculator",
+    "extra mortgage payment",
+    "biweekly mortgage",
+    "mortgage acceleration",
+    "payoff strategies",
+    "mortgage principal"
+  ]
+}

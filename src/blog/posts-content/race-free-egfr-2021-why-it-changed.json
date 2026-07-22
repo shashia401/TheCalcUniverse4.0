@@ -1,0 +1,69 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Was the Race Coefficient?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For decades, GFR estimation equations included a race coefficient: for Black patients, the calculated eGFR was multiplied by 1.21 (a 21% increase). This was based on the observation that Black populations tend to have higher average serum creatinine. The assumption was that this reflected higher muscle mass rather than better kidney function. However, this assumption proved flawed and harmful."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why It Was Removed"
+    },
+    {
+      "type": "paragraph",
+      "text": "A growing body of evidence showed that the race coefficient systematically overestimated GFR in Black individuals. This meant Black patients were told their kidneys were functioning better than they actually were, leading to later referral to nephrologists, lower rates of transplant waitlist placement, and higher rates of dialysis initiation at crisis stage. In 2021, the NKF and ASN jointly recommended removing race from GFR equations. The CKD-EPI 2021 equation is race-free and provides more equitable care."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How It Changed eGFR Values"
+    },
+    {
+      "type": "paragraph",
+      "text": "For Black patients, the removal of the 1.21 multiplier means eGFR results are typically 15-20% lower compared to the old equation. A Black patient who was told their eGFR was 70 under the old equation might now have an eGFR of 57 — changing their CKD stage from Stage 2 to Stage 3a. This change means more Black patients are now correctly diagnosed at earlier stages and can receive appropriate care sooner."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should labs re-run old samples with the new equation?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Ideally yes, but this is not always practical. For patients who have been followed over years, many labs now report both the historical and new eGFR values for comparison. If you know your creatinine value, you can use our GFR calculator to get the race-free result."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is the race-free equation perfect?"
+    },
+    {
+      "type": "paragraph",
+      "text": "No equation is perfect, and race-free equations may slightly underestimate GFR in some Black patients (missing mild CKD in a small percentage of cases). Researchers are working on cystatin C-based equations that do not depend on creatinine at all and in theory should be even more equitable and accurate."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Race-Free eGFR",
+      "body": "Use our free GFR calculator with the race-free CKD-EPI 2021 equation.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/gfr-calculator/"
+    }
+  ],
+  "keywords": [
+    "race-free egfr",
+    "ckd-epi 2021 race free",
+    "egfr race coefficient removed",
+    "kidney function racial bias",
+    "equitable kidney care",
+    "egfr without race"
+  ]
+}

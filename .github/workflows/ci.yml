@@ -1,0 +1,54 @@
+# CI — every push and PR must pass build, formula tests, E2E, and audit.
+# Quality gates live HERE so lowering them is a visible, reviewable diff.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: SVG diagram safety gate
+        # Educational diagrams render into static HTML unsanitized at runtime —
+        # this gate guarantees they stay pure vector markup.
+        run: node scripts/check-svg-safety.mjs
+
+      - name: Build (all pages must generate)
+        run: npm run build
+
+      - name: Content-in-HTML gate
+        # The invariant that killed v2: ranked content must exist in static HTML.
+        run: |
+          grep -q "Frequently Asked Questions" dist/finance/loan-calculator/index.html
+          grep -q '"FAQPage"' dist/finance/loan-calculator/index.html
+          grep -q "Interest Rate vs APR" dist/blog/apr-vs-interest-rate-difference/index.html
+          test -f dist/_redirects && test -f dist/_headers && test -f dist/robots.txt
+
+      - name: Formula tests (7,173 tests)
+        run: npm test
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E smoke against built site
+        run: npm run test:e2e
+
+      - name: Dependency audit
+        # Level=critical because of a known HIGH advisory in esbuild (GHSA-g7r4-m6w7-qqqr)
+        # that affects only the local dev server on Windows, never the built site.
+        # An esbuild override breaks Vite; the real fix is the next Astro major.
+        # When that lands, tighten this back to --audit-level=high.
+        run: npm audit --omit=dev --audit-level=critical

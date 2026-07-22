@@ -1,0 +1,106 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Many Calories Do You Need per Day?"
+    },
+    {
+      "type": "paragraph",
+      "text": "There's no universal number. Your daily calorie needs depend on your age, sex, weight, height, and activity level. The starting point is your BMR — the calories you burn at rest."
+    },
+    {
+      "type": "paragraph",
+      "text": "From there, you multiply by an activity factor to get your Total Daily Energy Expenditure (TDEE), which is your maintenance number. Eat that many calories and your weight stays stable."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Activity Level",
+        "Description",
+        "Multiplier"
+      ],
+      "rows": [
+        [
+          "Sedentary",
+          "Desk job, little to no exercise",
+          "BMR x 1.2"
+        ],
+        [
+          "Light Exercise",
+          "1–2 days per week",
+          "BMR x 1.375"
+        ],
+        [
+          "Moderate Exercise",
+          "3–5 days per week",
+          "BMR x 1.55"
+        ],
+        [
+          "Active",
+          "6–7 days per week",
+          "BMR x 1.725"
+        ],
+        [
+          "Very Active",
+          "Physical job + daily training",
+          "BMR x 1.9"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Many Calories for Weight Loss?"
+    },
+    {
+      "type": "paragraph",
+      "text": "To lose weight, eat **300–500 calories below your TDEE**. This creates a deficit that burns roughly **0. 5–1 lb (0."
+    },
+    {
+      "type": "paragraph",
+      "text": "2–0. 5 kg) per week**. That's the sweet spot for sustainable fat loss — fast enough to see progress, slow enough to preserve muscle and avoid metabolic slowdown."
+    },
+    {
+      "type": "paragraph",
+      "text": "A larger deficit might seem better, but it often backfires: you lose muscle, your metabolism adapts, and you're more likely to regain the weight. A 2,500-calorie TDEE means a weight loss target around **2,000–2,200 calories per day**."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Many Calories for Muscle Gain?"
+    },
+    {
+      "type": "paragraph",
+      "text": "To build muscle, eat **250–500 calories above your TDEE**. This surplus gives your body the extra energy it needs to synthesize new muscle tissue. A slower surplus of +250 (roughly **0."
+    },
+    {
+      "type": "paragraph",
+      "text": "5 lb gain per week**) is better for lean gains with minimal fat. A larger surplus of +500 works for aggressive bulking but will add more fat along with muscle. Pair your surplus with adequate protein — at least **1."
+    },
+    {
+      "type": "paragraph",
+      "text": "6 g per kg of body weight** — and consistent resistance training."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Don't trust calculators that ask you to eat fewer than 1,200 calories (women) or 1,500 calories (men). Those aren't personalized — they're hard safety floors. A truly personalized calorie target accounts for your specific body stats and activity level. Our calculator adjusts your deficit based on your real TDEE, not a one-size-fits-all minimum."
+    },
+    {
+      "type": "cta",
+      "heading": "Get Your Personalized Calorie Target",
+      "body": "Use our Calorie Calculator to find your BMR, TDEE, and projected weekly weight change based on your body and goals. Optional intake tracking shows your deficit or surplus in real time.",
+      "buttonLabel": "Calculate Calories",
+      "path": "/health/calorie-calculator/"
+    }
+  ],
+  "keywords": [
+    "daily calorie intake",
+    "how many calories to eat",
+    "calorie calculator",
+    "maintenance calories",
+    "calorie deficit for weight loss",
+    "calories for muscle gain"
+  ]
+}

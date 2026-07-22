@@ -1,0 +1,83 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Debt consolidation sounds simple: take out one loan at a lower rate, pay off all your high-interest debts, and make a single monthly payment. But the math is more complicated than a lower interest rate. Origination fees, longer repayment terms, and your credit score all determine whether consolidation actually saves you money."
+    },
+    {
+      "type": "heading",
+      "text": "How Debt Consolidation Works?",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "Debt consolidation replaces multiple debts — usually credit cards, personal loans, or medical bills — with a single new loan. The new loan should have a lower interest rate than your current weighted average rate. You use the loan proceeds to pay off your existing balances, then make one monthly payment on the consolidation loan."
+    },
+    {
+      "type": "paragraph",
+      "text": "The math works best when you've high-interest credit card debt (20%+ APR) and can qualify for a personal loan at 7-15%. The savings come from the interest rate gap — but fees and term length can erode or eliminate those savings entirely."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Method",
+        "How It Works",
+        "Typical Rates",
+        "Best For"
+      ],
+      "rows": [
+        [
+          "Personal Loan",
+          "Borrow a lump sum, pay off debts, repay in fixed installments",
+          "7-25% depending on credit",
+          "Larger balances, longer payoff timeline, predictable payments"
+        ],
+        [
+          "Balance Transfer Card",
+          "Transfer balances to a card with 0% intro APR",
+          "0% for 12-21 months, then 18-25%",
+          "Smaller balances you can pay off during the intro period"
+        ],
+        [
+          "Home Equity Loan",
+          "Borrow against home equity at a lower secured rate",
+          "6-10%",
+          "Large debt amounts, but puts your home at risk if you default"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "The Hidden Cost: Origination Fees",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "Most personal loans charge an **origination fee of 1-5%** of the loan amount. This fee is deducted upfront or added to your balance. A $15,000 loan with a 3% origination fee costs **$450** immediately."
+    },
+    {
+      "type": "paragraph",
+      "text": "That fee changes the math significantly. You need to save at least $450 in interest before you break even — and that's $450 you wouldn't owe if you kept paying the original debts separately. Always check the **total lifetime savings after fees** figure rather than just looking at the monthly payment reduction."
+    },
+    {
+      "type": "callout",
+      "text": "Divide the origination fee by your monthly savings to find the break-even month. If the fee is $300 and you save $75/month, you break even in 4 months. Every month after that's pure financial gain. If the break-even is longer than you plan to keep the loan, consolidation may not be worth it.",
+      "variant": "tip"
+    },
+    {
+      "type": "cta",
+      "heading": "Is Consolidation Worth It for You?",
+      "body": "Enter your debts and a proposed consolidation loan into our free Debt Consolidation Calculator. See the side-by-side comparison of monthly payment, total interest, and lifetime savings after fees.",
+      "buttonLabel": "Open the Debt Consolidation Calculator",
+      "path": "/finance/debt-consolidation-calculator/"
+    }
+  ],
+  "keywords": [
+    "debt consolidation",
+    "consolidate debt",
+    "personal loan vs balance transfer",
+    "debt consolidation calculator",
+    "is debt consolidation worth it",
+    "consolidation loan"
+  ]
+}

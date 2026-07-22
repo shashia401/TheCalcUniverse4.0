@@ -1,0 +1,71 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Core Difference"
+    },
+    {
+      "type": "paragraph",
+      "text": "SIP spreads your investment over time, reducing the risk of investing at a market peak. Lump sum invests everything at once, which can generate higher returns if the market rises but carries higher risk if the market drops immediately after your investment."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Factor",
+        "SIP",
+        "Lump Sum"
+      ],
+      "rows": [
+        [
+          "Risk",
+          "Lower (averaging)",
+          "Higher (market timing)"
+        ],
+        [
+          "Best for",
+          "Regular income, long-term",
+          "Windfall, bonus, inheritance"
+        ],
+        [
+          "Returns in rising market",
+          "Good",
+          "Better"
+        ],
+        [
+          "Returns in falling market",
+          "Better",
+          "Worse"
+        ],
+        [
+          "Discipline",
+          "Built-in",
+          "Requires self-control"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Choose SIP"
+    },
+    {
+      "type": "paragraph",
+      "text": "Choose SIP when you have a regular monthly income, want to build wealth over 5+ years, want to avoid the stress of timing the market, or are a first-time investor. SIP is the default recommendation for most retail investors."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SIP Calculator",
+      "body": "Calculate your systematic investment plan returns with our free SIP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/sip-calculator/"
+    }
+  ],
+  "keywords": [
+    "sip vs lump sum",
+    "sip or lump sum",
+    "lump sum vs sip",
+    "systematic investment vs one time",
+    "sip advantages lump sum"
+  ]
+}

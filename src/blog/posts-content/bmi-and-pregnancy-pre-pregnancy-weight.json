@@ -1,0 +1,95 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Pre-Pregnancy BMI and Weight Gain Guidelines"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Institute of Medicine (IOM) recommends different weight gain ranges based on pre-pregnancy BMI. These guidelines aim to balance the health of both mother and baby — too little gain risks low birth weight, too much gain risks gestational diabetes, cesarean delivery, and postpartum weight retention."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Pre-Pregnancy BMI",
+        "Category",
+        "Recommended Gain (lbs)",
+        "Recommended Gain (kg)"
+      ],
+      "rows": [
+        [
+          "Under 18.5",
+          "Underweight",
+          "28-40 lbs",
+          "12.5-18 kg"
+        ],
+        [
+          "18.5-24.9",
+          "Normal weight",
+          "25-35 lbs",
+          "11.5-16 kg"
+        ],
+        [
+          "25.0-29.9",
+          "Overweight",
+          "15-25 lbs",
+          "7-11.5 kg"
+        ],
+        [
+          "30.0 and above",
+          "Obese",
+          "11-20 lbs",
+          "5-9 kg"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "First Trimester Weight Gain"
+    },
+    {
+      "type": "paragraph",
+      "text": "In the first trimester (weeks 1-12), total recommended weight gain is only 1-4.5 lbs regardless of pre-pregnancy BMI. If you gain significantly more in the first trimester, it is mostly fluid and fat rather than fetal growth. This is a common source of excessive total pregnancy weight gain. Focus on eating nutritious foods rather than eating for two — the fetus is only about the size of a lime at 12 weeks."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I lose weight during pregnancy if my BMI is high?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Weight loss during pregnancy is generally not recommended, but weight gain can be safely minimized for women with high pre-pregnancy BMI. Some studies show that modest weight loss in severely obese women under strict medical supervision may have benefits, but this should only be attempted with your obstetrician guidance."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How does BMI affect fertility?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Both high and low BMI can affect fertility. Women with BMI over 30 have higher rates of ovulatory infertility, and weight loss often improves fertility outcomes. Women with BMI under 18.5 may have irregular periods and ovulatory dysfunction. Achieving a healthy BMI before trying to conceive is one of the best things you can do for fertility."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Pre-Pregnancy BMI",
+      "body": "Use our free BMI calculator and pregnancy weight gain calculator to plan your healthy pregnancy.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "bmi and pregnancy",
+    "pregnancy bmi",
+    "pre-pregnancy bmi",
+    "pregnancy weight gain bmi",
+    "bmi and fertility",
+    "bmi pregnancy risks"
+  ]
+}

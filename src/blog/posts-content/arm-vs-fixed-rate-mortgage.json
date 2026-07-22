@@ -1,0 +1,47 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Fixed vs Adjustable: The Core Difference"
+    },
+    {
+      "type": "paragraph",
+      "text": "A fixed-rate mortgage locks your interest rate for the entire loan term — typically 15 or 30 years. Your payment never changes. An adjustable-rate mortgage (ARM) offers a lower initial rate for a fixed period (3, 5, 7, or 10 years), after which the rate resets periodically based on market indexes plus a margin."
+    },
+    {
+      "type": "paragraph",
+      "text": "The tradeoff is simple: ARMs offer lower initial payments but carry future uncertainty. Fixed rates offer predictability at a higher initial cost. A 5/1 ARM might start at 5.5% vs a 30-year fixed at 6.5%, saving $200/month for the first 5 years — but after that, the rate could rise as high as 8.5%."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When Each Makes Sense"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "ARM is better if: You plan to move within the fixed period (5-7 years), rates are high and expected to drop, you need a lower payment to qualify, or you expect higher income later.",
+        "Fixed is better if: You plan to stay 10+ years, you prefer payment certainty, rates are historically low, or you are on a fixed income and cannot absorb payment increases."
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Compare Loan Types",
+      "body": "Use our mortgage amortization calculator to compare payments across different loan types and terms.",
+      "buttonLabel": "Compare Loans",
+      "path": "/finance/mortgage-amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "arm vs fixed rate",
+    "adjustable rate mortgage",
+    "fixed rate mortgage",
+    "mortgage types",
+    "5/1 arm",
+    "7/1 arm",
+    "30 year fixed",
+    "arm rate vs fixed"
+  ]
+}

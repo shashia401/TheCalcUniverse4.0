@@ -1,0 +1,106 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Diet Matters for CKD"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your kidneys process everything you eat. When kidney function declines, waste products from food can build up in your blood, causing symptoms and accelerating further damage. A kidney-friendly diet reduces the workload on your kidneys, helps control blood pressure and blood sugar, and slows CKD progression. Dietary needs change as CKD progresses — what is right for Stage 2 may be wrong for Stage 4."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Sodium — The Universal Guideline"
+    },
+    {
+      "type": "paragraph",
+      "text": "Limiting sodium to under 2,000 mg per day is recommended for all CKD stages. This means avoiding processed foods (deli meats, canned soups, frozen dinners, fast food), reading labels for hidden sodium, cooking with herbs instead of salt, and choosing fresh or frozen vegetables over canned. Reducing sodium helps control blood pressure and reduces fluid retention."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Nutrient Guidelines by Stage"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Nutrient",
+        "Stage 1-2",
+        "Stage 3",
+        "Stage 4",
+        "Stage 5"
+      ],
+      "rows": [
+        [
+          "Sodium",
+          "<2,000mg",
+          "<2,000mg",
+          "<2,000mg",
+          "<2,000mg"
+        ],
+        [
+          "Protein",
+          "0.8-1.0g/kg",
+          "0.8g/kg",
+          "0.6-0.8g/kg",
+          "1.0-1.2g/kg (dialysis)"
+        ],
+        [
+          "Potassium",
+          "No limit",
+          "Monitor",
+          "Limit 2,000-3,000mg",
+          "Limit <2,000mg"
+        ],
+        [
+          "Phosphorus",
+          "No limit",
+          "Monitor",
+          "Limit 800-1,000mg",
+          "Limit 800-1,000mg"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I eat bananas with kidney disease?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Bananas are high in potassium. In early CKD (Stages 1-2), moderate banana consumption is fine. In advanced CKD (Stages 4-5), bananas and other high-potassium foods like oranges, potatoes, tomatoes, and spinach may need to be limited. Your nephrologist or renal dietitian will advise based on your blood potassium levels."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Do I need to avoid all protein?"
+    },
+    {
+      "type": "paragraph",
+      "text": "No. Protein restriction is only moderate and is specific to non-dialysis CKD patients. Once you start dialysis, protein needs actually increase because dialysis removes amino acids. Do not restrict protein without medical guidance — your individual needs depend on your stage, muscle mass, and nutritional status."
+    },
+    {
+      "type": "cta",
+      "heading": "Check Your GFR",
+      "body": "Monitor your kidney function with our free GFR calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/gfr-calculator/"
+    }
+  ],
+  "keywords": [
+    "kidney disease diet",
+    "ckd diet",
+    "kidney friendly foods",
+    "renal diet",
+    "low potassium foods",
+    "ckd diet plan",
+    "kidney disease nutrition"
+  ]
+}

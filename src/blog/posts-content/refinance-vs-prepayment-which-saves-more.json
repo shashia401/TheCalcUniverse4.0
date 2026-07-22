@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Each Strategy Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "Refinancing replaces your existing loan with a new one at a lower rate, reducing your monthly payment and total interest. Prepayment means sending extra money to principal, which shortens the loan term and reduces total interest without changing your rate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Refinance"
+    },
+    {
+      "type": "paragraph",
+      "text": "Refinance when: (1) rates have dropped at least 1% below your current rate, (2) you plan to stay in the home long enough to recoup closing costs (typically 3-5 years), (3) you want to change loan terms (e.g., 30-year to 15-year). The refinance calculator shows your break-even point."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Prepay"
+    },
+    {
+      "type": "paragraph",
+      "text": "Prepay when: (1) your rate is already competitive and refinancing would not save enough, (2) you want flexibility (you can stop extra payments anytime), (3) you cannot justify refinance closing costs, (4) you have a short expected timeline and do not want refinance costs."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Hybrid Approach"
+    },
+    {
+      "type": "paragraph",
+      "text": "Sometimes the best strategy is both: refinance to a lower rate AND make extra payments. The lower rate reduces your required payment, and sending that savings as extra principal accelerates your payoff even faster."
+    },
+    {
+      "type": "cta",
+      "heading": "Compare Your Options",
+      "body": "Use our amortization calculator to compare refinance and prepayment scenarios.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "refinance vs prepayment",
+    "mortgage refinance vs extra payments",
+    "pay extra or refinance",
+    "refinance break even",
+    "mortgage strategy comparison"
+  ]
+}

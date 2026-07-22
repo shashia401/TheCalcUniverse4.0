@@ -1,0 +1,32 @@
+---
+// Search page — noindex (mirrors v2 policy). The island gets a slim prebuilt index.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SearchBox from '../../components/SearchBox';
+import { calculatorRegistry } from '../../lib/registry';
+import { SITE_NAME } from '../../config/constants';
+
+const index = calculatorRegistry.map((entry) => ({
+  t: entry.shortTitle ?? entry.title,
+  p: `/${entry.categorySlug}/${entry.id}/`,
+  c: entry.category,
+}));
+---
+
+<BaseLayout
+  title={`Search calculators | ${SITE_NAME}`}
+  description="Find any of our calculators by name or category."
+  canonicalPath="/search/"
+  noindex
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[720px] mx-auto px-4 md:px-8 py-10">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-default)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>Search</span>
+      </nav>
+      <h1 class="text-2xl font-bold text-[var(--surface-text)] mb-6">Search</h1>
+      <SearchBox client:load index={index} />
+    </div>
+  </main>
+</BaseLayout>

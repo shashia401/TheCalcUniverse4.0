@@ -1,0 +1,107 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Every time mortgage rates drop, you hear the same question: *should I refinance? * The answer isn't about the rate alone. it's about whether you'll stay in your home long enough for your monthly savings to cover the upfront closing costs."
+    },
+    {
+      "type": "paragraph",
+      "text": "here's exactly how to run the math."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Mortgage Refinance?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Refinancing replaces your current mortgage with a new one, ideally at a lower interest rate. A 1% rate drop on a $250,000 loan saves roughly **$150/month**. But refinancing isn't free."
+    },
+    {
+      "type": "paragraph",
+      "text": "Closing costs typically run 2–5% of the loan amount, covering origination fees, appraisal, title insurance, and recording fees. The key question: will your monthly savings outpace those upfront costs before you move?"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Only Number That Matters: Break-Even Point"
+    },
+    {
+      "type": "paragraph",
+      "text": "The break-even point is the number of months it takes for your monthly savings to equal your closing costs. The formula: **Break-Even = Closing Costs / Monthly Savings**. If closing costs are $6,000 and you save $250/month, your break-even is 24 months."
+    },
+    {
+      "type": "paragraph",
+      "text": "A break-even under 24 months is excellent. Between 24 and 36 months is standard. Over 48 months?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Only refinance if you're certain you'll stay long-term. don't refinance if you plan to move within 2–3 years, your rate drop is less than 0. 5%, or you would need to roll closing costs into the loan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Does a Lower Rate Always Mean Lower Total Cost?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Not always. If you refinance from a 20-year remaining term into a new 30-year loan, you reset the amortization clock. you'll pay mostly interest again for years, potentially increasing your lifetime interest cost even at a lower rate."
+    },
+    {
+      "type": "paragraph",
+      "text": "Always compare **total interest paid** over the remaining life of the loan. A rate-and-term refinance that matches your remaining term preserves your equity-building progress. Cash-out refinancing lets you borrow more than you owe and pocket the difference — useful for high-return improvements or debt consolidation, but it increases your loan balance and may carry a slightly higher rate."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario",
+        "Break-Even",
+        "Planned Stay",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "7.5% to 6.0%, $6K closing costs",
+          "24 months",
+          "60 months",
+          "Yes — Refi now, save $9K+"
+        ],
+        [
+          "7.5% to 6.0%, $6K closing costs",
+          "24 months",
+          "12 months",
+          "No — you'll lose $3K"
+        ],
+        [
+          "7.5% to 7.25%, $6K closing costs",
+          "~120 months",
+          "60 months",
+          "No — Rate drop too small"
+        ],
+        [
+          "Cash-out refi for improvements",
+          "Varies",
+          "N/A",
+          "Consider if ROI exceeds cost"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Run Your Refinance Numbers",
+      "body": "Not sure if refinancing is right for you? Use the Refinance Calculator to get a personalized Yes/No/Wait recommendation based on your current loan, new offer, and planned stay.",
+      "buttonLabel": "Check Your Refinance Options",
+      "path": "/finance/refinance-calculator/"
+    }
+  ],
+  "keywords": [
+    "should I refinance",
+    "mortgage refinance calculator",
+    "refinance break even calculator",
+    "refinance vs no refinance",
+    "mortgage refi",
+    "mortgage refinance guide",
+    "when to refinance mortgage",
+    "closing costs vs savings"
+  ]
+}

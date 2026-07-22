@@ -1,0 +1,101 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "you've heard it before: get eight hours of sleep. But if you wake up feeling like a zombie, the problem might not be the hours — it's the cycles. Your sleep runs in roughly 90-minute cycles, and waking up in the middle of one is what leaves you groggy, not the total time in bed."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Are Sleep Cycles, Really?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Each night, your brain cycles through four stages: light sleep, deep sleep (slow-wave), and REM sleep. One complete cycle takes about 90 minutes on average. Your first cycle is shorter and heavier on deep sleep; later cycles tilt toward more REM, which is why you dream more toward morning."
+    },
+    {
+      "type": "paragraph",
+      "text": "If you wake up during deep sleep, you experience sleep inertia — that disoriented, heavy-headed feeling that takes 30 minutes to shake."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Many Cycles Do You Actually Need?"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Cycles",
+        "Total Sleep",
+        "How You Feel",
+        "Best For"
+      ],
+      "rows": [
+        [
+          "3 cycles",
+          "4.5 hours",
+          "Bare minimum",
+          "Survival mode, not sustainable"
+        ],
+        [
+          "4 cycles",
+          "6 hours",
+          "Tolerable for some",
+          "Short sleepers (rare genetic trait)"
+        ],
+        [
+          "5 cycles",
+          "7.5 hours",
+          "Refreshed",
+          "Most adults — the sweet spot"
+        ],
+        [
+          "6 cycles",
+          "9 hours",
+          "Optimal",
+          "Active recovery, teens, athletes"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Find Your Ideal Bedtime"
+    },
+    {
+      "type": "paragraph",
+      "text": "The trick is simple: pick a wake-up time and subtract complete 90-minute cycles plus the average 14 minutes it takes you to fall asleep. For a 6:30 AM wake-up, **5 cycles back lands you at 10:46 PM** — that's the target. Waking at the end of cycle 5 or 6 means you rise during light sleep, not from deep sleep, which eliminates that dreaded alarm-clock disorientation."
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator shows you four options (3 through 6 cycles) and highlights the recommended one."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Pro tip: don't obsess over the exact minute. If your calculated bedtime is 10:46 PM, getting in bed by 10:30 and winding down works fine. The 14-minute fall-asleep average is just that — an average."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Sleep Timing Mistakes"
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Perfect Bedtime",
+      "body": "Use TheCalcUniverse Sleep Cycle Calculator to calculate your optimal bedtime or wake-up time based on real sleep science. No guesswork, just better mornings.",
+      "buttonLabel": "Try the Sleep Calculator",
+      "path": "/everyday/sleep-calculator/"
+    }
+  ],
+  "keywords": [
+    "sleep calculator",
+    "sleep cycle calculator",
+    "best bedtime",
+    "wake up calculator",
+    "REM cycles",
+    "90 minute cycles",
+    "sleep optimization",
+    "circadian rhythm"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Calculators Are Estimates"
+    },
+    {
+      "type": "paragraph",
+      "text": "TDEE calculators use population averages. They do not know your specific muscle mass, NEAT level, or metabolic efficiency. Research shows that actual TDEE can vary by 200-300 calories from the estimate, and in some cases up to 500-600 calories. The solution is a simple 2-3 week tracking protocol."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The 2-Week Verification Protocol"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Calculate estimated TDEE using the calculator.",
+        "Eat exactly that many calories every day for 2 weeks. Track everything — all food, drinks, oils, condiments.",
+        "Weigh yourself daily under consistent conditions (morning, after bathroom, before food).",
+        "After 2 weeks, average your weight changes.",
+        "If weight stayed exactly stable: calculated TDEE is correct. If you lost or gained weight: adjust by 100-200 calories per pound of change."
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Starting TDEE",
+      "body": "Get your estimate and start the verification protocol.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee accuracy",
+    "find true tdee",
+    "tdee adjustment",
+    "maintenance calories test",
+    "how to find real tdee",
+    "calorie tracking for tdee"
+  ]
+}

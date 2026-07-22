@@ -1,0 +1,48 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the Savings Calculator Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "Our savings calculator solves two problems: how much your savings will be worth in the future (given your current balance, monthly deposit, and interest rate), and how much you need to save each month to reach a specific goal by a target date. It handles regular savings accounts, high-yield accounts, CDs, and investment accounts."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Compound Interest in Savings"
+    },
+    {
+      "type": "paragraph",
+      "text": "Compound interest is interest earned on interest. In a savings account earning 4% APY compounded monthly, a $10,000 balance earning $400 in year one also earns interest on that $400 in year two. Over 10 years, that $10,000 grows to $14,888 — with $4,888 of that being compound interest (more than the simple interest of $4,000)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Setting Realistic Savings Goals"
+    },
+    {
+      "type": "paragraph",
+      "text": "A common rule is to save 20% of your income. For specific goals: emergency fund = 3-6 months of expenses. Down payment on a home = 20% of the purchase price. Retirement = 10-15% of income including employer match. Vacation = total estimated cost divided by months until travel. Our calculator helps you determine the monthly savings needed for any goal."
+    },
+    {
+      "type": "cta",
+      "heading": "Plan Your Savings Goals",
+      "body": "Use our free savings calculator to project your future balance or determine your monthly savings target.",
+      "buttonLabel": "Calculate Savings",
+      "path": "/finance/savings-calculator/"
+    }
+  ],
+  "keywords": [
+    "savings calculator",
+    "savings goal calculator",
+    "compound savings",
+    "monthly savings plan",
+    "future savings",
+    "how much to save each month",
+    "savings projection",
+    "goal planner"
+  ]
+}

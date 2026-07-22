@@ -1,0 +1,79 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Due Dates Are Calculated"
+    },
+    {
+      "type": "paragraph",
+      "text": "The standard method is Naegele rule: first day of your last menstrual period (LMP) plus 280 days (40 weeks). This assumes a 28-day cycle with ovulation on day 14. For women with irregular cycles, conception date or early ultrasound dating is more accurate. Ultrasound measurement of the fetus in the first trimester (crown-rump length) is considered the most accurate method, with an error margin of about 5-7 days."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Factors That Affect Accuracy"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Cycle length: Women with cycles longer or shorter than 28 days will have different actual due dates. A 35-day cycle means ovulation happens around day 21, pushing the due date back by a week.",
+        "Irregular cycles: If your cycle length varies significantly month to month, LMP-based calculation is less reliable. Early ultrasound dating is strongly recommended.",
+        "Conception date uncertainty: If you are unsure of your LMP or have irregular cycles, ultrasound dating in the first trimester is the best option.",
+        "Multiple pregnancies: Twins and triplets often arrive earlier than singleton pregnancies. The average gestational age for twins is 36 weeks."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the Research Says"
+    },
+    {
+      "type": "paragraph",
+      "text": "Studies show that only about 4-5% of babies are born on their exact due date. About 60% are born within one week of their due date (either side). Full-term pregnancy is defined as 37-42 weeks. Babies born at 37-38 weeks are considered early-term, 39-40 weeks full-term, and 41-42 weeks late-term. Due dates shifted by 3-5 days based on ultrasound measurements are common and normal."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Treat your due date as a target, not a deadline. A healthy pregnancy can go 2 weeks past the due date. Your healthcare provider will monitor you closely if you go past 41 weeks."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I make my due date more accurate?"
+    },
+    {
+      "type": "paragraph",
+      "text": "First trimester ultrasound is the most accurate method. If you have a dating ultrasound before 13 weeks, the due date from that measurement is more reliable than LMP-based calculation. Discuss with your provider whether an early ultrasound would be beneficial."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How is due date calculated for IVF pregnancies?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For IVF pregnancies, the due date is calculated from the embryo transfer date plus the age of the embryo. A day-5 blastocyst transfer would have a due date of transfer date plus 263 days. Your fertility clinic will provide an exact due date."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Due Date Calculator",
+      "body": "Estimate your pregnancy due date based on LMP or conception date.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/due-date-calculator/"
+    }
+  ],
+  "keywords": [
+    "pregnancy due date",
+    "due date calculator",
+    "how accurate is due date",
+    "estimated due date",
+    "pregnancy timeline"
+  ]
+}

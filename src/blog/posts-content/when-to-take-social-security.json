@@ -1,0 +1,62 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "The decision of when to claim Social Security is worth hundreds of thousands of dollars — possibly more than your entire 401(k) balance. Yet most people claim at 62, the earliest possible age, locking in a permanently reduced benefit for life."
+    },
+    {
+      "type": "paragraph",
+      "text": "The difference between claiming at 62 and waiting until 70 can be **$1,000+ per month**. Over a 20-year retirement, that's **$240,000+** in lost income. Here's how to make the right call."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How is your Social Security benefit calculated?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The SSA calculates your Primary Insurance Amount (PIA) using your highest 35 years of indexed earnings. The formula uses three bend points: **90%** of the first **$1,174** of monthly earnings, **32%** from **$1,174** to **$7,078**, and **15%** above **$7,078**."
+    },
+    {
+      "type": "paragraph",
+      "text": "This progressive formula means lower-income workers get a higher percentage of their pre-retirement earnings replaced. If you worked fewer than 35 years, zeros are averaged in, reducing your benefit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is your Full Retirement Age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "FRA depends on your birth year. Born between 1943-1954? Your FRA is **66**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Born in **1960 or later**? Your FRA is **67**. For birth years in between, FRA increases by 2 months per year."
+    },
+    {
+      "type": "paragraph",
+      "text": "Claiming at FRA gives you 100% of your PIA. Claiming before FRA permanently reduces it. Claiming after FRA permanently increases it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What happens if you claim at 62?"
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Optimal Claiming Age",
+      "body": "Enter your birth year, income, and expected retirement age to see your estimated benefit at 62, FRA, 70, and every age in between. Our side-by-side comparison chart makes the decision clear.",
+      "buttonLabel": "Try the Social Security Calculator",
+      "path": "/finance/social-security-calculator/"
+    }
+  ],
+  "keywords": [
+    "social security calculator",
+    "social security benefits calculator",
+    "when to claim social security",
+    "social security age 62 vs 67 vs 70",
+    "social security retirement calculator",
+    "ss benefit estimator"
+  ]
+}

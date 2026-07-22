@@ -1,0 +1,79 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Starter Portfolio"
+    },
+    {
+      "type": "paragraph",
+      "text": "For most beginners, the optimal portfolio is surprisingly simple: a single low-cost total market index fund or a two-fund portfolio of a total US stock market fund and a total international stock market fund. The specific investments matter less than starting early, contributing consistently, and staying invested during market downturns."
+    },
+    {
+      "type": "paragraph",
+      "text": "Dollar-cost averaging — investing a fixed amount at regular intervals regardless of market conditions — removes the stress of trying to time the market. It ensures you buy more shares when prices are low and fewer when prices are high, naturally averaging your entry price over time."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Asset Allocation by Age"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Age",
+        "Stocks",
+        "Bonds",
+        "Typical Portfolio"
+      ],
+      "rows": [
+        [
+          "20s-30s",
+          "90%",
+          "10%",
+          "Total stock market + small bond allocation"
+        ],
+        [
+          "40s",
+          "80%",
+          "20%",
+          "Broad diversification, start adding bonds"
+        ],
+        [
+          "50s",
+          "65%",
+          "35%",
+          "Move toward capital preservation"
+        ],
+        [
+          "60s",
+          "50%",
+          "50%",
+          "Near retirement — protect what you have"
+        ],
+        [
+          "70+",
+          "30-40%",
+          "60-70%",
+          "Income-focused, minimize volatility"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Project Your Portfolio Growth",
+      "body": "Use our investment calculator to see how different contribution levels and return rates affect your portfolio over time.",
+      "buttonLabel": "Calculate Growth",
+      "path": "/finance/investment-calculator/"
+    }
+  ],
+  "keywords": [
+    "investing for beginners",
+    "investment strategies",
+    "index fund investing",
+    "dollar cost averaging",
+    "beginner portfolio",
+    "stock market for beginners",
+    "how to start investing"
+  ]
+}

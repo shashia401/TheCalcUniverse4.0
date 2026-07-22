@@ -1,0 +1,115 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is TDEE?"
+    },
+    {
+      "type": "paragraph",
+      "text": "TDEE stands for Total Daily Energy Expenditure — the total number of calories your body burns in a day. Every breath, every step, every meal you digest, every workout rep — it all adds up. Think of TDEE as your daily calorie budget. Eat exactly that number and your weight stays the same. Eat less and you are in a deficit for weight loss. Eat more and you have a surplus for muscle gain. Every nutrition plan starts with getting this number right."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Four Components of TDEE"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMR (basal metabolic rate, 60-75% of TDEE) — calories your body burns at complete rest just staying alive. TEF (thermic effect of food, ~10%) — calories burned digesting and processing food. Protein has the highest TEF (20-30%), carbs moderate (5-10%), fat lowest (0-3%). EAT (exercise activity thermogenesis, 5-15%) — deliberate exercise. NEAT (non-exercise activity thermogenesis, 15-30%) — everything else: walking, fidgeting, standing, cleaning. NEAT varies the most between people."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How TDEE Changes With Activity Level"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Activity",
+        "Description",
+        "Multiplier",
+        "Example (180lb man)"
+      ],
+      "rows": [
+        [
+          "Sedentary",
+          "Desk job, minimal exercise",
+          "1.2",
+          "2,200 cal"
+        ],
+        [
+          "Light",
+          "1-3 days/week",
+          "1.375",
+          "2,500 cal"
+        ],
+        [
+          "Moderate",
+          "3-5 days/week",
+          "1.55",
+          "2,850 cal"
+        ],
+        [
+          "Active",
+          "6-7 days/week",
+          "1.725",
+          "3,150 cal"
+        ],
+        [
+          "Very active",
+          "2x/day or physical job",
+          "1.9",
+          "3,500 cal"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Using TDEE for Your Goals"
+    },
+    {
+      "type": "paragraph",
+      "text": "Weight maintenance: eat at TDEE. Weight loss: subtract 300-500 calories from TDEE for 0.5-1 lb/week. Muscle gain: add 300-500 calories above TDEE. Never eat below BMR. Never go below 1,200 cal (women) or 1,500 cal (men) without medical supervision. Recalculate TDEE every 10-15 lbs of weight change because your BMR changes with your body weight."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How accurate is the TDEE calculator?"
+    },
+    {
+      "type": "paragraph",
+      "text": "TDEE calculators provide a starting estimate accurate to about 200-300 calories. Individual variations in metabolism, muscle mass, and NEAT change the actual number. The best approach: calculate TDEE, eat at that level for 2 weeks, track your weight, and adjust up or down."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Does TDEE decrease with age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes. BMR decreases about 1-2% per decade after 20, primarily due to muscle loss. But this decline is mostly preventable with strength training. A 60-year-old who lifts weights can have a higher TDEE than a 30-year-old who is sedentary. Muscle mass is the most important controllable factor in maintaining metabolism as you age."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your TDEE",
+      "body": "Get your personalized maintenance calories with our free TDEE calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee calculator",
+    "total daily energy expenditure",
+    "maintenance calories",
+    "tdee for weight loss",
+    "how to calculate tdee",
+    "calorie management"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the Difference Exists"
+    },
+    {
+      "type": "paragraph",
+      "text": "The difference is primarily body composition. Men average 10-20% more muscle mass and 10-20% less body fat than women at the same weight. Muscle is metabolically active (burns more calories at rest), while fat is less active. This means a man and woman of the same weight and age typically differ by 100-300 calories in TDEE."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Other Factors Affecting Women TDEE"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Menstrual cycle: Metabolism may increase 5-10% during the luteal phase (after ovulation). Some women experience increased appetite during this phase.",
+        "Pregnancy: TDEE increases significantly, especially in the second and third trimesters. The energy cost of pregnancy totals about 80,000 calories.",
+        "Breastfeeding: Adds 300-500 calories to TDEE daily.",
+        "Menopause: Declining estrogen and progesterone are associated with decreased BMR and increased fat storage, particularly visceral fat."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What This Means For Diet Planning"
+    },
+    {
+      "type": "paragraph",
+      "text": "Women should not compare their calorie intake to men. A 1,800-calorie diet might be a 300-calorie deficit for a woman with TDEE 2,100, while it would be a 700-calorie deficit for a man with TDEE 2,500. Use your own TDEE, not someone else is. Women should also never go below 1,200 calories per day without medical supervision."
+    },
+    {
+      "type": "cta",
+      "heading": "Get Your TDEE",
+      "body": "Our TDEE calculator accounts for sex differences in metabolism.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee women vs men",
+    "female metabolism",
+    "male vs female calorie needs",
+    "why women burn fewer calories",
+    "sex differences metabolism",
+    "tdee for women"
+  ]
+}

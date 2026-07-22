@@ -1,0 +1,99 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Understanding Construction Cost Breakdown"
+    },
+    {
+      "type": "paragraph",
+      "text": "Construction costs fall into two main categories: hard costs (materials and labor directly related to building) and soft costs (permits, design, engineering, legal, financing). Hard costs typically represent 70-80% of total project cost. Soft costs take up the remaining 20-30%. Within hard costs, materials and labor are roughly equal at 50-50 for most projects, though material-heavy trades like concrete and steel may shift this ratio."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Cost Per Square Foot Benchmarks"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Project Type",
+        "Low-End/sq ft",
+        "Mid-Range/sq ft",
+        "High-End/sq ft"
+      ],
+      "rows": [
+        [
+          "Basic residential",
+          "$150",
+          "$200",
+          "$300+"
+        ],
+        [
+          "Custom home",
+          "$250",
+          "$350",
+          "$500+"
+        ],
+        [
+          "Commercial shell",
+          "$100",
+          "$150",
+          "$250+"
+        ],
+        [
+          "Renovation",
+          "$75",
+          "$150",
+          "$300+"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Regional Cost Variations"
+    },
+    {
+      "type": "paragraph",
+      "text": "Construction costs vary significantly by region. The national average is the baseline, but costs in major cities can be 30-50% higher. Labor costs in high-cost-of-living areas, permitting fees, and material transportation costs all contribute. The construction cost estimator allows regional adjustment factors."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What contingency should I include?"
+    },
+    {
+      "type": "paragraph",
+      "text": "10-15% for new construction, 15-20% for renovations. Renovations have more unknowns (what is behind the walls), so the higher contingency is warranted. For major infrastructure or commercial projects, 5-10% is standard with a separate management reserve."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I account for material price fluctuations?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Include a 3-5% escalation factor for projects lasting more than 6 months. Lumber, steel, and fuel prices can fluctuate significantly. Getting fixed-price bids from suppliers within 30 days of ordering locks in current pricing."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Construction Cost Estimator",
+      "body": "Build a detailed construction budget with material and labor cost breakdowns.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/loan-calculator/"
+    }
+  ],
+  "keywords": [
+    "construction cost estimator",
+    "building cost calculator",
+    "construction budget",
+    "cost per square foot",
+    "construction estimate"
+  ]
+}

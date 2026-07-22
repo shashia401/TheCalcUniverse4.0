@@ -1,0 +1,87 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "How many tiles you need depends on your room size, tile dimensions, and layout pattern. A simple grid layout wastes less tile than a herringbone pattern, and that difference can mean an extra box or two. Here's how to calculate it right."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Many Tiles Do You Need?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Divide your room area by the area of a single tile, then multiply by your waste factor. For a **12x10 foot** room (**120 sq ft**) with **12x24 inch tiles** covering **2 sq ft each**, you need at least 60 tiles. With the standard **10% waste factor**, that becomes **66 tiles** -- or about **7 boxes** at 10 tiles per box."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Waste Factor by Layout Pattern"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Layout Pattern",
+        "Waste Factor",
+        "Best For"
+      ],
+      "rows": [
+        [
+          "Standard Grid",
+          "10%",
+          "Large rooms, simple installation"
+        ],
+        [
+          "Brick / Staggered",
+          "10%",
+          "Subway tiles, classic look"
+        ],
+        [
+          "Diagonal",
+          "15%",
+          "Small rooms, adding visual space"
+        ],
+        [
+          "Herringbone",
+          "20%",
+          "Feature walls, accent areas"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Herringbone creates the most waste because of the complex angle cuts at every edge. Grid layouts are the most efficient -- you'll cut fewer tiles and have less leftover scrap."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Tile Size and Grout Lines Matter"
+    },
+    {
+      "type": "paragraph",
+      "text": "Larger tiles cover more area with fewer grout lines, which means less cutting and lower waste. But a single miscut on a **24x48 inch** tile costs more than a miscut on a **12x12 inch** tile. Grout lines also affect your count -- a **1/8-inch** grout line between 12-inch tiles reduces the tile quantity by about **1-2%** since each tile's effective coverage area expands slightly."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Always order at least one extra box beyond your calculated amount. Store it safely -- if a tile breaks in the future or the product line gets discontinued, you'll be glad you've matching tiles from the same dye lot."
+    },
+    {
+      "type": "cta",
+      "heading": "Starting a tiling project?",
+      "body": "Use the Tile Calculator to get the exact number of tiles and boxes you need. It supports grid, brick, diagonal, and herringbone layouts with automatic waste factors.",
+      "buttonLabel": "Calculate Your Tiles",
+      "path": "/diy/tile-calculator/"
+    }
+  ],
+  "keywords": [
+    "tile calculator",
+    "floor tile calculator",
+    "tile layout",
+    "herringbone pattern",
+    "tile waste factor",
+    "bathroom tile",
+    "kitchen backsplash",
+    "square foot tile"
+  ]
+}

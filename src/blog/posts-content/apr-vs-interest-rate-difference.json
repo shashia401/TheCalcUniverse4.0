@@ -1,0 +1,99 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Interest Rate vs APR: The Simple Difference"
+    },
+    {
+      "type": "paragraph",
+      "text": "The interest rate is the cost of borrowing the principal amount. The APR includes the interest rate plus any additional fees. Think of the interest rate as the base price and APR as the out-the-door price. For mortgages, APR includes origination fees, points, broker fees, and certain closing costs. For credit cards, APR includes the interest rate plus annual fees."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "APR = Interest Rate + Fees spread across the loan term. The APR is always equal to or higher than the interest rate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why APR Matters More Than the Interest Rate"
+    },
+    {
+      "type": "paragraph",
+      "text": "Lenders can advertise a low interest rate while charging high fees that make the loan more expensive overall. The APR reveals this. Loan A might have a 6.0% rate with $5,000 in fees (APR 6.5%), while Loan B has a 6.3% rate with $1,000 in fees (APR 6.4%). Comparing APRs gives you an apples-to-apples comparison. This is especially important for mortgages where fees can vary dramatically."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When APR Can Be Misleading"
+    },
+    {
+      "type": "paragraph",
+      "text": "APR assumes you keep the loan for its full term. If you refinance or sell within a few years, the one-time fees should not be spread across 30 years. For a mortgage you plan to keep only 5 years, a lower rate with higher fees might actually cost less than a lower-APR option. Always estimate your holding period."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Real-World Examples"
+    },
+    {
+      "type": "paragraph",
+      "text": "Compare two mortgages: Mortgage A at 6.0% with $5,000 in fees has an APR of 6.21%. Mortgage B at 6.25% with $1,500 in fees has an APR of 6.35%. Mortgage A looks better by APR, but if you sell in 3 years, the $5,000 in fees spread over only 36 months makes it more expensive per month. The APR calculator lets you compare both scenarios."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the APR Calculator"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Enter the loan amount.",
+        "Enter the interest rate.",
+        "Add origination fees, points, or closing costs.",
+        "Enter the loan term.",
+        "Review the true APR."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Does APR apply to all loans?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes, but its usefulness varies. For mortgages, APR is heavily regulated. For auto loans and personal loans, APR is simpler since there are fewer fees. For credit cards, APR is just the interest rate."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can APR change after closing?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For fixed-rate loans, APR is locked at closing. Credit card APRs can change with market rate adjustments, typically with 45 days notice."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the APR Calculator",
+      "body": "Calculate the true cost of any loan. No signup required.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/apr-calculator/"
+    }
+  ],
+  "keywords": [
+    "APR vs interest rate",
+    "what is APR",
+    "APR explained",
+    "interest rate vs APR",
+    "APR calculator guide",
+    "loan costs explained"
+  ]
+}

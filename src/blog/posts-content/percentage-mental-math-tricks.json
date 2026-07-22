@@ -1,0 +1,47 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The 10% Method"
+    },
+    {
+      "type": "paragraph",
+      "text": "10% of any number is simply the number divided by 10 (move the decimal one place left). From there, you can calculate any multiple: 20% is 10% times 2, 5% is half of 10%, 15% is 10% + 5%, and so on. For a $48 bill, 10% is $4.80, so 15% tip is $4.80 + $2.40 = $7.20."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The 1% Trick"
+    },
+    {
+      "type": "paragraph",
+      "text": "1% of any number is the number divided by 100 (move the decimal two places left). To find 7% of 80: 1% is 0.8, so 7% is 0.8 times 7 = 5.6. For a $250 item at 8% tax: 1% is $2.50, so 8% is $20.00."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Double-and-Halve Method"
+    },
+    {
+      "type": "paragraph",
+      "text": "To find a percentage where one number is easy to work with, double or halve both numbers. Finding 25% of 60? 25% is one quarter, and one quarter of 60 is 15. Finding 75% of 40? 75% is three quarters, and one quarter of 40 is 10, so three quarters is 30."
+    },
+    {
+      "type": "cta",
+      "heading": "Check Your Mental Math",
+      "body": "Use our percentage calculator to verify your mental math and learn from the instant results.",
+      "buttonLabel": "Verify Now",
+      "path": "/math/math-percentage-calculator/"
+    }
+  ],
+  "keywords": [
+    "percentage mental math",
+    "calculate percentages in head",
+    "mental math tricks",
+    "percentage shortcuts",
+    "how to calculate tip mentally",
+    "mental percentage",
+    "fast percentage calculation"
+  ]
+}

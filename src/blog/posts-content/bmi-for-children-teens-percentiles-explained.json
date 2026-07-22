@@ -1,0 +1,96 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Child BMI Differs From Adult BMI"
+    },
+    {
+      "type": "paragraph",
+      "text": "Adult BMI uses the same categories regardless of age. Child BMI uses percentile curves that account for normal growth patterns. A child BMI of 23 might be normal at one age and overweight at another because children grow at different rates. The CDC growth charts track BMI-for-age percentiles from age 2 to 19. These charts show where your child falls compared to other children of the same age and sex."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Child BMI Categories (Percentile-Based)"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Percentile Range",
+        "What It Means"
+      ],
+      "rows": [
+        [
+          "Underweight",
+          "Below 5th percentile",
+          "May need nutritional evaluation"
+        ],
+        [
+          "Healthy weight",
+          "5th to 84th percentile",
+          "Normal growth pattern"
+        ],
+        [
+          "Overweight",
+          "85th to 94th percentile",
+          "At risk — monitor trends"
+        ],
+        [
+          "Obese",
+          "95th percentile and above",
+          "Recommend medical evaluation"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Be Concerned"
+    },
+    {
+      "type": "paragraph",
+      "text": "A single high BMI percentile is not automatically concerning. Kids have growth spurts and body composition changes during puberty that can temporarily shift their percentile. What matters more is the trend: a child who has been at the 50th percentile and jumps to the 90th needs a conversation with their pediatrician. Similarly, a child dropping from the 50th to the 10th percentile needs evaluation. Rapid changes in either direction warrant attention, not a single high or low reading."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "At what age can I start calculating my child BMI?"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMI is measured for children starting at age 2. For infants and toddlers under 2, doctors use weight-for-length charts instead of BMI. These are different growth standards that assess whether a child weight is proportional to their length."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Does puberty affect child BMI accuracy?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes. During puberty, children gain weight and height at different rates, which can temporarily shift BMI percentiles. Body fat distribution also changes during puberty. A single BMI measurement during this time may not reflect the overall growth pattern. Your pediatrician tracks the trajectory over multiple visits, not just one number."
+    },
+    {
+      "type": "cta",
+      "heading": "Use the BMI Calculator",
+      "body": "Our BMI calculator includes child percentile mode for ages 2-19.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "child bmi percentile",
+    "bmi for children",
+    "child bmi chart",
+    "teen bmi",
+    "pediatric bmi",
+    "bmi growth chart",
+    "children weight categories"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Core Differences"
+    },
+    {
+      "type": "paragraph",
+      "text": "In an SWP, YOU decide how much to withdraw. In a dividend plan, the fund decides how much dividend to distribute. Dividends are not guaranteed and can be reduced or skipped in a bad year. SWP gives you control over your income amount."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Tax Treatment"
+    },
+    {
+      "type": "paragraph",
+      "text": "In SWP, you pay capital gains tax only on the profit portion (LTCG over ₹1 lakh per year at 10%). In dividend plans, dividends are added to your income and taxed at your slab rate. For most retirees in the 5-20% tax bracket, SWP is more tax efficient."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which Is Better for Retirement?"
+    },
+    {
+      "type": "paragraph",
+      "text": "SWP is generally better for retirement because you control the income amount, the tax treatment is favorable, and the remaining corpus continues to grow. Dividend plans are suitable if you want truly passive income and do not want to manage withdrawal amounts."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SWP Calculator",
+      "body": "Plan your retirement withdrawals with our free SWP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/swp-calculator/"
+    }
+  ],
+  "keywords": [
+    "swp vs dividend",
+    "dividend vs swp",
+    "swp or dividend plan",
+    "mutual fund income options",
+    "retirement income swp dividend"
+  ]
+}

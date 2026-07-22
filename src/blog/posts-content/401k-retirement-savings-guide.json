@@ -1,0 +1,62 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Millions of Americans leave free money on the table with their 401(k) every year. You might be one of them. The difference between contributing enough for the full employer match and maxing out could be **$1 million** or more over your career."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your 401(k) isn't just a retirement account. It's the most powerful tax-advantaged savings tool available to most workers — especially when you factor in the employer match and decades of compound growth. The math works so well because three forces combine: your contributions, your employer's contributions, and investment returns on top of both."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How does your employer match work?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The employer match is the closest thing to free money you'll ever get. A common structure is \"50% up to 6% of salary.\" If you earn **$80,000** and contribute 6% (**$4,800**), your employer adds another **$2,400** — an instant **50% return** on that piece of your contribution."
+    },
+    {
+      "type": "paragraph",
+      "text": "Not contributing at least up to the match limit means you're walking away from a guaranteed return. No investment can reliably deliver a 50-100% immediate return with zero risk. The employer match should always be your first savings priority."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Always contribute at least enough to get the full employer match. It's an instant, risk-free return on your money that beats any stock market investment. If your match is \"50% up to 6%,\" contribute at least 6% of your salary."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What are the 2025 401(k) contribution limits?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For 2025, the IRS allows you to contribute up to **$23,500** to your 401(k). If you're 50 or older, you can add a catch-up contribution of **$7,500**, bringing your total to **$31,000**. The combined employee-plus-employer limit's **$70,000**."
+    },
+    {
+      "type": "paragraph",
+      "text": "The SECURE 2. 0 Act introduced even higher catch-up limits. If you're aged 60-63, you can contribute up to **$34,750** in total employee deferrals."
+    },
+    {
+      "type": "paragraph",
+      "text": "These provisions are designed to help you accelerate savings in your peak earning years."
+    },
+    {
+      "type": "cta",
+      "heading": "See Your 401(k) Projection in Seconds",
+      "body": "Enter your age, salary, contribution rate, and employer match to see your projected balance at retirement. Our calculator breaks down exactly how much comes from you, your employer, and market growth.",
+      "buttonLabel": "Try the 401(k) Calculator",
+      "path": "/finance/401k-calculator/"
+    }
+  ],
+  "keywords": [
+    "401k calculator",
+    "401k retirement calculator",
+    "employer match calculator",
+    "401k employer match",
+    "retirement 401k projection",
+    "401k growth calculator"
+  ]
+}

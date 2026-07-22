@@ -1,0 +1,117 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The New Science of Dog Aging"
+    },
+    {
+      "type": "paragraph",
+      "text": "The 7:1 rule oversimplifies. Dogs age faster in their early years and slower later. A 1-year-old dog is roughly equivalent to a 15-year-old human. At 2 years, they are about 24 in human years. After that, aging slows to about 4-5 human years per dog year, depending on breed size. Small breeds age slower than large breeds. A 10-year-old Chihuahua is roughly 56 in human years, while a 10-year-old Great Dane is about 77."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Breed Size Affects Aging"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Breed Size",
+        "Example",
+        "1 Year",
+        "5 Years",
+        "10 Years",
+        "15 Years"
+      ],
+      "rows": [
+        [
+          "Small",
+          "Chihuahua",
+          "15",
+          "36",
+          "56",
+          "76"
+        ],
+        [
+          "Medium",
+          "Beagle",
+          "15",
+          "36",
+          "60",
+          "83"
+        ],
+        [
+          "Large",
+          "Labrador",
+          "15",
+          "38",
+          "68",
+          "93"
+        ],
+        [
+          "Giant",
+          "Great Dane",
+          "15",
+          "42",
+          "77",
+          "105+"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Signs of Aging in Dogs"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Graying muzzle, especially around the face (starts around 7-8 years for most breeds).",
+        "Decreased activity and longer sleep periods.",
+        "Vision and hearing loss (cataracts are common in older dogs).",
+        "Dental disease (tartar buildup, gum recession, tooth loss).",
+        "Weight gain or loss (metabolism changes with age).",
+        "Cognitive changes (confusion, disorientation, changes in sleep-wake cycle)."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "At what age is a dog considered senior?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Small breeds: around 11-12 years. Medium breeds: around 10 years. Large breeds: around 8-9 years. Giant breeds: around 6-7 years. Regular vet checkups every 6 months are recommended for senior dogs."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How can I help my dog live longer?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Maintain a healthy weight (obesity is the number one health issue in dogs), provide regular exercise appropriate for their age and breed, feed high-quality food, keep up with dental care, and schedule annual vet visits. Small breeds tend to live 5-7 years longer than giant breeds on average."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Dog Age Calculator",
+      "body": "Convert your dog age to human years with our science-based calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/dog-cat-age-calculator/"
+    }
+  ],
+  "keywords": [
+    "dog age calculator",
+    "dog years to human years",
+    "how old is my dog",
+    "dog age chart",
+    "dog years formula"
+  ]
+}

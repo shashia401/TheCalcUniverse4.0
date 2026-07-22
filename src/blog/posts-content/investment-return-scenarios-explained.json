@@ -1,0 +1,41 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the Three Scenarios Mean"
+    },
+    {
+      "type": "paragraph",
+      "text": "Investment calculators typically show three scenarios to account for market uncertainty. The expected scenario uses your entered rate of return (typically 6-8% for a balanced portfolio, reflecting long-term stock market averages). The optimistic scenario uses 1.5 times your expected rate. The pessimistic scenario uses half your expected rate."
+    },
+    {
+      "type": "paragraph",
+      "text": "For retirement planning, it is wise to use the pessimistic or expected scenario — not the optimistic one. Planning for the optimistic scenario risks coming up short. The pessimistic scenario helps ensure you save enough even if markets underperform."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Historical Context"
+    },
+    {
+      "type": "paragraph",
+      "text": "The S&P 500 has averaged approximately 10% annual returns before inflation (7% after inflation) over the past century. However, this average masks enormous variability: some years are up 30%, others down 40%. A 7% expected return with a 3.5% pessimistic and 10.5% optimistic range accounts for this variability while remaining historically grounded."
+    },
+    {
+      "type": "cta",
+      "heading": "See Your Investment Scenarios",
+      "body": "Use our calculator to project your investment growth across all three scenarios.",
+      "buttonLabel": "Project Now",
+      "path": "/finance/investment-calculator/"
+    }
+  ],
+  "keywords": [
+    "investment return scenarios",
+    "expected return",
+    "pessimistic vs optimistic investment",
+    "market return assumptions",
+    "investment projection accuracy",
+    "realistic investment returns"
+  ]
+}

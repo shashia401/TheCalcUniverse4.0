@@ -1,0 +1,68 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Investment Projections Work"
+    },
+    {
+      "type": "paragraph",
+      "text": "An investment calculator takes your starting balance, monthly contributions, expected return rate, and time horizon to project future value. It applies compound growth: each year, your returns earn returns themselves. The formula is Future Value = P(1 + r)^n + PMT x [((1 + r)^n - 1)/r], where P is starting principal, r is monthly return rate, n is months, and PMT is monthly contribution. The three most important inputs are your starting balance, how much you add regularly, and your time horizon."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Choosing Realistic Return Assumptions"
+    },
+    {
+      "type": "paragraph",
+      "text": "Using 10% annual returns (the stock market historical average) sounds reasonable, but it ignores sequence of returns risk and inflation. For planning purposes, use 5-7% after inflation (real return). This accounts for the fact that $1 million in 30 years will not buy what $1 million buys today. A more conservative projection gives you a safety margin. If the market outperforms, great — you end up with more than planned."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Impact of Fees on Growth"
+    },
+    {
+      "type": "paragraph",
+      "text": "Investment fees compound against you just as returns compound for you. A 1% annual fee on a $500,000 portfolio over 30 years costs approximately $180,000 in lost growth. A 2% fee (common in actively managed funds) costs over $300,000. Always use after-fee return rates in your projections. Index funds with 0.03-0.10% expense ratios preserve more of your growth than actively managed funds with 1%+ fees."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How often should I update my investment projections?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Review annually. Update your actual balance, adjust contributions for salary changes, and revise return assumptions if the market environment has shifted significantly. Do not adjust projections based on short-term market movements. Stay the course."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What if I stop contributing in some years?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator handles this by projecting based on actual contributions. If you have years where you cannot contribute, the existing balance continues to compound. The key is getting back on track as soon as possible. Missing 2-3 years of contributions early in your career has a much larger impact than missing them later due to compounding."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Investment Calculator",
+      "body": "Project your portfolio growth with realistic assumptions. No signup required.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/investment-calculator/"
+    }
+  ],
+  "keywords": [
+    "investment calculator",
+    "portfolio growth",
+    "investment projection",
+    "compound returns",
+    "retirement projection"
+  ]
+}

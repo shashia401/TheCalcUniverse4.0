@@ -1,0 +1,321 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is the Heat Index?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Ever stepped outside on a sticky summer day and felt like you were walking into a wall of soup? That's the heat index in action. It's what the air actually feels like when humidity gets factored in — not what the thermometer says."
+    },
+    {
+      "type": "paragraph",
+      "text": "On paper it might read 92°F. But your body? It could be experiencing something closer to 108°F. Why? Humidity stops your sweat from evaporating, which means your body can't cool itself. That difference is what makes a hot day a dangerous one."
+    },
+    {
+      "type": "paragraph",
+      "text": "The heat index was developed by Dr. Robert G. Steadman in 1979 and later refined by the National Weather Service. It's the temperature your body feels — not what the thermometer measures. And that's the number that actually matters for your safety."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Humidity Makes the Heat Feel Worse"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your body has a built-in cooling system: you sweat, the sweat evaporates, and that carries heat away. Works great in dry air."
+    },
+    {
+      "type": "paragraph",
+      "text": "But when humidity is high, the air is already full of water. Your sweat can't evaporate. So your body just holds onto the heat. That's why you feel so much hotter than the thermometer says."
+    },
+    {
+      "type": "paragraph",
+      "text": "That's why 95°F in Phoenix can feel OK, but 90°F in Houston can knock you flat. The actual temperature is lower in Houston, but the humidity cranks the heat index way up. Understanding that difference? It's the first step to staying safe."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "The NOAA Heat Index Formula looks like a math problem from another dimension: HI = −42.379 + 2.049T + 10.143R − 0.225TR − 0.00684T² − 0.0548R² + 0.00123T²R + 0.000853TR² − 0.00000199T²R²\n\nT is the air temperature in °F and R is the relative humidity in %. The formula works when temps are 80°F or higher and humidity is 40% or more. Below that, the heat index and the actual temperature are basically the same."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Heat Index Danger Tiers"
+    },
+    {
+      "type": "paragraph",
+      "text": "The National Weather Service breaks the heat index into five danger tiers. Each one tells you what's at risk and what to do about it. Knowing your tier helps you decide if today is a pool day or a stay-inside day."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Heat Index Range",
+        "Danger Tier",
+        "Risk Level",
+        "Precautions"
+      ],
+      "rows": [
+        [
+          "Below 80°F",
+          "Safe",
+          "Minimal risk",
+          "No special precautions needed."
+        ],
+        [
+          "80–89°F",
+          "Caution",
+          "Fatigue possible with prolonged exposure or physical activity",
+          "Stay hydrated, take breaks in shade or air conditioning."
+        ],
+        [
+          "90–104°F",
+          "Extreme Caution",
+          "Heat cramps, heat exhaustion possible",
+          "Limit strenuous activity, drink water frequently, wear light clothing."
+        ],
+        [
+          "105–129°F",
+          "Danger",
+          "Heat cramps, heat exhaustion likely; heat stroke possible",
+          "Avoid strenuous outdoor activity. Schedule work for early morning or evening. Take frequent, long breaks."
+        ],
+        [
+          "130°F or higher",
+          "Extreme Danger",
+          "Heat stroke imminent",
+          "Cancel all outdoor physical activity. Stay indoors in air conditioning. Monitor for heat stroke symptoms."
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "That jump from Caution to Extreme Caution at 90°F? That's where most people start to really feel it. Hit 105°F (Danger tier), and even a healthy adult can get heat exhaustion within an hour of moderate activity. At 130°F+ (Extreme Danger), heat stroke can happen in minutes. Stay inside."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Heat Index Examples: What the Numbers Mean for You"
+    },
+    {
+      "type": "paragraph",
+      "text": "Numbers are one thing. Here's what they actually look like in the real world."
+    },
+    {
+      "type": "paragraph",
+      "text": "Picture a summer afternoon in Atlanta: 92°F with 65% humidity. The heat index hits about 108°F — solidly in the Danger tier. At this level, OSHA says heavy outdoor work should be capped at 20 minutes per hour with mandatory 40-minute breaks. Even light stuff like gardening can lead to heat exhaustion within an hour. In Atlanta, this happens dozens of times every summer."
+    },
+    {
+      "type": "paragraph",
+      "text": "Same story plays out in Vegas and Phoenix. 100°F is normal there. But if humidity creeps above 35% — hello, monsoon season — the heat index rockets past 110°F. A typical hot day turns dangerous fast. That's why the heat index matters everywhere, not just in humid climates."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario",
+        "Air Temp",
+        "Humidity",
+        "Heat Index",
+        "Danger Tier",
+        "What It Means"
+      ],
+      "rows": [
+        [
+          "Dry summer day, Denver",
+          "88°F",
+          "15%",
+          "84°F",
+          "Caution",
+          "Feels cooler than air temp; safe with basic precautions."
+        ],
+        [
+          "Humid summer day, Atlanta",
+          "92°F",
+          "65%",
+          "108°F",
+          "Danger",
+          "Feels 16°F hotter than actual. Heavy work: 20 min/hr with mandatory breaks."
+        ],
+        [
+          "Monsoon afternoon, Phoenix",
+          "100°F",
+          "40%",
+          "118°F",
+          "Extreme Danger",
+          "Heat stroke risk in under 30 minutes of light activity."
+        ],
+        [
+          "Coastal heat wave, Miami",
+          "95°F",
+          "75%",
+          "132°F",
+          "Extreme Danger",
+          "Life-threatening. All outdoor activity should be cancelled."
+        ]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Here's a catch: the heat index calculation assumes you're in the shade. If you're in direct sunlight, add 10–15°F to whatever number you got. That 100°F day with moderate humidity? In full sun, you're looking at a feels-like temp past 130°F. That's Extreme Danger territory."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "OSHA Heat Safety Guidelines for Outdoor Workers"
+    },
+    {
+      "type": "paragraph",
+      "text": "OSHA uses the heat index for workplace safety — especially in jobs where working outdoors isn't optional. Construction, agriculture, landscaping, delivery services, utility maintenance. Their guidance follows the same NWS danger tiers, with specific rules for each level."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Caution (80–89°F): Make sure cool water is available. Remind everyone to drink every 15 minutes. Watch each other for signs of heat illness.",
+        "Extreme Caution (90–104°F): Schedule heavy work for early morning. Mandatory hydration breaks every hour. Set up a buddy system. New or returning workers need 5–7 days to get used to the heat.",
+        "Danger (105–129°F): Heavy work: 20 minutes on, 40 minutes rest in shade or AC. Assign someone to watch conditions and spot symptoms. Reschedule anything non-essential.",
+        "Extreme Danger (130°F+): Stop all non-essential outdoor work. If it must get done, do it before dawn. Have emergency plans ready."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Acclimatization is the most overlooked piece of heat safety. Someone who's been off for a week — vacation, sick days, whatever — is way more vulnerable when they come back. OSHA says ease them in: 20% of normal workload on day one, then increase by 20% each day. Give the body time to remember how to cool itself."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Recognizing Heat Illness: From Cramps to Stroke"
+    },
+    {
+      "type": "paragraph",
+      "text": "Heat illness is a spectrum. Catch it early, and it's no big deal. Miss the signs, and things go south fast."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Heat Cramps: Painful muscle spasms — usually in the legs, arms, or abdomen. It's your body's first SOS. Move to a cool spot, drink water or an electrolyte beverage, and gently stretch the affected muscles.",
+        "Heat Exhaustion: Heavy sweating, cold clammy skin, weak pulse, nausea, dizziness, headache, fainting. Body temp is up but usually below 104°F. Get to a cool place, loosen your clothes, sip water, use cool compresses. If it gets worse or lasts over an hour, see a doctor.",
+        "Heat Stroke: Medical emergency. Hot red dry skin (sweating stops), body temp above 103°F, rapid strong pulse, confusion, slurred speech, passing out, seizures. Call 911 immediately. While waiting, get them to shade or AC, remove extra clothes, and cool them with ice packs or cold towels on the head, neck, armpits, and groin."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Heat stroke can kill or cause permanent organ damage in under an hour if untreated. Don't wait to see if it passes. The second you suspect it — confusion, hot dry skin, loss of consciousness — call 911. Aggressively cool the person while you wait. And never give fluids to someone who's unconscious."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limitations of the Heat Index"
+    },
+    {
+      "type": "paragraph",
+      "text": "The heat index is great, but it's not perfect. Here's what it doesn't tell you."
+    },
+    {
+      "type": "paragraph",
+      "text": "First, it assumes shade and calm wind. Full sun can add 10–15°F. Wind helps cool you off, so a breezy hot day might feel better than the number suggests."
+    },
+    {
+      "type": "paragraph",
+      "text": "Second, the formula only works reliably above 80°F and 40% humidity. Outside that range, the heat index isn't accurate and you'd need a different metric."
+    },
+    {
+      "type": "paragraph",
+      "text": "For the full picture, professionals turn to Wet-Bulb Globe Temperature (WBGT). It factors in temperature, humidity, solar radiation, wind speed, and cloud cover. The military, athletic organizations, and industrial safety programs all use it. The heat index is a quick snapshot. WBGT is the full story."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Heat Illness Prevention: Practical Tips"
+    },
+    {
+      "type": "paragraph",
+      "text": "No matter what the thermometer says, these strategies work. Whether you're an athlete, an outdoor worker, or just hanging out in the backyard."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Drink before you're thirsty. If you feel thirsty, you're already behind. Down 16–20 ounces of water 1–2 hours before heading out. Then 6–12 ounces every 15–20 minutes while you're active.",
+        "Wear light-colored, loose, breathable clothing. Dark colors soak up heat. Tight clothes trap it against your skin. Cotton or moisture-wicking fabrics let your sweat actually work.",
+        "Time your outdoor time wisely. Before 10 a.m. or after 6 p.m. during summer. The heat index is way lower those hours.",
+        "Take real breaks. Even 15 minutes in AC can drop your core temp enough to matter. No AC available? Shade with good airflow is the next best thing.",
+        "Never leave kids, older adults, or pets in a parked car. The interior temp jumps 20°F in 10 minutes and 40°F in an hour. Cracking the windows doesn't help.",
+        "Watch for warning signs. Headache, dizziness, nausea, heavy sweating, muscle cramps. Feel any of that? Stop, find shade, and hydrate."
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate the Heat Index Instantly",
+      "body": "Try our free Heat Index Calculator. Plug in your local temperature and humidity, and in seconds you'll see the heat index, the danger tier, and exactly what to do about it. No signup or email required.",
+      "buttonLabel": "Open the Free Heat Index Calculator",
+      "path": "/everyday/heat-index-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions About the Heat Index"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the difference between heat index and actual temperature?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The actual temperature is what a thermometer reads in the shade. The heat index is what it feels like once humidity is factored in. High humidity = higher heat index = your sweat doesn't work."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can the heat index be lower than the actual temperature?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yep. When humidity is really low, the heat index can actually be lower than the air temp. Example: 96°F with 20% humidity feels like about 91°F. Dry heat lets sweat do its job."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "At what heat index should I cancel outdoor activities?"
+    },
+    {
+      "type": "paragraph",
+      "text": "105°F (Danger tier) is the cutoff for non-essential outdoor stuff. At 130°F (Extreme Danger), cancel everything outdoors. For kids, the elderly, or anyone with chronic health conditions, lower those thresholds — consider staying inside when the heat index passes 90°F."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is the heat index the same as the Wet-Bulb Globe Temperature (WBGT)?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Nope. The heat index only accounts for temperature and humidity in the shade. WBGT also factors in sunlight, wind speed, and cloud cover. It's a more complete picture of heat stress. That's why the military, athletic organizations, and industrial safety programs use WBGT for go/no-go decisions."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Free Heat Index Calculator",
+      "body": "Check the heat index for your area or model any temperature and humidity combo. You'll see the feels-like temp, the danger tier, and safety tips instantly.",
+      "buttonLabel": "Calculate Your Heat Index Now",
+      "path": "/everyday/heat-index-calculator/"
+    }
+  ],
+  "keywords": [
+    "heat index calculator",
+    "feels like temperature",
+    "NOAA heat index",
+    "heat safety",
+    "OSHA heat guidelines",
+    "heat stroke prevention",
+    "humidity index",
+    "what is heat index",
+    "heat index formula",
+    "heat index chart",
+    "heat illness prevention",
+    "wet bulb globe temperature"
+  ]
+}

@@ -1,0 +1,329 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is ROI (Return on Investment)?"
+    },
+    {
+      "type": "paragraph",
+      "text": "ROI tells you how profitable an investment was compared to what it cost you. It's a percentage that answers one simple question: for every dollar you put in, how much came back?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The best part? You can compare totally different investments on equal footing. A stock, a marketing campaign, a rental property — ROI lets you rank them all with the same number."
+    },
+    {
+      "type": "paragraph",
+      "text": "Since ROI is a percentage, not a dollar amount, it levels the playing field. A $500 investment that turns into $750? That's 50% ROI. A $500,000 investment that turns into $750,000? Also 50% ROI. Same return rate, different scale. That's why ROI is the universal language of investing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The ROI Formula"
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula only needs two numbers: what you put in, and what you got back. That's it."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "ROI (%) = ((Amount Returned − Amount Invested) ÷ Amount Invested) × 100"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's how it breaks down:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Subtract the amount invested from the amount returned to find the net profit (or net loss).",
+        "Divide that result by the amount originally invested.",
+        "Multiply by 100 to convert the decimal to a percentage."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Positive ROI means you made money. Negative means you lost some. Zero means you broke even — you got back exactly what you put in."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "ROI Calculation Examples"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Example 1: Stock Investment"
+    },
+    {
+      "type": "paragraph",
+      "text": "Say you buy $8,000 worth of stock. Two years later, you sell everything for $11,200."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Input",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Amount Invested",
+          "$8,000"
+        ],
+        [
+          "Amount Returned",
+          "$11,200"
+        ],
+        [
+          "Net Profit",
+          "$3,200"
+        ],
+        [
+          "ROI",
+          "+40.00%"
+        ],
+        [
+          "Investment Multiplier",
+          "1.40x"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the math: ($11,200 − $8,000) ÷ $8,000 × 100 = 40%. Your $8,000 grew to $11,200 — a 40% return, or 1.40x your original investment."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Example 2: Marketing Campaign"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your business spends $2,500 on paid ads. Those ads bring in $6,750 in trackable revenue from new customers."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Input",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Amount Invested (Ad Spend)",
+          "$2,500"
+        ],
+        [
+          "Amount Returned (Revenue)",
+          "$6,750"
+        ],
+        [
+          "Net Profit",
+          "$4,250"
+        ],
+        [
+          "ROI",
+          "+170.00%"
+        ],
+        [
+          "Investment Multiplier",
+          "2.70x"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the math: ($6,750 − $2,500) ÷ $2,500 × 100 = 170%. Every dollar you spent on ads brought back $2.70. That's a win any way you look at it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Example 3: Negative ROI (Loss)"
+    },
+    {
+      "type": "paragraph",
+      "text": "Not every investment works out. Say you put $15,000 into a startup. The company winds down and you get $9,000 back."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Input",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Amount Invested",
+          "$15,000"
+        ],
+        [
+          "Amount Returned",
+          "$9,000"
+        ],
+        [
+          "Net Loss",
+          "−$6,000"
+        ],
+        [
+          "ROI",
+          "−40.00%"
+        ],
+        [
+          "Investment Multiplier",
+          "0.60x"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The math: ($9,000 − $15,000) ÷ $15,000 × 100 = −40%. You lost 40% of your capital — $6,000 gone."
+    },
+    {
+      "type": "cta",
+      "heading": "See Your ROI in Seconds",
+      "body": "Plug in your numbers and get your ROI percentage, net profit, and investment multiplier instantly. No account needed.",
+      "buttonLabel": "Open the Free ROI Calculator",
+      "path": "/finance/roi-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Good ROI?"
+    },
+    {
+      "type": "paragraph",
+      "text": "There's no one-size-fits-all answer. It depends on what you're investing in, how long you're in it, and how much risk you're taking. Higher risk should mean higher potential ROI — otherwise, why take the gamble?"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Investment Type",
+        "Typical Annual ROI"
+      ],
+      "rows": [
+        [
+          "S&P 500 (long-term average)",
+          "7–10% (inflation-adjusted)"
+        ],
+        [
+          "Residential Real Estate",
+          "8–12%"
+        ],
+        [
+          "High-Yield Savings Account",
+          "4–5%"
+        ],
+        [
+          "Angel / Startup Investment",
+          "20–30%+ (with high failure rate)"
+        ],
+        [
+          "Marketing Campaigns (paid)",
+          "200–500% (varies widely by channel)"
+        ]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Compare apples to apples. A 12% ROI on a savings account? Amazing. A 12% ROI on a high-risk startup investment? Pretty weak."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "ROI Limitations: What ROI Does Not Tell You"
+    },
+    {
+      "type": "paragraph",
+      "text": "ROI is powerful because it's dead simple. But that simplicity comes with blind spots. Here's what ROI doesn't tell you:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Time: A 50% ROI over 1 year is dramatically better than a 50% ROI over 10 years. ROI ignores how long your capital was at risk. For time-adjusted returns, use CAGR (Compound Annual Growth Rate) or IRR (Internal Rate of Return).",
+        "Risk: Two investments with the same 30% ROI are not equivalent if one is a government bond and the other is a volatile penny stock. ROI does not factor in volatility or the probability of loss.",
+        "Inflation: A 5% ROI in a year with 4% inflation is only a 1% real gain in purchasing power. For inflation-adjusted analysis, subtract the inflation rate from your nominal ROI to get your \"Real ROI.\""
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "ROI vs. Related Metrics"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Metric",
+        "Best Used For"
+      ],
+      "rows": [
+        [
+          "ROI",
+          "Comparing profitability of any investment on equal footing"
+        ],
+        [
+          "CAGR",
+          "Measuring annualized growth rate over multi-year periods"
+        ],
+        [
+          "IRR",
+          "Evaluating investments with irregular cash flows (e.g., real estate)"
+        ],
+        [
+          "ROE",
+          "Measuring a company's profit relative to shareholder equity"
+        ],
+        [
+          "ROAS",
+          "Measuring revenue generated per dollar of ad spend"
+        ]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Don't rely on ROI alone. You also need to think about time horizon, risk, opportunity cost, and your bigger financial picture. ROI is one piece of the puzzle, not the whole puzzle."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Calculate ROI with Our Free Calculator"
+    },
+    {
+      "type": "paragraph",
+      "text": "Don't feel like doing the math by hand? Use our free ROI calculator instead. Here's how:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Enter the total amount of money you originally invested in the \"Amount Invested\" field.",
+        "Enter the total amount you received back in the \"Amount Returned\" field. This is your final value, including your original principal.",
+        "The calculator instantly shows your ROI percentage, net profit or loss in dollars, and your investment multiplier."
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Ready to Run the Numbers?",
+      "body": "Our free ROI calculator shows your return percentage, net profit, and investment multiplier right away. No signup, no email, no hassle.",
+      "buttonLabel": "Calculate My ROI Now",
+      "path": "/finance/roi-calculator/"
+    }
+  ],
+  "keywords": [
+    "roi calculator",
+    "how to calculate roi",
+    "return on investment formula",
+    "what is roi",
+    "roi formula",
+    "return on investment calculator",
+    "calculate roi percentage",
+    "roi meaning",
+    "roi example",
+    "investment return calculator",
+    "net profit roi",
+    "roi percentage"
+  ]
+}

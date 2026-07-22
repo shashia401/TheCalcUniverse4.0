@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Ideal Surplus"
+    },
+    {
+      "type": "paragraph",
+      "text": "A surplus of 300-500 calories above TDEE is the sweet spot for muscle gain with minimal fat gain. A smaller surplus (100-200 calories) — sometimes called maingaining or body recomposition — may work for beginners but is too slow for advanced lifters. A larger surplus (500+ calories) adds mostly fat, not muscle."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Tracking Surplus Results"
+    },
+    {
+      "type": "paragraph",
+      "text": "Gaining 0.5-1 lb per week is the sweet spot for most people. If you are gaining faster than 1 lb per week, reduce your surplus. If you are not gaining at all after 3-4 weeks, increase by 100-200 calories. Strength gains in the gym are the best indicator that your surplus is working. If your lifts go up, you are building muscle. If only your weight goes up, you are gaining fat."
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Bulking Calories",
+      "body": "Use our TDEE calculator to set your muscle gain calorie target.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee muscle gain",
+    "bulking calories",
+    "lean bulk tdee",
+    "calorie surplus for muscle",
+    "maingaining",
+    "tdee for bodybuilding"
+  ]
+}

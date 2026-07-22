@@ -1,0 +1,89 @@
+---
+// Renders structured blog sections to static HTML. Content is typed data
+// (paragraph/heading/callout/list/table/cta) — plain text only, never raw HTML,
+// so there is no sanitization surface here. Keep it that way.
+import type { BlogSection } from '../../types/blog';
+import { normalizeInternalPath } from '../../lib/blog';
+
+interface Props {
+  sections: BlogSection[];
+}
+
+const { sections } = Astro.props;
+
+const calloutStyles: Record<string, string> = {
+  info: 'border-accent-sky-400 bg-accent-sky-50',
+  tip: 'border-accent-emerald-400 bg-accent-emerald-50',
+  warning: 'border-accent-amber-400 bg-accent-amber-50',
+};
+---
+
+<div class="space-y-5 text-blog text-[var(--surface-text-secondary)]">
+  {sections.map((section) => {
+    if (section.type === 'heading') {
+      return section.level === 2 ? (
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mt-8">{section.text}</h2>
+      ) : (
+        <h3 class="text-lg font-semibold text-[var(--surface-text)] mt-6">{section.text}</h3>
+      );
+    }
+    if (section.type === 'paragraph') {
+      return <p>{section.text}</p>;
+    }
+    if (section.type === 'callout') {
+      return (
+        <aside class={`border-l-4 rounded-r-lg px-4 py-3 text-[var(--surface-text)] ${calloutStyles[section.variant] ?? calloutStyles.info}`}>
+          {section.text}
+        </aside>
+      );
+    }
+    if (section.type === 'list') {
+      return section.ordered ? (
+        <ol class="list-decimal pl-6 space-y-1.5">
+          {section.items.map((item) => <li>{item}</li>)}
+        </ol>
+      ) : (
+        <ul class="list-disc pl-6 space-y-1.5">
+          {section.items.map((item) => <li>{item}</li>)}
+        </ul>
+      );
+    }
+    if (section.type === 'table') {
+      return (
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-[var(--border-warm)] rounded-lg">
+            <thead>
+              <tr class="bg-[var(--surface-bg)] text-left">
+                {section.headers.map((h) => (
+                  <th class="px-3 py-2 font-semibold text-[var(--surface-text)] border-b border-[var(--border-warm)]">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {section.rows.map((row) => (
+                <tr class="border-b border-[var(--border-warm)] last:border-b-0">
+                  {row.map((cell) => <td class="px-3 py-2">{cell}</td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    if (section.type === 'cta') {
+      return (
+        <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-5 my-6">
+          <p class="font-semibold text-[var(--surface-text)] mb-1">{section.heading}</p>
+          <p class="text-sm mb-3">{section.body}</p>
+          <a
+            href={normalizeInternalPath(section.path)}
+            class="inline-block rounded-lg bg-[var(--brand-default)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-default)] active:bg-[var(--brand-active)]"
+          >
+            {section.buttonLabel}
+          </a>
+        </div>
+      );
+    }
+    return null;
+  })}
+</div>

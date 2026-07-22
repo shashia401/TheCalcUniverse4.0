@@ -1,0 +1,69 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is Waist-to-Height Ratio?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Waist-to-height ratio (WHtR) is your waist circumference divided by your height, measured in the same units. The target is a ratio under 0.5 — meaning your waist should be less than half your height. For example, a person who is 5'10\" (70 inches) should have a waist under 35 inches. WHtR measures central obesity (fat stored around the organs), which is the most dangerous type of fat and the most strongly linked to heart disease, diabetes, and metabolic syndrome."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why WHtR May Be Better Than BMI"
+    },
+    {
+      "type": "paragraph",
+      "text": "Multiple large-scale studies have shown that WHtR is a better predictor of cardiovascular disease, diabetes, and all-cause mortality than BMI. A 2024 meta-analysis of over 200,000 participants found WHtR outperformed BMI for predicting heart attacks and strokes. Unlike BMI, WHtR accounts for fat distribution — a critical factor because belly fat carries higher health risks than fat stored elsewhere. WHtR also does not penalize muscle mass like BMI does, making it more accurate for athletes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Measure Your Waist Correctly"
+    },
+    {
+      "type": "paragraph",
+      "text": "Stand with feet together. Place a tape measure around your bare abdomen at the level of your belly button (or at the midpoint between your lowest rib and hip bone). The tape should be snug but not compressing the skin. Breathe out normally and take the measurement. Do not hold your breath or suck in your stomach. Your waist measurement can vary by up to 2 inches depending on how recently you ate and your posture, so measure under consistent conditions."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is WHtR affected by height?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes — that is its main advantage. The ratio naturally accounts for different heights. A 35-inch waist on a 6-foot person (ratio 0.49) is healthier than the same 35-inch waist on a 5'4\" person (ratio 0.54). This is why WHtR is more personalized than absolute waist circumference alone."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should I replace my BMI tracking with WHtR?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Use both. BMI is still useful for population-level screening and insurance purposes. WHtR is better for individual health risk assessment. A healthy BMI + healthy WHtR = very low risk. High BMI + healthy WHtR = likely muscular rather than fat. Healthy BMI + high WHtR = normal weight obesity (hidden risk)."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your BMI",
+      "body": "Track both BMI and waist-related metrics with our free tools.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "waist to height ratio vs BMI",
+    "whtr",
+    "bmi vs waist measurement",
+    "waist circumference health",
+    "whtr calculator",
+    "which is better bmi or waist to height"
+  ]
+}

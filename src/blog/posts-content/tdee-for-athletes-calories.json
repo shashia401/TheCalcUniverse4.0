@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Athlete TDEE Is Significantly Higher"
+    },
+    {
+      "type": "paragraph",
+      "text": "Standard TDEE calculators only go up to \"very active\" (1.9x BMR), which may not capture elite athlete needs. Professional cyclists during the Tour de France burn 6,000-8,000 calories per day. Marathon runners burn 3,500-5,000 on training days. Even recreational athletes who train 1-2 hours daily often have TDEEs of 2,800-3,500."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Signs You Are Under-fueling"
+    },
+    {
+      "type": "paragraph",
+      "text": "Chronic fatigue, poor recovery, frequent illness, decreased performance, irritability, loss of menstrual cycle (women), and constant cravings all signal you may not be eating enough relative to your TDEE. RED-S (Relative Energy Deficiency in Sport) is a serious condition caused by chronic under-fueling relative to exercise energy expenditure."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your TDEE",
+      "body": "Use our TDEE calculator to ensure you are fueling adequately for your training.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee athletes",
+    "athlete calorie needs",
+    "endurance athlete calories",
+    "bodybuilding calories",
+    "sports nutrition tdee",
+    "how many calories do athletes need"
+  ]
+}

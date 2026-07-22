@@ -1,0 +1,87 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Calorie Deficit?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A calorie deficit simply means eating fewer calories than your body burns. Your body then uses stored fat to make up the difference, resulting in weight loss. One pound of body fat contains roughly 3,500 calories. To lose one pound per week, you need a deficit of about 500 calories per day. This can come from eating less, moving more, or ideally a combination of both."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Finding Your Deficit Sweet Spot"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Small deficit (200-300 cal/day): Slow, sustainable weight loss of 0.5 lb/week. Easy to maintain, minimal muscle loss.",
+        "Moderate deficit (300-500 cal/day): Standard recommendation. 0.5-1 lb/week. Good balance of speed and sustainability.",
+        "Aggressive deficit (500-800 cal/day): 1-1.5 lb/week. Short-term only. Risk of muscle loss, fatigue, and nutrient deficiencies.",
+        "Very aggressive deficit (800+ cal/day): Not recommended without medical supervision. Rapid weight loss but high risk of muscle loss, gallstones, and metabolic adaptation."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the Calorie Calculator"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Enter your age, gender, height, and weight.",
+        "Select your activity level (sedentary to very active).",
+        "Choose your weight loss goal (mild, moderate, or aggressive).",
+        "Review your TDEE (maintenance calories) and recommended calorie target.",
+        "Use the macro breakdown to plan your meals."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Never eat below 1,200 calories/day (women) or 1,500 calories/day (men) without medical supervision. Very low calorie diets can cause nutrient deficiencies, muscle loss, and metabolic slowdown."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Why am I not losing weight even with a deficit?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Possible reasons: underestimating calorie intake (people typically under-report by 20-50%), overestimating exercise calorie burn, water retention from sodium or carbs, hormonal factors, or metabolic adaptation from prolonged dieting. Track accurately for 2 weeks before adjusting."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should I eat back exercise calories?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Generally no. Exercise calorie estimates on machines and fitness trackers can be 30-50% inaccurate. If you feel overly fatigued, try eating back 25-50% of estimated exercise calories and see how your energy and progress respond."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Calorie Calculator",
+      "body": "Calculate your TDEE and personalized calorie target for weight loss, maintenance, or gain.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/calorie-calculator/"
+    }
+  ],
+  "keywords": [
+    "calorie deficit",
+    "calorie deficit calculator",
+    "weight loss calories",
+    "how many calories to lose weight",
+    "deficit calculator",
+    "sustainable weight loss"
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What BMI Actually Measures"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMI is a simple formula: your weight in kilograms divided by your height in meters squared. It was developed in the 1830s by Belgian mathematician Adolphe Quetelet as a way to measure population-level obesity, not as a diagnostic tool for individuals. The key word is population-level. BMI works well for spotting trends across large groups. For individuals, it is a starting point, not a verdict. It correlates reasonably well with body fat percentage for most people, but it does not directly measure body fat, muscle mass, bone density, or fat distribution."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The BMI Categories"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Range",
+        "Risk Level"
+      ],
+      "rows": [
+        [
+          "Severely underweight",
+          "Below 16.0",
+          "High"
+        ],
+        [
+          "Underweight",
+          "16.0 - 18.4",
+          "Moderate"
+        ],
+        [
+          "Normal weight",
+          "18.5 - 24.9",
+          "Low"
+        ],
+        [
+          "Overweight",
+          "25.0 - 29.9",
+          "Low-Moderate"
+        ],
+        [
+          "Obese Class I",
+          "30.0 - 34.9",
+          "Moderate"
+        ],
+        [
+          "Obese Class II",
+          "35.0 - 39.9",
+          "High"
+        ],
+        [
+          "Obese Class III",
+          "40.0 and above",
+          "Very High"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These cutoffs are based on white European populations and may not apply equally to all ethnic groups. Research shows that people of Asian descent have higher health risks at lower BMIs, while some studies suggest Black individuals may have lower risks at the same BMI. The World Health Organization recommends lower BMI cutoffs for Asian populations (overweight at 23 instead of 25)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When BMI Is Wrong"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Athletes and bodybuilders: Muscle is denser than fat. A muscular person can have a BMI in the obese range while having very low body fat. LeBron James at his peak had a BMI over 27.",
+        "Older adults: Muscle mass naturally declines with age. An older person might have a normal BMI but low muscle mass and high body fat percentage (sarcopenic obesity).",
+        "Pregnant women: BMI does not account for the weight of the baby, placenta, and amniotic fluid.",
+        "Different ethnicities: As mentioned, the standard BMI cutoffs do not apply equally across all populations.",
+        "Very tall or short people: BMI tends to overestimate body fat in short people and underestimate it in tall people because the formula uses height squared, which is not perfectly proportional."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Better Metrics to Track"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Body fat percentage: Directly measures how much of your weight is fat vs. muscle. Methods include DEXA scans, hydrostatic weighing, skinfold calipers, and bioelectrical impedance.",
+        "Waist-to-height ratio: Waist circumference divided by height. A ratio above 0.5 indicates increased health risk. This is a better predictor of heart disease than BMI.",
+        "Waist-to-hip ratio: Waist divided by hip circumference. Above 0.85 for women and 0.9 for men indicates central obesity.",
+        "Body composition tracking: Monitoring trends in weight, body fat, and muscle mass over time is more useful than any single number."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "BMI is a screening tool, not a diagnostic tool. Use it as one data point alongside waist measurement, body fat percentage, blood pressure, and blood work for a complete picture of metabolic health."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a healthy BMI for my age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For adults over 20, the same BMI categories apply regardless of age. However, a slightly higher BMI in older adults (25-27) is sometimes associated with better outcomes, a phenomenon called the obesity paradox. For children, BMI is plotted on growth charts and compared to age- and sex-specific percentiles."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can two people with the same BMI have different health risks?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Absolutely. A person with high muscle mass and low body fat can have the same BMI as someone with average muscle and high body fat. This is the main limitation of BMI. Two people with BMI 27 could have very different metabolic health depending on body composition and fat distribution."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your BMI",
+      "body": "Use our free BMI calculator with visual gauge, healthy weight range, and full category breakdown. Works for men, women, and children.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "BMI limitations",
+    "BMI guide",
+    "body mass index explained",
+    "BMI vs body fat",
+    "healthy BMI range",
+    "BMI calculator guide"
+  ]
+}

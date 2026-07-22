@@ -1,0 +1,57 @@
+---
+// Server-rendered (build-time) example result — SEO-critical.
+// The interactive calculator's results live in a client island, so Googlebot
+// (which never types inputs) sees no results. This block renders a real result
+// for a default scenario into the STATIC HTML, so the crawler sees a full page:
+// answer + gauge + donut. Also good UX: a worked example with live visuals.
+import type { CalculatorResult, CalcGauge, CalcDonut } from '../../types/calculator';
+import MiniGauge from './MiniGauge';
+import MiniDonut from './MiniDonut';
+
+interface Props {
+  scenario: string;               // e.g. "a $25,000 loan at 6.5% over 5 years"
+  results: CalculatorResult[];
+  gauge?: CalcGauge | null;
+  donut?: CalcDonut | null;
+}
+
+const { scenario, results, gauge, donut } = Astro.props;
+const colorClass: Record<string, string> = {
+  positive: 'text-accent-emerald-600',
+  negative: 'text-accent-rose-600',
+};
+// Hide internal/JSON helper rows (ids starting with "_")
+const shown = results.filter((r) => !r.id.startsWith('_'));
+---
+
+{shown.length > 0 && (
+  <section aria-label="Example result" class="mt-10">
+    <h2 class="text-lg font-bold text-[var(--surface-text)] mb-1">See it worked out</h2>
+    <p class="text-sm text-[var(--surface-text-secondary)] mb-4">Example — {scenario}:</p>
+
+    <div class="rounded-2xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {shown.map((r) => (
+          <div class={`rounded-xl p-4 ${r.highlight ? 'bg-[var(--brand-default)] text-white' : 'bg-[var(--surface-bg)] border border-[var(--border-warm)]'}`}>
+            <p class="text-xs font-medium opacity-75 mb-0.5">{r.label}</p>
+            <p class={`text-xl font-bold ${!r.highlight && r.color ? colorClass[r.color] ?? '' : ''}`}>
+              {r.value}{r.unit && <span class="ml-1 text-sm font-normal opacity-75">{r.unit}</span>}
+            </p>
+            {r.interpretation && <p class="text-xs opacity-80 mt-1">{r.interpretation}</p>}
+          </div>
+        ))}
+      </div>
+
+      {gauge && (
+        <div class="mt-5 rounded-xl bg-[var(--surface-bg)] border border-[var(--border-warm)] p-4">
+          <MiniGauge gauge={gauge} />
+        </div>
+      )}
+      {donut && (
+        <div class="mt-5 rounded-xl bg-[var(--surface-bg)] border border-[var(--border-warm)] p-4">
+          <MiniDonut donut={donut} />
+        </div>
+      )}
+    </div>
+  </section>
+)}

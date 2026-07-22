@@ -1,0 +1,92 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Is Your Due Date Actually Calculated?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The due date you get at your first prenatal visit follows a formula called **Naegele's Rule**, developed by a German obstetrician in the early 1800s. The rule adds **280 days (40 weeks)** from the first day of your last menstrual period. Despite being nearly 200 years old, it remains the standard clinical method used today."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Methods Can You Use to Estimate Your Due Date?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Depending on your situation, there are three ways to estimate your **pregnancy due date**: from your last period, from your conception date, or from an IVF transfer date. Each uses a different offset to arrive at the same 40-week target, and a good **due date calculator** should support all three."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Method",
+        "Starting Point",
+        "Calculation",
+        "Best For"
+      ],
+      "rows": [
+        [
+          "Last Menstrual Period (LMP)",
+          "First day of last period",
+          "Add 280 days",
+          "Regular 28-day cycles"
+        ],
+        [
+          "Conception Date",
+          "Ovulation date",
+          "Add 266 days",
+          "Women tracking ovulation"
+        ],
+        [
+          "IVF Transfer (Day 5)",
+          "Embryo transfer date",
+          "Add 261 days",
+          "IVF pregnancies"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Accurate Is the Estimated Due Date?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Only about **5% of babies** arrive on their exact estimated due date. Full-term delivery is considered anywhere between **37 and 42 weeks** — a five-week window. First-trimester ultrasound, measuring crown-rump length at 8–13 weeks, is the most accurate dating method with an error margin of just **±5–7 days**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your provider may revise your due date if the ultrasound differs significantly from the LMP-based estimate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Are the Key Trimester Milestones?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**First trimester (Weeks 1–13):** Major organ formation happens. Fatigue, nausea, and breast tenderness are common. Miscarriage risk is highest during this period, which is why many wait until week 12 to share the news.",
+        "**Second trimester (Weeks 14–27):** Energy often returns and morning sickness usually subsides. you'll start feeling fetal movement (quickening) around weeks 16–22. Most prenatal screening tests happen in this window.",
+        "**Third trimester (Weeks 28–40):** Rapid fetal weight gain and lung maturation accelerate. Physical discomfort increases as the baby grows. Braxton Hicks contractions may begin, and you'll start preparing for delivery."
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Pregnancy Due Date",
+      "body": "Use our Due Date Calculator to get your estimated due date, current gestational age, and trimester schedule. Supports LMP, conception, and IVF dates with automatic cycle-length adjustment.",
+      "buttonLabel": "Calculate Your Due Date",
+      "path": "/health/due-date-calculator/"
+    }
+  ],
+  "keywords": [
+    "due date calculator",
+    "pregnancy due date",
+    "when is my due date",
+    "pregnancy calculator",
+    "conception date calculator",
+    "how many weeks pregnant"
+  ]
+}

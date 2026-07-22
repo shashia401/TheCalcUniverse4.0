@@ -1,0 +1,342 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is GFR (Glomerular Filtration Rate)?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Glomerular filtration rate (GFR) measures how well your kidneys filter waste from your blood. It is the single best indicator of overall kidney function. Every minute, your kidneys filter roughly 120 milliliters of blood through millions of tiny filtering units called glomeruli. The GFR tells you the rate of that filtration — how many milliliters per minute your kidneys are clearing."
+    },
+    {
+      "type": "paragraph",
+      "text": "Think of GFR as your kidneys’ engine speedometer. Just as a speedometer tells you how fast the engine is running, GFR tells you how effectively your kidneys filter waste, balance electrolytes, and control blood pressure. A normal GFR means your kidneys are working at full capacity. A declining GFR signals that something may be impairing kidney function — and the sooner you catch it, the more you can do about it."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Estimated GFR (eGFR) is what laboratories report — it is a calculated estimate of your actual GFR based on a blood test for serum creatinine, combined with your age, sex, and sometimes other factors. The \"e\" stands for \"estimated\" because directly measuring GFR requires a complex 24-hour urine collection or injection of a radioactive tracer, which is impractical for routine screening."
+    },
+    {
+      "type": "paragraph",
+      "text": "The National Kidney Foundation and the American Society of Nephrology recommend using the 2021 CKD-EPI equation (race-free update) as the standard method for calculating eGFR. This is the formula our calculator uses, and it is the one your doctor is most likely to see on lab results."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why GFR Matters — The Kidney Function Gold Standard"
+    },
+    {
+      "type": "paragraph",
+      "text": "GFR matters because it catches kidney disease early — often before symptoms appear. Chronic kidney disease (CKD) is known as a silent disease because it typically has no noticeable symptoms until 75-90% of kidney function has already been lost. By that point, treatment options are limited to dialysis or transplantation."
+    },
+    {
+      "type": "paragraph",
+      "text": "A simple blood test that includes serum creatinine allows your doctor to calculate eGFR and detect kidney impairment while there is still time to intervene. The earlier kidney disease is detected, the more effectively its progression can be slowed through medication, diet, and lifestyle changes."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Kidney disease affects an estimated 1 in 7 adults worldwide — most of whom do not know they have it",
+        "Diabetes and hypertension account for roughly two-thirds of all CKD cases",
+        "Early detection through routine eGFR screening can delay or prevent progression to kidney failure",
+        "Regular eGFR monitoring is the standard of care for anyone with diabetes, hypertension, or a family history of kidney disease"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "eGFR is also essential for medication safety. Many drugs are cleared by the kidneys, and their doses must be adjusted when kidney function declines. If your eGFR drops below certain thresholds, your doctor may need to adjust dosages for antibiotics, blood pressure medications, diabetes drugs, and pain relievers. This is why your eGFR is reported on virtually every routine blood panel."
+    },
+    {
+      "type": "cta",
+      "heading": "Check Your Kidney Function Now",
+      "body": "Use our free GFR calculator — enter your creatinine, age, and sex to see your eGFR and CKD stage instantly. Powered by the 2021 CKD-EPI race-free equation.",
+      "buttonLabel": "Calculate Your GFR",
+      "path": "/health/gfr-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How GFR Is Measured: Direct vs. Estimated"
+    },
+    {
+      "type": "paragraph",
+      "text": "There are two ways to measure GFR. Direct GFR measurement uses inulin or a radioactive tracer, requiring injection and hours of urine collection. It is highly accurate but impractical for routine use."
+    },
+    {
+      "type": "paragraph",
+      "text": "eGFR — what your lab reports — is calculated from serum creatinine using validated equations. The most common are: CKD-EPI 2021 (race-free, current clinical standard), CKD-EPI 2009 (included race coefficient, now replaced), MDRD (1999, less accurate above 60 mL/min), and Cockcroft-Gault (1976, still used for drug dosing)."
+    },
+    {
+      "type": "paragraph",
+      "text": "Our calculator uses the CKD-EPI 2021 creatinine-based equation. If you see a race-adjusted eGFR from an older test, it may be 10-20% higher than the race-free version for Black patients — a correction that better reflects actual kidney function and eliminates a longstanding disparity in kidney disease diagnosis."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The 2021 Race-Free CKD-EPI Equation"
+    },
+    {
+      "type": "paragraph",
+      "text": "Prior to 2021, GFR equations included a race coefficient that multiplied results by approximately 1.16 for Black patients. This was based on the observation that Black individuals on average have higher serum creatinine, attributed to higher average muscle mass. However, evidence showed this systematically overestimated GFR, leading to delayed CKD diagnosis, lower nephrology referral rates, and reduced transplant access."
+    },
+    {
+      "type": "paragraph",
+      "text": "The NKF and ASN joint task force recommended immediate adoption of race-free equations in 2021. The 2021 CKD-EPI equation uses only serum creatinine, age, sex, and sex-specific kappa coefficients — removing race entirely. For most patients, the race-free equation produces a lower eGFR, identifying more people at an earlier stage when intervention is most effective."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "eGFR = 142 × min(SCr/κ, 1)^α × max(SCr/κ, 1)^(-1.200) × 0.9938^Age × (1.012 if female). Where SCr = serum creatinine, κ = 0.7 (female) or 0.9 (male)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "GFR Normal Range by Age"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 25-year-old with a GFR of 90 has normal kidney function. A 75-year-old with the same number might also be perfectly healthy — or could have early kidney disease. GFR naturally declines approximately 0.5-1% per year after age 30-40."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Age Group",
+        "Typical eGFR Range",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "20-29",
+          "90-130",
+          "Normal"
+        ],
+        [
+          "30-39",
+          "85-125",
+          "Normal"
+        ],
+        [
+          "40-49",
+          "80-120",
+          "Normal"
+        ],
+        [
+          "50-59",
+          "70-110",
+          "Normal"
+        ],
+        [
+          "60-69",
+          "60-100",
+          "Normal for age"
+        ],
+        [
+          "70-79",
+          "50-90",
+          "Normal for age"
+        ],
+        [
+          "80+",
+          "45-80",
+          "Normal for age"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "eGFR below 60 for three months or longer is the threshold for diagnosing CKD regardless of age. A single reading below 60 could be caused by dehydration, a high-protein meal, or strenuous exercise. Conversely, eGFR above 90 with other signs of kidney damage may indicate Stage 1 CKD."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "CKD Stages at a Glance"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Stage",
+        "eGFR",
+        "Kidney Function",
+        "Key Management"
+      ],
+      "rows": [
+        [
+          "Stage 1",
+          "≥90",
+          "Normal",
+          "Monitor underlying conditions"
+        ],
+        [
+          "Stage 2",
+          "60-89",
+          "Mildly decreased",
+          "BP and blood sugar control"
+        ],
+        [
+          "Stage 3a",
+          "45-59",
+          "Mild to moderate decrease",
+          "Nephrology referral, diet modification"
+        ],
+        [
+          "Stage 3b",
+          "30-44",
+          "Moderate to severe decrease",
+          "Manage complications (anemia, bone disease)"
+        ],
+        [
+          "Stage 4",
+          "15-29",
+          "Severely decreased",
+          "Prepare for dialysis or transplant"
+        ],
+        [
+          "Stage 5",
+          "<15",
+          "Kidney failure",
+          "Initiate renal replacement therapy"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Progression between stages varies widely. Some people remain in Stage 3 for decades. Others progress rapidly. The rate depends on the underlying cause, blood pressure control, medication adherence, and lifestyle factors."
+    },
+    {
+      "type": "cta",
+      "heading": "What Stage Are You In?",
+      "body": "Use our GFR calculator to determine your eGFR and CKD stage based on your latest lab results. Takes 30 seconds.",
+      "buttonLabel": "Check Your Stage",
+      "path": "/health/gfr-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Factors That Affect GFR Accuracy"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Dehydration — can temporarily lower eGFR by 5-10 points",
+        "High-protein meals before testing — increases creatinine production",
+        "Strenuous exercise — releases creatinine from muscles",
+        "Medications — NSAIDs, ACE inhibitors, certain antibiotics can affect eGFR",
+        "Pregnancy — eGFR normally increases by 30-50%",
+        "Muscle mass — high muscle mass can lower eGFR; low muscle mass can inflate it",
+        "Race and ethnicity — even the race-free equation performs differently across populations"
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "If your eGFR comes back below 60, your doctor will typically repeat the test within 2 weeks to 3 months. A single low reading does not automatically mean kidney disease — especially if you were dehydrated, ate a high-protein meal, or did intense exercise before the test."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to See a Nephrologist"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "eGFR persistently below 30 (Stage 4 or higher)",
+        "Rapid decline — drop of more than 5 mL/min/year or 25% in 2 years",
+        "Heavy proteinuria (albumin-to-creatinine ratio above 300 mg/g)",
+        "Difficult-to-control hypertension despite multiple medications",
+        "Significant electrolyte abnormalities",
+        "Genetic kidney disease suspected",
+        "Preparation for dialysis or transplant evaluation"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a normal eGFR by age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Normal eGFR varies: 20-29 year olds have 90-130, while healthy 70-79 year olds may have 50-90. eGFR naturally declines about 0.5-1% per year after age 30-40. The CKD diagnostic threshold is eGFR below 60 for three months or longer, regardless of age."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can my eGFR improve?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Acute drops from dehydration or medications can recover. Chronic low eGFR from CKD generally does not improve — the goal is slowing progression. Good BP control, ACE/ARB medications, blood sugar management, a kidney-friendly diet, and avoiding NSAIDs can all slow the rate of decline."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Why was the race coefficient removed?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Evidence showed it systematically overestimated GFR in Black patients, leading to delayed CKD diagnosis and reduced transplant access. The NKF/ASN joint task force recommended immediate adoption of race-free equations in 2021."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the difference between CKD-EPI and MDRD?"
+    },
+    {
+      "type": "paragraph",
+      "text": "MDRD (1999) is less accurate above 60 mL/min — it underestimates kidney function in healthier individuals. CKD-EPI (2021) is more accurate across all GFR levels and removed the race coefficient. Cockcroft-Gault is still used for drug dosing but not for CKD diagnosis."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How often should I check my eGFR?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Healthy adults with no risk factors: every 1-2 years. Diabetes or hypertension: every 3-12 months. Known CKD Stage 3-4: every 3-6 months. Stage 5: every 1-3 months."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Sources & References"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "National Kidney Foundation — GFR Overview: https://www.kidney.org/glomerular-filtration-rate-gfr",
+        "NKF GFR Calculator: https://www.kidney.org/professionals/gfr_calculator",
+        "CKD-EPI 2021 Equation: https://www.kidney.org/ckd-epi-creatinine-equation-2021-0",
+        "NIDDK eGFR Calculators: https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/estimated-gfr-calculators",
+        "Delgado et al. (2022) — A Unifying Approach for GFR Estimation: https://pmc.ncbi.nlm.nih.gov/articles/PMC9165591/"
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your GFR Now",
+      "body": "Our free online GFR calculator uses the 2021 CKD-EPI race-free equation. Takes 30 seconds. No signup required.",
+      "buttonLabel": "Open GFR Calculator",
+      "path": "/health/gfr-calculator/"
+    }
+  ],
+  "keywords": [
+    "gfr",
+    "egfr",
+    "glomerular filtration rate",
+    "kidney function test",
+    "normal gfr by age",
+    "ckd stages",
+    "gfr calculator",
+    "race-free egfr 2021",
+    "ckd-epi vs mdrd",
+    "how to improve gfr"
+  ]
+}

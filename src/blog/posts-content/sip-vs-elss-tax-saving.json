@@ -1,0 +1,68 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is ELSS?"
+    },
+    {
+      "type": "paragraph",
+      "text": "ELSS (Equity Linked Savings Scheme) is a type of mutual fund that offers tax deductions under Section 80C of the Income Tax Act, up to ₹1.5 lakhs per year. It has the shortest lock-in period among 80C investments (3 years). ELSS funds invest primarily in equities, offering potential for higher returns than PPF or tax-saving FDs."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Feature",
+        "ELSS SIP",
+        "PPF",
+        "Tax-Saving FD",
+        "NPS"
+      ],
+      "rows": [
+        [
+          "Lock-in",
+          "3 years",
+          "15 years",
+          "5 years",
+          "Till 60"
+        ],
+        [
+          "Returns",
+          "10-14%",
+          "7-8%",
+          "6-7%",
+          "8-12%"
+        ],
+        [
+          "Tax on returns",
+          "LTCG over ₹1L",
+          "Tax-free",
+          "Taxable",
+          "Partially taxable"
+        ],
+        [
+          "SIP available",
+          "Yes",
+          "Monthly",
+          "No",
+          "Yes"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SIP Calculator",
+      "body": "Calculate your systematic investment plan returns with our free SIP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/sip-calculator/"
+    }
+  ],
+  "keywords": [
+    "sip vs elss",
+    "elss tax saving",
+    "tax saving mutual fund",
+    "80c sip",
+    "elss vs ppf",
+    "equity linked savings scheme"
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "You look at an amortization schedule and see a grid of numbers stretching years into the future. Row after row of payments, split between interest and principal. It looks monotonous."
+    },
+    {
+      "type": "paragraph",
+      "text": "But buried in that table is a huge opportunity most borrowers miss."
+    },
+    {
+      "type": "paragraph",
+      "text": "Every single row is a chance to save money. The trick is understanding how the split changes over time — and what happens when you add just a small extra payment to the mix."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What exactly is an amortization schedule?"
+    },
+    {
+      "type": "paragraph",
+      "text": "An amortization schedule is a full breakdown of every loan payment from start to finish. Each row shows the payment number, how much goes to interest, how much goes to principal, and the remaining balance. It's the complete story of your loan."
+    },
+    {
+      "type": "paragraph",
+      "text": "In the early years, each payment is mostly interest. In the later years, it's mostly principal. The crossover point depends on your interest rate and term length."
+    },
+    {
+      "type": "paragraph",
+      "text": "For a **30-year mortgage at 6. 5%**, the first year of payments includes over **$16,000 in interest** but less than **$3,500 in principal reduction**."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How does each payment break down over time?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's what a **$250,000 loan at 6.5%** looks like across its life. Notice how the split flips over time:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Year",
+        "Monthly Payment",
+        "Interest Portion",
+        "Principal Portion"
+      ],
+      "rows": [
+        [
+          "Year 1",
+          "$1,580",
+          "$1,354 (86%)",
+          "$226 (14%)"
+        ],
+        [
+          "Year 10",
+          "$1,580",
+          "$1,086 (69%)",
+          "$494 (31%)"
+        ],
+        [
+          "Year 20",
+          "$1,580",
+          "$675 (43%)",
+          "$905 (57%)"
+        ],
+        [
+          "Year 30",
+          "$1,580",
+          "$7 (0.4%)",
+          "$1,573 (99.6%)"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "In year one, **86%** of each payment goes to interest. By year 30, almost the entire payment hits principal. The payment never changed — but where it went shifted dramatically."
+    },
+    {
+      "type": "cta",
+      "heading": "See your amortization schedule in seconds",
+      "body": "Enter your loan details and compare standard vs. accelerated payoff schedules side by side. See exactly how much time and interest extra payments save.",
+      "buttonLabel": "Use the Amortization Calculator",
+      "path": "/finance/amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "amortization calculator",
+    "loan amortization schedule",
+    "extra payment calculator",
+    "pay off loan early calculator",
+    "amortization table",
+    "loan payoff calculator"
+  ]
+}

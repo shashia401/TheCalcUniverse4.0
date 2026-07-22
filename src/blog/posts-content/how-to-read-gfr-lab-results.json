@@ -1,0 +1,172 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Does eGFR Look Like on a Lab Report?"
+    },
+    {
+      "type": "paragraph",
+      "text": "When you get a basic metabolic panel (BMP) or comprehensive metabolic panel (CMP) blood test, the lab typically reports your eGFR along with creatinine, BUN, and other kidney-related values. Your eGFR will appear as a single number with units of mL/min/1.73m². Some labs also report the CKD stage next to the eGFR value."
+    },
+    {
+      "type": "paragraph",
+      "text": "A typical lab report entry looks like: \"eGFR: 87 mL/min/1.73m² (CKD-EPI 2021)\". Some labs include a reference range (typically \">60 mL/min/1.73m²\") and may flag results below 60 as abnormal. The reference range is misleading because a value above 60 can still indicate disease if there are other signs of kidney damage, and a value between 60 and 89 may be completely normal for an older adult."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Check which formula your lab uses. Most labs now use the CKD-EPI 2021 race-free equation. If your lab still uses MDRD or reports a race-adjusted value, your eGFR may differ by 10-20% from what our calculator would give. Look for a footnote on your lab report identifying the formula."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Interpret Your eGFR Number"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here is a simple framework for understanding your eGFR result. Remember that this is just one piece of the picture — your doctor will interpret it alongside your complete health profile."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "eGFR Range",
+        "What It Suggests",
+        "Next Steps"
+      ],
+      "rows": [
+        [
+          "≥90",
+          "Normal kidney function",
+          "Routine monitoring. Check for proteinuria to confirm no Stage 1 CKD."
+        ],
+        [
+          "60-89",
+          "Normal or mildly decreased",
+          "Interpret based on age and other markers. Under 60 for 3+ months = CKD."
+        ],
+        [
+          "45-59",
+          "Stage 3a CKD (if persistent)",
+          "Repeat test in 2-12 weeks. Manage BP, blood sugar, diet. Consider nephrology referral."
+        ],
+        [
+          "30-44",
+          "Stage 3b CKD",
+          "Nephrology referral. Check hemoglobin, electrolytes, vitamin D, PTH. Medication review."
+        ],
+        [
+          "15-29",
+          "Stage 4 CKD",
+          "Prepare for dialysis/transplant. Dialysis access planning. Dietitian referral."
+        ],
+        [
+          "<15",
+          "Stage 5 CKD (kidney failure)",
+          "Initiate renal replacement therapy or plan comprehensive conservative care."
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The most important number is not your eGFR on any single test, but the trend over time. A gradual decline of 1-2 mL/min/year is typical for age-related change or well-managed CKD. A decline of 4-5+ mL/min/year warrants more aggressive intervention to slow progression."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Other Numbers on Your Lab Report That Matter"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your eGFR does not tell the whole story. Other lab values provide critical context:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Serum Creatinine (SCr) — the raw value used to calculate eGFR. Normal ranges vary by lab but are typically 0.6-1.2 mg/dL. Isolated creatinine without eGFR can be misleading (a muscular person may have high creatinine but normal GFR; an elderly person may have normal creatinine but low GFR).",
+        "BUN (Blood Urea Nitrogen) — typically 7-20 mg/dL. Elevated BUN can indicate kidney impairment but is also affected by protein intake, dehydration, and gastrointestinal bleeding. The BUN-to-creatinine ratio helps distinguish between kidney disease and dehydration.",
+        "Urine Albumin-to-Creatinine Ratio (UACR) — the key marker for kidney damage. A value below 30 mg/g is normal. 30-300 mg/g is moderately increased (microalbuminuria). Above 300 mg/g is severely increased (macroalbuminuria). Albuminuria can be present even with normal eGFR.",
+        "Estimated GFR (eGFR) — discussed above. Always interpret in context of the other markers."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "If your eGFR is low but your urine albumin is normal and your creatinine is stable, the cause may be non-kidney-related (dehydration, medication effect, lab error). If both eGFR is low and UACR is elevated, the evidence for kidney disease is stronger."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Scenarios and What They Mean"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here are real-world examples to help you understand different patterns:"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Scenario A: eGFR 55 in a 75-Year-Old"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 75-year-old woman with stable creatinine of 0.9 mg/dL over 5 years, no diabetes, well-controlled hypertension, and no protein in urine. Her eGFR of 55 represents Stage 3a CKD, but with stable values, no proteinuria, and well-controlled BP, her risk of progression to kidney failure is very low. The focus is on cardiovascular protection and annual monitoring."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Scenario B: eGFR 92 in a 45-Year-Old with Proteinuria"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 45-year-old diabetic man with eGFR 92 (normal!) but UACR of 150 mg/g (elevated). Despite a normal eGFR, he has Stage 1 CKD because there is evidence of kidney damage (proteinuria). Early intervention with ACE inhibitors and tight blood sugar control can prevent progression. If only eGFR were checked, this kidney damage would be missed."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Scenario C: eGFR Dropping from 80 to 62 in 18 Months"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 55-year-old with previously stable eGFR of 80 now shows 62. The rate of decline (18 units in 18 months = 12 mL/min/year) is far faster than expected for aging. This rapid change warrants immediate investigation for acute or subacute causes: medication review, blood pressure optimization, volume status assessment, and consideration of renal artery stenosis or other reversible causes."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your eGFR",
+      "body": "Enter your creatinine, age, and sex into our free calculator. See your eGFR and CKD stage instantly.",
+      "buttonLabel": "Check Your GFR",
+      "path": "/health/gfr-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Questions to Ask Your Doctor About eGFR"
+    },
+    {
+      "type": "paragraph",
+      "text": "Bring these questions to your next appointment:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "What formula does this lab use for eGFR? Is it the 2021 CKD-EPI race-free equation?",
+        "Is this eGFR result consistent with my previous results, or has it changed significantly?",
+        "Do I have any protein in my urine? Should I have a UACR test?",
+        "What is my target blood pressure, and is it well-controlled?",
+        "Do any of my medications need dose adjustment based on my current eGFR?",
+        "How often should I repeat this test?",
+        "Is a nephrology referral appropriate for me?"
+      ]
+    }
+  ],
+  "keywords": [
+    "how to read gfr results",
+    "interpret egfr",
+    "gfr lab results explained",
+    "what does my egfr mean",
+    "understand kidney function test",
+    "egfr blood test results",
+    "kidney function numbers explained"
+  ]
+}

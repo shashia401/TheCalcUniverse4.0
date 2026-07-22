@@ -1,0 +1,43 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Debunked Myths"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Myth: Eating 6 small meals boosts metabolism. Truth: Total daily energy expenditure is the same whether you eat 2 meals or 6. Meal frequency does not affect TDEE. What matters is total calories.",
+        "Myth: Starvation mode slows metabolism to zero. Truth: Metabolic adaptation is real (BMR drops 10-20% with extreme restriction), but it is far from zero. Your body becomes more efficient, not completely stops burning calories.",
+        "Myth: Eating after 8 PM causes weight gain. Truth: Total daily calorie intake determines weight change. When you eat them does not matter. Late-night snacking is problematic because people tend to eat more total calories, not because of timing.",
+        "Myth: Negative calorie foods exist (celery burns more to digest than it contains). Truth: The thermic effect of food maxes out at about 30% of calories (for protein). Even celery has a net positive calorie contribution."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Actually Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "The only proven way to increase your TDEE is to increase your muscle mass (which raises BMR permanently) and increase your daily activity (exercise and NEAT). No food timing strategy, specific food combination, or supplement has been shown to meaningfully increase TDEE beyond the effects of muscle mass and activity."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Real TDEE",
+      "body": "Get your evidence-based TDEE estimate with our free calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee myths",
+    "starvation mode",
+    "6 meals a day metabolism",
+    "negative calorie foods",
+    "eating late metabolism",
+    "boosting metabolism myths"
+  ]
+}

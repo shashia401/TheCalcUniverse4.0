@@ -1,0 +1,139 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Understanding Amazon FBA Fee Structure"
+    },
+    {
+      "type": "paragraph",
+      "text": "Amazon FBA (Fulfillment by Amazon) fees consist of several components: referral fees (8-15% of the sale price depending on category), fulfillment fees (picking, packing, and shipping), monthly storage fees (based on cubic footage, higher during peak Q4 months), and optional fees like advertising, returns processing, and removal orders. Together, these fees typically consume 30-45% of your selling price. For a $25 product, you might keep only $13-17 after all Amazon fees."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Fee Breakdown by Category"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Referral Fee",
+        "Min Fee",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Electronics",
+          "8%",
+          "$1.00",
+          "Lower rate for high-value items"
+        ],
+        [
+          "Clothing",
+          "15%",
+          "$1.00",
+          "$15 max fee on apparel"
+        ],
+        [
+          "Sports",
+          "15%",
+          "$1.00",
+          "Standard rate"
+        ],
+        [
+          "Home & Kitchen",
+          "15%",
+          "$1.00",
+          "Most common category"
+        ],
+        [
+          "Collectibles",
+          "20%",
+          "$1.00",
+          "Higher rate for collectibles"
+        ],
+        [
+          "Grocery",
+          "8%",
+          "$1.00",
+          "Lower rate for consumables"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the FBA Calculator"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Enter your product sale price.",
+        "Select the product category to auto-fill the referral fee percentage.",
+        "Enter your product dimensions and weight for fulfillment fee calculation.",
+        "Add your cost of goods sold (COGS) and any shipping costs to Amazon.",
+        "Review your net profit, ROI percentage, and break-even analysis."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Profitability Strategies"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Target 30%+ net margins: After all Amazon fees and COGS, aim for at least 30% remaining. If you are below 20%, your pricing or cost structure needs adjustment.",
+        "Use smaller, lighter products: Fulfillment fees are based on size and weight. Lowering dimensional weight by optimizing packaging can significantly reduce fees.",
+        "Avoid Q4 storage overages: Monthly storage fees triple from October through December. Plan inventory to avoid long-term storage surcharges.",
+        "Consider FBM for slow movers: Fulfillment by Merchant (FBM) can be cheaper for products that sell fewer than 10 units per month."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Amazon fees change every January. Always check the current fee schedule before setting prices or ordering inventory. The FBA calculator is updated with the latest rates."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the minimum profit margin I should accept on Amazon?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Aim for at least 20-30% net profit margin after ALL costs including Amazon fees, COGS, advertising, and returns. Below 15%, you are vulnerable to price wars, rising fees, or a single bad review wiping out your profit. Use the FBA calculator before ordering inventory."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do Amazon returns affect my profit?"
+    },
+    {
+      "type": "paragraph",
+      "text": "When a customer returns an item, Amazon does not refund the referral fee (they deduct it from your account). You also lose the fulfillment fee. If the item is unsellable (damaged returns), you lose the product cost too. Factor in a 5-10% return rate when calculating true profit margins."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Amazon FBA Calculator",
+      "body": "Calculate your true Amazon seller profit with current fee rates. No signup required.",
+      "buttonLabel": "Open Calculator",
+      "path": "/ecommerce/amazon-fba-calculator/"
+    }
+  ],
+  "keywords": [
+    "Amazon FBA fees",
+    "FBA calculator",
+    "Amazon seller profit",
+    "FBA fee breakdown",
+    "Amazon fulfillment costs",
+    "FBA profit margin"
+  ]
+}

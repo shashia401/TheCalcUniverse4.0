@@ -1,0 +1,95 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "That monthly payment on your loan papers looks simple enough. A fixed number, due every month, done. But behind that single number is a formula that decides exactly how much you'll pay the bank versus paying down what you borrowed."
+    },
+    {
+      "type": "paragraph",
+      "text": "The payment stays the same every month. But the split between principal and interest? That changes with every single payment."
+    },
+    {
+      "type": "paragraph",
+      "text": "Early on, you're mostly covering interest. Later, you're finally shrinking the balance. Understanding this shift can save you thousands."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Lenders use the standard amortization formula: M = P x [r(1+r)^n] / [(1+r)^n - 1]. M is your monthly payment. P is the principal. r is your monthly interest rate (annual rate divided by 12). n is the total number of payments. The same formula works for auto loans, personal loans, and mortgages."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why are your early payments mostly interest?"
+    },
+    {
+      "type": "paragraph",
+      "text": "When your loan balance is highest, the monthly interest charge is also highest. So in month one, most of your payment covers the interest that accrued since day one. Only a small slice reduces the principal."
+    },
+    {
+      "type": "paragraph",
+      "text": "This is called front-loaded interest, and it's built into every amortized loan."
+    },
+    {
+      "type": "paragraph",
+      "text": "Take a **5-year $20,000 loan at 8%**. Your first payment includes about **$133 in interest** and only **$272 in principal**. By the final payment, it flips to roughly **$5 in interest** and **$400 in principal**."
+    },
+    {
+      "type": "paragraph",
+      "text": "The payment amount never changed — but where your money went changed dramatically."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How much interest will you really pay?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The total interest cost depends heavily on your loan term. Longer terms mean smaller payments but way more total interest. Here's what a **$20,000 loan at 8%** looks like across different terms:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Loan Term",
+        "Monthly Payment",
+        "Total Interest",
+        "Interest as % of Total"
+      ],
+      "rows": [
+        [
+          "3 years (36 months)",
+          "$627",
+          "$2,560",
+          "11.4%"
+        ],
+        [
+          "5 years (60 months)",
+          "$406",
+          "$4,330",
+          "17.8%"
+        ],
+        [
+          "7 years (84 months)",
+          "$312",
+          "$6,190",
+          "23.6%"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "See exactly what your loan costs",
+      "body": "Run the numbers on any loan amount, term, and rate. View your full amortization schedule and total interest in seconds with our free loan calculator.",
+      "buttonLabel": "Use the Loan Calculator",
+      "path": "/finance/loan-calculator/"
+    }
+  ],
+  "keywords": [
+    "loan calculator",
+    "personal loan calculator",
+    "monthly payment calculator",
+    "loan amortization calculator",
+    "loan payment calculator",
+    "loan interest calculator"
+  ]
+}

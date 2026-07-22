@@ -1,0 +1,47 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Systematic Withdrawal Plan (SWP)?"
+    },
+    {
+      "type": "paragraph",
+      "text": "An SWP allows you to withdraw a fixed amount from your mutual fund investments at regular intervals (monthly, quarterly, or annually). Unlike a lump sum redemption where you withdraw everything at once, an SWP provides a steady income stream while the remaining balance continues to earn returns. SWPs are widely used by retirees in India to generate pension-like income from their retirement corpus."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The 4% Rule for Indian Investors"
+    },
+    {
+      "type": "paragraph",
+      "text": "The 4% rule, developed from US market data, suggests withdrawing 4% of your initial corpus annually (adjusted for inflation) for a 30-year retirement. For Indian investors, a 5-6% withdrawal rate is often considered sustainable given potentially higher equity returns. Using our SWP calculator, a ₹1 crore corpus at 8% returns with ₹50,000/month withdrawal lasts about 22 years."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "SWP vs Lump Sum Withdrawal"
+    },
+    {
+      "type": "paragraph",
+      "text": "Taking the entire corpus as a lump sum risks spending it too quickly and losing future growth potential. An SWP ensures: (a) Regular income every month, (b) Remaining balance continues to grow, (c) Tax efficiency — only the capital gains portion is taxed. The SWP calculator helps you find the sustainable withdrawal amount for your corpus."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SWP Calculator",
+      "body": "Plan your retirement withdrawals with our free SWP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/swp-calculator/"
+    }
+  ],
+  "keywords": [
+    "swp guide",
+    "systematic withdrawal plan",
+    "retirement income swp",
+    "monthly withdrawal plan",
+    "corpus withdrawal strategy",
+    "swp calculator guide",
+    "retirement corpus management"
+  ]
+}

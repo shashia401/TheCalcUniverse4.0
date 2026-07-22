@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Simple Difference"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMR is what your body would burn if you stayed in bed all day doing nothing. TDEE is BMR plus everything else: walking to the kitchen, digesting food, typing, exercise, fidgeting. For a sedentary person, TDEE is about 20% higher than BMR. For an active person, it can be 90% higher. Using your BMR as your calorie target would cause you to eat 20-90% fewer calories than you actually burn — an aggressive deficit that causes fatigue, muscle loss, and metabolic slowdown."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why People Confuse Them"
+    },
+    {
+      "type": "paragraph",
+      "text": "Many people calculate their BMR and think that is their maintenance level. It is not. Your BMR is the absolute floor — never eat below it. Your TDEE is what you should compare your intake to. If your BMR is 1,600 and your TDEE is 2,200, eating 1,900 calories (300 deficit) is healthy. Eating 1,600 calories (BMR) would be a 600-calorie deficit — too aggressive for most people."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Numbers",
+      "body": "Get both your BMR and TDEE with our free calculators.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "bmr vs tdee",
+    "difference between bmr and tdee",
+    "basal metabolic rate vs tdee",
+    "why tdee matters",
+    "calculate bmr vs tdee",
+    "which number to use for diet"
+  ]
+}

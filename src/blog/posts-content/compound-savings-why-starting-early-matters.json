@@ -1,0 +1,38 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Numbers: Early vs Late Starter"
+    },
+    {
+      "type": "paragraph",
+      "text": "Consider two savers. Alex starts at 25, saves $300/month for 10 years (total: $36,000), then stops contributing but leaves the money invested. Ben starts at 35, saves $300/month for 30 years (total: $108,000), until age 65. At 7% annual return: Alex has $592,000. Ben has $365,000. Alex contributed one-third as much money but ended up with 62% more — because of the extra 10 years of compounding."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Alex: $36,000 total contributions → $592,000 final balance. Ben: $108,000 total contributions → $365,000 final balance. Starting 10 years earlier is worth 3 times more money invested. This is the power of compound savings."
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula driving this is exponential: each year of compound growth is a multiplier on top of all previous years' growth. Ten extra years at 7% means your money gets multiplied by (1.07)^10 = 1.97 — nearly 2x. This is why financial advisors stress starting early far more than saving large amounts."
+    },
+    {
+      "type": "cta",
+      "heading": "See the Power of Starting Early",
+      "body": "Use our savings calculator to compare early vs late start scenarios and see the difference for yourself.",
+      "buttonLabel": "Calculate Now",
+      "path": "/finance/savings-calculator/"
+    }
+  ],
+  "keywords": [
+    "compound savings",
+    "start saving early",
+    "compound interest savings",
+    "power of compounding",
+    "early savings advantage",
+    "retirement savings start early",
+    "compound growth"
+  ]
+}

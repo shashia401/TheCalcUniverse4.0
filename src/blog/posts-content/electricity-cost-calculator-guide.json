@@ -1,0 +1,684 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Understanding Electricity Costs Matters"
+    },
+    {
+      "type": "paragraph",
+      "text": "The average US household spends roughly **$1,500 per year** on electricity. About $125 a month, give or take. But most people have no idea which devices in their home are actually driving that number."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's a reality check. Your gaming PC, running six hours a day, can cost **more per year** than your fridge — and that thing runs 24/7."
+    },
+    {
+      "type": "paragraph",
+      "text": "A space heater used for a few winter months can cost more than all your lighting combined. An EV charger on the wrong rate plan? Might beat your central AC."
+    },
+    {
+      "type": "paragraph",
+      "text": "Knowing your cost per kilowatt-hour (kWh) and how to calculate it for each appliance is where you start taking control."
+    },
+    {
+      "type": "paragraph",
+      "text": "You don't need to be an electrician. The math is simple, and once you know it, you'll never look at your bill the same way."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Simple Electricity Cost Formula"
+    },
+    {
+      "type": "paragraph",
+      "text": "Calculating what any appliance costs to run comes down to one simple formula. You just need four numbers: wattage, hours per day, days per period, and your rate per kWh."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Cost = (Watts × Hours per Day × Days Used) / 1000 × $/kWh × Quantity of Appliances"
+    },
+    {
+      "type": "paragraph",
+      "text": "Let's break it down. Wattage tells you how fast a device uses power. Multiply by hours and days — that's your total watt-hours."
+    },
+    {
+      "type": "paragraph",
+      "text": "Divide by 1,000 to get kilowatt-hours (kWh). That's the unit your utility bills you for."
+    },
+    {
+      "type": "paragraph",
+      "text": "Multiply by your rate, and boom — that's your cost."
+    },
+    {
+      "type": "paragraph",
+      "text": "Say you've got a **1,500-watt space heater** running 8 hours a day for 30 days at $0.14/kWh. (1,500 × 8 × 30) / 1000 × $0.14 = **$50.40**. That's fifty bucks for one heater. Run two, and it's over a hundred."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Kilowatt-Hour (kWh)?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A kWh is just the unit your utility uses to bill you. One kWh equals 1,000 watt-hours. In plain English: run ten 100-watt bulbs for an hour and you've used exactly 1 kWh."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your rate per kWh changes depending on where you live. Once you understand kWh, you can translate any appliance's usage into exactly what it costs you."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "The US national average is about **$0.14/kWh**, but it varies wildly by state. Hawaii? Over $0.40/kWh. Louisiana, Idaho, Washington? Under $0.10/kWh. Check your latest bill — your rate is printed right there, usually labeled \"energy charge\" or \"electricity supply rate.\""
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Your Electric Bill Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your electric bill has a few parts, but the number you care about is the energy charge per kWh. Most bills also include delivery fees, taxes, and fixed monthly charges. So your effective rate — total bill divided by total kWh — is usually higher than the base rate."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's how to find your true rate. Grab your bill and look for two numbers: total kWh used and total charges (minus fixed fees). Divide charges by kWh. That's your effective rate — use that in the formula for the most accurate results."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Bill Component",
+        "Typical Cost",
+        "What It Covers"
+      ],
+      "rows": [
+        [
+          "Energy Supply Charge",
+          "$0.08–$0.15/kWh",
+          "The actual electricity you consumed"
+        ],
+        [
+          "Delivery / Distribution",
+          "$0.03–$0.08/kWh",
+          "Transmission lines and infrastructure"
+        ],
+        [
+          "Fixed Monthly Fee",
+          "$5–$25/month",
+          "Meter reading, billing, grid connection"
+        ],
+        [
+          "Taxes & Surcharges",
+          "3–10% of total",
+          "State and local energy taxes"
+        ],
+        [
+          "Total Effective Rate",
+          "$0.10–$0.35+/kWh",
+          "All components combined"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Real Appliance Cost Comparisons"
+    },
+    {
+      "type": "paragraph",
+      "text": "Nothing beats real numbers. Here's what common devices actually cost to run at the national average rate of $0.14/kWh. Some of these will surprise you."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Appliance",
+        "Wattage",
+        "Daily Use",
+        "kWh/Day",
+        "Cost/Day",
+        "Cost/Month",
+        "Cost/Year"
+      ],
+      "rows": [
+        [
+          "Gaming PC (high-end)",
+          "500 W",
+          "6 hrs",
+          "3.00",
+          "$0.42",
+          "$12.60",
+          "$153.30"
+        ],
+        [
+          "LED TV (50-inch)",
+          "120 W",
+          "6 hrs",
+          "0.72",
+          "$0.10",
+          "$3.02",
+          "$36.74"
+        ],
+        [
+          "Refrigerator (avg. running)",
+          "210 W",
+          "24 hrs",
+          "5.04",
+          "$0.71",
+          "$21.17",
+          "$257.55"
+        ],
+        [
+          "Space Heater",
+          "1,500 W",
+          "6 hrs",
+          "9.00",
+          "$1.26",
+          "$37.80",
+          "$459.90"
+        ],
+        [
+          "Central AC (3.5 ton)",
+          "3,500 W",
+          "8 hrs",
+          "28.00",
+          "$3.92",
+          "$117.60",
+          "$1,430.80"
+        ],
+        [
+          "Clothes Dryer",
+          "3,000 W",
+          "1 hr",
+          "3.00",
+          "$0.42",
+          "$12.60",
+          "$153.30"
+        ],
+        [
+          "Washing Machine",
+          "500 W",
+          "1 hr",
+          "0.50",
+          "$0.07",
+          "$2.10",
+          "$25.55"
+        ],
+        [
+          "Dishwasher",
+          "1,800 W",
+          "1 hr",
+          "1.80",
+          "$0.25",
+          "$7.56",
+          "$91.98"
+        ],
+        [
+          "LED Light Bulb (10W)",
+          "10 W",
+          "5 hrs",
+          "0.05",
+          "$0.01",
+          "$0.21",
+          "$2.56"
+        ],
+        [
+          "EV Charger (Level 2)",
+          "7,000 W",
+          "4 hrs",
+          "28.00",
+          "$3.92",
+          "$117.60",
+          "$1,430.80"
+        ],
+        [
+          "Microwave Oven",
+          "1,100 W",
+          "0.5 hrs",
+          "0.55",
+          "$0.08",
+          "$2.31",
+          "$28.11"
+        ],
+        [
+          "Ceiling Fan",
+          "50 W",
+          "8 hrs",
+          "0.40",
+          "$0.06",
+          "$1.68",
+          "$20.44"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Notice that gaming PC? It costs **over four times more** to run than your LED TV — even with the same daily usage. The PC pulls ~500 watts under load. The TV? About 120 watts. That gap is why high-power electronics are worth a second look."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's another one: a space heater running 6 hours a day costs **more per month** than a refrigerator that runs 24/7."
+    },
+    {
+      "type": "paragraph",
+      "text": "Why? The heater pulls 1,500 watts nonstop. The fridge cycles on and off, averaging just **210 watts** over the day. Wattage and duty cycle — both matter."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Understanding Variable Power Draw"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Duty Cycles and Average Consumption"
+    },
+    {
+      "type": "paragraph",
+      "text": "Not everything runs at full power all the time. Take your fridge. The sticker might say 700 watts, but the compressor only runs about 25–35% of the time. The rest? Just enough for lights, the control board, and the defrost timer."
+    },
+    {
+      "type": "paragraph",
+      "text": "So the average power draw is closer to **210 watts** (700 W × 30% duty cycle). Peak is higher, but average is what matters for your bill."
+    },
+    {
+      "type": "paragraph",
+      "text": "Our calculator handles this. Just set the wattage to the average running power instead of peak. For common appliances, we've got presets based on real-world testing."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Appliance",
+        "Rated Wattage",
+        "Duty Cycle",
+        "Average Wattage",
+        "kWh/Day",
+        "Cost/Year"
+      ],
+      "rows": [
+        [
+          "Refrigerator (20 cu ft)",
+          "700 W",
+          "~30%",
+          "210 W",
+          "5.04",
+          "$257.55"
+        ],
+        [
+          "Well Pump",
+          "1,200 W",
+          "~10%",
+          "120 W",
+          "2.88",
+          "$147.17"
+        ],
+        [
+          "Room AC Unit",
+          "1,200 W",
+          "~70%",
+          "840 W",
+          "10.08",
+          "$514.89"
+        ],
+        [
+          "Sump Pump",
+          "800 W",
+          "~5%",
+          "40 W",
+          "0.96",
+          "$49.06"
+        ],
+        [
+          "Electric Water Heater",
+          "4,500 W",
+          "~20%",
+          "900 W",
+          "21.60",
+          "$1,103.04"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "EV Charging and Time-of-Use Rates"
+    },
+    {
+      "type": "paragraph",
+      "text": "EV charging is a big one. A Level 2 charger draws **7,000 watts** (32 amps at 240V). Four hours of charging consumes 28 kWh — about the same as running central AC for 8 hours."
+    },
+    {
+      "type": "paragraph",
+      "text": "Good news: most utilities offer time-of-use (TOU) plans for EV owners. Off-peak power (usually 11 PM to 7 AM) can cost as little as **$0.08/kWh**. Peak afternoon rates? Over $0.30/kWh."
+    },
+    {
+      "type": "paragraph",
+      "text": "Charge overnight and you can cut your cost by up to **70%**."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "EV charging example at $0.14/kWh flat rate: 7,000 W × 4 hrs/day × 30 days = 840 kWh/month. Cost: **$117.60/month**. At a TOU off-peak rate of $0.08/kWh: same usage drops to **$67.20/month**. That's **$604.80 saved per year** — just by shifting when you charge."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Standby Power: The Hidden Cost You Never See"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the creepy part: lots of devices in your home draw power even when they're \"off.\" It's called standby power, vampire power, or phantom load. TVs, cable boxes, gaming consoles, phone chargers — anything with a wall wart."
+    },
+    {
+      "type": "paragraph",
+      "text": "Each one is tiny — 1 to 10 watts. But they run 24/7/365. Got 20 devices averaging 5 watts each? That's 100 watts continuously."
+    },
+    {
+      "type": "paragraph",
+      "text": "2.4 kWh per day. 72 kWh per month. **876 kWh per year**. At the national average rate, that's about **$122 a year** for doing absolutely nothing."
+    },
+    {
+      "type": "paragraph",
+      "text": "Smart power strips fix this. They cut power completely when devices go into standby. Plug your entertainment center, computer, or gaming setup into one and save **$30–$50 per year** — zero effort after plugging it in."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Energy Saving Tips That Actually Work"
+    },
+    {
+      "type": "paragraph",
+      "text": "You don't need to live by candlelight. The best strategies just target the biggest energy hogs first. Here's what works, ranked by savings."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "1. Switch to LED Lighting"
+    },
+    {
+      "type": "paragraph",
+      "text": "LEDs use **75–80% less energy** than incandescent bulbs and last 15–25 times longer. Swap a 60W incandescent for a 10W LED and save 50 watts per hour."
+    },
+    {
+      "type": "paragraph",
+      "text": "Run that light 5 hours a day? (50 × 5 × 365) / 1000 × $0.14 = **$12.78 per year, per bulb**. Got 40 bulbs in your house? That's over **$500 a year**."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "2. Use Smart Power Strips"
+    },
+    {
+      "type": "paragraph",
+      "text": "Already covered these above, but they're worth repeating. Smart strips pay for themselves in **under six months** — after that it's pure savings. Put them where idle electronics cluster: entertainment centers, home offices, gaming rigs."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "3. Choose ENERGY STAR Appliances"
+    },
+    {
+      "type": "paragraph",
+      "text": "ENERGY STAR appliances use **10–50% less energy** than standard models. The savings really add up on things that run all the time — fridges, washers, dishwashers, HVAC."
+    },
+    {
+      "type": "paragraph",
+      "text": "When you're replacing a major appliance, check the yellow EnergyGuide label. It shows estimated annual operating costs. Compare before you buy."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "4. Maintain Your HVAC System"
+    },
+    {
+      "type": "paragraph",
+      "text": "Heating and cooling makes up **40–50%** of the average US home's energy bill. Swap dirty air filters every 1–3 months and cut HVAC energy use by **5–15%**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Annual pro maintenance — cleaning coils, checking refrigerant, sealing duct leaks — can boost efficiency by up to **20%**. Throw in a smart thermostat and save another **10–15%** by letting it adjust temps when you're asleep or away."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "5. Shift Usage to Off-Peak Hours"
+    },
+    {
+      "type": "paragraph",
+      "text": "If your utility has time-of-use pricing, shift the big stuff to off-peak hours. Run the dishwasher and laundry overnight. Charge your EV after 11 PM. Pre-cool your home in the morning."
+    },
+    {
+      "type": "paragraph",
+      "text": "How much can you save? Earlier we showed over **$600 per year** just by changing when you charge your EV. That's one appliance."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use Our Free Electricity Cost Calculator"
+    },
+    {
+      "type": "paragraph",
+      "text": "Our calculator does all the math for you. Just plug in the wattage, hours, days, rate, and quantity. It spits out daily, monthly, and annual costs instantly."
+    },
+    {
+      "type": "paragraph",
+      "text": "It comes with **20+ preset appliance profiles** — LED bulbs, ceiling fans, fridges, EV chargers, central AC. Each has a realistic average wattage so you don't need to hunt down specs. Got something not in the list? Enter custom values."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Feature",
+        "What It Does"
+      ],
+      "rows": [
+        [
+          "20+ Appliance Presets",
+          "Pre-loaded wattage values for common devices"
+        ],
+        [
+          "Custom Wattage Entry",
+          "Enter any wattage for appliances not in presets"
+        ],
+        [
+          "Hours & Days Adjustment",
+          "Set daily usage and number of days per period"
+        ],
+        [
+          "$/kWh Rate Input",
+          "Use national average ($0.14) or enter your actual rate"
+        ],
+        [
+          "Quantity Multiplier",
+          "Calculate cost for multiple identical appliances"
+        ],
+        [
+          "Daily / Monthly / Annual",
+          "See costs broken down across all three time periods"
+        ],
+        [
+          "Instant Results",
+          "Updates in real time as you adjust any input"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Use it to compare a gaming PC vs. a console. Estimate what that space heater costs through winter. Or check whether upgrading to an ENERGY STAR fridge is worth it."
+    },
+    {
+      "type": "paragraph",
+      "text": "It's completely free. No account, no signup. Just open it and go."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Putting It All Together: A Sample Home Energy Audit"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's a realistic example: a family of four with a typical mix of appliances. All calculated at **$0.14/kWh**."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Appliance",
+        "Watts",
+        "Hrs/Day",
+        "Qty",
+        "kWh/Month",
+        "Cost/Month"
+      ],
+      "rows": [
+        [
+          "Refrigerator",
+          "210",
+          "24",
+          "1",
+          "151.20",
+          "$21.17"
+        ],
+        [
+          "LED Lights (10W eq.)",
+          "10",
+          "5",
+          "20",
+          "30.00",
+          "$4.20"
+        ],
+        [
+          "Gaming PC",
+          "500",
+          "6",
+          "1",
+          "90.00",
+          "$12.60"
+        ],
+        [
+          "Laptop",
+          "60",
+          "4",
+          "2",
+          "14.40",
+          "$2.02"
+        ],
+        [
+          "LED TV (55-inch)",
+          "120",
+          "6",
+          "1",
+          "21.60",
+          "$3.02"
+        ],
+        [
+          "Cable Box + Router",
+          "40",
+          "24",
+          "1",
+          "28.80",
+          "$4.03"
+        ],
+        [
+          "Clothes Dryer",
+          "3,000",
+          "1",
+          "4 days/wk",
+          "51.43",
+          "$7.20"
+        ],
+        [
+          "Washing Machine",
+          "500",
+          "1",
+          "4 days/wk",
+          "8.57",
+          "$1.20"
+        ],
+        [
+          "Dishwasher",
+          "1,800",
+          "1",
+          "1",
+          "54.00",
+          "$7.56"
+        ],
+        [
+          "Central AC (3.5 ton)",
+          "3,500",
+          "8",
+          "1",
+          "840.00",
+          "$117.60"
+        ],
+        [
+          "EV Charger (Level 2)",
+          "7,000",
+          "4",
+          "1",
+          "840.00",
+          "$117.60"
+        ],
+        [
+          "Ceiling Fan",
+          "50",
+          "8",
+          "3",
+          "36.00",
+          "$5.04"
+        ],
+        [
+          "Space Heater",
+          "1,500",
+          "4",
+          "1",
+          "180.00",
+          "$25.20"
+        ],
+        [
+          "Total",
+          "",
+          "",
+          "",
+          "2,345.00",
+          "$328.44"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "This household's major appliances add up to about **$328 per month** before smaller stuff. The central AC and EV charger alone account for over **70%** of that total."
+    },
+    {
+      "type": "paragraph",
+      "text": "Switch the EV to a TOU rate ($0.08/kWh off-peak) and it drops from $117.60 to $67.20 — saving **$50.40/month**. Clean the AC filters and bump the thermostat 3 degrees in summer? Another **$12–$18/month** saved."
+    },
+    {
+      "type": "paragraph",
+      "text": "Run your own numbers and see exactly where your money's going. You might be surprised what you find."
+    },
+    {
+      "type": "cta",
+      "heading": "See What Your Appliances Actually Cost",
+      "body": "Our free calculator shows exact running costs for any appliance. Enter the wattage, usage, and your rate — get instant answers.",
+      "buttonLabel": "Open the Free Calculator",
+      "path": "/engineering/electricity-cost-calculator/"
+    }
+  ],
+  "keywords": [
+    "electricity cost calculator",
+    "appliance energy calculator",
+    "kWh calculator",
+    "power cost calculator",
+    "energy bill calculator",
+    "appliance wattage",
+    "electricity rate calculator",
+    "how to calculate electricity cost",
+    "kilowatt hour cost",
+    "energy saving tips",
+    "appliance running cost",
+    "electric bill breakdown",
+    "vampire power",
+    "time of use billing",
+    "standby power consumption"
+  ]
+}

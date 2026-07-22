@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Finding Your Rate"
+    },
+    {
+      "type": "paragraph",
+      "text": "The 4% rule suggests withdrawing 4% of your initial corpus yearly. For a ₹1 crore corpus: ₹40,000/year or ₹3,333/month. For Indian investors, 5% is often used (₹4,167/month per crore). The SWP calculator lets you test different rates to see how long your corpus lasts."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Stress-Testing Your Plan"
+    },
+    {
+      "type": "paragraph",
+      "text": "Use the SWP calculator to test different scenarios: (1) Expected scenario — 8% returns, (2) Conservative — 6% returns, (3) Bear market — first 5 years with 3% returns. If your corpus survives the bear market scenario, your withdrawal rate is likely safe."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SWP Calculator",
+      "body": "Plan your retirement withdrawals with our free SWP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/swp-calculator/"
+    }
+  ],
+  "keywords": [
+    "swp withdrawal rate",
+    "safe withdrawal rate",
+    "swp 4% rule",
+    "how much swp",
+    "sustainable withdrawal",
+    "corpus withdrawal percentage"
+  ]
+}

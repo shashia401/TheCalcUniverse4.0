@@ -1,0 +1,86 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Can You Really Improve GFR?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The answer depends on why your GFR is low. If you have acute kidney injury from dehydration, medication, or infection — yes, treating the cause can restore normal function. If you have chronic kidney disease from hypertension, diabetes, or other long-term conditions — complete recovery is unlikely, but you can significantly slow the rate of decline. The goal shifts from \"improving GFR\" to \"preserving the kidney function you have.\" Studies show that aggressive risk factor management can reduce CKD progression by 30-50%."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Strategies That Work"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Blood pressure control: Keeping BP under 130/80 is the single most effective intervention. ACE inhibitors and ARBs are the preferred medications — they lower blood pressure AND reduce pressure inside the kidney filters.",
+        "Diabetes management: Each 1% reduction in HbA1c reduces kidney disease progression risk by about 30%. Tight glucose control is especially important in early CKD.",
+        "Dietary changes: Reducing sodium to under 2g/day, moderating protein intake to 0.6-0.8g/kg/day (for non-dialysis patients), and limiting phosphorus from processed foods.",
+        "Avoiding nephrotoxic medications: NSAIDs (ibuprofen, naproxen, diclofenac) should be avoided. Acetaminophen is safe for pain relief. Some antibiotics and proton pump inhibitors also need dose adjustment."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Does NOT Work"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Detox teas and kidney cleanses: No scientific evidence supports any detox product for improving kidney function.",
+        "Drinking excessive water: While hydration helps, drinking gallons of water will not flush creatinine out faster. It can actually be dangerous in advanced CKD.",
+        "Herbal supplements: Many herbal supplements (including some sold for kidney health) can actually damage kidneys. St. John wort, creatine, and some Chinese herbs are nephrotoxic.",
+        "Very low protein diets: Severely restricting protein can cause malnutrition, which worsens outcomes. Moderate protein restriction under medical guidance is appropriate."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Most people with CKD can slow their progression to the point of never needing dialysis. The key is consistent management: daily blood pressure monitoring, quarterly lab checks, and annual nephrologist visits."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How long does it take to see GFR improvement?"
+    },
+    {
+      "type": "paragraph",
+      "text": "With acute kidney injury, improvement can be seen in days to weeks. With chronic management, the goal is to see the rate of decline slow from 5+ mL/min/year to under 2 mL/min/year. This can take 6-12 months of consistent management to demonstrate."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Does exercise improve GFR?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Regular moderate exercise improves blood pressure control, insulin sensitivity, and cardiovascular health — all of which support kidney health. However, very intense exercise temporarily raises creatinine. Moderate aerobic exercise 30 minutes, 5 days per week is recommended."
+    },
+    {
+      "type": "cta",
+      "heading": "Track Your GFR",
+      "body": "Use our free GFR calculator to monitor your kidney function over time.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/gfr-calculator/"
+    }
+  ],
+  "keywords": [
+    "how to improve gfr",
+    "improve kidney function",
+    "increase gfr naturally",
+    "slow ckd progression",
+    "kidney health tips",
+    "lower creatinine naturally"
+  ]
+}

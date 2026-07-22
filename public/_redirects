@@ -1,0 +1,27 @@
+# Cloudflare Pages redirects — most-specific rules first, catch-all splat last.
+# Verified against v2's sitemap (793 URLs): every /en/{category}/{id}/ maps 1:1
+# to /{category}/{id}/ (345 exact pairs), and every /en/methodology/{category}/{id}/
+# slug matches a live calculator id (257 checked). Do not reorder past the splat.
+
+# Old sitemap location
+/sitemap.xml /sitemap-index.xml 301
+
+# De-duplicated calculators — removed the /math/ copies (identical content); the
+# /everyday/ URL is the canonical home. 301 so any existing link/index consolidates.
+/math/love-calculator/ /everyday/love-calculator/ 301
+/math/dice-roller/ /everyday/dice-roller/ 301
+
+# Methodology pages (257 indexed) — formula/source content now lives on the calculator page
+/en/methodology/:category/:id /:category/:id/ 301
+/en/methodology/:category/:id/ /:category/:id/ 301
+
+# Comparison pages (2 indexed) — nearest surviving content is the category listing
+/en/compare/:category/* /:category/ 301
+
+# Retired index-style pages
+/en/calculators / 301
+/en/calculators/ / 301
+
+# Everything else keeps its path, minus the /en/ prefix
+/en / 301
+/en/* /:splat 301

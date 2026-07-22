@@ -1,0 +1,97 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Time Zones Work"
+    },
+    {
+      "type": "paragraph",
+      "text": "The world is divided into 24 time zones, each roughly 15 degrees of longitude wide. UTC (Coordinated Universal Time) is the reference point. Each zone is UTC plus or minus a certain number of hours. For example, New York is UTC-5 (Eastern Standard Time) and London is UTC+0 (Greenwich Mean Time). The difference between them is 5 hours. When it is 12 PM in New York, it is 5 PM in London."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Daylight Saving Time Complications"
+    },
+    {
+      "type": "paragraph",
+      "text": "Daylight saving time (DST) adds complexity because not all regions observe it. The US, Canada, and most of Europe spring forward in March and fall back in November. But Arizona, Hawaii, and most of Asia and Africa do not observe DST. When the US is in DST (March-November), New York is UTC-4 instead of UTC-5. If you are scheduling a meeting between New York and London, the 5-hour difference becomes 4 hours during US DST and 5 hours outside DST."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Best Practices for Cross-Time Zone Scheduling"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Use UTC for reference: Convert all times to UTC before comparing. This eliminates the mental math of working across multiple offsets.",
+        "Avoid early Monday and late Friday: These are the most time-zone-sensitive slots. Aim for 9-11 AM ET / 2-4 PM GMT which works for most US-Europe meetings.",
+        "Use meeting polls with time zone detection: Tools like Calendly automatically detect the recipient timezone.",
+        "Specify the time zone in every invitation: \"3 PM ET\" is clearer than \"3 PM\" when participants span multiple zones.",
+        "Account for half-hour zones: India (UTC+5:30), Nepal (UTC+5:45), and Newfoundland (UTC-3:30) use 30 or 45 minute offsets."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the Time Zone Calculator"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Select your current time zone from the dropdown.",
+        "Select the target time zone you want to convert to.",
+        "Enter the time and date you want to convert.",
+        "View the converted time with DST adjustment applied automatically.",
+        "Use the world clock view to see current times across multiple zones at once."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "When sending meeting invitations across time zones, always double-check DST status. Our time zone calculator shows whether DST is active for each zone."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I add multiple time zones to my calendar?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Both Google Calendar and Outlook allow you to display multiple time zones simultaneously. In Google Calendar, go to Settings > General > Time zone. In Outlook, go to File > Options > Calendar > Time zones. This lets you see your home time zone alongside the target zone."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the best time for a US-India meeting?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The overlap between US Eastern Time and India Standard Time (UTC+5:30) is roughly 7-9 AM ET (4:30-6:30 PM IST). For US-Pacific and India, the window is 4-6 AM PT (4:30-6:30 PM IST). Morning US time works because it is evening in India."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Time Zone Calculator",
+      "body": "Convert times between any two time zones with automatic DST adjustment. No signup required.",
+      "buttonLabel": "Open Calculator",
+      "path": "/math/time-zone-calculator/"
+    }
+  ],
+  "keywords": [
+    "time zone calculator",
+    "time zone converter",
+    "meeting across time zones",
+    "world clock calculator",
+    "time difference calculator",
+    "daylight saving time"
+  ]
+}

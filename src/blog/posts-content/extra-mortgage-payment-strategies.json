@@ -1,0 +1,85 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Strategy Comparison at a Glance"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Strategy",
+        "Extra Cost/Month",
+        "Interest Saved*",
+        "Payoff Accelerated*"
+      ],
+      "rows": [
+        [
+          "Bi-weekly (split payment)",
+          "$0 (same total)",
+          "~$52,000",
+          "~4.5 years"
+        ],
+        [
+          "+$100/month extra",
+          "$100",
+          "~$60,000",
+          "~5 years"
+        ],
+        [
+          "+$200/month extra",
+          "$200",
+          "~$105,000",
+          "~9 years"
+        ],
+        [
+          "+$500/month extra",
+          "$500",
+          "~$190,000",
+          "~14 years"
+        ],
+        [
+          "Annual $5,000 lump sum",
+          "$417/mo equivalent",
+          "~$140,000",
+          "~11 years"
+        ],
+        [
+          "Single $10,000 lump sum",
+          "One-time",
+          "~$55,000",
+          "~2.5 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Based on $300,000 at 6.5% for 30 years. Your savings will vary based on your loan amount, rate, and remaining term. Use our calculator for personalized results."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which Strategy Is Right for You?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Bi-weekly payments are the easiest to implement — most lenders can set this up automatically, and since it is just splitting your existing payment, you do not need to find extra money in your budget. Monthly extra payments give you flexibility — you can change the amount whenever your financial situation changes. Lump sums work well if you receive irregular income like bonuses, commissions, or tax refunds."
+    },
+    {
+      "type": "cta",
+      "heading": "Compare Your Options",
+      "body": "Use our mortgage payoff calculator to model different extra payment scenarios and see which saves you the most.",
+      "buttonLabel": "Compare Strategies",
+      "path": "/finance/mortgage-payoff-calculator/"
+    }
+  ],
+  "keywords": [
+    "extra mortgage payment",
+    "biweekly mortgage payments",
+    "mortgage lump sum",
+    "pay extra on mortgage",
+    "mortgage principal payment",
+    "accelerated mortgage",
+    "mortgage prepayment"
+  ]
+}

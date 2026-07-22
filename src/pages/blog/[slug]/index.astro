@@ -1,0 +1,75 @@
+---
+// Blog post — content rendered to static HTML at build time.
+// (v2 fetched this with client-side JS; crawlers saw an empty shell. Never again.)
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogSections from '../../../components/blog/BlogSections.astro';
+import { blogPosts, loadPostContent, normalizeInternalPath } from '../../../lib/blog';
+import { buildBlogSchemas } from '../../../lib/jsonld';
+import { SITE_NAME } from '../../../config/constants';
+import type { BlogPost } from '../../../types/blog';
+
+export async function getStaticPaths() {
+  return blogPosts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props;
+const content = await loadPostContent(post.slug);
+if (!content) {
+  throw new Error(`Blog post "${post.slug}" has no content file — refusing to build an empty page.`);
+}
+
+const schemas = buildBlogSchemas({ ...post, keywords: content.keywords });
+const dateFmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<BaseLayout
+  title={post.metaTitle ?? `${post.title} | ${SITE_NAME}`}
+  description={post.metaDescription}
+  canonicalPath={`/blog/${post.slug}/`}
+  schemas={schemas}
+  ogType="article"
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <article class="max-w-[760px] mx-auto px-4 md:px-8 py-10">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-default)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <a href="/blog/" class="text-[var(--brand-default)] hover:underline">Blog</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>{post.title}</span>
+      </nav>
+
+      <header class="mb-8">
+        <p class="text-tiny uppercase tracking-wide text-[var(--surface-text-muted)] mb-2">
+          {post.category} · {post.readingMinutes} min read
+        </p>
+        <h1 class="text-2xl md:text-3xl font-bold text-[var(--surface-text)] mb-3">{post.title}</h1>
+        <p class="text-sm text-[var(--surface-text-muted)]">
+          By {post.author.name}{post.author.role ? `, ${post.author.role}` : ''} ·
+          <time datetime={post.publishedAt}>{dateFmt.format(new Date(post.publishedAt))}</time>
+          {post.updatedAt && (
+            <span> · Updated <time datetime={post.updatedAt}>{dateFmt.format(new Date(post.updatedAt))}</time></span>
+          )}
+        </p>
+      </header>
+
+      <BlogSections sections={content.sections} />
+
+      {post.relatedCalculatorPath && (
+        <aside class="mt-10 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-5">
+          <p class="text-sm text-[var(--surface-text-secondary)] mb-2">Put this into practice:</p>
+          <a
+            href={normalizeInternalPath(post.relatedCalculatorPath)}
+            class="font-semibold text-[var(--brand-default)] hover:underline"
+          >
+            {post.relatedCalculatorLabel ?? 'Try the calculator'} →
+          </a>
+        </aside>
+      )}
+    </article>
+  </main>
+</BaseLayout>

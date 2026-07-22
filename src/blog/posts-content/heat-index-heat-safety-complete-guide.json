@@ -1,0 +1,121 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is the Heat Index?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The heat index is how hot it feels when relative humidity is combined with air temperature. Also called the apparent temperature or feels-like temperature. When humidity is high, sweat does not evaporate as quickly, so your body struggles to cool itself. The heat index accounts for this. For example, when the air temperature is 90°F with 60% humidity, the heat index is 100°F — meaning it feels like 100°F even though the thermometer reads 90°F."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "NOAA Heat Index Chart"
+    },
+    {
+      "type": "paragraph",
+      "text": "The National Oceanic and Atmospheric Administration publishes a heat index chart that shows the apparent temperature at different combinations of air temperature and relative humidity. At 80°F with 40% humidity, the heat index is 80°F — no change. At 80°F with 90% humidity, it is 86°F. At 100°F with 40% humidity, it is 109°F. At 100°F with 60% humidity, it is a dangerous 132°F. The chart turns from yellow (caution) to orange (extreme caution) to red (danger) to purple (extreme danger)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Danger Categories"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Heat Index Range",
+        "Health Risk"
+      ],
+      "rows": [
+        [
+          "Caution",
+          "80-90°F",
+          "Fatigue possible with prolonged exposure"
+        ],
+        [
+          "Extreme caution",
+          "90-103°F",
+          "Heat cramps and heat exhaustion possible"
+        ],
+        [
+          "Danger",
+          "103-124°F",
+          "Heat cramps/heat exhaustion likely. Heat stroke possible."
+        ],
+        [
+          "Extreme danger",
+          "126°F+",
+          "Heat stroke highly likely with continued exposure"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the Heat Index Is Calculated"
+    },
+    {
+      "type": "paragraph",
+      "text": "The heat index uses the Rothfusz regression equation, which NOAA developed in 1990. The full equation is complex with over 26 terms involving temperature and humidity squared and multiplied together. A simplified version works for typical conditions: HI = c1 + c2T + c3R + c4TR + c5T² + c6R² + c7T²R + c8TR² + c9T²R², where T is temperature and R is relative humidity. For conditions below 80°F, adjustments are made because the heat index effect is minimal. Our calculator handles all of this math instantly."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Heat Safety Tips"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Stay hydrated: Drink water before you feel thirsty. During heavy activity in heat, drink 8 oz every 20 minutes.",
+        "Avoid peak sun: Schedule outdoor activities before 10 AM or after 4 PM when the sun is less intense.",
+        "Wear appropriate clothing: Light-colored, loose-fitting, breathable fabrics help your body regulate temperature.",
+        "Take breaks: In extreme heat, take 15-minute breaks in the shade or air conditioning every hour.",
+        "Know the warning signs: Headache, dizziness, nausea, confusion, hot dry skin — these signal heat stroke, a medical emergency."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the difference between heat index and real feel?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Heat index only considers temperature and humidity. Wind chill considers temperature and wind. Some weather services use a real feel or apparent temperature that combines both plus solar radiation. The heat index is a subset of what goes into a full feels-like calculation."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "At what heat index should I cancel outdoor activities?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Heat index above 90°F (extreme caution): Modify activity — take more breaks, watch for symptoms. Above 103°F (danger): Reschedule strenuous outdoor activities. Above 125°F (extreme danger): Cancel all outdoor activities. For athletes, many organizations use wet bulb globe temperature instead of heat index for practice decisions."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate the Heat Index",
+      "body": "Use our free heat index calculator to check conditions before heading outside.",
+      "buttonLabel": "Open Calculator",
+      "path": "/everyday/heat-index-calculator/"
+    }
+  ],
+  "keywords": [
+    "heat index calculator",
+    "heat index chart",
+    "heat index explained",
+    "feels like temperature",
+    "heat safety",
+    "noaa heat index",
+    "heat danger levels"
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "You see a sign that says '30% off, plus an extra 20% at the register. ' Your brain adds them up and thinks 50% off. But the register thinks differently — and the gap costs you real money."
+    },
+    {
+      "type": "paragraph",
+      "text": "here's how discount math actually works."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why 20% Off + 10% Off doesn't Equal 30% Off"
+    },
+    {
+      "type": "paragraph",
+      "text": "Percentages multiply, they don't add. When a store applies two discounts sequentially, the second discount is taken from the already-reduced price, not the original. On a $100 item: **20% off drops it to $80."
+    },
+    {
+      "type": "paragraph",
+      "text": "Then 10% off $80 saves $8 more, bringing you to $72**. that's a 28% effective discount, not 30%. This is called the 'stacking gap,' and it's how retailers make 'up to 50% off' claims mathematically true but practically misleading."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Real Stacking Scenarios"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Advertised Deal",
+        "What It Looks Like",
+        "Actual Math",
+        "Effective Discount"
+      ],
+      "rows": [
+        [
+          "30% + 20%",
+          "50% off",
+          "$100 x 0.70 x 0.80",
+          "44.0% off"
+        ],
+        [
+          "25% + 15%",
+          "40% off",
+          "$100 x 0.75 x 0.85",
+          "36.3% off"
+        ],
+        [
+          "40% + 10%",
+          "50% off",
+          "$100 x 0.60 x 0.90",
+          "46.0% off"
+        ],
+        [
+          "50% + 25%",
+          "75% off",
+          "$100 x 0.50 x 0.75",
+          "62.5% off"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Does the Order of Discounts Matter?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For pure percentage discounts, no — multiplication is commutative. **20% off then 10% off is the same as 10% off then 20% off**. Both give you 28% off."
+    },
+    {
+      "type": "paragraph",
+      "text": "But if a store combines a percentage discount with a fixed-dollar coupon, order matters enormously. A '$10 off' coupon applied before a 20% discount saves you more than applying it after. Stores know this and set the order in their POS to minimize their loss on each transaction."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Sales Tax Interacts With Discounts"
+    },
+    {
+      "type": "paragraph",
+      "text": "Sales tax is always applied after all discounts in every US state. Tax is a percentage of the price you actually pay, not the sticker price. So a $100 item with 25% off and 8% sales tax: you pay **$75 + ($75 x 0."
+    },
+    {
+      "type": "paragraph",
+      "text": "08) = $81 total**. The discount actually reduces your tax bill — another reason to run the full numbers before you buy. The percent-off calculator accounts for this automatically."
+    },
+    {
+      "type": "cta",
+      "heading": "Stop Overpaying on Sales",
+      "body": "Use TheCalcUniverse Percent Off Calculator to see the true final price after stacked discounts and sales tax. No more getting fooled by misleading markdown math.",
+      "buttonLabel": "Try the Percent-Off Calculator",
+      "path": "/everyday/percent-off-calculator/"
+    }
+  ],
+  "keywords": [
+    "percent off calculator",
+    "discount calculator",
+    "stacked discount calculator",
+    "sale price calculator",
+    "percentage off calculator",
+    "final price calculator"
+  ]
+}

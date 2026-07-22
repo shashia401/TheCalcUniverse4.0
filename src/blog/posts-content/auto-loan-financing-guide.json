@@ -1,0 +1,94 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Your monthly car payment comes down to four things: the amount you finance, your interest rate, the loan term, and what you bring in cash and trade-in value. Get any of them wrong and you could overpay by thousands. Here's how each piece works so you can calculate your real payment before you step foot in a dealership."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Do Auto Loan Rates Work?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your APR includes the interest rate plus any lender fees, and it's determined largely by your credit score. Excellent credit (750+) gets you **5-7%**, while fair credit lands in the **12-15%** range. A **2%** rate difference on a $30,000 loan adds over $2,000 in interest over five years."
+    },
+    {
+      "type": "paragraph",
+      "text": "Check your score and get pre-approved from a credit union before you shop."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Does a Longer Loan Term Save You Money?"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Loan Term",
+        "Monthly Payment",
+        "Total Interest",
+        "Total Cost"
+      ],
+      "rows": [
+        [
+          "36 months",
+          "$925",
+          "$3,300",
+          "$33,300"
+        ],
+        [
+          "48 months",
+          "$718",
+          "$4,464",
+          "$34,464"
+        ],
+        [
+          "60 months",
+          "$593",
+          "$5,580",
+          "$35,580"
+        ],
+        [
+          "72 months",
+          "$511",
+          "$6,792",
+          "$36,792"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Longer terms drop your monthly payment but add thousands in total interest. A 72-month term saves **$414/month** over 36 months but costs **$3,492 more** in interest. That trade-off is worth understanding before you let the dealer stretch your term to hit a payment target."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Down Payment and Trade-In: Your Biggest Levers"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your down payment reduces the loan principal directly -- every **$1,000 down** saves about **$20/month** on a 5-year loan. Your trade-in works the same way if you've positive equity. If you owe more than it's worth, that negative equity gets rolled into your new loan, making your payment higher than you budgeted for."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Negative equity is when you owe more on your trade-in than it's worth. That difference gets added to your new loan principal. If your trade-in has $3,000 in negative equity on a $30,000 car, you're actually financing $33,000. Check your trade-in value before you walk into the dealership."
+    },
+    {
+      "type": "cta",
+      "heading": "Ready to calculate your real car payment?",
+      "body": "Use the Auto Loan Calculator to see your monthly payment with trade-in, sales tax, and all dealer fees included -- just like the dealership calculates it.",
+      "buttonLabel": "Calculate Your Payment",
+      "path": "/automotive/auto-loan-calculator/"
+    }
+  ],
+  "keywords": [
+    "auto loan calculator",
+    "car payment calculator",
+    "car loan calculator",
+    "trade in calculator",
+    "negative equity car loan",
+    "out the door price calculator"
+  ]
+}

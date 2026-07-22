@@ -1,0 +1,98 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is Mortgage Amortization?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Amortization is the process of spreading out a loan into fixed payments over time. Each payment has two components: interest (the cost of borrowing) and principal (paying down the loan balance). In a standard amortizing mortgage, your payment amount stays the same each month, but the split between interest and principal changes over time."
+    },
+    {
+      "type": "paragraph",
+      "text": "In the early years, most of your payment goes to interest. In the later years, most goes to principal. This gradual shift is called amortization. The schedule showing this breakdown month by month is an amortization schedule. Our mortgage amortization calculator generates this schedule for any loan — and shows how extra payments change the numbers."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Early Payments Are Mostly Interest"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Year",
+        "Payment",
+        "Interest",
+        "Principal",
+        "Remaining Balance"
+      ],
+      "rows": [
+        [
+          "Year 1",
+          "$18,996",
+          "$15,192 (80%)",
+          "$3,804 (20%)",
+          "$296,196"
+        ],
+        [
+          "Year 5",
+          "$18,996",
+          "$13,847 (73%)",
+          "$5,149 (27%)",
+          "$274,993"
+        ],
+        [
+          "Year 10",
+          "$18,996",
+          "$11,434 (60%)",
+          "$7,562 (40%)",
+          "$239,023"
+        ],
+        [
+          "Year 20",
+          "$18,996",
+          "$5,308 (28%)",
+          "$13,688 (72%)",
+          "$110,869"
+        ],
+        [
+          "Year 30",
+          "$18,996",
+          "$0",
+          "$18,996 (100%)",
+          "$0"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Based on a $300,000 mortgage at 6% for 30 years. Total interest paid over 30 years: $347,515."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Extra Payments Change Your Amortization"
+    },
+    {
+      "type": "paragraph",
+      "text": "An extra $200 per month on the same $300,000 mortgage at 6% saves approximately $88,000 in interest and shortens the loan by 8 years. The earlier you start making extra payments, the greater the impact because you are reducing the principal that future years of interest would be calculated on."
+    },
+    {
+      "type": "cta",
+      "heading": "See Your Full Amortization Schedule",
+      "body": "Use our free mortgage amortization calculator to see your complete payment breakdown and how extra payments save you money.",
+      "buttonLabel": "View Amortization",
+      "path": "/finance/mortgage-amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "mortgage amortization",
+    "loan amortization schedule",
+    "amortization explained",
+    "mortgage payment breakdown",
+    "principal vs interest mortgage",
+    "amortization table",
+    "how amortization works"
+  ]
+}

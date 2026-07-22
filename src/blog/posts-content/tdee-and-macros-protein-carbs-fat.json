@@ -1,0 +1,77 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Macro Priorities"
+    },
+    {
+      "type": "paragraph",
+      "text": "Protein is the most important macro to set first. Minimum 1.6g per kg of body weight for anyone active, up to 2.2g per kg for bodybuilders. Fat minimum is 0.5-0.8g per kg for hormone function. Remaining calories go to carbs. For a person eating 2,000 calories at 80kg: protein 160g (640 cal), fat 60g (540 cal), carbs 205g (820 cal)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Macro Splits by Goal"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Goal",
+        "Protein",
+        "Fat",
+        "Carbs"
+      ],
+      "rows": [
+        [
+          "Weight loss",
+          "2.0-2.4g/kg",
+          "0.5-0.8g/kg",
+          "Remaining"
+        ],
+        [
+          "Maintenance",
+          "1.6-2.0g/kg",
+          "0.5-1.0g/kg",
+          "Remaining"
+        ],
+        [
+          "Muscle gain",
+          "1.6-2.2g/kg",
+          "0.5-1.0g/kg",
+          "Remaining"
+        ],
+        [
+          "Bodybuilding prep",
+          "2.0-2.6g/kg",
+          "0.3-0.5g/kg",
+          "Remaining"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Protein Is Non-Negotiable"
+    },
+    {
+      "type": "paragraph",
+      "text": "Protein preserves muscle during weight loss and builds muscle during surplus. It also has the highest thermic effect (20-30%), meaning your body burns more calories digesting protein than carbs or fat. If you track only one macro, track protein. Our macro calculator uses your TDEE to set personalized protein, carb, and fat targets for your specific goals."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Macros",
+      "body": "Get personalized macro targets based on your TDEE and goals.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee macros",
+    "calculate macros from tdee",
+    "protein carbs fat ratio",
+    "macro split for weight loss",
+    "bodybuilding macros",
+    "tdee macro calculator"
+  ]
+}

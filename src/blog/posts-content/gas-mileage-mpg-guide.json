@@ -1,0 +1,107 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "You don't need a new car to save on fuel -- you just need to know your numbers. Tracking your fuel economy is the first step to cutting costs, and it's easier than you think. Here's how to measure MPG accurately and what to do with that information."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Do You Track MPG Accurately?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Fill your tank completely, reset your trip odometer, and drive at least 100 miles. Then fill up at the same pump and divide miles driven by gallons pumped. For the most reliable number, repeat this over several tanks and take the average."
+    },
+    {
+      "type": "paragraph",
+      "text": "Our gas mileage calculator handles both odometer readings and trip distance entry."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What's a Good MPG for Your Car?"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Vehicle Type",
+        "Combined MPG",
+        "Annual Fuel Cost (est.)"
+      ],
+      "rows": [
+        [
+          "Hybrid",
+          "45-55 MPG",
+          "$764 - $933"
+        ],
+        [
+          "Compact Sedan",
+          "30-35 MPG",
+          "$1,200 - $1,400"
+        ],
+        [
+          "Midsize Sedan",
+          "25-30 MPG",
+          "$1,400 - $1,680"
+        ],
+        [
+          "SUV",
+          "20-25 MPG",
+          "$1,680 - $2,100"
+        ],
+        [
+          "Truck",
+          "15-20 MPG",
+          "$2,100 - $2,800"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These annual costs assume **$3. 50/gallon** and **12,000 miles** per year. A hybrid saves about **$900/year** compared to a truck."
+    },
+    {
+      "type": "paragraph",
+      "text": "If you drive more, the savings gap widens even further."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Driving Habits That Actually Improve Fuel Economy"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Accelerate gently and maintain a steady speed -- hard acceleration burns up to **30% more fuel**",
+        "Use cruise control on highways to avoid speed fluctuations",
+        "Keep tires inflated to the recommended pressure -- under-inflated tires drop MPG by **0.2% per 1 PSI**",
+        "Remove excess weight from your trunk -- every **100 pounds** reduces MPG by about **1%**",
+        "Combine errands into one trip -- cold starts use more fuel than a warm engine"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Cost Per Mile: The Number That Matters"
+    },
+    {
+      "type": "cta",
+      "heading": "Ready to find your real MPG?",
+      "body": "Track your fuel economy and calculate your cost per mile with the Gas Mileage Calculator. It works with MPG, L/100km, and supports multiple currencies.",
+      "buttonLabel": "Calculate Your MPG",
+      "path": "/automotive/gas-mileage-calculator/"
+    }
+  ],
+  "keywords": [
+    "gas mileage calculator",
+    "MPG calculator",
+    "fuel economy calculator",
+    "L/100km",
+    "cost per mile",
+    "annual fuel cost",
+    "odometer fuel tracker",
+    "car fuel efficiency"
+  ]
+}

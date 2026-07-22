@@ -1,0 +1,74 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Most retirement advice throws around intimidating numbers. You'll hear you need **$1. 5 million** or **$2 million** to retire comfortably."
+    },
+    {
+      "type": "paragraph",
+      "text": "But the actual number depends entirely on one thing: how much you plan to spend."
+    },
+    {
+      "type": "paragraph",
+      "text": "The 4% Rule gives you a simple way to work backward from your spending to your target nest egg. No guesswork. Just math — and it might reveal you need less than you think."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is the 4% Rule and how does it work?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The 4% Rule comes from the landmark Trinity Study. It found that a balanced portfolio withdrawing 4% of its starting value annually (adjusted for inflation each year) historically lasted **30 years or more** without running out."
+    },
+    {
+      "type": "paragraph",
+      "text": "The math is simple: multiply your desired annual retirement income by 25. Want **$60,000** per year? You need **$1."
+    },
+    {
+      "type": "paragraph",
+      "text": "5 million**. Want **$40,000** per year? You need **$1 million**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Divide your target spending by 0. 04, and you get your number."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "The 4% withdrawal rate has survived every market cycle in modern US history, including the Great Depression, the 1970s stagflation, the 2008 financial crisis, and the 2022 bear market."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is your FIRE number?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The FIRE (Financial Independence, Retire Early) movement popularized this simple formula. Your FIRE number is **annual expenses × 25**. If you spend **$50,000** per year, your FIRE number is **$1."
+    },
+    {
+      "type": "paragraph",
+      "text": "25 million**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Variations include Lean FIRE (under **$40,000/year** spending), Fat FIRE (over **$75,000/year**), and Coast FIRE — where you've saved enough that your nest egg will reach your FIRE number by traditional retirement age without further contributions."
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Retirement Number Today",
+      "body": "Enter your age, current savings, monthly contributions, and target retirement age to see your projected nest egg. Our calculator uses the 4% Rule to show whether you're on track or need to adjust.",
+      "buttonLabel": "Try the Retirement Calculator",
+      "path": "/finance/retirement-calculator/"
+    }
+  ],
+  "keywords": [
+    "retirement calculator",
+    "retirement savings calculator",
+    "how much do i need to retire",
+    "retirement planning calculator",
+    "4% rule calculator",
+    "nest egg calculator"
+  ]
+}

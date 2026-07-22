@@ -1,0 +1,484 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Makes Canadian Mortgages Different?"
+    },
+    {
+      "type": "paragraph",
+      "text": "You're about to make the biggest financial decision of your life. And Canadian mortgages are nothing like American ones."
+    },
+    {
+      "type": "paragraph",
+      "text": "Semi-annual compounding. The B-20 stress test. CMHC premiums. Land transfer taxes. It's a lot — but you don't need to be a finance expert to understand it."
+    },
+    {
+      "type": "paragraph",
+      "text": "Let's walk through each piece with real numbers. Then you can run your own scenarios with our Canadian Mortgage Calculator."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Canadian Mortgages Are Different from US Mortgages"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the biggest difference: how interest compounds."
+    },
+    {
+      "type": "paragraph",
+      "text": "In the US, it's monthly. Your interest gets calculated every month and added to your principal. In Canada, it's semi-annual — twice a year. That's the law for fixed-rate mortgages."
+    },
+    {
+      "type": "paragraph",
+      "text": "Sounds like a technicality, right? It's not. It changes your monthly payment. That's why you can't just use any old calculator — you need a Canadian mortgage payment calculator built for the way Canadian rates actually work."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Here's the legal bit: Section 6 of Canada's Interest Act says any mortgage interest rate must be calculated as a nominal annual rate compounded semi-annually. Lenders have to use semi-annual compounding for your payments. If they use something different, they have to tell you the effective annual rate. That's the law. And it's why a Canadian mortgage payment calculator uses a totally different formula than a US one."
+    },
+    {
+      "type": "paragraph",
+      "text": "To turn a Canadian quoted rate into a monthly rate, you need two steps. First find the effective annual rate: EAR = (1 + quotedRate / 2)^2 — 1. Then get your monthly rate: monthlyRate = (1 + EAR)^(1/12) — 1."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's what that looks like with real numbers. At 4.5% quoted, the EAR is 4.5506% and your monthly rate is 0.3714%. If you just divided 4.5% by 12 like a US calculator would, you'd get 0.375% — and overestimate your payment."
+    },
+    {
+      "type": "paragraph",
+      "text": "On a $500,000 mortgage with a 25-year amortization, the correct Canadian payment is about **$2,767/month**. The US-style calculation gives you **$2,780**. Only $13 a month difference. But over 25 years? That's **$3,900**. And the gap gets bigger at higher rates."
+    },
+    {
+      "type": "paragraph",
+      "text": "There's another big difference: the structure. Canadian mortgages have a short term (1 to 5 years) attached to a long amortization (typically 25 years). So every few years, you renew at whatever rate the market offers. In the US, a 30-year fixed-rate mortgage locks in for life."
+    },
+    {
+      "type": "paragraph",
+      "text": "That means more risk when rates climb — but also a chance to benefit when they drop. Makes sense why you need a semi-annual compound mortgage calculator built for this system."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Does the Mortgage Stress Test Work?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's something that trips up a lot of buyers: the stress test."
+    },
+    {
+      "type": "paragraph",
+      "text": "Since 2018, OSFI (Canada's banking regulator) has required lenders to stress-test mortgages under Guideline B-20. The idea is simple — can you still afford your payments if rates go up? Even if you lock in a killer low rate today, you still have to qualify at a higher test rate."
+    },
+    {
+      "type": "paragraph",
+      "text": "As of 2026, the stress test rate is whichever is higher: your contract rate plus 2%, or **5.25%**. So even if you snag a 3.99% rate, you need to prove you can handle payments at **5.99%**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your income and debts are evaluated against that qualifying rate — not your actual payment rate. It can seriously shrink how much you can borrow. That's why the stress test is one of the most important inputs in any mortgage calculator Canada buyers should use."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Contract Rate",
+        "Stress Test Rate",
+        "Monthly Payment at Contract Rate (On $500K)",
+        "Monthly Payment at Stress Test Rate (On $500K)",
+        "Max Mortgage if Qualifying Payment Is $3,000"
+      ],
+      "rows": [
+        [
+          "3.99%",
+          "5.99%",
+          "$2,636",
+          "$3,206",
+          "$468,000"
+        ],
+        [
+          "4.49%",
+          "6.49%",
+          "$2,765",
+          "$3,355",
+          "$447,000"
+        ],
+        [
+          "4.99%",
+          "6.99%",
+          "$2,895",
+          "$3,506",
+          "$428,000"
+        ],
+        [
+          "5.49%",
+          "7.49%",
+          "$3,028",
+          "$3,658",
+          "$410,000"
+        ],
+        [
+          "5.99%",
+          "7.99%",
+          "$3,163",
+          "$3,812",
+          "$393,000"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "See what's happening here? The gap between your actual payment and your qualifying payment grows as rates rise."
+    },
+    {
+      "type": "paragraph",
+      "text": "Take someone with a 4.49% rate who can afford $3,000/month. The stress test limits them to **$447,000** — even though the actual payment on that amount is only **$2,765**. Without the stress test, they could borrow the full $500,000. That's **$53,000** less purchasing power."
+    },
+    {
+      "type": "paragraph",
+      "text": "At 5.99%? The stress test cuts borrowing power by over **$107,000**."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Here's the trap. You see a $600,000 house and figure you need a $540,000 mortgage. At 4.49%, the payment looks doable at **$2,986/month**. But at the stress test rate of 6.49%, the qualifying payment jumps to **$3,623**. If your income supports $3,500/month, you won't qualify — even though you could easily handle the actual payments. Always check your stress-test number before you start shopping."
+    },
+    {
+      "type": "paragraph",
+      "text": "The stress test doesn't go away after you buy. You face it at renewal too."
+    },
+    {
+      "type": "paragraph",
+      "text": "If your finances have changed or rates have jumped, you might need to switch lenders or extend your amortization just to pass. A good mortgage broker who knows B-20 rules can help you plan ahead. Our Canadian Mortgage Calculator lets you plug in the stress test rate to see exactly how it affects what you can borrow."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Does CMHC Insurance Cost?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Put less than 20% down? Canadian law says you need mortgage default insurance. Quick reality check: this insurance protects the lender, not you."
+    },
+    {
+      "type": "paragraph",
+      "text": "The biggest provider is CMHC (Canada Mortgage and Housing Corporation). But private insurers like Sagen and Canada Guaranty offer the same thing with the same rules. A good CMHC calculator handles all of them."
+    },
+    {
+      "type": "paragraph",
+      "text": "The premium is a percentage of your loan, and it gets added straight to your mortgage principal. That means you'll pay interest on the insurance itself for the life of the mortgage."
+    },
+    {
+      "type": "paragraph",
+      "text": "The smaller your down payment, the higher the premium. Here are the 2026 rates:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Down Payment %",
+        "CMHC Premium Rate (% of Loan)",
+        "Example Home Price",
+        "Loan Amount (Before Premium)",
+        "CMHC Premium Added",
+        "Total Insured Principal"
+      ],
+      "rows": [
+        [
+          "5% to 9.99%",
+          "4.00%",
+          "$500,000",
+          "$475,000",
+          "$19,000",
+          "$494,000"
+        ],
+        [
+          "10% to 14.99%",
+          "3.10%",
+          "$500,000",
+          "$450,000",
+          "$13,950",
+          "$463,950"
+        ],
+        [
+          "15% to 19.99%",
+          "2.80%",
+          "$500,000",
+          "$425,000",
+          "$11,900",
+          "$436,900"
+        ],
+        [
+          "20%+",
+          "0% (Not required)",
+          "$500,000",
+          "$400,000",
+          "$0",
+          "$400,000"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Let's look at a real example. A $500,000 home with 5% down ($25,000). You're financing $475,000. The 4% CMHC premium adds **$19,000** to your mortgage, so your total principal becomes **$494,000**."
+    },
+    {
+      "type": "paragraph",
+      "text": "At 4.5% over 25 years, your payment goes from $2,628 to **$2,733** — an extra **$105/month** that's all interest on the insurance."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the kicker: over 25 years, that $19,000 premium ends up costing you roughly **$31,500** once you account for the interest on it. A good CMHC calculator will show you both numbers."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "CMHC insurance isn't all bad. With just 5% down, you can buy a home years earlier than waiting to save 20%. And home prices might rise faster than your savings anyway. But explore alternatives first: a gifted down payment from family, the First-Time Home Buyer Incentive, or a co-signer to help you hit that 20% mark. One nice bonus: CMHC insurance is sometimes portable. If you move, you might transfer your insured mortgage without paying a new premium."
+    },
+    {
+      "type": "paragraph",
+      "text": "One more thing: if you put under 20% down, you're capped at a **25-year amortization**. The government tightened this rule to cool the market and help you build equity faster."
+    },
+    {
+      "type": "paragraph",
+      "text": "Shorter amortization means higher payments but way less interest. On a $500,000 loan at 4.5%, stretching from 25 to 30 years drops your payment by about **$268/month** — but adds roughly **$96,000** in total interest."
+    },
+    {
+      "type": "paragraph",
+      "text": "So there's a real trade-off between getting in sooner with a lower down payment and minimizing long-term cost. Use a Canadian mortgage calculator to compare both scenarios side by side."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Do Accelerated Bi-Weekly Payments Really Save Money?"
+    },
+    {
+      "type": "paragraph",
+      "text": "This might be the most powerful tool in the Canadian mortgage toolkit: accelerated bi-weekly payments."
+    },
+    {
+      "type": "paragraph",
+      "text": "The idea is simple. Instead of 12 monthly payments, you pay every two weeks — and each payment is half your monthly amount. Since there are 52 weeks in a year, you make 26 half-payments. That's the equivalent of 13 full payments a year instead of 12."
+    },
+    {
+      "type": "paragraph",
+      "text": "That one extra payment? It goes straight to your principal."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's how the numbers stack up on a $500,000 mortgage at 5.25% over 25 years:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Payment Schedule",
+        "Payment Amount",
+        "Payments Per Year",
+        "Annual Total",
+        "Total Interest Paid",
+        "Years to Pay Off"
+      ],
+      "rows": [
+        [
+          "Monthly",
+          "$2,981",
+          "12",
+          "$35,772",
+          "$394,140",
+          "25 years"
+        ],
+        [
+          "Semi-Monthly (24/yr)",
+          "$1,491",
+          "24",
+          "$35,784",
+          "$394,060",
+          "24 years 11 months"
+        ],
+        [
+          "Bi-Weekly (26/yr)",
+          "$1,376",
+          "26",
+          "$35,776",
+          "$394,100",
+          "24 years 11 months"
+        ],
+        [
+          "Accelerated Bi-Weekly",
+          "$1,491",
+          "26",
+          "$38,766",
+          "$345,860",
+          "21 years 2 months"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "See the difference between regular bi-weekly and accelerated? Regular bi-weekly splits your monthly payment by 2.333, giving you a smaller payment of **$1,376**. Your annual total stays roughly the same as monthly."
+    },
+    {
+      "type": "paragraph",
+      "text": "Accelerated takes exactly half your monthly payment (**$1,491**) and charges it every two weeks. Same per-payment as semi-monthly, but you make 26 payments instead of 24. That extra **$2,994** in principal each year adds up fast."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "The numbers are hard to ignore. On a $500,000 mortgage at 5.25%, switching to accelerated bi-weekly saves you about **$48,280** in interest and cuts your amortization from 25 years to just over **21 years**. That's nearly 4 years of payments gone. On a $700,000 mortgage? Savings exceed **$67,000** with more than 4 years shaved off. Most Canadian lenders offer this as a free option at origination. No refinancing, no fees. Just ask. An accelerated bi-weekly mortgage calculator can show you exactly how much you'd save at your specific rate and loan amount."
+    },
+    {
+      "type": "paragraph",
+      "text": "This strategy works best with a steady income. If you get paid every two weeks, the timing is perfect — payment comes out right after payday."
+    },
+    {
+      "type": "paragraph",
+      "text": "Self-employed or variable income? You might prefer lump-sum prepayments instead. Many Canadian mortgages let you prepay **10% to 20%** of the original principal each year without penalty."
+    },
+    {
+      "type": "paragraph",
+      "text": "Combine accelerated bi-weekly with annual lump-sum payments, and you could cut your amortization in half. That's six figures in interest savings."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Much Is Land Transfer Tax?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Land Transfer Tax (LTT) is a one-time tax you pay when you buy a property in Canada. It's a percentage of the purchase price, and it's due at closing."
+    },
+    {
+      "type": "paragraph",
+      "text": "The rate depends on your province. Alberta, Saskatchewan, and rural Nova Scotia? Zero LTT. Ontario and BC? They've got tiers that can add thousands."
+    },
+    {
+      "type": "paragraph",
+      "text": "And if you're buying in Toronto? There's a municipal LTT on top of the provincial one. It's one of the most expensive places in Canada to close a deal."
+    },
+    {
+      "type": "paragraph",
+      "text": "Let's use Ontario as an example. It has one of the highest LTT rates. Here's how it breaks down on a $500,000 home:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Property Value Bracket",
+        "Rate",
+        "Tax on $500K Home",
+        "Running Total"
+      ],
+      "rows": [
+        [
+          "First $55,000",
+          "0.5%",
+          "$275",
+          "$275"
+        ],
+        [
+          "$55,001 to $250,000",
+          "1.0%",
+          "$1,950",
+          "$2,225"
+        ],
+        [
+          "$250,001 to $400,000",
+          "1.5%",
+          "$2,250",
+          "$4,475"
+        ],
+        [
+          "$400,001 to $500,000",
+          "2.0%",
+          "$2,000",
+          "$6,475"
+        ],
+        [
+          "Total Ontario LTT",
+          "",
+          "$6,475",
+          "$6,475"
+        ],
+        [
+          "Toronto Municipal LTT (if applicable)",
+          "",
+          "$3,975",
+          "$10,450"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "So on a $500,000 home in Toronto, you're looking at **$6,475** provincial LTT plus **$3,975** municipal LTT. That's **$10,450** total. And you have to pay it out of pocket — it can't go into your mortgage."
+    },
+    {
+      "type": "paragraph",
+      "text": "A $1 million home in Toronto? The total jumps to **$32,950**."
+    },
+    {
+      "type": "paragraph",
+      "text": "BC's Property Transfer Tax works similarly: 1% on the first $200,000, 2% on the rest. And Vancouver buyers face additional empty homes and speculation taxes on top."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "First-time buyer? Good news. Ontario offers a rebate of up to **$4,000** on provincial LTT, and Toronto adds up to **$4,475** on the municipal portion. Combined, that's **$8,475** off your bill. BC has a similar exemption on homes up to $500,000, with partial exemptions up to $525,000. Always check your province's rebate programs. They can free up serious cash for renovations or your emergency fund."
+    },
+    {
+      "type": "paragraph",
+      "text": "Since LTT can't go into your mortgage, you need cash at closing. And it's not just LTT — budget for legal fees (**$1,000 to $2,500**), home inspection (**$400 to $800**), appraisal (**$300 to $500**), title insurance (**$200 to $400**), and GST/HST on new builds."
+    },
+    {
+      "type": "paragraph",
+      "text": "Good rule of thumb: set aside **1.5% to 4%** of the purchase price for all closing costs, depending on your province and whether you're a first-time buyer."
+    },
+    {
+      "type": "paragraph",
+      "text": "Run your numbers through a mortgage calculator Canada buyers trust — one that accounts for the full cost of buying."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Your Canadian Mortgage Toolkit"
+    },
+    {
+      "type": "paragraph",
+      "text": "Canadian mortgages are their own beast. Semi-annual compounding. The B-20 stress test. CMHC insurance tiers. Accelerated payment options. Land transfer taxes."
+    },
+    {
+      "type": "paragraph",
+      "text": "Each one affects how much you can borrow, what you'll pay each month, and what the mortgage actually costs you over its life."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the formula that ties it all together, adjusted for Canadian semi-annual compounding:"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "M = P * r(1+r)^n / ((1+r)^n — 1), where monthly_rate = (1 + annualRate/2)^(2/12) — 1. That semi-annual adjustment is required by Section 6 of Canada's Interest Act. It's the exact formula our Canadian Mortgage Calculator uses. A generic calculator? It'll give you wrong numbers."
+    },
+    {
+      "type": "paragraph",
+      "text": "Our Canadian Mortgage Calculator puts all of this in one place. Enter your home price, down payment, rate, amortization, and payment frequency — it handles the rest."
+    },
+    {
+      "type": "paragraph",
+      "text": "It applies the semi-annual compounding formula automatically. Shows you CMHC premium impacts. Models accelerated bi-weekly payments. And lets you apply the stress test to find your real qualifying rate."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Free Canadian Mortgage Calculator",
+      "body": "See your monthly payments, compare accelerated bi-weekly vs. monthly, check how CMHC premiums affect your principal, run the stress test, and factor in land transfer tax — all in one tool built for the Canadian market. No signup needed.",
+      "buttonLabel": "Open the Canadian Mortgage Calculator",
+      "path": "/finance/canadian-mortgage-calculator/"
+    }
+  ],
+  "keywords": [
+    "canadian mortgage calculator",
+    "mortgage calculator canada",
+    "cmhc calculator",
+    "accelerated bi-weekly mortgage",
+    "semi annual compound mortgage",
+    "canadian mortgage payment calculator"
+  ]
+}

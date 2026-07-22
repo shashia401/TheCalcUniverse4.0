@@ -1,0 +1,122 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why There Are Multiple GFR Formulas"
+    },
+    {
+      "type": "paragraph",
+      "text": "Different GFR formulas were developed in different eras using different patient populations. The MDRD equation was developed in 1999 using data from CKD patients, which means it systematically underestimates GFR in healthy people (gives falsely low readings above 60). The CKD-EPI equation (2009, updated 2021) was developed using a broader population including healthy individuals, making it more accurate across the full range of kidney function."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Formula Comparison"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Feature",
+        "MDRD",
+        "CKD-EPI 2009",
+        "CKD-EPI 2021",
+        "Cockcroft-Gault"
+      ],
+      "rows": [
+        [
+          "Year",
+          "1999",
+          "2009",
+          "2021",
+          "1976"
+        ],
+        [
+          "Population",
+          "CKD patients",
+          "General + CKD",
+          "General + CKD",
+          "Hospitalized men"
+        ],
+        [
+          "Race coefficient",
+          "Yes",
+          "Yes",
+          "No",
+          "No"
+        ],
+        [
+          "Accuracy at GFR >60",
+          "Poor (underestimates)",
+          "Good",
+          "Good",
+          "Fair"
+        ],
+        [
+          "Clinical standard",
+          "Historical",
+          "Replaced by 2021",
+          "Current gold standard",
+          "Drug dosing only"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the Race-Free Update Matters"
+    },
+    {
+      "type": "paragraph",
+      "text": "The MDRD and original CKD-EPI equations included a coefficient for Black patients that multiplied eGFR by 1.21. This was based on the observation that Black individuals on average have higher muscle mass (and therefore higher creatinine), not a racial difference in kidney function. However, studies showed this systematically overestimated GFR in Black patients, leading to delayed CKD diagnosis, lower transplant referral rates, and worse outcomes. The 2021 equation removed race entirely, treating everyone equally regardless of ethnicity. Our GFR calculator exclusively uses the CKD-EPI 2021 race-free equation."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When Cockcroft-Gault Is Still Used"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Cockcroft-Gault equation (developed in 1976) is still used for medication dosing, especially for chemotherapy drugs and certain antibiotics. It estimates creatinine clearance rather than GFR, and it uses actual body weight rather than standardized body surface area. Always use CKD-EPI 2021 for CKD staging and Cockcroft-Gault for drug dosing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Which formula should my lab use?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The NKF and ASN recommend CKD-EPI 2021 as the standard for all clinical labs in the US. Most labs have switched. If your lab still reports MDRD, ask them to switch to CKD-EPI 2021 for more accurate results, especially if your eGFR is above 60."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I convert MDRD to CKD-EPI?"
+    },
+    {
+      "type": "paragraph",
+      "text": "There is no simple conversion formula because the equations differ in structure. The best approach is to use a calculator that supports CKD-EPI 2021 directly and input your creatinine, age, and sex from scratch. Our GFR calculator uses CKD-EPI 2021 and gives you the most current, accurate result."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the GFR Calculator",
+      "body": "Uses the CKD-EPI 2021 race-free equation — the current clinical gold standard.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/gfr-calculator/"
+    }
+  ],
+  "keywords": [
+    "ckd-epi vs mdrd",
+    "gfr formula comparison",
+    "mdrd equation",
+    "ckd-epi 2021",
+    "cockcroft-gault",
+    "egfr formula accuracy",
+    "kidney function equation"
+  ]
+}

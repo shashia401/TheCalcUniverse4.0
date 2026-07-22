@@ -1,0 +1,100 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Critical Difference"
+    },
+    {
+      "type": "paragraph",
+      "text": "Heat exhaustion is your body overheating and struggling to cool itself. Heat stroke is your body cooling system failing entirely. With heat exhaustion, the person sweats heavily and feels sick. With heat stroke, sweating stops and body temperature rockets to 104°F+. Heat stroke is a medical emergency — it can cause organ damage and death within minutes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Symptoms Comparison"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Symptom",
+        "Heat Exhaustion",
+        "Heat Stroke"
+      ],
+      "rows": [
+        [
+          "Skin",
+          "Heavy sweating, cool/clammy",
+          "Hot, red, dry (no sweating)"
+        ],
+        [
+          "Temperature",
+          "Elevated (up to 104°F)",
+          "Very high (104°F+)"
+        ],
+        [
+          "Mental state",
+          "Dizzy, weak, anxious",
+          "Confusion, unconsciousness, seizures"
+        ],
+        [
+          "Nausea",
+          "Possible",
+          "Common"
+        ],
+        [
+          "Pulse",
+          "Fast and weak",
+          "Fast and strong"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "First Aid for Each"
+    },
+    {
+      "type": "paragraph",
+      "text": "For heat exhaustion: move to shade or AC, remove tight clothing, apply cool compresses, sip water slowly. Recovery usually within 30-60 minutes. For heat stroke: CALL 911 IMMEDIATELY. While waiting, move to shade, remove clothing, apply ice packs to armpits/groin/neck, fan the person. Do NOT give fluids if they are unconscious or confused. Heat stroke is a life-threatening emergency."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How quickly can heat exhaustion turn into heat stroke?"
+    },
+    {
+      "type": "paragraph",
+      "text": "It can happen in as little as 10-15 minutes in extreme conditions. Do not wait to see if symptoms improve — if someone with heat exhaustion worsens or stops sweating, treat it as a potential heat stroke emergency."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can you get heat stroke indoors?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes. Without air conditioning, indoor temperatures can reach dangerous levels during heat waves. Elderly people in homes without AC are among the highest risk groups for heat stroke."
+    },
+    {
+      "type": "cta",
+      "heading": "Check Today Heat Index",
+      "body": "Know the heat index before going outside. Use our free calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/everyday/heat-index-calculator/"
+    }
+  ],
+  "keywords": [
+    "heat stroke vs heat exhaustion",
+    "heat stroke symptoms",
+    "heat exhaustion",
+    "heat illness",
+    "heat emergency first aid",
+    "heat stroke treatment"
+  ]
+}

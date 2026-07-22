@@ -13,7 +13,6 @@ import { SITE_NAME, BASE_URL } from '../config/constants';
 
 const categories = getCategories().filter((cat) => cat.count > 0);
 const total = calculatorRegistry.length;
-const reviewed = calculatorRegistry.filter((e) => e.reviewedBy).length;
 
 // Per-category accent (ui-ux-pro-max "Vibrant & block-based" style — visual
 // scannability). Full static class strings so Tailwind's JIT detects them.
@@ -37,7 +36,7 @@ const accentFor = (slug: string) =>
 const trustPoints = [
   { Icon: FlaskConical, title: 'Tested, not guessed', body: '7,173 automated tests. Deterministic math — never a hallucinated number.', accent: 'text-accent-emerald-600', ring: 'bg-accent-emerald-500/12' },
   { Icon: FileText, title: 'Shows the work', body: 'Every formula, worked example, and source is on the page — not a black box.', accent: 'text-accent-sky-600', ring: 'bg-accent-sky-500/12' },
-  { Icon: ShieldCheck, title: 'Expert-reviewed', body: `${reviewed} calculators checked by named domain experts, with the date shown.`, accent: 'text-accent-violet-600', ring: 'bg-accent-violet-500/12' },
+  { Icon: ShieldCheck, title: 'Sourced & checkable', body: 'Where a formula has an authoritative source, it’s cited on the page — so you can verify it yourself.', accent: 'text-accent-violet-600', ring: 'bg-accent-violet-500/12' },
   { Icon: Lock, title: 'Private by default', body: 'Runs in your browser. Your inputs never leave your device. No account.', accent: 'text-accent-amber-600', ring: 'bg-accent-amber-500/15' },
 ];
 
@@ -67,7 +66,7 @@ const latestPosts = [...blogPosts]
 
 const faqs = [
   { q: 'Are the calculators free?', a: `Yes — all ${total} of them, with no account, no sign-up, and no paywall.` },
-  { q: 'Can I trust the results?', a: 'Every formula is a tested program, not a language-model guess — backed by 7,173 automated tests, with the formula and source shown on each page, and many reviewed by named domain experts. The math is deterministic: the same inputs always give the same answer.' },
+  { q: 'Can I trust the results?', a: 'Every formula is a tested program, not a language-model guess — backed by 7,173 automated tests, with the formula and its source shown on each page. The math is deterministic: the same inputs always give the same answer. See how we build and verify calculators on our methodology page.' },
   { q: 'Is my data private?', a: 'Completely. Every calculation runs inside your browser — your numbers are never sent to a server, and nothing is stored about you.' },
   { q: 'Do they work on mobile?', a: 'Yes. Every calculator is fully responsive and loads fast, because pages are static and ship almost no JavaScript.' },
 ];
@@ -152,8 +151,8 @@ const schemas = [
                 <dd class="sr-only">automated tests</dd>
               </div>
               <div>
-                <dt class="text-xs text-slate-400">expert-reviewed</dt>
-                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">{reviewed}</dd>
+                <dt class="text-xs text-slate-400">categories</dt>
+                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">{categories.length}</dd>
               </div>
               <div>
                 <dt class="text-xs text-slate-400">in-depth guides</dt>

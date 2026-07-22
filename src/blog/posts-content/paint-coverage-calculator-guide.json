@@ -1,0 +1,94 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "One gallon of paint covers about **350 square feet** per coat. That sounds simple until you factor in doors, windows, multiple coats, and waste. You don’t want to run out mid-roller, so here’s the exact method to calculate how much paint you need for any room."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Much Paint Do You Need for One Room?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Calculate your total wall area (perimeter times ceiling height), subtract doors (**21 sq ft each**) and windows (**15 sq ft each**), multiply by the number of coats, then divide by **350**. Add **10%** for waste from spills and touch-ups. A standard **12x14 foot** bedroom with **8-foot ceilings**, two doors, and three windows has about **390 sq ft** of paintable wall space."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Paint Coverage by Room Size"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Room Size",
+        "Paintable Area (2 coats)",
+        "Gallons Needed",
+        "Buy"
+      ],
+      "rows": [
+        [
+          "10x10 bedroom",
+          "~360 sq ft",
+          "2.3 gallons",
+          "1 gal + 2 qt"
+        ],
+        [
+          "12x14 bedroom",
+          "~440 sq ft",
+          "2.8 gallons",
+          "3 gallons"
+        ],
+        [
+          "14x18 living room",
+          "~550 sq ft",
+          "3.5 gallons",
+          "4 gallons"
+        ],
+        [
+          "20x20 master",
+          "~720 sq ft",
+          "4.5 gallons",
+          "5 gallons"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These estimates include the **10% waste buffer** and assume standard door and window counts. Always round up to the nearest gallon or quart -- leftover paint is great for touch-ups later."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Two Coats Matter"
+    },
+    {
+      "type": "paragraph",
+      "text": "The first coat seals the surface and provides a base. The second coat delivers even color and full coverage. One coat usually leaves thin spots and uneven sheen, especially when you're covering dark colors with light paint."
+    },
+    {
+      "type": "paragraph",
+      "text": "Going from a dark to light color may require **3 coats**. Use a primer on bare drywall to reduce the number of finish coats needed."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Choosing the Right Paint Finish"
+    },
+    {
+      "type": "cta",
+      "heading": "Painting a room this weekend?",
+      "body": "Use the Paint Coverage Calculator to get the exact gallons and quarts you need for any room. Enter your dimensions, doors, windows, and number of coats.",
+      "buttonLabel": "Calculate Paint Needed",
+      "path": "/diy/paint-coverage-calculator/"
+    }
+  ],
+  "keywords": [
+    "paint calculator",
+    "how much paint do i need",
+    "paint coverage calculator",
+    "gallons of paint calculator",
+    "room paint calculator",
+    "interior paint estimator"
+  ]
+}

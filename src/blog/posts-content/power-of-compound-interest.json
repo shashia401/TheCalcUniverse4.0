@@ -1,0 +1,106 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Compound Interest Rewards Early Starters"
+    },
+    {
+      "type": "paragraph",
+      "text": "Compound interest is interest on interest. When you earn returns on your investments and those returns themselves earn returns, growth accelerates over time. The key insight is that the acceleration is not linear — it is exponential. In the first few years, compounding looks unimpressive. But somewhere around year 15-20, the curve bends sharply upward. This is why the single most important factor in building wealth is not how much you invest, but how early you start."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Numbers: Starting at 25 vs 35 vs 45"
+    },
+    {
+      "type": "paragraph",
+      "text": "Consider three people: Alice starts investing $5,000/year at 25 and stops at 35 (10 years of contributions, $50,000 total). Bob starts at 35 and invests $5,000/year until 65 (30 years, $150,000 total). Charlie starts at 45 and invests $5,000/year until 65 (20 years, $100,000 total). Assuming 7% average annual return, Alice ends up with $602,000 — more than Bob ($540,000) despite contributing one-third as much. Charlie ends with $219,000. Alice contributed the least but ended with the most because her money had more time to compound."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Rule of 72"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Rule of 72 is a quick way to estimate how long it takes your money to double: divide 72 by your annual return rate. At 7%, your money doubles roughly every 10 years. At 10%, every 7.2 years. This means $10,000 invested at 25 becomes $20,000 by 35, $40,000 by 45, $80,000 by 55, and $160,000 by 65 — without adding another dollar."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What If You Started Late? Strategies That Still Work"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Increase your savings rate: Saving 20-30% of income later can still build significant wealth — you just need to save more aggressively.",
+        "Maximize tax-advantaged accounts: 401(k), IRA, HSA — every dollar of tax savings is another dollar compounding.",
+        "Consider catch-up contributions: At 50+, you can contribute an extra $7,500/year to 401(k)s and $1,000/year to IRAs.",
+        "Delay Social Security: Waiting from 62 to 70 increases your monthly benefit by about 8% per year — a 76% total increase."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "The best time to start investing was 10 years ago. The second best time is today. Even small amounts compound into meaningful sums over 20-30 year horizons."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the Compound Interest Calculator"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Enter your starting principal (initial investment amount).",
+        "Enter your annual contribution amount and frequency.",
+        "Set your expected annual return rate (7-8% is a reasonable long-term stock market average).",
+        "Choose your compounding frequency (monthly or annually).",
+        "Set your time horizon in years.",
+        "Review the growth chart showing how your money compounds over time."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a realistic compound interest rate to expect?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The S&P 500 has historically returned about 10% annually before inflation (7% after inflation). Bond returns are lower, typically 3-5%. A diversified portfolio of 80% stocks and 20% bonds might average 7-8%. Use conservative estimates (5-6%) for planning purposes."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How often should interest compound for best results?"
+    },
+    {
+      "type": "paragraph",
+      "text": "More frequent compounding grows money faster, but the difference is small. Daily compounding on a long-term investment might add 0.1-0.3% vs annual compounding. The compounding frequency matters much less than your contribution amount, rate of return, and time horizon."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Compound Interest Calculator",
+      "body": "See how your money grows with our free compound interest calculator. Adjust contributions, rates, and time horizon.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/compound-interest-calculator/"
+    }
+  ],
+  "keywords": [
+    "compound interest guide",
+    "power of compound interest",
+    "starting early investing",
+    "compound interest calculator",
+    "why compound interest matters",
+    "invest in your 20s"
+  ]
+}

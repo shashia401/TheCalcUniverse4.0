@@ -1,0 +1,173 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Honest Answer: Can GFR Improve?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The answer depends entirely on why your GFR is low. There are two categories: acute (reversible) causes and chronic (irreversible) damage. Understanding which category you fall into determines your outlook and treatment approach."
+    },
+    {
+      "type": "paragraph",
+      "text": "Acute GFR decline — from dehydration, medication effects, acute kidney injury, or temporary obstruction — can often improve when the underlying cause is addressed. In these cases, kidney function may return to baseline partially or completely over days to weeks."
+    },
+    {
+      "type": "paragraph",
+      "text": "Chronic GFR decline — from long-standing hypertension, diabetes, glomerulonephritis, or other chronic kidney diseases — generally does not reverse. The scarred nephrons cannot regenerate. However, the rate of decline can almost always be slowed, often dramatically. The goal shifts from \"improve GFR\" to \"preserve remaining function and slow progression.\""
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Strategy 1: Blood Pressure Control"
+    },
+    {
+      "type": "paragraph",
+      "text": "High blood pressure is the second leading cause of CKD and the most modifiable risk factor for progression. The pressure damages the delicate blood vessels in the glomeruli, causing them to scar and lose function. Controlling blood pressure is the single most effective intervention for slowing GFR decline."
+    },
+    {
+      "type": "paragraph",
+      "text": "Target blood pressure for people with CKD is <130/80 mmHg. The SPRINT trial showed that intensive control (target <120 systolic) reduced adverse kidney outcomes by approximately 30% in high-risk patients. ACE inhibitors and ARBs are preferred because they reduce pressure inside the glomerulus itself, providing kidney protection beyond their blood pressure-lowering effect."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "ACE inhibitors (lisinopril, enalapril) and ARBs (losartan, valsartan) are the most important medications for kidney protection. They reduce intraglomerular pressure and decrease proteinuria. Even if your blood pressure is normal, these medications may be prescribed specifically to protect your kidneys if you have proteinuria."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Strategy 2: Blood Sugar Control in Diabetes"
+    },
+    {
+      "type": "paragraph",
+      "text": "Diabetes is the leading cause of CKD worldwide. High blood sugar damages the glomeruli through a process called diabetic nephropathy. Tight glucose control dramatically reduces the risk of developing kidney disease and slows its progression."
+    },
+    {
+      "type": "paragraph",
+      "text": "Target HbA1c below 7% for most diabetic patients. Each 1% reduction in HbA1c reduces the risk of kidney disease progression by approximately 35%, according to the UK Prospective Diabetes Study. Newer diabetes medications — SGLT2 inhibitors (empagliflozin, dapagliflozin) and GLP-1 receptor agonists (semaglutide, liraglutide) — have been shown to provide kidney-protective effects independent of their glucose-lowering benefits."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Strategy 3: Medication Management"
+    },
+    {
+      "type": "paragraph",
+      "text": "Several classes of medications have been shown to slow CKD progression. Equally important is avoiding medications that can damage the kidneys."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "ACE inhibitors or ARBs — first-line for CKD with proteinuria regardless of blood pressure",
+        "SGLT2 inhibitors — proven to slow GFR decline in diabetic and non-diabetic CKD patients",
+        "Statins — reduce cardiovascular risk (more CKD patients die of heart disease than kidney failure)",
+        "Sodium bicarbonate — may slow progression in patients with metabolic acidosis (low bicarbonate)",
+        "AVOID NSAIDs — ibuprofen, naproxen, celecoxib, diclofenac. Use acetaminophen instead.",
+        "AVOID proton pump inhibitors — long-term use linked to CKD progression",
+        "AVOID high-dose vitamin C supplements — can cause oxalate kidney stones and damage"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Strategy 4: Dietary Changes"
+    },
+    {
+      "type": "paragraph",
+      "text": "Diet plays a direct role in kidney health. The kidney-friendly diet focuses on reducing the workload on your kidneys by moderating the nutrients they process."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Sodium restriction (<2,000 mg/day) — lowers blood pressure and reduces proteinuria",
+        "Moderate protein intake (0.6-0.8 g/kg/day for non-dialysis CKD) — reduces glomerular pressure",
+        "Potassium management — varies by stage; discuss with your doctor",
+        "Phosphorus limitation — limit processed foods, dark sodas, and high-phosphorus meats",
+        "Limit alcohol — no more than 1-2 drinks per day"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A registered dietitian who specializes in kidney disease is the best resource for creating a personalized eating plan that meets your nutritional needs while protecting your kidneys."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Strategy 5: Lifestyle Factors"
+    },
+    {
+      "type": "paragraph",
+      "text": "Beyond medication and diet, several lifestyle changes have been shown to slow CKD progression:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Exercise regularly — 150 minutes per week of moderate activity reduces cardiovascular strain. Both aerobic and resistance training are safe and beneficial for CKD patients when appropriately prescribed.",
+        "Stop smoking — smoking accelerates kidney function decline by 30-40%. The effect is dose-dependent and partially reversible upon quitting. This is one of the most impactful single changes you can make.",
+        "Maintain healthy weight — obesity increases CKD risk by 50-100% and accelerates progression. Weight loss of 5-10% improves proteinuria and blood pressure in overweight patients.",
+        "Stay adequately hydrated — drink when thirsty. Excessive water intake does not further improve kidney function and can be dangerous in advanced CKD.",
+        "Limit alcohol — excessive alcohol raises blood pressure and can directly damage kidney tissue."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Expect Results"
+    },
+    {
+      "type": "paragraph",
+      "text": "If your GFR decline is from acute causes (dehydration, medication), improvement can be seen within days to weeks of addressing the cause. If your GFR decline is from chronic disease, do not expect to see your eGFR go up — instead, look for the rate of decline to slow. An annual decline of 1-2 mL/min/year is acceptable. If your eGFR was dropping 5 mL/min/year and after interventions it drops only 1 mL/min/year, that is a treatment success."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your doctor will monitor your eGFR every 3-12 months depending on your stage and stability. The trend over 6-12 months is much more informative than any single reading. Do not be discouraged if your eGFR does not improve — slowing the decline to a normal aging rate is an excellent outcome that preserves years of kidney function."
+    },
+    {
+      "type": "cta",
+      "heading": "Track Your GFR Over Time",
+      "body": "Use our free GFR calculator regularly to track your eGFR trend. Based on the 2021 CKD-EPI equation.",
+      "buttonLabel": "Track Your eGFR",
+      "path": "/health/gfr-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Does NOT Improve GFR"
+    },
+    {
+      "type": "paragraph",
+      "text": "Many online sources promote unproven or dangerous methods for improving kidney function. Be skeptical of anything that promises to dramatically increase your eGFR:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Detox teas and cleanses — no evidence of benefit; some contain harmful ingredients",
+        "High-dose vitamin C, vitamin D, or herbal supplements — can cause kidney damage",
+        "Extreme water drinking (>4L/day) — does not improve GFR; can cause hyponatremia",
+        "Chelation therapy — dangerous without medical indication",
+        "Restrictive or fad diets — risk malnutrition, especially in advanced CKD",
+        "Any product claiming to \"reverse kidney damage\" — be highly skeptical of marketing claims"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Always discuss supplements or alternative treatments with your nephrologist. Some herbs and supplements interact with CKD medications or are directly toxic to kidneys."
+    }
+  ],
+  "keywords": [
+    "how to improve gfr",
+    "improve kidney function",
+    "increase egfr naturally",
+    "slow kidney disease progression",
+    "reverse kidney damage",
+    "improve gfr diet",
+    "can gfr get better",
+    "kidney function improvement"
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Are Macronutrients?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Macronutrients — protein, carbohydrates, and fat — are the three nutrients your body needs in large amounts. Protein provides **4 calories per gram** and is essential for muscle repair and satiety. Carbs also provide **4 cal/g** and are your body's preferred fuel."
+    },
+    {
+      "type": "paragraph",
+      "text": "Fat provides **9 cal/g** and is critical for hormone production and nutrient absorption. Every food you eat is a combination of these three."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Macros Matter for Weight Loss"
+    },
+    {
+      "type": "paragraph",
+      "text": "Total calories determine whether you lose or gain weight. But your macro split determines what you lose. At the same calorie deficit, a high-protein diet preserves more muscle than a low-protein one."
+    },
+    {
+      "type": "paragraph",
+      "text": "More muscle means a higher metabolism and a better shape as you slim down. The right macro split also affects your energy levels, hunger, and how easy the diet is to stick with — which is ultimately what determines long-term success."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Diet Type",
+        "Protein",
+        "Carbs",
+        "Fat"
+      ],
+      "rows": [
+        [
+          "Standard (Balanced)",
+          "20%",
+          "50%",
+          "30%"
+        ],
+        [
+          "Low-Carb",
+          "30%",
+          "25%",
+          "45%"
+        ],
+        [
+          "Keto",
+          "25%",
+          "5%",
+          "70%"
+        ],
+        [
+          "High-Protein",
+          "35%",
+          "35%",
+          "30%"
+        ],
+        [
+          "Mediterranean",
+          "20%",
+          "45%",
+          "35%"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Much Protein Do You Need?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The evidence-backed recommendation is **1. 6–2. 2 grams per kilogram of body weight** (0."
+    },
+    {
+      "type": "paragraph",
+      "text": "73–1. 0 g per lb). For a 180 lb (82 kg) person, that's **130–180 grams of protein per day**."
+    },
+    {
+      "type": "paragraph",
+      "text": "The higher end is better during a calorie deficit or if you're training hard. Spread it across 3–4 meals for optimal muscle protein synthesis. Even 2."
+    },
+    {
+      "type": "paragraph",
+      "text": "2+ g/kg is safe for healthy people but offers diminishing returns. Protein isn't just for bodybuilders — it's the single most important macro for anyone trying to lose weight while preserving muscle."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "The best macro split's the one you can sustain. A high-protein diet wins on science, but if you hate eating that much meat, a standard split with adequate protein works too. The perfect diet is the one you stick with. Our calculator lets you compare all five splits so you can see which one fits your lifestyle before committing."
+    },
+    {
+      "type": "cta",
+      "heading": "Get Your Personalized Macro Targets",
+      "body": "Use our Macro Calculator to see exact gram targets for protein, carbs, and fat based on your body, activity level, goal, and preferred diet type. Five diet splits to choose from.",
+      "buttonLabel": "Calculate Macros",
+      "path": "/health/macro-calculator/"
+    }
+  ],
+  "keywords": [
+    "macros for weight loss",
+    "macronutrient ratios",
+    "protein for fat loss",
+    "carb cycling",
+    "keto macros",
+    "high protein diet"
+  ]
+}

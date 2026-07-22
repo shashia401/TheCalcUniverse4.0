@@ -1,0 +1,85 @@
+---
+// About — static. Facts only: counts come from the registry, no invented claims.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { calculatorRegistry, getCategories } from '../../lib/registry';
+import { blogPosts } from '../../lib/blog';
+import { SITE_NAME, BASE_URL } from '../../config/constants';
+
+const total = calculatorRegistry.length;
+const categories = getCategories().filter((c) => c.count > 0);
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+    { '@type': 'ListItem', position: 2, name: 'About', item: `${BASE_URL}/about/` },
+  ],
+};
+---
+
+<BaseLayout
+  title={`About | ${SITE_NAME}`}
+  description={`What TheCalcUniverse is, how our ${total}+ calculators are built and checked, and why the site is free, fast, and privacy-first.`}
+  canonicalPath="/about/"
+  schemas={[breadcrumb]}
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-3xl mx-auto px-4 md:px-8 py-14">
+      <h1 class="text-3xl font-black tracking-tight text-[var(--surface-text)] mb-4">
+        About TheCalcUniverse
+      </h1>
+      <p class="text-blog text-[var(--surface-text-secondary)] leading-relaxed mb-10 max-w-2xl">
+        TheCalcUniverse is a free reference site: {total} calculators across
+        {categories.length} categories, each one built to show its work — the formula,
+        a worked example, and the limitations — not just spit out a number.
+      </p>
+
+      <div class="grid grid-cols-3 gap-4 mb-12">
+        <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-4 text-center">
+          <p class="text-2xl font-black text-[var(--brand-default)]">{total}</p>
+          <p class="text-xs text-[var(--surface-text-muted)] mt-1">calculators</p>
+        </div>
+        <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-4 text-center">
+          <p class="text-2xl font-black text-[var(--brand-default)]">{blogPosts.length}</p>
+          <p class="text-xs text-[var(--surface-text-muted)] mt-1">in-depth guides</p>
+        </div>
+        <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-4 text-center">
+          <p class="text-2xl font-black text-[var(--brand-default)]">7,173</p>
+          <p class="text-xs text-[var(--surface-text-muted)] mt-1">automated tests</p>
+        </div>
+      </div>
+
+      <div class="space-y-10 text-base-md text-[var(--surface-text-secondary)] leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[var(--surface-text)] [&_h2]:mb-3 [&_p]:mb-3">
+        <section>
+          <h2>How the calculators are built</h2>
+          <p>
+            Every calculator is a small, tested program with a documented formula. Where a formula
+            has an academic or regulatory source (loan amortization, BMI cutoffs, GFR equations),
+            the source is cited on the page. Money math runs on precise decimal arithmetic, not
+            floating-point shortcuts. See <a class="text-[var(--brand-default)] hover:underline" href="/methodology/">how we build and verify calculators</a>
+            {' '}for the full standards.
+          </p>
+        </section>
+
+        <section>
+          <h2>What we don't do</h2>
+          <p>
+            No accounts, no paywalls, no selling data. Your inputs never leave your browser — every
+            calculation runs locally on your device. The site is a set of static pages served from a
+            CDN, which is also why it's fast.
+          </p>
+        </section>
+
+        <section>
+          <h2>Something wrong?</h2>
+          <p>
+            If a formula, definition, or result looks off, tell us:
+            <strong> contact@thecalcuniverse.com</strong>. Corrections ship quickly — the whole
+            site rebuilds in under a minute.
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

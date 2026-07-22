@@ -1,0 +1,118 @@
+---
+// Privacy Policy — content ported from v2 (PrivacyPolicyPage.tsx), now static HTML.
+// One accuracy edit: "Session history/Reviews/Bookmarks" localStorage features exist
+// in v2; 4.0 currently stores only the theme preference. Wording kept general.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE_NAME, BASE_URL } from '../../config/constants';
+
+const LAST_UPDATED = 'July 20, 2026';
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+    { '@type': 'ListItem', position: 2, name: 'Privacy Policy', item: `${BASE_URL}/privacy/` },
+  ],
+};
+---
+
+<BaseLayout
+  title={`Privacy Policy | ${SITE_NAME}`}
+  description="TheCalcUniverse does not collect your personal data. Read our full privacy policy covering analytics, cookies, local storage, and third-party advertising."
+  canonicalPath="/privacy/"
+  schemas={[breadcrumb]}
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-3xl mx-auto px-4 md:px-8 py-14">
+      <header class="mb-10">
+        <h1 class="text-3xl font-black tracking-tight text-[var(--surface-text)] mb-2">Privacy Policy</h1>
+        <p class="text-sm text-[var(--surface-text-muted)]">Last updated: {LAST_UPDATED}</p>
+      </header>
+
+      <div class="rounded-2xl border border-accent-emerald-400/40 bg-accent-emerald-50 p-6 mb-10 dark:bg-transparent dark:border-accent-emerald-700">
+        <p class="text-sm font-semibold text-accent-emerald-700 mb-1">The short version</p>
+        <p class="text-sm text-[var(--surface-text-secondary)] leading-relaxed">
+          TheCalcUniverse does not collect your personal data, does not require an account, and does
+          not sell anything to anyone. Your calculator inputs stay in your browser.
+        </p>
+      </div>
+
+      <div class="space-y-10 text-base-md text-[var(--surface-text-secondary)] leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[var(--surface-text)] [&_h2]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_p]:mb-3 [&_a]:text-[var(--brand-default)] [&_a]:underline [&_a]:underline-offset-2">
+        <section>
+          <h2>1. Who we are</h2>
+          <p>TheCalcUniverse (<strong>we</strong>, <strong>our</strong>, <strong>us</strong>) is a free online calculator platform. Our website is available at <strong>thecalcuniverse.com</strong>.</p>
+        </section>
+
+        <section>
+          <h2>2. What data we do NOT collect</h2>
+          <p>We do not collect, store, or process:</p>
+          <ul>
+            <li>Your name, email address, or any contact information.</li>
+            <li>Your calculator inputs or results — these are processed entirely in your browser and never sent to our servers.</li>
+            <li>Your IP address for identification or tracking purposes.</li>
+            <li>Any payment information (there is nothing to pay for).</li>
+            <li>Demographic data, interests, or behaviour profiles (except as anonymised aggregate data via third-party analytics).</li>
+          </ul>
+          <p>We do not sell your personal data to third parties under any circumstances.</p>
+        </section>
+
+        <section>
+          <h2>3. Local storage</h2>
+          <p>TheCalcUniverse uses your browser's <strong>localStorage</strong> — a storage area that lives only on your own device — for functional preferences such as your light/dark theme choice.</p>
+          <p>None of this data is accessible to us. It stays strictly on your device. You can clear all site data for this domain at any time through your browser settings.</p>
+        </section>
+
+        <section>
+          <h2>4. Analytics</h2>
+          <p>We use <strong>Google Analytics 4</strong> to understand how visitors use our site — which calculators are most popular, how people navigate, and where we can improve. Google Analytics collects aggregated, anonymised data only. We have configured it with:</p>
+          <ul>
+            <li><strong>IP anonymisation</strong> enabled (your IP is masked before any logging)</li>
+            <li><strong>Advertising personalisation disabled</strong></li>
+            <li><strong>Google signals disabled</strong> (no cross-device tracking)</li>
+          </ul>
+          <p>No personal data (name, email, address) is sent to Google Analytics. The data cannot be used to identify you individually. You can opt out by installing the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics Opt-Out Browser Add-On</a>.</p>
+        </section>
+
+        <section>
+          <h2>5. Third-party advertising</h2>
+          <p>We use <strong>Google AdSense</strong> to display advertisements on this site. Google AdSense uses cookies (the <strong>DoubleClick cookie</strong>) to serve relevant ads based on your browsing history and to limit how often you see a particular ad. This cookie enables Google and its partners to serve ads based on your visits to this site and other sites across the internet.</p>
+          <p>You can learn more about how Google uses your data at <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">How Google uses data when you use our partners' sites or apps</a>.</p>
+          <p><strong>Opting out:</strong> You can opt out of personalised advertising by visiting Google's <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">Ads Settings</a>. You can also opt out of third-party vendor cookies used for personalised ads through the <a href="https://www.networkadvertising.org/managing/opt_out.jsp" target="_blank" rel="noopener noreferrer">NAI opt-out page</a>.</p>
+          <p>AdSense may also use <strong>web beacons</strong> (invisible 1×1 images) to measure ad performance and conversions. These do not collect personal information.</p>
+        </section>
+
+        <section>
+          <h2>6. Cookies</h2>
+          <p>This site uses cookies for the following purposes:</p>
+          <ul>
+            <li><strong>Advertising cookies:</strong> Google AdSense uses cookies (DoubleClick) to serve personalised or non-personalised ads. See the "Third-party advertising" section above.</li>
+            <li><strong>Analytics cookies:</strong> If analytics is enabled, the analytics provider may set a first-party cookie to count page views.</li>
+            <li><strong>Functional storage:</strong> Your theme preference (light / dark mode) is saved to localStorage — not a cookie — and is not accessible to us.</li>
+          </ul>
+          <p>You can block or delete cookies through your browser settings at any time without affecting calculator functionality.</p>
+        </section>
+
+        <section>
+          <h2>7. Third-party links</h2>
+          <p>Some pages may link to external websites (for example, in blog posts or the About page). We are not responsible for the privacy practices of those sites. We recommend reading their privacy policies before interacting with them.</p>
+        </section>
+
+        <section>
+          <h2>8. Children's privacy</h2>
+          <p>TheCalcUniverse is not directed to children under 13, but children may use the calculators with adult supervision. We do not knowingly collect any personal information from children. If you believe a child has inadvertently provided personal data through our site, please contact us and we will delete it promptly.</p>
+        </section>
+
+        <section>
+          <h2>9. Changes to this policy</h2>
+          <p>If we make material changes to how we handle data (for example, if we add an analytics service), we will update this page and revise the "Last updated" date at the top. Continued use of the site after changes are published constitutes acceptance of the revised policy.</p>
+        </section>
+
+        <section>
+          <h2>10. Contact</h2>
+          <p>If you have questions or concerns about this Privacy Policy, please reach out via the contact email at <strong>privacy@thecalcuniverse.com</strong>. We will respond as quickly as possible.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,73 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Does GFR Measure?"
+    },
+    {
+      "type": "paragraph",
+      "text": "GFR (Glomerular Filtration Rate) measures how many milliliters of blood your kidneys filter per minute. Think of it as your kidney RPM gauge. Each kidney contains about 1 million microscopic filters called glomeruli. Your entire blood volume circulates through your kidneys about 300 times per day. The glomeruli act as a sieve: waste products like creatinine pass through to become urine, while useful substances like blood cells and proteins stay in the blood. A normal GFR of 90-120 means your kidneys are filtering about a cup of blood every minute."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why GFR Matters"
+    },
+    {
+      "type": "paragraph",
+      "text": "Kidney disease is often called a silent killer because it has no symptoms until significant function is lost. By the time you feel something wrong, your GFR may be below 30 (Stage 4). Regular GFR testing catches decline early, when interventions like blood pressure control, dietary changes, and medication adjustments can slow or prevent progression to kidney failure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How eGFR Is Estimated"
+    },
+    {
+      "type": "paragraph",
+      "text": "Since measuring true GFR requires injected tracers, your doctor uses an estimated GFR (eGFR) from a simple blood test. The eGFR calculation uses three things: your serum creatinine level, your age, and your sex. The 2021 CKD-EPI equation is the most accurate and no longer includes race coefficients. The formula is complex, but our calculator handles it instantly. Simply enter your creatinine lab value, age, and sex."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "eGFR naturally declines about 0.6% per year after age 40. This means a 70-year-old with eGFR 75 could have normal kidney function for their age, while the same number in a 30-year-old would be concerning."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a normal GFR number?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A normal eGFR is 90 or above, but this varies by age. Younger adults typically have eGFR 90-120, while older adults may have lower numbers due to natural age-related decline. Your doctor interprets your eGFR based on your age and overall health, not just the number alone."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I improve my GFR naturally?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Managing blood pressure, controlling blood sugar, staying hydrated, avoiding NSAIDs (ibuprofen, naproxen), and eating a kidney-friendly diet can help maintain or slow the decline of GFR. However, significant improvement of a chronically low GFR is uncommon — the goal is typically to prevent further decline."
+    },
+    {
+      "type": "cta",
+      "heading": "Check Your GFR",
+      "body": "Use our free GFR calculator with the latest CKD-EPI 2021 equation.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/gfr-calculator/"
+    }
+  ],
+  "keywords": [
+    "what is gfr",
+    "glomerular filtration rate",
+    "kidney function test",
+    "normal gfr",
+    "egfr explained"
+  ]
+}

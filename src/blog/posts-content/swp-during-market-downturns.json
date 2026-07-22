@@ -1,0 +1,42 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Sequence-of-Return Risk"
+    },
+    {
+      "type": "paragraph",
+      "text": "Sequence-of-return risk is the danger of experiencing poor market returns in the early years of your SWP. If your corpus drops 20% in year one and you keep withdrawing, the remaining balance may never recover. A ₹1 crore corpus losing 20% becomes ₹80 lakhs, minus ₹6 lakhs SWP = ₹74 lakhs. It now needs 35% returns just to get back to ₹1 crore."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Protection Strategies"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Cash bucket strategy: Keep 2-3 years of withdrawals in a liquid fund or savings account. During market downturns, draw from this bucket instead of redeeming equity units.",
+        "Reduce withdrawal temporarily: If markets drop 20%+, reduce your SWP amount by 10-15%. Even a temporary reduction can significantly improve corpus longevity.",
+        "Dividend route in downturns: Switch any equity holdings to dividend options temporarily. Dividends provide income without redeeming units at depressed prices.",
+        "Rebalance annually: If your equity allocation has grown significantly in good years, rebalance to lock in gains and increase the safety buffer."
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SWP Calculator",
+      "body": "Plan your retirement withdrawals with our free SWP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/swp-calculator/"
+    }
+  ],
+  "keywords": [
+    "swp market downturn",
+    "sequence of return risk",
+    "swp bear market",
+    "retirement withdrawal during crash",
+    "protecting swp corpus"
+  ]
+}

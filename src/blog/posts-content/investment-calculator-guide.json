@@ -1,0 +1,57 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the Investment Calculator Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "Our investment calculator takes your starting balance (present value), monthly contributions, expected annual return, and time horizon to project your investment's future value. It automatically shows three scenarios: expected return, optimistic, and pessimistic — so you can see the range of possible outcomes based on market variability."
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator uses the future value of a series formula: FV = PV × (1+r)^n + PMT × [((1+r)^n − 1)/r]. This formula combines the growth of your initial lump sum with the accumulating growth of your regular contributions. The pessimistic scenario typically assumes a return 50% of the expected rate, while the optimistic scenario assumes 150%."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Power of Starting Early"
+    },
+    {
+      "type": "paragraph",
+      "text": "Time is the most powerful factor in investing. A 25-year-old investing $500/month at 7% annual return accumulates approximately $1.4 million by age 65. Starting at 35 with the same $500/month yields only $650,000. Starting at 45 yields only $275,000. The difference is compound growth — the extra 10-20 years gives your returns time to earn returns of their own."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "A 25-year-old investing $500/month at 7% for 40 years contributes $240,000 of their own money. The remaining $1.1 million is market growth — compound interest doing the heavy lifting. This is why time in the market beats timing the market."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Contributions Impact Your Outcome"
+    },
+    {
+      "type": "paragraph",
+      "text": "Increasing your monthly contribution has a direct and powerful effect on your final balance. At 7% return over 30 years: $300/month grows to $365,000. $500/month grows to $610,000. $1,000/month grows to $1.22 million. Doubling your contribution doubles your final balance, but the investment return portion stays proportional."
+    },
+    {
+      "type": "cta",
+      "heading": "Project Your Investment Growth",
+      "body": "Use our free investment calculator to see how your money can grow with different return scenarios and contribution levels.",
+      "buttonLabel": "Calculate Growth",
+      "path": "/finance/investment-calculator/"
+    }
+  ],
+  "keywords": [
+    "investment calculator",
+    "investment growth",
+    "future value",
+    "compound returns",
+    "investment projection",
+    "retirement planning calculator",
+    "investment return calculator",
+    "portfolio growth"
+  ]
+}

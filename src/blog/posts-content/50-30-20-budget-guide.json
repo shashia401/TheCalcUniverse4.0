@@ -1,0 +1,91 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Most people think budgeting means tracking every cent, cutting all fun spending, and feeling deprived. No wonder so many quit after two weeks. The 50/30/20 rule flips that approach."
+    },
+    {
+      "type": "paragraph",
+      "text": "It gives you a simple structure — **50% of your after-tax income for needs, 30% for wants, and 20% for savings** — while leaving plenty of room for the things you actually enjoy."
+    },
+    {
+      "type": "heading",
+      "text": "What Is the 50/30/20 Rule?",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "Popularized by Senator Elizabeth Warren, the 50/30/20 rule is a budgeting framework that divides your after-tax income into three broad categories. The goal isn't perfection — it's awareness. The categories are intentionally wide to make budgeting sustainable rather than restrictive."
+    },
+    {
+      "type": "paragraph",
+      "text": "here's how the split works: half your income covers essentials, about a third goes to lifestyle choices, and the remaining fifth builds your financial future. You can adjust the ratios to fit your situation, but the framework gives you a clear starting point."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Target %",
+        "What Goes Here",
+        "Examples"
+      ],
+      "rows": [
+        [
+          "Needs",
+          "50%",
+          "Essential living expenses",
+          "Rent, groceries, utilities, insurance, minimum debt payments"
+        ],
+        [
+          "Wants",
+          "30%",
+          "Discretionary lifestyle spending",
+          "Dining out, streaming, travel, shopping, hobbies"
+        ],
+        [
+          "Savings",
+          "20%",
+          "Future financial security",
+          "Emergency fund, 401(k), IRA, extra debt payoff"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "What Counts as a Need vs. a Want?",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "A need is something you can't eliminate without a major life disruption. Housing, utilities, groceries, transportation, health insurance, childcare, and minimum loan payments all qualify. If you stopped paying for them, you would face serious consequences within weeks."
+    },
+    {
+      "type": "paragraph",
+      "text": "A want is something you choose to spend money on. Dining out, entertainment, subscriptions, shopping, travel, and hobbies fall here. The line can get blurry — internet is a need for remote workers, but premium cable is a want."
+    },
+    {
+      "type": "paragraph",
+      "text": "Groceries are a need; restaurant takeout is a want. Be honest about which category each expense truly belongs in."
+    },
+    {
+      "type": "callout",
+      "text": "A reliable used car might be a need for commuting, but a luxury vehicle lease is a want. When in doubt, ask yourself: 'Could I reasonably reduce or eliminate this without losing my job or housing?' If yes, it's probably a want.",
+      "variant": "tip"
+    },
+    {
+      "type": "cta",
+      "heading": "Build Your 50/30/20 Budget in Minutes",
+      "body": "Enter your income and expenses into our free 50/30/20 Budget Calculator. See your actual spending vs. the ideal split, spot exactly where to adjust, and get a personalized donut chart of your finances.",
+      "buttonLabel": "Open the Budget Calculator",
+      "path": "/finance/budget-calculator/"
+    }
+  ],
+  "keywords": [
+    "50/30/20 budget",
+    "budget rule",
+    "how to budget",
+    "needs vs wants",
+    "monthly budget planner",
+    "save money each month"
+  ]
+}

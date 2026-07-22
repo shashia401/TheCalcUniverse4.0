@@ -1,0 +1,95 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "A $50/hour contract and a $95,000 salaried position might sound similar, but they're not even close to equal. The difference comes down to benefits, taxes, and how you value your time. Here's how to compare any pay structure and negotiate with confidence."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Hourly vs. Salary — What's the Real Difference?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Hourly workers get paid for every hour worked — including overtime. Salaried employees get a fixed annual amount regardless of hours. That $50/hour rate works out to **$104,000/year** (50 × 40 × 52), which is 9% more than $95,000."
+    },
+    {
+      "type": "paragraph",
+      "text": "But salaried roles typically include benefits worth $15,000–$30,000 that contractors must pay themselves."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Pay Period",
+        "Calculation",
+        "Example ($75,000/year)"
+      ],
+      "rows": [
+        [
+          "Hourly",
+          "Annual ÷ (hrs/wk × 52)",
+          "$36.06/hr"
+        ],
+        [
+          "Weekly",
+          "Annual ÷ 52",
+          "$1,442/wk"
+        ],
+        [
+          "Bi-Weekly",
+          "Annual ÷ 26",
+          "$2,885/paycheck"
+        ],
+        [
+          "Monthly",
+          "Annual ÷ 12",
+          "$6,250/mo"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is Your Total Compensation Really Worth?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your salary is only part of the picture. Total compensation includes base pay plus benefits like health insurance (worth $5,000–$15,000), 401(k) match (3–6% of salary), paid time off (2–4 weeks), and bonuses. A $95,000 salary with full benefits could be worth **$110,000–$125,000** in total compensation."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "When comparing a salaried job offer to a freelance contract, multiply the equivalent hourly rate by 1.5–2x. That $50/hr salary equivalent becomes **$75–$100/hr as a freelancer** — which accounts for self-employment tax, unpaid time off, and no benefits."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Calculate Your Minimum Acceptable Rate"
+    },
+    {
+      "type": "paragraph",
+      "text": "Before you negotiate, know your floor. Start with your current total compensation, add the value of benefits, factor in commute costs, and add your desired raise. Then convert that number to the pay period your employer uses."
+    },
+    {
+      "type": "paragraph",
+      "text": "The Salary Calculator handles all these conversions instantly."
+    },
+    {
+      "type": "cta",
+      "heading": "Compare Any Pay Structure",
+      "body": "Use our free Salary Calculator to convert hourly, salary, and all pay periods instantly. See your equivalent rates and estimated take-home pay.",
+      "buttonLabel": "Try the Salary Calculator",
+      "path": "/finance/salary-calculator/"
+    }
+  ],
+  "keywords": [
+    "salary negotiation",
+    "hourly to salary",
+    "salary calculator",
+    "total compensation",
+    "pay comparison",
+    "hourly rate vs salary",
+    "job offer negotiation",
+    "salary negotiation tips"
+  ]
+}

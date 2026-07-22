@@ -1,0 +1,68 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Refinance vs. Payoff: The Core Decision"
+    },
+    {
+      "type": "paragraph",
+      "text": "When you have extra cash or lower interest rates become available, two strategies compete: refinance your mortgage to a lower rate, or put that money toward paying off your existing mortgage faster. Both save you money, but the right choice depends on your current rate, remaining term, and financial goals."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Factor",
+        "Refinance Wins When",
+        "Payoff Wins When"
+      ],
+      "rows": [
+        [
+          "Current rate vs market",
+          "Your rate is 1%+ above current market",
+          "Your rate is already competitive"
+        ],
+        [
+          "Remaining term",
+          "You plan to stay 5+ years",
+          "You plan to move within 5 years"
+        ],
+        [
+          "Cash available",
+          "You want lower payments, not lump sum",
+          "You have a lump sum available"
+        ],
+        [
+          "Closing costs",
+          "You can recoup costs in <2 years",
+          "You want to avoid refinance fees"
+        ],
+        [
+          "Tax situation",
+          "You itemize deductions",
+          "You take the standard deduction"
+        ],
+        [
+          "Other debt",
+          "You have no high-interest debt",
+          "You have credit card or other debt"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Model Your Options",
+      "body": "Use our mortgage payoff calculator to compare refinancing vs extra payment scenarios side by side.",
+      "buttonLabel": "Compare Now",
+      "path": "/finance/mortgage-payoff-calculator/"
+    }
+  ],
+  "keywords": [
+    "refinance vs payoff",
+    "mortgage refinance",
+    "pay off mortgage or refinance",
+    "refinance calculator",
+    "mortgage strategy",
+    "lower rate vs extra payment"
+  ]
+}

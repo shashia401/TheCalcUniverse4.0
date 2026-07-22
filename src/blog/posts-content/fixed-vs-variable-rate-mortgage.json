@@ -1,0 +1,90 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Fixed and Variable Mortgages Work"
+    },
+    {
+      "type": "paragraph",
+      "text": "A fixed-rate mortgage locks in your interest rate for the entire loan term (typically 15 or 30 years). Your monthly payment never changes. A variable-rate mortgage (ARM — adjustable-rate mortgage) has a fixed period (typically 5, 7, or 10 years) followed by annual adjustments based on a benchmark index plus a margin. After the fixed period ends, your rate can go up or down each year, usually capped at 2% per adjustment and 5-6% total over the life of the loan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Choose Fixed"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "You plan to stay in the home for 7+ years: The longer you hold the mortgage, the more you benefit from rate stability.",
+        "You have a fixed budget: Knowing your exact payment every month helps with long-term financial planning.",
+        "Rates are historically low: If current rates are below long-term averages, locking in a fixed rate preserves that advantage.",
+        "You are risk-averse: The peace of mind of never worrying about rate increases is valuable."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Choose Variable (ARM)"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "You plan to sell or refinance within 5-7 years: ARMs typically offer 0.5-1% lower rates during the fixed period.",
+        "Rates are high and expected to fall: An ARM lets you benefit from future rate decreases without refinancing.",
+        "You want a lower initial payment: Lower start rate means lower monthly payments during the fixed period.",
+        "You can handle payment increases: If rates rise, can your budget absorb a 2% annual increase?"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rate Comparison Example"
+    },
+    {
+      "type": "paragraph",
+      "text": "A $400,000 mortgage at 6.5% fixed has a monthly payment of $2,528. The same loan as a 5/1 ARM at 5.75% has a payment of $2,334 for the first 5 years — saving $194/month or $11,640 over 5 years. After year 5, the rate could adjust up to 7.75% (2% cap) with a payment of $2,865. If you sell before year 5, the ARM saves you money. If you stay 10 years and rates rise, the ARM could cost you more."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What happens to my ARM if rates go down?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your rate adjusts down automatically at the next adjustment date. There is no need to refinance. However, the adjustment is limited by the floor rate built into your loan, so your rate cannot go below the margin."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I convert an ARM to a fixed rate later?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Some ARMs have a conversion option that lets you switch to a fixed rate without refinancing. This usually must be done during the fixed period and may have a fee. Check your loan documents or ask your lender about conversion options before choosing an ARM."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Mortgage Calculator",
+      "body": "Compare fixed and ARM payments side by side with our free mortgage calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/mortgage-amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "fixed vs variable mortgage",
+    "ARM vs fixed rate",
+    "mortgage rate types",
+    "adjustable rate mortgage",
+    "fixed rate mortgage",
+    "mortgage comparison"
+  ]
+}

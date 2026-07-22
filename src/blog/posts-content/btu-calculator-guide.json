@@ -1,0 +1,511 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is BTU and Why Does It Matter for Your HVAC System?"
+    },
+    {
+      "type": "paragraph",
+      "text": "BTU stands for British Thermal Unit. Fancy name for a simple idea. It's the standard way we measure how much heating or cooling power an HVAC system can deliver."
+    },
+    {
+      "type": "paragraph",
+      "text": "When you shop for an air conditioner, furnace, or heat pump, the BTU rating tells you how much oomph it's packing. Get that number wrong, and you'll pay for it."
+    },
+    {
+      "type": "paragraph",
+      "text": "Too small, and your unit runs nonstop without ever hitting the temperature you want. That's sky-high energy bills and a system that burns out way too fast."
+    },
+    {
+      "type": "paragraph",
+      "text": "Too big, and it short-cycles — turning on and off constantly. It never runs long enough to pull the humidity out, so your room feels cold and clammy instead of comfortable."
+    },
+    {
+      "type": "paragraph",
+      "text": "Nail the right size, though, and everything clicks. Efficient operation, consistent comfort, and equipment that actually lasts."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "One ton of cooling equals 12,000 BTU per hour. This goes back to the days of ice cooling: a ton of ice melting over 24 hours absorbs about 12,000 BTU per hour. So a 2-ton AC unit delivers 24,000 BTU/h."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's where people get tripped up. You'll see rules of thumb online — 20 BTU per square foot, stuff like that. But your actual needs depend on way more than room size."
+    },
+    {
+      "type": "paragraph",
+      "text": "Climate zone, ceiling height, sun exposure, insulation, room type, and even how many people are in the room all play a role. Our BTU Calculator handles all of that automatically. But understanding how these factors work together? That's what keeps you from making expensive mistakes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Complete BTU Formula"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the real formula. Don't let it intimidate you — it's just multiplication and addition."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "BTU = Area x ClimateFactor x CeilingFactor x SunFactor x InsulationFactor x RoomFactor + (People x 600)"
+    },
+    {
+      "type": "paragraph",
+      "text": "Start with the room's square footage. Multiply by your climate zone. Then stack on multipliers for ceiling height, sun exposure, insulation quality, and room type."
+    },
+    {
+      "type": "paragraph",
+      "text": "One more thing: every person in the room adds about 600 BTU of body heat. Turns out you're basically a small space heater. Let's look at each factor."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Climate Zone Factor"
+    },
+    {
+      "type": "paragraph",
+      "text": "Where you live changes everything. A 500 sq ft room in Phoenix needs way more cooling than the same room in Minneapolis. Four zones, four different baselines:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Climate Zone",
+        "Description",
+        "Factor (BTU per sq ft)"
+      ],
+      "rows": [
+        [
+          "Zone 1",
+          "Hot climate (e.g., Phoenix, Miami, Houston)",
+          "30"
+        ],
+        [
+          "Zone 2",
+          "Mixed climate (e.g., Atlanta, Dallas, Los Angeles)",
+          "25"
+        ],
+        [
+          "Zone 3",
+          "Cool climate (e.g., Seattle, Chicago, Denver)",
+          "20"
+        ],
+        [
+          "Zone 4",
+          "Cold climate (e.g., Minneapolis, Buffalo, Anchorage)",
+          "15"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Hot climates need a higher baseline because the gap between indoor and outdoor temps is bigger. Cold climates start lower since heating is the main concern."
+    },
+    {
+      "type": "paragraph",
+      "text": "Not sure about your zone? Quick test: if summer temps hit 100°F+ regularly, you're Zone 1. Mild winters, warm summers? Zone 2. Cool summers? Zone 3. If you're wearing a coat in June, that's Zone 4."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Ceiling Height Factor"
+    },
+    {
+      "type": "paragraph",
+      "text": "Most BTU rules of thumb assume 8-foot ceilings. Go higher than that, and you've got more air to heat or cool. Simple physics."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Ceiling Height",
+        "Factor"
+      ],
+      "rows": [
+        [
+          "Standard (8 ft)",
+          "1.0"
+        ],
+        [
+          "Tall (9-10 ft)",
+          "1.1"
+        ],
+        [
+          "Vaulted / Very High (12+ ft)",
+          "1.25"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A 400 sq ft room with 10-ft ceilings holds more air than one with standard 8-ft ceilings. The 1.1 factor handles that difference."
+    },
+    {
+      "type": "paragraph",
+      "text": "Got a cathedral ceiling? Use the average height. You'll be close enough."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Sun Exposure Factor"
+    },
+    {
+      "type": "paragraph",
+      "text": "Sunlight through windows is free heat — and in summer, that's the last thing you want. A west-facing room with big windows on a hot afternoon feels totally different from a north-facing room with small windows, even if they're the exact same size."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Sun Exposure",
+        "Description",
+        "Factor"
+      ],
+      "rows": [
+        [
+          "Minimal / Shaded",
+          "North-facing, heavy curtains, trees outside, or few windows",
+          "0.9"
+        ],
+        [
+          "Moderate",
+          "Average window area, some direct sun during the day",
+          "1.0"
+        ],
+        [
+          "High",
+          "Large windows, south- or west-facing, lots of direct sunlight",
+          "1.15"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Big windows with afternoon sun? You might need up to 15% more cooling capacity. Well-shaded room? You could need slightly less. When in doubt, go higher — you'll feel the difference on a sunny afternoon."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Insulation Factor"
+    },
+    {
+      "type": "paragraph",
+      "text": "Think of insulation as your HVAC's sidekick. Good insulation means less work for your system. Bad insulation means your AC or furnace fights a losing battle."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Insulation Quality",
+        "Description",
+        "Factor"
+      ],
+      "rows": [
+        [
+          "Poor",
+          "Older home, minimal insulation, drafty windows and doors",
+          "1.2"
+        ],
+        [
+          "Average",
+          "Standard modern insulation, typical construction quality",
+          "1.0"
+        ],
+        [
+          "Good",
+          "Well-insulated, energy-efficient windows, sealed ducts",
+          "0.9"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Poor insulation jacks up your BTU needs by 20%. Great insulation can cut them by 10%. If you're in an older home, this is the factor to watch."
+    },
+    {
+      "type": "paragraph",
+      "text": "Bonus: upgrading your insulation is one of the best investments you can make. It pays for itself in energy savings year after year."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Room Type Factor"
+    },
+    {
+      "type": "paragraph",
+      "text": "Not all rooms are created equal. A kitchen with the oven cranking generates way more heat than a bedroom. A basement stays cool naturally. The formula knows this."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Room Type",
+        "Factor"
+      ],
+      "rows": [
+        [
+          "Standard (living room, bedroom, office)",
+          "1.0"
+        ],
+        [
+          "Kitchen",
+          "1.15"
+        ],
+        [
+          "Basement",
+          "0.85"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Kitchens get a 1.15x multiplier because of all the heat from ovens, stovetops, and dishwashers. Basements get 0.85x since they're naturally cooler underground."
+    },
+    {
+      "type": "paragraph",
+      "text": "If you're finishing a basement, that lower number can make a real difference in what size unit you go with."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Real-World Example: Sizing a Living Room AC Unit"
+    },
+    {
+      "type": "paragraph",
+      "text": "Enough theory. Let me show you with real numbers."
+    },
+    {
+      "type": "paragraph",
+      "text": "You've got a 400 sq ft living room in a mixed climate (Zone 2). Moderate sun, average insulation, standard 8-ft ceilings. Two people live in the house."
+    },
+    {
+      "type": "paragraph",
+      "text": "Start simple. 400 sq ft x 25 (Zone 2) = 10,000 BTU/h. Standard ceiling? Factor stays 1.0. Moderate sun? 1.0. Average insulation? 1.0. Standard room? 1.0. Base stays at 10,000."
+    },
+    {
+      "type": "paragraph",
+      "text": "Now add the people. Two of them at 600 BTU each = 1,200 BTU. Total cooling load: 11,200 BTU per hour."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "11,200 BTU/h divided by 12,000 = 0.93 tons. You can't buy a 0.93-ton unit, so you round up to 1.0 ton (12,000 BTU/h). That buffer above the calculated load is fine — way better than being even a few hundred BTU short."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Factor",
+        "Value",
+        "Calculation"
+      ],
+      "rows": [
+        [
+          "Area",
+          "400 sq ft",
+          "Base cooling load"
+        ],
+        [
+          "Climate Factor (Zone 2)",
+          "25",
+          "400 x 25 = 10,000 BTU/h"
+        ],
+        [
+          "Ceiling Factor (8 ft)",
+          "1.0",
+          "10,000 x 1.0 = 10,000"
+        ],
+        [
+          "Sun Factor (Moderate)",
+          "1.0",
+          "10,000 x 1.0 = 10,000"
+        ],
+        [
+          "Insulation Factor (Average)",
+          "1.0",
+          "10,000 x 1.0 = 10,000"
+        ],
+        [
+          "Room Factor (Standard)",
+          "1.0",
+          "10,000 x 1.0 = 10,000"
+        ],
+        [
+          "People Factor (2 people)",
+          "1,200 BTU/h",
+          "10,000 + 1,200 = 11,200"
+        ],
+        [
+          "Total Cooling Needed",
+          "11,200 BTU/h",
+          "0.93 tons → Round up to 1.0 ton"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Now put the same room in Phoenix (Zone 1). High sun, bad insulation, vaulted 12-ft ceiling. Watch how fast the numbers climb:"
+    },
+    {
+      "type": "paragraph",
+      "text": "Base: 400 x 30 = 12,000. Ceiling factor of 1.25 pushes it to 15,000. High sun at 1.15 brings it to 17,250. Poor insulation at 1.2 cranks it to 20,700. Add two people: 21,900 BTU/h. That's 1.83 tons — you'd need a 2-ton unit."
+    },
+    {
+      "type": "paragraph",
+      "text": "Same square footage. Same room. But completely different conditions mean you need double the cooling. This is exactly why rules of thumb aren't enough."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Proper HVAC Sizing Matters"
+    },
+    {
+      "type": "paragraph",
+      "text": "Getting the BTU right isn't just about staying comfortable. The wrong size hits your wallet, shortens your equipment's life, and hurts your air quality. Here's what happens when you get it wrong:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Issue",
+        "Undersized Unit",
+        "Oversized Unit"
+      ],
+      "rows": [
+        [
+          "Comfort",
+          "Never reaches set temperature; runs constantly",
+          "Short-cycles; creates hot and cold spots"
+        ],
+        [
+          "Humidity",
+          "May reduce humidity somewhat but struggles",
+          "Does not run long enough to dehumidify; feels clammy"
+        ],
+        [
+          "Energy Bills",
+          "High from continuous runtime",
+          "High from frequent startup surges"
+        ],
+        [
+          "Equipment Life",
+          "Premature wear from never shutting off",
+          "Premature wear from frequent on/off cycles"
+        ],
+        [
+          "Air Quality",
+          "Constant airflow helps filtration",
+          "Insufficient runtime for proper air filtration"
+        ]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Here's a dirty secret: oversizing is actually more common than undersizing in residential HVAC. People assume bigger is better because it cools faster. But faster isn't better. An oversized AC cools the air quickly but doesn't run long enough to remove humidity. So you end up with a cold, damp, uncomfortable room. Nobody wants that."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your HVAC should run in long cycles, especially during extreme weather. That's how it properly dehumidifies, keeps temperatures even, and operates at peak efficiency."
+    },
+    {
+      "type": "paragraph",
+      "text": "Quick test: on the hottest day of summer, is your AC cycling on and off? It's probably oversized. A properly sized system should run almost continuously on extreme days."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Per-Square-Foot Rule of Thumb vs. Full Calculation"
+    },
+    {
+      "type": "paragraph",
+      "text": "You've seen the 20 BTU per square foot rule. It's fine for a quick ballpark. But that's all it is."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's how the different approaches stack up for a 500 sq ft room:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Approach",
+        "BTU Estimate",
+        "Best For"
+      ],
+      "rows": [
+        [
+          "20 BTU/sq ft rule of thumb",
+          "10,000 BTU/h",
+          "Quick estimates in average conditions"
+        ],
+        [
+          "25 BTU/sq ft (Zone 2 baseline)",
+          "12,500 BTU/h (before adjustments)",
+          "Mixed climates with standard conditions"
+        ],
+        [
+          "Full formula with all factors",
+          "8,500-22,000+ BTU/h (varies by factors)",
+          "Accurate sizing for real-world conditions"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A rule of thumb works if you've got a perfectly average room in a perfectly average climate. But as we just saw, the same 400 sq ft room can need anywhere from 11,200 to 21,900 BTU depending on conditions."
+    },
+    {
+      "type": "paragraph",
+      "text": "That's not a small difference. That's the gap between a window unit and a central AC system."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Do yourself a favor: run a full load calculation before you buy anything. Getting it wrong wastes energy, shortens equipment life, and leaves you uncomfortable. Our free BTU Calculator handles the full formula in seconds."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use Our BTU Calculator"
+    },
+    {
+      "type": "paragraph",
+      "text": "Our BTU Calculator does all the hard work for you. No formulas to memorize. No zone maps to decipher. Here's what you need to do:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Enter the room size in square feet (length x width, that's it).",
+        "Pick your climate zone. Not sure? The descriptions above will help you figure it out.",
+        "Choose your ceiling height: standard, tall, or vaulted.",
+        "Set the sun exposure based on how much direct light hits the windows.",
+        "Select your insulation quality. Be honest — old drafty house? Choose \"poor.\"",
+        "Pick the room type: standard, kitchen, or basement.",
+        "Enter how many people regularly use the room.",
+        "Hit calculate. That's it."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator shows you the BTU rating and tonnage instantly. Play around with the factors — see what happens if you add insulation or install blinds. It's a great way to understand what actually makes a difference in your cooling needs."
+    },
+    {
+      "type": "cta",
+      "heading": "Size Your HVAC the Right Way",
+      "body": "Stop guessing with rules of thumb. Our free BTU Calculator gives you the right size for your AC, furnace, or heat pump in seconds. No signup, no spam, no hassle.",
+      "buttonLabel": "Open the Free BTU Calculator",
+      "path": "/diy/btu-calculator/"
+    }
+  ],
+  "keywords": [
+    "BTU calculator",
+    "AC size calculator",
+    "BTU per square foot",
+    "room cooling calculator",
+    "furnace sizing",
+    "HVAC calculator",
+    "air conditioner size",
+    "heating BTU calculator",
+    "how to calculate BTU",
+    "BTU formula",
+    "HVAC sizing guide",
+    "air conditioning sizing"
+  ]
+}

@@ -1,0 +1,572 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Commission and How Is It Calculated?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Commission is simple on paper: sell something, get a cut. It's a percentage of the sale or revenue you generated."
+    },
+    {
+      "type": "paragraph",
+      "text": "But the way commissions actually work varies wildly. Flat percentage on every deal. Multi-tiered brackets. Real estate waterfall splits. They all look completely different."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's what matters: knowing which structure applies to you and what you'll actually take home. Whether you're negotiating a job offer, signing a brokerage agreement, or setting up a comp plan for your team, you need the real numbers."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Core Commission Formula"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Flat: Net Commission = Sale Amount × Commission Rate | Tiered: Net Commission = Σ(Tier Span × Tier Rate for each bracket) | Real Estate: Net Commission = (Sale × Gross Commission % / 2) × (1 − Franchise Fee %) × Agent Split %"
+    },
+    {
+      "type": "paragraph",
+      "text": "Flat structures? One multiplication. Done."
+    },
+    {
+      "type": "paragraph",
+      "text": "Tiered commissions work like tax brackets — different rates for different slices of revenue. Your blended effective rate always lands somewhere between the lowest and highest tier."
+    },
+    {
+      "type": "paragraph",
+      "text": "Real estate splits are a waterfall. A franchise fee gets skimmed off the top, then the remainder gets split between agent and broker. The order of operations? It matters way more than most people realize."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Sale: The transaction value or gross revenue the commission is calculated from.",
+        "Commission Rate: The percentage of the sale paid to the salesperson (flat or per tier).",
+        "Tier Bracket: The dollar range of the sale falling within a given tier (e.g., $0 to $50,000).",
+        "Gross Commission %: Total commission paid by the seller in a real estate transaction (typically 5–6%).",
+        "Agent Split: The agent's share of their side commission after the broker's cut.",
+        "Base Salary: Fixed annual salary paid regardless of commission earnings, combined into On-Target Earnings (OTE)."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Flat Commission Structure: Simple and Predictable"
+    },
+    {
+      "type": "paragraph",
+      "text": "A flat commission is exactly what it sounds like — one rate on everything you sell. Sell $200,000 at 10%? You get $20,000. No brackets, no tiers, no waterfalls."
+    },
+    {
+      "type": "paragraph",
+      "text": "You'll find this structure in retail, independent contractor roles, and entry-level sales. It's simple and transparent."
+    },
+    {
+      "type": "paragraph",
+      "text": "The trade-off? There's no extra incentive to go big. Every dollar earns the same rate as the one before it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Flat Commission Example — Sales Representative"
+    },
+    {
+      "type": "paragraph",
+      "text": "A medical device sales rep earns 12% flat on everything they sell. In Q1, they close $180,000."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Input",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Sale Amount",
+          "$180,000"
+        ],
+        [
+          "Flat Commission Rate",
+          "12%"
+        ],
+        [
+          "Net Commission",
+          "$21,600"
+        ],
+        [
+          "Effective Rate",
+          "12.00%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The math is clean: $180,000 × 12% = $21,600. With flat commissions, your effective rate always matches the quoted rate."
+    },
+    {
+      "type": "paragraph",
+      "text": "Throw in a $45,000 base salary, and that quarter looks even better. $45,000 ÷ 4 + $21,600 = $32,850 for the quarter. And that's before counting any other deals."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Tiered / Graduated Commission Structure: Rewarding Top Performers"
+    },
+    {
+      "type": "paragraph",
+      "text": "Tiered commissions are the standard for high-performance sales roles. The logic is simple: your first dollars earn a lower rate, then each marginal dollar earns more."
+    },
+    {
+      "type": "paragraph",
+      "text": "It's designed to push you past quota and close bigger deals. The more you sell, the higher your rate goes."
+    },
+    {
+      "type": "paragraph",
+      "text": "You'll see this in enterprise software, pharma, and financial services — anywhere companies want to reward top performers."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Tiered Commission Example — Enterprise Software Sales"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's a real example. An enterprise SaaS account exec has a three-tier plan: first $50,000 earns 5%, next $100,000 earns 8%, and everything above $150,000 earns 12%. In January, they close $275,000."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Tier",
+        "Bracket",
+        "Amount in Bracket",
+        "Rate",
+        "Commission Earned"
+      ],
+      "rows": [
+        [
+          "Tier 1",
+          "$0 – $50,000",
+          "$50,000",
+          "5%",
+          "$2,500"
+        ],
+        [
+          "Tier 2",
+          "$50,001 – $150,000",
+          "$100,000",
+          "8%",
+          "$8,000"
+        ],
+        [
+          "Tier 3",
+          "Above $150,000",
+          "$125,000",
+          "12%",
+          "$15,000"
+        ],
+        [
+          "Total",
+          "—",
+          "$275,000",
+          "Blended",
+          "$25,500"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Total commission: $2,500 + $8,000 + $15,000 = $25,500. Here's the interesting part — the Tier 3 chunk alone is $15,000. That's more than half the total commission, even though it covers less than half the sale."
+    },
+    {
+      "type": "paragraph",
+      "text": "The blended effective rate is $25,500 ÷ $275,000 = 9.27%. That sits right between the lowest tier of 5% and the highest of 12%."
+    },
+    {
+      "type": "paragraph",
+      "text": "Key insight: your effective rate in a tiered structure always falls somewhere between your lowest and highest tier. Which way it leans depends on where most of your volume lands."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How the Blended Effective Rate Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "The blended effective rate is the single most important number in a tiered commission plan. It answers one question: what percentage did you actually earn across the whole deal?"
+    },
+    {
+      "type": "paragraph",
+      "text": "In our example, the rep earned $25,500 on $275,000 — an effective rate of 9.27%. But what if they only closed $60,000 in a month?"
+    },
+    {
+      "type": "paragraph",
+      "text": "$50,000 × 5% = $2,500, plus $10,000 × 8% = $800. Total: $3,300. Effective rate: $3,300 ÷ $60,000 = 5.50%. Much closer to the Tier 1 rate because most of the volume landed there."
+    },
+    {
+      "type": "paragraph",
+      "text": "See why the effective rate rises as volume increases? And also why it's a dangerous number to use for projections at different volume levels."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Real Estate Commission Splits: The Waterfall"
+    },
+    {
+      "type": "paragraph",
+      "text": "Real estate commissions work completely differently. The money flows through multiple hands before it ever reaches the agent."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's how it goes: the seller pays a gross commission — usually 5% to 6% of the sale price. That gets split 50/50 between the listing broker and the buyer's broker. Then within each brokerage, a franchise or royalty fee gets deducted. Finally, what's left gets split between the agent and broker."
+    },
+    {
+      "type": "paragraph",
+      "text": "The order of operations matters enormously. A fee taken early in the chain shrinks the base for everything that follows."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Real Estate Example — $400,000 Home Sale at 6%"
+    },
+    {
+      "type": "paragraph",
+      "text": "Let's run the numbers. An agent sells a $400,000 home. The seller pays 6% total commission. The agent has a 60/40 split (60% to the agent), and the brokerage takes a 6% franchise fee off the top."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Step",
+        "Calculation",
+        "Amount"
+      ],
+      "rows": [
+        [
+          "Total Commission Paid by Seller",
+          "$400,000 × 6%",
+          "$24,000"
+        ],
+        [
+          "Your Side Commission (50% of total)",
+          "$24,000 ÷ 2",
+          "$12,000"
+        ],
+        [
+          "Franchise Fee (6% of side)",
+          "$12,000 × 6%",
+          "−$720"
+        ],
+        [
+          "After Franchise Fee",
+          "$12,000 − $720",
+          "$11,280"
+        ],
+        [
+          "To Broker (40%)",
+          "$11,280 × 40%",
+          "−$4,512"
+        ],
+        [
+          "Your Net Commission (60%)",
+          "$11,280 × 60%",
+          "$6,768"
+        ],
+        [
+          "Effective Rate of Sale Price",
+          "$6,768 ÷ $400,000",
+          "1.69%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The agent walks away with $6,768 on a $400,000 sale. That's an effective rate of 1.69%. The headline said 6%, but the waterfall turned $24,000 into $6,768."
+    },
+    {
+      "type": "paragraph",
+      "text": "That 6% franchise fee seems small. But because it's taken before the split, it drops the agent's share from 60% down to about 56.4%. A lot of new agents miss this when they're evaluating brokerage agreements."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is an Effective Commission Rate?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The effective commission rate is your actual take-home expressed as a percentage of the sale. It cuts through all the complexity of tiers, splits, and fees to show what you're really earning."
+    },
+    {
+      "type": "paragraph",
+      "text": "In a flat structure, the effective rate equals the quoted rate. In tiered structures, it's the blended average of all your brackets. In real estate, it's your net after the entire waterfall — franchise fees, broker splits, everything."
+    },
+    {
+      "type": "paragraph",
+      "text": "A real estate agent might see a headline 6% commission. The effective rate? Often below 2%."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Always calculate the effective commission rate when comparing compensation plans. A tiered plan with a high top-end rate but a very low first tier might pay less than a flat plan at moderate volumes. The effective rate is the only comparison you can trust."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Flat vs. Tiered vs. Real Estate: Which Structure Wins?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Which one wins depends on your role, your industry, and your volume. Here's how they stack up."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Feature",
+        "Flat Rate",
+        "Tiered / Graduated",
+        "Real Estate Split"
+      ],
+      "rows": [
+        [
+          "Predictability",
+          "High — same rate every time",
+          "Moderate — effective rate varies with volume",
+          "Low — depends on fees, splits, and sale price"
+        ],
+        [
+          "Incentive Structure",
+          "No escalation for larger deals",
+          "Strong incentive to exceed quota",
+          "Tied to gross commission % and split negotiation"
+        ],
+        [
+          "Best For",
+          "Retail, independent reps, simple transactions",
+          "Enterprise sales, SaaS, pharmaceutical, financial services",
+          "Residential and commercial real estate agents"
+        ],
+        [
+          "Worst Case",
+          "No upside for top performers",
+          "Complexity can confuse reps",
+          "Fees and splits can erode take-home significantly"
+        ],
+        [
+          "Effective Rate vs. Quoted Rate",
+          "Always identical",
+          "Always between lowest and highest tier",
+          "Often far below headline commission %"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Base Salary and OTE Factor Into Commission"
+    },
+    {
+      "type": "paragraph",
+      "text": "Many sales roles include a base salary alongside commission. It gives you stability while keeping the upside. Your total picture is called On-Target Earnings (OTE) — base salary plus expected commission."
+    },
+    {
+      "type": "paragraph",
+      "text": "Example: $40,000 base plus $60,000 in commission equals $100,000 OTE."
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator lets you enter a base salary and see total compensation automatically. This matters when you're comparing job offers. A lower commission rate with a higher base might give you more stability. A higher rate with a low base? More upside for top performers."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Commission at Different Volume Levels"
+    },
+    {
+      "type": "paragraph",
+      "text": "One of the best features in the commission calculator is the Commission Table. It shows your earnings at volumes from $5,000 to $1,000,000. So you can see exactly how volume scales your income and set real sales targets."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's what it looks like at a 7.50% effective rate."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Sale Volume",
+        "Commission Earned",
+        "Effective Rate"
+      ],
+      "rows": [
+        [
+          "$5,000",
+          "$375",
+          "7.50%"
+        ],
+        [
+          "$10,000",
+          "$750",
+          "7.50%"
+        ],
+        [
+          "$25,000",
+          "$1,875",
+          "7.50%"
+        ],
+        [
+          "$50,000",
+          "$3,750",
+          "7.50%"
+        ],
+        [
+          "$100,000",
+          "$7,500",
+          "7.50%"
+        ],
+        [
+          "$250,000",
+          "$18,750",
+          "7.50%"
+        ],
+        [
+          "$500,000",
+          "$37,500",
+          "7.50%"
+        ],
+        [
+          "$750,000",
+          "$56,250",
+          "7.50%"
+        ],
+        [
+          "$1,000,000",
+          "$75,000",
+          "7.50%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "At 7.50%, $100,000 in sales gets you $7,500. At $1,000,000, you're looking at $75,000 in commission."
+    },
+    {
+      "type": "paragraph",
+      "text": "The table updates dynamically based on your actual effective rate. So you can instantly see how different deal sizes translate to earnings."
+    },
+    {
+      "type": "paragraph",
+      "text": "Want to reverse-engineer your target? If you want $10,000 this month and your effective rate is 8%, you know you need to close $125,000 in business."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Questions About Commission Calculators"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How is a tiered (graduated) commission different from a flat commission?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Flat: one rate on everything. 10% of $200,000 = $20,000. Simple."
+    },
+    {
+      "type": "paragraph",
+      "text": "Tiered: the sale gets split into brackets, and each bracket has its own rate. First $50,000 at 5%, next $100,000 at 8%, anything above at 12%."
+    },
+    {
+      "type": "paragraph",
+      "text": "Why go tiered? Because the marginal rate increases with each bracket. Bigger deals pay better. The blended effective rate always lands between your lowest and highest tier. Our calculator handles both and shows the exact breakdown."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a typical real estate commission split for a new vs. experienced agent?"
+    },
+    {
+      "type": "paragraph",
+      "text": "New agents usually start at 50/50 or 60/40 splits. The broker keeps 40% to 50% of the agent's side commission."
+    },
+    {
+      "type": "paragraph",
+      "text": "As you gain experience, you graduate to 70/30, 80/20 — even 100% commission plans after hitting production caps. Top producers at cap-based brokerages keep nearly everything after paying a fixed annual fee."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the thing: the waterfall order matters more than the headline percentage. Always model your actual take-home with a calculator that accounts for the full fee waterfall."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What does the Commission Table show and why is it useful?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Commission Table shows your earnings at volumes from $5,000 to $1,000,000 at your effective rate. It's the fastest way to see how volume scales your income and set real targets."
+    },
+    {
+      "type": "paragraph",
+      "text": "At 7.5%, $100,000 in sales = $7,500 in commission. Instantly."
+    },
+    {
+      "type": "paragraph",
+      "text": "Use it to answer questions like \"How much do I need to sell to earn $15,000 this month?\" or \"What happens if I double my average deal size?\""
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is OTE and does base salary affect commission?"
+    },
+    {
+      "type": "paragraph",
+      "text": "OTE stands for On-Target Earnings — your base salary plus expected commission."
+    },
+    {
+      "type": "paragraph",
+      "text": "A base salary doesn't change the commission calculation itself. It just gets added on top to show your total annual compensation."
+    },
+    {
+      "type": "paragraph",
+      "text": "$40,000 base + $60,000 commission = $100,000 OTE. Enter your base salary in the calculator and it shows your total compensation automatically. That way you're comparing full offers, not just rates."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can the commission calculator handle two-tier structures without a third tier?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yep. The calculator supports up to three tiers, but you can use just two. Leave Tier 3 Rate blank, and optionally leave Tier 2 Limit blank too."
+    },
+    {
+      "type": "paragraph",
+      "text": "Enter a Tier 1 Limit, Tier 1 Rate, and Tier 2 Rate. The calculator applies Tier 2 Rate to everything above the Tier 1 Limit. Simple two-bracket structure."
+    },
+    {
+      "type": "paragraph",
+      "text": "That flexibility means the calculator adapts to pretty much any graduated commission plan."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Commission in Seconds",
+      "body": "Try our free Commission Calculator. Model flat rate, tiered, and real estate broker splits. See your effective rate, OTE, and a full commission table at different volume levels — instantly and free.",
+      "buttonLabel": "Open the Free Commission Calculator",
+      "path": "/finance/commission-calculator/"
+    }
+  ],
+  "keywords": [
+    "commission calculator",
+    "real estate commission calculator",
+    "tiered commission",
+    "sales commission calculator",
+    "broker split calculator",
+    "graduated commission",
+    "flat commission rate",
+    "effective commission rate",
+    "real estate agent commission split",
+    "commission structure",
+    "sales compensation calculator",
+    "blended commission rate"
+  ]
+}

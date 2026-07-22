@@ -1,0 +1,110 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Probability is the mathematics of uncertainty — it tells you how likely things are to happen, how to combine multiple events, and how to update your beliefs when new information comes in. From weather forecasts to medical tests to the algorithms that recommend your next video, probability runs the modern world. And the core ideas are more intuitive than you might think."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is the difference between independent and dependent events?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Two events are **independent** when one doesn't affect the other. Flipping a coin twice gives independent outcomes — knowing the first flip was heads tells you nothing about the second. **Dependent** events work the other way: the probability of the second event changes based on the first."
+    },
+    {
+      "type": "paragraph",
+      "text": "Drawing two cards from a deck without replacement is a classic example — the probability of drawing an ace on the second draw depends on whether the first card was an ace. Our Probability Calculator handles independent and **mutually exclusive** events (events that can't happen at the same time, like drawing a single card that's both a heart and a spade)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How do you calculate the probability of multiple events?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Two rules handle most cases. The **multiplication rule** finds the probability of A and B both happening: multiply their individual probabilities if they're independent (P(A∩B) = P(A) × P(B)). The **addition rule** finds the probability of A or B happening: P(A∪B) = P(A) + P(B) − P(A∩B)."
+    },
+    {
+      "type": "paragraph",
+      "text": "Subtracting the intersection avoids double-counting the overlap. For mutually exclusive events, the intersection is zero, so the formula simplifies to P(A) + P(B)."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario",
+        "Rule",
+        "Formula",
+        "Example"
+      ],
+      "rows": [
+        [
+          "Both A and B happen (independent)",
+          "Multiplication",
+          "P(A∩B) = P(A) × P(B)",
+          "Flip heads (50%) and roll 6 (16.7%) = 8.3%"
+        ],
+        [
+          "Either A or B happens (independent)",
+          "Addition",
+          "P(A∪B) = P(A) + P(B) - P(A∩B)",
+          "Rain 30% or snow 20% = 44% (not 50%)"
+        ],
+        [
+          "Either A or B happens (mutually exclusive)",
+          "Addition",
+          "P(A∪B) = P(A) + P(B)",
+          "Draw heart (25%) or spade (25%) = 50%"
+        ],
+        [
+          "A doesn't happen",
+          "Complement",
+          "P(¬A) = 1 - P(A)",
+          "Not rolling a 6 = 83.3%"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is conditional probability?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Conditional probability answers the question: \"Given that B happened, how does that change the likelihood of A? \" it's written as **P(A|B)** and calculated as P(A∩B) ÷ P(B). For independent events, P(A|B) = P(A) — knowing B happened tells you nothing new about A."
+    },
+    {
+      "type": "paragraph",
+      "text": "But for dependent events, it can shift probabilities dramatically. This is the foundation of **Bayes' theorem**, which powers email spam filters, medical diagnostic reasoning, and machine learning classifiers. Your spam filter doesn't just ask \"what is the probability this is spam?"
+    },
+    {
+      "type": "paragraph",
+      "text": "\" — it asks \"given that the email contains the word 'Nigerian,' what is the probability it's spam? \" that's conditional probability in action."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Where does probability show up in the real world?"
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate probabilities for your events",
+      "body": "Use our Probability Calculator to compute P(A and B), P(A or B), P(not A), and P(A|B) for independent or mutually exclusive events, with an interactive Venn diagram and percentage conversions.",
+      "buttonLabel": "Try the Probability Calculator",
+      "path": "/math/probability-calculator/"
+    }
+  ],
+  "keywords": [
+    "probability calculator",
+    "P(A and B)",
+    "P(A or B)",
+    "conditional probability",
+    "independent events",
+    "mutually exclusive events",
+    "venn diagram",
+    "addition rule",
+    "complement rule",
+    "P(A|B)"
+  ]
+}

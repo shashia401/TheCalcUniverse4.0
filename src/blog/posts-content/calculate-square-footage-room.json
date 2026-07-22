@@ -1,0 +1,81 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Basic Formula"
+    },
+    {
+      "type": "paragraph",
+      "text": "For a rectangular room: length x width = square footage. A room that is 12 feet wide and 15 feet long has 180 square feet (12 x 15 = 180). Always measure in feet. If your tape measure shows inches, divide by 12 to convert to feet first. For example, 12 feet 6 inches = 12.5 feet."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Irregular Shapes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "L-shaped rooms: Divide the room into two rectangles, calculate each separately, and add them together.",
+        "Triangular spaces: (Base x Height) / 2. A triangular bay window area with an 8-foot base and 4-foot depth = (8 x 4) / 2 = 16 square feet.",
+        "Circular areas: Pi x radius squared (3.14 x r²). A 10-foot diameter circle has a 5-foot radius: 3.14 x 25 = 78.5 square feet.",
+        "Add 10% for waste when buying flooring materials to account for cuts and mistakes."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Measuring from the outside of walls: Measure from interior wall to interior wall for livable floor area.",
+        "Forgetting closets: Include closet floor space in your total square footage.",
+        "Rounding too early: Keep measurements in decimal feet or carry inches through the calculation.",
+        "Mixing units: Do not multiply feet by inches. Convert everything to the same unit first."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How is square footage calculated for a house?"
+    },
+    {
+      "type": "paragraph",
+      "text": "House square footage typically includes all finished, livable areas above grade. Unfinished basements, garages, and attics are usually not counted. Measure each room, add them together, and multiply by the number of levels. For multi-story homes, measure each floor separately."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the difference between square footage and square feet?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Square footage and square feet refer to the same thing: the area of a space measured in square feet. They are used interchangeably in real estate and construction."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Square Footage Calculator",
+      "body": "Measure any room shape with our free calculator. Handles rectangles, L-shapes, and circles.",
+      "buttonLabel": "Open Calculator",
+      "path": "/diy/square-footage-calculator/"
+    }
+  ],
+  "keywords": [
+    "calculate square footage",
+    "square footage calculator",
+    "room measurement",
+    "how to measure a room",
+    "square feet",
+    "area calculator"
+  ]
+}

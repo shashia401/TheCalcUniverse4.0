@@ -1,0 +1,576 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Resistor Color Code?"
+    },
+    {
+      "type": "paragraph",
+      "text": "You've seen them — those tiny cylinders with colored stripes. Each band is a code that tells you the resistor's value, tolerance, and sometimes how it behaves with temperature. The electronics industry came up with this system because printing tiny numbers on a component smaller than a grain of rice just doesn't work."
+    },
+    {
+      "type": "paragraph",
+      "text": "It started with the Radio Manufacturers Association back in the 1920s and later became the IEC 60062 standard. And it's still the main way to identify through-hole resistors today. Why? Because it's practical, durable, and anyone who works with electronics can read it — whether you're fixing a vintage amp or breadboarding your first circuit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Resistor Color Code Chart"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the cheat sheet. Ten colors map to digits 0 through 9, plus a few extras for multipliers and tolerance. Memorize this and you're halfway there."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Color",
+        "Digit",
+        "Multiplier",
+        "Tolerance",
+        "Temp. Coefficient (ppm/K)"
+      ],
+      "rows": [
+        [
+          "Black",
+          "0",
+          "×1 (×10⁰)",
+          "—",
+          "—"
+        ],
+        [
+          "Brown",
+          "1",
+          "×10 (×10¹)",
+          "±1%",
+          "100"
+        ],
+        [
+          "Red",
+          "2",
+          "×100 (×10²)",
+          "±2%",
+          "50"
+        ],
+        [
+          "Orange",
+          "3",
+          "×1,000 (×10³)",
+          "—",
+          "15"
+        ],
+        [
+          "Yellow",
+          "4",
+          "×10,000 (×10⁴)",
+          "—",
+          "25"
+        ],
+        [
+          "Green",
+          "5",
+          "×100,000 (×10⁵)",
+          "—",
+          "20"
+        ],
+        [
+          "Blue",
+          "6",
+          "×1,000,000 (×10⁶)",
+          "—",
+          "10"
+        ],
+        [
+          "Violet",
+          "7",
+          "×10,000,000 (×10⁷)",
+          "—",
+          "5"
+        ],
+        [
+          "Gray",
+          "8",
+          "—",
+          "—",
+          "1"
+        ],
+        [
+          "White",
+          "9",
+          "—",
+          "—",
+          "—"
+        ],
+        [
+          "Gold",
+          "—",
+          "×0.1",
+          "±5%",
+          "—"
+        ],
+        [
+          "Silver",
+          "—",
+          "×0.01",
+          "±10%",
+          "—"
+        ],
+        [
+          "None (no band)",
+          "—",
+          "—",
+          "±20%",
+          "—"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The first two or three bands are the significant digits. The next one is the multiplier. Then comes tolerance. On 6-band resistors, the last band tells you the temperature coefficient. One rule: Black never goes first — a leading zero would be meaningless."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Black is never used as the first band. Why? Because it'd make the first digit zero, which just wastes a band and creates confusion. Makes sense when you think about it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Read a 4-Band Resistor"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 4-band resistor is what you'll see most of the time. These are standard-tolerance parts — usually ±5% or ±10%. Here's the layout: Band 1 is the first digit. Band 2 is the second digit. Band 3 is the multiplier. Band 4 is the tolerance."
+    },
+    {
+      "type": "paragraph",
+      "text": "The math: R = (Digit1 × 10 + Digit2) × Multiplier. Simple enough. Let's try it with a real resistor."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Example: Red-Violet-Orange-Gold"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Band 1 (Red) = 2 (first significant digit)",
+        "Band 2 (Violet) = 7 (second significant digit)",
+        "Band 3 (Orange) = ×1,000 (multiplier)",
+        "Band 4 (Gold) = ±5% (tolerance)"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Combine the digits: 2 and 7 make 27. Multiply: 27 × 1,000 = 27,000 ohms. Convert that to something readable: 27 kΩ. The ±5% tolerance means the real value is anywhere from 25.65 kΩ to 28.35 kΩ. That's a pretty common resistor — you'll find these in voltage dividers, pull-ups, and current limiters everywhere."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Red-Violet-Orange-Gold = 27 kΩ ±5%. It's one of the most common values out there. If you're breadboarding a circuit, you've probably got a handful of these."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Example: Brown-Black-Red-Gold"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's another one you'll see all the time."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Band 1 (Brown) = 1",
+        "Band 2 (Black) = 0",
+        "Band 3 (Red) = ×100",
+        "Band 4 (Gold) = ±5%"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Digits 1 and 0 make 10. Multiply by 100 and you get 1,000 ohms — or 1 kΩ. The ±5% tolerance puts the actual value between 950 Ω and 1,050 Ω. This is the single most common resistor in all of electronics. Seriously, almost every circuit has at least one 1 kΩ resistor."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Read a 5-Band Resistor"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 5-band resistor gives you a third significant digit. That means higher precision. You'll find these in precision voltage references, analog circuits, and measurement gear where ±1% or ±2% matters. The layout: Band 1 (first digit), Band 2 (second digit), Band 3 (third digit), Band 4 (multiplier), Band 5 (tolerance)."
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula: R = (Digit1 × 100 + Digit2 × 10 + Digit3) × Multiplier. One more digit to track, same idea."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Example: Yellow-Violet-Black-Red-Brown"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Band 1 (Yellow) = 4",
+        "Band 2 (Violet) = 7",
+        "Band 3 (Black) = 0",
+        "Band 4 (Red) = ×100",
+        "Band 5 (Brown) = ±1%"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Three digits: 4, 7, and 0 make 470. Multiply by 100 and you get 47,000 ohms = 47 kΩ. The brown band means ±1% tolerance, so the real value is between 46.53 kΩ and 47.47 kΩ. That's way tighter than the ±5% on a standard 4-band resistor."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Yellow-Violet-Black-Red-Brown = 47 kΩ ±1%. You'll see these in audio gear and precision analog circuits where 5% just won't cut it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Example: Brown-Black-Black-Brown-Brown"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Band 1 (Brown) = 1",
+        "Band 2 (Black) = 0",
+        "Band 3 (Black) = 0",
+        "Band 4 (Brown) = ×10",
+        "Band 5 (Brown) = ±1%"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Digits 1-0-0 give you 100. The brown multiplier is ×10. So 100 × 10 = 1,000 ohms = 1 kΩ. But this time it's ±1% instead of the usual ±5%. That means the actual value is between 990 Ω and 1,010 Ω. Same value you know and love, just more precise."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Read a 6-Band Resistor"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 6-band resistor adds a temperature coefficient band. These are for precision applications where the resistance needs to stay stable when things heat up or cool down — lab instruments, automotive electronics, industrial controls. The six bands: Band 1 (first digit), Band 2 (second digit), Band 3 (third digit), Band 4 (multiplier), Band 5 (tolerance), Band 6 (temperature coefficient in ppm/K)."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Example: Blue-Gray-Orange-Red-Violet-Brown"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Band 1 (Blue) = 6",
+        "Band 2 (Gray) = 8",
+        "Band 3 (Orange) = 3",
+        "Band 4 (Red) = ×100",
+        "Band 5 (Violet) = ±0.1%",
+        "Band 6 (Brown) = 100 ppm/K"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Digits 6, 8, and 3 make 683. Red multiplier ×100 gives you 68,300 ohms = 68.3 kΩ. Violet tolerance means ±0.1%, so the range is 68.23 kΩ to 68.37 kΩ. The brown tempco band means the resistance shifts by 100 ppm (0.01%) for every 1°C change. That's useful to know if your circuit runs in a hot car or a cold warehouse."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Blue-Gray-Orange-Red-Violet-Brown = 68.3 kΩ ±0.1% with a 100 ppm/K tempco. This level of precision is what you'd expect in measurement bridges and precision voltage dividers."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Understanding Resistor Tolerance"
+    },
+    {
+      "type": "paragraph",
+      "text": "Tolerance tells you how far off the actual resistance can be from what's printed on the band. It's the manufacturing margin. A 100 Ω resistor with ±10% tolerance could measure anywhere from 90 Ω to 110 Ω fresh out of the factory."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Tolerance Band Color",
+        "Percentage",
+        "Example: 1 kΩ Resistor Range",
+        "Typical Use"
+      ],
+      "rows": [
+        [
+          "Brown",
+          "±1%",
+          "990 Ω – 1,010 Ω",
+          "Precision analog, measurement"
+        ],
+        [
+          "Red",
+          "±2%",
+          "980 Ω – 1,020 Ω",
+          "Higher-precision general purpose"
+        ],
+        [
+          "Gold",
+          "±5%",
+          "950 Ω – 1,050 Ω",
+          "General purpose (most common)"
+        ],
+        [
+          "Silver",
+          "±10%",
+          "900 Ω – 1,100 Ω",
+          "Low-cost consumer electronics"
+        ],
+        [
+          "No band",
+          "±20%",
+          "800 Ω – 1,200 Ω",
+          "Vintage/legacy components"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "For most hobby projects, Gold (±5%) is all you need. LED current limiters, pull-up resistors, basic voltage dividers — they don't care about an extra 50 ohms. But if you're building an instrumentation amplifier or an ADC reference, reach for Brown (±1%) or tighter. That's where precision pays off."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Understanding Temperature Coefficient"
+    },
+    {
+      "type": "paragraph",
+      "text": "Temperature coefficient (tempco) tells you how much a resistor drifts when things get hot. It's measured in ppm/K — parts per million per degree Celsius. Lower number means a more stable resistor. Simple."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Tempco Band Color",
+        "ppm/K",
+        "Change per °C on a 100 kΩ Resistor"
+      ],
+      "rows": [
+        [
+          "Brown",
+          "100",
+          "±10 Ω per °C"
+        ],
+        [
+          "Red",
+          "50",
+          "±5 Ω per °C"
+        ],
+        [
+          "Orange",
+          "15",
+          "±1.5 Ω per °C"
+        ],
+        [
+          "Yellow",
+          "25",
+          "±2.5 Ω per °C"
+        ],
+        [
+          "Green",
+          "20",
+          "±2 Ω per °C"
+        ],
+        [
+          "Blue",
+          "10",
+          "±1 Ω per °C"
+        ],
+        [
+          "Violet",
+          "5",
+          "±0.5 Ω per °C"
+        ],
+        [
+          "Gray",
+          "1",
+          "±0.1 Ω per °C"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Want to calculate the drift? Use ΔR = R × (ppm/K) × ΔT × 10⁻⁶. Take a 100 kΩ resistor with a brown tempco (100 ppm/K). Heat it from 25°C to 75°C (a 50°C swing) and it shifts by 500 ohms — now it reads 100.5 kΩ. For room-temperature projects, tempco barely matters. But in automotive or industrial settings? It's the difference between a circuit that works and one that drifts out of spec."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "E-Series Standard Resistor Values"
+    },
+    {
+      "type": "paragraph",
+      "text": "Resistors aren't made in every possible value. They come in standard E-series sets (IEC 60063) that space values logarithmically so their tolerance ranges overlap without gaps. The calculator uses these when you switch to Reverse mode — type in a resistance and it finds the closest standard match."
+    },
+    {
+      "type": "paragraph",
+      "text": "The E12 series (12 values per decade, ±10% tolerance): 1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2. The E24 series (24 values per decade, ±5% tolerance) adds intermediate values: 1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Here's the neat part: each E-series value repeats across every order of magnitude. The value 4.7 in E12 gives you 0.47 Ω, 4.7 Ω, 47 Ω, 470 Ω, 4.7 kΩ, 47 kΩ, 470 kΩ, 4.7 MΩ, and so on. One family covers everything from under an ohm to several mega-ohms."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "SMD Resistor Markings (No Color Codes)"
+    },
+    {
+      "type": "paragraph",
+      "text": "Surface-mount resistors are too small for color bands, so they use a different system. Most common is the three- or four-digit code. First two digits are the significant figures, third digit is the multiplier. A resistor marked 472 means 47 × 10² = 4,700 ohms = 4.7 kΩ. A marking of 100 means 10 × 10⁰ = 10 ohms. The letter R stands for a decimal point: 4R7 means 4.7 ohms, and R33 means 0.33 ohms."
+    },
+    {
+      "type": "paragraph",
+      "text": "Four-digit codes work the same but with three significant figures: 4701 means 470 × 10¹ = 4,700 ohms = 4.7 kΩ. And for 1% precision SMD resistors, you'll see EIA-96 markings — a two-character code where the number comes from a lookup table and the letter tells you the multiplier."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Zero-Ohm Resistors and Special Cases"
+    },
+    {
+      "type": "paragraph",
+      "text": "A zero-ohm resistor is just a single black band on a through-hole part, or a lone 0 on an SMD part. Despite the name, it's basically a wire. These let PCB designers use one board for multiple configurations — populate the jumper for one path, leave it empty for another."
+    },
+    {
+      "type": "paragraph",
+      "text": "If you ever run into vintage resistors from the 1940s, they used a different system called body-end-dot. The body color was the first digit, the end was the second, and a dot on the body was the multiplier. The RMA standardized it before the modern band system took over in the 1950s."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the Resistor Calculator"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator works two ways. Forward mode: pick the colors on your resistor and it tells you the value, tolerance range, and min/max expected values. Reverse mode: type in a resistance and it finds the closest standard color code. Either way, it saves you from doing mental math."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Pick Forward (Colors to Ohms) or Reverse (Ohms to Colors) mode.",
+        "Choose how many bands your resistor has: 4, 5, or 6.",
+        "In Forward mode, select each band's color. The resistor display updates as you go.",
+        "In Reverse mode, enter your target value (e.g., 4700 for 4.7 kΩ).",
+        "Read the results: resistance, tolerance range, color bands, and E-series match."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The visual panel shows the bands in order so you can double-check against the physical resistor in your hand. For 6-band resistors, it even shows the temperature coefficient in ppm/K."
+    },
+    {
+      "type": "cta",
+      "heading": "Decode Any Resistor Instantly",
+      "body": "Use our free Resistor Color Code Calculator to decode 4-band, 5-band, and 6-band resistors, or find the color bands for any resistance value. No signup required.",
+      "buttonLabel": "Open the Free Resistor Calculator",
+      "path": "/engineering/resistor-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Why is Black not allowed for the first band of a resistor?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Black is zero. Put it first and you've got a leading zero — the same reason you wouldn't write 07 instead of 7. It wastes the band and creates ambiguity. You don't do it with regular numbers, and the resistor code follows the same logic."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the difference between 4-band and 5-band resistors?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 4-band resistor has two significant digits and uses standard tolerances (±5% or ±10%). A 5-band has three significant digits and tighter tolerances (±1% or ±2%). The extra digit means more precision. A 5-band can represent 4.87 kΩ, which you just can't express with two digits."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What does the temperature coefficient on a 6-band resistor mean?"
+    },
+    {
+      "type": "paragraph",
+      "text": "It tells you how much the resistance changes with temperature. A 100 ppm/K coefficient shifts by 0.01% for every 1°C. Barely noticeable at room temperature. But in a car dashboard that bakes in the sun or an industrial sensor that sees freezing temps, picking a low-tempco resistor matters."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I read a resistor if I cannot tell which end is the first band?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Look for the gap. The tolerance band (usually gold or silver) sits a little farther from the multiplier band. If there's a 6th tempco band, it's on the opposite end. Still unsure? Use the calculator in Forward mode — pick the colors you see. If the result seems crazy (like a multi-megaohm value on a tiny resistor), try reading from the other end."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What are the E12 and E24 series?"
+    },
+    {
+      "type": "paragraph",
+      "text": "They're the standard value sets defined by IEC 60063. E12 has 12 values per decade for ±10% resistors. E24 has 24 values per decade for ±5% resistors. They're spaced so the tolerance ranges of adjacent values overlap — meaning any resistance you need will fall within range of some standard manufactured value."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Resistor Values Now",
+      "body": "Our free Resistor Color Code Calculator handles forward and reverse calculations for 4-band, 5-band, and 6-band resistors. Includes tolerance ranges, temperature coefficient, and E-series matching.",
+      "buttonLabel": "Use the Free Resistor Calculator",
+      "path": "/engineering/resistor-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Final Thoughts"
+    },
+    {
+      "type": "paragraph",
+      "text": "Reading resistor color codes is one of the first things you learn in electronics — and for good reason. Resistors are everywhere. Once you've got the color-to-digit mapping down and understand the band layout for 4, 5, and 6 bands, you can identify any through-hole resistor at a glance."
+    },
+    {
+      "type": "paragraph",
+      "text": "The sequence Black-Brown-Red-Orange-Yellow-Green-Blue-Violet-Gray-White (0 through 9) is worth memorizing. Tuck it away and it'll never leave you. And keep our resistor calculator bookmarked for when your brain's full — it'll save you time and keep you from making expensive mistakes."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Free Resistor Color Code Calculator",
+      "body": "Decode any resistor in seconds. Supports forward and reverse modes for 4-band, 5-band, and 6-band resistors with visual band display, tolerance range, and E-series matching.",
+      "buttonLabel": "Open Resistor Calculator",
+      "path": "/engineering/resistor-calculator/"
+    }
+  ],
+  "keywords": [
+    "resistor calculator",
+    "resistor color code",
+    "ohm calculator",
+    "4 band resistor",
+    "5 band resistor",
+    "6 band resistor",
+    "electronics calculator",
+    "color code decoder",
+    "E12 series",
+    "E24 series",
+    "resistance calculator",
+    "resistor color bands",
+    "electronics engineering",
+    "circuit components"
+  ]
+}

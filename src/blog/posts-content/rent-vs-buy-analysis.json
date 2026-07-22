@@ -1,0 +1,80 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "you've heard it a hundred times: 'Renting is throwing money away. ' But that's not the full picture. Buying comes with closing costs, maintenance, property taxes, PMI, and selling costs that can easily total tens of thousands of dollars."
+    },
+    {
+      "type": "paragraph",
+      "text": "The real question: *how long do you need to stay for buying to actually beat renting?"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Break-Even Year: The One Number That Matters?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The break-even year is the point at which the cumulative net cost of buying becomes cheaper than renting. Before that year, renting wins. After it, buying wins."
+    },
+    {
+      "type": "paragraph",
+      "text": "Most simple calculators get this wrong by ignoring **opportunity cost** — the investment returns you give up by using your down payment on a house instead of investing in the stock market. The national average break-even is roughly 3–5 years, but it varies dramatically. In high-cost markets like San Francisco or NYC, it can stretch to 7–10+ years."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the Calculator Actually Compares"
+    },
+    {
+      "type": "paragraph",
+      "text": "The buying path tracks principal and interest, property taxes, maintenance (1–2% of home value per year), PMI, closing costs at purchase, and selling costs (5–8%) at exit, then subtracts your net sale proceeds. The renting path tracks all rent payments adjusted for annual increases, renters insurance, and *adds back* the investment gains your down payment would have earned in stocks at 7%. The result is an apples-to-apples net cost comparison."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your break-even year depends on several variables you control — a larger down payment, lower mortgage rate, or lower selling costs all shorten the timeline."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Transaction Costs Are the Hidden Barrier"
+    },
+    {
+      "type": "paragraph",
+      "text": "The biggest reason buying doesn't always win is transaction costs. Buying costs **3–5% upfront** in closing costs and **5–8% at sale** in realtor commissions and transfer taxes. On a $400,000 home, that's $12,000–$20,000 to buy and $20,000–$32,000 to sell."
+    },
+    {
+      "type": "paragraph",
+      "text": "Combined, you're out $32,000–$52,000 in friction costs before you've built any equity. It takes years of appreciation and principal paydown just to break even on those costs alone."
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator focuses on the financial comparison, but some benefits are harder to quantify. Renting offers flexibility — you can move with one month's notice and zero selling costs. Buying offers stability — no landlord, no unexpected rent hikes, no risk of non-renewal."
+    },
+    {
+      "type": "paragraph",
+      "text": "Ask yourself: How confident am I that i'll stay for X years? If I had to move in 2 years, could I absorb the loss? Is my down payment my only savings, or do i've a separate emergency fund?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Would I actually invest the difference if I kept renting?"
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Break-Even Year",
+      "body": "Run your own numbers with the Rent vs. Buy Calculator. Adjust the timeline, see the year-by-year chart, and discover your exact break-even point in seconds.",
+      "buttonLabel": "Compare Rent vs. Buy",
+      "path": "/finance/rent-vs-buy-calculator/"
+    }
+  ],
+  "keywords": [
+    "rent vs buy calculator",
+    "should I rent or buy",
+    "rent vs buy break even",
+    "is it better to rent or buy",
+    "rent vs buy analysis",
+    "home buying vs renting",
+    "rent or buy a house",
+    "break even year renting vs buying"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Key Differences"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Feature",
+        "Secured",
+        "Unsecured"
+      ],
+      "rows": [
+        [
+          "Collateral",
+          "Yes (house, car, etc.)",
+          "No"
+        ],
+        [
+          "Interest rate",
+          "3-8% typical",
+          "6-36% typical"
+        ],
+        [
+          "Loan amount",
+          "Up to asset value",
+          "Usually under $100K"
+        ],
+        [
+          "Approval time",
+          "Days to weeks",
+          "Same day possible"
+        ],
+        [
+          "Risk",
+          "Lose collateral if default",
+          "Credit damage if default"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Choose Each"
+    },
+    {
+      "type": "paragraph",
+      "text": "Choose secured for large amounts (mortgage, auto) where rates matter most. Choose unsecured for smaller, short-term needs (debt consolidation, emergency expenses) where you do not want to risk assets. Never take a secured loan for depreciating assets (except cars). Do not take an unsecured loan with a rate above 15% if you can make a payment plan instead."
+    },
+    {
+      "type": "cta",
+      "heading": "Compare Loan Payments",
+      "body": "Use our loan calculator to compare secured and unsecured loan payments.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/loan-calculator/"
+    }
+  ],
+  "keywords": [
+    "secured vs unsecured loan",
+    "collateral loan",
+    "unsecured loan rate",
+    "secured loan better",
+    "loan types comparison",
+    "personal loan vs secured loan"
+  ]
+}

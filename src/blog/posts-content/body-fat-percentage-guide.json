@@ -1,0 +1,109 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Body Fat Percentage Matters More Than Weight"
+    },
+    {
+      "type": "paragraph",
+      "text": "Two people can weigh the same but have completely different health profiles. The difference? Body composition."
+    },
+    {
+      "type": "paragraph",
+      "text": "Body fat percentage tells you how much of your weight is fat versus lean tissue (muscle, bone, organs, water). It's a far better health indicator than the scale because it reveals what your weight is actually made of. A person at **20% body fat** is  different from someone at **35% body fat**, even at the same weight."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Men",
+        "Women"
+      ],
+      "rows": [
+        [
+          "Essential Fat",
+          "2–5%",
+          "10–13%"
+        ],
+        [
+          "Athletic",
+          "6–13%",
+          "14–20%"
+        ],
+        [
+          "Fitness",
+          "14–17%",
+          "21–24%"
+        ],
+        [
+          "Average",
+          "18–24%",
+          "25–31%"
+        ],
+        [
+          "Obese",
+          "25%+",
+          "32%+"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Is Body Fat Measured?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The U. S. Navy circumference method is one of the simplest and most validated tape-measure techniques."
+    },
+    {
+      "type": "paragraph",
+      "text": "You take a few body measurements — neck, abdomen (for men), or waist and hip (for women) — and plug them into a formula. No expensive equipment, no appointments. The standard error is about **±2–3%** compared to hydrostatic weighing."
+    },
+    {
+      "type": "paragraph",
+      "text": "For the most accurate results, measure in the morning before eating, use a non-stretchable tape, and have someone else take the measurements."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "For men, the formula uses neck and abdomen circumference. For women, it uses neck, waist, and hip. The key measurement is the difference between your trunk and neck — this correlates strongly with total body density. Take each measurement 2–3 times and use the average for the best accuracy. Don't measure after a workout: water loss can give falsely low readings."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Improve Your Body Composition"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Prioritize protein. Aim for **1.6–2.2 g per kg** of body weight daily to preserve muscle during fat loss.",
+        "Lift weights, don't just do cardio. Resistance training signals your body to keep muscle while losing fat.",
+        "Create a moderate calorie deficit. **300–500 calories below TDEE** targets fat without triggering muscle loss.",
+        "Sleep at least **7 hours** per night. Poor sleep increases cortisol and ghrelin, making fat loss harder.",
+        "Track trends, not daily numbers. Body fat changes slowly — measure every 2–4 weeks and look for direction over time."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Body Fat vs. BMI — Which Is Better?"
+    },
+    {
+      "type": "cta",
+      "heading": "Estimate Your Body Fat Percentage",
+      "body": "Our Body Fat Calculator uses the U.S. Navy circumference method to estimate your body fat, fitness category, and lean mass breakdown. It takes less than a minute.",
+      "buttonLabel": "Calculate Body Fat",
+      "path": "/health/body-fat-calculator/"
+    }
+  ],
+  "keywords": [
+    "body fat percentage",
+    "healthy body fat ranges",
+    "us navy body fat method",
+    "body composition",
+    "body fat measurement",
+    "how to measure body fat"
+  ]
+}

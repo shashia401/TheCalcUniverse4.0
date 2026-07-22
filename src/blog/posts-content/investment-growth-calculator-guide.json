@@ -1,0 +1,62 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Albert Einstein reportedly called compound interest the eighth wonder of the world. Whether he said it or not, the math is staggering. Small, regular investments can grow into life-changing wealth — but only if you give them enough years to compound."
+    },
+    {
+      "type": "paragraph",
+      "text": "Our investment growth calculator shows you three scenarios: expected, optimistic, and pessimistic. Here's what the numbers mean for your portfolio and how you can use them to plan smarter."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How does the investment growth formula work?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The future value formula combines two things: the growth of your starting lump sum and the growth of your ongoing contributions. Both compound monthly at your expected rate of return."
+    },
+    {
+      "type": "paragraph",
+      "text": "Even if you start with **$0**, regular contributions of **$500/month** at **8%** return grow to over **$290,000** in 20 years. That's only **$120,000** in contributions — the other **$170,000+** comes from market returns."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why do you need three return scenarios?"
+    },
+    {
+      "type": "paragraph",
+      "text": "No investment returns exactly the same amount every year. Some years you'll see **20%** gains. Others you'll see **-10%** losses."
+    },
+    {
+      "type": "paragraph",
+      "text": "Our calculator shows expected, optimistic (rate + variance), and pessimistic (rate - variance) scenarios."
+    },
+    {
+      "type": "paragraph",
+      "text": "A **plus or minus 2%** variance is reasonable for a diversified portfolio. The range of outcomes helps you plan conservatively while understanding the upside potential."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Use the pessimistic scenario for planning purposes and the optimistic scenario for motivation. Your actual results will likely fall somewhere in between — and that's exactly why you need both numbers."
+    },
+    {
+      "type": "cta",
+      "heading": "Model Your Investment Growth",
+      "body": "Enter your starting amount, regular contribution, time horizon, and expected return to see three scenarios. Our calculator shows your expected, optimistic, and pessimistic outcomes so you can plan with confidence.",
+      "buttonLabel": "Try the Investment Calculator",
+      "path": "/finance/investment-calculator/"
+    }
+  ],
+  "keywords": [
+    "investment calculator",
+    "future value calculator",
+    "investment growth calculator",
+    "investment return calculator",
+    "stock market calculator",
+    "portfolio calculator"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "SIP for Retirement — The Advantage of Starting Early"
+    },
+    {
+      "type": "paragraph",
+      "text": "Retirement SIPs benefit enormously from time. The monthly investment needed drops dramatically the earlier you start. For a ₹2 crore retirement corpus at age 60 assuming 12% returns: starting at 25 needs ₹4,500/month, at 30 needs ₹8,000/month, at 35 needs ₹14,000/month, at 40 needs ₹25,000/month, at 45 needs ₹47,000/month."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "From SIP to SWP in Retirement"
+    },
+    {
+      "type": "paragraph",
+      "text": "During your working years, you build the corpus through SIP. In retirement, you use an SWP (Systematic Withdrawal Plan) to generate monthly income from that corpus. A well-planned SIP-to-SWP strategy ensures your savings last throughout retirement. The SWP calculator helps you plan the withdrawal phase."
+    },
+    {
+      "type": "cta",
+      "heading": "Plan Your Retirement SIP",
+      "body": "Use our SIP calculator to find your monthly investment target.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/sip-calculator/"
+    }
+  ],
+  "keywords": [
+    "sip for retirement",
+    "retirement sip calculator",
+    "monthly sip retirement",
+    "pension sip",
+    "retirement corpus sip",
+    "sip retirement planning india"
+  ]
+}

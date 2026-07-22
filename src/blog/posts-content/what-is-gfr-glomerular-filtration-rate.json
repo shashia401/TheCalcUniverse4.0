@@ -1,0 +1,220 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is GFR in Simple Terms?"
+    },
+    {
+      "type": "paragraph",
+      "text": "GFR stands for glomerular filtration rate. It is a measure of how many milliliters of blood your kidneys filter per minute. Think of your kidneys as your body's water treatment plant — every drop of your blood passes through them about 60 times a day. The glomeruli — tiny bundles of capillaries — act as the filters. GFR tells you how well those filters are working."
+    },
+    {
+      "type": "paragraph",
+      "text": "In a healthy young adult, the kidneys filter roughly 120 mL of blood per minute. That is about 180 liters per day. Most of that fluid is reabsorbed, with about 1.5-2 liters excreted as urine. GFR measures the filtration rate at the glomerulus level — before reabsorption — which is why it is such a sensitive indicator of kidney health."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Key distinction: Your lab report shows eGFR (estimated GFR), not a direct measurement of your GFR. The \"e\" matters — it means your result is calculated from a blood test using a validated equation, not measured directly. Direct GFR measurement is complex and reserved for research settings."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why GFR Is the Gold Standard for Kidney Health"
+    },
+    {
+      "type": "paragraph",
+      "text": "GFR is considered the best overall measure of kidney function for several reasons. First, it directly measures what the kidneys do — filter blood. Other tests like BUN or creatinine alone can be misleading because they are affected by diet, hydration, and muscle mass. Second, GFR offers a standardized number that applies across different body sizes and ages when normalized to 1.73m² of body surface area."
+    },
+    {
+      "type": "paragraph",
+      "text": "Third, GFR enables the staging of chronic kidney disease. The five-stage CKD classification system — from Stage 1 (normal function with kidney damage) to Stage 5 (kidney failure) — is defined entirely by GFR thresholds. This staging system drives clinical decisions: when to refer to a specialist, when to start medications, when to prepare for dialysis, and how often to monitor."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "eGFR ≥ 90: Normal kidney function (no CKD unless other damage markers present)",
+        "eGFR 60-89: Mildly decreased (normal for many older adults)",
+        "eGFR 45-59: Stage 3a — CKD diagnosed if persistent for 3+ months",
+        "eGFR 30-44: Stage 3b — nephrology referral typically indicated",
+        "eGFR 15-29: Stage 4 — prepare for renal replacement therapy",
+        "eGFR < 15: Stage 5 — kidney failure, dialysis or transplant needed"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The beauty of this system is that it gives both patients and doctors a clear picture of where things stand. An eGFR of 55 may sound alarming if you think \"below 60 is bad,\" but it is actually a common finding in a 70-year-old and may simply reflect normal aging. The trend over time matters far more than any single number."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Your Kidneys Filter Blood"
+    },
+    {
+      "type": "paragraph",
+      "text": "Understanding how your kidneys filter blood helps you appreciate what GFR really measures. Each kidney contains about 1 million nephrons — the functional units of the kidney. Each nephron contains a glomerulus (a tuft of capillaries) and a tubule. Blood enters the glomerulus under pressure, forcing fluid and small molecules (water, electrolytes, creatinine, urea, glucose) through the filter wall into Bowman's capsule."
+    },
+    {
+      "type": "paragraph",
+      "text": "The filtered fluid then travels through the tubule, where the kidney reabsorbs what the body needs to keep (water, glucose, electrolytes) and leaves the rest as urine. The glomerulus acts as a size-selective and charge-selective filter. Red blood cells and large proteins like albumin are too big to pass through a healthy glomerulus — which is why protein in the urine (proteinuria) is a sign of kidney damage."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "eGFR vs. Creatinine: What Is the Difference?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Serum creatinine alone is a poor measure of kidney function. Creatinine is a waste product from muscle metabolism, and its level in the blood depends on muscle mass, diet, age, and sex — not just kidney function. A muscular 25-year-old man and a frail 80-year-old woman with the same serum creatinine of 1.0 mg/dL have very different actual GFRs."
+    },
+    {
+      "type": "paragraph",
+      "text": "eGFR equations correct for these factors. They take the creatinine value and adjust it for age, sex, and sometimes body size to produce an estimated GFR. This is why eGFR has largely replaced serum creatinine as the standard for assessing kidney function. The 2021 CKD-EPI equation that our calculator uses is the most accurate available for the general population."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Test",
+        "What It Measures",
+        "Limitations"
+      ],
+      "rows": [
+        [
+          "eGFR (CKD-EPI)",
+          "Estimated filtration rate adjusted for age/sex",
+          "Less accurate at extremes of muscle mass"
+        ],
+        [
+          "Serum Creatinine",
+          "Creatinine level in blood",
+          "Affected by diet, muscle mass, hydration"
+        ],
+        [
+          "BUN (Blood Urea Nitrogen)",
+          "Urea level in blood",
+          "Affected by protein intake, liver function"
+        ],
+        [
+          "Cystatin C",
+          "Alternative filtration marker",
+          "More accurate but more expensive"
+        ],
+        [
+          "Creatinine Clearance",
+          "24-hour urine collection",
+          "Cumbersome, overestimates true GFR"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Affects GFR Accuracy?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Several factors can cause your eGFR to be temporarily different from your true kidney function. Understanding these helps you interpret a single abnormal result without unnecessary alarm."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Dehydration — the most common cause of a false low eGFR",
+        "High-protein meals — eating heavy meat before testing raises creatinine",
+        "Intense exercise — especially weightlifting or leg workouts 12-24 hours before",
+        "Medications — NSAIDs (ibuprofen, naproxen) can temporarily lower eGFR",
+        "Pregnancy — eGFR normally rises by 30-50%",
+        "Muscle wasting — low muscle mass inflates eGFR, masking kidney disease",
+        "Very high muscle mass — can lower eGFR, suggesting disease when none exists"
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "If your eGFR comes back below 60, your doctor will typically repeat the test after 2-12 weeks. A single low reading does not automatically mean kidney disease — especially if you had any of the factors above. Always discuss results with your healthcare provider rather than interpreting them alone."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "GFR and Age: Normal Decline vs. Disease"
+    },
+    {
+      "type": "paragraph",
+      "text": "A common source of confusion is distinguishing normal age-related GFR decline from disease. Beginning around age 30-40, GFR decreases by approximately 0.5-1% per year. This is a natural process driven by age-related changes in kidney structure — some nephrons are lost, blood flow to the kidneys decreases, and the remaining nephrons work less efficiently."
+    },
+    {
+      "type": "paragraph",
+      "text": "This means a healthy 80-year-old with an eGFR of 55 likely has kidneys that are functioning perfectly well for their age. The same eGFR in a 40-year-old would be cause for concern and investigation. This is why eGFR must always be interpreted in the context of age. Our GFR calculator accounts for this automatically by including age in the equation."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your eGFR",
+      "body": "Use our free GFR calculator — enter your creatinine, age, and sex. Takes 30 seconds. No signup required.",
+      "buttonLabel": "Calculate GFR",
+      "path": "/health/gfr-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a normal GFR?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A normal GFR for a young adult is 90-130 mL/min/1.73m². However, GFR naturally declines with age. A normal 70-year-old might have a GFR of 55-80, which is healthy for their age. The key threshold for concern across all ages is eGFR consistently below 60 for three months or longer."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is eGFR the same as GFR?"
+    },
+    {
+      "type": "paragraph",
+      "text": "No. eGFR is an estimate of your actual GFR, calculated from a blood test using equations like CKD-EPI. Direct GFR measurement is more accurate but requires a complex procedure (inulin injection or radioactive tracer with timed urine collections). eGFR is accurate enough for clinical decision-making in most situations."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I check my GFR at home?"
+    },
+    {
+      "type": "paragraph",
+      "text": "You cannot measure GFR at home directly, but you can use online calculators like ours with your lab results. The process is simple: have your doctor order a basic metabolic panel that includes serum creatinine. Once you have the creatinine value, enter it into our GFR calculator along with your age and sex to see your eGFR and CKD stage."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What does a GFR of 100 mean?"
+    },
+    {
+      "type": "paragraph",
+      "text": "An eGFR of 100 mL/min/1.73m² is normal and indicates healthy kidney function for most adults. It suggests your kidneys are filtering blood at an expected rate. However, other markers of kidney health (albumin in urine, blood in urine, imaging findings) also matter — even with a normal eGFR, you can still have early kidney disease (Stage 1 CKD) if other damage markers are present."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How often should I check my GFR?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For healthy adults: every 1-2 years on routine blood work. For those with diabetes, hypertension, or family history of kidney disease: every 6-12 months. For known CKD: every 3-6 months depending on stage."
+    }
+  ],
+  "keywords": [
+    "what is gfr",
+    "glomerular filtration rate",
+    "egfr explained",
+    "kidney function test",
+    "how kidneys work",
+    "what is egfr",
+    "gfr meaning",
+    "kidney filtration rate",
+    "normal kidney function"
+  ]
+}

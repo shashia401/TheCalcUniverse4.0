@@ -1,0 +1,104 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is an Amortization Calculator?"
+    },
+    {
+      "type": "paragraph",
+      "text": "An amortization calculator does more than tell you your monthly payment. It generates a full payment-by-payment breakdown showing exactly how much of each payment goes toward principal versus interest over the entire life of the loan. This schedule reveals a surprising truth: in the early years of a 30-year mortgage, the vast majority of each payment goes toward interest, not principal. Understanding this dynamic is the key to building a strategy that can save you tens of thousands of dollars."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Read an Amortization Schedule"
+    },
+    {
+      "type": "paragraph",
+      "text": "An amortization schedule lists every single payment over the life of your loan. Each row shows the payment number, the principal portion, the interest portion, and the remaining balance. In month one of a typical ,000 mortgage at 6.5%, roughly ,166 goes to interest and only  goes to principal. By year 15, those numbers start to flip. By year 25, most of your payment goes to principal. This front-loaded interest structure is why paying extra early has such an outsized impact."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Extra Payments Save You Money"
+    },
+    {
+      "type": "paragraph",
+      "text": "Every extra dollar you send to principal is a dollar that never accrues interest again. On that same ,000 mortgage at 6.5%, adding just  per month saves roughly ,000 in interest and pays off the loan 4 years early. An extra  per month saves over ,000 and cuts 7 years off the term. The amortization calculator shows you these exact numbers side by side so you can decide what fits your budget."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the Calculator"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Enter your loan amount, interest rate, and loan term.",
+        "View the full amortization schedule showing every payment.",
+        "Enter an extra monthly payment to see the side-by-side comparison.",
+        "Review the savings: interest saved, years cut, new payoff date.",
+        "Adjust the extra amount until you find the right balance."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Strategies That Work"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Biweekly payments: Pay half every two weeks. This results in 13 full payments per year instead of 12, shaving years off automatically.",
+        "Round up: Round your payment to the nearest  or  for painless extra principal.",
+        "Annual lump sums: Use tax refunds or bonuses as a one-time principal reduction.",
+        "Refinance strategically: If rates drop, a shorter-term refinance locks in savings."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Even one extra payment per year can shorten a 30-year mortgage by 4 to 5 years. Use the amortization calculator to find the strategy that works for your budget."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is it better to make extra mortgage payments or invest?"
+    },
+    {
+      "type": "paragraph",
+      "text": "If your mortgage rate is under 4%, investing historically earns a better return. At rates above 6%, paying down debt gives you a guaranteed risk-free return equal to your rate."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can I lose my extra payments if I sell early?"
+    },
+    {
+      "type": "paragraph",
+      "text": "No. Every dollar of extra principal builds equity. When you sell, that equity comes back to you as cash."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Amortization Calculator",
+      "body": "See exactly how extra payments affect your mortgage. No signup required.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "amortization calculator guide",
+    "mortgage amortization",
+    "extra payment calculator",
+    "amortization schedule explained",
+    "how to pay off mortgage early"
+  ]
+}

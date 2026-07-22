@@ -1,0 +1,81 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Obesity Paradox in Older Adults"
+    },
+    {
+      "type": "paragraph",
+      "text": "The obesity paradox is a fascinating phenomenon: in older adults (65+), being in the overweight BMI category (25-29.9) is associated with lower mortality than being in the normal BMI category (18.5-24.9). This does not mean obesity is healthy. It likely reflects that older adults with slightly higher BMIs have more muscle mass and nutritional reserves to weather illness, surgery, and hospitalizations. A normal BMI in an older adult can sometimes mask sarcopenic obesity — low muscle mass with hidden high body fat."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Sarcopenic Obesity — The Hidden Risk"
+    },
+    {
+      "type": "paragraph",
+      "text": "Sarcopenic obesity occurs when muscle mass declines with age (sarcopenia) while body fat stays the same or increases. The result: a person can have a normal BMI but dangerously low muscle mass and high body fat percentage. This is invisible to BMI but carries significant health risks — metabolic disease, functional decline, falls, and frailty. For seniors, body composition assessment (body fat percentage, muscle mass, waist circumference) is far more informative than BMI alone."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "BMI Guidelines for Seniors"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Below 22: Underweight — may indicate frailty or malnutrition risk. Nutritional assessment recommended.",
+        "22-27: Healthy range for seniors. This is slightly higher than the general adult range.",
+        "27-30: Overweight but may be protective. Unnecessary weight loss could be harmful.",
+        "Above 30: Obesity — associated with health risks even in seniors. Weight management should prioritize preserving muscle mass.",
+        "Above 35: Moderate-severe obesity — health risks likely outweigh any protective effect."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "If you are over 65, do not pursue weight loss without medical supervision. Unintended weight loss in seniors is associated with higher mortality. Focus on maintaining muscle and strength rather than achieving a specific BMI number."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a healthy BMI for a 70-year-old?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Research suggests a BMI of 24-27 is optimal for adults over 65. This is slightly higher than the general adult healthy range. A BMI below 22 in seniors is associated with increased mortality risk and may indicate frailty or malnutrition."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should seniors lose weight if their BMI is high?"
+    },
+    {
+      "type": "paragraph",
+      "text": "If a senior has a high BMI but is metabolically healthy and physically active, weight loss may not be beneficial. If there are obesity-related health problems (diabetes, joint pain, sleep apnea), modest weight loss of 5-10% can help — but it should include strength training to preserve muscle mass. Crash dieting in seniors is dangerous."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your BMI",
+      "body": "Use our free BMI calculator with age-adjusted interpretation for adults of all ages.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "bmi for seniors",
+    "healthy bmi for older adults",
+    "obesity paradox elderly",
+    "bmi for elderly",
+    "sarcopenic obesity",
+    "bmi over 65"
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Much Protein Do You Actually Need per Day?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Walk into any gym and you'll hear the rule: one gram of protein per pound of body weight. it's a simple guideline, but it overestimates for most people. The real evidence-based range from the ISSN and ACSM consensus is **1."
+    },
+    {
+      "type": "paragraph",
+      "text": "6 to 2. 2 grams per kilogram** of body weight — about **0. 73 to 1."
+    },
+    {
+      "type": "paragraph",
+      "text": "0 grams per pound**."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Your Goal Changes Your Protein Needs"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your daily **protein intake** target shifts depending on what you're trying to achieve. Someone maintaining weight with light activity needs less than someone in a calorie deficit trying to preserve muscle. The higher end of the range is most valuable during fat loss, where protein's thermic effect and satiety help you stick to your deficit and retain lean mass."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Goal",
+        "Range (g/kg)",
+        "Range (g/lb)",
+        "Best For"
+      ],
+      "rows": [
+        [
+          "Maintain",
+          "1.2–1.6 g/kg",
+          "0.55–0.73 g/lb",
+          "Sedentary to light activity"
+        ],
+        [
+          "Fat Loss (Cut)",
+          "1.6–2.2 g/kg",
+          "0.73–1.0 g/lb",
+          "Calorie deficit with resistance training"
+        ],
+        [
+          "Muscle Gain (Bulk)",
+          "1.6–2.2 g/kg",
+          "0.73–1.0 g/lb",
+          "Calorie surplus with resistance training"
+        ],
+        [
+          "Endurance Athlete",
+          "1.4–1.8 g/kg",
+          "0.64–0.82 g/lb",
+          "6+ hours of cardio per week"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When and How Should You Eat Your Protein?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The **anabolic window** is wider than commonly thought — you've **4 to 6 hours post-workout**, not 30 minutes. However, consuming **30–40 grams of protein within 2 hours of training** is still optimal timing. The single most important factor for muscle growth is total daily intake, not precise timing."
+    },
+    {
+      "type": "paragraph",
+      "text": "What matters more is spreading that total across the day."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your body has a per-meal ceiling for muscle protein synthesis (MPS) of roughly **0. 4 grams per kilogram of body weight**. Anything beyond that in a single meal is oxidized for energy rather than used to build muscle."
+    },
+    {
+      "type": "paragraph",
+      "text": "The solution is to spread your **daily protein** across **3 to 5 meals**, each hitting that threshold to maximally stimulate MPS throughout the day."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Chicken breast (3 oz):** ~26g protein — lean and versatile for any meal",
+        "**Greek yogurt (3/4 cup):** ~17g protein — excellent for breakfast or a high-protein snack",
+        "**Whey protein (1 scoop):** ~25g protein — fast-digesting and ideal post-workout",
+        "**Eggs (1 large):** ~6g protein — a complete protein with all essential amino acids",
+        "**Salmon (3 oz):** ~22g protein — rich in omega-3s alongside high-quality protein"
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Daily Protein Needs",
+      "body": "Get your personalized protein target based on your weight, goal, and training frequency. Includes a per-meal breakdown and food equivalents for practical planning.",
+      "buttonLabel": "Calculate Your Protein Intake",
+      "path": "/health/protein-calculator/"
+    }
+  ],
+  "keywords": [
+    "protein calculator",
+    "how much protein per day",
+    "protein intake calculator",
+    "protein for muscle gain",
+    "protein for fat loss",
+    "daily protein needs"
+  ]
+}

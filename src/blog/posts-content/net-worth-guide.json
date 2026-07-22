@@ -1,0 +1,96 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Your net worth is the truest measure of your financial health. Not your income, not your savings account balance, not your 401(k) — but the single number that represents everything you own minus everything you owe. Two people earning identical salaries can have radically different net worths depending on how they save, invest, and manage debt."
+    },
+    {
+      "type": "heading",
+      "text": "The Net Worth Formula",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula couldn't be simpler: **Net Worth = Total Assets minus Total Liabilities. ** Assets are everything you own that has monetary value. Liabilities are everything you owe."
+    },
+    {
+      "type": "paragraph",
+      "text": "The difference is your net worth — and it can be positive, zero, or negative."
+    },
+    {
+      "type": "paragraph",
+      "text": "Financial independence is typically defined as having a net worth large enough to generate passive income that covers your living expenses. The classic benchmark is **25 times your annual spending** (the 4% rule). But that's a long-term goal."
+    },
+    {
+      "type": "paragraph",
+      "text": "For today, just knowing your number is the first step."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "What to Include",
+        "Where to Find the Value"
+      ],
+      "rows": [
+        [
+          "Cash & Savings",
+          "Checking, savings, money market accounts",
+          "Bank statements or online banking"
+        ],
+        [
+          "Investments",
+          "Stocks, bonds, mutual funds, ETFs, brokerage accounts",
+          "Brokerage statements or portfolio dashboard"
+        ],
+        [
+          "Retirement",
+          "401(k), IRA, Roth IRA, pension value",
+          "Latest quarterly or annual statement"
+        ],
+        [
+          "Real Estate",
+          "Current market value of property you own",
+          "Zestimate, recent comps, or appraisal"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "What Counts as an Asset?",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "Assets fall into five main categories: **cash and savings** (checking, savings, money market), **investments** (stocks, bonds, mutual funds, ETFs), **retirement accounts** (401k, IRA, Roth IRA, pension value), **real estate** (your home, rental properties, land), and **other assets** (vehicles, jewelry, business equity, collectibles)."
+    },
+    {
+      "type": "paragraph",
+      "text": "Use current market values, not what you paid. For your home, use a realistic estimate from comparable sales or an online valuation. For vehicles, use a site like Kelley Blue Book."
+    },
+    {
+      "type": "paragraph",
+      "text": "For investments and retirement, use your latest statement balance."
+    },
+    {
+      "type": "callout",
+      "text": "Which asset category do people most often forget? Retirement accounts. Your 401(k) and IRA balances absolutely count toward your net worth, even though you can't access the money penalty-free until retirement age. they're still assets you own.",
+      "variant": "info"
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Net Worth Right Now",
+      "body": "Enter your assets and liabilities into our free Net Worth Calculator. Get your net worth, debt-to-asset ratio, and a clear financial health snapshot in under 2 minutes.",
+      "buttonLabel": "Open the Net Worth Calculator",
+      "path": "/finance/net-worth-calculator/"
+    }
+  ],
+  "keywords": [
+    "net worth",
+    "calculate net worth",
+    "assets and liabilities",
+    "net worth tracker",
+    "personal finance",
+    "financial health"
+  ]
+}

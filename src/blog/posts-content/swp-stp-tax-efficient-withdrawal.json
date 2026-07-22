@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The SWP + STP Strategy"
+    },
+    {
+      "type": "paragraph",
+      "text": "Keep 3-5 years of living expenses in debt funds (lower returns, lower tax). Set up an STP to transfer a fixed amount monthly from debt to equity funds. Run your SWP from the debt fund. This way, your equity allocation continues to grow for the long term while your short-term withdrawals come from the more stable debt portion."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Tax Benefits"
+    },
+    {
+      "type": "paragraph",
+      "text": "Debt fund withdrawals are taxed at your income slab rate but only on the capital gains portion. By keeping 3-5 years of expenses in debt, you avoid having to sell equity units when markets are down. The STP ensures your equity allocation is gradually built back up over time."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SWP Calculator",
+      "body": "Plan your retirement withdrawals with our free SWP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/swp-calculator/"
+    }
+  ],
+  "keywords": [
+    "swp stp strategy",
+    "tax efficient withdrawal",
+    "swp tax planning",
+    "stp swp combination",
+    "retirement tax strategy",
+    "systematic transfer plan"
+  ]
+}

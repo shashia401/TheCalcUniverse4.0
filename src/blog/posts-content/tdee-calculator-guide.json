@@ -1,0 +1,479 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is TDEE (Total Daily Energy Expenditure)?"
+    },
+    {
+      "type": "paragraph",
+      "text": "TDEE stands for Total Daily Energy Expenditure — the total number of calories your body burns in a day. Every breath you take, every step you walk, every meal you digest, every rep in the gym. It all adds up."
+    },
+    {
+      "type": "paragraph",
+      "text": "This is the most important number you’ll find if you’re trying to lose weight, build muscle, or just keep things as they are."
+    },
+    {
+      "type": "paragraph",
+      "text": "Think of TDEE as your daily calorie budget. Eat exactly that many and your weight stays put. Eat less and you’re in a deficit — that’s fat loss. Eat more and you’ve got a surplus for muscle growth. Every nutrition plan starts with getting this number right."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The TDEE Formula"
+    },
+    {
+      "type": "paragraph",
+      "text": "The TDEE formula is surprisingly simple. Take your BMR — the calories you burn doing absolutely nothing — and multiply it by an activity factor."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "TDEE = BMR × Activity Factor\n\nBMR (Mifflin-St Jeor, Men): 10W + 6.25H − 5A + 5\nBMR (Mifflin-St Jeor, Women): 10W + 6.25H − 5A − 161\nBMR (Katch-McArdle): 370 + 21.6 × Lean Body Mass (kg)"
+    },
+    {
+      "type": "paragraph",
+      "text": "Mifflin-St Jeor is the most widely tested BMR formula, and it’s what our TDEE calculator uses by default. It takes four things: your weight, height, age, and sex."
+    },
+    {
+      "type": "paragraph",
+      "text": "But here’s the trick: if you know your body fat percentage, the calculator switches to Katch-McArdle. It uses lean body mass instead of total weight, so it’s more accurate — especially if you’re lean or athletic."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Four Components of TDEE"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your TDEE isn’t one big number. It’s four separate pieces added together. And that’s why two people who weigh the same and do the same workouts can have totally different calorie needs."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "BMR — Basal Metabolic Rate (60–75% of TDEE)"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMR is what it costs your body just to stay alive. Breathing, pumping blood, keeping your temperature steady, growing cells. That’s it — and it’s 60 to 75% of your total daily burn."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your BMR is driven mostly by lean body mass. More muscle means a higher resting metabolism. That’s why strength training is such a long-term win: add muscle, raise your BMR, raise your TDEE."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "TEF — Thermic Effect of Food (~10% of TDEE)"
+    },
+    {
+      "type": "paragraph",
+      "text": "TEF is the energy cost of digesting your food. And not all foods cost the same to process."
+    },
+    {
+      "type": "paragraph",
+      "text": "Protein is the winner here: 20 to 30% of its calories get burned just from digestion. A 200-calorie chicken breast costs you 40 to 60 calories to process. Carbs cost 5 to 10%. Fat costs nearly nothing — 0 to 3%. This is one big reason high-protein diets work."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "EAT — Exercise Activity Thermogenesis (2–20% of TDEE)"
+    },
+    {
+      "type": "paragraph",
+      "text": "EAT is the calories from deliberate exercise. Running, lifting, swimming, cycling — the stuff you do on purpose."
+    },
+    {
+      "type": "paragraph",
+      "text": "This one varies wildly. A sedentary person? Near zero. An athlete training twice a day? That’s up to 20% of their TDEE. Our calculator handles this automatically based on your activity level."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "NEAT — Non-Exercise Activity Thermogenesis (10–15% of TDEE)"
+    },
+    {
+      "type": "paragraph",
+      "text": "NEAT is the sneakiest and most variable part of TDEE. It’s every calorie you burn through movement that isn’t exercise. Walking to the bus, fidgeting at your desk, standing while cooking, tapping your foot."
+    },
+    {
+      "type": "paragraph",
+      "text": "NEAT can be as low as 200 calories a day for a totally sedentary person or over 900 calories for someone with an active job or restless habits. That’s why two identical twins doing the same workouts can have different TDEEs — it’s NEAT."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here’s the good news: you can bump up your NEAT without a gym membership. Standing desk. Walking during phone calls. Take the stairs. Park farther away. It adds up fast."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Component",
+        "% of TDEE",
+        "Description",
+        "How to Influence It"
+      ],
+      "rows": [
+        [
+          "BMR",
+          "60–75%",
+          "Calories at complete rest",
+          "Build muscle through strength training"
+        ],
+        [
+          "TEF",
+          "~10%",
+          "Energy to digest food",
+          "Eat more protein (highest thermic effect)"
+        ],
+        [
+          "EAT",
+          "2–20%",
+          "Deliberate exercise calories",
+          "Increase workout frequency and intensity"
+        ],
+        [
+          "NEAT",
+          "10–15%",
+          "Non-exercise movement",
+          "Stand more, walk more, fidget more"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Activity Level Multipliers"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your activity level is the multiplier that turns BMR into TDEE. And picking the right one is the most common mistake people make. So be honest, not aspirational."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Activity Level",
+        "Description",
+        "Multiplier"
+      ],
+      "rows": [
+        [
+          "Sedentary",
+          "Desk job, little to no exercise",
+          "TDEE × 1.2"
+        ],
+        [
+          "Light Exercise",
+          "1–2 days per week of intentional activity",
+          "TDEE × 1.375"
+        ],
+        [
+          "Moderate Exercise",
+          "3–5 days per week, actual sweat sessions",
+          "TDEE × 1.55"
+        ],
+        [
+          "Heavy Exercise",
+          "6–7 days per week of intense training",
+          "TDEE × 1.725"
+        ],
+        [
+          "Athlete / Physical Job",
+          "Twice-daily training or physically demanding work",
+          "TDEE × 1.9"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Most people overestimate by one category. Work out three days a week but sit at a desk the rest of the time? You’re probably Light Exercise, not Moderate."
+    },
+    {
+      "type": "paragraph",
+      "text": "Picking one too high can inflate your TDEE by 200 to 400 calories. That’s enough to turn your deficit into maintenance without you realizing it. Our calculator lets you adjust and see the difference instantly."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Real-World TDEE Example"
+    },
+    {
+      "type": "paragraph",
+      "text": "Let’s run through a real example so you can see how this all works."
+    },
+    {
+      "type": "paragraph",
+      "text": "Take a 30-year-old guy who’s 180 lbs, 5’10”, and works out moderately 4 days a week. Mifflin-St Jeor says his BMR is about 1,795 calories. With a moderate activity multiplier of 1.55, his TDEE comes out to 2,780 calories a day."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Metric",
+        "Value"
+      ],
+      "rows": [
+        [
+          "BMR (Mifflin-St Jeor)",
+          "1,795 kcal/day"
+        ],
+        [
+          "Activity Level",
+          "Moderate (1.55x)"
+        ],
+        [
+          "TDEE (Maintenance)",
+          "2,780 kcal/day"
+        ],
+        [
+          "Mild Weight Loss",
+          "2,530 kcal/day (−250)"
+        ],
+        [
+          "Weight Loss",
+          "2,280 kcal/day (−500)"
+        ],
+        [
+          "Lean Muscle Gain",
+          "3,030 kcal/day (+250)"
+        ],
+        [
+          "Protein Recommendation",
+          "~180 g/day"
+        ],
+        [
+          "Fat Recommendation",
+          "~77 g/day (25% of calories)"
+        ],
+        [
+          "Carbohydrates (balance)",
+          "~310 g/day"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "So he can eat 2,780 calories a day and stay exactly where he is. Want to lose a pound a week? Drop to 2,280 (a 500-calorie deficit). Want to build muscle at a steady pace? Go to 3,030 (a 250-calorie surplus)."
+    },
+    {
+      "type": "paragraph",
+      "text": "Our TDEE calculator spits out all these numbers for your exact stats in seconds. Macros included."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Using TDEE for Weight Loss"
+    },
+    {
+      "type": "paragraph",
+      "text": "Weight loss is simple in theory: eat fewer calories than your TDEE. That’s a calorie deficit."
+    },
+    {
+      "type": "paragraph",
+      "text": "A 500-calorie deficit per day adds up to about a pound of fat loss per week. Roughly. The actual rate depends on your metabolism, your body composition, and how your body adapts."
+    },
+    {
+      "type": "paragraph",
+      "text": "A moderate deficit of 250 to 500 calories below TDEE is sustainable and keeps your muscle. Going lower — especially below 1,200 for women or 1,500 for men — that’s Very Low Calorie Diet territory. Medically supervised only."
+    },
+    {
+      "type": "paragraph",
+      "text": "The TDEE calculator flags these danger zones in red. So you won’t accidentally plan something unsafe."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Using TDEE for Muscle Gain"
+    },
+    {
+      "type": "paragraph",
+      "text": "Want to build muscle? You need a calorie surplus. Eat more than your TDEE so your body has the fuel and materials for muscle protein synthesis."
+    },
+    {
+      "type": "paragraph",
+      "text": "A 250 to 500 calorie surplus is the sweet spot for most people. Go higher and you’ll add mostly fat. Stay at maintenance and you won’t grow — unless you’re a beginner or coming back after a break."
+    },
+    {
+      "type": "paragraph",
+      "text": "What you eat matters too. Our calculator’s default macro split gives you about 1 gram of protein per pound of body weight, 25% of calories from fat, and the rest from carbs."
+    },
+    {
+      "type": "paragraph",
+      "text": "It’s designed to support muscle growth while keeping fat gain under control. Tweak the ratios based on how you feel and train. Just keep that protein high."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Mifflin-St Jeor vs. Katch-McArdle: Which Formula Should You Use?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Mifflin-St Jeor is the default for a reason. It works for most adults (ages 19 to 78) and only needs basic info: weight, height, age, and sex. No body fat measurement required."
+    },
+    {
+      "type": "paragraph",
+      "text": "And it’s accurate to within about 10% of your actual BMR. Pretty impressive for a simple equation."
+    },
+    {
+      "type": "paragraph",
+      "text": "Katch-McArdle is better for lean people and athletes. It uses lean body mass instead of total weight. Two people can weigh the same but have totally different BMRs if one has more muscle."
+    },
+    {
+      "type": "paragraph",
+      "text": "If you know your body fat percentage, enter it. The calculator automatically switches to Katch-McArdle. For most people the difference is small. For trained athletes with low body fat, it matters a lot."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Macronutrient Recommendations Based on TDEE"
+    },
+    {
+      "type": "paragraph",
+      "text": "Once you know your TDEE and your target, the next step is splitting those calories between protein, fat, and carbs. Our calculator gives you a starting split. Here’s why it’s set up that way:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Protein — aim for about 1 gram per pound of body weight. It has the highest thermic effect, it builds muscle, and it keeps you full. It’s the most important macro whether you’re cutting or bulking.",
+        "Fat — about 25% of your total calories. Your hormones need it (yes, including testosterone). So do your cell membranes and vitamin absorption. Don’t drop it too low.",
+        "Carbs — whatever’s left. They fuel your workouts, keep your brain sharp, and refill glycogen stores. On training days, eat more."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Your TDEE changes as you change. Lose weight? Your TDEE drops — a smaller body needs less fuel. Gain muscle? Your TDEE goes up — muscle is hungry.\n\nRecalculate every 10 to 15 pounds of change to keep your targets accurate. Our calculator makes it easy — just update your numbers."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Questions About TDEE"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the difference between BMR and TDEE?"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMR is what you’d burn lying in bed doing nothing at all. Just existing. TDEE adds everything on top — walking to the kitchen, digesting your food, typing emails, and your workout."
+    },
+    {
+      "type": "paragraph",
+      "text": "For nutrition planning, TDEE is the number you need. BMR is just the biggest piece of it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is it safe to eat below 1,200 or 1,500 calories?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For most people, going below 1,200 calories (women) or 1,500 (men) puts you in Very Low Calorie Diet territory. And that comes with real risks: nutrient deficiencies, muscle loss, gallstones, a slower metabolism, and hormone problems."
+    },
+    {
+      "type": "paragraph",
+      "text": "This is not a DIY zone. Medical supervision only. The TDEE calculator marks these limits in red as a safety warning."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How does NEAT vary between individuals?"
+    },
+    {
+      "type": "paragraph",
+      "text": "NEAT varies from 200 calories a day to over 900. A fidgety person who stands at their desk, takes the stairs, and paces on the phone can burn 500+ more calories through NEAT than someone who sits still all day."
+    },
+    {
+      "type": "paragraph",
+      "text": "That’s how two identical twins doing the exact same workouts can end up with different TDEEs. It’s NEAT."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What happens to my TDEE as I lose weight?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your TDEE drops as you lose weight. A smaller body needs less fuel. Lose 30 pounds and you might need 150 to 250 fewer calories per day than someone who’s naturally that weight."
+    },
+    {
+      "type": "paragraph",
+      "text": "This is why plateaus happen. They’re normal. The fix? Recalculate your TDEE every time your weight changes significantly. Our calculator updates instantly."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I choose the right activity level?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Be honest with yourself. Sedentary = desk job, no exercise. Light = 1–2 workouts a week where you actually sweat. Moderate = 3–5 workouts with real effort. Heavy = daily intense training. Athlete = twice-daily training or a physical job like construction."
+    },
+    {
+      "type": "paragraph",
+      "text": "When in doubt, pick the lower option. Most people overestimate by one category. That can inflate your TDEE by 200 to 400 calories — enough to sabotage a deficit you worked hard on."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "When should I use Katch-McArdle instead of Mifflin-St Jeor?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Use Katch-McArdle if you know your body fat percentage, especially if you’re lean or have above-average muscle. It uses lean body mass instead of total weight, so it removes the error from two people who weigh the same but carry different amounts of fat."
+    },
+    {
+      "type": "paragraph",
+      "text": "Know your body fat? Enter it. The calculator switches to Katch-McArdle automatically."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your TDEE Instantly",
+      "body": "Our free TDEE Calculator gives you your total daily energy expenditure, BMR, calorie targets for any goal, and personalized macros. Works in pounds or kilos, with optional body fat input for Katch-McArdle.",
+      "buttonLabel": "Open the Free TDEE Calculator",
+      "path": "/health/tdee-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Final Thoughts"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your TDEE is the foundation of any nutrition plan. Whether you’re after fat loss, muscle gain, or maintenance, knowing this number gives you a real starting point — not a guess."
+    },
+    {
+      "type": "paragraph",
+      "text": "The four components show you where your calories go and which levers you can actually pull."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here’s the thing: your TDEE doesn’t stay put. It changes with your weight, your muscle, your age, and your activity. Recalculate every 10 to 15 pounds and your plan stays on track."
+    },
+    {
+      "type": "paragraph",
+      "text": "Our free TDEE calculator gives you everything: maintenance calories, deficit and surplus targets, macros, and a full breakdown of all four components."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the TDEE Calculator Now",
+      "body": "Get your personalized TDEE, BMR, calorie goal matrix, and macros in seconds. No signup, no email needed.",
+      "buttonLabel": "Calculate My TDEE Now",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee calculator",
+    "total daily energy expenditure",
+    "calorie calculator",
+    "bmr calculator",
+    "maintenance calories",
+    "how many calories should i eat",
+    "tdee formula",
+    "mifflin st jeor",
+    "katch mcardle",
+    "tdee for weight loss",
+    "calorie deficit calculator",
+    "bmr vs tdee"
+  ]
+}

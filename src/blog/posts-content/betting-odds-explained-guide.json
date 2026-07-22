@@ -1,0 +1,115 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "If you've ever stared at '+200' or '7/2' on a sportsbook screen and felt your brain short-circuit, you're not alone. Betting odds come in three different formats depending on where you live, but they all tell you the same two things: your potential payout and the implied probability of an outcome."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Three Odds Formats at a Glance"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Format",
+        "Example",
+        "What It Means",
+        "Where It Is Used"
+      ],
+      "rows": [
+        [
+          "American (positive)",
+          "+200",
+          "Win $200 profit on a $100 bet",
+          "US, Canada"
+        ],
+        [
+          "American (negative)",
+          "-150",
+          "Bet $150 to win $100 profit",
+          "US, Canada"
+        ],
+        [
+          "Decimal",
+          "3.00",
+          "Multiply your stake by 3.00 for total return",
+          "Europe, Australia, Canada"
+        ],
+        [
+          "Fractional",
+          "2/1",
+          "Win $2 for every $1 staked",
+          "UK, Ireland"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Convert Between Formats"
+    },
+    {
+      "type": "paragraph",
+      "text": "The math is straightforward once you know the rules. For American odds, positive numbers convert to decimal with `(odds / 100) + 1` — so **+200 becomes 3. 00**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Negative odds use `(100 / |odds|) + 1` — so **-150 becomes 1. 667**. Fractional odds are just the decimal minus 1 expressed as a fraction: 3."
+    },
+    {
+      "type": "paragraph",
+      "text": "00 minus 1 is 2/1. An odds converter handles all three instantly, but learning the relationship helps you spot mispriced lines faster when shopping across sportsbooks."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is Implied Probability?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Implied probability is the percentage chance the odds represent. The formula is dead simple: `1 / decimal odds x 100`. Odds of **3."
+    },
+    {
+      "type": "paragraph",
+      "text": "00 imply a 33. 3% chance**. Odds of **1."
+    },
+    {
+      "type": "paragraph",
+      "text": "50 imply a 66. 7% chance**. This is the single most useful number for a bettor because it lets you ask the key question: 'Do I think the actual probability is higher or lower than what the odds say?"
+    },
+    {
+      "type": "paragraph",
+      "text": "' If you believe an outcome has a 40% chance but the odds only imply 33. 3%, you've found a value bet."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Remember: implied probabilities from a bookmaker always add up to more than 100%. That extra percentage is the vig (vigorish), also called the overround. In a fair market, two equally likely outcomes would each be at +100 (50% implied probability each). In reality, you'll see both sides at -110, which works out to 52.4% each for a total of 104.8%. That 4.8% is the bookmaker's built-in profit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Understanding the Vig and Why It Matters"
+    },
+    {
+      "type": "cta",
+      "heading": "Convert Odds Instantly",
+      "body": "Use TheCalcUniverse Betting Odds Converter to switch between American, Decimal, and Fractional formats, see implied probability, and calculate your payout for any stake.",
+      "buttonLabel": "Try the Odds Converter",
+      "path": "/everyday/betting-odds-calculator/"
+    }
+  ],
+  "keywords": [
+    "betting odds converter",
+    "odds calculator",
+    "implied probability calculator",
+    "american to decimal odds",
+    "betting payout calculator",
+    "sports betting odds",
+    "fractional odds to decimal",
+    "parlay calculator",
+    "vig calculator",
+    "overround calculator"
+  ]
+}

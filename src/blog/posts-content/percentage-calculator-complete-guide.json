@@ -1,0 +1,59 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Three Types of Percentage Calculations"
+    },
+    {
+      "type": "paragraph",
+      "text": "Most percentage problems fall into three categories. Find what percent of Y is X (e.g., what percent of 200 is 50?). Find what is X% of Y (e.g., what is 15% of 80?). Find the percentage change (e.g., what is the percent increase from 50 to 75?). Our calculator handles all three instantly."
+    },
+    {
+      "type": "paragraph",
+      "text": "The basic formula is: percentage = (part / whole) × 100. But you can also work backward: part = (percentage × whole) / 100. Our calculator handles both directions and also calculates percentage increase and decrease between two numbers."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Uses"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Shopping discounts: A $80 jacket at 25% off saves you $20. You pay $60.",
+        "Restaurant tips: 15% of a $65 bill is $9.75. 20% is $13.00.",
+        "Sales tax: 8% tax on a $40 purchase adds $3.20 for a total of $43.20.",
+        "Test scores: 42 correct out of 50 questions = 84%.",
+        "Investment returns: A $10,000 investment growing to $12,500 is a 25% gain.",
+        "Weight loss: Losing 15 lbs from 180 lbs is an 8.3% reduction."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Percentage Change: Increase vs Decrease"
+    },
+    {
+      "type": "paragraph",
+      "text": "To calculate percentage change, subtract the original value from the new value, divide by the original value, and multiply by 100. A positive result is an increase; a negative result is a decrease. For example, a stock going from $50 to $60 is a 20% increase. Rent dropping from $1,500 to $1,350 is a 10% decrease."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Percentages Instantly",
+      "body": "Use our free percentage calculator for discounts, tips, tax, and any percentage math.",
+      "buttonLabel": "Calculate Now",
+      "path": "/math/math-percentage-calculator/"
+    }
+  ],
+  "keywords": [
+    "percentage calculator",
+    "how to calculate percentage",
+    "percent of a number",
+    "percentage change",
+    "percentage calculator online",
+    "find percentage",
+    "percent difference"
+  ]
+}

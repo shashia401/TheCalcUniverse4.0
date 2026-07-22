@@ -1,0 +1,100 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Are Heart Rate Training Zones?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your heart doesn't beat at one speed — it responds to how hard you're working. Heart rate training zones categorize those responses into five distinct ranges, each triggering a different physiological adaptation. Knowing your zones is the difference between guessing your effort and training with real precision."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Do You Calculate Your Personal Heart Rate Zones?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The simplest method estimates your max heart rate as **220 minus your age**, then applies percentage ranges. But the **Karvonen formula** — which factors in your resting heart rate — is significantly more accurate. It calculates your Heart Rate Reserve (Max HR minus Resting HR) and applies intensity percentages to that, making your **target heart rate** zones truly personal to your fitness level."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Zone",
+        "Name",
+        "% of Max HR",
+        "Training Benefit"
+      ],
+      "rows": [
+        [
+          "Zone 1",
+          "Warm Up / Recovery",
+          "50–60%",
+          "Active recovery, blood flow, light movement"
+        ],
+        [
+          "Zone 2",
+          "Fat Burn / Aerobic Base",
+          "60–70%",
+          "Optimal fat oxidation, endurance building, conversational pace"
+        ],
+        [
+          "Zone 3",
+          "Aerobic / Cardio",
+          "70–80%",
+          "Cardiovascular efficiency, lactate threshold"
+        ],
+        [
+          "Zone 4",
+          "Anaerobic / Threshold",
+          "80–90%",
+          "Speed and power development, pushes lactate threshold higher"
+        ],
+        [
+          "Zone 5",
+          "VO2 Max / All-Out",
+          "90–100%",
+          "Maximum oxygen uptake, short bursts only (30–60 seconds)"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Is Zone 2 the Most Underrated Training Zone?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Zone 2 is the foundation of endurance. Training here builds aerobic capacity, improves **fat-burning efficiency**, increases capillary density in your muscles, and requires  little recovery time. Elite endurance athletes spend **80% of their training** in this zone."
+    },
+    {
+      "type": "paragraph",
+      "text": "Most recreational athletes skip it because it feels too easy, but that easy feeling is exactly the point."
+    },
+    {
+      "type": "paragraph",
+      "text": "Zone 3 is what coaches call the **grey zone** — not easy enough for optimal aerobic adaptation and not hard enough for anaerobic gains. If most of your runs feel moderately hard, you're probably stuck here. The 80/20 rule (also called polarized training) recommends **80% of weekly training in Zones 1–2** and only **20% in Zones 4–5**, a pattern validated in studies of Olympic-level rowers, cyclists, and runners."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Measure your resting heart rate first thing in the morning before getting out of bed. Take it on multiple mornings and average the readings. A lower resting HR generally indicates better cardiovascular fitness, and entering it into a **heart rate zone calculator** using the Karvonen method will give you significantly more accurate training zones."
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Personal Heart Rate Zones",
+      "body": "Enter your age and resting heart rate to get your personalized training zones using the Karvonen formula. Know exactly which heart rate to target for every workout.",
+      "buttonLabel": "Calculate Your Heart Rate Zones",
+      "path": "/health/heart-rate-zones-calculator/"
+    }
+  ],
+  "keywords": [
+    "heart rate zone calculator",
+    "target heart rate calculator",
+    "fat burning heart rate",
+    "karvonen formula",
+    "max heart rate calculator",
+    "training zones"
+  ]
+}

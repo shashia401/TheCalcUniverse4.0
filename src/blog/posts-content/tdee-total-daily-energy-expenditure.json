@@ -1,0 +1,68 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Four Components of TDEE"
+    },
+    {
+      "type": "paragraph",
+      "text": "TDEE has four components: BMR (basal metabolic rate, 60-75% of TDEE), TEF (thermic effect of food, ~10%), EAT (exercise activity thermogenesis, 5-15%), and NEAT (non-exercise activity thermogenesis, 15-30%). BMR is the calories needed for basic life functions at complete rest. TEF is the energy used to digest and process food. EAT is deliberate exercise. NEAT is everything else — walking, fidgeting, standing, cleaning."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Activity Level Affects TDEE"
+    },
+    {
+      "type": "paragraph",
+      "text": "The difference between sedentary and very active is enormous: a person with a 1,600-calorie BMR who is sedentary might have a TDEE of 1,920 (1,600 x 1.2). That same person who is very active (exercise 6-7 days/week) would have a TDEE of 2,768 (1,600 x 1.725). That is an 848-calorie difference per day — enough to significantly change weight loss or maintenance targets."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use TDEE for Weight Goals"
+    },
+    {
+      "type": "paragraph",
+      "text": "To maintain weight: eat at TDEE. To lose weight: eat 300-500 calories below TDEE for 0.5-1 lb per week. To gain weight: eat 300-500 calories above TDEE. Recalculate TDEE every 10-15 lbs of weight change because your BMR changes with your body weight."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How accurate are TDEE calculators?"
+    },
+    {
+      "type": "paragraph",
+      "text": "TDEE calculators provide a starting estimate accurate to about 200-300 calories. Individual variations in metabolism, muscle mass, and NEAT can change the actual number. Track your weight for 2-3 weeks eating at the calculated TDEE and adjust up or down based on results."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Does TDEE change with age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes. BMR decreases about 1-2% per decade after age 20, primarily due to muscle loss. Strength training helps maintain muscle mass and keeps TDEE higher as you age, which is why resistance training is recommended for long-term weight management."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the TDEE Calculator",
+      "body": "Calculate your total daily energy expenditure for weight loss, maintenance, or gain.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "TDEE",
+    "total daily energy expenditure",
+    "TDEE calculator",
+    "calories per day",
+    "energy expenditure"
+  ]
+}

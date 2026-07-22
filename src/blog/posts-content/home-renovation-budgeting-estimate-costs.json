@@ -1,0 +1,146 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Renovations Go Over Budget"
+    },
+    {
+      "type": "paragraph",
+      "text": "The number one reason renovations exceed budget is simple: surprises behind the walls. You open up a wall to find outdated wiring, water damage, or termite damage. What seemed like a straightforward kitchen update turns into a structural repair. The second reason is scope creep. Once you start, it is tempting to add just one more upgrade. And the third is underestimating materials. Square footage math seems simple until you account for tile patterns that need extra waste or cabinets that cost more per linear foot than expected."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The 20% Contingency Rule"
+    },
+    {
+      "type": "paragraph",
+      "text": "Every renovation budget needs a contingency fund. Industry standard is 10-20% of the total project cost set aside for unexpected issues. For older homes (pre-1980), lean toward 20%. For newer construction or cosmetic-only updates, 10% may be sufficient. This is not optional. If your kitchen renovation is budgeted at $30,000, you should have $6,000 available for surprises. Do not budget your contingency into the project scope itself. Keep it separate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the Renovation Budget Calculator"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "List all the rooms or areas you plan to renovate.",
+        "Enter estimated costs for each major category: materials, labor, permits, fixtures.",
+        "Add your contingency percentage (10-20% recommended).",
+        "Review the total budget with contingency included.",
+        "Adjust individual line items to see how changes affect the total."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Typical Cost Breakdown by Room"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Room",
+        "Low-End",
+        "Mid-Range",
+        "High-End"
+      ],
+      "rows": [
+        [
+          "Kitchen (minor)",
+          "$5,000",
+          "$15,000",
+          "$30,000"
+        ],
+        [
+          "Kitchen (major)",
+          "$15,000",
+          "$35,000",
+          "$70,000+"
+        ],
+        [
+          "Bathroom",
+          "$3,000",
+          "$9,000",
+          "$20,000+"
+        ],
+        [
+          "Basement (finished)",
+          "$6,000",
+          "$18,000",
+          "$40,000+"
+        ],
+        [
+          "Flooring (per room)",
+          "$500",
+          "$2,000",
+          "$5,000+"
+        ],
+        [
+          "Paint (per room)",
+          "$200",
+          "$400",
+          "$800+"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Where to Save vs. Splurge"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Save on: Cabinets (semi-custom vs. full custom), floor tiles (ceramic instead of natural stone), fixtures from mid-range brands, painting yourself.",
+        "Splurge on: Plumbing (cheap fixtures fail fast), electrical work (always hire licensed), structural changes (walls, beams), waterproofing in bathrooms and basements.",
+        "Never skimp on: Permits (unpermitted work causes issues when selling), labor for skilled trades (tile, counters, cabinets), quality paint (it lasts years longer)."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Get at least three quotes from contractors. Materials should be 40-50% of your budget, labor 30-40%, and contingency 10-20%. If a quote seems too good to be true, it probably is."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Do I need permits for my renovation?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Permits are required for structural changes, electrical, plumbing, HVAC, and sometimes flooring and window replacement. Requirements vary by location. Always check with your local building department. Unpermitted work can cause problems when selling your home and may not be covered by insurance."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I pay for a renovation?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Options include cash (no interest), home equity loans or HELOCs (low rates), personal loans (fast but higher rates), and credit cards only for small purchases. Avoid financing contractors through their in-house lending partners without comparing rates first."
+    },
+    {
+      "type": "cta",
+      "heading": "Plan Your Renovation Budget",
+      "body": "Use our free renovation budget calculator to estimate costs, add contingency, and keep your project on track.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/budget-calculator/"
+    }
+  ],
+  "keywords": [
+    "home renovation budget",
+    "renovation cost estimator",
+    "remodeling budget",
+    "home improvement costs",
+    "renovation calculator"
+  ]
+}

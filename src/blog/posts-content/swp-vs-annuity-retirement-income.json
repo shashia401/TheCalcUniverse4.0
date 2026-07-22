@@ -1,0 +1,36 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Key Differences"
+    },
+    {
+      "type": "paragraph",
+      "text": "SWP: Your corpus stays invested, you control the withdrawal amount, corpus can be passed to heirs, returns depend on market performance. Annuity: You get guaranteed income for life regardless of how long you live, but the principal is gone (no inheritance), and returns are typically lower (5-7%)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Hybrid Approach"
+    },
+    {
+      "type": "paragraph",
+      "text": "Most retirees benefit from a hybrid strategy: use an annuity for essential expenses (rent, groceries, utilities) where guaranteed income provides peace of mind, and use SWP for discretionary expenses (travel, gifts, hobbies) where flexibility and growth potential add value."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SWP Calculator",
+      "body": "Plan your retirement withdrawals with our free SWP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/swp-calculator/"
+    }
+  ],
+  "keywords": [
+    "swp vs annuity",
+    "annuity vs swp",
+    "retirement income comparison",
+    "guaranteed income vs market linked",
+    "swp or annuity better"
+  ]
+}

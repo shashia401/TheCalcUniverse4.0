@@ -41,7 +41,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     category: 'Engineering',
     categorySlug: 'engineering',
     subCategory: 'General',
-    reviewedBy: 'Network engineering specialist, CCNA certified',
     relatedIds: ['bandwidth-calculator', 'rate-limit-calculator', 'electricity-cost-calculator', 'password-generator'],
     relatedPosts: ['electricity-cost-calculator-guide'],
     seoKeywords: ['IP subnet calculator', 'CIDR calculator', 'subnet mask', 'network address', 'broadcast address', 'usable host range', 'IPv4 subnetting', 'CCNA calculator', 'binary subnet'],
@@ -89,7 +88,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     category: 'Engineering',
     categorySlug: 'engineering',
     subCategory: 'General',
-    reviewedBy: 'Computer science & data encoding specialist',
     relatedIds: ['url-encoder-decoder', 'password-generator', 'crypto-hash-generator', 'character-token-converter'],
     relatedPosts: ['electricity-cost-calculator-guide'],
     seoKeywords: ['base64 encoder', 'base64 decoder', 'base64 encode', 'base64 decode', 'base64 converter', 'base64 tool', 'data encoding', 'base64 text'],
@@ -136,7 +134,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     category: 'Engineering',
     categorySlug: 'engineering',
     subCategory: 'Electrical',
-    reviewedBy: 'Licensed electrical engineer',
     relatedIds: ['resistor-calculator', 'voltage-drop-calculator', 'wire-gauge-calculator', 'electricity-cost-calculator'],
     seoKeywords: ["ohm's law calculator", 'voltage current resistance calculator', 'electrical calculator', 'ohms law formula', 'power calculator electronics', 'v=ir calculator'],
     schema: 'both',
@@ -189,7 +186,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'GR = N2/N1 = ω1/ω2 | OutputRPM = InputRPM / GR | gear train ratio calculation',
     lastVerified: '2026-01-15',
-    reviewedBy: 'Mechanical engineering specialist',
     loader: () => import('../engineering/gear-ratio/index'),
   },
   {
@@ -204,7 +200,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     seoKeywords: ['mtbf calculator', 'mean time between failures', 'reliability calculator', 'failure rate calculator', 'system reliability', 'mtbf formula'],
     schema: 'both',
     mathSolverExpression: 'MTBF = TotalTime / Failures | R(t) = e^(-t/MTBF) | reliability engineering and failure rate',
-    reviewedBy: 'Engineering & technology specialist',
     relatedPosts: ['electricity-cost-calculator-guide'],
     lastVerified: '2026-01-15',
     loader: () => import('../engineering/mtbf/index'),
@@ -253,7 +248,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'SHA-256, MD5, SHA-1, SHA-512, Keccak-256 | deterministic cryptographic hash algorithms',
     lastVerified: '2026-05-18',
-    reviewedBy: 'Cryptography engineer',
     loader: () => import('../engineering/crypto-hash/index'),
   },
   {
@@ -269,7 +263,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'GDPR cookie consent banner | Art. 5(1)(a) data minimization | configurable position, layout, and theme',
     lastVerified: '2026-01-15',
-    reviewedBy: 'GDPR compliance attorney',
     loader: () => import('../engineering/cookie-consent/index'),
   },
   {
@@ -301,7 +294,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'pH = -log10([H+]) | pOH = -log10([OH-]) | pH + pOH = 14 | [H+] = 10^(-pH) | At 25°C',
     lastVerified: '2026-01-15',
-    reviewedBy: 'Chemistry & chemical engineering specialist',
     loader: () => import('../engineering/ph-calculator/index'),
   },
   {
@@ -317,7 +309,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'Nu = h × L / k | Nusselt number = convective heat transfer coefficient × characteristic length / thermal conductivity',
     lastVerified: '2026-05-19',
-    reviewedBy: 'Thermal engineering specialist',
     loader: () => import('../engineering/nusselt-number/index'),
   },
   {
@@ -333,7 +324,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'β = 2.303 × C × (Ka × [H+]) / (Ka + [H+])² | Van Slyke buffer capacity equation',
     lastVerified: '2026-05-19',
-    reviewedBy: 'Chemical engineering & biochemistry specialist',
     loader: () => import('../engineering/buffer-capacity/index'),
   },
   {
@@ -349,7 +339,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'Pr = μ × cp / k = ν / α | Prandtl number = dynamic viscosity × specific heat / thermal conductivity',
     lastVerified: '2026-05-19',
-    reviewedBy: 'Fluid dynamics & heat transfer specialist',
     loader: () => import('../engineering/prandtl-number/index'),
   },
   {
@@ -365,7 +354,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'Fr = v / √(g × L) | Froude number = velocity / square root of (gravity × characteristic length)',
     lastVerified: '2026-05-19',
-    reviewedBy: 'Hydraulic engineering & naval architecture specialist',
     loader: () => import('../engineering/froude-number/index'),
   },
   {
@@ -381,7 +369,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'T = F × p / (2π × η) | lead screw torque = axial force × lead / (2π × efficiency)',
     lastVerified: '2026-05-19',
-    reviewedBy: 'Mechanical engineering & CNC specialist',
     loader: () => import('../engineering/lead-screw/index'),
   },
   {
@@ -397,7 +384,6 @@ export const engineeringCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'ΔTf = Kf × m × i | freezing point depression = cryoscopic constant × molality × van\'t Hoff factor',
     lastVerified: '2026-05-19',
-    reviewedBy: 'Chemistry & chemical engineering specialist',
     loader: () => import('../engineering/freezing-point-depression/index'),
   },
 ];

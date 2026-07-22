@@ -1,0 +1,77 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Who Is Most Vulnerable?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Extreme heat affects everyone, but some groups face disproportionate risk. Elderly adults (65+) have reduced ability to regulate body temperature and may be on medications that impair heat response. Infants and children under 4 have higher surface-to-body-mass ratios, less developed temperature regulation, and cannot communicate discomfort. Outdoor workers face prolonged occupational exposure. People with chronic conditions (heart disease, diabetes, obesity) have reduced physiological reserve to handle heat stress."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Medications That Increase Heat Risk"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Diuretics (blood pressure meds): Reduce body water, impair sweating.",
+        "Beta-blockers: Reduce heart rate response to heat.",
+        "Antihistamines: Reduce sweat production.",
+        "Antidepressants: Can impair temperature regulation.",
+        "Antipsychotics: Reduce thirst sensation and impair cooling.",
+        "Alcohol: Impairs judgment and dehydrates."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Urban Heat Island Effect"
+    },
+    {
+      "type": "paragraph",
+      "text": "Cities are significantly hotter than surrounding rural areas, sometimes by 10-20°F during evening hours. This urban heat island effect is caused by dark surfaces (roads, roofs) absorbing and re-radiating heat, reduced vegetation, and waste heat from buildings and vehicles. Low-income neighborhoods often have fewer trees and less green space, making them disproportionately hotter during heat waves."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "At what temperature does heat become dangerous for elderly?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For elderly adults, any heat index above 90°F carries risk. Many cities activate cooling centers when the heat index reaches 95°F. If you have elderly relatives, check on them during heat waves and make sure they have working air conditioning and are staying hydrated."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How many people die from heat in the US each year?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Heat is the number one weather-related killer in the United States, causing an average of 700-1,500 deaths per year. This exceeds combined deaths from hurricanes, tornadoes, floods, and lightning."
+    },
+    {
+      "type": "cta",
+      "heading": "Check the Heat Index",
+      "body": "Know the conditions before heading outside with our free heat index calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/everyday/heat-index-calculator/"
+    }
+  ],
+  "keywords": [
+    "extreme heat risk",
+    "heat wave vulnerable",
+    "elderly heat safety",
+    "heat and medications",
+    "heat risk populations",
+    "heat wave safety"
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Formula for a Sustainable Freelance Rate"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your true hourly rate needs to cover more than your time. It must cover your desired salary, taxes (self-employment tax is ~15.3%), health insurance, equipment, software subscriptions, retirement savings, paid time off, and business expenses. A common rule: triple your desired hourly rate. If you want to earn $50/hour after expenses, charge $150/hour. This accounts for the 50%+ of your time spent on non-billable work (admin, marketing, proposals)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step-by-Step Rate Calculation"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Determine your desired annual salary (e.g., $80,000).",
+        "Add 30% for taxes and benefits ($80,000 x 1.3 = $104,000).",
+        "Add annual business expenses (software, equipment, insurance: ~$10,000).",
+        "Total annual need: $114,000.",
+        "Estimate billable hours per year: 52 weeks - 4 weeks PTO - 1 week holidays - 2 weeks sick = 45 weeks x 30 billable hours/week = 1,350 hours.",
+        "Rate: $114,000 / 1,350 = $84/hour."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Most Freelancers Undercharge"
+    },
+    {
+      "type": "paragraph",
+      "text": "The number one mistake freelancers make is comparing their rate to an employee salary. As an employee, your actual cost to an employer is 1.3-1.5x your salary. As a freelancer, you pay both sides of payroll tax, buy your own benefits, cover your own equipment, and eat the cost of unpaid time between projects. Charging $50/hour as a freelancer is equivalent to earning about $35/hour as an employee — less than you think. Use the freelance rate calculator to get a number that actually works for your situation."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Value-Based Pricing vs Hourly Rates"
+    },
+    {
+      "type": "paragraph",
+      "text": "While hourly rates are a good baseline, the most profitable freelancers shift to value-based pricing. Instead of charging $100/hour for a project that takes 20 hours ($2,000), charge based on the value delivered. If your work saves the client $50,000, charging $5,000-$10,000 is reasonable and makes your hourly effective rate much higher. Start with hourly to cover your costs, then move to value-based as you gain experience and results."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I know if my rate is too high or too low?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Track your close rate. If you win every proposal, your rate may be too low. If you win less than 25% of proposals, your rate may be too high (or your targeting is off). A healthy close rate is 30-50% for most freelancers."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should I charge different rates for different clients?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes, but transparently. Agencies often charge higher rates than direct clients because they add management overhead. Non-profits may have lower budgets. Geographic differences matter too. The key is knowing your minimum viable rate and never going below it regardless of the client."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Freelance Rate Calculator",
+      "body": "Calculate your true minimum hourly rate with all expenses factored in.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/salary-to-hourly-calculator/"
+    }
+  ],
+  "keywords": [
+    "freelance rate calculator",
+    "hourly rate freelancer",
+    "freelance pricing",
+    "how much to charge freelance"
+  ]
+}

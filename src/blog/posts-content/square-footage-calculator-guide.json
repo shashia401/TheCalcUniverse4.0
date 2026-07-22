@@ -1,0 +1,259 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is Square Footage?"
+    },
+    {
+      "type": "paragraph",
+      "text": "You hear 'square footage' every time you look at a house listing or buy flooring. It's just the area of a room measured in square feet. A **10x10 room** is **100 square feet**. Nothing fancy."
+    },
+    {
+      "type": "paragraph",
+      "text": "You'll see it everywhere — real estate listings, flooring orders, paint cans. Agents use it to price homes. Contractors use it to quote jobs. You'll use it when you're buying furniture, ordering carpet, or figuring out if that AC is strong enough for your living room."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Square Footage Formula by Shape"
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula changes depending on what shape you're dealing with. Here are the three most common ones you'll run into."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Rectangle (Standard Rooms)"
+    },
+    {
+      "type": "paragraph",
+      "text": "Most rooms are rectangles. Multiply length by width. That's it."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Rectangle Square Footage = Length × Width"
+    },
+    {
+      "type": "paragraph",
+      "text": "Say you've got a **12x16 bedroom** — that's **192 sq ft**. A **10x10 room**? **100 sq ft**. Measure in feet, get square feet. Measure in meters, get square meters."
+    },
+    {
+      "type": "paragraph",
+      "text": "Measure wall to wall at the longest and widest points. Got a closet? Measure it separately and add it to the room total."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Circle (Round Rooms & Spaces)"
+    },
+    {
+      "type": "paragraph",
+      "text": "Circular rooms aren't super common in homes, but they pop up in commercial spaces and fancier architecture. You'll need the radius (center to edge) and pi (π ≈ 3.14159)."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Circle Square Footage = π × r²"
+    },
+    {
+      "type": "paragraph",
+      "text": "Got a round dining area with an **8-foot radius**? That's π × 8² = **201 sq ft**. Only have the diameter? Cut it in half to get the radius."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "L-Shaped Rooms"
+    },
+    {
+      "type": "paragraph",
+      "text": "L-shaped rooms look complicated, but they're really not. Split the L into two rectangles, calculate each one, then add them together."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "L-Shape Square Footage = (Length₁ × Width₁) + (Length₂ × Width₂)"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take a living room that's **18x14** with an attached dining area that's **10x8**: (18 × 14) + (10 × 8) = **332 sq ft**. Our calculator does this automatically, but it's good to know the logic."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Real-World Example: A Complete Home Project"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Room",
+        "Shape",
+        "Dimensions",
+        "Area (sq ft)"
+      ],
+      "rows": [
+        [
+          "Living Room",
+          "Rectangle",
+          "18 ft × 14 ft",
+          "252"
+        ],
+        [
+          "Breakfast Nook",
+          "Circle (radius 6 ft)",
+          "π × 6²",
+          "113.10"
+        ],
+        [
+          "Hallway",
+          "L-Shape",
+          "48 + 24",
+          "72"
+        ],
+        [
+          "Total Raw Area",
+          "",
+          "",
+          "437.10"
+        ],
+        [
+          "With 10% Waste",
+          "",
+          "437.10 × 1.10",
+          "480.81"
+        ],
+        [
+          "at $4.50/sq ft",
+          "",
+          "480.81 × $4.50",
+          "$2,163.65"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "So there you go. With a 10% waste factor (standard for LVP flooring), order **481 sq ft**. At **$4.50/sq ft**, that's **$2,163.65** in materials."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why You Need a Waste Factor"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's something that trips people up: you won't use every square foot you buy. Cuts, mistakes, damaged pieces — it adds up. That's why you need a waste factor."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Project Type",
+        "Recommended Waste Factor"
+      ],
+      "rows": [
+        [
+          "Standard rectangular rooms",
+          "5%"
+        ],
+        [
+          "L-shaped or irregular rooms",
+          "10%"
+        ],
+        [
+          "Diagonal or herringbone patterns",
+          "15%"
+        ],
+        [
+          "Rooms with many cutouts",
+          "10–15%"
+        ]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Always round up to the nearest whole unit. A few extra square feet in the garage beats running out halfway through the job."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Measuring Tips for Accurate Results"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Laser measurer: worth the $30, way more accurate than a tape measure.",
+        "Measure at multiple points. Walls are rarely perfectly straight.",
+        "Sketch a quick floor plan with dimensions labeled. Helps catch mistakes.",
+        "Include every section: closets, alcoves, bay windows.",
+        "Multi-story project? Measure each floor separately. They're never identical."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Square Footage Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How many square feet is a 12×12 room?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A **12x12 room** is **144 sq ft**. Add 10% for waste and you're ordering **159 sq ft**."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I convert square feet to square meters?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Multiply sq ft by **0.092903** to get square meters. Going the other way? Multiply square meters by **10.7639**. Or just use the calculator — it does both for you."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Use Our Free Square Footage Calculator?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Our calculator handles rectangles, circles, and L-shapes in one tool. Waste factors and cost estimates are built right in."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Supports feet and meters with automatic conversion",
+        "Handles rectangles, circles, and L-shaped rooms",
+        "Built-in waste factor presets: 0%, 5%, 10%, 15%",
+        "Add a price per square foot for instant cost estimates",
+        "Free to use with no account required"
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Square Footage Instantly",
+      "body": "Try our square footage calculator. Rectangles, circles, L-shapes — it handles them all. Square feet, square meters, waste factor, cost estimates. Everything you need in one tool.",
+      "buttonLabel": "Open the Free Square Footage Calculator",
+      "path": "/diy/square-footage-calculator/"
+    }
+  ],
+  "keywords": [
+    "square footage calculator",
+    "sq ft calculator",
+    "area calculator",
+    "room size calculator",
+    "flooring calculator",
+    "square foot calculator",
+    "how to calculate square footage",
+    "square footage formula",
+    "L-shaped room area",
+    "material wastage",
+    "cost per square foot",
+    "square meter calculator"
+  ]
+}

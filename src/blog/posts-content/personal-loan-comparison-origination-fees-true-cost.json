@@ -1,0 +1,66 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "You found a personal loan with a great advertised rate. That number looks good — maybe 11. 5%."
+    },
+    {
+      "type": "paragraph",
+      "text": "But here's what the ad doesn't tell you: origination fees could make your real cost much higher."
+    },
+    {
+      "type": "paragraph",
+      "text": "Personal loans often come with upfront fees that change the true cost of borrowing in ways that aren't obvious from the interest rate alone. Understand these fees, and you'll never shop for a loan the same way again."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is a personal loan origination fee?"
+    },
+    {
+      "type": "paragraph",
+      "text": "An origination fee is what the lender charges to process your loan. It typically ranges from **1% to 8%** of the loan amount. Online lenders tend to charge more (3-8%), while credit unions and banks may charge less or nothing at all."
+    },
+    {
+      "type": "paragraph",
+      "text": "The fee can be handled in two ways. It can be deducted from your proceeds, meaning you receive less cash than you borrowed. Or it can be added to your loan balance, meaning you pay interest on the fee itself for the entire loan term."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How does a deducted origination fee affect your true cost?"
+    },
+    {
+      "type": "paragraph",
+      "text": "When the fee is deducted, you receive less money but still repay the full loan amount plus interest. This raises your effective APR above the stated rate."
+    },
+    {
+      "type": "paragraph",
+      "text": "Take a **$20,000 loan at 11. 5% APR with a 3% origination fee ($600)**. If the fee is deducted, you receive only **$19,400** but must repay the full $20,000 plus interest."
+    },
+    {
+      "type": "paragraph",
+      "text": "Your effective APR jumps to roughly **13. 5%** — 2 full points above the advertised rate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How does an added origination fee change things?"
+    },
+    {
+      "type": "cta",
+      "heading": "Compare the true cost of any personal loan",
+      "body": "Enter the loan amount, APR, and origination fee to see your real monthly payment, actual cash received, and total cost including all fees.",
+      "buttonLabel": "Use the Personal Loan Calculator",
+      "path": "/finance/personal-loan-calculator/"
+    }
+  ],
+  "keywords": [
+    "personal loan calculator",
+    "personal loan origination fee",
+    "loan payment calculator",
+    "personal loan amortization",
+    "personal loan total cost",
+    "actual cash received personal loan"
+  ]
+}

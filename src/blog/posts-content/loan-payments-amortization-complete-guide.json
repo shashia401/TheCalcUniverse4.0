@@ -1,0 +1,78 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is Loan Amortization?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Amortization is the process of spreading out a loan into a series of fixed payments over time. Each payment covers the interest owed since the last payment, with the remainder going toward the principal balance. As the principal balance declines, the interest portion decreases and the principal portion increases. This is why amortization schedules show mostly interest in early payments and mostly principal in later ones."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Amortization Formula"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your monthly payment is calculated using the formula M = P[r(1+r)^n]/[(1+r)^n-1], where M is the monthly payment, P is the principal loan amount, r is the monthly interest rate (annual rate divided by 12), and n is the total number of payments. This formula ensures that the loan is fully paid off after exactly n payments. Every amortized loan — mortgages, auto loans, student loans, personal loans — uses this same formula."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Early Payments Are Mostly Interest"
+    },
+    {
+      "type": "paragraph",
+      "text": "In month one of a $400,000 mortgage at 6.5%, the balance is at its highest. The interest owed for that month is $400,000 x (0.065 / 12) = $2,166.67. If the monthly payment is $2,528, only about $361 goes to principal. In month 180 (year 15), the balance is lower, so the interest might be $1,500 and principal $1,028. In month 360 (year 30), the final payment is nearly all principal. This front-loaded interest structure is why paying extra early has such a dramatic impact."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Extra Payments Change the Schedule"
+    },
+    {
+      "type": "paragraph",
+      "text": "Every extra dollar you send to principal is a dollar that never accrues interest again. Adding $100/month to a $400,000 mortgage at 6.5% saves roughly $42,000 in interest and pays off the loan 4 years early. The amortization calculator shows you the exact comparison side by side."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What types of loans use amortization?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Fixed-rate mortgages, auto loans, personal loans, and student loans are all amortized. Credit cards, interest-only loans, and balloon loans do not fully amortize — you could reach the end of the term with principal still owed."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How is amortization different from simple interest?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Amortized loans recalculate interest each month based on the declining principal balance. Simple interest loans calculate interest on the original principal for the entire term. With amortized loans, extra payments reduce future interest. With simple interest loans, they may not."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Amortization Calculator",
+      "body": "See your full amortization schedule and compare extra payment scenarios.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "amortization guide",
+    "loan payment explained",
+    "how amortization works",
+    "amortization schedule guide",
+    "monthly payment formula",
+    "loan interest front loaded"
+  ]
+}

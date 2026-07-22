@@ -1,0 +1,87 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Credit card debt is among the most expensive debt available to consumers, with average APRs currently exceeding **20%.** At that rate, **a $5,000 balance making only the 2% minimum payment costs over $4,500 in interest and takes more than 8 years to pay off.** The good news: with the right strategy and a realistic payment plan, you can break the cycle much faster."
+    },
+    {
+      "type": "heading",
+      "text": "Why Minimum Payments Keep You Trapped",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "Minimum payments (typically 1-2% of your balance) are designed to keep you in debt as long as possible. At a typical 22% APR, a $5,000 balance generates about **$92 in interest every month. ** If your minimum payment is $100, only $8 goes toward the principal."
+    },
+    {
+      "type": "paragraph",
+      "text": "At that rate, it would take over 30 years to pay off and cost more than $12,000 in interest."
+    },
+    {
+      "type": "paragraph",
+      "text": "The math gets worse: if your monthly payment doesn't exceed the monthly interest charge, your balance never decreases. you're treading water financially and the credit card company is collecting your money every month for nothing."
+    },
+    {
+      "type": "callout",
+      "text": "The Credit Card Payoff Calculator includes a warning system that tells you if your payment is too low to ever pay off the balance. If you see that red flag, increase your payment or switch to the 'pay off by date' mode to get a realistic monthly target.",
+      "variant": "warning"
+    },
+    {
+      "type": "heading",
+      "text": "Debt Avalanche vs. Debt Snowball: Which Is Better?",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "The two most popular credit card payoff strategies take different approaches. The **debt avalanche** targets the highest APR first, saving you the most money in interest. The **debt snowball** targets the smallest balance first, giving you quick wins that build momentum."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Strategy",
+        "How It Works",
+        "Best For",
+        "Total Interest Cost"
+      ],
+      "rows": [
+        [
+          "Debt Avalanche",
+          "Pay minimum on all cards, put extra cash toward the card with the highest APR",
+          "Maximizing every dollar",
+          "Lowest total interest"
+        ],
+        [
+          "Debt Snowball",
+          "Pay minimum on all cards, put extra cash toward the card with the smallest balance",
+          "Staying motivated",
+          "Higher total interest but faster first win"
+        ],
+        [
+          "Hybrid",
+          "Pick the highest APR card that also has a manageable balance",
+          "Balance of math and motivation",
+          "Middle ground"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Mathematically, the avalanche method wins every time. But finance is about behavior, not just math. If seeing a card get paid off in two months keeps you going, the snowball is the better strategy for you — even if it costs slightly more in interest."
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Debt-Free Date",
+      "body": "Enter your balance, APR, and preferred monthly payment into our Credit Card Payoff Calculator. See your exact debt-free month, total interest paid, and a month-by-month payoff timeline.",
+      "buttonLabel": "Open the Credit Card Payoff Calculator",
+      "path": "/finance/credit-card-payoff-calculator/"
+    }
+  ],
+  "keywords": [
+    "credit card debt payoff",
+    "avalanche vs snowball",
+    "pay off credit card debt",
+    "debt free plan",
+    "credit card interest",
+    "how to pay off credit cards"
+  ]
+}

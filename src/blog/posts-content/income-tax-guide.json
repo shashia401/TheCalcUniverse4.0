@@ -1,0 +1,97 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "You hear 'tax bracket' all the time, but most people misunderstand what it actually means. Getting into a higher bracket doesn't mean all your income gets taxed at that rate — it only applies to the money within that bracket. Here's how progressive taxation really works and why your effective rate is always lower than you think."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Do Tax Brackets Work in the US?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The US uses a progressive tax system: higher income is taxed at higher rates, but only the portion that falls in each bracket. If you're single and earn $75,000 in 2025, you don't pay 22% on the full amount. You pay 10% on the first $11,925, 12% on the next $36,550, and 22% only on the remaining $26,525."
+    },
+    {
+      "type": "paragraph",
+      "text": "That misunderstanding alone costs people thousands in unnecessary tax fear."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Tax Rate",
+        "Income Range",
+        "Tax Owed"
+      ],
+      "rows": [
+        [
+          "10%",
+          "$0 – $11,925",
+          "$1,192.50"
+        ],
+        [
+          "12%",
+          "$11,926 – $48,475",
+          "$4,386.00"
+        ],
+        [
+          "22%",
+          "$48,476 – $103,350",
+          "Depends on income"
+        ],
+        [
+          "24%+",
+          "$103,351+",
+          "Higher brackets apply"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Marginal vs. Effective Rate — What's the Difference?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your **marginal rate** is the rate on your last dollar earned — the highest bracket your income touches. Your **effective rate** is your total tax divided by your total income — the actual percentage you pay. For a single filer earning $75,000, the marginal rate is 22%, but the federal effective rate is roughly 13–14%."
+    },
+    {
+      "type": "paragraph",
+      "text": "That's a massive difference, and understanding it changes how you think about raises, bonuses, and tax planning."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Many people turn down raises or bonuses because they think the extra income will be 'taxed at 22%.' It will be — but that's still better than keeping $0. Earning $1,000 more and paying $220 in tax leaves you with $780 you didn't have before. Never turn down money because of taxes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Lowers Your Taxable Income?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your gross income isn't what gets taxed. You subtract adjustments, then the standard or itemized deduction, to arrive at taxable income. Here are the most powerful ways to reduce it."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Take-Home Pay",
+      "body": "Use our free Income Tax Calculator to see your marginal and effective rates, FICA breakdown, and net pay for any filing status and state.",
+      "buttonLabel": "Try the Income Tax Calculator",
+      "path": "/finance/income-tax-calculator/"
+    }
+  ],
+  "keywords": [
+    "income tax",
+    "tax brackets",
+    "marginal tax rate",
+    "effective tax rate",
+    "progressive tax",
+    "tax deductions",
+    "federal income tax",
+    "how tax brackets work",
+    "standard deduction",
+    "taxable income"
+  ]
+}

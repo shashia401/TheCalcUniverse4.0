@@ -1,0 +1,51 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Anatomy of an Amortization Schedule"
+    },
+    {
+      "type": "paragraph",
+      "text": "A standard amortization schedule has five columns: payment number, payment amount, principal portion, interest portion, and remaining balance. Some schedules also show cumulative interest paid. The schedule starts at payment 1 and ends at the final payment (e.g., payment 360 for a 30-year mortgage)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Key Numbers to Look For"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "First payment interest: This is your highest interest payment ever. For a $300,000 mortgage at 6%, this is $1,500.",
+        "Crossover point: The payment where principal exceeds interest. For a 30-year mortgage at 6%, this happens around year 18. For a 15-year mortgage, it is much sooner.",
+        "Total interest: The sum of all interest payments. This is often more than you expect.",
+        "Extra payment impact: Many amortization calculators show a side-by-side comparison of normal vs extra payment schedules."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the Schedule"
+    },
+    {
+      "type": "paragraph",
+      "text": "Most people check the first few payments and the total interest. Savvy borrowers look for the crossover point and experiment with extra payment scenarios. Even one extra payment per year can shift the crossover point years earlier. Our amortization calculator generates a full schedule and shows extra payment comparisons."
+    },
+    {
+      "type": "cta",
+      "heading": "See Your Amortization Schedule",
+      "body": "Generate a full schedule with our free amortization calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/amortization-calculator/"
+    }
+  ],
+  "keywords": [
+    "how to read amortization schedule",
+    "amortization table explained",
+    "understand amortization schedule",
+    "mortgage payment breakdown",
+    "loan payment schedule"
+  ]
+}

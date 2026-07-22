@@ -1,0 +1,104 @@
+---
+// Category listing — grouped by sub-category with jump links, so large
+// categories (math has 90 calculators) read as a table of contents, not a wall.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CategoryIcon from '../../components/CategoryIcon.astro';
+import { getCategories, getCalculatorsByCategory } from '../../lib/registry';
+import { SITE_NAME, BASE_URL } from '../../config/constants';
+
+export async function getStaticPaths() {
+  return getCategories()
+    .filter((cat) => cat.count > 0)
+    .map((cat) => ({ params: { category: cat.slug }, props: { meta: cat } }));
+}
+
+const { meta } = Astro.props;
+const calculators = getCalculatorsByCategory(meta.slug);
+
+// Group by subCategory, preserving registry order; singletons fall into "More"
+const groups = new Map<string, typeof calculators>();
+for (const calc of calculators) {
+  const key = calc.subCategory ?? 'More';
+  if (!groups.has(key)) groups.set(key, []);
+  groups.get(key)!.push(calc);
+}
+
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+    { '@type': 'ListItem', position: 2, name: meta.name, item: `${BASE_URL}/${meta.slug}/` },
+  ],
+};
+---
+
+<BaseLayout
+  title={`${meta.name} Calculators — ${meta.count} Free Tools | ${SITE_NAME}`}
+  description={meta.description}
+  canonicalPath={`/${meta.slug}/`}
+  schemas={[breadcrumb]}
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-8">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-default)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>{meta.name}</span>
+      </nav>
+
+      <div class="flex items-center gap-4 mb-3">
+        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--brand-default)]/10 text-[var(--brand-default)]">
+          <CategoryIcon slug={meta.slug} size={24} />
+        </span>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-[var(--surface-text)]">
+            {meta.name} Calculators
+          </h1>
+          <p class="text-sm text-[var(--surface-text-muted)]">
+            <span class="font-mono font-semibold">{meta.count}</span> tools, each with formula and worked examples
+          </p>
+        </div>
+      </div>
+      <p class="text-[var(--surface-text-secondary)] mb-6 max-w-2xl">{meta.description}</p>
+
+      {groups.size > 1 && (
+        <nav aria-label="Sections" class="flex flex-wrap gap-2 mb-10">
+          {[...groups.keys()].map((name) => (
+            <a
+              href={`#${slugify(name)}`}
+              class="rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-3 py-1 text-sm text-[var(--surface-text-secondary)] transition-colors hover:border-[var(--brand-default)] hover:text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+            >
+              {name} <span class="font-mono text-tiny text-[var(--surface-text-muted)]">{groups.get(name)!.length}</span>
+            </a>
+          ))}
+        </nav>
+      )}
+
+      {[...groups.entries()].map(([name, items]) => (
+        <section id={slugify(name)} class="mb-12 scroll-mt-20">
+          {groups.size > 1 && (
+            <h2 class="text-lg font-bold text-[var(--surface-text)] mb-4 pb-2 border-b border-[var(--border-warm)]">
+              {name} <span class="font-mono text-sm font-normal text-[var(--surface-text-muted)]">· {items.length}</span>
+            </h2>
+          )}
+          <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none p-0">
+            {items.map((calc) => (
+              <li>
+                <a
+                  href={`/${meta.slug}/${calc.id}/`}
+                  class="block h-full p-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+                >
+                  <p class="font-semibold text-sm text-[var(--surface-text)]">{calc.shortTitle ?? calc.title}</p>
+                  <p class="text-xs text-[var(--surface-text-secondary)] mt-1 leading-relaxed">{calc.description.slice(0, 110)}{calc.description.length > 110 ? '…' : ''}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </main>
+</BaseLayout>

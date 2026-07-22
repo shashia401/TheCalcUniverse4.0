@@ -1,0 +1,113 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "When you work for yourself, you're the employer and the employee — and the IRS wants both halves of FICA. That's the single biggest surprise for new freelancers. Here's how self-employment (SECA) tax works, what you can deduct, and how to avoid penalties."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is SECA Tax and How Is It Calculated?"
+    },
+    {
+      "type": "paragraph",
+      "text": "SECA (Self-Employment Contributions Act) is the self-employed version of FICA. You pay **15. 3%** on **92."
+    },
+    {
+      "type": "paragraph",
+      "text": "35%** of your net self-employment income. That 15. 3% breaks into **12."
+    },
+    {
+      "type": "paragraph",
+      "text": "4% for Social Security** (up to the wage base of $176,100 in 2026) and **2. 9% for Medicare** (no cap). The 92."
+    },
+    {
+      "type": "paragraph",
+      "text": "35% multiplier accounts for the fact that you can deduct half the tax."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Employees pay 7.65% of their wages and their employer pays the other 7.65%. Self-employed individuals pay the full 15.3% — but you can deduct half (7.65% of your SE earnings) as an above-the-line adjustment on Form 1040. This deduction reduces your income tax, not your SE tax itself."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Self-Employed vs. Employee — Real Dollar Comparison"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Factor",
+        "Employee ($100K)",
+        "Self-Employed ($100K profit)"
+      ],
+      "rows": [
+        [
+          "FICA/SECA tax",
+          "$7,650 (half paid by employer)",
+          "$14,129 (full 15.3%)"
+        ],
+        [
+          "Deductible portion",
+          "$0",
+          "$7,064 (deductible half)"
+        ],
+        [
+          "Health insurance",
+          "$5,000–$15,000 (employer subsidized)",
+          "You pay full cost"
+        ],
+        [
+          "Paid time off",
+          "2–4 weeks paid",
+          "$0 — every day off = lost income"
+        ],
+        [
+          "401(k) match",
+          "3–6% of salary",
+          "You fund both sides"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Expenses Reduce Your Self-Employment Tax?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your SE tax is based on net profit — revenue minus deductible business expenses. Every legitimate deduction reduces your SE tax. Here are the most common deductions available to self-employed individuals."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Home office deduction** — $5/sq ft simplified method (up to 300 sq ft) or actual expense method",
+        "**Health insurance premiums** — deducted on Form 1040, not Schedule C",
+        "**SEP IRA / Solo 401(k)** — contribute up to 25% of net earnings, reducing both income and SE tax",
+        "**Business use of vehicle** — $0.67/mile standard mileage rate for 2026",
+        "**QBI deduction** — up to 20% of qualified business income under Section 199A"
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Know Exactly What You Owe Before Tax Day",
+      "body": "Use our free Self-Employment Tax Calculator to see your full SECA breakdown, deductible half, and QBI deduction savings.",
+      "buttonLabel": "Try the Self-Employment Tax Calculator",
+      "path": "/finance/self-employment-tax-calculator/"
+    }
+  ],
+  "keywords": [
+    "self employment tax",
+    "SECA tax",
+    "self employed tax",
+    "1099 tax",
+    "self employed social security",
+    "quarterly estimated tax",
+    "self employment deductions",
+    "QBI deduction",
+    "self employment tax rate 2026",
+    "self employed fica"
+  ]
+}

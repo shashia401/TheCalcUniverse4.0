@@ -1,0 +1,46 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Finding Your Deficit"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take your TDEE and subtract 300-500 calories for weight loss of 0.5-1 lb per week. A larger deficit means faster weight loss but higher risk of muscle loss, metabolic slowdown, fatigue, and nutritional deficiencies. A smaller deficit is slower but more sustainable."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Minimum Safe Intake Rule"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your calorie target should NEVER go below your BMR. If your TDEE is 2,200 and BMR is 1,600, a 500-deficit gives you 1,700 — above BMR. A 700-deficit would give you 1,500 — below BMR and too aggressive. Also: women should not go below 1,200 cal/day, men not below 1,500. If your deficit pushes you below these minimums, increase it through exercise instead of cutting more food."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Adjusting as You Lose Weight"
+    },
+    {
+      "type": "paragraph",
+      "text": "As you lose weight, your BMR and TDEE decrease. A person who loses 20 lbs needs about 100-150 fewer calories per day. Recalculate your TDEE every 10-15 lbs of weight loss. If weight loss stalls, recalculate before cutting calories further."
+    },
+    {
+      "type": "cta",
+      "heading": "Set Your Calorie Target",
+      "body": "Use our TDEE and calorie calculators together to set your weight loss plan.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee weight loss",
+    "calorie deficit from tdee",
+    "tdee for fat loss",
+    "how much to cut from tdee",
+    "tdee deficit calculator",
+    "sustainable weight loss tdee"
+  ]
+}

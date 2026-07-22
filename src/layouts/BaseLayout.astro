@@ -1,0 +1,87 @@
+---
+// Base HTML shell for every page. Owns <head>: metadata, canonical, OG, JSON-LD.
+// Canonical always equals the served URL (trailing slash) — never a redirecting URL.
+import { BASE_URL, SITE_NAME } from '../config/constants';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import '../styles/global.css';
+// Defines the --svg-<hex> custom properties (light + dark) used by the 348
+// educational diagrams. Without it every diagram fill falls back to black.
+import '../styles/svg-theme.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path with leading and trailing slash, e.g. "/finance/loan-calculator/" */
+  canonicalPath: string;
+  schemas?: Record<string, unknown>[];
+  ogType?: string;
+  /** Search/utility pages only — excluded from indexing and the sitemap. */
+  noindex?: boolean;
+}
+
+const { title, description, canonicalPath, schemas = [], ogType = 'website', noindex = false } = Astro.props;
+const canonicalUrl = `${BASE_URL}${canonicalPath}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={`${BASE_URL}/og-image.png`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${BASE_URL}/og-image.png`} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    {/* Apply saved theme before first paint — prevents light/dark flash */}
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    {schemas.map((schema) => (
+      // Escape "<" so a first-party value containing "</script>" can't break out
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(schema).replace(/</g, '\\u003c')} />
+    ))}
+  </head>
+  <body class="bg-[var(--surface-body)] font-sans antialiased text-[var(--surface-text)]">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:bg-[var(--surface-card)] focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-elevation-2"
+    >
+      Skip to content
+    </a>
+    <Header />
+    <slot />
+    <Footer />
+  </body>
+</html>

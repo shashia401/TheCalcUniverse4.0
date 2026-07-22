@@ -1,0 +1,119 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Your GPA is one of the most important numbers in your academic life. Whether you're planning for college applications, tracking your semester progress, or trying to figure out what grades you need to reach a goal, understanding how GPA works can make all the difference. The good news: the math behind it's simpler than you might think."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is the difference between weighted and unweighted GPA?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Unweighted GPA treats every class the same. An A in gym is worth the same **4. 0 points** as an A in AP Calculus."
+    },
+    {
+      "type": "paragraph",
+      "text": "Weighted GPA gives you extra credit for tougher courses. That same A in AP Calculus might be worth **5. 0 points** instead of 4."
+    },
+    {
+      "type": "paragraph",
+      "text": "0, reflecting the fact that the course demands more work. Colleges look at both: unweighted for a standardized apples-to-apples comparison, and weighted to see how much academic rigor you took on."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Factor",
+        "Unweighted GPA",
+        "Weighted GPA"
+      ],
+      "rows": [
+        [
+          "Scale",
+          "4.0 (A = 4.0, B = 3.0, C = 2.0)",
+          "Up to 5.0 (AP/IB get +1.0 bonus)"
+        ],
+        [
+          "Course difficulty",
+          "All courses treated equally",
+          "Bonus points for honors, AP, IB"
+        ],
+        [
+          "Colleges prefer",
+          "Standardized comparison across applicants",
+          "Shows academic ambition and rigor"
+        ],
+        [
+          "Class rank impact",
+          "Level playing field",
+          "Students taking advanced courses rank higher"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How do you calculate your GPA?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula is straightforward: GPA equals total grade points divided by total credits. Each letter grade maps to a numeric value — **A = 4. 0**, **B = 3."
+    },
+    {
+      "type": "paragraph",
+      "text": "0**, **C = 2. 0**, **D = 1. 0**, **F = 0."
+    },
+    {
+      "type": "paragraph",
+      "text": "0** — with plus and minus grades getting intermediate values (A- is 3. 67, B+ is 3. 33)."
+    },
+    {
+      "type": "paragraph",
+      "text": "For weighted GPA, you multiply each course's grade points by its weight multiplier before adding them up. A typical AP or IB class gets a **1. 1x multiplier**, while honors gets **1."
+    },
+    {
+      "type": "paragraph",
+      "text": "05x**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Say you took four courses: Math (A, 4 credits, AP), English (B+, 3 credits, Regular), Science (A-, 4 credits, Honors), and History (B, 3 credits, Regular). Your unweighted GPA might land around **3. 5**, but your weighted GPA would be higher because the AP and Honors courses add bonus points."
+    },
+    {
+      "type": "paragraph",
+      "text": "The GPA Calculator on this site does all the heavy lifting — just enter your courses and it handles the rest."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is the difference between semester and cumulative GPA?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your semester GPA covers just one term — fall or spring. Your cumulative GPA averages every course you've taken across all semesters. Colleges care most about cumulative GPA, but semester GPA helps you track short-term trends."
+    },
+    {
+      "type": "paragraph",
+      "text": "A strong semester can pull your cumulative GPA up, and a weak one can drag it down. The key takeaway: **improvement matters**. A rising trend in semester GPAs over time looks great on college applications, even if your cumulative number isn't perfect yet."
+    },
+    {
+      "type": "cta",
+      "heading": "Ready to calculate your GPA?",
+      "body": "Use our GPA Calculator to compute your weighted and unweighted GPA, track semester and cumulative averages, and find out what grades you need to reach your target.",
+      "buttonLabel": "Calculate Your GPA",
+      "path": "/math/gpa-calculator/"
+    }
+  ],
+  "keywords": [
+    "GPA calculator",
+    "grade point average",
+    "weighted GPA",
+    "unweighted GPA",
+    "target GPA",
+    "college GPA",
+    "semester GPA",
+    "cumulative GPA",
+    "grade calculator"
+  ]
+}

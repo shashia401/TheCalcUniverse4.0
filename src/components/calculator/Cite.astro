@@ -1,0 +1,41 @@
+---
+// Cite button (Inch Calculator idea) — a formatted citation, one click to copy.
+// Static + a tiny inline script for copy. Trust/E-E-A-T + makes the page quotable.
+import { SITE_NAME } from '../../config/constants';
+
+interface Props {
+  title: string;
+  url: string;        // full canonical URL
+  updated?: string;   // ISO date (lastVerified) if available
+}
+
+const { title, url, updated } = Astro.props;
+const year = updated ? new Date(updated).getFullYear() : new Date().getFullYear();
+const accessed = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+const citation = `${SITE_NAME}. "${title}." ${SITE_NAME}, ${year}, ${url}. Accessed ${accessed}.`;
+---
+
+<details class="mt-6 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] px-4 py-3 text-sm">
+  <summary class="cursor-pointer font-medium text-[var(--surface-text)] select-none">Cite this calculator</summary>
+  <p id="cite-text" class="mt-3 text-[var(--surface-text-secondary)] leading-relaxed font-mono text-xs">{citation}</p>
+  <button
+    type="button"
+    data-cite-copy
+    class="mt-3 text-xs font-medium text-[var(--brand-default)] rounded px-2 py-1 transition-colors hover:bg-[var(--surface-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+  >
+    Copy citation
+  </button>
+</details>
+
+<script is:inline>
+  document.querySelectorAll('[data-cite-copy]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const text = document.getElementById('cite-text')?.textContent ?? '';
+      navigator.clipboard?.writeText(text).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      }).catch(() => {});
+    });
+  });
+</script>

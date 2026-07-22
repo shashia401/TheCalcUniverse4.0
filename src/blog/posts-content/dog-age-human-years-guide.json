@@ -1,0 +1,103 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Is the 7-Year Rule for Dog Years Wrong?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes, it's surprisingly inaccurate. A 1-year-old dog isn't 7 in human years — according to modern epigenetics, that dog is closer to **31 human years old**. The old multiply-by-7 rule fails because dogs age much faster in their early years and then the rate slows down significantly."
+    },
+    {
+      "type": "paragraph",
+      "text": "it's a rough approximation that science has now replaced with a much better model."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is the Epigenetic Method for Calculating Dog Age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "In 2020, researchers at UC San Diego published a landmark study in Cell Systems analyzing DNA methylation patterns — an **epigenetic clock** — in Labrador retrievers and comparing them to human methylation profiles. They discovered the relationship between dog and human age follows a logarithmic curve, not a straight line. The formula is: **Human Age = 16 x ln(Dog Age) + 31**."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Dog Age (years)",
+        "Traditional x7 Method",
+        "Epigenetic (NIH 2020)"
+      ],
+      "rows": [
+        [
+          "1",
+          "7 human years",
+          "31.0 human years"
+        ],
+        [
+          "3",
+          "21 human years",
+          "48.6 human years"
+        ],
+        [
+          "5",
+          "35 human years",
+          "56.8 human years"
+        ],
+        [
+          "8",
+          "56 human years",
+          "64.2 human years"
+        ],
+        [
+          "12",
+          "84 human years",
+          "70.8 human years"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Does Breed Size Affect How Dogs Age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "**Larger breeds age faster** and have shorter lifespans. A Great Dane reaches senior status around **age 6 or 7**, while a Chihuahua may not be considered senior until **age 11 or 12**. The best **dog age calculator** accounts for these differences through size-based life stage classification."
+    },
+    {
+      "type": "paragraph",
+      "text": "Small breeds live longer on average, which means their epigenetic and traditional age equivalents need to be interpreted differently."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How Do Cats Compare?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Cats follow a slightly different pattern. The standard veterinary formula is: first year = **15 human years**, second year = **9 additional years** (total 24 at age 2), and each year after that = **4 human years**. Large-scale epigenetic studies for cats aren't yet available, so this formula relies on observed developmental milestones rather than molecular clocks."
+    },
+    {
+      "type": "paragraph",
+      "text": "A dedicated **cat age calculator** uses this stepwise approach as the best available method."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Dog or Cat's Real Age",
+      "body": "Use our Pet Age Calculator to see both the traditional and epigenetic methods side by side. Enter your pet's age, species, and size to get their true human age equivalent and life stage classification.",
+      "buttonLabel": "Calculate Your Pet's Age",
+      "path": "/health/dog-cat-age-calculator/"
+    }
+  ],
+  "keywords": [
+    "dog age calculator",
+    "dog years to human years",
+    "pet age calculator",
+    "how old is my dog",
+    "dog years chart",
+    "epigenetic dog age",
+    "dog age formula"
+  ]
+}

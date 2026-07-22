@@ -1,0 +1,100 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Healthy Weight Ranges Are Determined"
+    },
+    {
+      "type": "paragraph",
+      "text": "The most common method uses your BMI to calculate a weight range. Since a healthy BMI is 18.5-24.9, your healthy weight range is the weight that puts you in that BMI zone. For a person 5'9\" (175 cm): healthy weight range is approximately 125-169 lbs (56.7-76.7 kg). The range is wide because body composition varies — the lower end works for someone with less muscle mass, while the upper end works for someone more muscular."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Ideal Weight Formulas Compared"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Formula",
+        "Man 5'10\"",
+        "Woman 5'4\"",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Devine",
+          "166 lbs",
+          "120 lbs",
+          "Most common, used in medical dosing"
+        ],
+        [
+          "Robinson",
+          "165 lbs",
+          "119 lbs",
+          "Similar to Devine, slightly different"
+        ],
+        [
+          "Miller",
+          "161 lbs",
+          "117 lbs",
+          "More recent adjustment"
+        ],
+        [
+          "Hamwi",
+          "178 lbs",
+          "140 lbs",
+          "Gives highest values of any formula"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Ideal Weight Is a Range, Not a Number"
+    },
+    {
+      "type": "paragraph",
+      "text": "The concept of a single ideal weight is misleading. Your healthy weight depends on your frame size, muscle mass, bone density, and body fat distribution. A muscular athlete might be at their healthiest at the top of the BMI range, while someone with less muscle mass might be healthiest in the middle. The best approach is to use the BMI-based healthy weight range as a guideline, then adjust based on how you feel, your energy levels, and your blood work results."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the ideal weight for a 5'6\" woman?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The healthy BMI range (18.5-24.9) for 5'6\" (66 inches) gives a range of 115-154 lbs. Different formulas give different ideals: Devine formula says 125 lbs, Hamwi says 129 lbs. The right weight for you depends on your body composition, frame size, and personal health goals."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How much should a 5'10\" man weigh?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The healthy BMI range for 5'10\" gives a range of 129-173 lbs. Devine formula: 166 lbs. Hamwi: 178 lbs. Our ideal weight calculator shows results from multiple formulas so you can see the range and find what is realistic for your body type."
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your Ideal Weight",
+      "body": "Use our free BMI calculator and ideal weight calculator to find your healthy weight range.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "healthy weight for my height",
+    "ideal weight for height",
+    "healthy weight range",
+    "ideal body weight",
+    "weight height chart",
+    "what should i weigh"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Systematic Investment Plan (SIP)?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A SIP is a method of investing a fixed amount regularly (monthly or quarterly) into a mutual fund scheme. Instead of trying to time the market with one lump sum, you invest consistently regardless of market conditions. When markets are high, you buy fewer units. When markets are low, you buy more units. Over time, this averages out your purchase cost — a concept called rupee cost averaging."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Power of Compounding"
+    },
+    {
+      "type": "paragraph",
+      "text": "The real wealth builder in SIP is compounding. Each monthly investment starts earning returns from the month it is invested. Those returns earn their own returns in subsequent months. Over 20-30 years, the compounding effect dominates. A ₹10,000 monthly SIP at 12% returns grows to just ₹12 lakh total invested — but the final corpus is over ₹1 crore. The returns contribute far more than the contributions in long-term SIPs."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rupee Cost Averaging Explained"
+    },
+    {
+      "type": "paragraph",
+      "text": "Rupee cost averaging is the benefit of investing the same amount regularly regardless of market conditions. When the NAV (Net Asset Value) is high, your fixed amount buys fewer units. When NAV is low, it buys more units. Over time, the average cost per unit is lower than the average NAV. This protects you from the emotional trap of trying to time the market."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "SIP vs Lump Sum"
+    },
+    {
+      "type": "paragraph",
+      "text": "SIP is better when you have regular income and want to build wealth over time. Lump sum is better when you have a large amount available and markets are undervalued. In most market conditions, SIP reduces risk through averaging. Over 10+ year periods, the difference between SIP and lump sum narrows significantly."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SIP Calculator",
+      "body": "Calculate your systematic investment plan returns with our free SIP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/sip-calculator/"
+    }
+  ],
+  "keywords": [
+    "sip investing",
+    "systematic investment plan",
+    "sip mutual fund",
+    "sip wealth creation",
+    "rupee cost averaging",
+    "sip calculator guide"
+  ]
+}

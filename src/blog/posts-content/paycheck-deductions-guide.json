@@ -1,0 +1,105 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "You work 40 hours, get your paycheck, and a chunk is already gone. Federal tax, FICA, state tax, benefits — it adds up fast. Here's exactly where each dollar goes and how to make sure you're not overpaying."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is FICA and How Much Comes Out?"
+    },
+    {
+      "type": "paragraph",
+      "text": "FICA stands for the Federal Insurance Contributions Act. It funds Social Security and Medicare. From every paycheck, your employer deducts **6."
+    },
+    {
+      "type": "paragraph",
+      "text": "2% for Social Security** (up to the wage base of $176,100 in 2026) and **1. 45% for Medicare** (uncapped). Your employer matches both."
+    },
+    {
+      "type": "paragraph",
+      "text": "If you earn over $200,000 (single) or $250,000 (MFJ), an additional **0. 9% Medicare surtax** kicks in."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "The Social Security wage base means once you've earned $176,100 in a year, the 6.2% deduction stops for the rest of the year. Medicare keeps going on every dollar. High earners see the SS deduction disappear mid-year while Medicare continues."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Federal Income Tax Withholding Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your employer uses the information on your W-4 form to determine how much federal income tax to withhold from each paycheck. The IRS withholding tables apply the same progressive brackets used for your annual return — but prorated per pay period. If you withhold too little, you may owe at tax time plus penalties."
+    },
+    {
+      "type": "paragraph",
+      "text": "Too much, and you're giving the IRS an interest-free loan."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Pay Frequency",
+        "Paychecks/Year",
+        "Example Period"
+      ],
+      "rows": [
+        [
+          "Weekly (52)",
+          "52",
+          "Every Friday"
+        ],
+        [
+          "Bi-Weekly (26)",
+          "26",
+          "Every other Friday"
+        ],
+        [
+          "Semi-Monthly (24)",
+          "24",
+          "1st and 15th"
+        ],
+        [
+          "Monthly (12)",
+          "12",
+          "1st of month"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which States Have No Income Tax?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Eight states have no individual income tax: **Alaska, Florida, Nevada, South Dakota, Tennessee, Texas, Washington, and Wyoming**. New Hampshire has no tax on earned wages. Living in one of these states means the state tax line on your paycheck is $0."
+    },
+    {
+      "type": "paragraph",
+      "text": "In contrast, states like California (top rate **9. 3%** effective), Oregon (**9%**), and Minnesota (**7. 85%**) take a significant bite."
+    },
+    {
+      "type": "cta",
+      "heading": "See Exactly Where Your Next Paycheck Goes",
+      "body": "Use our free Paycheck Calculator — supports hourly and salary, all pay frequencies, and all 50 states. See your per-paycheck breakdown with an interactive chart.",
+      "buttonLabel": "Try the Paycheck Calculator",
+      "path": "/finance/paycheck-calculator/"
+    }
+  ],
+  "keywords": [
+    "paycheck deductions",
+    "paycheck calculator",
+    "FICA tax",
+    "federal withholding",
+    "take home pay",
+    "net pay calculator",
+    "pay stub explained",
+    "pre tax deductions",
+    "biweekly paycheck",
+    "paycheck tax breakdown"
+  ]
+}

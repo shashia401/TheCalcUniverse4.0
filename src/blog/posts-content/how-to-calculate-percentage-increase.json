@@ -1,0 +1,120 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Percentage Change Formula"
+    },
+    {
+      "type": "paragraph",
+      "text": "Percentage change measures how much a value has grown or shrunk relative to its original value. The formula is: (New Value - Original Value) / Original Value x 100. If the result is positive, it is an increase. If negative, it is a decrease. For example, if a stock goes from $50 to $60: ($60 - $50) / $50 x 100 = 20% increase. If it drops from $50 to $40: ($40 - $50) / $50 x 100 = -20% decrease."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Real-World Examples"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario",
+        "Old Value",
+        "New Value",
+        "Change",
+        "Formula"
+      ],
+      "rows": [
+        [
+          "Price increase",
+          "$25",
+          "$30",
+          "+20%",
+          "(30-25)/25 x 100"
+        ],
+        [
+          "Grade improvement",
+          "72%",
+          "85%",
+          "+18.1%",
+          "(85-72)/72 x 100"
+        ],
+        [
+          "Population decline",
+          "10,000",
+          "9,200",
+          "-8%",
+          "(9200-10000)/10000 x 100"
+        ],
+        [
+          "Salary raise",
+          "$50,000",
+          "$54,000",
+          "+8%",
+          "(54000-50000)/50000 x 100"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes to Avoid"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Dividing by the new value instead of the original: Always use the original (starting) value as the denominator.",
+        "Confusing percentage points with percent change: A rate going from 4% to 5% is a 25% increase (relative), not a 1% increase.",
+        "Forgetting to multiply by 100: The formula gives a decimal; multiply by 100 to express as a percentage.",
+        "Using percentage change for very small bases: If something goes from 1 to 3, that is a 200% increase — impressive sounding but maybe misleading without context."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Percentage Increase vs Percentage Points"
+    },
+    {
+      "type": "paragraph",
+      "text": "This is a common point of confusion. If an interest rate rises from 5% to 6%, that is a 1 percentage point increase. But it is a 20% increase relative to the starting rate (1/5 = 0.20 = 20%). In news reporting, \"inflation rose by 2%\" could mean either 2 percentage points or a 2% relative increase. Always check which one is meant."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I calculate percentage decrease for discounts?"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 20% discount on a $100 item means you pay $80. The formula: Discount Amount = Original Price x (Discount % / 100). Sale Price = Original Price - Discount Amount. Our percentage calculator handles both increase and decrease scenarios instantly."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the difference between percentage change and percentage difference?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Percentage change compares a new value to an original value (directional). Percentage difference compares two values without designating one as the original (non-directional). Percentage difference uses the average of the two values as the denominator, giving a symmetric result."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Percentage Calculator",
+      "body": "Calculate percentage increases, decreases, and differences instantly. No signup required.",
+      "buttonLabel": "Open Calculator",
+      "path": "/everyday/percentage-calculator/"
+    }
+  ],
+  "keywords": [
+    "calculate percentage increase",
+    "percentage decrease formula",
+    "percent change calculator",
+    "how to calculate percent increase",
+    "percentage difference",
+    "percent change formula"
+  ]
+}

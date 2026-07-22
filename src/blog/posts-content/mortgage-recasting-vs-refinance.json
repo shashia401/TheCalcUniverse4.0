@@ -1,0 +1,45 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is Mortgage Recasting?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Mortgage recasting is a process where you make a large lump sum payment toward your principal, and the lender re-amortizes your loan. This means they recalculate your remaining payments based on the new lower balance, keeping your original rate and remaining term. Your monthly payment goes down, but your interest rate and loan term stay the same."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Recasting vs Refinancing"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Recasting: Keep your existing rate. Typical fee $150-$500. No credit check. No appraisal. Must have a conventional loan (not FHA or VA). Typically need to pay at least $5,000-$10,000 toward principal.",
+        "Refinancing: Get a new rate. Closing costs 2-5% of loan amount. Credit check and appraisal required. Works with all loan types. Takes 30-45 days to close."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Recasting is ideal if you have a good rate already and want to lower your payment. Refinancing is better when rates have dropped significantly."
+    },
+    {
+      "type": "cta",
+      "heading": "Plan Your Lump Sum Payment",
+      "body": "Use our mortgage payoff calculator to see how a lump sum payment changes your loan.",
+      "buttonLabel": "Calculate Impact",
+      "path": "/finance/mortgage-payoff-calculator/"
+    }
+  ],
+  "keywords": [
+    "mortgage recast",
+    "recasting vs refinance",
+    "mortgage recasting explained",
+    "lower mortgage payment",
+    "recast mortgage",
+    "principal reduction recast"
+  ]
+}

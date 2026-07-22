@@ -1,0 +1,99 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "You probably know your age in years, but do you know how many days you've been alive? Or when you'll hit 10,000? Calculating your exact age down to the day gives you more than trivia — it changes your perspective on time itself."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Exactly Is Chronological Age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your chronological age is the exact amount of time that has passed since your birth date, measured in years, months, and days. It sounds simple, but month lengths vary and leap years throw a wrench into the math. A proper age calculator accounts for all of this — February 29 birthdays (leaplings) included."
+    },
+    {
+      "type": "paragraph",
+      "text": "In non-leap years, the calculator treats March 1 as your birthday equivalent, so you never lose track of your countdown."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Milestones Worth Tracking"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Milestone",
+        "Age",
+        "Days Lived (approx.)",
+        "Weeks Lived"
+      ],
+      "rows": [
+        [
+          "10,000 days old",
+          "27 years, 4 months",
+          "10,000",
+          "1,428"
+        ],
+        [
+          "20,000 days old",
+          "54 years, 9 months",
+          "20,000",
+          "2,857"
+        ],
+        [
+          "30,000 days old",
+          "82 years, 1 month",
+          "30,000",
+          "4,285"
+        ],
+        [
+          "1,000 weeks old",
+          "19 years, 2 months",
+          "7,000",
+          "1,000"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How a Birthday Countdown Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your next birthday countdown calculates the number of days between today and your birthday later this year. If your birthday has already passed this year, it rolls forward to next year. This is useful for **planning parties, booking travel, or just building anticipation**."
+    },
+    {
+      "type": "paragraph",
+      "text": "The countdown also helps you track when you become eligible for age-based benefits like senior discounts, car rental rates, or retirement account contributions."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Did you know that reaching 1,000 weeks old happens at roughly age 19? And hitting 2,000 weeks is age 38. Life measured in weeks passes faster than you think — there are only about 4,000 weeks in an average 80-year lifespan. That perspective is why tracking your age in multiple units can be genuinely motivating."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Ways to Use Your Age Data"
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Exact Age",
+      "body": "Use TheCalcUniverse Age Calculator to find your exact age in years, months, days, weeks, hours, and more. Plus get your birthday countdown in one click.",
+      "buttonLabel": "Try the Age Calculator",
+      "path": "/everyday/age-calculator/"
+    }
+  ],
+  "keywords": [
+    "age calculator",
+    "how old am i",
+    "exact age calculator",
+    "birthday calculator",
+    "days lived calculator",
+    "age in days"
+  ]
+}

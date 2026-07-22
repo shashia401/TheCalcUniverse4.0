@@ -1,0 +1,74 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Snowball Method: Smallest Balance First"
+    },
+    {
+      "type": "paragraph",
+      "text": "List all debts from smallest balance to largest. Pay minimums on everything except the smallest debt, and throw every extra dollar at that one. Once it is paid off, roll that payment to the next smallest. The psychological win of knocking out debts quickly keeps you motivated. Studies show the snowball method has a higher completion rate because the early wins create momentum."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Avalanche Method: Highest Interest First"
+    },
+    {
+      "type": "paragraph",
+      "text": "List all debts from highest APR to lowest. Pay minimums on everything except the highest-interest debt. This method saves the most money in interest because high-rate debts are eliminated first. The avalanche method is mathematically optimal but requires more discipline because the first debt on the list may be the largest one, taking months to pay off."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Side-by-Side Comparison"
+    },
+    {
+      "type": "paragraph",
+      "text": "A $5,000 debt at 22% APR, a $2,000 debt at 18%, and a $15,000 debt at 6% with a $500 monthly payoff budget. Avalanche: pay $2,000 first (18%), then $5,000 (22%), then $15,000 (6%). Total interest: $3,124. Time: 42 months. Snowball: pay $2,000 first, then $5,000, then $15,000. Total interest: $3,347. Time: 43 months. The avalanche saves $223 total but takes the same time because the interest rate difference between the first two debts was small."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Choose snowball if you need motivation to stay on track. Choose avalanche if you are disciplined and want to minimize total interest. Either method beats paying minimums forever."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should I use savings to pay off debt?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Keep a $1,000 emergency fund before starting aggressive debt payoff. Once the debt is gone, rebuild to 3-6 months of expenses. Paying off high-interest (18%+) debt with savings makes sense. Low-interest debt (under 5%) is less urgent."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What if I have debt and want to invest?"
+    },
+    {
+      "type": "paragraph",
+      "text": "If your debt APR is higher than expected investment returns (7-8%), pay the debt first. If your debt is low interest (under 5%), consider splitting extra money between debt and investing. Our debt payoff calculator shows the breakeven point."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Debt Payoff Calculator",
+      "body": "Compare snowball and avalanche methods for your specific debts. See timelines and total interest.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/debt-payoff-calculator/"
+    }
+  ],
+  "keywords": [
+    "debt payoff",
+    "snowball method",
+    "avalanche method",
+    "debt repayment",
+    "pay off debt",
+    "debt snowball calculator"
+  ]
+}

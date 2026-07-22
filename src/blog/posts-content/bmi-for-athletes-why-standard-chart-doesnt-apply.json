@@ -1,0 +1,75 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Athlete BMI Problem"
+    },
+    {
+      "type": "paragraph",
+      "text": "Muscle is about 18% denser than fat. This means athletes and bodybuilders often have BMIs in the overweight (25-29.9) or even obese (30+) range while having very low body fat percentages. Studies of NFL players found that over 50% had BMIs in the obese category, yet only a fraction had body fat percentages above 25%. The BMI formula does not know whether your weight comes from muscle or fat."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Better Metrics for Athletes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Body fat percentage: The most relevant metric. Healthy athletic ranges are 6-13% for men and 14-20% for women. Our body fat calculator uses the Navy circumference method.",
+        "Lean body mass (LBM): Your total weight minus fat mass. This is what actually matters for performance.",
+        "Waist-to-height ratio: Keep your waist under half your height. This is a better cardiometabolic risk predictor than BMI.",
+        "Performance metrics: Track measurable performance data (lift numbers, run times, vertical jump) rather than body composition numbers."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to Tell Your Doctor"
+    },
+    {
+      "type": "paragraph",
+      "text": "If your doctor flags your BMI as overweight, explain your training history and ask for a body fat measurement instead. Most doctors will use a different assessment for athletes. If they still insist on BMI, ask about the \"athlete adjustment\" or consider switching to a sports medicine specialist who understands body composition. The BMI chart was designed for population screening, not athletic assessment."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a normal BMI for a bodybuilder?"
+    },
+    {
+      "type": "paragraph",
+      "text": "There is no \"normal\" BMI for bodybuilders because the formula does not account for muscle mass. Most bodybuilders will have BMIs in the overweight (25-29.9) or obese (30+) category regardless of how lean they are. Focus on body fat percentage instead."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Do professional athletes care about BMI?"
+    },
+    {
+      "type": "paragraph",
+      "text": "No. Professional sports teams use body fat percentage, lean body mass, and performance metrics. BMI is rarely mentioned in athletic training contexts. The one exception is weight-class sports (wrestling, boxing) where absolute weight matters."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Body Fat",
+      "body": "Get a more accurate picture of your body composition with our free body fat calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/body-fat-calculator/"
+    }
+  ],
+  "keywords": [
+    "bmi for athletes",
+    "muscle vs fat bmi",
+    "why bmi is wrong for athletes",
+    "body fat percentage athletes",
+    "lean body mass",
+    "bmi inaccurate muscular"
+  ]
+}

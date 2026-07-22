@@ -1,0 +1,101 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Standard deviation is the single most important measure of spread in statistics. It tells you how much your data wobbles around the average — and it's the key to understanding normal distributions, confidence intervals, and hypothesis testing. Whether you're analyzing test scores, investment returns, or manufacturing quality, standard deviation is the tool that separates signal from noise."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What does standard deviation actually tell you?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Think of it as the average distance each data point sits from the mean. A **low standard deviation** means most values cluster close to the average — everyone scored similarly on a test. A **high standard deviation** means values are spread widely — some students aced it while others bombed."
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula works by squaring each difference from the mean (to handle negative values), averaging those squared differences to get the **variance**, and then taking the square root to bring the number back to the original unit of measurement."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is the difference between sample and population standard deviation?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The population formula (symbol: **σ**) divides by N — the total number of data points. You use it when you've data for every single member of the group you're studying. The sample formula (symbol: **s**) divides by **n - 1** instead."
+    },
+    {
+      "type": "paragraph",
+      "text": "This is Bessel's correction, and it compensates for the fact that a sample tends to slightly underestimate the true variability of the population. In practice, you'll almost always use the sample formula, because real-world research rarely has access to an entire population."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "The Standard Deviation Calculator on this site lets you toggle between sample and population mode. If you're not sure which to use, choose sample — it's the standard choice for almost all real-world data analysis."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is the 68-95-99.7 rule?"
+    },
+    {
+      "type": "paragraph",
+      "text": "In a **normal distribution** (the classic bell curve), standard deviations map neatly to data percentages. About **68%** of all values fall within one standard deviation of the mean. About **95%** fall within two standard deviations."
+    },
+    {
+      "type": "paragraph",
+      "text": "About **99. 7%** fall within three standard deviations. This means values beyond three SDs from the mean are  rare — less than **0."
+    },
+    {
+      "type": "paragraph",
+      "text": "3%** chance — which is why researchers often flag those as potential outliers."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Range",
+        "Data Contained",
+        "Interpretation"
+      ],
+      "rows": [
+        [
+          "Mean ± 1 SD",
+          "68%",
+          "Most data lives here; expected range"
+        ],
+        [
+          "Mean ± 2 SD",
+          "95%",
+          "Uncommon but still normal values"
+        ],
+        [
+          "Mean ± 3 SD",
+          "99.7%",
+          "Very rare; potential outliers or anomalies"
+        ],
+        [
+          "Beyond 3 SD",
+          "0.3%",
+          "Extremely unusual; worth investigating"
+        ]
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate your data's standard deviation now",
+      "body": "Use our Standard Deviation & Variance Calculator to compute SD, variance, mean, median, range, and coefficient of variation for any data set. Choose between sample and population mode.",
+      "buttonLabel": "Try the Standard Deviation Calculator",
+      "path": "/math/standard-deviation-calculator/"
+    }
+  ],
+  "keywords": [
+    "standard deviation calculator",
+    "variance calculator",
+    "statistics calculator",
+    "mean median calculator",
+    "sample standard deviation",
+    "population standard deviation"
+  ]
+}

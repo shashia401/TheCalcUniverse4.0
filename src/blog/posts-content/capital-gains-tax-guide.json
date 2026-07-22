@@ -1,0 +1,104 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Selling an investment isn't just about the profit — it's about how much of that profit you get to keep. The difference between holding for 364 days vs. 366 days can cut your tax bill in half."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's what you need to know about capital gains tax in 2026."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Short-Term vs. Long-Term Gains — What's the Difference?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The length of time you hold an asset determines how your gain is taxed. **Short-term capital gains** (held 365 days or less) are taxed as ordinary income — at your marginal rate, which can be as high as **37%**. **Long-term capital gains** (held more than 365 days) get preferential rates of **0%, 15%, or 20%**."
+    },
+    {
+      "type": "paragraph",
+      "text": "That's potentially a 17-percentage-point difference — one of the biggest tax breaks in the code."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Filing Status",
+        "0% Rate",
+        "15% Rate",
+        "20% Rate"
+      ],
+      "rows": [
+        [
+          "Single",
+          "$0 – $47,025",
+          "$47,026 – $518,900",
+          "$518,901+"
+        ],
+        [
+          "Married Filing Jointly",
+          "$0 – $94,050",
+          "$94,051 – $583,750",
+          "$583,751+"
+        ],
+        [
+          "Head of Household",
+          "$0 – $63,000",
+          "$63,001 – $551,350",
+          "$551,351+"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is the Net Investment Income Tax (NIIT)?"
+    },
+    {
+      "type": "paragraph",
+      "text": "If your modified adjusted gross income exceeds **$200,000 (single)** or **$250,000 (married filing jointly)**, an additional **3. 8% NIIT** applies to your net investment income. This surtax was introduced by the Affordable Care Act and applies to capital gains, dividends, interest, and rental income."
+    },
+    {
+      "type": "paragraph",
+      "text": "For a high-earner in the 20% LTCG bracket, NIIT pushes the effective federal rate to **23. 8%**."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Can Capital Losses Offset Your Gains?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes — and this is one of the most powerful tax strategies available. Capital losses offset capital gains dollar-for-dollar. If your losses exceed your gains, you can deduct up to **$3,000 ($1,500 if married filing separately)** against ordinary income each year."
+    },
+    {
+      "type": "paragraph",
+      "text": "Remaining losses carry forward indefinitely. This strategy — called tax-loss harvesting — is widely used by investors to reduce taxable gains."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Beware of the wash-sale rule. If you sell a security at a loss and buy a substantially identical security within 30 days before or after the sale, the loss is disallowed for tax purposes. This applies to stocks, ETFs, and crypto."
+    },
+    {
+      "type": "cta",
+      "heading": "See Exactly What You'll Owe Before You Sell",
+      "body": "Use our free Capital Gains Tax Calculator with 2026 brackets, NIIT, and state tax support. Compare short-term vs. long-term scenarios instantly.",
+      "buttonLabel": "Try the Capital Gains Tax Calculator",
+      "path": "/finance/capital-gains-tax-calculator/"
+    }
+  ],
+  "keywords": [
+    "capital gains tax 2026",
+    "long term capital gains",
+    "short term capital gains",
+    "capital gains tax rates",
+    "NIIT",
+    "capital gains tax brackets",
+    "investment tax",
+    "tax loss harvesting",
+    "capital gains tax calculator",
+    "crypto tax"
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Are the 5 Stages of CKD?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Chronic kidney disease is classified into five stages by the National Kidney Foundation based on eGFR. The stage determines monitoring frequency, treatment approach, complication management, and whether specialist referral is needed."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Stage",
+        "eGFR",
+        "Description",
+        "Typical Management"
+      ],
+      "rows": [
+        [
+          "Stage 1",
+          "≥90 mL/min",
+          "Normal kidney function but with kidney damage (proteinuria, hematuria, abnormal imaging)",
+          "Diagnose and treat underlying cause. Monitor BP and proteinuria annually."
+        ],
+        [
+          "Stage 2",
+          "60-89 mL/min",
+          "Mildly decreased function with evidence of kidney damage",
+          "Same as Stage 1 plus cardiovascular risk assessment. Manage comorbidities aggressively."
+        ],
+        [
+          "Stage 3a",
+          "45-59 mL/min",
+          "Mild to moderate decrease",
+          "Monitor eGFR every 6-12 months. Manage complications. Consider nephrology referral."
+        ],
+        [
+          "Stage 3b",
+          "30-44 mL/min",
+          "Moderate to severe decrease",
+          "Refer to nephrologist. Manage anemia, bone disease, and electrolyte abnormalities."
+        ],
+        [
+          "Stage 4",
+          "15-29 mL/min",
+          "Severe decrease",
+          "Prepare for renal replacement therapy. Dialysis access planning. Transplant evaluation."
+        ],
+        [
+          "Stage 5",
+          "<15 mL/min",
+          "Kidney failure",
+          "Initiate dialysis or receive kidney transplant. End-of-life care if not pursuing RRT."
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The staging system is important because it drives clinical decisions. For example, ACE inhibitors or ARBs are recommended for anyone with CKD and proteinuria regardless of stage. Anemia management begins around Stage 3b. Dialysis access planning starts at Stage 4. These evidence-based guidelines ensure consistent, high-quality care across healthcare settings."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Stage 1 CKD: Normal Function, Early Damage"
+    },
+    {
+      "type": "paragraph",
+      "text": "Stage 1 CKD means your eGFR is normal (≥90 mL/min) but there is evidence of kidney damage. Damage markers include albuminuria (protein in the urine), hematuria (blood in the urine), or structural abnormalities seen on imaging (ultrasound, CT scan). Most people at Stage 1 feel completely normal and have no symptoms."
+    },
+    {
+      "type": "paragraph",
+      "text": "The goal at Stage 1 is aggressive management of the underlying cause. If you have diabetes, tight blood sugar control can prevent progression. If you have hypertension, ACE inhibitors or ARBs reduce proteinuria and protect kidney function. Treatment at this stage can often prevent any further kidney damage."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Stage 2 CKD: Mild Decrease"
+    },
+    {
+      "type": "paragraph",
+      "text": "Stage 2 CKD involves mildly decreased kidney function (eGFR 60-89) with continued evidence of kidney damage. The rate of progression varies enormously — some people remain stable at Stage 2 for decades, while others progress within years."
+    },
+    {
+      "type": "paragraph",
+      "text": "Management focuses on blood pressure control (target <130/80), blood sugar control in diabetes, proteinuria reduction with ACE/ARB medications, and cardiovascular risk reduction. Statins are typically recommended because cardiovascular disease is the leading cause of death in CKD — more people with CKD die from heart disease than progress to kidney failure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Stage 3 CKD: The Tipping Point"
+    },
+    {
+      "type": "paragraph",
+      "text": "Stage 3 CKD is divided into 3a (eGFR 45-59) and 3b (eGFR 30-44). This is the stage where kidney function decline becomes clinically significant and complications begin to emerge."
+    },
+    {
+      "type": "paragraph",
+      "text": "At Stage 3a, many patients still feel well. The main intervention is slowing progression through medication optimization and lifestyle changes. This is also the stage where most primary care doctors will refer to a nephrologist for specialized management."
+    },
+    {
+      "type": "paragraph",
+      "text": "At Stage 3b, complications become more common: anemia (due to reduced erythropoietin production), secondary hyperparathyroidism and bone disease (from phosphate retention and vitamin D deficiency), electrolyte imbalances (especially potassium and bicarbonate), and worsening blood pressure control. Medications need careful dose adjustment because many drugs are renally cleared."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Stage 3 is where the trajectory of your kidney disease becomes clearer. The annual rate of eGFR decline is the most important predictor of outcomes. A decline of 1-2 mL/min/year is typical. A decline of 4-5+ mL/min/year warrants aggressive intervention and evaluation for progressing to kidney failure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Stage 4 CKD: Preparing for Kidney Failure"
+    },
+    {
+      "type": "paragraph",
+      "text": "Stage 4 CKD (eGFR 15-29) marks severe reduction in kidney function. Symptoms become more common: fatigue, swelling in legs and feet (edema), loss of appetite, changes in urination pattern, sleep problems, cognitive changes, and itchiness (pruritus). The buildup of waste products in the blood (uremia) begins to cause systemic effects."
+    },
+    {
+      "type": "paragraph",
+      "text": "This is the stage for active preparation for renal replacement therapy. Your nephrologist should discuss dialysis modality options (hemodialysis vs peritoneal dialysis) and arrange for dialysis access placement — either a fistula for hemodialysis or a catheter for peritoneal dialysis. If you are a candidate for kidney transplantation, you should be evaluated for the transplant waiting list."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Dialysis education — attend classes, meet with dietitians, visit dialysis centers",
+        "Vascular access — AV fistula placement ideally 6-12 months before needing dialysis",
+        "Transplant evaluation — blood type, tissue typing, cardiac clearance, social work assessment",
+        "Dietary counseling — renal diet with sodium, potassium, and phosphorus restrictions",
+        "Medication review — ensure all drugs are appropriately dosed for reduced kidney function"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Stage 5 CKD: Kidney Failure"
+    },
+    {
+      "type": "paragraph",
+      "text": "Stage 5 CKD (eGFR <15) is kidney failure. At this point, the kidneys can no longer sustain life without medical intervention. Waste products and excess fluid accumulate to levels that cause progressive symptoms and eventually become fatal without treatment."
+    },
+    {
+      "type": "paragraph",
+      "text": "Treatment options for kidney failure include hemodialysis (usually 3 times per week at a dialysis center or at home), peritoneal dialysis (done daily at home by the patient), kidney transplantation (from a living or deceased donor), or comprehensive conservative care (medical management without dialysis, appropriate for some older adults or those with advanced comorbidities)."
+    },
+    {
+      "type": "paragraph",
+      "text": "The decision of which treatment to pursue is deeply personal and depends on medical factors, lifestyle, support system, and personal preferences. A nephrologist and multidisciplinary care team should guide this decision with thorough education and shared decision-making."
+    },
+    {
+      "type": "cta",
+      "heading": "Determine Your CKD Stage",
+      "body": "Enter your creatinine, age, and sex into our free GFR calculator. See your exact eGFR and corresponding CKD stage instantly.",
+      "buttonLabel": "Check Your Stage",
+      "path": "/health/gfr-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Fast Does CKD Progress?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The rate of CKD progression varies enormously between individuals. The most important predictor is the annual rate of eGFR decline. An average decline of 1-2 mL/min/1.73m² per year is typical for age-related decline or well-managed CKD. A decline of 4-5+ mL/min/year is rapid and suggests the need for more aggressive intervention."
+    },
+    {
+      "type": "paragraph",
+      "text": "Several factors accelerate progression: poorly controlled blood pressure, uncontrolled diabetes, persistent heavy proteinuria, smoking, obesity, and acute kidney injury episodes. The good news is that these are all modifiable — addressing them can slow or even halt progression in many cases."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can CKD be reversed?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Chronic kidney disease generally cannot be reversed, but its progression can often be slowed significantly — and in some cases nearly halted — with proper treatment. The earlier CKD is detected, the more kidney function can be preserved. Acute causes of kidney injury that temporarily lower eGFR can sometimes be reversed."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "At what stage of CKD do symptoms start?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Most people with Stage 1-3a CKD have no symptoms at all. Symptoms typically begin to appear at Stage 3b-4 and become more prominent at Stage 5. This silent nature of early CKD is why routine screening with eGFR is so important."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Do I need to see a nephrologist?"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you are at Stage 1-3a and stable, your primary care doctor can manage your CKD. Nephrology referral is recommended for Stage 3b or higher, rapid progression, heavy proteinuria, difficult-to-control hypertension, or if the cause of kidney disease is unclear."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the life expectancy with Stage 3 CKD?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Life expectancy with Stage 3 CKD depends on age, overall health, and the rate of progression. Many people with Stage 3 CKD live for decades without ever reaching kidney failure. Cardiovascular disease is a more significant risk to life expectancy than progression to end-stage renal disease."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is Stage 3 kidney disease serious?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Stage 3a (eGFR 45-59) is generally considered mild to moderate kidney disease and carries a good prognosis with proper management. Stage 3b (eGFR 30-44) is more serious and requires closer monitoring. Both stages benefit from aggressive cardiovascular risk factor management."
+    }
+  ],
+  "keywords": [
+    "ckd stages",
+    "chronic kidney disease stages",
+    "stage 3 kidney disease",
+    "stage 4 kidney disease",
+    "kidney failure stages",
+    "egfr stages chart",
+    "ckd stage 3b",
+    "end stage renal disease",
+    "kidney disease progression"
+  ]
+}

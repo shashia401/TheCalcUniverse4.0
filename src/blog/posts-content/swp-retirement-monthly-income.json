@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Building Your SWP Income Plan"
+    },
+    {
+      "type": "paragraph",
+      "text": "Step 1: Calculate your monthly expenses in retirement. Step 2: Factor in other income sources (pension, rental, part-time work). Step 3: The gap needs to come from your SWP. Step 4: Use the SWP calculator to check if your corpus can sustain that withdrawal. Step 5: Choose the right fund for SWP (balanced advantage or hybrid funds work well for SWP)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Recommended Funds for SWP"
+    },
+    {
+      "type": "paragraph",
+      "text": "For SWP, choose funds with lower volatility than pure equity: balanced advantage funds dynamically manage equity/debt allocation, hybrid aggressive funds maintain 65-80% equity, and short-term debt funds for the first 3-5 years of withdrawals."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SWP Calculator",
+      "body": "Plan your retirement withdrawals with our free SWP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/swp-calculator/"
+    }
+  ],
+  "keywords": [
+    "swp retirement",
+    "monthly pension swp",
+    "retirement income plan",
+    "swp monthly income",
+    "pension through swp",
+    "retirement corpus swp"
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is BMI and How Is It Calculated?"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMI stands for Body Mass Index. It is your weight in kilograms divided by your height in meters squared (kg/m²). For example, a person who is 1.75m tall and weighs 70kg has a BMI of 22.9 (70 Ã· 3.06). The formula was developed by Belgian mathematician Adolphe Quetelet in the 1830s as a way to measure population-level obesity, not as a diagnostic tool for individuals. In the US imperial system, the formula is (weight in pounds / height in inches²) x 703."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "WHO BMI Categories"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "BMI Range",
+        "Health Risk"
+      ],
+      "rows": [
+        [
+          "Severely underweight",
+          "Under 16.0",
+          "High risk — malnutrition"
+        ],
+        [
+          "Underweight",
+          "16.0 â€“ 18.4",
+          "Moderate risk"
+        ],
+        [
+          "Normal weight",
+          "18.5 â€“ 24.9",
+          "Low risk"
+        ],
+        [
+          "Overweight",
+          "25.0 â€“ 29.9",
+          "Low-moderate risk"
+        ],
+        [
+          "Obese Class I",
+          "30.0 â€“ 34.9",
+          "Moderate risk"
+        ],
+        [
+          "Obese Class II",
+          "35.0 â€“ 39.9",
+          "High risk"
+        ],
+        [
+          "Obese Class III",
+          "40.0 and above",
+          "Very high risk"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When BMI Is Wrong for You"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMI has three major limitations. First, it cannot distinguish between muscle and fat. An athlete with 12% body fat can have the same BMI as someone with 30% body fat. Second, standard BMI cutoffs were developed using white European populations and do not apply equally to all ethnic groups — Asian populations have higher health risks at lower BMIs. Third, BMI does not account for age-related changes; older adults lose muscle mass, so a normal BMI can mask high body fat."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Better Metrics to Track"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Body fat percentage: Directly measures how much of your weight is fat vs muscle. Our body fat calculator uses the Navy circumference method.",
+        "Waist-to-height ratio: Waist circumference divided by height. Keep it under 0.5. This is a better predictor of heart disease than BMI.",
+        "Waist-to-hip ratio: Waist divided by hip circumference. Above 0.85 for women and 0.9 for men indicates central obesity.",
+        "BMR and TDEE: Understand your metabolism to set realistic calorie targets for weight management."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Ethnicity-Specific BMI Cutoffs"
+    },
+    {
+      "type": "paragraph",
+      "text": "The World Health Organization recommends lower BMI cutoffs for Asian populations: overweight at 23 (instead of 25) and obese at 27.5 (instead of 30). This is because people of Asian descent tend to have higher body fat percentages at the same BMI and develop obesity-related health conditions at lower BMIs. Our BMI calculator includes an Asian-adjusted setting that uses these modified thresholds. Black populations may have slightly different risk profiles as well, though specific cutoff adjustments are less standardized."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a healthy BMI for my age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "For adults over 20, the same BMI categories apply regardless of age. However, research suggests that slightly higher BMIs (25-27) may be associated with better outcomes in older adults, a phenomenon called the obesity paradox. For children and teens, BMI is evaluated using age- and sex-specific percentile charts rather than fixed adult categories."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How accurate is BMI for muscular people?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Very inaccurate. Muscle is denser than fat, so muscular individuals often have BMIs in the overweight or obese range despite having very low body fat. LeBron James reportedly had a BMI over 27 at his peak. If you have above-average muscle mass, body fat percentage is a much more useful metric than BMI."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can two people with the same BMI have different health risks?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Absolutely. A person with high muscle mass and low body fat can have the same BMI as someone with average muscle and excessive body fat. This is the single biggest criticism of BMI as an individual health metric. Always use BMI alongside other measurements like waist circumference, body fat percentage, and blood work for a complete health picture."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your BMI",
+      "body": "Free BMI calculator with visual gauge, Asian-adjusted cutoffs, and healthy weight range.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "bmi calculator",
+    "body mass index",
+    "bmi guide",
+    "bmi limitations",
+    "healthy bmi range",
+    "bmi vs body fat",
+    "bmi for athletes"
+  ]
+}

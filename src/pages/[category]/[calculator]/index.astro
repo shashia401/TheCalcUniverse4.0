@@ -123,13 +123,13 @@ const tocItems = [
       </h1>
       <p class="text-[var(--surface-text-secondary)] mb-4 max-w-2xl">{entry.description}</p>
 
-      {/* Trust signals — verifiable facts, not badges */}
+      {/* Trust signals — only verifiable facts. We do NOT show a "reviewed by
+          [expert]" badge unless a real, named review happened; instead we link
+          to how every formula is tested + sourced. */}
       <div class="flex flex-wrap items-center gap-2 mb-6 text-tiny">
-        {entry.reviewedBy && (
-          <span class="inline-flex items-center gap-1.5 rounded-full border border-accent-emerald-400/50 bg-accent-emerald-50 px-2.5 py-1 font-medium text-accent-emerald-700 dark:bg-transparent">
-            ✓ Reviewed by {entry.reviewedBy}
-          </span>
-        )}
+        <a href="/methodology/" class="inline-flex items-center gap-1.5 rounded-full border border-accent-emerald-400/50 bg-accent-emerald-50 px-2.5 py-1 font-medium text-accent-emerald-700 transition-colors hover:border-accent-emerald-500 dark:bg-transparent">
+          ✓ Tested formula &amp; cited sources
+        </a>
         {entry.lastVerified && (
           <span class="inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-2.5 py-1 font-medium text-[var(--surface-text-muted)]">
             Formula verified {entry.lastVerified}

@@ -1,0 +1,75 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Roof Pitch Changes Everything"
+    },
+    {
+      "type": "paragraph",
+      "text": "A roof with a 6/12 pitch (6 inches of rise per 12 inches of run) has about 12% more surface area than the ground footprint of the house. A 12/12 pitch (45 degrees) has 41% more surface area. This means a 1,500 sq ft ground footprint with a steep roof could require over 2,100 sq ft of roofing materials. The roofing calculator accounts for pitch automatically."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Many Shingles Do You Need?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Shingles are sold in bundles. Standard 3-tab shingles: 3 bundles per square (100 sq ft). Architectural shingles: 4 bundles per square. For a 2,000 sq ft roof (20 squares) with standard shingles: 20 x 3 = 60 bundles. Add 10-15% for waste (starter strips, hips, ridges, mistakes). That is 66-69 bundles. Always round up when ordering."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Additional Materials"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Underlayment: One roll of 15-lb felt covers about 4 squares (400 sq ft). Ice and water shield is needed for valleys and eaves in cold climates.",
+        "Drip edge: Measure the total perimeter of your roof edges. Comes in 10-foot lengths.",
+        "Ridge vents: One vent covers about 20 linear feet of ridge. Measure your roof ridge length.",
+        "Nails: 1 lb per square for standard shingles (about 320 nails per square for 4 nails per shingle)."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I measure roof pitch?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Place a level on your roof, hold it level, measure 12 inches from the bottom end along the level, then measure straight down from that point to the roof surface. That measurement is the rise. A 6-inch rise = 6/12 pitch. The roofing calculator includes a pitch measurement guide."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should I add extra for waste?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes. 10% minimum for simple gable roofs, 15% for roofs with valleys, hips, and dormers. Complex roofs with multiple intersecting planes may need 20% waste factor. It is better to have extra shingles than to run out mid-project."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Roofing Calculator",
+      "body": "Estimate shingles and materials for your roof project. Adjusts for pitch automatically.",
+      "buttonLabel": "Open Calculator",
+      "path": "/diy/roofing-calculator/"
+    }
+  ],
+  "keywords": [
+    "roofing calculator",
+    "shingle calculator",
+    "roof materials estimator",
+    "how many shingles",
+    "roofing estimate",
+    "roof square footage"
+  ]
+}

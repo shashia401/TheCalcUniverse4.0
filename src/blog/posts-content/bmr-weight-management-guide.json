@@ -1,0 +1,84 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is BMR?"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMR stands for Basal Metabolic Rate. It's the number of calories your body burns at complete rest — just breathing, circulating blood, repairing cells, and keeping your temperature stable. It accounts for a massive **60–75%** of your total daily calorie burn."
+    },
+    {
+      "type": "paragraph",
+      "text": "By comparison, exercise and walking make up only **10–30%**. That's why knowing your BMR is the foundation of any weight management plan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "BMR vs. TDEE — What's the Difference?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your Total Daily Energy Expenditure (TDEE) is BMR plus everything else: the thermic effect of food (digestion burns about 10% of your calories), NEAT (non-exercise activity like fidgeting and walking), and deliberate exercise. To get your TDEE, multiply your BMR by an activity factor: **1. 2** for sedentary, **1."
+    },
+    {
+      "type": "paragraph",
+      "text": "55** for moderate exercise, up to **1. 9** for  active. Your TDEE is the real number for weight management — BMR is just the starting point."
+    },
+    {
+      "type": "paragraph",
+      "text": "The Mifflin-St Jeor equation is the most accurate formula for estimating BMR in the general population."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use BMR for Weight Loss"
+    },
+    {
+      "type": "paragraph",
+      "text": "To lose weight, you need a calorie deficit — eating fewer calories than your TDEE. But here's the critical rule: never eat below your BMR. Doing so forces your body to break down muscle and organ tissue for fuel."
+    },
+    {
+      "type": "paragraph",
+      "text": "A safe deficit's **250–500 calories below TDEE**, which yields about **0. 5–1 lb of fat loss per week**. Women shouldn't go below **1,200 calories** daily, and men shouldn't go below **1,500**, unless medically supervised."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Your BMR is the floor. Think of it as your survival budget — the minimum your body needs just to function. Any weight loss plan that asks you to eat below this number is unsustainable and potentially dangerous. If your TDEE is 2,200 and your BMR is 1,500, your safe deficit range is between 1,700 and 1,950 calories per day."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Does Your BMR Change With Age?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes. BMR drops about **2% per decade** after age 20. That's roughly 20–30 fewer calories burned per day each decade."
+    },
+    {
+      "type": "paragraph",
+      "text": "The primary cause isn't aging itself — it's sarcopenia, the gradual loss of muscle mass. The good news? Resistance training is the most effective way to slow or even reverse this decline."
+    },
+    {
+      "type": "paragraph",
+      "text": "Muscle tissue burns about **6 calories per pound per day** at rest, while fat tissue burns only about 2."
+    },
+    {
+      "type": "cta",
+      "heading": "Find Your BMR in 30 Seconds",
+      "body": "Use our BMR Calculator to see your personal basal metabolic rate using the Mifflin-St Jeor, Harris-Benedict, or Katch-McArdle formula. Compare all three side by side.",
+      "buttonLabel": "Calculate BMR",
+      "path": "/health/bmr-calculator/"
+    }
+  ],
+  "keywords": [
+    "bmr for weight loss",
+    "basal metabolic rate",
+    "tdee calculator",
+    "calorie deficit",
+    "metabolic rate",
+    "bmr calculator online"
+  ]
+}

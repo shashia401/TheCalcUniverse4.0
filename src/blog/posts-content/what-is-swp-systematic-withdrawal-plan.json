@@ -1,0 +1,43 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How SWP Works"
+    },
+    {
+      "type": "paragraph",
+      "text": "You set up an SWP in your mutual fund folio specifying: the amount you want to receive monthly, the frequency (monthly/quarterly), and the duration. Every month, units equivalent to your withdrawal amount are redeemed from your fund, and the proceeds are credited to your bank account. Meanwhile, your remaining units continue to participate in market movements and earn returns."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Key SWP Benefits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Regular income: Predictable cash flow every month for retirement expenses.",
+        "Growth potential: Remaining corpus stays invested and continues earning returns.",
+        "Tax efficient: Only capital gains are taxed, not the entire withdrawal amount.",
+        "Flexibility: Change withdrawal amount, frequency, or stop anytime.",
+        "No TDS: Unlike FD interest, SWP does not attract TDS (tax is paid on capital gains at the time of filing)."
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Try the SWP Calculator",
+      "body": "Plan your retirement withdrawals with our free SWP calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/swp-calculator/"
+    }
+  ],
+  "keywords": [
+    "what is swp",
+    "systematic withdrawal plan",
+    "swp explained",
+    "swp mutual fund",
+    "monthly income through swp"
+  ]
+}

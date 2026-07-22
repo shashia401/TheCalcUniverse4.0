@@ -1,0 +1,361 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is Compound Interest?"
+    },
+    {
+      "type": "paragraph",
+      "text": "You've heard the phrase \"compound interest\" before. Here's what it actually means: you earn interest not just on what you put in, but on the interest you've already earned. Simple interest only pays you on the original amount. Compound interest pays you on *everything*."
+    },
+    {
+      "type": "paragraph",
+      "text": "A 25-year-old who invests **$10,000 once** and never adds another dollar ends up with roughly **$76,000** at age 65 (at 7% compounded annually). That's only ten grand out of pocket. The other $66,000? Pure compounding. Now imagine adding monthly contributions on top of that. That's when it gets wild."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Compound Interest Formula"
+    },
+    {
+      "type": "paragraph",
+      "text": "The compound interest formula looks intimidating, but it's really two parts: what your lump sum does, and what your monthly contributions do. Here's the full formula our calculator uses:"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "FV = P × (1 + r/n)^(n×t) + PMT × [((1 + r/12)^(12×t) − 1) / (r/12)]"
+    },
+    {
+      "type": "paragraph",
+      "text": "Let's break down each piece:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**FV (Future Value):** the total value of your investment after everything compounds. The number you actually care about.",
+        "**P (Principal):** the lump sum you start with. Even a small amount goes a long way with enough time.",
+        "**PMT (Monthly Contribution):** money you add each month. Consistency beats dollar amount almost every time.",
+        "**r (Annual Interest Rate):** your expected return as a decimal. For stocks, **7% (0.07)** is the standard inflation-adjusted long-term assumption.",
+        "**n (Compounding Frequency):** how many times per year interest gets added. Common values: 12 (monthly), 4 (quarterly), 2 (semi-annual), 1 (annual).",
+        "**t (Time):** the number of years your money stays invested. This is the secret weapon. More time means more exponential growth."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The first chunk handles your initial lump sum. The second chunk handles your monthly contributions — each one starts compounding the moment it hits your account. Together, they show the full picture of how your wealth builds."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Compound Interest vs. Simple Interest"
+    },
+    {
+      "type": "paragraph",
+      "text": "The difference is straightforward: linear vs. exponential. Simple interest pays you the same amount every year on your original principal. Compound interest pays you on your principal **plus** all the interest you've already racked up. So your returns get bigger every single period."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Feature",
+        "Simple Interest",
+        "Compound Interest"
+      ],
+      "rows": [
+        [
+          "Growth Pattern",
+          "Linear",
+          "Exponential"
+        ],
+        [
+          "Interest Earned On",
+          "Principal only",
+          "Principal + accumulated interest"
+        ],
+        [
+          "Formula",
+          "I = P × r × t",
+          "FV = P × (1 + r/n)^(n×t)"
+        ],
+        [
+          "$10,000 at 7% over 20 years",
+          "$24,000",
+          "$38,697 (annual compounding)"
+        ],
+        [
+          "Best For",
+          "Short-term loans, bonds",
+          "Long-term investing, retirement"
+        ],
+        [
+          "Risk Profile",
+          "Predictable, low growth",
+          "Higher potential, time-dependent"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Over 20 years, $10,000 at 7% simple interest grows to **$24,000**. Same money with annual compounding? Roughly **$38,700** — nearly $15,000 more. Stretch it to 30 years and the gap blows past **$55,000**. You can see the exact difference side by side on our simple vs. compound interest comparison page."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Want to see the difference with your own numbers? Check out our Simple vs Compound Interest comparison to visualize how compounding amplifies your returns over time."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Rule of 72: A Quick Mental Shortcut"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's a neat trick. Want to know how fast your money doubles? Divide 72 by your annual return rate. That's your doubling time in years. No calculator needed."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Annual Return",
+        "Doubling Time (Rule of 72)",
+        "Exact Doubling Time"
+      ],
+      "rows": [
+        [
+          "4%",
+          "18.0 years",
+          "17.7 years"
+        ],
+        [
+          "6%",
+          "12.0 years",
+          "11.9 years"
+        ],
+        [
+          "7%",
+          "10.3 years",
+          "10.2 years"
+        ],
+        [
+          "8%",
+          "9.0 years",
+          "9.0 years"
+        ],
+        [
+          "10%",
+          "7.2 years",
+          "7.3 years"
+        ],
+        [
+          "12%",
+          "6.0 years",
+          "6.1 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The Rule of 72 is most accurate for rates between 6% and 10%. Outside that range it's off by a fraction, but still useful for quick comparisons. At 7%, your money doubles roughly every 10 years. So **$10,000** at age 25 becomes **$20,000** by 35, **$40,000** by 45, and **$80,000** by 55. All from compounding, with zero extra contributions."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Compounding Frequency Affects Your Returns"
+    },
+    {
+      "type": "paragraph",
+      "text": "Does it matter if interest compounds monthly vs. annually? Yes — but maybe not as much as you'd think. More frequent compounding means your money earns interest on a slightly bigger balance sooner. The real-world difference is smaller than most people expect."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Compounding Frequency",
+        "Future Value of $10,000 at 7% over 20 Years",
+        "Difference vs. Annual"
+      ],
+      "rows": [
+        [
+          "Annually (1x/year)",
+          "$38,697",
+          "—"
+        ],
+        [
+          "Semi-Annually (2x/year)",
+          "$39,116",
+          "+$419"
+        ],
+        [
+          "Quarterly (4x/year)",
+          "$39,343",
+          "+$646"
+        ],
+        [
+          "Monthly (12x/year)",
+          "$39,487",
+          "+$790"
+        ],
+        [
+          "Daily (365x/year)",
+          "$39,586",
+          "+$889"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Going from annual to monthly compounding adds about **$790** over 20 years on a $10,000 investment. Noticeable. But going from monthly to daily adds less than **$100**. So here's the takeaway: focus on your rate of return and your time horizon. A 7% return compounded annually will always beat 6% compounded daily. Frequency matters, but rate and time matter way more."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Power of Starting Early: Three Real-World Scenarios"
+    },
+    {
+      "type": "paragraph",
+      "text": "Nothing matters more than time. Let's look at three investors to prove it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Scenario A: The Early Starter"
+    },
+    {
+      "type": "paragraph",
+      "text": "Sarah starts at 25. She invests **$5,000/year** ($417/month) for 10 years, then stops at 35. Total out of pocket: **$50,000**. At 7% returns, her investment grows to roughly **$540,000** by 65. That's $490,000 in pure compound growth on just $50,000 she actually put in."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Scenario B: The Late Starter"
+    },
+    {
+      "type": "paragraph",
+      "text": "John waits until 35. He invests $5,000/year every year from 35 to 65 — 30 years, **$150,000** total. At 7%, his balance hits roughly **$505,000** by 65. He put in three times as much as Sarah and ended up with *less*."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Scenario C: The Maximalist"
+    },
+    {
+      "type": "paragraph",
+      "text": "Maria starts at 25 and invests $5,000/year all the way to 65 — 40 years, **$200,000** total. At 7%, she walks away with roughly **$1,068,000**. Millionaire. And over 80% of that came from compounding, not her own wallet."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Sarah put in $50,000 and walked away with $540,000. John put in $150,000 — triple the money — and ended up with $505,000. Less. The difference? Sarah's money had 10 extra years to compound. Starting early is the single best financial decision you can make."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Monthly Contributions Supercharge Growth"
+    },
+    {
+      "type": "paragraph",
+      "text": "A lump sum is great. But regular monthly contributions? That's where compounding turns into a rocket ship. Every contribution starts earning interest the moment it lands. Small amounts, consistently invested, build serious wealth over time."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Monthly Contribution",
+        "Total After 30 Years at 7%",
+        "You Contributed",
+        "Compound Growth"
+      ],
+      "rows": [
+        [
+          "$0 (lump sum $10,000)",
+          "$76,123",
+          "$10,000",
+          "$66,123"
+        ],
+        [
+          "$250",
+          "$283,891",
+          "$100,000",
+          "$183,891"
+        ],
+        [
+          "$500",
+          "$567,783",
+          "$190,000",
+          "$377,783"
+        ],
+        [
+          "$1,000",
+          "$1,135,565",
+          "$370,000",
+          "$765,565"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Someone investing **$500/month** for 30 years at 7% ends up with over **$567,000**. They contributed $190,000. Compounding did the rest — $377,000. Around year 20, compounding starts contributing more to your balance than you do. Your money starts working harder than you."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Questions About Compound Interest"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is a realistic rate of return for planning?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The S&P 500 has historically returned about **10% nominal** and **7% inflation-adjusted** annually over long stretches. For conservative planning, use 5-6%. For a balanced portfolio, 6-8% is reasonable. Our compound interest calculator has a rate variance feature — you can model optimistic and pessimistic scenarios side by side instead of betting on a single number."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do taxes affect compound interest?"
+    },
+    {
+      "type": "paragraph",
+      "text": "In tax-advantaged accounts like 401(k)s and IRAs, your money compounds tax-free until withdrawal (traditional) or entirely tax-free (Roth). In taxable brokerage accounts, taxes nibble at your returns every year, dragging down your effective compounding rate. That's why maxing out retirement accounts before putting money in taxable accounts is almost always the smarter move."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Can compound interest work against me?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Absolutely. Compound interest doesn't care whether it's working for you or against you. Credit cards, student loans, and personal loans all compound interest on unpaid balances. At a **22% APR** credit card rate compounded daily, a **$5,000** balance balloons past **$13,000** in just five years if you only make minimum payments. Paying down high-interest debt is mathematically the highest-return investment most people can make."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Start Calculating Your Compound Interest"
+    },
+    {
+      "type": "paragraph",
+      "text": "The best way to really *get* compound interest is to plug in your own numbers and watch it work. Our free compound interest calculator handles one-time investments, monthly contributions, different rates, time horizons, and multiple compounding frequencies. Model optimistic and pessimistic scenarios side by side and see the full range of what's possible."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Free Compound Interest Calculator",
+      "body": "See how your money can grow over time with our compound interest calculator. Model different rates, contributions, and time horizons — all free, no signup required.",
+      "buttonLabel": "Open the Compound Interest Calculator",
+      "path": "/finance/compound-interest-calculator/"
+    }
+  ],
+  "keywords": [
+    "compound interest",
+    "compound interest formula",
+    "how compound interest works",
+    "compound interest calculator",
+    "rule of 72",
+    "compounding frequency",
+    "exponential growth",
+    "investment growth calculator",
+    "future value formula",
+    "simple vs compound interest",
+    "long term investing",
+    "power of compounding"
+  ]
+}

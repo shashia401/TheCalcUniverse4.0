@@ -1,0 +1,46 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How They Differ"
+    },
+    {
+      "type": "paragraph",
+      "text": "The heat index uses only temperature and humidity, measured in shade. WBGT (Wet Bulb Globe Temperature) combines temperature, humidity, wind speed, and solar radiation. This makes WBGT more accurate for assessing heat stress in direct sunlight. WBGT is the standard for military training, athletic events, and occupational safety in many countries."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to Use Each"
+    },
+    {
+      "type": "paragraph",
+      "text": "Use heat index for quick checks from weather data — when you look at a weather app and want to know if conditions are safe. Use WBGT for formal safety decisions — practices, outdoor work shifts, military training. Many high school athletic associations mandate WBGT-based activity modification. The general rule: WBGT is typically 5-10°F higher than heat index in direct sun with low wind."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Human Survivability Limit"
+    },
+    {
+      "type": "paragraph",
+      "text": "Research suggests a WBGT of 35°C (95°F) is the theoretical human survivability limit — the point where the body cannot cool itself even at rest. Climate models project that parts of South Asia, the Persian Gulf, and the US Gulf Coast could experience conditions approaching this limit during extreme heat events by mid-century."
+    },
+    {
+      "type": "cta",
+      "heading": "Check Heat Conditions",
+      "body": "Use our heat index calculator for quick condition checks before outdoor activities.",
+      "buttonLabel": "Open Calculator",
+      "path": "/everyday/heat-index-calculator/"
+    }
+  ],
+  "keywords": [
+    "heat index vs wbgt",
+    "wet bulb globe temperature",
+    "heat stress measurement",
+    "wbgt vs heat index",
+    "military heat guidelines",
+    "athletic heat safety"
+  ]
+}

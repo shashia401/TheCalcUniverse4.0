@@ -1,0 +1,72 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Three Numbers and What Each Tells You"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMI, BMR, and TDEE are three different numbers that serve different purposes. BMI (body mass index) classifies your weight relative to height. BMR (basal metabolic rate) is the calories your body burns at complete rest. TDEE (total daily energy expenditure) is the total calories you burn including activity. BMI tells you where you are now, BMR tells you the baseline, and TDEE tells you what you need to eat to maintain, lose, or gain weight."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use Them Together"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Step 1: Calculate your BMI to establish your starting category and healthy weight range.",
+        "Step 2: Calculate your BMR to understand your baseline metabolic needs.",
+        "Step 3: Calculate your TDEE by adding your activity level. This is your maintenance calorie target.",
+        "Step 4: Set your goal: subtract 300-500 calories from TDEE for weight loss, or add 300-500 for weight gain.",
+        "Step 5: Track your progress and recalculate every 10-15 lbs of weight change."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "A person with a higher BMI will typically have a higher BMR because they have more body mass to maintain. This means a larger person burns more calories at rest than a smaller person — even doing nothing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Does BMI affect metabolism?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Indirectly, yes. A higher BMI means more body mass, which generally means a higher BMR. However, the type of mass matters: muscle is metabolically active (burns calories at rest), while fat tissue is less active. Two people with the same BMI can have different BMRs if they have different body compositions."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should I calculate BMR before starting a diet?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Yes. Your BMR is the absolute minimum you should eat in a day. Eating below your BMR triggers metabolic adaptation — your body slows down to conserve energy. Always set your calorie target above your BMR, ideally between BMR and TDEE. Never eat below 1,200 calories (women) or 1,500 (men) without medical supervision."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your Numbers",
+      "body": "Use our BMI, BMR, and TDEE calculators to get your complete metabolic profile.",
+      "buttonLabel": "Try BMI Calculator",
+      "path": "/health/bmi-calculator/"
+    }
+  ],
+  "keywords": [
+    "bmi vs bmr",
+    "bmi vs tdee",
+    "bmi and metabolism",
+    "tdee for weight loss",
+    "how to use bmi and tdee",
+    "body composition metabolism"
+  ]
+}

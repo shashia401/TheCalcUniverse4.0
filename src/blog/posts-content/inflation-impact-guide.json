@@ -1,0 +1,89 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "Inflation is often called the **silent thief** because it slowly erodes your purchasing power over time without you noticing. At 3% average annual inflation, **$100 loses half its purchasing power in about 24 years. ** That $100 bill in your wallet today will buy roughly $50 worth of goods in 2049."
+    },
+    {
+      "type": "paragraph",
+      "text": "Understanding inflation is essential for saving, investing, and planning for retirement."
+    },
+    {
+      "type": "heading",
+      "text": "What Is the Consumer Price Index (CPI)?",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "The Consumer Price Index (CPI) measures the average price level of a fixed basket of goods and services purchased by urban consumers. it's the most widely used measure of inflation in the United States, published monthly by the Bureau of Labor Statistics."
+    },
+    {
+      "type": "paragraph",
+      "text": "The CPI basket includes food, housing, energy, transportation, medical care, education, and recreation — weighted by typical consumer spending patterns. The basket is periodically updated to reflect changing consumption (streaming services and smartphones are now included, for example)."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "CPI Component",
+        "Typical Weight",
+        "Examples"
+      ],
+      "rows": [
+        [
+          "Housing",
+          "~33%",
+          "Rent, mortgage interest, utilities, furniture"
+        ],
+        [
+          "Transportation",
+          "~16%",
+          "New and used vehicles, gas, airfare, insurance"
+        ],
+        [
+          "Food & Beverages",
+          "~14%",
+          "Groceries, restaurant meals, alcohol"
+        ],
+        [
+          "Medical Care",
+          "~8%",
+          "Doctor visits, hospital services, prescriptions"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "How Does the Inflation Formula Work?",
+      "level": 2
+    },
+    {
+      "type": "paragraph",
+      "text": "The inflation adjustment formula is straightforward: **Adjusted Value = (Original Amount / CPI in Start Year) x CPI in End Year.** If prices in year B are 50% higher than in year A, then $100 in year A has the same purchasing power as $150 in year B."
+    },
+    {
+      "type": "paragraph",
+      "text": "The cumulative inflation rate tell you the total price change over a period. The average annual rate smooths that into a per-year percentage. Both are calculated directly from the CPI ratio between the two years."
+    },
+    {
+      "type": "callout",
+      "text": "This inflation calculator uses the same official CPI data from the Bureau of Labor Statistics that powers bls.gov. Annual average CPI values are used for each year. For month-to-month precision, the BLS provides monthly CPI data for calculations within a single year.",
+      "variant": "info"
+    },
+    {
+      "type": "cta",
+      "heading": "See How Inflation Affects Your Money",
+      "body": "Enter any dollar amount and year range into our free Inflation Calculator. See the inflation-adjusted value, cumulative inflation rate, and annual average rate using official BLS CPI data from 1913 to today.",
+      "buttonLabel": "Open the Inflation Calculator",
+      "path": "/finance/inflation-calculator/"
+    }
+  ],
+  "keywords": [
+    "inflation",
+    "CPI",
+    "purchasing power",
+    "inflation calculator",
+    "how inflation works",
+    "consumer price index",
+    "money value over time"
+  ]
+}

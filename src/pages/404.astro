@@ -1,0 +1,41 @@
+---
+// 404 — static, noindex, points people back to something useful.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCategories } from '../lib/registry';
+import { SITE_NAME } from '../config/constants';
+
+const categories = getCategories().filter((cat) => cat.count > 0);
+---
+
+<BaseLayout
+  title={`Page not found | ${SITE_NAME}`}
+  description="This page doesn't exist. Browse our calculator categories or search to find what you need."
+  canonicalPath="/404/"
+  noindex
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[720px] mx-auto px-4 py-16 text-center">
+      <p class="text-6xl font-bold text-[var(--brand-default)] mb-4">404</p>
+      <h1 class="text-2xl font-bold text-[var(--surface-text)] mb-2">This page doesn't exist</h1>
+      <p class="text-[var(--surface-text-secondary)] mb-8">
+        The address may have changed. Every calculator lives at
+        <code class="text-sm">/category/calculator-name/</code> — start from a category:
+      </p>
+      <ul class="flex flex-wrap justify-center gap-3 list-none p-0">
+        {categories.map((cat) => (
+          <li>
+            <a
+              href={`/${cat.slug}/`}
+              class="inline-block rounded-lg border border-[var(--border-warm)] bg-[var(--surface-card)] px-4 py-2 text-sm font-medium text-[var(--surface-text)] transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+            >
+              {cat.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-8">
+        <a href="/search/" class="text-[var(--brand-default)] hover:underline">Or search all calculators →</a>
+      </p>
+    </div>
+  </main>
+</BaseLayout>

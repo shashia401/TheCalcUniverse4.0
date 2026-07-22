@@ -1,0 +1,50 @@
+---
+// Blog index — fully static. Posts sorted newest first.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { blogPosts } from '../../lib/blog';
+import { SITE_NAME } from '../../config/constants';
+
+const posts = [...blogPosts].sort(
+  (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+);
+
+const dateFmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+
+<BaseLayout
+  title={`Blog — Guides & Explanations | ${SITE_NAME}`}
+  description={`${posts.length} in-depth guides behind our calculators: mortgages, BMI, retirement, e-commerce fees, and more — with formulas and worked examples.`}
+  canonicalPath="/blog/"
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[900px] mx-auto px-4 md:px-10 py-10">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-default)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>Blog</span>
+      </nav>
+
+      <h1 class="text-3xl font-bold text-[var(--surface-text)] mb-2">Guides &amp; Explanations</h1>
+      <p class="text-[var(--surface-text-secondary)] mb-10">
+        The thinking behind the calculators — {posts.length} articles.
+      </p>
+
+      <ul class="space-y-6 list-none p-0">
+        {posts.map((post) => (
+          <li>
+            <a
+              href={`/blog/${post.slug}/`}
+              class="block p-5 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+            >
+              <p class="text-tiny uppercase tracking-wide text-[var(--surface-text-muted)] mb-1">
+                {post.category} · {dateFmt.format(new Date(post.publishedAt))} · {post.readingMinutes} min read
+              </p>
+              <h2 class="text-lg font-semibold text-[var(--surface-text)]">{post.title}</h2>
+              <p class="text-sm text-[var(--surface-text-secondary)] mt-1">{post.excerpt}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </main>
+</BaseLayout>

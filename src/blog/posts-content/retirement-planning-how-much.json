@@ -1,0 +1,115 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The 4% Rule Explained"
+    },
+    {
+      "type": "paragraph",
+      "text": "The 4% rule says you can withdraw 4% of your retirement savings in your first year of retirement, then adjust for inflation each year, with a high probability that your money lasts 30 years. Under this rule, if you need $40,000 per year from investments, you need $1 million saved ($40,000 / 0.04 = $1,000,000). The rule was based on historical US stock and bond returns from 1926-1995 and is a guideline, not a guarantee. Many experts now recommend 3-3.5% for longer retirements."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Savings Benchmarks by Age"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Age",
+        "Target (1x Salary)",
+        "Target (3x Expenses)"
+      ],
+      "rows": [
+        [
+          "30",
+          "1x salary",
+          "$90,000"
+        ],
+        [
+          "35",
+          "2x salary",
+          "$180,000"
+        ],
+        [
+          "40",
+          "3x salary",
+          "$270,000"
+        ],
+        [
+          "45",
+          "4x salary",
+          "$360,000"
+        ],
+        [
+          "50",
+          "6x salary",
+          "$540,000"
+        ],
+        [
+          "55",
+          "7x salary",
+          "$630,000"
+        ],
+        [
+          "60",
+          "8x salary",
+          "$720,000"
+        ],
+        [
+          "65",
+          "10x salary",
+          "$900,000"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Social Security and Pensions"
+    },
+    {
+      "type": "paragraph",
+      "text": "Social Security replaces about 40% of pre-retirement income for the average worker. If you have a pension, factor that into your calculations too. The retirement calculator lets you include Social Security and pension income to see how much you still need from your savings. Remember: Social Security benefits increase by about 8% per year if you delay claiming from age 62 to 70."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What if I want to retire early (before 59.5)?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Early retirement requires a higher savings rate (typically 50%+ of income) and careful tax planning. You can access 401(k) funds penalty-free through Roth conversion ladders or SEPP (72t) distributions. Health insurance before Medicare also needs to be factored in. The retirement calculator includes early retirement scenarios."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How do I account for inflation in my retirement plan?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Use real (after-inflation) return rates in your calculations. If you expect 7% market returns and 3% inflation, use 4% as your real return. The retirement calculator has an inflation toggle to show both nominal and real (inflation-adjusted) projections."
+    },
+    {
+      "type": "cta",
+      "heading": "Try the Retirement Calculator",
+      "body": "Calculate how much you need to save for retirement with our free calculator.",
+      "buttonLabel": "Open Calculator",
+      "path": "/finance/retirement-calculator/"
+    }
+  ],
+  "keywords": [
+    "retirement planning",
+    "retirement calculator",
+    "how much for retirement",
+    "4 percent rule",
+    "retirement savings",
+    "retirement by age"
+  ]
+}

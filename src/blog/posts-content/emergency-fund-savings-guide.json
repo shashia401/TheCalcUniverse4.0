@@ -1,0 +1,80 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Much Do You Need?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The standard recommendation is 3-6 months of essential living expenses. If you have stable employment, dual income, and strong job security, 3 months may be enough. If you are self-employed, work on commission, or have a single income, aim for 6-12 months. Essential expenses include housing, food, utilities, insurance, transportation, and minimum debt payments."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Situation",
+        "Target",
+        "Example Monthly Expenses",
+        "Total Needed"
+      ],
+      "rows": [
+        [
+          "Single, stable job",
+          "3 months",
+          "$3,000",
+          "$9,000"
+        ],
+        [
+          "Single, variable income",
+          "6 months",
+          "$3,000",
+          "$18,000"
+        ],
+        [
+          "Couple, dual income",
+          "3 months",
+          "$4,500",
+          "$13,500"
+        ],
+        [
+          "Couple, single income",
+          "6 months",
+          "$4,500",
+          "$27,000"
+        ],
+        [
+          "Self-employed",
+          "6-12 months",
+          "$5,000",
+          "$30,000-$60,000"
+        ],
+        [
+          "Retired",
+          "6-12 months",
+          "$4,000",
+          "$24,000-$48,000"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Use our savings calculator to determine how much to save each month to reach your emergency fund target by a specific date."
+    },
+    {
+      "type": "cta",
+      "heading": "Plan Your Emergency Savings",
+      "body": "Use our savings calculator to set a monthly savings target for your emergency fund.",
+      "buttonLabel": "Start Saving",
+      "path": "/finance/savings-calculator/"
+    }
+  ],
+  "keywords": [
+    "emergency fund",
+    "how much emergency fund",
+    "emergency savings",
+    "rainy day fund",
+    "3 months expenses",
+    "6 months expenses",
+    "emergency fund calculator"
+  ]
+}

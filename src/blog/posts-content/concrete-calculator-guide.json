@@ -1,0 +1,470 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is a Concrete Calculator and Why Do You Need One?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Ordering concrete is one of the most stressful parts of any DIY project. The margin for error is tiny. Order too little and you're racing to the hardware store while your crew waits around. Order too much and you're stuck with a pile of hardened material you paid for but can't return."
+    },
+    {
+      "type": "paragraph",
+      "text": "A concrete calculator takes the guesswork out. You punch in your project's dimensions and shape, and it tells you the exact volume you need. Pouring a patio slab, setting fence posts, forming deck footings, or building steps — the calculator handles the math so you can focus on the actual work."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Concrete Formula: Volume = Area x Depth"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Volume = Area x Depth\nCubic Yards = Cubic Feet / 27\nOne cubic yard = 27 cubic feet | One 80lb bag = 0.6 cubic feet"
+    },
+    {
+      "type": "paragraph",
+      "text": "All concrete volume calculations start here: find the area in square feet, multiply by the depth in feet, convert to cubic yards. That's the whole formula."
+    },
+    {
+      "type": "paragraph",
+      "text": "Concrete is ordered by the cubic yard from ready-mix suppliers or by the bag at home improvement stores. So you need to know that conversion. Depth is usually measured in inches on site — divide by 12 to get feet. A 4-inch thick slab? That's 4 / 12 = 0.333 feet deep. An 80lb bag of concrete mix gives you about 0.6 cubic feet. A 60lb bag gives you about 0.45 cubic feet."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Understanding Concrete Measurements"
+    },
+    {
+      "type": "paragraph",
+      "text": "Concrete comes in three units, and you need to know how they connect. Cubic yards are what ready-mix trucks use. Cubic feet are what your tape measure spits out. Bags are what you grab off the shelf at the store."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the quick rule: if your project is under 2 cubic yards, bagged concrete is the better deal. Above that, ready-mix wins on both price and convenience."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Unit",
+        "Equivalent",
+        "Typical Use"
+      ],
+      "rows": [
+        [
+          "1 cubic yard",
+          "27 cubic feet",
+          "Ready-mix truck carries 8 to 10 cubic yards"
+        ],
+        [
+          "1 cubic foot",
+          "0.037 cubic yards",
+          "One 80lb bag yields about 0.6 cubic feet"
+        ],
+        [
+          "1 80lb bag",
+          "0.6 cubic feet",
+          "Standard bag, good balance of weight and yield"
+        ],
+        [
+          "1 60lb bag",
+          "0.45 cubic feet",
+          "Lighter bag, easier to handle for small jobs"
+        ],
+        [
+          "1 40lb bag",
+          "0.30 cubic feet",
+          "Small repairs and patch work"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Concrete Volume by Shape"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator handles four shapes: slab, round hole, column, and stairs. Each uses a slightly different formula. The calculator picks the right one automatically based on what you select."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Slab or Patio"
+    },
+    {
+      "type": "paragraph",
+      "text": "A rectangular slab is the most straightforward pour you'll do. The formula is Volume = Length x Width x (Depth in inches / 12)."
+    },
+    {
+      "type": "paragraph",
+      "text": "Say you've got a 10-foot by 10-foot patio at 4 inches deep. That's 100 square feet of area. Multiply by (4/12) and you get 33.33 cubic feet. Divide by 27 and you're at 1.23 cubic yards. Add the standard 10% waste, and you need about 1.36 cubic yards total."
+    },
+    {
+      "type": "paragraph",
+      "text": "What does that mean in bags? About 62 of the 80lb bags or 82 of the 60lb bags from your local Home Depot."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Input / Output",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Shape",
+          "Slab / Patio"
+        ],
+        [
+          "Length",
+          "10 ft"
+        ],
+        [
+          "Width",
+          "10 ft"
+        ],
+        [
+          "Depth",
+          "4 in"
+        ],
+        [
+          "Raw Volume",
+          "33.33 cu ft"
+        ],
+        [
+          "Cubic Yards (raw)",
+          "1.23 cu yd"
+        ],
+        [
+          "Waste Allowance",
+          "10%"
+        ],
+        [
+          "Total Volume with Waste",
+          "1.36 cu yd / 36.67 cu ft"
+        ],
+        [
+          "80lb Bags Needed",
+          "62"
+        ],
+        [
+          "60lb Bags Needed",
+          "82"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Round Hole or Footing"
+    },
+    {
+      "type": "paragraph",
+      "text": "Round footings use the classic cylinder formula: V = pi x r squared x h. You give the calculator the diameter and depth, and it does the math."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's a real example. A deck footing with a 2-foot diameter and 4-foot depth. That's pi x (1 foot) squared x 4 feet = 12.57 cubic feet, or 0.47 cubic yards. Add 10% waste and you're looking at about 0.51 cubic yards. That's roughly 24 of the 80lb bags per footing."
+    },
+    {
+      "type": "paragraph",
+      "text": "Columns and cylinders use the same formula, so you can use the same calculator for both above-ground posts and below-grade footings."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Stairs"
+    },
+    {
+      "type": "paragraph",
+      "text": "Stairs are the most complex shape because each step is basically a small rectangular block. The calculator treats each step as half of a full block."
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula: Volume = Length x Width x (Riser Height / 12) x Number of Steps x 0.5. Say you've got stairs that are 10 feet long, 3 feet wide, with 7-inch risers and 10 steps. That works out to 87.5 cubic feet, which is 3.24 cubic yards."
+    },
+    {
+      "type": "paragraph",
+      "text": "At that size, you're well past the 2-cubic-yard threshold. This is a job for ready-mix delivery, not bags."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Many Bags of Concrete Do You Need?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Once you know your total volume in cubic feet, figuring out bags is simple math. One cubic yard needs 45 of the 80lb bags (27 / 0.6 = 45) or 60 of the 60lb bags (27 / 0.45 = 60)."
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator rounds up to the nearest whole bag — you can't buy half a bag. And it factors in your waste allowance before doing the count."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's a quick reference for common project sizes:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Cubic Yards",
+        "80lb Bags",
+        "60lb Bags",
+        "Typical Project"
+      ],
+      "rows": [
+        [
+          "0.5",
+          "23",
+          "30",
+          "Small shed slab or 6 to 8 fence posts"
+        ],
+        [
+          "1.0",
+          "45",
+          "60",
+          "4 x 4 ft patio slab at 4 in thick"
+        ],
+        [
+          "1.5",
+          "68",
+          "90",
+          "10 x 10 ft patio slab with waste"
+        ],
+        [
+          "2.0",
+          "90",
+          "120",
+          "Small driveway or wide walkway"
+        ],
+        [
+          "3.0",
+          "135",
+          "180",
+          "Staircase or small foundation"
+        ],
+        [
+          "5.0",
+          "225",
+          "300",
+          "Single-car driveway"
+        ],
+        [
+          "10.0",
+          "450",
+          "600",
+          "Large project, call for ready-mix instead"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Keep in mind these bag counts assume perfect mixing and no loss. Real life isn't that clean. Uneven subgrades, spilled material, overfilled forms — that's why the calculator includes a waste allowance."
+    },
+    {
+      "type": "paragraph",
+      "text": "10% is standard for most projects. Use 5% for simple flatwork on a prepared base. Use 15% for complex pours with rebar, multiple obstacles, or irregular shapes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Bagged Concrete vs. Ready-Mix: Which Should You Choose?"
+    },
+    {
+      "type": "paragraph",
+      "text": "This is the question every DIYer faces. The answer depends mostly on volume, but also on site access, your timeline, and how much physical labor you're up for."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Factor",
+        "Bagged Concrete",
+        "Ready-Mix"
+      ],
+      "rows": [
+        [
+          "Best for",
+          "Small to medium projects (under 2 cu yd)",
+          "Large projects (2 cu yd and above)"
+        ],
+        [
+          "Mixing required",
+          "Yes, drum mixer or wheelbarrow",
+          "No, arrives ready to pour"
+        ],
+        [
+          "Cost per cubic yard",
+          "Higher ($150 to $200 per cu yd)",
+          "Lower ($120 to $160 per cu yd)"
+        ],
+        [
+          "Flexibility",
+          "Mix only what you need when you need it",
+          "Must order minimum (typically 3 to 4 cu yd)"
+        ],
+        [
+          "Shelf life",
+          "Unlimited if kept dry",
+          "Must pour within 90 minutes of batching"
+        ],
+        [
+          "Consistency",
+          "Manual mixing can vary batch to batch",
+          "Uniform mix tested at the plant"
+        ],
+        [
+          "Transport",
+          "Fits in a car or truck bed",
+          "Requires concrete truck access to the site"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "For most patio slabs, walkways, fence posts, and small footings, bagged concrete is the practical choice. You buy exactly what you need, mix it on your schedule, and skip the minimum-order headache."
+    },
+    {
+      "type": "paragraph",
+      "text": "For driveways, large foundations, staircases, or anything over 2 cubic yards, ready-mix saves you time and your back. Just check your supplier's minimum — most require 3 to 4 cubic yards."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Waste Allowance: Why 10% Is the Standard"
+    },
+    {
+      "type": "paragraph",
+      "text": "No concrete pour goes exactly to plan. The ground can be uneven. Forms might bulge. Material stays in the drum or wheelbarrow. Stuff spills. The waste allowance covers all of that."
+    },
+    {
+      "type": "paragraph",
+      "text": "The industry standard is 10%. Multiply your raw volume by 1.10 and that's what you order. If your raw volume is 33.33 cubic feet, you order 36.67 cubic feet."
+    },
+    {
+      "type": "paragraph",
+      "text": "For complex pours with rebar, obstacles, or tough terrain, bump it to 15%. For simple flatwork on a well-prepared level base, 5% might be enough if you measure carefully."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the Concrete Calculator"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator gets you from your tape measure to a material list in under a minute. Here's how it works:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Pick your shape from the dropdown: Slab, Round Hole, Column, or Stairs. The form updates automatically to show only the measurements you need.",
+        "Enter your dimensions in feet and inches. The calculator handles the inch-to-foot conversion so you don't have to remember the formula.",
+        "Set your waste allowance. Start at 10% (standard), then adjust up or down depending on how complex your pour is.",
+        "Check your results: total cubic yards, cubic feet, exact count of 60lb and 80lb bags, total weight estimate, and the formula the calculator used."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator also shows you the formula it used for your shape, so you can double-check the math and learn for next time. The weight estimate helps with logistics planning — a pallet of 80lb bags weighs over a ton."
+    },
+    {
+      "type": "cta",
+      "heading": "Ready to Pour? Get Your Concrete Number in Seconds",
+      "body": "Our free Concrete Calculator gives you exact cubic yards, bag counts, and weight estimates for any project. No signup, no email, no hassle.",
+      "buttonLabel": "Open the Free Concrete Calculator",
+      "path": "/diy/concrete-calculator/"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Concrete Calculator FAQs"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How many 80lb bags do I need per cubic yard?"
+    },
+    {
+      "type": "paragraph",
+      "text": "You need about 45 of the 80lb bags to make one cubic yard. One cubic yard is 27 cubic feet. One 80lb Quikrete bag yields about 0.6 cubic feet. So 27 divided by 0.6 gives you 45 bags."
+    },
+    {
+      "type": "paragraph",
+      "text": "For 60lb bags, the yield is 0.45 cubic feet per bag, so you need 60 bags per cubic yard. The calculator always rounds up to the nearest full bag."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is the standard waste allowance and when should I increase it?"
+    },
+    {
+      "type": "paragraph",
+      "text": "10% is the standard waste allowance for most concrete projects. It covers spillage, uneven subgrades, depth variations, and material left in the mixing equipment."
+    },
+    {
+      "type": "paragraph",
+      "text": "Go up to 15% for complex pours with rebar, obstacles, irregular forms, or sloping terrain. For simple flatwork on a well-prepared base — like a square patio on compacted gravel — 5% is usually fine if you measure carefully."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Should I use fiber mesh or rebar for reinforcement?"
+    },
+    {
+      "type": "paragraph",
+      "text": "It depends on what you're pouring and what loads it'll carry."
+    },
+    {
+      "type": "paragraph",
+      "text": "Fiber mesh is ideal for flatwork — sidewalks, patios, driveways. It controls plastic shrinkage cracking by reinforcing the whole slab in three dimensions. Rebar is better for structural jobs like footings, foundations, and columns that need to carry heavy loads. Many contractors use both: rebar for strength, fiber mesh for crack control."
+    },
+    {
+      "type": "paragraph",
+      "text": "For a standard 4-inch driveway on good soil, 6 x 6 inch welded wire mesh or half-inch rebar on 24-inch centers is common. If your slab is over 5 inches thick or you're building on expansive clay, rebar is strongly recommended."
+    },
+    {
+      "type": "paragraph",
+      "text": "Cut control joints at intervals of 2 to 3 times the slab thickness in inches. For a 4-inch slab, that means joints every 8 to 12 feet."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Plan Your Concrete Project with Confidence"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's the thing about concrete: once it's mixed, the clock starts ticking. You can't pause the chemical reaction. Having the right volume calculated before you start — that's what separates a smooth pour from a stressful one."
+    },
+    {
+      "type": "paragraph",
+      "text": "Whether you're pouring a backyard patio, setting fence posts, building deck footings, or forming a set of stairs, knowing exactly how much concrete you need means you buy the right materials, schedule the right help, and pour with confidence."
+    },
+    {
+      "type": "cta",
+      "heading": "Use the Free Concrete Calculator",
+      "body": "Get instant concrete volume estimates for slabs, footings, columns, and stairs. Cubic yards, bag counts, weight — everything you need before you head to the store.",
+      "buttonLabel": "Open the Concrete Calculator",
+      "path": "/diy/concrete-calculator/"
+    }
+  ],
+  "keywords": [
+    "concrete calculator",
+    "concrete volume",
+    "cubic yards concrete",
+    "concrete bag calculator",
+    "slab concrete",
+    "concrete footing",
+    "80lb bags concrete",
+    "60lb bags concrete",
+    "DIY concrete",
+    "concrete formula",
+    "how much concrete do I need",
+    "concrete measurement",
+    "concrete bags per yard",
+    "bagged vs ready-mix concrete",
+    "concrete for stairs",
+    "concrete waste allowance",
+    "fiber mesh vs rebar"
+  ]
+}

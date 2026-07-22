@@ -1,0 +1,46 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Four Components"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMR (60-75%) is the dominant component. TEF (~10%) is the energy cost of digesting food — protein requires the most energy. EAT (5-15%) is exercise. NEAT (15-30%) is everything else. The most interesting component is NEAT because it varies enormously between people. Two people with the same weight, height, age, and exercise routine can have a 500-calorie difference in TDEE because one fidgets and paces while the other sits still."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Increasing Your TDEE Without Exercise"
+    },
+    {
+      "type": "paragraph",
+      "text": "The easiest way to increase TDEE is to increase NEAT. Walk while on phone. Use a standing desk. Pace during meetings. Take stairs. Park farther away. Fidget. Studies show that NEAT can vary by up to 2,000 calories per day between an active non-exerciser and a completely sedentary person. The TEF can be increased by eating more protein (which has the highest thermic effect)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why NEAT Matters Most for Non-Exercisers"
+    },
+    {
+      "type": "paragraph",
+      "text": "For someone who does not exercise, EAT is close to zero. Their TDEE is almost entirely BMR, TEF, and NEAT. The only component they can influence significantly is NEAT. Walking 10,000 steps per day (versus 3,000-5,000) can add 300-500 calories to TDEE — the same effect as a moderate workout. For weight loss without formal exercise, increasing daily steps is the single most effective strategy."
+    },
+    {
+      "type": "cta",
+      "heading": "Calculate Your TDEE",
+      "body": "Our TDEE calculator breaks down all four components.",
+      "buttonLabel": "Open Calculator",
+      "path": "/health/tdee-calculator/"
+    }
+  ],
+  "keywords": [
+    "tdee components",
+    "what makes up tdee",
+    "bmr tef eat neat",
+    "non exercise activity thermogenesis",
+    "thermic effect of food",
+    "increase neat"
+  ]
+}

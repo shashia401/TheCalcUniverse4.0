@@ -1,0 +1,115 @@
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "you're at dinner with friends, the bill arrives, and suddenly everyone is doing mental math on their phones. Should you tip on the pre-tax amount? What is standard for good service?"
+    },
+    {
+      "type": "paragraph",
+      "text": "And why does the UK feel so different from the US? let's settle this once and for all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Standard Tipping Percentages by Service"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Service",
+        "Standard",
+        "Good Service",
+        "Exceptional"
+      ],
+      "rows": [
+        [
+          "Sit-down restaurant",
+          "15%",
+          "18-20%",
+          "22-25%"
+        ],
+        [
+          "Bar (per drink)",
+          "$1-2 or 15%",
+          "$2-3 or 20%",
+          "$5+ per round"
+        ],
+        [
+          "Food delivery",
+          "15%",
+          "18-20%",
+          "25% (bad weather)"
+        ],
+        [
+          "Hotel housekeeping",
+          "$2/night",
+          "$3-4/night",
+          "$5+/night"
+        ],
+        [
+          "Salon / barber",
+          "15%",
+          "18-20%",
+          "25%"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Should You Tip on Pre-Tax or the Total?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Traditionally, you tip on the pre-tax subtotal — the cost of the food and drink before sales tax. In practice, the difference is tiny. On a $100 meal with 8% tax, tipping **18**% on the subtotal is $18; on the total it's $19."
+    },
+    {
+      "type": "paragraph",
+      "text": "44. that's $1. 44."
+    },
+    {
+      "type": "paragraph",
+      "text": "Most servers won't notice, and either is fine. What matters is tipping something fair. The calc handles both: just enter the optional tax amount to tip on pre-tax, or leave it blank to tip on the full bill."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Split a Restaurant Bill Fairly"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Equal split: The easiest method. Everyone pays the same regardless of what they ordered. Works best when everyone ordered similar-priced items and shared appetizers.",
+        "Itemized split: Fair but awkward. Each person pays for their own meal plus a proportional share of the tip. Best for groups with wildly different spending.",
+        "Separate checks: Ask your server upfront. Some restaurants allow individual checks for parties of 6 or fewer.",
+        "The venmo shuffle: One person pays the full bill and everyone transfers their share. This is the most common approach among friends."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Tipping Etiquette Around the World"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "In the US, many service workers earn a tipped minimum wage of just $2.13 per hour, so tips are their primary income. In Japan, tipping is considered rude — excellent service is the baseline expectation. In much of Europe, a service charge is included in the bill, and leaving 5-10% extra shows appreciation but isn't expected. In Australia, the minimum wage is high enough that tipping is purely optional, usually rounding up or leaving small change. Always check if your bill includes a 'service charge' before adding a tip."
+    },
+    {
+      "type": "cta",
+      "heading": "Split Bills With Confidence",
+      "body": "Use TheCalcUniverse Tip Calculator & Bill Splitter to split any bill instantly, calculate tip percentages, and see exactly what each person owes.",
+      "buttonLabel": "Try the Tip Calculator",
+      "path": "/everyday/tip-calculator/"
+    }
+  ],
+  "keywords": [
+    "tip calculator",
+    "bill splitter",
+    "tip splitter",
+    "restaurant tip calculator",
+    "how much to tip",
+    "split the bill calculator"
+  ]
+}

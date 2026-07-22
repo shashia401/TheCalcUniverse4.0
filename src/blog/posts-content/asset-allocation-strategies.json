@@ -1,0 +1,49 @@
+{
+  "sections": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Asset Allocation Matters More Than Stock Picking"
+    },
+    {
+      "type": "paragraph",
+      "text": "Studies consistently show that more than 90% of a portfolio's long-term return variability is explained by asset allocation — not individual stock selection or market timing. In other words, deciding how much to put in stocks vs bonds matters far more than which specific stocks you buy."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Allocation Models"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Conservative (20% stocks / 80% bonds): For capital preservation, short time horizons, or near retirement.",
+        "Moderate (60% stocks / 40% bonds): The classic balanced portfolio. Suitable for medium-term goals 5-10 years away.",
+        "Aggressive (80% stocks / 20% bonds): For long-term growth, 10+ year horizons, comfortable with volatility.",
+        "Three-fund portfolio: Total US stock + Total international stock + Total bond market. Simple, diversified, low-cost.",
+        "Target-date fund: Set it and forget it. Automatically adjusts allocation based on your target retirement year."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Our investment calculator helps you project your portfolio's growth under different return scenarios based on your chosen allocation."
+    },
+    {
+      "type": "cta",
+      "heading": "Project Your Portfolio",
+      "body": "Use our free investment calculator to see how different allocations and contributions grow over time.",
+      "buttonLabel": "Calculate Now",
+      "path": "/finance/investment-calculator/"
+    }
+  ],
+  "keywords": [
+    "asset allocation",
+    "portfolio diversification",
+    "investment portfolio",
+    "stock vs bond allocation",
+    "portfolio rebalancing",
+    "risk tolerance",
+    "diversified portfolio"
+  ]
+}
