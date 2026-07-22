@@ -1,0 +1,146 @@
+---
+// Methodology / Editorial & Accuracy Standards — the authoritative trust page.
+// Facts only; counts come from the registry. This is the E-E-A-T reference the
+// calculator trust badges link to. Distinct from /about/ (what/why) — this is
+// the "how we guarantee the math is right" standards doc.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { calculatorRegistry } from '../../lib/registry';
+import { SITE_NAME, BASE_URL } from '../../config/constants';
+
+const total = calculatorRegistry.length;
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+    { '@type': 'ListItem', position: 2, name: 'Methodology', item: `${BASE_URL}/methodology/` },
+  ],
+};
+
+const principles = [
+  {
+    title: 'Deterministic, not generated',
+    body: 'Every calculator is a small, tested program. The same inputs always produce the same answer. Nothing here is written by a language model at request time — so there are no hallucinated numbers, ever. That is the core difference between a calculator and asking an AI to "do the math".',
+  },
+  {
+    title: 'Formulas are sourced',
+    body: 'Where a formula has an authoritative origin — loan amortization, WHO BMI cut-offs, GFR equations, tax brackets — that source is cited on the calculator’s page. You can check our work against the primary reference, not just take our word for it.',
+  },
+  {
+    title: 'The work is shown',
+    body: 'Each page displays the formula, a worked example with real numbers, and the limitations (when the formula does not apply). The math is on the page, not hidden inside a black box.',
+  },
+  {
+    title: 'Money math is exact',
+    body: 'Financial calculations use precise decimal arithmetic, not floating-point shortcuts — so a payment or interest total is not off by a rounding cent.',
+  },
+  {
+    title: 'Private by design',
+    body: 'Every calculation runs in your browser. Your inputs are never sent to a server and nothing is stored about you. No account, no tracking of what you calculate.',
+  },
+];
+---
+
+<BaseLayout
+  title={`Editorial & Accuracy Standards — Methodology | ${SITE_NAME}`}
+  description={`How TheCalcUniverse builds, tests, sources, and corrects its ${total} calculators. Deterministic tested formulas, cited sources, and a fast correction process — not AI-generated numbers.`}
+  canonicalPath="/methodology/"
+  schemas={[breadcrumb]}
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-3xl mx-auto px-4 md:px-8 py-14">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-default)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>Methodology</span>
+      </nav>
+
+      <h1 class="text-3xl font-black tracking-tight text-[var(--surface-text)] mb-4">
+        Editorial &amp; accuracy standards
+      </h1>
+      <p class="text-blog text-[var(--surface-text-secondary)] leading-relaxed mb-10 max-w-2xl">
+        You should be able to trust a number before you act on it. Here is exactly how
+        {' '}{SITE_NAME}’s {total} calculators are built, checked, sourced, and corrected —
+        so you can verify our work rather than take it on faith.
+      </p>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-12">
+        <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-4 text-center">
+          <p class="font-mono text-2xl font-black text-[var(--brand-default)]">7,173</p>
+          <p class="text-xs text-[var(--surface-text-muted)] mt-1">automated tests</p>
+        </div>
+        <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-4 text-center">
+          <p class="font-mono text-2xl font-black text-[var(--brand-default)]">{total}</p>
+          <p class="text-xs text-[var(--surface-text-muted)] mt-1">calculators</p>
+        </div>
+        <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-4 text-center">
+          <p class="font-mono text-2xl font-black text-[var(--brand-default)]">100%</p>
+          <p class="text-xs text-[var(--surface-text-muted)] mt-1">formula shown</p>
+        </div>
+        <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-4 text-center">
+          <p class="font-mono text-2xl font-black text-[var(--brand-default)]">$0</p>
+          <p class="text-xs text-[var(--surface-text-muted)] mt-1">no account</p>
+        </div>
+      </div>
+
+      <div class="space-y-8">
+        {principles.map((p, i) => (
+          <section class="flex gap-4">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-default)]/10 font-mono text-sm font-bold text-[var(--brand-default)]">
+              {i + 1}
+            </span>
+            <div>
+              <h2 class="text-lg font-bold text-[var(--surface-text)] mb-1.5">{p.title}</h2>
+              <p class="text-base-md text-[var(--surface-text-secondary)] leading-relaxed">{p.body}</p>
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <div class="mt-12 space-y-8 text-base-md text-[var(--surface-text-secondary)] leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[var(--surface-text)] [&_h2]:mb-2 [&_p]:mb-3">
+        <section>
+          <h2>How a calculator is verified</h2>
+          <p>
+            Before a calculator ships, its formula is implemented as code and locked in with
+            automated tests that assert known inputs produce known outputs (for example, a
+            $200,000 loan at 6% over 30 years must return a $1,199.10 monthly payment). Those
+            tests — 7,173 of them across the site — run on every change, so a formula cannot
+            silently drift. Where a regulatory or academic reference exists, the result is checked
+            against it and the source is cited on the page.
+          </p>
+        </section>
+
+        <section>
+          <h2>Expert review</h2>
+          <p>
+            Automated tests confirm a formula is implemented correctly; they do not, on their own,
+            confirm it is the right formula for the job. Where a calculator has had additional
+            subject-matter review, that is noted on the page with the reviewer’s area and the date.
+            Where it has not, the page shows the verified-formula and cited-source signals instead —
+            we do not claim a review that did not happen.
+          </p>
+        </section>
+
+        <section>
+          <h2>Corrections &amp; updates</h2>
+          <p>
+            If a formula, definition, or result looks wrong, tell us at
+            {' '}<strong>contact@thecalcuniverse.com</strong>. The whole site is static and rebuilds
+            in under a minute, so genuine corrections ship the same day. Each calculator page shows
+            when its formula was last verified.
+          </p>
+        </section>
+
+        <section>
+          <h2>What we don’t do</h2>
+          <p>
+            No accounts, no paywalls, no ads that get between you and the answer, and no selling of
+            data. See <a class="text-[var(--brand-default)] hover:underline" href="/privacy/">our privacy page</a>
+            {' '}for specifics, or <a class="text-[var(--brand-default)] hover:underline" href="/about/">about the project</a>.
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
