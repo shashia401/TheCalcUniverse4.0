@@ -1,0 +1,222 @@
+---
+// Calculator page. Everything except <CalculatorForm> is static HTML at build time —
+// the educational content Google ranks needs no JavaScript to exist.
+import type { CalculatorEntry, CalculatorResult } from '../../../types/calculator';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import CalculatorForm from '../../../components/calculator/CalculatorForm';
+import EducationalSection from '../../../components/calculator/EducationalSection';
+import ExampleResult from '../../../components/calculator/ExampleResult.astro';
+import TableOfContents from '../../../components/calculator/TableOfContents.astro';
+import Cite from '../../../components/calculator/Cite.astro';
+import HelpfulFeedback from '../../../components/calculator/HelpfulFeedback';
+import { calculatorRegistry, getCalculatorById, getCalculatorsByCategory } from '../../../lib/registry';
+import { getBlogPostBySlug } from '../../../lib/blog';
+import { buildCalculatorSchemas } from '../../../lib/jsonld';
+import { SITE_NAME, BASE_URL } from '../../../config/constants';
+
+export async function getStaticPaths() {
+  return calculatorRegistry.map((entry) => ({
+    params: { category: entry.categorySlug, calculator: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CalculatorEntry;
+}
+
+const { entry } = Astro.props;
+const { default: config } = await entry.loader();
+const schemas = buildCalculatorSchemas(entry, config);
+const shortName = entry.shortTitle ?? entry.title;
+
+// Related calculators: curated relatedIds first, topped up from the same category.
+const related = (entry.relatedIds ?? [])
+  .map((id) => getCalculatorById(id))
+  .filter((e) => e !== undefined && e.id !== entry.id);
+if (related.length < 4) {
+  for (const sib of getCalculatorsByCategory(entry.categorySlug)) {
+    if (related.length >= 4) break;
+    if (sib.id !== entry.id && !related.some((r) => r!.id === sib.id)) related.push(sib);
+  }
+}
+
+const relatedPosts = (entry.relatedPosts ?? [])
+  .map((slug) => getBlogPostBySlug(slug))
+  .filter((p) => p !== undefined)
+  .slice(0, 3);
+
+// ── SEO-critical: build-time sample result ──────────────────────────────
+// The interactive form is a client island, so a crawler that never types inputs
+// sees no results. Compute a real result from the inputs' default values at build
+// time and render it into the static HTML (via <ExampleResult/>), so the page
+// Google indexes includes a full answer + gauge/donut. Only fires when the calc
+// has enough defaults to produce a result.
+const sampleValues: Record<string, string> = {};
+for (const inp of config.inputs) {
+  if (inp.defaultValue !== undefined && inp.defaultValue !== '') {
+    sampleValues[inp.id] = String(inp.defaultValue);
+  } else if (inp.type === 'select' && inp.options?.length) {
+    sampleValues[inp.id] = inp.options[0].value;
+  } else if ((inp.type === 'number' || inp.type === 'percentage') && inp.placeholder) {
+    // Fall back to the placeholder as an example value (it usually is one).
+    // Strip thousands separators, then pull the first number. Non-numeric
+    // placeholders ("e.g. amount") yield no match → the calc gracefully renders
+    // no example. This lights up the crawlable SEO result on ~any calc with
+    // numeric placeholders, without per-calc editing.
+    const m = inp.placeholder.replace(/,/g, '').match(/-?\d+\.?\d*/);
+    if (m) sampleValues[inp.id] = m[0];
+  }
+}
+let sampleResults: CalculatorResult[] = [];
+let sampleGauge = null;
+let sampleDonut = null;
+try { sampleResults = config.calculate(sampleValues); } catch { sampleResults = []; }
+try { sampleGauge = config.gauge?.(sampleValues) ?? null; } catch { sampleGauge = null; }
+try { sampleDonut = config.donut?.(sampleValues) ?? null; } catch { sampleDonut = null; }
+const scenario = config.inputs
+  .filter((i) => sampleValues[i.id] && i.type !== 'select')
+  .slice(0, 4)
+  .map((i) => `${i.label} ${sampleValues[i.id]}${i.unit ? ' ' + i.unit : ''}`)
+  .join(', ');
+
+const canonicalUrl = `${BASE_URL}/${entry.categorySlug}/${entry.id}/`;
+const tocItems = [
+  { label: 'Calculator', href: '#main-content' },
+  ...(config.educational?.formula ? [{ label: 'How it works', href: '#how-it-works' }] : []),
+  ...(config.educational?.workedExamples?.length ? [{ label: 'Examples', href: '#examples' }] : []),
+  ...(config.educational?.faqs?.length ? [{ label: 'FAQs', href: '#faqs' }] : []),
+  ...(config.educational?.citations?.length ? [{ label: 'Sources', href: '#sources' }] : []),
+];
+---
+
+<BaseLayout
+  title={`${entry.title} | ${SITE_NAME}`}
+  description={entry.description}
+  canonicalPath={`/${entry.categorySlug}/${entry.id}/`}
+  schemas={schemas}
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-8">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-default)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <a href={`/${entry.categorySlug}/`} class="text-[var(--brand-default)] hover:underline">
+          {entry.category}
+        </a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>{shortName}</span>
+      </nav>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-[var(--surface-text)] mb-2">
+        {entry.title}
+      </h1>
+      <p class="text-[var(--surface-text-secondary)] mb-4 max-w-2xl">{entry.description}</p>
+
+      {/* Trust signals — verifiable facts, not badges */}
+      <div class="flex flex-wrap items-center gap-2 mb-6 text-tiny">
+        {entry.reviewedBy && (
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-accent-emerald-400/50 bg-accent-emerald-50 px-2.5 py-1 font-medium text-accent-emerald-700 dark:bg-transparent">
+            ✓ Reviewed by {entry.reviewedBy}
+          </span>
+        )}
+        {entry.lastVerified && (
+          <span class="inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-2.5 py-1 font-medium text-[var(--surface-text-muted)]">
+            Formula verified {entry.lastVerified}
+          </span>
+        )}
+        <span class="inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-2.5 py-1 font-medium text-[var(--surface-text-muted)]">
+          Runs in your browser — inputs never sent anywhere
+        </span>
+      </div>
+
+      {/* Tool-first layout: the calculator leads the main column; a sticky rail
+          holds the on-page contents. The formula callout and TOC used to sit
+          ABOVE the tool, pushing it ~500px down the page (below the fold on
+          mobile). Now the tool is the first thing after the H1. */}
+      <div class="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-10">
+        {/* MAIN — the tool and everything that supports it */}
+        <div class="min-w-0">
+          {/* The only hydrated island on the page */}
+          <CalculatorForm client:visible calculatorId={entry.id} />
+
+          {/* Static sample result — in the HTML for crawlers/no-JS (see frontmatter
+              note). The .seo-fallback wrapper is removed by CalculatorForm once it
+              hydrates, so JS users don't see the result twice. */}
+          {sampleResults.length > 0 && (
+            <div class="seo-fallback">
+              <ExampleResult scenario={scenario} results={sampleResults} gauge={sampleGauge} donut={sampleDonut} />
+            </div>
+          )}
+
+          {/* Signature: the work, right under the answer */}
+          {config.educational?.formula && (
+            <div class="mt-6 rounded-r-xl border-l-4 border-[var(--accent-amber)] bg-[var(--surface-card)] px-4 py-3 shadow-card">
+              <p class="text-tiny font-bold uppercase tracking-[0.18em] text-[var(--surface-text-muted)] mb-1">The formula</p>
+              <p class="font-mono text-sm text-[var(--surface-text)] whitespace-pre-line line-clamp-3">{config.educational.formula}</p>
+              <a href="#how-it-works" class="text-xs font-medium text-[var(--brand-default)] hover:underline">
+                Full explanation below ↓
+              </a>
+            </div>
+          )}
+
+          {config.educational && (
+            <section id="how-it-works" aria-label={`How ${shortName} works`} class="mt-10 scroll-mt-20">
+              <EducationalSection content={config.educational} calculatorTitle={shortName} />
+            </section>
+          )}
+
+          {/* Engagement + citation */}
+          <div class="mt-8 flex flex-col gap-4 border-t border-[var(--border-warm)] pt-6">
+            <HelpfulFeedback client:visible calculatorId={entry.id} />
+            <Cite title={entry.title} url={canonicalUrl} updated={entry.lastVerified} />
+          </div>
+
+          {related.length > 0 && (
+            <section aria-label="Related calculators" class="mt-12">
+              <h2 class="text-lg font-bold text-[var(--surface-text)] mb-4">Related calculators</h2>
+              <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 list-none p-0">
+                {related.slice(0, 4).map((r) => (
+                  <li>
+                    <a
+                      href={`/${r!.categorySlug}/${r!.id}/`}
+                      class="block h-full p-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+                    >
+                      <p class="font-semibold text-sm text-[var(--surface-text)]">{r!.shortTitle ?? r!.title}</p>
+                      <p class="text-xs text-[var(--surface-text-secondary)] mt-1 leading-relaxed">{r!.description.slice(0, 110)}{r!.description.length > 110 ? '…' : ''}</p>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {relatedPosts.length > 0 && (
+            <section aria-label="Related guides" class="mt-10">
+              <h2 class="text-lg font-bold text-[var(--surface-text)] mb-4">Guides that use this calculator</h2>
+              <ul class="space-y-2 list-none p-0">
+                {relatedPosts.map((p) => (
+                  <li>
+                    <a href={`/blog/${p!.slug}/`} class="text-[var(--brand-default)] hover:underline text-sm font-medium">
+                      {p!.title} →
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+
+        {/* STICKY RAIL — on-page contents; desktop only (mobile leads with the
+            tool and uses the educational headings to navigate). */}
+        {tocItems.length > 1 && (
+          <aside class="hidden lg:block">
+            <div class="lg:sticky lg:top-20">
+              <TableOfContents items={tocItems} />
+            </div>
+          </aside>
+        )}
+      </div>
+    </div>
+  </main>
+</BaseLayout>
