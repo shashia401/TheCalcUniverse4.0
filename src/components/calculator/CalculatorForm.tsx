@@ -254,8 +254,35 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     );
   };
 
+  const activeShape = values.shape || config.shapeTabs?.[0]?.value;
+
   return (
     <div className="bg-[var(--surface-card)] border border-[var(--border-warm)] rounded-2xl p-6 md:p-8">
+      {/* Variant/shape tabs — switch which set of inputs (and formula) applies.
+          Writes to values.shape, which each calc's inputs read via showWhen. */}
+      {config.shapeTabs && config.shapeTabs.length > 0 && (
+        <div role="tablist" aria-label="Options" className="mb-5 flex flex-wrap gap-1.5">
+          {config.shapeTabs.map((tab) => {
+            const active = activeShape === tab.value;
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => handleChange('shape', tab.value)}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--brand-default)] ${
+                  active
+                    ? 'bg-[var(--brand-default)] text-white'
+                    : 'border border-[var(--border-warm)] bg-[var(--surface-bg)] text-[var(--surface-text-secondary)] hover:border-[var(--brand-default)] hover:text-[var(--surface-text)]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         {visibleInputs.map((input) => (
           <div key={input.id}>
