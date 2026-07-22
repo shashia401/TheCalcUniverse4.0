@@ -22,6 +22,13 @@ interface Props {
 
 const { title, description, canonicalPath, schemas = [], ogType = 'website', noindex = false } = Astro.props;
 const canonicalUrl = `${BASE_URL}${canonicalPath}`;
+
+// Cap the meta description at ~158 chars on a word boundary — longer descriptions
+// just truncate in the SERP. Trims to the last full word, no mid-word cut.
+const metaDescription =
+  description.length <= 160
+    ? description
+    : description.slice(0, 158).replace(/\s+\S*$/, '').trimEnd() + '…';
 ---
 
 <!doctype html>
@@ -30,7 +37,7 @@ const canonicalUrl = `${BASE_URL}${canonicalPath}`;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
     <link rel="canonical" href={canonicalUrl} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
@@ -41,12 +48,12 @@ const canonicalUrl = `${BASE_URL}${canonicalPath}`;
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={`${BASE_URL}/og-image.png`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={`${BASE_URL}/og-image.png`} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />

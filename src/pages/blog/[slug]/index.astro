@@ -24,6 +24,16 @@ if (!content) {
 
 const schemas = buildBlogSchemas({ ...post, keywords: content.keywords });
 const dateFmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+// Related guides — topic clusters. Same category first (most relevant), topped
+// up with the most recent others so every post links out to 3 more guides.
+const byRecent = [...blogPosts].sort(
+  (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+);
+const relatedGuides = [
+  ...byRecent.filter((p) => p.slug !== post.slug && p.category === post.category),
+  ...byRecent.filter((p) => p.slug !== post.slug && p.category !== post.category),
+].slice(0, 3);
 ---
 
 <BaseLayout
@@ -69,6 +79,25 @@ const dateFmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long
             {post.relatedCalculatorLabel ?? 'Try the calculator'} →
           </a>
         </aside>
+      )}
+
+      {relatedGuides.length > 0 && (
+        <section aria-label="Related guides" class="mt-12 border-t border-[var(--border-warm)] pt-8">
+          <h2 class="text-lg font-bold text-[var(--surface-text)] mb-4">Related guides</h2>
+          <ul class="grid grid-cols-1 sm:grid-cols-3 gap-3 list-none p-0">
+            {relatedGuides.map((g) => (
+              <li>
+                <a
+                  href={`/blog/${g.slug}/`}
+                  class="block h-full p-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--brand-default)] hover:shadow-card-hover motion-reduce:transform-none motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+                >
+                  <p class="text-tiny uppercase tracking-wide text-[var(--surface-text-muted)] mb-1">{g.category} · {g.readingMinutes} min</p>
+                  <p class="font-semibold text-sm text-[var(--surface-text)] leading-snug">{g.title}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </article>
   </main>

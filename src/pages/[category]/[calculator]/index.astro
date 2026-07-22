@@ -101,7 +101,9 @@ const tocItems = [
 ---
 
 <BaseLayout
-  title={`${entry.title} | ${SITE_NAME}`}
+  {/* No "| TheCalcUniverse" suffix — entry.title is already keyword-rich, and
+      dropping the brand keeps most titles under the ~60-char SERP truncation. */}
+  title={entry.title}
   description={entry.description}
   canonicalPath={`/${entry.categorySlug}/${entry.id}/`}
   schemas={schemas}
