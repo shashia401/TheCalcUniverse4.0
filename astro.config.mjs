@@ -14,8 +14,11 @@ export default defineConfig({
     // global.css owns the @tailwind directives; don't inject a second base sheet
     tailwind({ applyBaseStyles: false }),
     sitemap({
-      // noindex pages stay out of the sitemap
-      filter: (page) => !page.includes('/search/') && !page.includes('/404/'),
+      // noindex pages stay out of the sitemap (search, 404, and the /embed/
+      // framing routes — they're noindex + robots-disallowed, so listing them
+      // sends a mixed signal).
+      filter: (page) =>
+        !page.includes('/search/') && !page.includes('/404/') && !page.includes('/embed/'),
     }),
   ],
   build: {
