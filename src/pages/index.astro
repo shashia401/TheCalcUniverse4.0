@@ -169,19 +169,22 @@ const schemas = [
           {/* RIGHT — a real, working calculator, worked out on graph paper */}
           {demo && (
             <div class="hero-rise hero-rise-2 relative lg:pt-1">
-              <div class="mb-3 flex items-center justify-between gap-3">
-                <p class="text-sm font-semibold text-white">
-                  <span class="live-badge"><span class="live-dot" aria-hidden="true"></span>Live</span>
-                  <span class="text-slate-400"> — {demo.shortTitle ?? demo.title}</span>
-                </p>
-                <a href={`/${demo.categorySlug}/${demo.id}/`} class="text-xs font-medium text-accent-amber-400 hover:underline shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-amber-400">
-                  Full calculator →
-                </a>
-              </div>
+              <p class="mb-3 text-sm font-semibold text-white">
+                <span class="live-badge"><span class="live-dot" aria-hidden="true"></span>Live</span>
+                <span class="text-slate-400"> — {demo.shortTitle ?? demo.title}, no sign-up</span>
+              </p>
               {/* Hero tool is above the fold — hydrate on load, not on scroll-into-view
                   (client:visible's IntersectionObserver is unreliable for a display:contents
-                  island sitting at the top of the page). */}
-              <CalculatorForm client:load calculatorId={demo.id} compact />
+                  island sitting at the top of the page).
+                  visibleInputIds: BMI Score only needs weight + height (sex/age don't
+                  change it), so the hero card stays short and glanceable. The in-card
+                  CTA deep-links to the full page carrying whatever was entered here. */}
+              <CalculatorForm
+                client:load
+                calculatorId={demo.id}
+                compact
+                visibleInputIds={['unit', 'weight', 'heightFt', 'heightIn', 'heightCm']}
+              />
             </div>
           )}
         </div>

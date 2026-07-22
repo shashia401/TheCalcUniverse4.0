@@ -20,6 +20,12 @@ interface Props {
    * stays hero-sized. The full treatment lives on the calculator's own page.
    */
   compact?: boolean;
+  /**
+   * Restrict which inputs render (by id). Used by the compact hero to show only
+   * the fields that affect the headline result (e.g. BMI needs weight + height,
+   * not sex/age), keeping the card short. showWhen still applies on top of this.
+   */
+  visibleInputIds?: string[];
 }
 
 const fieldClasses =
@@ -30,8 +36,9 @@ const resultColorClasses: Record<string, string> = {
   negative: 'text-accent-rose-600',
 };
 
-export default function CalculatorForm({ calculatorId, compact = false }: Props) {
+export default function CalculatorForm({ calculatorId, compact = false, visibleInputIds }: Props) {
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
+  const [catSlug, setCatSlug] = useState('');
   const [values, setValues] = useState<Record<string, string>>({});
   const [results, setResults] = useState<CalculatorResult[]>([]);
   const [copied, setCopied] = useState(false);
@@ -80,6 +87,7 @@ export default function CalculatorForm({ calculatorId, compact = false }: Props)
     let cancelled = false;
     const entry = getCalculatorById(calculatorId);
     if (!entry) return;
+    setCatSlug(entry.categorySlug);
     entry.loader().then(({ default: cfg }) => {
       if (cancelled) return;
       const defaults: Record<string, string> = {};
@@ -135,8 +143,23 @@ export default function CalculatorForm({ calculatorId, compact = false }: Props)
   };
 
   const visibleInputs = config.inputs.filter(
-    (input) => !input.showWhen || input.showWhen(values)
+    (input) =>
+      (!visibleInputIds || visibleInputIds.includes(input.id)) &&
+      (!input.showWhen || input.showWhen(values))
   );
+
+  // Deep-link to the full calculator page, carrying the current inputs so the
+  // hero scenario continues seamlessly on the dedicated page. Same whitelist +
+  // 64-char cap as syncUrl; trailingSlash:'always' means the slash precedes '?'.
+  const fullBreakdownHref = () => {
+    const params = new URLSearchParams();
+    for (const input of config.inputs) {
+      const v = values[input.id];
+      if (v !== undefined && v !== '') params.set(input.id, String(v).slice(0, 64));
+    }
+    const qs = params.toString();
+    return `/${catSlug}/${calculatorId}/${qs ? `?${qs}` : ''}`;
+  };
 
   const renderField = (input: InputField) => {
     if (input.type === 'custom' && input.component) {
@@ -331,6 +354,17 @@ export default function CalculatorForm({ calculatorId, compact = false }: Props)
             );
           })()}
         </div>
+      )}
+
+      {/* Compact hero: carry these inputs to the full page for the detailed breakdown */}
+      {compact && catSlug && (
+        <a
+          href={fullBreakdownHref()}
+          className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-[var(--brand-default)] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-default)] active:opacity-90"
+        >
+          See the full breakdown with your numbers
+          <span aria-hidden="true">→</span>
+        </a>
       )}
 
       {/* Live worked solution — the user's own numbers, step by step */}
