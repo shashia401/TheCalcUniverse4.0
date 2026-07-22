@@ -4,6 +4,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CategoryIcon from '../../components/CategoryIcon.astro';
 import { getCategories, getCalculatorsByCategory } from '../../lib/registry';
+import { accentFor } from '../../lib/categoryAccent';
 import { SITE_NAME, BASE_URL } from '../../config/constants';
 
 export async function getStaticPaths() {
@@ -14,6 +15,7 @@ export async function getStaticPaths() {
 
 const { meta } = Astro.props;
 const calculators = getCalculatorsByCategory(meta.slug);
+const a = accentFor(meta.slug);
 
 // Group by subCategory, preserving registry order; singletons fall into "More"
 const groups = new Map<string, typeof calculators>();
@@ -50,7 +52,7 @@ const breadcrumb = {
       </nav>
 
       <div class="flex items-center gap-4 mb-3">
-        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--brand-default)]/10 text-[var(--brand-default)]">
+        <span class={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${a.tint} ${a.text}`}>
           <CategoryIcon slug={meta.slug} size={24} />
         </span>
         <div>
@@ -89,7 +91,7 @@ const breadcrumb = {
               <li>
                 <a
                   href={`/${meta.slug}/${calc.id}/`}
-                  class="block h-full p-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+                  class={`block h-full p-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-card-hover motion-reduce:transform-none motion-reduce:transition-none ${a.border} focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]`}
                 >
                   <p class="font-semibold text-sm text-[var(--surface-text)]">{calc.shortTitle ?? calc.title}</p>
                   <p class="text-xs text-[var(--surface-text-secondary)] mt-1 leading-relaxed">{calc.description.slice(0, 110)}{calc.description.length > 110 ? '…' : ''}</p>

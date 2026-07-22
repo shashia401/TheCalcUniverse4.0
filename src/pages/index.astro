@@ -7,6 +7,7 @@ import CategoryIcon from '../components/CategoryIcon.astro';
 import SearchBox from '../components/SearchBox';
 import CalculatorForm from '../components/calculator/CalculatorForm';
 import { getCategories, calculatorRegistry, getCalculatorById } from '../lib/registry';
+import { accentFor } from '../lib/categoryAccent';
 import { blogPosts } from '../lib/blog';
 import { FlaskConical, FileText, ShieldCheck, Lock } from 'lucide-react';
 import { SITE_NAME, BASE_URL } from '../config/constants';
@@ -14,23 +15,6 @@ import { SITE_NAME, BASE_URL } from '../config/constants';
 const categories = getCategories().filter((cat) => cat.count > 0);
 const total = calculatorRegistry.length;
 
-// Per-category accent (ui-ux-pro-max "Vibrant & block-based" style — visual
-// scannability). Full static class strings so Tailwind's JIT detects them.
-const CAT_ACCENT: Record<string, { tint: string; text: string; border: string }> = {
-  finance:     { tint: 'bg-accent-emerald-500/12', text: 'text-accent-emerald-600', border: 'hover:border-accent-emerald-500' },
-  health:      { tint: 'bg-accent-rose-500/12',    text: 'text-accent-rose-600',    border: 'hover:border-accent-rose-500' },
-  math:        { tint: 'bg-accent-sky-500/12',     text: 'text-accent-sky-600',     border: 'hover:border-accent-sky-500' },
-  everyday:    { tint: 'bg-accent-amber-500/15',   text: 'text-accent-amber-600',   border: 'hover:border-accent-amber-500' },
-  ecommerce:   { tint: 'bg-accent-violet-500/12',  text: 'text-accent-violet-600',  border: 'hover:border-accent-violet-500' },
-  diy:         { tint: 'bg-accent-orange-500/12',  text: 'text-accent-orange-600',  border: 'hover:border-accent-orange-500' },
-  automotive:  { tint: 'bg-accent-cyan-500/12',    text: 'text-accent-cyan-600',    border: 'hover:border-accent-cyan-500' },
-  engineering: { tint: 'bg-accent-amber-500/12',   text: 'text-accent-amber-700',   border: 'hover:border-accent-amber-500' },
-  industrial:  { tint: 'bg-accent-teal-500/12',    text: 'text-accent-teal-600',    border: 'hover:border-accent-teal-500' },
-  devtools:    { tint: 'bg-accent-violet-500/12',  text: 'text-accent-violet-700',  border: 'hover:border-accent-violet-500' },
-  realestate:  { tint: 'bg-accent-emerald-500/12', text: 'text-accent-emerald-700', border: 'hover:border-accent-emerald-500' },
-};
-const accentFor = (slug: string) =>
-  CAT_ACCENT[slug] ?? { tint: 'bg-[var(--brand-default)]/10', text: 'text-[var(--brand-default)]', border: 'hover:border-[var(--brand-default)]' };
 
 // Trust/Safety band — the Marketplace/Directory pattern's missing section
 const trustPoints = [
