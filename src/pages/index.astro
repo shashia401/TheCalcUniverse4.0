@@ -1,0 +1,381 @@
+---
+// Homepage — tool-first. The hero leads with SEARCH (the thing people came to do),
+// then a LIVE embedded calculator so a visitor gets a real answer without navigating.
+// Clean look kept; substance restored (v2 was a tool, not a directory of links).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CategoryIcon from '../components/CategoryIcon.astro';
+import SearchBox from '../components/SearchBox';
+import CalculatorForm from '../components/calculator/CalculatorForm';
+import { getCategories, calculatorRegistry, getCalculatorById } from '../lib/registry';
+import { blogPosts } from '../lib/blog';
+import { FlaskConical, FileText, ShieldCheck, Lock } from 'lucide-react';
+import { SITE_NAME, BASE_URL } from '../config/constants';
+
+const categories = getCategories().filter((cat) => cat.count > 0);
+const total = calculatorRegistry.length;
+const reviewed = calculatorRegistry.filter((e) => e.reviewedBy).length;
+
+// Per-category accent (ui-ux-pro-max "Vibrant & block-based" style — visual
+// scannability). Full static class strings so Tailwind's JIT detects them.
+const CAT_ACCENT: Record<string, { tint: string; text: string; border: string }> = {
+  finance:     { tint: 'bg-accent-emerald-500/12', text: 'text-accent-emerald-600', border: 'hover:border-accent-emerald-500' },
+  health:      { tint: 'bg-accent-rose-500/12',    text: 'text-accent-rose-600',    border: 'hover:border-accent-rose-500' },
+  math:        { tint: 'bg-accent-sky-500/12',     text: 'text-accent-sky-600',     border: 'hover:border-accent-sky-500' },
+  everyday:    { tint: 'bg-accent-amber-500/15',   text: 'text-accent-amber-600',   border: 'hover:border-accent-amber-500' },
+  ecommerce:   { tint: 'bg-accent-violet-500/12',  text: 'text-accent-violet-600',  border: 'hover:border-accent-violet-500' },
+  diy:         { tint: 'bg-accent-orange-500/12',  text: 'text-accent-orange-600',  border: 'hover:border-accent-orange-500' },
+  automotive:  { tint: 'bg-accent-cyan-500/12',    text: 'text-accent-cyan-600',    border: 'hover:border-accent-cyan-500' },
+  engineering: { tint: 'bg-accent-amber-500/12',   text: 'text-accent-amber-700',   border: 'hover:border-accent-amber-500' },
+  industrial:  { tint: 'bg-accent-teal-500/12',    text: 'text-accent-teal-600',    border: 'hover:border-accent-teal-500' },
+  devtools:    { tint: 'bg-accent-violet-500/12',  text: 'text-accent-violet-700',  border: 'hover:border-accent-violet-500' },
+  realestate:  { tint: 'bg-accent-emerald-500/12', text: 'text-accent-emerald-700', border: 'hover:border-accent-emerald-500' },
+};
+const accentFor = (slug: string) =>
+  CAT_ACCENT[slug] ?? { tint: 'bg-[var(--brand-default)]/10', text: 'text-[var(--brand-default)]', border: 'hover:border-[var(--brand-default)]' };
+
+// Trust/Safety band — the Marketplace/Directory pattern's missing section
+const trustPoints = [
+  { Icon: FlaskConical, title: 'Tested, not guessed', body: '7,173 automated tests. Deterministic math — never a hallucinated number.', accent: 'text-accent-emerald-600', ring: 'bg-accent-emerald-500/12' },
+  { Icon: FileText, title: 'Shows the work', body: 'Every formula, worked example, and source is on the page — not a black box.', accent: 'text-accent-sky-600', ring: 'bg-accent-sky-500/12' },
+  { Icon: ShieldCheck, title: 'Expert-reviewed', body: `${reviewed} calculators checked by named domain experts, with the date shown.`, accent: 'text-accent-violet-600', ring: 'bg-accent-violet-500/12' },
+  { Icon: Lock, title: 'Private by default', body: 'Runs in your browser. Your inputs never leave your device. No account.', accent: 'text-accent-amber-600', ring: 'bg-accent-amber-500/15' },
+];
+
+// Slim, serializable search index for the hero island (no registry in the bundle)
+const searchIndex = calculatorRegistry.map((entry) => ({
+  t: entry.shortTitle ?? entry.title,
+  p: `/${entry.categorySlug}/${entry.id}/`,
+  c: entry.category,
+}));
+
+const popularIds = [
+  'bmi-calculator', 'loan-calculator', 'percentage-calculator', 'compound-interest',
+  'age-calculator', 'mortgage-amortization-calculator', 'tdee-calculator', 'fraction-calculator',
+];
+const popular = popularIds.map((id) => getCalculatorById(id)).filter((e) => e !== undefined);
+
+// Quick chips under the search bar — discovery + shows breadth
+const quickPicks = ['bmi-calculator', 'loan-calculator', 'percentage-calculator', 'age-calculator']
+  .map((id) => getCalculatorById(id))
+  .filter((e) => e !== undefined);
+
+const demo = getCalculatorById('bmi-calculator');
+
+const latestPosts = [...blogPosts]
+  .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+  .slice(0, 3);
+
+const faqs = [
+  { q: 'Are the calculators free?', a: `Yes — all ${total} of them, with no account, no sign-up, and no paywall.` },
+  { q: 'Can I trust the results?', a: 'Every formula is a tested program, not a language-model guess — backed by 7,173 automated tests, with the formula and source shown on each page, and many reviewed by named domain experts. The math is deterministic: the same inputs always give the same answer.' },
+  { q: 'Is my data private?', a: 'Completely. Every calculation runs inside your browser — your numbers are never sent to a server, and nothing is stored about you.' },
+  { q: 'Do they work on mobile?', a: 'Yes. Every calculator is fully responsive and loads fast, because pages are static and ship almost no JavaScript.' },
+];
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: `${BASE_URL}/`,
+    description: `${total}+ free calculators with formulas, worked examples, and expert explanations.`,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${BASE_URL}/search/?q={query}`,
+      'query-input': 'required name=query',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title={`${SITE_NAME} — Free Online Calculators for Finance, Health, Math & More`}
+  description={`${total}+ free calculators with formulas, worked examples, and expert explanations. Search or start calculating instantly — no account, and your inputs never leave your browser.`}
+  canonicalPath="/"
+  schemas={schemas}
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    {/* ── Hero: search-first ─────────────────────────────────────────── */}
+    <section class="hero-grid relative overflow-hidden">
+      <div class="max-w-[1200px] mx-auto px-4 md:px-10 pt-14 pb-12 lg:pt-20 lg:pb-16 relative">
+        <div class="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+
+          {/* LEFT — the pitch + the primary action */}
+          <div class="hero-rise">
+            <p class="text-tiny font-bold uppercase tracking-[0.22em] text-accent-amber-400/90 mb-4">
+              {total} calculators · every answer shows its formula
+            </p>
+            <h1 class="hero-title text-white mb-5">
+              Don't just get the answer.<br />
+              <span class="relative inline-block">
+                <span class="text-accent-amber-400">See the work.</span>
+                {/* Signature: a hand-marked underline — the thesis, drawn by hand */}
+                <svg class="scribble" viewBox="0 0 260 18" fill="none" aria-hidden="true" preserveAspectRatio="none">
+                  <path d="M4 12 C60 4, 120 4, 176 9 C210 12, 236 9, 256 6" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+                </svg>
+              </span>
+            </h1>
+            <p class="text-base md:text-lg text-slate-300 leading-relaxed max-w-xl mb-7">
+              A tested program runs every calculation — and the formula, the steps, and the source sit right on the page. So you can trust the number, not just take it.
+            </p>
+
+            {/* THE primary action */}
+            <SearchBox client:idle index={searchIndex} hero />
+
+            {/* quick picks */}
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <span class="text-xs text-white/50">Popular:</span>
+              {quickPicks.map((c) => (
+                <a
+                  href={`/${c!.categorySlug}/${c!.id}/`}
+                  class="rounded-full border border-white/20 px-3 py-1 text-xs font-medium text-white/85 transition-colors hover:border-white/50 hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-amber-400"
+                >
+                  {c!.shortTitle ?? c!.title}
+                </a>
+              ))}
+            </div>
+
+            {/* proof, not slogans */}
+            <dl class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 max-w-lg">
+              <div>
+                <dt class="text-xs text-slate-400">tested formulas</dt>
+                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">7,173</dd>
+                <dd class="sr-only">automated tests</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-400">expert-reviewed</dt>
+                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">{reviewed}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-400">in-depth guides</dt>
+                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">{blogPosts.length}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-400">no account · private</dt>
+                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">$0</dd>
+              </div>
+            </dl>
+          </div>
+
+          {/* RIGHT — a real, working calculator, worked out on graph paper */}
+          {demo && (
+            <div class="hero-rise hero-rise-2 relative lg:pt-1">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <p class="text-sm font-semibold text-white">
+                  <span class="live-badge"><span class="live-dot" aria-hidden="true"></span>Live</span>
+                  <span class="text-slate-400"> — {demo.shortTitle ?? demo.title}</span>
+                </p>
+                <a href={`/${demo.categorySlug}/${demo.id}/`} class="text-xs font-medium text-accent-amber-400 hover:underline shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-amber-400">
+                  Full calculator →
+                </a>
+              </div>
+              {/* CalculatorForm renders its own card — no outer card, so no nesting */}
+              <CalculatorForm client:visible calculatorId={demo.id} compact />
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <div class="max-w-[1200px] mx-auto px-4 md:px-10">
+
+      {/* ── Most used ────────────────────────────────────────────────── */}
+      <section aria-label="Popular calculators" class="py-8">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-5">Most used</h2>
+        <ul class="grid grid-cols-2 md:grid-cols-4 gap-3 list-none p-0">
+          {popular.map((calc) => (
+            <li>
+              <a
+                href={`/${calc!.categorySlug}/${calc!.id}/`}
+                class="group flex items-start gap-3 h-full p-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+              >
+                <span class="mt-0.5 text-[var(--brand-default)] shrink-0">
+                  <CategoryIcon slug={calc!.categorySlug} size={18} />
+                </span>
+                <span>
+                  <span class="block font-semibold text-sm text-[var(--surface-text)]">{calc!.shortTitle ?? calc!.title}</span>
+                  <span class="block text-xs text-[var(--surface-text-muted)] mt-0.5">{calc!.category}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ── Categories ───────────────────────────────────────────────── */}
+      <section id="categories" aria-label="Categories" class="py-8 scroll-mt-20">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-5">Browse by category</h2>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none p-0">
+          {categories.map((cat) => {
+            const a = accentFor(cat.slug);
+            return (
+            <li>
+              <a
+                href={`/${cat.slug}/`}
+                class={`group flex gap-4 h-full p-5 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-card-hover motion-reduce:transform-none motion-reduce:transition-none ${a.border} focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]`}
+              >
+                <span class={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105 motion-reduce:transform-none ${a.tint} ${a.text}`}>
+                  <CategoryIcon slug={cat.slug} size={22} />
+                </span>
+                <span class="min-w-0">
+                  <span class="flex items-baseline gap-2">
+                    <span class="font-semibold text-[var(--surface-text)]">{cat.name}</span>
+                    <span class="font-mono text-tiny text-[var(--surface-text-muted)]">{cat.count}</span>
+                  </span>
+                  <span class="block text-sm text-[var(--surface-text-secondary)] mt-1 leading-relaxed">{cat.description}</span>
+                </span>
+              </a>
+            </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* ── Why trust these calculators (Trust/Safety band) ──────────── */}
+      <section aria-label="Why trust these calculators" class="py-8">
+        <div class="rounded-2xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-6 sm:p-8">
+          <div class="max-w-2xl mb-6">
+            <h2 class="text-xl font-bold text-[var(--surface-text)]">Numbers you can actually trust</h2>
+            <p class="text-sm text-[var(--surface-text-secondary)] mt-2 leading-relaxed">
+              Every result here is a tested program — not a language-model guess. That's the difference between a calculator and asking an AI to "do the math."
+            </p>
+          </div>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0">
+            {trustPoints.map((t) => {
+              const Icon = t.Icon;
+              return (
+              <li class="flex flex-col gap-3">
+                <span class={`flex h-10 w-10 items-center justify-center rounded-xl ${t.ring} ${t.accent}`}>
+                  <Icon size={20} aria-hidden="true" />
+                </span>
+                <span class="block font-semibold text-sm text-[var(--surface-text)]">{t.title}</span>
+                <span class="block text-sm text-[var(--surface-text-secondary)] leading-relaxed">{t.body}</span>
+              </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
+
+      {/* ── Latest guides ────────────────────────────────────────────── */}
+      <section aria-label="Latest guides" class="py-8">
+        <div class="flex items-baseline justify-between mb-5">
+          <h2 class="text-xl font-bold text-[var(--surface-text)]">Latest guides</h2>
+          <a href="/blog/" class="text-sm font-medium text-[var(--brand-default)] hover:underline">All {blogPosts.length} →</a>
+        </div>
+        <ul class="grid grid-cols-1 md:grid-cols-3 gap-4 list-none p-0">
+          {latestPosts.map((post) => (
+            <li>
+              <a
+                href={`/blog/${post.slug}/`}
+                class="block h-full p-5 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+              >
+                <p class="text-tiny uppercase tracking-wide text-[var(--surface-text-muted)] mb-1">{post.category} · {post.readingMinutes} min</p>
+                <p class="font-semibold text-sm text-[var(--surface-text)] leading-snug">{post.title}</p>
+                <p class="text-xs text-[var(--surface-text-secondary)] mt-2 leading-relaxed">{post.excerpt.slice(0, 100)}…</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ── FAQ: trust + engagement + SEO ────────────────────────────── */}
+      <section aria-label="Frequently asked questions" class="py-8 pb-16 max-w-3xl">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-5">Questions, answered</h2>
+        <dl class="space-y-4">
+          {faqs.map((f) => (
+            <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-5">
+              <dt class="font-semibold text-[var(--surface-text)]">{f.q}</dt>
+              <dd class="text-sm text-[var(--surface-text-secondary)] mt-1 leading-relaxed">{f.a}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .hero-grid {
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(160deg, var(--surface-hero-start, #0f1a2e) 0%, var(--surface-hero-end, #0a1220) 100%);
+    background-size: 32px 32px, 32px 32px, 100% 100%;
+  }
+
+  /* Type scale — the hero is the one big typographic moment */
+  .hero-title {
+    font-size: clamp(2.25rem, 5.2vw, 3.75rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.04;
+  }
+
+  /* Signature — a hand-marked underline under the thesis word */
+  .scribble {
+    position: absolute;
+    left: -2%;
+    bottom: -0.28em;
+    width: 104%;
+    height: 0.4em;
+    color: #f59e0b;
+    opacity: 0.95;
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: scribble-in 0.7s ease 0.5s forwards;
+  }
+  @keyframes scribble-in {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Live badge on the calculator card */
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #f59e0b;
+  }
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 9999px;
+    background: #f59e0b;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
+    animation: live-pulse 2s ease-out infinite;
+  }
+  @keyframes live-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.55); }
+    70% { box-shadow: 0 0 0 7px rgba(245, 158, 11, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  }
+
+  /* Load-in: quiet fade + rise, once */
+  .hero-rise {
+    animation: hero-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .hero-rise-2 { animation-delay: 0.12s; }
+  @keyframes hero-rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-rise, .scribble, .live-dot { animation: none; }
+    .scribble { stroke-dashoffset: 0; }
+    .hero-rise { opacity: 1; transform: none; }
+  }
+</style>
