@@ -74,6 +74,9 @@ const roiConfig: CalculatorConfig = {
         value: `${totalRoi >= 0 ? '+' : '-'}${Math.abs(totalRoi).toFixed(2)}%`,
         highlight: true,
         color: totalRoi >= 0 ? 'positive' : 'negative',
+        interpretation: years > 0
+          ? `That's a total return earned over ${years} year${years === 1 ? '' : 's'} — about ${annualizedRoi >= 0 ? '+' : ''}${annualizedRoi.toFixed(1)}% per year. Compare the annualized figure between investments: a big total return means little until you know how long it took to earn.`
+          : `This is your total return on the money invested. To compare it fairly against other opportunities, factor in how long it took — a return over one month is very different from the same return over five years.`,
       },
       {
         id: 'netProfit',

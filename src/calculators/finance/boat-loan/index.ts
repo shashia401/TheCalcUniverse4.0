@@ -180,7 +180,7 @@ const boatLoanConfig: CalculatorConfig = {
       { id: 'trueMonthly', label: monthlyMaintenance.gt(0) ? 'True Monthly Cost (Loan + Maint.)' : 'Monthly Loan Payment', value: `$${fmt(trueMonthly)}`, color: monthlyMaintenance.gt(0) ? 'negative' as const : 'positive' as const },
       { id: 'totalInterest', label: 'Total Interest Paid', value: `$${fmt(totalInterest)}`, color: 'negative' as const },
       { id: 'totalMaintenance', label: monthlyMaintenance.gt(0) ? 'Total Maintenance & Storage' : 'Maintenance & Storage', value: monthlyMaintenance.gt(0) ? `$${fmt(totalMaintenance)}` : 'N/A', color: monthlyMaintenance.gt(0) ? 'negative' as const : 'neutral' as const },
-      { id: 'trueTotal', label: 'True Total Cost of Ownership', value: `$${fmt(trueTotalCost)}`, color: 'negative' as const, highlight: true },
+      { id: 'trueTotal', label: 'True Total Cost of Ownership', value: `$${fmt(trueTotalCost)}`, color: 'negative' as const, highlight: true, interpretation: `Beyond the amount financed you'll pay $${fmt(totalInterest)} in interest${monthlyMaintenance.gt(0) ? ` and $${fmt(totalMaintenance)} in upkeep and storage` : ''} — this is the real cost of ownership, not the sticker price. Recreational-boat interest is rarely deductible, so budget against this figure.` },
       { id: 'loanAmount', label: 'Amount Financed', value: `$${fmt(loanAmount)}`, color: 'neutral' as const },
       { id: 'downPct', label: 'Down Payment %', value: `${priceRaw > 0 ? downPayment.div(price).times(100).toFixed(0) : 0}%`, color: 'neutral' as const },
       { id: 'termYears', label: 'Loan Term', value: `${Math.floor(termMonths / 12)}yr ${termMonths % 12}mo`, color: 'neutral' as const },

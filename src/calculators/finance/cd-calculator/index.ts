@@ -145,7 +145,7 @@ const cdConfig: CalculatorConfig = {
       n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
     return [
-      { id: 'balance', label: `Balance at Maturity (${termUnit === 'months' ? termRaw : termRaw * 12} ${termRaw === 1 ? 'month' : 'months'})`, value: fmtLarge(balance), highlight: true, color: 'positive' as const },
+      { id: 'balance', label: `Balance at Maturity (${termUnit === 'months' ? termRaw : termRaw * 12} ${termRaw === 1 ? 'month' : 'months'})`, value: fmtLarge(balance), highlight: true, color: 'positive' as const, interpretation: `Of this balance, ${interestPct.toFixed(1)}% (${fmtLarge(totalInterest)}) is interest the bank pays you — the rest is your own money back. A CD's return is fixed and guaranteed, but locked: withdrawing early usually forfeits several months of that interest.` },
       { id: 'totalPrincipal', label: 'Total Principal Deposited', value: fmtLarge(deposit + additionalDeposit * totalPeriods), color: 'neutral' as const },
       { id: 'totalInterest', label: 'Total Interest Earned', value: fmtLarge(totalInterest), color: 'positive' as const },
       { id: 'interestPct', label: 'Interest as % of Final Balance', value: `${interestPct.toFixed(1)}%`, color: interestPct > 20 ? 'positive' as const : 'neutral' as const },

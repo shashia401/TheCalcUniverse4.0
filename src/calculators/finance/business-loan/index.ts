@@ -164,6 +164,7 @@ const businessLoanConfig: CalculatorConfig = {
         value: `$${fmt(monthlyPayment)}`,
         highlight: true,
         color: 'neutral' as const,
+        interpretation: `Over the term you'll pay $${fmt(totalInterest)} in interest — the cost of the capital. For a business that interest is usually tax-deductible (principal isn't), so weigh it against the return the borrowed money is expected to generate, not the payment alone.`,
       },
       {
         id: 'totalInterest',

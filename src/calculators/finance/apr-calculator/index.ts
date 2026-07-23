@@ -144,6 +144,7 @@ const aprCalculatorConfig: CalculatorConfig = {
         value: `${aprAnnual.toFixed(3)}%`,
         highlight: true,
         color: aprColor as 'positive' | 'neutral' | 'negative',
+        interpretation: `APR folds fees into the rate, so it runs ${aprDifference.toFixed(2)} points above the ${nominalRate.toFixed(2)}% quoted — this is the number to compare between lenders, because a lower headline rate with high fees can cost more. It assumes you hold the loan to term.`,
       },
       {
         id: 'nominalRateResult',

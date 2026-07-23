@@ -115,6 +115,7 @@ const sipConfig: CalculatorConfig = {
         value: fmt(fv),
         highlight: true,
         color: 'positive',
+        interpretation: `Of this, ${fmt(totalInvested)} is money you contribute and the rest is projected market growth at the return you assumed. That growth compounds, but it isn't guaranteed — real returns swing year to year, so treat this as a midpoint, not a promise.`,
       },
       {
         id: 'totalInvested',
