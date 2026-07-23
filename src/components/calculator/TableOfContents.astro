@@ -12,7 +12,7 @@ const { items } = Astro.props;
     <ul class="flex flex-wrap gap-x-4 gap-y-1.5 list-none p-0 m-0">
       {items.map((item) => (
         <li>
-          <a href={item.href} class="text-sm text-[var(--brand-default)] hover:underline">{item.label}</a>
+          <a href={item.href} class="text-sm text-[var(--brand-ink)] hover:underline">{item.label}</a>
         </li>
       ))}
     </ul>

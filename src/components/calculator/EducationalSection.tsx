@@ -32,7 +32,7 @@ export default function EducationalSection({ content, calculatorTitle }: Props) 
             <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
               {content.variables.map((v) => (
                 <div key={v.symbol} className="flex gap-3 text-sm">
-                  <dt className="font-mono font-bold text-[var(--brand-default)] shrink-0 w-10">{v.symbol}</dt>
+                  <dt className="font-mono font-bold text-[var(--brand-ink)] shrink-0 w-10">{v.symbol}</dt>
                   <dd className="text-[var(--surface-text-secondary)]">
                     <span className="font-medium text-[var(--surface-text)]">{v.name}</span>
                     {' — '}{v.description}
@@ -105,7 +105,7 @@ export default function EducationalSection({ content, calculatorTitle }: Props) 
           <ul className="space-y-2">
             {content.commonUses.map((use, i) => (
               <li key={i} className="text-[var(--surface-text-secondary)] flex gap-2">
-                <span className="text-[var(--brand-default)]">•</span>
+                <span className="text-[var(--brand-ink)]">•</span>
                 {use}
               </li>
             ))}
@@ -136,7 +136,7 @@ export default function EducationalSection({ content, calculatorTitle }: Props) 
                     {Object.entries(ex.inputs).map(([k, v]) => `${k} = ${v}`).join('  ·  ')}
                   </p>
                 )}
-                <p className="text-[var(--brand-default)] font-bold font-mono">{ex.result}</p>
+                <p className="text-[var(--brand-ink)] font-bold font-mono">{ex.result}</p>
                 <p className="text-sm text-[var(--surface-text-muted)] mt-1">{ex.insight}</p>
               </div>
             ))}
@@ -200,7 +200,7 @@ export default function EducationalSection({ content, calculatorTitle }: Props) 
                   href={c.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--brand-default)] hover:underline"
+                  className="text-[var(--brand-ink)] hover:underline"
                 >
                   {c.title ?? c.source ?? c.url}
                 </a>

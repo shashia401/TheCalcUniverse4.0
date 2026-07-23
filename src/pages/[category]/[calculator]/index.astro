@@ -111,9 +111,9 @@ const tocItems = [
   <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
     <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-8">
       <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
-        <a href="/" class="text-[var(--brand-default)] hover:underline">Home</a>
+        <a href="/" class="text-[var(--brand-ink)] hover:underline">Home</a>
         <span class="mx-2" aria-hidden="true">›</span>
-        <a href={`/${entry.categorySlug}/`} class="text-[var(--brand-default)] hover:underline">
+        <a href={`/${entry.categorySlug}/`} class="text-[var(--brand-ink)] hover:underline">
           {entry.category}
         </a>
         <span class="mx-2" aria-hidden="true">›</span>
@@ -214,7 +214,7 @@ const tocItems = [
               <ul class="space-y-2 list-none p-0">
                 {relatedPosts.map((p) => (
                   <li>
-                    <a href={`/blog/${p!.slug}/`} class="text-[var(--brand-default)] hover:underline text-sm font-medium">
+                    <a href={`/blog/${p!.slug}/`} class="text-[var(--brand-ink)] hover:underline text-sm font-medium">
                       {p!.title} →
                     </a>
                   </li>

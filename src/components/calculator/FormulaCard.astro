@@ -42,7 +42,7 @@ const {
       <dl class="mt-3 space-y-1.5 text-xs">
         {variables.map((v) => (
           <div class="flex gap-2">
-            <dt class="w-10 shrink-0 font-mono font-bold text-[var(--brand-default)]">{v.symbol}</dt>
+            <dt class="w-10 shrink-0 font-mono font-bold text-[var(--brand-ink)]">{v.symbol}</dt>
             <dd class="text-[var(--surface-text-secondary)]">{v.name}</dd>
           </div>
         ))}
@@ -55,13 +55,13 @@ const {
       <p class="mb-1 text-tiny font-semibold uppercase tracking-wider text-[var(--surface-text-muted)]">
         Worked example{scenario ? ` — ${scenario}` : ''}
       </p>
-      <p class="font-mono text-sm font-bold text-[var(--brand-default)]">
+      <p class="font-mono text-sm font-bold text-[var(--brand-ink)]">
         {resultLabel} = {resultValue}{resultUnit ? ` ${resultUnit}` : ''}
       </p>
     </div>
   )}
 
-  <a href="#how-it-works" class="mt-3 inline-block text-xs font-medium text-[var(--brand-default)] hover:underline">
+  <a href="#how-it-works" class="mt-3 inline-block text-xs font-medium text-[var(--brand-ink)] hover:underline">
     Full explanation ↓
   </a>
 </div>

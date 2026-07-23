@@ -186,7 +186,7 @@ const schemas = [
                 href={`/${calc!.categorySlug}/${calc!.id}/`}
                 class="group flex items-start gap-3 h-full p-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
               >
-                <span class="mt-0.5 text-[var(--brand-default)] shrink-0">
+                <span class="mt-0.5 text-[var(--brand-ink)] shrink-0">
                   <CategoryIcon slug={calc!.categorySlug} size={18} />
                 </span>
                 <span>
@@ -258,7 +258,7 @@ const schemas = [
       <section aria-label="Latest guides" class="py-8">
         <div class="flex items-baseline justify-between mb-5">
           <h2 class="text-xl font-bold text-[var(--surface-text)]">Latest guides</h2>
-          <a href="/blog/" class="text-sm font-medium text-[var(--brand-default)] hover:underline">All {blogPosts.length} →</a>
+          <a href="/blog/" class="text-sm font-medium text-[var(--brand-ink)] hover:underline">All {blogPosts.length} →</a>
         </div>
         <ul class="grid grid-cols-1 md:grid-cols-3 gap-4 list-none p-0">
           {latestPosts.map((post) => (

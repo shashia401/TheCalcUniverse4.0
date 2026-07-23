@@ -33,12 +33,13 @@ const fieldClasses =
   'w-full rounded-lg border border-[var(--border-warm)] bg-[var(--surface-bg)] px-3 py-2 text-sm text-[var(--surface-text)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-default)] focus:border-[var(--brand-default)]';
 
 const resultColorClasses: Record<string, string> = {
-  positive: 'text-accent-emerald-600',
-  negative: 'text-accent-rose-600',
+  // Theme-aware: darker shade on light (AA on white), lighter on dark (AA on dark card)
+  positive: 'text-accent-emerald-700 dark:text-accent-emerald-400',
+  negative: 'text-accent-rose-700 dark:text-accent-rose-400',
 };
 
 const actionBtnCls =
-  'text-xs font-medium text-[var(--brand-default)] rounded px-2 py-1 transition-colors hover:bg-[var(--surface-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-70';
+  'text-xs font-medium text-[var(--brand-ink)] rounded px-2 py-1 transition-colors hover:bg-[var(--surface-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-70';
 
 export default function CalculatorForm({ calculatorId, compact = false, visibleInputIds }: Props) {
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
@@ -580,12 +581,12 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
             <ol className="space-y-3">
               {steps.map((step, i) => (
                 <li key={i} className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--brand-default)]/10 font-mono text-xs font-bold text-[var(--brand-default)]">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--brand-default)]/10 font-mono text-xs font-bold text-[var(--brand-ink)]">
                     {i + 1}
                   </span>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-[var(--surface-text)]">{step.label}</p>
-                    <p className="font-mono text-sm text-[var(--brand-default)] mt-0.5 overflow-x-auto whitespace-nowrap">
+                    <p className="font-mono text-sm text-[var(--brand-ink)] mt-0.5 overflow-x-auto whitespace-nowrap">
                       {step.expr}
                     </p>
                     {step.note && (

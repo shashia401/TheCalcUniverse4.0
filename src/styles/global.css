@@ -19,6 +19,11 @@
     --brand-default: #0e7490;
     --brand-hover: #155e75;
     --brand-active: #164e63;
+    /* Brand color for TEXT/links. Same as --brand-default in light mode (passes
+       AA on white); lightened in dark mode where the dark teal fails contrast.
+       Kept separate so button/badge backgrounds (bg-brand-default) stay dark
+       enough for white text. Tracks the active theme's brand by default. */
+    --brand-ink: var(--brand-default);
     --accent-amber: #f59e0b;
     --accent-rust: #0e7490;
     --accent-deep-teal: #155e75;
@@ -57,9 +62,11 @@
     --surface-border: #2a3a54;
     --surface-text: #e8eef4;
     --surface-text-secondary: #b0c0d4;
-    --surface-text-muted: #8090a4;
+    --surface-text-muted: #99a7bc; /* was #8090a4 (4.41:1) — now AA on dark cards */
     --surface-muted: #b0c0d4;
-    --surface-muted-lighter: #8090a4;
+    --surface-muted-lighter: #99a7bc;
+    /* Lighter teal for text/links in dark mode (dark #0e7490 failed AA on dark) */
+    --brand-ink: #38b2cd;
     --surface-header: rgba(15,26,46,0.90);
     --surface-hero-start: #0a1220;
     --surface-hero-end: #060c18;
