@@ -146,6 +146,9 @@ const investmentConfig: CalculatorConfig = {
         value: fmtDollar(expected),
         highlight: true,
         color: 'positive' as const,
+        interpretation: totalContributed.gt(0)
+          ? `Of the ${fmtDollar(expected)} projected, ${fmtDollar(totalReturns)} (${totalReturns.div(totalContributed).mul(100).toFixed(0)}%) is market growth on top of the ${fmtDollar(totalContributed)} you put in. Returns aren't guaranteed — this scenario ranges from ${fmtDollar(pessimistic)} to ${fmtDollar(optimistic)}, so treat it as a midpoint, not a promise.`
+          : undefined,
       },
       {
         id: 'totalContributed',
