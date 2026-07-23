@@ -102,6 +102,7 @@ const helocCalculatorConfig: CalculatorConfig = {
         value: `$${fmt(maxBorrowable)}`,
         highlight: true,
         color: maxBorrowable > 0 ? 'positive' : 'negative',
+        interpretation: `This is the most a lender may extend against your equity — not a spending target. A HELOC is secured by your home, and the interest-only payment above doesn't reduce the balance, so what you draw stays owed until the repayment period begins.`,
       },
       {
         id: 'monthlyInterestPayment',

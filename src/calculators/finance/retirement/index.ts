@@ -148,6 +148,7 @@ const retirementConfig: CalculatorConfig = {
         value: fmt(futureValue),
         highlight: true,
         color: 'positive' as const,
+        interpretation: `Of the ${fmt(futureValue)}, ${fmt(totalContributed)} is what you contribute and ${fmt(totalGrowth)} is investment growth. This is in future dollars — at ${(inflationRate * 100).toFixed(1)}% inflation, plan against the today's-dollars figure below, not this headline.`,
       },
       {
         id: 'inflationAdjusted',

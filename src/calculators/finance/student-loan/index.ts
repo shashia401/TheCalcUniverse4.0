@@ -133,6 +133,7 @@ const studentLoanConfig: CalculatorConfig = {
         value: `${fmt(monthlyPayment)}/mo`,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `Over ${repaymentYears} years you'll repay ${fmt(totalPaid)} total, of which ${fmt(totalInterestRepayment)} is interest. Refinancing to a lower rate or paying extra toward principal early shrinks that interest; stretching the term lowers the monthly payment but raises the total.`,
       },
     ];
 

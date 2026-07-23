@@ -183,6 +183,7 @@ const homeAffordabilityConfig: CalculatorConfig = {
         value: `$${fmt(Math.max(0, maxHomePrice))}`,
         highlight: true,
         color: 'positive',
+        interpretation: `This is a ceiling, not a recommendation — it puts your total housing at ${frontEndRatio.toFixed(0)}% of gross income and total debt at ${backEndRatio.toFixed(0)}%. Lenders cap the back-end near 43%; buying below this leaves room for maintenance, emergencies, and rate changes the formula can't see.`,
       },
       {
         id: 'maxLoanAmount',

@@ -237,6 +237,7 @@ const personalLoanConfig: CalculatorConfig = {
         value: `$${fmt(monthlyPayment)}`,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `Over the term you'll pay $${fmt(totalInterest)} in interest — ${((totalInterest / totalPaid) * 100).toFixed(0)}% of the $${fmt(totalPaid)} total. The monthly payment is only half the story; a shorter term or lower APR is what shrinks the interest.`,
       },
       {
         id: 'actualCashReceived',
