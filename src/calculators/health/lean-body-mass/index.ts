@@ -121,6 +121,7 @@ const leanBodyMassConfig: CalculatorConfig = {
         value: display(avgLbm),
         highlight: true,
         color: 'positive',
+        interpretation: `This is the weight of everything that isn't fat — muscle, bone, organs, water — averaged across three formulas, which puts your body fat near ${bodyFatPct.toFixed(0)}%. LBM is what you want to preserve while losing weight; a deficit paired with protein and resistance training keeps the loss coming from fat, not muscle.`,
       },
       {
         id: 'boer',

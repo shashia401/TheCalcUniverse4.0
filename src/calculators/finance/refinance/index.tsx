@@ -248,6 +248,7 @@ const refinanceConfig: CalculatorConfig = {
         value: recommendation,
         highlight: true,
         color: recColor,
+        interpretation: `Refinancing carries upfront closing costs, so it only pays off if you keep the loan past the break-even point (${breakEvenMonths < Infinity ? `about ${breakEvenMonths} months here` : 'never, at these numbers'}). ${monthlySavings > 0 ? `The lower payment helps, but resetting to a fresh 30-year term can still raise total interest even at a lower rate.` : `Your new rate isn't lower, so there's nothing to recover.`}`,
       },
       {
         id: 'monthlySavings',

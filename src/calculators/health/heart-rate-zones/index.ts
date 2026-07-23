@@ -128,6 +128,7 @@ const heartRateZonesConfig: CalculatorConfig = {
         value: `${maxHR} bpm`,
         highlight: true,
         color: 'neutral' as const,
+        interpretation: `The 220 − age rule is a population average — your true max can run 10-15 bpm either way, so treat the zones below as guides, not hard limits. ${hasRHR ? 'Since you entered a resting rate, the zones use the Karvonen (heart-rate-reserve) method, which personalizes them to your fitness.' : 'Add your resting heart rate for zones tailored to your fitness via the Karvonen method.'}`,
       },
     ];
 

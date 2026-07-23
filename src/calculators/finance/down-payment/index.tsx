@@ -114,6 +114,7 @@ const downPaymentConfig: CalculatorConfig = {
         value: `$${fmtInt(targetDownPayment)}`,
         highlight: true,
         color: 'neutral',
+        interpretation: `At ${(targetDownPct * 100).toFixed(0)}% down, ${isPmiRequired ? `you'll pay roughly $${fmtInt(annualPmiCost)}/year in PMI until you reach 20% equity — putting 20% down up front removes that cost.` : `you're at or above 20%, so you skip PMI (private mortgage insurance) entirely.`} A bigger down payment also shrinks the loan and total interest — but don't drain your emergency fund to get there.`,
       },
       {
         id: 'savingsGap',

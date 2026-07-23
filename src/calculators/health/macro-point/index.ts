@@ -124,6 +124,7 @@ const macroPointConfig: CalculatorConfig = {
         value: `${points.toFixed(1)} points`,
         highlight: true,
         color: category.color,
+        interpretation: `Lower is better — the score climbs with calories, saturated fat, and sugar, and protein pulls it back down. Use it to compare foods at a glance rather than as a hard limit; an occasional high-point food fits fine in an otherwise balanced diet.`,
       },
       {
         id: 'pointsCategory',

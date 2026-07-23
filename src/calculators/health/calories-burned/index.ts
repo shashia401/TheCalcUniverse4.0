@@ -83,6 +83,7 @@ const caloriesBurnedConfig: CalculatorConfig = {
         value: `${Math.round(calories)} kcal`,
         highlight: true,
         color: 'positive',
+        interpretation: `This is based on the activity's MET value and your bodyweight — heavier people and harder efforts burn more. It's a solid estimate, but real burn varies with intensity and fitness, and wrist trackers often overstate it by 10-20%. Worth remembering how quickly this can be eaten back.`,
       },
       {
         id: 'calPerMin',

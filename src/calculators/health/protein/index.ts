@@ -160,6 +160,7 @@ const proteinConfig: CalculatorConfig = {
         value: `${fmt(dailyMin)}–${fmt(dailyMax)} g/day · ${fmt(calFromProtein)} kcal`,
         highlight: true,
         color: 'positive',
+        interpretation: `The low end maintains muscle; the high end supports building it. Your body uses only about ${maxPerMeal}g per meal for muscle synthesis, so spreading intake across ~${mealsOptimal} meals beats one large dose. Protein also blunts hunger, which helps most on a calorie deficit.`,
       },
       {
         id: 'dailyTarget',
