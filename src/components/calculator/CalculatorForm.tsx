@@ -59,6 +59,13 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   const [results, setResults] = useState<CalculatorResult[]>([]);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  // Currency: symbol swap only (no FX conversion — the numbers are the same, a UK
+  // user just wants £ not $). Persists across calcs via localStorage.
+  // ponytail: symbol swap on "$" strings; add real FX only if users ask to convert.
+  const [cur, setCur] = useState(() => {
+    try { return localStorage.getItem('currency') || '$'; } catch { return '$'; }
+  });
+  const money = (s: string) => (cur === '$' || !s?.includes('$') ? s : s.split('$').join(cur));
 
   // Reflect the current inputs in the URL query string so a scenario is shareable.
   // Whitelisted to this calc's input ids; values capped at 64 chars. Canonical stays
@@ -86,7 +93,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
 
   const copyResults = () => {
     const text = results
-      .map((r) => `${r.label}: ${r.value}${r.unit ? ` ${r.unit}` : ''}`)
+      .map((r) => `${r.label}: ${money(r.value)}${r.unit ? ` ${r.unit}` : ''}`)
       .join('\n');
     navigator.clipboard
       .writeText(`${text}\n— calculated at ${window.location.href}`)
@@ -304,6 +311,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
 
   const activeShape = values.shape || config.shapeTabs?.[0]?.value;
   const stickyResult = results.find((r) => r.highlight) ?? results[0];
+  const isMoney = results.some((r) => r.value.includes('$'));
 
   return (
     <>
@@ -391,6 +399,23 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                 <button type="button" onClick={addScenario} title="Save this result to compare side by side" className={actionBtnCls}>
                   + Compare
                 </button>
+                {isMoney && (
+                  <select
+                    value={cur}
+                    onChange={(e) => { setCur(e.target.value); try { localStorage.setItem('currency', e.target.value); } catch {} }}
+                    aria-label="Currency symbol"
+                    title="Change currency symbol (no conversion)"
+                    className="text-xs font-medium text-[var(--brand-ink)] rounded border border-[var(--border-warm)] bg-transparent px-1.5 py-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+                  >
+                    <option value="$">$ USD</option>
+                    <option value="€">€ EUR</option>
+                    <option value="£">£ GBP</option>
+                    <option value="₹">₹ INR</option>
+                    <option value="¥">¥ JPY</option>
+                    <option value="C$">C$ CAD</option>
+                    <option value="A$">A$ AUD</option>
+                  </select>
+                )}
               </div>
             )}
           </div>
@@ -426,11 +451,11 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
               >
                 <p className={`text-xs font-medium mb-0.5 ${r.highlight ? 'text-white/90' : 'text-[var(--surface-text-muted)]'}`}>{r.label}</p>
                 <p className={`text-xl font-bold ${!r.highlight && r.color ? resultColorClasses[r.color] ?? '' : ''}`}>
-                  {r.value}
+                  {money(r.value)}
                   {r.unit && <span className={`ml-1 text-sm font-normal ${r.highlight ? 'text-white/90' : 'opacity-75'}`}>{r.unit}</span>}
                 </p>
                 {!compact && r.interpretation && (
-                  <p className={`text-xs mt-1 ${r.highlight ? 'text-white/90' : 'text-[var(--surface-text-secondary)]'}`}>{r.interpretation}</p>
+                  <p className={`text-xs mt-1 ${r.highlight ? 'text-white/90' : 'text-[var(--surface-text-secondary)]'}`}>{money(r.interpretation)}</p>
                 )}
               </div>
             ))}
@@ -546,7 +571,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                       const m = sc.results.find((x) => x.id === r.id);
                       return (
                         <td key={sc.id} className="p-2 text-right font-mono font-medium text-[var(--surface-text)]">
-                          {m ? `${m.value}${m.unit ? ` ${m.unit}` : ''}` : '—'}
+                          {m ? `${money(m.value)}${m.unit ? ` ${m.unit}` : ''}` : '—'}
                         </td>
                       );
                     })}
@@ -615,7 +640,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
             <p className="min-w-0 truncate text-sm">
               <span className="font-medium text-[var(--surface-text-muted)]">{stickyResult.label}: </span>
               <span className="font-bold text-[var(--surface-text)]">
-                {stickyResult.value}
+                {money(stickyResult.value)}
                 {stickyResult.unit ? ` ${stickyResult.unit}` : ''}
               </span>
             </p>
