@@ -190,6 +190,7 @@ const k401Config: CalculatorConfig = {
         value: fmtM(balanceNum),
         highlight: true,
         color: 'positive' as const,
+        interpretation: `You contribute ${fmtM(totalYourContribsNum)}${totalEmployerContribsNum > 0 ? `, your employer adds ${fmtM(totalEmployerContribsNum)} in match` : ''}, and compounding grows it by ${fmtM(growthReturns)}. ${employerMatch > 0 ? "The match is an instant return you can't beat elsewhere — contribute at least enough to capture all of it." : 'No employer match set — if yours offers one, getting the full match is the single highest-return move here.'}`,
       },
       {
         id: 'yourContribs',

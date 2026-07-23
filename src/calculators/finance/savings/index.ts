@@ -124,6 +124,9 @@ const savingsConfig: CalculatorConfig = {
           value: fmtK(finalBalance),
           highlight: true,
           color: 'positive' as const,
+          interpretation: totalPrincipal > 0
+            ? `You deposit $${fmtD(totalPrincipal)} over ${timeLabel}; interest adds another $${fmtD(totalInterest)} — ${((totalInterest / finalBalance) * 100).toFixed(0)}% of the balance. At ${(apy * 100).toFixed(2)}% APY, leaving money in longer compounds faster than topping it up.`
+            : undefined,
         },
         {
           id: 'totalPrincipal',
@@ -185,6 +188,9 @@ const savingsConfig: CalculatorConfig = {
           value: `$${fmtD(requiredMonthly)}/mo`,
           highlight: true,
           color: 'positive' as const,
+          interpretation: totalInterest > 0
+            ? `Save that each month and interest covers $${fmtD(totalInterest)} of your ${fmtK(goal)} goal — you only deposit $${fmtD(totalDeposited)} yourself.`
+            : `To hit ${fmtK(goal)} in ${months} months you deposit $${fmtD(totalDeposited)}; over this short horizon interest barely moves the needle.`,
         },
         {
           id: 'savingsGoal',

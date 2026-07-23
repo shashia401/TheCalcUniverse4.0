@@ -174,6 +174,9 @@ const mortgagePayoffConfig: CalculatorConfig = {
           value: payoffDate(newSim.months),
           highlight: true,
           color: 'positive' as const,
+          interpretation: interestSaved > 0
+            ? `Those extra payments clear the loan ${timeSavedLabel(monthsSaved)} early and save $${fmt(interestSaved)} in interest — prepaid principal skips all of its future interest, which is why early extra payments matter most.`
+            : undefined,
         },
         {
           id: 'timeSaved',

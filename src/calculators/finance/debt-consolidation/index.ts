@@ -168,6 +168,7 @@ const debtConsolidationConfig: CalculatorConfig = {
         value: `${fmtD(Math.abs(monthlySavings))}/mo`,
         highlight: true,
         color: monthlySavings >= 0 ? 'positive' as const : 'negative' as const,
+        interpretation: `${monthlySavings >= 0 ? `Frees up $${fmtD(Math.abs(monthlySavings))}/mo` : `Raises your payment by $${fmtD(Math.abs(monthlySavings))}/mo`}, but judge it on the lifetime line: after fees you ${lifetimeSaved >= 0 ? `save $${fmt(Math.abs(lifetimeSaved))} overall` : `pay $${fmt(Math.abs(lifetimeSaved))} MORE overall`}. A lower monthly payment stretched over a longer term can cost more — the rate alone doesn't tell you.`,
       },
       {
         id: 'lifetimeSaved',
