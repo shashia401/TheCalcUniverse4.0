@@ -92,6 +92,7 @@ const waterIntakeConfig: CalculatorConfig = {
         value: `${fmt(totalLiters)} liters (${fmt(totalOz)} oz)`,
         highlight: true,
         color: 'positive',
+        interpretation: `This target already accounts for your activity and climate — and about 20% of daily fluid comes from food, so you don't need to drink every ounce. Thirst and pale-yellow urine are better day-to-day guides than hitting an exact number.`,
       },
       {
         id: 'cups',

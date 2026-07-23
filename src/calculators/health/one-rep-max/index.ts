@@ -95,6 +95,7 @@ const oneRepMaxConfig: CalculatorConfig = {
         value: `${fmt(primary)} lbs`,
         highlight: true,
         color: 'positive',
+        interpretation: `Estimated from your ${cappedReps.toFixed(0)}-rep set — these formulas are most accurate at 5 reps or fewer and read higher than reality as reps climb. Use the percentage table below to set training loads, and never attempt a true max without a spotter and a full warm-up.`,
       },
       {
         id: 'maxBasedOn',

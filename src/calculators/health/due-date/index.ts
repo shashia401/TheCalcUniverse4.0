@@ -114,6 +114,7 @@ const dueDateConfig: CalculatorConfig = {
         value: fmtDate(dueDate),
         highlight: true,
         color: 'positive' as const,
+        interpretation: `This is a 40-week estimate from your last period (Naegele's rule) — only about 1 in 20 babies actually arrive on the exact date. Full term is anywhere from 37 to 42 weeks, so treat it as the middle of a window, not a deadline. An early ultrasound dating scan is more precise.`,
       },
       {
         id: 'gestationalAge',

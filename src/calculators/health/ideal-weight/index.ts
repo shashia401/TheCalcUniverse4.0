@@ -139,6 +139,7 @@ const idealWeightConfig: CalculatorConfig = {
         value: displayKg(avgIdeal),
         highlight: true,
         color: 'positive',
+        interpretation: `This averages four classic formulas (Devine, Robinson, Miller, Hamwi), which is why the range below spans several pounds rather than one exact number. They use height and sex only — not muscle or frame — so a lean, muscular person can sit above "ideal" and still be healthy. Treat it as a rough anchor.`,
       },
       {
         id: 'rangeIdeal',

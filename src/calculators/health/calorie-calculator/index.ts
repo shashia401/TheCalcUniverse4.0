@@ -238,6 +238,7 @@ const calorieConfig: CalculatorConfig = {
         value: `${fmt(bmr)} kcal/day`,
         highlight: true,
         color: 'neutral',
+        interpretation: `This is what your body burns at complete rest just to stay alive — about ${Math.round((bmr / tdee) * 100)}% of your total daily burn. It's the floor, not a diet target: eating below your BMR long-term is how people stall progress and lose muscle.`,
       },
       {
         id: 'tdee',
@@ -245,6 +246,7 @@ const calorieConfig: CalculatorConfig = {
         value: `${fmt(tdee)} kcal/day`,
         highlight: true,
         color: 'neutral',
+        interpretation: `Eat around this to maintain your weight, roughly 500 fewer to lose about a pound a week, or 500 more to gain. It's an estimate from population averages — track your weight for two weeks and adjust, since real metabolism varies by ±10%.`,
       },
       {
         id: 'bmi',

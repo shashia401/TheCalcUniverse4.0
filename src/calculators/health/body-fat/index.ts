@@ -281,6 +281,7 @@ const bodyFatConfig: CalculatorConfig = {
         value: `${fmt(bodyFatPct)}%`,
         highlight: true,
         color: category === 'Obese' ? 'negative' : category === 'Average' ? 'neutral' : 'positive',
+        interpretation: `A ${fmt(bodyFatPct)}% reading falls in the "${category}" range. Below about ${essentialFatMax}% is essential fat your body needs; athletes usually sit under ${athleticMax}%. The Navy tape method is an estimate — best for tracking change over time, less precise than a DEXA scan for any single reading.`,
       },
       {
         id: 'category',
