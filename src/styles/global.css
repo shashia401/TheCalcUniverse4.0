@@ -835,3 +835,18 @@ nav[aria-label='Breadcrumb'] a {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* Calc panels use default-Tailwind accent TEXT colors (text-orange-500,
+   text-blue-600…) that fail WCAG AA and break the no-default-palette rule.
+   One remap here fixes contrast in both themes for every panel at once — AA
+   darker shade on light, lighter on dark — instead of editing ~20 files.
+   ponytail: class-name remap; migrate panels to accent-* tokens if this grows. */
+.text-orange-500, .text-orange-600 { color: #c2410c; }
+.text-blue-500, .text-blue-600 { color: #1d4ed8; }
+.text-red-500 { color: #dc2626; }
+.text-emerald-500, .text-emerald-600 { color: #047857; }
+.dark .text-orange-500, .dark .text-orange-600 { color: #fb923c; }
+.dark .text-blue-500, .dark .text-blue-600 { color: #60a5fa; }
+.dark .text-red-500 { color: #f87171; }
+.dark .text-emerald-500, .dark .text-emerald-600 { color: #34d399; }
+.dark .text-slate-600 { color: #94a3b8; }

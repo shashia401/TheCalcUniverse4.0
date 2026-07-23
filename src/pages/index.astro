@@ -156,14 +156,16 @@ const schemas = [
                 <span class="live-badge"><span class="live-dot" aria-hidden="true"></span>Live</span>
                 <span class="text-slate-400"> — {demo.shortTitle ?? demo.title}, no sign-up</span>
               </p>
-              {/* Hero tool is above the fold — hydrate on load, not on scroll-into-view
-                  (client:visible's IntersectionObserver is unreliable for a display:contents
-                  island sitting at the top of the page).
+              {/* Hero tool is above the fold. client:idle (not client:load) hydrates
+                  once the main thread is idle — after LCP — so the interactive BMI
+                  island doesn't block first paint (homepage LCP was ~3.5s on client:load).
+                  Still reliable (unlike client:visible, whose IntersectionObserver is
+                  flaky for a display:contents island at the top of the page).
                   visibleInputIds: BMI Score only needs weight + height (sex/age don't
                   change it), so the hero card stays short and glanceable. The in-card
                   CTA deep-links to the full page carrying whatever was entered here. */}
               <CalculatorForm
-                client:load
+                client:idle
                 calculatorId={demo.id}
                 compact
                 visibleInputIds={['unit', 'weight', 'heightFt', 'heightIn', 'heightCm']}
