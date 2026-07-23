@@ -1,0 +1,48 @@
+---
+// Collections index — lists the curated bundles.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { collections } from '../../lib/collections';
+import { getCalculatorById } from '../../lib/registry';
+import { SITE_NAME } from '../../config/constants';
+
+const list = collections.map((c) => ({
+  ...c,
+  count: c.calcIds.map((id) => getCalculatorById(id)).filter(Boolean).length,
+}));
+---
+
+<BaseLayout
+  title="Calculator collections — curated for life's big decisions"
+  description="Hand-picked calculator bundles for buying a home, starting a business, planning retirement, and more — the tools you need, grouped by the decision you're making."
+  canonicalPath="/collections/"
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[900px] mx-auto px-4 md:px-10 py-10">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-ink)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>Collections</span>
+      </nav>
+
+      <h1 class="text-3xl font-bold text-[var(--surface-text)] mb-2">Collections</h1>
+      <p class="text-[var(--surface-text-secondary)] mb-8 max-w-2xl">
+        The calculators you need, grouped by the decision you're making — not by category.
+      </p>
+
+      <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4 list-none p-0">
+        {list.map((c) => (
+          <li>
+            <a
+              href={`/collections/${c.slug}/`}
+              class="block h-full p-5 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--brand-default)] hover:shadow-card-hover motion-reduce:transform-none motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+            >
+              <p class="font-semibold text-[var(--surface-text)]">{c.title}</p>
+              <p class="text-sm text-[var(--surface-text-secondary)] mt-1 leading-relaxed">{c.blurb}</p>
+              <p class="text-tiny font-mono text-[var(--surface-text-muted)] mt-2">{c.count} calculators →</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </main>
+</BaseLayout>

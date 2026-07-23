@@ -1,0 +1,70 @@
+---
+// One curated collection — reuses the category card grid pattern.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CategoryIcon from '../../components/CategoryIcon.astro';
+import { collections } from '../../lib/collections';
+import { getCalculatorById } from '../../lib/registry';
+import { accentFor } from '../../lib/categoryAccent';
+import { SITE_NAME, BASE_URL } from '../../config/constants';
+
+export async function getStaticPaths() {
+  return collections.map((c) => ({ params: { slug: c.slug }, props: { collection: c } }));
+}
+
+const { collection } = Astro.props;
+const calcs = collection.calcIds.map((id) => getCalculatorById(id)).filter((e) => e !== undefined);
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+    { '@type': 'ListItem', position: 2, name: 'Collections', item: `${BASE_URL}/collections/` },
+    { '@type': 'ListItem', position: 3, name: collection.title, item: `${BASE_URL}/collections/${collection.slug}/` },
+  ],
+};
+---
+
+<BaseLayout
+  title={`${collection.title} — ${calcs.length} calculators`}
+  description={collection.blurb}
+  canonicalPath={`/collections/${collection.slug}/`}
+  schemas={[breadcrumb]}
+>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-8">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-ink)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <a href="/collections/" class="text-[var(--brand-ink)] hover:underline">Collections</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>{collection.title}</span>
+      </nav>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-[var(--surface-text)] mb-2">{collection.title}</h1>
+      <p class="text-[var(--surface-text-secondary)] mb-8 max-w-2xl">{collection.blurb}</p>
+
+      <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none p-0">
+        {calcs.map((calc) => {
+          const a = accentFor(calc!.categorySlug);
+          return (
+            <li>
+              <a
+                href={`/${calc!.categorySlug}/${calc!.id}/`}
+                class={`group flex gap-4 h-full p-5 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-card-hover motion-reduce:transform-none motion-reduce:transition-none ${a.border} focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]`}
+              >
+                <span class={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${a.tint} ${a.text}`}>
+                  <CategoryIcon slug={calc!.categorySlug} size={22} />
+                </span>
+                <span class="min-w-0">
+                  <span class="block font-semibold text-[var(--surface-text)]">{calc!.shortTitle ?? calc!.title}</span>
+                  <span class="block text-sm text-[var(--surface-text-secondary)] mt-1 leading-relaxed">{calc!.description.slice(0, 110)}{calc!.description.length > 110 ? '…' : ''}</span>
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </main>
+</BaseLayout>
