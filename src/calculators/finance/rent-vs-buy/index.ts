@@ -309,6 +309,7 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
         value: breakEvenDisplay,
         highlight: true,
         color: 'neutral' as const,
+        interpretation: `Buying carries big upfront costs (down payment, closing) that renting doesn't, so it only wins if you stay long enough to spread them out. ${breakEvenYear > 1 ? `Past ${breakEvenYear} years buying pulls ahead; sell sooner and renting likely costs less.` : 'Here buying comes out ahead quickly.'} This assumes steady rent and home-price growth — shift either and the break-even moves.`,
       },
 
       // 2. Verdict at selected horizon

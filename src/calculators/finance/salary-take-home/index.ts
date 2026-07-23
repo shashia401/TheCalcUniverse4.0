@@ -319,6 +319,7 @@ const salaryTakeHomeConfig: CalculatorConfig = {
         value: `$${fmt(netAnnual)}`,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `You keep about ${(100 - effectiveTaxRate).toFixed(0)}% of gross; $${fmt(totalTax)} goes to taxes and deductions. This uses standard brackets and doesn't include credits (child, education) or itemized deductions, which can raise your real take-home — so treat it as a baseline.`,
       },
       {
         id: 'perPaycheck',

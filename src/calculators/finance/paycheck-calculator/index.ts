@@ -265,6 +265,7 @@ const paycheckConfig: CalculatorConfig = {
         value: `$${fmt(netPerPaycheck)}`,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `You take home about ${(100 - totalEffectiveRate.toNumber()).toFixed(0)}% of gross — the rest is federal, state, and FICA tax plus any deductions. Withholding is an estimate the IRS trues up at filing; if you consistently owe or get a big refund, adjust your W-4 rather than waiting for tax season.`,
       },
       {
         id: 'netAnnual',

@@ -214,6 +214,7 @@ const amortizationConfig: CalculatorConfig = {
         value: `$${fmt(basePayment)}`,
         highlight: true,
         color: 'neutral' as const,
+        interpretation: `The payment stays level, but its split doesn't: early on most goes to interest, and only near the end does most go to principal. Over the full schedule you'll pay $${fmt(totalInterestStandard)} in interest — extra payments applied to principal in the early years cut that the most.`,
       },
       {
         id: 'totalInterestStandard',
