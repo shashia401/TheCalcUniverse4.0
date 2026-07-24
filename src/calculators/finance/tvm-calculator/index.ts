@@ -243,6 +243,7 @@ const tvmConfig: CalculatorConfig = {
         value: displayValue,
         highlight: true,
         color: solveFor === 'RATE' || solved >= 0 ? 'positive' : 'negative',
+        interpretation: `This solves the standard time-value-of-money equation for the one unknown you left blank — every other TVM calculator (loan, savings, annuity) is really this same formula with different inputs fixed. ${timing === 'begin' ? 'Payments here occur at the start of each period (annuity due), which slightly changes the math from the more common end-of-period convention.' : 'Payments occur at the end of each period (ordinary annuity), the standard convention for most loans and savings plans.'}`,
       },
       {
         id: 'formula',

@@ -153,6 +153,7 @@ const socialSecurityConfig: CalculatorConfig = {
         value: `${fmt(benefitAtChosen)}/mo`,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `Claiming before your full retirement age (${fra}) locks in a permanently reduced benefit for life; waiting past it — up to 70 — permanently increases it by about 8% per year. There's no single right age: it depends on health, other income, and whether you need the cash sooner rather than maximizing the monthly amount.`,
       },
       {
         id: 'annual',

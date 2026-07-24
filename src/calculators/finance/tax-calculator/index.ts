@@ -167,6 +167,7 @@ const taxCalculatorConfig: CalculatorConfig = {
         value: fmtMoney(totalTax),
         highlight: true,
         color: 'negative',
+        interpretation: `Your marginal rate — the rate on your last dollar earned — is ${marginalRate}%, but this total reflects the effective rate below, which is always lower because only income above each bracket threshold is taxed at that bracket's rate. This is federal tax only; state income tax, if applicable, is separate.`,
       },
       {
         id: 'effectiveRate',

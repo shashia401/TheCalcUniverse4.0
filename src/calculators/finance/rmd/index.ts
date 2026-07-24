@@ -146,6 +146,7 @@ const rmdConfig: CalculatorConfig = {
         value: fmtDollar(rmd),
         highlight: true,
         color: 'positive',
+        interpretation: `This is a mandatory withdrawal, not optional income — the IRS taxes it as ordinary income whether you need the cash or not, and missing it triggers a 25% penalty (${fmtDollar(penalty25)} here) on the shortfall. It's ${rmdPct.toFixed(1)}% of your balance this year; the percentage rises each year as the distribution period shortens.`,
       },
       {
         id: 'distributionPeriod',

@@ -123,6 +123,7 @@ const salaryConfig: CalculatorConfig = {
         value: heroValue,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `This converts your ${freq} rate assuming standard full-time hours — actual pay varies with overtime, unpaid leave, and how many pay periods actually land in a given year. Estimated take-home after typical taxes is shown separately below; the figure above is gross, before withholding.`,
       },
       {
         id: 'hourly',

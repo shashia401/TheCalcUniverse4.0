@@ -134,6 +134,7 @@ const rothIRAConfig: CalculatorConfig = {
         value: fmt(taxFreeTotal),
         highlight: true,
         color: 'positive' as const,
+        interpretation: `Every dollar of this — including ${fmt(totalEarnings)} in growth — comes out with zero tax owed, since you already paid tax on contributions going in. That's worth an estimated ${fmt(taxSavingsVsTraditional)} versus a Traditional account taxed at your assumed ${(retirementTaxRate * 100).toFixed(0)}% retirement rate. Roth wins most clearly when you expect to be in a similar or higher bracket later.`,
       },
     ];
 

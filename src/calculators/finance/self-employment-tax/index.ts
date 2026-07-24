@@ -86,6 +86,7 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
         value: `$${fmt(secaTax)}`,
         highlight: true,
         color: 'negative' as const,
+        interpretation: `This covers both halves of Social Security and Medicare that a W-2 employer would normally split with you — as a self-employed filer, you owe all of it. Half of this amount is deductible on your income tax return, which softens the real cost; set this aside quarterly rather than facing it as one bill in April.`,
       },
       {
         id: 'socialSecurityPortion',

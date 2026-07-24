@@ -108,6 +108,9 @@ const swpConfig: CalculatorConfig = {
         value: fmt(endingValue),
         highlight: true,
         color: endingValue > 0 ? 'positive' : 'negative',
+        interpretation: monthsLasted >= targetMonths
+          ? `Your withdrawal rate stayed below the assumed growth rate, so the corpus outlasted the withdrawal period and still has value left. This assumes a steady return every month — real markets don't move in a straight line, so a market downturn early in withdrawals can deplete a fund faster than this model shows.`
+          : `Withdrawals outpaced growth and the fund ran out after ${monthsLasted} of the ${targetMonths} months requested. Lowering the monthly withdrawal or extending the time horizon are the two levers that fix this.`,
       },
       {
         id: 'totalInvested',
