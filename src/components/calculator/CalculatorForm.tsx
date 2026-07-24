@@ -5,13 +5,113 @@
 // The config is loaded here via the registry's dynamic import, which Vite splits
 // into a per-calculator chunk — a page only ever downloads its own logic.
 
-import { useEffect, useRef, useState, type HTMLAttributes } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes } from 'react';
 import { createPortal } from 'react-dom';
 import type { CalculatorConfig, CalculatorResult, InputField } from '../../types/calculator';
 import { getCalculatorById } from '../../calculators/registry/index';
 import MiniAreaChart from './MiniAreaChart';
 import MiniDonut from './MiniDonut';
 import MiniGauge from './MiniGauge';
+
+// Thousands-separator grouping for number inputs, keyed off each input's own
+// currency `prefix` — ₹ gets Indian lakh/crore grouping (1,00,00,000), every
+// other currency (or none) gets Western 3-digit grouping (10,000,000). Not
+// tied to the results-panel currency dropdown: that only exists for calcs
+// whose results already contain "$", so it wouldn't apply to e.g. SIP's
+// fixed-INR inputs.
+const groupDigits = (raw: string, prefix?: string): string => {
+  if (!raw) return '';
+  const negative = raw.startsWith('-');
+  const unsigned = negative ? raw.slice(1) : raw;
+  const dotIdx = unsigned.indexOf('.');
+  const intPart = dotIdx === -1 ? unsigned : unsigned.slice(0, dotIdx);
+  const decPart = dotIdx === -1 ? '' : '.' + unsigned.slice(dotIdx + 1);
+  let groupedInt: string;
+  if (prefix === '₹' && intPart.length > 3) {
+    const last3 = intPart.slice(-3);
+    const rest = intPart.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    groupedInt = `${rest},${last3}`;
+  } else {
+    groupedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  return `${negative ? '-' : ''}${groupedInt}${decPart}`;
+};
+
+// Keep digits, at most one leading '-', at most one '.' — strips grouping
+// commas and anything else a paste/typo might introduce.
+const sanitizeNumeric = (s: string): string => {
+  const negative = s.trim().startsWith('-');
+  let cleaned = s.replace(/[^0-9.]/g, '');
+  const firstDot = cleaned.indexOf('.');
+  if (firstDot !== -1) {
+    cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+  }
+  return (negative ? '-' : '') + cleaned;
+};
+
+// A plain rAF-timed cursor restore races React's own re-render of a controlled
+// input's value — React can reset the caret to the end on commit regardless
+// of what a later rAF callback sets. useLayoutEffect keyed to the displayed
+// (grouped) string is the reliable fix: it runs synchronously right after
+// THIS component's DOM commit, so there's no window for React to win the race.
+function GroupedNumberInput({
+  id,
+  rawValue,
+  prefix,
+  placeholder,
+  inputMode,
+  className,
+  onRawChange,
+}: {
+  id: string;
+  rawValue: string;
+  prefix?: string;
+  placeholder?: string;
+  inputMode?: HTMLAttributes<HTMLInputElement>['inputMode'];
+  className: string;
+  onRawChange: (raw: string) => void;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const pendingCursorRef = useRef<number | null>(null);
+  const grouped = groupDigits(rawValue, prefix);
+
+  useLayoutEffect(() => {
+    if (pendingCursorRef.current !== null && ref.current) {
+      ref.current.setSelectionRange(pendingCursorRef.current, pendingCursorRef.current);
+      pendingCursorRef.current = null;
+    }
+  }, [grouped]);
+
+  return (
+    <input
+      ref={ref}
+      id={id}
+      type="text"
+      inputMode={inputMode ?? 'decimal'}
+      value={grouped}
+      placeholder={placeholder}
+      onChange={(e) => {
+        const el = e.target;
+        const cursorPos = el.selectionStart ?? el.value.length;
+        const digitsBeforeCursor = (el.value.slice(0, cursorPos).match(/[\d.]/g) || []).length;
+        const nextRaw = sanitizeNumeric(el.value);
+        const nextGrouped = groupDigits(nextRaw, prefix);
+        let count = 0;
+        let newPos = nextGrouped.length;
+        for (let i = 0; i < nextGrouped.length; i++) {
+          if (/[\d.]/.test(nextGrouped[i])) count++;
+          if (count === digitsBeforeCursor) {
+            newPos = i + 1;
+            break;
+          }
+        }
+        pendingCursorRef.current = newPos;
+        onRawChange(nextRaw);
+      }}
+      className={className}
+    />
+  );
+}
 
 interface Props {
   calculatorId: string;
@@ -298,10 +398,26 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
         />
       );
     }
+    if (input.type === 'number') {
+      // Comma-grouped while typing (Indian lakh/crore for ₹, Western
+      // thousands otherwise) — plain type="number" can't display grouping
+      // separators at all, so this is a text input with manual formatting.
+      return (
+        <GroupedNumberInput
+          id={input.id}
+          rawValue={values[input.id] ?? ''}
+          prefix={input.prefix}
+          placeholder={input.placeholder}
+          inputMode={input.inputMode as HTMLAttributes<HTMLInputElement>['inputMode']}
+          className={fieldClasses}
+          onRawChange={(raw) => handleChange(input.id, raw)}
+        />
+      );
+    }
     return (
       <input
         id={input.id}
-        type={input.type === 'number' || input.type === 'percentage' ? 'number' : input.type === 'date' ? 'date' : 'text'}
+        type={input.type === 'percentage' ? 'number' : input.type === 'date' ? 'date' : 'text'}
         inputMode={input.inputMode as HTMLAttributes<HTMLInputElement>['inputMode']}
         value={values[input.id] ?? ''}
         min={input.min}

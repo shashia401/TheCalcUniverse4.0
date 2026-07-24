@@ -125,6 +125,7 @@ const fhaLoanConfig: CalculatorConfig = {
         highlight: true,
         color: 'neutral',
         interpretation: `This includes $${fmt(monthlyMIP)}/mo in mortgage insurance premium (MIP), which FHA loans require regardless of down payment size. MIP runs for ${mipDuration.toLowerCase()} here — ${downPct.lt(0.1) ? 'putting down at least 10% would let it drop off after 11 years instead of following you the whole loan' : 'refinancing to a conventional loan once you reach 20% equity is the usual way to remove it early'}.`,
+      },
       {
         id: 'monthlyPI',
         value: `$${fmt(monthlyPI)}`,
