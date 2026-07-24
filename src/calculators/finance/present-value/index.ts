@@ -108,6 +108,7 @@ const presentValueConfig: CalculatorConfig = {
         value: `$${fmt(presentValue)}`,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `This is how much you'd need today, at your assumed discount rate, to grow into the future amount — the flip side of compound interest. A higher discount rate lowers this number, since it assumes your money could earn more elsewhere; use a rate that reflects a realistic alternative investment, not a wish.`,
       },
       {
         id: 'discountAmountResult',

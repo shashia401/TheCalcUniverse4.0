@@ -285,6 +285,7 @@ const irrCalculatorConfig: CalculatorConfig = {
         value: `${(irr * 100).toFixed(2)}%`,
         highlight: true,
         color: (irr > 0.15 ? 'positive' : irr > 0 ? 'neutral' : 'negative') as 'positive' | 'neutral' | 'negative',
+        interpretation: `IRR is the discount rate at which this project's cash flows break even — compare it to your required return or cost of capital, not to zero. A high IRR on a tiny investment can matter less than a modest IRR on a large one, so weigh it alongside the payback period and total cash generated, not alone.`,
       });
     } else {
       results.push({

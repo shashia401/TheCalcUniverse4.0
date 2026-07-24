@@ -119,7 +119,7 @@ const repaymentConfig: CalculatorConfig = {
       results.push(
         { id: 'monthlyPayment', label: 'Monthly Payment', value: `$${fmt(monthlyPayment)}`, highlight: true, color: 'positive' as const },
         { id: 'monthlyWithExtra', label: 'Monthly Payment with Extra', value: `$${fmt(totalExtraPmt)}`, color: 'positive' as const },
-        { id: 'interestSaved', label: 'Interest Saved', value: `$${fmtLarge(interestSaved)}`, highlight: true, color: 'positive' as const },
+        { id: 'interestSaved', label: 'Interest Saved', value: `$${fmtLarge(interestSaved)}`, highlight: true, color: 'positive' as const, interpretation: `Extra payments go straight to principal, so this saving compounds — every dollar paid early stops accruing interest for the rest of the loan. Paying extra earliest in the term saves the most; the same extra dollar late in the loan barely moves the needle.` },
         { id: 'timeSaved', label: 'Time Saved', value: timeSavedStr, highlight: true, color: 'positive' as const },
         { id: 'newPayoffTime', label: 'New Payoff Time', value: `${Math.floor(extraMonths / 12)}yr ${extraMonths % 12}mo (${extraMonths} payments)`, color: 'neutral' as const },
         { id: 'totalInterest', label: 'Total Interest (Standard)', value: `$${fmtLarge(totalInterest)}`, color: 'negative' as const },

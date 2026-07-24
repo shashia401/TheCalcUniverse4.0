@@ -147,6 +147,7 @@ const pensionConfig: CalculatorConfig = {
         value: `$${fmt(finalBalance)}`,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `In today's purchasing power, that's about $${fmt(inflationAdjusted)} — inflation quietly erodes a number this far out, so the adjusted figure is the more honest one to plan spending against. At a 4% withdrawal rate this balance supports roughly $${fmt(monthlyPayoutAdj4pct)}/mo in real terms.`,
       },
       {
         id: 'projectedBalance',

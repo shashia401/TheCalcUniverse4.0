@@ -165,7 +165,7 @@ const marriageTaxConfig: CalculatorConfig = {
 
     return [
       // Primary SEO row: side-by-side comparison exact format
-      { id: 'hero', label: `If Single: ${singleFmt} | If Married: ${marriedFmt} | Result: ${resultFmt}`, value: resultFmt, highlight: true, color: heroColor },
+      { id: 'hero', label: `If Single: ${singleFmt} | If Married: ${marriedFmt} | Result: ${resultFmt}`, value: resultFmt, highlight: true, color: heroColor, interpretation: `A "penalty" or "bonus" shows up when combining incomes pushes you into different tax brackets than filing separately would — it's most common when both partners earn similar, high incomes. This compares married-filing-jointly against two single filers; married-filing-separately is rarely better but exists as an option in specific situations (e.g., income-driven student loan repayment).` },
       { id: 'unmarriedTotal', label: 'If UNMARRIED — Combined Federal Tax (filing 2 singles)', value: singleFmt, color: 'neutral' as const },
       { id: 'p1Tax', label: `   • Partner 1 (income $${fmt(i1)}, deduction $${fmt(ded1)})`, value: `$${fmt(tax1)}`, color: 'neutral' as const },
       { id: 'p2Tax', label: `   • Partner 2 (income $${fmt(i2)}, deduction $${fmt(ded2)})`, value: `$${fmt(tax2)}`, color: 'neutral' as const },

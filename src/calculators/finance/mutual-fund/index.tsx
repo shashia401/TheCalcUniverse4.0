@@ -200,7 +200,7 @@ const mutualFundConfig: CalculatorConfig = {
     const earningsWith = withFees - totalContributions;
 
     return [
-      { id: 'withFees', label: `Projected Balance (${(expenseRatio * 100).toFixed(2)}% Expense Ratio)`, value: fmtCurrency(withFees), highlight: true, color: 'positive' as const },
+      { id: 'withFees', label: `Projected Balance (${(expenseRatio * 100).toFixed(2)}% Expense Ratio)`, value: fmtCurrency(withFees), highlight: true, color: 'positive' as const, interpretation: `That ${(expenseRatio * 100).toFixed(2)}% annual fee costs you ${fmtCurrency(feeImpact)} over this period — ${feeImpactPct.toFixed(1)}% of what you'd otherwise have. Fees compound too, quietly, which is why even a "small" 1% difference in expense ratio can add up to a meaningful chunk of your balance over decades.` },
       { id: 'withoutFees', label: 'Projected Balance (No Fees)', value: fmtCurrency(withoutFees), color: 'neutral' as const },
       { id: 'feeImpact', label: 'Total Cost of Fees', value: `${fmtCurrency(feeImpact)} (${feeImpactPct.toFixed(1)}% of balance)`, color: 'negative' as const },
       { id: 'totalContributions', label: 'Total Contributions', value: fmtCurrency(totalContributions), color: 'neutral' as const },

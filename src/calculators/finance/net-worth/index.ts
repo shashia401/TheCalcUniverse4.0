@@ -140,6 +140,9 @@ const netWorthConfig: CalculatorConfig = {
         value: `${netWorth >= 0 ? '' : '-'}$${fmt(netWorth)}`,
         highlight: true,
         color: netWorth >= 0 ? 'positive' : 'negative',
+        interpretation: netWorth >= 0
+          ? `This is a snapshot, not a score — a young household with student debt often has negative net worth despite a strong trajectory. Debt-to-asset ratio here is ${debtToAssetRatio.toFixed(0)}%; the trend over time (tracked quarterly or annually) matters more than any single number.`
+          : `A negative reading is common early in adulthood or after a major purchase — it's not a red flag on its own. What matters is the trend: track this every few months and watch whether debt is shrinking relative to assets.`,
       },
       {
         id: 'totalAssets',

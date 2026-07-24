@@ -101,6 +101,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
           value: `$${fmt(M)}`,
           highlight: true,
           color: 'neutral' as const,
+          interpretation: `Over the full term you'll pay $${fmt(totalInterest)} in interest on top of the $${fmt(P)} borrowed. This uses a fixed rate for the whole term — if your actual loan is variable-rate, the real payment can shift as rates change.`,
         },
         {
           id: 'totalInterest',

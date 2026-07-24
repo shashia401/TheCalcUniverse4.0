@@ -125,6 +125,7 @@ const paybackPeriodConfig: CalculatorConfig = {
           : `${fmt(simplePaybackYears)} years`,
         highlight: true,
         color: simplePaybackYears <= 3 ? 'positive' : simplePaybackYears <= 5 ? 'neutral' : 'negative',
+        interpretation: `Simple payback ignores the time value of money — it treats a dollar earned in year 5 the same as one earned today. It's a quick screening tool for comparing projects, but for a real investment decision pair it with IRR or NPV, which do account for discounting.`,
       },
       {
         id: 'annualCashFlowResult',
