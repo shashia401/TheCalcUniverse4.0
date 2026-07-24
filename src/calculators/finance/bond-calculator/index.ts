@@ -127,6 +127,7 @@ const bondCalculatorConfig: CalculatorConfig = {
         label: 'Yield to Maturity (YTM)',
         value: fmtPct(ytm),
         highlight: true,
+        interpretation: `YTM is the total return if you hold to maturity and reinvest every coupon at this same rate — that reinvestment assumption is the weak link, since real rates move. The bond is trading at a ${isDiscount ? 'discount' : isPremium ? 'premium' : 'par'} to face value, which is${isDiscount ? " why YTM runs above the coupon rate" : isPremium ? " why YTM runs below the coupon rate" : ' consistent with YTM matching the coupon rate'}.`,
         color: ytm > couponRate ? 'positive' as const : ytm < couponRate ? 'negative' as const : 'neutral' as const,
       },
       {

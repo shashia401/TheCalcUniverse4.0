@@ -92,7 +92,7 @@ const averageReturnConfig: CalculatorConfig = {
       const growthMultiple = end / start;
 
       return [
-        { id: 'cagr', label: 'Compound Annual Growth Rate (CAGR)', value: fmtPct(cagrRate), highlight: true, color: cagrRate > 0 ? 'positive' as const : 'negative' as const },
+        { id: 'cagr', label: 'Compound Annual Growth Rate (CAGR)', value: fmtPct(cagrRate), highlight: true, color: cagrRate > 0 ? 'positive' as const : 'negative' as const, interpretation: `CAGR smooths the whole period into one steady annual rate — useful for comparing investments, but it hides the ride. The simple average (${fmtPct(arithmeticAvg)}) counts each year equally and can overstate returns when growth is volatile; CAGR is almost always the more honest number.` },
         { id: 'simpleAvg', label: 'Simple Average Return (Annual)', value: fmtPct(arithmeticAvg), color: 'neutral' as const },
         { id: 'totalReturn', label: 'Total Return Over Period', value: fmtPct(simpleReturn), color: 'neutral' as const },
         { id: 'growthMultiple', label: 'Growth Multiple', value: `${growthMultiple.toFixed(2)}x`, color: 'positive' as const },

@@ -330,6 +330,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
       {
         id: 'totalTax',
         label: 'Total Tax Liability',
+        interpretation: `You held this asset ${isShortTerm ? 'under a year, so the gain is taxed as ordinary income at your marginal rate' : 'over a year, which qualifies for the lower long-term capital gains rate'} — that's an effective rate of ${effectiveRate.toFixed(1)}%. Waiting past the one-year mark before selling can meaningfully cut this bill if you're close to the line.`,
         value: fmtMoney(totalTax),
         highlight: true,
         color: 'negative',

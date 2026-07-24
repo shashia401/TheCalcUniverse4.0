@@ -145,7 +145,7 @@ const annuityPayoutConfig: CalculatorConfig = {
       const totalInterestEarned = new Decimal(totalPayout).minus(principal).toNumber();
 
       results.push(
-        { id: 'pmt', label: `${frequency === 'monthly' ? 'Monthly' : 'Annual'} Payout Amount`, value: `$${fmtD(pmt)}${freqLabel}`, highlight: true, color: 'positive' as const },
+        { id: 'pmt', label: `${frequency === 'monthly' ? 'Monthly' : 'Annual'} Payout Amount`, value: `$${fmtD(pmt)}${freqLabel}`, highlight: true, color: 'positive' as const, interpretation: `Over ${desiredYears} years you'll receive $${fmtK(totalPayout)} total — $${fmtK(totalInterestEarned)} of that is interest on top of your principal. This assumes a fixed rate for the full payout period; a variable-rate annuity could pay more or less.` },
         { id: 'duration', label: 'Payout Duration', value: `${desiredYears} years (${n.toFixed(0)} ${frequency === 'monthly' ? 'monthly payments' : 'annual payments'})`, color: 'neutral' as const },
         { id: 'totalPayout', label: 'Total Amount Received', value: fmtK(totalPayout), color: 'positive' as const },
         { id: 'principal', label: 'Your Original Principal', value: fmtK(principal), color: 'neutral' as const },

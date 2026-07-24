@@ -211,6 +211,7 @@ const fireCalculatorConfig: CalculatorConfig = {
         value: fmt(fireNumber),
         highlight: true,
         color: 'positive',
+        interpretation: `This is built on the 4% withdrawal rule — historically a portfolio this size can sustain your annual spending indefinitely, adjusted for inflation. It assumes a diversified portfolio and doesn't account for sequence-of-returns risk (a bad market right after you retire); many ${fireTypeLabels[fireType] || 'FIRE'} planners treat 4% as a starting point and stay flexible on spending in down years.`,
       },
       {
         id: 'fireAge',

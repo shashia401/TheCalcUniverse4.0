@@ -163,7 +163,7 @@ const commissionConfig: CalculatorConfig = {
     // ─── Helper to append results common to all structures ───
     function buildResults(extraResults: CalculatorResult[]): CalculatorResult[] {
       const results: CalculatorResult[] = [
-        { id: 'net', label: 'Your Net Commission', value: `$${fmt(gross)}`, highlight: true, color: 'positive' as const },
+        { id: 'net', label: 'Your Net Commission', value: `$${fmt(gross)}`, highlight: true, color: 'positive' as const, interpretation: `This is gross commission before income tax withholding — self-employed or 1099 commission isn't taxed at the source, so set aside a portion for quarterly estimated taxes if that applies to you.${baseSalary > 0 ? ' Your total comp below adds this to your base salary.' : ''}` },
         { id: 'sale', label: 'Sale Amount', value: `$${fmt(sale)}`, color: 'neutral' as const },
         ...extraResults,
       ];

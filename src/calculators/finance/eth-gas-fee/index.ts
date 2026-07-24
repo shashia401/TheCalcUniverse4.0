@@ -84,7 +84,7 @@ const ethGasFeeConfig: CalculatorConfig = {
       { id: 'gasPriceGwei', label: 'Gas Price', value: `${gasPriceGwei.toFixed(1)} Gwei`, color: 'neutral' },
       { id: 'gasLimit', label: 'Gas Limit', value: `${gasLimit.toLocaleString(undefined)} units`, color: 'neutral' },
       { id: 'ethPrice', label: 'ETH Price', value: `$${ethPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, color: 'neutral' },
-      { id: 'gasFeeEth', label: 'Gas Fee (ETH)', value: fmtEth(feeEth), highlight: true, color: 'positive' },
+      { id: 'gasFeeEth', label: 'Gas Fee (ETH)', value: fmtEth(feeEth), highlight: true, color: 'positive', interpretation: `Gas price swings by time of day and network congestion — this estimate can range from $${fmtUsd(slowFeeUsd).replace('$', '')} at low priority to $${fmtUsd(fastFeeUsd).replace('$', '')} for faster confirmation. It's a live network fee, not a platform fee, so it applies no matter which wallet or app you use.` },
       { id: 'gasFeeUsd', label: 'Gas Fee (USD)', value: fmtUsd(feeUsd), highlight: true, color: 'positive' },
       { id: 'gasFeeUsdSlow', label: 'Slow Fee (USD)', value: fmtUsd(slowFeeUsd), color: 'neutral' },
       { id: 'gasFeeUsdFast', label: 'Fast Fee (USD)', value: fmtUsd(fastFeeUsd), color: 'neutral' },

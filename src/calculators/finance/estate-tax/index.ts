@@ -206,6 +206,9 @@ const estateTaxConfig: CalculatorConfig = {
       label: 'Total Estimated Estate Tax',
       value: totalTax > 0 ? fmtM(totalTax) : '$0 — Estate is below exemption',
       highlight: true,
+      interpretation: totalTax > 0
+        ? `This is due within 9 months of death, which can force a quick sale of illiquid assets (a business, real estate) if there's no liquidity plan. Trusts, gifting strategies, and life insurance are common ways to reduce or pre-fund this — worth a conversation with an estate attorney well before it's owed.`
+        : `Your estate falls below the exemption threshold, so no federal estate tax is owed at these numbers. Exemptions are set by current law and can change — revisit this periodically, especially after major asset growth.`,
       color: totalTax > 0 ? 'negative' as const : 'positive' as const,
     });
     results.push({

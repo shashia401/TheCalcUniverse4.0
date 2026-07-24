@@ -288,6 +288,9 @@ const budgetCalculatorConfig: CalculatorConfig = {
         value: `${leftover >= 0 ? '' : '-'}$${fmt(leftoverAbs)}`,
         highlight: true,
         color: leftover >= 0 ? 'positive' : 'negative',
+        interpretation: leftover >= 0
+          ? `You're spending ${needsPct.toFixed(0)}% on needs, ${wantsPct.toFixed(0)}% on wants, and saving ${savingsPct.toFixed(0)}% — compare that to the 50/30/20 guideline below to see where you're ahead or behind.`
+          : `You're spending more than you earn — needs (${needsPct.toFixed(0)}%) and wants (${wantsPct.toFixed(0)}%) are eating past 100% of income. Wants are usually the fastest lever to cut; needs take longer-term changes.`,
       },
       {
         id: 'totalSpendingResult',

@@ -217,7 +217,7 @@ const collegeCostConfig: CalculatorConfig = {
     }
 
     results.push(
-      { id: 'projectedCost', label: `Projected Cost of ${collegeYears}-Year Degree`, value: fmtLarge(totalProjectedCostNum), highlight: true, color: 'negative' as const },
+      { id: 'projectedCost', label: `Projected Cost of ${collegeYears}-Year Degree`, value: fmtLarge(totalProjectedCostNum), highlight: true, color: 'negative' as const, interpretation: `This inflates today's tuition forward to when your student actually enrolls — costs climb faster than general inflation, which is why the number looks larger than sticker price today. Your current savings plan covers about ${pctFunded.toFixed(0)}% of it; the gap below is what more monthly saving (or aid/loans) needs to close.` },
       { id: 'currentAnnualCost', label: `Current ${INSTITUTION_LABELS[institutionType]} Annual Cost`, value: fmtLarge(annualCostNow), color: 'neutral' as const },
       { id: 'costAtStart', label: `Annual Cost When College Starts (${Math.round(yearsUntilCollege)} yrs)`, value: fmtLarge(yearByYearCost[0] || 0), color: 'neutral' as const },
       { id: 'savingsAtCollege', label: 'Projected Savings at College Start', value: fmtLarge(savingsAtCollege), color: 'positive' as const },

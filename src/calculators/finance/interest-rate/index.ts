@@ -113,6 +113,9 @@ const interestRateConfig: CalculatorConfig = {
         value: pct(rate),
         highlight: true,
         color: 'positive' as const,
+        interpretation: n > 0
+          ? `This is the stated (nominal) rate — because it compounds ${n} times a year, the effective annual rate you actually earn or pay is ${pct(ear)}. Always compare loans and investments by their effective rate, not the nominal one; nominal rates can make products look cheaper or more lucrative than they are.`
+          : `Simple interest doesn't compound, so this rate is also the effective rate. Total interest over the period is $${fmtD(totalInterest)}, a ${growth.toFixed(1)}% gain from the starting amount.`,
       },
       {
         id: 'ear',

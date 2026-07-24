@@ -124,6 +124,7 @@ const depreciationConfig: CalculatorConfig = {
           label: 'Year 1 Depreciation Expense',
           value: `$${fmt(annualDep)}`,
           highlight: true,
+          interpretation: `This expense reduces taxable income without any actual cash leaving the business — it's a paper loss that spreads the asset's cost over its useful life. Straight-line depreciation splits it evenly; accelerated methods front-load larger deductions in earlier years if that better fits your tax strategy.`,
           color: 'positive',
         },
         {

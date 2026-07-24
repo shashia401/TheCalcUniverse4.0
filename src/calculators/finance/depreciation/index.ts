@@ -137,6 +137,7 @@ const depreciationConfig: CalculatorConfig = {
           value: `$${fmt(annualDep)} / year`,
           highlight: true,
           color: 'positive' as const,
+          interpretation: `Straight-line spreads the $${fmt(depreciableBasis)} depreciable basis evenly across ${usefulLife} years — same deduction every year, easiest to plan around. It's a paper expense, not a cash outflow; useful life and salvage value are estimates, and tax rules may require a different method (like MACRS) for actual filings.`,
         },
         {
           id: 'totalDepreciation',

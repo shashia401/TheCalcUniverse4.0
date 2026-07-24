@@ -77,6 +77,7 @@ const arvFlippingConfig: CalculatorConfig = {
         value: `$${fmt(maxAllowableOffer)}`,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `This is a ceiling, not a target offer — it's what keeps your ${targetProfitMargin}% margin intact after repairs and holding costs. The 70% rule (roughly $${fmt(seventyPercentRule)} here) is a rougher gut-check some investors use; treat both as starting points and verify repair estimates before committing.`,
       },
       {
         id: 'maxAllowableOffer',

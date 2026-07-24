@@ -138,6 +138,7 @@ const houseAffordabilityConfig: CalculatorConfig = {
         value: fmtK(maxHomePrice),
         highlight: true,
         color: 'positive' as const,
+        interpretation: `This puts your back-end DTI (all debt including housing) at ${backEndDTI.toFixed(0)}% of gross income — lenders typically cap around 43-45%. It's the lender's ceiling, not a comfort level; buying meaningfully below this leaves breathing room for maintenance, rate changes, and life's surprises.`,
       },
       {
         id: 'maxLoan',

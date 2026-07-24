@@ -164,6 +164,7 @@ const iraCalculatorConfig: CalculatorConfig = {
         value: fmt(rothBalance),
         highlight: true,
         color: 'positive' as const,
+        interpretation: `This grows tax-free and comes out tax-free in retirement — the ${winner} account wins here mainly because of the tax-rate assumptions you entered. Roth tends to win if you expect a higher tax rate in retirement than now; Traditional tends to win in the opposite case, since its upfront deduction is worth more at a high current rate.`,
       },
       {
         id: 'tradAfterTax',

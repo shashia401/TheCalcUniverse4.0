@@ -226,7 +226,8 @@ const homeEquityLoanConfig: CalculatorConfig = {
         value: actualClosingCosts > 0
           ? `$${fmt(actualMonthlyPayment)} (costs rolled in)`
           : `$${fmt(monthlyPayment)}`,
-        highlight: true, color: 'neutral' },
+        highlight: true, color: 'neutral',
+        interpretation: `This puts your combined loan-to-value (CLTV) at ${(cltvRatio * 100).toFixed(0)}% — most lenders cap around 80-85%. Unlike a HELOC, this is a fixed lump sum with a fixed payment; it's secured by your home, so missed payments put the house at risk, not just your credit score.` },
       { id: 'maxAvailable', label: 'Maximum Available',
         value: maxHeloc > 0 ? `$${fmtInt(maxHeloc)}` : '$0',
         color: maxHeloc > 0 ? 'positive' : 'negative' },
