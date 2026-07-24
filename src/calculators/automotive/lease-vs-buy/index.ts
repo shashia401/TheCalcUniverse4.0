@@ -124,6 +124,9 @@ const leaseBuyConfig: CalculatorConfig = {
         value: `Save $${fmt(Math.abs(totalBuyCost - totalLeaseCost))}`,
         highlight: true,
         color: 'positive',
+        interpretation: leaseWins
+          ? `Leasing wins on pure cost here, but you own nothing at the end — this comparison is about cash flow, not wealth building. Buying builds equity you can sell or trade later, which this number doesn't capture.`
+          : `Buying wins here largely because you keep the car's value at the end instead of returning it. Leasing can still make sense if you value driving a newer car every few years or want lower monthly payments and warranty coverage.`,
       },
       {
         id: 'totalLease',

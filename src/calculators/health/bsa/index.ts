@@ -100,6 +100,7 @@ const bsaConfig: CalculatorConfig = {
         value: `${fmt(bsaMosteller)} m²`,
         highlight: true,
         color: 'positive',
+        interpretation: `Body surface area is used clinically to dose chemotherapy and some other medications more precisely than weight-based dosing alone, since it better tracks metabolic rate. This is a reference figure only — actual medical dosing must come from a clinician using verified measurements, not a web calculator.`,
       },
       {
         id: 'bsaDubois',

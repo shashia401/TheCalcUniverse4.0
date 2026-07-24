@@ -150,6 +150,7 @@ const autoLoanConfig: CalculatorConfig = {
         value: `$${fmt(monthlyPayment)}`,
         highlight: true,
         color: 'neutral' as const,
+        interpretation: `Over the loan you'll pay $${fmt(totalInterest)} in interest on top of the amount financed — a shorter term or larger down payment cuts that fast. Cars depreciate quickly in the first few years, so a long loan term risks owing more than the car is worth (being "underwater") if you need to sell or trade in early.`,
       },
       {
         id: 'outTheDoor',

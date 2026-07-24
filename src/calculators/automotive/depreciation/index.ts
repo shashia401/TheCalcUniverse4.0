@@ -102,6 +102,7 @@ const depreciationConfig: CalculatorConfig = {
         value: `$${fmt(totalDepreciation)} (-${depreciationPct.toFixed(1)}%)`,
         highlight: true,
         color: 'negative',
+        interpretation: `That's about $${fmt(costPerMonth)}/month in lost value — the single biggest cost of car ownership that doesn't show up on a receipt. Depreciation is steepest in the first 1-3 years, which is why buying a lightly used car often means someone else absorbs the sharpest drop.`,
       },
       {
         id: 'futureValue',

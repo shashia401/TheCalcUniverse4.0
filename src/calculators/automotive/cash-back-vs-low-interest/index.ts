@@ -119,6 +119,7 @@ const cashBackVsLowInterestConfig: CalculatorConfig = {
         value: winnerSavings,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `This crossover flips depending on your loan term and the rate gap — cash back tends to win on shorter loans and when the rate difference is small, while the low-rate offer wins on longer loans with a wide rate spread. Run both scenarios if you're between two term lengths, since the winner can change.`,
       },
       {
         id: 'savingsAmount',

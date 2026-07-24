@@ -128,7 +128,7 @@ const chocolateConfig: CalculatorConfig = {
     const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 1 });
 
     return [
-      { id: 'severity', label: 'Toxicity Level', value: severity, highlight: true, color: severityColor === 'red' ? 'negative' : severityColor === 'yellow' ? 'neutral' : 'positive' },
+      { id: 'severity', label: 'Toxicity Level', value: severity, highlight: true, color: severityColor === 'red' ? 'negative' : severityColor === 'yellow' ? 'neutral' : 'positive', interpretation: `This estimates toxicity from theobromine and caffeine at ${mgPerKg.toFixed(1)} mg/kg of body weight — darker, more concentrated chocolate (baking chocolate, cocoa powder) is far more dangerous per ounce than milk chocolate. This tool is not a substitute for veterinary advice; if you're at all unsure, call your vet or the ASPCA Poison Control line below rather than waiting to see symptoms.` },
       { id: 'severityColor', label: 'Severity Color', value: severityColor },
       { id: 'theobromineMg', label: 'Theobromine Consumed', value: `${fmt(theobromineMg)} mg`, color: 'neutral' },
       { id: 'caffeineMg', label: 'Caffeine Consumed', value: `${fmt(caffeineMg)} mg`, color: 'neutral' },

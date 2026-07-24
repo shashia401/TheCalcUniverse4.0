@@ -186,6 +186,7 @@ const healthyWeightConfig: CalculatorConfig = {
         value: `${displayKg(healthyWeightLowKg)} – ${displayKg(healthyWeightHighKg)}`,
         highlight: true,
         color: 'positive',
+        interpretation: `This range comes from BMI alone, which doesn't account for muscle mass, bone density, or frame size — the adjusted target below narrows it using your frame. A muscular, athletic person can sit above this range and still be at a healthy body composition; use it as a starting reference, not a strict target.`,
       },
       {
         id: 'adjustedTarget',

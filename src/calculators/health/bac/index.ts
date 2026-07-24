@@ -154,6 +154,7 @@ const bacConfig: CalculatorConfig = {
         value: `${fmtBAC(bac)}% BAC`,
         highlight: true,
         color: impairment.color,
+        interpretation: `This is a rough estimate — actual BAC varies with food intake, medication, hydration, and individual metabolism, and can run meaningfully higher or lower than this formula predicts. Never use this number to decide whether it's safe to drive; the only safe choice below any impairment is not getting behind the wheel.`,
       },
       {
         id: 'impairment',

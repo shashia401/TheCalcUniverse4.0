@@ -130,6 +130,7 @@ const pregnancyConfig: CalculatorConfig = {
         value: fmtDate(dueDate),
         highlight: true,
         color: 'positive',
+        interpretation: `This is a 40-week estimate from your last period — only about 1 in 20 babies arrive on the exact date, and full term spans 37 to 42 weeks. Treat it as the middle of a window rather than a deadline; an early ultrasound dating scan from your provider is more precise than this calculation.`,
       },
       {
         id: 'gestationalAge',
