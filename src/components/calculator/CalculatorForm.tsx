@@ -52,11 +52,16 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   const [scenarios, setScenarios] = useState<{ id: number; results: CalculatorResult[] }[]>([]);
   const scenarioId = useRef(0);
   const addScenario = () => {
-    if (!results.length) return;
-    setScenarios((prev) => [...prev, { id: ++scenarioId.current, results: results.map((r) => ({ ...r })) }].slice(-4));
+    if (!visibleResults.length) return;
+    setScenarios((prev) => [...prev, { id: ++scenarioId.current, results: visibleResults.map((r) => ({ ...r })) }].slice(-4));
   };
   const removeScenario = (id: number) => setScenarios((prev) => prev.filter((s) => s.id !== id));
   const [results, setResults] = useState<CalculatorResult[]>([]);
+  // Calculators pass internal-only data to their extraPanel via a result with an
+  // id prefixed "_" (e.g. `_caData`, `_chartData`) — never meant to render as a
+  // visible card. Every user-facing consumer (grid, copy, CSV, share, compare)
+  // uses this filtered view; extraPanel alone gets the raw `results`.
+  const visibleResults = results.filter((r) => !r.id.startsWith('_'));
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   // Currency: symbol swap only (no FX conversion — the numbers are the same, a UK
@@ -92,7 +97,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   };
 
   const copyResults = () => {
-    const text = results
+    const text = visibleResults
       .map((r) => `${r.label}: ${money(r.value)}${r.unit ? ` ${r.unit}` : ''}`)
       .join('\n');
     navigator.clipboard
@@ -112,11 +117,11 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
 
   // Export the current results as CSV (a small table of label/value/unit).
   const downloadCsv = () => {
-    if (!results.length) return;
+    if (!visibleResults.length) return;
     const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
     const rows = [
       ['Metric', 'Value', 'Unit'],
-      ...results.map((r) => [r.label, String(r.value), r.unit ?? '']),
+      ...visibleResults.map((r) => [r.label, String(r.value), r.unit ?? '']),
     ];
     const csv = rows.map((row) => row.map((c) => esc(String(c))).join(',')).join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -310,8 +315,8 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   };
 
   const activeShape = values.shape || config.shapeTabs?.[0]?.value;
-  const stickyResult = results.find((r) => r.highlight) ?? results[0];
-  const isMoney = results.some((r) => r.value.includes('$'));
+  const stickyResult = visibleResults.find((r) => r.highlight) ?? visibleResults[0];
+  const isMoney = visibleResults.some((r) => r.value.includes('$'));
 
   return (
     <>
@@ -373,7 +378,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
         ))}
       </div>
 
-      {results.length > 0 && (
+      {visibleResults.length > 0 && (
         <div className="border-t border-[var(--border-warm)] pt-5">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h2 className="text-sm font-semibold text-[var(--surface-text-muted)] uppercase tracking-wide">
@@ -440,7 +445,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Compact hero embed shows only the two headline results (e.g. BMI
                 Prime + BMI Score); the full breakdown lives on the calc page. */}
-            {(compact ? results.slice(0, 2) : results).map((r) => (
+            {(compact ? visibleResults.slice(0, 2) : visibleResults).map((r) => (
               <div
                 key={r.id}
                 className={`rounded-xl p-4 ${
@@ -450,7 +455,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                 }`}
               >
                 <p className={`text-xs font-medium mb-0.5 ${r.highlight ? 'text-white/90' : 'text-[var(--surface-text-muted)]'}`}>{r.label}</p>
-                <p className={`text-xl font-bold ${!r.highlight && r.color ? resultColorClasses[r.color] ?? '' : ''}`}>
+                <p className={`${r.value.includes('\n') ? 'text-sm font-medium whitespace-pre-line leading-relaxed' : 'text-xl font-bold'} ${!r.highlight && r.color ? resultColorClasses[r.color] ?? '' : ''}`}>
                   {money(r.value)}
                   {r.unit && <span className={`ml-1 text-sm font-normal ${r.highlight ? 'text-white/90' : 'opacity-75'}`}>{r.unit}</span>}
                 </p>
@@ -564,7 +569,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                 </tr>
               </thead>
               <tbody>
-                {results.map((r) => (
+                {visibleResults.map((r) => (
                   <tr key={r.id} className="border-t border-[var(--border-warm)]">
                     <td className="p-2 text-[var(--surface-text-secondary)]">{r.label}</td>
                     {scenarios.map((sc) => {
