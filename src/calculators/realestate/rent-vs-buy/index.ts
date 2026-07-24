@@ -249,6 +249,9 @@ const rentVsBuyConfig: CalculatorConfig = {
         value: breakEvenYear
           ? `Buy if staying > ${breakEvenYear} ${breakEvenYear === 1 ? 'year' : 'years'}`
           : 'Renting is cheaper long-term at these inputs',
+        interpretation: breakEvenYear
+          ? `Buying's upfront costs (down payment, closing) need time to be offset by building equity instead of paying rent — sell before this point and you likely come out behind after transaction costs. This assumes steady rent and home-price growth; a hot rental market or slow appreciation shifts the break-even.`
+          : `At these inputs, renting stays cheaper even over a long horizon — often because rent growth or home-price appreciation assumptions favor renting. Try adjusting the appreciation rate or your expected time in the home to see how sensitive this verdict is.`,
         highlight: true,
         color: breakEvenYear && years >= breakEvenYear ? ('positive' as const) : ('neutral' as const),
       },

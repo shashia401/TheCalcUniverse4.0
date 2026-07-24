@@ -91,6 +91,7 @@ const fhaLoanConfig: CalculatorConfig = {
         label: 'Total Monthly Payment',
         value: `$${fmt(totalMonthly)}`,
         highlight: true,
+        interpretation: `This includes $${fmt(monthlyMIP)}/mo in mortgage insurance premium, which every FHA loan requires regardless of down payment. It runs for ${mipDuration.toLowerCase()} at your ${(downPct * 100).toFixed(0)}% down payment — putting down at least 10% caps it at 11 years instead of the life of the loan.`,
         color: 'neutral',
       },
       {

@@ -66,6 +66,7 @@ const cogsConfig: CalculatorConfig = {
         label: 'Cost of Goods Sold (COGS)',
         value: `$${fmt(cogs)}`,
         highlight: true,
+        interpretation: `COGS only counts direct product costs — inventory, materials, direct labor — not overhead like rent or marketing. It's the number that feeds gross margin and is deductible on your tax return; keeping accurate inventory records matters here since errors compound into every downstream profit calculation.`,
         color: 'neutral' as const,
       },
       {

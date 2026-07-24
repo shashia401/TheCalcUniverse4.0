@@ -75,6 +75,7 @@ const profitMarginConfig: CalculatorConfig = {
           label: mode === 'margin' ? 'Gross Profit Margin' : 'Markup Percentage',
           value: mode === 'margin' ? `${margin.toFixed(2)}%` : `${markup.toFixed(2)}%`,
           highlight: true,
+          interpretation: `Margin (profit ÷ selling price) and markup (profit ÷ cost) describe the same $${fmt(profit)} of profit differently — margin is always the smaller number of the two. This is gross profit only, before overhead like rent, salaries, or marketing; net margin after those costs will be lower.`,
           color: profit > 0 ? 'positive' : 'negative',
         },
         { id: 'profit', label: 'Gross Profit', value: `$${fmt(profit)}`, color: profit > 0 ? 'positive' as const : 'negative' as const },

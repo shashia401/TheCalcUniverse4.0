@@ -67,6 +67,7 @@ const breakEvenConfig: CalculatorConfig = {
         value: `${Math.ceil(breakEvenUnits).toLocaleString(undefined)} units`,
         highlight: true,
         color: 'neutral',
+        interpretation: `Each unit sold contributes $${fmt(contributionMargin)} toward covering your fixed costs — below this number you're losing money, above it every sale is pure profit. Raising price or cutting variable cost per unit lowers this threshold faster than trying to cut fixed costs, which are usually harder to shrink quickly.`,
       },
       {
         id: 'breakEvenRevenue',

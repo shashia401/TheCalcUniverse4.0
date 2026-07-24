@@ -147,6 +147,7 @@ const paymentFeesConfig: CalculatorConfig = {
         label: 'You Receive',
         value: `$${fmt(net)}`,
         highlight: true,
+        interpretation: `Payment processors charge a percentage plus a small fixed fee per transaction — the fixed portion hits small transactions hardest, so tiny sales lose a disproportionate share to fees. Comparing processors on rate alone misses this; check the fixed fee too if you sell a lot of low-ticket items.`,
         color: 'positive' as const,
       },
       {

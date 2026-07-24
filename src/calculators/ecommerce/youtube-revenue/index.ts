@@ -114,6 +114,7 @@ const youtubeRevenueConfig: CalculatorConfig = {
         value: `$${fmt(monthlyRevenue)}`,
         highlight: true,
         color: 'positive' as const,
+        interpretation: `This is ad revenue only (YouTube's typical ~55% creator share of AdSense) and RPM swings widely by niche, season, and audience location — finance and tech content earns multiples of what gaming or vlogs typically see. Most established creators earn more from sponsorships, memberships, and affiliate links than from ads alone.`,
       },
       {
         id: 'yearlyRevenue',

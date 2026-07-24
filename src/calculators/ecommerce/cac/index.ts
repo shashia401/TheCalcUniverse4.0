@@ -82,6 +82,7 @@ const cacConfig: CalculatorConfig = {
         label: 'Customer Acquisition Cost (CAC)',
         value: `$${fmt(cac)}`,
         highlight: true,
+        interpretation: `This blends all acquisition spend across all channels into one average — some channels are quietly much more efficient than others, so a healthy blended CAC can hide a wasteful one. Compare this against customer lifetime value (LTV); a good rule of thumb is LTV at least 3x CAC to have room for profit after acquisition cost.`,
         color: 'neutral' as const,
       },
     ];

@@ -90,6 +90,7 @@ const amazonFbaConfig: CalculatorConfig = {
         value: `$${fmt(netProfit)}`,
         highlight: true,
         color: netProfit > 0 ? 'positive' : 'negative',
+        interpretation: `This is per-unit after Amazon's referral and FBA fulfillment fees — multiply by monthly unit volume to see real cash flow, since a healthy-looking margin can still lose money at low volume once storage and advertising costs are added. Aim for enough margin to absorb PPC spend, which most new listings need to gain visibility.`,
       },
       {
         id: 'margin',

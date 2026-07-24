@@ -126,6 +126,7 @@ const engagementRateConfig: CalculatorConfig = {
         label: 'Engagement Rate',
         value: `${engagementRate.toFixed(2)}%`,
         highlight: true,
+        interpretation: `Engagement rate tends to fall as follower count rises — a smaller, more niche account often out-engages a mega-influencer, which is exactly why brands increasingly value this metric over raw follower count. Compare against accounts of similar size and niche, not against every account, since "good" varies a lot by platform and audience.`,
         color: benchmarkColor,
       },
       {

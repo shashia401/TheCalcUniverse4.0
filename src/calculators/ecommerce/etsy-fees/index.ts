@@ -121,6 +121,7 @@ const etsyFeesConfig: CalculatorConfig = {
         label: 'Net Profit (Take-Home)',
         value: `$${fmt(netProfit)}`,
         highlight: true,
+        interpretation: `Etsy's listing, transaction, and payment processing fees stack up fast — this is what's actually left after all of them, before your own time and materials are factored in as a labor cost. Many sellers underprice by forgetting to build these fees into their listed price from the start.`,
         color: netProfit > 0 ? 'positive' as const : 'negative' as const,
       },
       {

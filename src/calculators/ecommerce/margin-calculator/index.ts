@@ -99,6 +99,7 @@ const marginCalculatorConfig: CalculatorConfig = {
           label: 'Gross Margin (%)',
           value: fmtPct(margin),
           highlight: true,
+          interpretation: `Margin and markup answer different questions from the same numbers — margin is profit as a share of the selling price, markup is profit as a share of cost. A 50% markup is only a ${exampleMargin.toFixed(1)}% margin, which is why the two get confused; always check which one a target or industry benchmark actually refers to.`,
           color: profit >= 0 ? 'positive' as const : 'negative' as const,
         },
         {

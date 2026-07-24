@@ -159,6 +159,7 @@ const capRateConfig: CalculatorConfig = {
         label: `Cap Rate — ${getCapLabel(capRate)}`,
         value: `${capRate.toFixed(2)}%`,
         highlight: true,
+        interpretation: `Cap rate is the property's return ignoring financing — it's what a cash buyer would earn, so it's the standard way to compare deals regardless of how each is financed. Higher usually means higher risk or a rougher market, not necessarily a better deal; a great neighborhood commanding a low cap rate can still outperform on appreciation.`,
         color: getCapColor(capRate),
       },
       {

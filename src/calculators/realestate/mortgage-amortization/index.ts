@@ -256,6 +256,7 @@ const mortgageAmortizationConfig: CalculatorConfig = {
         label: 'Total Monthly Payment (PITI)',
         value: `$${fmt(totalMonthly)}`,
         highlight: true,
+        interpretation: `PITI bundles Principal, Interest, Taxes, and Insurance — the full housing payment lenders qualify you on, not just the loan payment. ${downPct < 20 ? `At ${downPct.toFixed(0)}% down you're also paying $${fmt(pmiAnnual / 12)}/mo in PMI, which drops off once you reach 20% equity.` : `At ${downPct.toFixed(0)}% down you've cleared the 20% threshold, so no PMI applies.`}`,
         color: 'neutral' as const,
       },
       {

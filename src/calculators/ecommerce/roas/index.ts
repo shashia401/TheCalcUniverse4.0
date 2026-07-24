@@ -61,6 +61,7 @@ const roasConfig: CalculatorConfig = {
         label: 'Return on Ad Spend (ROAS)',
         value: `${roas.toFixed(2)}x`,
         highlight: true,
+        interpretation: `ROAS is revenue, not profit — a 4x ROAS can still lose money if your product margin is thin, since it doesn't subtract cost of goods or overhead. A more accurate profitability check divides ad spend against gross profit (not revenue); use ROAS to compare campaigns against each other, not as a standalone profit signal.`,
         color: roas >= 4 ? 'positive' as const : roas >= 2 ? 'neutral' as const : 'negative' as const,
       },
       {

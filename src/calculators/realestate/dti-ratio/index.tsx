@@ -164,6 +164,7 @@ const dtiRatioConfig: CalculatorConfig = {
         value: `${backEndDTI.toFixed(1)}%`,
         highlight: true,
         color: getColor(backEndDTI),
+        interpretation: `This is all your monthly debt — housing plus cards, auto, student loans — as a share of gross income. Most mortgage lenders cap this around 43%, with the best rates reserved for borrowers under 36%; paying down other debt before applying often moves the needle more than shopping for a lower mortgage rate.`,
       },
       {
         id: 'frontEndDTI',

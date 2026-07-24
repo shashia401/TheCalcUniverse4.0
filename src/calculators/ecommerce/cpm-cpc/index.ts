@@ -95,6 +95,7 @@ const cpmCpcConfig: CalculatorConfig = {
           label: 'Required Ad Spend',
           value: `$${fmt(requiredBudget)}`,
           highlight: true,
+          interpretation: `This assumes you actually achieve your target CPM — real auction prices shift with competition, audience size, and season, so treat this as a planning estimate rather than a guarantee. Budget some cushion above this figure for testing and optimization before results stabilize.`,
           color: 'positive',
         },
         {

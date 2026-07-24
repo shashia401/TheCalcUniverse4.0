@@ -121,6 +121,7 @@ const saasLtvCacConfig: CalculatorConfig = {
         label: 'LTV:CAC Ratio',
         value: `${ltvCacRatio.toFixed(2)}:1`,
         highlight: true,
+        interpretation: `3:1 is the widely cited healthy target — below that, acquisition costs are eating too much of what each customer is worth; well above 5:1 can actually mean you're under-investing in growth and leaving market share on the table. This is a lifetime projection built on retention assumptions, so it's only as reliable as your churn estimate.`,
         color: ratioColor,
       },
       {

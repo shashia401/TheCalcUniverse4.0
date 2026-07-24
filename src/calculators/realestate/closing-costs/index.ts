@@ -113,6 +113,7 @@ const closingCostsConfig: CalculatorConfig = {
         label: `Total Buyer Closing Costs`,
         value: `${fmt(totalBuyer)} (${((totalBuyer / homePrice) * 100).toFixed(1)}% of price)`,
         highlight: party === 'buyer',
+        interpretation: `Closing costs are cash due at signing, on top of your down payment — most buyers underestimate this and get surprised near the finish line. Some categories (like origination fees) are negotiable or lender-dependent; ask for a Loan Estimate early so this figure isn't a last-minute shock.`,
         color: 'neutral' as const,
       });
 
