@@ -26,6 +26,7 @@ const sipConfig: CalculatorConfig = {
       step: 5000,
       helpText: 'One-time investment amount',
       showWhen: (v) => v.shape === 'lumpsum',
+      slider: { min: 0, max: 5000000, step: 5000 },
     },
     {
       id: 'monthlyInvestment',
@@ -37,6 +38,7 @@ const sipConfig: CalculatorConfig = {
       step: 500,
       helpText: 'Amount you invest every month',
       showWhen: (v) => v.shape !== 'lumpsum',
+      slider: { min: 0, max: 100000, step: 500 },
     },
     {
       id: 'expectedReturn',
@@ -50,6 +52,7 @@ const sipConfig: CalculatorConfig = {
       step: 0.5,
       required: true,
       helpText: 'Expected annual return rate',
+      slider: { min: 0, max: 30, step: 0.5 },
     },
     {
       id: 'timePeriod',
@@ -62,6 +65,7 @@ const sipConfig: CalculatorConfig = {
       step: 1,
       required: true,
       helpText: 'Number of years you plan to invest',
+      slider: { min: 1, max: 40, step: 1 },
     },
   ],
   calculate: (values) => {
