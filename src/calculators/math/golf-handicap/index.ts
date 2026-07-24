@@ -94,7 +94,7 @@ const golfConfig: CalculatorConfig = {
         color: 'positive',
       },
       {
-        id: 'differentials',
+        id: '_differentials',
         label: 'Round Differentials',
         value: JSON.stringify(
           diffs.map((d, i) => ({

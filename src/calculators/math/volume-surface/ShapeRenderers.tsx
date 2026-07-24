@@ -12,7 +12,7 @@ export function Sphere3D({ r, unit }: { r: number; unit: string }) {
   const cx = 220, cy = 175;
   const radius = Math.min(Math.max(r * 6, 40), 120);
   return (
-    <svg width="100%" height="auto" viewBox="0 0 440 360" role="img" aria-label={'Sphere 3D diagram showing radius r equals ' + r + unit} style={{ maxWidth: '440px' }}>
+    <svg width="100%" viewBox="0 0 440 360" role="img" aria-label={'Sphere 3D diagram showing radius r equals ' + r + unit} style={{ maxWidth: '440px', height: 'auto' }}>
       <defs>
         <radialGradient id="sphereGrad" cx="35%" cy="35%">
           <stop offset="0%" stopColor="rgba(59,130,246,0.25)" />

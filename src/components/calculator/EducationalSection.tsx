@@ -9,11 +9,17 @@ import type { EducationalContent } from '../../types/calculator';
 interface Props {
   content: EducationalContent;
   calculatorTitle: string;
+  /**
+   * Ids of inputs with type "custom" (e.g. a multi-row debt list) — their raw
+   * value is a JSON-encoded string never meant for display, so worked-example
+   * previews skip them instead of dumping `debts = [{"name":...}]` as text.
+   */
+  customInputIds?: Set<string>;
 }
 
 const card = 'bg-[var(--surface-card)] border border-[var(--border-warm)] rounded-xl p-6';
 
-export default function EducationalSection({ content, calculatorTitle }: Props) {
+export default function EducationalSection({ content, calculatorTitle, customInputIds }: Props) {
   return (
     <div className="space-y-8 text-[var(--surface-text)]">
 
@@ -131,11 +137,14 @@ export default function EducationalSection({ content, calculatorTitle }: Props) 
             {content.workedExamples.map((ex, i) => (
               <div key={i} className="border-l-4 border-[var(--brand-default)] pl-4">
                 <p className="font-semibold mb-1.5">{ex.scenario}</p>
-                {ex.inputs && Object.keys(ex.inputs).length > 0 && (
-                  <p className="font-mono text-xs text-[var(--surface-text-muted)] mb-1.5">
-                    {Object.entries(ex.inputs).map(([k, v]) => `${k} = ${v}`).join('  ·  ')}
-                  </p>
-                )}
+                {ex.inputs && Object.keys(ex.inputs).length > 0 && (() => {
+                  const shown = Object.entries(ex.inputs).filter(([k]) => !customInputIds?.has(k));
+                  return shown.length > 0 ? (
+                    <p className="font-mono text-xs text-[var(--surface-text-muted)] mb-1.5 break-words [overflow-wrap:anywhere]">
+                      {shown.map(([k, v]) => `${k} = ${v}`).join('  ·  ')}
+                    </p>
+                  ) : null;
+                })()}
                 <p className="text-[var(--brand-ink)] font-bold font-mono">{ex.result}</p>
                 <p className="text-sm text-[var(--surface-text-muted)] mt-1">{ex.insight}</p>
               </div>

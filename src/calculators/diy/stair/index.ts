@@ -172,7 +172,7 @@ const stairConfig: CalculatorConfig = {
         value: '2x12 lumber recommended (minimum 2x10)',
       },
       {
-        id: 'stairData',
+        id: '_stairData',
         label: 'Stair Geometry Data',
         value: stairData,
       },

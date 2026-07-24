@@ -34,7 +34,7 @@ const shown = results.filter((r) => !r.id.startsWith('_'));
         {shown.map((r) => (
           <div class={`rounded-xl p-4 ${r.highlight ? 'bg-[var(--brand-default)] text-white' : 'bg-[var(--surface-bg)] border border-[var(--border-warm)]'}`}>
             <p class="text-xs font-medium opacity-75 mb-0.5">{r.label}</p>
-            <p class={`text-xl font-bold ${!r.highlight && r.color ? colorClass[r.color] ?? '' : ''}`}>
+            <p class={`break-words [overflow-wrap:anywhere] text-xl font-bold ${!r.highlight && r.color ? colorClass[r.color] ?? '' : ''}`}>
               {r.value}{r.unit && <span class="ml-1 text-sm font-normal opacity-75">{r.unit}</span>}
             </p>
             {r.interpretation && <p class="text-xs opacity-80 mt-1">{r.interpretation}</p>}

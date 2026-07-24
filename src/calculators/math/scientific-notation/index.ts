@@ -72,7 +72,7 @@ const scientificNotationConfig: CalculatorConfig = {
         { id: 'exponent', label: 'Exponent', value: exponent.toString() },
         { id: 'moves', label: 'Decimal Moves', value: moves.toString() },
         { id: 'direction', label: 'Decimal Direction', value: direction === 'left' ? 'Moved left (large number)' : 'Moved right (small number)' },
-        { id: 'animationData', label: 'Animation Data', value: JSON.stringify({ coefficient, exponent, moves, direction, original: raw, isNegative: num < 0 }) },
+        { id: '_animationData', label: 'Animation Data', value: JSON.stringify({ coefficient, exponent, moves, direction, original: raw, isNegative: num < 0 }) },
       ];
     }
 

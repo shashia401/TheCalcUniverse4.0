@@ -196,7 +196,7 @@ const statisticsConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       {
-        id: 'boxPlotData',
+        id: '_boxPlotData',
         label: '',
         value: JSON.stringify({ min: fmt(s[0]), q1: fmt(q.q1), median: fmt(q.q2), q3: fmt(q.q3), max: fmt(s[n - 1]), outliers: out.map(fmt) }),
       },

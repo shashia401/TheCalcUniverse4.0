@@ -122,7 +122,7 @@ const gradeConfig: CalculatorConfig = {
         value: `${examWeight}%`,
       },
       {
-        id: 'gradeData',
+        id: '_gradeData',
         label: 'Grade Data',
         value: JSON.stringify({
           currentGrade,

@@ -144,7 +144,7 @@ const roofingConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       {
-        id: 'materialsList',
+        id: '_materialsList',
         label: 'Materials List',
         value: JSON.stringify({
           squares,

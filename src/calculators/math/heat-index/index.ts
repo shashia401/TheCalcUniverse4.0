@@ -138,18 +138,6 @@ const heatIndexConfig: CalculatorConfig = {
           recommendations,
         }),
       },
-      {
-        id: 'chartData',
-        label: '',
-        value: JSON.stringify({
-          heatIndex: hi,
-          temperature: Tf,
-          humidity: RH,
-          dangerTier: danger.label,
-          dangerColor: danger.color,
-          recommendations,
-        }),
-      },
     ];
   },
   extraPanel: (values, results) => {

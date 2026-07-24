@@ -131,7 +131,7 @@ const swpConfig: CalculatorConfig = {
         color: 'neutral',
       },
       {
-        id: 'withdrawalChart',
+        id: '_withdrawalChart',
         label: 'Withdrawal Chart Data',
         value: JSON.stringify(chartData),
       },

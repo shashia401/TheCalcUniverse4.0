@@ -77,7 +77,6 @@ const lcmConfig: CalculatorConfig = {
       { id: 'lcmFormula', label: 'LCM Formula', value: `LCM(a,b) = (a × b) / GCD(a,b)` },
       { id: 'gcdValue', label: `GCD of ${nums[0]} and ${nums[1]}`, value: gcd(nums[0], nums[1]).toString() },
       { id: '_primeData', label: 'Prime Factorization Data', value: JSON.stringify(pfacs) },
-      { id: 'primeData', label: 'Prime Factorization Data', value: JSON.stringify(pfacs) },
       { id: '_multiplesData', label: 'Multiples Data', value: JSON.stringify({
         a: nums[0],
         b: nums.length > 1 ? nums[1] : nums[0],
@@ -85,15 +84,7 @@ const lcmConfig: CalculatorConfig = {
         multiplesB,
         lcm: result,
       }) },
-      { id: 'multiplesData', label: 'Multiples Data', value: JSON.stringify({
-        a: nums[0],
-        b: nums.length > 1 ? nums[1] : nums[0],
-        multiplesA,
-        multiplesB,
-        lcm: result,
-      }) },
       { id: '_inputNums', label: 'Input Numbers', value: JSON.stringify(nums) },
-      { id: 'inputNums', label: 'Input Numbers', value: JSON.stringify(nums) },
     ];
   },
   extraPanel: (values, results) => {

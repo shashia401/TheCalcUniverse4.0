@@ -130,7 +130,7 @@ const sipConfig: CalculatorConfig = {
         color: 'positive',
       },
       {
-        id: 'wealthChart',
+        id: '_wealthChart',
         label: 'Wealth Chart Data',
         value: JSON.stringify(chartData),
       },

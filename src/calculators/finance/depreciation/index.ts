@@ -152,7 +152,7 @@ const depreciationConfig: CalculatorConfig = {
           color: 'neutral' as const,
         },
         {
-          id: 'schedule',
+          id: '_schedule',
           label: '_schedule',
           value: JSON.stringify(schedule),
         },
@@ -196,7 +196,7 @@ const depreciationConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       {
-        id: 'schedule',
+        id: '_schedule',
         label: '_schedule',
         value: JSON.stringify(schedule),
       },

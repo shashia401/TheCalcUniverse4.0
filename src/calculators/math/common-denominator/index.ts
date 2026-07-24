@@ -140,12 +140,6 @@ const commonDenomConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       {
-        id: 'convertedFractions',
-        label: 'Converted Fractions',
-        value: JSON.stringify(converted),
-        color: 'neutral' as const,
-      },
-      {
         id: 'work',
         label: 'Work Steps',
         value: workStr,

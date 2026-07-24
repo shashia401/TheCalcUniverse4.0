@@ -82,8 +82,9 @@ let sampleDonut = null;
 try { sampleResults = config.calculate(sampleValues); } catch { sampleResults = []; }
 try { sampleGauge = config.gauge?.(sampleValues) ?? null; } catch { sampleGauge = null; }
 try { sampleDonut = config.donut?.(sampleValues) ?? null; } catch { sampleDonut = null; }
+const customInputIds = new Set(config.inputs.filter((i) => i.type === 'custom').map((i) => i.id));
 const scenario = config.inputs
-  .filter((i) => sampleValues[i.id] && i.type !== 'select')
+  .filter((i) => sampleValues[i.id] && i.type !== 'select' && !customInputIds.has(i.id))
   .slice(0, 4)
   .map((i) => `${i.label} ${sampleValues[i.id]}${i.unit ? ' ' + i.unit : ''}`)
   .join(', ');
@@ -178,7 +179,7 @@ const tocItems = [
 
           {config.educational && (
             <section id="how-it-works" aria-label={`How ${shortName} works`} class="mt-10 scroll-mt-20">
-              <EducationalSection content={config.educational} calculatorTitle={shortName} />
+              <EducationalSection content={config.educational} calculatorTitle={shortName} customInputIds={customInputIds} />
             </section>
           )}
 

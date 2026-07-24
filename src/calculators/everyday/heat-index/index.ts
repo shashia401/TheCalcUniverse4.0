@@ -164,18 +164,6 @@ const heatIndexConfig: CalculatorConfig = {
             recommendations: getSafetyRecommendations(Tf),
           }),
         },
-        {
-          id: 'chartData',
-          label: '',
-          value: JSON.stringify({
-            heatIndex: Tf,
-            temperature: Tf,
-            humidity: 0,
-            dangerTier: danger.label,
-            dangerColor: danger.color,
-            recommendations: getSafetyRecommendations(Tf),
-          }),
-        },
       ];
     }
 
@@ -225,18 +213,6 @@ const heatIndexConfig: CalculatorConfig = {
       },
       {
         id: '_chartData',
-        label: '',
-        value: JSON.stringify({
-          heatIndex: hi,
-          temperature: Tf,
-          humidity: RH,
-          dangerTier: danger.label,
-          dangerColor: danger.color,
-          recommendations,
-        }),
-      },
-      {
-        id: 'chartData',
         label: '',
         value: JSON.stringify({
           heatIndex: hi,

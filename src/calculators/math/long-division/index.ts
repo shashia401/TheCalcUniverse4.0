@@ -102,14 +102,6 @@ const longDivisionConfig: CalculatorConfig = {
           remainder: result.remainder,
           decimalResult: result.decimalResult,
         }) },
-        { id: 'divisionData', label: 'Division Steps', value: JSON.stringify({
-          dividend: Math.abs(dividend),
-          divisor: Math.abs(divisor),
-          steps: result.steps,
-          quotient: Math.abs(result.quotient),
-          remainder: result.remainder,
-          decimalResult: result.decimalResult,
-        }) },
       ] : [
         { id: 'quotient', label: 'Quotient', value: (parseFloat(result.decimalResult) * sign).toString(), highlight: true, color: 'positive' as const },
         { id: 'decimalResult', label: 'Decimal Result', value: (parseFloat(result.decimalResult) * sign).toString() },

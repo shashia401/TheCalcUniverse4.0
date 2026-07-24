@@ -118,18 +118,6 @@ const dewPointConfig: CalculatorConfig = {
           comfortDescription: comfort.description,
         }),
       },
-      {
-        id: 'chartData',
-        label: '',
-        value: JSON.stringify({
-          dewPointF: dpF,
-          dewPointC: dpC,
-          temperature: Tf,
-          humidity: RH,
-          comfortLabel: comfort.label,
-          comfortDescription: comfort.description,
-        }),
-      },
     ];
   },
   extraPanel: (values, results) => {

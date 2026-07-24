@@ -83,7 +83,6 @@ const roundingConfig: CalculatorConfig = {
       { id: 'original', label: 'Original Number', value: num.toString() },
       { id: 'rounded', label: 'Rounded Value', value: rounded.toString(), highlight: true, color: 'positive' },
       { id: 'direction', label: 'Rounding Direction', value: info.direction === 'up' ? 'Round Up' : 'Round Down' },
-      { id: 'roundingData', label: 'Rounding Data', value: JSON.stringify({ ...info, rounded, divisor: place === 'ten' ? 10 : place === 'hundred' ? 100 : place === 'thousand' ? 1000 : place === 'tenth' ? 0.1 : place === 'hundredth' ? 0.01 : place === 'thousandth' ? 0.001 : place === 'ten-thousandth' ? 0.0001 : place === 'million' ? 1000000 : 1 }) },
       { id: '_roundingData', label: 'Rounding Data', value: JSON.stringify({ ...info, rounded, divisor: place === 'ten' ? 10 : place === 'hundred' ? 100 : place === 'thousand' ? 1000 : place === 'tenth' ? 0.1 : place === 'hundredth' ? 0.01 : place === 'thousandth' ? 0.001 : place === 'ten-thousandth' ? 0.0001 : place === 'million' ? 1000000 : 1 }) },
     ];
   },

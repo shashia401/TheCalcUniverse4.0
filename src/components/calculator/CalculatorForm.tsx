@@ -455,7 +455,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                 }`}
               >
                 <p className={`text-xs font-medium mb-0.5 ${r.highlight ? 'text-white/90' : 'text-[var(--surface-text-muted)]'}`}>{r.label}</p>
-                <p className={`${r.value.includes('\n') ? 'text-sm font-medium whitespace-pre-line leading-relaxed' : 'text-xl font-bold'} ${!r.highlight && r.color ? resultColorClasses[r.color] ?? '' : ''}`}>
+                <p className={`break-words [overflow-wrap:anywhere] ${r.value.includes('\n') ? 'text-sm font-medium whitespace-pre-line leading-relaxed' : 'text-xl font-bold'} ${!r.highlight && r.color ? resultColorClasses[r.color] ?? '' : ''}`}>
                   {money(r.value)}
                   {r.unit && <span className={`ml-1 text-sm font-normal ${r.highlight ? 'text-white/90' : 'opacity-75'}`}>{r.unit}</span>}
                 </p>

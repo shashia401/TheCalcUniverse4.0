@@ -68,7 +68,7 @@ const primeFactorizationConfig: CalculatorConfig = {
       { id: 'factorization', label: 'Prime Factorization', value: factorization, highlight: true, color: 'positive' },
       { id: 'primeFactors', label: 'Prime Factors', value: factors.map(f => f.factor).join(', ') },
       { id: 'totalPrimes', label: 'Prime Factors (with multiplicity)', value: factors.reduce((s, f) => s + f.exponent, 0).toString() },
-      { id: 'treeData', label: 'Factor Tree Data', value: JSON.stringify(treeData) },
+      { id: '_treeData', label: 'Factor Tree Data', value: JSON.stringify(treeData) },
     ];
   },
   extraPanel: (values, results) => {

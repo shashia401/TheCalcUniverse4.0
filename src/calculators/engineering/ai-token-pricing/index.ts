@@ -193,7 +193,7 @@ const aiTokenPricingConfig: CalculatorConfig = {
       { id: 'annualCost', label: 'Estimated Annual Cost', value: fmtDollar(annualCost), color: 'neutral' },
       { id: 'costPerUser', label: 'Cost per User per Month', value: fmtDollar(costPerUser), color: 'neutral' },
       { id: 'requestsPerDay', label: 'Requests per Day', value: requestsPerDay.toLocaleString(), color: 'neutral' },
-      { id: 'allModels', label: 'All Model Comparisons', value: JSON.stringify(modelComparison) },
+      { id: '_allModels', label: 'All Model Comparisons', value: JSON.stringify(modelComparison) },
     ];
   },
   extraPanel: (values, results) => {

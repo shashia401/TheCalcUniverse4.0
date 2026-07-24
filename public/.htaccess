@@ -3,6 +3,14 @@
 # Custom 404 page
 ErrorDocument 404 /404.html
 
+# The sitemap integration emits sitemap-index.xml (robots.txt points crawlers
+# there directly), but /sitemap.xml is a common manual/tool-default check —
+# alias it internally so both URLs work.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^sitemap\.xml$ /sitemap-index.xml [L]
+</IfModule>
+
 # Force HTTPS (uncomment once SSL is active on the domain)
 # RewriteEngine On
 # RewriteCond %{HTTPS} off

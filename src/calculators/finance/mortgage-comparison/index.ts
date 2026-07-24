@@ -174,7 +174,7 @@ const mortgageComparisonConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       {
-        id: 'breakdown',
+        id: '_breakdown',
         label: '_breakdown',
         value: JSON.stringify({
           loanAmount,

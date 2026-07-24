@@ -77,7 +77,6 @@ const gcfConfig: CalculatorConfig = {
       { id: 'gcf', label: `GCF of ${a} and ${b}`, value: gcf.toString(), highlight: true, color: 'positive' },
       { id: 'euclidSteps', label: 'Euclidean Algorithm', value: euclidSteps.join(' | ') },
       { id: '_primeData', label: 'Prime Data', value: JSON.stringify({ a: pfA, b: pfB, shared }) },
-      { id: 'primeData', label: 'Prime Data', value: JSON.stringify({ a: pfA, b: pfB, shared }) },
       { id: 'sharedFactors', label: 'Shared Prime Factors', value: shared.map(f => `${f.factor}^${f.exponent}`).join(' × ') },
     ];
   },

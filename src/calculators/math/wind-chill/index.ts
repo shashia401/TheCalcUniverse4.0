@@ -143,20 +143,6 @@ const windChillConfig: CalculatorConfig = {
           frostbite,
         }),
       },
-      {
-        id: 'chartData',
-        label: '',
-        value: JSON.stringify({
-          windChillF: wcF,
-          windChillC: wcC,
-          temperatureF: Tf,
-          temperatureC: fToC(Tf),
-          windSpeedMph: Vmph,
-          originalTemp: temp,
-          originalUnit: tempUnit,
-          frostbite,
-        }),
-      },
     ];
   },
   extraPanel: (values, results) => {

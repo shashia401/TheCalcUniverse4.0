@@ -157,7 +157,7 @@ const stairConfig: CalculatorConfig = {
         value: '2x12 lumber recommended',
       },
       {
-        id: 'stairData',
+        id: '_stairData',
         label: 'Stair Geometry Data',
         value: stairData,
       },

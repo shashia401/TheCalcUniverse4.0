@@ -300,7 +300,7 @@ const molecularWeightConfig: CalculatorConfig = {
         value: result.formulaDisplay,
       },
       {
-        id: 'elementBreakdown',
+        id: '_elementBreakdown',
         label: 'Element Breakdown',
         value: JSON.stringify(result.breakdown),
       },
