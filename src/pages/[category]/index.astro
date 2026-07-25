@@ -37,8 +37,12 @@ const breadcrumb = {
 };
 ---
 
+{/* "financial calculator" (49.5K/mo search volume) is the actual phrasing
+    people search — "finance calculators" (the nav label) barely matches it.
+    Title-only override; meta.name stays "Finance" everywhere else (nav,
+    breadcrumb, footer) since that's the right word for a category label. */}
 <BaseLayout
-  title={`${meta.name} Calculators — ${meta.count} Free Tools | ${SITE_NAME}`}
+  title={`${meta.slug === 'finance' ? 'Financial' : meta.name} Calculators — ${meta.count} Free Tools | ${SITE_NAME}`}
   description={meta.description}
   canonicalPath={`/${meta.slug}/`}
   schemas={[breadcrumb]}
