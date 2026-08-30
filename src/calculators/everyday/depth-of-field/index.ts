@@ -317,7 +317,7 @@ const depthOfFieldConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Depth of Field', url: 'https://en.wikipedia.org/wiki/Depth_of_field' },
-      { source: 'Wolfram MathWorld', title: 'Depth of Field', url: 'https://mathworld.wolfram.com/DepthofField.html' },
+
     ],
   },
 };

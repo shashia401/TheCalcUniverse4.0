@@ -222,7 +222,7 @@ const oneRepMaxConfig: CalculatorConfig = {
       'For competitive powerlifting, use this as a training guide only — meet attempts should be based on actual heavy singles performed in training, not formula estimates.',
     ],
 citations: [
-      { source: 'NSCA - Strength Training', url: 'https://www.nsca.com/education/publications/essentials-of-strength-training-and-conditioning/' },
+
       { source: 'ACSM - Resistance Training', url: 'https://www.acsm.org/education-resources/books/guidelines-exercise-testing-prescription' },
     ],
   },

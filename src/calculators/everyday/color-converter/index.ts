@@ -312,7 +312,7 @@ const colorConverterConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Color Model', url: 'https://en.wikipedia.org/wiki/Color_model' },
-      { source: 'Wolfram MathWorld', title: 'RGB Color', url: 'https://mathworld.wolfram.com/RGBColor.html' },
+
     ],
   },
 };

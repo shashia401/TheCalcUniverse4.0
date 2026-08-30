@@ -229,7 +229,7 @@ const mpgCalculatorConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'EPA Fuel Economy', url: 'https://www.fueleconomy.gov/' },
-      { source: 'U.S. Department of Energy', url: 'https://www.energy.gov/eere/vehicles/fuel-economy' },
+
     ],
   },
 };

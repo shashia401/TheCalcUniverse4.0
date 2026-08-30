@@ -131,7 +131,7 @@ const EDUCATIONAL = {
     },
   ],
   citations: [
-    { source: 'NIST - SI Units of Area', url: 'https://www.nist.gov/pml/owm/si-units-area' },
+
     { source: 'USDA - Land Measurement and Survey Standards', url: 'https://www.nrcs.usda.gov/resources/data-and-reports' },
     { source: 'RICS - Code of Measuring Practice', url: 'https://www.rics.org/profession-standards/rics-standards-and-guidance/sector-standards/real-estate-standards/code-of-measuring-practice' },
   ],

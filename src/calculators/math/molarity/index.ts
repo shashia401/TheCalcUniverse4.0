@@ -353,7 +353,7 @@ const molarityConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Molar Concentration', url: 'https://en.wikipedia.org/wiki/Molar_concentration' },
-      { source: 'Wolfram MathWorld - Molarity', url: 'https://mathworld.wolfram.com/Molarity.html' },
+
     ],
   },
 };

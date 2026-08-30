@@ -287,7 +287,7 @@ const massConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Mass', url: 'https://en.wikipedia.org/wiki/Mass' },
-      { source: 'Wolfram MathWorld', title: 'Mass', url: 'https://mathworld.wolfram.com/Mass.html' },
+
     ],
   },
 };

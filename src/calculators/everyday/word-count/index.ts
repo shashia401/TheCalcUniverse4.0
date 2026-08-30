@@ -240,7 +240,7 @@ const wordCountConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'Dictionary.com', url: 'https://www.dictionary.com/e/word-count/' },
+
       { source: 'Grammarly', url: 'https://www.grammarly.com/blog/word-count/' },
     ],
   },

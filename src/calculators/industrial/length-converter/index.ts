@@ -107,7 +107,7 @@ const EDUCATIONAL = {
   ],
   citations: [
     { source: 'NIST - SI Length', url: 'https://www.nist.gov/pml/owm/si-units-length' },
-    { source: 'NIST - US Customary Units', url: 'https://www.nist.gov/pml/owm/us-customary-system' },
+
   ],
   workedExamples: [
     {

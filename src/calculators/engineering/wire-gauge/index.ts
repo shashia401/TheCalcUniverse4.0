@@ -232,7 +232,7 @@ const wireGaugeConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'American Wire Gauge', url: 'https://en.wikipedia.org/wiki/American_wire_gauge' },
-      { source: 'Wolfram MathWorld', title: 'Wire Gauge', url: 'https://mathworld.wolfram.com/WireGauge.html' },
+
     ],
   },
 };

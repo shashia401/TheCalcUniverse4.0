@@ -179,7 +179,7 @@ calculate: (values): CalculatorResult[] => {
       'This is a planning tool, not a substitute for veterinary monitoring. Always consult a swine veterinarian for high-value breeding stock or when complications arise.',
     ],
   citations: [
-      { source: 'Wikipedia — Pig Gestation', url: 'https://en.wikipedia.org/wiki/Pig_Gestation' },
+      { source: 'Wikipedia — Pig Gestation', url: 'https://en.wikipedia.org/wiki/List_of_mammalian_gestation_durations' },
       { source: 'Pig Gestation — Engineering Reference', url: 'https://www.engineeringtoolbox.com/' },
     ],
   },

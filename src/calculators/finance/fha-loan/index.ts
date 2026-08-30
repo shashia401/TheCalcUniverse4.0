@@ -268,7 +268,7 @@ const fhaLoanConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'U.S. Department of Housing and Urban Development — FHA Loan Programs', url: 'https://www.hud.gov/program_offices/housing/fhahistory' },
-      { source: 'Federal Housing Administration — About Single Family Programs', url: 'https://www.hud.gov/program_offices/housing/sfh/fha_about' },
+
       { source: 'Consumer Financial Protection Bureau — What is mortgage insurance?', url: 'https://www.consumerfinance.gov/ask-cfpb/what-is-mortgage-insurance-en-1953/' },
       { source: 'HUD Handbook 4000.1 — FHA Single Family Housing Policy', url: 'https://www.hud.gov/program_offices/housing/sfh/handbook_4000-1' },
     ],

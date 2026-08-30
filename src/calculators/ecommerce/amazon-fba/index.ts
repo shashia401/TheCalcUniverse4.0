@@ -238,7 +238,7 @@ const amazonFbaConfig: CalculatorConfig = {
     citations: [
       { source: 'Amazon Seller Central -- FBA Features and Fees', url: 'https://sellercentral.amazon.com/help/hub/reference/G201074180' },
       { source: 'Amazon Seller Central -- Referral Fees', url: 'https://sellercentral.amazon.com/help/hub/reference/G200336920' },
-      { source: 'Jungle Scout FBA Fee Calculator', url: 'https://www.junglescout.com/resources/amazon-fba-calculator/' },
+
       { source: 'USITC Harmonized Tariff Schedule', url: 'https://hts.usitc.gov/' },
     ],
   },

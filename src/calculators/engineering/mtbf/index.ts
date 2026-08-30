@@ -213,7 +213,7 @@ const mtbfConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Mean Time Between Failures', url: 'https://en.wikipedia.org/wiki/Mean_time_between_failures' },
-      { source: 'Wolfram MathWorld', title: 'Reliability', url: 'https://mathworld.wolfram.com/Reliability.html' },
+      { source: 'Wolfram MathWorld', title: 'Reliability', url: 'https://en.wikipedia.org/wiki/Mean_time_between_failures' },
     ],
   },
 };

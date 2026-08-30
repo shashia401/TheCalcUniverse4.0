@@ -146,7 +146,7 @@ const EDUCATIONAL = {
   citations: [
     { source: 'King Arthur Baking - Ingredient Weight Chart', url: 'https://www.kingarthurbaking.com/learn/ingredient-weight-chart' },
     { source: 'NIST - Cooking Measurement Standards and Conversions', url: 'https://www.nist.gov/pml/owm/cooking-measurements' },
-    { source: 'FDA - Food Labeling: Serving Sizes and Reference Amounts', url: 'https://www.fda.gov/food/nutrition-food-labeling-and-critical-foods' },
+
   ],
 };
 

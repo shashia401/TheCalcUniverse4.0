@@ -202,7 +202,7 @@ const chocolateConfig: CalculatorConfig = {
   
     citations: [
       { source: 'ASPCA - Chocolate Toxicity', url: 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/chocolate' },
-      { source: 'Merck Veterinary Manual', url: 'https://www.merckvetmanual.com/toxicology/food-hazards/theobromine-poisoning' },
+      { source: 'Wikipedia', title: 'Theobromine Poisoning', url: 'https://en.wikipedia.org/wiki/Theobromine_poisoning' },
     ],
   },
 };

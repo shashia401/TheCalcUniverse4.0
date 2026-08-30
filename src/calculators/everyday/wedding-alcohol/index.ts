@@ -260,7 +260,7 @@ const weddingAlcoholConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Wedding Reception', url: 'https://en.wikipedia.org/wiki/Wedding_reception' },
-      { source: 'Wolfram MathWorld', title: 'Estimation', url: 'https://mathworld.wolfram.com/Estimation.html' },
+
     ],
   },
 };

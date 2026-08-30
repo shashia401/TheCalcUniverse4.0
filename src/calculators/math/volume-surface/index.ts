@@ -109,7 +109,7 @@ const boxEdu: EducationalContent = {
     { question: 'Why does the surface area formula have three parts?', answer: 'A box has 6 faces in 3 pairs: front/back (l × h), top/bottom (l × w), and left/right (w × h). Each pair has two identical faces, so SA = 2lw + 2lh + 2wh.' },
   ],
   citations: [
-    { source: 'Wolfram MathWorld - Rectangular Prism', url: 'https://mathworld.wolfram.com/RectangularPrism.html' },
+
     { source: 'Wikipedia - Cuboid', url: 'https://en.wikipedia.org/wiki/Cuboid' },
   ],
 };

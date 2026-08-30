@@ -210,7 +210,7 @@ const carbohydrateConfig: CalculatorConfig = {
   
     citations: [
       { source: 'NIH - Carbohydrates', url: 'https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/' },
-      { source: 'WHO - Carbohydrate Guidelines', url: 'https://www.who.int/publications/i/item/9789241547344' },
+
     ],
   },
 };

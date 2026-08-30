@@ -172,7 +172,7 @@ const flowRateConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Volumetric Flow Rate', url: 'https://en.wikipedia.org/wiki/Volumetric_flow_rate' },
-      { source: 'Wolfram MathWorld', title: 'Flow Rate', url: 'https://mathworld.wolfram.com/FlowRate.html' },
+
     ],
   },
 };

@@ -306,8 +306,7 @@ const armyBodyFatConfig: CalculatorConfig = {
       'Administrative separation assessment — continued non-compliance with body fat standards after 6+ months in ABCP can lead to administrative separation proceedings'
     ],
     citations: [
-      { source: 'US Army Public Health Center', url: 'https://phc.amedd.army.mil/' },
-      { source: 'DoD - Body Composition Program', url: 'https://www.esd.whs.mil/Portals/54/Documents/DD/issuances/dodi/130821p.pdf' },
+      { source: 'Wikipedia - Body Fat Percentage', url: 'https://en.wikipedia.org/wiki/Body_fat_percentage' },
     ],
   },
 };

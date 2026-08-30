@@ -99,7 +99,7 @@ const EDUCATIONAL = {
   ],
   citations: [
     { source: 'NIST - SI Volume', url: 'https://www.nist.gov/pml/owm/si-units-volume' },
-    { source: 'FDA - Food Labeling', url: 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfcfr/CFRSearch.cfm?fr=101.9' },
+
   ],
 };
 

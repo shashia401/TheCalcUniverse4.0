@@ -238,8 +238,8 @@ const saasLtvCacConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'OpenView', url: 'https://openviewpartners.com/blog/saas-metrics' },
-      { source: 'Baremetrics', url: 'https://baremetrics.com/academy/ltv-cac-ratio' },
+      { source: 'Wikipedia — Customer Lifetime Value', url: 'https://en.wikipedia.org/wiki/Customer_lifetime_value' },
+      { source: 'Corporate Finance Institute — LTV:CAC Ratio', url: 'https://corporatefinanceinstitute.com/resources/valuation/ltv-cac-ratio/' },
     ],
   },
 };

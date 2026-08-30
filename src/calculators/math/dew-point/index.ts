@@ -168,7 +168,7 @@ const dewPointConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'NOAA - Dew Point Definition', url: 'https://www.weather.gov/ffc/dewpoint' },
+
       { source: 'Wikipedia - Dew Point', url: 'https://en.wikipedia.org/wiki/Dew_point' },
     ],
   },

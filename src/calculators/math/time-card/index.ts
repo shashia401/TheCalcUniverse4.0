@@ -417,7 +417,7 @@ const timeCardConfig: CalculatorConfig = {
       'For multi-rate scenarios (different rates for different days or tasks), run the calculator separately for each rate and combine the results manually.',
     ],    citations: [
       { source: 'Wikipedia', title: 'Timesheet', url: 'https://en.wikipedia.org/wiki/Timesheet' },
-      { source: 'Wolfram MathWorld', title: 'Time', url: 'https://mathworld.wolfram.com/Time.html' },
+
     ],
   },
 };

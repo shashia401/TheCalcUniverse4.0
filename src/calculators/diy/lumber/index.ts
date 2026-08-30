@@ -229,7 +229,7 @@ const lumberConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'American Wood Council', title: 'Design Tools and Span Tables', url: 'https://www.awc.org/design-tools' },
-      { source: 'American Softwood Lumber Standard', title: 'PS 20-20 Voluntary Product Standard', url: 'https://www.nist.gov/pml/owm/ps-20-20-american-softwood-lumber-standard' },
+
       { source: 'International Residential Code', title: 'IRC 2021 -- Wood Framing', url: 'https://codes.iccsafe.org/content/IRC2021P4/chapter-6-wall-construction' },
       { source: 'National Hardwood Lumber Association', title: 'NHLA Grading Rules', url: 'https://www.nhla.com/' },
       { source: 'Wikipedia', title: 'Board Foot', url: 'https://en.wikipedia.org/wiki/Board_foot' },

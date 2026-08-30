@@ -167,7 +167,7 @@ calculate: (values) => {
       'Critical speed (whirling) and buckling load limits are not calculated. Thread friction varies with lubrication condition, wear, and contamination — efficiency values should be verified for your specific operating conditions.',
     ],
   citations: [
-      { source: 'Wikipedia — Lead Screw', url: 'https://en.wikipedia.org/wiki/Lead_Screw' },
+      { source: 'Wikipedia — Lead Screw', url: 'https://en.wikipedia.org/wiki/Leadscrew' },
       { source: 'Lead Screw — Engineering Reference', url: 'https://www.engineeringtoolbox.com/' },
     ],
   },

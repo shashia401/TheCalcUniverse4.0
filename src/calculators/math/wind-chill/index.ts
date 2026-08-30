@@ -194,7 +194,7 @@ const windChillConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'NOAA - Wind Chill', url: 'https://www.weather.gov/safety/cold-wind-chill' },
+
       { source: 'Wikipedia - Wind Chill', url: 'https://en.wikipedia.org/wiki/Wind_chill' },
     ],
   },

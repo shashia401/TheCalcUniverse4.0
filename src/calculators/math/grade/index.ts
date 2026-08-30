@@ -199,7 +199,7 @@ const gradeConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Grading in Education', url: 'https://en.wikipedia.org/wiki/Grading_in_education' },
-      { source: 'College Board - GPA Weighting', url: 'https://bigfuture.collegeboard.org/help-center/what-is-weighted-gpa' },
+
     ],
     diagram: {
       svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="20" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-333333)">Final Exam Grade Needed</text><text x="15" y="48" font-size="11" fill="var(--svg-555555)">Current Grade</text><rect x="15" y="54" width="200" height="18" rx="4" fill="var(--svg-3b82f6)"/><text x="225" y="68" font-size="11" fill="var(--svg-333333)" font-weight="bold">85%</text><text x="15" y="96" font-size="11" fill="var(--svg-555555)">Contribution (1  −  Weight)</text><rect x="15" y="102" width="160" height="18" rx="4" fill="var(--svg-3b82f6)" opacity="0.4"/><text x="225" y="116" font-size="11" fill="var(--svg-333333)" font-weight="bold">68%</text><text x="15" y="148" font-size="11" fill="var(--svg-ef4444)">Desired Grade</text><line x1="15" y1="158" x2="220" y2="158" stroke="var(--svg-ef4444)" stroke-width="2" stroke-dasharray="4"/><polygon points="220,153 230,158 220,163" fill="var(--svg-ef4444)"/><text x="242" y="162" font-size="11" fill="var(--svg-ef4444)" font-weight="bold">90%</text><rect x="10" y="172" width="300" height="22" rx="4" fill="var(--svg-eff6ff)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="160" y="187" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">Needed = (Desired  −  Current×(1−Weight)) / Weight</text></svg>',

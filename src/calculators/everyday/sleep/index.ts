@@ -287,7 +287,7 @@ const sleepConfig: CalculatorConfig = {
     citations: [
       { source: 'CDC - Sleep and Sleep Disorders', url: 'https://www.cdc.gov/sleep/' },
       { source: 'National Sleep Foundation - Sleep Duration Recommendations', url: 'https://www.thensf.org/' },
-      { source: 'Kleitman, N. (1963). Sleep and Wakefulness. University of Chicago Press.', url: 'https://press.uchicago.edu/ucp/books/book/chicago/S/bo5950866.html' },
+
     ],
   },
 };

@@ -265,7 +265,7 @@ const tipConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'IRS - Tip Record Keeping and Reporting', url: 'https://www.irs.gov/businesses/small-businesses-self-employed/tip-record-keeping-and-reporting' },
+
       { source: 'Wikipedia - Gratuity', url: 'https://en.wikipedia.org/wiki/Gratuity' },
     ],
   },

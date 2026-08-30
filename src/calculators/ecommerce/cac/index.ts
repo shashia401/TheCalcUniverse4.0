@@ -229,8 +229,7 @@ const cacConfig: CalculatorConfig = {
       { label: 'LTV Formula (Gross)', value: '(AOV × Frequency × GM%) ÷ Churn' },
     ],
     citations: [
-      { source: 'HubSpot', url: 'https://blog.hubspot.com/marketing/what-is-cac' },
-      { source: 'Google Analytics', url: 'https://support.google.com/analytics/answer/9311489' },
+      { source: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Customer_acquisition_cost' },
     ],
   },
 };

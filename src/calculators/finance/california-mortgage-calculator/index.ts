@@ -188,7 +188,7 @@ const caMortgageConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'CalHFA Homebuyer Programs', url: 'https://www.calhfa.ca.gov/homebuyer/' },
-      { source: 'CA State Board of Equalization — Proposition 13', url: 'https://www.boe.ca.gov/proptaxes/' },
+
       { source: 'CFPB — Mortgage Payment Calculator Methodology', url: 'https://www.consumerfinance.gov/owning-a-home/' },
     ],
   },

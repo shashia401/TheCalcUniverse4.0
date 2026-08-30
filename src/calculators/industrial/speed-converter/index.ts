@@ -130,9 +130,9 @@ const EDUCATIONAL = {
     },
   ],
   citations: [
-    { source: 'NIST - SI Units of Speed', url: 'https://www.nist.gov/pml/owm/si-units-speed' },
+
     { source: 'NASA - Mach Number', url: 'https://www.grc.nasa.gov/www/k-12/airplane/mach.html' },
-    { source: 'ICAO - Standard Atmosphere', url: 'https://www.icao.int/safety/OPS/OPS-Normal/Pages/Standard-Atmosphere.aspx' },
+
   ],
 };
 

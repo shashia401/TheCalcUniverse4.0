@@ -216,7 +216,7 @@ const breakEvenConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'SCORE', url: 'https://www.score.org/resource/break-even-analysis' },
-      { source: 'U.S. Small Business Administration', url: 'https://www.sba.gov/business-guide/manage-your-business/manage-your-finances/break-even-point' },
+      { source: 'Wikipedia', title: 'Break-even (Economics)', url: 'https://en.wikipedia.org/wiki/Break-even_(economics)' },
     ],
   },
 };

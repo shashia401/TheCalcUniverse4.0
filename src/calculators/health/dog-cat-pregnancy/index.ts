@@ -266,9 +266,9 @@ const dogCatPregnancyConfig: CalculatorConfig = {
       { label: 'Temperature Drop (Dogs)', value: 'Below 100°F/37.8°C signals labor in 12–24 hrs' },
     ],
     citations: [
-      { source: 'American Kennel Club — Dog Pregnancy', url: 'https://www.akc.org/expert-advice/health/dog-pregnancy/' },
+
       { source: 'VCA Hospitals — Cat Pregnancy', url: 'https://vcahospitals.com/know-your-pet/cat-pregnancy-and-kitten-care' },
-      { source: 'Wikipedia — Canine Pregnancy', url: 'https://en.wikipedia.org/wiki/Canine_pregnancy' },
+      { source: 'Wikipedia — Canine Reproduction', url: 'https://en.wikipedia.org/wiki/Canine_reproduction' },
       { source: 'Merck Veterinary Manual — Small Animal Reproduction', url: 'https://www.merckvetmanual.com/management-and-nutrition/management-of-reproduction-small-animals/the-breeding-of-dogs' },
     ],
   },

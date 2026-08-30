@@ -243,7 +243,7 @@ const proteinConfig: CalculatorConfig = {
     ],
   
     citations: [
-      { source: 'NIH - Dietary Protein', url: 'https://ods.od.nih.gov/factsheets/Protein-HealthProfessional/' },
+      { source: 'Wikipedia - Protein (Nutrient)', url: 'https://en.wikipedia.org/wiki/Protein_(nutrient)' },
       { source: 'WHO/FAO - Protein Requirements', url: 'https://www.who.int/publications/i/item/9789241209352' },
     ],
   },

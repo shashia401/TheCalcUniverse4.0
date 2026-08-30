@@ -333,7 +333,7 @@ const businessLoanConfig: CalculatorConfig = {
     citations: [
       { source: 'US Small Business Administration — Loan Programs', url: 'https://www.sba.gov' },
       { source: 'Consumer Financial Protection Bureau — Small Business Lending', url: 'https://www.consumerfinance.gov' },
-      { source: 'SBA SOP 50 10 7 — Lender and Development Company Loan Programs', url: 'https://www.sba.gov/sop-50-10-7-lender-loan-programs' },
+
     ],
   },
 };

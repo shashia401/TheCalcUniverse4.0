@@ -525,8 +525,7 @@ const marginCalculatorConfig: CalculatorConfig = {
       { label: 'Cost from Price+Margin', value: 'Price × (1 − M%/100)' },
     ],
     citations: [
-      { source: 'Shopify', url: 'https://www.shopify.com/blog/markup-vs-margin' },
-      { source: 'U.S. Small Business Administration', url: 'https://www.sba.gov/business-guide/manage-your-business/manage-your-finances/cost-goods-sold' },
+      { source: 'Wikipedia', title: 'Markup (Business)', url: 'https://en.wikipedia.org/wiki/Markup_(business)' },
     ],
   },
 };

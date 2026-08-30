@@ -131,7 +131,7 @@ const EDUCATIONAL = {
     },
   ],
   citations: [
-    { source: 'NIST - SI Units for Force and Newton', url: 'https://www.nist.gov/pml/owm/metric-si/si-units-force' },
+
     { source: 'ISO 80000-4 - Quantities and Units (Mechanics)', url: 'https://www.iso.org/standard/30669.html' },
     { source: 'Wikipedia - Newton (unit), historical development', url: 'https://en.wikipedia.org/wiki/Newton_(unit)' },
   ],

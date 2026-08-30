@@ -348,7 +348,7 @@ const distanceConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Distance', url: 'https://en.wikipedia.org/wiki/Distance' },
-      { source: 'NIST - SI Units: Length', url: 'https://www.nist.gov/pml/owm/metric-si/length' },
+
       { source: 'Wikipedia - Euclidean Distance', url: 'https://en.wikipedia.org/wiki/Euclidean_distance' },
     ],
   },

@@ -245,7 +245,7 @@ const phCalculatorConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'pH', url: 'https://en.wikipedia.org/wiki/PH' },
-      { source: 'Wolfram MathWorld', title: 'pH', url: 'https://mathworld.wolfram.com/ph.html' },
+
     ],
   },
 };

@@ -299,7 +299,7 @@ const autoLoanConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'NHTSA', url: 'https://www.nhtsa.gov/' },
-      { source: 'Experian Automotive', url: 'https://www.experian.com/automotive/auto-finance-trends' },
+      { source: 'CFPB - Auto Loans', url: 'https://www.consumerfinance.gov/consumer-tools/auto-loans/' },
     ],
   },
 };

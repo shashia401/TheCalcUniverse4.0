@@ -386,7 +386,7 @@ const leaseCalculatorConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Edmunds', url: 'https://www.edmunds.com/car-leasing/lease-calculator.html' },
-      { source: 'Consumer Financial Protection Bureau', url: 'https://www.consumerfinance.gov/ask-cfpb/what-is-a-car-lease-en-1886/' },
+      { source: 'Wikipedia', title: 'Vehicle Leasing', url: 'https://en.wikipedia.org/wiki/Vehicle_leasing' },
     ],
   },
 };

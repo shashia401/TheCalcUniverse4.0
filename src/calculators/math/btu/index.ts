@@ -324,7 +324,7 @@ const btuConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'British Thermal Unit', url: 'https://en.wikipedia.org/wiki/British_thermal_unit' },
-      { source: 'Wolfram MathWorld', title: 'BTU', url: 'https://mathworld.wolfram.com/BTU.html' },
+
     ],
   },
 };

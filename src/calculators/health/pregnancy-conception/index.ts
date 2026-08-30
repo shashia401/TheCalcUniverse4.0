@@ -444,7 +444,7 @@ const conceptionConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'ACOG - Optimizing Fertility', url: 'https://www.acog.org/womens-health/faqs/optimizing-fertility' },
-      { source: 'NIH - Fertility', url: 'https://www.nichd.nih.gov/health/topics/fertility' },
+      { source: 'Wikipedia - Fertility', url: 'https://en.wikipedia.org/wiki/Fertility' },
       { source: 'Wilcox et al. (1995) - Timing of Sexual Intercourse in Relation to Ovulation', url: 'https://doi.org/10.1056/NEJM199512073332301' },
       { source: 'ASRM - Optimizing Natural Fertility', url: 'https://www.asrm.org/practice-guidance/practice-committee-documents/optimizing-natural-fertility/' },
     ],

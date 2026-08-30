@@ -381,7 +381,7 @@ const molecularWeightConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Molecular Mass', url: 'https://en.wikipedia.org/wiki/Molecular_mass' },
-      { source: 'Wolfram MathWorld - Molecular Weight', url: 'https://mathworld.wolfram.com/MolecularWeight.html' },
+      { source: 'Wikipedia - Molar Mass', url: 'https://en.wikipedia.org/wiki/Molar_mass' },
     ],
   },
 };

@@ -306,8 +306,7 @@ const youtubeRevenueConfig: CalculatorConfig = {
       { label: 'Long-form RPM (per 1,000 views)', value: '$2-$12+' },
     ],
     citations: [
-      { source: 'YouTube Creator Academy -- Revenue Basics', url: 'https://creatoracademy.youtube.com/page/lesson/revenue' },
-      { source: 'Google AdSense Help', url: 'https://support.google.com/adsense/answer/1705824' },
+
       { source: 'YouTube Partner Program Overview & Policies', url: 'https://support.google.com/youtube/answer/72851' },
       { source: 'Social Blade -- YouTube Statistics & Analytics', url: 'https://socialblade.com/youtube/' },
     ],

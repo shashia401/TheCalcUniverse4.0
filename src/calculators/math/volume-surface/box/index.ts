@@ -46,7 +46,7 @@ const boxConfig: CalculatorConfig = {
       { question: 'What is the surface area formula telling me?', answer: 'The formula SA = 2(lw + lh + wh) breaks down as: lw is the area of the bottom (and top), lh is the area of the front (and back), wh is the area of each side. The factor 2 accounts for opposite faces being identical. For a 8 x 5 x 3 box: bottom and top are 40 each (80 total), front and back are 24 each (48 total), sides are 15 each (30 total) — sum is 158 square units. This is exactly how much material you need to build the box.' },
     ],
     citations: [
-      { source: 'Wolfram MathWorld', title: 'Rectangular Prism', url: 'https://mathworld.wolfram.com/RectangularPrism.html' },
+
       { source: 'Wikipedia', title: 'Cuboid', url: 'https://en.wikipedia.org/wiki/Cuboid' },
     ],
   },

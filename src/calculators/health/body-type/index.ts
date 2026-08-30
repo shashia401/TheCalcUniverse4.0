@@ -243,7 +243,7 @@ const bodyTypeConfig: CalculatorConfig = {
       'Weight loss progress monitoring — track changes in waist-to-hip ratio over time as a meaningful health indicator that captures dangerous visceral fat reduction beyond scale weight'
     ],
     citations: [
-      { source: 'WHO - Waist Circumference and Waist-Hip Ratio', url: 'https://www.who.int/publications/i/item/9789241547776' },
+
       { source: 'NIH - Assessing Your Weight and Health Risk', url: 'https://www.nhlbi.nih.gov/health/educational/lose_wt/risk.htm' },
       { source: 'INTERHEART Study - WHR vs BMI', url: 'https://pubmed.ncbi.nlm.nih.gov/16271645/' },
     ],

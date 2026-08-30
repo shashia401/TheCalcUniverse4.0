@@ -354,7 +354,7 @@ const pValueConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'NIST/SEMATECH - Engineering Statistics Handbook: Hypothesis Testing', url: 'https://www.itl.nist.gov/div898/handbook/eda/section3/eda3271.htm' },
+      { source: 'NIST/SEMATECH - Engineering Statistics Handbook: Hypothesis Testing', url: 'https://www.itl.nist.gov/div898/handbook/eda/section3/eda35.htm' },
       { source: 'Wikipedia - P-value', url: 'https://en.wikipedia.org/wiki/P-value' },
       { source: 'American Statistical Association - Statement on p-Values (2016)', url: 'https://www.tandfonline.com/doi/full/10.1080/00031305.2016.1154108' },
       { source: 'Abramowitz & Stegun - Handbook of Mathematical Functions (Normal CDF approximation)', url: 'https://en.wikipedia.org/wiki/Error_function#Numerical_approximations' },

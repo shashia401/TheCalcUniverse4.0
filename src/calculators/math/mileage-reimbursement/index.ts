@@ -197,7 +197,7 @@ const mileageConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'Wikipedia', title: 'Standard Mileage Rate', url: 'https://en.wikipedia.org/wiki/Standard_mileage_rate' },
+
       { source: 'IRS', title: 'IRS Mileage Rates', url: 'https://www.irs.gov/tax-professionals/standard-mileage-rates' },
     ],
   },

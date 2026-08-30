@@ -409,7 +409,7 @@ const paycheckConfig: CalculatorConfig = {
     formulaSource: 'IRS Revenue Procedure 2025-XX (2026 inflation-adjusted brackets); Tax Foundation State Individual Income Tax Rates and Brackets, 2026; Internal Revenue Code §3101 (FICA rates).',
     citations: [
       { source: 'IRS Publication 15 (Circular E) — Employer\'s Tax Guide for federal income tax withholding tables and FICA rates', url: 'https://www.irs.gov/publications/p15' },
-      { source: 'IRS Revenue Procedure 2025-XX — Inflation-adjusted tax brackets, standard deduction amounts, and FICA wage base for 2026', url: 'https://www.irs.gov/pub/irs-drop/rp-25-xx.pdf' },
+
       { source: 'Tax Foundation — State Individual Income Tax Rates and Brackets, 2026', url: 'https://taxfoundation.org/data/all/state/state-income-tax-rates/' },
       { source: 'Internal Revenue Code §3101 — Rate of tax on employees for old-age, survivors, and disability insurance (Social Security)', url: 'https://www.law.cornell.edu/uscode/text/26/3101' },
       { source: 'Social Security Administration — Contribution and Benefit Base for 2026', url: 'https://www.ssa.gov/oact/cola/cbb.html' },

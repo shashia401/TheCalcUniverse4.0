@@ -287,7 +287,7 @@ const areaPerimeterConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'Euclid\'s Elements (c. 300 BCE)', url: 'https://mathshistory.st-andrews.ac.uk/HistTopics/Euclid/' },
+
       { source: 'Archimedes — Measurement of a Circle (c. 250 BCE)', url: 'https://en.wikipedia.org/wiki/Area_of_a_circle' },
     ],
   },

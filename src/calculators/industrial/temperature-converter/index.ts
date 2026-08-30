@@ -188,7 +188,7 @@ const config: CalculatorConfig = {
     ],
     citations: [
       { source: 'NIST - SI Temperature', url: 'https://www.nist.gov/pml/owm/si-units-temperature' },
-      { source: 'NIST - Temperature Conversion', url: 'https://www.nist.gov/pml/owm/temperature-conversion' },
+
     ],
   },
 };

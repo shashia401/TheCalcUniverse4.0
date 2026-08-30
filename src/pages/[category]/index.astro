@@ -35,15 +35,21 @@ const breadcrumb = {
     { '@type': 'ListItem', position: 2, name: meta.name, item: `${BASE_URL}/${meta.slug}/` },
   ],
 };
----
 
-{/* "financial calculator" (49.5K/mo search volume) is the actual phrasing
-    people search — "finance calculators" (the nav label) barely matches it.
-    Title-only override; meta.name stays "Finance" everywhere else (nav,
-    breadcrumb, footer) since that's the right word for a category label. */}
+// "financial calculator" (49.5K/mo search volume) is the actual phrasing
+// people search — "finance calculators" (the nav label) barely matches it.
+// Override title/H1/meta-description only; meta.name stays "Finance"
+// everywhere else (nav, breadcrumb, footer) since that's the right word
+// for a category label.
+const categoryLabel = meta.slug === 'finance' ? 'Financial' : meta.name;
+const metaDescription =
+  meta.slug === 'finance'
+    ? 'Free financial calculators for loans, investments, mortgages, and real estate — personal finance made simple.'
+    : meta.description;
+---
 <BaseLayout
-  title={`${meta.slug === 'finance' ? 'Financial' : meta.name} Calculators — ${meta.count} Free Tools | ${SITE_NAME}`}
-  description={meta.description}
+  title={`${categoryLabel} Calculators — ${meta.count} Free Tools | ${SITE_NAME}`}
+  description={metaDescription}
   canonicalPath={`/${meta.slug}/`}
   schemas={[breadcrumb]}
 >
@@ -61,7 +67,7 @@ const breadcrumb = {
         </span>
         <div>
           <h1 class="text-2xl md:text-3xl font-bold text-[var(--surface-text)]">
-            {meta.name} Calculators
+            {categoryLabel} Calculators
           </h1>
           <p class="text-sm text-[var(--surface-text-muted)]">
             <span class="font-mono font-semibold">{meta.count}</span> tools, each with formula and worked examples

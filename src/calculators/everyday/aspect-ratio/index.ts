@@ -314,7 +314,7 @@ const aspectRatioConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Aspect Ratio (Image)', url: 'https://en.wikipedia.org/wiki/Aspect_ratio_(image)' },
-      { source: 'Wolfram MathWorld', title: 'Aspect Ratio', url: 'https://mathworld.wolfram.com/AspectRatio.html' },
+      { source: 'Wikipedia', title: 'Aspect Ratio', url: 'https://en.wikipedia.org/wiki/Aspect_ratio' },
     ],
   },
 };

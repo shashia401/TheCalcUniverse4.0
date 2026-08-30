@@ -319,7 +319,7 @@ const squareFootageConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Square Foot', url: 'https://en.wikipedia.org/wiki/Square_foot' },
-      { source: 'ANSI Z765 — Square Footage Standard', url: 'https://www.nahb.org/advocacy/industry-issues/ansi-residential-square-footage-standard' },
+
       { source: 'Wolfram MathWorld', title: 'Area', url: 'https://mathworld.wolfram.com/Area.html' },
     ],
   },

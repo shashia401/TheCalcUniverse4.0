@@ -161,7 +161,7 @@ calculate: (values) => {
       'The formula assumes ideal solution behavior — concentrated solutions (> 0.5 M) deviate from ideality.',
     ],
   citations: [
-      { source: 'Wikipedia — Buffer Capacity', url: 'https://en.wikipedia.org/wiki/Buffer_Capacity' },
+      { source: 'Wikipedia — Buffer Capacity', url: 'https://en.wikipedia.org/wiki/Buffer_solution' },
       { source: 'Buffer Capacity — Engineering Reference', url: 'https://www.engineeringtoolbox.com/' },
     ],
   },

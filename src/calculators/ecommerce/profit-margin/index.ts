@@ -231,7 +231,7 @@ const profitMarginConfig: CalculatorConfig = {
       { label: 'Ecom Target (Premium)', value: '50-65% Gross Margin' },
     ],
     citations: [
-      { source: 'Shopify', url: 'https://www.shopify.com/blog/how-to-calculate-profit-margin' },
+      { source: 'Wikipedia - Profit Margin', url: 'https://en.wikipedia.org/wiki/Profit_margin' },
       { source: 'Amazon Seller Central', url: 'https://sellercentral.amazon.com/help/hub/reference/G200332050' },
     ],
   },

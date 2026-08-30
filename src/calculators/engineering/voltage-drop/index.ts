@@ -238,7 +238,7 @@ const voltageDropConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Voltage Drop', url: 'https://en.wikipedia.org/wiki/Voltage_drop' },
-      { source: 'Wolfram MathWorld', title: 'Voltage', url: 'https://mathworld.wolfram.com/Voltage.html' },
+      { source: 'Wikipedia', title: 'Voltage', url: 'https://en.wikipedia.org/wiki/Voltage' },
       { source: 'NFPA 70 (NEC)', title: 'National Electrical Code, Article 210.19', url: 'https://www.nfpa.org/codes-and-standards/nfpa-70-standard-development/70' },
     ],
   },

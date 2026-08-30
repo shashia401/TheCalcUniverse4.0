@@ -189,7 +189,7 @@ const bpmTapperConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Tempo', url: 'https://en.wikipedia.org/wiki/Tempo' },
-      { source: 'Wolfram MathWorld', title: 'Frequency', url: 'https://mathworld.wolfram.com/Frequency.html' },
+      { source: 'Wikipedia', title: 'Frequency', url: 'https://en.wikipedia.org/wiki/Frequency' },
     ],
   },
 };

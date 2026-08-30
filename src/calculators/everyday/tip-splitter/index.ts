@@ -190,7 +190,7 @@ const tipSplitterConfig: CalculatorConfig = {
     ],
   
     citations: [
-      { source: 'Emily Post Institute - Tipping', url: 'https://emilypost.com/weddings/tipping-etiquette/' },
+
       { source: 'Investopedia', url: 'https://www.investopedia.com/terms/t/tip.asp' },
     ],
   },

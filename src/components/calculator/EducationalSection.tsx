@@ -5,6 +5,7 @@
 // A student should be able to learn the method from this page alone.
 
 import type { EducationalContent } from '../../types/calculator';
+import { splitIntoParagraphs } from '../../utils/paragraphSplit';
 
 interface Props {
   content: EducationalContent;
@@ -31,7 +32,11 @@ export default function EducationalSection({ content, calculatorTitle, customInp
             {content.formula}
           </p>
           {content.formulaDescription && (
-            <p className="mt-3 text-[var(--surface-text-secondary)]">{content.formulaDescription}</p>
+            <div className="mt-3 space-y-3">
+              {splitIntoParagraphs(content.formulaDescription).map((para, i) => (
+                <p key={i} className="text-[var(--surface-text-secondary)]">{para}</p>
+              ))}
+            </div>
           )}
 
           {content.variables && content.variables.length > 0 && (
@@ -123,9 +128,13 @@ export default function EducationalSection({ content, calculatorTitle, customInp
       {content.explanation && (
         <div className={card}>
           <h2 className="text-lg font-bold mb-3">Understanding the Result</h2>
-          <p className="text-[var(--surface-text-secondary)] whitespace-pre-line leading-relaxed">
-            {content.explanation}
-          </p>
+          <div className="space-y-3">
+            {splitIntoParagraphs(content.explanation).map((para, i) => (
+              <p key={i} className="text-[var(--surface-text-secondary)] whitespace-pre-line leading-relaxed">
+                {para}
+              </p>
+            ))}
+          </div>
         </div>
       )}
 

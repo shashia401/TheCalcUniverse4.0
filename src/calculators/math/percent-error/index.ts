@@ -215,7 +215,7 @@ const percentErrorConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Approximation Error', url: 'https://en.wikipedia.org/wiki/Approximation_error' },
-      { source: 'Wolfram MathWorld - Percent Error', url: 'https://mathworld.wolfram.com/PercentError.html' },
+
       { source: 'NIST - Measurement Uncertainty', url: 'https://www.nist.gov/pml/owm' },
     ],
   },

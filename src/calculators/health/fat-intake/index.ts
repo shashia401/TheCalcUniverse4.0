@@ -188,7 +188,7 @@ const fatIntakeConfig: CalculatorConfig = {
   
     citations: [
       { source: 'NIH - Dietary Fats', url: 'https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/' },
-      { source: 'WHO - Dietary Fat Guidelines', url: 'https://www.who.int/publications/i/item/9789241547344' },
+
     ],
   },
 };

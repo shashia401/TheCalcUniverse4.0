@@ -137,7 +137,7 @@ const EDUCATIONAL = {
   citations: [
     { source: 'ISO 6789 - Torque Tool Calibration Standards', url: 'https://www.iso.org/standard/30669.html' },
     { source: 'SAE International - Fastener Torque Standards', url: 'https://www.sae.org/standards/' },
-    { source: 'NIST - Torque Measurement and Calibration', url: 'https://www.nist.gov/pml/owm/torque-measurement' },
+
   ],
 };
 

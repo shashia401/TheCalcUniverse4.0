@@ -146,8 +146,7 @@ const cogsConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'IRS', url: 'https://www.irs.gov/businesses/small-businesses-self-employed/cost-of-goods-sold' },
-      { source: 'U.S. Small Business Administration', url: 'https://www.sba.gov/business-guide/manage-your-business/manage-your-finances/cost-goods-sold' },
+      { source: 'Wikipedia', title: 'Cost of Goods Sold', url: 'https://en.wikipedia.org/wiki/Cost_of_goods_sold' },
     ],
   },
 };

@@ -203,7 +203,7 @@ const studyTimeConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'American Psychological Association — Spacing Effects in Learning', url: 'https://www.apa.org/science/about/psa/2006/11/kornell' },
+
       { source: 'National Institutes of Health', url: 'https://pubmed.ncbi.nlm.nih.gov/21261492/' },
     ],
   },

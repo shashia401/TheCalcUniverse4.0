@@ -178,7 +178,7 @@ const fhaLoanConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'U.S. Department of Housing and Urban Development', url: 'https://www.hud.gov/program_offices/housing/fhahistory' },
-      { source: 'Federal Housing Administration', url: 'https://www.hud.gov/program_offices/housing/sfh/fha_about' },
+      { source: 'Wikipedia', title: 'FHA Insured Loan', url: 'https://en.wikipedia.org/wiki/FHA_insured_loan' },
     ],
   },
 };

@@ -384,7 +384,7 @@ const btuConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'British Thermal Unit', url: 'https://en.wikipedia.org/wiki/British_thermal_unit' },
-      { source: 'U.S. Department of Energy — HVAC Sizing', url: 'https://www.energy.gov/energysaver/air-conditioning' },
+
       { source: 'ACCA Manual J — Residential Load Calculation', url: 'https://www.acca.org/standards/technical-manuals/manual-j' },
     ],
   },

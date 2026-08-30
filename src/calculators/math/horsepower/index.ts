@@ -198,7 +198,7 @@ const horsepowerConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Horsepower', url: 'https://en.wikipedia.org/wiki/Horsepower' },
-      { source: 'Wolfram MathWorld', title: 'Horsepower', url: 'https://mathworld.wolfram.com/Horsepower.html' },
+
     ],
   },
 };

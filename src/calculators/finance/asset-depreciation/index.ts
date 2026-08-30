@@ -380,7 +380,7 @@ const depreciationConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Internal Revenue Service (Publication 946)', url: 'https://www.irs.gov/publications/p946' },
-      { source: 'Financial Accounting Standards Board (GAAP)', url: 'https://www.fasb.org' },
+
       { source: 'Investopedia — Depreciation Methods', url: 'https://www.investopedia.com/terms/d/depreciation.asp' },
     ],
   },

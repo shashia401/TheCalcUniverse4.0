@@ -210,7 +210,7 @@ const gearRatioConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Gear Ratio', url: 'https://en.wikipedia.org/wiki/Gear_ratio' },
-      { source: 'Wolfram MathWorld', title: 'Gear', url: 'https://mathworld.wolfram.com/Gear.html' },
+
     ],
   },
 };

@@ -207,7 +207,7 @@ const ohmsLawConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: "Ohm's Law", url: 'https://en.wikipedia.org/wiki/Ohm%27s_law' },
-      { source: 'Wolfram MathWorld', title: "Ohm's Law", url: 'https://mathworld.wolfram.com/OhmsLaw.html' },
+
     ],
   },
 };

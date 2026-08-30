@@ -253,7 +253,7 @@ const tireSizeConfig: CalculatorConfig = {
     citations: [
       { source: 'Tire and Rim Association', url: 'https://www.us-tra.org/' },
       { source: 'NHTSA Tire Safety', url: 'https://www.nhtsa.gov/equipment/tires' },
-      { source: 'Tire Rack Tech Article: Plus Sizing', url: 'https://www.tirerack.com/upgrade-garage/what-is-plus-sizing' },
+
       { source: 'SAE J2452 — Stepwise Coastdown Methodology for Measuring Tire Rolling Resistance', url: 'https://www.sae.org/standards/content/j2452/' },
     ],
   },

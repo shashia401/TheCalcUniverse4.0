@@ -358,7 +358,7 @@ const schengenVisaConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Schengen Area', url: 'https://en.wikipedia.org/wiki/Schengen_Area' },
-      { source: 'European Commission', title: 'Schengen Visas', url: 'https://ec.europa.eu/home-affairs/policies/schengen-borders-and-visa/schengen-area_en' },
+
     ],
   },
 };

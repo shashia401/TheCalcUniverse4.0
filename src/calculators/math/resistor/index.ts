@@ -539,7 +539,7 @@ const resistorConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Resistor', url: 'https://en.wikipedia.org/wiki/Resistor' },
-      { source: 'Wolfram MathWorld', title: 'Resistor', url: 'https://mathworld.wolfram.com/Resistor.html' },
+
     ],
   },
 };

@@ -204,7 +204,7 @@ const roasConfig: CalculatorConfig = {
       { label: 'TikTok Ads Target', value: '2-4x ROAS' },
     ],
     citations: [
-      { source: 'Google Ads', url: 'https://ads.google.com/home/resources/roas/' },
+
       { source: 'Shopify', url: 'https://www.shopify.com/blog/roas' },
     ],
   },

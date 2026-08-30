@@ -96,7 +96,7 @@ const commonFactorConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Factorization', url: 'https://en.wikipedia.org/wiki/Factorization' },
-      { source: 'Wolfram MathWorld - Common Factor', url: 'https://mathworld.wolfram.com/CommonFactor.html' },
+      { source: 'Wikipedia - Greatest Common Divisor', url: 'https://en.wikipedia.org/wiki/Greatest_common_divisor' },
     ],
   },
 };

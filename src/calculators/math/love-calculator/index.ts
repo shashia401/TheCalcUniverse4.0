@@ -346,7 +346,7 @@ const config: CalculatorConfig = {
       caption: 'Love score is calculated from L-O-V-E letter values and shared letter bonus, producing a fun 0-100% match.',
     },
     citations: [
-      { source: 'Wikipedia - Love Calculator', url: 'https://en.wikipedia.org/wiki/Love_calculator' },
+
       { source: 'Britannica - Astrology & Zodiac', url: 'https://www.britannica.com/topic/zodiac' },
     ],
   },

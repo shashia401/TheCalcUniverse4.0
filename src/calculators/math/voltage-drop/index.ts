@@ -256,7 +256,7 @@ const voltageDropConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Voltage Drop', url: 'https://en.wikipedia.org/wiki/Voltage_drop' },
-      { source: 'NFPA 70 - National Electrical Code (NEC)', url: 'https://www.nfpa.org/codes-and-standards/all-codes-and-standards/list-of-codes-and-standards/nfpa-70' },
+
     ],
   },
 };
