@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import SalaryHourlyPanel from './SalaryHourlyPanel';
@@ -91,8 +90,6 @@ const salaryHourlyConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const salary = parseFloat(values.annualSalary);
     const hoursPerWeek = parseFloat(values.hoursPerWeek);
     const trueHourlyToggle = values.trueHourlyToggle || 'no';

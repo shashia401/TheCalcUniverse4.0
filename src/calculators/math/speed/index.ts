@@ -32,7 +32,7 @@ const formatPace = (minutesPerUnit: number): string => {
   const totalSec = Math.round(minutesPerUnit * 60);
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
-  return `${m}:${s.toString().padStart(2, '0')} min/${minutesPerUnit < 1 ? 'km' : 'mi'}`;
+  return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
 const speedConfig: CalculatorConfig = {
@@ -231,7 +231,7 @@ const speedConfig: CalculatorConfig = {
         results.push({
           id: 'paceMile',
           label: 'Pace (min/mi)',
-          value: formatPace(paceMinMile).replace('min/mi', ''),
+          value: formatPace(paceMinMile),
           color: 'neutral' as const,
         });
       }
@@ -239,7 +239,7 @@ const speedConfig: CalculatorConfig = {
         results.push({
           id: 'paceKm',
           label: 'Pace (min/km)',
-          value: formatPace(paceMinKm).replace('min/km', ''),
+          value: formatPace(paceMinKm),
           color: 'neutral' as const,
         });
       }

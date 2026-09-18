@@ -165,10 +165,6 @@ const marsTimeConfig: CalculatorConfig = {
     return results;
   },
 
-  extraPanel: (values, results) => {
-    if (!results.length) return null;
-    return null;
-  },
   educational: {
     formula: '1 sol = 24h 39m 35.244s = 88,775.244 seconds',
     formulaDescription: 'A Mars solar day (sol) is 39 minutes and 35 seconds longer than an Earth day. This is because Mars rotates slightly slower — its sidereal rotation period is 24h 37m 22.7s, but the orbital motion adds ~2 minutes to the solar day. Over a full Mars year (687 Earth days), there are 669 sols.',

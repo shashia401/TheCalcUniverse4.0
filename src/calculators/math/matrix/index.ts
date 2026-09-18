@@ -119,7 +119,6 @@ const matrixConfig: CalculatorConfig = {
         { id: 'determinant', label: `det(A)`, value: detStr, highlight: true, color: 'positive' },
         { id: 'matrixSize', label: 'Matrix Size', value: `${size}×${size}` },
         { id: '_matrixData', label: 'Matrix Data', value: JSON.stringify(matrix) },
-        { id: 'matrixData', label: 'Matrix Data', value: JSON.stringify(matrix) },
       ];
     }
 
@@ -136,7 +135,6 @@ const matrixConfig: CalculatorConfig = {
         { id: 'inverse', label: 'A⁻¹', value: invStr, highlight: true, color: 'positive' },
         { id: 'matrixSize', label: 'Matrix Size', value: `${size}×${size}` },
         { id: '_matrixData', label: 'Matrix Data', value: JSON.stringify(matrix) },
-        { id: 'matrixData', label: 'Matrix Data', value: JSON.stringify(matrix) },
         { id: '_inverseData', label: 'Inverse Data', value: JSON.stringify(inv) },
       ];
     }

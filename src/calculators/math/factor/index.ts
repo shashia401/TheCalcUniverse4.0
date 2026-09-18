@@ -51,7 +51,6 @@ const factorConfig: CalculatorConfig = {
       { id: 'sum', label: 'Sum of Factors', value: factors.reduce((s, f) => s + f, 0).toString() },
       { id: 'isPrime', label: 'Prime?', value: factors.length === 2 ? 'Yes' : 'No' },
       { id: '_pairsData', label: 'Pairs Data', value: JSON.stringify(pairs) },
-      { id: 'pairsData', label: 'Pairs Data', value: JSON.stringify(pairs) },
     ];
   },
   extraPanel: (values, results) => {

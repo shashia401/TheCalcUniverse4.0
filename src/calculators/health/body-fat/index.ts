@@ -1,5 +1,4 @@
 ﻿import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import BodyFatPanel from './BodyFatPanel';
 
@@ -202,8 +201,6 @@ const bodyFatConfig: CalculatorConfig = {
     };
   },
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const unit = values.unit || 'imperial';
     const sex = values.sex || 'male';
     const age = parseFloat(values.age);

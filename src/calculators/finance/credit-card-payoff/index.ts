@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import CreditCardPanel from './CreditCardPanel';
 
@@ -114,8 +113,6 @@ const creditCardPayoffConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const balance = parseFloat(values.balance);
     const apr = parseFloat(values.apr) / 100;
     const payoffMode = values.payoffMode || 'fixed';

@@ -28,7 +28,7 @@ function getBandColor(colorName: string): string {
 
 export default function ResistorPanel({ values, results }: Props) {
   const mode = values.mode || 'forward';
-  const colorSequenceRow = results.find((r) => r.id === 'colorSequence' || r.id === 'colorBands');
+  const colorSequenceRow = results.find((r) => r.id === '_colorSequence' || r.id === '_colorBands');
   const resistanceRow = results.find((r) => r.id === 'resistance' || r.id === 'resistorValue');
   const toleranceRow = results.find((r) => r.id === 'tolerance');
   const minRes = results.find((r) => r.id === 'minResistance');

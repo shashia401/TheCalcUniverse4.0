@@ -66,7 +66,6 @@ const workingDaysConfig: CalculatorConfig = {
       return usHolidays.has(mmdd);
     };
 
-    let totalDays = 0;
     let workingDays = 0;
     let weekendDays = 0;
     let holidayDays = 0;
@@ -82,7 +81,6 @@ const workingDaysConfig: CalculatorConfig = {
     current.setTime(adjustedStart.getTime());
 
     while (current <= adjustedEnd) {
-      totalDays++;
       const dow = current.getDay();
       if (dow === 0 || dow === 6) {
         weekendDays++;

@@ -67,11 +67,24 @@ const amazonFbaConfig: CalculatorConfig = {
 
     const referralFee = price * referralPct;
 
+    // Amazon's real fee schedule has a "Large Standard" tier between the
+    // ~21lb ceiling of the standard-size formula and the ~90lb start of the
+    // oversize formula, but its exact current per-pound rate isn't something
+    // this calculator can verify against Amazon's published rate card (it
+    // changes periodically). Rather than guess a fake-precise number, this
+    // bridges the two tiers this file already computes (21lb -> $12.13 from
+    // the standard formula, 90lb -> $89.98 from the oversize formula) with a
+    // straight line, so the fee is at least continuous and monotonic instead
+    // of jumping ~$20 for a 0.01lb difference in weight. For an exact
+    // mid-weight quote, check Amazon's current FBA fee table directly.
+    const fee21lb = 5.29 + (21 - 3) * 0.38; // = 12.13, the standard-tier formula's own value at its ceiling
+    const fee90lb = 89.98; // the oversize formula's own value at its floor
     let fbaFulfillmentFee: number;
     if (weight <= 1) fbaFulfillmentFee = 3.22;
     else if (weight <= 2) fbaFulfillmentFee = 4.18;
     else if (weight <= 3) fbaFulfillmentFee = 5.29;
     else if (weight <= 21) fbaFulfillmentFee = 5.29 + (weight - 3) * 0.38;
+    else if (weight <= 90) fbaFulfillmentFee = fee21lb + (weight - 21) * ((fee90lb - fee21lb) / (90 - 21));
     else fbaFulfillmentFee = 89.98 + (weight - 90) * 0.83;
 
     const monthlyStorageFee = weight * 0.75;
@@ -208,6 +221,7 @@ const amazonFbaConfig: CalculatorConfig = {
     limitations: [
       'FBA fulfillment fees in this calculator are based on item weight only and DO NOT account for dimensional weight. Amazon charges the greater of actual weight and dimensional weight (L x W x H in inches / 139 for standard-size items). Large, lightweight items (pillows, blankets, foam products, empty storage bins, lampshades) will have dimensional weights far exceeding their actual weights, and their true FBA fee could be 2-5x higher than what this calculator shows. For large or bulky items, use the Amazon Revenue Calculator on Seller Central for exact dimensional-weight-based fees by ASIN.',
       'Amazon adjusts FBA fees annually (typically in February) and occasionally mid-year. The fee schedule used in this calculator may not reflect the most current rates. Significant fee changes in recent years include: the introduction of dimensional weight pricing, the addition of a fuel and inflation surcharge (5% average increase across all tiers in 2022-2023), and the restructuring of oversize and large-standard tiers. Always verify current rates at Amazon Seller Central > Fulfillment by Amazon > FBA features and fees.',
+      'For items between 21 and 90 lbs, this calculator estimates the fee by interpolating a straight line between the standard-size and oversize formulas rather than using Amazon\'s exact published mid-weight tier rates, which are not modeled here. For products in this weight range, check Amazon\'s current FBA fee table directly for a precise figure.',
       'Storage fees shown are estimates based on weight and do not account for cubic footage, which is how Amazon actually bills monthly storage. Amazon charges $0.75 per cubic foot per month (January-September) and $2.40 per cubic foot (October-December) for standard-size products, based on the product\'s packaged dimensions. Products with inefficient packaging (large box, small product) pay disproportionately more storage fees than this calculator estimates. The calculator uses a rough weight-based estimate that may not reflect actual cubic-foot-based charges.',
       'This calculator does NOT include: (a) Amazon PPC advertising costs (typically 15-30% of revenue for new/competitive products), (b) return processing fees (FBA charges the fulfillment fee again for returned items that are resellable), (c) long-term storage fees for inventory held 271+ days ($1.50-$6.90/cu ft), (d) removal or disposal fees for unsold inventory ($1.50-$3.00 per unit), (e) prep service fees if using a third-party to label, polybag, or bubble wrap items ($0.50-$2.00/unit), (f) costs of giveaways or promotional discounts for launch, (g) trademark/brand registry costs ($225-$525 per class), and (h) professional seller account fee ($39.99/month). All-in costs for an FBA product typically represent 35-55% of the selling price, well above what this calculator shows.',
       'The calculator assumes all units sell at the listed price. In reality, competitive pressure may force price reductions, and Amazon\'s automated repricing tools can drive prices down as competitors match or undercut each other. Additionally, Amazon sometimes suppresses the Buy Box on listings where the price is not competitive relative to other e-commerce sites (including the brand\'s own website), which can reduce sales velocity dramatically. Successful sellers model a range of selling prices, not a single point estimate, to understand the profit profile at different competitive price points.',

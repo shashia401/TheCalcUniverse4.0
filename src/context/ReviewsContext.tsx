@@ -67,7 +67,7 @@ export function ReviewsProvider({ children }: { children: React.ReactNode }) {
       lastReviewTimestamps.current[review.calculatorId] = now;
       const full: Review = {
         ...review,
-        id: `${review.calculatorId}-${Date.now()}-${typeof crypto !== 'undefined' && crypto.randomUUID ? (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9)) : Math.random().toString(36).slice(2) + Date.now().toString(36)}`,
+        id: `${review.calculatorId}-${Date.now()}-${typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36)}`,
         createdAt: new Date().toISOString(),
       };
       setAllReviews((prev) => ({

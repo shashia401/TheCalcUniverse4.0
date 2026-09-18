@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import IncomeTaxPanel from './IncomeTaxPanel';
 import {
@@ -85,8 +84,6 @@ const incomeTaxConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const gross = parseFloat(values.grossIncome);
     const status = (values.filingStatus || 'single') as FilingStatus;
     const stateCode = values.state || 'TX';

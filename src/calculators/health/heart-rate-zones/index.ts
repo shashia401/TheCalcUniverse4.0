@@ -1,5 +1,4 @@
 ﻿import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import HRZonesPanel from './HRZonesPanel';
 
@@ -86,8 +85,6 @@ const heartRateZonesConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const age = parseFloat(values.age);
     const rhrInput = parseFloat(values.restingHR);
     const method = values.method || 'karvonen';

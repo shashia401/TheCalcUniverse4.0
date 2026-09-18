@@ -173,7 +173,7 @@ const rmdConfig: CalculatorConfig = {
         color: 'neutral',
       },
       {
-        id: 'projectionData',
+        id: '_projectionData',
         label: '__projectionData__',
         value: JSON.stringify(projection),
         color: 'neutral',

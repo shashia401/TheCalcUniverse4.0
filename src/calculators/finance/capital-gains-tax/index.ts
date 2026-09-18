@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import CapitalGainsPanel from './CapitalGainsPanel';
 
@@ -42,6 +41,37 @@ function getNIITThreshold(filingStatus: string): number {
 function daysBetween(d1: Date, d2: Date): number {
   const ms = d2.getTime() - d1.getTime();
   return Math.round(ms / (1000 * 60 * 60 * 24));
+}
+
+// Gains stack on top of ordinary income, so each dollar of gain is taxed at
+// the rate of the bracket it falls into — not one flat rate for the whole
+// gain. Walks the brackets from where ordinary income leaves off, taxing
+// only the slice of `gainAmount` inside each one. Returns the total tax and
+// the highest marginal rate the gain touched (for the result label).
+function stackedBracketTax(
+  gainAmount: number,
+  ordinaryIncome: number,
+  brackets: { ceiling: number; rate: number }[]
+): { tax: number; topRate: number } {
+  let remaining = gainAmount;
+  let floor = ordinaryIncome;
+  let prevCeiling = 0;
+  let tax = 0;
+  let topRate = 0;
+  for (const b of brackets) {
+    if (remaining <= 0) break;
+    if (floor < b.ceiling) {
+      const amountInBracket = Math.min(remaining, b.ceiling - Math.max(floor, prevCeiling));
+      if (amountInBracket > 0) {
+        tax += amountInBracket * (b.rate / 100);
+        topRate = b.rate;
+        remaining -= amountInBracket;
+        floor += amountInBracket;
+      }
+    }
+    prevCeiling = b.ceiling;
+  }
+  return { tax, topRate };
 }
 
 const capitalGainsTaxConfig: CalculatorConfig = {
@@ -130,8 +160,6 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const purchaseDateStr = values.purchaseDate;
     const saleDateStr = values.saleDate;
     const costBasis = parseFloat(values.costBasis);
@@ -230,34 +258,27 @@ const capitalGainsTaxConfig: CalculatorConfig = {
         ],
       };
       const bracketSet = stBrackets[filingStatus] || stBrackets.Single;
-      let rate = 37;
-      for (const b of bracketSet) {
-        if (annualIncome <= b.threshold) {
-          rate = b.rate;
-          break;
-        }
-      }
-      federalTaxRate = rate;
-      federalTax = gain * (federalTaxRate / 100);
+      // Short-term gains stack on top of ordinary income and are taxed
+      // bracket-by-bracket like ordinary income, not at one flat rate.
+      const { tax, topRate } = stackedBracketTax(
+        gain,
+        annualIncome,
+        bracketSet.map((b) => ({ ceiling: b.threshold, rate: b.rate }))
+      );
+      federalTaxRate = topRate;
+      federalTax = tax;
     } else {
-      // Long-term: use LTCG brackets
-      const totalIncome = gain + annualIncome;
+      // Long-term: gains stack on top of ordinary income across the LTCG
+      // brackets — only the slice of the gain in each bracket is taxed at
+      // that bracket's rate, not the whole gain at one rate.
       const brackets = getLTCGBrackets(filingStatus);
-      // Determine the LTCG rate based on total income
-      // The LTCG rate is determined by the total taxable income
-      // More precise: check which bracket the ordinary income falls in + gains stack on top
-      // Gains are stacked on top of ordinary income
-      let ltcgRate: number;
-      if (totalIncome >= brackets[2].min) {
-        ltcgRate = 20;
-      } else if (totalIncome >= brackets[1].min) {
-        ltcgRate = 15;
-      } else {
-        ltcgRate = 0;
-      }
-
-      federalTaxRate = ltcgRate;
-      federalTax = gain * (ltcgRate / 100);
+      const { tax, topRate } = stackedBracketTax(
+        gain,
+        annualIncome,
+        brackets.map((b) => ({ ceiling: b.max, rate: b.rate }))
+      );
+      federalTaxRate = topRate;
+      federalTax = tax;
     }
 
     // Net Investment Income Tax (NIIT)
@@ -302,7 +323,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
       },
       {
         id: 'federalTax',
-        label: `Federal Tax${isShortTerm ? ` (${federalTaxRate}% ordinary rate)` : ` (${federalTaxRate}% LTCG rate)`}`,
+        label: `Federal Tax${isShortTerm ? ` (up to ${federalTaxRate}% ordinary rate)` : ` (up to ${federalTaxRate}% LTCG rate)`}`,
         value: fmtMoney(federalTax),
         color: 'negative',
       },

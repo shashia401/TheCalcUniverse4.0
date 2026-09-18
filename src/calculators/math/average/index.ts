@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import AveragePanel from './AveragePanel';

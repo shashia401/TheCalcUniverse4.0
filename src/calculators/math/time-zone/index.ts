@@ -343,7 +343,7 @@ const config: CalculatorConfig = {
       {
         scenario: 'A global customer support team with offices in Tokyo (JST), London (GMT), and New York (EST) needs to find overlapping business hours for a handoff meeting. They want to know: when are all three offices simultaneously in business hours?',
         inputs: { fromZone: 'est', toZone: 'jst', time: '8:00 AM', date: '2026-08-10', includeBusinessHours: 'yes' },
-        result: '8:00 AM EST = 10:00 PM JST (next day); 14 hours ahead; No overlap in business hours',
+        result: '8:00 AM EST = 10:00 PM JST (same day); 14 hours ahead; No overlap in business hours',
         insight: 'This is a "follow the sun" challenge. EST (UTC-5) 8:00 AM = GMT (UTC+0) 1:00 PM = JST (UTC+9) 10:00 PM. JST is outside business hours at 10 PM. Running the pairwise checks: EST-GMT overlap is 8:00 AM-12:00 PM EST / 1:00-5:00 PM GMT. GMT-JST overlap is minimal — JST business hours (9 AM-5 PM) are GMT 12:00 AM-8:00 AM. The three zones never fully overlap in standard business hours. The best compromise is a 7:00 AM EST / 12:00 PM GMT / 9:00 PM JST call, where JST is just at the edge.',
       },
     ],

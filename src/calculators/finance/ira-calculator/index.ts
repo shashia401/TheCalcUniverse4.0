@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { fvWithContributions } from '../../../utils/financial';
 import { IRA_LIMITS } from '../../../utils/taxData';
@@ -100,8 +99,6 @@ const iraCalculatorConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const currentAge = parseInt(values.currentAge);
     const retirementAge = parseInt(values.retirementAge);
     const currentBalance = parseFloat(values.currentBalance) || 0;
@@ -128,15 +125,20 @@ const iraCalculatorConfig: CalculatorConfig = {
     const tradBalance = fvWithContributions(currentBalance, contrib / 12, monthlyRate, months);
     const tradAfterTax = tradBalance * (1 - retireRate);
 
-    // Tax savings from Traditional: deduction saves marginalRate * contrib each year
+    // Tax savings from Traditional: the deduction frees up marginalRate * contrib
+    // in cash each year, which — if invested the same way — grows alongside the
+    // IRA itself. Without crediting this, Traditional only ever loses (the
+    // withdrawal tax) and never wins, which is the bug this fixes: Roth and
+    // Traditional start with the same account formula by design (same annual
+    // contribution either way), so Traditional's entire case rests on this
+    // reinvested-refund side account, not on the IRA balance alone.
     const yearlyDeductionSavings = contrib * marginalRate;
-    let tradTaxSavingsInvested = 0;
-    for (let y = 0; y < years; y++) {
-      tradTaxSavingsInvested = tradTaxSavingsInvested * (1 + annualReturn) + yearlyDeductionSavings;
-    }
+    const tradTaxSavingsInvested = fvWithContributions(0, yearlyDeductionSavings / 12, monthlyRate, months);
+    const tradTotal = tradAfterTax + tradTaxSavingsInvested;
 
-    // Roth advantage: no tax on withdrawal
-    const rothAdvantage = rothBalance - tradAfterTax;
+    // Roth advantage: no tax on withdrawal, compared against Traditional's
+    // after-tax IRA balance PLUS its reinvested deduction savings.
+    const rothAdvantage = rothBalance - tradTotal;
 
     const totalContribs = currentBalance + contrib * years;
     const rothEarnings = rothBalance - totalContribs;
@@ -146,7 +148,7 @@ const iraCalculatorConfig: CalculatorConfig = {
       let lo = 0, hi = 0.5;
       for (let i = 0; i < 50; i++) {
         const mid = (lo + hi) / 2;
-        if (tradBalance * (1 - mid) > rothBalance) lo = mid;
+        if (tradBalance * (1 - mid) + tradTaxSavingsInvested > rothBalance) lo = mid;
         else hi = mid;
       }
       return lo;
@@ -183,6 +185,13 @@ const iraCalculatorConfig: CalculatorConfig = {
         label: 'Traditional IRA — Gross Balance (Before Tax)',
         value: fmt(tradBalance),
         color: 'neutral' as const,
+      },
+      {
+        id: 'tradTaxSavingsInvested',
+        label: 'Traditional — Reinvested Tax Refund (Side Account)',
+        value: fmt(tradTaxSavingsInvested),
+        color: 'neutral' as const,
+        interpretation: `Your ${(marginalRate * 100).toFixed(0)}% deduction frees up ${fmt(yearlyDeductionSavings)}/year in cash. Investing that refund the same way it grows to ${fmt(tradTaxSavingsInvested)} — this is Traditional's real advantage, on top of the IRA balance itself.`,
       },
       {
         id: 'rothEarnings',

@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 
 const DIET_PRESETS: Record<string, { label: string; proteinPct: number; carbPct: number; fatPct: number }> = {
@@ -144,8 +143,6 @@ const macroConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const unit = values.unit || 'imperial';
     const sex = values.sex || 'male';
     const age = parseFloat(values.age);

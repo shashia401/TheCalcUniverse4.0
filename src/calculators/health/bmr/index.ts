@@ -1,5 +1,4 @@
 ﻿import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BMRComparisonPanel from './BMRComparisonPanel';
 
@@ -115,8 +114,6 @@ const bmrConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const unit = values.unit || 'imperial';
     const formula = values.formula || 'mifflin';
     const sex = values.sex || 'male';

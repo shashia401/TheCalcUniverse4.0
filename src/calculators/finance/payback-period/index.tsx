@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 
 const paybackPeriodConfig: CalculatorConfig = {
@@ -65,8 +64,6 @@ const paybackPeriodConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const initialInvestment = parseFloat(values.initialInvestment);
     const annualCashFlow = parseFloat(values.annualCashFlow);
     const useDiscounted = values.useDiscounted === 'discounted';

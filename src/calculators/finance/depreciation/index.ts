@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import DepreciationPanel from './DepreciationPanel';
 
@@ -112,8 +111,6 @@ const depreciationConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const assetCost = parseFloat(values.assetCost);
     const salvageValue = parseFloat(values.salvageValue) || 0;
     const usefulLife = parseInt(values.usefulLife, 10);

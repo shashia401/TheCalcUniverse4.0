@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import { fvLumpSum, fvWithContributions } from '../../../utils/financial';
 import FutureValuePanel from './FutureValuePanel';
@@ -71,8 +70,6 @@ const futureValueConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const presentValue = parseFloat(values.presentValue);
     const annualRate = parseFloat(values.annualRate) / 100;
     const years = parseFloat(values.years);
@@ -102,28 +99,6 @@ const futureValueConfig: CalculatorConfig = {
 
     const fmtInt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-
-    // Build yearly breakdown data for the formula panel
-    const yearlyData: Array<{ year: number; balance: number; interest: number; contributions: number }> = [];
-    let runningBalance = presentValue;
-    const monthlyRate = annualRate / 12;
-    for (let y = 1; y <= years; y++) {
-      for (let m = 1; m <= 12; m++) {
-        runningBalance = runningBalance * (1 + monthlyRate);
-        if (monthlyContribution > 0) {
-          runningBalance += monthlyContribution;
-        }
-      }
-      // Cap at n years
-      if (y <= 60) {
-        yearlyData.push({
-          year: y,
-          balance: runningBalance,
-          interest: 0, // calculated per year in the panel
-          contributions: totalContributions * (y / years),
-        });
-      }
-    }
 
     return [
       {
@@ -168,11 +143,6 @@ const futureValueConfig: CalculatorConfig = {
         label: 'Compounding',
         value: compoundingPerYear === 1 ? 'Annual' : compoundingPerYear === 2 ? 'Semi-Annual' : compoundingPerYear === 4 ? 'Quarterly' : compoundingPerYear === 12 ? 'Monthly' : 'Daily',
         color: 'neutral',
-      },
-      {
-        id: '_yearlyData',
-        label: '_yearlyData',
-        value: JSON.stringify(yearlyData),
       },
     ];
   },

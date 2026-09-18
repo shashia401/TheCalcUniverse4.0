@@ -77,7 +77,7 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'RMD = AccountBalance / LifeExpectancyFactor(age from IRS Uniform Lifetime Table) | 10year_projection = Σ(RMD_t for t = 1 to 10, adjusting balance each year for withdrawal and growth)',
     lastVerified: '2026-05-18',
     relatedIds: ['pension-calculator', 'roth-ira-calculator', 'ira-calculator', '401k-calculator'],
-    relatedPosts: ['rmd-calculator-guide', 'when-to-take-social-security'],
+    relatedPosts: ['when-to-take-social-security'],
     loader: () => import('../finance/rmd/index'),
   },
   {
@@ -395,7 +395,7 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'M = P x r(1+r)^n / ((1+r)^n - 1) | trueMonthlyCost = M + propertyTax/12 + PMI/12 | Texas Homestead Exemption reduces school tax base by $100,000',
     lastVerified: '2026-05-18',
     relatedIds: ['mortgage-payoff-calculator', 'mortgage-comparison-calculator', 'mortgage-amortization-calculator', 'refinance-calculator', 'house-affordability-calculator', 'new-york-mortgage-calculator'],
-    relatedPosts: ['texas-mortgage-guide', 'mortgage-refinance-guide'],
+    relatedPosts: ['mortgage-refinance-guide'],
     loader: () => import('../finance/texas-mortgage-calculator/index'),
   },
   {
@@ -411,7 +411,6 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'M = P × r(1+r)^n / ((1+r)^n − 1) | trueMonthlyCost = M + propertyTax/12 + PMI/12 | STAR exemption reduces school tax base',
     lastVerified: '2026-05-18',
     relatedIds: ['mortgage-payoff-calculator', 'texas-mortgage-calculator', 'refinance-calculator', 'house-affordability-calculator'],
-    relatedPosts: ['new-york-mortgage-guide'],
     loader: () => import('../finance/new-york-mortgage-calculator/index'),
   },
   {
@@ -695,7 +694,7 @@ export const financeCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'simple_interest = P × r × t | compound_interest = P × (1 + r/n)^(n×t) − P | total_amount = P + interest | supports annual, monthly, and daily time periods with all compounding frequencies',
     lastVerified: '2026-01-15',
-    relatedIds: ['compound-interest-calculator', 'simple-interest-calculator', 'interest-rate-calculator'],
+    relatedIds: ['compound-interest-calculator', 'interest-rate-calculator'],
     loader: () => import('../finance/interest-calculator/index'),
   },
   {
@@ -1042,7 +1041,6 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'FV_no_fees = PV x (1+r)^n + PMT x ((1+r)^n - 1)/r | FV_with_fees = PV x (1+r-ER)^n + PMT x ((1+(r-ER))^n - 1)/(r-ER) | fee_impact = FV_no_fees - FV_with_fees | fee_drag_pct = fee_impact / FV_no_fees x 100%',
     lastVerified: '2026-05-15',
     relatedIds: ['average-return-calculator', 'investment-calculator', 'bond-calculator', 'future-value-calculator'],
-    relatedPosts: ['mutual-fund-investing-guide'],
     loader: () => import('../finance/mutual-fund/index'),
   },
   {
@@ -1058,7 +1056,7 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'Roth_FV = PMT × ((1+r)^n − 1)/r (tax_free at withdrawal) | Traditional_FV = PMT × ((1+r)^n − 1)/r × (1 − withdrawal_tax_rate) | breakeven_tax = rate where Roth_FV = Traditional_FV_after_tax | contribution_limit = $7,000 ($8,000 age 50+)',
     lastVerified: '2026-01-15',
     relatedIds: ['roth-ira-calculator', '401k-calculator', 'social-security-calculator', 'rmd-calculator'],
-    relatedPosts: ['retirement-planning-guide', 'investment-basics-guide', 'tax-planning-for-retirement'],
+    relatedPosts: ['retirement-planning-how-much'],
     loader: () => import('../finance/ira-calculator/index'),
   },
   {
@@ -1214,7 +1212,7 @@ export const financeCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'total_fee_ETH = gas_units × (base_fee + priority_fee) / 1e9 | total_fee_USD = total_fee_ETH × ETH_price_in_USD | speed_tiers: slow(low_priority), standard(average), fast(high_priority) affecting priority_fee only',
     lastVerified: '2026-01-15',
-    relatedIds: ['currency-converter', 'investment-calculator', 'bitcoin-calculator'],
+    relatedIds: ['currency-calculator', 'investment-calculator'],
     loader: () => import('../finance/eth-gas-fee/index'),
   },
   {
@@ -1292,7 +1290,7 @@ export const financeCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'Tax = Σ(bracket_rate × bracket_income) for each bracket',
     lastVerified: '2026-01-15',
-    relatedIds: ['income-tax', 'self-employment-tax', 'capital-gains-tax', 'salary-take-home'],
+    relatedIds: ['income-tax-calculator', 'self-employment-tax-calculator', 'capital-gains-tax-calculator', 'salary-take-home'],
     loader: () => import('../finance/tax-calculator/index'),
   },
 
@@ -1309,7 +1307,7 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'FV = LS x (1 + r)^n + P x [((1 + r)^n - 1) / r] x (1 + r)',
     lastVerified: '2026-05-15',
     relatedIds: ['investment-calculator', 'compound-interest-calculator', 'mutual-fund-calculator', 'retirement-calculator'],
-    relatedPosts: ['sip-investment-guide'],
+    relatedPosts: ['sip-investing-complete-guide'],
     loader: () => import('../finance/sip-calculator/index'),
   },
   {
@@ -1325,7 +1323,7 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'Balance_t = Balance_t-1 x (1 + r/12) - Withdrawal',
     lastVerified: '2026-05-15',
     relatedIds: ['retirement-calculator', 'annuity-payout-calculator', 'mutual-fund-calculator', 'investment-calculator'],
-    relatedPosts: ['swp-retirement-guide'],
+    relatedPosts: ['swp-retirement-income-complete-guide'],
     loader: () => import('../finance/swp-calculator/index'),
   },
 ];

@@ -28,17 +28,18 @@ export default function FutureValuePanel({ values, results }: Props) {
 
   const yearlyData = useMemo(() => {
     const data: Array<{ year: number; balance: number; totalContrib: number }> = [];
-    const monthlyRate = annualRate / 12;
+    const ratePerPeriod = annualRate / compounding;
+    const contribPerPeriod = monthlyContribution * (12 / compounding);
     let bal = presentValue;
     for (let y = 1; y <= Math.min(years, 40); y++) {
-      for (let m = 1; m <= 12; m++) {
-        bal = bal * (1 + monthlyRate) + monthlyContribution;
+      for (let p = 1; p <= compounding; p++) {
+        bal = bal * (1 + ratePerPeriod) + contribPerPeriod;
       }
       const contribSoFar = presentValue + monthlyContribution * 12 * y;
       data.push({ year: y, balance: bal, totalContrib: contribSoFar });
     }
     return data;
-  }, [presentValue, annualRate, years, monthlyContribution]);
+  }, [presentValue, annualRate, years, monthlyContribution, compounding]);
 
   const fvValue = results.find(r => r.id === 'futureValue')?.value ?? '';
   const earValue = results.find(r => r.id === 'effectiveAnnualRate')?.value ?? '';

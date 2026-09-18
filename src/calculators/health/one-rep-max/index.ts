@@ -1,5 +1,4 @@
 ﻿import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import OneRepMaxPanel from './OneRepMaxPanel';
 
@@ -45,8 +44,6 @@ const oneRepMaxConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const weight = parseFloat(values.weight);
     const reps = parseFloat(values.reps);
     const formula = values.formula || 'epley';

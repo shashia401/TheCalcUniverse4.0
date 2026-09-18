@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import InterestRatePanel from './InterestRatePanel';
 
@@ -67,8 +66,6 @@ const interestRateConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const P = parseFloat(values.principal);
     const A = parseFloat(values.finalAmount);
     const t_raw = parseFloat(values.timePeriod);

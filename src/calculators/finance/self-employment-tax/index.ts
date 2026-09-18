@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import SelfEmploymentTaxPanel from './SelfEmploymentTaxPanel';
 
@@ -47,8 +46,6 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const netProfit = parseFloat(values.netProfit);
     const w2Income = parseFloat(values.w2Income) || 0;
     const qbiEnabled = values.qbiDeduction === 'yes';

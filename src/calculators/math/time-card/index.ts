@@ -162,11 +162,19 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
 
   const totalHours = totalMinutes / 60;
 
-  // Overtime
+  // Overtime. The "8 hours/day" option is daily overtime (each day's hours
+  // beyond 8 are OT, e.g. California-style rules) — a fundamentally
+  // different calculation from the weekly-total options (35/38/40/44/0),
+  // which compare the whole week's total against a single threshold.
+  const isDailyOvertime = (values.overtimeThreshold || '40') === '8';
+
   let regularHours: number;
   let overtimeHours: number;
 
-  if (overtimeThreshold <= 0) {
+  if (isDailyOvertime) {
+    regularHours = dailyData.reduce((sum, d) => sum + Math.min(d.hours, 8), 0);
+    overtimeHours = dailyData.reduce((sum, d) => sum + Math.max(0, d.hours - 8), 0);
+  } else if (overtimeThreshold <= 0) {
     // No overtime — all hours are regular
     regularHours = totalHours;
     overtimeHours = 0;
@@ -198,7 +206,7 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
       value: `${fmtHours(overtimeHours)} hours`,
     },
     {
-      id: 'dailyBreakdown',
+      id: '_dailyBreakdown',
       label: 'Daily Breakdown',
       value: JSON.stringify(dailyData),
     },

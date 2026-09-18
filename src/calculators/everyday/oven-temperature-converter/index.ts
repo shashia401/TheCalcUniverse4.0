@@ -9,18 +9,24 @@ interface GasMarkEntry {
   description: string;
 }
 
+// Celsius values are the independently standardized UK Gas Mark figures
+// (e.g. Gas Mark 4 = 180°C/350°F is the standard reference point), not a
+// direct °F→°C conversion of the Fahrenheit column — those are two
+// separately rounded conventions and previously disagreed with the
+// industrial/oven-temperature-converter calculator's table for the same
+// gas marks.
 const gasMarkTable: GasMarkEntry[] = [
-  { gasMark: 0.25, fahrenheit: 225, celsius: 107, description: 'Very Slow / Cool' },
-  { gasMark: 0.5, fahrenheit: 250, celsius: 121, description: 'Very Slow / Cool' },
-  { gasMark: 1, fahrenheit: 275, celsius: 135, description: 'Slow / Cool' },
-  { gasMark: 2, fahrenheit: 300, celsius: 149, description: 'Slow' },
-  { gasMark: 3, fahrenheit: 325, celsius: 163, description: 'Moderately Slow / Warm' },
-  { gasMark: 4, fahrenheit: 350, celsius: 177, description: 'Moderate / Medium' },
-  { gasMark: 5, fahrenheit: 375, celsius: 191, description: 'Moderate / Moderately Hot' },
-  { gasMark: 6, fahrenheit: 400, celsius: 204, description: 'Moderately Hot' },
-  { gasMark: 7, fahrenheit: 425, celsius: 218, description: 'Hot' },
-  { gasMark: 8, fahrenheit: 450, celsius: 232, description: 'Hot / Very Hot' },
-  { gasMark: 9, fahrenheit: 475, celsius: 246, description: 'Very Hot' },
+  { gasMark: 0.25, fahrenheit: 225, celsius: 110, description: 'Very Slow / Cool' },
+  { gasMark: 0.5, fahrenheit: 250, celsius: 130, description: 'Very Slow / Cool' },
+  { gasMark: 1, fahrenheit: 275, celsius: 140, description: 'Slow / Cool' },
+  { gasMark: 2, fahrenheit: 300, celsius: 150, description: 'Slow' },
+  { gasMark: 3, fahrenheit: 325, celsius: 165, description: 'Moderately Slow / Warm' },
+  { gasMark: 4, fahrenheit: 350, celsius: 180, description: 'Moderate / Medium' },
+  { gasMark: 5, fahrenheit: 375, celsius: 190, description: 'Moderate / Moderately Hot' },
+  { gasMark: 6, fahrenheit: 400, celsius: 200, description: 'Moderately Hot' },
+  { gasMark: 7, fahrenheit: 425, celsius: 220, description: 'Hot' },
+  { gasMark: 8, fahrenheit: 450, celsius: 230, description: 'Hot / Very Hot' },
+  { gasMark: 9, fahrenheit: 475, celsius: 245, description: 'Very Hot' },
   { gasMark: 10, fahrenheit: 500, celsius: 260, description: 'Extremely Hot' },
 ];
 
@@ -259,7 +265,7 @@ const ovenTempConverterConfig: CalculatorConfig = {
       'View the converted temperatures in all three scales, plus a cooking description and the formula used.',
     ],
     explanation:
-      'Oven temperature conversions are essential when following recipes from different countries. The Fahrenheit scale, developed by Daniel Gabriel Fahrenheit in 1724, sets the freezing point of water at 32°F and boiling at 212°F. The Celsius scale, also called centigrade, sets freezing at 0°C and boiling at 100°C — a more intuitive decimal system adopted by most of the world. The Gas Mark scale originated in the UK as a numbering system for gas oven regulators, with Gas Mark 1 starting at 275°F (135°C) and each subsequent mark increasing by approximately 25°F (14°C). Modern electric ovens in the UK still display Gas Marks alongside Celsius because many traditional British recipes reference them by number. Understanding these conversions prevents baking disasters: a cake recipe calling for Gas Mark 4 (350°F / 177°C) baked at Gas Mark 6 (400°F / 204°C) would likely burn on the outside while remaining raw inside. The Fahrenheit–Celsius conversion formula is linear, but Gas Mark conversions rely on a lookup table because the gas mark scale is discrete. This calculator handles all three conversions instantly, so you can confidently cook any recipe regardless of the temperature units used.',
+      'Oven temperature conversions are essential when following recipes from different countries. The Fahrenheit scale, developed by Daniel Gabriel Fahrenheit in 1724, sets the freezing point of water at 32°F and boiling at 212°F. The Celsius scale, also called centigrade, sets freezing at 0°C and boiling at 100°C — a more intuitive decimal system adopted by most of the world. The Gas Mark scale originated in the UK as a numbering system for gas oven regulators, with Gas Mark 1 starting at 275°F (140°C) and each subsequent mark increasing by approximately 25°F (14°C). Modern electric ovens in the UK still display Gas Marks alongside Celsius because many traditional British recipes reference them by number. Understanding these conversions prevents baking disasters: a cake recipe calling for Gas Mark 4 (350°F / 177°C) baked at Gas Mark 6 (400°F / 204°C) would likely burn on the outside while remaining raw inside. The Fahrenheit–Celsius conversion formula is linear, but Gas Mark conversions rely on a lookup table because the gas mark scale is discrete. This calculator handles all three conversions instantly, so you can confidently cook any recipe regardless of the temperature units used.',
     faqs: [
       {
         question: 'Why does the US use Fahrenheit while most countries use Celsius?',
@@ -269,7 +275,7 @@ const ovenTempConverterConfig: CalculatorConfig = {
       {
         question: 'Why do UK recipes use Gas Marks?',
         answer:
-          'Gas Marks originated in the 1930s when gas ovens became common in UK households. Gas oven thermostats were not precise enough for exact Fahrenheit or Celsius settings, so manufacturers devised a numbered scale. Gas Mark 1 was set at 275°F (135°C), and each subsequent number increases the temperature by roughly 25°F (14°C). Although modern ovens are much more accurate, the convention persists in British cookbooks and recipes, much like Fahrenheit persists in American cooking.',
+          'Gas Marks originated in the 1930s when gas ovens became common in UK households. Gas oven thermostats were not precise enough for exact Fahrenheit or Celsius settings, so manufacturers devised a numbered scale. Gas Mark 1 was set at 275°F (140°C), and each subsequent number increases the temperature by roughly 25°F (14°C). Although modern ovens are much more accurate, the convention persists in British cookbooks and recipes, much like Fahrenheit persists in American cooking.',
       },
       {
         question: 'How do I convert oven temperatures when a recipe only provides one unit?',
