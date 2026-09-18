@@ -1,20 +1,19 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BasicCalcPanel from './BasicCalcPanel';
+import { safeEval } from '../shared/safeEval';
 
-function safeEval(expr: string): number | string {
+// BasicCalcPanel (the actual interactive keypad) already uses the shared
+// parser below — this wrapper exists so the (currently unreachable, since
+// `inputs` is empty) expression-field path can't regress to `new Function`
+// if a text input is ever added here.
+function evaluateExpression(expr: string): number | string {
   const trimmed = expr.trim();
   if (!trimmed) return 'empty';
-  // Only allow digits, operators, parentheses, spaces, decimal points
-  const sanitized = trimmed.replace(/\s/g, '');
-  if (!/^[\d+\-*/().%^]+$/.test(sanitized)) return 'invalid';
+  const sanitized = trimmed.replace(/\s/g, '').replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
   try {
-    // Replace × and ÷ with * and /
-    // ^ would be bitwise XOR in JS; users expect exponentiation
-    const clean = sanitized.replace(/×/g, '*').replace(/÷/g, '/').replace(/\^/g, '**');
-     
-    const result = new Function(`return (${clean})`)();
-    if (typeof result === 'number' && isFinite(result)) return result;
+    const result = safeEval(sanitized);
+    if (isFinite(result)) return result;
     return 'invalid';
   } catch {
     return 'invalid';
@@ -29,7 +28,7 @@ const basicCalcConfig: CalculatorConfig = {
   calculate: (values: Record<string, string>): CalculatorResult[] => {
     const expr = values.expression || '';
     if (!expr.trim()) return [];
-    const result = safeEval(expr);
+    const result = evaluateExpression(expr);
     if (result === 'empty') return [];
     if (result === 'invalid') return [{ id: 'error', label: 'Error', value: 'Invalid expression' }];
     return [

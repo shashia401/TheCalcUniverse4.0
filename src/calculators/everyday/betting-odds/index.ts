@@ -174,12 +174,6 @@ const bettingOddsConfig: CalculatorConfig = {
         value: `$${fmtD(stake)}`,
         color: 'neutral',
       },
-      {
-        id: 'vigDisplay',
-        label: 'Implied Margin (overround per side)',
-        value: `${impliedProbability.toFixed(2)}%`,
-        color: 'neutral',
-      },
     ];
   },
   extraPanel: (values, results) => {

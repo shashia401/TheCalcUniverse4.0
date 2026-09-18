@@ -143,9 +143,13 @@ const schengenVisaConfig: CalculatorConfig = {
 
     if (trips.length === 0) return [];
 
-    // Rolling 180-day window
+    // Rolling 180-day window. daysBetween() is inclusive of both endpoints,
+    // so the window start must be 179 days back (not 180) for
+    // [windowStart, checkDate] to span exactly 180 days — matching the EU's
+    // own Schengen calculator convention. Off by one here silently counts
+    // an extra day and can flag an overstay a day early.
     const windowStart = new Date(checkDate);
-    windowStart.setDate(windowStart.getDate() - 180);
+    windowStart.setDate(windowStart.getDate() - 179);
 
     let totalDaysInWindow = 0;
     const tripDetails: { label: string; days: number; inWindow: boolean }[] = [];
@@ -215,7 +219,7 @@ const schengenVisaConfig: CalculatorConfig = {
       const sortedTrips = [...trips].sort((a, b) => a.start.getTime() - b.start.getTime());
       const oldestTrip = sortedTrips[0];
       const daysUntilReset = Math.round(
-        (oldestTrip.start.getTime() + 181 * 24 * 60 * 60 * 1000 - checkDate.getTime()) / (1000 * 60 * 60 * 24)
+        (oldestTrip.start.getTime() + 180 * 24 * 60 * 60 * 1000 - checkDate.getTime()) / (1000 * 60 * 60 * 24)
       );
       results.push({
         id: 'resetInfo',

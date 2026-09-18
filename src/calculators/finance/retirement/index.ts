@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RetirementPanel from './RetirementPanel';
 
@@ -99,8 +98,6 @@ const retirementConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const currentAge = parseFloat(values.currentAge);
     const retirementAge = parseFloat(values.retirementAge);
     const currentSavings = parseFloat(values.currentSavings) || 0;

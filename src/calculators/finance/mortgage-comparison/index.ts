@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import MortgageComparePanel from './MortgageComparePanel';
 
@@ -85,8 +84,6 @@ const mortgageComparisonConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const homePrice = parseFloat(values.homePrice) || 0;
     const downPayment = parseFloat(values.downPayment) || 0;
     const rate15 = (parseFloat(values.rate15) || 0) / 100;

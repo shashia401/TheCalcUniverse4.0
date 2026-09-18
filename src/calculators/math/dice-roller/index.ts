@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import DicePanel from './DicePanel';
@@ -89,7 +88,7 @@ const diceRollerConfig: CalculatorConfig = {
         value: rolls.join(', '),
       },
       {
-        id: 'rollData',
+        id: '_rollData',
         label: 'Roll Data',
         value: JSON.stringify(rolls),
       },
@@ -106,7 +105,9 @@ const diceRollerConfig: CalculatorConfig = {
       {
         id: 'average',
         label: 'Average Roll',
-        value: (total / count).toFixed(1),
+        // Per-die average of the raw rolls, not diluted by the flat modifier
+        // (the modifier is added once to the total, not per die).
+        value: (rawSum / count).toFixed(1),
       },
     ];
   },

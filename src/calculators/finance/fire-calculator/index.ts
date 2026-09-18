@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import FIREPanel from './FIREPanel';
 
@@ -130,8 +129,6 @@ const fireCalculatorConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const currentAge = parseFloat(values.currentAge);
     const nw = parseFloat(values.currentNetWorth);
     const income = parseFloat(values.annualIncome);
@@ -161,8 +158,15 @@ const fireCalculatorConfig: CalculatorConfig = {
 
     const annualSavings = income - expenses;
     const wr = withdrawalRate / 100;
+    const r0 = investmentReturn / 100;
+
+    // Coast FIRE targets a retirement age (traditionally 65, per the Trinity
+    // Study convention this calculator's own educational content already
+    // cites) rather than "stop working now" — see quickReference below.
+    const COAST_RETIREMENT_AGE = 65;
 
     let fireNumber: number;
+    let coastFireNumber: number | null = null;
     switch (fireType) {
       case 'lean':
         fireNumber = expenses * 25;
@@ -170,22 +174,29 @@ const fireCalculatorConfig: CalculatorConfig = {
       case 'fat':
         fireNumber = expenses * 1.5 * 25;
         break;
-      case 'coast':
+      case 'coast': {
         fireNumber = expenses / wr;
+        const yearsToRetirement = Math.max(0, COAST_RETIREMENT_AGE - currentAge);
+        coastFireNumber = fireNumber / Math.pow(1 + r0, yearsToRetirement);
         break;
+      }
       default:
         fireNumber = expenses / wr;
     }
 
-    const yearsToFire = solveYearsToFire(nw, Math.max(0, annualSavings), fireNumber, investmentReturn);
+    // For Coast FIRE, "years to FIRE" means years of continued contributions
+    // until net worth alone can compound to fireNumber by age 65 — not years
+    // to reach fireNumber directly (that's what makes Coast FIRE different
+    // from Standard FIRE).
+    const solveTarget = fireType === 'coast' && coastFireNumber !== null ? coastFireNumber : fireNumber;
+    const yearsToFire = solveYearsToFire(nw, Math.max(0, annualSavings), solveTarget, investmentReturn);
     const fireAge = currentAge + (yearsToFire === Infinity ? 99 : yearsToFire);
     const monthlySavings = Math.max(0, annualSavings / 12);
 
-    const r = investmentReturn / 100;
     let nwAtRetirement = nw;
     let totalContributions = nw;
     for (let i = 0; i < (yearsToFire === Infinity ? 0 : yearsToFire); i++) {
-      nwAtRetirement = nwAtRetirement * (1 + r) + Math.max(0, annualSavings);
+      nwAtRetirement = nwAtRetirement * (1 + r0) + Math.max(0, annualSavings);
       totalContributions += Math.max(0, annualSavings);
     }
 
@@ -213,16 +224,36 @@ const fireCalculatorConfig: CalculatorConfig = {
         color: 'positive',
         interpretation: `This is built on the 4% withdrawal rule — historically a portfolio this size can sustain your annual spending indefinitely, adjusted for inflation. It assumes a diversified portfolio and doesn't account for sequence-of-returns risk (a bad market right after you retire); many ${fireTypeLabels[fireType] || 'FIRE'} planners treat 4% as a starting point and stay flexible on spending in down years.`,
       },
+      ...(fireType === 'coast' && coastFireNumber !== null
+        ? [
+            {
+              id: 'coastFireNumber',
+              label: 'Coast FIRE Number (Needed Today)',
+              value: fmt(coastFireNumber),
+              highlight: true,
+              color: 'positive' as const,
+              interpretation: `The amount you need invested right now so that, compounding at ${investmentReturn}% with zero further contributions, it grows to your ${fmt(fireNumber)} FIRE number by age ${COAST_RETIREMENT_AGE}. ${
+                nw >= coastFireNumber
+                  ? "You're already there — your current net worth alone is projected to coast to your FIRE number without another dollar saved."
+                  : `You still need ${fmt(coastFireNumber - nw)} more before you can stop contributing and coast.`
+              }`,
+            },
+          ]
+        : []),
       {
         id: 'fireAge',
-        label: 'Estimated FIRE Age',
+        label: fireType === 'coast' ? 'Age You Can Stop Contributing' : 'Estimated FIRE Age',
         value: yearsToFire === Infinity ? 'Not achievable' : `${fireAge.toFixed(0)} years old`,
         highlight: true,
         color: fireAge < 50 ? 'positive' : fireAge < 65 ? 'neutral' : 'negative',
+        interpretation:
+          fireType === 'coast'
+            ? `This is when your net worth reaches the Coast FIRE number above. After this age, you can stop contributing entirely — your investments alone will compound to your full FIRE number by age ${COAST_RETIREMENT_AGE}.`
+            : undefined,
       },
       {
         id: 'yearsToFire',
-        label: 'Years Until FIRE',
+        label: fireType === 'coast' ? 'Years Until You Can Coast' : 'Years Until FIRE',
         value: yearsToFire === Infinity ? 'N/A' : `${yearsToFire.toFixed(0)} years`,
         color: yearsToFire <= 10 ? 'positive' : yearsToFire <= 20 ? 'neutral' : 'negative',
       },

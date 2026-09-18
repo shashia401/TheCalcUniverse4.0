@@ -127,6 +127,7 @@ const recipeScalerConfig: CalculatorConfig = {
     const desiredServings = parseInt(values.desiredServings, 10);
 
     if (isNaN(originalServings) || originalServings <= 0) return [];
+    if (isNaN(desiredServings) || desiredServings <= 0) return [];
 
     const scaleFactor = desiredServings / originalServings;
 

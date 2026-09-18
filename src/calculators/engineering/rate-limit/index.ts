@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import RateLimitPanel from './RateLimitPanel';
 
@@ -62,8 +61,6 @@ const rateLimitConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const rpm = parseFloat(values.maxRpm);
     const payloadSizeKB = parseFloat(values.avgPayloadSize);
     const peakConcurrent = parseFloat(values.peakConcurrentUsers);

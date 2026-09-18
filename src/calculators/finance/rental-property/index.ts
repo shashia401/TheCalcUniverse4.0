@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import RentalWaterfallPanel from './RentalWaterfallPanel';
 import { STATE_TAX_RATES } from './utils';
@@ -211,8 +210,6 @@ const rentalPropertyConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const purchasePrice = parseFloat(values.purchasePrice);
     const downPayment = parseFloat(values.downPayment) || 0;
     const closingCosts = parseFloat(values.closingCosts) || 0;

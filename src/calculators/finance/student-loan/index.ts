@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import StudentLoanPanel from './StudentLoanPanel';
 
@@ -89,8 +88,6 @@ const studentLoanConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const principal = parseFloat(values.loanBalance);
     const annualRate = parseFloat(values.interestRate) / 100;
     const repaymentYears = parseInt(values.repaymentTerm) || 10;

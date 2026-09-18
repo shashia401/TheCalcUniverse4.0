@@ -130,7 +130,7 @@ function forwardCalculate(values: Record<string, string>) {
       value: formatResistance(maxRes),
     },
     {
-      id: 'colorSequence',
+      id: '_colorSequence',
       label: 'Color Bands',
       value: JSON.stringify(bandColors),
     },
@@ -237,7 +237,7 @@ function reverseCalculate(values: Record<string, string>) {
       color: 'positive' as const,
     },
     {
-      id: 'colorBands',
+      id: '_colorBands',
       label: 'Color Bands',
       value: JSON.stringify(bandColors),
     },

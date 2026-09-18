@@ -11,12 +11,16 @@ function getClassification(pH: number): string {
   return 'Strong base';
 }
 
+// Boundaries mirror getClassification() exactly — using a different
+// operator (<=) here previously put pH 3.00 in "Weak acid" (Strong acid
+// uses < 3) but colored it Red (the strong-acid color), and pH 11.00 in
+// "Strong base" but colored it Blue (the weak-base color).
 function getIndicatorColor(pH: number): string {
   if (pH < 0 || pH > 14) return 'Invalid';
-  if (pH <= 3) return 'Red';
-  if (pH <= 6) return 'Orange/Yellow';
+  if (pH < 3) return 'Red';
+  if (pH < 7) return 'Orange/Yellow';
   if (pH === 7) return 'Green';
-  if (pH <= 11) return 'Blue';
+  if (pH < 11) return 'Blue';
   return 'Purple';
 }
 

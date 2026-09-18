@@ -23,7 +23,7 @@ export function calculate(shape: string, d1: number, d2: number, d3: number) {
   }
 
   if (shape === 'box') {
-    if (isNaN(d1) || isNaN(d2) || isNaN(d3)) return [];
+    if (isNaN(d1) || isNaN(d2) || isNaN(d3) || d1 <= 0 || d2 <= 0 || d3 <= 0) return [];
     const [l, w, h] = [d1, d2, d3];
     return [
       { id: 'volume', label: 'Volume', value: fmt(l * w * h), highlight: true, color: 'positive' as const },
@@ -33,7 +33,7 @@ export function calculate(shape: string, d1: number, d2: number, d3: number) {
   }
 
   if (shape === 'cylinder') {
-    if (isNaN(d1) || isNaN(d2)) return [];
+    if (isNaN(d1) || isNaN(d2) || d1 <= 0 || d2 <= 0) return [];
     const [r, h] = [d1, d2];
     return [
       { id: 'volume', label: 'Volume', value: fmt(pi * r * r * h), highlight: true, color: 'positive' as const },
@@ -43,7 +43,7 @@ export function calculate(shape: string, d1: number, d2: number, d3: number) {
   }
 
   if (shape === 'cone') {
-    if (isNaN(d1) || isNaN(d2)) return [];
+    if (isNaN(d1) || isNaN(d2) || d1 <= 0 || d2 <= 0) return [];
     const [r, h] = [d1, d2];
     const s = Math.sqrt(r * r + h * h);
     return [
@@ -54,7 +54,7 @@ export function calculate(shape: string, d1: number, d2: number, d3: number) {
   }
 
   if (shape === 'pyramid') {
-    if (isNaN(d1) || isNaN(d2)) return [];
+    if (isNaN(d1) || isNaN(d2) || d1 <= 0 || d2 <= 0) return [];
     const [b, h] = [d1, d2];
     const vol = b * b * h / 3;
     const slantH = Math.sqrt((b/2) * (b/2) + h * h);

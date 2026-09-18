@@ -109,7 +109,7 @@ export default function DicePanel({ results }: Props) {
   const countResult = results.find(r => r.id === 'count');
   const modifierResult = results.find(r => r.id === 'modifier');
   const averageResult = results.find(r => r.id === 'average');
-  const rollData = results.find(r => r.id === 'rollData');
+  const rollData = results.find(r => r.id === '_rollData');
 
   const [rollKey, setRollKey] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);

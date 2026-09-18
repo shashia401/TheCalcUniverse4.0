@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import BloodTypePanel from './BloodTypePanel';
 
@@ -114,8 +113,6 @@ const bloodTypeConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const p1Blood = values.parent1Blood;
     const p1Rh = values.parent1Rh;
     const p2Blood = values.parent2Blood;

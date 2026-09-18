@@ -125,7 +125,14 @@ const cdConfig: CalculatorConfig = {
     const years = termUnit === 'months' ? termRaw / 12 : termRaw;
     const { n: periodsPerYear, label: compLabel } = COMPOUND_LABELS[compoundingKey] || COMPOUND_LABELS.monthly;
 
-    const ratePerPeriod = apy / periodsPerYear;
+    // APY is already the effective ANNUAL rate (the input's own helpText says
+    // so), not a nominal rate to re-compound — so the per-period rate must be
+    // the one that, compounded `periodsPerYear` times, reproduces exactly
+    // that APY: (1+apy)^(1/n) - 1. Dividing apy/n here would treat it as a
+    // nominal rate and silently change the balance based on which
+    // compounding frequency the user picks, even though APY is defined to
+    // make that frequency irrelevant.
+    const ratePerPeriod = Math.pow(1 + apy, 1 / periodsPerYear) - 1;
     const totalPeriods = Math.round(years * periodsPerYear);
 
     // Future value
@@ -151,7 +158,6 @@ const cdConfig: CalculatorConfig = {
       { id: 'interestPct', label: 'Interest as % of Final Balance', value: `${interestPct.toFixed(1)}%`, color: interestPct > 20 ? 'positive' as const : 'neutral' as const },
       { id: 'apyResult', label: 'APY', value: `${(apy * 100).toFixed(2)}%`, color: 'neutral' as const },
       { id: 'compoundingResult', label: 'Compounding', value: `${compLabel} (${periodsPerYear}x/year)`, color: 'neutral' as const },
-      { id: 'effectiveAnnualRate', label: 'Effective Annual Rate (APY)', value: `${(Math.pow(1 + ratePerPeriod, periodsPerYear) - 1) * 100 >= apy * 100 ? (Math.pow(1 + ratePerPeriod, periodsPerYear) - 1) * 100 : apy * 100}%`, color: 'neutral' as const },
     ];
   },
 
@@ -172,7 +178,7 @@ const cdConfig: CalculatorConfig = {
     variables: [
       { symbol: 'A', name: 'Maturity Balance', description: 'The total value of the CD at the end of its term — includes both the original principal and all compounded interest earned over the full term.' },
       { symbol: 'P', name: 'Initial Deposit', description: 'The principal amount you deposit to open the CD. Most banks require a minimum deposit of $500 to $5,000.' },
-      { symbol: 'APY & Compounding', name: 'True Yield & Compounding Frequency', description: 'APY (Annual Percentage Yield) reflects the true annual return including compounding. More frequent compounding earns slightly more — daily compounding on a $10K 1-year CD at 4.25% yields about $6 more than annual compounding.' },
+      { symbol: 'APY & Compounding', name: 'True Yield & Compounding Frequency', description: 'APY (Annual Percentage Yield) already reflects the true annual return including compounding — that is the entire point of disclosing APY instead of a nominal rate. A 4.25% APY CD grows $10,000 to the same $10,425 in one year whether the bank compounds daily or annually; the compounding-frequency selector changes how often interest posts to your account, not how much you ultimately earn.' },
     ],
     howToUse: [
       'Enter your initial deposit amount — CDs typically require a $500 to $5,000 minimum deposit.',
@@ -188,7 +194,7 @@ const cdConfig: CalculatorConfig = {
       'Decide between a high-yield savings account and a fixed-term CD by projecting the total interest earned under each option.',
     ],
     explanation:
-      'Certificates of Deposit (CDs) offer a guaranteed fixed return in exchange for locking your money away for a predetermined term. The key advantage over regular savings accounts is the higher fixed interest rate that is guaranteed for the entire term. Banks issue CDs as a way to secure stable deposits they can use for lending, and in return they offer depositors a premium over standard savings rates. The trade-off is the loss of liquidity during the CD term — if you need access to your funds before maturity, you will typically face an early withdrawal penalty. The compounding frequency matters more than most people realize: on a $10,000 1-year CD at 4.25% APY, daily compounding earns about $8 more than annual compounding — a small but literally free amount. The real strategy for maximizing CD returns is known as "CD laddering": splitting your total deposit across multiple CDs with staggered maturity dates (3-month, 6-month, 1-year, 2-year, etc.) so that some portion of your money matures at regular intervals, giving you ongoing liquidity access while keeping the bulk of your savings earning the higher long-term rates. CD laddering works especially well in a rising rate environment because as shorter-term CDs mature, you reinvest at higher current rates. This calculator also accounts for additional recurring deposits, which some banks offer through "add-on" CDs that allow you to continue contributing during the term rather than making only a single initial deposit. The effective annual rate calculation shows you the true yield after accounting for the compounding frequency, which is especially important when comparing offers that compound at different intervals. For example, a CD with 4.5% APY compounded monthly has an effective annual rate of approximately 4.59%, while the same 4.5% APY compounded daily has an effective rate of approximately 4.60%. The difference is small but real, and it compounds over longer terms. When comparing CD offers, always look at the APY rather than the nominal rate — the APY is required by federal law (Truth in Savings Act) to reflect the true annual return including compounding, making it the most honest basis for comparison. FDIC insurance coverage of up to $250,000 per depositor per bank makes CDs one of the safest places to park cash, alongside Treasury securities and high-yield savings accounts.',
+      'Certificates of Deposit (CDs) offer a guaranteed fixed return in exchange for locking your money away for a predetermined term. The key advantage over regular savings accounts is the higher fixed interest rate that is guaranteed for the entire term. Banks issue CDs as a way to secure stable deposits they can use for lending, and in return they offer depositors a premium over standard savings rates. The trade-off is the loss of liquidity during the CD term — if you need access to your funds before maturity, you will typically face an early withdrawal penalty. Because APY already bakes in the effect of compounding, a given APY produces the same maturity balance no matter how often the bank compounds it — that is the entire reason regulators require APY disclosure instead of a nominal rate: it lets you compare CDs apples-to-apples without doing the compounding math yourself. The real strategy for maximizing CD returns is known as "CD laddering": splitting your total deposit across multiple CDs with staggered maturity dates (3-month, 6-month, 1-year, 2-year, etc.) so that some portion of your money matures at regular intervals, giving you ongoing liquidity access while keeping the bulk of your savings earning the higher long-term rates. CD laddering works especially well in a rising rate environment because as shorter-term CDs mature, you reinvest at higher current rates. This calculator also accounts for additional recurring deposits, which some banks offer through "add-on" CDs that allow you to continue contributing during the term rather than making only a single initial deposit. This is also why comparing the advertised APY across banks is always safe even if two offers compound at different intervals — a 4.5% APY is a 4.5% yield regardless of whether it is credited monthly or daily; the bank has already done that math for you. When comparing CD offers, always look at the APY rather than the nominal rate — the APY is required by federal law (Truth in Savings Act) to reflect the true annual return including compounding, making it the most honest basis for comparison. FDIC insurance coverage of up to $250,000 per depositor per bank makes CDs one of the safest places to park cash, alongside Treasury securities and high-yield savings accounts.',
     faqs: [
       {
         question: 'What is the difference between APY and APR?',
@@ -222,13 +228,13 @@ const cdConfig: CalculatorConfig = {
     formulaSource: 'Compound interest formula A = P(1 + r/n)^(nt) is the standard future value equation from time value of money theory. The Truth in Savings Act (12 CFR Part 1030) requires banks to disclose APY calculated as (1 + r/n)^n - 1, ensuring consistent comparison across products with different compounding frequencies.',
     proTips: [
       'Build a CD ladder instead of buying one long-term CD. Split your deposit across 3-month, 6-month, 1-year, and 2-year CDs. As each matures, reinvest at the current (potentially higher) rate. This gives you regular liquidity while capturing higher long-term yields.',
-      'Always compare APY, not the nominal interest rate. Banks are required by law to disclose APY which includes the effect of compounding. A 4.25% APY compounded daily is actually a higher yield than 4.25% APY compounded monthly, even though the APY number is the same — the difference is in the effective annual rate.',
+      'Always compare APY, not the nominal interest rate. Banks are required by law to disclose APY, which already includes the effect of compounding — a 4.25% APY is a 4.25% yield whether it is credited daily or monthly, so you never need to adjust for compounding frequency yourself when comparing offers.',
       'Watch for promotional "special" CD rates that are significantly above market. These are often limited to new customers or require a minimum deposit. Read the fine print: some promotional CDs automatically renew at much lower rates unless you act during a narrow grace period.',
       'Consider no-penalty CDs if you might need early access. These CDs (offered by Ally, Marcus, and others) allow full withdrawal after a short lock-up period (typically 6-7 days) with no penalty. The trade-off is a slightly lower APY — typically 0.25-0.50% below standard CD rates.',
     ],
     limitations: [
       'This calculator assumes the APY and compounding frequency remain constant throughout the CD term. It does not account for early withdrawal penalties, which vary by bank (typically 3-12 months of interest).',
-      'The effective annual rate calculation approximates continuous compounding effects — actual bank calculations may differ by fractions of a cent due to rounding conventions.',
+      'This calculator assumes the bank credits interest at exactly the frequency selected and rounds only at maturity — actual bank statements may differ by fractions of a cent due to daily rounding conventions.',
       'CD interest is taxable as ordinary income; this calculator does not estimate after-tax returns.',
       'FDIC insurance covers up to $250,000 per depositor per bank; amounts above this limit are not protected.',
       'For CDs held in IRAs, different tax rules apply.',

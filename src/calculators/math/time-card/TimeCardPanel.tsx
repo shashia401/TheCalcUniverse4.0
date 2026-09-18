@@ -38,7 +38,7 @@ export default function TimeCardPanel({ results }: Props) {
   const totalPay = results.find((r) => r.id === 'totalPay');
   const regularPay = results.find((r) => r.id === 'regularPay');
   const overtimePay = results.find((r) => r.id === 'overtimePay');
-  const dailyBreakdown = results.find((r) => r.id === 'dailyBreakdown');
+  const dailyBreakdown = results.find((r) => r.id === '_dailyBreakdown');
   const weekNumber = results.find((r) => r.id === 'weekNumber');
 
   if (!totalHours || !regularHours || !overtimeHours) return null;

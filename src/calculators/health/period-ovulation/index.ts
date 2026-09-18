@@ -72,9 +72,20 @@ const periodOvulationConfig: CalculatorConfig = {
     const fmt = (d: Date) =>
       d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    // Generate 3 months of predictions
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Anchor predictions to whichever cycle "today" actually falls in — a
+    // saved/revisited LMP date can be several cycles in the past, and
+    // generating a fixed 3-cycle window starting at LMP would then show a
+    // "next period" that already happened and a cycle day in the hundreds.
+    const dayMs = 1000 * 60 * 60 * 24;
+    const daysSinceLmpRaw = Math.floor((today.getTime() - lmp.getTime()) / dayMs);
+    const cyclesElapsed = Math.max(0, Math.floor(daysSinceLmpRaw / cycleLength));
+
+    // Generate the current cycle plus the next 2 months of predictions
     const predictions: { periodStart: Date; periodEnd: Date; ovulation: Date; fertileStart: Date; fertileEnd: Date }[] = [];
-    for (let m = 0; m < 3; m++) {
+    for (let m = cyclesElapsed; m < cyclesElapsed + 3; m++) {
       const periodStart = addDays(lmp, m * cycleLength);
       const periodEnd = addDays(periodStart, periodLength - 1);
       const ovulation = addDays(periodStart, cycleLength - lutealPhase);
@@ -83,17 +94,7 @@ const periodOvulationConfig: CalculatorConfig = {
       predictions.push({ periodStart, periodEnd, ovulation, fertileStart, fertileEnd });
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Find current cycle info
-    let currentCycleIndex = 0;
-    for (let i = 0; i < predictions.length; i++) {
-      if (predictions[i].periodStart <= today) {
-        currentCycleIndex = i;
-      }
-    }
-    const currentCycle = predictions[currentCycleIndex];
+    const currentCycle = predictions[0];
 
     // Current status
     const daysSinceLmp = Math.round((today.getTime() - currentCycle.periodStart.getTime()) / (1000 * 60 * 60 * 24));
@@ -111,8 +112,8 @@ const periodOvulationConfig: CalculatorConfig = {
       statusText = 'Follicular Phase — post-period, pre-ovulation';
     }
 
-    // Next period date
-    const nextPeriod = addDays(lmp, cycleLength);
+    // Next period date (after the cycle "today" is currently in)
+    const nextPeriod = addDays(currentCycle.periodStart, cycleLength);
     const daysUntilNextPeriod = Math.round((nextPeriod.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
     // Ovulation for current cycle

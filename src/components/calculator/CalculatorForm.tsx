@@ -170,7 +170,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   const [cur, setCur] = useState(() => {
     try { return localStorage.getItem('currency') || '$'; } catch { return '$'; }
   });
-  const money = (s: string) => (cur === '$' || !s?.includes('$') ? s : s.split('$').join(cur));
+  const money = (s: string) => (cur === '$' || !s?.includes('$') ? s : s.replaceAll('$', cur));
 
   // Reflect the current inputs in the URL query string so a scenario is shareable.
   // Whitelisted to this calc's input ids; values capped at 64 chars. Canonical stays

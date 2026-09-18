@@ -7,6 +7,22 @@ import { BASE_URL, SITE_NAME } from '../config/constants';
 
 type Schema = Record<string, unknown>;
 
+// schema.org SoftwareApplication.applicationCategory has no strict enum, but
+// these are the conventionally recognized values. Every calculator was
+// previously tagged 'UtilitiesApplication' regardless of category.
+const APPLICATION_CATEGORY_BY_CATEGORY: Record<string, string> = {
+  Finance: 'FinanceApplication',
+  'Health & Fitness': 'HealthApplication',
+  Mathematics: 'EducationalApplication',
+  'Developer Tools': 'DeveloperApplication',
+  'E-Commerce': 'BusinessApplication',
+  Everyday: 'LifestyleApplication',
+  'Home DIY': 'LifestyleApplication',
+  Automotive: 'UtilitiesApplication',
+  Engineering: 'UtilitiesApplication',
+  'Industrial & Trades': 'UtilitiesApplication',
+};
+
 export function calculatorUrl(entry: CalculatorEntry): string {
   return `${BASE_URL}/${entry.categorySlug}/${entry.id}/`;
 }
@@ -20,7 +36,7 @@ export function buildCalculatorSchemas(entry: CalculatorEntry, config: Calculato
       '@type': 'SoftwareApplication',
       name: entry.title,
       description: entry.description,
-      applicationCategory: 'UtilitiesApplication',
+      applicationCategory: APPLICATION_CATEGORY_BY_CATEGORY[entry.category] ?? 'UtilitiesApplication',
       operatingSystem: 'Web',
       url,
       provider: { '@type': 'Organization', name: SITE_NAME, url: BASE_URL },

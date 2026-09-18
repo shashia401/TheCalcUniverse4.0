@@ -1,5 +1,4 @@
 ﻿import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import CaloriesBurnedPanel from './CaloriesBurnedPanel';
 import { ACTIVITIES } from './activities';
@@ -54,8 +53,6 @@ const caloriesBurnedConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const unit = values.unit || 'imperial';
     const weight = parseFloat(values.weight);
     const activityId = values.activity || 'run_6mph';

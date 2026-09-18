@@ -31,12 +31,13 @@ const wireGaugeConfig: CalculatorConfig = {
       id: 'insulationType',
       label: 'Insulation Temperature Rating',
       type: 'select',
+      showWhen: (values) => values.conductorMaterial !== 'aluminum',
       options: [
         { label: '60°C (THHN/THWN in conduit, low temp)', value: '60' },
         { label: '75°C (THWN-2, most common)', value: '75' },
         { label: '90°C (THHN, dry locations)', value: '90' },
       ],
-      helpText: 'Higher rating allows more current for the same wire gauge',
+      helpText: 'Higher rating allows more current for the same wire gauge. Aluminum conductors in this calculator use the standard 75°C ampacity table.',
     },
     {
       id: 'numConductors',

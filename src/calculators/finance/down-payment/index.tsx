@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 
 const downPaymentConfig: CalculatorConfig = {
@@ -66,8 +65,6 @@ const downPaymentConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const homePrice = parseFloat(values.homePrice);
     const targetDownPct = parseFloat(values.targetDownPct || '20') / 100;
     const currentSavingsRaw = parseFloat(values.currentSavings);

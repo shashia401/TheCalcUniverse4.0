@@ -15,29 +15,11 @@ const PRESETS: Record<string, { minute: string; hour: string; dom: string; month
 const MONTH_NAMES = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-function generateDescription(
-  minute: string,
-  hour: string,
-  dom: string,
-  month: string,
-  dow: string
-): string {
+// Shared by generateDescription() and generateNextRunDescription() — both
+// append the same "on day X / in month Y / on day-of-week Z" suffix, only
+// the minute/hour prefix phrasing differs between them.
+function scheduleSuffixParts(dom: string, month: string, dow: string): string[] {
   const parts: string[] = [];
-
-  if (minute === '*' && hour === '*') {
-    parts.push('Every minute');
-  } else if (minute === '*/5' && hour === '*') {
-    parts.push('Every 5 minutes');
-  } else if (minute === '*/15' && hour === '*') {
-    parts.push('Every 15 minutes');
-  } else if (minute === '0' && hour === '*') {
-    parts.push('Every hour');
-  } else if (minute !== '*' && hour !== '*') {
-    const minStr = minute === '0' ? '00' : minute.padStart(2, '0');
-    parts.push(`At ${hour.padStart(2, '0')}:${minStr}`);
-  } else if (minute !== '*') {
-    parts.push(`At minute ${minute}`);
-  }
 
   if (dom !== '*' && dom !== '?') {
     if (/^\d+$/.test(dom)) {
@@ -65,6 +47,35 @@ function generateDescription(
     }
   }
 
+  return parts;
+}
+
+function generateDescription(
+  minute: string,
+  hour: string,
+  dom: string,
+  month: string,
+  dow: string
+): string {
+  const parts: string[] = [];
+
+  if (minute === '*' && hour === '*') {
+    parts.push('Every minute');
+  } else if (minute === '*/5' && hour === '*') {
+    parts.push('Every 5 minutes');
+  } else if (minute === '*/15' && hour === '*') {
+    parts.push('Every 15 minutes');
+  } else if (minute === '0' && hour === '*') {
+    parts.push('Every hour');
+  } else if (minute !== '*' && hour !== '*') {
+    const minStr = minute === '0' ? '00' : minute.padStart(2, '0');
+    parts.push(`At ${hour.padStart(2, '0')}:${minStr}`);
+  } else if (minute !== '*') {
+    parts.push(`At minute ${minute}`);
+  }
+
+  parts.push(...scheduleSuffixParts(dom, month, dow));
+
   return parts.join(' ') || 'Custom schedule';
 }
 
@@ -82,40 +93,13 @@ function generateNextRunDescription(
 
   if (minute === '0' && hour === '0' && dom === '*') {
     if (dow === '0') return 'Every Sunday at midnight';
-    if ((dom as string) === '1') return 'Every 1st of the month at midnight';
     return 'Every day at midnight';
   }
 
   const minStr = minute === '0' ? '00' : minute.padStart(2, '0');
-  let desc = `At ${hour.padStart(2, '0')}:${minStr}`;
+  const desc = `At ${hour.padStart(2, '0')}:${minStr}`;
 
-  if (dom !== '*' && dom !== '?') {
-    if (/^\d+$/.test(dom)) {
-      desc += ` on day ${dom}`;
-    } else {
-      desc += ` on days: ${dom}`;
-    }
-  }
-
-  if (month !== '*' && month !== '?') {
-    const monthNum = parseInt(month, 10);
-    if (/^\d+$/.test(month) && monthNum >= 1 && monthNum <= 12) {
-      desc += ` in ${MONTH_NAMES[monthNum]}`;
-    } else {
-      desc += ` in months: ${month}`;
-    }
-  }
-
-  if (dow !== '*' && dow !== '?') {
-    const dowNum = parseInt(dow, 10);
-    if (/^\d+$/.test(dow) && dowNum >= 0 && dowNum <= 6) {
-      desc += ` on ${DAY_NAMES[dowNum]}`;
-    } else {
-      desc += ` on days of week: ${dow}`;
-    }
-  }
-
-  return desc;
+  return [desc, ...scheduleSuffixParts(dom, month, dow)].join(' ');
 }
 
 const cronGeneratorConfig: CalculatorConfig = {

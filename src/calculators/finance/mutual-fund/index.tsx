@@ -1,5 +1,4 @@
 import { createElement, useMemo } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { fvWithContributions, fmtCurrency } from '../../../utils/financial';
 
@@ -172,8 +171,6 @@ const mutualFundConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const initial = parseFloat(values.initialInvestment);
     const monthly = parseFloat(values.monthlyContribution) || 0;
     const annualReturn = parseFloat(values.expectedReturn) / 100;

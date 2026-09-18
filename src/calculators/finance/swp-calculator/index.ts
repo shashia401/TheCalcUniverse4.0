@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SwpPanel from './SwpPanel';
 
@@ -61,8 +60,6 @@ const swpConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const corpus = parseFloat(values.corpus) || 0;
     const r = parseFloat(values.expectedReturn) / 100;
     const monthlyW = parseFloat(values.monthlyWithdrawal) || 0;

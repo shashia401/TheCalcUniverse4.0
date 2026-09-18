@@ -252,6 +252,24 @@ const UNIT_LABELS: Record<string, string> = {
   brl: 'BRL',
 };
 
+// ─── Per-category unit options ────────────────────────────────────────────────
+// A single flat "From Unit" / "To Unit" select spanning every category let a
+// user pick e.g. category=length with fromUnit=kilogram — the calculate()
+// factor lookup would then silently return [] with no explanation. Each
+// category gets its own pair of unit selects (shown only when that category
+// is selected), so the dropdown itself can never mix categories.
+
+const UNITS_BY_CATEGORY: Record<string, { label: string; value: string }[]> = Object.fromEntries(
+  CATEGORIES.map(({ value: cat }) => {
+    const keys = cat === 'temperature' ? ['celsius', 'fahrenheit', 'kelvin'] : Object.keys(FACTORS[cat] || {});
+    const options = keys.map((key) => {
+      const fullLabel = ALL_UNITS.find((u) => u.value === key)?.label || key;
+      return { value: key, label: fullLabel.replace(/\s*\([^)]*\)\s*$/, '') };
+    });
+    return [cat, options];
+  })
+);
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function fmt(n: number): string {
@@ -282,27 +300,31 @@ const conversionConfig: CalculatorConfig = {
       inputMode: 'decimal',
       helpText: 'The numeric value to convert',
     },
-    {
-      id: 'fromUnit',
-      label: 'From Unit',
-      type: 'select',
-      required: true,
-      options: ALL_UNITS,
-      helpText: 'Select the unit you are converting from',
-    },
-    {
-      id: 'toUnit',
-      label: 'To Unit',
-      type: 'select',
-      required: true,
-      options: ALL_UNITS,
-      helpText: 'Select the unit you are converting to',
-    },
+    ...CATEGORIES.flatMap(({ value: cat }) => [
+      {
+        id: `fromUnit_${cat}`,
+        label: 'From Unit',
+        type: 'select' as const,
+        required: true,
+        options: UNITS_BY_CATEGORY[cat],
+        showWhen: (v: Record<string, string>) => v.category === cat,
+        helpText: 'Select the unit you are converting from',
+      },
+      {
+        id: `toUnit_${cat}`,
+        label: 'To Unit',
+        type: 'select' as const,
+        required: true,
+        options: UNITS_BY_CATEGORY[cat],
+        showWhen: (v: Record<string, string>) => v.category === cat,
+        helpText: 'Select the unit you are converting to',
+      },
+    ]),
   ],
   calculate: (values) => {
     const category = (values.category || '').trim();
-    const fromUnit = (values.fromUnit || '').trim();
-    const toUnit = (values.toUnit || '').trim();
+    const fromUnit = (values[`fromUnit_${category}`] || '').trim();
+    const toUnit = (values[`toUnit_${category}`] || '').trim();
     const fromValue = parseFloat(values.fromValue);
 
     if (isNaN(fromValue)) return [];
@@ -407,19 +429,19 @@ const conversionConfig: CalculatorConfig = {
     workedExamples: [
       {
         scenario: 'Maria, a European baker, is following an American recipe that calls for 3 cups of flour and 2 sticks of butter (each stick is 4 ounces). Her kitchen scale and measuring tools are metric. She needs to convert to milliliters and grams.',
-        inputs: { category: 'volume', fromValue: '3', fromUnit: 'cup', toUnit: 'milliliter' },
+        inputs: { category: 'volume', fromValue: '3', fromUnit_volume: 'cup', toUnit_volume: 'milliliter' },
         result: '709.764 mL',
         insight: '3 cups × 0.236588 L/cup = 0.709764 L = 709.764 mL. For the butter: 8 oz × 28.3495 g/oz = 226.796 g. Maria should measure approximately 710 mL of flour and 227 g of butter. Understanding cup-to-mL conversion is essential for baking precision since flour density means volume measurements can vary — professional bakers prefer weight-based recipes for consistency.',
       },
       {
         scenario: 'James, a logistics manager, is shipping a container from the US to Germany. The cargo weighs 24,500 pounds, but the German port authority requires weight declarations in metric tons. He also needs the total in kilograms for the shipping manifest.',
-        inputs: { category: 'weight', fromValue: '24500', fromUnit: 'pound', toUnit: 'metric-ton' },
+        inputs: { category: 'weight', fromValue: '24500', fromUnit_weight: 'pound', toUnit_weight: 'metric-ton' },
         result: '11.113004 t',
         insight: '24,500 lb × (453.592 / 1,000,000) = 11.113 metric tons, or 11,113 kg. International shipping requires precise conversions — a mistake here could lead to customs delays, overweight container penalties (typically $500-$2,000 per violation), or even cargo rejection. Most international shipping containers have a maximum gross weight of about 30 metric tons.',
       },
       {
         scenario: 'Priya, an Indian student studying in the United States, checks the weather forecast showing 95°F for the weekend. She is accustomed to Celsius and wants to understand how hot that really is. She converts to Celsius and also checks if the temperature is in the dangerous heat zone.',
-        inputs: { category: 'temperature', fromValue: '95', fromUnit: 'fahrenheit', toUnit: 'celsius' },
+        inputs: { category: 'temperature', fromValue: '95', fromUnit_temperature: 'fahrenheit', toUnit_temperature: 'celsius' },
         result: '35 °C',
         insight: '°C = (95 − 32) × 5/9 = 63 × 5/9 = 35°C. This is a hot day by any standard. Priya should stay hydrated and limit outdoor activity during peak afternoon hours. For reference, the human body begins experiencing heat stress around 35°C (95°F) with high humidity, and the Indian Meteorological Department issues heatwave warnings when temperatures exceed 40°C (104°F) in plains regions.',
       },

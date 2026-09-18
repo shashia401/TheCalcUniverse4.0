@@ -403,7 +403,7 @@ const BandwidthPanel: React.FC<{
               <strong>TCP Overhead Active:</strong> 10% of bandwidth ({speedMbps} Mbps) is consumed by protocol
               overhead, reducing effective throughput to <strong>{effectiveSpeedMbps} Mbps</strong>.
               Estimated transfer time increased from{' '}
-              <strong>{timeSeconds > 0 ? formatTime(timeSeconds / 0.9) : '-'}</strong> to{' '}
+              <strong>{timeSeconds > 0 ? formatTime(timeSeconds * 0.9) : '-'}</strong> to{' '}
               <strong>{getResult('Transfer Time')}</strong>.
             </div>
           )}

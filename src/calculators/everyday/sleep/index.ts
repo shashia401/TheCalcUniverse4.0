@@ -113,7 +113,7 @@ const sleepConfig: CalculatorConfig = {
 
       return [
         {
-          id: 'options',
+          id: '_options',
           label: 'Optimal Times',
           value: JSON.stringify(options),
         },
@@ -155,7 +155,7 @@ const sleepConfig: CalculatorConfig = {
 
       return [
         {
-          id: 'options',
+          id: '_options',
           label: 'Optimal Times',
           value: JSON.stringify(options),
         },

@@ -2,14 +2,17 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import YarnYardagePanel from './YarnYardagePanel';
 
+// XL = L + (L − M), extending each project's own S→M→L increment — the
+// size selector below offers XL for every project type, so every entry
+// needs one (a missing key silently returned zero results for that combo).
 const PROJECT_BASE_YARDAGE: Record<string, Record<string, number>> = {
-  Scarf: { S: 300, M: 400, L: 500 },
-  Blanket: { S: 1200, M: 1800, L: 2400 },
-  Sweater: { S: 800, M: 1000, L: 1200 },
-  Hat: { S: 200, M: 250, L: 300 },
-  Socks: { S: 250, M: 300, L: 350 },
-  Shawl: { S: 500, M: 700, L: 900 },
-  Dishcloth: { S: 100, M: 150, L: 200 },
+  Scarf: { S: 300, M: 400, L: 500, XL: 600 },
+  Blanket: { S: 1200, M: 1800, L: 2400, XL: 3000 },
+  Sweater: { S: 800, M: 1000, L: 1200, XL: 1400 },
+  Hat: { S: 200, M: 250, L: 300, XL: 350 },
+  Socks: { S: 250, M: 300, L: 350, XL: 400 },
+  Shawl: { S: 500, M: 700, L: 900, XL: 1100 },
+  Dishcloth: { S: 100, M: 150, L: 200, XL: 250 },
 };
 
 const PRECUT_CONVERTER: Record<string, number> = {

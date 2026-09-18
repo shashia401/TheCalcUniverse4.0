@@ -1,5 +1,4 @@
 ﻿import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import MilestonesPanel from './MilestonesPanel';
 
@@ -51,8 +50,6 @@ const dueDateConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const method = values.method || 'lmp';
     const dateStr = values.date?.trim();
     const cycleLength = parseFloat(values.cycleLength) || 28;
@@ -72,7 +69,11 @@ const dueDateConfig: CalculatorConfig = {
       lmpDate = addDays(inputDate, -19);
     }
 
-    const cycleOffset = cycleLength - 28;
+    // The cycle-length field is documented as "LMP method only" (it adjusts
+    // where ovulation likely fell within a self-reported LMP) — it must not
+    // shift a due date that was already back-calculated from a known
+    // conception or IVF transfer date.
+    const cycleOffset = method === 'lmp' ? cycleLength - 28 : 0;
     const dueDate = addDays(lmpDate, 280 + cycleOffset);
 
     const today = new Date();

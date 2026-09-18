@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import DebtConsolidationPanel from './DebtConsolidationPanel';
 import DebtInputs from './DebtInputs';
@@ -61,8 +60,6 @@ const debtConsolidationConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     let debts: Array<{ name: string; balance: number; rate: number; payment: number }> = [];
     try {
       const raw = JSON.parse(values.debts || '[]');

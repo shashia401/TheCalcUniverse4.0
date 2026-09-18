@@ -1,7 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ExponentPanel from './ExponentPanel';
-import Decimal from 'decimal.js';
 
 // Decimal.js is used for precision edge cases: very large integer exponents
 // and small decimal results where native IEEE 754 double-precision can drift.

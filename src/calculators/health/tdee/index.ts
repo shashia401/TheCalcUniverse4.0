@@ -1,5 +1,4 @@
 import { createElement, Fragment } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import CalorieMatrixPanel from './CalorieMatrixPanel';
 import TDEComparisonPanel from './TDEComparisonPanel';
@@ -190,8 +189,6 @@ const tdeeConfig: CalculatorConfig = {
     return steps;
   },
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const unit = values.unit || 'imperial';
     const sex = values.sex || 'male';
     const age = parseFloat(values.age);

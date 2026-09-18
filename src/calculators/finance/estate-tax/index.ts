@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import EstateTaxPanel from './EstateTaxPanel';
 
@@ -119,8 +118,6 @@ const estateTaxConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const totalAssets = parseFloat(values.totalAssets) || 0;
     const debtsDeductions = parseFloat(values.debtsDeductions) || 0;
     const filingStatus = values.filingStatus || 'single';

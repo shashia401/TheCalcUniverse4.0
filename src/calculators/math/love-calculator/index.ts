@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import LovePanel from './LovePanel';

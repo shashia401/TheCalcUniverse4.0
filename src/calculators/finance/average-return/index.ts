@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import { cagr, arithmeticAverage } from '../../../utils/financial';
 import AverageReturnPanel from './AverageReturnPanel';
@@ -62,8 +61,6 @@ const averageReturnConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const mode = values.inputMode || 'simple';
 
     if (mode === 'simple') {

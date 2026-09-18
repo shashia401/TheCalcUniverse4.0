@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import NetWorthPanel from './NetWorthPanel';
 
@@ -107,8 +106,6 @@ const netWorthConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const parse = (key: string) => parseFloat(values[key]) || 0;
 
     const totalAssets =

@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import MarriageTaxPanel from './MarriageTaxPanel';
 
@@ -104,8 +103,6 @@ const marriageTaxConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const i1 = parseFloat(values.income1);
     const i2 = parseFloat(values.income2);
     const dType = values.deductionType || 'standard';

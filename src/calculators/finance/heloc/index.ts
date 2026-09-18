@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import HELOCPanel from './HELOCPanel';
@@ -64,8 +63,6 @@ const helocCalculatorConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const homeValue = parseFloat(values.homeValue);
     const mortgageBalance = parseFloat(values.mortgageBalance);
     const maxLTV = parseFloat(values.maxLTV || '80');

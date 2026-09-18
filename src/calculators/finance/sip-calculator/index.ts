@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SipPanel from './SipPanel';
 
@@ -69,8 +68,6 @@ const sipConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const lumpsum = parseFloat(values.lumpsum) || 0;
     const monthly = parseFloat(values.monthlyInvestment) || 0;
     const r = parseFloat(values.expectedReturn) / 100;

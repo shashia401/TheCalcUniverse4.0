@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import VAPanel from './VAPanel';
 
@@ -128,8 +127,6 @@ const vaMortgageConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const homePrice = parseFloat(values.homePrice);
     const interestRate = parseFloat(values.interestRate);
     const loanTerm = parseInt(values.loanTerm || '30');

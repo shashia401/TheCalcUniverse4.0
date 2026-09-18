@@ -112,10 +112,6 @@ calculate: (values): CalculatorResult[] => {
     return results;
   },
 
-  extraPanel: (values, results) => {
-    if (!results.length) return null;
-    return null;
-  },
   educational: {
     formula: 'Gestation period = species-specific constant. Due date = Breeding date + Gestation period.',
     formulaDescription: 'Gestation periods vary enormously across the animal kingdom — from 12 days (opossum) to 645 days (African elephant) to over 3 years (frilled shark). Marsupials have extremely short gestations with extended pouch development. Birds incubate externally. Fish and reptiles show remarkable diversity including male pregnancy (seahorses).',

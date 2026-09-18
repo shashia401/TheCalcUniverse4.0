@@ -155,8 +155,12 @@ function generateRandomPassword(length: number, charSets: string[]): string {
   return shuffleArray(password).join('');
 }
 
+function passphraseWordCount(length: number): number {
+  return Math.max(3, Math.min(6, Math.round(length / 4)));
+}
+
 function generatePassphrase(length: number): string {
-  const wordCount = Math.max(3, Math.min(6, Math.round(length / 4)));
+  const wordCount = passphraseWordCount(length);
   const words: string[] = [];
 
   for (let i = 0; i < wordCount; i++) {
@@ -166,6 +170,16 @@ function generatePassphrase(length: number): string {
 
   const number = getRandomInt(1000);
   return words.join('-') + number;
+}
+
+// A dictionary-attack model: each word is drawn from a ~200-word list
+// (not the 26/52/62/89-symbol charset the "random string" mode uses), plus
+// a trailing 3-digit number (1000 possibilities). Using length × log2(charset
+// size) here — as if the passphrase were random per-character — dramatically
+// overstates its real entropy (e.g. ~149 bits instead of the true ~33 bits).
+function calculatePassphraseEntropy(length: number): number {
+  const wordCount = passphraseWordCount(length);
+  return wordCount * Math.log2(WORD_LIST.length) + Math.log2(1000);
 }
 
 function calculateEntropy(length: number, charsetSize: number): number {
@@ -299,17 +313,19 @@ const passwordGeneratorConfig: CalculatorConfig = {
 
     let password: string;
     let actualLength: number;
+    let entropy: number;
 
     if (mode === 'passphrase') {
       password = generatePassphrase(length);
       actualLength = password.length;
+      entropy = calculatePassphraseEntropy(length);
     } else {
       const clampedLength = Math.max(4, Math.min(128, length));
       password = generateRandomPassword(clampedLength, charSets);
       actualLength = clampedLength;
+      entropy = calculateEntropy(actualLength, charsetSize);
     }
 
-    const entropy = calculateEntropy(actualLength, charsetSize);
     const strength = classifyStrength(entropy);
     const crackTime = formatCrackTime(entropy);
 
@@ -341,11 +357,17 @@ const passwordGeneratorConfig: CalculatorConfig = {
         label: 'Time to Crack (Brute Force)',
         value: crackTime,
       },
-      {
-        id: 'charset',
-        label: 'Character Set Size',
-        value: String(charsetSize),
-      },
+      mode === 'passphrase'
+        ? {
+            id: 'charset',
+            label: 'Word List Size',
+            value: String(WORD_LIST.length),
+          }
+        : {
+            id: 'charset',
+            label: 'Character Set Size',
+            value: String(charsetSize),
+          },
     ];
   },
 

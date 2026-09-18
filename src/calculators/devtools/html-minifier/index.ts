@@ -57,8 +57,8 @@ function minifyCss(code: string): string {
   result = result.replace(/\s*,\s*/g, ',');
   // Remove trailing semicolons before closing braces
   result = result.replace(/;\}/g, '}');
-  // Collapse remaining whitespace
-  result = result.replace(/\s+/g, ' ').replace(/\s/g, '');
+  // Remove all remaining whitespace
+  result = result.replace(/\s/g, '');
 
   // Restore calc() expressions
   result = result.replace(/\x00CALC(\d+)\x00/g, (_, i) => calcBlocks[parseInt(i)]);
@@ -79,9 +79,6 @@ function minifyJs(code: string): string {
   result = result.replace(/[ \t]+/g, ' ');
   // Remove spaces around operators (basic)
   result = result.replace(/\s*([=+\-*/%<>&|!?:;,{}()[\]])\s*/g, '$1');
-  // Fix spaces that were collapsed around ++ and --
-  result = result.replace(/\+\+/g, '++');
-  result = result.replace(/--/g, '--');
   // Remove unnecessary semicolons before closing braces
   result = result.replace(/;\}/g, '}');
   // Remove leading/trailing whitespace on each line

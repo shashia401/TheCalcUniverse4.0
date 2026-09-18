@@ -45,16 +45,18 @@ calculate: (values): CalculatorResult[] => {
     const breedingDate = new Date(breedingStr);
     if (isNaN(breedingDate.getTime())) return [];
 
-    // Base gestation: 114 days (3-3-3 rule)
+    // Base gestation: 114 days (3-3-3 rule). Breed and parity adjustments
+    // must combine (a heritage-breed gilt should still get the heritage
+    // adjustment), so they're applied as deltas rather than absolute
+    // overwrites — the previous version let a later assignment silently
+    // erase an earlier one for any breed+parity combination.
     let gestationDays = 114;
 
-    // Heritage breeds sometimes go 1–2 days longer
-    if (breedType === 'large') gestationDays = 115;
-    if (breedType === 'mini') gestationDays = 114;
+    // Heritage/large breeds sometimes go ~1 day longer
+    if (breedType === 'large') gestationDays += 1;
 
-    // Gilts may farrow 1 day early; older sows 1 day late
-    if (parity === 'gilt') gestationDays = 114;
-    if (parity === 'olderSow') gestationDays = 115;
+    // Older, more mature sows may carry slightly longer
+    if (parity === 'olderSow') gestationDays += 1;
 
     const dueDate = new Date(breedingDate);
     dueDate.setDate(dueDate.getDate() + gestationDays);

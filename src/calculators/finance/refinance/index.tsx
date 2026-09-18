@@ -1,5 +1,4 @@
 import { createElement, useMemo } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { pmt, fmtCurrency } from '../../../utils/financial';
 import { TrendingUp } from 'lucide-react';
@@ -194,8 +193,6 @@ const refinanceConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for monetary precision — imported at top of file
-
     const currentBalance = parseFloat(values.currentBalance);
     const currentRate = parseFloat(values.currentRate) / 100;
     const currentTerm = parseFloat(values.currentTerm);
