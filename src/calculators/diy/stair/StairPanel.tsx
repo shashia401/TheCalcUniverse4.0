@@ -18,7 +18,7 @@ interface StairData {
 }
 
 function parseStairData(results: CalculatorResult[]): StairData | null {
-  const row = results.find((r) => r.id === 'stairData');
+  const row = results.find((r) => r.id === '_stairData');
   if (!row) return null;
   try {
     return JSON.parse(row.value) as StairData;

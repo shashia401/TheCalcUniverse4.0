@@ -15,7 +15,7 @@ export default function AITokenPricingPanel({ results }: Props) {
   const outputCost = results.find(r => r.id === 'outputCost');
   const modelName = results.find(r => r.id === 'modelName');
   const lastUpdated = results.find(r => r.id === 'lastUpdated');
-  const allModelsRaw = results.find(r => r.id === 'allModels');
+  const allModelsRaw = results.find(r => r.id === '_allModels');
 
   const allModels = useMemo(() => {
     if (!allModelsRaw) return [];

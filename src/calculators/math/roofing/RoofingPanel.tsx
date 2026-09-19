@@ -79,7 +79,7 @@ function PitchBarSVG({ pitch }: { pitch: string }) {
 }
 
 export default function RoofingPanel({ values, results }: Props) {
-  const matStr = getResult(results, 'materialsList')?.value;
+  const matStr = getResult(results, '_materialsList')?.value;
   let mats: Materials | null = null;
   if (matStr) {
     try {

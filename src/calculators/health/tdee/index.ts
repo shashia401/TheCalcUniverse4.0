@@ -288,6 +288,24 @@ const tdeeConfig: CalculatorConfig = {
         value: `Maintain: ${fmt(tdee)} · Cut (-500 deficit, ~1 lb/wk): ${fmt(cutting500)} · Bulk (+500 surplus, ~1 lb/wk): ${fmt(bulking500)} kcal/day`,
         color: 'neutral',
       },
+      // Internal-only: granular per-goal breakdown consumed by CalorieMatrixPanel's
+      // comparison table and bar chart (bmrBreakdown/calorieTargets above are the
+      // combined-string versions shown in the plain results list).
+      { id: '_bmr', label: '', value: `${fmt(bmr)} kcal/day`, color: 'neutral' },
+      { id: '_tef', label: '', value: `${fmt(tef)} kcal/day`, color: 'neutral' },
+      { id: '_eat', label: '', value: `${fmt(eat)} kcal/day`, color: 'neutral' },
+      { id: '_neat', label: '', value: `${fmt(Math.max(neat, 0))} kcal/day`, color: 'neutral' },
+      { id: '_maintainCalories', label: '', value: `${fmt(tdee)} kcal/day`, color: 'neutral' },
+      { id: '_mildLoss', label: '', value: `${fmt(tdee - 250)} kcal/day`, color: 'neutral' },
+      { id: '_moderateLoss', label: '', value: `${fmt(cutting500)} kcal/day`, color: 'neutral' },
+      {
+        id: '_extremeLoss',
+        label: '',
+        value: tdee - 1000 < safeMin ? 'Not recommended (below safe minimum)' : `${fmt(tdee - 1000)} kcal/day`,
+        color: 'neutral',
+      },
+      { id: '_leanGain', label: '', value: `${fmt(tdee + 250)} kcal/day`, color: 'neutral' },
+      { id: '_aggressiveGain', label: '', value: `${fmt(bulking500)} kcal/day`, color: 'neutral' },
       {
         id: 'safeMinWarning',
         label: `Safe Minimum (${sex === 'female' ? 'Women' : 'Men'})`,

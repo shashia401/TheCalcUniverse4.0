@@ -126,7 +126,7 @@ const annuityPayoutConfig: CalculatorConfig = {
     const fmtK = (n: number) =>
       n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${new Decimal(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 
-    const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral' }> = [];
+    const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral'; interpretation?: string }> = [];
 
     if (solveFor === 'payout') {
       if (desiredYears <= 0) return [];

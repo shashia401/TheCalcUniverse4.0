@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
 
 interface Props {
@@ -12,7 +13,7 @@ interface TreeNode {
   right?: TreeNode;
 }
 
-function renderTree(node: TreeNode, x: number, y: number, xSpacing: number, level: number): JSX.Element | null {
+function renderTree(node: TreeNode, x: number, y: number, xSpacing: number, level: number): ReactElement | null {
   const hasChildren = node.left && node.right;
   return (
     <g key={`${x}-${y}`}>

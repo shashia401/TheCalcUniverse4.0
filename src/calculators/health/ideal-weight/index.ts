@@ -132,7 +132,7 @@ const idealWeightConfig: CalculatorConfig = {
     const fmtLbs = (n: number) => `${(n / 0.45359237).toFixed(0)} lbs`;
     const displayKg = (n: number) => unit === 'imperial' ? fmtLbs(n) : fmtKg(n);
 
-    const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral' }> = [
+    const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral'; interpretation?: string }> = [
       {
         id: 'avgIdeal',
         label: 'Average Ideal Weight (4 formulas)',

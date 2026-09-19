@@ -92,7 +92,7 @@ const repaymentConfig: CalculatorConfig = {
         ? `$${(n / 1_000_000).toFixed(2)}M`
         : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
-    const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral' }> = [];
+    const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral'; interpretation?: string }> = [];
 
     // Compute extra payment scenario
     if (extraPayment > 0 && monthlyRate > 0) {

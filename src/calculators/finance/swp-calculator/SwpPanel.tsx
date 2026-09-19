@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
 
 function SwpPanel({ values, results }: { values: Record<string, string>; results: CalculatorResult[] }) {
-  const chartDataStr = results.find((r) => r.id === 'withdrawalChart')?.value || '[]';
+  const chartDataStr = results.find((r) => r.id === '_withdrawalChart')?.value || '[]';
   const chartData = useMemo(() => {
     try {
       const parsed = JSON.parse(chartDataStr);

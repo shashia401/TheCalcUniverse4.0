@@ -7,7 +7,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes } from 'react';
 import { createPortal } from 'react-dom';
-import type { CalculatorConfig, CalculatorResult, InputField } from '../../types/calculator';
+import type { CalculatorConfig, CalculatorResult, ExplainStep, InputField } from '../../types/calculator';
 import { getCalculatorById } from '../../calculators/registry/index';
 import MiniAreaChart from './MiniAreaChart';
 import MiniDonut from './MiniDonut';
@@ -709,7 +709,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
 
       {/* Live worked solution — the user's own numbers, step by step */}
       {!compact && config.explainSteps && results.length > 0 && (() => {
-        let steps;
+        let steps: ExplainStep[];
         try {
           steps = config.explainSteps(values);
         } catch {

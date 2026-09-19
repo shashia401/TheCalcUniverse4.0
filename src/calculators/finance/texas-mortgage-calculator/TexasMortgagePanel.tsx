@@ -14,7 +14,7 @@ export default function TexasMortgagePanel({ values, results }: Props) {
   const loanRes = results.find((r) => r.id === 'loanAmount');
   const interestRes = results.find((r) => r.id === 'totalInterest');
   const totalCostRes = results.find((r) => r.id === 'totalCost');
-  const taxNoteRes = results.find((r) => r.id === 'propertyTaxNote');
+  const taxNoteRes = results.find((r) => r.id === 'propertyTaxAfter');
 
   if (!monthlyRes || !interestRes || !totalCostRes) return null;
 

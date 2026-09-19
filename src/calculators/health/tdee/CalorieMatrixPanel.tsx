@@ -13,16 +13,16 @@ function parseKcal(s: string): number {
 
 export default function CalorieMatrixPanel({ results }: Props) {
   const tdeeResult = results.find(r => r.id === 'tdee');
-  const bmrResult = results.find(r => r.id === 'bmr');
-  const tefResult = results.find(r => r.id === 'tef');
-  const eatResult = results.find(r => r.id === 'eat');
-  const neatResult = results.find(r => r.id === 'neat');
-  const maintainResult = results.find(r => r.id === 'maintainCalories');
-  const mildLossResult = results.find(r => r.id === 'mildLoss');
-  const moderateLossResult = results.find(r => r.id === 'moderateLoss');
-  const extremeLossResult = results.find(r => r.id === 'extremeLoss');
-  const leanGainResult = results.find(r => r.id === 'leanGain');
-  const aggressiveGainResult = results.find(r => r.id === 'aggressiveGain');
+  const bmrResult = results.find(r => r.id === '_bmr');
+  const tefResult = results.find(r => r.id === '_tef');
+  const eatResult = results.find(r => r.id === '_eat');
+  const neatResult = results.find(r => r.id === '_neat');
+  const maintainResult = results.find(r => r.id === '_maintainCalories');
+  const mildLossResult = results.find(r => r.id === '_mildLoss');
+  const moderateLossResult = results.find(r => r.id === '_moderateLoss');
+  const extremeLossResult = results.find(r => r.id === '_extremeLoss');
+  const leanGainResult = results.find(r => r.id === '_leanGain');
+  const aggressiveGainResult = results.find(r => r.id === '_aggressiveGain');
 
   if (!tdeeResult || !bmrResult) return null;
 

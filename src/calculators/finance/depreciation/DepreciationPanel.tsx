@@ -197,7 +197,7 @@ function AssetValueLine({ schedule, assetCost }: { schedule: ScheduleRow[]; asse
 // ─── Main Panel ────────────────────────────────────────────────────────────────
 
 export default function DepreciationPanel({ values, results }: Props) {
-  const scheduleResult = results.find((r) => r.id === 'schedule');
+  const scheduleResult = results.find((r) => r.id === '_schedule');
   if (!scheduleResult) return null;
 
   let schedule: ScheduleRow[] = [];

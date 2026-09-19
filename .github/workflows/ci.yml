@@ -26,6 +26,15 @@ jobs:
         # this gate guarantees they stay pure vector markup.
         run: node scripts/check-svg-safety.mjs
 
+      - name: Result-id gate
+        # Catches "panel looks up a result id calculate() never emits" — the
+        # exact defect behind 12+ dead-panel bugs found in review, where an
+        # entire panel section silently never rendered.
+        run: node scripts/check-result-ids.mjs
+
+      - name: Type check
+        run: npx tsc --noEmit -p tsconfig.json
+
       - name: Build (all pages must generate)
         run: npm run build
 

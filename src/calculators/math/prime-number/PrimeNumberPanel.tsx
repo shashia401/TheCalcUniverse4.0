@@ -10,16 +10,15 @@ function parseNum(s: string): number {
   return m ? parseFloat(m[0]) : 0;
 }
 
-export default function PrimeNumberPanel({ results }: Props) {
+export default function PrimeNumberPanel({ values, results }: Props) {
   const isPrime = results.find(r => r.id === 'isPrime');
   const factors = results.find(r => r.id === 'factors');
   const divisorCount = results.find(r => r.id === 'divisorCount');
-  const n = results.find(r => r.id === 'n');
 
   if (!isPrime) return null;
 
   const prime = isPrime.value === 'Yes';
-  const num = n ? parseNum(n.value) : 0;
+  const num = parseNum(values.n ?? '0');
   const factorStr = factors?.value ?? '';
 
   // Parse factors for display

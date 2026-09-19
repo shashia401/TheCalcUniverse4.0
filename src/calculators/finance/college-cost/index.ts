@@ -208,7 +208,7 @@ const collegeCostConfig: CalculatorConfig = {
     };
     const pctFunded = savingsAtCollege > 0 ? Math.min(100, (savingsAtCollege / totalProjectedCostNum) * 100) : 0;
 
-    const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral' }> = [];
+    const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral'; interpretation?: string }> = [];
 
     if (showBaseCost) {
       results.push(

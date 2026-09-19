@@ -15,7 +15,7 @@ interface SleepOption {
 export default function SleepPanel({ results }: Props) {
   const mode = results.length > 0 ? (results.find((r) => r.id === 'recommendedBedtime') ? 'wake' : 'sleep') : 'wake';
   const recommendedTime = getValue(results, mode === 'wake' ? 'recommendedBedtime' : 'recommendedWakeup');
-  const optionsRaw = getValue(results, 'options');
+  const optionsRaw = getValue(results, '_options');
   const cycleInfo = getValue(results, 'cycleInfo');
 
   if (!recommendedTime || !optionsRaw) return null;
