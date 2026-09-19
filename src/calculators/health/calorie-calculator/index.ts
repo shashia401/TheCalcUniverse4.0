@@ -426,7 +426,7 @@ const calorieConfig: CalculatorConfig = {
       { source: 'CDC - Healthy Weight, Nutrition, and Physical Activity', url: 'https://www.cdc.gov/healthyweight/index.html' },
       { source: 'NIH - Body Weight Planner & Energy Balance', url: 'https://www.niddk.nih.gov/health-information/weight-management/body-weight-planner' },
       { source: 'Mifflin MD, St Jeor ST et al. (1990) - A new predictive equation for resting energy expenditure', url: 'https://pubmed.ncbi.nlm.nih.gov/2305711/' },
-
+      { source: 'Academy of Nutrition and Dietetics (J Am Diet Assoc) - Comparison of Predictive Equations for Resting Metabolic Rate', url: 'https://www.jandonline.org/article/S0002-8223(05)00149-5/abstract' },
     ],
   },
   extraPanel: (values, results) => {

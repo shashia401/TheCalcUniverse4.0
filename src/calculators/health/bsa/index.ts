@@ -239,8 +239,8 @@ const bsaConfig: CalculatorConfig = {
       'For clinical medication dosing, carboplatin and chemotherapeutic agents should ONLY be dosed by a licensed physician — never self-calculate or self-adjust doses. The Rule of Nines is taught for concept understanding only; actual burn assessment must be performed by trained medical personnel.',
     ],
     citations: [
-
       { source: 'NIH - Mosteller BSA Formula', url: 'https://pubmed.ncbi.nlm.nih.gov/3558715/' },
+      { source: 'Wikipedia - Body Surface Area', url: 'https://en.wikipedia.org/wiki/Body_surface_area' },
     ],
 
 

@@ -307,6 +307,7 @@ const armyBodyFatConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Body Fat Percentage', url: 'https://en.wikipedia.org/wiki/Body_fat_percentage' },
+      { source: 'U.S. Army - AR 600-9, The Army Body Composition Program', url: 'https://www.army.mil/e2/downloads/rv7/r2/policydocs/r600_9.pdf' },
     ],
   },
 };

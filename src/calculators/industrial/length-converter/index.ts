@@ -107,7 +107,7 @@ const EDUCATIONAL = {
   ],
   citations: [
     { source: 'NIST - SI Length', url: 'https://www.nist.gov/pml/owm/si-units-length' },
-
+    { source: 'NIST Guide to the SI, Appendix B: Conversion Factors', url: 'https://www.nist.gov/pml/special-publication-811/nist-guide-si-appendix-b-conversion-factors' },
   ],
   workedExamples: [
     {
