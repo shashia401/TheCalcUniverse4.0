@@ -14,9 +14,12 @@ describe('cd calculator', () => {
       additionalDeposit: '0',
     });
     const balance = parseMoney(getValue(r, 'balance'));
-    // $10K at 5% for 5yr monthly: ~$12,833.59
-    expect(balance).toBeGreaterThan(12800);
-    expect(balance).toBeLessThan(12900);
+    // apy is a true APY (compounding-frequency-invariant by definition, per
+    // Truth in Savings Act disclosure rules) — not a nominal rate to
+    // re-compound, so this is exactly $10,000 x 1.05^5 regardless of
+    // compounding frequency: $12,762.82.
+    expect(balance).toBeGreaterThan(12700);
+    expect(balance).toBeLessThan(12800);
   });
 
   it('calculates short-term CD in months', () => {
@@ -59,9 +62,9 @@ describe('cd calculator', () => {
       additionalDeposit: '0',
     });
     const balance = parseMoney(getValue(r, 'balance'));
-    // $10K at 5% for 1yr daily: ~$10,512.67
-    expect(balance).toBeGreaterThan(10500);
-    expect(balance).toBeLessThan(10600);
+    // True APY is compounding-frequency-invariant: $10,000 x 1.05 = $10,500
+    // exactly for any compounding frequency over a 1-year term.
+    near(balance, 10500, 1);
   });
 
   it('calculates CD with quarterly compounding', () => {
@@ -79,7 +82,7 @@ describe('cd calculator', () => {
     expect(balance).toBeLessThan(27500);
   });
 
-  it('daily compounding earns more than annual for same APY (more frequent = higher effective)', () => {
+  it('same APY produces the same balance regardless of compounding frequency (APY is frequency-invariant by definition)', () => {
     const daily = config.calculate({
       initialDeposit: '10000',
       termUnit: 'years',
@@ -98,7 +101,7 @@ describe('cd calculator', () => {
     });
     const dailyBal = parseMoney(getValue(daily, 'balance'));
     const annualBal = parseMoney(getValue(annual, 'balance'));
-    expect(dailyBal).toBeGreaterThan(annualBal);
+    near(dailyBal, annualBal, 1);
   });
 
   it('shows correct total interest', () => {
@@ -347,8 +350,10 @@ describe('cd calculator', () => {
     });
     const earStr = getValue(r, 'effectiveAnnualRate');
     const ear = parsePercent(earStr);
-    // For monthly compounding at 5% nominal: (1+0.05/12)^12 - 1 = ~5.116%
-    expect(ear).toBeGreaterThan(5);
+    // apy is already the true APY, so the effective annual rate reproduces
+    // it exactly regardless of compounding frequency — that's the whole
+    // point of disclosing APY instead of a nominal rate.
+    near(ear, 5, 0.01);
   });
 
   it('effective annual rate equals APY for annual compounding', () => {

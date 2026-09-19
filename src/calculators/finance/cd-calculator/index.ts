@@ -158,6 +158,12 @@ const cdConfig: CalculatorConfig = {
       { id: 'interestPct', label: 'Interest as % of Final Balance', value: `${interestPct.toFixed(1)}%`, color: interestPct > 20 ? 'positive' as const : 'neutral' as const },
       { id: 'apyResult', label: 'APY', value: `${(apy * 100).toFixed(2)}%`, color: 'neutral' as const },
       { id: 'compoundingResult', label: 'Compounding', value: `${compLabel} (${periodsPerYear}x/year)`, color: 'neutral' as const },
+      {
+        id: 'effectiveAnnualRate',
+        label: 'Effective Annual Rate',
+        value: `${((Math.pow(1 + ratePerPeriod, periodsPerYear) - 1) * 100).toFixed(2)}%`,
+        color: 'neutral' as const,
+      },
     ];
   },
 
