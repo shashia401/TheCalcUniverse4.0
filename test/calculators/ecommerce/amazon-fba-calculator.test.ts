@@ -54,13 +54,17 @@ describe('amazon-fba-calculator', () => {
     });
     expect(r).toHaveLength(6);
 
-    // For weight > 21 lbs: FBA fee = 89.98 + (weight - 90) * 0.83
-    // FBA fee: 89.98 + (25 - 90) * 0.83 = 89.98 - 53.95 = 36.03
+    // 25 lbs falls in the 21-90 lb tier, which the calculator deliberately
+    // interpolates linearly between the standard formula's value at 21 lbs
+    // ($12.13) and the oversize formula's value at 90 lbs ($89.98), rather
+    // than applying the 90+ lb oversize formula directly (which would jump
+    // discontinuously for any item under 90 lbs).
+    // FBA fee: 12.13 + (25-21) * ((89.98-12.13)/69) = 16.64
     // 15% referral = $30
     // Storage fee = 25 * 0.75 = 18.75
-    // Net profit = 200 - 80 - 30 - 36.03 - 18.75 = 35.22
-    near(parseNumber(getValue(r, 'netProfit')), 35.22, 0.1);
-    near(parseNumber(getValue(r, 'fbaFee')), 36.03, 0.1);
+    // Net profit = 200 - 80 - 30 - 16.64 - 18.75 = 54.61
+    near(parseNumber(getValue(r, 'netProfit')), 54.61, 0.1);
+    near(parseNumber(getValue(r, 'fbaFee')), 16.64, 0.1);
   });
 
   it('handles very small item under 1 lb', () => {
