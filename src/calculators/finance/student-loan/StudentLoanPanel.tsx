@@ -1,5 +1,6 @@
 import { GraduationCap } from 'lucide-react';
 import { CalculatorResult } from '../../../types/calculator';
+import { pmt } from '../../../utils/financial';
 
 interface Props {
   values: Record<string, string>;
@@ -82,10 +83,10 @@ function TermComparison({ principal: balanceAtRepayment, annualRate }: { princip
   const rMonth = annualRate / 12;
   const results = terms.map((years) => {
     const n = years * 12;
-    const pmt = rMonth === 0 ? balanceAtRepayment / n : (balanceAtRepayment * rMonth) / (1 - Math.pow(1 + rMonth, -n));
-    const total = pmt * n;
+    const payment = pmt(balanceAtRepayment, rMonth, n);
+    const total = payment * n;
     const interest = total - balanceAtRepayment;
-    return { years, pmt, total, interest };
+    return { years, pmt: payment, total, interest };
   });
 
   const maxInterest = Math.max(...results.map((r) => r.interest));
@@ -138,8 +139,8 @@ export default function StudentLoanPanel({ values }: Props) {
 
   const repaymentYears = parseInt(values.repaymentTerm) || 10;
   const n = repaymentYears * 12;
-  const pmt = monthlyRate === 0 ? effectivePrincipal / n : (effectivePrincipal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -n));
-  const totalPaid = pmt * n;
+  const monthlyPmt = pmt(effectivePrincipal, monthlyRate, n);
+  const totalPaid = monthlyPmt * n;
   const repaymentInterest = totalPaid - effectivePrincipal;
 
   const fmt = (n: number) =>

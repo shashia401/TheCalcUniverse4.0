@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { pmt } from '../../../utils/financial';
 import DebtConsolidationPanel from './DebtConsolidationPanel';
 import DebtInputs from './DebtInputs';
 
@@ -101,9 +102,7 @@ const debtConsolidationConfig: CalculatorConfig = {
     const consolidationPrincipal = totalBalance + originationFeeAmount;
 
     const rMonth = newRate / 100 / 12;
-    const newMonthlyPayment = rMonth === 0
-      ? consolidationPrincipal / newTermMonths
-      : (consolidationPrincipal * rMonth) / (1 - Math.pow(1 + rMonth, -newTermMonths));
+    const newMonthlyPayment = pmt(consolidationPrincipal, rMonth, newTermMonths);
 
     const newTotalPaid = newMonthlyPayment * newTermMonths;
     const newTotalInterest = newTotalPaid - consolidationPrincipal;

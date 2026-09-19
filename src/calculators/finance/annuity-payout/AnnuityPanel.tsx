@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { TrendingDown } from 'lucide-react';
 import { CalculatorResult } from '../../../types/calculator';
+import { pmt } from '../../../utils/financial';
 
 interface Props {
   solveFor: string;
@@ -180,7 +181,7 @@ export default function AnnuityPanel({ solveFor, principal, annualReturn, freque
   const resolvedPmt = useMemo(() => {
     if (solveFor === 'payout' && desiredYears > 0) {
       const n = desiredYears * periodsPerYear;
-      return rPeriod === 0 ? principal / n : (principal * rPeriod) / (1 - Math.pow(1 + rPeriod, -n));
+      return pmt(principal, rPeriod, n);
     }
     return payoutAmount;
   }, [solveFor, principal, rPeriod, desiredYears, periodsPerYear, payoutAmount]);

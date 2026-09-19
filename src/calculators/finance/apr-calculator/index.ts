@@ -1,5 +1,6 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
+import { pmt } from '../../../utils/financial';
 import APRPanel from './APRPanel';
 
 function calcAPR(netProceeds: number, monthlyPayment: number, n: number): number {
@@ -108,14 +109,7 @@ const aprCalculatorConfig: CalculatorConfig = {
     const termMonths = loanTermUnit === 'years' ? loanTermValue * 12 : loanTermValue;
     const monthlyNominalRate = nominalRate / 100 / 12;
 
-    let monthlyPayment: number;
-    if (monthlyNominalRate === 0) {
-      monthlyPayment = loanAmount / termMonths;
-    } else {
-      monthlyPayment =
-        (loanAmount * monthlyNominalRate) /
-        (1 - Math.pow(1 + monthlyNominalRate, -termMonths));
-    }
+    const monthlyPayment = pmt(loanAmount, monthlyNominalRate, termMonths);
 
     const netCashReceived = loanAmount - upfrontFees;
     const totalPaid = monthlyPayment * termMonths;

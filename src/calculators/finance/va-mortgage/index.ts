@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { pmt } from '../../../utils/financial';
 import VAPanel from './VAPanel';
 
 // VA Funding Fee Table (purchase loans only)
@@ -159,15 +160,7 @@ const vaMortgageConfig: CalculatorConfig = {
     const monthlyRate = interestRate / 100 / 12;
     const n = loanTerm * 12;
 
-    let principalAndInterest: number;
-    if (totalLoanAmount <= 0) {
-      principalAndInterest = 0;
-    } else if (monthlyRate === 0) {
-      principalAndInterest = totalLoanAmount / n;
-    } else {
-      principalAndInterest =
-        (totalLoanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -n));
-    }
+    const principalAndInterest = totalLoanAmount <= 0 ? 0 : pmt(totalLoanAmount, monthlyRate, n);
 
     const annualPropertyTax = parseFloat(values.annualPropertyTax) || 0;
     const annualInsurance = parseFloat(values.annualInsurance) || 0;

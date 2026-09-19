@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { pmt } from '../../../utils/financial';
 import StudentLoanPanel from './StudentLoanPanel';
 
 const studentLoanConfig: CalculatorConfig = {
@@ -112,9 +113,7 @@ const studentLoanConfig: CalculatorConfig = {
     }
 
     const n = repaymentYears * 12;
-    const monthlyPayment = monthlyRate === 0
-      ? effectivePrincipal / n
-      : (effectivePrincipal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -n));
+    const monthlyPayment = pmt(effectivePrincipal, monthlyRate, n);
 
     const totalPaid = monthlyPayment * n;
     const totalInterestRepayment = totalPaid - effectivePrincipal;

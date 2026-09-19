@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { pmt } from '../../../utils/financial';
 import AmortizationPanel from '../../../components/calculator/AmortizationPanel';
 
 const personalLoanConfig: CalculatorConfig = {
@@ -92,9 +93,7 @@ const personalLoanConfig: CalculatorConfig = {
     const actualLoanBalance = feeHandling === 'added' ? loanAmount + originationFeeAmount : loanAmount;
     const monthlyRate = interestRate / 100 / 12;
 
-    let monthlyPayment: number;
-    if (monthlyRate === 0) monthlyPayment = actualLoanBalance / n;
-    else monthlyPayment = (actualLoanBalance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -n));
+    const monthlyPayment = pmt(actualLoanBalance, monthlyRate, n);
 
     const totalPaid = monthlyPayment * n;
     const totalInterest = totalPaid - actualLoanBalance;
@@ -184,14 +183,7 @@ const personalLoanConfig: CalculatorConfig = {
 
     const monthlyRate = interestRate / 100 / 12;
 
-    // Monthly payment calculation
-    let monthlyPayment: number;
-    if (monthlyRate === 0) {
-      monthlyPayment = actualLoanBalance / n;
-    } else {
-      monthlyPayment =
-        (actualLoanBalance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -n));
-    }
+    const monthlyPayment = pmt(actualLoanBalance, monthlyRate, n);
 
     const totalPaid = monthlyPayment * n;
     const totalInterest = totalPaid - actualLoanBalance;
@@ -300,13 +292,7 @@ const personalLoanConfig: CalculatorConfig = {
     const monthlyRate = interestRate / 12;
     const years = n / 12;
 
-    let monthlyPayment: number;
-    if (monthlyRate === 0) {
-      monthlyPayment = actualLoanBalance / n;
-    } else {
-      monthlyPayment =
-        (actualLoanBalance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -n));
-    }
+    const monthlyPayment = pmt(actualLoanBalance, monthlyRate, n);
 
     const totalInterest = monthlyPayment * n - actualLoanBalance;
 

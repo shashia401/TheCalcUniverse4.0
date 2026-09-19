@@ -1,4 +1,5 @@
 import { HELOCData, fmt } from './helocTypes';
+import { pmt } from '../../../utils/financial';
 
 export function AmortizationNote({ data }: { data: HELOCData }) {
   const { actualDraw, helocRate } = data;
@@ -7,13 +8,7 @@ export function AmortizationNote({ data }: { data: HELOCData }) {
 
   const repayMonthlyRate = helocRate / 100 / 12;
   const repayN = 20 * 12;
-  let repayPayment: number;
-  if (repayMonthlyRate === 0) {
-    repayPayment = actualDraw / repayN;
-  } else {
-    repayPayment =
-      (actualDraw * repayMonthlyRate) / (1 - Math.pow(1 + repayMonthlyRate, -repayN));
-  }
+  const repayPayment = pmt(actualDraw, repayMonthlyRate, repayN);
 
   const interestOnlyPayment = actualDraw * (helocRate / 100 / 12);
 

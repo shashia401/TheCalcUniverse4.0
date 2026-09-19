@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { pmt } from '../../../utils/financial';
 import CanadianMortgagePanel from './CanadianMortgagePanel';
 
 /// ─── CMHC Insurance Premium Tiers ─────────────────────────────────────
@@ -293,7 +294,7 @@ const canadianMortgageConfig: CalculatorConfig = {
     const m = periodsPerYear[freq];
     const periodicRate = Math.pow(1 + effectiveAnnual, 1 / m) - 1;
     const monthlyRate = Math.pow(1 + effectiveAnnual, 1 / 12) - 1;
-    const monthlyPayment = monthlyRate === 0 ? principal / (years * 12) : (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -years * 12));
+    const monthlyPayment = pmt(principal, monthlyRate, years * 12);
 
     let payment: number, displayLabel: string;
     if (freq === 'monthly') { payment = monthlyPayment; displayLabel = 'Monthly Payment'; }
@@ -335,7 +336,7 @@ const canadianMortgageConfig: CalculatorConfig = {
       const qr = qualifyingRate / 100;
       const qEffectiveAnnual = Math.pow(1 + qr / 2, 2) - 1;
       const qMonthlyRate = Math.pow(1 + qEffectiveAnnual, 1 / 12) - 1;
-      const qMonthlyPmt = qMonthlyRate === 0 ? principal / (years * 12) : (principal * qMonthlyRate) / (1 - Math.pow(1 + qMonthlyRate, -years * 12));
+      const qMonthlyPmt = pmt(principal, qMonthlyRate, years * 12);
       stressTestPaymentDisplay = `$${fmt(qMonthlyPmt)}/month (qualifying at ${qualifyingRate.toFixed(2)}%)`;
       if (qMonthlyRate > 0) {
         const maxLoan = monthlyPayment / (qMonthlyRate / (1 - Math.pow(1 + qMonthlyRate, -years * 12)));

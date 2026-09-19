@@ -1,10 +1,10 @@
 // ─── Mortgage amortization helpers ────────────────────────────────────────────
 
+import { pmt } from '../../../utils/financial';
+
 /** Calculate the monthly payment for a fixed-rate amortizing loan. */
 export function monthlyPayment(principal: number, annualRate: number, termMonths: number): number {
-  if (annualRate === 0) return principal / termMonths;
-  const r = annualRate / 12;
-  return (principal * (r * Math.pow(1 + r, termMonths))) / (Math.pow(1 + r, termMonths) - 1);
+  return pmt(principal, annualRate / 12, termMonths);
 }
 
 /** Remaining loan balance at end of year y (after y*12 payments). */

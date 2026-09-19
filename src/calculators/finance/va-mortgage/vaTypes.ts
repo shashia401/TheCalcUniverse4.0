@@ -1,3 +1,5 @@
+import { pmt } from '../../../utils/financial';
+
 export interface VAData {
   homePrice: number;
   downPaymentDollars: number;
@@ -31,7 +33,5 @@ export function fmtK(n: number): string {
 export function calcMonthlyPI(loanAmt: number, annualRate: number, termYears: number): number {
   if (loanAmt <= 0) return 0;
   const monthlyRate = annualRate / 100 / 12;
-  const n = termYears * 12;
-  if (monthlyRate === 0) return loanAmt / n;
-  return (loanAmt * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -n));
+  return pmt(loanAmt, monthlyRate, termYears * 12);
 }
