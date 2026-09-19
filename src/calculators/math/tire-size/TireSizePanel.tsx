@@ -1,5 +1,6 @@
 import React from 'react';
 import { CalculatorResult } from '../../../types/calculator';
+import { findResult as getResult } from '../../../utils/calcResults';
 
 interface TireSpec {
   width: number;
@@ -22,10 +23,6 @@ interface TireDiff {
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-function getResult(results: Props['results'], id: string) {
-  return results.find((r) => r.id === id);
 }
 
 function SpeedometerSVG({ actualSpeed }: { actualSpeed: number }) {

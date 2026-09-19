@@ -253,7 +253,7 @@ const gpaConfig: CalculatorConfig = {
           color: 'neutral' as const,
         },
         {
-          id: 'gpaData',
+          id: '_gpaData',
           label: '',
           value: JSON.stringify(gpaData),
           highlight: false,

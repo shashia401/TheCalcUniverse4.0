@@ -1,5 +1,6 @@
 import React from 'react';
 import type { CalculatorResult } from '../../../types/calculator';
+import { findResult as getResult } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
@@ -16,10 +17,6 @@ interface ElementBreakdown {
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
-
-function getResult(results: CalculatorResult[], id: string): CalculatorResult | undefined {
-  return results.find((r) => r.id === id);
-}
 
 function parseBreakdown(json: string | undefined): ElementBreakdown[] {
   if (!json) return [];
@@ -148,7 +145,7 @@ function DonutChart({ slices }: { slices: Slice[] }) {
 export default function MolecularWeightPanel({ results }: Props) {
   const mwResult = getResult(results, 'molecularWeight');
   const formulaResult = getResult(results, 'formula');
-  const breakdownResult = getResult(results, 'elementBreakdown');
+  const breakdownResult = getResult(results, '_elementBreakdown');
   const totalAtomsResult = getResult(results, 'totalAtoms');
   const formulaUnitsResult = getResult(results, 'formulaUnits');
 

@@ -1,13 +1,9 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { getResultValue as getValue } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-function getValue(results: CalculatorResult[], id: string): string {
-  const r = results.find((x) => x.id === id);
-  return r ? r.value : '';
 }
 
 export default function TipPanel({ results }: Props) {

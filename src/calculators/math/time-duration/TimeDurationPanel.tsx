@@ -2,15 +2,11 @@ import { useMemo } from 'react';
 import type { CalculatorResult } from '../../../types/calculator';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { CalendarRange, Briefcase, Timer } from 'lucide-react';
+import { getResultValue as getValue } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-function getValue(results: CalculatorResult[], id: string): string {
-  const r = results.find((x) => x.id === id);
-  return r ? r.value : '';
 }
 
 export default function TimeDurationPanel({ results }: Props) {

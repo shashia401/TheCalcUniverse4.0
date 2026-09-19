@@ -1,4 +1,5 @@
 import type { CalculatorResult } from '../../../types/calculator';
+import { findResult as getResult } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
@@ -6,10 +7,6 @@ interface Props {
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
-
-function getResult(results: CalculatorResult[], id: string): CalculatorResult | undefined {
-  return results.find((r) => r.id === id);
-}
 
 function parseStepByStep(raw: string | undefined): string[] {
   if (!raw) return [];

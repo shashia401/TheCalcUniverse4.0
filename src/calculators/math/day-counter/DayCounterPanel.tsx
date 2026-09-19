@@ -1,14 +1,10 @@
 import type { CalculatorResult } from '../../../types/calculator';
 import { CalendarDays, Clock, TrendingUp, Sparkles } from 'lucide-react';
+import { getResultValue as getValue } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-function getValue(results: CalculatorResult[], id: string): string {
-  const r = results.find((x) => x.id === id);
-  return r ? r.value : '';
 }
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

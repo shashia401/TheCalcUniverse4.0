@@ -1,12 +1,9 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { findResult as getResult } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-function getResult(results: Props['results'], id: string) {
-  return results.find((r) => r.id === id);
 }
 
 function GardenBedSVG({ shape }: { shape: string }) {

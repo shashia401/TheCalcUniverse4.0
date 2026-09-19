@@ -1,14 +1,10 @@
 import type { CalculatorResult } from '../../../types/calculator';
 import { Ruler, Info, ArrowLeftRight, AlertTriangle } from 'lucide-react';
+import { getResultValue as getValue } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-function getValue(results: CalculatorResult[], id: string): string {
-  const r = results.find((x) => x.id === id);
-  return r ? r.value : '';
 }
 
 interface SisterSize {

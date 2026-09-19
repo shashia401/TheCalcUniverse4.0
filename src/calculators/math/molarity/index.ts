@@ -188,7 +188,7 @@ const molarityConfig: CalculatorConfig = {
         { id: 'volumeUsed', label: 'Volume of Solution', value: (volume >= 1 ? volume.toFixed(3) : volume.toFixed(6)), unit: 'L' },
         { id: 'molarMassUsed', label: 'Molar Mass', value: molarMass.toFixed(4), unit: 'g/mol' },
         { id: 'formulaUsed', label: 'Formula Used', value: 'M = n / V = (m / MM) / V' },
-        { id: 'stepByStep', label: 'Step-by-Step', value: JSON.stringify([
+        { id: '_stepByStep', label: 'Step-by-Step', value: JSON.stringify([
           `n = m / MM = ${mass.toFixed(4)} g / ${molarMass.toFixed(4)} g/mol = ${moles.toFixed(6)} mol`,
           `M = n / V = ${moles.toFixed(6)} mol / ${volume.toFixed(6)} L = ${M.toFixed(4)} mol/L`,
         ]) },
@@ -212,7 +212,7 @@ const molarityConfig: CalculatorConfig = {
         { id: 'volumeUsed', label: 'Volume of Solution', value: (volume >= 1 ? volume.toFixed(3) : volume.toFixed(6)), unit: 'L' },
         { id: 'molarMassUsed', label: 'Molar Mass', value: molarMass.toFixed(4), unit: 'g/mol' },
         { id: 'formulaUsed', label: 'Formula Used', value: 'm = M × V × MM' },
-        { id: 'stepByStep', label: 'Step-by-Step', value: JSON.stringify([
+        { id: '_stepByStep', label: 'Step-by-Step', value: JSON.stringify([
           `n = M × V = ${molarityRaw.toFixed(4)} mol/L × ${volume.toFixed(6)} L = ${moles.toFixed(6)} mol`,
           `m = n × MM = ${moles.toFixed(6)} mol × ${molarMass.toFixed(4)} g/mol = ${massCalc.toFixed(4)} g`,
         ]) },
@@ -236,7 +236,7 @@ const molarityConfig: CalculatorConfig = {
         { id: 'molarityUsed', label: 'Molarity', value: molarityRaw.toFixed(4), unit: 'mol/L' },
         { id: 'molarMassUsed', label: 'Molar Mass', value: molarMass.toFixed(4), unit: 'g/mol' },
         { id: 'formulaUsed', label: 'Formula Used', value: 'V = n / M = (m / MM) / M' },
-        { id: 'stepByStep', label: 'Step-by-Step', value: JSON.stringify([
+        { id: '_stepByStep', label: 'Step-by-Step', value: JSON.stringify([
           `n = m / MM = ${mass.toFixed(4)} g / ${molarMass.toFixed(4)} g/mol = ${moles.toFixed(6)} mol`,
           `V = n / M = ${moles.toFixed(6)} mol / ${molarityRaw.toFixed(4)} mol/L = ${volumeCalc.toFixed(6)} L`,
         ]) },

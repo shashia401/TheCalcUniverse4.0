@@ -1,4 +1,5 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { getResultValue as getValue } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
@@ -14,11 +15,6 @@ interface DifferentialEntry {
   used: boolean;
 }
 
-function getValue(results: CalculatorResult[], id: string): string {
-  const r = results.find((x) => x.id === id);
-  return r ? r.value : '';
-}
-
 function getCategory(index: number): { label: string; color: string; bg: string } {
   if (index <= 0) return { label: 'Scratch', color: 'text-yellow-700', bg: 'bg-yellow-50 border-yellow-200' };
   if (index <= 5) return { label: 'Pro', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' };
@@ -29,7 +25,7 @@ function getCategory(index: number): { label: string; color: string; bg: string 
 
 export default function GolfPanel({ results }: Props) {
   const handicapIndex = getValue(results, 'handicapIndex');
-  const differentialsRaw = getValue(results, 'differentials');
+  const differentialsRaw = getValue(results, '_differentials');
   const roundsUsed = getValue(results, 'roundsUsed');
   const averageDifferential = getValue(results, 'averageDifferential');
   const courseHandicap = getValue(results, 'courseHandicap');

@@ -1,14 +1,10 @@
 import type { CalculatorResult } from '../../../types/calculator';
 import { CalendarDays, Clock, PartyPopper, Sparkles } from 'lucide-react';
+import { getResultValue as getValue } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-function getValue(results: CalculatorResult[], id: string): string {
-  const r = results.find((x) => x.id === id);
-  return r ? r.value : '';
 }
 
 export default function AgePanel({ results }: Props) {

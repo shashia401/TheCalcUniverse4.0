@@ -1,13 +1,10 @@
 import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
+import { findResult } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-function findResult(results: CalculatorResult[], id: string): CalculatorResult | undefined {
-  return results.find((r) => r.id === id);
 }
 
 function ParabolaSVG({ a, b, c }: { a: number; b: number; c: number }) {
