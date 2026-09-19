@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, SelectOption } from '../../../types/calculator';
+import { FEDERAL_BRACKETS as SHARED_FEDERAL_BRACKETS, STANDARD_DEDUCTION as SHARED_STANDARD_DEDUCTION, FICA } from '../../../utils/taxData';
 import SalaryTakeHomePanel from './SalaryTakeHomePanel';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -18,50 +19,27 @@ const PAY_PERIOD_LABELS: Record<string, string> = {
   weekly: 'per week',
 };
 
-/** 2025 Federal income tax brackets (taxable income). */
+// Federal income tax brackets and standard deduction, derived from the shared,
+// actively-maintained data (utils/taxData.ts) — this file used to hardcode its
+// own copy that had drifted badly for Head of Household.
 const FEDERAL_BRACKETS: Record<string, Array<{ min: number; max: number; rate: number }>> = {
-  single: [
-    { min: 0, max: 11925, rate: 0.10 },
-    { min: 11925, max: 48475, rate: 0.12 },
-    { min: 48475, max: 103350, rate: 0.22 },
-    { min: 103350, max: 197300, rate: 0.24 },
-    { min: 197300, max: 250525, rate: 0.32 },
-    { min: 250525, max: 626350, rate: 0.35 },
-    { min: 626350, max: Infinity, rate: 0.37 },
-  ],
-  mfj: [
-    { min: 0, max: 23850, rate: 0.10 },
-    { min: 23850, max: 96950, rate: 0.12 },
-    { min: 96950, max: 206700, rate: 0.22 },
-    { min: 206700, max: 394600, rate: 0.24 },
-    { min: 394600, max: 501050, rate: 0.32 },
-    { min: 501050, max: 751600, rate: 0.35 },
-    { min: 751600, max: Infinity, rate: 0.37 },
-  ],
-  hoh: [
-    { min: 0, max: 17050, rate: 0.10 },
-    { min: 17050, max: 65200, rate: 0.12 },
-    { min: 65200, max: 111350, rate: 0.22 },
-    { min: 111350, max: 199750, rate: 0.24 },
-    { min: 199750, max: 250850, rate: 0.32 },
-    { min: 250850, max: 626350, rate: 0.35 },
-    { min: 626350, max: Infinity, rate: 0.37 },
-  ],
+  single: [...SHARED_FEDERAL_BRACKETS.single],
+  mfj: [...SHARED_FEDERAL_BRACKETS.mfj],
+  hoh: [...SHARED_FEDERAL_BRACKETS.hoh],
 };
 
-/** 2025 standard deductions. */
 const STANDARD_DEDUCTION: Record<string, number> = {
-  single: 15000,
-  mfj: 30000,
-  hoh: 22500,
+  single: SHARED_STANDARD_DEDUCTION.single,
+  mfj: SHARED_STANDARD_DEDUCTION.mfj,
+  hoh: SHARED_STANDARD_DEDUCTION.hoh,
 };
 
-const FICA_SS_RATE = 0.062;
-const FICA_MEDICARE_RATE = 0.0145;
-const SS_WAGE_BASE_2025 = 176100;
-const ADDITIONAL_MEDICARE_RATE = 0.009;
-const ADDITIONAL_MEDICARE_THRESHOLD_SINGLE = 200000;
-const ADDITIONAL_MEDICARE_THRESHOLD_MFJ = 250000;
+const FICA_SS_RATE = FICA.socialSecurityRate;
+const FICA_MEDICARE_RATE = FICA.medicareRate;
+const SS_WAGE_BASE_2025 = FICA.socialSecurityWageBase;
+const ADDITIONAL_MEDICARE_RATE = FICA.additionalMedicareRate;
+const ADDITIONAL_MEDICARE_THRESHOLD_SINGLE = FICA.additionalMedicareThreshold.single;
+const ADDITIONAL_MEDICARE_THRESHOLD_MFJ = FICA.additionalMedicareThreshold.mfj;
 
 /** Simplified flat state income tax rates by state code. */
 const STATE_TAX: Record<string, number> = {

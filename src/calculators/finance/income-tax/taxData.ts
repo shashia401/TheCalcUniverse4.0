@@ -1,58 +1,12 @@
+import { FEDERAL_BRACKETS, STANDARD_DEDUCTION } from '../../../utils/taxData';
+
 export type FilingStatus = 'single' | 'mfj' | 'mfs' | 'hoh';
 
-export interface TaxBracket {
-  rate: number;
-  min: number;
-  max: number;
-  from: number;
-  to: number;
-}
-
-export const FEDERAL_BRACKETS_2025: Record<FilingStatus, TaxBracket[]> = {
-  single: [
-    { rate: 0.10, min: 0, max: 11925, from: 0, to: 11925 },
-    { rate: 0.12, min: 11925, max: 48475, from: 11925, to: 48475 },
-    { rate: 0.22, min: 48475, max: 103350, from: 48475, to: 103350 },
-    { rate: 0.24, min: 103350, max: 197300, from: 103350, to: 197300 },
-    { rate: 0.32, min: 197300, max: 250525, from: 197300, to: 250525 },
-    { rate: 0.35, min: 250525, max: 626350, from: 250525, to: 626350 },
-    { rate: 0.37, min: 626350, max: Infinity, from: 626350, to: Infinity },
-  ],
-  mfj: [
-    { rate: 0.10, min: 0, max: 23850, from: 0, to: 23850 },
-    { rate: 0.12, min: 23850, max: 96950, from: 23850, to: 96950 },
-    { rate: 0.22, min: 96950, max: 206700, from: 96950, to: 206700 },
-    { rate: 0.24, min: 206700, max: 394600, from: 206700, to: 394600 },
-    { rate: 0.32, min: 394600, max: 501050, from: 394600, to: 501050 },
-    { rate: 0.35, min: 501050, max: 751600, from: 501050, to: 751600 },
-    { rate: 0.37, min: 751600, max: Infinity, from: 751600, to: Infinity },
-  ],
-  mfs: [
-    { rate: 0.10, min: 0, max: 11925, from: 0, to: 11925 },
-    { rate: 0.12, min: 11925, max: 48475, from: 11925, to: 48475 },
-    { rate: 0.22, min: 48475, max: 103350, from: 48475, to: 103350 },
-    { rate: 0.24, min: 103350, max: 197300, from: 103350, to: 197300 },
-    { rate: 0.32, min: 197300, max: 250525, from: 197300, to: 250525 },
-    { rate: 0.35, min: 250525, max: 375800, from: 250525, to: 375800 },
-    { rate: 0.37, min: 375800, max: Infinity, from: 375800, to: Infinity },
-  ],
-  hoh: [
-    { rate: 0.10, min: 0, max: 17000, from: 0, to: 17000 },
-    { rate: 0.12, min: 17000, max: 64850, from: 17000, to: 64850 },
-    { rate: 0.22, min: 64850, max: 103350, from: 64850, to: 103350 },
-    { rate: 0.24, min: 103350, max: 197300, from: 103350, to: 197300 },
-    { rate: 0.32, min: 197300, max: 250500, from: 197300, to: 250500 },
-    { rate: 0.35, min: 250500, max: 626350, from: 250500, to: 626350 },
-    { rate: 0.37, min: 626350, max: Infinity, from: 626350, to: Infinity },
-  ],
-};
-
-export const STANDARD_DEDUCTIONS_2025: Record<FilingStatus, number> = {
-  single: 15000,
-  mfj: 30000,
-  mfs: 15000,
-  hoh: 22500,
-};
+// Re-exported from the shared, actively-maintained bracket data (utils/taxData.ts)
+// so this calculator can't silently drift out of sync with the others that use it
+// (the old local copy here had wrong MFS/HOH thresholds).
+export const FEDERAL_BRACKETS_2025 = FEDERAL_BRACKETS;
+export const STANDARD_DEDUCTIONS_2025 = STANDARD_DEDUCTION;
 
 export const RETIREMENT_LIMITS_2025 = {
   traditional401k: 23500,

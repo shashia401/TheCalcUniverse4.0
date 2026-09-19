@@ -1,30 +1,15 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { FEDERAL_BRACKETS, STANDARD_DEDUCTION } from '../../../utils/taxData';
 import MarriageTaxPanel from './MarriageTaxPanel';
 
-// 2026 IRS tax brackets (inflation-adjusted projections / final published values)
-const SINGLE_BRACKETS_2026: [number, number][] = [
-  [11925, 0.10],
-  [48475, 0.12],
-  [103350, 0.22],
-  [197300, 0.24],
-  [250525, 0.32],
-  [626350, 0.35],
-  [Infinity, 0.37],
-];
+// Derived from the shared, actively-maintained bracket data (utils/taxData.ts) —
+// this file used to hardcode its own copy that had drifted (wrong standard deduction).
+const SINGLE_BRACKETS_2026: [number, number][] = FEDERAL_BRACKETS.single.map((b) => [b.to, b.rate]);
+const MFJ_BRACKETS_2026: [number, number][] = FEDERAL_BRACKETS.mfj.map((b) => [b.to, b.rate]);
 
-const MFJ_BRACKETS_2026: [number, number][] = [
-  [23850, 0.10],
-  [96950, 0.12],
-  [206700, 0.22],
-  [394600, 0.24],
-  [501050, 0.32],
-  [751600, 0.35],
-  [Infinity, 0.37],
-];
-
-const STD_DEDUCTION_SINGLE_2026 = 15750;
-const STD_DEDUCTION_MFJ_2026 = 31500;
+const STD_DEDUCTION_SINGLE_2026 = STANDARD_DEDUCTION.single;
+const STD_DEDUCTION_MFJ_2026 = STANDARD_DEDUCTION.mfj;
 
 function calcTax(taxableIncome: number, brackets: [number, number][]): number {
   if (taxableIncome <= 0) return 0;

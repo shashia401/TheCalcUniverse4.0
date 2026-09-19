@@ -1,54 +1,28 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { FEDERAL_BRACKETS, STANDARD_DEDUCTION } from '../../../utils/taxData';
 import TaxCalculatorPanel from './TaxCalculatorPanel';
 
-// 2025 Federal Tax Brackets
-const BRACKETS: Record<string, [number, number][]> = {
-  Single: [
-    [11925, 0.10],
-    [48475, 0.12],
-    [103350, 0.22],
-    [197300, 0.24],
-    [250525, 0.32],
-    [626350, 0.35],
-    [Infinity, 0.37],
-  ],
-  'Married Filing Jointly': [
-    [23850, 0.10],
-    [96950, 0.12],
-    [206700, 0.22],
-    [394600, 0.24],
-    [501050, 0.32],
-    [751600, 0.35],
-    [Infinity, 0.37],
-  ],
-  'Head of Household': [
-    [16275, 0.10],
-    [64450, 0.12],
-    [103350, 0.22],
-    [197300, 0.24],
-    [250525, 0.32],
-    [626350, 0.35],
-    [Infinity, 0.37],
-  ],
-  'Married Filing Separately': [
-    [11925, 0.10],
-    [48475, 0.12],
-    [103350, 0.22],
-    [197300, 0.24],
-    [250525, 0.32],
-    [375800, 0.35],
-    [Infinity, 0.37],
-  ],
+// Derived from the shared, actively-maintained bracket data (utils/taxData.ts) —
+// this file used to hardcode its own copy that had drifted (wrong Head of
+// Household thresholds).
+const STATUS_KEY: Record<string, keyof typeof FEDERAL_BRACKETS> = {
+  Single: 'single',
+  'Married Filing Jointly': 'mfj',
+  'Head of Household': 'hoh',
+  'Married Filing Separately': 'mfs',
 };
 
-// 2025 Standard Deductions
-const STD_DEDUCTION: Record<string, number> = {
-  Single: 15000,
-  'Married Filing Jointly': 30000,
-  'Head of Household': 22500,
-  'Married Filing Separately': 15000,
-};
+const BRACKETS: Record<string, [number, number][]> = Object.fromEntries(
+  Object.entries(STATUS_KEY).map(([label, key]) => [
+    label,
+    FEDERAL_BRACKETS[key].map((b) => [b.to, b.rate] as [number, number]),
+  ])
+);
+
+const STD_DEDUCTION: Record<string, number> = Object.fromEntries(
+  Object.entries(STATUS_KEY).map(([label, key]) => [label, STANDARD_DEDUCTION[key]])
+);
 
 function calcTax(
   taxableIncome: number,
