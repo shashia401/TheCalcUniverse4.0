@@ -87,9 +87,17 @@ export function buildCalculatorSchemas(entry: CalculatorEntry, config: Calculato
 function mathSolverSchema(entry: CalculatorEntry, url: string): Schema {
   return {
     '@context': 'https://schema.org',
-    '@type': 'MathSolver',
+    // Google's Math Solver rich result requires BOTH types together, plus
+    // usageInfo (required) and learningResourceType (required once
+    // LearningResource is declared) — a bare 'MathSolver' string was flagged
+    // by Search Console as an invalid itemtype.
+    // https://developers.google.com/search/docs/appearance/structured-data/math-solvers
+    '@type': ['MathSolver', 'LearningResource'],
     name: entry.title,
     url,
+    usageInfo: `${BASE_URL}/privacy/`,
+    inLanguage: 'en',
+    learningResourceType: 'Math Solver',
     eduQuestionType: 'Word problem',
     mathExpression: entry.mathSolverExpression,
   };
