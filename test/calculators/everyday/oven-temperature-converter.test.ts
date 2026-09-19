@@ -19,10 +19,10 @@ describe('Oven Temperature Converter', () => {
     expect(getValue(results, 'cookingDescription')).toBe('Moderately Hot');
   });
 
-  it('Gas Mark 5 → 375°F, 191°C', () => {
+  it('Gas Mark 5 → 375°F, 190°C', () => {
     const results = config.calculate({ temperature: '5', fromUnit: 'Gas Mark' });
     expect(getValue(results, 'fahrenheit')).toBe('375°F');
-    expect(getValue(results, 'celsius')).toBe('191°C');
+    expect(getValue(results, 'celsius')).toBe('190°C');
     expect(getValue(results, 'gasMark')).toBe('Gas Mark 5');
     expect(getValue(results, 'cookingDescription')).toBe('Moderate / Moderately Hot');
   });
@@ -57,17 +57,17 @@ describe('Oven Temperature Converter', () => {
   it('Gas Mark below table min uses closest', () => {
     const results = config.calculate({ temperature: '0.1', fromUnit: 'Gas Mark' });
     expect(getValue(results, 'fahrenheit')).toBe('225°F');
-    expect(getValue(results, 'celsius')).toBe('107°C');
+    expect(getValue(results, 'celsius')).toBe('110°C');
     expect(getValue(results, 'cookingDescription')).toBe('Very Slow / Cool');
   });
 
   it('interpolates non-integer gas marks within range', () => {
     const results = config.calculate({ temperature: '1.5', fromUnit: 'Gas Mark' });
-    // Between Gas Mark 1 (135°C) and Gas Mark 2 (149°C): t = 0.5
+    // Between Gas Mark 1 (140°C) and Gas Mark 2 (150°C): t = 0.5
     // f = 275 + 0.5 * 25 = 287.5 → 288°F
-    // c = 135 + 0.5 * 14 = 142°C
+    // c = 140 + 0.5 * 10 = 145°C
     expect(getValue(results, 'fahrenheit')).toBe('288°F');
-    expect(getValue(results, 'celsius')).toBe('142°C');
+    expect(getValue(results, 'celsius')).toBe('145°C');
   });
 
   it('Gas Mark above table max uses closest', () => {
