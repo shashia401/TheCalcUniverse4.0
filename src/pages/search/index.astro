@@ -11,6 +11,7 @@ const index = calculatorRegistry.map((entry) => ({
   t: entry.shortTitle ?? entry.title,
   p: `/${entry.categorySlug}/${entry.id}/`,
   c: entry.category,
+  k: entry.seoKeywords,
 }));
 
 const categories = getCategories().filter((c) => c.count > 0);

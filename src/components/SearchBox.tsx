@@ -12,6 +12,8 @@ export interface SearchEntry {
   p: string;
   /** category name */
   c: string;
+  /** alternate names / synonyms people search by (from the calculator's seoKeywords) */
+  k?: string[];
 }
 
 interface Props {
@@ -26,7 +28,11 @@ export default function SearchBox({ index, hero = false }: Props) {
     const q = query.trim().toLowerCase();
     if (q.length < 2) return [];
     return index
-      .filter((e) => e.t.toLowerCase().includes(q) || e.c.toLowerCase().includes(q))
+      .filter((e) =>
+        e.t.toLowerCase().includes(q) ||
+        e.c.toLowerCase().includes(q) ||
+        e.k?.some((kw) => kw.toLowerCase().includes(q))
+      )
       .slice(0, 25);
   }, [query, index]);
 
@@ -42,8 +48,6 @@ export default function SearchBox({ index, hero = false }: Props) {
           placeholder={`Search ${index.length} calculators — try "mortgage", "BMI", "percentage"…`}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setTimeout(() => setFocused(false), 150)}
           aria-label={`Search ${index.length} calculators`}
           className="w-full rounded-xl border border-white/25 bg-white/10 px-5 py-4 text-base text-white placeholder-white/55 backdrop-blur transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-amber-400 focus:border-white/50"
         />

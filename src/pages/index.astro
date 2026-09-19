@@ -29,6 +29,7 @@ const searchIndex = calculatorRegistry.map((entry) => ({
   t: entry.shortTitle ?? entry.title,
   p: `/${entry.categorySlug}/${entry.id}/`,
   c: entry.category,
+  k: entry.seoKeywords,
 }));
 
 const popularIds = [
