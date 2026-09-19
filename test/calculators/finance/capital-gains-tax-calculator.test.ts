@@ -111,9 +111,14 @@ describe('capital-gains-tax-calculator', () => {
       filingStatus: 'Single',
       stateTaxRate: '0',
     });
-    // 500000 + 100000 = 600000, which is > 518900 = 20% bracket
+    // Gains stack on top of ordinary income and are taxed at each bracket's
+    // marginal rate as they cross it — not a flat rate on the whole gain just
+    // because the total exceeds a threshold. Income $500,000 already sits in
+    // the 15% bracket; the $100,000 gain stacks from $500,000 to $600,000:
+    // $18,900 (to the $518,900 20% breakpoint) at 15% = $2,835, plus $81,100
+    // at 20% = $16,220. Total: $19,055.
     const federalTax = parseMoney(getValue(r, 'federalTax'));
-    near(federalTax, 20000, 1); // 20% of 100000
+    near(federalTax, 19055, 1);
   });
 
   it('applies 0% LTCG for married filing jointly under threshold', () => {
@@ -431,11 +436,13 @@ describe('capital-gains-tax-calculator', () => {
       filingStatus: 'Married Filing Jointly',
       stateTaxRate: '0',
     });
-    // Gain = 50000, Income + Gain = 130000, which is > 94050 MFJ 0% threshold => 15%
+    // Gains stack on top of ordinary income. Income $80,000 is below the MFJ
+    // $94,050 0% threshold; the $50,000 gain stacks from $80,000 to $130,000:
+    // $14,050 (to the threshold) at 0% = $0, plus $35,950 at 15% = $5,392.50.
     expect(getValue(r, 'gainLoss')).toContain('50,000');
     const federalTax = parseMoney(getValue(r, 'federalTax'));
     expect(federalTax).toBeGreaterThan(0);
-    near(federalTax, 7500, 1); // 15% of 50000
+    near(federalTax, 5392.5, 1);
   });
 
   it('handles married filing separately status', () => {
