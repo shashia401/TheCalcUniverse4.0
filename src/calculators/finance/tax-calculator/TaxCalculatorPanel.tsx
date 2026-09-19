@@ -1,14 +1,11 @@
 import { useMemo } from 'react';
 import { Landmark } from 'lucide-react';
 import { CalculatorResult } from '../../../types/calculator';
+import { parseAmount as parseVal } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-function parseVal(s: string): number {
-  return parseFloat(s.replace(/[$%,+\s]/g, '').replace(/,/g, '')) || 0;
 }
 
 const BRACKETS_LABELS: Array<{ limit: number; rate: number }> = [
