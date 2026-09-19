@@ -81,7 +81,7 @@ describe('Resistor Calculator', () => {
     const r = config.calculate({
       mode: 'reverse', targetOhms: '4700', reverseBands: '4',
     });
-    const bands = JSON.parse(getValue(r, 'colorBands'));
+    const bands = JSON.parse(getValue(r, '_colorBands'));
     expect(bands[0]).toBe('Yellow');
     expect(bands[1]).toBe('Violet');
     expect(bands[2]).toBe('Red'); // x100 multiplier
@@ -91,7 +91,7 @@ describe('Resistor Calculator', () => {
     const r = config.calculate({
       mode: 'reverse', targetOhms: '1000', reverseBands: '4',
     });
-    const bands = JSON.parse(getValue(r, 'colorBands'));
+    const bands = JSON.parse(getValue(r, '_colorBands'));
     expect(bands[0]).toBe('Brown');
     expect(bands[1]).toBe('Black');
     expect(bands[2]).toBe('Red');
@@ -166,7 +166,7 @@ describe('Resistor Calculator', () => {
       band1: 'Brown', band2: 'Black',
       multiplier: 'Red', tolerance: 'Gold (±5%)',
     });
-    const colors = JSON.parse(getValue(r, 'colorSequence'));
+    const colors = JSON.parse(getValue(r, '_colorSequence'));
     expect(Array.isArray(colors)).toBe(true);
     expect(colors.length).toBeGreaterThanOrEqual(3);
   });
@@ -183,7 +183,7 @@ describe('Resistor Calculator', () => {
     expect(ids).toContain('tolerance');
     expect(ids).toContain('minResistance');
     expect(ids).toContain('maxResistance');
-    expect(ids).toContain('colorSequence');
+    expect(ids).toContain('_colorSequence');
     expect(ids).toContain('ohmicValue');
   });
 });

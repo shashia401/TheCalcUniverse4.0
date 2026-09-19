@@ -27,7 +27,7 @@ describe('Long Division calculator', () => {
 
   it('includes division steps data', () => {
     const r = config.calculate({ dividend: '4876', divisor: '12' });
-    expect(getValue(r, 'divisionData')).toContain('steps');
+    expect(getValue(r, '_divisionData')).toContain('steps');
   });
 
   it('divides 10 by 2 = 5 exactly', () => {

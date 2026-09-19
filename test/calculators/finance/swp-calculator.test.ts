@@ -133,7 +133,7 @@ describe('SWP Calculator', () => {
       monthlyWithdrawal: '50000',
       withdrawalPeriod: '30',
     });
-    const chart = getValue(r, 'withdrawalChart');
+    const chart = getValue(r, '_withdrawalChart');
     expect(chart.length).toBeGreaterThan(10);
     expect(chart).toContain('year');
     expect(chart).toContain('1');

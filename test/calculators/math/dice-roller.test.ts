@@ -22,7 +22,7 @@ describe('Dice Roller', () => {
 
   it('modifier is correctly applied to the total', () => {
     const r = config.calculate({ count: '2', sides: '6', modifier: '5' });
-    const rollData = JSON.parse(getValue(r, 'rollData'));
+    const rollData = JSON.parse(getValue(r, '_rollData'));
     const rolls = rollData as number[];
     const rawSum = rolls.reduce((a: number, b: number) => a + b, 0);
     const expectedTotal = rawSum + 5;
@@ -32,7 +32,7 @@ describe('Dice Roller', () => {
 
   it('total equals sum of rolls plus modifier', () => {
     const r = config.calculate({ count: '3', sides: '10', modifier: '3' });
-    const rollData = JSON.parse(getValue(r, 'rollData')) as number[];
+    const rollData = JSON.parse(getValue(r, '_rollData')) as number[];
     const rawSum = rollData.reduce((a, b) => a + b, 0);
     const expectedTotal = rawSum + 3;
 
@@ -59,7 +59,7 @@ describe('Dice Roller', () => {
 
   it('handles negative modifier correctly', () => {
     const r = config.calculate({ count: '2', sides: '6', modifier: '-3' });
-    const rollData = JSON.parse(getValue(r, 'rollData')) as number[];
+    const rollData = JSON.parse(getValue(r, '_rollData')) as number[];
     const rawSum = rollData.reduce((a, b) => a + b, 0);
     const expectedTotal = rawSum - 3;
 
@@ -69,7 +69,7 @@ describe('Dice Roller', () => {
 
   it('results contain valid rollData JSON', () => {
     const r = config.calculate({ count: '4', sides: '8', modifier: '2' });
-    const rollDataStr = getValue(r, 'rollData');
+    const rollDataStr = getValue(r, '_rollData');
 
     let rollData: number[];
     expect(() => { rollData = JSON.parse(rollDataStr); }).not.toThrow();

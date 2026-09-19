@@ -115,7 +115,7 @@ describe('Roofing Calculator', () => {
         roofType: 'gable',
         wasteFactor: '10',
       });
-      const materials = getValue(results, 'materialsList');
+      const materials = getValue(results, '_materialsList');
       expect(materials).toBeTruthy();
       const parsed = JSON.parse(materials);
       expect(parsed.squares).toBeGreaterThan(0);

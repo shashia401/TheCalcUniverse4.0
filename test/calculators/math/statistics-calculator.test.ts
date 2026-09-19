@@ -70,7 +70,7 @@ describe('Statistics Calculator', () => {
 
   it('returns box plot data', () => {
     const r = config.calculate({ data: standardData, type: 'sample' });
-    const box = r.find(x => x.id === 'boxPlotData');
+    const box = r.find(x => x.id === '_boxPlotData');
     expect(box).toBeTruthy();
     expect(box!.value).toContain('q1');
   });

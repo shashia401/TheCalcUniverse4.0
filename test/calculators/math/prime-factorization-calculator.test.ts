@@ -82,13 +82,13 @@ describe('Prime Factorization calculator', () => {
   // ── Factor Tree Data ────────────────────────────────────────────────
   it('shows factor tree data for panel', () => {
     const r = config.calculate({ number: '72' });
-    expect(getValue(r, 'treeData')).toContain('value');
-    expect(getValue(r, 'treeData')).toContain('isPrime');
+    expect(getValue(r, '_treeData')).toContain('value');
+    expect(getValue(r, '_treeData')).toContain('isPrime');
   });
 
   it('factor tree data is valid JSON with tree structure', () => {
     const r = config.calculate({ number: '72' });
-    const tree = JSON.parse(getValue(r, 'treeData'));
+    const tree = JSON.parse(getValue(r, '_treeData'));
     expect(Array.isArray(tree)).toBe(true);
     expect(tree[0].value).toBe(72);
   });

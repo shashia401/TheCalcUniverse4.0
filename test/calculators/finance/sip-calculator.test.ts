@@ -121,7 +121,7 @@ describe('SIP Calculator', () => {
     const r = config.calculate({
       lumpsum: '500000', monthlyInvestment: '10000', expectedReturn: '12', timePeriod: '10',
     });
-    const chart = getValue(r, 'wealthChart');
+    const chart = getValue(r, '_wealthChart');
     expect(chart.length).toBeGreaterThan(10);
     expect(chart).toContain('1');
   });

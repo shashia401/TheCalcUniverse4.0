@@ -38,7 +38,7 @@ describe('Scientific Notation calculator', () => {
 
   it('shows animation data for panel', () => {
     const r = config.calculate({ mode: 'toScientific', decimal: '0.0045' });
-    expect(getValue(r, 'animationData')).toContain('moves');
+    expect(getValue(r, '_animationData')).toContain('moves');
   });
 
   it('handles zero correctly', () => {

@@ -72,7 +72,7 @@ describe('Roofing Calculator', () => {
 
   it('materialsList contains expected fields', () => {
     const r = config.calculate({ length: '40', width: '30', pitch: '6', overhang: '1', roofType: 'gable', wasteFactor: '10' });
-    const val = getValue(r, 'materialsList');
+    const val = getValue(r, '_materialsList');
     const parsed = JSON.parse(val);
     expect(parsed.squares).toBeGreaterThan(0);
     expect(parsed.bundles).toBeGreaterThan(0);

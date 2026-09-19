@@ -85,7 +85,7 @@ describe('RMD Calculator', () => {
       spouseToggle: 'no',
       expectedReturn: '6',
     });
-    const projection = JSON.parse(getValue(r, 'projectionData'));
+    const projection = JSON.parse(getValue(r, '_projectionData'));
     expect(Array.isArray(projection)).toBe(true);
     expect(projection.length).toBe(10);
     expect(projection[0]).toHaveProperty('year');
@@ -122,7 +122,7 @@ describe('RMD Calculator', () => {
       spouseToggle: 'no',
       expectedReturn: '2',
     });
-    const projLow = JSON.parse(getValue(rLow, 'projectionData'));
+    const projLow = JSON.parse(getValue(rLow, '_projectionData'));
 
     const rHigh = config.calculate({
       birthYear: '1950',
@@ -130,7 +130,7 @@ describe('RMD Calculator', () => {
       spouseToggle: 'no',
       expectedReturn: '10',
     });
-    const projHigh = JSON.parse(getValue(rHigh, 'projectionData'));
+    const projHigh = JSON.parse(getValue(rHigh, '_projectionData'));
 
     const lastLow = projLow[projLow.length - 1].balance;
     const lastHigh = projHigh[projHigh.length - 1].balance;

@@ -20,7 +20,7 @@ describe('Common Denominator Calculator', () => {
 
   it('converts fractions correctly', () => {
     const r = config.calculate({ numerators: '1, 1', denominators: '2, 3' });
-    const convertedRaw = getValue(r, 'convertedFractions');
+    const convertedRaw = getValue(r, '_convertedFractions');
     const converted = JSON.parse(convertedRaw);
     expect(converted[0].numerator).toBe(3);
     expect(converted[0].denominator).toBe(6);
@@ -66,7 +66,7 @@ describe('Common Denominator Calculator', () => {
 
   it('converts fraction with multiplier info', () => {
     const r = config.calculate({ numerators: '3', denominators: '4, 6' });
-    const convertedRaw = getValue(r, 'convertedFractions');
+    const convertedRaw = getValue(r, '_convertedFractions');
     const converted = JSON.parse(convertedRaw);
     expect(converted[0].multiplier).toBe(3); // 12/4 = 3
     expect(converted[1].multiplier).toBe(2); // 12/6 = 2

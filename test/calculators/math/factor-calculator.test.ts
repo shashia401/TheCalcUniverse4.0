@@ -45,7 +45,7 @@ describe('Factor calculator', () => {
 
   it('includes pairs data for panel', () => {
     const r = config.calculate({ number: '12' });
-    const val = getValue(r, 'pairsData');
+    const val = getValue(r, '_pairsData');
     expect(val).toContain('[');
     const parsed = JSON.parse(val);
     expect(Array.isArray(parsed)).toBe(true);

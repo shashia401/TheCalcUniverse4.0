@@ -39,7 +39,7 @@ describe('golf-handicap', () => {
 
   it('parses round differentials correctly', () => {
     const r = config.calculate({ rounds: '85, 72.5, 130' });
-    const differentials = JSON.parse(getValue(r, 'differentials'));
+    const differentials = JSON.parse(getValue(r, '_differentials'));
     expect(differentials).toHaveLength(1);
     near(differentials[0].differential, 10.87);
   });
@@ -52,7 +52,7 @@ describe('golf-handicap', () => {
 
   it('skips malformed lines', () => {
     const r = config.calculate({ rounds: '85, 72.5, 130\ninvalid\n92, 74.0, 140' });
-    const differentials = JSON.parse(getValue(r, 'differentials'));
+    const differentials = JSON.parse(getValue(r, '_differentials'));
     expect(differentials).toHaveLength(2);
   });
 

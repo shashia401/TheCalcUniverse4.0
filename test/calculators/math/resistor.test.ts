@@ -114,7 +114,7 @@ describe('Resistor Calculator', () => {
         reverseBands: '4',
       });
       expect(getValue(r, 'resistorValue')).toBe('4.70 kΩ');
-      const bands = JSON.parse(getValue(r, 'colorBands'));
+      const bands = JSON.parse(getValue(r, '_colorBands'));
       expect(bands[0]).toBe('Yellow');
       expect(bands[1]).toBe('Violet');
       expect(bands[2]).toBe('Red');
@@ -127,7 +127,7 @@ describe('Resistor Calculator', () => {
         reverseBands: '5',
       });
       expect(getValue(r, 'bandCount')).toBe('5-Band');
-      const bands = JSON.parse(getValue(r, 'colorBands'));
+      const bands = JSON.parse(getValue(r, '_colorBands'));
       expect(bands[0]).toBe('Brown');
       expect(bands[1]).toBe('Black');
       expect(bands[2]).toBe('Black');
@@ -140,7 +140,7 @@ describe('Resistor Calculator', () => {
         targetOhms: '1',
         reverseBands: '4',
       });
-      const bands = JSON.parse(getValue(r, 'colorBands'));
+      const bands = JSON.parse(getValue(r, '_colorBands'));
       expect(bands[0]).toBe('Brown');
       expect(bands[1]).toBe('Black');
       // 1 ohm = 10 * 0.1 -> multiplier is Gold
@@ -218,7 +218,7 @@ describe('Resistor Calculator', () => {
         multiplier: 'Orange',
         tolerance: 'Gold (±5%)',
       });
-      const seq = JSON.parse(getValue(r, 'colorSequence'));
+      const seq = JSON.parse(getValue(r, '_colorSequence'));
       expect(Array.isArray(seq)).toBe(true);
       expect(seq.length).toBeGreaterThanOrEqual(3);
     });

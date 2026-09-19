@@ -10,7 +10,7 @@ interface ScheduleRow {
 }
 
 function parseSchedule(results: Array<{ id: string; value: string }>): ScheduleRow[] {
-  const s = results.find((r) => r.id === 'schedule');
+  const s = results.find((r) => r.id === '_schedule');
   if (!s) throw new Error('No schedule found');
   return JSON.parse(s.value) as ScheduleRow[];
 }

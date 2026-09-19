@@ -196,7 +196,7 @@ describe('Time Card Calculator', () => {
   describe('Daily breakdown', () => {
     it('includes daily breakdown JSON', () => {
       const r = config.calculate({ entries: standardWeek, overtimeThreshold: '40' });
-      const jsonStr = getValue(r, 'dailyBreakdown');
+      const jsonStr = getValue(r, '_dailyBreakdown');
       const data = JSON.parse(jsonStr);
       expect(Array.isArray(data)).toBe(true);
       expect(data.length).toBe(5);

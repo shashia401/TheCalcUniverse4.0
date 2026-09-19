@@ -20,7 +20,7 @@ describe('Matrix calculator', () => {
 
   it('includes matrix data for panel', () => {
     const r = config.calculate({ size: '2', operation: 'determinant', matrixA: '1 2\n3 4' });
-    expect(getValue(r, 'matrixData')).toContain('1');
+    expect(getValue(r, '_matrixData')).toContain('1');
   });
 
   it('returns empty for NaN entries', () => {

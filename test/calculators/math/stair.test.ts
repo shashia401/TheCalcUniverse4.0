@@ -209,7 +209,7 @@ describe('Stair Calculator', () => {
         unitSystem: 'in',
         includeOverhang: 'yes',
       });
-      const data = JSON.parse(getValue(r, 'stairData'));
+      const data = JSON.parse(getValue(r, '_stairData'));
       expect(data.numberOfRisers).toBe(15);
       expect(data.numberOfTreads).toBe(14);
       expect(data.ibcCompliant).toBe(true);

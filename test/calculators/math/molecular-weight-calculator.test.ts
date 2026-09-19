@@ -59,7 +59,7 @@ describe('Molecular Weight Calculator', () => {
 
   it('returns element breakdown with percentages', () => {
     const r = config.calculate({ formula: 'H2O' });
-    const breakdown = getValue(r, 'elementBreakdown');
+    const breakdown = getValue(r, '_elementBreakdown');
     expect(breakdown).toContain('H');
     expect(breakdown).toContain('O');
   });

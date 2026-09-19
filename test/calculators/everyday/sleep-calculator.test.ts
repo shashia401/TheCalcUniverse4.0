@@ -8,7 +8,7 @@ describe('Sleep Calculator', () => {
       mode: 'wake',
       wakeupTime: '6:30 AM',
     });
-    const options = JSON.parse(getValue(results, 'options'));
+    const options = JSON.parse(getValue(results, '_options'));
     expect(options).toHaveLength(4);
     expect(options[0]).toHaveProperty('cycles');
     expect(options[0]).toHaveProperty('time');
@@ -21,7 +21,7 @@ describe('Sleep Calculator', () => {
       mode: 'sleep',
       bedtime: '11:00 PM',
     });
-    const options = JSON.parse(getValue(results, 'options'));
+    const options = JSON.parse(getValue(results, '_options'));
     expect(options).toHaveLength(4);
     expect(options[0]).toHaveProperty('cycles');
     expect(options[0]).toHaveProperty('time');
@@ -66,7 +66,7 @@ describe('Sleep Calculator', () => {
       mode: 'wake',
       wakeupTime: '06:30',
     });
-    const options = JSON.parse(getValue(results, 'options'));
+    const options = JSON.parse(getValue(results, '_options'));
     expect(options).toHaveLength(4);
   });
 });

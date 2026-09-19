@@ -97,7 +97,7 @@ describe('Wind Chill calculator', () => {
 
   it('outputs chart data', () => {
     const r = config.calculate({ temperature: '30', tempUnit: 'F', windSpeed: '15', speedUnit: 'mph' });
-    const chart = r.find(x => x.id === 'chartData');
+    const chart = r.find(x => x.id === '_chartData');
     expect(chart).toBeTruthy();
     expect(chart!.value).toContain('windChillF');
   });

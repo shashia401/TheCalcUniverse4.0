@@ -102,7 +102,7 @@ describe('Grade calculator (Final Exam)', () => {
       desiredGrade: '90',
       examWeight: '20',
     });
-    const gradeData = JSON.parse(getValue(r, 'gradeData'));
+    const gradeData = JSON.parse(getValue(r, '_gradeData'));
     expect(gradeData.currentGrade).toBe(85);
     expect(gradeData.desiredGrade).toBe(90);
     expect(gradeData.examWeight).toBe(20);

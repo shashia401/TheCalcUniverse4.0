@@ -97,7 +97,7 @@ describe('Dew Point calculator', () => {
 
   it('outputs chart data', () => {
     const r = config.calculate({ temperature: '75', humidity: '60' });
-    const chart = r.find(x => x.id === 'chartData');
+    const chart = r.find(x => x.id === '_chartData');
     expect(chart).toBeTruthy();
     expect(chart!.value).toContain('dewPointF');
   });

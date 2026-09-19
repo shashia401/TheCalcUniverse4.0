@@ -63,19 +63,19 @@ describe('LCM calculator', () => {
   // ── Data for Extra Panel ────────────────────────────────────────────
   it('LCM includes prime factorization data', () => {
     const r = config.calculate({ numbers: '12, 18' });
-    expect(getValue(r, 'primeData')).toContain('factor');
+    expect(getValue(r, '_primeData')).toContain('factor');
     expect(getValue(r, '_primeData')).toContain('factor');
   });
 
   it('LCM includes multiples data', () => {
     const r = config.calculate({ numbers: '12, 18' });
-    expect(getValue(r, 'multiplesData')).toContain('multiplesA');
+    expect(getValue(r, '_multiplesData')).toContain('multiplesA');
     expect(getValue(r, '_multiplesData')).toContain('multiplesA');
   });
 
   it('LCM includes inputNums data', () => {
     const r = config.calculate({ numbers: '12, 18, 24' });
-    expect(getValue(r, 'inputNums')).toContain('12');
+    expect(getValue(r, '_inputNums')).toContain('12');
     expect(getValue(r, '_inputNums')).toContain('24');
   });
 

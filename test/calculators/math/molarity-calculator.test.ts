@@ -36,7 +36,7 @@ describe('Molarity Calculator', () => {
 
   it('calcMolarity: shows step-by-step', () => {
     const r = config.calculate({ mode: 'calcMolarity', mass: '58.44', volume: '1', volumeUnit: 'L', molarMass: '58.44' });
-    const steps = getValue(r, 'stepByStep');
+    const steps = getValue(r, '_stepByStep');
     expect(steps).toContain('n = m / MM');
   });
 

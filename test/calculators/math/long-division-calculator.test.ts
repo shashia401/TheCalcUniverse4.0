@@ -78,7 +78,7 @@ describe('Long Division Calculator', () => {
 
   it('includes division steps data', () => {
     const r = config.calculate({ dividend: '48', divisor: '12' });
-    const stepsData = r.find((x) => x.id === 'divisionData');
+    const stepsData = r.find((x) => x.id === '_divisionData');
     expect(stepsData).toBeTruthy();
     const parsed = JSON.parse(stepsData!.value);
     expect(parsed.dividend).toBe(48);
