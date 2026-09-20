@@ -13,6 +13,12 @@ export default defineConfig({
       // metadata with no logic to test.
       include: ['src/calculators/**/index.ts', 'src/calculators/**/index.tsx'],
       exclude: ['src/calculators/**/*Panel.tsx', 'src/calculators/registry/**'],
+      thresholds: {
+        statements: 88,
+        branches: 78,
+        functions: 94,
+        lines: 92,
+      },
     },
   },
 });
