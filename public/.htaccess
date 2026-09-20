@@ -10,6 +10,15 @@ ErrorDocument 404 /404.html
   RewriteEngine On
   RewriteRule ^sitemap\.xml$ /sitemap-index.xml [L]
 
+  # Legacy /en/ locale-prefixed URLs — no i18n route exists (see
+  # src/lib/blog.ts normalizeInternalPath, which already strips this prefix
+  # from newly generated links) so every /en/* path 404s. Google still has
+  # hundreds of /en/* URLs indexed from a prior site version and real
+  # searchers are clicking through to the dead page. 301 to the canonical
+  # unprefixed route, preserving the rest of the path and query string.
+  RewriteRule ^en/?$ / [R=301,L]
+  RewriteRule ^en/(.*)$ /$1 [R=301,L,QSA]
+
   # Legacy flat calculator slugs (pre-category-nesting URLs, no known inbound
   # backlinks per Semrush audit) — single-hop 301 to the canonical nested route.
   RewriteRule ^age-calculator/?$ /everyday/age-calculator/ [R=301,L]
