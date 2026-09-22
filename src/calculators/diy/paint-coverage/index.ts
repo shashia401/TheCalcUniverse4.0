@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import PaintCoveragePanel from './PaintCoveragePanel';
+import { fixed1 as fmt } from '../../../lib/format';
 
 const paintCoverageConfig: CalculatorConfig = {
   inputs: [
@@ -91,8 +92,6 @@ const paintCoverageConfig: CalculatorConfig = {
     const gallonsNeeded = (paintableArea * coats) / coveragePerGallon;
     const gallonsWithWaste = gallonsNeeded * 1.1;
     const gallonContainers = Math.ceil(gallonsWithWaste);
-
-    const fmt = (n: number) => n.toFixed(1);
 
     return [
       {

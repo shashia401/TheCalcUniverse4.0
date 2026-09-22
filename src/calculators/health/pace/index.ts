@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PacePanel from './PacePanel';
+import { fixed2 as fmt } from '../../../lib/format';
 
 const paceConfig: CalculatorConfig = {
   inputs: [
@@ -208,8 +209,6 @@ const paceConfig: CalculatorConfig = {
         });
       }
     }
-
-    const fmt = (n: number) => n.toFixed(2);
 
     const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral' }> = [
       {

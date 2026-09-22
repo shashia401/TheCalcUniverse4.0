@@ -1,4 +1,5 @@
 import { CalculatorConfig } from '../../../types/calculator';
+import { roundLocale as fmt } from '../../../lib/format';
 
 const DIET_PRESETS: Record<string, { label: string; proteinPct: number; carbPct: number; fatPct: number }> = {
   standard: { label: 'Standard (Balanced)', proteinPct: 20, carbPct: 50, fatPct: 30 },
@@ -206,8 +207,6 @@ const macroConfig: CalculatorConfig = {
     const proteinRange = `${Math.round(weightKg * 1.6)}–${Math.round(weightKg * 2.2)} g`;
     const fatMin = Math.round((finalCalories * 0.2) / 9);
     const fatMax = Math.round((finalCalories * 0.35) / 9);
-
-    const fmt = (n: number) => Math.round(n).toLocaleString(undefined);
 
     return [
       {

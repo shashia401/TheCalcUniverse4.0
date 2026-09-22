@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ProteinPanel from './ProteinPanel';
+import { plainLocale as fmt } from '../../../lib/format';
 
 const GOAL_RANGES: Record<string, { label: string; minG: number; maxG: number }> = {
   maintain: { label: 'Maintain (1.2–1.6 g/kg)', minG: 1.2, maxG: 1.6 },
@@ -150,8 +151,6 @@ const proteinConfig: CalculatorConfig = {
     // Max per meal for optimal MPS (muscle protein synthesis)
     const maxPerMeal = Math.round(0.4 * weightKg);
     const mealsOptimal = Math.ceil(dailyTarget / maxPerMeal);
-
-    const fmt = (n: number) => n.toLocaleString(undefined);
 
     return [
       {

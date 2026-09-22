@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
+import { roundStr6 as fmt } from '../../../lib/format';
 
 interface Props {
   values: Record<string, string>;
@@ -189,7 +190,6 @@ function FormulaApplication({
   perimVal: string | undefined;
 }) {
   const pi = Math.PI;
-  const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
 
   const cards: { label: string; formula: string; substitution: string; result: string }[] = [];
 

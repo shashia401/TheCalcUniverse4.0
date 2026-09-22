@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import TileFlooringPanel from './TileFlooringPanel';
+import { fixed1 as fmt } from '../../../lib/format';
 
 const tileFlooringConfig: CalculatorConfig = {
   inputs: [
@@ -80,8 +81,6 @@ const tileFlooringConfig: CalculatorConfig = {
     const tilesNeeded = Math.ceil(totalSqFtNeeded / tileSqFt);
     const sqFtPerBox = 20;
     const boxesNeeded = Math.ceil(totalSqFtNeeded / sqFtPerBox);
-
-    const fmt = (n: number) => n.toFixed(1);
 
     const results = [
       {

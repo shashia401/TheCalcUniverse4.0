@@ -1,4 +1,5 @@
 import { CalculatorConfig } from '../../../types/calculator';
+import { sigFig4 as fmt } from '../../../lib/format';
 
 const froudeConfig: CalculatorConfig = {
   inputs: [
@@ -48,7 +49,6 @@ calculate: (values) => {
     if (isNaN(v) || isNaN(g) || isNaN(L) || v < 0 || g <= 0 || L <= 0) return [];
 
     const fr = v / Math.sqrt(g * L);
-    const fmt = (n: number) => n.toLocaleString(undefined, { maximumSignificantDigits: 4 });
 
     let regime = '';
     let color: 'positive' | 'negative' | 'neutral' = 'neutral';

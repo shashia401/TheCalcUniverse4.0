@@ -1,4 +1,5 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { roundStr4 as fmt } from '../../../lib/format';
 
 interface Props {
   values: Record<string, string>;
@@ -66,7 +67,6 @@ export default function PythagoreanPanel({ values, results }: Props) {
   const yC = yA - (sideA || 1) * scale;
 
   // Format side lengths for display
-  const fmt = (n: number) => parseFloat(n.toFixed(4)).toString();
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">

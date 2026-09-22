@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import TireSizePanel from './TireSizePanel';
+import { roundStr2 as fmt } from '../../../lib/format';
 
 interface TireSpec {
   width: number;
@@ -103,8 +104,6 @@ const tireSizeConfig: CalculatorConfig = {
     const revDiff = nwTire.revs - oem.revs;
     const groundClearanceDiff = diamDiff / 2;
     const actualSpeed = 60 * (nwTire.circ / oem.circ);
-
-    const fmt = (n: number) => parseFloat(n.toFixed(2)).toString();
 
     return [
       {

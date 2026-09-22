@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import TilePanel from './TilePanel';
+import { fixed1 as fmt } from '../../../lib/format';
 
 const LAYOUT_WASTE: Record<string, number> = {
   grid: 10,
@@ -137,8 +138,6 @@ const tileConfig: CalculatorConfig = {
     // Standard box has 10 tiles; adjust for larger format
     const tilesPerBox = effectiveTileL * effectiveTileW > 2 ? 5 : 10;
     const boxesNeeded = Math.ceil(totalTiles / tilesPerBox);
-
-    const fmt = (n: number) => n.toFixed(1);
 
     const results = [
       {

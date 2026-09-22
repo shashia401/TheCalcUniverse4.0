@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MatrixPanel from './MatrixPanel';
+import { roundStr8 as fmt } from '../../../lib/format';
 
 function parseMatrix(input: string, size: number): number[][] | null {
   const rows = input.trim().split('\n').filter(r => r.trim());
@@ -108,8 +109,6 @@ const matrixConfig: CalculatorConfig = {
 
     const matrix = parseMatrix(raw, size);
     if (!matrix) return [];
-
-    const fmt = (n: number) => parseFloat(n.toFixed(8)).toString();
 
     if (operation === 'determinant') {
       const det = determinant(matrix);

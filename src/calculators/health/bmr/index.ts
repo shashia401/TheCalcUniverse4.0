@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BMRComparisonPanel from './BMRComparisonPanel';
+import { roundLocale as fmt } from '../../../lib/format';
 
 const bmrConfig: CalculatorConfig = {
   inputs: [
@@ -163,8 +164,6 @@ const bmrConfig: CalculatorConfig = {
       : formula === 'harris'
       ? 'Harris-Benedict'
       : 'Katch-McArdle';
-
-    const fmt = (n: number) => Math.round(n).toLocaleString(undefined);
 
     const results: CalculatorResult[] = [
       {

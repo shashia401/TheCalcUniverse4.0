@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import BSAPanel from './BSAPanel';
+import { fixed2 as fmt } from '../../../lib/format';
 
 const bsaConfig: CalculatorConfig = {
   inputs: [
@@ -90,8 +91,6 @@ const bsaConfig: CalculatorConfig = {
 
     // Haycock formula: BSA = 0.024265 × W^0.5378 × H^0.3964
     const bsaHaycock = 0.024265 * Math.pow(weightKg, 0.5378) * Math.pow(heightCm, 0.3964);
-
-    const fmt = (n: number) => n.toFixed(2);
 
     return [
       {
@@ -242,7 +241,6 @@ const bsaConfig: CalculatorConfig = {
       { source: 'NIH - Mosteller BSA Formula', url: 'https://pubmed.ncbi.nlm.nih.gov/3558715/' },
       { source: 'Wikipedia - Body Surface Area', url: 'https://en.wikipedia.org/wiki/Body_surface_area' },
     ],
-
 
   },
 };

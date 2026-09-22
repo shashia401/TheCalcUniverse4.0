@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import OneRepMaxPanel from './OneRepMaxPanel';
+import { plainLocale as fmt } from '../../../lib/format';
 
 const oneRepMaxConfig: CalculatorConfig = {
   inputs: [
@@ -83,7 +84,6 @@ const oneRepMaxConfig: CalculatorConfig = {
     }));
 
     // Rep max estimates (how many reps at certain %)
-    const fmt = (n: number) => n.toLocaleString(undefined);
 
     return [
       {

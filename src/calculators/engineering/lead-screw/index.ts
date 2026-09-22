@@ -1,4 +1,5 @@
 import { CalculatorConfig } from '../../../types/calculator';
+import { roundStr4 as fmt } from '../../../lib/format';
 
 const leadScrewConfig: CalculatorConfig = {
   inputs: [
@@ -65,8 +66,6 @@ calculate: (values) => {
     const torqueWithSF = torque * sf;
     const mechanicalAdvantage = (2 * Math.PI * eta) / p;
     const powerAt1RPS = torque * 2 * Math.PI;
-
-    const fmt = (n: number) => parseFloat(n.toFixed(4)).toString();
 
     return [
       { id: 'torque', label: 'Required Torque', value: `${fmt(torque)} N·m`, highlight: true, color: 'positive' },

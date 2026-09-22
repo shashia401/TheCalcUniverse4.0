@@ -1,4 +1,5 @@
 import { CalculatorConfig } from '../../../types/calculator';
+import { sigFig4 as fmt } from '../../../lib/format';
 
 const fpDepressionConfig: CalculatorConfig = {
   inputs: [
@@ -92,7 +93,6 @@ calculate: (values) => {
     if (isNaN(molality) || molality < 0 || isNaN(i) || i <= 0) return [];
 
     const deltaTf = kf * molality * i;
-    const fmt = (n: number) => n.toLocaleString(undefined, { maximumSignificantDigits: 4 });
 
     const newFreezingPoint = 0 - deltaTf;
 

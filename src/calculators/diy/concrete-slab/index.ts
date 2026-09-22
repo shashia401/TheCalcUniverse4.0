@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import ConcreteSlabPanel from './ConcreteSlabPanel';
+import { fixed2 as fmt } from '../../../lib/format';
 
 const concreteSlabConfig: CalculatorConfig = {
   inputs: [
@@ -69,8 +70,6 @@ const concreteSlabConfig: CalculatorConfig = {
     const withWaste = cubicYards * (1 + wastePct);
     const bags60lb = Math.ceil(withWaste * 27 / 0.45);
     const bags80lb = Math.ceil(withWaste * 27 / 0.6);
-
-    const fmt = (n: number) => n.toFixed(2);
 
     return [
       {

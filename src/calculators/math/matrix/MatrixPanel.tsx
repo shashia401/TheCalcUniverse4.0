@@ -1,4 +1,5 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { roundStr6 as fmt } from '../../../lib/format';
 
 interface Props {
   values: Record<string, string>;
@@ -19,8 +20,6 @@ export default function MatrixPanel({ values, results }: Props) {
   } catch { /* ignore */ }
 
   if (results.length === 0 || matrix.length === 0) return null;
-
-  const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
 
   const renderMatrix = (m: number[][], label: string, color: string) => (
     <div className="rounded-xl border border-slate-200 bg-white p-4">

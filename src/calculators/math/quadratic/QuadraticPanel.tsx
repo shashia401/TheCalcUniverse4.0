@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
+import { roundStr6 as fmt } from '../../../lib/format';
 
 interface Props {
   values: Record<string, string>;
@@ -25,7 +26,6 @@ export default function QuadraticPanel({ values, results }: Props) {
   if (!equationRow) return null;
 
   const discriminant = b * b - 4 * a * c;
-  const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
   const hasRealRoots = discriminant >= 0;
 
   // Generate parabola points

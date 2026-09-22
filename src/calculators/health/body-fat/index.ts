@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import BodyFatPanel from './BodyFatPanel';
+import { fixed1 as fmt } from '../../../lib/format';
 
 function cmFromInput(values: Record<string, string>, unit: string): number {
   if (unit === 'imperial') {
@@ -264,8 +265,6 @@ const bodyFatConfig: CalculatorConfig = {
     //   Actually, let me use the standard Hodgdon & Beckett equations which are:
     // Men: %BF = 86.010 × log10(abdomenCm - neckCm) - 70.041 × log10(heightCm) + 36.76  (already used above)
     // Women: %BF = 163.205 × log10(waistCm + hipCm - neckCm) - 97.684 × log10(heightCm) - 78.387 (already used above)
-
-    const fmt = (n: number) => n.toFixed(1);
 
     // Weight classification by body fat for reference
     const essentialFatMax = isMale ? 6 : 14;

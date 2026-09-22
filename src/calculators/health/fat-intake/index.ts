@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import FatIntakePanel from './FatIntakePanel';
+import { plainLocale as fmt } from '../../../lib/format';
 
 const fatIntakeConfig: CalculatorConfig = {
   inputs: [
@@ -87,8 +88,6 @@ const fatIntakeConfig: CalculatorConfig = {
     // Omega-3 specific: 0.6-1.2% of calories
     const omega3LowG = Math.round((calories * 0.006) / 9);
     const omega3HighG = Math.round((calories * 0.012) / 9);
-
-    const fmt = (n: number) => n.toLocaleString(undefined);
 
     return [
       {

@@ -1,4 +1,5 @@
 import { CalculatorConfig } from '../../../types/calculator';
+import { sigFig4 as fmt } from '../../../lib/format';
 
 const bufferConfig: CalculatorConfig = {
   inputs: [
@@ -50,7 +51,6 @@ calculate: (values) => {
     const H = Math.pow(10, -pH);
     const beta = 2.303 * C * (Ka * H) / Math.pow((Ka + H), 2);
 
-    const fmt = (n: number) => n.toLocaleString(undefined, { maximumSignificantDigits: 4 });
     const ratio = Math.pow(10, pH - pKa);
     const baseFraction = (100 / (1 + (1/ratio))).toFixed(1);
     const acidFraction = (100 - parseFloat(baseFraction)).toFixed(1);

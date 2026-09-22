@@ -1,4 +1,5 @@
 import { CalculatorConfig } from '../../../types/calculator';
+import { sigFig4 as fmt } from '../../../lib/format';
 
 const nusseltConfig: CalculatorConfig = {
   inputs: [
@@ -47,8 +48,6 @@ calculate: (values) => {
     if (isNaN(h) || isNaN(L) || isNaN(k) || h <= 0 || L <= 0 || k <= 0) return [];
 
     const nu = (h * L) / k;
-
-    const fmt = (n: number) => n.toLocaleString(undefined, { maximumSignificantDigits: 4 });
 
     return [
       { id: 'nusselt', label: 'Nusselt Number (Nu)', value: fmt(nu), highlight: true, color: 'positive' },

@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import { cagr, arithmeticAverage } from '../../../utils/financial';
 import AverageReturnPanel from './AverageReturnPanel';
+import { money2dp as fmt } from '../../../lib/format';
 
 const averageReturnConfig: CalculatorConfig = {
   inputs: [
@@ -84,7 +85,6 @@ const averageReturnConfig: CalculatorConfig = {
       if (lastYearFraction > 0) simulatedEnd *= (1 + cagrRate * lastYearFraction);
 
       const fmtPct = (n: number) => `${(n * 100).toFixed(2)}%`;
-      const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
       const growthMultiple = end / start;
 

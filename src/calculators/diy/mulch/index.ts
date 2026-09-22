@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MulchPanel from './MulchPanel';
+import { roundStr2 as fmt } from '../../../lib/format';
 
 const mulchConfig: CalculatorConfig = {
   inputs: [
@@ -96,7 +97,6 @@ const mulchConfig: CalculatorConfig = {
     const bags3ft = Math.ceil(cubicFeet / 3);
     const bulkScoops = Math.ceil(cubicYards);
 
-    const fmt = (n: number) => parseFloat(n.toFixed(2)).toString();
     const fmtSqft = (n: number) => parseFloat(n.toFixed(1)).toString();
 
     // Determine savings recommendation

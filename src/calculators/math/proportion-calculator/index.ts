@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ProportionPanel from './ProportionPanel';
+import { roundStr8 as fmt } from '../../../lib/format';
 
 /**
  * Solve a proportion a/b = c/d for the missing value.
@@ -96,8 +97,6 @@ const proportionConfig: CalculatorConfig = {
     const allFour = knowns.length === 4;
     if (knowns.length < 3) return [];
     if (knowns.some((x) => x <= 0)) return [];
-
-    const fmt = (n: number) => parseFloat(n.toFixed(8)).toString();
 
     if (allFour) {
       const leftVal = a! / b!;

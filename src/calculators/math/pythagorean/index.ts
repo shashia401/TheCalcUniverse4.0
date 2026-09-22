@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PythagoreanPanel from './PythagoreanPanel';
+import { roundStr8 as fmt } from '../../../lib/format';
 
 const pythagoreanConfig: CalculatorConfig = {
   inputs: [
@@ -51,7 +52,6 @@ const pythagoreanConfig: CalculatorConfig = {
     const b = parseFloat(values.b);
     const c = parseFloat(values.c);
 
-    const fmt = (n: number) => parseFloat(n.toFixed(8)).toString();
     const deg = (r: number) => r * (180 / Math.PI);
 
     if (mode === 'hypotenuse') {

@@ -1,6 +1,7 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import GearRatioPanel from './GearRatioPanel';
+import { roundStr4 as fmt } from '../../../lib/format';
 
 const gearRatioConfig: CalculatorConfig = {
   inputs: [
@@ -67,8 +68,6 @@ const gearRatioConfig: CalculatorConfig = {
     const gearRatio = parseFloat(values.gearRatio);
     const inputTorque = parseFloat(values.inputTorque);
     const efficiency = 0.95;
-
-    const fmt = (n: number) => parseFloat(n.toFixed(4)).toString();
 
     if (mode === 'output') {
       if (isNaN(inputRPM) || isNaN(gearRatio) || gearRatio <= 0) return [];

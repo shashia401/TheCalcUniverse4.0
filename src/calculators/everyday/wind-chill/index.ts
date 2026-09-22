@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WindChillPanel from './WindChillPanel';
+import { roundStrD as fmt } from '../../../lib/format';
 
 function fToC(f: number): number {
   return (f - 32) * 5 / 9;
@@ -92,8 +93,6 @@ const windChillConfig: CalculatorConfig = {
     const wcF = windChillF(Tf, Vmph);
     const wcC = fToC(wcF);
     const frostbite = getFrostbiteRisk(wcF);
-
-    const fmt = (n: number, d = 1) => parseFloat(n.toFixed(d)).toString();
 
     return [
       {

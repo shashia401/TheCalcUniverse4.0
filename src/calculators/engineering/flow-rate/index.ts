@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import FlowRatePanel from './FlowRatePanel';
+import { roundStr4 as fmt } from '../../../lib/format';
 
 const flowRateConfig: CalculatorConfig = {
   inputs: [
@@ -55,8 +56,6 @@ const flowRateConfig: CalculatorConfig = {
     const diamIn = parseFloat(values.pipeDiameter);
     const flowGPM = parseFloat(values.flowRate);
     const velocityFps = parseFloat(values.velocity);
-
-    const fmt = (n: number) => parseFloat(n.toFixed(4)).toString();
 
     if (mode === 'velocity') {
       if (isNaN(diamIn) || isNaN(flowGPM) || diamIn <= 0) return [];

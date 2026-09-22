@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import QuadraticPanel from './QuadraticPanel';
 import Decimal from 'decimal.js';
+import { roundStr8 as fmt } from '../../../lib/format';
 
 // Decimal.js is used for precision in the discriminant computation (b² − 4ac)
 // and root calculations where near-zero discriminants or nearly-canceling
@@ -62,7 +63,6 @@ const quadraticConfig: CalculatorConfig = {
     const vertexY = a * vertexX * vertexX + b * vertexX + c;
     const axisOfSymmetry = -b / (2 * a);
 
-    const fmt = (n: number) => parseFloat(n.toFixed(8)).toString();
     const fmtComplex = (n: number) => {
       const abs = Math.abs(n);
       if (abs < 1e-14) return '0';

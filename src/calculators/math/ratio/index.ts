@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RatioPanel from './RatioPanel';
+import { roundStr6 as fmt } from '../../../lib/format';
 
 function gcd(a: number, b: number): number {
   a = Math.abs(a);
@@ -80,7 +81,6 @@ const ratioConfig: CalculatorConfig = {
 
     if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) return [];
 
-    const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
     const [sa, sb] = simplifyRatio(a, b);
     const ratio = a / b;
 

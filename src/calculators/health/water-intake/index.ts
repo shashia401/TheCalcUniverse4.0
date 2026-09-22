@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WaterIntakePanel from './WaterIntakePanel';
+import { fixed1 as fmt } from '../../../lib/format';
 
 const waterIntakeConfig: CalculatorConfig = {
   inputs: [
@@ -82,8 +83,6 @@ const waterIntakeConfig: CalculatorConfig = {
     const totalLiters = totalOz * 0.0295735;
     const totalCups = totalOz / 8;
     const totalMl = totalLiters * 1000;
-
-    const fmt = (n: number) => n.toFixed(1);
 
     return [
       {

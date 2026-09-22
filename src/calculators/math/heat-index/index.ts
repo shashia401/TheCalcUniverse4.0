@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import HeatIndexPanel from './HeatIndexPanel';
+import { roundStrD as fmt } from '../../../lib/format';
 
 function heatIndex(Tf: number, RH: number): number {
   if (Tf < 80) return Tf;
@@ -85,8 +86,6 @@ const heatIndexConfig: CalculatorConfig = {
     const hi = heatIndex(Tf, RH);
     const danger = getDangerTier(hi);
     const recommendations = getSafetyRecommendations(hi);
-
-    const fmt = (n: number, d = 1) => parseFloat(n.toFixed(d)).toString();
 
     return [
       {

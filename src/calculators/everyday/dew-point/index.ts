@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import DewPointPanel from './DewPointPanel';
+import { roundStrD as fmt } from '../../../lib/format';
 
 function fToC(f: number): number {
   return (f - 32) * 5 / 9;
@@ -65,8 +66,6 @@ const dewPointConfig: CalculatorConfig = {
     const dpC = dewPoint(Tc, RH);
     const dpF = cToF(dpC);
     const comfort = getComfortLevel(dpF);
-
-    const fmt = (n: number, d = 1) => parseFloat(n.toFixed(d)).toString();
 
     return [
       {

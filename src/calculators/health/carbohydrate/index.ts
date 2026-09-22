@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import CarbohydratePanel from './CarbohydratePanel';
+import { plainLocale as fmt } from '../../../lib/format';
 
 const GOAL_RANGES: Record<string, { label: string; minG: number; maxG: number }> = {
   endurance: { label: 'Endurance Training (high volume)', minG: 7, maxG: 12 },
@@ -108,8 +109,6 @@ const carbohydrateConfig: CalculatorConfig = {
           return { loadStart, eventDate, loadDays: '3 days before event' };
         })()
       : null;
-
-    const fmt = (n: number) => n.toLocaleString(undefined);
 
     const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral' }> = [
       {

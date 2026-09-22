@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import AreaPanel from './AreaPanel';
 import { circleEdu, rectangleEdu, squareEdu, triangleEdu, trapezoidEdu, parallelogramEdu, hexagonEdu } from './educational';
+import { roundStr6 as fmt } from '../../../lib/format';
 
 const shapeTabs = [
   { label: 'Circle', value: 'circle', slug: 'circle' },
@@ -72,7 +73,6 @@ const areaPerimeterConfig: CalculatorConfig = {
   calculate: (values) => {
     // Decimal.js for precision — all geometric formulas use high-precision arithmetic
     const shape = values.shape || 'circle';
-    const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
     const pi = Math.PI;
 
     if (shape === 'circle') {

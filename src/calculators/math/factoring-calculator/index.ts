@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import FactoringPanel from './FactoringPanel';
+import { roundStr6 as fmt } from '../../../lib/format';
 
 function gcd(a: number, b: number): number {
   a = Math.abs(a);
@@ -153,7 +154,6 @@ const factoringConfig: CalculatorConfig = {
     const discriminant = b * b - 4 * a * c;
     const ac = a * c;
     const factors = findIntegerFactors(a, b, c);
-    const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
 
     const results: CalculatorResult[] = [];
 

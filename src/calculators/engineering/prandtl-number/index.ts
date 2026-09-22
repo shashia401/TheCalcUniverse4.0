@@ -1,4 +1,5 @@
 import { CalculatorConfig } from '../../../types/calculator';
+import { sigFig4 as fmt } from '../../../lib/format';
 
 const prandtlConfig: CalculatorConfig = {
   inputs: [
@@ -48,7 +49,6 @@ calculate: (values) => {
     if (isNaN(mu) || isNaN(cp) || isNaN(k) || mu <= 0 || cp <= 0 || k <= 0) return [];
 
     const pr = (mu * cp) / k;
-    const fmt = (n: number) => n.toLocaleString(undefined, { maximumSignificantDigits: 4 });
 
     let category = '';
     if (pr < 0.01) category = 'Liquid metal (very low Pr) — thermal diffusion dominates';

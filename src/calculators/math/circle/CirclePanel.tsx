@@ -1,4 +1,5 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { roundStr6 as fmt } from '../../../lib/format';
 
 interface Props {
   values: Record<string, string>;
@@ -24,8 +25,6 @@ export default function CirclePanel({ results }: Props) {
   const cy = svgSize / 2;
   const scaleR = Math.min(rVal * 12, 130);
   const displayR = Math.max(scaleR, 44);
-
-  const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
 
   /* formula cards */
   const formulaCards = [

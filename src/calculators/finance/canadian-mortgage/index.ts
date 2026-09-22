@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { pmt } from '../../../utils/financial';
 import CanadianMortgagePanel from './CanadianMortgagePanel';
+import { money2dp as fmt } from '../../../lib/format';
 
 /// ─── CMHC Insurance Premium Tiers ─────────────────────────────────────
 function cmhcPremiumRate(loanToValue: number): number {
@@ -262,7 +263,6 @@ const canadianMortgageConfig: CalculatorConfig = {
 
     if (isNaN(price) || isNaN(down) || isNaN(annualRate) || price <= 0 || down < 0 || annualRate < 0 || annualRate > 30) return [];
 
-    const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const baseLoan = price - down;
     if (baseLoan <= 0) return [];
     const ltv = baseLoan / price;

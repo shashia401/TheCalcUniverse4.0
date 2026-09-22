@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import MPGPanel from './MPGPanel';
+import { fixed2 as fmt } from '../../../lib/format';
 
 const mpgCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -81,8 +82,6 @@ const mpgCalculatorConfig: CalculatorConfig = {
     const mpg = parseFloat(values.mpg);
     const fuelPrice = parseFloat(values.fuelPrice);
     const tankSize = parseFloat(values.tankSize);
-
-    const fmt = (n: number) => n.toFixed(2);
 
     if (mode === 'mpg') {
       if (isNaN(milesDriven) || isNaN(gallonsUsed) || gallonsUsed <= 0) return [];

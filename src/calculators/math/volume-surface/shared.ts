@@ -1,6 +1,6 @@
+import { roundStr6 as fmt } from '../../../lib/format';
 export function calculate(shape: string, d1: number, d2: number, d3: number) {
   const pi = Math.PI;
-  const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
 
   if (shape === 'sphere') {
     if (isNaN(d1) || d1 <= 0) return [];

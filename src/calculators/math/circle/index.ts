@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import CirclePanel from './CirclePanel';
+import { roundStr8 as fmt } from '../../../lib/format';
 
 const circleConfig: CalculatorConfig = {
   inputs: [
@@ -36,7 +37,6 @@ const circleConfig: CalculatorConfig = {
     if (isNaN(inputVal) || inputVal <= 0) return [];
 
     const pi = Math.PI;
-    const fmt = (n: number) => parseFloat(n.toFixed(8)).toString();
 
     let r: number, d: number, C: number, A: number;
     let reverseStep: string;

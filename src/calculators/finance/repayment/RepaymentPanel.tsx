@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { TrendingDown, Download } from 'lucide-react';
 import { downloadCsv } from '../../../utils/downloadCsv';
+import { money2dp as fmt } from '../../../lib/format';
 
 interface MonthlyRow {
   month: number;
@@ -93,7 +94,6 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
     }));
   }, [schedule]);
 
-  const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtInt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   if (schedule.length === 0) return null;

@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MortgageComparePanel from './MortgageComparePanel';
+import { money2dp as fmt } from '../../../lib/format';
 
 const mortgageComparisonConfig: CalculatorConfig = {
   inputs: [
@@ -128,7 +129,6 @@ const mortgageComparisonConfig: CalculatorConfig = {
     const savings = totalPaid30 - totalPaid15;
     const extraMonthly = totalMonthly15 - totalMonthly30;
 
-    const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtWhole = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
     return [
