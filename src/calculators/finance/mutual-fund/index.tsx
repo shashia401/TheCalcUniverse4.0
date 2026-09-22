@@ -245,14 +245,14 @@ const mutualFundConfig: CalculatorConfig = {
       {
         scenario: "Sarah, age 30, is choosing between VTSAX (0.04% expense ratio) and a popular actively managed large-cap fund (0.85% expense ratio). She plans to invest $10,000 initially plus $500/month for 30 years, expecting 8% market returns. How much will fees cost her with each choice?",
         inputs: { initialInvestment: '10000', monthlyContribution: '500', expectedReturn: '8', expenseRatio: '0.85', investmentYears: '30' },
-        result: "With the actively managed fund (0.85% fee), projected balance is approximately $603,000. Fee cost: roughly $181,000 over 30 years — nearly 3x total contributions of $190,000. Switching to VTSAX (0.04% fee) would save approximately $172,000.",
-        insight: "With the actively managed fund (0.85% fee), the projected balance is about $603,000. The total cost of fees: approximately $181,000 over 30 years — nearly 3x her total contributions of $190,000. Switching to VTSAX (0.04% fee) would save roughly $172,000 in fees. The fee difference alone could fund several years of retirement.",
+        result: "With the actively managed fund (0.85% fee), projected balance is approximately $713,000. Fee cost: roughly $141,000 over 30 years — about 74% of total contributions of $190,000. Switching to VTSAX (0.04% fee) would save approximately $134,000.",
+        insight: "With the actively managed fund (0.85% fee), the projected balance is about $713,000. The total cost of fees: approximately $141,000 over 30 years — about 74% of her total contributions of $190,000. Switching to VTSAX (0.04% fee) would save roughly $134,000 in fees. The fee difference alone could fund several years of retirement.",
       },
       {
         scenario: "James inherited $50,000 at age 25 and wants to invest it without additional contributions for 35 years until retirement at 60. He is considering a fund with 1.25% expense ratio vs. a low-cost index fund at 0.10%. Market returns are expected at 9%.",
         inputs: { initialInvestment: '50000', monthlyContribution: '0', expectedReturn: '9', expenseRatio: '1.25', investmentYears: '35' },
-        result: "With the expensive fund (1.25% fee), projected balance is approximately $683,000. Fee cost: roughly $337,000 — over one-third of potential wealth. With an index fund (0.10% fee), projected balance is approximately $985,000. The $302,000 difference is purely from the expense ratio gap.",
-        insight: "Without fees at 9%, the portfolio would grow to approximately $1,020,000. With the expensive fund (net return 7.75%), it reaches about $683,000. Fees consume $337,000 — over one-third of potential wealth. With the index fund (0.10% fee), it reaches about $985,000 — only $35,000 lost to fees. The $302,000 difference between the two fund choices is purely from the expense ratio gap of 1.15%.",
+        result: "With the expensive fund (1.25% fee), projected balance is approximately $747,000. Fee cost: roughly $406,000 — over one-third of potential wealth. With an index fund (0.10% fee), projected balance is approximately $1,114,000. The $367,000 difference is purely from the expense ratio gap.",
+        insight: "Without fees at 9%, the portfolio would grow to approximately $1,153,000. With the expensive fund (net return 7.75%), it reaches about $747,000. Fees consume $406,000 — over one-third of potential wealth. With the index fund (0.10% fee), it reaches about $1,114,000 — only $39,000 lost to fees. The $367,000 difference between the two fund choices is purely from the expense ratio gap of 1.15%.",
       },
     ],
     proTips: [
