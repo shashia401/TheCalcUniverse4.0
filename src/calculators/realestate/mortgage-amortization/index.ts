@@ -243,8 +243,11 @@ const mortgageAmortizationConfig: CalculatorConfig = {
 
     const sm = parseInt(values.startMonth) || new Date().getMonth() + 1;
     const sy = parseInt(values.startYear) || new Date().getFullYear();
-    const payoffMonthIndex = (sm - 1 + numPayments) % 12;
-    const payoffYear = sy + Math.floor((sm - 1 + numPayments) / 12);
+    // The Nth payment lands numPayments-1 months after the first payment
+    // (payment 1 is the start month itself, not one month after it).
+    const monthsFromStart = sm - 1 + numPayments - 1;
+    const payoffMonthIndex = monthsFromStart % 12;
+    const payoffYear = sy + Math.floor(monthsFromStart / 12);
     const payoffDate = `${MONTHS[payoffMonthIndex]} ${payoffYear}`;
 
     const fmt = (n: number) =>
