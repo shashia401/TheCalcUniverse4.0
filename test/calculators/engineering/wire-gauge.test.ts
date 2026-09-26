@@ -53,6 +53,17 @@ describe('Wire Gauge Calculator', () => {
     expect(getValue(results, 'recommended')).toContain('12 AWG');
   });
 
+  it('recommends 10 AWG aluminum for 30A (NEC Table 310.15(B)(16) 75°C ampacity)', () => {
+    // The table previously listed 10 AWG aluminum at 25A instead of the
+    // correct 30A, which would have wrongly bumped a 26-30A load up to 8 AWG.
+    const results = config.calculate({
+      current: '30',
+      conductorMaterial: 'aluminum',
+      numConductors: '1',
+    });
+    expect(getValue(results, 'recommended')).toContain('10 AWG');
+  });
+
   it('returns empty for zero current', () => {
     const results = config.calculate({
       current: '0',

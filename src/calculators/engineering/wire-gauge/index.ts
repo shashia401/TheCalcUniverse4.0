@@ -86,7 +86,7 @@ const wireGaugeConfig: CalculatorConfig = {
       },
       aluminum: {
         '75': [
-          { awg: '12', amps: 20 }, { awg: '10', amps: 25 }, { awg: '8', amps: 40 },
+          { awg: '12', amps: 20 }, { awg: '10', amps: 30 }, { awg: '8', amps: 40 },
           { awg: '6', amps: 50 }, { awg: '4', amps: 65 }, { awg: '3', amps: 75 },
           { awg: '2', amps: 90 }, { awg: '1', amps: 100 }, { awg: '1/0', amps: 120 },
           { awg: '2/0', amps: 135 }, { awg: '3/0', amps: 155 },
