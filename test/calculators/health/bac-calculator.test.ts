@@ -24,6 +24,17 @@ describe('BAC calculator', () => {
     expect(bac).toBeLessThan(0.15);
   });
 
+  it('matches the pinned Widmark result for the 130 lb / 3 drinks / 2 hr worked example', () => {
+    // The educational.workedExamples[1] text previously claimed 0.079%/0.109%
+    // (peak) for these exact inputs, but the real formula gives 0.100%/0.130% —
+    // verified by hand: (3*14 / (130*453.592*0.55)) * 100 - 0.015*2 = 0.0995.
+    const r = config.calculate({
+      sex: 'female', weight: '130', drinks: '3', hours: '2',
+    });
+    expect(getValue(r, 'bac')).toContain('0.100');
+    expect(getValue(r, 'rawBac')).toContain('0.130');
+  });
+
   it('shows female BAC is higher than male BAC for same weight and drinks', () => {
     const male = config.calculate({
       sex: 'male', weight: '150', drinks: '3', hours: '2',
