@@ -46,6 +46,14 @@ describe('Electrical Unit Converter', () => {
     expect(config.calculate({ value: 'abc', from: 'v', to: 'mv_v' })).toEqual([]);
   });
 
+  it('flags cross-category conversion as an error instead of computing a meaningless number', () => {
+    const r = config.calculate({ value: '10', from: 'v', to: 'ohm' });
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
+    expect(r[0].color).toBe('negative');
+    expect(r[0].value).toMatch(/different physical quantities/i);
+  });
+
   it('returns empty for negative value (not physically meaningful)', () => {
     const r = config.calculate({ value: '-10', from: 'v', to: 'mv_v' });
     // Negative values still convert mathematically but are flagged

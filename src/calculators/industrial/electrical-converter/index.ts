@@ -224,6 +224,22 @@ const calculate = (values: Record<string, string>) => {
   if (!fromDef || !toDef) return [];
   if (toDef.factor === 0) return [];
 
+  // Units are grouped by physical quantity via the "Category — Name" label
+  // prefix (see comment above UNITS). Voltage, current, resistance, etc. are
+  // not interconvertible by a factor — only same-category pairs are valid.
+  const category = (u: UnitDef) => u.label.split(' — ')[0];
+  if (category(fromDef) !== category(toDef)) {
+    return [
+      {
+        id: 'error',
+        label: 'Incompatible Units',
+        value: `${fromDef.label} and ${toDef.label} measure different physical quantities and cannot be converted by a simple factor. Select two units from the same category (e.g., both Voltage, or both Resistance).`,
+        color: 'negative' as const,
+        highlight: true,
+      },
+    ];
+  }
+
   const result = (val * fromDef.factor) / toDef.factor;
 
   return [
