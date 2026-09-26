@@ -3,6 +3,15 @@ import config from '../../../src/calculators/math/z-score/index';
 import { getValue, parseNumber, near } from '../../helpers';
 
 describe('Z-score calculator', () => {
+  it('matches the textbook Φ(1.96) = 0.975 (95% CI anchor value)', () => {
+    // The old cdf() forgot to divide by √2 before applying the Abramowitz &
+    // Stegun erf approximation, producing 0.9972 instead of 0.975 for this
+    // input — one of the most well-known facts in statistics.
+    const r = config.calculate({ rawScore: '1.96', mean: '0', stddev: '1' });
+    const prob = parseFloat(getValue(r, 'probability'));
+    near(prob, 0.975, 0.001);
+  });
+
   it('calculates Z = 1.5 for x=85, μ=70, σ=10', () => {
     const r = config.calculate({ rawScore: '85', mean: '70', stddev: '10' });
     near(parseNumber(getValue(r, 'zscore')), 1.5);
