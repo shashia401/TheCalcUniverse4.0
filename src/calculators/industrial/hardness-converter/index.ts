@@ -18,36 +18,62 @@ interface HardnessScale {
   range: string;
 }
 
+/** Piecewise-linear interpolation over a [x, y] table sorted ascending by x. */
+function interpolate(table: [number, number][], x: number): number | null {
+  if (x < table[0][0] || x > table[table.length - 1][0]) return null;
+  for (let i = 0; i < table.length - 1; i++) {
+    const [x0, y0] = table[i];
+    const [x1, y1] = table[i + 1];
+    if (x >= x0 && x <= x1) return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+  }
+  return null;
+}
+
+/** Inverse of interpolate(): look up x for a given y, over the same ascending table. */
+function interpolateInverse(table: [number, number][], y: number): number | null {
+  const minY = table[0][1];
+  const maxY = table[table.length - 1][1];
+  if (y < minY || y > maxY) return null;
+  for (let i = 0; i < table.length - 1; i++) {
+    const [x0, y0] = table[i];
+    const [x1, y1] = table[i + 1];
+    if (y >= y0 && y <= y1) return x0 + ((x1 - x0) * (y - y0)) / (y1 - y0);
+  }
+  return null;
+}
+
+// ASTM E140 reference data for non-austenitic (hardened) steel, via published
+// ASTM E140 conversion tables (metricmech.com/reference/hardness-conversion-chart,
+// cross-checked against independent sources confirming HRC 60 ≈ HV 697).
+const HRC_HV_TABLE: [number, number][] = [
+  [20, 244], [22, 253], [24, 263], [26, 277], [28, 291], [30, 305],
+  [32, 319], [34, 336], [36, 354], [38, 372], [40, 392], [42, 412],
+  [44, 434], [46, 458], [48, 484], [50, 513], [52, 544], [54, 577],
+  [56, 613], [58, 653], [60, 697], [62, 746], [65, 832], [68, 940],
+];
+const HRB_HV_TABLE: [number, number][] = [
+  [60, 118], [62, 122], [64, 126], [66, 130], [68, 134], [70, 139],
+  [72, 143], [74, 148], [76, 153], [78, 157], [80, 163], [82, 170],
+  [84, 176], [86, 182], [88, 189], [90, 195], [92, 203], [94, 212],
+  [96, 219], [98, 228], [100, 240],
+];
+
 const SCALES: HardnessScale[] = [
   {
     value: 'hrc',
     label: 'Rockwell C (HRC)',
     shortLabel: 'HRC',
-    toHV: (v) => {
-      if (v < 20 || v > 70) return null;
-      return -0.00316 * Math.pow(v, 3) + 0.524 * Math.pow(v, 2) + 11.28 * v + 58.5;
-    },
-    fromHV: (hv) => {
-      if (hv < 250 || hv > 1000) return null;
-      // Inverse: approximate
-      return Math.pow((hv - 100) / 15.6, 1 / 1.2);
-    },
-    range: 'HRC 20–70',
+    toHV: (v) => interpolate(HRC_HV_TABLE, v),
+    fromHV: (hv) => interpolateInverse(HRC_HV_TABLE, hv),
+    range: 'HRC 20–68',
   },
   {
     value: 'hrb',
     label: 'Rockwell B (HRB)',
     shortLabel: 'HRB',
-    toHV: (v) => {
-      if (v < 40 || v > 100) return null;
-      if (v < 60) return 0.862 * Math.pow(v, 2) - 66.2 * v + 1739; // HRB 40-60
-      return 1.194 * Math.pow(v, 2) - 110.5 * v + 2808; // HRB 60-100
-    },
-    fromHV: (hv) => {
-      if (hv < 80 || hv > 280) return null;
-      return 28.5 + Math.sqrt((hv - 50) / 1.2);
-    },
-    range: 'HRB 40–100',
+    toHV: (v) => interpolate(HRB_HV_TABLE, v),
+    fromHV: (hv) => interpolateInverse(HRB_HV_TABLE, hv),
+    range: 'HRB 60–100',
   },
   {
     value: 'hra',

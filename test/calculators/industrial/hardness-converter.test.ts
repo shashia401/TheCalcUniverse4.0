@@ -3,6 +3,27 @@ import config from '../../../src/calculators/industrial/hardness-converter/index
 import { getValue, getResult } from '../../helpers';
 
 describe('Hardness Converter', () => {
+  it('converts HRC to HV using real ASTM E140 reference points, not the old fabricated formula', () => {
+    // HRC 50 = HV 513 and HRC 60 = HV 697 per ASTM E140 (verified against
+    // independent sources). The formula this replaced produced ~1537 and
+    // ~1939 respectively — roughly 3x too high.
+    const r50 = config.calculate({ fromValue: '50', fromUnit: 'hrc' });
+    const hv50 = getResult(r50, 'eq_hv');
+    expect(hv50.value).toContain('513');
+
+    const r60 = config.calculate({ fromValue: '60', fromUnit: 'hrc' });
+    const hv60 = getResult(r60, 'eq_hv');
+    expect(hv60.value).toContain('697');
+  });
+
+  it('converts HRB to HV using real ASTM E140 reference points, not the old fabricated formula', () => {
+    // HRB 80 = HV 163 per ASTM E140. The old formula produced ~1610 — about
+    // 10x too high.
+    const r = config.calculate({ fromValue: '80', fromUnit: 'hrb' });
+    const hv = getResult(r, 'eq_hv');
+    expect(hv.value).toContain('163');
+  });
+
   it('converts HRC 40 to equivalents', () => {
     const r = config.calculate({
       fromValue: '40',
