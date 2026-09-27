@@ -79,7 +79,9 @@ const golfConfig: CalculatorConfig = {
     const selectedDiffs = selectedItems.map(x => x.d);
     const selectedIndices = new Set(selectedItems.map(x => x.i));
     const avgDiff = selectedDiffs.reduce((s, d) => s + d, 0) / selectedDiffs.length;
-    const index = Math.round(avgDiff * 0.96 * 10) / 10;
+    // WHS Rule 5.1b: the Handicap Index is truncated (not rounded) to one
+    // decimal place, e.g. 15.284 -> 15.2, never 15.3.
+    const index = Math.trunc(avgDiff * 0.96 * 10) / 10;
     const courseHandicap = Math.round(index);
 
     const roundsUsedStr = `Lowest ${count} of ${rounds.length}`;

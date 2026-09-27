@@ -68,8 +68,10 @@ describe('golf-handicap', () => {
 
   it('handles negative differential (below course rating)', () => {
     const r = config.calculate({ rounds: '70, 72.5, 130' });
-    // diff = (70-72.5)*113/130 = -2.5*113/130 = -2.17
-    near(parseNumber(getValue(r, 'handicapIndex')), -2.1); // -2.17 * 0.96 = -2.08
+    // diff = (70-72.5)*113/130 = -2.5*113/130 = -2.17; -2.17*0.96 = -2.087,
+    // which truncates TOWARD ZERO per WHS Rule 5.1b to -2.0 (not -2.1, which
+    // would be rounding away from zero).
+    near(parseNumber(getValue(r, 'handicapIndex')), -2.0);
     expect(parseFloat(getValue(r, 'handicapIndex'))).toBeLessThan(0);
   });
 
