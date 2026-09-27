@@ -170,8 +170,16 @@ const yarnYardageConfig: CalculatorConfig = {
       if (!baseYardage) return [];
     }
 
+    // The Custom-mode area formula above already divides by the user's own
+    // stitchesPerInch/rowsPerInch, so their actual gauge is already baked into
+    // baseYardage. Re-applying the 20/24-baseline gaugeFactor on top of that
+    // (as previously done for every project type) double-counts gauge and can
+    // shrink or inflate the estimate by several times — e.g. a 10 st / 12 row
+    // custom gauge previously quartered the true yardage. Only the preset
+    // project sizes (fixed yardages measured at the 20/24 baseline) need this
+    // adjustment to scale to the user's real gauge.
     const gaugeFactor = (stitchesPer4in / 20) * (rowsPer4in / 24);
-    const gaugeAdjustedYardage = baseYardage * gaugeFactor;
+    const gaugeAdjustedYardage = projectType === 'Custom' ? baseYardage : baseYardage * gaugeFactor;
 
     const precutType = values.precutType || '';
     const precutCount = parseInt(values.precutCount, 10) || 0;
@@ -209,7 +217,9 @@ const yarnYardageConfig: CalculatorConfig = {
       {
         id: 'gaugeAdjustment',
         label: `Gauge Adjustment (${stitchesPer4in} st / ${rowsPer4in} rows per 4")`,
-        value: `× ${gaugeFactor.toFixed(2)} factor`,
+        value: projectType === 'Custom'
+          ? 'Already included in base yardage (your gauge sets the fabric area above)'
+          : `× ${gaugeFactor.toFixed(2)} factor`,
         color: 'neutral',
       },
     ];

@@ -94,6 +94,24 @@ describe('Yarn Yardage Calculator', () => {
     expect(yardage).toBeLessThan(150);
   });
 
+  it('does not double-apply the gauge factor for custom projects (regression: a non-baseline custom gauge previously got squared/discounted because gaugeFactor was multiplied on top of an area formula that already divided by the user\'s own gauge)', () => {
+    const results = config.calculate({
+      projectType: 'Custom',
+      customWidth: '50',
+      customLength: '60',
+      yarnWeight: 'Bulky',
+      stitchesPer4in: '10',
+      rowsPer4in: '12',
+      precutType: 'Jelly Roll',
+      precutCount: '1',
+    });
+    // Area method: (50*60) / (2.5*3) * 1.2 = 400 * 1.2 = 480 yards.
+    // The old code then multiplied by gaugeFactor = (10/20)*(12/24) = 0.25,
+    // wrongly shrinking the result to 120 yards.
+    const yardage = parseNumber(getValue(results, 'yardageNeeded'));
+    expect(yardage).toBe(480);
+  });
+
   it('accounts for precut fabric yardage', () => {
     const results = config.calculate({
       projectType: 'Scarf',
