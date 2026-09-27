@@ -218,8 +218,8 @@ const presentValueConfig: CalculatorConfig = {
       {
         scenario: 'A relative promises to give you $50,000 in 8 years. What is that promise worth today if your required return is 5% with quarterly compounding?',
         inputs: { futureValue: '50000', periods: '8', discountRate: '5', compoundingFrequency: '4' },
-        result: 'PV = $33,591.94',
-        insight: 'The promise of $50,000 in 8 years is worth only $33,592 today at a 5% discount rate. If you could invest that $33,592 today at 5% compounded quarterly, it would grow to exactly $50,000 in 8 years. This illustrates why lottery winners choosing between a lump sum and annuity payments should always calculate the PV of the annuity stream.',
+        result: 'PV = $33,599.20',
+        insight: 'The promise of $50,000 in 8 years is worth only $33,599 today at a 5% discount rate. If you could invest that $33,599 today at 5% compounded quarterly, it would grow to exactly $50,000 in 8 years. This illustrates why lottery winners choosing between a lump sum and annuity payments should always calculate the PV of the annuity stream.',
       },
       {
         scenario: 'You are offered a lump-sum pension buyout of $200,000 now vs. receiving $500,000 in 20 years. Which is better if you can earn 6% annually?',

@@ -17,6 +17,19 @@ describe('present-value', () => {
     near(parseMoney(getValue(r, 'discountAmountResult')), 49165.07, 1);
   });
 
+  it('matches the educational worked example (FV $50K, 8yr, 5%, quarterly)', () => {
+    // Regression test: the calculator's own workedExamples cited $33,591.94,
+    // which did not match the actual formula output of $33,599.20.
+    const r = config.calculate({
+      futureValue: '50000',
+      periods: '8',
+      discountRate: '5',
+      compoundingFrequency: '4',
+    });
+    const pv = parseMoney(getValue(r, 'presentValueResult'));
+    near(pv, 33599.20, 0.5);
+  });
+
   it('calculates PV with monthly compounding', () => {
     const r = config.calculate({
       futureValue: '100000',
