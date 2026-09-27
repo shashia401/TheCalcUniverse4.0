@@ -115,6 +115,23 @@ describe('pension calculator', () => {
     expect(getValue(r, 'projectionSpan')).toContain('Age 45 → 67');
   });
 
+  it('matches the educational explanation scenario (age 35->65, $50K, $500/mo, 7%)', () => {
+    // Regression test: the calculator's own "explanation" text cites this exact
+    // scenario (~$947K balance, $230K contributions, $717K growth) — verify
+    // calculate() actually produces those figures.
+    const r = config.calculate({
+      currentAge: '35',
+      retirementAge: '65',
+      currentBalance: '50000',
+      monthlyContribution: '500',
+      growthRate: '7',
+      inflationAdjust: 'nominal',
+    });
+    expect(parseMoney(getValue(r, 'projectedBalance'))).toBeCloseTo(947377, -2);
+    expect(parseMoney(getValue(r, 'totalContributions'))).toBe(230000);
+    expect(parseMoney(getValue(r, 'totalGrowth'))).toBeCloseTo(717377, -2);
+  });
+
   it('matches manual year-by-year calculation', () => {
     const r = config.calculate({
       currentAge: '30',
