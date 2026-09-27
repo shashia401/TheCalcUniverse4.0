@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import config from '../../../src/calculators/finance/capital-gains-tax';
-import { getValue, parseNumber, parseMoney, near } from '../../helpers';
+import { getValue, getResult, parseNumber, parseMoney, near } from '../../helpers';
 
 describe('capital-gains-tax-calculator', () => {
   // === Holding Period Tests ===
@@ -114,11 +114,11 @@ describe('capital-gains-tax-calculator', () => {
     // Gains stack on top of ordinary income and are taxed at each bracket's
     // marginal rate as they cross it — not a flat rate on the whole gain just
     // because the total exceeds a threshold. Income $500,000 already sits in
-    // the 15% bracket; the $100,000 gain stacks from $500,000 to $600,000:
-    // $18,900 (to the $518,900 20% breakpoint) at 15% = $2,835, plus $81,100
-    // at 20% = $16,220. Total: $19,055.
+    // the 15% bracket (2026 LTCG breakpoint for single filers: $545,500); the
+    // $100,000 gain stacks from $500,000 to $600,000: $45,500 at 15% =
+    // $6,825, plus $54,500 at 20% = $10,900. Total: $17,725.
     const federalTax = parseMoney(getValue(r, 'federalTax'));
-    near(federalTax, 19055, 1);
+    near(federalTax, 17725, 1);
   });
 
   it('applies 0% LTCG for married filing jointly under threshold', () => {
@@ -437,12 +437,13 @@ describe('capital-gains-tax-calculator', () => {
       stateTaxRate: '0',
     });
     // Gains stack on top of ordinary income. Income $80,000 is below the MFJ
-    // $94,050 0% threshold; the $50,000 gain stacks from $80,000 to $130,000:
-    // $14,050 (to the threshold) at 0% = $0, plus $35,950 at 15% = $5,392.50.
+    // $98,900 0% threshold (2026); the $50,000 gain stacks from $80,000 to
+    // $130,000: $18,900 (to the threshold) at 0% = $0, plus $31,100 at 15% =
+    // $4,665.
     expect(getValue(r, 'gainLoss')).toContain('50,000');
     const federalTax = parseMoney(getValue(r, 'federalTax'));
     expect(federalTax).toBeGreaterThan(0);
-    near(federalTax, 5392.5, 1);
+    near(federalTax, 4665, 1);
   });
 
   it('handles married filing separately status', () => {
@@ -579,5 +580,38 @@ describe('capital-gains-tax-calculator', () => {
       annualIncome: '',
     } as Record<string, string>);
     expect(r).toEqual([]);
+  });
+
+  it('matches the "Elena" worked example (regression: LTCG and short-term brackets were previously stale 2024/2025 IRS figures instead of the 2026 figures used elsewhere in this app)', () => {
+    const r = config.calculate({
+      assetType: 'Stocks',
+      purchaseDate: '2023-01-15',
+      saleDate: '2025-03-20',
+      costBasis: '12500',
+      saleProceeds: '31000',
+      annualIncome: '92000',
+      filingStatus: 'Single',
+      stateTaxRate: '0',
+    });
+    // Long-term: $92,000 ordinary income + $18,500 gain stays within the 15%
+    // LTCG bracket ($49,451-$545,500 for single filers in 2026).
+    near(parseMoney(getValue(r, 'federalTax')), 2775, 1);
+  });
+
+  it('short-term gain crossing a 2026 bracket boundary is taxed at more than one marginal rate (regression: local short-term bracket copy was stale, understating the top rate touched)', () => {
+    const r = config.calculate({
+      assetType: 'Stocks',
+      purchaseDate: '2024-06-01',
+      saleDate: '2025-01-01',
+      costBasis: '12500',
+      saleProceeds: '31000',
+      annualIncome: '92000',
+      filingStatus: 'Single',
+      stateTaxRate: '0',
+    });
+    // $92,000 + $18,500 = $110,500 crosses the 2026 single 22%/24% boundary
+    // at $105,700, so part of the gain is taxed at 24%, not entirely at 22%.
+    near(parseMoney(getValue(r, 'federalTax')), 4166, 1);
+    expect(getResult(r, 'federalTax').label).toContain('24%');
   });
 });

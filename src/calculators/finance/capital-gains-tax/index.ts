@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { FEDERAL_BRACKETS } from '../../../utils/taxData';
 import CapitalGainsPanel from './CapitalGainsPanel';
 
 interface LTCGBracket {
@@ -8,22 +9,25 @@ interface LTCGBracket {
   rate: number;
 }
 
+// 2026 LTCG brackets per IRS Revenue Procedure 2025-32 (same source as the
+// shared ordinary-income brackets in utils/taxData.ts — kept in sync with
+// that filing year rather than hardcoded to an older year's thresholds).
 function getLTCGBrackets(filingStatus: string): LTCGBracket[] {
   const brackets: Record<string, LTCGBracket[]> = {
     Single: [
-      { min: 0, max: 47025, rate: 0 },
-      { min: 47026, max: 518900, rate: 15 },
-      { min: 518901, max: Infinity, rate: 20 },
+      { min: 0, max: 49450, rate: 0 },
+      { min: 49451, max: 545500, rate: 15 },
+      { min: 545501, max: Infinity, rate: 20 },
     ],
     'Married Filing Jointly': [
-      { min: 0, max: 94050, rate: 0 },
-      { min: 94051, max: 583750, rate: 15 },
-      { min: 583751, max: Infinity, rate: 20 },
+      { min: 0, max: 98900, rate: 0 },
+      { min: 98901, max: 613700, rate: 15 },
+      { min: 613701, max: Infinity, rate: 20 },
     ],
     'Head of Household': [
-      { min: 0, max: 63000, rate: 0 },
-      { min: 63001, max: 551350, rate: 15 },
-      { min: 551351, max: Infinity, rate: 20 },
+      { min: 0, max: 66200, rate: 0 },
+      { min: 66201, max: 579600, rate: 15 },
+      { min: 579601, max: Infinity, rate: 20 },
     ],
   };
   return brackets[filingStatus] || brackets.Single;
@@ -226,38 +230,19 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     let federalTax: number;
 
     if (isShortTerm) {
-      // Short-term: taxed as ordinary income
-      // Use the filing-status-appropriate 2026 brackets to determine marginal rate
-      const stBrackets: Record<string, { threshold: number; rate: number }[]> = {
-        Single: [
-          { threshold: 11925, rate: 10 },
-          { threshold: 48475, rate: 12 },
-          { threshold: 103350, rate: 22 },
-          { threshold: 197300, rate: 24 },
-          { threshold: 250525, rate: 32 },
-          { threshold: 626350, rate: 35 },
-          { threshold: Infinity, rate: 37 },
-        ],
-        'Married Filing Jointly': [
-          { threshold: 23850, rate: 10 },
-          { threshold: 96950, rate: 12 },
-          { threshold: 206700, rate: 22 },
-          { threshold: 394600, rate: 24 },
-          { threshold: 501050, rate: 32 },
-          { threshold: 751600, rate: 35 },
-          { threshold: Infinity, rate: 37 },
-        ],
-        'Head of Household': [
-          { threshold: 17000, rate: 10 },
-          { threshold: 64850, rate: 12 },
-          { threshold: 103350, rate: 22 },
-          { threshold: 197300, rate: 24 },
-          { threshold: 250525, rate: 32 },
-          { threshold: 626350, rate: 35 },
-          { threshold: Infinity, rate: 37 },
-        ],
+      // Short-term: taxed as ordinary income. Pull the filing-status brackets
+      // from the shared, actively-maintained utils/taxData.ts (same fix as
+      // income-tax/taxData.ts) instead of a local hardcoded copy — the old
+      // local copy here was stuck on stale 2025 thresholds (e.g. Single
+      // 22% starting at $103,350) after the IRS's 2026 inflation adjustment
+      // moved that threshold to $105,700.
+      const ST_STATUS_MAP: Record<string, keyof typeof FEDERAL_BRACKETS> = {
+        Single: 'single',
+        'Married Filing Jointly': 'mfj',
+        'Head of Household': 'hoh',
       };
-      const bracketSet = stBrackets[filingStatus] || stBrackets.Single;
+      const bracketSet = FEDERAL_BRACKETS[ST_STATUS_MAP[filingStatus] || 'single']
+        .map((b) => ({ threshold: b.to, rate: b.rate * 100 }));
       // Short-term gains stack on top of ordinary income and are taxed
       // bracket-by-bracket like ordinary income, not at one flat rate.
       const { tax, topRate } = stackedBracketTax(
@@ -377,8 +362,8 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     formulaDescription:
       'Capital gains tax is calculated based on the holding period (short-term vs. long-term), your total taxable income, and filing status. Short-term gains are taxed at ordinary income rates, while long-term gains benefit from preferential rates of 0%, 15%, or 20%. An additional 3.8% Net Investment Income Tax (NIIT) may apply for high-income taxpayers.',
     diagram: {
-      svg: '<svg viewBox="0 0 460 140" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="230" y="18" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">2026 Long-Term Capital Gains Tax Brackets (Single Filer)</text><!-- 0% bracket --><rect x="20" y="35" width="140" height="28" rx="5" fill="var(--svg-22c55e)" opacity="0.2" stroke="var(--svg-22c55e)" stroke-width="1.5"/><text x="90" y="53" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">0% rate</text><text x="90" y="73" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">$0 — $47,025</text><!-- 15% bracket --><rect x="170" y="35" width="160" height="28" rx="5" fill="var(--svg-f59e0b)" opacity="0.2" stroke="var(--svg-f59e0b)" stroke-width="1.5"/><text x="250" y="53" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">15% rate</text><text x="250" y="73" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">$47,026 — $518,900</text><!-- 20% bracket --><rect x="340" y="35" width="100" height="28" rx="5" fill="var(--svg-ef4444)" opacity="0.2" stroke="var(--svg-ef4444)" stroke-width="1.5"/><text x="390" y="53" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">20% rate</text><text x="390" y="73" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">$518,901+</text><!-- NIIT note --><rect x="70" y="90" width="320" height="22" rx="5" fill="var(--svg-f1f5f9)" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="230" y="104" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-1e293b)" text-anchor="middle">+3.8% NIIT if AGI &gt; $200k (single) or &gt; $250k (MFJ)</text><!-- Short-term note --><text x="230" y="126" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">Short-term (&le;365 days): taxed at ordinary income rates (10%-37%) | Holding period starts day after purchase</text></svg>',
-      alt: 'Diagram of 2026 long-term capital gains tax brackets for single filers: 0% up to $47,025, 15% from $47,026 to $518,900, and 20% above $518,901',
+      svg: '<svg viewBox="0 0 460 140" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="230" y="18" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">2026 Long-Term Capital Gains Tax Brackets (Single Filer)</text><!-- 0% bracket --><rect x="20" y="35" width="140" height="28" rx="5" fill="var(--svg-22c55e)" opacity="0.2" stroke="var(--svg-22c55e)" stroke-width="1.5"/><text x="90" y="53" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">0% rate</text><text x="90" y="73" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">$0 — $49,450</text><!-- 15% bracket --><rect x="170" y="35" width="160" height="28" rx="5" fill="var(--svg-f59e0b)" opacity="0.2" stroke="var(--svg-f59e0b)" stroke-width="1.5"/><text x="250" y="53" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">15% rate</text><text x="250" y="73" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">$49,451 — $545,500</text><!-- 20% bracket --><rect x="340" y="35" width="100" height="28" rx="5" fill="var(--svg-ef4444)" opacity="0.2" stroke="var(--svg-ef4444)" stroke-width="1.5"/><text x="390" y="53" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">20% rate</text><text x="390" y="73" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">$545,501+</text><!-- NIIT note --><rect x="70" y="90" width="320" height="22" rx="5" fill="var(--svg-f1f5f9)" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="230" y="104" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-1e293b)" text-anchor="middle">+3.8% NIIT if AGI &gt; $200k (single) or &gt; $250k (MFJ)</text><!-- Short-term note --><text x="230" y="126" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">Short-term (&le;365 days): taxed at ordinary income rates (10%-37%) | Holding period starts day after purchase</text></svg>',
+      alt: 'Diagram of 2026 long-term capital gains tax brackets for single filers: 0% up to $49,450, 15% from $49,451 to $545,500, and 20% above $545,501',
       caption: 'Long-term gains (held >365 days) get preferential rates. Short-term gains are taxed as ordinary income. NIIT adds 3.8% above income thresholds.',
     },
     variables: [
@@ -395,7 +380,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
       {
         symbol: 'LTCG Rate',
         name: 'Long-Term Capital Gains Rate',
-        description: 'Preferential tax rates of 0%, 15%, or 20% for assets held more than one year. The rate depends on your total taxable income and filing status. In 2026, 0% rate applies up to $47,025 for single filers.',
+        description: 'Preferential tax rates of 0%, 15%, or 20% for assets held more than one year. The rate depends on your total taxable income and filing status. In 2026, 0% rate applies up to $49,450 for single filers.',
       },
       {
         symbol: 'NIIT',
@@ -422,7 +407,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
       'Evaluate the after-tax return of an investment sale to make informed decisions about portfolio rebalancing.',
     ],
     explanation:
-      'Capital gains tax is one of the most important considerations for investors when selling assets. The tax treatment depends primarily on how long you held the asset before selling. Short-term capital gains (assets held for 365 days or less) are taxed as ordinary income at your marginal tax rate, which can be as high as 37%. This is a significant tax disadvantage compared to long-term gains, which benefit from preferential rates of 0%, 15%, or 20% depending on your income level. The difference is substantial: a high-income earner in the 37% bracket pays nearly twice the tax on short-term gains compared to long-term gains. This tax preference is a key reason why financial advisors recommend a "buy and hold" investment strategy. For 2026, the 0% long-term capital gains rate applies to single filers with total taxable income up to $47,025, married filing jointly up to $94,050, and heads of household up to $63,000. The 15% rate applies to most middle-income taxpayers, and the 20% rate applies to high-income earners. The Net Investment Income Tax (NIIT) adds an additional 3.8% for single filers with modified AGI exceeding $200,000 ($250,000 for married filing jointly). This surtax was introduced as part of the Affordable Care Act to help fund Medicare and applies to the lesser of your net investment income or the excess over the threshold. State taxes vary widely — some states like Texas, Florida, and Nevada have no state income tax, while others like California (up to 13.3%) and New York (up to 10.9%) can significantly increase the total tax burden on capital gains. Understanding these rules allows investors to make tax-aware decisions about when to sell assets and how to structure their investment portfolio.',
+      'Capital gains tax is one of the most important considerations for investors when selling assets. The tax treatment depends primarily on how long you held the asset before selling. Short-term capital gains (assets held for 365 days or less) are taxed as ordinary income at your marginal tax rate, which can be as high as 37%. This is a significant tax disadvantage compared to long-term gains, which benefit from preferential rates of 0%, 15%, or 20% depending on your income level. The difference is substantial: a high-income earner in the 37% bracket pays nearly twice the tax on short-term gains compared to long-term gains. This tax preference is a key reason why financial advisors recommend a "buy and hold" investment strategy. For 2026, the 0% long-term capital gains rate applies to single filers with total taxable income up to $49,450, married filing jointly up to $98,900, and heads of household up to $66,200. The 15% rate applies to most middle-income taxpayers, and the 20% rate applies to high-income earners. The Net Investment Income Tax (NIIT) adds an additional 3.8% for single filers with modified AGI exceeding $200,000 ($250,000 for married filing jointly). This surtax was introduced as part of the Affordable Care Act to help fund Medicare and applies to the lesser of your net investment income or the excess over the threshold. State taxes vary widely — some states like Texas, Florida, and Nevada have no state income tax, while others like California (up to 13.3%) and New York (up to 10.9%) can significantly increase the total tax burden on capital gains. Understanding these rules allows investors to make tax-aware decisions about when to sell assets and how to structure their investment portfolio.',
     faqs: [
       {
         question: 'What is the difference between short-term and long-term capital gains?',
@@ -451,7 +436,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
         scenario: 'Elena in Seattle, WA sold Apple stock that she bought on January 15, 2023 for $12,500 (including commissions) and sold on March 20, 2025 for $31,000. As a single filer with $92,000 in ordinary income, she wants to know her capital gains tax liability.',
         inputs: { assetType: 'Stocks', purchaseDate: '2023-01-15', saleDate: '2025-03-20', costBasis: '12500', saleProceeds: '31000', annualIncome: '92000', filingStatus: 'Single', stateTaxRate: '0' },
         result: 'Holding period: 795 days (Long-Term). Capital gain: $18,500. Total income ($92,000 + $18,500 = $110,500) falls in the 15% LTCG bracket. Federal tax: $2,775 (15%). Washington has no state income tax. Elena keeps $28,225 after federal tax.',
-        insight: 'Elena held her Apple shares for just over two years, qualifying for the preferential long-term capital gains rate. Her $18,500 gain was taxed at only 15% instead of her ordinary income marginal rate of 22% (her $92,000 income falls in the 22% single-filer bracket, up to $103,350), saving her approximately $1,295 in federal taxes compared to selling before the one-year holding period. The difference is real: short-term treatment would have cost her 22% — about $4,070 — making the long-term holding period worth the wait.',
+        insight: 'Elena held her Apple shares for just over two years, qualifying for the preferential long-term capital gains rate. Her $18,500 gain was taxed at only 15% instead of stacking on top of her ordinary income at the short-term rate, saving her approximately $1,391 in federal taxes compared to selling before the one-year holding period. Short-term treatment would have pushed part of the gain into the 24% bracket (her $92,000 income plus the $18,500 gain crosses the $105,700 top of the 22% bracket for single filers in 2026), costing about $4,166 in federal tax versus $2,775 long-term — making the long-term holding period worth the wait.',
       },
       {
         scenario: 'James and Maria Johnson in Portland, OR are a married couple filing jointly with $175,000 in combined ordinary income. They bought Bitcoin on November 5, 2023 for $8,000 and sold it on October 1, 2024 for $22,000. Oregon has a 9.9% state income tax.',
@@ -464,16 +449,16 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     proTips: [
       'The holding period clock starts the day AFTER purchase. If you bought on January 15, the one-year mark is January 16 of the following year — sell on January 15 and you have held for exactly 365 days (short-term). Wait one more day for long-term treatment.',
       'Tax-loss harvesting: sell losing positions before year-end to offset gains. Up to $3,000 of net losses can offset ordinary income, with the remainder carried forward indefinitely. This is one of the few free lunches in tax planning.',
-      'If you are in the 0% LTCG bracket (single filers with total income under $47,025 in 2025), consider realizing gains up to the top of the 0% bracket each year — it is essentially a tax-free step-up in cost basis that reduces future tax liability.',
+      'If you are in the 0% LTCG bracket (single filers with total income under $49,450 in 2026), consider realizing gains up to the top of the 0% bracket each year — it is essentially a tax-free step-up in cost basis that reduces future tax liability.',
       'The 3.8% Net Investment Income Tax applies to single filers above $200,000 and married couples above $250,000. If you are near the threshold, timing income across tax years — or maximizing pre-tax retirement contributions to reduce MAGI — can avoid the surtax on capital gains.',
     ],
 
     quickReference: [
       { label: 'Short-Term (≤365 days)', value: 'Taxed as ordinary income (10%–37%)' },
       { label: 'Long-Term (>365 days)', value: '0%, 15%, or 20% based on total taxable income' },
-      { label: '0% LTCG Rate (Single 2025)', value: 'Total income up to $47,025' },
-      { label: '15% LTCG Rate (Single 2025)', value: 'Total income $47,026–$518,900' },
-      { label: '20% LTCG Rate (Single 2025)', value: 'Total income $518,901+' },
+      { label: '0% LTCG Rate (Single 2026)', value: 'Total income up to $49,450' },
+      { label: '15% LTCG Rate (Single 2026)', value: 'Total income $49,451–$545,500' },
+      { label: '20% LTCG Rate (Single 2026)', value: 'Total income $545,501+' },
       { label: 'NIIT Threshold (Single)', value: 'MAGI > $200,000 (additional 3.8%)' },
       { label: 'NIIT Threshold (MFJ)', value: 'MAGI > $250,000 (additional 3.8%)' },
       { label: 'Annual Capital Loss Deduction', value: 'Up to $3,000 against ordinary income ($1,500 MFS)' },
