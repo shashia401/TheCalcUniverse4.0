@@ -76,4 +76,17 @@ describe('business-loan', () => {
     });
     expect(getValue(r, 'originationFeeResult')).toContain('$0');
   });
+
+  it('matches the "River City Bakery" worked example figures (regression: educational text previously understated interest/total cost by $8)', () => {
+    const r = config.calculate({
+      loanAmount: '250000',
+      loanTermMonths: '60',
+      interestRate: '8.5',
+      originationFee: '2',
+      monthlyNOI: '8500',
+    });
+    near(parseMoney(getValue(r, 'monthlyPayment')), 5129.13, 0.01);
+    near(parseMoney(getValue(r, 'totalInterest')), 57747.97, 0.5);
+    near(parseMoney(getValue(r, 'totalCost')), 312747.97, 0.5);
+  });
 });
