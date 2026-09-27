@@ -173,8 +173,8 @@ const unixTimestampConfig: CalculatorConfig = {
           'Mode': 'Timestamp to Date',
           'Unix Timestamp': '1715875200',
         },
-        result: 'May 16, 2024 at 10:00:00 AM (local time) / Thu, 16 May 2024 14:00:00 GMT (UTC)',
-        insight: 'The timestamp 1715875200 corresponds to 2024-05-16T14:00:00Z UTC. This is in seconds (not milliseconds) because the value is around 1.7 billion. If mistakenly treated as milliseconds, the result would be January 20, 1970 — clearly wrong. Always check magnitude: values around 1.5-2 billion are seconds; values around 1.5-2 trillion are milliseconds.',
+        result: 'Thu, 16 May 2024 16:00:00 GMT (UTC) / 2024-05-16T16:00:00.000Z (ISO 8601). Local time depends on the viewer\'s time zone.',
+        insight: 'The timestamp 1715875200 corresponds to 2024-05-16T16:00:00Z UTC. This is in seconds (not milliseconds) because the value is around 1.7 billion. If mistakenly treated as milliseconds, the result would be January 20, 1970 — clearly wrong. Always check magnitude: values around 1.5-2 billion are seconds; values around 1.5-2 trillion are milliseconds.',
       },
       {
         scenario: 'An API integration requires sending dates as Unix timestamps. The user needs to convert "July 4, 2026 at 12:00:00 UTC" to its Unix timestamp for the API request.',
@@ -182,8 +182,8 @@ const unixTimestampConfig: CalculatorConfig = {
           'Mode': 'Date to Timestamp',
           'Date Input': '2026-07-04T12:00:00Z',
         },
-        result: 'Unix Timestamp (seconds): 1782753600 / Unix Timestamp (milliseconds): 1782753600000',
-        insight: 'The ISO 8601 date "2026-07-04T12:00:00Z" converts to Unix timestamp 1782753600 in seconds. The Z suffix explicitly marks UTC time, which is critical for accurate conversion. Without the Z, JavaScript\'s Date parser may interpret the string as local time, producing a different timestamp — a common pitfall in API integrations.',
+        result: 'Unix Timestamp (seconds): 1783166400 / Unix Timestamp (milliseconds): 1783166400000',
+        insight: 'The ISO 8601 date "2026-07-04T12:00:00Z" converts to Unix timestamp 1783166400 in seconds. The Z suffix explicitly marks UTC time, which is critical for accurate conversion. Without the Z, JavaScript\'s Date parser may interpret the string as local time, producing a different timestamp — a common pitfall in API integrations.',
       },
     ],
     proTips: [

@@ -16,6 +16,16 @@ describe('Unix Timestamp Converter', () => {
       expect(getValue(r, 'milliseconds')).toBe('1713484800000');
     });
 
+    it('matches the worked example for timestamp 1715875200 (regression: narrative previously claimed 14:00:00 GMT, actual UTC time is 16:00:00 GMT)', () => {
+      const r = config.calculate({
+        mode: 'ts-to-date',
+        timestamp: '1715875200',
+        dateInput: '',
+      });
+      expect(getValue(r, 'utcDate')).toBe('Thu, 16 May 2024 16:00:00 GMT');
+      expect(getValue(r, 'isoString')).toBe('2024-05-16T16:00:00.000Z');
+    });
+
     it('converts epoch zero to date', () => {
       const r = config.calculate({
         mode: 'ts-to-date',
@@ -78,6 +88,16 @@ describe('Unix Timestamp Converter', () => {
         dateInput: '2024-01-01 00:00:00',
       });
       expect(getValue(r, 'seconds')).toBeTruthy();
+    });
+
+    it('matches the worked example for "2026-07-04T12:00:00Z" (regression: narrative previously claimed 1782753600, which is actually 2026-06-29T17:20:00Z, not the requested date)', () => {
+      const r = config.calculate({
+        mode: 'date-to-ts',
+        timestamp: '',
+        dateInput: '2026-07-04T12:00:00Z',
+      });
+      expect(getValue(r, 'seconds')).toBe('1783166400');
+      expect(getValue(r, 'ms')).toBe('1783166400000');
     });
   });
 
