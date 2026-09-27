@@ -278,7 +278,7 @@ const savingsConfig: CalculatorConfig = {
       },
       {
         question: 'What are current high-yield savings account rates?',
-        answer: 'As of 2025, leading online banks and credit unions offer 4.5–5.5% APY on high-yield savings accounts (HYSA). Traditional brick-and-mortar bank savings accounts still offer as little as 0.01–0.1% APY. The difference is enormous: $10,000 at 5% APY for 5 years earns ~$2,762 in interest; at 0.01% it earns only $5.',
+        answer: 'As of 2026, leading online banks and credit unions offer 4.5–5.5% APY on high-yield savings accounts (HYSA). Traditional brick-and-mortar bank savings accounts still offer as little as 0.01–0.1% APY. The difference is enormous: $10,000 at 5% APY for 5 years earns roughly $2,834 in interest (this calculator compounds monthly); at 0.01% it earns only $5.',
       },
       {
         question: 'How much should I have in an emergency fund?',
