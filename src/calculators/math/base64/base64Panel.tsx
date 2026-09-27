@@ -73,10 +73,11 @@ const Base64Panel: React.FC<{
         }}
       >
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600, fontSize: '13px' }}>
+          <label htmlFor="base64-input-type" style={{ display: 'block', marginBottom: '4px', fontWeight: 600, fontSize: '13px' }}>
             Input Type
           </label>
           <select
+            id="base64-input-type"
             value={inputType}
             onChange={(e) => {
               setInputType(e.target.value);
@@ -95,10 +96,11 @@ const Base64Panel: React.FC<{
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600, fontSize: '13px' }}>
+          <label htmlFor="base64-mode" style={{ display: 'block', marginBottom: '4px', fontWeight: 600, fontSize: '13px' }}>
             Mode
           </label>
           <select
+            id="base64-mode"
             value={mode}
             onChange={(e) => setMode(e.target.value)}
             style={{
@@ -118,10 +120,11 @@ const Base64Panel: React.FC<{
       {/* Input Section */}
       {inputType === 'Text' ? (
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600, fontSize: '13px' }}>
+          <label htmlFor="base64-text-input" style={{ display: 'block', marginBottom: '4px', fontWeight: 600, fontSize: '13px' }}>
             {mode === 'Encode' ? 'Text to Encode' : 'Base64 to Decode'}
           </label>
           <textarea
+            id="base64-text-input"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             rows={4}
@@ -171,10 +174,11 @@ const Base64Panel: React.FC<{
         </div>
       ) : (
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600, fontSize: '13px' }}>
+          <label htmlFor="base64-file-input" style={{ display: 'block', marginBottom: '4px', fontWeight: 600, fontSize: '13px' }}>
             Select File
           </label>
           <input
+            id="base64-file-input"
             ref={fileInputRef}
             type="file"
             onChange={handleFileChange}
