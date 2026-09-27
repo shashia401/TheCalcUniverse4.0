@@ -22,6 +22,14 @@ describe('String Case Converter', () => {
     expect(r.find((x) => x.id === 'kebab-case')?.value).toBe('hello-world-example');
   });
 
+  it('splits camelCase input on case boundaries for snake_case, kebab-case, and PascalCase (regression: "customerBillingAddress" previously collapsed into one lowercased word like "customerbillingaddress" because only punctuation/spaces were treated as separators)', () => {
+    const r = config.calculate({ input: 'customerBillingAddress' });
+    expect(r.find((x) => x.id === 'camelCase')?.value).toBe('customerBillingAddress');
+    expect(r.find((x) => x.id === 'PascalCase')?.value).toBe('CustomerBillingAddress');
+    expect(r.find((x) => x.id === 'snake_case')?.value).toBe('customer_billing_address');
+    expect(r.find((x) => x.id === 'kebab-case')?.value).toBe('customer-billing-address');
+  });
+
   it('converts to UPPER CASE', () => {
     const r = config.calculate({ input: 'hello world' });
     expect(r.find((x) => x.id === 'UPPER CASE')?.value).toBe('HELLO WORLD');
@@ -95,9 +103,9 @@ describe('String Case Converter', () => {
     expect(r.find((x) => x.id === 'snake_case')?.value).toBe('hello_world_test');
   });
 
-  it('converts camelCase input correctly', () => {
+  it('converts camelCase input correctly (regression: snake_case previously collapsed "helloWorld" into "helloworld" with no separator, instead of splitting on the case boundary)', () => {
     const r = config.calculate({ input: 'helloWorld' });
-    expect(r.find((x) => x.id === 'snake_case')?.value).toBe('helloworld');
+    expect(r.find((x) => x.id === 'snake_case')?.value).toBe('hello_world');
     expect(r.find((x) => x.id === 'UPPER CASE')?.value).toBe('HELLOWORLD');
   });
 

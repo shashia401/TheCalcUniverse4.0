@@ -2,8 +2,22 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import StringCasePanel from './StringCasePanel';
 
+// Splits on existing delimiters (spaces, punctuation) AND on camelCase/PascalCase
+// letter-case transitions ("customerB" -> "customer B", "XMLHttp" -> "XML Http").
+// Without the case-transition step, any already-camelCase or PascalCase input
+// with no other delimiters (e.g. "customerBillingAddress") wouldn't be split at
+// all, so every conversion below would collapse it into one lowercased word
+// instead of the intended per-word case conversion.
+function splitWords(input: string): string[] {
+  return input
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean);
+}
+
 function toCamelCase(input: string): string {
-  const words = input.split(/[^a-zA-Z0-9]+/).filter(Boolean);
+  const words = splitWords(input);
   if (words.length === 0) return '';
   const first = words[0].toLowerCase();
   const rest = words.slice(1).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
@@ -11,27 +25,17 @@ function toCamelCase(input: string): string {
 }
 
 function toPascalCase(input: string): string {
-  const words = input.split(/[^a-zA-Z0-9]+/).filter(Boolean);
+  const words = splitWords(input);
   if (words.length === 0) return '';
   return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
 }
 
 function toSnakeCase(input: string): string {
-  return input
-    .replace(/[^a-zA-Z0-9\s]/g, ' ')
-    .trim()
-    .split(/\s+/)
-    .join('_')
-    .toLowerCase();
+  return splitWords(input).join('_').toLowerCase();
 }
 
 function toKebabCase(input: string): string {
-  return input
-    .replace(/[^a-zA-Z0-9\s]/g, ' ')
-    .trim()
-    .split(/\s+/)
-    .join('-')
-    .toLowerCase();
+  return splitWords(input).join('-').toLowerCase();
 }
 
 function toUpperCase(input: string): string {
@@ -57,12 +61,7 @@ function toStartCase(input: string): string {
 }
 
 function toDotCase(input: string): string {
-  return input
-    .replace(/[^a-zA-Z0-9\s]/g, ' ')
-    .trim()
-    .split(/\s+/)
-    .join('.')
-    .toLowerCase();
+  return splitWords(input).join('.').toLowerCase();
 }
 
 const stringCaseConverterConfig: CalculatorConfig = {
@@ -200,8 +199,8 @@ const stringCaseConverterConfig: CalculatorConfig = {
       {
         scenario: 'Standardizing user-entered form data to a consistent identifier format',
         inputs: { input: '  User-Entered   DATA_Field!!  ' },
-        result: 'camelCase: userEnteredDataField, UPPER CASE: USER_ENTERED_DATA_FIELD, Title Case: User Entered Data Field',
-        insight: 'Real user input is messy — spaces, mixed delimiters, special characters. Entering "  User-Entered   DATA_Field!!  " produces clean "userEnteredDataField" (camelCase), "USER_ENTERED_DATA_FIELD" (upper snake for constants), and "User Entered Data Field" (Title Case for display). Use this to sanitize and normalize free-form user input into consistent identifiers for your backend.',
+        result: 'camelCase: userEnteredDataField, snake_case: user_entered_data_field, PascalCase: UserEnteredDataField',
+        insight: 'Real user input is messy — spaces, mixed delimiters, special characters. Entering "  User-Entered   DATA_Field!!  " produces clean "userEnteredDataField" (camelCase), "user_entered_data_field" (snake_case for database columns or Python variables), and "UserEnteredDataField" (PascalCase for a class name). Note that the simple UPPER CASE and Title Case outputs do not sanitize punctuation or extra whitespace the way camelCase/snake_case/PascalCase do — they only change letter casing, so messy input stays messy in those two fields. Use the sanitizing formats (camelCase, snake_case, kebab-case, PascalCase) to normalize free-form user input into consistent identifiers for your backend.',
       },
     ],
     proTips: [
@@ -212,7 +211,7 @@ const stringCaseConverterConfig: CalculatorConfig = {
     ],
     limitations: [
       'The converter works with standard ASCII alphanumeric characters. Non-ASCII Unicode characters (accented letters, CJK characters, emoji) are treated as word separators in some conversion modes but may produce unexpected results.',
-      'camelCase conversion from already-camelCase input strips the casing and starts fresh (e.g., "helloWorld" -> "hello_world" in snake_case) which loses the internal word boundary — this is a known limitation of plain-text case converters without semantic word boundary detection.',
+      'Acronym boundaries can be ambiguous: an all-caps run followed by a single trailing capital before more lowercase text (e.g., "IOStream") splits as "IO Stream" rather than "I OStream", but a single stray capital in the middle of an acronym-like run can still split in ways that do not match the author\'s intent — verify the result for identifiers with unusual acronym casing.',
       'The Start Case conversion capitalizes the first letter after any non-alphanumeric character, which may not match strict Title Case rules that lowercase articles and prepositions.',
       'For production code generation where preservation of original word boundaries matters, use AST-aware tools rather than string-based converters.',
     ],
