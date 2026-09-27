@@ -24,6 +24,13 @@ describe('Macro Point calculator', () => {
     expect(pts).toBeGreaterThan(10);
   });
 
+  it('matches the worked example scores for grilled chicken salad vs fast-food sandwich (regression: worked-example headlines previously said ~7.3/~12.8, actual formula gives 9.1/16.2)', () => {
+    const salad = config.calculate({ calories: '350', satFat: '3', sugar: '6', protein: '32' });
+    expect(getValue(salad, 'macroPoints')).toBe('9.1 points');
+    const sandwich = config.calculate({ calories: '530', satFat: '5', sugar: '12', protein: '28' });
+    expect(getValue(sandwich, 'macroPoints')).toBe('16.2 points');
+  });
+
   it('returns points category', () => {
     const r = config.calculate({
       calories: '150', satFat: '1', sugar: '5', protein: '20',
