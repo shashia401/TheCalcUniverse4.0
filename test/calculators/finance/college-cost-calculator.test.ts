@@ -38,6 +38,38 @@ describe('college cost calculator', () => {
     expect(gap).toContain('$');
   });
 
+  it('matches the "Johnsons" worked example figures (regression: educational text previously understated monthlyNeeded by ~$123/mo)', () => {
+    const r = config.calculate({
+      childAge: '8',
+      currentSavings: '10000',
+      monthlyContribution: '200',
+      institutionType: 'in-state',
+      includeRoomBoard: 'yes',
+      tuitionInflation: '5',
+      growthRate: '6',
+      collegeYears: '4',
+    });
+    expect(parseMoney(getValue(r, 'projectedCost'))).toBeCloseTo(168708, -2);
+    expect(parseMoney(getValue(r, 'savingsAtCollege'))).toBeCloseTo(50970, -2);
+    expect(parseMoney(getValue(r, 'fundingGap'))).toBeCloseTo(117739, -2);
+    expect(parseMoney(getValue(r, 'monthlyNeeded'))).toBeCloseTo(718, 0);
+  });
+
+  it('matches the "newborn private university" worked example figures (regression: educational text previously understated the cost by ~$180K and the required monthly savings by ~$935/mo — stale TUITION_DATA constants)', () => {
+    const r = config.calculate({
+      childAge: '0',
+      currentSavings: '5000',
+      monthlyContribution: '0',
+      institutionType: 'private',
+      includeRoomBoard: 'yes',
+      tuitionInflation: '5',
+      growthRate: '6',
+      collegeYears: '4',
+    });
+    expect(parseMoney(getValue(r, 'projectedCost'))).toBeCloseTo(582849, -2);
+    expect(parseMoney(getValue(r, 'monthlyNeeded'))).toBeCloseTo(1467, 0);
+  });
+
   it('shows fully funded when savings are sufficient', () => {
     const r = config.calculate({
       childAge: '0',

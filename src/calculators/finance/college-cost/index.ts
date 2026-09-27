@@ -302,14 +302,14 @@ const collegeCostConfig: CalculatorConfig = {
       {
         scenario: 'The Johnsons in Denver have an 8-year-old daughter and $10,000 saved in a 529 plan. They contribute $200/month and plan for in-state public university with room & board.',
         inputs: { childAge: '8', currentSavings: '10000', monthlyContribution: '200', institutionType: 'in-state', includeRoomBoard: 'yes', tuitionInflation: '5', growthRate: '6', collegeYears: '4' },
-        result: 'Projected 4-year cost: $171,000. Savings grow to approximately $51,000 by college age, covering 30% of costs. Funding gap: $120,000. To close fully, save an additional $595/month.',
-        insight: 'Projected 4-year cost: $171,000. Their savings grow to ~$51,000 by college age — covering just 30% of costs, leaving a $120,000 funding gap. To close it fully, they would need to save an additional $595/month, totaling $795/month. Starting at birth instead of age 8 would have reduced the monthly need by nearly half due to the extra compounding years.',
+        result: 'Projected 4-year cost: $168,708. Savings grow to approximately $50,970 by college age, covering 30% of costs. Funding gap: $117,739. To close fully, save an additional $718/month.',
+        insight: 'Projected 4-year cost: $168,708. Their savings grow to ~$50,970 by college age — covering just 30% of costs, leaving a $117,739 funding gap. To close it fully, they would need to save an additional $718/month, totaling $918/month. Starting at birth instead of age 8 would have reduced the monthly need substantially due to the extra compounding years.',
       },
       {
         scenario: 'A newborn has $5,000 in a 529 plan gifted by grandparents. Parents plan to save for a private university with room & board, hoping to cover 100% of projected costs.',
         inputs: { childAge: '0', currentSavings: '5000', monthlyContribution: '0', institutionType: 'private', includeRoomBoard: 'yes', tuitionInflation: '5', growthRate: '6', collegeYears: '4' },
-        result: 'Projected 4-year private cost: $403,000. To cover 100% from birth, save $531/month. Starting at age 5 instead would require $690/month — a 30% penalty for the delay.',
-        insight: 'Projected 4-year private cost: $403,000. To cover 100%, parents need to save $531/month from birth. Waiting until the child is 5 would increase the required monthly savings to $690/month — a 30% penalty for the 5-year delay. The power of starting at birth: even with only $5,000 initially, compound growth over 18 years does heavy lifting.',
+        result: 'Projected 4-year private cost: $582,849. To cover 100% from birth, save $1,467/month. Starting at age 5 instead would require $1,893/month — a ~29% penalty for the delay.',
+        insight: 'Projected 4-year private cost: $582,849. To cover 100%, parents need to save $1,467/month from birth. Waiting until the child is 5 would increase the required monthly savings to $1,893/month — a ~29% penalty for the 5-year delay. The power of starting at birth: even with only $5,000 initially, compound growth over 18 years does heavy lifting.',
       },
     ],
     proTips: [
