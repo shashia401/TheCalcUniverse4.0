@@ -273,14 +273,14 @@ const businessLoanConfig: CalculatorConfig = {
       {
         scenario: 'River City Bakery seeks a $250,000 SBA 7(a) loan over 5 years for a second location. Their monthly NOI is $8,500, and they are quoted 8.5% with a 2% origination fee.',
         inputs: { loanAmount: '250000', loanTermMonths: '60', interestRate: '8.5', originationFee: '2', monthlyNOI: '8500' },
-        result: 'Monthly payment is $5,129 with total interest of $57,740 over 60 months. Including $5,000 origination fee, total cost is $312,740. DSCR is 1.66 — strong approval territory.',
-        insight: 'The monthly payment is $5,129, giving a DSCR of 1.66 — strong approval territory. However, the $5,000 origination fee means they only receive $245,000 in cash. The true cost including fees is $312,740 over 5 years. With a DSCR above 1.50, they have room to negotiate the origination fee down or ask for a rate reduction.',
+        result: 'Monthly payment is $5,129.13 with total interest of $57,747.97 over 60 months. Including $5,000 origination fee, total cost is $312,747.97. DSCR is 1.66 — strong approval territory.',
+        insight: 'The monthly payment is $5,129.13, giving a DSCR of 1.66 — strong approval territory. However, the $5,000 origination fee means they only receive $245,000 in cash. The true cost including fees is $312,748 over 5 years. With a DSCR above 1.50, they have room to negotiate the origination fee down or ask for a rate reduction.',
       },
       {
         scenario: 'A tech startup with $45,000 monthly NOI wants a $500,000 equipment loan at 12% over 3 years from an online lender with a 3% origination fee.',
         inputs: { loanAmount: '500000', loanTermMonths: '36', interestRate: '12', originationFee: '3', monthlyNOI: '45000' },
-        result: 'Monthly payment is $16,608 with total interest of $97,880 over 36 months. Including $15,000 origination fee, total cost is $612,880. DSCR is 2.71 — very strong approval territory.',
-        insight: 'Monthly payment of $16,608 and DSCR of 2.71 is very strong. But the 3% origination fee costs $15,000 upfront, and total interest over 3 years is $97,880. The startup might qualify for a bank loan at 7-9% given their strong cash flow, saving $20,000+ in interest.',
+        result: 'Monthly payment is $16,607.15 with total interest of $97,857.58 over 36 months. Including $15,000 origination fee, total cost is $612,857.58. DSCR is 2.71 — very strong approval territory.',
+        insight: 'Monthly payment of $16,607.15 and DSCR of 2.71 is very strong. But the 3% origination fee costs $15,000 upfront, and total interest over 3 years is $97,858. The startup might qualify for a bank loan at 7-9% given their strong cash flow, saving $20,000+ in interest.',
       },
     ],
     proTips: [
