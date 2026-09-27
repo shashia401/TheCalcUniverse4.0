@@ -240,20 +240,20 @@ const investmentConfig: CalculatorConfig = {
       {
         scenario: 'Emma starts investing at age 30 with $10,000 and contributes $500/month, expecting 8% annual returns over 30 years until retirement at 60.',
         inputs: { startingAmount: '10000', contribution: '500', contributionFrequency: 'monthly', years: '30', returnRate: '8', returnVariance: '2' },
-        result: 'Future value: approximately $813,000 after 30 years with $190,000 in contributions and $623,000 in market returns.',
-        insight: 'After 30 years, Emma\'s portfolio grows to approximately $813,000 — of which $190,000 is her own contributions and $623,000 is market returns. The market did 77% of the work. If she started just 10 years earlier at age 20, the same contributions would grow to over $1.9 million, demonstrating the massive impact of starting early.',
+        result: 'Future value: approximately $854,500 after 30 years with $190,000 in contributions and $664,500 in market returns.',
+        insight: 'After 30 years, Emma\'s portfolio grows to approximately $854,500 — of which $190,000 is her own contributions and $664,500 is market returns. The market did 78% of the work. If she started just 10 years earlier at age 20, the same contributions would grow to nearly $2 million, demonstrating the massive impact of starting early.',
       },
       {
         scenario: 'James receives a $50,000 inheritance and invests it as a lump sum with no additional contributions, expecting 7% annual returns over 20 years.',
         inputs: { startingAmount: '50000', contribution: '0', contributionFrequency: 'monthly', years: '20', returnRate: '7', returnVariance: '2' },
-        result: 'Future value: approximately $193,000 after 20 years, nearly quadrupling the initial $50,000 investment through compound growth alone.',
-        insight: 'The $50,000 grows to about $193,000 purely through compounding — nearly quadrupling without a single additional contribution. This demonstrates the power of time in the market: the "Rule of 72" says at 7%, money doubles roughly every 10.3 years, so 20 years yields roughly 4x growth.',
+        result: 'Future value: approximately $202,000 after 20 years, just over quadrupling the initial $50,000 investment through compound growth alone.',
+        insight: 'The $50,000 grows to about $202,000 purely through compounding — just over 4x without a single additional contribution. This demonstrates the power of time in the market: the "Rule of 72" says at 7%, money doubles roughly every 10.3 years, so 20 years (just under two doubling periods) yields just over 4x growth.',
       },
       {
         scenario: 'Maria, a 25-year-old teacher, starts contributing $300/month to her Roth IRA with an initial $2,000 investment, expecting 9% annual returns over 35 years until age 60.',
         inputs: { startingAmount: '2000', contribution: '300', contributionFrequency: 'monthly', years: '35', returnRate: '9', returnVariance: '3' },
-        result: 'Future value: approximately $890,000 after 35 years with $128,000 in contributions and $762,000 in market returns.',
-        insight: 'After 35 years, Maria\'s portfolio grows to approximately $890,000 in the expected scenario. Her total contributions are only $128,000 ($2,000 + $300 × 12 × 35), meaning market returns contributed over $760,000 — about 85% of the final value. In the pessimistic scenario (6% returns), she would still have about $425,000, demonstrating that even below-average returns produce substantial wealth with consistent, long-term investing. The key lesson: start early, stay consistent, and let compounding do the heavy lifting.',
+        result: 'Future value: approximately $928,700 after 35 years with $128,000 in contributions and $800,700 in market returns.',
+        insight: 'After 35 years, Maria\'s portfolio grows to approximately $928,700 in the expected scenario. Her total contributions are only $128,000 ($2,000 + $300 × 12 × 35), meaning market returns contributed roughly $800,700 — about 86% of the final value. In the pessimistic scenario (6% returns), she would still have about $443,700, demonstrating that even below-average returns produce substantial wealth with consistent, long-term investing. The key lesson: start early, stay consistent, and let compounding do the heavy lifting.',
       },
     ],
     proTips: [

@@ -237,4 +237,17 @@ describe('investment', () => {
       expect(input.helpText, `Input "${input.id}" is missing helpText`).toBeTruthy();
     });
   });
+
+  it('matches the "Emma" worked example figures (regression: educational text previously understated the future value by ~$41,500, about 5%)', () => {
+    const r = config.calculate({
+      startingAmount: '10000',
+      contribution: '500',
+      contributionFrequency: 'monthly',
+      years: '30',
+      returnRate: '8',
+      returnVariance: '2',
+    });
+    near(parseMoney(getValue(r, 'expected')), 854537, 1000);
+    near(parseMoney(getValue(r, 'totalReturns')), 664537, 1000);
+  });
 });
