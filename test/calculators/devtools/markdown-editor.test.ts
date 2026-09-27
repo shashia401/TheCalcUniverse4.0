@@ -14,6 +14,16 @@ describe('Markdown Editor & Preview', () => {
     expect(html).toContain('<h3>Heading 3</h3>');
   });
 
+  it('matches the worked examples\' line counts (regression: narrative previously said 6 and 8 lines, but lineCount includes blank lines and the actual inputs are 13 and 17 lines)', () => {
+    const md1 = '# MyProject\n\nA lightweight utility library for data processing.\n\n## Features\n\n- Fast parsing with zero dependencies\n- Streaming support for large files\n- TypeScript definitions included\n\n## Install\n\n`npm install my-project`';
+    const r1 = markdownConfig.calculate({ markdown: md1, outputFormat: 'Preview' });
+    expect(getValue(r1, 'lineCount')).toBe('13');
+
+    const md2 = '## GET /api/users\n\nFetches a paginated list of users.\n\n`GET https://api.example.com/v1/users?page=1&limit=20`\n\n```json\n{\n  "data": [\n    { "id": 1, "name": "Alice" },\n    { "id": 2, "name": "Bob" }\n  ],\n  "total": 42\n}\n```\n\n> **Rate Limit**: 100 requests per minute per API key. Exceeding this returns HTTP 429.';
+    const r2 = markdownConfig.calculate({ markdown: md2, outputFormat: 'Preview' });
+    expect(getValue(r2, 'lineCount')).toBe('17');
+  });
+
   it('renders bold and italic text', () => {
     const results = markdownConfig.calculate({
       markdown: '**bold** and *italic*',

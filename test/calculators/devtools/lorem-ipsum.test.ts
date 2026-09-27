@@ -12,6 +12,15 @@ describe('Lorem Ipsum Generator', () => {
     expect(words.length).toBeGreaterThan(20);
   });
 
+  it('matches the worked examples\' word/char counts (regression: narrative previously said 3 paragraphs = ~180 words/~950 chars and 1 sentence = ~85 chars, but the fixed sentence corpus actually produces 250 words/1,656 chars and a 123-char first sentence)', () => {
+    const r3para = loremIpsumConfig.calculate({ count: '3', unit: 'Paragraphs' });
+    expect(getValue(r3para, 'wordCount')).toBe('250');
+    expect(getValue(r3para, 'charCount')).toBe('1,656');
+
+    const r1sentence = loremIpsumConfig.calculate({ count: '1', unit: 'Sentences' });
+    expect(getValue(r1sentence, 'charCount')).toBe('123');
+  });
+
   it('generates specified number of sentences', () => {
     const results = loremIpsumConfig.calculate({ count: '3', unit: 'Sentences' });
     const text = getValue(results, 'generatedText');

@@ -223,7 +223,7 @@ const loremIpsumConfig: CalculatorConfig = {
           'Unit': 'Paragraphs',
           'Count': '3',
         },
-        result: '3 paragraphs generated (approximately 180 words, ~950 characters)',
+        result: '3 paragraphs generated (approximately 250 words, ~1,656 characters)',
         insight: 'Using 3 paragraphs of Lorem Ipsum provides a realistic simulation of a short- to medium-length blog post. The scrambled Latin has a letter distribution similar to English, so the text flows naturally and looks like readable content at a glance. This lets stakeholders focus on the visual design — spacing, typography, line height — without getting distracted by reading the actual content.',
       },
       {
@@ -232,8 +232,8 @@ const loremIpsumConfig: CalculatorConfig = {
           'Unit': 'Sentences',
           'Count': '1',
         },
-        result: '1 sentence generated (approximately 85 characters)',
-        insight: 'A single Lorem Ipsum sentence (~85 characters) is ideal for UI component placeholders like card descriptions, tooltips, or notification messages. The sentence length is realistic for a short description but still long enough to test text overflow, ellipsis, and responsive wrapping behavior. For testing edge cases, also try generating 2-3 sentences.',
+        result: '1 sentence generated (approximately 123 characters)',
+        insight: 'A single Lorem Ipsum sentence (~123 characters) is ideal for UI component placeholders like card descriptions, tooltips, or notification messages. The sentence length is realistic for a short description but still long enough to test text overflow, ellipsis, and responsive wrapping behavior. For testing edge cases, also try generating 2-3 sentences.',
       },
     ],
     proTips: [

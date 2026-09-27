@@ -314,7 +314,7 @@ const markdownConfig: CalculatorConfig = {
           'Markdown Input': '# MyProject\n\nA lightweight utility library for data processing.\n\n## Features\n\n- Fast parsing with zero dependencies\n- Streaming support for large files\n- TypeScript definitions included\n\n## Install\n\n`npm install my-project`',
           'Output Format': 'Preview',
         },
-        result: 'Rendered HTML with h1 heading, description paragraph, h2 features heading, unordered list with 3 items, h2 install heading, and inline code block (6 lines of markdown)',
+        result: 'Rendered HTML with h1 heading, description paragraph, h2 features heading, unordered list with 3 items, h2 install heading, and inline code block (13 lines of markdown, counting blank lines)',
         insight: 'This markdown structure follows the standard README convention: project name as h1, one-line description, feature list using bullet points, and installation instructions with inline code. The inline code format (`npm install my-project`) ensures the command is rendered in a monospace font for easy copying.',
       },
       {
@@ -323,7 +323,7 @@ const markdownConfig: CalculatorConfig = {
           'Markdown Input': '## GET /api/users\n\nFetches a paginated list of users.\n\n`GET https://api.example.com/v1/users?page=1&limit=20`\n\n```json\n{\n  "data": [\n    { "id": 1, "name": "Alice" },\n    { "id": 2, "name": "Bob" }\n  ],\n  "total": 42\n}\n```\n\n> **Rate Limit**: 100 requests per minute per API key. Exceeding this returns HTTP 429.',
           'Output Format': 'Preview',
         },
-        result: 'Rendered HTML with h2 heading, description paragraph, inline code for endpoint URL, fenced code block with JSON content, and a blockquote for the rate limit warning (8 lines of markdown)',
+        result: 'Rendered HTML with h2 heading, description paragraph, inline code for endpoint URL, fenced code block with JSON content, and a blockquote for the rate limit warning (17 lines of markdown, counting blank lines)',
         insight: 'API documentation combines multiple Markdown elements effectively. The inline code format makes the endpoint URL visually distinct. Fenced code blocks preserve JSON formatting exactly as written, including indentation. Blockquotes are excellent for callouts like rate limits.',
       },
     ],
