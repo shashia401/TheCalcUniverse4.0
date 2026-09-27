@@ -23,4 +23,16 @@ describe('body-type-calculator', () => {
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
   });
+
+  it('matches the worked example for Lena (82-72-100 cm) as Pear (regression: the original 96-72-100 example claimed Pear but both bust:waist and hip:waist ratios exceed 1.15, which the classifier treats as Hourglass)', () => {
+    const r = config.calculate({ unit: 'metric', bust: '82', waist: '72', hip: '100' });
+    const shape = r.find((x) => x.id === 'bodyShape');
+    expect(shape?.value).toBe('Pear (Triangle)');
+  });
+
+  it('classifies bust=96/waist=72/hip=100 as Hourglass, not Pear, since both ratios cross the 1.15 threshold', () => {
+    const r = config.calculate({ unit: 'metric', bust: '96', waist: '72', hip: '100' });
+    const shape = r.find((x) => x.id === 'bodyShape');
+    expect(shape?.value).toBe('Hourglass');
+  });
 });
