@@ -66,7 +66,7 @@ export default function BodyFatPanel({ values, results }: Props) {
 
       <div className="p-5 space-y-5">
         {/* Classification table */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Body fat percentage classification by category">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">

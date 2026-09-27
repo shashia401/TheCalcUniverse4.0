@@ -114,7 +114,7 @@ function ConversionPanel({ results }: { results: CalculatorResult[] }) {
             </p>
 
             <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Positional value breakdown table">
                 <table className="w-full text-xs font-mono">
                   <thead>
                     <tr className="text-slate-500 border-b border-slate-200">
@@ -434,7 +434,7 @@ function BitwiseReference() {
       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
         Bitwise Truth Table
       </p>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Bitwise operation truth table">
         <table className="w-full text-[11px] font-mono text-center">
           <thead>
             <tr className="text-slate-500 border-b border-slate-200">
@@ -494,7 +494,7 @@ function ByteLayoutSection({ results }: { results: CalculatorResult[] }) {
       </p>
 
       <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Byte layout comparing big endian and little endian">
           <table className="w-full text-xs font-mono">
             <thead>
               <tr className="bg-slate-100 text-slate-500 border-b border-slate-200">

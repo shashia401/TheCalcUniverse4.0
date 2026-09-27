@@ -34,7 +34,7 @@ export default function PregnancyGainPanel({ results }: Props) {
       </div>
 
       <div className="p-5 space-y-5">
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="IOM weight gain guidelines by BMI category">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">

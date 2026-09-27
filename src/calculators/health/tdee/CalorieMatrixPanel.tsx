@@ -194,7 +194,7 @@ export default function CalorieMatrixPanel({ results }: Props) {
       </div>
 
       <div className="p-5">
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Calorie goal matrix table">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">

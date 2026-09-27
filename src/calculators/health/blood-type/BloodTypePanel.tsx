@@ -141,7 +141,7 @@ export default function BloodTypePanel({ values, results }: Props) {
         {combinedPairs.length > 0 && (
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Combined ABO + Rh Probabilities</p>
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Combined ABO and Rh blood type probabilities">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">

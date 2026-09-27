@@ -15,7 +15,7 @@ export default function VATPanel({}: { results: CalculatorResult[] }) {
           Standard VAT rates across major economies. Many countries apply reduced rates to specific goods (food, medicine, books).
         </p>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-200 mb-4">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 mb-4" tabIndex={0} role="region" aria-label="Worldwide VAT rates by country">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">

@@ -77,7 +77,7 @@ export default function BMIPanel({ results }: Props) {
           <span style={{ fontSize: '1.1rem' }}>📋</span>
           <span style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--surface-text-muted)' }}>BMI Classification Reference</span>
         </div>
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto' }} tabIndex={0} role="region" aria-label="BMI classification reference table">
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
             <thead>
               <tr>

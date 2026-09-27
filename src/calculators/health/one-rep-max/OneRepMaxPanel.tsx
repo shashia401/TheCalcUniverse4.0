@@ -103,7 +103,7 @@ export default function OneRepMaxPanel({ results }: Props) {
         </div>
 
         {/* % Breakdown Table */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="One-rep max percentage breakdown table">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
