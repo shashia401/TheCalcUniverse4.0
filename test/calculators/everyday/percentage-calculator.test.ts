@@ -24,6 +24,12 @@ describe('percentage-calculator', () => {
     near(parsePercent(getValue(r, 'result')), -25);
   });
 
+  it('matches the worked example for adding 8.75% tax to $65 (regression: narrative previously said $70.69/$5.69, but the formatter shows up to 4 decimal places, giving 70.6875/5.6875)', () => {
+    const r = config.calculate({ mode: 'add', x: '8.75', y: '65' });
+    expect(getValue(r, 'result')).toBe('70.6875');
+    expect(getValue(r, 'added')).toBe('+5.6875');
+  });
+
   it('"add": 200 + 15% = 230', () => {
     const r = config.calculate({ mode: 'add', x: '15', y: '200' });
     near(parseNumber(getValue(r, 'result')), 230);
