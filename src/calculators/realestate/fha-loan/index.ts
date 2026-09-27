@@ -76,7 +76,10 @@ const fhaLoanConfig: CalculatorConfig = {
         (Math.pow(1 + monthlyRate, numPayments) - 1);
     }
 
-    const annualMIPRate = downPct < 0.1 ? 0.0055 : 0.005;
+    // Per HUD Mortgagee Letter 2023-05: the annual MIP rate steps up to 55 bps only when
+    // LTV > 95% (down payment < 5%); loans with 5%+ down (LTV <= 95%) are 50 bps. This is a
+    // different threshold than the 11-year vs life-of-loan duration cutoff below (10% down).
+    const annualMIPRate = downPct < 0.05 ? 0.0055 : 0.005;
     const monthlyMIP = (baseLoan * annualMIPRate) / 12;
     const totalMonthly = monthlyPI + monthlyMIP;
 
