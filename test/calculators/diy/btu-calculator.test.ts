@@ -41,6 +41,22 @@ describe('BTU Calculator', () => {
     });
   });
 
+  describe('worked example: Phoenix master bedroom', () => {
+    it('recommends 1.0 ton, not 1.5 ton — regression for narrative drift fix', () => {
+      // Educational workedExamples text previously claimed 0.98 tons and a 1.5 ton (18,000
+      // BTU/h) recommendation for this scenario. The real calculate() output is 350*30 + 2*600
+      // = 11,700 BTU/h = 0.975 tons, which rounds up to 1.0 ton (12,000 BTU/h), not 1.5 ton.
+      const r = config.calculate({
+        area: '350', climateZone: '1', sunExposure: 'moderate', insulation: 'average',
+        ceilingHeight: '8', roomType: 'standard', people: '2', purpose: 'cooling',
+      });
+      near(parseNumber(getValue(r, 'btuRequired')), 11700);
+      near(parseNumber(getValue(r, 'tonsRequired')), 1.0, 0.05);
+      expect(getValue(r, 'recommendedAC')).toContain('1.0 ton');
+      expect(getValue(r, 'recommendedAC')).toContain('12,000');
+    });
+  });
+
   describe('Room Types', () => {
     it('calculates higher BTU for kitchen', () => {
       // Kitchen factor = 1.15 → 400 × 30 × 1.15 + 600 = 14,400
