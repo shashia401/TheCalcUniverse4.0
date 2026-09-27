@@ -234,7 +234,7 @@ const salaryConfig: CalculatorConfig = {
     proTips: [
       'When negotiating salary, always think in annual terms — a $2/hr raise sounds small but is $4,160/year at 40 hours/week. Over a 30-year career with 3% raises, that single $2/hr bump compounds to over $250,000 in lifetime earnings.',
       'Bi-weekly pay means 26 paychecks/year — two months each year will have 3 paychecks. Budget based on 2 paychecks/month and treat the "extra" checks as windfalls for debt payoff or investing.',
-      'For overtime eligibility: the FLSA salary threshold for exempt employees is $58,656/year as of 2025. If you earn less than this, you must receive overtime pay (1.5x) for hours over 40/week.',
+      'For overtime eligibility: the federal FLSA salary threshold for exempt employees is $35,568/year ($684/week) — the 2019 DOL rule, reinstated after a federal court vacated a 2024 rule that would have raised it to $58,656. If you earn less than the current threshold, you must receive overtime pay (1.5x) for hours over 40/week. Some states set higher thresholds than the federal minimum.',
       'Use the net pay estimate to budget realistically — gross salary is aspirational, but your take-home after taxes, benefits, and 401k contributions is what you actually live on.',
     ],
     limitations: [
