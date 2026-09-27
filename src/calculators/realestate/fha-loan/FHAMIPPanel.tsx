@@ -87,7 +87,7 @@ export default function FHAMIPPanel({ results }: Props) {
         {/* MIP cost over time table */}
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Total MIP Cost Over Time</p>
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Total MIP cost over time table">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">

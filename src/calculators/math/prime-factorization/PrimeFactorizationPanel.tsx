@@ -65,8 +65,8 @@ export default function PrimeFactorizationPanel({ values, results }: Props) {
       <div className="p-5 space-y-4">
         {/* Factor Tree SVG */}
         {tree.length > 0 && (
-          <div className="flex justify-center overflow-auto">
-            <svg width={280} height={200} viewBox="0 0 280 200" role="img" aria-label={'Prime factor tree diagram showing factorization of ' + n}>
+          <div className="flex justify-center overflow-auto" tabIndex={0} role="img" aria-label={'Prime factor tree diagram showing factorization of ' + n}>
+            <svg width={280} height={200} viewBox="0 0 280 200" aria-hidden="true">
               {renderTree(tree[0], 140, 25, 80, 0)}
             </svg>
           </div>

@@ -105,7 +105,7 @@ export default function StandardDeviationPanel({ values }: Props) {
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-[10px] font-bold text-slate-500 uppercase">Step 2: Deviations &amp; Squared Deviations</p>
             <p className="text-[10px] text-slate-500 mt-1 mb-2">Table of (xᵢ − x̄) and (xᵢ − x̄)²</p>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Deviations and squared deviations table">
               <table className="w-full text-xs font-mono">
                 <thead>
                   <tr className="text-slate-500 border-b border-slate-200">

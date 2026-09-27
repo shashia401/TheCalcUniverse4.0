@@ -54,7 +54,7 @@ export default function ScientificNotationPanel({ values, results }: Props) {
       <div className="p-5 space-y-4">
         {/* Decimal jump visualization */}
         {anim && (
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 overflow-x-auto">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 overflow-x-auto" tabIndex={0} role="region" aria-label="Decimal point movement visualization">
             <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-3">
               Decimal Point: Moving {anim.moves} place{anim.moves !== 1 ? 's' : ''} {anim.direction}
             </p>

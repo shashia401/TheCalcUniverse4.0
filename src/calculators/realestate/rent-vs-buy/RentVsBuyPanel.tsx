@@ -95,7 +95,7 @@ function EquityChart({
   const bevX = showBev ? toX(breakEvenYear!) : null;
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="region" aria-label="Equity versus rent cost chart showing home value, equity, and sunk rent costs over 30 years">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ minWidth: '320px' }} role="img" aria-label="Equity versus rent cost chart showing home value, equity, and sunk rent costs over 30 years">
         <defs>
           <linearGradient id="rvEqHome" x1="0" y1="0" x2="0" y2="1">
