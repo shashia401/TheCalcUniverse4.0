@@ -266,7 +266,7 @@ const salaryHourlyConfig: CalculatorConfig = {
           'Paid Time Off': '20',
         },
         result: 'Standard Hourly: $51.28/hr. True Hourly: $40.50/hr. Effective Hours per Week: 60 hrs (incl. commute & overtime). Effective Annual Hours: 2,880 hrs. Annual Commute Cost: $3,360.',
-        insight: 'Marcus\'s true hourly rate of $40.50 is about 21% below his standard $51.28 rate — a significant gap driven by his long commute and long hours. His 60 effective weekly hours mean he is effectively working 1.5 full-time jobs. The $100K remote offer at 45 hours/week with no commute would give a true hourly rate of about $42.74/hr ($100K ÷ (45hrs × 48wks with 20 PTO days)). Despite the $20K nominal pay cut, the remote role actually pays slightly more per hour actually spent on work — and Marcus would reclaim 520+ hours per year (10 hours of commute per week). This is the classic case where the lower-paying job is actually the better deal when you account for total time invested.',
+        insight: 'Marcus\'s true hourly rate of $40.50 is about 21% below his standard $51.28 rate — a significant gap driven by his long commute and long hours. His 60 effective weekly hours mean he is effectively working 1.5 full-time jobs. The $100K remote offer at 45 hours/week with no commute would give a true hourly rate of about $46.30/hr ($100K ÷ (45hrs × 48wks with 20 PTO days)). Despite the $20K nominal pay cut, the remote role actually pays slightly more per hour actually spent on work — and Marcus would reclaim 520+ hours per year (10 hours of commute per week). This is the classic case where the lower-paying job is actually the better deal when you account for total time invested.',
       },
     ],
 
