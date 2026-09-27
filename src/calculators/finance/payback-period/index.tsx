@@ -232,8 +232,8 @@ workedExamples: [
           'Discount Rate (WACC / Required Return)': '8',
           'Project Life (Years)': '10',
         },
-        result: 'Simple Payback: 4.2 years. Discounted Payback: 5.4 years. NPV: $30,520. Profitability Index: 1.61x. Total Undiscounted Return: $120,000.',
-        insight: 'Carlos gets his money back in just over 4 years on a simple basis, or 5.4 years when accounting for the time value of money at 8%. The NPV of over $30,000 confirms this is a value-creating investment — the equipment pays for itself and generates an additional $30,520 in present-value terms above the cost of capital. The profitability index of 1.61x means every dollar invested returns $1.61 in present value. With 10 years of useful life, this is a strong investment.',
+        result: 'Simple Payback: 4.2 years. Discounted Payback: 5.3 years. NPV: $30,521. Profitability Index: 1.61x. Total Undiscounted Return: $120,000.',
+        insight: 'Carlos gets his money back in just over 4 years on a simple basis, or 5.3 years when accounting for the time value of money at 8%. The NPV of over $30,000 confirms this is a value-creating investment — the equipment pays for itself and generates an additional $30,521 in present-value terms above the cost of capital. The profitability index of 1.61x means every dollar invested returns $1.61 in present value. With 10 years of useful life, this is a strong investment.',
       },
       {
         scenario: 'Priya runs a small manufacturing business in Ohio and is evaluating a $75,000 automation upgrade expected to save $22,000 annually. She wants to compare simple vs discounted payback at her 10% WACC over an 8-year machine life.',
@@ -244,8 +244,8 @@ workedExamples: [
           'Discount Rate (WACC / Required Return)': '10',
           'Project Life (Years)': '8',
         },
-        result: 'Simple Payback: 3.4 years. Discounted Payback: 4.4 years. NPV: $42,369. Profitability Index: 1.56x. Total Undiscounted Return: $176,000.',
-        insight: 'Priya\'s automation upgrade has a simple payback of 3.4 years — well within the 8-year life — and a discounted payback of 4.4 years. The NPV of $42,369 means the project creates significant value above her required 10% return. At a 1.56x profitability index, it is a strong investment. If Priya had to choose between this and another project, she would compare NPVs and profitability indices.',
+        result: 'Simple Payback: 3.4 years. Discounted Payback: 4.4 years. NPV: $42,368. Profitability Index: 1.56x. Total Undiscounted Return: $176,000.',
+        insight: 'Priya\'s automation upgrade has a simple payback of 3.4 years — well within the 8-year life — and a discounted payback of 4.4 years. The NPV of $42,368 means the project creates significant value above her required 10% return. At a 1.56x profitability index, it is a strong investment. If Priya had to choose between this and another project, she would compare NPVs and profitability indices.',
       },
     ],
 faqs: [
