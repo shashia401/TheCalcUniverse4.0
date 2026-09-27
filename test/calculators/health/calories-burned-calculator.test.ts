@@ -15,6 +15,17 @@ describe('Calories Burned calculator', () => {
     near(cals, 378, 10);
   });
 
+  it('matches the worked example for a 155 lb runner at 6 mph for 30 min (regression: narrative previously said 343 kcal, actual formula gives 345)', () => {
+    const r = config.calculate({
+      unit: 'imperial',
+      weight: '155',
+      activity: 'run_6mph',
+      duration: '30',
+    });
+    const cals = parseNumber(getValue(r, 'caloriesBurned'));
+    expect(cals).toBe(345);
+  });
+
   it('calculates calories for walking 3 mph (metric, 70 kg, 60 min)', () => {
     const r = config.calculate({
       unit: 'metric',
