@@ -174,8 +174,8 @@ const swpConfig: CalculatorConfig = {
       {
         scenario: 'Mr. Sharma, age 60, has a retirement corpus of Rs 1 crore invested in a balanced fund. He needs Rs 50,000 per month for living expenses. Assuming 8% annual returns, will his corpus last 30 years until age 90?',
         inputs: { corpus: '10000000', expectedReturn: '8', monthlyWithdrawal: '50000', withdrawalPeriod: '30' },
-        result: 'With 8% returns and Rs 50,000/month withdrawal (6% annual withdrawal rate), the corpus lasts approximately 28-29 years — just short of 30 years. Reducing withdrawals to Rs 45,000/month (5.4% withdrawal rate) would extend the corpus to cover the full 30 years.',
-        insight: 'With 8% returns and Rs 50,000/month withdrawal (6% annual withdrawal rate), the corpus lasts approximately 28-29 years — just short of the 30-year target. Mr. Sharma should either reduce withdrawals to about Rs 45,000/month (5.4% withdrawal rate) or supplement with an additional Rs 10-15 lakh corpus to comfortably cover 30 years.',
+        result: 'With 8% returns and Rs 50,000/month withdrawal (6% annual withdrawal rate), the corpus not only lasts the full 30 years but grows, ending with approximately Rs 3.48 crore still remaining — because the 8% return outpaces the 6% withdrawal rate.',
+        insight: 'With 8% returns and Rs 50,000/month withdrawal (6% annual withdrawal rate), the corpus comfortably survives the full 30-year target and still has roughly Rs 3.48 crore left over, since the return rate exceeds the withdrawal rate. Mr. Sharma actually has room to increase his monthly withdrawal — a corpus this size only depletes if the withdrawal rate creeps above the 8% return rate for an extended period.',
       },
       {
         scenario: 'Ananya, age 45, is planning early retirement (FIRE) with a corpus of Rs 3 crore. She needs Rs 1 lakh per month and expects 9% returns from a diversified portfolio. Can she sustain this for 45 years?',

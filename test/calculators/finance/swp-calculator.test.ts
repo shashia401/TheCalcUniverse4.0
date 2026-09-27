@@ -26,6 +26,22 @@ describe('SWP Calculator', () => {
     expect(parseInr(getValue(r, 'totalWithdrawn'))).toBeGreaterThan(0);
   });
 
+  it('matches the educational worked example (Mr. Sharma: 1 crore corpus survives 30yr with surplus)', () => {
+    // Regression test: the worked example previously claimed this exact scenario
+    // depletes at ~28-29 years, which contradicted the calculator's own output
+    // (return 8% > withdrawal rate 6%, so the corpus actually grows).
+    const r = config.calculate({
+      corpus: '10000000',
+      expectedReturn: '8',
+      monthlyWithdrawal: '50000',
+      withdrawalPeriod: '30',
+    });
+    const finalValueLabel = r.find((x) => x.id === 'finalValue')?.label ?? '';
+    expect(finalValueLabel).toContain('Corpus preserved');
+    const finalValue = parseInr(getValue(r, 'finalValue'));
+    near(finalValue, 34839324, 50000);
+  });
+
   it('corpus of ₹50,00,000 @ 6% with ₹1,00,000/mo withdrawal depletes before 5 years', () => {
     const r = config.calculate({
       corpus: '5000000',
