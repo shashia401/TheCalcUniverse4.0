@@ -52,4 +52,14 @@ describe('Slope calculator', () => {
     const r = config.calculate({ x1: 'a', y1: '2', x2: '3', y2: '4' });
     expect(r).toEqual([]);
   });
+
+  it('regression: distance for (0,0)-(240,24) matches worked example (was 241.2015, actually 241.197)', () => {
+    const r = config.calculate({ x1: '0', y1: '0', x2: '240', y2: '24' });
+    expect(getValue(r, 'distance')).toBe('241.197');
+  });
+
+  it('regression: distance for (1,50000)-(6,65000) matches worked example (was 15000.0025, actually 15000.0008)', () => {
+    const r = config.calculate({ x1: '1', y1: '50000', x2: '6', y2: '65000' });
+    expect(getValue(r, 'distance')).toBe('15000.0008');
+  });
 });

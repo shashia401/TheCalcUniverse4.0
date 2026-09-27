@@ -215,7 +215,7 @@ const slopeConfig: CalculatorConfig = {
       {
         scenario: 'Maria, a civil engineer, is designing a wheelchair ramp for a community center entrance. The door threshold is 24 inches above the sidewalk, and she has 20 feet (240 inches) of available horizontal space. Will the ramp meet the ADA maximum slope requirement of 1:12 (approximately 8.3%)?',
         inputs: { x1: '0', y1: '0', x2: '240', y2: '24' },
-        result: 'Slope m = 0.1 (positive, increasing). Slope as fraction: 1/10. Direction: increasing (positive slope). Distance between points: 241.2015. Angle: 5.71°. Y-intercept: (0, 0). Slope-intercept form: y = 0.1x.',
+        result: 'Slope m = 0.1 (positive, increasing). Slope as fraction: 1/10. Direction: increasing (positive slope). Distance between points: 241.197. Angle: 5.71°. Y-intercept: (0, 0). Slope-intercept form: y = 0.1x.',
         insight: 'The slope is 24/240 = 0.10, or 10%. This exceeds the ADA maximum of 8.3% (1:12), so Maria needs to either extend the ramp to at least 288 inches (24 feet) or add a switchback. At 288 inches, the slope would be 24/288 = 0.0833, exactly meeting the 1:12 requirement.',
       },
       {
@@ -227,7 +227,7 @@ const slopeConfig: CalculatorConfig = {
       {
         scenario: 'Priya, a data analyst, is tracking monthly sales growth for her company. January sales were $50,000 and June sales reached $65,000. She wants to find the average monthly sales growth rate from the slope of the trend line.',
         inputs: { x1: '1', y1: '50000', x2: '6', y2: '65000' },
-        result: 'Slope m = 3000 (positive, increasing). Slope as fraction: 3000/1. Direction: increasing (positive slope). Distance between points: 15000.0025. Angle: 89.98°. Y-intercept: (0, 47000). Slope-intercept form: y = 3000x + 47000. By December (x=12), projected sales ≈ $83,000.',
+        result: 'Slope m = 3000 (positive, increasing). Slope as fraction: 3000/1. Direction: increasing (positive slope). Distance between points: 15000.0008. Angle: 89.98°. Y-intercept: (0, 47000). Slope-intercept form: y = 3000x + 47000. By December (x=12), projected sales ≈ $83,000.',
         insight: 'The slope of 3,000 means sales increased by $3,000 per month on average over this period. The slope-intercept form y = 3000x + 47000 tells Priya that the baseline (extrapolated) was $47,000 and the growth trajectory predicts approximately $83,000 by December (x=12) if the trend continues.',
       },
     ],
