@@ -265,7 +265,7 @@ export default function HalfLifePanel({ values, results }: Props) {
         </div>
 
         <div className="p-5">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Decay progression table">
             <table className="w-full text-xs font-mono">
               <thead>
                 <tr className="border-b border-slate-200">

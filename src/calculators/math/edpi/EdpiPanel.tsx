@@ -121,7 +121,7 @@ export default function EdpiPanel({ values, results }: Props) {
         {/* Pro Settings Comparison Table */}
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Pro Player Reference Settings</p>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Pro player reference settings table">
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-slate-200">

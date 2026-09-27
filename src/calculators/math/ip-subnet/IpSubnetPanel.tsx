@@ -132,7 +132,7 @@ export default function IpSubnetPanel({ values, results }: Props) {
               Binary Representation
             </p>
 
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 overflow-x-auto">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Binary representation of IP address and subnet mask">
               {/* Labels */}
               <div className="flex items-center gap-2 mb-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
                 <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700">

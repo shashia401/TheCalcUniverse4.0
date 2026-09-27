@@ -109,7 +109,7 @@ export default function GPAPanel({ results }: Props) {
           {courses.length > 0 && (
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Course Breakdown</p>
-              <div className="overflow-x-auto rounded-lg border border-slate-200">
+              <div className="overflow-x-auto rounded-lg border border-slate-200" tabIndex={0} role="region" aria-label="Course breakdown table">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-slate-100 text-slate-600 font-bold uppercase tracking-wider">

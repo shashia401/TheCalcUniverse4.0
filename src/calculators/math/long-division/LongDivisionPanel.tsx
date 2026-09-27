@@ -62,8 +62,8 @@ export default function LongDivisionPanel({ results }: Props) {
 
       <div className="p-5 space-y-4">
         {/* SVG Long Division Bracket */}
-        <div className="flex justify-center overflow-x-auto">
-          <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} className="font-mono" role="img" aria-label="Long division bracket diagram showing divisor, dividend, quotient, and calculation steps">
+        <div className="flex justify-center overflow-x-auto" tabIndex={0} role="img" aria-label="Long division bracket diagram showing divisor, dividend, quotient, and calculation steps">
+          <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} className="font-mono" aria-hidden="true">
             {/* Division bracket: divisor on left, dividend inside */}
             <text x="10" y="24" fontSize="14" fontWeight="bold" fill="#3b82f6">{divisor}</text>
             {/* Bracket: horizontal top + vertical left */}

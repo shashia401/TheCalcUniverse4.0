@@ -87,7 +87,7 @@ export default function GolfPanel({ results }: Props) {
               Used: {usedCount} / {diffs.length}
             </span>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Round differentials table">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
