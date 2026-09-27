@@ -78,7 +78,7 @@ const lumberConfig: CalculatorConfig = {
     const totalLinearFeet = length * quantity;
     // Approximate actual dimensions (subtract 0.5-inch from nominal for surfaced lumber)
     const actualThickness = thickness >= 2 ? thickness - 0.5 : thickness - 0.25;
-    const actualWidth = width >= 4 ? width - 0.5 : width - 0.25;
+    const actualWidth = width >= 8 ? width - 0.75 : width >= 2 ? width - 0.5 : width - 0.25;
     const actualBoardFeetPerBoard = (actualThickness * actualWidth * length) / 12;
     const actualTotalBoardFeet = actualBoardFeetPerBoard * quantity;
 

@@ -82,6 +82,22 @@ describe('lumber', () => {
     near(nominal, 53.33, 0.01);
   });
 
+  it('reports correct actual width for nominal 8-inch+ lumber (PS-20 standard) — regression fix', () => {
+    // Bug: actualWidth formula only checked `width >= 4 ? width - 0.5 : width - 0.25`,
+    // giving 2x8 an actual width of 7.5" instead of the real American Softwood Lumber
+    // Standard (PS-20) value of 7.25" (widths 8"+ lose 0.75", not 0.5"). This also affected
+    // 2x2/2x3-style narrow widths, which should lose 0.5" like 2x4-2x7, not 0.25".
+    const r8 = config.calculate({ thickness: '1', width: '8', length: '10', quantity: '6' });
+    const dims8 = getValue(r8, 'actualDimensions');
+    expect(dims8).toContain('7.3'); // 7.25 rounds to 7.3 at one decimal
+    const actualBdFt8 = parseNumber(getValue(r8, 'actualBdFt'));
+    near(actualBdFt8, 27.19, 0.05); // 6 boards x (0.75 x 7.25 x 10)/12 = 27.1875
+
+    const r2 = config.calculate({ thickness: '2', width: '2', length: '8', quantity: '1' });
+    const dims2 = getValue(r2, 'actualDimensions');
+    expect(dims2).toContain('1.5'); // actual 2x2 is 1.5 x 1.5, not 1.5 x 1.75
+  });
+
   it('does not include cost result when price is omitted', () => {
     const r = config.calculate({
       thickness: '2',
