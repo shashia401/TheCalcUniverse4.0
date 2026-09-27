@@ -410,6 +410,20 @@ describe('time zone calculator', () => {
     expect(r).toEqual([]);
   });
 
+  it('regression: PST-GMT business hours never overlap (worked example was wrongly claiming 1 hour)', () => {
+    const r = config.calculate({
+      fromZone: 'pst',
+      toZone: 'gmt',
+      time: '9:00 AM',
+      date: '2026-06-15',
+      includeBusinessHours: 'yes',
+    });
+    expect(getValue(r, 'convertedTime')).toBe('5:00 PM');
+    expect(getValue(r, 'timeDifference')).toBe('8 hours ahead');
+    // PST business hours (9-17) map to 17-25 UTC-equivalent, GMT is 9-17 -- exactly adjacent, zero overlap
+    expect(getValue(r, 'businessOverlap')).toBe('No overlap in business hours');
+  });
+
   it('returns empty for invalid target zone ID', () => {
     const r = config.calculate({
       fromZone: 'est',

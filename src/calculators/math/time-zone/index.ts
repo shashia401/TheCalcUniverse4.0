@@ -331,8 +331,8 @@ const config: CalculatorConfig = {
       {
         scenario: 'Sarah is a product manager in San Francisco (PST) scheduling a video call with her engineering team in London (GMT). She wants to propose 9:00 AM her time and needs to know what time that is for the London team.',
         inputs: { fromZone: 'pst', toZone: 'gmt', time: '9:00 AM', date: '2026-06-15', includeBusinessHours: 'yes' },
-        result: '5:00 PM GMT (8 hours ahead); Business hours overlap: 1 hour (4:00 PM – 5:00 PM GMT)',
-        insight: '9:00 AM PST = 5:00 PM GMT. The London team would be at the end of their workday (9 AM-5 PM). The business hours overlay shows this is within both zones\' working hours (green) for only 1 hour of overlap. A better meeting time would be 8:00 AM PST = 4:00 PM GMT, giving 1 hour of overlap. The ideal cross-Atlantic window is typically 7:00-9:00 AM PST / 3:00-5:00 PM GMT.',
+        result: '5:00 PM GMT (8 hours ahead); No overlap in business hours',
+        insight: '9:00 AM PST = 5:00 PM GMT -- right at the very end of London\'s workday. Because PST business hours (9 AM-5 PM, which map to 5 PM-1 AM GMT) and GMT business hours (9 AM-5 PM) are two 8-hour windows separated by exactly the 8-hour offset, they never overlap -- a well-known scheduling headache between California and the UK. Teams in this situation typically have to schedule outside one side\'s normal business hours, such as an early call for the Bay Area team or a late one for London.',
       },
       {
         scenario: 'Raj is based in Mumbai (IST, UTC+5:30) and needs to join a webinar hosted from New York (EST) at 2:00 PM Eastern Time. He wants to know if he will need to stay up late.',
