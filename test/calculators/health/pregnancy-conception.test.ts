@@ -132,6 +132,30 @@ describe('Conception / Fertile Window calculator', () => {
     expect(dueDate?.value).toContain('December');
   });
 
+  it('estimates Day 5 egg retrieval as 5 full days before transfer (regression: previously used embryoDays-1, giving March 11 instead of the correct March 10)', () => {
+    const r = config.calculate({
+      method: 'ivf',
+      lmpDate: '',
+      nextPeriodDate: '',
+      ivfDate: '2026-03-15',
+      embryoType: 'day5',
+    });
+    const retrieval = r.find((x) => x.id === 'ivfRetrieval');
+    expect(retrieval?.value).toContain('March 10, 2026');
+  });
+
+  it('estimates Day 3 egg retrieval as 3 full days before transfer', () => {
+    const r = config.calculate({
+      method: 'ivf',
+      lmpDate: '',
+      nextPeriodDate: '',
+      ivfDate: '2026-03-15',
+      embryoType: 'day3',
+    });
+    const retrieval = r.find((x) => x.id === 'ivfRetrieval');
+    expect(retrieval?.value).toContain('March 12, 2026');
+  });
+
   it('shows fertile days status when in fertile window', () => {
     // Calculate based on recent LMP to test fertile window logic
     const today = new Date();

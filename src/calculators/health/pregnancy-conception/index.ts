@@ -116,8 +116,11 @@ const conceptionConfig: CalculatorConfig = {
       const ivfDueDateDays = embryoDays === 5 ? 261 : 263;
       const estDueDate = addDays(transferDate, ivfDueDateDays);
 
-      // Estimated "ovulation" (retrieval) date
-      const retrievalDate = addDays(transferDate, -(embryoDays - 1)); // e.g., day 5 → retrieval 5 days before transfer
+      // Estimated "ovulation" (retrieval) date — Day 0 is the retrieval/fertilization
+      // day, so a "Day 5" (blastocyst) transfer happens 5 days after retrieval and a
+      // "Day 3" transfer 3 days after — matching the 261/263-day due-date offsets above
+      // (266 - embryoDays), which already assume retrieval = transfer - embryoDays.
+      const retrievalDate = addDays(transferDate, -embryoDays); // e.g., day 5 → retrieval 5 days before transfer
       const retrievalLabel = embryoDays === 5 ? 'Blastocyst (Day 5)' : 'Cleavage Stage (Day 3)';
 
       const weeksPregnant = Math.floor((today.getTime() - transferDate.getTime()) / (1000 * 60 * 60 * 24 * 7)) + (embryoDays === 5 ? 2 : 2);
@@ -405,8 +408,8 @@ const conceptionConfig: CalculatorConfig = {
       {
         scenario: 'A couple is planning a pregnancy and wants the baby to be born around September 1, 2026 (to align with school cutoff dates and work leave schedules). They want to know the optimal conception window and when to start trying.',
         inputs: { method: 'dueDate', targetDueDate: '2026-09-01', cycleLength: '28', periodLength: '5' },
-        result: 'Working backwards from a September 1, 2026 due date: Estimated Conception Date: ~December 10, 2025. Fertile/Conception Window: ~December 5–10, 2025. Estimated LMP: ~November 26, 2025.',
-        insight: 'To target a September 1, 2026 due date, conception should occur around December 10, 2025 (266 days before the due date). The couple should focus their efforts on the fertile window of approximately December 5–10, 2025, with peak fertility December 8–10. This reverse-planning approach is useful for coordinating with career timing, school enrollment cutoffs, and seasonal preferences. However, conception timing is inherently uncertain — even with perfectly timed intercourse in the fertile window, the per-cycle pregnancy rate for healthy couples is only about 20–30%. The couple should start trying 2–3 cycles before the target window (October–November 2025) to account for the possibility that the first few cycles may not result in conception. If pregnancy does not occur by the December 2025 window, each subsequent cycle shifts the due date about one month forward.',
+        result: 'Working backwards from a September 1, 2026 due date: Estimated Conception Date: ~December 9, 2025. Fertile/Conception Window: ~December 4–9, 2025. Estimated LMP: ~November 25, 2025.',
+        insight: 'To target a September 1, 2026 due date, conception should occur around December 9, 2025 (266 days before the due date). The couple should focus their efforts on the fertile window of approximately December 4–9, 2025, with peak fertility December 7–9. This reverse-planning approach is useful for coordinating with career timing, school enrollment cutoffs, and seasonal preferences. However, conception timing is inherently uncertain — even with perfectly timed intercourse in the fertile window, the per-cycle pregnancy rate for healthy couples is only about 20–30%. The couple should start trying 2–3 cycles before the target window (October–November 2025) to account for the possibility that the first few cycles may not result in conception. If pregnancy does not occur by the December 2025 window, each subsequent cycle shifts the due date about one month forward.',
       },
       {
         scenario: 'A woman undergoing IVF had a Day 5 blastocyst embryo transferred on March 15, 2026. She wants to calculate her estimated due date, the earliest recommended pregnancy test date, and understand how IVF dating differs from natural conception dating.',
