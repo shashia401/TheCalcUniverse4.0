@@ -183,8 +183,8 @@ const leaseBuyConfig: CalculatorConfig = {
       {
         scenario: 'Alex is considering a $40,000 SUV. Lease: $2,000 down, $450/month, 36 months. Buy: $5,000 down, 6.9% APR for 60 months, 15% annual depreciation. Over 36 months, which costs less?',
         inputs: { vehiclePrice: '40000', leasePayment: '450', leaseDownPayment: '2000', leaseTerm: '36', buyDownPayment: '5000', buyAPR: '6.9', depreciationRate: '15' },
-        result: 'Buying saves $12,535 over 36 months — lease costs $18,200 with nothing retained vs. net buy cost of $5,665 after equity',
-        insight: 'Total lease cost = $2,000 + ($450 x 36) = $18,200. Buy scenario: Loan principal = $35,000. Monthly payment at 6.9% for 60 months = $691.53. Over 36 months, buyer pays $5,000 + ($691.53 x 36) = $29,895. But after 3 years at 15% depreciation, the car\'s residual value is $40,000 x (0.85)^3 = $24,565. Net buy cost = $29,895 - $24,565 = $5,330. Buying saves $12,870 over 36 months because the car retains significant equity. If Alex can afford the higher payment, buying is the clear winner here — but the lease offers lower monthly cash outlay.',
+        result: 'Buying saves $12,875 over 36 months — lease costs $18,200 with nothing retained vs. net buy cost of $5,325 after equity',
+        insight: 'Total lease cost = $2,000 + ($450 x 36) = $18,200. Buy scenario: Loan principal = $35,000. Monthly payment at 6.9% for 60 months = $691.39. Over 36 months, buyer pays $5,000 + ($691.39 x 36) = $29,890. But after 3 years at 15% depreciation, the car\'s residual value is $40,000 x (0.85)^3 = $24,565. Net buy cost = $29,890 - $24,565 = $5,325. Buying saves $12,875 over 36 months because the car retains significant equity. If Alex can afford the higher payment, buying is the clear winner here — but the lease offers lower monthly cash outlay.',
       },
       {
         scenario: 'Taylor drives 8,000 miles per year and wants a new car every 3 years with the latest tech. The $35,000 sedan leases at $380/month with $1,500 down (36 months). Buying at 7.5% APR with $3,500 down and 18% annual depreciation. Is leasing the better fit?',

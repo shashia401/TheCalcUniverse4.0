@@ -23,6 +23,24 @@ describe('lease-vs-buy', () => {
     near(parseNumber(getValue(r, 'residualValue')), 24565, 100);
   });
 
+  it('worked example: Alex $40k SUV — regression for narrative drift fix', () => {
+    // Educational workedExamples "result" text previously claimed $12,535 savings and a
+    // $5,665 net buy cost, disagreeing with its own insight text ($12,870 / $5,330) and
+    // with the real calculate() output. Pin the correct values: $12,875 savings, $5,325 net buy cost.
+    const r = config.calculate({
+      vehiclePrice: '40000',
+      leasePayment: '450',
+      leaseDownPayment: '2000',
+      leaseTerm: '36',
+      buyDownPayment: '5000',
+      buyAPR: '6.9',
+      depreciationRate: '15',
+    });
+    near(parseNumber(getValue(r, 'totalBuy')), 5325, 5);
+    const savings = 18200 - parseNumber(getValue(r, 'totalBuy'));
+    near(savings, 12875, 5);
+  });
+
   it('higher lease payment makes buying the recommendation', () => {
     const r = config.calculate({
       vehiclePrice: '40000',
