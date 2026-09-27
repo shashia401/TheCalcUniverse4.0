@@ -181,7 +181,7 @@ const taxCalculatorConfig: CalculatorConfig = {
         symbol: 'Standard Deduction',
         name: 'Standard Deduction Amount',
         description:
-          'A fixed dollar amount that reduces your taxable income. For 2025: $15,000 (Single/MFS), $30,000 (MFJ), $22,500 (HOH).',
+          'A fixed dollar amount that reduces your taxable income. For 2026: $16,100 (Single/MFS), $32,200 (MFJ), $24,150 (HOH).',
       },
       {
         symbol: 'Taxable Income',
@@ -214,7 +214,7 @@ const taxCalculatorConfig: CalculatorConfig = {
         question:
           'If I get a raise that pushes me into a higher tax bracket, will I take home less money?',
         answer:
-          'No, never. Only the income above the bracket threshold is taxed at the higher rate. If you are a single filer earning $103,350 (top of the 22% bracket) and get a $1 raise to $103,351, only that $1 is taxed at 24%. The rest of your income is still taxed at 10%, 12%, and 22%. A raise always increases your take-home pay — it never leaves you with less after taxes.',
+          'No, never. Only the income above the bracket threshold is taxed at the higher rate. If you are a single filer earning $105,700 (top of the 22% bracket) and get a $1 raise to $105,701, only that $1 is taxed at 24%. The rest of your income is still taxed at 10%, 12%, and 22%. A raise always increases your take-home pay — it never leaves you with less after taxes.',
       },
       {
         question: 'What is the difference between marginal tax rate and effective tax rate?',
@@ -236,21 +236,21 @@ const taxCalculatorConfig: CalculatorConfig = {
       {
         question: 'How is the standard deduction determined for each filing status?',
         answer:
-          'For 2025, the standard deduction amounts are: $15,000 for Single and Married Filing Separately, $30,000 for Married Filing Jointly, and $22,500 for Head of Household. These amounts are adjusted annually for inflation. Taxpayers may choose to itemize deductions instead if their total eligible expenses (mortgage interest, charitable contributions, state and local taxes) exceed the standard deduction for their filing status.',
+          'For 2026, the standard deduction amounts are: $16,100 for Single and Married Filing Separately, $32,200 for Married Filing Jointly, and $24,150 for Head of Household. These amounts are adjusted annually for inflation. Taxpayers may choose to itemize deductions instead if their total eligible expenses (mortgage interest, charitable contributions, state and local taxes) exceed the standard deduction for their filing status.',
       },
     ],
     
     workedExamples: [
       {
-        scenario: 'David, a single software engineer in Austin, TX, earns $75,000/year with no pre-tax deductions and no withholding. He wants to understand his federal income tax obligation under the 2025 tax brackets.',
+        scenario: 'David, a single software engineer in Austin, TX, earns $75,000/year with no pre-tax deductions and no withholding. He wants to understand his federal income tax obligation under the 2026 tax brackets.',
         inputs: {
           'Annual Income': '$75,000',
           'Filing Status': 'Single',
           'Pre-tax Deductions': '$0',
           'Withholding / Tax Paid': '$0',
         },
-        result: 'Taxable income: $60,000 (after $15,000 standard deduction). Total federal income tax: $8,114.00. Effective rate: 10.82%. Marginal rate: 22.00%. Balance due: $8,114.00.',
-        insight: 'Even though David is in the 22% marginal tax bracket, his effective tax rate is only 10.82% — less than half his marginal rate. This is because only the income from $48,476 to $60,000 (about $11,524) is actually taxed at 22%. The first $11,925 is taxed at just 10%, and the next $36,550 at 12%. Understanding this gap between marginal and effective rates is essential for making smart retirement contribution and tax-planning decisions.',
+        result: 'Taxable income: $58,900 (after $16,100 standard deduction). Total federal income tax: $7,670.00. Effective rate: 10.23%. Marginal rate: 22.00%. Balance due: $7,670.00.',
+        insight: 'Even though David is in the 22% marginal tax bracket, his effective tax rate is only 10.23% — less than half his marginal rate. This is because only the income from $50,400 to $58,900 (about $8,500) is actually taxed at 22%. The first $12,400 is taxed at just 10%, and the next $38,000 at 12%. Understanding this gap between marginal and effective rates is essential for making smart retirement contribution and tax-planning decisions.',
       },
       {
         scenario: 'Priya and Raj, a married couple in Chicago filing jointly, earn a combined $180,000. Raj contributes $10,000 to his 401(k). They have already had $28,000 withheld from their paychecks during the year.',
@@ -260,28 +260,28 @@ const taxCalculatorConfig: CalculatorConfig = {
           'Pre-tax Deductions': '$10,000',
           'Withholding / Tax Paid': '$28,000',
         },
-        result: 'Taxable income: $140,000 (after $30,000 standard deduction + $10,000 pre-tax). Total federal income tax: $20,628.00. Effective rate: 11.46%. Marginal rate: 22.00%. Balance due: they overpaid by $7,372.00 — a refund.',
-        insight: 'Priya and Raj overpaid by more than $7,300 because their withholding was based on gross income without accounting for the standard deduction and 401(k) contributions. Their effective rate of 11.5% on $180,000 of gross income illustrates how progressive brackets plus deductions dramatically reduce the actual tax burden for married couples. The $10,000 401(k) contribution alone saved them $2,200 in federal tax (contribution multiplied by their 22% marginal rate).',
+        result: 'Taxable income: $137,800 (after $32,200 standard deduction + $10,000 pre-tax). Total federal income tax: $19,740.00. Effective rate: 10.97%. Marginal rate: 22.00%. Balance due: they overpaid by $8,260.00 — a refund.',
+        insight: 'Priya and Raj overpaid by more than $8,200 because their withholding was based on gross income without accounting for the standard deduction and 401(k) contributions. Their effective rate of 11.0% on $180,000 of gross income illustrates how progressive brackets plus deductions dramatically reduce the actual tax burden for married couples. The $10,000 401(k) contribution alone saved them $2,200 in federal tax (contribution multiplied by their 22% marginal rate).',
       },
     ],
 
     proTips: [
       'Your marginal bracket (the rate on your last dollar) is the number that matters for decision-making: every extra dollar you contribute to a pre-tax 401(k) or traditional IRA saves you tax at exactly your marginal rate, not your effective rate.',
-      'The standard deduction is free money — $15,000 for single filers, $30,000 for married joint — that you never pay tax on. If your itemized deductions (mortgage interest, charitable giving, state/local taxes) exceed these amounts, itemize instead.',
+      'The standard deduction is free money — $16,100 for single filers, $32,200 for married joint — that you never pay tax on. If your itemized deductions (mortgage interest, charitable giving, state/local taxes) exceed these amounts, itemize instead.',
       'If your withholding results in a large refund every year, adjust your W-4 to keep more money in each paycheck — you are giving the IRS an interest-free loan.',
       'Use the "Married Filing Jointly" and "Married Filing Separately" options side-by-side to check for a marriage penalty or bonus — the brackets are not simply double the single brackets at higher income levels.',
     ],
 
     limitations: [
-      'This calculator uses 2025 federal tax brackets only. 2026 brackets and standard deductions differ slightly due to inflation adjustments (e.g., single standard deduction rises to $15,750 in 2026). Always use the correct tax year for your filing.',
+      'This calculator uses 2026 federal tax brackets. Prior and future tax years have different bracket thresholds and standard deductions due to annual inflation adjustments. Always use the correct tax year for your filing.',
       'It does not model tax credits (Child Tax Credit, Earned Income Tax Credit, education credits) which directly reduce your tax bill dollar-for-dollar and can significantly change your net liability.',
       'State income tax is not included. If you live in a state with income tax (e.g., California, New York), your total tax burden will be higher than the federal-only estimate shown here.',
       'It does not account for the Alternative Minimum Tax (AMT), Net Investment Income Tax (3.8% surtax above $200K/$250K), self-employment tax, or the 0.9% Additional Medicare Tax on wages above $200,000.',
     ],
 citations: [
       {
-        source: 'IRS Revenue Procedure 2024-40 (2025 Tax Brackets)',
-        url: 'https://www.irs.gov/pub/irs-drop/rp-24-40.pdf',
+        source: 'IRS Revenue Procedure 2025-32 (2026 Tax Brackets)',
+        url: 'https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026-including-amendments-from-the-one-big-beautiful-bill',
       },
       {
         source: 'IRS Publication 501 (Standard Deduction)',
@@ -295,13 +295,13 @@ citations: [
         'Federal income tax is progressive: each bracket applies only to income within that range. Moving to a higher bracket does not affect income taxed in lower brackets.',
     },
     quickReference: [
-      { label: '10% Bracket', value: '$0 - $11,925' },
-      { label: '12% Bracket', value: '$11,926 - $48,475' },
-      { label: '22% Bracket', value: '$48,476 - $103,350' },
-      { label: '24% Bracket', value: '$103,351 - $197,300' },
-      { label: '32% Bracket', value: '$197,301 - $250,525' },
-      { label: '35% Bracket', value: '$250,526 - $626,350' },
-      { label: '37% Bracket', value: '$626,351+' },
+      { label: '10% Bracket', value: '$0 - $12,400' },
+      { label: '12% Bracket', value: '$12,401 - $50,400' },
+      { label: '22% Bracket', value: '$50,401 - $105,700' },
+      { label: '24% Bracket', value: '$105,701 - $201,775' },
+      { label: '32% Bracket', value: '$201,776 - $256,225' },
+      { label: '35% Bracket', value: '$256,226 - $640,600' },
+      { label: '37% Bracket', value: '$640,601+' },
     ],
     commonUses: [
       'Estimate your annual federal income tax obligation and effective tax rate for financial planning and budgeting.',

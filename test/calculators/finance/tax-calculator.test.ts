@@ -13,18 +13,18 @@ describe('tax-calculator', () => {
 
     expect(r.length).toBeGreaterThan(0);
 
-    // Taxable: $75,000 - $15,000 (std deduction) = $60,000
-    // 10% bracket: min($11,925, $60,000) x 0.10 = $1,192.50
-    // 12% bracket: min($48,475-$11,925, $60,000-$11,925) x 0.12 = $36,550 x 0.12 = $4,386.00
-    // 22% bracket: ($60,000 - $48,475) x 0.22 = $11,525 x 0.22 = $2,535.50
-    // Total: $1,192.50 + $4,386.00 + $2,535.50 = $8,114.00
-    const expectedTotal = 1192.50 + 4386.00 + 2535.50;
+    // Taxable: $75,000 - $16,100 (2026 std deduction) = $58,900
+    // 10% bracket: $12,400 x 0.10 = $1,240.00
+    // 12% bracket: ($50,400-$12,400) x 0.12 = $38,000 x 0.12 = $4,560.00
+    // 22% bracket: ($58,900 - $50,400) x 0.22 = $8,500 x 0.22 = $1,870.00
+    // Total: $1,240.00 + $4,560.00 + $1,870.00 = $7,670.00
+    const expectedTotal = 1240.00 + 4560.00 + 1870.00;
     near(parseMoney(getValue(r, 'totalTax')), expectedTotal, 0.01);
 
-    near(parseMoney(getValue(r, 'taxableIncome')), 60000, 0.01);
+    near(parseMoney(getValue(r, 'taxableIncome')), 58900, 0.01);
 
-    // Effective rate = $8,114 / $75,000 = 10.8187%
-    near(parsePercent(getValue(r, 'effectiveRate')), 10.82, 0.1);
+    // Effective rate = $7,670 / $75,000 = 10.2267%
+    near(parsePercent(getValue(r, 'effectiveRate')), 10.23, 0.1);
 
     // Marginal rate should be 22%
     near(parsePercent(getValue(r, 'marginalRate')), 22, 0.1);
@@ -38,10 +38,10 @@ describe('tax-calculator', () => {
       withholding: '0',
     });
 
-    // Taxable: $20,000 - $15,000 = $5,000
-    // All in 10% bracket: $5,000 x 0.10 = $500
-    near(parseMoney(getValue(r, 'totalTax')), 500, 0.01);
-    near(parsePercent(getValue(r, 'effectiveRate')), 2.50, 0.01);
+    // Taxable: $20,000 - $16,100 = $3,900
+    // All in 10% bracket: $3,900 x 0.10 = $390
+    near(parseMoney(getValue(r, 'totalTax')), 390, 0.01);
+    near(parsePercent(getValue(r, 'effectiveRate')), 1.95, 0.01);
     near(parsePercent(getValue(r, 'marginalRate')), 10, 0.01);
   });
 
@@ -53,15 +53,15 @@ describe('tax-calculator', () => {
       withholding: '0',
     });
 
-    // Taxable: $80,000 - $15,000 = $65,000
-    // 10%: $11,925 x 0.10 = $1,192.50
-    // 12%: ($48,475 - $11,925) x 0.12 = $36,550 x 0.12 = $4,386.00
-    // 22%: ($65,000 - $48,475) x 0.22 = $16,525 x 0.22 = $3,635.50
-    // Total: $9,214.00
-    // Effective rate: $9,214 / $80,000 = 11.5175%
-    const expectedTax = 1192.50 + 4386.00 + 3635.50;
+    // Taxable: $80,000 - $16,100 = $63,900
+    // 10%: $12,400 x 0.10 = $1,240.00
+    // 12%: ($50,400 - $12,400) x 0.12 = $38,000 x 0.12 = $4,560.00
+    // 22%: ($63,900 - $50,400) x 0.22 = $13,500 x 0.22 = $2,970.00
+    // Total: $8,770.00
+    // Effective rate: $8,770 / $80,000 = 10.9625%
+    const expectedTax = 1240.00 + 4560.00 + 2970.00;
     near(parseMoney(getValue(r, 'totalTax')), expectedTax, 0.01);
-    near(parsePercent(getValue(r, 'effectiveRate')), 11.52, 0.1);
+    near(parsePercent(getValue(r, 'effectiveRate')), 10.96, 0.1);
     near(parsePercent(getValue(r, 'marginalRate')), 22, 0.01);
   });
 
@@ -73,13 +73,13 @@ describe('tax-calculator', () => {
       withholding: '0',
     });
 
-    // Taxable: $150,000 - $30,000 = $120,000
-    // 10%: $23,850 x 0.10 = $2,385.00
-    // 12%: ($96,950 - $23,850) x 0.12 = $73,100 x 0.12 = $8,772.00
-    // 22%: ($120,000 - $96,950) x 0.22 = $23,050 x 0.22 = $5,071.00
-    // Total: $16,228.00
-    // Effective rate: $16,228 / $150,000 = 10.8187%
-    const expectedTax = 2385.00 + 8772.00 + 5071.00;
+    // Taxable: $150,000 - $32,200 = $117,800
+    // 10%: $24,800 x 0.10 = $2,480.00
+    // 12%: ($100,800 - $24,800) x 0.12 = $76,000 x 0.12 = $9,120.00
+    // 22%: ($117,800 - $100,800) x 0.22 = $17,000 x 0.22 = $3,740.00
+    // Total: $15,340.00
+    // Effective rate: $15,340 / $150,000 = 10.2267%
+    const expectedTax = 2480.00 + 9120.00 + 3740.00;
     near(parseMoney(getValue(r, 'totalTax')), expectedTax, 0.01);
     near(parsePercent(getValue(r, 'marginalRate')), 22, 0.01);
   });
@@ -92,11 +92,11 @@ describe('tax-calculator', () => {
       withholding: '10000',
     });
 
-    // Total tax: $8,114
+    // Total tax: $7,670
     // Withholding: $10,000
-    // Refund: $1,886
+    // Refund: $2,330
     const refundValue = getValue(r, 'taxAfterWithholding');
-    near(parseMoney(refundValue), 1886, 0.01);
+    near(parseMoney(refundValue), 2330, 0.01);
 
     const refundLabel = r.find((x) => x.id === 'taxAfterWithholding')?.label ?? '';
     expect(refundLabel).toContain('Refund');
@@ -110,10 +110,10 @@ describe('tax-calculator', () => {
       withholding: '5000',
     });
 
-    // Total tax: $8,114
+    // Total tax: $7,670
     // Withholding: $5,000
-    // Balance due: $3,114
-    near(parseMoney(getValue(r, 'taxAfterWithholding')), 3114, 0.01);
+    // Balance due: $2,670
+    near(parseMoney(getValue(r, 'taxAfterWithholding')), 2670, 0.01);
 
     const label = r.find((x) => x.id === 'taxAfterWithholding')?.label ?? '';
     expect(label).toContain('Balance Due');
@@ -189,8 +189,8 @@ describe('tax-calculator', () => {
       withholding: '0',
     });
 
-    // Taxable: $75,000 - $15,000 - $5,000 = $55,000
-    near(parseMoney(getValue(r, 'taxableIncome')), 55000, 0.01);
+    // Taxable: $75,000 - $16,100 - $5,000 = $53,900
+    near(parseMoney(getValue(r, 'taxableIncome')), 53900, 0.01);
   });
 
   it('head of household uses correct deduction and brackets', () => {
@@ -201,8 +201,8 @@ describe('tax-calculator', () => {
       withholding: '0',
     });
 
-    // Taxable: $100,000 - $22,500 = $77,500
-    near(parseMoney(getValue(r, 'taxableIncome')), 77500, 0.01);
+    // Taxable: $100,000 - $24,150 = $75,850
+    near(parseMoney(getValue(r, 'taxableIncome')), 75850, 0.01);
     expect(parseMoney(getValue(r, 'totalTax'))).toBeGreaterThan(0);
   });
 
@@ -214,8 +214,8 @@ describe('tax-calculator', () => {
       withholding: '0',
     });
 
-    // Taxable: $100,000 - $15,000 = $85,000
-    near(parseMoney(getValue(r, 'taxableIncome')), 85000, 0.01);
+    // Taxable: $100,000 - $16,100 = $83,900
+    near(parseMoney(getValue(r, 'taxableIncome')), 83900, 0.01);
     expect(parseMoney(getValue(r, 'totalTax'))).toBeGreaterThan(0);
   });
 
