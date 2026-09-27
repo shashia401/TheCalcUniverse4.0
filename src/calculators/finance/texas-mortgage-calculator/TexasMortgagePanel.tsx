@@ -107,8 +107,8 @@ export default function TexasMortgagePanel({ values, results }: Props) {
           <>
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Loan Balance Over Time</p>
-              <div className="w-full overflow-x-auto">
-                <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Loan amortization chart">
+              <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="Loan amortization chart">
+                <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
                   {[0, 0.25, 0.5, 0.75, 1].map((g) => {
                     const y = padT + (1 - g) * innerH;
                     return (
@@ -151,7 +151,7 @@ export default function TexasMortgagePanel({ values, results }: Props) {
 
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Year by Year</p>
-              <div className="overflow-x-auto rounded-xl border border-slate-200 max-h-36 overflow-y-auto">
+              <div className="overflow-x-auto rounded-xl border border-slate-200 max-h-36 overflow-y-auto" tabIndex={0} role="region" aria-label="Year by year loan balance table">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 sticky top-0">

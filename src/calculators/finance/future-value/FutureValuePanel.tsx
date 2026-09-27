@@ -58,7 +58,7 @@ export default function FutureValuePanel({ values, results }: Props) {
 
       <div className="p-6 space-y-6">
         {/* Rendered Formula */}
-        <div className="rounded-xl bg-slate-800 p-5 overflow-x-auto">
+        <div className="rounded-xl bg-slate-800 p-5 overflow-x-auto" tabIndex={0}>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">FV Formula — With Your Numbers</p>
           <div className="text-sm font-mono text-emerald-300 leading-relaxed space-y-1 whitespace-nowrap">
             <p className="text-slate-500">FV = PV × (1 + r/m)^(n×m) + PMT × [((1 + r/m)^(n×m) − 1) / (r/m)]</p>
@@ -99,7 +99,7 @@ export default function FutureValuePanel({ values, results }: Props) {
         {yearlyData.length > 1 && (
           <>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Year-by-Year Growth</p>
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Year-by-year growth table">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">

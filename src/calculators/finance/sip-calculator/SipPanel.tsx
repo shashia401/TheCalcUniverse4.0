@@ -42,13 +42,12 @@ function SipPanel({ values, results }: { values: Record<string, string>; results
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Wealth Growth Over Time</span>
       </div>
       <div className="p-6 space-y-4">
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="SIP wealth growth projection chart">
           <svg
             viewBox={`0 0 ${width} ${height}`}
             className="w-full"
             style={{ minWidth: '280px' }}
-            role="img"
-            aria-label="SIP wealth growth projection chart"
+            aria-hidden="true"
           >
             {[0, 0.25, 0.5, 0.75, 1].map((g) => {
               const y = padT + (1 - g) * chartH;

@@ -46,13 +46,12 @@ function DepreciationBarChart({ schedule, isMacrs }: { schedule: ScheduleRow[]; 
   const barColor = isMacrs ? '#f59e0b' : '#3b82f6';
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" tabIndex={0} role="img" aria-label="Depreciation expense bar chart">
       <svg
         width={Math.max(chartWidth + 8, 300)}
         height={chartHeight + 36}
         className="block"
-        role="img"
-        aria-label="Depreciation expense bar chart"
+        aria-hidden="true"
       >
         {schedule.map((row, i) => {
           const barH = maxDep > 0 ? (row.depreciationExpense / maxDep) * chartHeight : 0;
@@ -147,8 +146,8 @@ function AssetValueLine({ schedule, assetCost }: { schedule: ScheduleRow[]; asse
   };
 
   return (
-    <div className="overflow-x-auto">
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Asset value decline line chart">
+    <div className="overflow-x-auto" tabIndex={0} role="img" aria-label="Asset value decline line chart">
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
         <defs>
           <linearGradient id="declineGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.15" />
@@ -271,7 +270,7 @@ export default function DepreciationPanel({ values, results }: Props) {
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
             Year-by-Year Depreciation Schedule
           </p>
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Year-by-year depreciation schedule table">
             <table className="w-full text-xs min-w-[500px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">

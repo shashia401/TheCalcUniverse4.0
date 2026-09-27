@@ -89,13 +89,12 @@ function RMDBarChart({ projection }: BarChartProps) {
   };
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="10-Year RMD Projection Bar Chart">
       <svg
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         className="w-full"
         style={{ minWidth: '320px' }}
-        role="img"
-        aria-label="10-Year RMD Projection Bar Chart"
+        aria-hidden="true"
       >
         {/* Grid lines */}
         {gridFractions.map((g) => {
@@ -313,7 +312,7 @@ export default function RMDPanel({ values, results }: RMDPanelProps) {
             <RMDBarChart projection={activeProjection} />
 
             {/* Projection detail table */}
-            <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200">
+            <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="10-year RMD projection detail table">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
@@ -374,7 +373,7 @@ export default function RMDPanel({ values, results }: RMDPanelProps) {
           The SECURE 2.0 Act (signed December 2022) changed the age at which RMDs must begin, phased in over
           several years. Your birth year determines which rule applies to you.
         </p>
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="SECURE 2.0 RMD age rules table">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">

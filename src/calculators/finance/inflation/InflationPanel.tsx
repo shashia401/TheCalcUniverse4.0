@@ -84,8 +84,8 @@ function CPIChart({ startYear, endYear, amount }: { startYear: number; endYear: 
   const xLabels = values.filter((_, i) => i % labelStep === 0 || i === values.length - 1);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Inflation impact chart">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="Inflation impact chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
         <defs>
           <linearGradient id="inflGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#ef4444" stopOpacity="0.25" />
@@ -128,7 +128,7 @@ function DecadeTable({ rows }: { rows: DecadeRow[]; direction: 'forward' | 'back
   if (!rows.length) return null;
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Inflation by period table">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">

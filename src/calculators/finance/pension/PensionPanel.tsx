@@ -57,8 +57,8 @@ function GrowthChart({ projection }: { projection: ProjectionRow[] }) {
   const midIdx = Math.floor(projection.length / 2);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Pension payment chart">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="Pension payment chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
         <defs>
           <linearGradient id="pensionGrad" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.6" />
@@ -110,7 +110,7 @@ function ProjectionTable({ projection }: { projection: ProjectionRow[] }) {
     n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Year-by-year pension projection table">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">

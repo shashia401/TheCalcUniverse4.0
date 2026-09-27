@@ -108,8 +108,8 @@ export default function IraPanel({ values }: { values: Record<string, string>; r
         {/* Growth chart */}
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Balance Growth Over Time</p>
-          <div className="w-full overflow-x-auto">
-            <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="IRA balance growth comparison chart">
+          <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="IRA balance growth comparison chart">
+            <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
               {[0, 0.25, 0.5, 0.75, 1].map((g) => {
                 const y = padT + (1 - g) * chartH;
                 return (

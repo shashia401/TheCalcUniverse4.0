@@ -156,8 +156,8 @@ function BalanceChart({ stdYearlyInterest, newYearlyInterest, balance, monthlyRa
   if (!xLabels.includes(maxYears - 1)) xLabels.push(maxYears - 1);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Mortgage payoff timeline chart">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="Mortgage payoff timeline chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
         {gridLines.map((g) => {
           const y = padT + (1 - g) * chartH;
           return (

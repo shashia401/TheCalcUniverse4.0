@@ -79,8 +79,8 @@ function GrowthChart({ data }: { data: GrowthPoint[] }) {
   const labelStep = Math.max(1, Math.floor((data.length - 1) / (maxLabels - 1)));
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="TVM balance growth chart">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="TVM balance growth chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
         <defs>
           <linearGradient id="tvmPrincipalGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.6" />

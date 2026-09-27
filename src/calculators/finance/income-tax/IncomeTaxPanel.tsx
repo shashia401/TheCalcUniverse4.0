@@ -75,7 +75,7 @@ function BracketTable({ taxableIncome, status }: { taxableIncome: number; status
     n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Federal tax bracket breakdown table">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
@@ -211,7 +211,7 @@ export default function IncomeTaxPanel({ gross, status, stateCode, retirement401
 
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Take-Home Pay by Pay Period</p>
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Take-home pay by pay period table">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">

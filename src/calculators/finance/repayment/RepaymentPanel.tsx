@@ -171,7 +171,7 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
         </div>
 
         {/* Schedule Table */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Amortization schedule table">
           {view === 'annual' ? (
             <table className="w-full text-xs">
               <thead>
@@ -349,8 +349,8 @@ function BalanceChart({ rows }: { rows: { year: number; startBalance: number; en
   for (let y = step; y <= years; y += step) xLabels.push(y);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px', maxWidth: '100%' }} role="img" aria-label="Loan repayment chart">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="Loan repayment chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px', maxWidth: '100%' }} aria-hidden="true">
         {gridLines.map((g) => {
           const y = padT + (1 - g) * chartH;
           return (

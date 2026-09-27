@@ -110,8 +110,8 @@ function StackedAreaChart({ data, annualReturn }: { data: DataPoint[]; annualRet
   for (let a = Math.ceil(minAge / 5) * 5; a <= maxAge; a += ageStep) xLabels.push(a);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Retirement portfolio growth chart">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="Retirement portfolio growth chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
         <defs>
           <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#22c55e" stopOpacity="0.35" />
@@ -180,7 +180,7 @@ function MilestoneTable({ data }: { data: DataPoint[] }) {
   const milestones = data.filter((_d, i) => i % 5 === 0 || i === data.length - 1);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Year-by-year retirement milestones table">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">

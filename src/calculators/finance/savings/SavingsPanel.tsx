@@ -84,8 +84,8 @@ function BarChart({ data, goal }: { data: DataPoint[]; goal?: number }) {
   const xLabels = data.filter((_, i) => i % labelStep === 0 || i === data.length - 1);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Savings goal chart">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="Savings goal chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
         <defs>
           <linearGradient id="savPrinGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.65" />
@@ -159,7 +159,7 @@ function MilestoneTable({ data }: { data: DataPoint[] }) {
   const rows = data.filter((_, i) => i % step === 0 || i === data.length - 1);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Monthly savings breakdown table">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">

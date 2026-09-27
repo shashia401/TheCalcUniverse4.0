@@ -119,7 +119,7 @@ function BracketMiniTable({ annual }: { annual: number }) {
     n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Federal tax bracket breakdown table">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
@@ -157,7 +157,7 @@ export default function SalaryPanel({ amount, freq, hoursPerWeek, daysPerWeek }:
       </div>
 
       <div className="p-6 space-y-6">
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Full pay period grid table">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">

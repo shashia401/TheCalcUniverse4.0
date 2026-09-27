@@ -117,8 +117,8 @@ function TimelineChart({ snowballTimeline, avalancheTimeline }: { snowballTimeli
   const xLabels = Array.from({ length: Math.ceil(allMonths / labelStep) + 1 }, (_, i) => i * labelStep).filter((m) => m <= allMonths);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Debt payoff timeline chart">
+    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="Debt payoff timeline chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
         {[0, 0.25, 0.5, 0.75, 1].map((g) => {
           const y = padT + (1 - g) * chartH;
           return (
@@ -241,7 +241,7 @@ export default function DebtPayoffPanel({ values, results }: Props) {
 
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Your Debts</p>
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Your debts table">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
