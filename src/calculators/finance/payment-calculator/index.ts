@@ -307,7 +307,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
       'Determine how large a loan you can afford by entering your target monthly payment, interest rate, and desired loan term — see how much house or car you can qualify for before shopping.',
       'Compare loan scenarios side by side: a $30,000 car loan at 6% for 60 months ($580/month) vs 72 months ($498/month) — lower payment but $1,200 more in interest.',
       'Find out how long it will take to pay off a loan at your current monthly payment amount including accrued interest, plus see how adding just $50/month accelerates your payoff.',
-      'See the true cost of extending your mortgage term: a $200,000 mortgage at 6.5% costs $1,264/month for 30 years ($255,000 interest) vs $1,811/month for 15 years ($126,000 interest) — save $129,000 by choosing 15 years if you can afford the payment.',
+      'See the true cost of extending your mortgage term: a $200,000 mortgage at 6.5% costs $1,264/month for 30 years ($255,000 interest) vs $1,742/month for 15 years ($113,600 interest) — save about $141,500 by choosing 15 years if you can afford the payment.',
       'Use the Calculate Loan Amount mode to reverse-engineer your borrowing power: if you can afford $600/month and qualify for 7% APR over 60 months, you can borrow approximately $30,300 — but at 72 months, ~$35,000.',
       'Credit card debt analysis: see how long it takes to pay off revolving credit card debt at minimum payments, and compare the impact of increasing your payment to a fixed amount each month.',
     ],
@@ -336,7 +336,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
       },
       {
         question: 'What is the best strategy for paying off a car loan vs a mortgage?',
-        answer: 'For car loans (typically $20K-$50K over 3-7 years at 5-9% APR): a shorter term is almost always better because cars depreciate rapidly. A $35,000 car loan at 7% over 48 months costs $838/month with $5,224 total interest vs 72 months at $596/month with $7,911 total interest — the extra 2 years costs $2,687 more in interest. For mortgages ($150K-$500K+ over 15-30 years at 6-7% APR): a 15-year term saves dramatically on interest but requires a much higher payment. A $250,000 mortgage at 6.5% costs $1,896/month for 15 years ($91,280 total interest) vs $1,580/month for 30 years ($318,800 total interest). The 30-year term costs $227,520 more in interest. However, the 15-year payment is $316/month higher, so choose based on whether the cash flow or long-term savings matters more to you.',
+        answer: 'For car loans (typically $20K-$50K over 3-7 years at 5-9% APR): a shorter term is almost always better because cars depreciate rapidly. A $35,000 car loan at 7% over 48 months costs $838/month with $5,230 total interest vs 72 months at $597/month with $7,963 total interest — the extra 2 years costs about $2,734 more in interest. For mortgages ($150K-$500K+ over 15-30 years at 6-7% APR): a 15-year term saves dramatically on interest but requires a much higher payment. A $250,000 mortgage at 6.5% costs $2,178/month for 15 years ($142,000 total interest) vs $1,580/month for 30 years ($318,900 total interest). The 30-year term costs about $176,900 more in interest. However, the 15-year payment is about $598/month higher, so choose based on whether the cash flow or long-term savings matters more to you.',
       },
       {
         question: 'How much more can I borrow if I add $50 to my monthly payment?',
