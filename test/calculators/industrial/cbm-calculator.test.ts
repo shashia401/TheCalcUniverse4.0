@@ -137,6 +137,21 @@ describe("CBM Calculator", () => {
     near(parseNumber(cbm), 3.0, 0.01);
   });
 
+  it("worked example: 12x8x4 in boxes, 150 pkgs, courier — regression for narrative drift fix", () => {
+    // Educational workedExamples text previously claimed 6,298 cm3/box and 188.94 kg dim weight;
+    // the real calculate() output is 6,292.6 cm3/box and 188.78 kg. Pin the correct values.
+    const results = config.calculate({
+      length: "12", width: "8", height: "4",
+      unit: "in", packages: "150", actualWeight: "217.7", shippingMode: "courier",
+    });
+    const dimWeight = getValue(results, "dimWeight");
+    near(parseNumber(dimWeight), 188.78, 0.05);
+    const chargeable = getValue(results, "chargeableWeight");
+    near(parseNumber(chargeable), 217.7, 0.05);
+    const basis = getValue(results, "weightBasis");
+    expect(basis).toContain("Actual");
+  });
+
   it("single package does not show perUnitCbm", () => {
     const results = config.calculate({
       length: "100", width: "50", height: "40",
