@@ -60,6 +60,7 @@ function GroupedNumberInput({
   prefix,
   placeholder,
   inputMode,
+  required,
   className,
   onRawChange,
 }: {
@@ -68,6 +69,7 @@ function GroupedNumberInput({
   prefix?: string;
   placeholder?: string;
   inputMode?: HTMLAttributes<HTMLInputElement>['inputMode'];
+  required?: boolean;
   className: string;
   onRawChange: (raw: string) => void;
 }) {
@@ -90,6 +92,8 @@ function GroupedNumberInput({
       inputMode={inputMode ?? 'decimal'}
       value={grouped}
       placeholder={placeholder}
+      required={required}
+      aria-required={required || undefined}
       onChange={(e) => {
         const el = e.target;
         const cursorPos = el.selectionStart ?? el.value.length;
@@ -376,6 +380,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           id={input.id}
           value={values[input.id] ?? ''}
           onChange={(e) => handleChange(input.id, e.target.value)}
+          aria-required={input.required || undefined}
           className={fieldClasses}
         >
           {input.options?.map((opt) => (
@@ -394,6 +399,8 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           placeholder={input.placeholder}
           onChange={(e) => handleChange(input.id, e.target.value)}
           rows={5}
+          required={input.required}
+          aria-required={input.required || undefined}
           className={fieldClasses}
         />
       );
@@ -409,6 +416,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           prefix={input.prefix}
           placeholder={input.placeholder}
           inputMode={input.inputMode as HTMLAttributes<HTMLInputElement>['inputMode']}
+          required={input.required}
           className={fieldClasses}
           onRawChange={(raw) => handleChange(input.id, raw)}
         />
@@ -425,6 +433,8 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
         step={input.step}
         placeholder={input.placeholder}
         onChange={(e) => handleChange(input.id, e.target.value)}
+        required={input.required}
+        aria-required={input.required || undefined}
         className={fieldClasses}
       />
     );
@@ -495,7 +505,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
       </div>
 
       {visibleResults.length > 0 && (
-        <div className="border-t border-[var(--border-warm)] pt-5">
+        <div className="border-t border-[var(--border-warm)] pt-5" aria-live="polite" aria-atomic="false">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h2 className="text-sm font-semibold text-[var(--surface-text-muted)] uppercase tracking-wide">
               Results
@@ -666,9 +676,9 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
             <table className="w-full min-w-[420px] border-collapse text-sm">
               <thead>
                 <tr>
-                  <th className="p-2 text-left font-medium text-[var(--surface-text-muted)]">Metric</th>
+                  <th scope="col" className="p-2 text-left font-medium text-[var(--surface-text-muted)]">Metric</th>
                   {scenarios.map((sc, i) => (
-                    <th key={sc.id} className="p-2 text-right">
+                    <th key={sc.id} scope="col" className="p-2 text-right">
                       <span className="inline-flex items-center gap-1.5">
                         <span className="font-semibold text-[var(--surface-text)]">#{i + 1}</span>
                         <button
@@ -687,7 +697,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
               <tbody>
                 {visibleResults.map((r) => (
                   <tr key={r.id} className="border-t border-[var(--border-warm)]">
-                    <td className="p-2 text-[var(--surface-text-secondary)]">{r.label}</td>
+                    <th scope="row" className="p-2 text-left font-normal text-[var(--surface-text-secondary)]">{r.label}</th>
                     {scenarios.map((sc) => {
                       const m = sc.results.find((x) => x.id === r.id);
                       return (

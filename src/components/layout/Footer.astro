@@ -21,7 +21,7 @@ const company = [
 const year = new Date().getFullYear();
 ---
 
-<footer class="mt-16 bg-[var(--surface-bg)] print:hidden">
+<footer aria-label="Site footer" class="mt-16 bg-[var(--surface-bg)] print:hidden">
   <div class="h-px bg-gradient-to-r from-transparent via-[var(--accent-amber)]/30 to-transparent"></div>
   <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-10">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -47,7 +47,7 @@ const year = new Date().getFullYear();
         <ul class="space-y-1.5 list-none p-0">
           {categories.map((c) => (
             <li>
-              <a href={`/${c.slug}/`} class="text-sm text-[var(--surface-text-muted)] transition-colors hover:text-[var(--surface-text)]">
+              <a href={`/${c.slug}/`} class="rounded text-sm text-[var(--surface-text-muted)] transition-colors hover:text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]">
                 {c.name}
               </a>
             </li>
@@ -61,13 +61,13 @@ const year = new Date().getFullYear();
         <ul class="space-y-1.5 list-none p-0">
           {company.map((item) => (
             <li>
-              <a href={item.href} class="text-sm text-[var(--surface-text-muted)] transition-colors hover:text-[var(--surface-text)]">
+              <a href={item.href} class="rounded text-sm text-[var(--surface-text-muted)] transition-colors hover:text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]">
                 {item.label}
               </a>
             </li>
           ))}
           <li>
-            <a href="mailto:contact@thecalcuniverse.com" class="text-sm text-[var(--surface-text-muted)] transition-colors hover:text-[var(--surface-text)]">
+            <a href="mailto:contact@thecalcuniverse.com" class="rounded text-sm text-[var(--surface-text-muted)] transition-colors hover:text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]">
               Report an issue
             </a>
           </li>
