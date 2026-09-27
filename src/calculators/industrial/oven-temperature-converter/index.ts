@@ -13,7 +13,7 @@ const GAS_MARK_TABLE: { mark: string; value: number; celsius: number; fahrenheit
   { mark: 'Gas Mark 6', value: 6, celsius: 200, fahrenheit: 400 },
   { mark: 'Gas Mark 7', value: 7, celsius: 220, fahrenheit: 425 },
   { mark: 'Gas Mark 8', value: 8, celsius: 230, fahrenheit: 450 },
-  { mark: 'Gas Mark 9', value: 9, celsius: 245, fahrenheit: 475 },
+  { mark: 'Gas Mark 9', value: 9, celsius: 240, fahrenheit: 475 },
   { mark: 'Gas Mark 10', value: 10, celsius: 260, fahrenheit: 500 },
 ];
 

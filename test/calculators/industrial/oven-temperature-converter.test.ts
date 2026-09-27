@@ -44,6 +44,11 @@ describe('Oven Temperature Converter', () => {
     expect(r[0].value).toContain('200.0');
   });
 
+  it('converts Gas Mark 9 to 240°C (not 245°C) per Which?/Wikipedia/B&Q consensus', () => {
+    const r = config.calculate({ value: '9', from: 'gas', to: 'c' });
+    expect(r[0].value).toContain('240.0');
+  });
+
   it('returns "Moderate" oven term for 180°C', () => {
     const r = config.calculate({ value: '180', from: 'c', to: 'f' });
     const desc = r.find((res) => res.id === 'description');
