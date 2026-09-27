@@ -183,10 +183,10 @@ const inflationConfig: CalculatorConfig = {
         insight: 'A dollar in 1990 had more than double the purchasing power of a dollar today. This demonstrates why salary comparisons across decades can be misleading without adjusting for inflation — a $50,000 salary in 1990 had the same real value as roughly $120,000 today.',
       },
       {
-        scenario: 'James is planning for retirement in 20 years and wants to understand how much his $500,000 savings will be eroded by a projected 3% inflation rate.',
-        inputs: { amount: '500000', startYear: '2024', endYear: '2044' },
-        result: 'The purchasing power drops to roughly $277,000 in today\'s dollars after 20 years at 3% inflation.',
-        insight: 'Even at the Fed\'s target 2% inflation rate, a 30-year retirement horizon erodes purchasing power by nearly 45%. This is why retirement portfolios should maintain significant equity exposure even after retirement — fixed-income assets often fail to keep pace with inflation over multi-decade retirement periods.',
+        scenario: 'James retired in 2000 with $500,000 in savings and wants to know what that amount would need to be worth today (2026) just to have kept pace with inflation.',
+        inputs: { amount: '500000', startYear: '2000', endYear: '2026' },
+        result: 'The adjusted value is approximately $940,800 in 2026 dollars — James\'s original $500,000 would need to nearly double just to match inflation over 26 years.',
+        insight: 'Prices roughly doubled (cumulative inflation of about 88%, or 2.5%/year average) between 2000 and 2026. If James had left his $500,000 sitting in cash earning no return, its real purchasing power today would be worth only about half of what it was in 2000. This is why retirement portfolios need to outpace inflation, not just preserve nominal value — a multi-decade retirement horizon is common, and cash alone rarely keeps up. Note: this calculator looks up actual historical CPI data, so it can only compare years it has data for (this app\'s data currently runs through 2026) — it does not project future inflation.',
       },
     ],
     proTips: [

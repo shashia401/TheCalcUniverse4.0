@@ -196,4 +196,14 @@ describe('inflation-calculator', () => {
       }
     }
   });
+
+  it('matches the "James" worked example (regression: educational text previously used endYear 2044, a year outside CPI_DATA that made calculate() return an empty array)', () => {
+    // The calculator has no data for 2044, so those exact inputs return nothing —
+    // pinning that here documents the limitation the corrected example now avoids.
+    expect(config.calculate({ amount: '500000', startYear: '2024', endYear: '2044' })).toEqual([]);
+
+    const r = config.calculate({ amount: '500000', startYear: '2000', endYear: '2026' });
+    expect(r.length).toBeGreaterThan(0);
+    near(parseMoney(getValue(r, 'adjustedAmount')), 940800, 500);
+  });
 });
