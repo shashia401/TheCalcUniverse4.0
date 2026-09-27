@@ -28,7 +28,12 @@ export default function EducationalSection({ content, calculatorTitle, customInp
       {content.formula && (
         <div className={card}>
           <h2 className="text-lg font-bold mb-3">How {calculatorTitle} Works</h2>
-          <p className="font-mono text-sm md:text-base bg-[var(--surface-bg)] border border-[var(--border-warm)] rounded-lg px-4 py-3 whitespace-pre-line overflow-x-auto">
+          <p
+            className="font-mono text-sm md:text-base bg-[var(--surface-bg)] border border-[var(--border-warm)] rounded-lg px-4 py-3 whitespace-pre-line overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+            tabIndex={0}
+            role="region"
+            aria-label="Formula"
+          >
             {content.formula}
           </p>
           {content.formulaDescription && (
@@ -94,7 +99,7 @@ export default function EducationalSection({ content, calculatorTitle, customInp
       {content.quickReference && content.quickReference.length > 0 && (
         <div className={card}>
           <h2 className="text-lg font-bold mb-4">Quick Reference</h2>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]" tabIndex={0} role="region" aria-label="Quick reference table">
             <table className="w-full text-sm">
               <tbody>
                 {content.quickReference.map((row) => (

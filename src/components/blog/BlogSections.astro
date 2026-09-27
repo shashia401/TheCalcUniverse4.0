@@ -50,7 +50,7 @@ const calloutStyles: Record<string, string> = {
     }
     if (section.type === 'table') {
       return (
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]" tabindex="0" role="region" aria-label="Table">
           <table class="w-full text-sm border border-[var(--border-warm)] rounded-lg">
             <thead>
               <tr class="bg-[var(--surface-bg)] text-left">

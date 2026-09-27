@@ -672,7 +672,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
               Clear
             </button>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]" tabIndex={0} role="region" aria-label="Compared scenarios table">
             <table className="w-full min-w-[420px] border-collapse text-sm">
               <thead>
                 <tr>
@@ -742,7 +742,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                   </span>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-[var(--surface-text)]">{step.label}</p>
-                    <p className="font-mono text-sm text-[var(--brand-ink)] mt-0.5 overflow-x-auto whitespace-nowrap">
+                    <p className="font-mono text-sm text-[var(--brand-ink)] mt-0.5 overflow-x-auto whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]" tabIndex={0}>
                       {step.expr}
                     </p>
                     {step.note && (
