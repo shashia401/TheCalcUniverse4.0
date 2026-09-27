@@ -197,9 +197,9 @@ const weddingAlcoholConfig: CalculatorConfig = {
           winePct: '15',
           liquorPct: '25',
         },
-        result: '45 drinking guests. Stock 243 beers (10 cases), 9 bottles of wine, and 4 bottles of liquor (about 51 cocktails).',
+        result: '45 drinking guests. Stock 243 beers (11 cases), 9 bottles of wine, and 3 bottles of liquor (about 51 cocktails).',
         insight:
-          'For a 50-guest summer BBQ with 90% drinkers (45 drinking guests), 6 hours, and a beer-heavy crowd (60% beer), the calculator recommends approximately 243 beers (10 cases of 24), 9 bottles of wine, and 4 bottles of liquor (about 51 cocktails). Hot weather increases beer consumption by 15-25%, so the 1.5 beers/hour rate is appropriate. The longer duration (6 hours) significantly increases totals compared to a 4-hour event. Stock extra ice, water, and non-alcoholic drinks: about 2-3 per guest for the full 6 hours.',
+          'For a 50-guest summer BBQ with 90% drinkers (45 drinking guests), 6 hours, and a beer-heavy crowd (60% beer), the calculator recommends approximately 243 beers (11 cases of 24), 9 bottles of wine, and 3 bottles of liquor (about 51 cocktails). Hot weather increases beer consumption by 15-25%, so the 1.5 beers/hour rate is appropriate. The longer duration (6 hours) significantly increases totals compared to a 4-hour event. Stock extra ice, water, and non-alcoholic drinks: about 2-3 per guest for the full 6 hours.',
       },
     ],
     quickReference: [
