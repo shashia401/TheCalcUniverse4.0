@@ -240,7 +240,7 @@ const rmdConfig: CalculatorConfig = {
         scenario: 'Margaret, born in 1953 (age 73 in 2026), has a $500,000 traditional IRA balance as of December 31, 2025. She is not married to someone 10+ years younger. Her account earns 6% annually.',
         inputs: { birthYear: '1953', accountBalance: '500000', spouseToggle: 'no', expectedReturn: '6' },
         result: 'Margaret\'s 2026 RMD is $500,000 / 26.5 = $18,868. This represents 3.77% of her account balance. At a 22% marginal tax rate, she will owe approximately $4,150 in federal taxes on this withdrawal.',
-        insight: 'Margaret\'s 2026 RMD is $500,000 / 26.5 = $18,868. Her RMD started at age 73 (she is in that first year). The RMD represents 3.77% of her account balance. At her marginal tax rate (say 22%), she will owe roughly $4,150 in federal taxes on this withdrawal. Her 10-year projection shows her RMD growing to about $25,000 by age 83, assuming 6% annual growth.',
+        insight: 'Margaret\'s 2026 RMD is $500,000 / 26.5 = $18,868. Her RMD started at age 73 (she is in that first year). The RMD represents 3.77% of her account balance. At her marginal tax rate (say 22%), she will owe roughly $4,150 in federal taxes on this withdrawal. Her 10-year projection shows her RMD growing to about $30,400 by age 82, assuming 6% annual growth — the RMD grows even as the shrinking distribution-period factor and rising withdrawals partly offset investment gains.',
       },
       {
         scenario: 'Bob, born in 1948 (age 78 in 2026), has a $750,000 401(k) balance and his wife Susan is 15 years younger (age 63). He has named her as his sole beneficiary.',
