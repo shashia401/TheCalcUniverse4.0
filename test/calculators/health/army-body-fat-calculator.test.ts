@@ -52,6 +52,28 @@ describe('Army Body Fat calculator (AR 600-9)', () => {
     }
   });
 
+  // ── Worked-example regressions (narrative previously didn't match the formula) ──
+  it('matches worked example 1: 25yo male, 69in, neck 16, waist 35 -> 18.0% (previously narrated as 18.5%)', () => {
+    const r = config.calculate({
+      sex: 'male', age: '25', heightInches: '69', weight: '195', neck: '16', waist: '35', hip: '',
+    });
+    expect(getValue(r, 'bodyFatArmy')).toBe('18.0%');
+  });
+
+  it('matches worked example 2: 32yo female, 65in, neck 13, waist 30, hip 38 -> 28.6% (previously narrated as 32.8%)', () => {
+    const r = config.calculate({
+      sex: 'female', age: '32', heightInches: '65', weight: '155', neck: '13', waist: '30', hip: '38',
+    });
+    expect(getValue(r, 'bodyFatArmy')).toBe('28.6%');
+  });
+
+  it('matches worked example 3: 45yo male, 72in, neck 17, waist 40 -> 23.8% (previously narrated as 27.2%)', () => {
+    const r = config.calculate({
+      sex: 'male', age: '45', heightInches: '72', weight: '235', neck: '17', waist: '40', hip: '',
+    });
+    expect(getValue(r, 'bodyFatArmy')).toBe('23.8%');
+  });
+
   // ── Female calculations ──────────────────────────────────────────────
   it('calculates body fat for a female', () => {
     const r = config.calculate({
