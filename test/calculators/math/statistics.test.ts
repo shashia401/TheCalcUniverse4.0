@@ -59,4 +59,18 @@ describe('Statistics calculator', () => {
     const r = config.calculate({ data: '1, 2', type: 'sample' });
     expect(r).toEqual([]);
   });
+
+  it('regression: real-estate outlier example matches worked example (was Q1=293750/Q3=310000/IQR=16250)', () => {
+    const r = config.calculate({ data: '285000, 310000, 295000, 305000, 1200000, 290000, 300000, 315000', type: 'sample' });
+    expect(getValue(r, 'q1')).toBe('292500');
+    expect(getValue(r, 'q3')).toBe('312500');
+    expect(getValue(r, 'iqr')).toBe('20000');
+  });
+
+  it('regression: bean growth outlier example matches worked example (was Q1=12.275/Q3=14.275/IQR=2.0)', () => {
+    const r = config.calculate({ data: '12.5, 14.2, 11.8, 13.9, 3.2, 15.1, 13.4, 12.9, 14.6, 13.1', type: 'sample' });
+    expect(getValue(r, 'q1')).toBe('12.5');
+    expect(getValue(r, 'q3')).toBe('14.2');
+    expect(getValue(r, 'iqr')).toBe('1.7');
+  });
 });

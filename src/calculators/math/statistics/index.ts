@@ -248,14 +248,14 @@ const statisticsConfig: CalculatorConfig = {
       {
         scenario: 'Marcus, a real estate analyst, is evaluating sale prices in a neighborhood. Last month\'s sales were: $285,000, $310,000, $295,000, $305,000, $1,200,000, $290,000, $300,000, $315,000. The $1.2M sale was a commercial property that was accidentally included. Marcus wants to confirm it is a statistical outlier.',
         inputs: { data: '285000, 310000, 295000, 305000, 1200000, 290000, 300000, 315000', type: 'sample' },
-        result: 'Q1=$293,750, Q3=$310,000, IQR=$16,250; Upper fence $334,375; 1 outlier detected: $1,200,000',
-        insight: 'The $1.2M sale is well beyond the upper fence and is flagged as an outlier. Marcus should remove it from the residential analysis. After removal, the remaining 7 sales have a mean of about $300,000 with an IQR of $17,500, giving a much more accurate picture of the residential market.',
+        result: 'Q1=$292,500, Q3=$312,500, IQR=$20,000; Upper fence $342,500; 1 outlier detected: $1,200,000',
+        insight: 'The $1.2M sale is well beyond the upper fence and is flagged as an outlier. Marcus should remove it from the residential analysis. After removal, the remaining 7 sales have a mean of about $300,000 with an IQR of $20,000, giving a much more accurate picture of the residential market.',
       },
       {
         scenario: 'Lisa, a biology teacher, has her students measure the growth of bean plants over 30 days. The results (in cm) are: 12.5, 14.2, 11.8, 13.9, 3.2, 15.1, 13.4, 12.9, 14.6, 13.1. One student\'s plant barely grew. Lisa wants to check if it is a statistical outlier before discussing experimental errors with the class.',
         inputs: { data: '12.5, 14.2, 11.8, 13.9, 3.2, 15.1, 13.4, 12.9, 14.6, 13.1', type: 'sample' },
-        result: 'Q1=12.275, Q3=14.275, IQR=2.0; Lower fence 9.275; 1 outlier detected: 3.2 cm',
-        insight: 'Q1=12.275, Q3=14.275, IQR=2.0. Lower fence = 12.275 - 3.0 = 9.275. The 3.2cm value is well below the lower fence and is flagged as an outlier. Lisa can use this to discuss possible causes: the student may have overwatered, used poor soil, or measured incorrectly.',
+        result: 'Q1=12.5, Q3=14.2, IQR=1.7; Lower fence 9.95; 1 outlier detected: 3.2 cm',
+        insight: 'Q1=12.5, Q3=14.2, IQR=1.7. Lower fence = 12.5 - 1.5×1.7 = 12.5 - 2.55 = 9.95. The 3.2cm value is well below the lower fence and is flagged as an outlier. Lisa can use this to discuss possible causes: the student may have overwatered, used poor soil, or measured incorrectly.',
       },
     ],
     proTips: [
