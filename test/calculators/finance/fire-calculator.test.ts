@@ -131,4 +131,19 @@ describe('FIRE Calculator', () => {
     const fireAgeStr = getValue(results, 'fireAge');
     expect(fireAgeStr).toMatch(/years old/);
   });
+
+  it('matches the "Maya" worked example figures (regression: educational text previously said FIRE age 43 / 15 years when the actual figures are 42 / 14 years)', () => {
+    const results = fireConfig.calculate({
+      currentAge: '28',
+      currentNetWorth: '65000',
+      annualIncome: '95000',
+      annualExpenses: '48000',
+      investmentReturn: '7',
+      targetWithdrawalRate: '4',
+      fireType: 'standard',
+    });
+    expect(getValue(results, 'fireNumber')).toContain('1.2');
+    expect(getValue(results, 'fireAge')).toBe('42 years old');
+    expect(getValue(results, 'yearsToFire')).toBe('14 years');
+  });
 });
