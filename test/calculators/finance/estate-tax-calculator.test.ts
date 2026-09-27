@@ -31,8 +31,8 @@ describe('Estate Tax Calculator', () => {
 
   it('calculates federal tax correctly for a $20M estate (single filer)', () => {
     // $20M gross, $200K debts, single → adjusted $19.8M
-    // Exemption $13.99M → taxable $5.81M
-    // Graduated brackets 18-40% → est. tax ~$2.29M
+    // Exemption $15M (2026, per OBBBA) → taxable $4.8M
+    // Graduated brackets 18-40% → est. tax ~$1.87M
     const results = estateTaxConfig.calculate({
       totalAssets: '20000000',
       debtsDeductions: '200000',
@@ -41,25 +41,25 @@ describe('Estate Tax Calculator', () => {
     });
 
     const fedTaxable = find(results, 'federalTaxableEstate');
-    expect(fedTaxable).toContain('5.81M');
+    expect(fedTaxable).toContain('4.80M');
 
     const fedTax = find(results, 'federalTax');
-    // Expected: ~$2.29M federal tax
+    // Expected: ~$1.87M federal tax
     const taxAmount = dollars(fedTax);
-    expect(taxAmount).toBeGreaterThan(2_200_000);
-    expect(taxAmount).toBeLessThan(2_400_000);
+    expect(taxAmount).toBeGreaterThan(1_800_000);
+    expect(taxAmount).toBeLessThan(1_950_000);
   });
 
   it('doubles exemption for married filing status', () => {
     const single = estateTaxConfig.calculate({
-      totalAssets: '15000000',
+      totalAssets: '20000000',
       debtsDeductions: '0',
       filingStatus: 'single',
       stateResidence: 'none',
     });
 
     const married = estateTaxConfig.calculate({
-      totalAssets: '15000000',
+      totalAssets: '20000000',
       debtsDeductions: '0',
       filingStatus: 'married',
       stateResidence: 'none',
@@ -69,7 +69,7 @@ describe('Estate Tax Calculator', () => {
     const marriedTax = dollars(find(married, 'federalTax'));
 
     // Married should pay less (higher exemption)
-    // $15M is above single exemption ($13.99M) but below married ($27.98M)
+    // $20M is above single exemption ($15M) but below married ($30M, 2026 per OBBBA)
     expect(singleTax).toBeGreaterThan(0);
     expect(marriedTax).toBe(0);
   });

@@ -2,8 +2,13 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import EstateTaxPanel from './EstateTaxPanel';
 
-const FEDERAL_EXEMPTION_2025 = 13_990_000;
-const TAX_YEAR = 2025;
+// The One Big Beautiful Bill Act (OBBBA), signed July 2025, permanently set
+// the federal estate/gift tax exemption at $15M per individual starting in
+// 2026 (inflation-indexed thereafter), replacing the pre-OBBBA law that would
+// have sunset the TCJA's elevated exemption back to ~$7M. Source: IRS Rev.
+// Proc. 2025-32 / OBBBA Sec. 70106.
+const FEDERAL_EXEMPTION_2025 = 15_000_000;
+const TAX_YEAR = 2026;
 
 const STATE_EXEMPTIONS: Record<string, { name: string; exemption: number; topRate: number }> = {
   'none': { name: 'No State Estate Tax', exemption: 0, topRate: 0 },
@@ -46,7 +51,7 @@ function calcFederalEstateTax(taxableEstate: number): number {
   return tax;
 }
 
-const estateTaxSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="16" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Estate Tax: Only Above Exemption</text><rect x="30" y="30" width="260" height="28" rx="4" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><text x="160" y="49" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-1e40af)">Gross Estate: $20M</text><line x1="160" y1="58" x2="160" y2="66" stroke="var(--svg-64748b)" stroke-width="1.5"/><rect x="30" y="66" width="25" height="22" rx="3" fill="var(--svg-f59e0b)"/><text x="42" y="82" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Debts</text><rect x="58" y="66" width="170" height="22" rx="3" fill="var(--svg-22c55e)"/><text x="143" y="82" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-ffffff)">Federal Exemption: $13.99M</text><rect x="232" y="66" width="58" height="22" rx="3" fill="var(--svg-ef4444)"/><text x="261" y="82" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Taxable</text><text x="160" y="105" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-ef4444)">Taxable = $20M - $0.2M - $13.99M = $5.81M</text><rect x="30" y="114" width="260" height="36" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="130" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">Graduated rate up to 40% on taxable portion</text><text x="160" y="146" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Est. Tax ~$2.3M | Net to Heirs ~$17.5M</text><rect x="30" y="158" width="260" height="28" rx="6" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="160" y="172" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e40af)">99.9% of estates pay $0 federal estate tax</text><text x="160" y="184" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">State taxes may apply at much lower thresholds ($1M-$7M)</text></svg>';
+const estateTaxSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="16" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Estate Tax: Only Above Exemption</text><rect x="30" y="30" width="260" height="28" rx="4" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><text x="160" y="49" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-1e40af)">Gross Estate: $20M</text><line x1="160" y1="58" x2="160" y2="66" stroke="var(--svg-64748b)" stroke-width="1.5"/><rect x="30" y="66" width="25" height="22" rx="3" fill="var(--svg-f59e0b)"/><text x="42" y="82" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Debts</text><rect x="58" y="66" width="170" height="22" rx="3" fill="var(--svg-22c55e)"/><text x="143" y="82" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-ffffff)">Federal Exemption: $15M</text><rect x="232" y="66" width="58" height="22" rx="3" fill="var(--svg-ef4444)"/><text x="261" y="82" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Taxable</text><text x="160" y="105" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-ef4444)">Taxable = $20M - $0.2M - $15M = $4.8M</text><rect x="30" y="114" width="260" height="36" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="130" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">Graduated rate up to 40% on taxable portion</text><text x="160" y="146" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Est. Tax ~$1.9M | Net to Heirs ~$17.9M</text><rect x="30" y="158" width="260" height="28" rx="6" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="160" y="172" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e40af)">99.9% of estates pay $0 federal estate tax</text><text x="160" y="184" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">State taxes may apply at much lower thresholds ($1M-$7M)</text></svg>';
 
 const estateTaxConfig: CalculatorConfig = {
   inputs: [
@@ -230,15 +235,15 @@ const estateTaxConfig: CalculatorConfig = {
     return createElement(EstateTaxPanel, { values, results });
   },
   educational: {
-    formula: 'Taxable Estate = Gross Estate − Debts − Federal Exemption ($13.99M in 2025)',
+    formula: 'Taxable Estate = Gross Estate − Debts − Federal Exemption ($15M in 2026)',
     diagram: {
       svg: estateTaxSvg,
       alt: 'Estate tax stacked bar showing gross estate split into debts deduction, federal exemption of alt: 3.99M, and taxable portion only for amounts above the exemption',
-      caption: 'Only about 0.1% of estates owe federal estate tax - the first caption: 3.99M per individual is exempt in 2025, though state taxes may apply at lower thresholds',
+      caption: 'Only about 0.1% of estates owe federal estate tax — $15M per individual is exempt in 2026, though state taxes may apply at lower thresholds',
     },
     formulaDescription: `Federal estate tax applies a graduated rate (up to 40%) only on the portion of the estate exceeding the exemption. For ${TAX_YEAR}, the federal exemption is $${(FEDERAL_EXEMPTION_2025 / 1_000_000).toFixed(2)} million per individual ($${((FEDERAL_EXEMPTION_2025 * 2) / 1_000_000).toFixed(2)}M for married couples using portability).`,
     variables: [
-      { symbol: '$13.99M', name: `${TAX_YEAR} Federal Exemption`, description: `The IRS allows each person to transfer up to $${(FEDERAL_EXEMPTION_2025 / 1_000_000).toFixed(2)} million tax-free. Estates below this amount owe zero federal estate tax. This limit is scheduled to sunset to approximately $7M (inflation-adjusted) after 2025 unless Congress acts.` },
+      { symbol: '$15M', name: `${TAX_YEAR} Federal Exemption`, description: `The IRS allows each person to transfer up to $${(FEDERAL_EXEMPTION_2025 / 1_000_000).toFixed(2)} million tax-free. Estates below this amount owe zero federal estate tax. The One Big Beautiful Bill Act (OBBBA), signed in 2025, made this elevated exemption permanent starting in 2026 (inflation-indexed thereafter), replacing the prior law's scheduled sunset to roughly $7M.` },
       { symbol: 'Portability', name: 'Married Couple Exemption', description: 'Married couples can combine exemptions via a "portability election" on the first spouse\'s estate return, effectively doubling the exemption. This requires filing a federal estate tax return (Form 706) even if no tax is owed.' },
       { symbol: 'DSUE', name: 'Deceased Spouse Unused Exclusion', description: 'The portability amount — the unused portion of the first spouse\'s exemption that can be transferred to the surviving spouse. Must be elected on a timely filed Form 706.' },
     ],
@@ -255,7 +260,7 @@ const estateTaxConfig: CalculatorConfig = {
       'Plan estate reduction strategies by understanding how the progressive estate tax rates apply to assets above the exemption limit.',
     ],
     explanation:
-      `Only about 0.1% of estates actually owe federal estate tax — estates must exceed $${(FEDERAL_EXEMPTION_2025 / 1_000_000).toFixed(2)} million (2025) before any federal tax applies. However, state estate taxes can apply at much lower thresholds: Oregon taxes estates above $1 million, Massachusetts above $2 million. IMPORTANT NOTE: This calculator uses the ${TAX_YEAR} federal exemption of $${(FEDERAL_EXEMPTION_2025 / 1_000_000).toFixed(2)}M. The Tax Cuts and Jobs Act provisions are scheduled to sunset after 2025, which could reduce the exemption to approximately $7M. Consult an estate planning attorney for current law status.`,
+      `Only about 0.1% of estates actually owe federal estate tax — estates must exceed $${(FEDERAL_EXEMPTION_2025 / 1_000_000).toFixed(2)} million (${TAX_YEAR}) before any federal tax applies. However, state estate taxes can apply at much lower thresholds: Oregon taxes estates above $1 million, Massachusetts above $2 million. This calculator uses the ${TAX_YEAR} federal exemption of $${(FEDERAL_EXEMPTION_2025 / 1_000_000).toFixed(2)}M, made permanent (and inflation-indexed) by the One Big Beautiful Bill Act — the exemption is no longer scheduled to sunset back to roughly $7M as it was under prior law. Consult an estate planning attorney for current law status.`,
     faqs: [
       {
         question: 'What is included in a taxable estate?',
@@ -271,7 +276,7 @@ const estateTaxConfig: CalculatorConfig = {
       },
       {
         question: 'Will the exemption change?',
-        answer: 'Possibly. The elevated $13.99M exemption (from the 2017 Tax Cuts and Jobs Act) is currently scheduled to sunset at the end of 2025, reverting to approximately $7M (inflation-adjusted). Congress may extend or modify this. Consult an estate planning attorney for the most current information.',
+        answer: 'The One Big Beautiful Bill Act (OBBBA), signed in 2025, permanently set the exemption at $15M per person starting in 2026 (inflation-indexed thereafter), replacing the prior law under which the elevated Tax Cuts and Jobs Act exemption was scheduled to sunset to roughly $7M. Future Congresses could still change the law, so consult an estate planning attorney for the most current information.',
       },
     
       {
@@ -283,37 +288,37 @@ const estateTaxConfig: CalculatorConfig = {
       {
         scenario: 'Robert Chen, a widower in Portland, OR, has a gross estate valued at $5.8 million including his home, investment accounts, and a small business. After subtracting $350,000 in remaining mortgage debt and funeral expenses, he wants to know if his heirs will owe federal estate tax. Oregon has a $1M state exemption and a top rate of 16%.',
         inputs: { totalAssets: '5800000', debtsDeductions: '350000', filingStatus: 'single', stateResidence: 'OR' },
-        result: 'Adjusted gross estate: $5.45M. Federal taxable estate: $0 (well below the $13.99M individual exemption). However, Oregon state taxable estate: $4.45M ($5.45M minus $1M state exemption). Estimated Oregon estate tax: approximately $356,000. Net to heirs: roughly $5.09M.',
+        result: 'Adjusted gross estate: $5.45M. Federal taxable estate: $0 (well below the $15M individual exemption). However, Oregon state taxable estate: $4.45M ($5.45M minus $1M state exemption). Estimated Oregon estate tax: approximately $356,000. Net to heirs: roughly $5.09M.',
         insight: 'Robert\'s estate owes zero federal estate tax — like 99.9% of estates — but faces a significant state estate tax bill in Oregon. This is a critical planning insight: even estates far below the federal exemption can trigger state estate taxes in the 12 states (plus DC) that levy their own estate taxes with much lower thresholds. Robert should consult an estate planning attorney about strategies like irrevocable life insurance trusts (ILITs) or gifting programs to reduce his Oregon taxable estate, as Oregon\'s $1M exemption is one of the lowest in the country.',
       },
       {
         scenario: 'Margaret and Thomas Sullivan in Greenwich, CT have a combined estate of $18.5 million including a primary residence worth $3.2M, a vacation home in Florida worth $1.8M, investment portfolios valued at $11M, and life insurance policies. They have $600,000 in debts and want to know their estate tax exposure as a married couple with portability.',
         inputs: { totalAssets: '18500000', debtsDeductions: '600000', filingStatus: 'married', stateResidence: 'CT' },
-        result: 'Adjusted gross estate: $17.9M. Federal exemption (married with portability): $27.98M. Federal taxable estate: $0. Connecticut exemption: $13.61M. CT taxable estate: $4.29M. Estimated CT estate tax: approximately $257,400. Net to heirs: roughly $17.64M.',
-        insight: 'The Sullivans benefit from the married exemption, which doubles the federal exemption to $27.98M — far above their $17.9M adjusted estate. However, Connecticut\'s estate tax uses its own exemption of $13.61M and does not allow portability at the state level (each spouse\'s CT exemption is not transferable). This means at the second death, the entire $17.9M faces the Connecticut estate tax with only a single $13.61M exemption. This scenario highlights why wealthy couples in state-estate-tax jurisdictions need careful planning — the federal exemption may shield you, but state taxes can still take a substantial bite. Credit shelter trusts (bypass trusts) are a common tool to preserve both spouses\' state exemptions.',
+        result: 'Adjusted gross estate: $17.9M. Federal exemption (married with portability): $30M. Federal taxable estate: $0. Connecticut exemption: $13.61M. CT taxable estate: $4.29M. Estimated CT estate tax: approximately $257,400. Net to heirs: roughly $17.64M.',
+        insight: 'The Sullivans benefit from the married exemption, which doubles the federal exemption to $30M — far above their $17.9M adjusted estate. However, Connecticut\'s estate tax uses its own exemption of $13.61M and does not allow portability at the state level (each spouse\'s CT exemption is not transferable). This means at the second death, the entire $17.9M faces the Connecticut estate tax with only a single $13.61M exemption. This scenario highlights why wealthy couples in state-estate-tax jurisdictions need careful planning — the federal exemption may shield you, but state taxes can still take a substantial bite. Credit shelter trusts (bypass trusts) are a common tool to preserve both spouses\' state exemptions.',
       },
     ],
 
     proTips: [
-      'If you are married, make sure the executor of the first spouse\'s estate files IRS Form 706 to elect portability — even if no tax is owed. Without this election, the deceased spouse\'s unused exemption ($13.99M) is permanently lost. The portability election deadline is 9 months after death (with a 6-month automatic extension available).',
+      'If you are married, make sure the executor of the first spouse\'s estate files IRS Form 706 to elect portability — even if no tax is owed. Without this election, the deceased spouse\'s unused exemption ($15M) is permanently lost. The portability election deadline is 9 months after death (with a 6-month automatic extension available).',
       'The annual gift exclusion ($19,000 per recipient in 2025) lets you reduce your estate tax-free over time without touching your lifetime exemption. A married couple with three children can gift $114,000 per year ($19,000 × 2 parents × 3 children) without filing a gift tax return — that is over $1M removed from the estate over a decade.',
       'Life insurance proceeds are included in your gross estate if you own the policy at death. To exclude them, place the policy in an Irrevocable Life Insurance Trust (ILIT) — the trust owns the policy, not you, so the death benefit passes to heirs outside your taxable estate.',
-      'The current $13.99M federal exemption is scheduled to sunset at the end of 2025, dropping to approximately $7M (inflation-adjusted). If you have an estate between $7M and $14M, consider making large gifts before the sunset to lock in the higher exemption — the IRS has confirmed it will not claw back gifts made under the higher exemption.',
+      'The One Big Beautiful Bill Act permanently set the federal exemption at $15M per person starting in 2026, so the previously-planned sunset to ~$7M no longer applies. If your estate is well above $15M ($30M married), large lifetime gifts, ILITs, and other trust strategies still matter for reducing what is exposed to the 40% top rate — the IRS has confirmed it will not claw back gifts made under a higher prior-year exemption.',
     ],
 
     quickReference: [
-      { label: 'Federal Exemption (2025 Individual)', value: '$13,990,000 — applies to estate + lifetime gifts combined' },
-      { label: 'Federal Exemption (2025 Married)', value: '$27,980,000 — with portability election on first spouse\'s Form 706' },
+      { label: 'Federal Exemption (2026 Individual)', value: '$15,000,000 — applies to estate + lifetime gifts combined' },
+      { label: 'Federal Exemption (2026 Married)', value: '$30,000,000 — with portability election on first spouse\'s Form 706' },
       { label: 'Top Federal Estate Tax Rate', value: '40% — applied only to the portion above the exemption' },
       { label: 'Lowest State Exemption', value: 'Oregon: $1,000,000 (Massachusetts: $2,000,000, Washington: $2,193,000)' },
       { label: 'Estates Owing Federal Tax', value: '~0.1% of all estates — roughly 2,000 estates per year' },
       { label: 'Annual Gift Exclusion (2025)', value: '$19,000 per recipient per year (does not count against lifetime exemption)' },
       { label: 'Unlimited Marital Deduction', value: 'Spouses who are US citizens inherit unlimited amounts free of federal estate tax' },
-      { label: 'Sunset Risk (Post-2025)', value: 'Exemption may drop to ~$7M if Congress does not extend TCJA provisions' },
+      { label: 'OBBBA Permanence', value: 'The $15M exemption is now permanent (indexed for inflation) — the previously-scheduled sunset to ~$7M no longer applies' },
     ],
 
     limitations: [
-      'This calculator uses the 2025 federal exemption of $13.99M and may not reflect future legislative changes. The Tax Cuts and Jobs Act provisions are scheduled to sunset after 2025, which would approximately halve the federal exemption. Always verify the current exemption amount before making planning decisions.',
+      'This calculator uses the 2026 federal exemption of $15M, made permanent (and inflation-indexed) by the One Big Beautiful Bill Act. Always verify the current exemption amount before making planning decisions, since future legislation could still change it.',
       'State estate tax estimates use a simplified calculation (50% of the top rate applied to taxable estate). Actual state estate taxes use graduated brackets similar to federal income tax, and many states have special credits, deductions, or different rules for non-residents with property in the state.',
       'This calculator does not account for lifetime taxable gifts that reduce the available estate tax exemption. If you have made large gifts exceeding the annual exclusion in prior years, your remaining exemption may be lower than the full statutory amount.',
       'It does not model specialized estate planning tools: Qualified Terminable Interest Property (QTIP) trusts, Grantor Retained Annuity Trusts (GRATs), Charitable Remainder Trusts (CRTs), family limited partnerships, or valuation discounts for closely-held business interests — all of which can significantly reduce taxable estate value.',

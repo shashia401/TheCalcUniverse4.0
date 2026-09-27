@@ -12,7 +12,7 @@ describe('estate-tax', () => {
       stateResidence: 'none',
     });
     expect(r.length).toBeGreaterThanOrEqual(6);
-    expect(getValue(r, 'notice')).toContain('$13.99M');
+    expect(getValue(r, 'notice')).toContain('$15.00M');
     near(parseMoney(getValue(r, 'adjustedEstate')), 19800000, 100);
     expect(parseMoney(getValue(r, 'federalTax'))).toBeGreaterThan(0);
     expect(parseMoney(getValue(r, 'totalTax'))).toBeGreaterThan(0);
@@ -50,7 +50,7 @@ describe('estate-tax', () => {
     });
     // Label should reference married couple filing, value shows exemption amount
     expect(getResult(r, 'notice').label).toContain('Married Couple');
-    expect(getValue(r, 'notice')).toContain('$27.98M');
+    expect(getValue(r, 'notice')).toContain('$30.00M');
   });
 
   it('includes state tax details for Washington (estate tax state)', () => {
@@ -86,5 +86,29 @@ describe('estate-tax', () => {
     });
     const stateTaxResult = r.find(x => x.id === 'stateTax');
     expect(stateTaxResult).toBeUndefined();
+  });
+
+  it('matches the "Robert Chen" worked example (regression: educational text previously used the stale pre-OBBBA $13.99M federal exemption)', () => {
+    const r = config.calculate({
+      totalAssets: '5800000',
+      debtsDeductions: '350000',
+      filingStatus: 'single',
+      stateResidence: 'OR',
+    });
+    near(parseMoney(getValue(r, 'adjustedEstate')), 5450000, 1000);
+    expect(getValue(r, 'federalTaxableEstate')).toContain('Below exemption');
+    near(parseMoney(getValue(r, 'stateTax')), 356000, 100);
+  });
+
+  it('matches the "Sullivans" worked example (regression: educational text previously said the married exemption was $27.98M; OBBBA set it to $30M for 2026)', () => {
+    const r = config.calculate({
+      totalAssets: '18500000',
+      debtsDeductions: '600000',
+      filingStatus: 'married',
+      stateResidence: 'CT',
+    });
+    expect(getValue(r, 'notice')).toContain('$30.00M');
+    expect(getValue(r, 'federalTaxableEstate')).toContain('Below exemption');
+    near(parseMoney(getValue(r, 'stateTax')), 257400, 100);
   });
 });
