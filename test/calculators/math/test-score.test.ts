@@ -37,4 +37,12 @@ describe('currentGrade', () => {
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
   });
+
+  it('regression: 95% current / 70% desired / 20% weight already secures the grade (FAQ example, was wrongly 95/90/20)', () => {
+    const result = config.calculate({ currentGrade: '95', desiredGrade: '70', examWeight: '20' });
+    const needed = result.find((r: any) => r.id === 'needed');
+    expect(needed?.value).toBe('-30.0%');
+    const note = result.find((r: any) => r.id === 'note');
+    expect(note?.value).toContain('already have the desired grade');
+  });
 });
