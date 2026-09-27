@@ -288,4 +288,58 @@ describe('va-mortgage', () => {
       expect(inp.helpText).toBeTruthy();
     }
   });
+
+  it('matches the educational worked example (Sarah: $500K, exempt, 10% vs 0% down)', () => {
+    // Regression test: the worked example previously claimed $3,279/mo (10% down)
+    // and $3,553/mo (0% down), which did not match the calculator's own formula
+    // (correct answers are ~$3,573 and ~$3,873).
+    const r10 = config.calculate({
+      homePrice: '500000',
+      downPaymentType: 'percent',
+      downPaymentValue: '10',
+      loanTerm: '30',
+      interestRate: '6.0',
+      vaUseType: 'first',
+      fundingFeeExempt: 'yes',
+      fundingFeePaidUpfront: 'rolled',
+      annualPropertyTax: '6000',
+      annualInsurance: '1500',
+      monthlyHOA: '250',
+    });
+    near(parseMoney(getValue(r10, 'totalMonthlyPayment')), 3572.98, 1);
+
+    const r0 = config.calculate({
+      homePrice: '500000',
+      downPaymentType: 'percent',
+      downPaymentValue: '0',
+      loanTerm: '30',
+      interestRate: '6.0',
+      vaUseType: 'first',
+      fundingFeeExempt: 'yes',
+      fundingFeePaidUpfront: 'rolled',
+      annualPropertyTax: '6000',
+      annualInsurance: '1500',
+      monthlyHOA: '250',
+    });
+    near(parseMoney(getValue(r0, 'totalMonthlyPayment')), 3872.75, 1);
+  });
+
+  it('matches the educational worked example (James: $275K, subsequent use, 5% down)', () => {
+    // Regression test: the worked example previously claimed $1,983/mo, which
+    // did not match the calculator's own formula (correct answer ~$2,118).
+    const r = config.calculate({
+      homePrice: '275000',
+      downPaymentType: 'percent',
+      downPaymentValue: '5',
+      loanTerm: '30',
+      interestRate: '6.5',
+      vaUseType: 'subsequent',
+      fundingFeeExempt: 'no',
+      fundingFeePaidUpfront: 'rolled',
+      annualPropertyTax: '3300',
+      annualInsurance: '1100',
+      monthlyHOA: '75',
+    });
+    near(parseMoney(getValue(r, 'totalMonthlyPayment')), 2117.71, 1);
+  });
 });
