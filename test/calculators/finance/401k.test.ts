@@ -56,4 +56,26 @@ describe('401k', () => {
     expect(pct).toBeGreaterThan(0);
     expect(pct).toBeLessThan(100);
   });
+
+  it('matches the "Maria" worked example figures (regression: educational text previously did not match calculate())', () => {
+    const r = config.calculate({
+      currentAge: '30',
+      retirementAge: '65',
+      currentBalance: '50000',
+      annualSalary: '120000',
+      salaryIncrease: '3',
+      yourContribution: '6',
+      employerMatch: '50',
+      employerMatchLimit: '6',
+      rateOfReturn: '7',
+    });
+    near(parseMoney(getValue(r, 'totalBalance')), 2_867_759, 5000);
+    near(parseMoney(getValue(r, 'yourContribs')), 435_327, 5);
+    near(parseMoney(getValue(r, 'employerContribs')), 217_663, 5);
+    // Employer match is always exactly half of the employee's contribution here
+    // (match = 50% up to a 6% limit, and the contribution rate is also 6%).
+    const yourContribs = parseMoney(getValue(r, 'yourContribs'));
+    const employerContribs = parseMoney(getValue(r, 'employerContribs'));
+    near(employerContribs, yourContribs * 0.5, 1);
+  });
 });

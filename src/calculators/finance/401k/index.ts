@@ -275,14 +275,14 @@ const k401Config: CalculatorConfig = {
       {
         scenario: 'Maria, a 30-year-old software engineer earning $120,000 in San Francisco with a 6% 401(k) contribution and a generous 50% match up to 6%',
         inputs: { currentAge: '30', retirementAge: '65', currentBalance: '50,000', annualSalary: '120,000', yourContribution: '6', employerMatch: '50', employerMatchLimit: '6', rateOfReturn: '7' },
-        result: 'After 35 years of contributions with employer match, your 401(k) grows to approximately $2,138,000. Total employee contributions: $252,000. Total employer match: $378,000. Investment returns: $1,458,000.',
-        insight: 'At retirement, Maria has over $2.1M — roughly 3x her total contributions. Her employer pays in $378,000 in matching funds over 35 years. The compounding returns ($1.3M) dominate the final balance, accounting for more than 60% of her total retirement nest egg.',
+        result: 'After 35 years of contributions with employer match, your 401(k) grows to approximately $2,867,759. Total employee contributions: $435,327. Total employer match: $217,663. Investment returns: $2,164,768.',
+        insight: 'At retirement, Maria has over $2.87M — roughly 4.4x her total contributions. Her employer pays in $217,663 in matching funds over 35 years. The compounding returns ($2.16M) dominate the final balance, accounting for more than 75% of her total retirement nest egg.',
       },
       {
         scenario: 'David, 45, plays catch-up after starting late with only $30,000 saved and a $75,000 salary — he contributes 10% to close the gap',
         inputs: { currentAge: '45', retirementAge: '67', currentBalance: '30,000', annualSalary: '75,000', yourContribution: '10', employerMatch: '50', employerMatchLimit: '6', rateOfReturn: '7' },
-        result: 'After 22 years of catch-up contributions, your 401(k) grows to approximately $590,000. Total employee contributions: $165,000. Total employer match: $99,000. Investment returns: $296,000.',
-        insight: 'Even starting at 45, David accumulates $590,000 by age 67. The key insight: increasing contributions from 6% to 10% adds over $120,000 to his final balance. Catch-up contributions after age 50 (an extra $7,500/year in 2025) would push this even higher.',
+        result: 'After 22 years of catch-up contributions, your 401(k) grows to approximately $788,751. Total employee contributions: $229,026. Total employer match: $68,708. Investment returns: $461,017.',
+        insight: 'Even starting at 45, David accumulates nearly $789,000 by age 67. Because the employer match caps out at 6% of salary while he contributes 10%, only the first 6 points of his contribution are matched — the match is 30% of his own contribution, not 50%. Catch-up contributions after age 50 (an extra $7,500/year in 2025) would push this even higher.',
       },
     ],
     proTips: [
