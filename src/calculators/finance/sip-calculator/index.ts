@@ -183,8 +183,8 @@ const sipConfig: CalculatorConfig = {
       {
         scenario: 'Priya receives a Rs 5 lakh bonus and wants to invest it as a lump sum while also starting a Rs 15,000 monthly SIP for her daughter\'s college education in 12 years. She expects 10% annual returns from a balanced fund.',
         inputs: { lumpsum: '500000', monthlyInvestment: '15000', expectedReturn: '10', timePeriod: '12' },
-        result: 'Lump sum growth: Rs 5 lakh grows to approximately Rs 15.7 lakh. SIP growth: Rs 15,000/month grows to approximately Rs 41.5 lakh. Combined corpus: approximately Rs 57.2 lakh, with Rs 30.6 lakh in returns.',
-        insight: 'The lump sum of Rs 5 lakh grows to approximately Rs 15.7 lakh at 10% over 12 years. The monthly SIP of Rs 15,000 grows to approximately Rs 41.5 lakh. Combined, she will have about Rs 57.2 lakh for her daughter\'s education. The total invested is Rs 26.6 lakh, generating Rs 30.6 lakh in returns.',
+        result: 'Lump sum growth: Rs 5 lakh grows to approximately Rs 16.5 lakh. SIP growth: Rs 15,000/month grows to approximately Rs 41.8 lakh. Combined corpus: approximately Rs 58.3 lakh, with Rs 31.7 lakh in returns.',
+        insight: 'The lump sum of Rs 5 lakh grows to approximately Rs 16.5 lakh at 10% over 12 years (monthly compounding). The monthly SIP of Rs 15,000 grows to approximately Rs 41.8 lakh. Combined, she will have about Rs 58.3 lakh for her daughter\'s education. The total invested is Rs 26.6 lakh, generating Rs 31.7 lakh in returns.',
       },
     ],
     proTips: [

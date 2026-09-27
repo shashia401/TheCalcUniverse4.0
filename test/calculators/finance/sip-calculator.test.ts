@@ -32,6 +32,18 @@ describe('SIP Calculator', () => {
     near(fv, sipFv(10000, 12, 10), 500);
   });
 
+  it('matches the educational worked example (Priya: 5L lumpsum + 15K/mo @ 10% for 12yr)', () => {
+    // Regression test: the worked example previously stated a combined corpus of
+    // ~Rs 57.2 lakh, computed with annual compounding on the lumpsum leg, which
+    // did not match the calculator's actual monthly-compounding formula (~Rs 58.3 lakh).
+    const r = config.calculate({
+      lumpsum: '500000', monthlyInvestment: '15000', expectedReturn: '10', timePeriod: '12',
+    });
+    const fv = parseInr(getValue(r, 'futureValue'));
+    near(fv, sipFv(15000, 10, 12, 500000), 500);
+    expect(fv / 100000).toBeCloseTo(58.3, 0);
+  });
+
   it('SIP only: ₹5,000/mo @ 15% for 5 years', () => {
     const r = config.calculate({
       lumpsum: '', monthlyInvestment: '5000', expectedReturn: '15', timePeriod: '5',
