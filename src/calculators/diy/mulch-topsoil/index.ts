@@ -192,7 +192,7 @@ const mulchTopsoilConfig: CalculatorConfig = {
       },
       {
         scenario: 'A city parks department is refreshing the mulch on 10 tree rings, each 6 ft in diameter. They need 3 inches of fresh mulch on each ring.',
-        inputs: { material: 'mulch', length: '30', width: '10', depth: '3' },
+        inputs: { material: 'mulch', length: '28', width: '10', depth: '3' },
         result: 'Tree ring area each = pi × (3 ft)² = 28.3 sq ft × 10 rings = 283 sq ft total. For rectangular approximation: treat as 28×10 ft = 280 sq ft. Volume = 2.59 cu yd without waste, 2.85 cu yd with 10% buffer. About 39 two-cu-ft bags.',
         insight: 'While the calculator uses a rectangular approximation, for circular tree rings the parks department should calculate separately or use a slightly larger rectangle to be safe. At 2.85 cu yd, they are in bulk delivery range. For municipal orders, they should also factor in that some mulch will blow away or be scattered by pedestrians, so ordering 3 full yards is safer. Parks departments often use coarser mulch (wood chips) that lasts longer than shredded hardwood — wood chips can go 2 seasons without refreshing while shredded mulch typically needs annual replenishment. They should also ensure the mulch is not piled against tree trunks ("volcano mulching"), which causes bark rot and invites pests.',
       },

@@ -36,6 +36,22 @@ describe('mulch-topsoil', () => {
     near(parseNumber(getValue(r, 'area')), 100);
   });
 
+  it('worked example: 10 tree rings rectangular approximation — regression for inputs/result mismatch fix', () => {
+    // Educational workedExamples previously listed inputs of length:30, width:10 (300 sq ft,
+    // matching a DIFFERENT example) while the result/insight text described a 28x10 = 280 sq ft
+    // approximation (2.59/2.85 cu yd, 39 bags). Fixed inputs to length:28 so they actually
+    // produce the stated result.
+    const r = config.calculate({
+      material: 'mulch',
+      length: '28',
+      width: '10',
+      depth: '3',
+    });
+    near(parseNumber(getValue(r, 'area')), 280);
+    near(parseNumber(getValue(r, 'cubicYards')), 2.85, 0.01);
+    near(parseNumber(getValue(r, 'bags')), 39);
+  });
+
   it('calculates gravel for a small pathway', () => {
     const r = config.calculate({
       material: 'gravel',
