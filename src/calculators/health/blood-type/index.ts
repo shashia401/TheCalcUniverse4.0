@@ -316,8 +316,8 @@ const bloodTypeConfig: CalculatorConfig = {
           'Parent 2 Blood Type': 'B',
           'Parent 2 Rh Factor': '+',
         },
-        result: 'AB: 56.3%, A: 18.8%, B: 18.8%, O: 6.3%. Rh+: 93.8%, Rh-: 6.3%. Combined: AB+ at 52.8%, A+ at 17.6%, B+ at 17.6%, AB- at 3.5%, A- at 1.2%, B- at 1.2%, O+ at 5.9%, O- at 0.4%.',
-        insight: 'With two parents expressing A and B phenotypes, nearly every blood type is possible for their child — from AB+ (most likely, 52.8%) to O- (least likely, 0.4%). This happens because both parents could be heterozygous (AO and BO). Because both parents are Rh+, the calculator considers both RR and Rr genotypes equally likely, producing 93.8% Rh+ / 6.3% Rh- odds. If either parent\'s exact genotype were known (e.g., both are confirmed Rr), the Rh probabilities would shift. Similarly, if James were AA instead of AO, type O would be impossible for the child.',
+        result: 'AB: 56.3%, A: 18.8%, B: 18.8%, O: 6.3%. Rh+: 93.8%, Rh-: 6.3%. Combined: AB+ at 52.7%, A+ at 17.6%, B+ at 17.6%, AB- at 3.5%, A- at 1.2%, B- at 1.2%, O+ at 5.9%, O- at 0.4%.',
+        insight: 'With two parents expressing A and B phenotypes, nearly every blood type is possible for their child — from AB+ (most likely, 52.7%) to O- (least likely, 0.4%). This happens because both parents could be heterozygous (AO and BO). Because both parents are Rh+, the calculator considers both RR and Rr genotypes equally likely, producing 93.8% Rh+ / 6.3% Rh- odds. If either parent\'s exact genotype were known (e.g., both are confirmed Rr), the Rh probabilities would shift. Similarly, if James were AA instead of AO, type O would be impossible for the child.',
       },
       {
         scenario: 'Priya (O-) and Ravi (AB+) are both first-time blood donors. Priya knows she is a universal donor (O-), but they want to understand what blood types their future children could have.',

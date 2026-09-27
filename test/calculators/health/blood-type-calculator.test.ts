@@ -83,6 +83,17 @@ describe('Blood Type Calculator (Punnett Square)', () => {
     expect(combined).toContain('%');
   });
 
+  it('matches the worked example combined probability for A+ x B+ parents (regression: narrative previously said AB+ at 52.8%, actual formula gives 52.7%)', () => {
+    const r = config.calculate({
+      parent1Blood: 'A',
+      parent1Rh: '+',
+      parent2Blood: 'B',
+      parent2Rh: '+',
+    });
+    const combined = getValue(r, 'combinedHeader');
+    expect(combined).toContain('AB+: 52.7%');
+  });
+
   it('shows disclaimer text', () => {
     const r = config.calculate({
       parent1Blood: 'O',
