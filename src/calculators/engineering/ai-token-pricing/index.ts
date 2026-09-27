@@ -225,7 +225,7 @@ const aiTokenPricingConfig: CalculatorConfig = {
         scenario: 'Customer support chatbot: 10K DAU, 5 requests/user, 500 prompt + 150 output tokens each, GPT-4o',
         inputs: { model: 'gpt-4o', promptTokensPerRequest: '500', completionTokensPerRequest: '150', useCachePricing: 'yes', dailyActiveUsers: '10000', requestsPerUser: '5' },
         result: 'Cost per request: $0.0018125; Monthly: ~$2,719; Annual: ~$32,625 (with caching).',
-        insight: 'With prompt caching enabled (cached input at $0.625/1M), input cost = $0.0003125/req + output cost = $0.0015/req = $0.0018125/req. 50K requests/day = ~$90.63/day, ~$2,719/month, ~$32,625/year. Without caching: ~$10,875/month. Caching saves ~75% on input costs. Switch to GPT-4o-mini and monthly costs drop to ~$65/month — a 40x reduction for simple classification/FAQ-style support.',
+        insight: 'With prompt caching enabled (cached input at $0.625/1M), input cost = $0.0003125/req + output cost = $0.0015/req = $0.0018125/req. 50K requests/day = ~$90.63/day, ~$2,719/month, ~$32,625/year. Without caching (standard $2.50/1M input): ~$4,125/month. Caching saves ~34% here since output tokens dominate the cost. Switch to GPT-4o-mini (cached) and monthly costs drop to ~$163/month — roughly a 17x reduction for simple classification/FAQ-style support.',
       },
       {
         scenario: 'Code review agent: 100 DAU devs, 20 requests/dev/day, 8000 prompt (codebase context) + 2000 output tokens, Claude Opus 4.7',
@@ -236,8 +236,8 @@ const aiTokenPricingConfig: CalculatorConfig = {
       {
         scenario: 'Simple text classification pipeline: 1M DAU free-tier users, 3 requests/user, 100 prompt + 10 output tokens, Gemini 3.1 Flash',
         inputs: { model: 'gemini-3-flash', promptTokensPerRequest: '100', completionTokensPerRequest: '10', useCachePricing: 'yes', dailyActiveUsers: '1000000', requestsPerUser: '3' },
-        result: 'Cost per request: ~$0.0000062; Monthly: ~$557 at 3M requests/day.',
-        insight: 'With cached input at $0.01875/1M: cost = (100/1M * $0.01875) + (10/1M * $0.60) = $0.0000001875 + $0.000006 = $0.0000061875/req. 3M requests/day = $18.56/day = ~$557/month. At this scale, even tiny prompt optimizations matter — shaving 10 tokens off the prompt saves ~$55/month. Model choice at scale has enormous leverage: GPT-5 would cost ~$24,480/month for the same pipeline.',
+        result: 'Cost per request: ~$0.0000079; Monthly: ~$709 at 3M requests/day.',
+        insight: 'With cached input at $0.01875/1M: cost = (100/1M * $0.01875) + (10/1M * $0.60) = $0.000001875 + $0.000006 = $0.000007875/req. 3M requests/day = $23.63/day = ~$709/month. At this scale, even tiny prompt optimizations matter — shaving 10 tokens off the prompt saves ~$56/month. Model choice at scale has enormous leverage: GPT-5 (standard, no cache) would cost $0.0021/req = $189,000/month for the same pipeline — a 267x difference.',
       },
     ],
     proTips: [

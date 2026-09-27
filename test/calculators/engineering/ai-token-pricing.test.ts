@@ -68,6 +68,23 @@ describe('ai-token-pricing', () => {
     expect(getValue(r, 'modelName')).toBe('Gemini 3.1 Flash');
   });
 
+  it('worked example: Gemini 3.1 Flash at 3M requests/day (cached) — regression for narrative drift fix', () => {
+    // Educational workedExamples text previously miscalculated the cached input cost by 10x
+    // (wrote $0.0000001875 instead of $0.000001875), understating cost per request as
+    // ~$0.0000062 and monthly cost as ~$557. The real calculate() output is ~$0.0000079/req
+    // and ~$709/month at 3M requests/day.
+    const r = config.calculate({
+      model: 'gemini-3-flash',
+      promptTokensPerRequest: '100',
+      completionTokensPerRequest: '10',
+      useCachePricing: 'yes',
+      dailyActiveUsers: '1000000',
+      requestsPerUser: '3',
+    });
+    near(parseMoney(getValue(r, 'costPerRequest')), 0.000007875, 0.0000001);
+    near(parseMoney(getValue(r, 'monthlyCost')), 708.75, 1);
+  });
+
   it('shows Claude Sonnet 4.6 pricing', () => {
     const r = config.calculate({ ...baseValues, model: 'claude-sonnet-4' });
     expect(getValue(r, 'modelName')).toBe('Claude Sonnet 4.6');
