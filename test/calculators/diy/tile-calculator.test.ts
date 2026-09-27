@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import tileConfig from '../../../src/calculators/diy/tile/index';
-import { getValue } from '../../helpers';
+import { getValue, parseNumber, near } from '../../helpers';
 
 describe('Tile Calculator', () => {
   describe('basic tile calculations', () => {
@@ -40,6 +40,22 @@ describe('Tile Calculator', () => {
       });
       const boxes = getValue(results, 'boxesNeeded');
       expect(boxes).toBeTruthy();
+    });
+
+    it('treats an exactly-2-sq-ft tile (12x24) as large format at 5/box — regression fix', () => {
+      // Bug: `tileArea > 2 ? 5 : 10` excluded the common 12x24" tile (exactly 2 sq ft)
+      // from the large-format bucket, giving 10/box instead of the documented 5/box.
+      // The Nashville bathroom worked example (12x10 room, 12x24 tile, diagonal, 15% waste)
+      // expects 69 tiles at 5/box = 14 boxes, not 7 boxes at 10/box.
+      const results = tileConfig.calculate({
+        areaLength: '12',
+        areaWidth: '10',
+        tileLength: '12',
+        tileWidth: '24',
+        layout: 'diagonal',
+      });
+      near(parseNumber(getValue(results, 'baseTiles')), 60);
+      near(parseNumber(getValue(results, 'boxesNeeded')), 14);
     });
   });
 

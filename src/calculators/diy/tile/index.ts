@@ -136,7 +136,7 @@ const tileConfig: CalculatorConfig = {
     const wasteTiles = Math.ceil(baseTiles * wasteDecimal);
     const totalTiles = Math.ceil(baseTiles * (1 + wasteDecimal));
     // Standard box has 10 tiles; adjust for larger format
-    const tilesPerBox = effectiveTileL * effectiveTileW > 2 ? 5 : 10;
+    const tilesPerBox = effectiveTileL * effectiveTileW >= 2 ? 5 : 10;
     const boxesNeeded = Math.ceil(totalTiles / tilesPerBox);
 
     const results = [
