@@ -8,6 +8,16 @@ describe('Pig Gestation', () => {
     expect(r.find(x => x.id === 'gestation')?.value).toContain('3 months');
   });
 
+  it('matches the worked example farrowing date for a gilt bred 2025-03-01 (regression: bare `new Date(breedingStr)` parsed as UTC midnight, showing June 22 instead of June 23 in negative-UTC-offset timezones)', () => {
+    const r = config.calculate({ breedingDate: '2025-03-01', breedType: 'commercial', parity: 'gilt' });
+    expect(r.find(x => x.id === 'dueDate')?.value).toBe('June 23, 2025');
+  });
+
+  it('matches the worked example farrowing date for a mature sow bred 2025-10-15', () => {
+    const r = config.calculate({ breedingDate: '2025-10-15', breedType: 'commercial', parity: 'matureSow' });
+    expect(r.find(x => x.id === 'dueDate')?.value).toBe('February 6, 2026');
+  });
+
   it('computes pregnancy progress percentage', () => {
     const r = config.calculate({ breedingDate: '2025-01-01', breedType: 'commercial', parity: 'matureSow' });
     expect(r.find(x => x.id === 'progress')).toBeDefined();

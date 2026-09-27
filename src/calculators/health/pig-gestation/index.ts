@@ -42,7 +42,7 @@ calculate: (values): CalculatorResult[] => {
 
     if (!breedingStr || !breedingStr.trim()) return [];
 
-    const breedingDate = new Date(breedingStr);
+    const breedingDate = new Date(breedingStr + 'T00:00:00');
     if (isNaN(breedingDate.getTime())) return [];
 
     // Base gestation: 114 days (3-3-3 rule). Breed and parity adjustments
