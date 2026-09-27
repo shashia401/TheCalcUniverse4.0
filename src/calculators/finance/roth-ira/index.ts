@@ -69,13 +69,13 @@ const rothIRAConfig: CalculatorConfig = {
       type: 'select',
       required: true,
       options: [
-        { label: '10% — Single < $11,600 / MFJ < $23,200', value: '10' },
-        { label: '12% — Single $11,600–$47,150 / MFJ up to $94,300', value: '12' },
-        { label: '22% — Single $47,150–$100,525 / MFJ up to $201,050', value: '22' },
-        { label: '24% — Single $100,525–$191,950 / MFJ up to $383,900', value: '24' },
-        { label: '32% — Single $191,950–$243,725 / MFJ up to $487,450', value: '32' },
-        { label: '35% — Single $243,725–$609,350 / MFJ up to $731,200', value: '35' },
-        { label: '37% — Single > $609,350 / MFJ > $731,200', value: '37' },
+        { label: '10% — Single < $12,400 / MFJ < $24,800', value: '10' },
+        { label: '12% — Single $12,400–$50,400 / MFJ up to $100,800', value: '12' },
+        { label: '22% — Single $50,400–$105,700 / MFJ up to $211,400', value: '22' },
+        { label: '24% — Single $105,700–$201,775 / MFJ up to $403,550', value: '24' },
+        { label: '32% — Single $201,775–$256,225 / MFJ up to $512,450', value: '32' },
+        { label: '35% — Single $256,225–$640,600 / MFJ up to $768,700', value: '35' },
+        { label: '37% — Single > $640,600 / MFJ > $768,700', value: '37' },
       ],
       helpText: 'Used to calculate how much in taxes a traditional/taxable account would owe on the same growth',
     },
@@ -207,7 +207,7 @@ const rothIRAConfig: CalculatorConfig = {
     variables: [
       { symbol: 'Contribution Limits', name: `${TAX_YEAR} Roth IRA Max Contributions`, description: `Under 50: $${ROTH_LIMIT_2026.toLocaleString()}/year. Age 50+: $${(ROTH_LIMIT_2026 + ROTH_CATCHUP_2026).toLocaleString()}/year (includes $${ROTH_CATCHUP_2026.toLocaleString()} catch-up). Limits apply to combined contributions across all IRA accounts (Roth + Traditional).` },
       { symbol: 'Tax-Free', name: 'The Core Advantage', description: 'Roth IRA contributions are made with after-tax dollars. All growth and withdrawals in retirement are completely tax-free (assuming age 59½+ and 5-year rule met). On a $1M Roth balance, a 22% withdrawal tax rate would cost $220,000 in a traditional IRA. With a Roth: $0.' },
-      { symbol: 'Income Limit', name: 'Phase-Out Range', description: `For ${TAX_YEAR}: Single filers earning $150,000–$165,000 face a reduced contribution limit. Above $165,000, direct Roth IRA contributions are not allowed. Married filing jointly: $236,000–$246,000 phase-out. Alternative: the "Backdoor Roth IRA" strategy (contribute to traditional IRA, then convert).` },
+      { symbol: 'Income Limit', name: 'Phase-Out Range', description: `For ${TAX_YEAR}: Single filers earning $153,000–$168,000 face a reduced contribution limit. Above $168,000, direct Roth IRA contributions are not allowed. Married filing jointly: $242,000–$252,000 phase-out. Alternative: the "Backdoor Roth IRA" strategy (contribute to traditional IRA, then convert).` },
     ],
     howToUse: [
       'Enter your current and target retirement age to set the investment window.',
@@ -222,7 +222,7 @@ const rothIRAConfig: CalculatorConfig = {
       'Plan your annual contribution strategy to maximize the Roth IRA limit and understand the long-term value of tax-free withdrawals in retirement.',
     ],
     explanation:
-      `The Roth IRA is the most tax-efficient retirement account available to most Americans. You pay taxes now (on contributions) and never again — not on growth, not on withdrawals. The tax-free compounding advantage grows exponentially: on a $${ROTH_LIMIT_2026.toLocaleString()}/year contribution at 7% for 35 years, your contributions total roughly $${(ROTH_LIMIT_2026 * 35 / 1000).toFixed(0)}K while your tax-free balance reaches over $1M. The ${(35 / 35 * 100).toFixed(0)}%+ of the final balance that represents earnings — all untaxed at withdrawal — is the Roth IRA's irreplaceable value proposition.`,
+      `The Roth IRA is the most tax-efficient retirement account available to most Americans. You pay taxes now (on contributions) and never again — not on growth, not on withdrawals. The tax-free compounding advantage grows exponentially: on a $${ROTH_LIMIT_2026.toLocaleString()}/year contribution at 7% for 35 years, your contributions total roughly $${(ROTH_LIMIT_2026 * 35 / 1000).toFixed(0)}K while your tax-free balance reaches over $1M. Roughly 75% of that final balance represents earnings — all untaxed at withdrawal — which is the Roth IRA's irreplaceable value proposition.`,
     faqs: [
       {
         question: `What are the ${TAX_YEAR} Roth IRA contribution limits?`,
@@ -230,7 +230,7 @@ const rothIRAConfig: CalculatorConfig = {
       },
       {
         question: 'What are the income limits for Roth IRA contributions?',
-        answer: `For ${TAX_YEAR}: Single filers with MAGI above $165,000 cannot contribute directly to a Roth IRA. The phase-out begins at $150,000. For married filing jointly, the phase-out is $236,000–$246,000. If you exceed these limits, consider the "Backdoor Roth IRA" strategy: contribute to a non-deductible traditional IRA, then convert it to Roth.`,
+        answer: `For ${TAX_YEAR}: Single filers with MAGI above $168,000 cannot contribute directly to a Roth IRA. The phase-out begins at $153,000. For married filing jointly, the phase-out is $242,000–$252,000. If you exceed these limits, consider the "Backdoor Roth IRA" strategy: contribute to a non-deductible traditional IRA, then convert it to Roth.`,
       },
       {
         question: 'Roth IRA vs. Traditional IRA: which is better?',
