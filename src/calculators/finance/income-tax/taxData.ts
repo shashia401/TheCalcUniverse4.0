@@ -1,4 +1,4 @@
-import { FEDERAL_BRACKETS, STANDARD_DEDUCTION } from '../../../utils/taxData';
+import { FEDERAL_BRACKETS, STANDARD_DEDUCTION, FICA as SHARED_FICA } from '../../../utils/taxData';
 
 export type FilingStatus = 'single' | 'mfj' | 'mfs' | 'hoh';
 
@@ -15,11 +15,18 @@ export const RETIREMENT_LIMITS_2025 = {
   catchUpIRA: 1000,
 };
 
+// Social Security wage base, rates, and the single/mfj additional-Medicare
+// thresholds now come from the shared, actively-maintained utils/taxData.ts
+// (same fix already applied to FEDERAL_BRACKETS/STANDARD_DEDUCTION above) so
+// this file can't drift out of sync again — the wage base here used to be
+// hardcoded at the stale 2025 figure ($176,100) after the SSA raised it to
+// $184,500 for 2026. mfs/hoh additional-Medicare thresholds aren't in the
+// shared FICA export, so they stay defined locally.
 export const FICA_2025 = {
-  socialSecurityRate: 0.062,
-  socialSecurityWageBase: 176100,
-  medicareRate: 0.0145,
-  additionalMedicareRate: 0.009,
+  socialSecurityRate: SHARED_FICA.socialSecurityRate,
+  socialSecurityWageBase: SHARED_FICA.socialSecurityWageBase,
+  medicareRate: SHARED_FICA.medicareRate,
+  additionalMedicareRate: SHARED_FICA.additionalMedicareRate,
   additionalMedicareThreshold: { single: 200000, mfj: 250000, mfs: 125000, hoh: 200000 },
 };
 

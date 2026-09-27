@@ -228,7 +228,7 @@ const incomeTaxConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What is the difference between marginal and effective tax rate?',
-        answer: 'Your marginal rate is the rate on your last dollar of income (your bracket). Your effective rate is the total tax divided by total income — it\'s the actual percentage of your income paid in taxes. A $75,000 single filer in 2025 is in the 22% bracket, but their federal effective rate is only about 13-14%.',
+        answer: 'Your marginal rate is the rate on your last dollar of income (your bracket). Your effective rate is the total tax divided by total income — it\'s the actual percentage of your income paid in taxes. A $75,000 single filer with just the standard deduction is in the 22% bracket for 2026, but their federal effective rate is only about 10%.',
       },
       {
         question: 'Does my 401(k) contribution really reduce my taxes?',
@@ -236,7 +236,7 @@ const incomeTaxConfig: CalculatorConfig = {
       },
       {
         question: 'What is FICA?',
-        answer: 'FICA stands for Federal Insurance Contributions Act. It funds Social Security (6.2% on wages up to $176,100) and Medicare (1.45% on all wages, plus 0.9% additional Medicare tax on wages over $200,000 for single filers). Your employer pays a matching 6.2% + 1.45%.',
+        answer: 'FICA stands for Federal Insurance Contributions Act. It funds Social Security (6.2% on wages up to $184,500 in 2026) and Medicare (1.45% on all wages, plus 0.9% additional Medicare tax on wages over $200,000 for single filers). Your employer pays a matching 6.2% + 1.45%.',
       },
       {
         question: 'Are state income tax rates accurate?',
@@ -244,7 +244,7 @@ const incomeTaxConfig: CalculatorConfig = {
       },
       {
         question: 'Should I take the standard deduction or itemize?',
-        answer: 'The standard deduction for 2025 is $15,000 for single filers and $30,000 for married couples filing jointly. You should itemize only if your total itemizable deductions (mortgage interest, state and local taxes up to $10,000, charitable contributions, and medical expenses exceeding 7.5% of AGI) exceed the standard deduction. For most taxpayers, the standard deduction yields a lower tax bill, especially after the Tax Cuts and Jobs Act nearly doubled standard deduction amounts. If you own a home with a large mortgage, donate significantly to charity, or have large medical bills, itemizing may be better.',
+        answer: 'The standard deduction for 2026 is $16,100 for single filers and $32,200 for married couples filing jointly. You should itemize only if your total itemizable deductions (mortgage interest, state and local taxes up to $10,000, charitable contributions, and medical expenses exceeding 7.5% of AGI) exceed the standard deduction. For most taxpayers, the standard deduction yields a lower tax bill, especially after the Tax Cuts and Jobs Act nearly doubled standard deduction amounts. If you own a home with a large mortgage, donate significantly to charity, or have large medical bills, itemizing may be better.',
       },
     ],
   
@@ -252,14 +252,14 @@ const incomeTaxConfig: CalculatorConfig = {
       {
         scenario: 'Jake, a single 29-year-old graphic designer in Dallas, TX, earns $75,000/year. He contributes $6,000 to his 401(k) and pays $3,000/year in health insurance premiums (pre-tax). He has no other pre-tax deductions. Texas has no state income tax.',
         inputs: { grossIncome: '75000', filingStatus: 'single', state: 'TX', retirement401k: '6000', healthInsurance: '3000', otherPreTax: '0' },
-        result: 'Federal taxable income: $51,000 ($75,000 − $6,000 − $3,000 = $66,000 AGI − $15,000 standard deduction). Federal income tax: approximately $6,134. FICA: $5,508 (SS: $4,464 on $72,000 FICA wages + Medicare: $1,044). Total tax: $11,642. Annual take-home pay: $54,358 ($4,530/month, $2,091 biweekly). Federal marginal rate: 22%. Federal effective rate: 8.2%. All-in effective rate: 15.5%.',
-        insight: 'Jake keeps about 72 cents of every dollar he earns after all taxes and pre-tax deductions. His 22% marginal bracket sounds high, but his effective federal rate is only 8.2% because progressive brackets tax different portions of his income at different rates — the first $11,925 is taxed at 10%, the next $36,550 at 12%, and only the top $2,525 falls in the 22% bracket. His $6,000 401(k) contribution reduces his taxable income dollar-for-dollar, saving him $1,320 in federal taxes (22% × $6,000). Note that 401(k) contributions do NOT reduce FICA wages (only health insurance and HSA do) — his FICA wages are $72,000. Living in no-income-tax Texas saves him roughly $3,000-$4,000 annually compared to a high-tax state like California or New York.',
+        result: 'Federal taxable income: $49,900 ($75,000 − $6,000 − $3,000 = $66,000 AGI − $16,100 standard deduction). Federal income tax: approximately $5,740. FICA: $5,508 (SS: $4,464 on $72,000 FICA wages + Medicare: $1,044). Total tax: $11,248. Annual take-home pay: $54,752 ($4,563/month, $2,106 biweekly). Federal marginal rate: 12%. Federal effective rate: 7.7%. All-in effective rate: 15.0%.',
+        insight: 'Jake keeps about 73 cents of every dollar he earns after all taxes and pre-tax deductions. His taxable income of $49,900 falls entirely within the 12% bracket (which runs up to $50,400 for single filers in 2026), so his federal effective rate is only 7.7% — the progressive brackets tax the first $12,400 at 10% and the rest at 12%, with none of his income reaching the 22% bracket. His $6,000 401(k) contribution reduces his taxable income dollar-for-dollar, saving him $720 in federal taxes (12% × $6,000). Note that 401(k) contributions do NOT reduce FICA wages (only health insurance and HSA do) — his FICA wages are $72,000. Living in no-income-tax Texas saves him roughly $3,000-$4,000 annually compared to a high-tax state like California or New York.',
       },
       {
         scenario: 'Emily and Ryan Thompson in Portland, OR file married jointly with a combined income of $185,000. They each contribute $10,000 to their 401(k)s ($20,000 total) and pay $6,000/year in health insurance premiums. Ryan also contributes $4,000 to an HSA. Oregon has an effective state rate of approximately 7.7%.',
         inputs: { grossIncome: '185000', filingStatus: 'mfj', state: 'OR', retirement401k: '20000', healthInsurance: '6000', otherPreTax: '4000' },
-        result: 'Federal taxable income: $125,000 ($185,000 − $20,000 − $6,000 − $4,000 = $155,000 AGI − $30,000 MFJ standard deduction). Federal income tax: approximately $17,328. FICA: $13,388 (SS: $10,850 on $175,000 FICA wages + Medicare: $2,538). Oregon state tax: approximately $11,935 (7.7% of $155,000 AGI). Total tax: $42,651. Annual take-home pay: $112,350 ($9,362/month). Federal marginal rate: 22%. Federal effective rate: 9.4%. All-in effective rate: 23.1%.',
-        insight: 'The Thompsons\' combined all-in tax rate of 23.1% is driven significantly by FICA ($13,388) and Oregon\'s state income tax ($11,935), which together exceed their federal tax bill. Their pre-tax deductions are a powerful tax shield: the $30,000 in combined 401(k), health insurance, and HSA contributions reduce their federal AGI by that full amount, saving approximately $6,600 in federal taxes (22% × $30,000). At a 22% federal marginal rate, every additional dollar of traditional 401(k) contribution saves $0.22 in federal tax — an immediate 22% return before any investment growth. For high-income couples in high-tax states, maximizing pre-tax contributions is the single most impactful tax strategy available.',
+        result: 'Federal taxable income: $122,800 ($185,000 − $20,000 − $6,000 − $4,000 = $155,000 AGI − $32,200 MFJ standard deduction). Federal income tax: approximately $16,440. FICA: $13,388 (SS: $10,850 on $175,000 FICA wages + Medicare: $2,538). Oregon state tax: approximately $11,935 (7.7% of $155,000 AGI). Total tax: $41,763. Annual take-home pay: $113,238 ($9,436/month). Federal marginal rate: 22%. Federal effective rate: 8.9%. All-in effective rate: 22.6%.',
+        insight: 'The Thompsons\' combined all-in tax rate of 22.6% is driven significantly by FICA ($13,388) and Oregon\'s state income tax ($11,935), which together exceed their federal tax bill. Their pre-tax deductions are a powerful tax shield: the $30,000 in combined 401(k), health insurance, and HSA contributions reduce their federal AGI by that full amount, saving approximately $6,600 in federal taxes (22% × $30,000). At a 22% federal marginal rate, every additional dollar of traditional 401(k) contribution saves $0.22 in federal tax — an immediate 22% return before any investment growth. For high-income couples in high-tax states, maximizing pre-tax contributions is the single most impactful tax strategy available.',
 
       },
     ],
@@ -272,10 +272,10 @@ const incomeTaxConfig: CalculatorConfig = {
     ],
 
     quickReference: [
-      { label: '2025 Standard Deduction (Single)', value: '$15,000 — reduces taxable income with no itemization required' },
-      { label: '2025 Standard Deduction (MFJ)', value: '$30,000 — married filing jointly' },
-      { label: '2025 Standard Deduction (HoH)', value: '$22,500 — head of household' },
-      { label: 'Social Security Tax (2025)', value: '6.2% on wages up to $176,100 (wage base limit)' },
+      { label: '2026 Standard Deduction (Single)', value: '$16,100 — reduces taxable income with no itemization required' },
+      { label: '2026 Standard Deduction (MFJ)', value: '$32,200 — married filing jointly' },
+      { label: '2026 Standard Deduction (HoH)', value: '$24,150 — head of household' },
+      { label: 'Social Security Tax (2026)', value: '6.2% on wages up to $184,500 (wage base limit)' },
       { label: 'Medicare Tax', value: '1.45% on all wages + 0.9% additional on wages above $200K (single) / $250K (MFJ)' },
       { label: '2025 401(k) Limit (Under 50)', value: '$23,500 — pre-tax or Roth contributions' },
       { label: '2025 401(k) Limit (50+)', value: '$31,000 — includes $7,500 catch-up contribution' },
@@ -285,8 +285,8 @@ const incomeTaxConfig: CalculatorConfig = {
     limitations: [
       'State income tax uses simplified effective rates (flat percentage applied to AGI). Many states have graduated brackets with multiple rates, standard deductions, and personal exemptions. The calculator\'s state estimate is approximate — for precise state tax planning, use your state\'s official tax calculator or consult a tax preparer.',
       'It does not model tax credits (Child Tax Credit, Earned Income Tax Credit, education credits, saver\'s credit), itemized deductions (mortgage interest, charitable contributions, SALT capped at $10,000), or above-the-line deductions beyond the pre-tax categories provided. Real tax liability may be significantly lower if you qualify for credits.',
-      'FICA calculation applies the Social Security wage base cap ($176,100 in 2025) but does not account for multiple jobs (where each employer withholds separately, potentially causing over-withholding that is refunded at tax time). Additional Medicare tax applies above $200K (single) / $250K (MFJ).',
-      'This calculator assumes all income is W-2 wage income. Self-employment income, investment income (capital gains, dividends, interest), rental income, and retirement distributions are taxed differently and are not modeled. Self-employed individuals must pay both the employee and employer portions of FICA (15.3% total on the first $176,100).',
+      'FICA calculation applies the Social Security wage base cap ($184,500 in 2026) but does not account for multiple jobs (where each employer withholds separately, potentially causing over-withholding that is refunded at tax time). Additional Medicare tax applies above $200K (single) / $250K (MFJ).',
+      'This calculator assumes all income is W-2 wage income. Self-employment income, investment income (capital gains, dividends, interest), rental income, and retirement distributions are taxed differently and are not modeled. Self-employed individuals must pay both the employee and employer portions of FICA (15.3% total on the first $184,500).',
     ],
 citations: [
     { source: 'IRS Publication 17', url: 'https://www.irs.gov/publications/p17' },

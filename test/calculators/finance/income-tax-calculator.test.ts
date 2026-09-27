@@ -10,12 +10,12 @@ describe('income-tax', () => {
       state: 'TX',
     });
     expect(r).toHaveLength(10);
-    // Taxable income: 75000 - 15000 (std deduction, single) = 60000
-    // 10% on first 11925 = 1192.50
-    // 12% on 11925-48475 = 4386.00
-    // 22% on 48475-60000 = 2535.50
-    // Total federal: 1192.50 + 4386.00 + 2535.50 = 8114.00
-    near(parseMoney(getValue(r, 'netPay')), 75000 - 8114 - (75000 * 0.062) - (75000 * 0.0145), 10);
+    // Taxable income: 75000 - 16100 (2026 std deduction, single) = 58900
+    // 10% on first 12400 = 1240.00
+    // 12% on 12400-50400 = 4560.00
+    // 22% on 50400-58900 = 1870.00
+    // Total federal: 1240.00 + 4560.00 + 1870.00 = 7670.00
+    near(parseMoney(getValue(r, 'netPay')), 75000 - 7670 - (75000 * 0.062) - (75000 * 0.0145), 10);
     expect(parseNumber(getValue(r, 'marginalRate'))).toBe(22);
   });
 
@@ -39,9 +39,8 @@ describe('income-tax', () => {
       state: 'TX',
     });
     expect(r).toHaveLength(10);
-    // MFJ std deduction: 30000
-    // Taxable: 150000 - 30000 = 120000
-    // Should be in the 12% marginal rate bracket
+    // MFJ std deduction (2026): 32200
+    // Taxable: 150000 - 32200 = 117800 (in the 22% marginal rate bracket)
     expect(parseMoney(getValue(r, 'netPay'))).toBeGreaterThan(0);
   });
 
@@ -97,8 +96,35 @@ describe('income-tax', () => {
       state: 'FL',
     });
     expect(r).toHaveLength(10);
-    // HoH std deduction: 22500
-    // Taxable: 80000 - 22500 = 57500
+    // HoH std deduction (2026): 24150
+    // Taxable: 80000 - 24150 = 55850
     expect(parseMoney(getValue(r, 'netPay'))).toBeGreaterThan(0);
+  });
+
+  it('matches the "Jake" worked example figures (regression: educational text previously used stale 2025 tax brackets/deduction; the shared 2026 data now puts him in the 12% bracket, not 22%)', () => {
+    const r = config.calculate({
+      grossIncome: '75000',
+      filingStatus: 'single',
+      state: 'TX',
+      retirement401k: '6000',
+      healthInsurance: '3000',
+      otherPreTax: '0',
+    });
+    expect(getValue(r, 'taxableIncome')).toContain('49,900');
+    expect(parseNumber(getValue(r, 'marginalRate'))).toBe(12);
+    near(parseNumber(getValue(r, 'federalTax')), 5740, 5);
+  });
+
+  it('matches the "Thompsons" worked example figures (regression: educational text previously used the stale 2025 MFJ standard deduction of $30,000 instead of the 2026 figure of $32,200)', () => {
+    const r = config.calculate({
+      grossIncome: '185000',
+      filingStatus: 'mfj',
+      state: 'OR',
+      retirement401k: '20000',
+      healthInsurance: '6000',
+      otherPreTax: '4000',
+    });
+    expect(getValue(r, 'taxableIncome')).toContain('122,800');
+    near(parseNumber(getValue(r, 'federalTax')), 16440, 5);
   });
 });
