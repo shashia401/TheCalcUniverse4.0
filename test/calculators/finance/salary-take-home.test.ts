@@ -16,13 +16,13 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
     const gross = parseMoney(getValue(r, 'grossAnnual'));
     near(gross, 75000);
 
-    // Federal tax on $60K taxable (after $15K std deduction):
-    //   10% on $0–$11,925 = $1,192.50
-    //   12% on $11,925–$48,475 = $4,386.00
-    //   22% on $48,475–$60,000 = $2,535.50
-    //   Total federal = $8,114.00
+    // Federal tax on $58,900 taxable (after $16,100 std deduction, 2026):
+    //   10% on $0–$12,400 = $1,240.00
+    //   12% on $12,400–$50,400 = $4,560.00
+    //   22% on $50,400–$58,900 = $1,870.00
+    //   Total federal = $7,670.00
     const federalTax = parseMoney(getValue(r, 'totalFederalTax'));
-    near(federalTax, 8114.00);
+    near(federalTax, 7670.00);
 
     // FICA: $75K × 7.65% = $5,737.50
     const fica = parseMoney(getValue(r, 'totalFICA'));
@@ -31,17 +31,17 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
     // State tax: none → $0
     expect(getValue(r, 'totalStateTax')).toBe('$0.00 (No state tax)');
 
-    // Total tax: $8,114 + $5,737.50 = $13,851.50
+    // Total tax: $7,670 + $5,737.50 = $13,407.50
     const totalTax = parseMoney(getValue(r, 'totalTax'));
-    near(totalTax, 13851.50);
+    near(totalTax, 13407.50);
 
-    // Net annual: $75,000 – $13,851.50 = $61,148.50
+    // Net annual: $75,000 – $13,407.50 = $61,592.50
     const netAnnual = parseMoney(getValue(r, 'netAnnual'));
-    near(netAnnual, 61148.50);
+    near(netAnnual, 61592.50);
 
-    // Per paycheck (monthly): $61,148.50 / 12 ≈ $5,095.71
+    // Per paycheck (monthly): $61,592.50 / 12 ≈ $5,132.71
     const perPaycheck = parseMoney(getValue(r, 'perPaycheck'));
-    near(perPaycheck, 61148.50 / 12, 0.02);
+    near(perPaycheck, 61592.50 / 12, 0.02);
   });
 
   it('$150K married, CA — higher total tax than test 1 due to state tax', () => {
@@ -60,19 +60,19 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
     // State tax should be ~$13,950 ($150K × 9.3%)
     near(stateTax, 13950.00);
 
-    // Federal tax on $120K taxable (MFJ, $30K std deduction):
-    //   10% on $0–$23,850 = $2,385
-    //   12% on $23,850–$96,950 = $8,772
-    //   22% on $96,950–$120,000 = $5,071
-    //   Total = $16,228
+    // Federal tax on $117,800 taxable (MFJ, $32,200 std deduction, 2026):
+    //   10% on $0–$24,800 = $2,480
+    //   12% on $24,800–$100,800 = $9,120
+    //   22% on $100,800–$117,800 = $3,740
+    //   Total = $15,340
     const federalTax = parseMoney(getValue(r, 'totalFederalTax'));
-    near(federalTax, 16228.00);
+    near(federalTax, 15340.00);
 
-    // Total tax should be higher than the single/no-state case (~$13,851)
+    // Total tax should be higher than the single/no-state case (~$13,407.50)
     const totalTax = parseMoney(getValue(r, 'totalTax'));
-    expect(totalTax).toBeGreaterThan(13851.50);
+    expect(totalTax).toBeGreaterThan(13407.50);
 
-    // FICA: $150K (SS capped at $176,100, no cap on Medicare)
+    // FICA: $150K (SS capped at $184,500, no cap on Medicare)
     //   SS: $150K × 6.2% = $9,300
     //   Medicare: $150K × 1.45% = $2,175
     //   Total = $11,475
@@ -115,27 +115,27 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
     const deductions = parseMoney(getValue(r, 'preTaxDeductions'));
     near(deductions, 7500.00);
 
-    // Taxable income: $75K – $7,500 – $15,000 = $52,500
+    // Taxable income: $75K – $7,500 – $16,100 = $51,400
     const taxable = parseMoney(getValue(r, 'taxableIncome'));
-    near(taxable, 52500.00);
+    near(taxable, 51400.00);
 
-    // Federal tax on $52,500 taxable:
-    //   10% on $0–$11,925 = $1,192.50
-    //   12% on $11,925–$48,475 = $4,386.00
-    //   22% on $48,475–$52,500 = $885.50
-    //   Total = $6,464.00
+    // Federal tax on $51,400 taxable (2026 brackets):
+    //   10% on $0–$12,400 = $1,240.00
+    //   12% on $12,400–$50,400 = $4,560.00
+    //   22% on $50,400–$51,400 = $220.00
+    //   Total = $6,020.00
     const federalTax = parseMoney(getValue(r, 'totalFederalTax'));
-    near(federalTax, 6464.00);
+    near(federalTax, 6020.00);
 
     // FICA is still on full $75K (pre-tax 401k does NOT reduce FICA)
     const fica = parseMoney(getValue(r, 'totalFICA'));
     near(fica, 5737.50);
 
-    // Net annual: $75K – $7,500 – $6,464 – $5,737.50 = $55,298.50
+    // Net annual: $75K – $7,500 – $6,020 – $5,737.50 = $55,742.50
     const netAnnual = parseMoney(getValue(r, 'netAnnual'));
-    near(netAnnual, 55298.50);
+    near(netAnnual, 55742.50);
 
-    // Net should be lower than the no-deduction case ($61,148.50)
+    // Net should be lower than the no-deduction case ($61,592.50)
     const rNoDed = config.calculate({
       annualSalary: '75000',
       filingStatus: 'single',
@@ -157,12 +157,12 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
     });
 
     // FICA should include additional Medicare (0.9% on wages over $250K for MFJ)
-    // SS: $176,100 × 6.2% = $10,918.20 (capped)
+    // SS: $184,500 × 6.2% = $11,439.00 (capped, 2026 wage base)
     // Medicare: $300K × 1.45% = $4,350
     // Additional: ($300K - $250K) × 0.9% = $450
-    // Total: $10,918.20 + $4,350 + $450 = $15,718.20
+    // Total: $11,439.00 + $4,350 + $450 = $16,239.00
     const fica = parseMoney(getValue(r, 'totalFICA'));
-    near(fica, 15718.20);
+    near(fica, 16239.00);
 
     // CA state tax: $300K × 9.3% = $27,900
     const stateTax = parseMoney(getValue(r, 'totalStateTax'));
@@ -178,13 +178,13 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
       preTaxDeductions: '0',
     });
 
-    // FICA: SS capped at $176,100
-    // SS: $176,100 × 6.2% = $10,918.20
+    // FICA: SS capped at $184,500 (2026 wage base)
+    // SS: $184,500 × 6.2% = $11,439.00
     // Medicare: $225K × 1.45% = $3,262.50
     // Additional: ($225K - $200K) × 0.9% = $225
-    // Total: $10,918.20 + $3,262.50 + $225 = $14,405.70
+    // Total: $11,439.00 + $3,262.50 + $225 = $14,926.50
     const fica = parseMoney(getValue(r, 'totalFICA'));
-    near(fica, 14405.70);
+    near(fica, 14926.50);
   });
 
   it('Bi-weekly vs monthly frequency — same net annual, different per-paycheck', () => {
@@ -209,20 +209,20 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
     const netAnnualBiweekly = parseMoney(getValue(rBiweekly, 'netAnnual'));
     near(netAnnualMonthly, netAnnualBiweekly);
 
-    // Net annual for $100K single no state:
-    //   Taxable: $100K – $15K = $85K
-    //   Fed tax: $1,192.50 + $4,386 + $8,035.50 = $13,614
+    // Net annual for $100K single no state (2026 brackets):
+    //   Taxable: $100K – $16.1K = $83.9K
+    //   Fed tax: $1,240 + $4,560 + $7,370 = $13,170
     //   FICA: $6,200 + $1,450 = $7,650
-    //   Total tax: $21,264
-    //   Net: $78,736
-    near(netAnnualMonthly, 78736);
+    //   Total tax: $20,820
+    //   Net: $79,180
+    near(netAnnualMonthly, 79180);
 
     // Per-paycheck differs by frequency
     const perPayMonthly = parseMoney(getValue(rMonthly, 'perPaycheck'));
     const perPayBiweekly = parseMoney(getValue(rBiweekly, 'perPaycheck'));
 
-    near(perPayMonthly, 78736 / 12, 0.02);
-    near(perPayBiweekly, 78736 / 26, 0.02);
+    near(perPayMonthly, 79180 / 12, 0.02);
+    near(perPayBiweekly, 79180 / 26, 0.02);
 
     // Per-paycheck amounts should be different
     expect(perPayMonthly).not.toBeCloseTo(perPayBiweekly, 1);
@@ -249,7 +249,7 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
     });
 
     const effRate = parseNumber(getValue(r, 'effectiveTaxRate'));
-    // Effective rate = $13,851.50 / $75,000 * 100 ≈ 18.5%
-    near(effRate, 18.5, 0.1);
+    // Effective rate = $13,407.50 / $75,000 * 100 ≈ 17.9%
+    near(effRate, 17.9, 0.1);
   });
 });
