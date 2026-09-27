@@ -236,7 +236,7 @@ const dogCatPregnancyConfig: CalculatorConfig = {
       {
         scenario: 'A small-breed dog (Chihuahua) was bred twice on June 10 and June 12, 2026. The owner is unsure which date to use and wants to understand all relevant pregnancy milestones.',
         inputs: { species: 'dog', breedingDate: '2026-06-11' },
-        result: 'Whelping Due Date: August 13, 2026 (using June 11 as midpoint). Expected Range: August 6 to August 16, 2026. Current trimester depends on today\'s date relative to breeding.',
+        result: 'Whelping Due Date: August 13, 2026 (using June 11 as midpoint). Expected Range: August 8 to August 18, 2026. Current trimester depends on today\'s date relative to breeding.',
         insight: 'When multiple matings occur over 2–3 days, using the middle date provides the most practical estimate. Small breeds like Chihuahuas sometimes deliver 1–3 days earlier than large breeds, so the owner should be especially watchful starting August 3. Due to the breed\'s tendency for dystocia (difficult birth due to large head-to-pelvis ratio), the owner should schedule a veterinarian to be on standby and discuss planned C-section protocols. The week-by-week calendar helps identify that the first trimester (days 1–21) ends around July 1 — embryo implantation is complete by then. X-rays on July 26 (day 45) can confirm puppy count, which is especially helpful for small breeds where litter size is typically 1–4 puppies.',
       },
     ],

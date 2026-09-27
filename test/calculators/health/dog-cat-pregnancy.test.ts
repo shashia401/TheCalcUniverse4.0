@@ -135,6 +135,16 @@ describe('Dog/Cat Pregnancy Whelping Calculator', () => {
     expect(trimester).toContain('Days 22–42');
   });
 
+  it('matches the worked example date range for a dog bred 2026-06-11 (regression: narrative previously said Aug 6-16, actual is Aug 8-18)', () => {
+    const r = config.calculate({
+      species: 'dog',
+      breedingDate: '2026-06-11',
+    });
+    const range = getValue(r, 'dueDateRange');
+    expect(range).toContain('August 8');
+    expect(range).toContain('August 18');
+  });
+
   it('returns due date range with en-dash separator', () => {
     const r = config.calculate({
       species: 'dog',
