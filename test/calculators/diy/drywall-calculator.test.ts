@@ -141,6 +141,18 @@ describe('drywall', () => {
     expect(tape).toContain('rolls');
   });
 
+  it('worked example: 24x16 basement — regression for narrative drift fix', () => {
+    // Educational workedExamples text previously claimed "6.0 gal joint compound" and
+    // "6 rolls joint tape" for this scenario. The real calculate() output is 6.5 gal
+    // (ceil(33/30*5)+0.5) and 4 rolls (ceil(2*(24+16)/50)*2).
+    const r = config.calculate({
+      length: '24', width: '16', height: '8', sheetSize: '32', ceiling: 'yes', doors: '1', windows: '3',
+    });
+    near(parseNumber(getValue(r, 'sheets')), 33);
+    near(parseNumber(getValue(r, 'jointCompound')), 6.5, 0.05);
+    near(parseNumber(getValue(r, 'tape')), 4, 0.01);
+  });
+
   describe('Educational content', () => {
     it('has formula defined', () => {
       expect(config.educational.formula).toBeTruthy();
