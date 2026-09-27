@@ -173,14 +173,14 @@ const breakEvenConfig: CalculatorConfig = {
       {
         scenario: 'Tom runs a coffee shop with $8,000 in monthly fixed costs (rent, utilities, staff). Each cup sells for $4.50. Variable costs per cup are $1.20 (beans, milk, cup, lid). Tom wants to know how many cups he must sell per month to break even.',
         inputs: { fixedCosts: '8000', pricePerUnit: '4.50', variableCostPerUnit: '1.20' },
-        result: '2,425 cups/month (about 81 cups/day) — break-even revenue of $10,912.50',
-        insight: 'Contribution margin per cup = $4.50 − $1.20 = $3.30. Break-even = $8,000 ÷ $3.30 = 2,425 cups/month, or about 81 cups per day (30-day month). If the shop is open 12 hours daily, that\'s roughly 7 cups per hour. Tom\'s shop currently sells 95 cups/day, giving him a 17% margin of safety above break-even. To increase profitability, raising the price $0.50 to $5.00 would reduce break-even to 2,105 cups/month (70/day) — a significant safety improvement.',
+        result: '2,425 cups/month (about 81 cups/day) — break-even revenue of $10,909.09',
+        insight: 'Contribution margin per cup = $4.50 − $1.20 = $3.30. Break-even = $8,000 ÷ $3.30 = 2,424.2, rounded up to 2,425 cups/month, or about 81 cups per day (30-day month). If the shop is open 12 hours daily, that\'s roughly 7 cups per hour. Tom\'s shop currently sells 95 cups/day (2,850/month), giving him about a 15% margin of safety above break-even. To increase profitability, raising the price $0.50 to $5.00 would reduce break-even to 2,106 cups/month (70/day) — a significant safety improvement.',
       },
       {
         scenario: 'Deepa plans to launch a SaaS product with $45,000 in monthly fixed costs (3 engineers at $10K, hosting $3K, sales $7K, admin $5K). The product is priced at $99/month per user with variable costs of $6/month (hosting per user, payment processing). She wants to know minimum subscribers needed.',
         inputs: { fixedCosts: '45000', pricePerUnit: '99', variableCostPerUnit: '6' },
-        result: '484 subscribers — break-even revenue of $47,916/month',
-        insight: 'Contribution margin = $99 − $6 = $93/user/month. Break-even = $45,000 ÷ $93 = 484 subscribers. At $99/month, 484 users generate $47,916/month in revenue. If Deepa raises the price to $149/month, break-even drops to 315 subscribers — much more achievable for a B2B SaaS in the first year. This analysis helped Deepa decide to launch at $149/month rather than $99.',
+        result: '484 subscribers — break-even revenue of $47,903.23/month',
+        insight: 'Contribution margin = $99 − $6 = $93/user/month. Break-even = $45,000 ÷ $93 = 483.87, rounded up to 484 subscribers. At $99/month, break-even revenue is $45,000 ÷ 93 × 99 ≈ $47,903/month. If Deepa raises the price to $149/month, break-even drops to 315 subscribers — much more achievable for a B2B SaaS in the first year. This analysis helped Deepa decide to launch at $149/month rather than $99.',
       },
       {
         scenario: 'Aisha sells handmade jewelry on Etsy with $2,400 in fixed monthly costs (studio rent, website, tools). Her average necklace sells for $38 with variable costs of $14 (materials, Etsy fees, packaging, $5 shipping). She wants to know break-even and whether she can afford to quit her day job.',

@@ -107,6 +107,22 @@ describe('break-even', () => {
     const units = parseNumber(getValue(r, 'breakEvenUnits'));
     expect(units).toBe(1);
   });
+
+  it('worked example: coffee shop — regression for narrative drift fix', () => {
+    // Educational workedExamples text previously claimed a break-even revenue of $10,912.50
+    // (computed from the display-rounded 2,425 units), but calculate() derives breakEvenRevenue
+    // from the raw (unrounded) unit count: 8000/3.30 * 4.50 = $10,909.09.
+    const r = config.calculate({ fixedCosts: '8000', pricePerUnit: '4.50', variableCostPerUnit: '1.20' });
+    near(parseNumber(getValue(r, 'breakEvenUnits')), 2425);
+    near(parseNumber(getValue(r, 'breakEvenRevenue')), 10909.09, 0.5);
+  });
+
+  it('worked example: SaaS subscribers — regression for narrative drift fix', () => {
+    // Same class of bug: text claimed $47,916 (484 x 99) instead of the real raw-unit revenue.
+    const r = config.calculate({ fixedCosts: '45000', pricePerUnit: '99', variableCostPerUnit: '6' });
+    near(parseNumber(getValue(r, 'breakEvenUnits')), 484);
+    near(parseNumber(getValue(r, 'breakEvenRevenue')), 47903.23, 0.5);
+  });
 });
 
 describe('Break-Even educational content', () => {
