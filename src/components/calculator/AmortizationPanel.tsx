@@ -201,7 +201,7 @@ function CostDonutChart({ breakdown }: { breakdown: MonthlyBreakdown }) {
             ))}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 dark:text-slate-600 dark:text-slate-400">Monthly</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400">Monthly</span>
             <span className="text-base font-black text-slate-800 dark:text-slate-100">{fmtTotal(total)}</span>
           </div>
         </div>
@@ -215,7 +215,7 @@ function CostDonutChart({ breakdown }: { breakdown: MonthlyBreakdown }) {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-100">${fmt(seg.value)}</span>
-                <span className="text-[10px] text-slate-600 dark:text-slate-400 w-8 text-right dark:text-slate-600 dark:text-slate-400">{((seg.value / total) * 100).toFixed(0)}%</span>
+                <span className="text-[10px] text-slate-600 dark:text-slate-400 w-8 text-right">{((seg.value / total) * 100).toFixed(0)}%</span>
               </div>
             </div>
           ))}
@@ -290,8 +290,8 @@ function ComparisonChart({
   ];
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Payoff comparison chart">
+    <div className="w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="img" aria-label="Payoff comparison chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
         {gridLines.map((g) => {
           const y = toY(g * maxY);
           return (
@@ -323,7 +323,7 @@ function ComparisonChart({
         {legend.map((l) => (
           <div key={l.label} className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 flex-shrink-0" style={{ backgroundColor: l.color }} />
-            <span className="text-[10px] text-slate-600 dark:text-slate-400 dark:text-slate-600 dark:text-slate-400">{l.label}</span>
+            <span className="text-[10px] text-slate-600 dark:text-slate-400">{l.label}</span>
           </div>
         ))}
       </div>
@@ -378,8 +378,8 @@ function BalanceChart({ rows }: { rows: AmortizationRow[] }) {
   for (let y = step; y <= years; y += step) xLabels.push(y);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px', maxWidth: '100%' }} role="img" aria-label="Amortization balance chart">
+    <div className="w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="img" aria-label="Amortization balance chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px', maxWidth: '100%' }} aria-hidden="true">
         {gridLines.map((g) => {
           const y = padT + (1 - g) * chartH;
           return (
@@ -414,11 +414,11 @@ function BalanceChart({ rows }: { rows: AmortizationRow[] }) {
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 px-1">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-0.5 rounded-sm flex-shrink-0" style={{ backgroundColor: '#ea580c' }} />
-          <span className="text-[10px] text-slate-600 dark:text-slate-400 dark:text-slate-600 dark:text-slate-400">Balance</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400">Balance</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-0.5 rounded-sm flex-shrink-0" style={{ backgroundColor: '#f97316' }} />
-          <span className="text-[10px] text-slate-600 dark:text-slate-400 dark:text-slate-600 dark:text-slate-400">Cumulative Interest</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400">Cumulative Interest</span>
         </div>
       </div>
     </div>
@@ -563,13 +563,13 @@ function ExtraPaymentPanel({
         <div className="flex gap-2">
           <button
             onClick={() => setMode('monthly')}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors border ${mode === 'monthly' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 dark:text-slate-400 border-slate-200 hover:border-blue-300'}`}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors border ${mode === 'monthly' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-blue-300'}`}
           >
             Extra Monthly
           </button>
           <button
             onClick={() => setMode('biweekly')}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors border ${mode === 'biweekly' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 dark:text-slate-400 border-slate-200 hover:border-blue-300'}`}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors border ${mode === 'biweekly' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-blue-300'}`}
           >
             Bi-Weekly
           </button>
@@ -579,7 +579,7 @@ function ExtraPaymentPanel({
           <div className="flex items-center gap-3">
             <label className="text-xs font-semibold text-slate-600 whitespace-nowrap dark:text-slate-300">Extra per month</label>
             <div className="relative flex-1">
-              <span className="absolute inset-y-0 left-3 flex items-center text-slate-600 dark:text-slate-400 text-sm font-medium pointer-events-none dark:text-slate-600 dark:text-slate-400">$</span>
+              <span className="absolute inset-y-0 left-3 flex items-center text-slate-600 dark:text-slate-400 text-sm font-medium pointer-events-none">$</span>
               <input
                 type="text"
                 inputMode="decimal"
@@ -595,7 +595,7 @@ function ExtraPaymentPanel({
             <div className="flex items-center gap-3">
               <label className="text-xs font-semibold text-slate-600 whitespace-nowrap dark:text-slate-300">Extra per bi-weekly</label>
               <div className="relative flex-1">
-                <span className="absolute inset-y-0 left-3 flex items-center text-slate-600 dark:text-slate-400 text-sm font-medium pointer-events-none dark:text-slate-600 dark:text-slate-400">$</span>
+                <span className="absolute inset-y-0 left-3 flex items-center text-slate-600 dark:text-slate-400 text-sm font-medium pointer-events-none">$</span>
                 <input
                   type="text"
                   inputMode="decimal"
@@ -606,7 +606,7 @@ function ExtraPaymentPanel({
                 />
               </div>
             </div>
-            <p className="text-[10px] text-slate-600 dark:text-slate-400 dark:text-slate-600 dark:text-slate-400">
+            <p className="text-[10px] text-slate-600 dark:text-slate-400">
               Bi-weekly = half payment every 2 weeks (26 payments/yr). Even $0 extra bi-weekly saves vs. monthly.
             </p>
           </div>
@@ -617,26 +617,26 @@ function ExtraPaymentPanel({
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-800/60 dark:bg-emerald-950/30">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">Interest Saved</p>
-              <p className="text-lg font-black text-emerald-700">${fmtInt(savings.interestSaved)}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">Interest Saved</p>
+              <p className="text-lg font-black text-emerald-700 dark:text-emerald-400">${fmtInt(savings.interestSaved)}</p>
             </div>
             <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-800/60 dark:bg-blue-950/40">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1">Time Saved</p>
-              <p className="text-lg font-black text-blue-700">{timeSavedLabel(savings.timeSavedMonths)}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">Time Saved</p>
+              <p className="text-lg font-black text-blue-700 dark:text-blue-400">{timeSavedLabel(savings.timeSavedMonths)}</p>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 col-span-2 sm:col-span-1 dark:border-slate-700 dark:bg-slate-800">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1 dark:text-slate-600 dark:text-slate-400">New Payoff</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1">New Payoff</p>
               <p className="text-lg font-black text-slate-800 dark:text-slate-100">{savings.newPayoffLabel}</p>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Original vs. with-extra-payment comparison table">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 dark:bg-slate-900 dark:border-slate-700">
-                  <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] dark:text-slate-600 dark:text-slate-400"></th>
-                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] dark:text-slate-600 dark:text-slate-400">Original</th>
-                  <th scope="col" className="text-right px-4 py-2.5 font-bold text-emerald-600 uppercase tracking-wider text-[10px]">With Extra</th>
+                  <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]"></th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">Original</th>
+                  <th scope="col" className="text-right px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider text-[10px]">With Extra</th>
                 </tr>
               </thead>
               <tbody>
@@ -647,39 +647,39 @@ function ExtraPaymentPanel({
                     {mode === 'monthly' ? `$${fmt(monthlyPayment + extraMonthly)}` : `$${fmt(monthlyPayment / 2 + extraBiweekly)}/2wk`}
                   </td>
                 </tr>
-                <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800">
+                <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/50">
                   <td className="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Total Interest</td>
-                  <td className="px-3 py-2.5 text-right font-bold text-red-500">${fmtInt(originalInterest)}</td>
-                  <td className="px-4 py-2.5 text-right font-bold text-emerald-600">${fmtInt(savings.newTotalInterest)}</td>
+                  <td className="px-3 py-2.5 text-right font-bold text-red-500 dark:text-red-400">${fmtInt(originalInterest)}</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-emerald-600 dark:text-emerald-400">${fmtInt(savings.newTotalInterest)}</td>
                 </tr>
                 <tr className="border-b border-slate-100 dark:border-slate-800">
                   <td className="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Total Payments</td>
                   <td className="px-3 py-2.5 text-right font-bold text-slate-800 dark:text-slate-100">${fmtInt(monthlyPayment * originalMonths)}</td>
                   <td className="px-4 py-2.5 text-right font-bold text-slate-800 dark:text-slate-100">${fmtInt(loanAmount + savings.newTotalInterest)}</td>
                 </tr>
-                <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800">
+                <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/50">
                   <td className="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Payoff Date</td>
                   <td className="px-3 py-2.5 text-right font-bold text-slate-800 dark:text-slate-100">{originalPayoffLabel}</td>
-                  <td className="px-4 py-2.5 text-right font-bold text-emerald-700">{savings.newPayoffLabel}</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-emerald-700 dark:text-emerald-400">{savings.newPayoffLabel}</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Loan Term</td>
                   <td className="px-3 py-2.5 text-right font-bold text-slate-800 dark:text-slate-100">{timeSavedLabel(originalMonths)}</td>
-                  <td className="px-4 py-2.5 text-right font-bold text-emerald-700">{timeSavedLabel(savings.newMonths)}</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-emerald-700 dark:text-emerald-400">{timeSavedLabel(savings.newMonths)}</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-3 dark:text-slate-600 dark:text-slate-400">Payoff Comparison</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-3">Payoff Comparison</p>
             <ComparisonChart originalRows={originalYearly} newRows={savings.newYearly} maxYears={maxYears} />
           </div>
         </div>
       )}
 
       {savings && savings.timeSavedMonths <= 0 && (
-        <p className="text-xs text-slate-600 dark:text-slate-400 text-center py-2 dark:text-slate-600 dark:text-slate-400">Enter an extra payment amount to see your savings.</p>
+        <p className="text-xs text-slate-600 dark:text-slate-400 text-center py-2">Enter an extra payment amount to see your savings.</p>
       )}
     </div>
   );
@@ -734,7 +734,7 @@ export default function AmortizationPanel({
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden print:shadow-none dark:border-slate-700 dark:bg-slate-800">
       <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
-        <TrendingDown size={16} className="text-slate-600 dark:text-slate-400 dark:text-slate-600 dark:text-slate-400" />
+        <TrendingDown size={16} className="text-slate-600 dark:text-slate-400" />
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300">Amortization Schedule</span>
       </div>
 
@@ -742,13 +742,13 @@ export default function AmortizationPanel({
         <div className={`grid gap-6 ${hasExtras ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
           {hasExtras && monthlyBreakdown && (
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-3 dark:text-slate-600 dark:text-slate-400">Monthly Cost Breakdown</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-3">Monthly Cost Breakdown</p>
               <CostDonutChart breakdown={monthlyBreakdown} />
             </div>
           )}
 
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-3 dark:text-slate-600 dark:text-slate-400">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-3">
               {hasExtras ? 'Principal vs. Interest Over Time' : 'Balance Over Time'}
             </p>
             <BalanceChart rows={yearly} />
@@ -793,7 +793,7 @@ export default function AmortizationPanel({
               <button
                 onClick={() => { setView('annual'); setShowAll(false); }}
                 className={`px-4 py-1.5 transition-colors ${
-                  view === 'annual' ? 'bg-blue-500 text-white' : 'bg-white text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                  view === 'annual' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
               >
                 Annual
@@ -801,7 +801,7 @@ export default function AmortizationPanel({
               <button
                 onClick={() => { setView('monthly'); setShowAll(false); }}
                 className={`px-4 py-1.5 transition-colors border-l border-slate-200 dark:border-slate-700 ${
-                  view === 'monthly' ? 'bg-blue-500 text-white' : 'bg-white text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                  view === 'monthly' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
               >
                 Monthly
@@ -821,34 +821,34 @@ export default function AmortizationPanel({
                     : monthly.map((r, i) => [i + 1, `${MONTH_NAMES[r.month - 1]} ${r.year}`, r.interest.toFixed(2), r.principal.toFixed(2), r.endBalance.toFixed(2)])
                 }
               />
-              <span className="text-[10px] text-slate-600 dark:text-slate-400 dark:text-slate-600 dark:text-slate-400">
+              <span className="text-[10px] text-slate-600 dark:text-slate-400">
                 {view === 'annual' ? `${yearly.length} years` : `${monthly.length} payments`}
               </span>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Amortization schedule table">
             {view === 'annual' ? (
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 dark:bg-slate-900 dark:border-slate-700">
-                    <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] dark:text-slate-600 dark:text-slate-400">Year</th>
-                    <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] hidden sm:table-cell dark:text-slate-600 dark:text-slate-400">Period</th>
+                    <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">Year</th>
+                    <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] hidden sm:table-cell">Period</th>
                     <th scope="col" className="text-right px-3 py-2.5 font-bold text-orange-500 uppercase tracking-wider text-[10px]">Interest</th>
                     <th scope="col" className="text-right px-3 py-2.5 font-bold text-blue-500 uppercase tracking-wider text-[10px]">Principal</th>
-                    <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] dark:text-slate-600 dark:text-slate-400">Balance</th>
+                    <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">Balance</th>
                   </tr>
                 </thead>
                 <tbody>
                   {displayedYearly.map((row, i) => (
                     <tr
                       key={row.year}
-                      className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors dark:border-slate-800 dark:hover:bg-slate-800${
-                        i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
+                      className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors dark:border-slate-800 dark:hover:bg-slate-800 ${
+                        i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/50 dark:bg-slate-800/50'
                       }`}
                     >
                       <td className="px-4 py-2.5 font-bold text-slate-800 dark:text-slate-100">{row.year}</td>
-                      <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400 hidden sm:table-cell dark:text-slate-600 dark:text-slate-400">{row.dateRange}</td>
+                      <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400 hidden sm:table-cell">{row.dateRange}</td>
                       <td className="px-3 py-2.5 text-right text-orange-600 font-semibold">${fmt(row.interest)}</td>
                       <td className="px-3 py-2.5 text-right text-blue-600 font-semibold">${fmt(row.principal)}</td>
                       <td className="px-4 py-2.5 text-right font-bold text-slate-700 dark:text-slate-200">
@@ -862,23 +862,23 @@ export default function AmortizationPanel({
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 dark:bg-slate-900 dark:border-slate-700">
-                    <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] dark:text-slate-600 dark:text-slate-400">#</th>
-                    <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] dark:text-slate-600 dark:text-slate-400">Date</th>
+                    <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">#</th>
+                    <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">Date</th>
                     <th scope="col" className="text-right px-3 py-2.5 font-bold text-orange-500 uppercase tracking-wider text-[10px]">Interest</th>
                     <th scope="col" className="text-right px-3 py-2.5 font-bold text-blue-500 uppercase tracking-wider text-[10px]">Principal</th>
-                    <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] dark:text-slate-600 dark:text-slate-400">Balance</th>
+                    <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">Balance</th>
                   </tr>
                 </thead>
                 <tbody>
                   {displayedMonthly.map((row, i) => (
                     <tr
                       key={`${row.month}-${row.year}`}
-                      className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors dark:border-slate-800 dark:hover:bg-slate-800${
-                        i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
+                      className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors dark:border-slate-800 dark:hover:bg-slate-800 ${
+                        i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/50 dark:bg-slate-800/50'
                       }`}
                     >
-                      <td className="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 dark:text-slate-600 dark:text-slate-400">{i + 1}</td>
-                      <td className="px-3 py-2 text-slate-600 dark:text-slate-400 dark:text-slate-600 dark:text-slate-400">{MONTH_NAMES[row.month - 1]} {row.year}</td>
+                      <td className="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400">{i + 1}</td>
+                      <td className="px-3 py-2 text-slate-600 dark:text-slate-400">{MONTH_NAMES[row.month - 1]} {row.year}</td>
                       <td className="px-3 py-2 text-right text-orange-600 font-semibold">${fmt(row.interest)}</td>
                       <td className="px-3 py-2 text-right text-blue-600 font-semibold">${fmt(row.principal)}</td>
                       <td className="px-4 py-2 text-right font-bold text-slate-700 dark:text-slate-200">
