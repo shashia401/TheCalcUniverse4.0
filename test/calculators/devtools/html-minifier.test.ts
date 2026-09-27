@@ -27,6 +27,24 @@ describe('HTML/CSS/JS Minifier', () => {
     expect(minified).toContain('color:red');
   });
 
+  it('keeps a single space between space-separated CSS values instead of gluing them together (regression: box-shadow "0 2px 4px rgba(...)" previously became the invalid "02px4pxrgba(...)")', () => {
+    const results = htmlMinifierConfig.calculate({
+      codeType: 'CSS',
+      code: '.header {\n  box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n}',
+    });
+    const minified = getValue(results, 'minified');
+    expect(minified).toBe('.header{box-shadow:0 2px 4px rgba(0,0,0,0.1)}');
+  });
+
+  it('keeps a single space between descendant-combinator selectors (regression: ".header .logo" previously became ".header.logo", a different CSS selector)', () => {
+    const results = htmlMinifierConfig.calculate({
+      codeType: 'CSS',
+      code: '.header .logo {\n  width: 120px;\n}',
+    });
+    const minified = getValue(results, 'minified');
+    expect(minified).toBe('.header .logo{width:120px}');
+  });
+
   it('minifies JavaScript by removing comments', () => {
     const results = htmlMinifierConfig.calculate({
       codeType: 'JavaScript',

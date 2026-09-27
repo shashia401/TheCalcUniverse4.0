@@ -57,8 +57,12 @@ function minifyCss(code: string): string {
   result = result.replace(/\s*,\s*/g, ',');
   // Remove trailing semicolons before closing braces
   result = result.replace(/;\}/g, '}');
-  // Remove all remaining whitespace
-  result = result.replace(/\s/g, '');
+  // Collapse any remaining whitespace runs to a single space — this is
+  // significant in space-separated value lists (box-shadow, margin, padding,
+  // font, transform) and descendant-combinator selectors ("div p"). Removing
+  // it entirely (the previous behavior) glued adjacent values together into
+  // one invalid token, e.g. "0 2px 4px rgba(...)" became "02px4pxrgba(...)".
+  result = result.replace(/\s+/g, ' ').trim();
 
   // Restore calc() expressions
   result = result.replace(/\x00CALC(\d+)\x00/g, (_, i) => calcBlocks[parseInt(i)]);
@@ -270,9 +274,9 @@ const htmlMinifierConfig: CalculatorConfig = {
           codeType: 'HTML',
           code: '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <!-- Page Title -->\n  <title>My Website</title>\n</head>\n<body>\n  <div class="container">\n    <h1>Welcome</h1>\n    <p>This is a paragraph of text.</p>\n  </div>\n</body>\n</html>',
         },
-        result: 'Minified HTML output: ~140 bytes (approximately 36% savings from original 220 bytes)',
+        result: 'Minified HTML output: 185 bytes (approximately 23% savings from original 241 bytes)',
         insight:
-          'The original HTML is 220 bytes with proper indentation, comments, and readable formatting. After minification, comments are stripped, whitespace between tags is collapsed, and attribute formatting is optimized. The minified output is approximately 140 bytes — about 36% savings. In a real-world scenario, a typical HTML page of 15-20 KB could save 5-7 KB from minification alone. When combined with Gzip compression (which typically achieves 70-80% compression on minified HTML), the final transferred size could be under 3 KB.',
+          'The original HTML is 241 bytes with proper indentation, comments, and readable formatting. After minification, comments are stripped, whitespace between tags is collapsed, and attribute formatting is optimized. The minified output is 185 bytes — about 23% savings. In a real-world scenario, a typical HTML page of 15-20 KB could save 5-7 KB from minification alone. When combined with Gzip compression (which typically achieves 70-80% compression on minified HTML), the final transferred size could be under 3 KB.',
       },
       {
         scenario: 'Minifying CSS to Reduce Stylesheet Size',
@@ -280,9 +284,9 @@ const htmlMinifierConfig: CalculatorConfig = {
           codeType: 'CSS',
           code: '/* Main Stylesheet v2.1 */\n/* Author: Dev Team */\n\nbody {\n  margin: 0;\n  padding: 0;\n  font-family: sans-serif;\n}\n\n.header {\n  background-color: #ffffff;\n  box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n}\n\n.header .logo {\n  width: 120px;\n  height: auto;\n}',
         },
-        result: 'Minified CSS output: ~190 bytes (approximately 40% savings from original 315 bytes)',
+        result: 'Minified CSS output: 155 bytes (approximately 37% savings from original 247 bytes)',
         insight:
-          'The original CSS is about 315 bytes with comments, indentation, and readable formatting. Minification removes the two comment blocks, collapses all whitespace around brackets and colons, and produces output around 190 bytes — about 40% savings. For large CSS frameworks (Bootstrap: ~160 KB unminified, ~120 KB minified before Gzip) the savings are significant. Beyond this basic minification, production tools like cssnano can further optimize by merging duplicate selectors, shortening hex colors (#ffffff → #fff), and removing unused CSS rules through tree shaking.',
+          'The original CSS is 247 bytes with comments, indentation, and readable formatting. Minification removes the two comment blocks, collapses whitespace around brackets and colons, and produces output at 155 bytes — about 37% savings. Note that space-separated values like "0 2px 4px" in the box-shadow declaration and descendant selectors like ".header .logo" must keep a single space, or the value becomes invalid CSS. For large CSS frameworks (Bootstrap: ~160 KB unminified, ~120 KB minified before Gzip) the savings are significant. Beyond this basic minification, production tools like cssnano can further optimize by merging duplicate selectors, shortening hex colors (#ffffff → #fff), and removing unused CSS rules through tree shaking.',
       },
     ],
     citations: [
