@@ -235,8 +235,8 @@ const marsTimeConfig: CalculatorConfig = {
       {
         scenario: "It is noon UTC on Earth, May 20, 2026. What is the Local Mean Solar Time at Gale Crater (137.4°E), where Curiosity is exploring?",
         inputs: { mode: 'earthToMars', earthDate: '2026-05-20T12:00:00', marsLongitude: '137.4' },
-        result: 'LMST at Gale Crater (137.4°E): approximately 09:16:00, MSD ~53335.',
-        insight: "Using the Mars24 algorithm, noon UTC on Earth translates to approximately late morning at Gale Crater. The LMST depends on the current Mars-Earth alignment and the rover's longitude. NASA Curiosity team members starting their shift at 8 AM LMST would need to start at roughly 8 PM UTC the previous Earth day, shifting ~40 min later each subsequent day.",
+        result: 'LMST at Gale Crater (137.4°E): approximately 18:22:19, MSD ~54174.38.',
+        insight: "Using the Mars24 algorithm, noon UTC on Earth translates to early evening local time at Gale Crater. The LMST depends on the current Mars-Earth alignment and the rover's longitude. NASA Curiosity team members starting their shift at 8 AM LMST would need to start at roughly 8 PM UTC the previous Earth day, shifting ~40 min later each subsequent day.",
       },
       {
         scenario: 'Perseverance has been on Mars for 1,000 sols. How many Earth days is this?',

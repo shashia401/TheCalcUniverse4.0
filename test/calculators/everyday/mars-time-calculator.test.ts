@@ -8,6 +8,12 @@ describe('Mars Time', () => {
     expect(r.find(x => x.id === 'msd')).toBeDefined();
   });
 
+  it('matches the worked example LMST/MSD for noon UTC 2026-05-20 at Gale Crater (regression: narrative previously claimed 09:16:00/MSD~53335, actual is 18:22:19/MSD~54174.38)', () => {
+    const r = config.calculate({ mode: 'earthToMars', earthDate: '2026-05-20T12:00:00', marsLongitude: '137.4' });
+    expect(r.find(x => x.id === 'lmst')?.value).toBe('18:22:19');
+    expect(r.find(x => x.id === 'msd')?.value).toBe('54174.3838');
+  });
+
   it('converts sols to Earth time', () => {
     const r = config.calculate({ mode: 'solToEarth', sols: '100' });
     expect(r.find(x => x.id === 'earthTime')?.value).toContain('d');
