@@ -11,7 +11,7 @@ describe('self-employment-tax', () => {
     });
 
     const seEarnings = 100000 * 0.9235; // 92,350
-    // SS: min(92350, 176100) * 12.4% = 92350 * 0.124 = 11,451.40
+    // SS: min(92350, 184500) * 12.4% = 92350 * 0.124 = 11,451.40
     const ssExpected = 92350 * 0.124;
     // Medicare: 92350 * 2.9% = 2,678.15
     const medExpected = 92350 * 0.029;
@@ -34,9 +34,9 @@ describe('self-employment-tax', () => {
       qbiDeduction: 'no',
     });
 
-    // Remaining SS wage base = 176100 - 100000 = 76100
-    // SS on min(92350, 76100) * 12.4% = 76100 * 0.124 = 9,436.40
-    const ssExpected = 76100 * 0.124;
+    // Remaining SS wage base (2026) = 184500 - 100000 = 84500
+    // SS on min(92350, 84500) * 12.4% = 84500 * 0.124 = 10,478.00
+    const ssExpected = 84500 * 0.124;
     near(parseMoney(getValue(r, 'socialSecurityPortion')), ssExpected, 0.01);
   });
 
@@ -77,11 +77,23 @@ describe('self-employment-tax', () => {
       qbiDeduction: 'no',
     });
 
-    // Remaining SS base = max(0, 176100 - 200000) = 0
+    // Remaining SS base = max(0, 184500 - 200000) = 0
     near(parseMoney(getValue(r, 'socialSecurityPortion')), 0, 0.01);
 
     // Medicare still applies: 50000 * 0.9235 * 0.029 = 1,339.075
     near(parseMoney(getValue(r, 'medicarePortion')), 50000 * 0.9235 * 0.029, 0.01);
+  });
+
+  it('matches the educational worked example (Raj: $180K net profit, $45K W-2, 2026 wage base)', () => {
+    const r = config.calculate({
+      netProfit: '180000',
+      w2Income: '45000',
+      qbiDeduction: 'yes',
+    });
+    near(parseMoney(getValue(r, 'secaTax')), 22118.67, 0.01);
+    near(parseMoney(getValue(r, 'socialSecurityPortion')), 17298.00, 0.01);
+    near(parseMoney(getValue(r, 'medicarePortion')), 4820.67, 0.01);
+    expect(parseFloat(getValue(r, 'effectiveRate'))).toBeCloseTo(12.29, 1);
   });
 
   it('shows total combined income', () => {

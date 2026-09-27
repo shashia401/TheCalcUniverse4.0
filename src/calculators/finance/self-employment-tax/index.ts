@@ -4,7 +4,7 @@ import SelfEmploymentTaxPanel from './SelfEmploymentTaxPanel';
 
 const SS_RATE = 0.124; // 12.4%
 const MEDICARE_RATE = 0.029; // 2.9%
-const SS_WAGE_BASE_2026 = 176100;
+const SS_WAGE_BASE_2026 = 184500;
 const SE_MULTIPLIER = 0.9235; // 92.35% of net earnings subject to SE tax
 
 const selfEmploymentTaxConfig: CalculatorConfig = {
@@ -132,12 +132,12 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
   educational: {
     formula: 'SECA Tax = Net Profit × 92.35% × 15.3%',
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect width="440" height="340" fill="var(--svg-f8fafc)" rx="8"/><text x="220" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--svg-1e293b)">Self-Employment Tax Breakdown</text><text x="220" y="44" text-anchor="middle" font-size="11" fill="var(--svg-64748b)">Self-employed pay both the employee AND employer share of FICA</text><g transform="translate(30,65)"><!-- Net Profit at top --><rect x="60" y="0" width="310" height="40" rx="8" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><text x="215" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-1e40af)">Net Profit: $100,000</text><text x="215" y="34" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">Schedule C net earnings after business expenses</text><!-- 92.35% multiplier arrow --><path d="M 215,40 L 215,58" stroke="var(--svg-64748b)" stroke-width="2" marker-end="url(#arrow)"/><rect x="60" y="58" width="310" height="30" rx="6" fill="var(--svg-e2e8f0)"/><text x="215" y="78" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-475569)">SE Earnings Base: $92,350 (92.35% of profit)</text><!-- Split into SS and Medicare --><rect x="60" y="100" width="200" height="40" rx="6" fill="var(--svg-3b82f6)"/><text x="160" y="118" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Social Security: 12.4%</text><text x="160" y="134" text-anchor="middle" font-size="9" fill="var(--svg-dbeafe)">$11,451 (cap $176,100)</text><rect x="280" y="100" width="90" height="40" rx="6" fill="var(--svg-8b5cf6)"/><text x="325" y="118" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Medicare: 2.9%</text><text x="325" y="134" text-anchor="middle" font-size="9" fill="var(--svg-e9d5ff)">$2,678 (no cap)</text><!-- Total SECA --><rect x="60" y="155" width="310" height="40" rx="8" fill="var(--svg-ef4444)"/><text x="215" y="175" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-ffffff)">Total SECA Tax: $14,129</text><text x="215" y="191" text-anchor="middle" font-size="9" fill="var(--svg-fecaca)">= $100K × 92.35% × 15.3%</text><!-- Employee vs Employer comparison --><rect x="40" y="210" width="350" height="65" rx="10" fill="var(--svg-f1f5f9)"/><text x="215" y="228" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Employee vs. Self-Employed: Same Total, Different Pocket</text><text x="80" y="248" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">Employee: 7.65% ($7,650)</text><text x="80" y="262" text-anchor="middle" font-size="9" fill="var(--svg-f59e0b)">Employer: 7.65% ($7,650)</text><text x="215" y="248" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">↕</text><text x="310" y="248" text-anchor="middle" font-size="9" fill="var(--svg-ef4444)">Self-Employed: 15.3% ($14,129)</text><text x="215" y="272" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">Deductible half: $7,064 (reduces income tax, not SE tax)</text></g></svg>',
+      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect width="440" height="340" fill="var(--svg-f8fafc)" rx="8"/><text x="220" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--svg-1e293b)">Self-Employment Tax Breakdown</text><text x="220" y="44" text-anchor="middle" font-size="11" fill="var(--svg-64748b)">Self-employed pay both the employee AND employer share of FICA</text><g transform="translate(30,65)"><!-- Net Profit at top --><rect x="60" y="0" width="310" height="40" rx="8" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><text x="215" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-1e40af)">Net Profit: $100,000</text><text x="215" y="34" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">Schedule C net earnings after business expenses</text><!-- 92.35% multiplier arrow --><path d="M 215,40 L 215,58" stroke="var(--svg-64748b)" stroke-width="2" marker-end="url(#arrow)"/><rect x="60" y="58" width="310" height="30" rx="6" fill="var(--svg-e2e8f0)"/><text x="215" y="78" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-475569)">SE Earnings Base: $92,350 (92.35% of profit)</text><!-- Split into SS and Medicare --><rect x="60" y="100" width="200" height="40" rx="6" fill="var(--svg-3b82f6)"/><text x="160" y="118" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Social Security: 12.4%</text><text x="160" y="134" text-anchor="middle" font-size="9" fill="var(--svg-dbeafe)">$11,451 (cap $184,500)</text><rect x="280" y="100" width="90" height="40" rx="6" fill="var(--svg-8b5cf6)"/><text x="325" y="118" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Medicare: 2.9%</text><text x="325" y="134" text-anchor="middle" font-size="9" fill="var(--svg-e9d5ff)">$2,678 (no cap)</text><!-- Total SECA --><rect x="60" y="155" width="310" height="40" rx="8" fill="var(--svg-ef4444)"/><text x="215" y="175" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-ffffff)">Total SECA Tax: $14,129</text><text x="215" y="191" text-anchor="middle" font-size="9" fill="var(--svg-fecaca)">= $100K × 92.35% × 15.3%</text><!-- Employee vs Employer comparison --><rect x="40" y="210" width="350" height="65" rx="10" fill="var(--svg-f1f5f9)"/><text x="215" y="228" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Employee vs. Self-Employed: Same Total, Different Pocket</text><text x="80" y="248" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">Employee: 7.65% ($7,650)</text><text x="80" y="262" text-anchor="middle" font-size="9" fill="var(--svg-f59e0b)">Employer: 7.65% ($7,650)</text><text x="215" y="248" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">↕</text><text x="310" y="248" text-anchor="middle" font-size="9" fill="var(--svg-ef4444)">Self-Employed: 15.3% ($14,129)</text><text x="215" y="272" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">Deductible half: $7,064 (reduces income tax, not SE tax)</text></g></svg>',
       alt: 'Self-employment tax diagram flowing from Net Profit through 92.35% adjustment to 12.4% Social Security and 2.9% Medicare components, comparing employee (7.65%) vs self-employed (15.3%) rates',
       caption: 'Self-employed individuals pay the full 15.3% SECA tax (both employee and employer shares of FICA), but can deduct half as an above-the-line adjustment',
     },
     formulaDescription:
-      'Self-employment tax is 15.3% of 92.35% of your net self-employment income. The 15.3% breaks into 12.4% for Social Security (up to the annual wage base of $176,100 in 2026) and 2.9% for Medicare (no cap). You can deduct half of your SE tax as an above-the-line adjustment on Form 1040. The QBI deduction (Section 199A) allows eligible self-employed individuals to deduct up to 20% of qualified business income from income tax.',
+      'Self-employment tax is 15.3% of 92.35% of your net self-employment income. The 15.3% breaks into 12.4% for Social Security (up to the annual wage base of $184,500 in 2026) and 2.9% for Medicare (no cap). You can deduct half of your SE tax as an above-the-line adjustment on Form 1040. The QBI deduction (Section 199A) allows eligible self-employed individuals to deduct up to 20% of qualified business income from income tax.',
     variables: [
       {
         symbol: '92.35%',
@@ -147,7 +147,7 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
       {
         symbol: 'SECA Components',
         name: 'Social Security & Medicare Rates',
-        description: 'SE tax has two parts: 12.4% for Social Security (capped at $176,100 for 2026) and 2.9% for Medicare (no cap). Together they form the 15.3% total SECA rate. An additional 0.9% Medicare surtax applies above $200K/$250K.',
+        description: 'SE tax has two parts: 12.4% for Social Security (capped at $184,500 for 2026) and 2.9% for Medicare (no cap). Together they form the 15.3% total SECA rate. An additional 0.9% Medicare surtax applies above $200K/$250K.',
       },
       {
         symbol: 'QBI',
@@ -166,7 +166,7 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
       'Plan estimated quarterly tax payments by understanding your total SE tax liability alongside your income tax obligation.',
     ],
     explanation:
-      'Self-employment tax is the self-employed person\'s equivalent of FICA (Social Security + Medicare). While employees split FICA 50/50 with their employer (each pays 7.65%), the self-employed pay both halves (15.3%). However, you can deduct the employer-half as an above-the-line adjustment on Form 1040, effectively reducing income tax but not the SE tax itself. The 92.35% multiplier accounts for this deduction. For 2026, the Social Security wage base is $176,100 — any SE earnings above this are only subject to the 2.9% Medicare portion.',
+      'Self-employment tax is the self-employed person\'s equivalent of FICA (Social Security + Medicare). While employees split FICA 50/50 with their employer (each pays 7.65%), the self-employed pay both halves (15.3%). However, you can deduct the employer-half as an above-the-line adjustment on Form 1040, effectively reducing income tax but not the SE tax itself. The 92.35% multiplier accounts for this deduction. For 2026, the Social Security wage base is $184,500 — any SE earnings above this are only subject to the 2.9% Medicare portion.',
     faqs: [
       {
         question: 'Why does only 92.35% of my net profit get taxed for SE tax?',
@@ -181,7 +181,7 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
       {
         question: 'What if I have both W-2 wages and 1099 income?',
         answer:
-          'Your W-2 wages count toward the Social Security wage base ($176,100 for 2026). If your W-2 wages already exceed the wage base, you owe $0 SS tax on your SE income. If not, the remaining wage base is available for your SE income. Medicare tax has no cap, so you always owe the 2.9% Medicare portion on SE earnings regardless of W-2 income.',
+          'Your W-2 wages count toward the Social Security wage base ($184,500 for 2026). If your W-2 wages already exceed the wage base, you owe $0 SS tax on your SE income. If not, the remaining wage base is available for your SE income. Medicare tax has no cap, so you always owe the 2.9% Medicare portion on SE earnings regardless of W-2 income.',
       },
     
       {
@@ -207,22 +207,22 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
           'W-2 Wages (if applicable)': '45,000',
           'Qualified Business Income (QBI) Deduction': 'Yes — Apply QBI deduction (simplified 20%)',
         },
-        result: 'Total SECA Tax: $21,077.07. Social Security Portion: $16,256.40 (12.4% of $131,100). Medicare Portion: $4,820.67 (2.9% of $166,230). Effective SE Tax Rate: 11.71%. Deductible Half: $10,538.54. Estimated QBI Savings: $7,920. Total Combined Income: $225,000.',
-        insight: 'Raj\'s W-2 wages of $45,000 have already used $45K of the Social Security wage base ($176,100 for 2026). Only $131,100 of the wage base remains available for his SE income. His SE earnings base is $166,230 ($180K × 92.35%), but only $131,100 of it is subject to the 12.4% Social Security portion — the rest escapes Social Security tax entirely. His effective SE tax rate drops to 11.71% (down from the full 14.13% Elena pays with no W-2 offset). The Medicare portion of 2.9% applies to the full SE earnings base with no cap. His total combined income of $225K puts him above the $200K threshold where the additional 0.9% Medicare surtax may apply on earned income — though this simplified calculator does not model that surtax.',
+        result: 'Total SECA Tax: $22,118.67. Social Security Portion: $17,298.00 (12.4% of $139,500). Medicare Portion: $4,820.67 (2.9% of $166,230). Effective SE Tax Rate: 12.29%. Deductible Half: $11,059.34. Estimated QBI Savings: $7,920. Total Combined Income: $225,000.',
+        insight: 'Raj\'s W-2 wages of $45,000 have already used $45K of the Social Security wage base ($184,500 for 2026). Only $139,500 of the wage base remains available for his SE income. His SE earnings base is $166,230 ($180K × 92.35%), but only $139,500 of it is subject to the 12.4% Social Security portion — the rest escapes Social Security tax entirely. His effective SE tax rate drops to 12.29% (down from the full 14.13% Elena pays with no W-2 offset). The Medicare portion of 2.9% applies to the full SE earnings base with no cap. His total combined income of $225K puts him above the $200K threshold where the additional 0.9% Medicare surtax may apply on earned income — though this simplified calculator does not model that surtax.',
       },
     ],
 
     proTips: [
       'Set aside 25-30% of your net profit for self-employment tax + federal income tax, and pay quarterly estimated taxes (due April 15, June 15, September 15, January 15). Missing quarterly deadlines triggers underpayment penalties even if you pay in full by April.',
       'The deductible half of SE tax is an above-the-line deduction — it reduces your AGI dollar-for-dollar, which can also help you qualify for other tax benefits with AGI phaseouts (IRA deductions, student loan interest deduction, child tax credit).',
-      'If your net profit exceeds the Social Security wage base ($176,100 in 2026), only the Medicare portion (2.9%) applies above that threshold. High-earning freelancers effectively get a 12.4% tax cut on income above the cap — the SE tax rate drops from 15.3% to 2.9%.',
+      'If your net profit exceeds the Social Security wage base ($184,500 in 2026), only the Medicare portion (2.9%) applies above that threshold. High-earning freelancers effectively get a 12.4% tax cut on income above the cap — the SE tax rate drops from 15.3% to 2.9%.',
       'Consider forming an S-Corp if your net profit consistently exceeds $60,000-$80,000. An S-Corp allows you to pay yourself a "reasonable salary" (subject to FICA) and take the remainder as distributions (not subject to SE tax). The savings can be thousands per year but requires payroll administration and corporate tax filings.',
     ],
 
     quickReference: [
       { label: 'SECA Rate', value: '15.3% (12.4% SS + 2.9% Medicare)' },
       { label: 'SE Earnings Multiplier', value: '92.35% of net profit' },
-      { label: 'SS Wage Base (2026)', value: '$176,100' },
+      { label: 'SS Wage Base (2026)', value: '$184,500' },
       { label: 'Medicare Cap', value: 'No cap — 2.9% on all SE earnings' },
       { label: 'Deductible Half', value: 'Above-the-line, Form 1040 adjustment' },
       { label: '$100K net profit', value: '~$14,130 SE tax (effective ~14.1%)' },
