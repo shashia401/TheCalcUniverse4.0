@@ -303,7 +303,7 @@ const homeEquityLoanConfig: CalculatorConfig = {
         scenario: `Maria owns a home in Austin, TX worth $400,000 with a $250,000 remaining first mortgage. Her credit score is 740 (Excellent), and she wants to borrow $50,000 for a kitchen renovation. She gets quoted an 8.5% fixed rate for a 10-year term with $2,000 in closing costs.`,
         inputs: { homeValue: '400000', currentMortgage: '250000', creditProfile: 'excellent', desiredLoan: '50000', interestRate: '8.5', loanTerm: '120' },
         result: `Maria qualifies for the full $50,000 because her CLTV of 75% ($300K / $400K) is under the 85% limit. Her monthly payment including rolled-in closing costs is approximately $645, with total interest of about $25,400 over 10 years.`,
-        insight: `Maria's excellent credit gives her access to 85% CLTV, well above her current 75%. This means she could borrow up to $90,000 if needed. The 10-year term keeps her total interest manageable compared to a longer term. If she chose a 20-year term, her monthly payment would drop to about $430 but total interest would nearly triple.`,
+        insight: `Maria's excellent credit gives her access to 85% CLTV, well above her current 75%. This means she could borrow up to $90,000 if needed. The 10-year term keeps her total interest manageable compared to a longer term. If she chose a 20-year term, her monthly payment would drop to about $451 but total interest would more than double, to roughly $56,300.`,
       },
       {
         scenario: `James has a home worth $300,000 with a $250,000 mortgage. His credit score is 670 (Fair), limiting him to 75% CLTV. He needs $40,000 to consolidate high-interest credit card debt and is offered a 9.5% rate for 15 years.`,

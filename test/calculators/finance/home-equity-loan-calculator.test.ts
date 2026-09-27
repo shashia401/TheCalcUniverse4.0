@@ -19,6 +19,23 @@ describe('home equity loan calculator', () => {
     expect(getValue(r, 'ltvRatio')).toContain('%');
   });
 
+  it('matches the "Maria" worked example 20-year comparison (regression: educational text previously said $430/mo and "nearly triple" interest, actual is $451/mo and about 2.2x)', () => {
+    const r = config.calculate({
+      homeValue: '400000',
+      currentMortgage: '250000',
+      creditProfile: 'excellent',
+      desiredLoan: '50000',
+      interestRate: '8.5',
+      loanTerm: '240',
+      closingCosts: '2000',
+    });
+    const monthlyStr = getValue(r, 'monthlyPayment');
+    const monthlyVal = parseMoney(monthlyStr.replace(/\s*\(.*\)/, ''));
+    expect(Math.abs(monthlyVal - 451.27)).toBeLessThan(1);
+    const totalInterest = parseMoney(getValue(r, 'totalInterest'));
+    expect(Math.abs(totalInterest - 56304)).toBeLessThan(50);
+  });
+
   it('caps desired loan at max LTV limit', () => {
     const r = config.calculate({
       homeValue: '300000',
