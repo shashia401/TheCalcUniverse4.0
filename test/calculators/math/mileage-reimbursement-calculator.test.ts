@@ -3,11 +3,11 @@ import config from '../../../src/calculators/math/mileage-reimbursement/index';
 import { getValue, parseNumber, near } from '../../helpers';
 
 describe('mileage-reimbursement', () => {
-  it('calculates business mileage at 2026 rate ($0.655/mi)', () => {
+  it('calculates business mileage at the 2026 rate ($0.76/mi, raised mid-year by IRS Announcement 2026-11)', () => {
     const r = config.calculate({ miles: '1000', mileageType: 'business', year: '2026', additionalExpenses: '' });
-    near(parseNumber(getValue(r, 'reimbursement')), 655);
-    near(parseNumber(getValue(r, 'mileageAmount')), 655);
-    expect(getValue(r, 'rateUsed')).toContain('0.66');
+    near(parseNumber(getValue(r, 'reimbursement')), 760);
+    near(parseNumber(getValue(r, 'mileageAmount')), 760);
+    expect(getValue(r, 'rateUsed')).toContain('0.76');
   });
 
   it('calculates 2025 business rate ($0.70/mi)', () => {
@@ -16,10 +16,10 @@ describe('mileage-reimbursement', () => {
     expect(getValue(r, 'rateUsed')).toContain('0.70');
   });
 
-  it('calculates medical mileage ($0.21/mi)', () => {
+  it('calculates medical mileage ($0.235/mi)', () => {
     const r = config.calculate({ miles: '500', mileageType: 'medical', year: '2026', additionalExpenses: '' });
-    near(parseNumber(getValue(r, 'reimbursement')), 105);
-    near(parseNumber(getValue(r, 'mileageAmount')), 105);
+    near(parseNumber(getValue(r, 'reimbursement')), 117.5);
+    near(parseNumber(getValue(r, 'mileageAmount')), 117.5);
   });
 
   it('calculates charitable mileage ($0.14/mi)', () => {
@@ -30,7 +30,7 @@ describe('mileage-reimbursement', () => {
 
   it('includes additional expenses', () => {
     const r = config.calculate({ miles: '1000', mileageType: 'business', year: '2026', additionalExpenses: '50.00' });
-    near(parseNumber(getValue(r, 'reimbursement')), 705);
+    near(parseNumber(getValue(r, 'reimbursement')), 810);
     near(parseNumber(getValue(r, 'additionalAmount')), 50);
   });
 

@@ -9,7 +9,11 @@ function fmtCurrency(n: number): string {
 }
 
 const RATES: Record<string, Record<string, number>> = {
-  '2026': { business: 0.655, medical: 0.21, charitable: 0.14 },
+  // The IRS raised the 2026 rates mid-year (Announcement 2026-11 modifying
+  // Notice 2026-10) due to rising fuel costs: business 72.5c -> 76c and
+  // medical/moving 20.5c -> 23.5c, effective July 1, 2026. These are the
+  // current, in-effect rates; charitable is fixed by statute at 14c.
+  '2026': { business: 0.76, medical: 0.235, charitable: 0.14 },
   '2025': { business: 0.70, medical: 0.21, charitable: 0.14 },
 };
 
@@ -39,8 +43,8 @@ const mileageConfig: CalculatorConfig = {
       label: 'Mileage Type',
       type: 'select',
       options: [
-        { label: 'Business ($0.655/mi)', value: 'business' },
-        { label: 'Medical / Moving ($0.21/mi)', value: 'medical' },
+        { label: 'Business ($0.76/mi)', value: 'business' },
+        { label: 'Medical / Moving ($0.235/mi)', value: 'medical' },
         { label: 'Charitable ($0.14/mi)', value: 'charitable' },
       ],
     },
@@ -71,7 +75,7 @@ const mileageConfig: CalculatorConfig = {
 
     if (isNaN(miles) || miles < 0) return [];
 
-    const rate = RATES[year]?.[mileageType] ?? 0.655;
+    const rate = RATES[year]?.[mileageType] ?? 0.76;
     const mileageAmount = miles * rate;
     const additionalExpenses = parseFloat(additionalStr);
     const hasAdditional = !isNaN(additionalExpenses) && additionalExpenses > 0;
@@ -140,9 +144,9 @@ const mileageConfig: CalculatorConfig = {
     formulaDescription:
       'The IRS standard mileage rate is a simplified method for calculating deductible vehicle costs. Multiply your business miles by the IRS rate, then add any tolls or parking fees.',
     diagram: {
-      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-333333)">Mileage Reimbursement Formula</text><rect x="20" y="35" width="85" height="30" rx="5" fill="var(--svg-3b82f6)" opacity="0.8"/><text x="62" y="53" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">Miles</text><text x="112" y="53" font-size="12" fill="var(--svg-333333)">×</text><rect x="125" y="35" width="85" height="30" rx="5" fill="var(--svg-3b82f6)" opacity="0.6"/><text x="167" y="53" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">IRS Rate</text><text x="217" y="53" font-size="12" fill="var(--svg-333333)">+</text><rect x="230" y="35" width="70" height="30" rx="5" fill="var(--svg-3b82f6)" opacity="0.7"/><text x="265" y="53" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Fees</text><text x="160" y="80" text-anchor="middle" font-size="12" fill="var(--svg-333333)">=</text><rect x="100" y="90" width="120" height="30" rx="5" fill="var(--svg-ef4444)" opacity="0.8"/><text x="160" y="108" text-anchor="middle" font-size="11" fill="var(--svg-ffffff)" font-weight="bold">Reimbursement</text><line x1="20" y1="130" x2="300" y2="130" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="160" y="148" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-555555)">2026 IRS Standard Mileage Rates</text><rect x="20" y="155" width="88" height="22" rx="4" fill="var(--svg-3b82f6)" opacity="0.8"/><text x="64" y="170" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Business: $0.655</text><rect x="116" y="155" width="88" height="22" rx="4" fill="var(--svg-3b82f6)" opacity="0.6"/><text x="160" y="170" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Medical: $0.21</text><rect x="212" y="155" width="88" height="22" rx="4" fill="var(--svg-3b82f6)" opacity="0.5"/><text x="256" y="170" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Charity: $0.14</text></svg>',
+      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-333333)">Mileage Reimbursement Formula</text><rect x="20" y="35" width="85" height="30" rx="5" fill="var(--svg-3b82f6)" opacity="0.8"/><text x="62" y="53" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">Miles</text><text x="112" y="53" font-size="12" fill="var(--svg-333333)">×</text><rect x="125" y="35" width="85" height="30" rx="5" fill="var(--svg-3b82f6)" opacity="0.6"/><text x="167" y="53" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">IRS Rate</text><text x="217" y="53" font-size="12" fill="var(--svg-333333)">+</text><rect x="230" y="35" width="70" height="30" rx="5" fill="var(--svg-3b82f6)" opacity="0.7"/><text x="265" y="53" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Fees</text><text x="160" y="80" text-anchor="middle" font-size="12" fill="var(--svg-333333)">=</text><rect x="100" y="90" width="120" height="30" rx="5" fill="var(--svg-ef4444)" opacity="0.8"/><text x="160" y="108" text-anchor="middle" font-size="11" fill="var(--svg-ffffff)" font-weight="bold">Reimbursement</text><line x1="20" y1="130" x2="300" y2="130" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="160" y="148" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-555555)">2026 IRS Standard Mileage Rates</text><rect x="20" y="155" width="88" height="22" rx="4" fill="var(--svg-3b82f6)" opacity="0.8"/><text x="64" y="170" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Business: $0.76</text><rect x="116" y="155" width="88" height="22" rx="4" fill="var(--svg-3b82f6)" opacity="0.6"/><text x="160" y="170" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Medical: $0.235</text><rect x="212" y="155" width="88" height="22" rx="4" fill="var(--svg-3b82f6)" opacity="0.5"/><text x="256" y="170" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Charity: $0.14</text></svg>',
       alt: 'Flow diagram showing the mileage reimbursement formula: Miles times IRS Rate plus Fees equals Reimbursement',
-      caption: 'Reimbursement = Miles × IRS Rate + Additional Expenses. The 2026 business rate is $0.655/mile, medical $0.21/mile, charitable $0.14/mile.',
+      caption: 'Reimbursement = Miles × IRS Rate + Additional Expenses. The 2026 business rate is $0.76/mile, medical $0.235/mile, charitable $0.14/mile.',
     },
     variables: [
       {
@@ -169,12 +173,12 @@ const mileageConfig: CalculatorConfig = {
       'Read your total reimbursement and estimated tax savings.',
     ],
     explanation:
-      'The IRS standard mileage rate simplifies vehicle expense deduction. Instead of tracking actual costs (gas, repairs, insurance, depreciation), you multiply your business miles by the IRS rate. For 2026, the business rate is $0.655 per mile. Self-employed individuals can deduct this on Schedule C, reducing their taxable income. Practical example: a real estate agent drives 15,000 business miles in 2026. The mileage deduction is 15,000 × $0.655 = $9,825. If they also paid $200 in tolls and $150 in parking, the total deduction is $10,175. At a 30% marginal tax rate, this saves approximately $3,053 in taxes. Edge cases: for rideshare drivers (Uber, Lyft), the distinction between personal and business miles is critical — only miles driven while the app is on and you are actively working count as business miles. Miles driven to the first pickup location are not deductible as business miles (they are commuting miles). If you use the standard mileage rate in the first year of vehicle ownership, you cannot switch to actual expenses in later years. For a vehicle leased for business use, you must use the standard mileage rate for the entire lease period. Medical mileage includes trips for medical care, dental visits, and pharmacy runs — but the 7.5% of AGI floor for medical expenses applies. Charitable mileage is only deductible if you itemize deductions on Schedule A. For mixed-use vehicles (personal and business), keep a detailed mileage log showing date, purpose, starting and ending odometer readings for each business trip.',
+      'The IRS standard mileage rate simplifies vehicle expense deduction. Instead of tracking actual costs (gas, repairs, insurance, depreciation), you multiply your business miles by the IRS rate. For 2026, the business rate is $0.76 per mile (raised mid-year from $0.725 by IRS Announcement 2026-11 due to rising fuel costs). Self-employed individuals can deduct this on Schedule C, reducing their taxable income. Practical example: a real estate agent drives 15,000 business miles in 2026. The mileage deduction is 15,000 × $0.76 = $11,400. If they also paid $200 in tolls and $150 in parking, the total deduction is $11,750. At a 30% marginal tax rate, this saves approximately $3,525 in taxes. Edge cases: for rideshare drivers (Uber, Lyft), the distinction between personal and business miles is critical — only miles driven while the app is on and you are actively working count as business miles. Miles driven to the first pickup location are not deductible as business miles (they are commuting miles). If you use the standard mileage rate in the first year of vehicle ownership, you cannot switch to actual expenses in later years. For a vehicle leased for business use, you must use the standard mileage rate for the entire lease period. Medical mileage includes trips for medical care, dental visits, and pharmacy runs — but the 7.5% of AGI floor for medical expenses applies. Charitable mileage is only deductible if you itemize deductions on Schedule A. For mixed-use vehicles (personal and business), keep a detailed mileage log showing date, purpose, starting and ending odometer readings for each business trip.',
     faqs: [
       {
         question: 'What is the standard mileage rate for 2026?',
         answer:
-          'The 2026 IRS standard mileage rate for business use is $0.655 per mile. The medical/moving rate is $0.21 per mile, and the charitable rate is $0.14 per mile.',
+          'The 2026 IRS standard mileage rate for business use is $0.76 per mile (raised mid-year from $0.725 effective July 1, 2026). The medical/moving rate is $0.235 per mile, and the charitable rate is $0.14 per mile.',
       },
       {
         question: 'Can I use both actual expenses and standard mileage?',
