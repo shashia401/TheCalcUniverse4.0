@@ -44,6 +44,19 @@ describe('Flow Rate Calculator', () => {
     near(diam, 2.02, 0.05);
   });
 
+  it('worked example: 100 GPM at 6 ft/s pipe sizing — regression for narrative drift fix', () => {
+    // The educational "explanation" text previously claimed 100 GPM at 6 ft/s requires
+    // "approximately 3.5-inch" diameter pipe; the real calculate() output is ~2.6 inches.
+    const results = config.calculate({
+      mode: 'diameter',
+      pipeDiameter: '',
+      flowRate: '100',
+      velocity: '6',
+    });
+    const diam = parseNumber(getValue(results, 'diameter'));
+    near(diam, 2.61, 0.05);
+  });
+
   it('returns pipe cross-section area', () => {
     const results = config.calculate({
       mode: 'velocity',
