@@ -386,8 +386,8 @@ const taylorConfig: CalculatorConfig = {
       {
         scenario: 'A physics student wants to compute e^2 using a 5th-order Taylor expansion around a=0 to compare with the exact value from their scientific calculator.',
         inputs: { expression: 'e^x', center: '0', order: '5', xValue: '2' },
-        result: '1 + x + 0.5·x^2 + 0.166667·x^3 + 0.041667·x^4 + 0.008333·x^5; f(2) ≈ 7.266667',
-        insight: 'The Maclaurin series for e^x is 1 + x + x^2/2! + x^3/3! + x^4/4! + x^5/5! = 1 + 2 + 2 + 1.333 + 0.667 + 0.267 = 7.267. The exact e^2 = 7.389, giving an error of about 1.7%. With a 10th-order expansion, the approximation improves to 7.389 - nearly exact. This demonstrates both the power of Taylor series and the need for sufficient terms when evaluating far from the center.',
+        result: '1 + x + 0.5·x^2 + 0.166667·x^3 + 0.041667·x^4 + 0.008333·x^5; f(2) ≈ 7.266664',
+        insight: 'The Maclaurin series for e^x is 1 + x + x^2/2! + x^3/3! + x^4/4! + x^5/5! = 1 + 2 + 2 + 1.333 + 0.667 + 0.267 = 7.267 (the calculator\'s rounded per-term coefficients give 7.266664). The exact e^2 = 7.389, giving an error of about 1.7%. With a 10th-order expansion, the approximation improves to 7.389 - nearly exact. This demonstrates both the power of Taylor series and the need for sufficient terms when evaluating far from the center.',
       },
     ],
     proTips: [

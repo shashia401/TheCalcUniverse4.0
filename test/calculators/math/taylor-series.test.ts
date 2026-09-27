@@ -53,4 +53,9 @@ describe('Taylor Series Calculator', () => {
     const r = config.calculate({ expression: 'e^x', center: '0', order: '2' });
     expect(getValue(r, 'terms')).toContain('·');
   });
+
+  it('regression: e^x order-5 evaluated at x=2 matches worked example (was 7.266667, actually 7.266664)', () => {
+    const r = config.calculate({ expression: 'e^x', center: '0', order: '5', xValue: '2' });
+    expect(getValue(r, 'evaluation')).toBe('7.266664');
+  });
 });
