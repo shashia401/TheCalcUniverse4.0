@@ -73,6 +73,26 @@ describe('payment-fees (Stripe/PayPal/Square Fee Calculator)', () => {
     expect(getValue(r, 'fee')).not.toBe('—');
   });
 
+  it('worked example: $65 Stripe order — regression for narrative drift fix', () => {
+    // Educational workedExamples text previously claimed a net of $62.81 and monthly fees of
+    // $438 for 200 orders; real calculate() output is net $62.82 and monthly fees $437.00
+    // (200 x $2.185, not 200 x the display-rounded $2.19).
+    const r = config.calculate({ invoiceAmount: '65', platform: 'stripe-domestic', reverseMode: 'no' });
+    expect(getValue(r, 'netAmount')).toBe('$62.82');
+    // The real per-order fee is 65*0.029+0.30 = $2.185 (displays rounded as $2.19), so the
+    // true monthly total for 200 orders is 200*2.185 = $437, not 200*2.19 = $438.
+    const exactFeePerOrder = 65 * 0.029 + 0.30;
+    near(exactFeePerOrder * 200, 437, 0.5);
+  });
+
+  it('worked example: $5,000 PayPal International reverse mode — regression for narrative drift fix', () => {
+    // Educational workedExamples text previously claimed an invoice of $5,240.77 / fee of
+    // $240.77; the real calculate() output is $5,235.57 / $235.57.
+    const r = config.calculate({ invoiceAmount: '5000', platform: 'paypal-international', reverseMode: 'yes' });
+    expect(getValue(r, 'reverseAmount')).toBe('$5,235.57');
+    expect(getValue(r, 'fee')).toBe('$235.57');
+  });
+
   it('Reverse mode: to receive $500 with Square, invoice correctly', () => {
     const r = config.calculate({
       invoiceAmount: '500',
