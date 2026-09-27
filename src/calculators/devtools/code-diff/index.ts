@@ -177,8 +177,8 @@ const codeDiffConfig: CalculatorConfig = {
           'Original Text': 'DATABASE_HOST=localhost\nDATABASE_PORT=5432\nDATABASE_NAME=myapp_dev\nLOG_LEVEL=debug\nMAX_CONNECTIONS=10',
           'Modified Text': 'DATABASE_HOST=prod-db.example.com\nDATABASE_PORT=5432\nDATABASE_NAME=myapp_prod\nDATABASE_USER=app_user\nLOG_LEVEL=info\nMAX_CONNECTIONS=50\nCACHE_TTL=3600',
         },
-        result: '4 additions, 4 deletions, 8 total changes',
-        insight: 'The side-by-side diff highlights every environment-specific difference. Lines 1, 3, 5, and 6 differ between environments, while DATABASE_PORT=5432 is the only unchanged line serving as an anchor. The added lines (DATABASE_USER, CACHE_TTL) are clearly marked as additions in the modified version. This type of config diff is essential for DevOps workflows — it prevents configuration drift by making environment differences explicit and reviewable.',
+        result: '6 additions, 4 deletions, 10 total changes',
+        insight: 'The side-by-side diff highlights every environment-specific difference. DATABASE_PORT=5432 is the only line that matches exactly between the two files, so it is the sole unchanged anchor line — every other original line (4 total) is treated as a deletion, and every other modified line (6 total, including the new DATABASE_USER and CACHE_TTL lines) is treated as an addition, even where a line was really just edited rather than added outright. This type of config diff is essential for DevOps workflows — it prevents configuration drift by making environment differences explicit and reviewable.',
       },
     ],
     proTips: [

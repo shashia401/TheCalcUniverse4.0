@@ -22,6 +22,16 @@ describe('Code Diff Checker', () => {
     expect(r.find((x) => x.id === 'totalChanges')?.value).toBe('1');
   });
 
+  it('matches the worked example config-diff counts (regression: narrative previously said 4 additions/8 total, but only DATABASE_PORT=5432 matches exactly, so 6 modified lines count as additions and 4 original lines count as deletions)', () => {
+    const r = config.calculate({
+      leftText: 'DATABASE_HOST=localhost\nDATABASE_PORT=5432\nDATABASE_NAME=myapp_dev\nLOG_LEVEL=debug\nMAX_CONNECTIONS=10',
+      rightText: 'DATABASE_HOST=prod-db.example.com\nDATABASE_PORT=5432\nDATABASE_NAME=myapp_prod\nDATABASE_USER=app_user\nLOG_LEVEL=info\nMAX_CONNECTIONS=50\nCACHE_TTL=3600',
+    });
+    expect(r.find((x) => x.id === 'additions')?.value).toBe('6');
+    expect(r.find((x) => x.id === 'deletions')?.value).toBe('4');
+    expect(r.find((x) => x.id === 'totalChanges')?.value).toBe('10');
+  });
+
   it('detects both additions and deletions', () => {
     const r = config.calculate({
       leftText: 'apple\nbanana\ncherry',
