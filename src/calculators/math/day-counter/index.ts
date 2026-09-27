@@ -77,11 +77,11 @@ const dayCounterConfig: CalculatorConfig = {
 
     let businessDaysCount = 0;
     if (businessDays === 'yes') {
-      const countEnd = new Date(end);
-      if (includeEnd === 'yes') {
-        countEnd.setDate(countEnd.getDate() + 1);
-      }
-      businessDaysCount = countWeekdaysInRange(start, countEnd);
+      // countWeekdaysInRange is already inclusive of both start and end
+      // (it uses <=), so no extra +1 day is needed when includeEnd is
+      // 'yes' — adding one previously double-counted a day whenever the
+      // day immediately after `end` was itself a weekday.
+      businessDaysCount = countWeekdaysInRange(start, end);
     }
 
     // Approximate years, months, days

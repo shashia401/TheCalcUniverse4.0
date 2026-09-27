@@ -73,6 +73,20 @@ describe('day counter calculator', () => {
     expect(parseNumber(getValue(r, 'businessDaysCount'))).toBe(10);
   });
 
+  it('business days with includeEndDate=yes does not double-count the day after end (Mon to Mon +7 = 6 business days)', () => {
+    // 2024-01-22 is a Monday, 2024-01-29 is the following Monday.
+    // Inclusive weekdays: 22,23,24,25,26 (Mon-Fri) + 29 (Mon) = 6.
+    // A prior bug added an extra day to the range when includeEndDate
+    // was 'yes', which would wrongly count 2024-01-30 (Tuesday) too, giving 7.
+    const r = config.calculate({
+      startDate: '2024-01-22',
+      endDate: '2024-01-29',
+      includeEndDate: 'yes',
+      countBusinessDays: 'yes',
+    });
+    expect(parseNumber(getValue(r, 'businessDaysCount'))).toBe(6);
+  });
+
   it('full year 2024 (leap year) = 366 days (exclude end)', () => {
     const r = config.calculate({
       startDate: '2024-01-01',
