@@ -105,7 +105,14 @@ const edpiConfig: CalculatorConfig = {
 
     if (targetGame && targetGame !== currentGame) {
       const targetMult = GAME_MULTIPLIERS[targetGame] || 1;
-      const targetSens = (sens * currentMult) / targetMult;
+      // Each game's multiplier is its sensitivity scale relative to CS:GO=1
+      // (e.g. Valorant=0.314 means the same physical aim feel needs a raw
+      // sens value ~0.314x as large as CS:GO's). To convert while preserving
+      // feel: targetSens * currentMult = sens * targetMult is wrong framing —
+      // the correct relation is targetSens = sens * (targetMult / currentMult),
+      // confirmed against this file's own workedExamples (1.1 CS:GO -> 0.3454
+      // Valorant) and the documented quickReference ("CS -> Valorant: x0.314").
+      const targetSens = (sens * targetMult) / currentMult;
       results.push({
         id: 'targetSensitivity',
         label: `Converted Sensitivity (${targetGame})`,

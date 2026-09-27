@@ -18,16 +18,16 @@ describe('eDPI Calculator', () => {
   it('converts sensitivity from CS:GO to Valorant', () => {
     const r = config.calculate({ mouseDpi: '800', sensitivity: '2', currentGame: 'CS:GO', targetGame: 'Valorant' });
     // CS:GO mult = 1, Valorant mult = 0.314
-    // targetSens = (2 * 1) / 0.314 = 6.3694...
-    near(parseNumber(getValue(r, 'targetSensitivity')), 2 / 0.314, 0.01);
+    // targetSens = (2 * 0.314) / 1 = 0.628 (preserves the same physical cm/360 feel)
+    near(parseNumber(getValue(r, 'targetSensitivity')), 2 * 0.314, 0.01);
     expect(getValue(r, 'targetGameName')).toBe('Valorant');
   });
 
   it('converts sensitivity from Valorant to CS:GO', () => {
     const r = config.calculate({ mouseDpi: '800', sensitivity: '0.5', currentGame: 'Valorant', targetGame: 'CS:GO' });
     // Valorant mult = 0.314, CS:GO mult = 1
-    // targetSens = (0.5 * 0.314) / 1 = 0.157
-    near(parseNumber(getValue(r, 'targetSensitivity')), 0.157, 0.001);
+    // targetSens = (0.5 * 1) / 0.314 = 1.592
+    near(parseNumber(getValue(r, 'targetSensitivity')), 0.5 / 0.314, 0.001);
   });
 
   it('converts between other games (Overwatch to Apex)', () => {

@@ -32,8 +32,8 @@ describe('eDPI calculator', () => {
     const r = config.calculate({ mouseDpi: '800', sensitivity: '2.5', currentGame: 'CS:GO', targetGame: 'Valorant' });
     const targetSens = parseNumber(getValue(r, 'targetSensitivity'));
     // Valorant multiplier = 0.314, CS:GO = 1.0
-    // target = (2.5 * 1.0) / 0.314 ≈ 7.96
-    near(targetSens, 2.5 / 0.314, 0.01);
+    // target = (2.5 * 0.314) / 1.0 = 0.785 (matches the well-known CS:GO -> Valorant conversion factor)
+    near(targetSens, 2.5 * 0.314, 0.01);
   });
 
   it('shows target game name when converting', () => {
