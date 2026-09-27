@@ -293,8 +293,8 @@ const debtConsolidationConfig: CalculatorConfig = {
       {
         scenario: 'Sarah has three debts: a credit card with $6,500 at 23% APR ($200/mo), another card with $3,200 at 20% APR ($150/mo), and a personal loan with $4,000 at 10% APR ($100/mo). She is considering a consolidation loan at 12% APR over 5 years with a 2% origination fee.',
         inputs: { debts: '[{"name":"Card A","balance":"6500","rate":"23","payment":"200"},{"name":"Card B","balance":"3200","rate":"20","payment":"150"},{"name":"Personal Loan","balance":"4000","rate":"10","payment":"100"}]', newRate: '12', newTermMonths: '60', originationFee: '2' },
-        result: 'Monthly savings: about $145/mo. Total interest saved: approximately $4,200 after the $274 origination fee.',
-        insight: 'At 12% APR, Sarah\'s new rate is well below her weighted average of ~18.5%. Consolidating saves her roughly $145/month in payments and about $4,200 in total interest over the 5-year term, even after accounting for the 2% origination fee. She should verify the new rate with at least 3 lenders and check for prepayment penalties before committing.',
+        result: 'Monthly savings: about $139/mo. Total lifetime savings: approximately $497 after the $274 origination fee.',
+        insight: 'At 12% APR, Sarah\'s new rate is well below her weighted average of ~18.5%. Consolidating saves her roughly $139/month in payments, but because she was on track to pay off her current debts in about 52 months while the new loan runs a fixed 60 months, most of the interest-rate benefit is offset by the longer term — netting only about $497 in total lifetime savings after the 2% origination fee. She should compare a shorter consolidation term (e.g. 48 months) to capture more of the rate advantage, and verify the new rate with at least 3 lenders before committing.',
       },
     ],
 

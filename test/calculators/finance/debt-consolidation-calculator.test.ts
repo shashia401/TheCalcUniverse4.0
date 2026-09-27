@@ -21,6 +21,18 @@ describe('debt-consolidation-calculator', () => {
     expect(getValue(r, 'newPayment')).toMatch(/\$\S+\/mo/);
   });
 
+  it('matches the "Sarah" worked example figures (regression: educational text previously claimed ~$4,200 in lifetime interest savings when the actual figure is ~$497 — it had reported roughly the current plan\'s total interest instead of the savings delta)', () => {
+    const r = config.calculate({
+      debts: '[{"name":"Card A","balance":"6500","rate":"23","payment":"200"},{"name":"Card B","balance":"3200","rate":"20","payment":"150"},{"name":"Personal Loan","balance":"4000","rate":"10","payment":"100"}]',
+      newRate: '12',
+      newTermMonths: '60',
+      originationFee: '2',
+    });
+    near(parseMoney(getValue(r, 'lifetimeSaved')), 497, 5);
+    const monthlySavingsStr = getValue(r, 'monthlySavings');
+    near(parseNumber(monthlySavingsStr), 139, 1);
+  });
+
   it('three debts: still produces consolidation results', () => {
     const r = config.calculate({
       debt1name: 'Card A',
