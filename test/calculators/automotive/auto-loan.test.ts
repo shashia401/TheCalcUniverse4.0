@@ -138,6 +138,33 @@ describe('auto-loan', () => {
     expect(r).toHaveLength(0);
   });
 
+  it('worked example: Marcus (paid-off trade-in) — regression for narrative drift fix', () => {
+    // Educational workedExamples text previously claimed $331.78/mo and $3,106.85 interest;
+    // the real calculate() output is $331.87/mo and $3,112.08 interest. Pin the correct values.
+    const r = config.calculate({
+      vehiclePrice: '28000', loanTerm: '60', interestRate: '6.9',
+      downPayment: '5000', tradeInValue: '8000', tradeInOwed: '0',
+      salesTaxPct: '7', titleRegFees: '400',
+    });
+    near(parseNumber(getValue(r, 'monthlyPayment')), 331.87, 0.05);
+    near(parseNumber(getValue(r, 'totalInterest')), 3112.08, 1);
+  });
+
+  it('worked example: Jasmine (underwater trade-in) — regression for narrative drift fix', () => {
+    // Educational workedExamples text previously claimed a $30,220 loan amount (incorrectly
+    // subtracting the trade-in value on top of adding negative equity) and $538.11/mo.
+    // The real calculate() output rolls in negative equity WITHOUT any trade-in tax/principal
+    // credit (since the trade-in is underwater): loan = $46,120, payment = $819.94/mo.
+    const r = config.calculate({
+      vehiclePrice: '42000', loanTerm: '72', interestRate: '8.5',
+      downPayment: '2000', tradeInValue: '15000', tradeInOwed: '18000',
+      salesTaxPct: '6', titleRegFees: '600',
+    });
+    near(parseNumber(getValue(r, 'totalFinanced')), 46120, 1);
+    near(parseNumber(getValue(r, 'monthlyPayment')), 819.94, 0.05);
+    near(parseNumber(getValue(r, 'totalInterest')), 12915.62, 1);
+  });
+
   it('handles sales tax correctly with trade-in credit', () => {
     const r = config.calculate({
       vehiclePrice: '40000',

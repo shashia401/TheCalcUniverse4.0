@@ -231,14 +231,14 @@ const autoLoanConfig: CalculatorConfig = {
       {
         scenario: 'Marcus is buying a used Honda CR-V priced at $28,000. He has $5,000 cash down, a trade-in worth $8,000 with no remaining loan, lives in a state with 7% sales tax, and expects $400 in title and doc fees. The dealer offers 6.9% APR for 60 months. What is his real monthly payment?',
         inputs: { vehiclePrice: '28000', loanTerm: '60', interestRate: '6.9', downPayment: '5000', tradeInValue: '8000', tradeInOwed: '0', salesTaxPct: '7', titleRegFees: '400' },
-        result: '$331.78/month — $3,106.85 total interest over 60 months',
-        insight: 'With $8,000 positive trade-in equity: taxable amount is $28,000 - $8,000 = $20,000 at 7% tax = $1,400. Out-the-door price = $28,000 + $1,400 + $400 = $29,800. Amount financed = $29,800 - $5,000 - $8,000 = $16,800. Monthly payment at 6.9% over 60 months: approximately $332. Total interest paid: about $3,108. Marcus saves significantly by having a paid-off trade-in with equity.',
+        result: '$331.87/month — $3,112.08 total interest over 60 months',
+        insight: 'With $8,000 positive trade-in equity: taxable amount is $28,000 - $8,000 = $20,000 at 7% tax = $1,400. Out-the-door price = $28,000 + $1,400 + $400 = $29,800. Amount financed = $29,800 - $5,000 - $8,000 = $16,800. Monthly payment at 6.9% over 60 months: approximately $331.87. Total interest paid: about $3,112. Marcus saves significantly by having a paid-off trade-in with equity.',
       },
       {
         scenario: 'Jasmine wants a new SUV priced at $42,000. She has only $2,000 down, her trade-in is worth $15,000 but she still owes $18,000 on it, and her state charges 6% sales tax with $600 in fees. The dealer offers 8.5% APR for 72 months. What will her payments look like?',
         inputs: { vehiclePrice: '42000', loanTerm: '72', interestRate: '8.5', downPayment: '2000', tradeInValue: '15000', tradeInOwed: '18000', salesTaxPct: '6', titleRegFees: '600' },
-        result: '$538.11/month — $8,525.44 total interest over 72 months',
-        insight: 'Negative equity: $15,000 - $18,000 = -$3,000 rolled into the new loan. Taxable amount: $42,000 - $15,000 = $27,000 at 6% = $1,620. Out-the-door = $42,000 + $1,620 + $600 = $44,220. Amount financed = $44,220 + $3,000 (negative equity) - $2,000 - $15,000 = $30,220. Monthly payment at 8.5% over 72 months: approximately $538. Total interest: about $8,536 — nearly $8,500 in interest alone on a $30,220 loan over 6 years. The underwater trade-in and long loan term are costly.',
+        result: '$819.94/month — $12,915.62 total interest over 72 months',
+        insight: 'Negative equity: $15,000 owed value − $18,000 owed = -$3,000 rolled into the new loan. Because the trade-in is underwater, it earns Jasmine zero trade-in tax credit (the $15,000 trade-in value only goes toward paying off the $18,000 payoff, not toward the new car) — taxable amount stays the full $42,000 price at 6% = $2,520. Out-the-door = $42,000 + $2,520 + $600 = $45,120. Amount financed = $45,120 + $3,000 (negative equity) - $2,000 (down) = $46,120. Monthly payment at 8.5% over 72 months: approximately $819.94. Total interest: about $12,916 — the underwater trade-in, zero tax credit, and long loan term make this a very expensive deal.',
       },
     ],
     proTips: [
