@@ -437,4 +437,18 @@ describe('cd calculator', () => {
     expect(config.educational!.formulaSource).toBeTruthy();
     expect(config.educational!.formulaSource!.length).toBeGreaterThan(50);
   });
+
+  it('matches the "Jennifer" worked example figures (regression: educational text previously paired a monthly $500 deposit narrative with daily compounding, giving a wildly wrong ~$645,900 balance instead of ~$76,937)', () => {
+    const r = config.calculate({
+      initialDeposit: '50000',
+      termUnit: 'years',
+      termLength: '3',
+      apy: '4.85',
+      compounding: 'monthly',
+      additionalDeposit: '500',
+    });
+    near(parseMoney(getValue(r, 'balance')), 76936.91, 1);
+    near(parseMoney(getValue(r, 'totalInterest')), 8936.91, 1);
+    near(parseMoney(getValue(r, 'totalPrincipal')), 68000, 1);
+  });
 });

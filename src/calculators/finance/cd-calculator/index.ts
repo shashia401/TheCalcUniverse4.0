@@ -261,9 +261,9 @@ const cdConfig: CalculatorConfig = {
       },
       {
         scenario: 'Jennifer has $100,000 from a home sale and wants to max FDIC coverage while earning competitive returns. She splits across two banks using add-on CDs.',
-        inputs: { initialDeposit: '50000', termUnit: 'years', termLength: '3', apy: '4.85', compounding: 'daily', additionalDeposit: '500' },
-        result: 'Balance at maturity: approximately $73,800 per bank. Total interest earned: about $9,800 across 3 years per bank, plus additional deposit growth.',
-        insight: 'By splitting $100,000 evenly between two FDIC-insured banks (each with the full $250,000 coverage), Jennifer ensures all her principal is protected. The add-on CD feature allows her to deposit an extra $500 each month from her paycheck, turning a fixed-term CD into a forced savings vehicle. After 3 years, she will have contributed $68,000 in additional deposits per bank, with interest pushing the total well above her initial $50,000 deposit.',
+        inputs: { initialDeposit: '50000', termUnit: 'years', termLength: '3', apy: '4.85', compounding: 'monthly', additionalDeposit: '500' },
+        result: 'Balance at maturity: approximately $76,937 per bank. Total interest earned: about $8,937 across 3 years per bank, plus additional deposit growth.',
+        insight: 'By splitting $100,000 evenly between two FDIC-insured banks (each with the full $250,000 coverage), Jennifer ensures all her principal is protected. The add-on CD feature allows her to deposit an extra $500 each month from her paycheck, turning a fixed-term CD into a forced savings vehicle. After 3 years, she will have contributed $68,000 total (initial deposit plus additions) per bank, with interest pushing the total to nearly $77,000. Note: this calculator adds recurring deposits once per compounding period, so the "additional deposit" cadence must match the compounding frequency selected (here, monthly) — pairing a monthly deposit with daily compounding would incorrectly add $500 every day instead of every month.',
       },
     ],
     quickReference: [
