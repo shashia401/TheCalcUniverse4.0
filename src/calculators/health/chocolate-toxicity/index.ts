@@ -178,7 +178,7 @@ const chocolateConfig: CalculatorConfig = {
       },
       {
         question: 'How much chocolate is dangerous for my dog?',
-        answer: 'It depends on the type and your dog\'s weight. As a rule of thumb, 20 mg of methylxanthines per kg of body weight is the threshold for mild symptoms. For a 25 lb (11.3 kg) dog, that\'s about 1 oz of milk chocolate or just 0.2 oz of baking chocolate. Always use this calculator for an accurate assessment.',
+        answer: 'It depends on the type and your dog\'s weight. As a rule of thumb, 20 mg of methylxanthines per kg of body weight is the threshold for mild symptoms. For a 25 lb (11.3 kg) dog, that\'s about 3 oz of milk chocolate or just 0.5 oz of baking chocolate. Always use this calculator for an accurate assessment.',
       },
       {
         question: 'What are the symptoms of chocolate poisoning?',

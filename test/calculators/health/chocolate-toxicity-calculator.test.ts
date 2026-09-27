@@ -34,6 +34,30 @@ describe('Chocolate Toxicity Calculator', () => {
     near(parseNumber(getValue(r, 'mgPerKg')), expectedMgPerKg, 0.1);
   });
 
+  it('matches the FAQ claim that ~3oz of milk chocolate hits the 20mg/kg mild-toxicity threshold for a 25lb dog (regression: FAQ previously said ~1oz)', () => {
+    const r = config.calculate({
+      dogWeight: '25',
+      weightUnit: 'lbs',
+      chocolateType: 'Milk',
+      amountEaten: '3',
+      amountUnit: 'oz',
+    });
+    const mgPerKg = parseNumber(getValue(r, 'mgPerKg'));
+    near(mgPerKg, 20, 1.5);
+  });
+
+  it('matches the FAQ claim that ~0.5oz of baking chocolate hits the 20mg/kg mild-toxicity threshold for a 25lb dog (regression: FAQ previously said ~0.2oz)', () => {
+    const r = config.calculate({
+      dogWeight: '25',
+      weightUnit: 'lbs',
+      chocolateType: 'Baking Chocolate',
+      amountEaten: '0.5',
+      amountUnit: 'oz',
+    });
+    const mgPerKg = parseNumber(getValue(r, 'mgPerKg'));
+    near(mgPerKg, 20, 1.5);
+  });
+
   it('shows green severity for safe amount (white chocolate, small amount)', () => {
     const r = config.calculate({
       dogWeight: '80',
