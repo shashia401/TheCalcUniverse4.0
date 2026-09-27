@@ -132,7 +132,7 @@ const uuidGeneratorConfig: CalculatorConfig = {
       {
         symbol: 'Collision',
         name: 'Identifier Collision',
-        description: 'The probability that two randomly generated identifiers are the same. UUID v4 collision probability is approximately 1 in 2^71 for 10^18 UUIDs generated.',
+        description: 'The probability that two randomly generated identifiers are the same. By the birthday paradox, generating 10^18 UUID v4s already carries roughly a 9% (about 1-in-11) chance of at least one collision; the commonly cited 50% collision point is reached at about 2.71 x 10^18 UUIDs.',
       },
     ],
     howToUse: [
@@ -163,7 +163,7 @@ const uuidGeneratorConfig: CalculatorConfig = {
       },
       {
         question: 'How unique are UUID v4 and ULID in practice?',
-        answer: 'UUID v4 has 122 random bits, giving approximately 5.3 x 10^36 possible values. The chance of a collision after generating 10^18 UUIDs is about 1 in 2 x 10^15. ULID has 80 random bits (about 1.2 x 10^24 values per millisecond). For practical purposes, both are effectively unique, especially when combined with uniqueness constraints in your database.',
+        answer: 'UUID v4 has 122 random bits, giving approximately 5.3 x 10^36 possible values. By the birthday paradox, the chance of at least one collision after generating 10^18 UUIDs is already around 9% (roughly 1 in 11) — collisions become a coin flip (50%) at about 2.71 x 10^18 UUIDs generated. ULID has 80 random bits (about 1.2 x 10^24 values per millisecond). For most applications generating far fewer IDs, both are effectively unique, especially when combined with uniqueness constraints in your database — but at extreme (billions-per-second, decades-long) generation volumes, the math matters more than intuition suggests.',
       },
       {
         question: 'Can ULIDs be decoded to extract the timestamp?',
