@@ -108,4 +108,25 @@ describe('marriage tax calculator', () => {
     });
     expect(getValue(r, 'jointIncome')).toContain('130');
   });
+
+  it('matches the "Marcus and Lena" worked example (regression: educational text previously used a stale standard deduction, $15,750/$31,500 instead of the actual $16,100/$32,200)', () => {
+    const r = config.calculate({
+      income1: '150000',
+      income2: '150000',
+      deductionType: 'standard',
+    });
+    expect(getValue(r, 'p1Tax')).toContain('24,734');
+    expect(getValue(r, 'marriedTotal')).toContain('49,468');
+    expect(getValue(r, 'hero')).toBe('No difference');
+  });
+
+  it('matches the "James and Sophie" worked example (regression: same stale standard deduction meant the claimed bonus of $4,541 no longer matched calculate())', () => {
+    const r = config.calculate({
+      income1: '200000',
+      income2: '35000',
+      deductionType: 'standard',
+    });
+    expect(getValue(r, 'marriedTotal')).toContain('34,040');
+    expect(getValue(r, 'hero')).toContain('Save $4,714');
+  });
 });

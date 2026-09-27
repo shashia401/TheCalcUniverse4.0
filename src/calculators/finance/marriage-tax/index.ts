@@ -177,7 +177,7 @@ const marriageTaxConfig: CalculatorConfig = {
       { symbol: 'Single₁', name: 'Partner 1 Single Tax', description: "Partner 1's federal tax filing as a single individual." },
       { symbol: 'Single₂', name: 'Partner 2 Single Tax', description: "Partner 2's federal tax filing as a single individual." },
       { symbol: 'MFJ', name: 'Married Filing Jointly Tax', description: 'Combined federal tax on the joint return using MFJ brackets.' },
-      { symbol: 'Std Ded', name: 'Standard Deduction (2026)', description: 'Single: $15,750. MFJ: $31,500. Exactly 2× the single, so the deduction itself is neutral.' },
+      { symbol: 'Std Ded', name: 'Standard Deduction (2026)', description: 'Single: $16,100. MFJ: $32,200. Exactly 2× the single, so the deduction itself is neutral.' },
       { symbol: 'Effective Rate', name: 'Overall Federal Tax Rate', description: 'The percentage of total household income paid in federal income tax. Comparing the effective rate when filing as two singles versus filing jointly tells you whether the tax code penalizes or rewards your marriage.' },
     ],
     howToUse: [
@@ -191,12 +191,12 @@ const marriageTaxConfig: CalculatorConfig = {
       'Plan the optimal filing strategy by understanding how the marriage penalty affects high-earning couples with similar incomes.',
     ],
     explanation:
-      'For the lower brackets (10%, 12%, 22%, 24%) the MFJ thresholds are exactly double the single thresholds, so couples in those brackets are tax-neutral. The penalty appears in the 32%, 35%, and 37% brackets, where MFJ thresholds are LESS than double the single thresholds — so two high-earning singles get pushed into a higher bracket when they marry. Bonuses appear when one partner earns much more than the other, because the joint return effectively averages the income across two people, sliding more of it into the lower brackets.',
+      'For most brackets (10% through 32%) the MFJ thresholds are exactly double the single thresholds, so couples in those brackets are tax-neutral no matter how the income is split. The penalty only appears once income reaches the top 37% bracket, where the MFJ threshold ($768,700) is less than double the single threshold ($640,600) — so two very high-earning singles, each already deep in the 35% bracket, get pushed into the 37% bracket sooner when they marry. Bonuses appear when one partner earns much more than the other, because the joint return effectively averages the income across two people, sliding more of it into the lower brackets.',
     faqs: [
       {
         question: 'When do couples typically experience a marriage penalty?',
         answer:
-          'When both partners earn similar high incomes. Two singles each making $250,000 each pay tax at marginal rates topping out around 35%. Combined as MFJ, their $500,000 joint income hits the 32%/35% brackets earlier and harder, often creating a penalty of several thousand dollars per year. The penalty grows with income and is maximized when the two incomes are roughly equal.',
+          'When both partners individually earn very high, similar incomes — specifically once each partner is already deep into the 35% single bracket (roughly $380K+ each). Two singles each making $450,000 pay tax at a marginal rate of 35%. Combined as MFJ, their $900,000 joint income crosses into the 37% bracket sooner than it would on two separate returns, creating a penalty of a few thousand dollars per year. Below this income level, the brackets are exactly neutral between filing separately and jointly, so no penalty exists for moderate earners.',
       },
       {
         question: 'When do couples get a marriage bonus?',
@@ -222,8 +222,8 @@ const marriageTaxConfig: CalculatorConfig = {
           'Partner 2 — Annual Income': '$150,000',
           'Deduction Type': 'Standard Deduction (most common)',
         },
-        result: 'If Unmarried (two singles): Partner 1 tax = $25,067, Partner 2 tax = $25,067, combined = $50,134. If Married (MFJ): joint tax = $50,134. Result: Neutral — no penalty or bonus.',
-        insight: 'Marcus and Lena face neither a penalty nor a bonus — the result is exactly neutral because their combined income of $300,000 falls entirely within the 24% bracket for both filing statuses. For MFJ, the 24% bracket caps at $394,600, and for singles it caps at $197,300 per person ($394,600 combined). In these lower brackets (10% through 24%), the MFJ thresholds are exactly double the single thresholds, so two equal earners in this range pay the same total tax married or single. A penalty would appear if their incomes pushed into the 32%+ brackets, where MFJ thresholds are less than double the single thresholds.',
+        result: 'If Unmarried (two singles): Partner 1 tax = $24,734, Partner 2 tax = $24,734, combined = $49,468. If Married (MFJ): joint tax = $49,468. Result: Neutral — no penalty or bonus.',
+        insight: 'Marcus and Lena face neither a penalty nor a bonus — the result is exactly neutral because their combined income of $300,000 falls entirely within the 24% bracket for both filing statuses. For MFJ, the 24% bracket caps at $403,550, and for singles it caps at $201,775 per person ($403,550 combined). In these lower brackets (10% through 24%), the MFJ thresholds are exactly double the single thresholds, so two equal earners in this range pay the same total tax married or single. A penalty only appears once joint income is high enough to push into the MFJ 37% bracket while each partner individually remains in the single 35% bracket — the MFJ 37% threshold is less than double the single 35%-bracket threshold.',
       },
       {
         scenario: 'James earns $200,000 as an attorney in Denver, while his partner Sophie earns $35,000 as a non-profit program coordinator. They are considering marriage and want to know whether they will get a bonus or penalty.',
@@ -232,25 +232,25 @@ const marriageTaxConfig: CalculatorConfig = {
           'Partner 2 — Annual Income': '$35,000',
           'Deduction Type': 'Standard Deduction (most common)',
         },
-        result: 'If Unmarried: James tax = $37,067, Sophie tax = $2,072, combined = $39,139. If Married: joint tax = $34,598. Marriage Bonus: Save $4,541.',
-        insight: 'James and Sophie receive a substantial marriage bonus of over $4,500 because their incomes are highly unequal. Filing jointly effectively averages their incomes across two people in the bracket math — pulling much of James\'s $200K income out of the higher single brackets and spreading it across the wider MFJ bracket thresholds. As a single filer, James\'s taxable income of $184,250 reaches the 24% bracket (which starts at $103,350 for singles). Filing jointly, their combined taxable income of $203,500 stays within the 22% MFJ bracket (which extends to $206,700). The bigger the income disparity, the bigger the bonus. Single-earner households and couples with very unequal incomes almost always benefit from marriage at tax time.',
+        result: 'If Unmarried: James tax = $36,734, Sophie tax = $2,020, combined = $38,754. If Married: joint tax = $34,040. Marriage Bonus: Save $4,714.',
+        insight: 'James and Sophie receive a substantial marriage bonus of over $4,700 because their incomes are highly unequal. Filing jointly effectively averages their incomes across two people in the bracket math — pulling much of James\'s $200K income out of the higher single brackets and spreading it across the wider MFJ bracket thresholds. As a single filer, James\'s taxable income of $183,900 reaches the 24% bracket (which starts at $105,700 for singles). Filing jointly, their combined taxable income of $202,800 stays within the 22% MFJ bracket (which extends to $211,400). The bigger the income disparity, the bigger the bonus. Single-earner households and couples with very unequal incomes almost always benefit from marriage at tax time.',
       },
     ],
 
     proTips: [
       'Run this calculator both ways (standard deduction and itemized) — if one partner has large mortgage interest or charitable deductions, itemizing might flip a penalty into a bonus or vice versa.',
-      'The marriage penalty appears in the 32%, 35%, and 37% brackets where MFJ thresholds are less than double the single thresholds. If both partners earn above roughly $190K each, you will almost certainly face a penalty.',
+      'The marriage penalty only appears once joint income pushes into the 37% MFJ bracket while each partner individually is still in the 35% single bracket — the 10% through 32% brackets are all exactly double for singles vs. MFJ, so they are neutral. If both partners individually earn above roughly $380K each, you will likely face a penalty.',
       'Don\'t forget about non-tax factors: married couples may qualify for better health insurance rates, spousal IRA contributions, and Social Security survivor benefits that can outweigh a tax penalty.',
       'This is federal income tax only. If you live in a community property state (CA, TX, WA, etc.), your state tax picture can be entirely different from the federal result.',
     ],
 
     quickReference: [
-      { label: 'Single Std Ded (2026)', value: '$15,750' },
-      { label: 'MFJ Std Ded (2026)', value: '$31,500' },
-      { label: 'Brackets neutral', value: '10%–24% (MFJ = 2× Single)' },
-      { label: 'Brackets penalize', value: '32%–37% (MFJ < 2× Single)' },
-      { label: '$100K + $40K', value: 'Bonus ~$2,423 (standard deduction)' },
-      { label: '$200K + $200K', value: 'Penalty ~$4,100 (standard deduction)' },
+      { label: 'Single Std Ded (2026)', value: '$16,100' },
+      { label: 'MFJ Std Ded (2026)', value: '$32,200' },
+      { label: 'Brackets neutral', value: '10%–32% (MFJ = 2× Single)' },
+      { label: 'Bracket that penalizes', value: '37% (MFJ threshold < 2× Single 35% threshold)' },
+      { label: '$100K + $40K', value: 'Bonus ~$2,650 (standard deduction)' },
+      { label: '$500K + $500K', value: 'Penalty ~$3,982 (standard deduction)' },
     ],
 
     limitations: [
