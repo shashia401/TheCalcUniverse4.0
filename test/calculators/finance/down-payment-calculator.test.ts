@@ -26,6 +26,18 @@ describe('down-payment-calculator', () => {
     near(parseMoney(getValue(r, 'loanAmount')), 280000);
   });
 
+  it('matches the "Keisha" worked example (regression: educational text previously claimed a 5% conventional down payment was "already saved" when it is actually $500 short)', () => {
+    const r = config.calculate({
+      homePrice: '250000',
+      targetDownPct: '5',
+      currentSavings: '12000',
+      monthlySavings: '800',
+    });
+    near(parseMoney(getValue(r, 'targetDownPayment')), 12500);
+    near(parseMoney(getValue(r, 'savingsGap')), 500);
+    expect(getValue(r, 'savingsGap')).not.toBe('Already saved!');
+  });
+
   it('calculates 3.5% FHA down payment correctly', () => {
     const r = config.calculate({
       homePrice: '300000',
