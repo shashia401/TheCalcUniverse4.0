@@ -289,7 +289,7 @@ const squareFootageConfig: CalculatorConfig = {
       {
         scenario: 'Paver Patio Circular Fire Pit Area',
         inputs: { shape: 'circle', radius: '6', unit: 'ft', pricePerSqFt: '8.00', wastage: '10' },
-        result: '124.4 sq ft needed. At $8.00/sq ft: $995.20 for concrete pavers. 38 linear ft of paver edging needed.',
+        result: '124.4 sq ft needed. At $8.00/sq ft: $995.26 for concrete pavers. 38 linear ft of paver edging needed.',
         insight: 'A circular paver area with a 6 ft radius: Area = pi x 6^2 = 3.14159 x 36 = 113.1 sq ft. With 10% waste for paver cuts around the curved edge: 113.1 x 1.10 = 124.4 sq ft needed. The circumference = 2 x pi x 6 = 37.7 ft, so you will need approximately 38 linear feet of paver edging to contain the circle. Circular areas generate more waste than rectangular ones because pavers must be cut to follow the curve -- the outer edge of each cut piece is wasted. For detailed curved paver work, professional installation is highly recommended. A pallet of standard concrete pavers covers roughly 100-120 sq ft, so order 1.25 pallets. At $400-$500 per pallet at home centers, budget about $500-$650 for materials plus $200-$300 for base gravel, sand, and edge restraints. Rent a plate compactor ($60/day) for the gravel base and a wet saw ($50/day) for cutting curves cleanly.',
       },
     ],

@@ -63,6 +63,16 @@ describe('Square Footage Calculator', () => {
     expect(getValue(r, 'totalCost')).toBe('$550.00');
   });
 
+  it('worked example: circular fire pit patio — regression for narrative drift fix', () => {
+    // Educational workedExamples text previously claimed $995.20 (computed from the
+    // display-rounded 124.4 sq ft), but the real calculate() output multiplies price by the
+    // unrounded area, giving $995.26 (8 x pi x 36 x 1.1).
+    const r = config.calculate({
+      shape: 'circle', radius: '6', unit: 'ft', wastage: '10', pricePerSqFt: '8.00',
+    });
+    expect(getValue(r, 'totalCost')).toBe('$995.26');
+  });
+
   // ── Missing inputs → empty ──
 
   it('returns empty for missing rectangle dimensions', () => {
