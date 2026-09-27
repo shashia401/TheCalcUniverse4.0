@@ -284,8 +284,8 @@ const config: CalculatorConfig = {
       {
         scenario: "Two friends named Oliver and Olivia meet at university orientation in Melbourne, Australia. Someone jokes that their similar names mean they are meant to be. They try the Love Calculator to settle the friendly debate.",
         inputs: { name1: 'Oliver', name2: 'Olivia' },
-        result: 'Love Score: 38% — Fair Compatibility',
-        insight: "Combined 'oliverolivia': L=2 (×1=2), O=3 (×2=6), V=2 (×3=6), E=1 (×4=4) = base 18 points. Shared letters between 'oliver' (o,l,i,v,e,r) and 'olivia' (o,l,i,v,i,a): o, l, i, v = 4 shared × 5 = 20 (capped at 20). Score = (18 + 20) mod 101 = 38%. Fair compatibility — they remain good friends and the story becomes a running joke throughout university.",
+        result: 'Love Score: 36% — Fair Compatibility',
+        insight: "Combined 'oliverolivia': L=2 (×1=2), O=2 (×2=4), V=2 (×3=6), E=1 (×4=4) = base 16 points. Shared letters between 'oliver' (o,l,i,v,e,r) and 'olivia' (o,l,i,v,i,a): o, l, i, v = 4 shared × 5 = 20 (capped at 20). Score = (16 + 20) mod 101 = 36%. Fair compatibility — they remain good friends and the story becomes a running joke throughout university.",
       },
     ],
     faqs: [
