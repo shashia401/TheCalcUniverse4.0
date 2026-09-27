@@ -169,7 +169,7 @@ export default function AmazonFBAPanel({ values, results }: Props) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-md shadow-slate-200/60 overflow-hidden">
       <div className="px-5 py-3 border-b border-slate-100 bg-gradient-to-r from-orange-50 to-amber-100/50">
         <span className="text-xs font-bold uppercase tracking-widest text-orange-700">
           Amazon FBA Fee Breakdown

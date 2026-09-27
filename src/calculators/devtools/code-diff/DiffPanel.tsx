@@ -91,7 +91,13 @@ function DiffView({ data }: { data: DiffData }) {
       </div>
 
       {/* Diff area */}
-      <div className="flex" style={{ minHeight: '200px', maxHeight: '600px', overflow: 'auto' }}>
+      <div
+        className="flex"
+        style={{ minHeight: '200px', maxHeight: '600px', overflow: 'auto' }}
+        tabIndex={0}
+        role="region"
+        aria-label="Side-by-side text diff, scrollable"
+      >
         {/* Left panel */}
         <div className="flex-1 min-w-0 border-r border-slate-200 dark:border-slate-700">
           {hunks.length === 0 && (
@@ -115,8 +121,8 @@ function DiffView({ data }: { data: DiffData }) {
                 const content = line.left?.text ?? '';
                 return (
                   <div key={li} className={`flex font-mono text-[12px] leading-[1.6] ${bg} border-b border-slate-100 dark:border-slate-800/50`}>
-                    <span className="w-[50px] flex-shrink-0 text-right pr-2 text-slate-400 dark:text-slate-600 select-none py-0.5">{hunk.leftStart + li}</span>
-                    <span className="w-[30px] flex-shrink-0 text-center text-slate-400 dark:text-slate-600 select-none py-0.5">{marker}</span>
+                    <span className="w-[50px] flex-shrink-0 text-right pr-2 text-slate-400 dark:text-slate-500 select-none py-0.5">{hunk.leftStart + li}</span>
+                    <span className="w-[30px] flex-shrink-0 text-center text-slate-400 dark:text-slate-500 select-none py-0.5">{marker}</span>
                     <span className="flex-1 whitespace-pre-wrap break-all py-0.5 px-1 text-slate-800 dark:text-slate-200" dangerouslySetInnerHTML={{ __html: content ? highlightLine(content) : '&nbsp;' }} />
                   </div>
                 );
@@ -142,8 +148,8 @@ function DiffView({ data }: { data: DiffData }) {
                 const content = line.right?.text ?? '';
                 return (
                   <div key={li} className={`flex font-mono text-[12px] leading-[1.6] ${bg} border-b border-slate-100 dark:border-slate-800/50`}>
-                    <span className="w-[50px] flex-shrink-0 text-right pr-2 text-slate-400 dark:text-slate-600 select-none py-0.5">{hunk.rightStart + li}</span>
-                    <span className="w-[30px] flex-shrink-0 text-center text-slate-400 dark:text-slate-600 select-none py-0.5">{marker}</span>
+                    <span className="w-[50px] flex-shrink-0 text-right pr-2 text-slate-400 dark:text-slate-500 select-none py-0.5">{hunk.rightStart + li}</span>
+                    <span className="w-[30px] flex-shrink-0 text-center text-slate-400 dark:text-slate-500 select-none py-0.5">{marker}</span>
                     <span className="flex-1 whitespace-pre-wrap break-all py-0.5 px-1 text-slate-800 dark:text-slate-200" dangerouslySetInnerHTML={{ __html: content ? highlightLine(content) : '&nbsp;' }} />
                   </div>
                 );
@@ -355,7 +361,7 @@ const DiffPanel: React.FC<DiffPanelProps> = ({ results, onValuesChange }) => {
         <div className="py-16 text-center text-sm text-slate-500 dark:text-slate-500">
           <div className="text-3xl mb-3">⇄</div>
           <p className="font-medium">Enter or load text on both sides to compare</p>
-          <p className="text-xs mt-1 text-slate-400 dark:text-slate-600">Supports file upload, drag & drop, and paste</p>
+          <p className="text-xs mt-1 text-slate-400 dark:text-slate-500">Supports file upload, drag & drop, and paste</p>
         </div>
       )}
     </div>

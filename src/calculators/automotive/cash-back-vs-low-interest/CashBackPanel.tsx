@@ -129,7 +129,12 @@ export default function CashBackPanel({ values, results }: Props) {
         </div>
 
         {/* Side-by-side comparison table */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div
+          className="overflow-x-auto rounded-xl border border-slate-200"
+          tabIndex={0}
+          role="region"
+          aria-label="Side-by-side comparison table of cash back versus low interest options"
+        >
           <table className="w-full text-sm min-w-[360px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">

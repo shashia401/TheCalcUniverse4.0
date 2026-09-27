@@ -162,7 +162,12 @@ export default function EtsyFeesPanel({ values, results }: Props) {
           </svg>
           <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Fee Breakdown</span>
         </div>
-        <div className="overflow-x-auto">
+        <div
+          className="overflow-x-auto"
+          tabIndex={0}
+          role="region"
+          aria-label="Fee breakdown table"
+        >
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
