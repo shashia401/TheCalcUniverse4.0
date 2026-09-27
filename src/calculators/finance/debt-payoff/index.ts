@@ -301,14 +301,14 @@ const debtPayoffConfig: CalculatorConfig = {
       {
         scenario: 'Sarah has three credit cards: Chase Sapphire ($4,500 balance, 22.99% APR, $85/mo min), Citi Double Cash ($2,100 balance, 19.99% APR, $45/mo min), and Capital One Quicksilver ($850 balance, 28.99% APR, $25/mo min). She can afford $200 extra per month above minimums.',
         inputs: { extraPayment: '200', card1name: 'Chase Sapphire', card1balance: '4500', card1rate: '22.99', card1min: '85', card2name: 'Citi Double Cash', card2balance: '2100', card2rate: '19.99', card2min: '45', card3name: 'CapOne', card3balance: '850', card3rate: '28.99', card3min: '25' },
-        result: 'Avalanche method saves approximately $200 more in interest than Snowball. Both strategies eliminate all debt in roughly 18-20 months compared to 8+ years paying only minimums. Total interest saved versus minimums: approximately $3,500+.',
-        insight: 'Avalanche targets the 28.99% Capital One card first (highest rate) — saving Sarah about $200 more in interest than Snowball, which would pay off the smallest $850 balance first for a quick motivational win. Both strategies beat paying only minimums by thousands of dollars.',
+        result: 'Avalanche method saves approximately $268 more in interest than Snowball ($2,349 vs $2,617). Snowball clears all three cards in 35 months; Avalanche in 33 months. Paying only the minimums would barely make a dent — on the Capital One card alone, the minimum payment is smaller than the interest that accrues each month, so the balance would never shrink.',
+        insight: 'Avalanche targets the 28.99% Capital One card first (highest rate) — saving Sarah about $268 more in interest than Snowball, which would pay off the smallest $850 balance first for a quick motivational win. Both strategies beat paying only minimums, which would actually leave her balances growing indefinitely on the highest-rate card.',
       },
       {
         scenario: 'Mike only has two credit cards: $8,000 at 24% with $200 minimum, and $3,000 at 18% with $75 minimum. He can spare $150 extra each month.',
         inputs: { extraPayment: '150', card1name: 'Card A', card1balance: '8000', card1rate: '24', card1min: '200', card2name: 'Card B', card2balance: '3000', card2rate: '18', card2min: '75' },
-        result: 'Snowball pays off Card B ($3,000) first in about 10 months, freeing $75/month to attack Card A. Avalanche targets Card A first at 24% APR, saving more in interest but requiring patience before seeing a card fully eliminated.',
-        insight: 'Snowball pays off Card B ($3,000) first in about 10 months — giving Mike a quick win and freeing up $75/month to attack the larger $8,000 card. Avalanche targets the 24% Card A first, saving more money but requiring patience before seeing a card eliminated.',
+        result: 'Snowball pays off Card B ($3,000) first in about 15 months, freeing $75/month to attack Card A. Avalanche targets Card A first at 24% APR, saving more in interest but requiring patience before seeing a card fully eliminated.',
+        insight: 'Snowball pays off Card B ($3,000) first in about 15 months — giving Mike a quick win and freeing up $75/month to attack the larger $8,000 card. Avalanche targets the 24% Card A first, saving more money but requiring patience before seeing a card eliminated.',
       },
     ],
     proTips: [

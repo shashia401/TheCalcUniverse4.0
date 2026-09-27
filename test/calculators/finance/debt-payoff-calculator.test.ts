@@ -37,6 +37,19 @@ describe('Debt Payoff Calculator', () => {
     near(totalMin, 130, 1);
   });
 
+  it('matches the "Sarah" worked example figures (regression: educational text previously claimed 18-20 months payoff and ~$200 interest saved when the actual figures are 33-35 months and ~$268)', () => {
+    const r = config.calculate({
+      extraPayment: '200',
+      card1name: 'Chase Sapphire', card1balance: '4500', card1rate: '22.99', card1min: '85',
+      card2name: 'Citi Double Cash', card2balance: '2100', card2rate: '19.99', card2min: '45',
+      card3name: 'CapOne', card3balance: '850', card3rate: '28.99', card3min: '25',
+    });
+    expect(getValue(r, 'snowballTime')).toBe('2yr 11mo');
+    expect(getValue(r, 'avalancheTime')).toBe('2yr 9mo');
+    near(parseMoney(getValue(r, 'snowballInterest')), 2617, 5);
+    near(parseMoney(getValue(r, 'avalancheInterest')), 2349, 5);
+  });
+
   it('avalanche saves more or equal interest than snowball', () => {
     const r = config.calculate(defaultInputs);
     const snowballInterest = parseMoney(getValue(r, 'snowballInterest'));
