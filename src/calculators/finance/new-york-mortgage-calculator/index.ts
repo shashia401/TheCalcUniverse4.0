@@ -184,8 +184,8 @@ const nyMortgageConfig: CalculatorConfig = {
       {
         scenario: 'Maria is buying a $400,000 condo in Queens, NYC with 20% down ($80,000), a 30-year fixed mortgage at 6.7%, and NYC property tax rate of 0.9%. She qualifies for Basic STAR.',
         inputs: { homePrice: '400000', downPayment: '80000', interestRate: '6.7', loanTerm: '30', propertyTaxRate: '0.9', starEligible: 'basic' },
-        result: 'Monthly P&I is approximately $2,064, plus $300/month property tax — total $2,364/month. STAR saves roughly $600/year on school taxes. Mortgage recording tax at closing: approximately $1,600.',
-        insight: 'Maria\'s monthly P&I is about $2,064, plus $300/month in property tax — total ~$2,364/month before STAR savings. The mortgage recording tax adds roughly $1,600 at closing. STAR saves her roughly $600/year on school taxes. State income tax on top means her true housing burden is higher than the mortgage alone suggests.',
+        result: 'Monthly P&I is approximately $2,064, plus $300/month property tax — total $2,364/month. STAR saves roughly $162/year on school taxes. Mortgage recording tax at closing: approximately $1,600.',
+        insight: 'Maria\'s monthly P&I is about $2,064, plus $300/month in property tax — total ~$2,364/month before STAR savings. The mortgage recording tax adds roughly $1,600 at closing. STAR saves her roughly $162/year on school taxes. State income tax on top means her true housing burden is higher than the mortgage alone suggests.',
       },
       {
         scenario: 'The Johnsons are buying a $250,000 home in Rochester (Monroe County) with 10% down ($25,000), a 30-year fixed at 6.7%, and Monroe County property tax rate of 2.5%. They are first-time buyers using SONYMA.',

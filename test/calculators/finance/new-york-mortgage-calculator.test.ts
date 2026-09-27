@@ -68,6 +68,19 @@ describe('New York Mortgage Calculator', () => {
     expect(getValue(r, 'starSavings')).not.toBe('Not eligible');
   });
 
+  it('computes basic STAR savings for Maria\'s worked example ($400K, 0.9% tax) as ~$162/yr, not $600/yr', () => {
+    const r = config.calculate({
+      homePrice: '400000',
+      downPayment: '80000',
+      interestRate: '6.7',
+      loanTerm: '30',
+      propertyTaxRate: '0.9',
+      starEligible: 'basic',
+    });
+    const starSavings = parseFloat(getValue(r, 'starSavings').replace(/[$,/yr]/g, ''));
+    expect(starSavings).toBeCloseTo(162, 0);
+  });
+
   it('shows no STAR savings when not eligible', () => {
     const r = config.calculate(defaultInputs);
     expect(getValue(r, 'starSavings')).toBe('Not eligible');
