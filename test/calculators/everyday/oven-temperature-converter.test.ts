@@ -35,6 +35,17 @@ describe('Oven Temperature Converter', () => {
     expect(getValue(results, 'cookingDescription')).toBe('Very Slow / Cool');
   });
 
+  it('educational diagram Celsius values match the gasMarkTable, not a straight F-to-C conversion of the Fahrenheit column (regression: the diagram previously showed (F-32)*5/9 values like 245/230/220... instead of the table\'s 245/230/220 — verified against every gas mark)', () => {
+    const svg = config.educational.diagram!.svg;
+    const marks = ['0.25', '0.5', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+    for (const gm of marks) {
+      const results = config.calculate({ temperature: gm, fromUnit: 'Gas Mark' });
+      const celsius = getValue(results, 'celsius');
+      const celsiusValue = celsius.replace('°C', '');
+      expect(svg).toContain(`>${celsiusValue}</text>`);
+    }
+  });
+
   it('empty temperature returns empty array', () => {
     const results = config.calculate({ temperature: '', fromUnit: '°F' });
     expect(results).toEqual([]);
