@@ -294,14 +294,14 @@ const tvmConfig: CalculatorConfig = {
       {
         scenario: 'You want to save $500,000 for retirement in 25 years. Your current savings are $50,000. How much must you invest monthly at an 8% expected annual return?',
         inputs: { solveFor: 'PMT', n: '300', rate: String(8 / 12), pv: '-50000', pmt: '0', fv: '500000', timing: 'end' },
-        result: 'PMT = -$525.29/month',
-        insight: 'The power of starting early: your $50,000 already on hand will grow to about $340,000 on its own. You only need $525/month to reach $500,000 in 25 years — showing how compounding does much of the heavy lifting when you start early.',
+        result: 'PMT = -$139.84/month',
+        insight: 'The power of starting early: your $50,000 already on hand will grow to about $367,000 on its own. You only need about $140/month to reach $500,000 in 25 years — showing how compounding does most of the heavy lifting when you start early.',
       },
       {
         scenario: 'You invested $10,000 in a mutual fund 8 years ago, added $200/month, and today it is worth $38,500. What annual return did you earn?',
         inputs: { solveFor: 'RATE', n: '96', rate: '0', pv: '-10000', pmt: '-200', fv: '38500', timing: 'end' },
-        result: 'I/Y = ~0.85%/month, ~10.2% annually',
-        insight: 'Solving for rate (I/Y) gives a monthly return of about 0.85%, which annualizes to roughly 10.2% — well above the long-run S&P 500 average of ~10% nominal. The Newton-Raphson method iterates to find the rate that satisfies the equation.',
+        result: 'I/Y = ~0.42%/month, ~5.0% annually',
+        insight: 'Solving for rate (I/Y) gives a monthly return of about 0.42%, which annualizes to roughly 5.0% nominal (about 5.1% effective annual rate with compounding) — a solid but unspectacular return, well below the long-run S&P 500 average of ~10% nominal. The Newton-Raphson method iterates to find the rate that satisfies the equation.',
       },
     ],
     proTips: [

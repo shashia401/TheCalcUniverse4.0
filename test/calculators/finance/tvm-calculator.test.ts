@@ -292,4 +292,38 @@ describe('tvm-calculator', () => {
     const fvBegin = parseMoney(getValue(rBegin, 'result'));
     expect(Math.abs(fvBegin)).toBeGreaterThan(Math.abs(fvEnd));
   });
+
+  // ── Educational worked-example regressions ─────────────────
+  it('matches the educational worked example (retirement PMT: 50K now + 8%/25yr -> 500K goal)', () => {
+    // Regression test: the worked example previously stated PMT = -$525.29/month,
+    // which did not match the calculator's own formula (correct answer ~-$139.84/month).
+    const r = config.calculate({
+      solveFor: 'PMT',
+      n: '300',
+      rate: String(8 / 12),
+      pv: '-50000',
+      pmt: '0',
+      fv: '500000',
+      timing: 'end',
+    });
+    const pmt = parseMoney(getValue(r, 'result'));
+    near(Math.abs(pmt), 139.84, 0.5);
+  });
+
+  it('matches the educational worked example (RATE: 10K + 200/mo for 96mo -> 38,500)', () => {
+    // Regression test: the worked example previously stated ~0.85%/month (~10.2%
+    // annually), which did not match the calculator's own solver (correct answer
+    // ~0.42%/month, ~5.0% annually).
+    const r = config.calculate({
+      solveFor: 'RATE',
+      n: '96',
+      rate: '0',
+      pv: '-10000',
+      pmt: '-200',
+      fv: '38500',
+      timing: 'end',
+    });
+    const ratePct = parsePercent(getValue(r, 'result'));
+    near(ratePct, 0.418, 0.01);
+  });
 });
