@@ -72,4 +72,21 @@ describe('ira calculator (traditional vs roth)', () => {
     const hasWarning = r.some((x) => x.id === 'limitWarning');
     expect(hasWarning).toBe(true);
   });
+
+  it('matches the "Diana" worked example (regression: educational text previously called this "virtually tied" with Roth ahead, when Traditional actually wins once the reinvested tax deduction is credited)', () => {
+    const r = config.calculate({
+      currentAge: '48',
+      retirementAge: '67',
+      currentBalance: '120000',
+      annualContribution: '7500',
+      expectedReturn: '6',
+      marginalTaxRate: '32',
+      retirementTaxRate: '12',
+    });
+    expect(getValue(r, 'winner')).toContain('Traditional wins');
+    const rothBalance = parseMoney(getValue(r, 'rothBalance'));
+    const tradTaxSavingsInvested = parseMoney(getValue(r, 'tradTaxSavingsInvested'));
+    const tradAfterTax = parseMoney(getValue(r, 'tradAfterTax'));
+    expect(tradAfterTax + tradTaxSavingsInvested).toBeGreaterThan(rothBalance);
+  });
 });
