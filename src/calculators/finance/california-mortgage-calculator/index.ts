@@ -154,8 +154,8 @@ const caMortgageConfig: CalculatorConfig = {
       {
         scenario: 'A first-time buyer in Los Angeles uses CalHFA MyHome assistance (3.5%) toward a $750,000 condo with only 5% down.',
         inputs: { homePrice: '750000', downPayment: '37500', interestRate: '7.25', loanTerm: '30', propertyTaxRate: '0.85' },
-        result: 'Monthly P&I is $4,864, plus $531 property tax and $297 PMI = $5,692/month. With only 5% down, PMI adds $3,564/year until equity reaches 20%. Total annual housing cost is approximately $68,304.',
-        insight: 'Monthly P&I is $4,864, plus $531 property tax and $297 PMI = $5,692/month. The PMI adds $3,564/year until equity reaches 20%. With CalHFA assistance, the effective down payment is $63,750 (8.5%). Saving aggressively to refinance out of PMI once they have 20% equity could save $3,500+/year.',
+        result: 'Monthly P&I is $4,861, plus $531 property tax and $297 PMI = $5,689/month. With only 5% down, PMI adds $3,563/year until equity reaches 20%. Total annual housing cost is approximately $68,264.',
+        insight: 'Monthly P&I is $4,861, plus $531 property tax and $297 PMI = $5,689/month. The PMI adds $3,563/year until equity reaches 20%. With CalHFA assistance, the effective down payment is $63,750 (8.5%). Saving aggressively to refinance out of PMI once they have 20% equity could save $3,500+/year.',
       },
     ],
     proTips: [

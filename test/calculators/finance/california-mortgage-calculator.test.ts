@@ -16,4 +16,10 @@ describe('California Mortgage Calculator', () => {
   it('returns empty when down payment exceeds home price', () => {
     expect(caConfig.calculate({ homePrice: '500000', downPayment: '600000', interestRate: '6.9' })).toEqual([]);
   });
+
+  it('matches the "LA first-time buyer" worked example P&I (regression: educational text previously overstated it by ~$3.50/mo)', () => {
+    const r = caConfig.calculate({ homePrice: '750000', downPayment: '37500', interestRate: '7.25', loanTerm: '30', propertyTaxRate: '0.85' });
+    const monthlyPayment = parseFloat(find(r, 'monthlyPayment').replace(/[$,]/g, ''));
+    expect(Math.abs(monthlyPayment - 4860.51)).toBeLessThan(0.5);
+  });
 });
