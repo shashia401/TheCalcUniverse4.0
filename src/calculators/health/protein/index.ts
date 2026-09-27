@@ -141,12 +141,13 @@ const proteinConfig: CalculatorConfig = {
     const meals4 = Math.round(dailyTarget / 4);
     const meals5 = Math.round(dailyTarget / 5);
 
-    // Food equivalents
-    const chickenBreastG = dailyTarget / 31; // 3 oz = ~26g protein
+    // Food equivalents — each is a COUNT of the standard serving named in its label
+    // (e.g. chickenBreastCount = number of 3 oz chicken breasts), not a gram/ounce total.
+    const chickenBreastCount = dailyTarget / 26; // 3 oz = ~26g protein
     const eggsCount = dailyTarget / 6; // 1 large egg = ~6g
     const wheyScoops = dailyTarget / 25; // 1 scoop = ~25g
     const greekYogurtCups = dailyTarget / 17; // 3/4 cup = ~17g
-    const salmonG = dailyTarget / 22; // 3 oz = ~22g
+    const salmonServings = dailyTarget / 22; // 3 oz = ~22g
 
     // Max per meal for optimal MPS (muscle protein synthesis)
     const maxPerMeal = Math.round(0.4 * weightKg);
@@ -182,7 +183,7 @@ const proteinConfig: CalculatorConfig = {
       {
         id: 'foodEquivalents',
         label: 'Daily Food Equivalents',
-        value: `~${chickenBreastG.toFixed(0)} chicken breasts · ${eggsCount.toFixed(0)} eggs · ${wheyScoops.toFixed(0)} whey scoops · ${greekYogurtCups.toFixed(0)} cups Greek yogurt · ${salmonG.toFixed(0)} oz salmon`,
+        value: `~${chickenBreastCount.toFixed(0)} chicken breasts (3 oz) · ${eggsCount.toFixed(0)} eggs · ${wheyScoops.toFixed(0)} whey scoops · ${greekYogurtCups.toFixed(0)} cups Greek yogurt · ${salmonServings.toFixed(0)} servings salmon (3 oz)`,
         color: 'neutral',
       },
       {

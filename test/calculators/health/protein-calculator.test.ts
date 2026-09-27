@@ -62,6 +62,18 @@ describe('Protein calculator', () => {
     expect(getValue(r, 'foodEquivalents')).toContain('chicken');
   });
 
+  it('divides chicken-breast equivalents by 26g (the documented protein content of a 3 oz breast), not 31g (regression)', () => {
+    const r = config.calculate({
+      unit: 'metric', weight: '100', age: '30',
+      heightFt: '', heightIn: '', heightCm: '180',
+      goal: 'maintain', trainingFrequency: 'none',
+    });
+    const dailyTarget = parseFloat(getValue(r, 'dailyTarget'));
+    const equivalents = getValue(r, 'foodEquivalents');
+    const expectedBreasts = Math.round(dailyTarget / 26).toString();
+    expect(equivalents).toContain(`~${expectedBreasts} chicken breasts`);
+  });
+
   it('returns empty for invalid inputs', () => {
     const r = config.calculate({
       unit: 'metric', weight: '0', age: '30',
