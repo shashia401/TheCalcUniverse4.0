@@ -188,7 +188,7 @@ const etsyFeesConfig: CalculatorConfig = {
       },
       {
         question: 'What is the effective total fee percentage on Etsy?',
-        answer: 'For a $50 item with $5 shipping and no Offsite Ads: listing fee ($0.20) + transaction fee ($3.25) + payment processing ($1.90) + shipping fee ($0.33) = $5.68, or about 10.3% of the total sale. With Offsite Ads at 12%, this jumps to $12.28, or 22.3%. With Offsite Ads at 15%, it becomes $14.03, or 25.5%. Understanding these effective rates is essential for pricing — aim for at least a 20-30% net margin after all fees to build a sustainable business.',
+        answer: 'For a $50 item with $5 shipping and no Offsite Ads: listing fee ($0.20) + transaction fee ($3.25) + payment processing ($1.90) + shipping fee ($0.33) = $5.68, or about 10.3% of the total sale. With Offsite Ads at 12%, this jumps to $12.28, or 22.3%. With Offsite Ads at 15%, it becomes $13.92, or 25.3%. Understanding these effective rates is essential for pricing — aim for at least a 20-30% net margin after all fees to build a sustainable business.',
       },
       {
         question: 'Should I use Etsy Ads (promoted listings)?',

@@ -87,6 +87,19 @@ describe('etsy-fees (Etsy Fee Calculator)', () => {
     expect(getValue(r, 'offsiteAdsFee')).toBe('$30.00');
   });
 
+  it('FAQ scenario: $50 item, $5 shipping, 15% Offsite Ads — regression for narrative drift fix', () => {
+    // The "effective total fee percentage" FAQ previously claimed $14.03 / 25.5% for this
+    // scenario; the real calculate() output is $13.92 total fees / 25.3% of the sale.
+    const r = config.calculate({
+      itemPrice: '50',
+      shippingCharged: '5',
+      materialCost: '20',
+      offsiteAds: 'qualified',
+    });
+    expect(getValue(r, 'totalFees')).toBe('$13.92');
+    near(parseNumber(getValue(r, 'totalFees')) / 55 * 100, 25.3, 0.1);
+  });
+
   it('Profit margin is negative when costs and fees exceed revenue', () => {
     const r = config.calculate({
       itemPrice: '5',
