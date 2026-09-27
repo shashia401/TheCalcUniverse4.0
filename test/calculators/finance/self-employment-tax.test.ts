@@ -34,9 +34,10 @@ describe('self-employment-tax', () => {
       qbiDeduction: 'no',
     });
 
-    // Remaining SS wage base = 176100 - 100000 = 76100
-    // SS on min(92350, 76100) * 12.4% = 76100 * 0.124 = 9,436.40
-    const ssExpected = 76100 * 0.124;
+    // Remaining SS wage base = 184500 - 100000 = 84500 (2026 wage base, fixed
+    // from the previously-stale 176100/2025 figure)
+    // SS on min(92350, 84500) * 12.4% = 84500 * 0.124 = 10,478.00
+    const ssExpected = 84500 * 0.124;
     near(parseMoney(getValue(r, 'socialSecurityPortion')), ssExpected, 0.01);
   });
 
