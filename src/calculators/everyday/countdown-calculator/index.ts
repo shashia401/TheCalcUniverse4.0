@@ -294,7 +294,7 @@ const countdownCalculatorConfig: CalculatorConfig = {
           startDate: '2026-05-18',
           includeTime: 'No',
         },
-        result: '5,399 days (about 14y 9m 1w 1d) from the start date of May 18, 2026.',
+        result: '5,401 days (about 14y 9m 2w 1d) from the start date of May 18, 2026.',
         insight:
           'Using a fixed start date of May 18, 2026 (today), the countdown to March 1, 2041 spans roughly 14 years and 10 months. The year-month-week-day breakdown makes the long-term milestone feel more tangible and helps with financial planning — you can see exactly how many months of saving remain, or how many weeks until you need to have your retirement accounts in order.',
       },

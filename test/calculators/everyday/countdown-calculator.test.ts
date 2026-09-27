@@ -37,6 +37,18 @@ describe('Countdown Calculator', () => {
     expect(breakdown).toMatch(/\d+y \d+m \d+w \d+d/);
   });
 
+  it('matches the worked example for a fixed start/target date pair (regression: narrative previously said 5,399 days / 14y 9m 1w 1d, actual formula gives 5,401 days / 14y 9m 2w 1d)', () => {
+    const results = config.calculate({
+      targetDate: '2041-03-01',
+      startDate: '2026-05-18',
+      includeTime: 'No',
+    });
+    const totalDays = parseNumber(getValue(results, 'totalDays'));
+    expect(totalDays).toBe(5401);
+    const breakdown = getValue(results, 'breakdown');
+    expect(breakdown).toBe('14y 9m 2w 1d');
+  });
+
   it('shows "ago" indicator for a past date', () => {
     const results = config.calculate({
       targetDate: '2020-01-01',
