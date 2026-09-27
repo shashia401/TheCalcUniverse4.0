@@ -264,7 +264,7 @@ const studentLoanConfig: CalculatorConfig = {
         scenario: 'Emily graduates from a public university with $35,000 in unsubsidized federal loans at 6.53%. She had loans disbursed over 4 years and is about to enter her 6-month grace period. She wants to know the true cost of deferring interest.',
         inputs: { loanBalance: '35000', interestRate: '6.53', repaymentTerm: '10', inSchool: 'yes', monthsUntilGraduation: '0', loanType: 'unsubsidized', gracePeriodMonths: '6' },
         result: 'Capitalized interest: $1,143.02, Effective principal: $36,143.02, Monthly payment: $411.23/mo',
-        insight: 'Emily\'s 6-month grace period will add over $1,143 to her principal. On a 10-year plan, the capitalized interest alone will cost her an additional $258 in interest over the repayment term because she pays interest on the interest. If Emily can pay just $190/month during her grace period to cover the accruing interest, she prevents capitalization entirely and enters repayment owing exactly $35,000 — saving thousands over the loan\'s life.',
+        insight: 'Emily\'s 6-month grace period will add over $1,143 to her principal. On a 10-year plan, the capitalized interest alone will cost her an additional $416 in interest over the repayment term because she pays interest on the interest. If Emily can pay just $190/month during her grace period to cover the accruing interest, she prevents capitalization entirely and enters repayment owing exactly $35,000 — saving thousands over the loan\'s life.',
       },
       {
         scenario: 'Marcus borrowed $60,000 for graduate school at 8.08% and is pursuing a career in government. He qualifies for PSLF and is choosing between the standard 10-year plan and a 25-year IDR plan.',
