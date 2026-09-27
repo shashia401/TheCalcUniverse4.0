@@ -113,8 +113,8 @@ const scientificConfig: CalculatorConfig = {
       {
         scenario: 'James, a financial analyst, is computing the continuously compounded annual growth rate of an investment that grew from $10,000 to $27,000 over 8 years. Continuous compounding uses the formula r = ln(A/P) / t.',
         inputs: { expression: 'ln(27000/10000)/8' },
-        result: '0.12411612881 (approximately 12.41% continuously compounded annual growth rate). The natural log function is the inverse of exponential growth, giving the exact continuous rate.',
-        insight: 'The expression evaluates to approximately 0.1241, or a 12.41% continuously compounded annual growth rate. Using the natural log (ln) function is essential here — it is the inverse of the exponential growth function and gives the exact continuous rate.',
+        result: '0.1241564716 (approximately 12.42% continuously compounded annual growth rate). The natural log function is the inverse of exponential growth, giving the exact continuous rate.',
+        insight: 'The expression evaluates to approximately 0.1242, or a 12.42% continuously compounded annual growth rate. Using the natural log (ln) function is essential here — it is the inverse of the exponential growth function and gives the exact continuous rate.',
       },
     ],
     proTips: [

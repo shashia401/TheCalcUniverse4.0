@@ -22,4 +22,10 @@ describe('Scientific Calculator', () => {
     const r = config.calculate({ expression: '(2 + 3) × 4' });
     expect(getValue(r, 'result')).toBe('20');
   });
+
+  it('evaluates continuous growth rate example (regression: workedExamples narrative drift)', () => {
+    // ln(27000/10000)/8 = 0.12415647..., NOT the previously-documented 0.12411612881
+    const r = config.calculate({ expression: 'ln(27000/10000)/8' });
+    expect(getValue(r, 'result')).toBe('0.1241564716');
+  });
 });
