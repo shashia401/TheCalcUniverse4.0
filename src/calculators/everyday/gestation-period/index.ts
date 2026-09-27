@@ -86,7 +86,7 @@ calculate: (values): CalculatorResult[] => {
     ];
 
     if (breedingStr && breedingStr.trim()) {
-      const breedingDate = new Date(breedingStr);
+      const breedingDate = new Date(breedingStr + 'T00:00:00');
       if (!isNaN(breedingDate.getTime())) {
         const dueDate = new Date(breedingDate);
         dueDate.setDate(dueDate.getDate() + entry.periodDays);
