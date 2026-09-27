@@ -271,10 +271,10 @@ const robuxConfig: CalculatorConfig = {
         insight: 'Roblox Premium at $4.99/month ($59.88/year) pays for itself if you buy at least 8,000 Robux per year. The 10% bonus on four $99.99 packages gives $40 worth of free Robux, and the monthly stipend (450/month for the basic tier) provides another 5,400 Robux annually — combined value well exceeding the subscription cost for regular buyers.',
       },
       {
-        scenario: 'A Fortnite player wants the new Battle Pass (950 V-Bucks) plus a 2,000 V-Buck skin bundle. They need 2,950 V-Bucks total. They compare: one 2,800 V-Buck package plus one 1,000 V-Buck package (3,800 V-Bucks for $31.98), or one 5,000 V-Buck package (5,000 V-Bucks for $36.99). The 5,000 package gives 1,200 more V-Bucks for only $5.01 more — enough for another emote or pickaxe.',
+        scenario: 'A Fortnite player wants the new Battle Pass (950 V-Bucks) plus a 2,000 V-Buck skin bundle. They need 2,950 V-Bucks total and check the calculator in Basic mode to see the best-value recommendation.',
         inputs: { virtualCurrency: '2950', currencyType: 'V-Bucks' },
-        result: 'Estimated cost: $36.99 for 5,000 V-Bucks via best-value package. Effective rate: $0.0074 per unit.',
-        insight: 'The mathematical approach: buying 2,800 + 1,000 = 3,800 V-Bucks costs $22.99 + $8.99 = $31.98. The 5,000 V-Buck package costs $36.99 — only $5.01 more for 1,200 additional V-Bucks. This is a 24% better per-unit rate on the extra V-Bucks. For players who regularly buy cosmetics and Battle Passes, batch-purchasing the largest package is always the better long-term financial decision.',
+        result: 'Estimated cost: $79.99 for 13,500 V-Bucks via best-value package. Effective rate: $0.0059 per unit.',
+        insight: 'The calculator always recommends the single package with the lowest per-unit rate — here, the 13,500 V-Buck tier at $0.0059/V-Buck beats every smaller tier, including the 5,000 V-Buck package at $0.0074/V-Buck. That means the "best value" pick (13,500 V-Bucks for $79.99) delivers over 10,000 more V-Bucks than the player actually needs. For a one-time purchase close to the exact amount, switching to Advanced mode and selecting the 5,000 V-Buck package directly ($36.99) avoids the large surplus, at the cost of a worse per-unit rate. For players who buy V-Bucks regularly, banking the leftover balance in the largest package is usually the better long-term financial decision; for a single purchase, the closer-fitting package avoids overspending.',
       },
     ],
     proTips: [
