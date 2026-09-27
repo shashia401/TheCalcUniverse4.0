@@ -236,7 +236,7 @@ export default function AmortizationComparePanel({ loanAmount, annualRate, total
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label={view === 'annual' ? 'Annual amortization comparison table' : 'Monthly amortization comparison table'}>
           {view === 'annual' ? (
             <table className="w-full text-xs min-w-[540px]">
               <thead>

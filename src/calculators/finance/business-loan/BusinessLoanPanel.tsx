@@ -183,9 +183,9 @@ export default function BusinessLoanPanel({ values, results }: Props) {
   if (!results.length) return null;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden dark:border-slate-700 dark:bg-slate-800">
       {/* Header */}
-      <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
+      <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <Building2 size={16} className="text-slate-500" />
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
           Business Loan Analysis
@@ -265,7 +265,7 @@ export default function BusinessLoanPanel({ values, results }: Props) {
               </span>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <div className="overflow-x-auto rounded-xl border border-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Business loan amortization schedule table">
               <table className="w-full text-xs min-w-[560px]">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">

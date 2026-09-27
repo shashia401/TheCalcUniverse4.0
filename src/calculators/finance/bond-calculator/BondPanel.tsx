@@ -114,7 +114,7 @@ function CashFlowTimeline({ faceValue, couponRate, yearsToMaturity, frequency }:
   return (
     <div>
       <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Simplified Cash Flow Timeline</p>
-      <div className="flex items-end gap-1 h-20 overflow-x-auto">
+      <div className="flex items-end gap-1 h-20 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="img" aria-label="Simplified bond cash flow timeline chart">
         {displayed.map((period) => {
           const isLast = period === Math.ceil(totalPeriods);
           const value = isLast ? faceValue + couponPayment : couponPayment;

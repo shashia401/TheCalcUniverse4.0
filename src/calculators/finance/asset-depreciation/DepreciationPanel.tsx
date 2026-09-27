@@ -111,13 +111,12 @@ export default function DepreciationPanel({ values, results }: Props) {
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
             Depreciation Expense by Year
           </p>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="img" aria-label="Depreciation expense bar chart">
             <svg
               width={Math.max(chartWidth + 8, 300)}
               height={chartHeight + 36}
               className="block"
-              role="img"
-              aria-label="Depreciation expense bar chart"
+              aria-hidden="true"
             >
               {schedule.map((row, i) => {
                 const barH = maxDep > 0 ? (row.depreciationExpense / maxDep) * chartHeight : 0;
@@ -159,7 +158,7 @@ export default function DepreciationPanel({ values, results }: Props) {
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
             Full Depreciation Schedule
           </p>
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Full depreciation schedule table">
             <table className="w-full text-xs min-w-[580px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">

@@ -75,8 +75,8 @@ function DepletionChart({ data, frequency }: { data: BalancePoint[]; frequency: 
   const midIdx = Math.floor(data.length / 2);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Annuity balance depletion chart">
+    <div className="w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="img" aria-label="Annuity balance depletion chart">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
         <defs>
           <linearGradient id="annuityGrad" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#22c55e" stopOpacity="0.6" />
@@ -145,7 +145,7 @@ function PeriodTable({ data, frequency }: { data: BalancePoint[]; frequency: str
   const rows = yearlyData.filter((_, i) => i % step === 0 || i === yearlyData.length - 1);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Year-by-year annuity summary table">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
@@ -204,8 +204,8 @@ export default function AnnuityPanel({ solveFor, principal, annualReturn, freque
   const fmtD = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
-      <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden dark:border-slate-700 dark:bg-slate-800">
+      <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <TrendingDown size={16} className="text-slate-500" />
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Annuity Depletion Chart</span>
       </div>

@@ -158,8 +158,8 @@ export default function CapitalGainsPanel({ values, results }: Props) {
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
               Transaction Waterfall: Proceeds to Net
             </p>
-            <div className="w-full overflow-x-auto">
-              <svg viewBox="0 0 560 220" className="w-full" style={{ minWidth: '400px' }} role="img" aria-label="Capital gains waterfall chart">
+            <div className="w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="img" aria-label="Capital gains waterfall chart">
+              <svg viewBox="0 0 560 220" className="w-full" style={{ minWidth: '400px' }} aria-hidden="true">
                 {waterfallItems.map(function(item, i) {
                   const barW = 48;
                   const gap = 16;

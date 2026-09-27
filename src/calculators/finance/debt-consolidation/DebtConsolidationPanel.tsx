@@ -216,7 +216,7 @@ export default function DebtConsolidationPanel({ values, results }: Props) {
         {debts.length > 0 && (
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Your Existing Debts</p>
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <div className="overflow-x-auto rounded-xl border border-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Existing debts table">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">

@@ -118,7 +118,7 @@ export default function CollegeCostPanel({
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
               Savings Growth Until College (Age {Math.max(0, collegeAgeStart - yearsUntilCollege)} → Age {collegeAgeStart})
             </p>
-            <div className="w-full overflow-x-auto">
+            <div className="w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="img" aria-label="College cost savings projection chart">
               <SavingsChart data={data.savingsGrowth} totalProjected={totalProjected} />
             </div>
           </div>
@@ -129,7 +129,7 @@ export default function CollegeCostPanel({
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
             Projected Annual Costs in College
           </p>
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Projected annual college costs table">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
@@ -219,7 +219,7 @@ function SavingsChart({
   };
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px', maxWidth: '100%' }} role="img" aria-label="College cost savings projection chart">
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px', maxWidth: '100%' }} aria-hidden="true">
       <defs>
         <linearGradient id="collegeGrad" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />

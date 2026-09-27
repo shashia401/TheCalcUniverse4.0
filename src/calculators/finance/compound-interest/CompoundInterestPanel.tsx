@@ -97,7 +97,7 @@ function StackedAreaChart({ data, rate, variance }: { data: DataPoint[]; rate: n
   const xLabels = data.filter((_, i) => i % labelStep === 0 || i === data.length - 1);
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Compound interest growth chart and legend">
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Compound interest growth chart">
         <defs>
           <linearGradient id="ciPrincipalGrad" x1="0" y1="0" x2="0" y2="1">
@@ -182,7 +182,7 @@ function MilestoneTable({ data }: { data: DataPoint[] }) {
   const rows = data.filter((_, i) => i % step === 0 || i === data.length - 1);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Compound interest milestone table">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">

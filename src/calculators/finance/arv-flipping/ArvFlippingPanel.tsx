@@ -144,8 +144,8 @@ function SeventyRuleFormula({ arv, repairCosts, seventyRule }: { arv: number; re
   const H = 120;
 
   return (
-    <div className="overflow-x-auto">
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="70% Rule formula">
+    <div className="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="img" aria-label="70% Rule formula">
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
         <rect x={10} y={8} width={W - 20} height={40} rx={8} fill="#eff6ff" stroke="#bfdbfe" strokeWidth={1} />
         <text x={20} y={22} fontSize={11} fontWeight="bold" fill="#1e40af">70% Rule Formula:</text>
         <text x={20} y={40} fontSize={12} fontFamily="monospace" fontWeight="bold" fill="#1d4ed8">

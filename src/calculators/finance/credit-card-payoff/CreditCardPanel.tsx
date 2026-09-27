@@ -77,8 +77,8 @@ export default function CreditCardPanel({ balance, apr, payoffMode, monthlyPayme
   const linePath = timeline.map((d, i) => `${i === 0 ? 'M' : 'L'} ${toX(i).toFixed(1)} ${toY(d.balance).toFixed(1)}`).join(' ');
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
-      <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden dark:border-slate-700 dark:bg-slate-800">
+      <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <TrendingDown size={16} className="text-slate-500" />
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Payoff Timeline</span>
       </div>
@@ -95,8 +95,8 @@ export default function CreditCardPanel({ balance, apr, payoffMode, monthlyPayme
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto">
-          <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Credit card payoff timeline chart">
+        <div className="w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="img" aria-label="Credit card payoff timeline chart">
+          <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
             <defs>
               <linearGradient id="ccGrad" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stopColor="#ef4444" stopOpacity="0.5" />
