@@ -95,6 +95,11 @@ describe('Wind Chill calculator', () => {
     expect(r).toEqual([]);
   });
 
+  it('regression: 20°F at 25 mph matches explanation worked example (was wrongly stated as 3.0°F, actually 2.6°F)', () => {
+    const r = config.calculate({ temperature: '20', tempUnit: 'F', windSpeed: '25', speedUnit: 'mph' });
+    expect(getValue(r, 'windChillF')).toBe('2.6°F');
+  });
+
   it('outputs chart data', () => {
     const r = config.calculate({ temperature: '30', tempUnit: 'F', windSpeed: '15', speedUnit: 'mph' });
     const chart = r.find(x => x.id === '_chartData');
