@@ -242,7 +242,7 @@ const marsTimeConfig: CalculatorConfig = {
         scenario: 'Perseverance has been on Mars for 1,000 sols. How many Earth days is this?',
         inputs: { mode: 'solToEarth', sols: '1000' },
         result: '1,000 sols = 1,027d 11h 47m Earth time (1,027.49 Earth days).',
-        insight: '1,000 sols × 88,775.244 seconds = 88,775,244 seconds = 1,027.49 Earth days. That is 2 years, 9 months, and 22 days. Perseverance reached Sol 1,000 on November 7, 2023 (Earth date). This milestone represents a major achievement — the primary mission was planned for just 1 Mars year (669 sols).',
+        insight: '1,000 sols × 88,775.244 seconds = 88,775,244 seconds = 1,027.49 Earth days. That is 2 years, 9 months, and 22 days. Adding that to Perseverance\'s Feb 18, 2021 landing puts Sol 1,000 on December 13, 2023 (Earth date). This milestone represents a major achievement — the primary mission was planned for just 1 Mars year (669 sols).',
       },
     ],
     limitations: [
