@@ -1,5 +1,11 @@
 # TheCalcUniverse — Apache config for shared hosting (Namecheap)
 
+# Without this, Apache serves text/plain and text/html with no charset
+# parameter, and browsers/fetchers guess an encoding (usually Latin-1),
+# turning UTF-8 bytes like an em dash into mojibake ("â€”"). Hit this on
+# llms.txt specifically since it's served as bare text/plain.
+AddDefaultCharset UTF-8
+
 # Custom 404 page
 ErrorDocument 404 /404.html
 
