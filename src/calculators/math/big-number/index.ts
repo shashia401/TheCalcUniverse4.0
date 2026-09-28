@@ -154,8 +154,8 @@ const bigNumberConfig: CalculatorConfig = {
       {
         scenario: 'A cryptographer, Dr. Patel, is verifying an RSA key generation routine. The public modulus n = p x q where p and q are large primes. She needs to multiply 1,234,567,890,123,456,789,012,345 by 9,876,543,210,987,654,321,098,765 to verify the library produces the correct result.',
         inputs: { a: '1234567890123456789012345', b: '9876543210987654321098765', op: 'multiply' },
-        result: '12193263113702179522618503273362292307411849925 (49 digits)',
-        insight: 'The result has 49 digits and equals the full product without any rounding. A standard JavaScript multiplication would lose precision after about 16 digits and produce an incorrect scientific-notation approximation. The exact product can be verified against the cryptographic library implementation to ensure correctness.',
+        result: '12193263113702179522618496034720321071359549253925 (50 digits)',
+        insight: 'The result has 50 digits and equals the full product without any rounding. A standard JavaScript multiplication would lose precision after about 16 digits and produce an incorrect scientific-notation approximation. The exact product can be verified against the cryptographic library implementation to ensure correctness.',
       },
       {
         scenario: 'Professor Chen is teaching number theory and wants to demonstrate how factorials grow. She computes 2^100 exactly to show how fast exponential functions grow compared to polynomial ones — a key insight for algorithm complexity analysis.',
