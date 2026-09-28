@@ -100,6 +100,21 @@ describe('Hardness Converter', () => {
     expect(Array.isArray(r)).toBe(true);
   });
 
+  it('omits HRA when the formula would produce a physically impossible value', () => {
+    // HRC 60 -> HV 697 -> HRA formula gives ~105.5, but Rockwell A tops out
+    // around 85-90. The old code had no output bound and would display this
+    // impossible value; it should now be filtered out instead.
+    const r = config.calculate({ fromValue: '60', fromUnit: 'hrc' });
+    const hra = r.find((x) => x.id === 'eq_hra');
+    expect(hra).toBeUndefined();
+  });
+
+  it('keeps HRA when the formula stays within its declared 50-85 range', () => {
+    const r = config.calculate({ fromValue: '40', fromUnit: 'hrc' });
+    const hra = getResult(r, 'eq_hra');
+    expect(hra.value).toContain('67.7');
+  });
+
   it('has extra panel for valid results', () => {
     expect(typeof config.extraPanel).toBe('function');
     const r = config.calculate({

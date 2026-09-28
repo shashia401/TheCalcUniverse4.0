@@ -85,7 +85,9 @@ const SCALES: HardnessScale[] = [
     },
     fromHV: (hv) => {
       if (hv < 150 || hv > 1000) return null;
-      return 0.06 * Math.pow(hv, 1.1) + 25;
+      const hra = 0.06 * Math.pow(hv, 1.1) + 25;
+      if (hra < 50 || hra > 85) return null;
+      return hra;
     },
     range: 'HRA 50–85',
   },
@@ -232,13 +234,13 @@ const hardnessConfig: CalculatorConfig = {
       'Use the quick reference table for typical hardness equivalents like HRC 40 and its approximate HV and HBW values.',
     ],
     quickReference: [
-      { label: 'HRC 40', value: '≈ HB 371 / HV 380 / HRA 72' },
-      { label: 'HRC 50', value: '≈ HB 488 / HV 500 / HRA 77' },
-      { label: 'HRC 60', value: '≈ HB 620 / HV 640 / HRA 82' },
-      { label: 'HRB 80', value: '≈ HB 145 / HV 150' },
-      { label: 'HRB 95', value: '≈ HB 210 / HV 220' },
-      { label: 'HV 200', value: '≈ HRB 93 / HB 200' },
-      { label: 'HV 600', value: '≈ HRC 56 / HB 570' },
+      { label: 'HRC 40', value: '≈ HB 392 / HV 392 / HRA 67.7' },
+      { label: 'HRC 50', value: '≈ HB 513 / HV 513 / HRA 82.4' },
+      { label: 'HRC 60', value: '≈ HB 697 / HV 697' },
+      { label: 'HRB 80', value: '≈ HB 163 / HV 163' },
+      { label: 'HRB 95', value: '≈ HB 215.5 / HV 215.5' },
+      { label: 'HV 200', value: '≈ HRB 91.3 / HB 200' },
+      { label: 'HV 600', value: '≈ HRC 55.3 / HB 600' },
       { label: 'N/mm² estimate', value: 'tensile ≈ 3.2 × HV (carbon steel)' },
     ],
     commonUses: [
