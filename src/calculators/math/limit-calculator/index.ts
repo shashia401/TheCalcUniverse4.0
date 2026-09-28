@@ -239,6 +239,10 @@ const limitConfig: CalculatorConfig = {
 
     faqs: [
       {
+        question: 'What is the limit of sin(x)/x as x approaches 0?',
+        answer: 'The limit is 1, even though sin(x)/x is undefined at x = 0 itself (it gives 0/0). This is one of the most important limits in calculus — it\'s the basis for proving that the derivative of sin(x) is cos(x). You can verify it numerically: as x shrinks toward 0 (0.1, 0.01, 0.001, ...), sin(x)/x gets closer and closer to 1 from both sides. Try entering sin(x)/x with approach value 0 above to see the approach table converge.',
+      },
+      {
         question: 'What does it mean for a limit to exist?',
         answer: 'A limit exists if and only if the left-hand limit (x → a⁻) and the right-hand limit (x → a⁺) both exist and are equal. If they differ, the two-sided limit does not exist — the function has a jump discontinuity at that point. If either side diverges to infinity, the limit does not exist in the finite sense.',
       },

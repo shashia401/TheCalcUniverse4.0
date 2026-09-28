@@ -239,9 +239,9 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'gcf-calculator',
-    title: 'GCF Calculator — Greatest Common Factor with Euclidean Algorithm &',
+    title: 'GCF Calculator — Greatest Common Factor via Euclidean Algorithm',
     shortTitle: 'Greatest Common Factor',
-    description: 'Find the Greatest Common Factor (also called GCD or HCF) of two numbers using both the Euclidean algorithm with step-by-step division and prime.',
+    description: 'Find the Greatest Common Factor (also called GCD or HCF) of two numbers using both the Euclidean algorithm with step-by-step division and prime factorization.',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'Number Theory',

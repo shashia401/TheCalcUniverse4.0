@@ -158,6 +158,10 @@ const uuidGeneratorConfig: CalculatorConfig = {
       'Universally Unique Identifiers (UUIDs) and ULIDs serve the critical purpose of generating unique identifiers without requiring a central authority. UUID v4 is purely random: each of its 122 random bits (out of 128 total) is independently generated, making collisions astronomically unlikely. The version (4) and variant bits are fixed at positions 13 and 17 respectively. ULID was designed as a modern alternative that brings time-sortability to unique IDs: the first 10 characters encode a 48-bit millisecond timestamp using Crockford Base32, allowing ULIDs to be lexicographically sorted by creation time. This makes ULIDs particularly useful for database indexing where B-tree performance benefits from insertion-time ordering. ULIDs use Crockford Base32 encoding which excludes ambiguous characters (I, L, O, U) for human readability and case-insensitive processing. Both UUID v4 and ULID are 128-bit identifiers, but ULID is more compact at 26 characters vs 36 characters for UUID v4. The timestamp prefix in ULID provides approximately 1 millisecond precision and will not overflow until the year 10889.',
     faqs: [
       {
+        question: 'What is a UUID?',
+        answer: 'A UUID (Universally Unique Identifier) is a 128-bit number used to identify information without needing a central authority to hand out IDs — unlike an auto-incrementing database ID, any computer can generate one and it will not collide with an ID generated anywhere else. UUID v4, the most common version and what this generator produces by default, is 122 random bits displayed as 36 characters in the format 8-4-4-4-12 (e.g. 550e8400-e29b-41d4-a716-446655440000). Use this UUID generator to create one instantly, in bulk, for free, entirely in your browser.',
+      },
+      {
         question: 'When should I use UUID v4 vs ULID?',
         answer: 'Use UUID v4 when you need purely random identifiers with no timing information, such as security tokens or when you want to avoid leaking creation times. Use ULID when you want time-sortable identifiers for database indexing — ULIDs maintain insertion order which improves B-tree performance in databases like PostgreSQL and MySQL.',
       },
@@ -170,12 +174,8 @@ const uuidGeneratorConfig: CalculatorConfig = {
         answer: 'Yes, the first 10 characters of a ULID encode the creation timestamp in Crockford Base32. You can decode these characters to get the millisecond-precision Unix timestamp. This makes ULIDs self-documenting — you can tell when an ID was created without querying the database.',
       },
       {
-        question: 'Why does ULID exclude certain characters from its alphabet?',
-        answer: 'ULID uses Crockford Base32 which intentionally excludes the letters I, L, O, and U to avoid confusion with digits 1, 0, and V. This makes ULIDs easier for humans to read, type, and communicate verbally without ambiguity.',
-      },
-      {
-        question: 'Are ULIDs case-sensitive?',
-        answer: 'Crockford Base32 is case-insensitive: lowercase letters are normalized to uppercase during decoding. ULID generation typically uses uppercase, but the spec requires decoders to accept both cases. Unlike Base64, the encoding is designed to be transmitted and handled in the same way as uppercase strings.',
+        question: 'Why does ULID exclude certain characters, and is it case-sensitive?',
+        answer: 'ULID uses Crockford Base32, which intentionally excludes the letters I, L, O, and U to avoid confusion with the digits 1, 0, and V — making ULIDs easier for humans to read, type, and read aloud without ambiguity. The encoding is also case-insensitive: lowercase letters are normalized to uppercase during decoding, so both cases are valid input even though generation typically produces uppercase.',
       },
     ],
     citations: [

@@ -205,6 +205,14 @@ const marsTimeConfig: CalculatorConfig = {
     explanation: "Mars time is both simple and maddening. A Mars solar day (sol) is 24 hours, 39 minutes, and 35.244 seconds of Earth time — only about 40 minutes longer than an Earth day. This small difference means that Mars rover operations teams must shift their work schedule 40 minutes later every Earth day to stay synchronized with the rover's day-night cycle. Over two weeks, this cumulative drift flips day and night completely — mission controllers working Mars time describe it as permanent jet lag. The Mars Sol Date (MSD) system, developed by Michael Allison (1997) and refined by NASA, provides a continuous sol count analogous to the Julian Date used by astronomers. Local Mean Solar Time (LMST) works exactly like Earth time zones: every 15° of longitude shifts LMST by 1 hour. The prime meridian of Mars passes through the tiny crater Airy-0 (diameter ~0.5 km) in Sinus Meridiani, established by the Mariner 9 team in 1972. Mars has seasons too — its 25.2° axial tilt (similar to Earth's 23.4°) produces summer and winter, though each season lasts about twice as long as Earth's because the Mars year is 687 Earth days.",
     faqs: [
       {
+        question: 'How many hours, minutes, and seconds is a Mars day compared to Earth?',
+        answer: 'A Mars solar day (sol) is 24 hours, 39 minutes, and 35.244 seconds — exactly 88,775.244 seconds. That\'s 39 minutes 35 seconds longer than a 24-hour Earth day, or about 1.0275 Earth days per sol. The difference comes from Mars\' slower rotation combined with the extra rotation needed each day to catch up with its own orbital motion around the Sun.',
+      },
+      {
+        question: 'What is Coordinated Mars Time (MTC)?',
+        answer: 'Coordinated Mars Time (MTC) is the Mars equivalent of Earth\'s UTC — a single planet-wide reference time defined as the Local Mean Solar Time at Mars\' prime meridian (0° longitude, through the crater Airy-0). Every other longitude\'s Local Mean Solar Time (LMST) is MTC plus or minus an offset based on how far east or west it sits from that meridian — the same way Earth time zones offset from UTC, except Mars has no daylight saving and offsets are continuous rather than in 1-hour steps.',
+      },
+      {
         question: 'Why is a Mars day called a "sol"?',
         answer: 'The term "sol" was adopted by NASA during the Viking missions (1976) to distinguish Mars solar days from Earth days in mission planning. The word derives from Latin "sol" meaning sun — the same root as "solar." Using a distinct term prevents ambiguity: "Sol 100" unambiguously means 100 Mars solar days after landing, not 100 Earth days. Each NASA Mars mission starts counting from Sol 0 (landing day). The first Mars sunrise after landing marks Sol 1.',
       },
