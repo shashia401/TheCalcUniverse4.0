@@ -85,10 +85,11 @@ const Base64Panel: React.FC<{
             }}
             style={{
               padding: '8px 12px',
-              border: '1px solid #d1d5db',
+              border: '1px solid var(--border-warm)',
               borderRadius: '6px',
               fontSize: '14px',
-              background: 'var(--bg-default, #fff)',
+              background: 'var(--surface-card)',
+              color: 'var(--surface-text)',
             }}
           >
             <option value="Text">Text</option>
@@ -105,10 +106,11 @@ const Base64Panel: React.FC<{
             onChange={(e) => setMode(e.target.value)}
             style={{
               padding: '8px 12px',
-              border: '1px solid #d1d5db',
+              border: '1px solid var(--border-warm)',
               borderRadius: '6px',
               fontSize: '14px',
-              background: 'var(--bg-default, #fff)',
+              background: 'var(--surface-card)',
+              color: 'var(--surface-text)',
             }}
           >
             <option value="Encode">Encode</option>
@@ -136,12 +138,14 @@ const Base64Panel: React.FC<{
             style={{
               width: '100%',
               padding: '10px 12px',
-              border: '1px solid #d1d5db',
+              border: '1px solid var(--border-warm)',
               borderRadius: '6px',
               fontSize: '14px',
               fontFamily: 'monospace',
               resize: 'vertical',
               boxSizing: 'border-box',
+              background: 'var(--surface-card)',
+              color: 'var(--surface-text)',
             }}
           />
           <div
@@ -150,7 +154,7 @@ const Base64Panel: React.FC<{
               justifyContent: 'space-between',
               marginTop: '4px',
               fontSize: '12px',
-              color: '#9ca3af',
+              color: 'var(--surface-text-muted)',
             }}
           >
             <span>{inputText.length} character{inputText.length !== 1 ? 's' : ''}</span>
@@ -160,7 +164,7 @@ const Base64Panel: React.FC<{
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#6b7280',
+                  color: 'var(--surface-text-secondary)',
                   cursor: 'pointer',
                   fontSize: '12px',
                   textDecoration: 'underline',
@@ -366,9 +370,9 @@ const Base64Panel: React.FC<{
           style={{
             padding: '32px',
             textAlign: 'center',
-            color: '#9ca3af',
+            color: 'var(--surface-text-muted)',
             fontSize: '14px',
-            background: '#f9fafb',
+            background: 'var(--surface-bg)',
             borderRadius: '8px',
           }}
         >
