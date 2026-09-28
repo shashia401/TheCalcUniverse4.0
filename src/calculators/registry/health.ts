@@ -177,7 +177,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'pregnancy-conception-calculator',
-    title: 'Pregnancy Conception & Fertile Window Calculator — Calculator',
+    title: 'Conception Calculator — Fertile Window & Ovulation Date',
     shortTitle: 'Conception Calculator',
     description: 'Calculate your fertile window, peak fertility days, and estimated ovulation date using LMP, cycle, or next period methods.',
     category: 'Health & Fitness',

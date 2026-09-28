@@ -98,7 +98,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'common-factor-calculator',
-    title: 'Common Factor Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Common Factor Calculator — Find GCF & All Shared Factors',
     shortTitle: 'Common Factors',
     description: 'Find all common factors shared by two numbers. Lists every divisor that divides both numbers evenly, with the Greatest Common Factor (GCF) highlighted.',
     category: 'Mathematics',
@@ -1235,7 +1235,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'limit-calculator',
-    title: 'Limit Calculator — Evaluate Limits with Step-by-Step',
+    title: 'Limit Calculator — Evaluate Limits with Step-by-Step Solutions',
     shortTitle: 'Limit Calc',
     description: 'Compute limits of functions as x approaches any value. Evaluate left-hand, right-hand, and two-sided limits with approach tables.',
     category: 'Mathematics',
