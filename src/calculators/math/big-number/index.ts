@@ -195,6 +195,10 @@ const bigNumberConfig: CalculatorConfig = {
     ],
     faqs: [
       {
+        question: 'What is the biggest number a regular calculator can handle, and how is this different?',
+        answer: 'Most physical and phone calculators display 10-12 digits and switch to rounded scientific notation beyond that — and standard JavaScript numbers silently lose precision past 2^53 (about 9 quadrillion, 16 digits). This is sometimes called a "giant number calculator" because it has no such ceiling: it uses BigInt to compute exact, unrounded results for integers with hundreds or even thousands of digits, limited only by your browser\'s available memory rather than a fixed digit limit.',
+      },
+      {
         question: 'What is a big integer calculator?',
         answer: 'A big integer calculator (also called a big int calculator) performs exact arithmetic — addition, subtraction, multiplication, division, and exponentiation — on whole numbers that exceed what a standard calculator or programming language\'s native number type can represent precisely. Regular calculators and JavaScript\'s Number type lose precision past 2^53 (about 9 quadrillion, 16 digits); this tool uses BigInt to compute exact results for integers with hundreds or thousands of digits, which is why it\'s used for cryptography, number theory, and any application where an approximate answer isn\'t good enough.',
       },
