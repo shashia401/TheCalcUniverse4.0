@@ -3,7 +3,7 @@ import type { CalculatorEntry } from '../../types/calculator';
 export const diyCalculators: CalculatorEntry[] = [
   {
     id: 'concrete-calculator',
-    title: 'Concrete Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Concrete Calculator — Cubic Yards & Bags for Slabs, Holes & Columns',
     shortTitle: 'Concrete Calculator',
     description: 'Calculate the exact volume of concrete needed for slabs, holes, columns, and stairs. Outputs cubic yards plus the number of 60-lb and 80-lb bags required.',
     category: 'Home DIY',
@@ -19,7 +19,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'btu-calculator',
-    title: 'BTU Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'BTU Calculator — Room Heating & Cooling Size Estimator',
     shortTitle: 'BTU Calculator',
     description: 'Calculate the required BTUs for heating or cooling any room. Factors in climate zone, sun exposure, insulation, ceiling height, room type, and occupancy.',
     category: 'Home DIY',
@@ -35,7 +35,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'square-footage-calculator',
-    title: 'Square Footage Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Square Footage Calculator — Rectangles, Circles & L-Shaped Rooms',
     shortTitle: 'Sq Footage',
     description: 'Calculate square footage for rectangles, circles, and L-shaped rooms. Supports feet and meters, includes wastage for materials, and estimates total cost.',
     category: 'Home DIY',
@@ -51,7 +51,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'tile-calculator',
-    title: 'Tile Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Tile Calculator — Grid, Brick, Diagonal & Herringbone Layouts',
     shortTitle: 'Tile Calculator',
     description: 'Calculate tiles needed for any room with different layout patterns. Supports grid, brick, diagonal, and herringbone layouts with automatic waste factors.',
     category: 'Home DIY',
@@ -67,7 +67,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'roofing-calculator',
-    title: 'Roofing Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Roofing Calculator — Shingle Bundles, Squares & Nails',
     shortTitle: 'Roofing Calculator',
     description: 'Estimate roofing materials for gable and hip roofs. Calculates squares, shingle bundles, felt rolls, and nails. Includes pitch multipliers and waste factors.',
     category: 'Home DIY',
@@ -82,7 +82,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'stair-calculator',
-    title: 'Stair Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Stair Calculator — IBC-Compliant Rise, Run & Stringer Length',
     shortTitle: 'Stair Calculator',
     description: 'Design safe stairs with IBC-compliant rise/run calculations. Computes number of steps, riser height, tread depth, stringer length and angle.',
     category: 'Home DIY',
@@ -98,7 +98,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mulch-calculator',
-    title: 'Mulch Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Mulch Calculator — Bagged vs. Bulk Cost Comparison',
     shortTitle: 'Mulch Calculator',
     description: 'Calculate mulch volume for rectangular and circular garden beds. Compare costs between bagged (2 cu ft) and bulk delivery to find the most economical option.',
     category: 'Home DIY',
@@ -113,7 +113,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'gravel-calculator',
-    title: 'Gravel Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Gravel Calculator — Cubic Yards & Tons for Landscaping',
     shortTitle: 'Gravel Calculator',
     description: 'Calculate gravel volume in cubic yards and tons for landscaping projects. Choose from pea gravel, crushed limestone, river rock, and decomposed granite.',
     category: 'Home DIY',
@@ -128,7 +128,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'paint-coverage-calculator',
-    title: 'Paint Coverage Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Paint Coverage Calculator — Gallons Needed by Room Size',
     shortTitle: 'Paint Calculator',
     description: 'Calculate how many gallons of paint you need for any room. Enter dimensions, number of doors and windows, and coats to get an accurate paint quantity.',
     category: 'Home DIY',
@@ -144,7 +144,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'tile-flooring-calculator',
-    title: 'Tile & Flooring Calculator — Free Online Calculator & Formula Guide',
+    title: 'Tile & Flooring Calculator — Boxes Needed with Waste Factor',
     shortTitle: 'Tile Calculator',
     description: 'Calculate how many tiles you need for any floor or wall. Includes waste percentage for cuts, multiple tile sizes, and optional material cost estimate.',
     category: 'Home DIY',
@@ -160,7 +160,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'concrete-slab-calculator',
-    title: 'Concrete Slab Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Concrete Slab Calculator — Cubic Yards for Driveways & Foundations',
     shortTitle: 'Concrete Calculator',
     description: 'Calculate cubic yards of concrete needed for any slab, driveway, or foundation. Shows cubic yards for ready-mix ordering and equivalent bag counts.',
     category: 'Home DIY',
@@ -176,7 +176,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mulch-topsoil-calculator',
-    title: 'Mulch & Topsoil Calculator — Free Online Calculator & Formula Guide',
+    title: 'Mulch & Topsoil Calculator — Cubic Yards for Any Landscaping Material',
     shortTitle: 'Mulch Calculator',
     description: 'Calculate cubic yards of mulch, topsoil, compost, gravel, or sand needed for any landscaping project. Shows bulk yards and equivalent bagged quantities.',
     category: 'Home DIY',
@@ -192,7 +192,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'drywall-calculator',
-    title: 'Drywall Sheet Estimator — Quick & Accurate Online Calculator & Guide',
+    title: 'Drywall Sheet Estimator — Sheets, Screws & Joint Compound',
     shortTitle: 'Drywall Calculator',
     description: 'Calculate how many sheets of drywall you need for walls and ceiling. Includes screw count, joint compound, tape estimates, and accounts for doors.',
     category: 'Home DIY',
@@ -208,7 +208,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'lumber-board-foot-calculator',
-    title: 'Lumber Board Foot Calculator — Free Online Calculator & Formula Guide',
+    title: 'Lumber Board Foot Calculator — Nominal vs. Actual Dimensions',
     shortTitle: 'Board Foot Calculator',
     description: 'Calculate board feet of lumber for any project. Shows nominal and actual board foot volumes with dimensional conversions.',
     category: 'Home DIY',

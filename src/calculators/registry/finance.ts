@@ -1186,7 +1186,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'depreciation-calculator',
-    title: 'Depreciation Calculator — MACRS (200% DB) & Straight Line with',
+    title: 'Depreciation Calculator — MACRS (200% DB) & Straight Line Methods',
     shortTitle: 'Depreciation (MACRS/SL)',
     description: 'Calculate year-by-year depreciation schedules using Straight Line or MACRS (200% Declining Balance with half-year convention).',
     category: 'Finance',
@@ -1217,9 +1217,9 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'fire-calculator',
-    title: 'FIRE Calculator — Financial Independence, Retire Early (4% Rule &',
+    title: 'FIRE Calculator — Financial Independence, Retire Early (4% Rule)',
     shortTitle: 'FIRE Calculator',
-    description: 'Calculate your path to financial independence with the FIRE framework. Enter your age, net worth, income, and expenses to see your FIRE number, estimated.',
+    description: 'Calculate your path to financial independence with the FIRE framework. Enter your age, net worth, income, and expenses to see your FIRE number and estimated retirement date.',
     category: 'Finance',
     categorySlug: 'finance',
     subCategory: 'Retirement',

@@ -51,7 +51,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'dice-roller',
-    title: 'Dice Roller — Free Online Calculator with Step-by-Step Guide',
+    title: 'Dice Roller — D4 to D20 with Modifiers, Cryptographically Random',
     shortTitle: 'Dice Roller',
     description: 'Roll virtual dice from D4 to D20 with modifiers. Uses cryptographically secure random values. Free, instant, and accurate.',
     category: 'Everyday',
@@ -97,7 +97,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'shoe-size-calculator',
-    title: 'Shoe Size Converter — Free Online Calculator with Step-by-Step Guide',
+    title: 'Shoe Size Converter — US, UK, EU & Japan/CM Sizing',
     shortTitle: 'Shoe Size Converter',
     description: 'Convert shoe sizes across US, UK, EU, and Japan/CM systems with mens and womens sizing and smart interpolation for half sizes. Free, instant, and accurate.',
     category: 'Everyday',
@@ -143,7 +143,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'bra-size-calculator',
-    title: 'Bra Size Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Bra Size Calculator — Modern 6-Measurement Method',
     shortTitle: 'Bra Size Calculator',
     description: 'Find your correct bra size using the modern 6-measurement method (underbust loose/snug/tight, bust standing/leaning/lying).',
     category: 'Everyday',
@@ -158,7 +158,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'sleep-calculator',
-    title: 'Sleep Cycle Calculator — 90-Minute REM Cycles, Optimal Bedtime &',
+    title: 'Sleep Cycle Calculator — 90-Minute REM Cycles & Optimal Bedtime',
     shortTitle: 'Sleep Cycle Calculator',
     description: 'Calculate your optimal bedtime or wake-up time using 90-minute sleep cycles and sleep onset latency. Free, instant, and accurate.',
     category: 'Everyday',
@@ -174,7 +174,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'golf-handicap-calculator',
-    title: 'Golf Handicap Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Golf Handicap Calculator — World Handicap System (WHS) Index',
     shortTitle: 'Golf Handicap',
     description: 'Calculate your World Handicap System (WHS) index from recent rounds. Supports 5 to 20 rounds with proper differential selection.',
     category: 'Everyday',

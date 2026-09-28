@@ -3,9 +3,9 @@ import type { CalculatorEntry } from '../../types/calculator';
 export const healthCalculators: CalculatorEntry[] = [
   {
     id: 'bmi-calculator',
-    title: 'BMI & Ideal Weight Calculator — Free Online Calculator & Formula Guide',
+    title: 'BMI & Ideal Weight Calculator — WHO Classification Gauge',
     shortTitle: 'BMI Calculator',
-    description: 'Calculate your Body Mass Index and ideal weight range for your height. Features a WHO classification visual gauge with color-coded BMI bands, needle.',
+    description: 'Calculate your Body Mass Index and ideal weight range for your height. Features a WHO classification visual gauge with color-coded BMI bands and a needle indicator.',
     category: 'Health & Fitness',
     categorySlug: 'health',
     subCategory: 'Body Composition',
@@ -99,7 +99,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'water-intake-calculator',
-    title: 'Daily Water Intake Calculator — Free Online Calculator & Formula Guide',
+    title: 'Daily Water Intake Calculator — By Weight, Activity & Climate',
     shortTitle: 'Water Intake',
     description: 'Calculate your recommended daily water intake based on body weight, activity level, and climate. Free, instant, and accurate.',
     category: 'Health & Fitness',

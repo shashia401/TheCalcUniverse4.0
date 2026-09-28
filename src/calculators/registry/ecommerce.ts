@@ -34,9 +34,9 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'break-even-calculator',
-    title: 'Break-Even Point Calculator — Free Online Calculator & Formula Guide',
+    title: 'Break-Even Point Calculator — Units & Revenue to Profitability',
     shortTitle: 'Break-Even Point',
-    description: 'Calculate your break-even point in units and revenue. Enter fixed costs, selling price, and variable cost per unit to find when your business becomes.',
+    description: 'Calculate your break-even point in units and revenue. Enter fixed costs, selling price, and variable cost per unit to find when your business becomes profitable.',
     category: 'E-Commerce',
     categorySlug: 'ecommerce',
     subCategory: 'Operations',
@@ -98,7 +98,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'margin-calculator',
-    title: 'Margin Calculator — Gross Margin, Markup, Cost & Price (Solve Any',
+    title: 'Margin Calculator — Gross Margin, Markup, Cost & Price (Solve Any One)',
     shortTitle: 'Margin Calculator',
     description: 'Solve for Gross Margin %, Markup %, Cost, or Revenue — choose what you know and calculate what you need. Free, instant, and accurate.',
     category: 'E-Commerce',

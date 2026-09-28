@@ -3,7 +3,7 @@ import type { CalculatorEntry } from '../../types/calculator';
 export const engineeringCalculators: CalculatorEntry[] = [
   {
     id: 'resistor-calculator',
-    title: 'Resistor Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Resistor Color Code Calculator — 4/5/6-Band Decoder',
     shortTitle: 'Resistor Calculator',
     description: 'Decode 4/5/6-band resistor color codes to ohms or reverse-calculate the color bands from any resistance value. Free, instant, and accurate.',
     category: 'Engineering',
@@ -35,7 +35,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'ip-subnet-calculator',
-    title: 'IP Subnet Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'IP Subnet Calculator — Network, Broadcast & Host Range',
     shortTitle: 'IP Subnet Calculator',
     description: 'Calculate network address, broadcast address, usable host range, and total hosts for any IPv4 subnet. Includes binary representation and IP class detection.',
     category: 'Engineering',
@@ -51,7 +51,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'bandwidth-calculator',
-    title: 'Bandwidth Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Bandwidth Calculator — File Transfer Time by Connection Speed',
     shortTitle: 'Bandwidth Calculator',
     description: 'Calculate file transfer times based on connection speed. Includes TCP overhead simulation and clear bit vs byte distinction (Mbps vs MB/s).',
     category: 'Engineering',
@@ -67,7 +67,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'password-generator',
-    title: 'Password Generator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Password Generator — Cryptographically Secure, Custom Length',
     shortTitle: 'Password Gen',
     description: 'Generate cryptographically secure passwords with customizable length and character types. Free online calculator with formula guide and step-by-step results.',
     category: 'Engineering',
@@ -82,7 +82,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'base64-encoder-decoder',
-    title: 'Base64 Encoder / Decoder — Quick & Accurate Online Calculator & Guide',
+    title: 'Base64 Encoder / Decoder — Text & File, Instant Encoding',
     shortTitle: 'Base64 Encoder / Decoder',
     description: 'Encode text to Base64 or decode Base64 back to text instantly. Supports text and file input with live encoding and one-click copy.',
     category: 'Engineering',
@@ -98,7 +98,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'url-encoder-decoder',
-    title: 'URL Encoder / Decoder — Free Online Calculator with Step-by-Step Guide',
+    title: 'URL Encoder / Decoder — Percent-Encoding for Safe Transmission',
     shortTitle: 'URL Encode',
     description: 'Encode text for safe URL transmission or decode URL-encoded strings. Shows character mappings for special characters. Free, instant, and accurate.',
     category: 'Engineering',
@@ -144,7 +144,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'voltage-drop-calculator',
-    title: 'Voltage Drop Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Voltage Drop Calculator — AWG Wire Gauge & NEC 3% Rule',
     shortTitle: 'Voltage Drop',
     description: 'Calculate voltage drop over a wire run based on AWG gauge, wire length, and current. Checks compliance with the NEC 3% recommended maximum.',
     category: 'Engineering',
@@ -175,7 +175,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'gear-ratio-calculator',
-    title: 'Gear Ratio & RPM Calculator — Free Online Calculator & Formula Guide',
+    title: 'Gear Ratio & RPM Calculator — Output Torque & Speed Reduction',
     shortTitle: 'Gear Ratio',
     description: 'Calculate output RPM, output torque, or gear ratio for any gear system. Supports speed reduction, overdrive, and compound gear train analysis.',
     category: 'Engineering',
@@ -190,7 +190,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mtbf-calculator',
-    title: 'MTBF Reliability Calculator — Free Online Calculator & Formula Guide',
+    title: 'MTBF Reliability Calculator — Mean Time Between Failures',
     shortTitle: 'MTBF Calculator',
     description: 'Calculate Mean Time Between Failures (MTBF), system reliability at a specific mission time, and expected number of failures for reliability engineering.',
     category: 'Engineering',

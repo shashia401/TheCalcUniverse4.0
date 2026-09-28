@@ -67,7 +67,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'binary-hex-calculator',
-    title: 'Binary & Hex Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Binary & Hex Calculator — Decimal, Binary, Hex & Octal Converter',
     shortTitle: 'Binary & Hex',
     description: 'Convert between Decimal, Binary, Hex, and Octal with positional value breakdown. Perform arithmetic and bitwise operations (AND, OR, XOR, NOT, shifts).',
     category: 'Mathematics',
@@ -223,7 +223,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'fraction-to-decimal-calculator',
-    title: 'Fraction to Decimal Converter — Free Online Calculator & Formula Guide',
+    title: 'Fraction to Decimal Converter — Auto-Simplifies with GCD',
     shortTitle: 'Fraction Converter',
     description: 'Convert fractions to decimals, decimals to fractions, and mixed numbers to decimals. Automatically simplifies fractions using GCD.',
     category: 'Mathematics',
@@ -254,7 +254,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'gdp-calculator',
-    title: 'GDP Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'GDP Calculator — Nominal & Real GDP (Expenditure Approach)',
     shortTitle: 'GDP Calculator',
     description: 'Calculate Nominal and Real GDP using the expenditure approach: GDP = C + I + G + (X − M). Free online calculator with formula guide and step-by-step results.',
     category: 'Mathematics',
@@ -285,7 +285,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'grade-calculator',
-    title: 'Final Grade Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Final Grade Calculator — What Score Do You Need on the Exam?',
     shortTitle: 'Final Grade',
     description: 'Determine what score you need on your final exam to achieve your target overall grade. Supports any current grade, desired grade, and exam weight combination.',
     category: 'Mathematics',
@@ -347,7 +347,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'log-calculator',
-    title: 'Logarithm Calculator — Custom Base, Natural Log, Common Log &',
+    title: 'Logarithm Calculator — Custom Base, Natural Log & Common Log',
     shortTitle: 'Log Calculator',
     description: 'Calculate logarithms in any custom base with the change of base formula explained step-by-step. Free, instant, and accurate.',
     category: 'Mathematics',
@@ -363,7 +363,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'long-division-calculator',
-    title: 'Long Division Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Long Division Calculator — Step-by-Step Tableau Format',
     shortTitle: 'Long Division',
     description: 'Perform long division with the traditional tableau format. Shows each step — divide, multiply, subtract, bring down — just like the classroom method.',
     category: 'Mathematics',
@@ -394,7 +394,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'matrix-calculator',
-    title: 'Matrix Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Matrix Calculator — Determinant & Inverse, 2×2 to 5×5',
     shortTitle: 'Matrix Calculator',
     description: 'Calculate the determinant and inverse of square matrices from 2×2 to 5×5. Shows step-by-step calculation with LaTeX-style formatting for college assignments.',
     category: 'Mathematics',
@@ -425,7 +425,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'number-sequence-calculator',
-    title: 'Number Sequence Calculator — Free Online Calculator & Formula Guide',
+    title: 'Number Sequence Calculator — Arithmetic, Geometric & Fibonacci',
     shortTitle: 'Number Sequences',
     description: 'Identify arithmetic, geometric, and Fibonacci sequences. Find common difference, common ratio, nth-term formula, and compute next terms.',
     category: 'Mathematics',
@@ -440,7 +440,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'nth-root-calculator',
-    title: 'Root Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Root Calculator — Square, Cube & Nth Roots',
     shortTitle: 'Root Calculator',
     description: 'Calculate any nth root — square roots, cube roots, and beyond. Shows both radical form and fractional exponent equivalent with step-by-step verification.',
     category: 'Mathematics',
@@ -535,7 +535,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'pythagorean-theorem-calculator',
-    title: 'Right Triangle Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Right Triangle Calculator — Pythagorean Theorem & SOH CAH TOA',
     shortTitle: 'Right Triangle',
     description: 'Solve right triangles using the Pythagorean theorem and SOH CAH TOA trigonometry. Find sides, angles, area, and perimeter with a dynamic SVG triangle diagram.',
     category: 'Mathematics',
@@ -613,7 +613,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'sample-size-calculator',
-    title: 'Sample Size Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Sample Size Calculator — Surveys & Research Studies',
     shortTitle: 'Sample Size',
     description: 'Determine the ideal sample size for surveys and research studies. Adjust for population size, confidence level, and margin of error.',
     category: 'Mathematics',
@@ -675,7 +675,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'standard-deviation-calculator',
-    title: 'Standard Deviation Calculator — Variance, Mean & Coefficient of',
+    title: 'Standard Deviation Calculator — Variance, Mean & Coefficient of Variation',
     shortTitle: 'Standard Deviation',
     description: 'Compute standard deviation, variance, mean, median, range, and coefficient of variation from any dataset. Free online calculator with step-by-step results.',
     category: 'Mathematics',
@@ -723,7 +723,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'time-card-calculator',
-    title: 'Time Card Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Time Card Calculator — Weekly Hours, Overtime & Pay',
     shortTitle: 'Time Card Calculator',
     description: 'Track weekly work hours with day-by-day entries. Calculates regular and overtime hours, handles 12hr/24hr time formats, overnight shifts, and optional pay.',
     category: 'Mathematics',
@@ -738,9 +738,9 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'time-zone-calculator',
-    title: 'Time Zone Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Time Zone Calculator — 24 Zones with Meeting-Time Overlay',
     shortTitle: 'Time Zone Calculator',
-    description: 'Convert time between 24 time zones worldwide with business hours overlay. Green-yellow-gray color-coded grid shows the best meeting times across multiple.',
+    description: 'Convert time between 24 time zones worldwide with business hours overlay. Green-yellow-gray color-coded grid shows the best meeting times across multiple time zones.',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'General',
@@ -754,7 +754,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'triangle-calculator',
-    title: 'Triangle Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Triangle Calculator — Solve by SSS, SAS, or ASA',
     shortTitle: 'Triangle Solver',
     description: 'Solve any triangle using SSS, SAS, or ASA input modes. Computes all sides, angles, area, and perimeter with dynamic SVG visualization.',
     category: 'Mathematics',
@@ -800,7 +800,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'roman-numeral-converter',
-    title: 'Roman Numeral Converter — Quick & Accurate Online Calculator & Guide',
+    title: 'Roman Numeral Converter — Numbers, Dates & Subtractive Notation',
     shortTitle: 'Roman Numerals',
     description: 'Convert numbers to Roman numerals and back, including date conversion. Features subtractive notation breakdown and tattoo verification.',
     category: 'Mathematics',
@@ -831,7 +831,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mass-calculator',
-    title: 'Mass Calculator — Free Online Calculator with Step-by-Step Guide',
+    title: 'Mass Calculator — Density & Volume, With Planetary Weight',
     shortTitle: 'Mass Calculator',
     description: 'Calculate mass, density, or volume using m = ρ × V. Shows planetary weight comparison on Earth, Moon, Mars, and Jupiter with unit conversions.',
     category: 'Mathematics',
@@ -940,7 +940,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'day-of-week-calculator',
-    title: 'Day of the Week Calculator — Free Online Calculator & Formula Guide',
+    title: "Day of the Week Calculator — Any Date via Zeller's Congruence",
     shortTitle: 'Day of Week',
     description: "Find the day of the week for any date using Zeller's congruence. Features a perpetual calendar algorithm explanation and historical context.",
     category: 'Mathematics',

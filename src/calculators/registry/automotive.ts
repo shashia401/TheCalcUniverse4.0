@@ -3,7 +3,7 @@ import type { CalculatorEntry } from '../../types/calculator';
 export const automotiveCalculators: CalculatorEntry[] = [
   {
     id: 'engine-horsepower-calculator',
-    title: 'Engine Horsepower Calculator — Free Online Calculator & Formula Guide',
+    title: 'Engine Horsepower Calculator — Torque & RPM Formula',
     shortTitle: 'Engine Horsepower Calculator',
     description: 'Calculate engine horsepower from torque and RPM using the classic formula HP = (Torque x RPM) / 5252. Free, instant, and accurate.',
     category: 'Automotive',
@@ -18,7 +18,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'horsepower-calculator',
-    title: 'Horsepower Calculator (Track) — Free Online Calculator & Formula Guide',
+    title: 'Horsepower Calculator (Track) — Quarter-Mile ET & Trap Speed',
     shortTitle: 'Horsepower',
     description: "Estimate your vehicle's horsepower from quarter-mile ET and trap speed using the Hale formula. Includes drivetrain loss estimation (FWD/RWD/AWD) and power-to-weight ratio.",
     category: 'Automotive',
@@ -49,7 +49,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'gas-mileage-calculator',
-    title: 'Gas Mileage Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Gas Mileage Calculator — MPG & L/100km from Odometer or Trip',
     shortTitle: 'Gas Mileage',
     description: 'Calculate your fuel economy in MPG or L/100km using odometer readings or trip distance. Free online calculator with formula guide and step-by-step results.',
     category: 'Automotive',
@@ -127,7 +127,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'lease-vs-buy-calculator',
-    title: 'Car Lease vs. Buy Calculator — Free Online Calculator & Formula Guide',
+    title: 'Car Lease vs. Buy Calculator — True Total Cost Comparison',
     shortTitle: 'Lease vs. Buy',
     description: 'Compare the true total cost of leasing vs. buying a vehicle over the same time period. Accounts for depreciation, equity, and total payments.',
     category: 'Automotive',
@@ -158,7 +158,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'trip-fuel-cost-calculator',
-    title: 'Trip Fuel Cost Calculator — Quick & Accurate Online Calculator & Guide',
+    title: 'Trip Fuel Cost Calculator — MPG & L/100km Road Trip Cost',
     shortTitle: 'Trip Fuel Cost',
     description: 'Calculate the total fuel cost for any road trip with unit support for miles/MPG and km/L/100km. Free, instant, and accurate.',
     category: 'Automotive',
