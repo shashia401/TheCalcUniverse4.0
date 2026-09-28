@@ -61,7 +61,7 @@ export const mathCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'arbitrary-precision integer arithmetic using JavaScript BigInt',
     lastVerified: '2026-05-17',
-    relatedIds: ['basic-calculator', 'scientific-calculator', 'exponent-calculator', 'binary-hex-calculator'],
+    relatedIds: ['basic-calculator', 'scientific-calculator', 'exponent-calculator', 'binary-hex-calculator', 'factorial-calculator'],
     relatedPosts: ['fractions-math-guide'],
     loader: () => import('../math/big-number/index'),
   },
@@ -1143,7 +1143,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'factorial-calculator',
-    title: 'Factorial Calculator — Compute n! with Steps — Free Online Calculator',
+    title: 'Factorial Calculator — Compute n! with Step-by-Step Solutions',
     shortTitle: 'Factorial Calculator',
     description: 'Calculate the factorial of any number from 0 to 170. Shows the step-by-step multiplication, digit count, and trailing zeros.',
     category: 'Mathematics',
@@ -1153,7 +1153,7 @@ export const mathCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'n! = n × (n-1) × (n-2) × ... × 1',
     lastVerified: '2026-01-15',
-    relatedIds: ['permutation-combination-calculator', 'probability-calculator', 'prime-number', 'number-sequence-calculator'],
+    relatedIds: ['permutation-combination-calculator', 'probability-calculator', 'prime-number', 'number-sequence-calculator', 'big-number-calculator'],
     loader: () => import('../math/factorial-calculator/index'),
   },
   {
