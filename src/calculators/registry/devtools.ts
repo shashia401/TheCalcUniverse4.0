@@ -146,7 +146,7 @@ export const devtoolsCalculators: CalculatorEntry[] = [
   {
     id: 'code-diff',
     title: 'Code Diff Checker — Compare Two Blocks of Text or Code',
-    shortTitle: 'Code Diff Checker — Compare',
+    shortTitle: 'Code Diff Checker',
     description: 'Compare two blocks of text or code side-by-side. See additions, deletions, and unchanged lines highlighted for quick visual comparison.',
     category: 'Developer Tools',
     categorySlug: 'devtools',

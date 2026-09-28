@@ -206,8 +206,8 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'flow-rate-calculator',
-    title: 'Fluid Flow Rate & Pipe Velocity Calculator — Free Online Calculator',
-    shortTitle: 'Fluid Flow Rate & Pipe',
+    title: 'Fluid Flow Rate & Pipe Velocity Calculator — Continuity Equation',
+    shortTitle: 'Flow Rate Calculator',
     description: 'Calculate pipe flow velocity, volumetric flow rate, or required pipe diameter using the continuity equation. Supports GPM and metric units.',
     category: 'Engineering',
     categorySlug: 'engineering',

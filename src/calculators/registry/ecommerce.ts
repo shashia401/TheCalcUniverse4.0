@@ -132,7 +132,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
     id: 'payment-fees-calculator',
     title: 'Stripe & PayPal Fee Calculator — Payment Processor Fee Comparison',
     shortTitle: 'Payment Fees',
-    description: 'Compare Stripe and PayPal transaction fees side by side. Enter your transaction amount to see the exact fee, net amount, effective rate, and monthly.',
+    description: 'Compare Stripe and PayPal transaction fees side by side. Enter your transaction amount to see the exact fee, net amount, effective rate, and monthly cost across transaction sizes.',
     category: 'E-Commerce',
     categorySlug: 'ecommerce',
     subCategory: 'Operations',
@@ -162,7 +162,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   {
     id: 'etsy-fees-calculator',
     title: 'Etsy Fee Calculator — Listing, Transaction, Payment & Offsite Ads',
-    shortTitle: 'Etsy Fee Calculator — Listing,',
+    shortTitle: 'Etsy Fee Calculator',
     description: 'Calculate all Etsy seller fees for any item: listing fee ($0.20), transaction fee (6.5%), payment processing (3% + $0.25), and optional offsite ads fee.',
     category: 'E-Commerce',
     categorySlug: 'ecommerce',
@@ -178,7 +178,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   {
     id: 'cpm-cpc-calculator',
     title: 'CPM & CPC Calculator — Reverse Budget Mode with Industry Benchmarks',
-    shortTitle: 'CPM & CPC Calculator —',
+    shortTitle: 'CPM & CPC Calculator',
     description: 'Calculate CPM (cost per mille) and CPC (cost per click) from ad spend, impressions, and clicks. Free, instant, and accurate.',
     category: 'E-Commerce',
     categorySlug: 'ecommerce',

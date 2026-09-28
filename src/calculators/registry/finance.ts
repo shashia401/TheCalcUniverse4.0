@@ -859,8 +859,8 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'dti-ratio-calculator',
-    title: 'Debt-to-Income (DTI) Ratio Calculator — Free Online Calculator & Guide',
-    shortTitle: 'Debt-to-Income (DTI) Ratio Calculat',
+    title: 'Debt-to-Income (DTI) Ratio Calculator — Front-End & Back-End DTI',
+    shortTitle: 'DTI Ratio Calculator',
     description: 'Calculate your front-end and back-end debt-to-income ratios to see if you qualify for a mortgage. Lenders typically require a DTI below 43%.',
     category: 'Finance',
     categorySlug: 'finance',

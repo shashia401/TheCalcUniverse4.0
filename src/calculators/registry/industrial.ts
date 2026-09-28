@@ -5,7 +5,7 @@ export const industrialCalculators: CalculatorEntry[] = [
     id: 'pressure-converter',
     title: 'Pressure Converter — PSI, Bar, kPa, MPa, atm & More',
     shortTitle: 'Pressure Converter',
-    description: 'Convert between PSI, bar, kPa, MPa, atmospheres, torr, and inches of mercury. Free online pressure unit converter with instant results and common.',
+    description: 'Convert between PSI, bar, kPa, MPa, atmospheres, torr, and inches of mercury. Free online pressure unit converter with instant results and common reference conversions.',
     category: 'Industrial & Trades',
     categorySlug: 'industrial',
     subCategory: 'Unit Converters',
@@ -332,7 +332,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   {
     id: 'oven-temperature-converter',
     title: 'Oven Temperature Converter — °C, °F, and Gas Mark Conversions',
-    shortTitle: 'Oven Temperature Converter — °C,',
+    shortTitle: 'Oven Temperature Converter',
     description: 'Convert oven temperatures between Celsius, Fahrenheit, and Gas Mark instantly. Includes common oven temperature terms and fan oven adjustments.',
     category: 'Industrial & Trades',
     categorySlug: 'industrial',
