@@ -21,7 +21,7 @@ export const devtoolsCalculators: CalculatorEntry[] = [
     id: 'regex-tester',
     title: 'Regex Tester & Debugger — Test JavaScript Regular Expressions Live',
     shortTitle: 'Regex Tester',
-    description: 'Test and debug JavaScript regular expressions in real-time. Enter a pattern, flags, and test string to see match count, matched substrings, and whether a.',
+    description: 'Test and debug JavaScript regular expressions in real-time. Enter a pattern, flags, and test string to see match count, matched substrings, and whether the pattern matches.',
     category: 'Developer Tools',
     categorySlug: 'devtools',
     subCategory: 'Text & Code',

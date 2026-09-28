@@ -5,7 +5,7 @@ export const everydayCalculators: CalculatorEntry[] = [
     id: 'wind-chill-calculator',
     title: 'Wind Chill Calculator — Frostbite Risk & Feels-Like Temperature (NWS)',
     shortTitle: 'Wind Chill',
-    description: 'Calculate the wind chill feels-like temperature using the official NWS formula. Includes frostbite risk timeline, OSHA cold-stress safety guidelines, and.',
+    description: 'Calculate the wind chill feels-like temperature using the official NWS formula. Includes frostbite risk timeline, OSHA cold-stress safety guidelines, and both °F/°C and mph/km/h units.',
     category: 'Everyday',
     categorySlug: 'everyday',
     subCategory: 'Misc',
