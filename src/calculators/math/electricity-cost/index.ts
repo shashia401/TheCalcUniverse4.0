@@ -251,7 +251,26 @@ const electricityCostConfig: CalculatorConfig = {
       alt: 'Flow diagram showing appliance power converted to kilowatt-hours and then to cost',
       caption: 'Electricity cost calculation: appliance wattage is converted to kilowatt-hours, then multiplied by the electricity rate.',
     },
+    quickReference: [
+      { label: '1 kWh at $0.14/kWh (US avg)', value: '$0.14' },
+      { label: '10 kWh', value: '$1.40' },
+      { label: '20 kWh', value: '$2.80' },
+      { label: '50 kWh', value: '$7.00' },
+      { label: '100 kWh', value: '$14.00' },
+      { label: '150 kWh', value: '$21.00' },
+      { label: '200 kWh', value: '$28.00' },
+      { label: '500 kWh', value: '$70.00' },
+      { label: '1,000 kWh', value: '$140.00' },
+    ],
     faqs: [
+      {
+        question: 'How much does 1 kWh cost, or any specific amount of kWh?',
+        answer: 'Cost = kWh used x your rate per kWh — no wattage or hours needed if you already know your kWh usage (e.g., from a bill or smart meter). At the US average rate of $0.14/kWh: 0.5 kWh = $0.07, 1 kWh = $0.14, 1.5 kWh = $0.21, 1.8 kWh = $0.25, 2 kWh = $0.28. See the quick reference table above for larger amounts (10-1,000 kWh). To use this calculator for a known kWh amount directly, set Appliance Wattage to 1000 and Hours Used Per Day to your kWh figure (since 1000W x 1h = 1 kWh) — or just multiply your kWh by your rate by hand, which is exactly what the calculator does internally.',
+      },
+      {
+        question: 'How do I calculate the cost of running X watts for an hour?',
+        answer: 'Cost per hour = (Watts / 1000) x your rate per kWh. For example, a 1,500W space heater running for one hour costs 1.5 kWh x $0.14 = $0.21 at the US average rate. For "watts per hour" style questions where you know the wattage and want a running cost, enter the wattage above with Hours Used Per Day set to 1 and Calculate For set to Day — the Cost Per Day result is your hourly cost.',
+      },
       {
         question: 'What is a kilowatt-hour (kWh)?',
         answer: 'A kilowatt-hour is a unit of energy equal to using 1,000 watts for one hour. If a 100W light bulb runs for 10 hours, it uses 1 kWh. Your electric bill charges you per kWh consumed.',
