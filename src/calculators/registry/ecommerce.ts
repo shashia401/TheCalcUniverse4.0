@@ -19,7 +19,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'cogs-calculator',
-    title: 'Cost of Goods Sold (COGS) Calculator — Free Online Calculator & Guide',
+    title: 'Cost of Goods Sold (COGS) Calculator — Gross Profit & Margin',
     shortTitle: 'COGS Calculator',
     description: 'Calculate your Cost of Goods Sold using the inventory accounting formula. Includes gross profit margin and COGS as a percentage of revenue.',
     category: 'E-Commerce',

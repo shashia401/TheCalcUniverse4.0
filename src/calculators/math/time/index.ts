@@ -226,6 +226,10 @@ const timeConfig: CalculatorConfig = {
       'Time calculators are used daily by shift workers, freelancers, contractors, and payroll processors to track hours worked and compute earnings. The tool automatically handles overnight shifts (e.g., starting at 10 PM and ending at 6 AM the next morning = 8 hours) and deducts unpaid break time. Decimal hours (e.g., 8.5 hours) are standard in payroll systems because they simplify wage calculation — just multiply by the hourly rate. HH:MM format (e.g., 8:30) is common on paper timesheets and for human readability. Converting between the two is straightforward: divide the minutes by 60 (e.g., 30 minutes ÷ 60 = 0.5 hours). The calculator performs this conversion automatically.',
     faqs: [
       {
+        question: 'How do I convert a time difference to minutes?',
+        answer: 'Enter your start and end times above and the "Total Minutes" result gives you the exact count directly — no manual math needed. For example, 9:00 AM to 5:00 PM is 480 minutes (8 hours x 60). If you already know the hours and minutes, the formula is simply (hours x 60) + minutes — e.g., 7 hours 30 minutes = (7 x 60) + 30 = 450 minutes.',
+      },
+      {
         question: 'Does it handle overnight shifts?',
         answer:
           'Yes. If your end time is earlier than your start time, the calculator automatically detects that the shift crosses midnight. For example, a shift from 10:00 PM to 6:00 AM is correctly calculated as 8 hours. This works with break deductions too — a 10 PM to 6 AM shift with a 30-minute break gives 7.5 hours of paid time.',

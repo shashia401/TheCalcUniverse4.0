@@ -125,6 +125,14 @@ const cogsConfig: CalculatorConfig = {
     ],
     faqs: [
       {
+        question: 'How do I find ending inventory or beginning inventory if I already know COGS?',
+        answer: 'Rearrange the same formula (COGS = Beginning Inventory + Purchases − Ending Inventory) for whichever value you\'re missing: Ending Inventory = Beginning Inventory + Purchases − COGS, or Beginning Inventory = COGS + Ending Inventory − Purchases. For example, with Beginning Inventory $50,000, Purchases $120,000, and a known COGS of $125,000: Ending Inventory = 50,000 + 120,000 − 125,000 = $45,000 — the same number this calculator\'s forward direction produces from those three inputs.',
+      },
+      {
+        question: 'Where does COGS show up — income statement or balance sheet?',
+        answer: 'COGS appears on the income statement, deducted from revenue to calculate gross profit. It does not appear on the balance sheet — the balance sheet shows ending inventory (an asset), not COGS (an expense). The two are linked through the formula above: this period\'s ending inventory becomes next period\'s beginning inventory.',
+      },
+      {
         question: 'What is included in COGS?',
         answer: 'COGS includes all costs directly related to production: raw materials, direct labor, manufacturing overhead, inbound freight, and import duties. It excludes operating expenses like rent, non-production salaries, marketing, and administrative costs.',
       },
