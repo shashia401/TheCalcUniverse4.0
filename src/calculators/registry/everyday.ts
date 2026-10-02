@@ -267,7 +267,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'working-days-calculator',
-    title: 'Working Days Between Two Dates — Free Online Calculator & Guide',
+    title: 'Working Days Between Two Dates — Excludes Weekends & Holidays',
     shortTitle: 'Working Days',
     description: 'Count the exact number of working days (business days) between two dates, excluding weekends and US federal holidays. Free, instant, and accurate.',
     category: 'Everyday',

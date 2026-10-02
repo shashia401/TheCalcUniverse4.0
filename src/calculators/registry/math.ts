@@ -113,7 +113,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'confidence-interval-calculator',
-    title: 'Confidence Interval Calculator — Free Online Calculator & Guide',
+    title: 'Confidence Interval Calculator — Margin of Error & Z-Value',
     shortTitle: 'Confidence Interval',
     description: 'Calculate confidence intervals for a population mean. Breaks out the Margin of Error (MOE), critical Z-value, and standard error.',
     category: 'Mathematics',
@@ -644,7 +644,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'scientific-notation-calculator',
-    title: 'Scientific Notation Calculator — Free Online Calculator & Guide',
+    title: 'Scientific Notation Calculator — Decimal ↔ Exponent Form',
     shortTitle: 'Sci Notation',
     description: 'Convert between decimal and scientific notation. Learn how the decimal point jumps left or right with an interactive movement visualization.',
     category: 'Mathematics',
@@ -770,7 +770,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'volume-surface-calculator',
-    title: 'Volume & Surface Area Calculator — Free Online Calculator & Guide',
+    title: 'Volume & Surface Area Calculator — 6 Common 3D Shapes',
     shortTitle: 'Volume & Surface Area',
     description: 'Calculate volume and surface area of spheres, cubes, rectangular prisms, cylinders, cones, and pyramids. Free, instant, and accurate.',
     category: 'Mathematics',

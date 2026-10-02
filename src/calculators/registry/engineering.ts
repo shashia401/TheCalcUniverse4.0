@@ -160,7 +160,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'wire-gauge-calculator',
-    title: 'Wire Gauge Ampacity Calculator — Free Online Calculator & Guide',
+    title: 'Wire Gauge Ampacity Calculator — AWG Size by Amps',
     shortTitle: 'Wire Gauge',
     description: 'Find the correct AWG wire gauge for any electrical circuit based on current, conductor material, insulation rating, and conduit fill.',
     category: 'Engineering',

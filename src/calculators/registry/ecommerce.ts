@@ -3,7 +3,7 @@ import type { CalculatorEntry } from '../../types/calculator';
 export const ecommerceCalculators: CalculatorEntry[] = [
   {
     id: 'profit-margin-calculator',
-    title: 'Profit Margin & Markup Calculator — Free Online Calculator & Guide',
+    title: 'Profit Margin & Markup Calculator — Cost, Price & Margin %',
     shortTitle: 'Profit Margin',
     description: 'Calculate gross profit margin, markup percentage, and selling price. Converts between margin and markup with full profit breakdown.',
     category: 'E-Commerce',
@@ -50,7 +50,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'amazon-fba-calculator',
-    title: 'Amazon FBA Fee & Margin Calculator — Free Online Calculator & Guide',
+    title: 'Amazon FBA Fee & Margin Calculator — Net Profit & ROI',
     shortTitle: 'Amazon FBA',
     description: 'Calculate Amazon FBA fees, net profit, ROI, and margin for any product. Includes referral fees (8-20%), weight-based fulfillment fees, monthly storage.',
     category: 'E-Commerce',
@@ -66,7 +66,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'roas-calculator',
-    title: 'Return on Ad Spend (ROAS) Calculator — Free Online Calculator & Guide',
+    title: 'Return on Ad Spend (ROAS) Calculator — Break-Even ROAS',
     shortTitle: 'ROAS Calculator',
     description: 'Calculate your ROAS and break-even ROAS based on gross margin. Determine if your advertising campaigns are truly profitable.',
     category: 'E-Commerce',

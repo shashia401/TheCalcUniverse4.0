@@ -65,7 +65,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mileage-reimbursement-calculator',
-    title: 'Mileage Reimbursement Calculator — Free Online Calculator & Guide',
+    title: 'Mileage Reimbursement Calculator — IRS Standard Rate',
     shortTitle: 'Mileage Reimbursement',
     description: 'Calculate IRS-standard mileage reimbursement for business, medical, and charitable driving. Includes tax savings estimates and additional expense tracking.',
     category: 'Automotive',
@@ -143,7 +143,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mpg-calculator',
-    title: 'MPG & Fuel Efficiency Calculator — Free Online Calculator & Guide',
+    title: 'MPG & Fuel Efficiency Calculator — Miles Per Gallon',
     shortTitle: 'MPG Calculator',
     description: 'Calculate MPG from miles driven and fuel used, estimate trip fuel costs, determine driving range, or convert between MPG and L/100km.',
     category: 'Automotive',
@@ -174,7 +174,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'tire-size-calculator',
-    title: 'Tire Size Comparison Calculator — Free Online Calculator & Guide',
+    title: 'Tire Size Comparison Calculator — Diameter & Speedo Error',
     shortTitle: 'Tire Size Comparison Calculator',
     description: 'Compare two tire sizes and calculate the diameter difference, speedometer error, and fitment impact of changing tire sizes.',
     category: 'Automotive',
@@ -189,7 +189,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'vehicle-depreciation-calculator',
-    title: 'Vehicle Depreciation Calculator — Free Online Calculator & Guide',
+    title: 'Vehicle Depreciation Calculator — Future Value & Annual Loss',
     shortTitle: 'Car Depreciation',
     description: 'Calculate how much a vehicle will depreciate over your ownership period. Shows total depreciation, future value, and monthly depreciation cost.',
     category: 'Automotive',

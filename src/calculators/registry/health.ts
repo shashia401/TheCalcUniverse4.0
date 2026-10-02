@@ -67,7 +67,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'bmr-calculator',
-    title: 'Basal Metabolic Rate (BMR) Calculator — Free Online Calculator & Guide',
+    title: 'Basal Metabolic Rate (BMR) Calculator — Mifflin-St Jeor',
     shortTitle: 'BMR Calculator',
     description: 'Calculate your Basal Metabolic Rate using Mifflin-St Jeor, Harris-Benedict, and Katch-McArdle formulas. Free, instant, and accurate.',
     category: 'Health & Fitness',
@@ -83,7 +83,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'heart-rate-zones-calculator',
-    title: 'Target Heart Rate Zone Calculator — Free Online Calculator & Guide',
+    title: 'Target Heart Rate Zone Calculator — Karvonen Formula',
     shortTitle: 'Heart Rate Zones',
     description: 'Calculate your 5 training heart rate zones using the Karvonen formula or percentage of max HR. Free, instant, and accurate.',
     category: 'Health & Fitness',
