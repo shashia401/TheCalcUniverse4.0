@@ -2,6 +2,10 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import DogCatAgePanel from './DogCatAgePanel';
 
+// 1st year = 15, 2nd year = 9, each later year = 4 (linear within years 1-2 so age 1 -> 15, age 2 -> 24)
+const traditionalHumanYears = (age: number): number =>
+  age < 1 ? age * 15 : age < 2 ? 15 + (age - 1) * 9 : 24 + (age - 2) * 4;
+
 const dogCatAgeConfig: CalculatorConfig = {
   inputs: [
     {
@@ -54,17 +58,8 @@ const dogCatAgeConfig: CalculatorConfig = {
 
     if (species === 'dog') {
       // ── Traditional method ──
-      let traditionalHumanAge: number;
-      if (age < 1) {
-        // Puppy < 1 year: simplified
-        traditionalHumanAge = age * 15;
-      } else if (age < 2) {
-        // First year = 15 human years
-        traditionalHumanAge = 15;
-      } else {
-        // First year = 15, second year = 9, each additional = 4
-        traditionalHumanAge = 15 + 9 + (age - 2) * 4;
-      }
+      // 1st year = 15, 2nd year = 9 more, each later year = 4 (interpolated within years 1-2)
+      const traditionalHumanAge = traditionalHumanYears(age);
 
       // ── Epigenetic method (NIH 2020) — only for age ≥ 1 ──
       let epigeneticHumanAge: number | null = null;
@@ -73,15 +68,17 @@ const dogCatAgeConfig: CalculatorConfig = {
       }
 
       // Life stage lookup for dogs based on size
+      // Half-open, contiguous bands; thresholds match the FAQ ("At what age should I start considering my pet a senior?")
       const getDogLifeStage = (a: number, size: string): string => {
         if (a < 1) return 'Puppy';
-        if (a >= 1 && a < 2) return 'Junior';
-        if (a >= 2 && a <= 6)
-          return size === 'large' && a >= 5 ? 'Mature' : 'Adult';
-        if (a >= 7 && a <= 10)
-          return size === 'small' ? 'Mature' : 'Senior';
-        if (a >= 11 && a <= 14) return 'Senior';
-        return 'Geriatric';
+        if (a < 2) return 'Junior';
+        const seniorFrom = size === 'large' ? 7 : size === 'small' ? 11 : 8;
+        const geriatricFrom = size === 'large' ? 12 : 15;
+        const matureFrom = size === 'large' ? 5 : size === 'small' ? 7 : Infinity;
+        if (a >= geriatricFrom) return 'Geriatric';
+        if (a >= seniorFrom) return 'Senior';
+        if (a >= matureFrom) return 'Mature';
+        return 'Adult';
       };
       const stage = getDogLifeStage(age, dogSize);
 
@@ -117,21 +114,15 @@ const dogCatAgeConfig: CalculatorConfig = {
       });
     } else {
       // ── Cat ──
-      // Traditional formula: first year = 15, second year = 9, each additional = 4
-      let catHumanAge: number;
-      if (age < 1) {
-        catHumanAge = age * 15;
-      } else {
-        catHumanAge = 15 + 9 + Math.max(0, (age - 2)) * 4;
-      }
+      const catHumanAge = traditionalHumanYears(age);
 
       // Life stage
       const getCatLifeStage = (a: number): string => {
         if (a < 1) return 'Kitten';
-        if (a >= 1 && a < 2) return 'Junior';
-        if (a >= 2 && a <= 6) return 'Adult';
-        if (a >= 7 && a <= 10) return 'Mature';
-        if (a >= 11 && a <= 14) return 'Senior';
+        if (a < 2) return 'Junior';
+        if (a < 7) return 'Adult';
+        if (a < 11) return 'Mature';
+        if (a < 15) return 'Senior';
         return 'Geriatric';
       };
       const catStage = getCatLifeStage(age);
@@ -233,7 +224,7 @@ const dogCatAgeConfig: CalculatorConfig = {
       },
       {
         question: 'Is the epigenetic formula applicable to all dog breeds equally?',
-        answer: 'The NIH 2020 study used blood samples from 320 dogs, predominantly Labrador retrievers ranging from 4 weeks to 16 years old. While the methylation clock was validated against human methylation data and showed strong consistency, breed-specific validation is still ongoing. Separate research from the Dog Aging Project (University of Washington/Texas A&M) is collecting epigenetic data across dozens of breeds to refine breed-specific aging models. For now, the Labrador-derived formula provides the best available molecular estimate, but it may overestimate aging in exceptionally long-lived small breeds and underestimate it in very short-lived giant breeds.',
+        answer: 'The 2020 study (Wang et al., Cell Systems) profiled DNA methylation in blood samples from 104 Labrador retrievers aged 4 weeks to 16 years and compared them with methylation data from 320 humans. While the methylation clock was validated against human methylation data and showed strong consistency, breed-specific validation is still ongoing. Separate research from the Dog Aging Project (University of Washington/Texas A&M) is collecting epigenetic data across dozens of breeds to refine breed-specific aging models. For now, the Labrador-derived formula provides the best available molecular estimate, but it may overestimate aging in exceptionally long-lived small breeds and underestimate it in very short-lived giant breeds.',
       },
       {
         question: 'How do I interpret the difference between the traditional and epigenetic age results?',

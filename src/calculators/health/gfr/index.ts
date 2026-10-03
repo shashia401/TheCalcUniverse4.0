@@ -155,19 +155,19 @@ const gfrConfig: CalculatorConfig = {
       {
         scenario: 'A 45-year-old woman with serum creatinine of 0.8 mg/dL',
         inputs: { creatinine: '0.8', age: '45', sex: 'female', creatinineUnit: 'mgdl' },
-        result: 'eGFR ≈ 102 mL/min/1.73m² — Stage 1',
+        result: 'eGFR ≈ 92.5 mL/min/1.73m² — Stage 1',
         insight: 'Creatinine of 0.8 is comfortably within the normal female range (0.6–1.1 mg/dL), and at 45 the age penalty (0.9938^45 ≈ 0.76 of the base value) still leaves filtration in the normal band.',
       },
       {
         scenario: 'A 70-year-old man with serum creatinine of 1.3 mg/dL',
         inputs: { creatinine: '1.3', age: '70', sex: 'male', creatinineUnit: 'mgdl' },
-        result: 'eGFR ≈ 57 mL/min/1.73m² — Stage 3a',
-        insight: 'The same creatinine in a 40-year-old would produce an eGFR near 69. Age drives much of the difference, which is why doctors interpret borderline values like this in context — and confirm with a repeat test and urine albumin before diagnosing CKD.',
+        result: 'eGFR ≈ 59 mL/min/1.73m² — Stage 3a',
+        insight: 'The same creatinine in a 40-year-old would produce an eGFR near 71. Age drives much of the difference, which is why doctors interpret borderline values like this in context — and confirm with a repeat test and urine albumin before diagnosing CKD.',
       },
       {
         scenario: 'A 30-year-old male bodybuilder with creatinine of 1.4 mg/dL',
         inputs: { creatinine: '1.4', age: '30', sex: 'male', creatinineUnit: 'mgdl' },
-        result: 'eGFR ≈ 66 mL/min/1.73m² — appears Stage 2',
+        result: 'eGFR ≈ 69 mL/min/1.73m² — appears Stage 2',
         insight: 'High muscle mass produces more creatinine, deflating the eGFR estimate without any kidney problem. This is a textbook case for a confirmatory cystatin C test, which is independent of muscle mass.',
       },
     ],

@@ -311,7 +311,7 @@ const retirementConfig: CalculatorConfig = {
           'Desired Annual Retirement Income': '60,000',
         },
         result: 'Estimated total at retirement (age 65): approximately $1,476,000. Inflation-adjusted (today\'s dollars): approximately $524,000. Total contributed: $260,000. Total growth: approximately $1,216,000. Money multiplied: 5.7×. With the 4% rule inflation-adjusted targets, the calculator shows a gap relative to the inflation-adjusted goal — Anna\'s $60K desired income inflates to about $169K/year in future dollars, requiring about $4.2M at retirement.',
-        insight: 'Anna\'s contributions of $260,000 grow to about $1,476,000 — a 5.7× multiplier, with over $1.2 million coming from compound growth alone. The key insight from the 4% rule check is that inflation-adjusted targets are ambitious: $60,000 in today\'s dollars becomes roughly $169,000 in 35 years at 3% inflation, requiring a nest egg of about $4.2 million. While her projected $1.48 million portfolio would generate about $59,000/year using the simple 4% rule (close to her current $60K goal), the inflation-adjusted target requires a significantly larger nest egg. If she started just 5 years later at 35, her final balance would drop to roughly $990,000 — a nearly $490,000 difference that shows why starting early is the single most powerful retirement decision.',
+        insight: 'Anna\'s contributions of $260,000 grow to about $1,476,000 — a 5.7× multiplier, with over $1.2 million coming from compound growth alone. The key insight from the 4% rule check is that inflation-adjusted targets are ambitious: $60,000 in today\'s dollars becomes roughly $169,000 in 35 years at 3% inflation, requiring a nest egg of about $4.2 million. While her projected $1.48 million portfolio would generate about $59,000/year using the simple 4% rule (close to her current $60K goal), the inflation-adjusted target requires a significantly larger nest egg. If she started just 5 years later at 35, her final balance would drop to roughly $1,016,000 — a difference of about $460,000 that shows why starting early is the single most powerful retirement decision.',
       },
       {
         scenario: 'Robert is 45, has $120,000 saved, contributes $800/month, and wants to retire at 67. He uses a conservative 5% return assumption (closer to a 60/40 bond/stock portfolio) and 3% inflation. He wants $70,000/year in retirement.',
@@ -330,7 +330,7 @@ const retirementConfig: CalculatorConfig = {
     ],
 
     proTips: [
-      'Start early. A 25-year-old contributing $400/month at 7% will have about $960K at 65. Waiting until 35 requires nearly double the monthly contribution ($775/month) to reach the same goal — that is the cost of 10 lost years of compounding.',
+      'Start early. A 25-year-old contributing $400/month at 7% will have about $1.05M at 65 (starting from $0). Waiting until 35 requires more than double the monthly contribution (about $861/month) to reach the same goal — that is the cost of 10 lost years of compounding.',
       'Always include your employer match in your monthly contribution. If your employer matches 50% of your 401(k) contribution up to 6% of salary, a $500/month contribution is actually $750/month with the match — a 50% instant return that dramatically improves your projection.',
       'The 4% rule works for 30-year retirements. For early retirement at 55, use a 3.0-3.5% withdrawal rate to account for the longer horizon. For traditional retirement at 65-67, 4% remains a reasonable baseline established by the Trinity Study.',
       'Run projections at multiple return assumptions: 5% (conservative), 7% (historical average), and 9% (optimistic). If your plan works at 5%, you are in excellent shape. If it only works at 9%, you need to increase contributions or adjust expectations.',
@@ -340,9 +340,9 @@ const retirementConfig: CalculatorConfig = {
       { label: '4% Rule', value: 'Desired income ÷ 0.04 = target nest egg' },
       { label: 'Historical S&P 500 Return', value: '~7% inflation-adjusted (long-term)' },
       { label: 'Conservative Return', value: '5% (balanced 60/40 portfolio)' },
-      { label: '$500/mo from age 25', value: '~$1.2M at 65 (7% return)' },
-      { label: '$500/mo from age 35', value: '~$567K at 65 (7% return)' },
-      { label: '10-year delay cost', value: 'Roughly HALVES your final balance' },
+      { label: '$500/mo from age 25', value: '~$1.31M at 65 (7% return, starting from $0)' },
+      { label: '$500/mo from age 35', value: '~$610K at 65 (7% return, starting from $0)' },
+      { label: '10-year delay cost', value: 'Cuts your final balance by more than half (about 54%)' },
       { label: 'Inflation target', value: 'Fed target 2%, long-term avg ~3%' },
     ],
 

@@ -28,12 +28,47 @@
     },
     {
       "type": "table",
-      "headers": ["Years", "Total contributed", "Pessimistic (4%)", "Expected (6%)", "Optimistic (8%)", "Optimistic / pessimistic"],
+      "headers": [
+        "Years",
+        "Total contributed",
+        "Pessimistic (4%)",
+        "Expected (6%)",
+        "Optimistic (8%)",
+        "Optimistic / pessimistic"
+      ],
       "rows": [
-        ["5", "$56,000", "$64,199", "$68,839", "$73,883", "1.15x"],
-        ["10", "$92,000", "$118,167", "$134,716", "$154,160", "1.30x"],
-        ["20", "$164,000", "$264,516", "$343,429", "$451,948", "1.71x"],
-        ["30", "$236,000", "$482,700", "$723,161", "$1,112,930", "2.31x"]
+        [
+          "5",
+          "$56,000",
+          "$64,199",
+          "$68,839",
+          "$73,883",
+          "1.15x"
+        ],
+        [
+          "10",
+          "$92,000",
+          "$118,167",
+          "$134,716",
+          "$154,160",
+          "1.30x"
+        ],
+        [
+          "20",
+          "$164,000",
+          "$264,516",
+          "$343,429",
+          "$451,948",
+          "1.71x"
+        ],
+        [
+          "30",
+          "$236,000",
+          "$482,700",
+          "$723,161",
+          "$1,112,930",
+          "2.31x"
+        ]
       ]
     },
     {
@@ -51,11 +86,27 @@
     },
     {
       "type": "table",
-      "headers": ["Return that actually happens", "Monthly contribution needed", "Total you pay in"],
+      "headers": [
+        "Return that actually happens",
+        "Monthly contribution needed (rounded to the dollar)",
+        "Total you pay in (including the $20,000 start)"
+      ],
       "rows": [
-        ["4% (pessimistic)", "$1,242", "$318,080"],
-        ["6% (expected)", "$939", "$245,360"],
-        ["8% (optimistic)", "$682", "$183,680"]
+        [
+          "4% (pessimistic)",
+          "$1,242",
+          "$318,080"
+        ],
+        [
+          "6% (expected)",
+          "$939",
+          "$245,360"
+        ],
+        [
+          "8% (optimistic)",
+          "$682",
+          "$183,680"
+        ]
       ]
     },
     {
@@ -77,11 +128,31 @@
     },
     {
       "type": "table",
-      "headers": ["Situation", "Bad years first", "Bad years last", "Constant 5.5%"],
+      "headers": [
+        "Situation",
+        "Bad years first",
+        "Bad years last",
+        "Constant 5.5%"
+      ],
       "rows": [
-        ["$100,000 lump sum, no deposits", "$160,384", "$160,384", "$170,814"],
-        ["$10,000 added at the end of each year, no starting balance", "$158,826", "$103,206", "$128,754"],
-        ["$100,000 start, $6,000 withdrawn at the start of each year", "$61,466", "$94,838", "-"]
+        [
+          "$100,000 lump sum, no deposits",
+          "$160,384",
+          "$160,384",
+          "$170,814"
+        ],
+        [
+          "$10,000 added at the end of each year, no starting balance",
+          "$158,826",
+          "$103,206",
+          "$128,754"
+        ],
+        [
+          "$100,000 start, $6,000 withdrawn at the start of each year",
+          "$61,466",
+          "$94,838",
+          "$89,313"
+        ]
       ]
     },
     {
@@ -97,7 +168,7 @@
       "type": "list",
       "ordered": false,
       "items": [
-        "The pessimistic scenario is not a worst case. A decade like the bad-first sequence above is not captured by a steady 4%.",
+        "The pessimistic scenario is not a worst case. In the withdrawal example above, the bad-years-first path compounds at about 4.84% a year, yet it ends with $61,466, below the $73,106 that a steady 4% would leave.",
         "The default 2-point variance is a convenience setting, not a measured range. Choose a wider band if you hold a more volatile mix.",
         "Fees, taxes and inflation are not modeled, so enter returns after fees and adjust for inflation separately.",
         "Past performance does not guarantee future results, and no scenario here promises a return."

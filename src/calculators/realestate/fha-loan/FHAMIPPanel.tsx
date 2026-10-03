@@ -5,7 +5,7 @@ interface Props {
   results: CalculatorResult[];
 }
 
-export default function FHAMIPPanel({ results }: Props) {
+export default function FHAMIPPanel({ values, results }: Props) {
   if (!results || results.length === 0) return null;
 
   const totalMonthly = results.find(r => r.id === 'totalMonthly');
@@ -31,9 +31,12 @@ export default function FHAMIPPanel({ results }: Props) {
   const mip1yr = monthlyMIPVal * 12;
   const mip5yr = monthlyMIPVal * 60;
   const mip10yr = monthlyMIPVal * 120;
+  const termYears = parseFloat(values.loanTerm || '30') || 30;
   const mipFullTerm = isLifeOfLoan
-    ? monthlyMIPVal * 360
-    : monthlyMIPVal * 132; // 11 years
+    ? monthlyMIPVal * termYears * 12
+    : monthlyMIPVal * Math.min(132, termYears * 12); // 11 years or the term, if shorter
+  // Effective annual rate = monthly MIP x 12 / base loan (upfront MIP is 1.75% of base loan)
+  const annualRatePct = upfrontMIPVal > 0 ? ((monthlyMIPVal * 12) / (upfrontMIPVal / 0.0175)) * 100 : 0;
 
   const fmt = (n: number) =>
     n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -101,7 +104,7 @@ export default function FHAMIPPanel({ results }: Props) {
                   { period: 'Year 1', mip: mip1yr, cum: mip1yr },
                   { period: 'Year 5', mip: mip5yr, cum: upfrontMIPVal + mip5yr },
                   { period: 'Year 10', mip: mip10yr, cum: upfrontMIPVal + mip10yr },
-                  { period: isLifeOfLoan ? 'Full Term (30yr)' : 'Full Term', mip: mipFullTerm, cum: upfrontMIPVal + mipFullTerm },
+                  { period: isLifeOfLoan ? `Full Term (${termYears}yr)` : 'Full Term', mip: mipFullTerm, cum: upfrontMIPVal + mipFullTerm },
                 ].map((row, i) => (
                   <tr key={`item-${i}`} className={`border-b border-slate-100 last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
                     <td className="px-4 py-2.5 font-bold text-slate-700">{row.period}</td>
@@ -124,7 +127,7 @@ export default function FHAMIPPanel({ results }: Props) {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-400 mt-0.5">•</span>
-              <span><strong>Annual MIP:</strong> {isLifeOfLoan ? '0.55%' : '0.50%'} of loan balance, paid monthly.</span>
+              <span><strong>Annual MIP:</strong> {annualRatePct.toFixed(2)}% of loan balance, paid monthly.</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-400 mt-0.5">•</span>

@@ -35,6 +35,21 @@ describe('Age Calculator', () => {
     expect(getValue(r, 'totalHours')).toBeTruthy();
   });
 
+  it('never reports negative days when the birth day exceeds the previous month length', () => {
+    // 31 Jan -> 1 Mar used to give "34 years, 1 month, -1 days"
+    const a = config.calculate({ birthDate: '1990-01-31', toDate: '2024-03-01' });
+    expect(getValue(a, 'exactAge')).toBe('34 years, 1 months, 1 days');
+    const b = config.calculate({ birthDate: '1985-12-31', toDate: '2025-03-01' });
+    expect(getValue(b, 'exactAge')).toBe('39 years, 2 months, 1 days');
+    for (const r of [a, b]) expect(getValue(r, 'exactAge')).not.toContain('-');
+  });
+
+  it('counts total days exactly across a daylight-saving change', () => {
+    // 2000-01-01 -> 2000-06-01 is 152 days; local-midnight milliseconds gave 151 in US time zones
+    const r = config.calculate({ birthDate: '2000-01-01', toDate: '2000-06-01' });
+    expect(parseNumber(getValue(r, 'totalDays'))).toBe(152);
+  });
+
   it('shows countdown to next birthday', () => {
     const r = config.calculate({
       birthDate: '1995-06-15',

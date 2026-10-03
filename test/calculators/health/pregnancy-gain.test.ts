@@ -66,3 +66,26 @@ describe('unit', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 });
+
+describe('Pregnancy Weight Gain — metric ranges and per-week status', () => {
+  const v = (o: Record<string, string>) => config.calculate(o);
+  const get = (r: ReturnType<typeof v>, id: string) => r.find((x) => x.id === id)?.value;
+
+  it('metric mode converts the IOM lb ranges to kg (25-35 lbs = 11.3-15.9 kg)', () => {
+    const r = v({ unit: 'metric', prepregnancyWeight: '63.5', currentWeight: '70', heightCm: '165', currentWeek: '20' });
+    expect(get(r, 'totalRange')).toBe('11.3 kg–15.9 kg');
+  });
+
+  it('after week 13 compares gain with the pace (1-4.4 lbs + weekly rate x weeks since 13), not the whole-pregnancy range', () => {
+    const base = { unit: 'imperial', prepregnancyWeight: '140', heightFt: '5', heightIn: '5', currentWeek: '20' };
+    // normal BMI, week 20: expected 6.6-11.4 lbs
+    expect(get(v({ ...base, currentWeight: '155' }), 'gainStatus')).toBe('Above Recommended Range'); // 15 lbs
+    expect(get(v({ ...base, currentWeight: '149' }), 'gainStatus')).toBe('Within Recommended Range'); // 9 lbs
+    expect(get(v({ ...base, currentWeight: '144' }), 'gainStatus')).toBe('Below Recommended Range'); // 4 lbs
+  });
+
+  it('underweight worked example (22 lbs at week 30, expected 18-26.5) is within range', () => {
+    const r = v({ unit: 'imperial', prepregnancyWeight: '105', currentWeight: '127', heightFt: '5', heightIn: '4', currentWeek: '30' });
+    expect(get(r, 'gainStatus')).toBe('Within Recommended Range');
+  });
+});

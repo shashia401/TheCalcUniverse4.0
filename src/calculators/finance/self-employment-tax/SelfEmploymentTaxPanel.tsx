@@ -128,7 +128,7 @@ export default function SelfEmploymentTaxPanel({ results }: Props) {
                 style={{ width: `${secaTax > 0 ? (ssAmount / secaTax) * 100 : 0}%` }}
               />
             </div>
-            <p className="text-[10px] text-blue-500 mt-1">12.4% rate · Capped at $176,100 wage base (2026)</p>
+            <p className="text-[10px] text-blue-500 mt-1">12.4% rate · Capped at $184,500 wage base (2026)</p>
           </div>
           {/* Medicare bar */}
           <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">

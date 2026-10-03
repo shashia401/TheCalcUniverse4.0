@@ -1,133 +1,231 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "BMI, or body mass index, is your weight in kilograms divided by your height in metres squared (kg/m2). A person who is 1.75 m tall and weighs 70 kg has a BMI of 70 / 1.75^2 = 22.86, which rounds to 22.9 and falls in the healthy weight range. In US units the same calculation is 703 x weight in pounds / height in inches squared. This guide is a how-to: how to calculate BMI by hand, how to read the result, how much weight moves you between categories, and what to do next. For a deeper look at where BMI misleads, see our separate post on BMI limitations."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "What Is BMI and How Is It Calculated?"
+      "text": "How to calculate BMI by hand"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Metric: divide weight in kg by height in metres, then divide again by height in metres. Example: 70 kg and 1.75 m gives 70 / 3.0625 = 22.86.",
+        "Imperial: multiply weight in pounds by 703, then divide by height in inches squared. Example: 140 lb and 5 ft 4 in (64 in) gives 703 x 140 / 4,096 = 24.03.",
+        "Cross-check: 140 lb is 63.5 kg and 64 in is 1.6256 m, so 63.5 / 1.6256^2 = 24.03, the same answer."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "BMI stands for Body Mass Index. It is your weight in kilograms divided by your height in meters squared (kg/m²). For example, a person who is 1.75m tall and weighs 70kg has a BMI of 22.9 (70 ÷ 3.06). The formula was developed by Belgian mathematician Adolphe Quetelet in the 1830s as a way to measure population-level obesity, not as a diagnostic tool for individuals. In the US imperial system, the formula is (weight in pounds / height in inches²) x 703."
+      "text": "The CDC and WHO both describe BMI as weight divided by height squared, with weight in kilograms and height in metres."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "WHO BMI Categories"
+      "text": "Read the result: the categories"
     },
     {
       "type": "table",
       "headers": [
-        "Category",
-        "BMI Range",
-        "Health Risk"
+        "Category (CDC, adults 20+)",
+        "BMI"
       ],
       "rows": [
         [
-          "Severely underweight",
-          "Under 16.0",
-          "High risk — malnutrition"
-        ],
-        [
           "Underweight",
-          "16.0 â€“ 18.4",
-          "Moderate risk"
+          "Less than 18.5"
         ],
         [
-          "Normal weight",
-          "18.5 â€“ 24.9",
-          "Low risk"
+          "Healthy weight",
+          "18.5 to less than 25"
         ],
         [
           "Overweight",
-          "25.0 â€“ 29.9",
-          "Low-moderate risk"
+          "25 to less than 30"
         ],
         [
-          "Obese Class I",
-          "30.0 â€“ 34.9",
-          "Moderate risk"
+          "Class 1 obesity",
+          "30 to less than 35"
         ],
         [
-          "Obese Class II",
-          "35.0 â€“ 39.9",
-          "High risk"
+          "Class 2 obesity",
+          "35 to less than 40"
         ],
         [
-          "Obese Class III",
-          "40.0 and above",
-          "Very high risk"
+          "Class 3 obesity",
+          "40 or greater"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The CDC applies these categories to adults 20 and older regardless of age, sex or race. The WHO uses 25 or more for overweight and 30 or more for obesity. Our BMI calculator uses the 18.5, 25 and 30 boundaries, and it does not adjust for ethnicity."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the healthy range looks like at different heights"
+    },
+    {
+      "type": "paragraph",
+      "text": "Because BMI is weight over height squared, the same category covers a different weight at each height. This table was computed from the boundaries 18.5 and 25 (a BMI of exactly 25 is the first overweight value, so the upper figure is the boundary and not a target). Values are rounded to the nearest 0.1 kg and whole pound."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Height",
+        "Weight at BMI 18.5",
+        "Weight at BMI 25 (upper boundary)",
+        "In pounds"
+      ],
+      "rows": [
+        [
+          "150 cm",
+          "41.6 kg",
+          "56.3 kg",
+          "92 to 124 lb"
+        ],
+        [
+          "160 cm",
+          "47.4 kg",
+          "64.0 kg",
+          "104 to 141 lb"
+        ],
+        [
+          "170 cm",
+          "53.5 kg",
+          "72.3 kg",
+          "118 to 159 lb"
+        ],
+        [
+          "180 cm",
+          "59.9 kg",
+          "81.0 kg",
+          "132 to 179 lb"
+        ],
+        [
+          "190 cm",
+          "66.8 kg",
+          "90.3 kg",
+          "147 to 199 lb"
         ]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When BMI Is Wrong for You"
+      "text": "How close are you to a boundary?"
     },
     {
       "type": "paragraph",
-      "text": "BMI has three major limitations. First, it cannot distinguish between muscle and fat. An athlete with 12% body fat can have the same BMI as someone with 30% body fat. Second, standard BMI cutoffs were developed using white European populations and do not apply equally to all ethnic groups — Asian populations have higher health risks at lower BMIs. Third, BMI does not account for age-related changes; older adults lose muscle mass, so a normal BMI can mask high body fat."
+      "text": "Small weight changes move BMI by small amounts, and that matters near a category line. A person 5 ft 5 in (65 in) weighing 150 lb has a BMI of 703 x 150 / 4,225 = 24.96, just inside the healthy range. At 153 lb the same person is at 25.46, in the overweight category, although nothing meaningful about their health changed in 3 pounds. The weight at BMI 25 for 65 in is 150.2 lb. Likewise, someone 1.75 m tall who weighs 82 kg has a BMI of 26.78; the weight at BMI 25 for that height is 76.56 kg, which is 5.44 kg lower. That gap describes where the boundary sits, not a goal you should set without advice."
+    },
+    {
+      "type": "paragraph",
+      "text": "One kilogram changes BMI by about 0.44 at 1.50 m, 0.39 at 1.60 m, 0.35 at 1.70 m, 0.31 at 1.80 m and 0.28 at 1.90 m. Shorter people move through BMI points faster per kilogram."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Better Metrics to Track"
+      "text": "Using BMI for children, teens and adults over 20"
+    },
+    {
+      "type": "paragraph",
+      "text": "For ages 2 to 19 the CDC uses BMI-for-age percentiles that depend on sex and age. Underweight is less than the 5th percentile, healthy weight is the 5th to less than the 85th, overweight is the 85th to less than the 95th, and obesity is the 95th percentile or greater. WHO defines overweight and obesity in ages 5 to 19 using standard deviations from a growth reference median. Our calculator is built on adult cutoffs and is not calibrated for children, so for anyone under 20 use a pediatric growth chart with a clinician."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Where BMI helps"
+    },
+    {
+      "type": "paragraph",
+      "text": "The CDC calls BMI a quick, safe and reliable screening measure of weight relative to height, and says it is useful for screening, for tracking health risks over time and as a population-level measure of obesity trends. It is a good first check and a convenient way to track your own trend with the same scale and method."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Where it falls short, in brief"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Body fat percentage: Directly measures how much of your weight is fat vs muscle. Our body fat calculator uses the Navy circumference method.",
-        "Waist-to-height ratio: Waist circumference divided by height. Keep it under 0.5. This is a better predictor of heart disease than BMI.",
-        "Waist-to-hip ratio: Waist divided by hip circumference. Above 0.85 for women and 0.9 for men indicates central obesity.",
-        "BMR and TDEE: Understand your metabolism to set realistic calorie targets for weight management."
+        "It does not distinguish fat, muscle and bone mass, and says nothing about where fat is stored (CDC).",
+        "A 2010 meta-analysis of 31,968 people found that common BMI cutoffs failed to identify about half of those with excess body fat percentage.",
+        "Some populations have higher risk at lower BMI values; the WHO 2004 consultation highlighted 23.0 and 27.5 as potential public health action points for Asian populations.",
+        "The WHO calls BMI a surrogate marker of fatness and notes that waist circumference can help the diagnosis of obesity."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Ethnicity-Specific BMI Cutoffs"
+      "text": "Common mistakes"
     },
     {
-      "type": "paragraph",
-      "text": "The World Health Organization recommends lower BMI cutoffs for Asian populations: overweight at 23 (instead of 25) and obese at 27.5 (instead of 30). This is because people of Asian descent tend to have higher body fat percentages at the same BMI and develop obesity-related health conditions at lower BMIs. Our BMI calculator includes an Asian-adjusted setting that uses these modified thresholds. Black populations may have slightly different risk profiles as well, though specific cutoff adjustments are less standardized."
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Entering height in centimetres into the metric formula. 70 / 175^2 gives 0.0023, which is nonsense. Convert 175 cm to 1.75 m first.",
+        "Forgetting the 703 factor in the imperial formula. 140 / 64^2 gives 0.034, not 24.03.",
+        "Mixing units, such as pounds with metres.",
+        "Rounding too early. Keep two decimals while calculating, then round at the end.",
+        "Reading 25.0 versus 24.9 as a big change. It is a convention, not a cliff."
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
+      "text": "What to do with your result"
+    },
+    {
+      "type": "paragraph",
+      "text": "The CDC says BMI is one potential health indicator and should be considered with other factors, and recommends discussing your result with a healthcare provider. Useful companions are waist measurement, blood pressure and blood tests, which a clinician can interpret in your context."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "This guide is educational and is not medical advice. BMI is a screening measure, not a diagnosis. If you are concerned about your weight, a recent change in weight, or a result from the calculator, talk to a qualified clinician."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently asked questions"
     },
     {
       "type": "heading",
       "level": 3,
-      "text": "What is a healthy BMI for my age?"
+      "text": "Is my BMI the same at any age?"
     },
     {
       "type": "paragraph",
-      "text": "For adults over 20, the same BMI categories apply regardless of age. However, research suggests that slightly higher BMIs (25-27) may be associated with better outcomes in older adults, a phenomenon called the obesity paradox. For children and teens, BMI is evaluated using age- and sex-specific percentile charts rather than fixed adult categories."
+      "text": "The CDC uses the same adult categories for everyone 20 and older. It does not provide separate age-based adult ranges, and we have not found a primary source that does, so we do not publish one."
     },
     {
       "type": "heading",
       "level": 3,
-      "text": "How accurate is BMI for muscular people?"
+      "text": "Can I use BMI if I lift weights?"
     },
     {
       "type": "paragraph",
-      "text": "Very inaccurate. Muscle is denser than fat, so muscular individuals often have BMIs in the overweight or obese range despite having very low body fat. LeBron James reportedly had a BMI over 27 at his peak. If you have above-average muscle mass, body fat percentage is a much more useful metric than BMI."
+      "text": "You can calculate it, but be careful reading it. Because BMI cannot separate muscle from fat, a body fat measurement and your waist size give you information BMI does not."
     },
     {
       "type": "heading",
       "level": 3,
-      "text": "Can two people with the same BMI have different health risks?"
+      "text": "Should I rely on the healthy weight range in the calculator?"
     },
     {
       "type": "paragraph",
-      "text": "Absolutely. A person with high muscle mass and low body fat can have the same BMI as someone with average muscle and excessive body fat. This is the single biggest criticism of BMI as an individual health metric. Always use BMI alongside other measurements like waist circumference, body fat percentage, and blood work for a complete health picture."
+      "text": "Treat it as a reference range for your height computed from BMI 18.5 and 25, not as a personal goal. Your clinician can tell you what is appropriate for you."
     },
     {
       "type": "cta",
       "heading": "Calculate Your BMI",
-      "body": "Free BMI calculator with visual gauge, Asian-adjusted cutoffs, and healthy weight range.",
+      "body": "Free adult BMI calculator with a WHO-category gauge and the healthy weight range for your height. It uses the standard 18.5, 25 and 30 cutoffs.",
       "buttonLabel": "Open Calculator",
       "path": "/health/bmi-calculator/"
     }

@@ -287,3 +287,11 @@ describe('social-security', () => {
     expect(ids).toContain('vs62');
   });
 });
+
+describe('social security wage base consistency', () => {
+  it('income help text quotes the 2026 wage base ($184,500), same as the self-employment calculator', () => {
+    const income = config.inputs.find((i) => i.id === 'annualIncome');
+    expect(income?.helpText).toContain('$184,500');
+    expect(income?.helpText).not.toContain('176,100');
+  });
+});

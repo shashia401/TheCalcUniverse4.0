@@ -166,23 +166,26 @@ const debtPayoffConfig: CalculatorConfig = {
 
       while (balances.some((b) => b > 0) && month < maxMonths) {
         month++;
+        // Extra pool = user's extra payment + minimums freed up by cards already paid off ("rollover")
         let extra = extraPayment;
         const paid: number[] = balances.map((b, i) => {
-          if (b <= 0) return 0;
-          const interest = new Decimal(b).mul(order[i].rate).div(100).div(12).toNumber();
-          totalInterest = totalInterest.plus(interest);
-          const newBalance = b + interest;
-          balances[i] = newBalance;
-          return order[i].min;
+          let minPaid = 0;
+          if (b > 0) {
+            const interest = new Decimal(b).mul(order[i].rate).div(100).div(12).toNumber();
+            totalInterest = totalInterest.plus(interest);
+            balances[i] = b + interest;
+            minPaid = Math.min(order[i].min, balances[i]);
+          }
+          extra += order[i].min - minPaid; // unused minimum (card already cleared) rolls into the pool
+          return minPaid;
         });
 
-        // Apply extra payment to the first card with a balance (in priority order)
-        for (let i = 0; i < balances.length; i++) {
+        // Apply the pool to cards in priority order; any leftover after a card is cleared flows to the next
+        for (let i = 0; i < balances.length && extra > 0; i++) {
           if (balances[i] <= 0) continue;
-          const pay = Math.min(extra, balances[i]);
+          const pay = Math.min(extra, balances[i] - paid[i]);
           extra -= pay;
           paid[i] += pay;
-          break;
         }
 
         for (let i = 0; i < balances.length; i++) {
@@ -301,8 +304,8 @@ const debtPayoffConfig: CalculatorConfig = {
       {
         scenario: 'Sarah has three credit cards: Chase Sapphire ($4,500 balance, 22.99% APR, $85/mo min), Citi Double Cash ($2,100 balance, 19.99% APR, $45/mo min), and Capital One Quicksilver ($850 balance, 28.99% APR, $25/mo min). She can afford $200 extra per month above minimums.',
         inputs: { extraPayment: '200', card1name: 'Chase Sapphire', card1balance: '4500', card1rate: '22.99', card1min: '85', card2name: 'Citi Double Cash', card2balance: '2100', card2rate: '19.99', card2min: '45', card3name: 'CapOne', card3balance: '850', card3rate: '28.99', card3min: '25' },
-        result: 'Avalanche method saves approximately $268 more in interest than Snowball ($2,349 vs $2,617). Snowball clears all three cards in 35 months; Avalanche in 33 months. Paying only the minimums would barely make a dent — on the Capital One card alone, the minimum payment is smaller than the interest that accrues each month, so the balance would never shrink.',
-        insight: 'Avalanche targets the 28.99% Capital One card first (highest rate) — saving Sarah about $268 more in interest than Snowball, which would pay off the smallest $850 balance first for a quick motivational win. Both strategies beat paying only minimums, which would actually leave her balances growing indefinitely on the highest-rate card.',
+        result: 'Avalanche saves about $92 in interest compared with Snowball ($2,027 vs $2,119). Both strategies clear all three cards in 27 months (2 years 3 months) because Sarah pays $355 a month in total ($155 in minimums plus $200 extra) and the minimum of each cleared card rolls into the next one. Paying only the minimums would never clear the Chase card: its $85 minimum is smaller than the $86.21 of interest that accrues each month, so that balance would never shrink.',
+        insight: 'The Capital One card is both the smallest balance and the highest rate, so both strategies attack it first; the strategies only diverge afterwards. Avalanche then goes after Chase (22.99%) before Citi (19.99%), while Snowball clears the smaller Citi balance first, which costs about $92 more interest. Because the total monthly payment stays at $355 as cards are paid off, the rolled-over minimums are what keep the payoff on a 27-month track instead of the much longer minimums-only path.',
       },
       {
         scenario: 'Mike only has two credit cards: $8,000 at 24% with $200 minimum, and $3,000 at 18% with $75 minimum. He can spare $150 extra each month.',

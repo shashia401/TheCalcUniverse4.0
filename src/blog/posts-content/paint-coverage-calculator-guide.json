@@ -136,7 +136,7 @@
       "items": [
         "Forgetting the ceiling. Walls only is the standard calculation. Ceiling area is length x width: 14 x 12 = 168 square feet, which is about 1.06 gallons for two coats or 0.53 gallons for one, using the same assumptions. Ceiling paint is usually a separate product.",
         "Skipping the waste allowance. Without the 10 percent, the bedroom needs 2.18 gallons instead of 2.39; a small shortfall in a tight estimate can leave you one wall short.",
-        "Treating the estimate as exact. Cut-in work, textured surfaces, deep color changes and dark-to-light jobs all increase use.",
+        "Treating the estimate as exact. Cut-in work, textured surfaces, deep color changes and dark-to-light jobs can all increase use.",
         "Mixing batches. Buy all the paint for a room at the same time and check the label so one wall does not come out a slightly different shade.",
         "Ignoring built-ins. Fireplaces, bookcases and large alcoves change the area and are not in the basic formula."
       ]
@@ -157,7 +157,7 @@
     {
       "type": "cta",
       "heading": "Painting a room this weekend?",
-      "body": "Use the Paint Coverage Calculator to get the exact gallons and quarts you need for any room. Enter your dimensions, doors, windows, and number of coats.",
+      "body": "Use the Paint Coverage Calculator to see the gallons you need for any room, with a 10 percent waste allowance. Enter your dimensions, doors, windows and number of coats.",
       "buttonLabel": "Calculate Paint Needed",
       "path": "/diy/paint-coverage-calculator/"
     }

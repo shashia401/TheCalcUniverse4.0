@@ -80,7 +80,7 @@ const socialSecurityConfig: CalculatorConfig = {
       min: 0,
       step: 1000,
       required: true,
-      helpText: 'Your gross W-2 or self-employment income. Social Security taxes apply up to $176,100 in 2025.',
+      helpText: 'Your gross W-2 or self-employment income. Social Security taxes apply up to $184,500 in 2026.',
     },
     {
       id: 'maritalStatus',

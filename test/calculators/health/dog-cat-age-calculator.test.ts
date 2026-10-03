@@ -309,3 +309,44 @@ describe('Dog & Cat Age Calculator', () => {
     expect(dogSizeInput.showWhen({ species: 'cat' })).toBe(false);
   });
 });
+
+describe('Dog & Cat Age: contiguous life stages and cat table', () => {
+  const stage = (species: string, dogSize: string, age: number) =>
+    getValue(config.calculate({ species, dogSize, petAgeYears: String(age) }), 'lifeStage');
+
+  it('never falls into a gap between stage bands (no half-year Geriatric for young pets)', () => {
+    for (const size of ['small', 'medium', 'large']) {
+      expect(stage('dog', size, 6.5)).not.toBe('Geriatric');
+      expect(stage('dog', size, 10.5)).not.toBe('Geriatric');
+      expect(stage('dog', size, 14.5)).toBe(size === 'large' ? 'Geriatric' : 'Senior');
+    }
+    expect(stage('cat', '', 6.5)).toBe('Adult');
+    expect(stage('cat', '', 10.5)).toBe('Mature');
+    expect(stage('cat', '', 14.5)).toBe('Senior');
+  });
+
+  it('matches FAQ thresholds: small 11/15, medium 8/15, large 7/12', () => {
+    expect(stage('dog', 'small', 10.5)).toBe('Mature');
+    expect(stage('dog', 'small', 11)).toBe('Senior');
+    expect(stage('dog', 'small', 15)).toBe('Geriatric');
+    expect(stage('dog', 'medium', 7.5)).toBe('Adult');
+    expect(stage('dog', 'medium', 8)).toBe('Senior');
+    expect(stage('dog', 'large', 6.5)).toBe('Mature');
+    expect(stage('dog', 'large', 7)).toBe('Senior');
+    expect(stage('dog', 'large', 11.5)).toBe('Senior');
+    expect(stage('dog', 'large', 12)).toBe('Geriatric');
+  });
+
+  it('cat table: age 1 = 15, age 2 = 24, age 7 = 44 human years', () => {
+    const cat = (a: number) => getValue(config.calculate({ species: 'cat', petAgeYears: String(a) }), 'catHumanAge');
+    expect(cat(1)).toBe('15 human years');
+    expect(cat(2)).toBe('24 human years');
+    expect(cat(7)).toBe('44 human years');
+  });
+
+  it('FAQ cites 104 Labradors / 320 humans, not 320 dogs', () => {
+    const faq = config.educational.faqs.map((f) => f.answer).join(' ');
+    expect(faq).toContain('104 Labrador retrievers');
+    expect(faq).not.toContain('from 320 dogs');
+  });
+});

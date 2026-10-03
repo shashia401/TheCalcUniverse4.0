@@ -45,7 +45,7 @@
     },
     {
       "type": "paragraph",
-      "text": "The method comes from Hodgdon and Beckett (1984, Naval Health Research Center). It uses circumferences in inches and height in inches. For men: body fat % = 86.010 x log10(abdomen - neck) - 70.041 x log10(height) + 36.76. For women: body fat % = 163.205 x log10(waist + hip - neck) - 97.684 x log10(height) - 78.387. The same equations are published in a body-density form for centimetre measurements, and the two forms give nearly identical answers. For example, a man with a 36 in abdomen, 16 in neck and 72 in height comes out at 18.6% from the inch equation and 18.5% from the centimetre density form."
+      "text": "The method comes from Hodgdon and Beckett (1984). It uses circumferences in inches and height in inches. For men: body fat % = 86.010 x log10(abdomen - neck) - 70.041 x log10(height) + 36.76. For women: body fat % = 163.205 x log10(waist + hip - neck) - 97.684 x log10(height) - 78.387. The equations expect inches, so a calculator that takes centimetres must divide by 2.54 first; feeding centimetres straight into the inch coefficients gives numbers that are far too high. For example, a man with a 36 in abdomen, 16 in neck and 72 in height comes out at 18.6%."
     },
     {
       "type": "heading",
@@ -79,7 +79,7 @@
       "items": [
         "It estimates body fat from the shape of your trunk. Circumferences cannot separate fat from muscle, or fat under the skin from fat around the organs.",
         "Large neck or trunk muscle, wide hips or bone structure, and bloating can all shift the result without any change in fat. The calculator's own documentation says the formula can overestimate in some lean or muscular people.",
-        "The equation was developed on a military population, so it may fit less well for older adults, adolescents and very muscular athletes.",
+        "The method is used for military fitness screening rather than being designed for every body type, so it may fit less well for older adults, adolescents and very muscular athletes.",
         "Other methods such as DXA scans, skinfold callipers and body-fat scales give different numbers for the same person. Compare like with like and stick to one method when tracking change."
       ]
     },

@@ -41,7 +41,7 @@
       "rows": [
         ["95 kg", "2,625 kcal", "500 kcal"],
         ["90 kg", "2,556 kcal", "431 kcal"],
-        ["85 kg", "2,487 kcal", "363 kcal"]
+        ["85 kg", "2,487 kcal", "362 kcal"]
       ]
     },
     {
@@ -55,7 +55,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Take a 30-year-old woman, 165 cm, 65 kg, moderately active (factor 1.55). Her BMR is 1,370 kcal and her TDEE is 2,124 kcal. She eats about 2,000 kcal a day and says she is stuck. Her deficit is only 124 kcal a day, which projects to 0.11 kg per week, or about 62 days per kilogram of fat. Day-to-day scale changes from water, food in the gut and hormones are larger than that, so a real but tiny trend is invisible. For a 500 kcal deficit she would need a target of about 1,624 kcal a day, which the calculator would show as roughly 0.45 kg a week."
+      "text": "Take a 30-year-old woman, 165 cm, 65 kg, moderately active (factor 1.55). Her BMR is 1,370 kcal and her TDEE is 2,124 kcal. She eats about 2,000 kcal a day and says she is stuck. Her deficit is only 124 kcal a day, which projects to 0.11 kg per week, or about 62 days per kilogram of fat. Day-to-day scale changes from water and food in the gut can easily be larger than that, so a real but tiny trend is hidden. For a 500 kcal deficit she would need a target of about 1,624 kcal a day, which the calculator would show as roughly 0.45 kg a week."
     },
     {
       "type": "heading",
@@ -68,7 +68,7 @@
         "The activity factor is too generous. For the man above, choosing 1.55 instead of 1.375 adds 334 kcal to his estimated TDEE, which erases most of a 500 kcal deficit.",
         "Intake is not what you think. Portions, oils, drinks and weekend meals are the usual gaps. Weighing food for a couple of weeks is the usual way to find out.",
         "Exercise calories are overcounted. Treat machine and watch estimates as rough and avoid eating them all back.",
-        "Not enough time. A weekly change of 0.2 to 0.5 kg is smaller than normal day-to-day fluctuation, so compare weekly averages over three to four weeks.",
+        "Not enough time. A weekly change of 0.2 to 0.5 kg can be hidden by day-to-day fluctuation from water and food in the gut, so compare weekly averages over three to four weeks.",
         "The deficit is real but the equation is wrong for you. BMR estimates can be off by around 10 percent, which for a 2,000 kcal intake is a couple of hundred calories."
       ]
     },

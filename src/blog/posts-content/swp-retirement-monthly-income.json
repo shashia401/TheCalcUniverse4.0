@@ -2,7 +2,7 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "To use an SWP as a monthly pension, start from your expenses, not from your corpus: subtract the income you will receive from other sources, and the gap is the amount the SWP must pay, adjusted every year for rising costs. Then test whether your corpus can fund that rising gap for the number of years you need. This post walks through that build with one household and one set of stated assumptions. The assumptions are illustrations, not forecasts, and past performance does not guarantee future results."
+      "text": "To use an SWP as a monthly pension, start from your expenses, not from your corpus: subtract the income you will receive from other sources, and the gap is the amount the SWP must pay, raised every year as costs rise. Then test whether your corpus can fund that rising gap for the number of years you need. This post walks through that build with one household and one set of stated assumptions. The assumptions are illustrations, not forecasts, and past performance does not guarantee future results."
     },
     {
       "type": "heading",
@@ -20,51 +20,137 @@
     },
     {
       "type": "paragraph",
-      "text": "A flat Rs. 45,000 loses value every year. The calculator on this site holds the withdrawal fixed, so to see the effect of rising costs I ran the same month-by-month logic (grow by the annual rate divided by 12, then withdraw) and increased the withdrawal once a year. As a cross-check, with zero increases my run gives the same Rs. 6,68,48,767 closing balance as the calculator for Rs. 1.5 crore, 7% and Rs. 45,000 for 30 years. The table assumes a 7% return and a 30-year plan."
+      "text": "A flat Rs. 45,000 loses value every year. The calculator on this site holds the withdrawal fixed, so to see the effect of rising costs this post uses the calculator's own month-by-month rule and raises the withdrawal once a year. The convention: each month the balance grows by the annual return divided by 12, then the withdrawal is taken out. Months 1 to 12 pay Rs. 45,000; from month 13 the amount steps up by the stated percentage, so the monthly withdrawal in year 30 is 45,000 times (1 plus the increase) to the power 29. With zero increases the run reproduces the fixed-withdrawal result, Rs. 6,68,48,767 after 30 years for Rs. 1.5 crore at 7% and Rs. 45,000 a month. Figures are rounded to the nearest rupee, and the 7% return is an assumption applied smoothly every month."
     },
     {
       "type": "table",
       "headers": [
         "Yearly increase in withdrawal",
-        "Withdrawal in year 30",
+        "Withdrawal per month in year 30",
         "Balance after 30 years",
-        "Does the corpus last?"
+        "How long the corpus lasts"
       ],
       "rows": [
         [
           "0% (fixed Rs. 45,000)",
           "Rs. 45,000",
           "Rs. 6,68,48,767",
-          "Yes"
+          "Does not run out (still positive after 100 years)"
         ],
         [
           "4%",
           "Rs. 1,40,339",
           "Rs. 3,75,86,514",
-          "Yes"
+          "66.4 years"
         ],
         [
           "5%",
           "Rs. 1,85,226",
           "Rs. 2,68,13,053",
-          "Yes"
+          "43.6 years"
         ],
         [
           "6%",
           "Rs. 2,43,827",
           "Rs. 1,40,71,544",
-          "Lasts 30 years, but runs out after 34.8 years"
+          "34.8 years"
         ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "At a 6% yearly increase the corpus just survives the 30-year mark, but the balance has fallen to Rs. 1,40,71,544 by year 30, and it runs out after 34.8 years. The point is not that 6% is the right inflation figure. It is that a one-percentage-point change in an assumption you cannot know moves the outcome from comfortable to marginal. Use a range, and re-run the plan with actual inflation as the years pass."
+      "text": "Moving the yearly increase from 5% to 6% cuts the year-30 balance from Rs. 2,68,13,053 to Rs. 1,40,71,544 and the lifetime of the corpus from 43.6 to 34.8 years. All four cases last 30 years, but the 6% case is paying Rs. 2,43,827 a month by then, so the remaining balance covers only about five more years. The point is not that 6% is the right inflation figure. It is that a one-percentage-point change in an assumption you cannot know changes the outcome a lot. Use a range, and re-run the plan with actual cost increases as the years pass."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Step 3: check how big the corpus needs to be"
+      "text": "Step 3: watch the rate you are really drawing"
+    },
+    {
+      "type": "paragraph",
+      "text": "The 3.6% in Step 1 is only the first-year rate. Because the withdrawal rises faster than the balance, the share of the balance you draw each year climbs. The table follows the 5% case at 7% (the same row as above), measuring the withdrawal for the year against the balance at the start of that year."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Start of year",
+        "Balance at start of year",
+        "Monthly withdrawal that year",
+        "Yearly withdrawal as share of that balance"
+      ],
+      "rows": [
+        [
+          "1",
+          "Rs. 1,50,00,000",
+          "Rs. 45,000",
+          "3.60%"
+        ],
+        [
+          "10",
+          "Rs. 2,00,35,435",
+          "Rs. 69,810",
+          "4.18%"
+        ],
+        [
+          "20",
+          "Rs. 2,54,86,105",
+          "Rs. 1,13,713",
+          "5.35%"
+        ],
+        [
+          "30",
+          "Rs. 2,71,46,091",
+          "Rs. 1,85,226",
+          "8.19%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "So even in a plan where the balance keeps growing for decades, the draw in year 30 is more than twice the year-1 rate. Review the plan yearly against this number, not against the original 3.6%."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 4: check whether your other income rises too"
+    },
+    {
+      "type": "paragraph",
+      "text": "The earlier tables assumed the gap itself rises 5% a year, which is true only if the pension rises with expenses. If the Rs. 15,000 pension stays fixed while expenses rise 5% a year, the gap is still Rs. 45,000 in year 1 but grows faster: it reaches Rs. 2,31,968 a month in year 30 (60,000 times 1.05 to the power 29, minus 15,000), against Rs. 1,85,226 when the pension is indexed. The corpus of Rs. 1.5 crore then lasts:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Assumed return",
+        "Pension rises 5% a year",
+        "Pension stays fixed"
+      ],
+      "rows": [
+        [
+          "6%",
+          "34.3 years",
+          "29.2 years"
+        ],
+        [
+          "7%",
+          "43.6 years",
+          "35.0 years"
+        ],
+        [
+          "8%",
+          "69.5 years",
+          "46.1 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "At 6% the fixed-pension household falls just short of a 30-year plan. Whether your pension is indexed is a fact you can look up, so check it before you rely on the more favourable column."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 5: check how big the corpus needs to be"
     },
     {
       "type": "paragraph",
@@ -97,16 +183,16 @@
     },
     {
       "type": "paragraph",
-      "text": "These are the break-even amounts, with nothing left at year 30, so they leave no margin. The household's Rs. 1.5 crore clears all three with room to spare in this smooth model. If returns arrive in a bad order, or the plan has to last beyond 30 years, the margin is what protects you."
+      "text": "These are break-even amounts, with nothing left at year 30, so they leave no margin. The household's Rs. 1.5 crore clears all three in this smooth model, but at 6% the cushion is only about Rs. 15.8 lakh. If returns arrive in a bad order, or the plan has to last beyond 30 years, the margin is what protects you."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Step 4: decide where the money sits"
+      "text": "Step 6: decide where the money sits"
     },
     {
       "type": "paragraph",
-      "text": "A pension-like SWP is only as steady as the fund it draws from. The more of the corpus sits in assets that can fall sharply, the more the monthly cheque is exposed to market swings, and the more units you must sell in a bad year to pay the same rupee amount. A common approach is to split the corpus: a portion in lower-risk holdings to cover the next few years of withdrawals, and the rest in growth assets for the long term. This blog cannot tell you what mix suits you, and I have not named any fund, because that depends on your age, health, other income and temperament. Compare funds on cost, the risk the fund document describes, and the scheme's own rules for withdrawals, not on last year's return."
+      "text": "A pension-like SWP is only as steady as the fund it draws from. The more of the corpus sits in assets that can fall sharply, the more the monthly cheque is exposed to market swings, and the more units you must sell in a bad year to pay the same rupee amount. A common approach is to split the corpus: a portion in lower-risk holdings to cover the next few years of withdrawals, and the rest in growth assets for the long term. This post cannot tell you what mix suits you and names no fund, because that depends on your age, health, other income and temperament. Compare funds on cost, the risk the fund document describes, and the scheme's own rules for withdrawals, not on last year's return."
     },
     {
       "type": "heading",
@@ -119,7 +205,8 @@
       "items": [
         "Setting the amount before checking the gap. Many people pick a round monthly figure that feels right and never test it against their actual expenses.",
         "Starting at the maximum the calculator allows. If your plan only works at the optimistic return, it has no margin.",
-        "Forgetting that a pension may not rise with inflation. Check whether your other income is fixed or indexed.",
+        "Assuming a pension rises with inflation. Check whether your other income is fixed or indexed, as Step 4 shows.",
+        "Judging the plan by the first-year rate. As Step 3 shows, the share of the balance you draw can more than double over the years.",
         "Ignoring tax. Rules on how redemption gains are taxed change, and they are not in the calculator, so look up the current rules or ask a registered adviser.",
         "Never reviewing. Compare the balance with the plan every year and adjust the withdrawal, rather than waiting for the shortfall to be obvious."
       ]
@@ -127,7 +214,7 @@
     {
       "type": "callout",
       "variant": "warning",
-      "text": "This post is general education, not personal financial advice. For decisions about a retirement corpus, speak to a SEBI-registered investment adviser who can see your whole situation."
+      "text": "This post is general education, not personal financial advice. All returns and cost increases above are assumptions, not forecasts. For decisions about a retirement corpus, speak to a SEBI-registered investment adviser who can see your whole situation."
     },
     {
       "type": "cta",

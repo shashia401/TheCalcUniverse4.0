@@ -2,6 +2,40 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import AgeCalculatorPanel from './AgeCalculatorPanel';
 
+const daysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate();
+const utcDay = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+
+// Calendar-borrow age breakdown. When the birth day is later than the length of
+// the previous month (e.g. 31 Jan -> 1 Mar) the borrowed days still leave a
+// negative day count; in that case anchor on the birthday clamped to month-end
+// (31 Jan -> 29 Feb) and count the real days from there. Total days use UTC
+// day numbers so a DST change can't drop a day.
+function ageBreakdown(birth: Date, to: Date) {
+  let years = to.getFullYear() - birth.getFullYear();
+  let months = to.getMonth() - birth.getMonth();
+  let days = to.getDate() - birth.getDate();
+  const rawYears = years;
+  const borrowDays = days < 0;
+  if (days < 0) {
+    months -= 1;
+    days += new Date(to.getFullYear(), to.getMonth(), 0).getDate();
+  }
+  const borrowMonths = months < 0;
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+  if (days < 0) {
+    const anchorIdx = birth.getFullYear() * 12 + birth.getMonth() + years * 12 + months;
+    const ay = Math.floor(anchorIdx / 12);
+    const am = anchorIdx % 12;
+    const anchor = new Date(ay, am, Math.min(birth.getDate(), daysInMonth(ay, am)));
+    days = Math.round((utcDay(to) - utcDay(anchor)) / 86400000);
+  }
+  const totalDays = Math.round((utcDay(to) - utcDay(birth)) / 86400000);
+  return { years, months, days, rawYears, borrowDays, borrowMonths, totalDays };
+}
+
 const ageCalculatorConfig: CalculatorConfig = {
   inputs: [
     {
@@ -36,23 +70,7 @@ const ageCalculatorConfig: CalculatorConfig = {
 
     if (birth > to) return [];
 
-    let years = to.getFullYear() - birth.getFullYear();
-    let months = to.getMonth() - birth.getMonth();
-    let days = to.getDate() - birth.getDate();
-    const rawYears = years;
-    const borrowDays = days < 0;
-    if (days < 0) {
-      months -= 1;
-      const prevMonth = new Date(to.getFullYear(), to.getMonth(), 0);
-      days += prevMonth.getDate();
-    }
-    const borrowMonths = months < 0;
-    if (months < 0) {
-      years -= 1;
-      months += 12;
-    }
-
-    const totalDays = Math.floor((to.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24));
+    const { years, months, days, rawYears, borrowDays, borrowMonths, totalDays } = ageBreakdown(birth, to);
     const toLabel = hasToDate ? toStr : 'today';
 
     const steps: { label: string; expr: string; note?: string }[] = [
@@ -103,21 +121,7 @@ const ageCalculatorConfig: CalculatorConfig = {
 
     if (birth > to) return [];
 
-    let years = to.getFullYear() - birth.getFullYear();
-    let months = to.getMonth() - birth.getMonth();
-    let days = to.getDate() - birth.getDate();
-
-    if (days < 0) {
-      months -= 1;
-      const prevMonth = new Date(to.getFullYear(), to.getMonth(), 0);
-      days += prevMonth.getDate();
-    }
-    if (months < 0) {
-      years -= 1;
-      months += 12;
-    }
-
-    const totalDays = Math.floor((to.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24));
+    const { years, months, days, totalDays } = ageBreakdown(birth, to);
     const totalWeeks = Math.floor(totalDays / 7);
     const totalMonths = years * 12 + months;
     const totalHours = totalDays * 24;
@@ -353,7 +357,7 @@ const ageCalculatorConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'How is the exact age in years, months, and days calculated?',
-        answer: 'The calculator compares your birth date and reference date component by component. First, subtract the years. Then subtract the months. If the reference day is smaller than the birth day, borrow 1 month and add the number of days in the previous month. If the reference month is smaller than the birth month (after any day borrowing), borrow 1 year and add 12 months. This produces an exact "X years, Y months, Z days" breakdown. For example: born January 31, reference March 1. Years: 0. Months: March (3) minus January (1) = 2. Days: 1 minus 31 = -30. Borrow 1 month (months becomes 1, add 28 days from February): days = 1 + 28 - 31 = -2. Still negative! Borrow 1 more month: months becomes 0, add 31 days from January: days = 1 + 31 - 31 = 1. Final: 0 years, 0 months, 1 day. This is correct — January 31 to March 1 is indeed 1 month and minus 2 days, which normalizes to 1 day when months are zero.',
+        answer: 'The calculator compares your birth date and reference date component by component. First, subtract the years. Then subtract the months. If the reference day is smaller than the birth day, borrow 1 month and add the number of days in the previous month. If the reference month is smaller than the birth month (after any day borrowing), borrow 1 year and add 12 months. This produces an exact "X years, Y months, Z days" breakdown. When the birth day is later than the length of the previous month, borrowing still leaves a negative day count, so the birthday is clamped to the last day of that month and the real days are counted from there. For example: born January 31, 1990, reference March 1, 2024. Borrowing gives 34 years, 1 month and -1 days, which is invalid. The birthday is clamped to February 29, 2024 (the last day of February), and March 1 is 1 day later: 34 years, 1 month, 1 day.',
       },
       {
         question: 'What happens if I was born on February 29 in a leap year?',

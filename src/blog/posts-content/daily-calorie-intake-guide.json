@@ -72,7 +72,7 @@
       "items": [
         "Eat roughly your estimated maintenance for two weeks while weighing yourself at a consistent time.",
         "Compare the average weight of week one with week two. If it is stable, your estimate is close.",
-        "If it moves, convert it back: a drift of 0.25 kg a week is roughly 250 kcal a day by the 7,700 kcal per kg rule. Adjust your target by about that amount and repeat.",
+        "If it moves, convert it back: a drift of 0.25 kg a week is roughly 275 kcal a day by the 7,700 kcal per kg rule (0.25 x 7,700 / 7). Adjust your target by about that amount and repeat.",
         "Recalculate after any large change in weight or activity."
       ]
     },

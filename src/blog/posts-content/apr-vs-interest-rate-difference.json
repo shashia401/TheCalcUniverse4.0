@@ -2,7 +2,7 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "The interest rate is the yearly price of borrowing the outstanding balance. The APR (annual percentage rate) is a broader yearly figure that also counts certain upfront lender charges, so for the same loan it is usually higher than the interest rate. The US Consumer Financial Protection Bureau describes the APR as including points, mortgage broker fees and other charges you pay to get the loan, and recommends comparing APRs across offers while not relying on the APR alone. Below, one 30-year loan is worked through to the decimal so you can see exactly where the gap comes from."
+      "text": "The interest rate is the yearly price of borrowing the outstanding balance. The APR (annual percentage rate) is a broader yearly figure that also counts certain upfront lender charges, so for the same loan it is usually higher than the interest rate. The US Consumer Financial Protection Bureau describes the APR as including points, mortgage broker fees and other charges you pay to get the loan, and cautions against looking at the APR alone when deciding which loan makes sense. Below, one 30-year loan is worked through to the decimal so you can see exactly where the gap comes from."
     },
     {
       "type": "heading",
@@ -47,15 +47,15 @@
           "1",
           "0.51554%",
           "6.1865%",
-          "$294,092.45",
-          "$92.45 too high"
+          "$294,091.93",
+          "$91.93 too high"
         ],
         [
           "2",
           "0.51579%",
           "6.1895%",
-          "$294,000.02",
-          "$0.02 too high"
+          "$294,000.01",
+          "$0.01 too high"
         ],
         [
           "3",
@@ -143,7 +143,7 @@
       "items": [
         "Short holding periods: shown above, the APR spreads fees over the whole term.",
         "Adjustable-rate loans: the CFPB notes the APR does not show the maximum possible rate, and warns against comparing fixed-rate and adjustable-rate loans on APR alone.",
-        "Which charges count is set by rules: this calculator and this article treat whatever fee total you type in as a financing charge. Items such as property taxes and insurance escrow are not part of the APR, so ask the lender which fees their disclosed APR includes.",
+        "Which charges count is set by rules: this calculator and this article treat whatever fee total you type in as a financing charge, so ask the lender which fees their disclosed APR includes.",
         "Disclosed figures may differ slightly: for regular transactions Regulation Z treats a disclosed APR as accurate if it is within one-eighth of a percentage point of the actual figure."
       ]
     },

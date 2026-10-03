@@ -15,16 +15,61 @@
     },
     {
       "type": "table",
-      "headers": ["Dog age (years)", "Multiply by 7", "Stepwise (15, 9, then 4)", "Epigenetic: 16 ln(age) + 31"],
+      "headers": [
+        "Dog age (years)",
+        "Multiply by 7",
+        "Stepwise (15, 9, then 4)",
+        "Epigenetic: 16 ln(age) + 31"
+      ],
       "rows": [
-        ["1", "7", "15", "31.0"],
-        ["2", "14", "24", "42.1"],
-        ["3", "21", "28", "48.6"],
-        ["5", "35", "36", "56.8"],
-        ["7", "49", "44", "62.1"],
-        ["10", "70", "56", "67.8"],
-        ["12", "84", "64", "70.8"],
-        ["15", "105", "76", "74.3"]
+        [
+          "1",
+          "7",
+          "15",
+          "31.0"
+        ],
+        [
+          "2",
+          "14",
+          "24",
+          "42.1"
+        ],
+        [
+          "3",
+          "21",
+          "28",
+          "48.6"
+        ],
+        [
+          "5",
+          "35",
+          "36",
+          "56.8"
+        ],
+        [
+          "7",
+          "49",
+          "44",
+          "62.1"
+        ],
+        [
+          "10",
+          "70",
+          "56",
+          "67.8"
+        ],
+        [
+          "12",
+          "84",
+          "64",
+          "70.8"
+        ],
+        [
+          "15",
+          "105",
+          "76",
+          "74.3"
+        ]
       ]
     },
     {
@@ -34,11 +79,11 @@
     },
     {
       "type": "paragraph",
-      "text": "The formula comes from a 2020 paper in the journal Cell Systems by Wang and colleagues in Trey Ideker's group at the University of California San Diego. The researchers looked at DNA methylation, chemical tags on DNA whose pattern shifts as an animal ages, in about 100 dogs that were almost all Labrador retrievers (published summaries give 104 or 105 dogs). They aligned the dog patterns with human methylation data and fitted a single curve. The result is a logarithm, which means aging runs fast early and slows later."
+      "text": "The formula comes from a 2020 paper in the journal Cell Systems, led by Trey Ideker's laboratory at the University of California San Diego with collaborators that include researchers at the US National Human Genome Research Institute. The team measured DNA methylation, chemical tags on DNA whose pattern shifts as an animal ages, in 104 dogs aged from 4 weeks to 16 years, mostly Labrador retrievers (a University of California summary says 105 Labradors). They compared the dog patterns with previously published methylation data from 320 people aged 1 to 103 and fitted a single curve. The result is a logarithm, which means aging runs fast early and slows later."
     },
     {
       "type": "paragraph",
-      "text": "The university's own announcement flags a limitation: the clock was built on a single breed, and some breeds are known to live longer than others. Treat the output as an estimate of molecular age for a typical Labrador-like dog, not a measurement of your particular dog."
+      "text": "The University of California's own summary states the limitation plainly: the clock was developed using a single breed, and some dog breeds are known to live longer than others. The researchers expected it to hold more widely, but that was a prediction, not something this study tested. Treat the output as an estimate of molecular age for a typical Labrador-like dog, not a measurement of your particular dog."
     },
     {
       "type": "heading",
@@ -56,7 +101,7 @@
     },
     {
       "type": "paragraph",
-      "text": "A rescue dog is estimated to be 6 years old. Multiplying by 7 gives 42. The stepwise rule gives 15 + 9 + 4 x 4 = 40. The epigenetic formula gives 16 x ln(6) + 31 = 16 x 1.792 + 31 = 59.7. The first two are within two years of each other, and the formula is roughly 18 to 20 years higher. None of them is wrong arithmetic. They answer different questions: the stepwise rule tracks developmental milestones, while the formula tracks molecular aging against humans."
+      "text": "A rescue dog is estimated to be 6 years old. Multiplying by 7 gives 42. The stepwise rule gives 15 + 9 + 4 x 4 = 40. The epigenetic formula gives 16 x ln(6) + 31 = 16 x 1.792 + 31 = 59.7. The first two are within two years of each other, and the formula is roughly 18 to 20 years higher. None of them is wrong arithmetic. They answer different questions: the stepwise rule is a simple convention, while the formula is a fit to methylation data from a small, mostly one-breed sample compared against human data."
     },
     {
       "type": "paragraph",

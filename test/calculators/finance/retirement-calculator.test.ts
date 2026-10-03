@@ -150,3 +150,37 @@ describe('retirement', () => {
     near(parseNumber(getValue(r, 'growthMultiple')), 1);
   });
 });
+
+describe('retirement educational numbers match the calculator', () => {
+  const base = { retirementAge: '65', currentSavings: '0', annualReturn: '7', inflationRate: '3' };
+  const fvOf = (currentAge: string, monthlyContribution: string) =>
+    getValue(config.calculate({ ...base, currentAge, monthlyContribution }), 'futureValue');
+
+  it('$400/mo from 25 = $1.05M, $500/mo from 25 = $1.31M, $500/mo from 35 = $609,985 (all 7%, from $0)', () => {
+    expect(fvOf('25', '400')).toBe('$1.05M');
+    expect(fvOf('25', '500')).toBe('$1.31M');
+    expect(fvOf('35', '500')).toBe('$609,985');
+  });
+
+  it('a 10-year delay cuts the balance by more than half (609,985 / 1,312,407 = 46.5%)', () => {
+    const ratio = parseMoney(fvOf('35', '500')) / (parseFloat(fvOf('25', '500').replace(/[^0-9.]/g, '')) * 1_000_000);
+    expect(ratio).toBeGreaterThan(0.45);
+    expect(ratio).toBeLessThan(0.5);
+  });
+
+  it('educational text quotes those figures', () => {
+    const edu = config.educational;
+    const tips = edu.proTips!.join(' ');
+    expect(tips).toContain('$1.05M');
+    expect(tips).toContain('$861/month');
+    const ref = edu.quickReference!.map((q) => `${q.label} ${q.value}`).join(' ');
+    expect(ref).toContain('$1.31M');
+    expect(ref).toContain('$610K');
+    expect(ref).not.toContain('HALVES');
+  });
+
+  it('Anna worked example: starting at 35 instead of 30 gives about $1,016,000', () => {
+    const r = config.calculate({ currentAge: '35', retirementAge: '65', currentSavings: '50000', monthlyContribution: '500', annualReturn: '7', inflationRate: '3' });
+    expect(getValue(r, 'futureValue')).toBe('$1.02M');
+  });
+});

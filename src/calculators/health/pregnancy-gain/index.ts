@@ -155,8 +155,10 @@ const pregnancyGainConfig: CalculatorConfig = {
         if (gainLbs > iom.t1Max) return 'above';
         return 'within';
       }
-      if (gainLbs < (iom.totalMin * 0.5)) return 'below';
-      if (gainLbs > iom.totalMax) return 'above';
+      // After week 13: first-trimester gain plus the IOM weekly rate for each week since (capped at week 40)
+      const weeksSinceT1 = Math.min(currentWeek, 40) - 13;
+      if (gainLbs < iom.t1Min + weeksSinceT1 * iom.weeklyMin) return 'below';
+      if (gainLbs > iom.t1Max + weeksSinceT1 * iom.weeklyMax) return 'above';
       return 'within';
     };
 
@@ -178,7 +180,7 @@ const pregnancyGainConfig: CalculatorConfig = {
       {
         id: 'totalRange',
         label: 'IOM Recommended Total Gain',
-        value: unit === 'imperial' ? `${iom.totalMin}–${iom.totalMax} lbs` : `${fmtKg(iom.totalMin)}–${fmtKg(iom.totalMax)}`,
+        value: unit === 'imperial' ? `${iom.totalMin}–${iom.totalMax} lbs` : `${fmtKg(iom.totalMin * 0.45359237)}–${fmtKg(iom.totalMax * 0.45359237)}`,
         color: 'positive',
       },
       {
@@ -272,14 +274,14 @@ const pregnancyGainConfig: CalculatorConfig = {
       {
         scenario: 'A woman with a pre-pregnancy weight of 140 lbs at 5\'5" (BMI 23.3, Normal category) is at week 20 of pregnancy. Her current weight is 155 lbs. She wants to know if her 15 lb gain is on track and what her total gain should be.',
         inputs: { unit: 'imperial', prepregnancyWeight: '140', currentWeight: '155', heightFt: '5', heightIn: '5', currentWeek: '20' },
-        result: 'BMI: 23.3 (Normal category). IOM Recommended Total Gain: 25–35 lbs. Weight Gained So Far: 15.0 lbs at Week 20. Gain Status: Within Recommended Range. Weekly Gain Target (2nd/3rd Tri): 0.8–1.0 lbs/week. Projected Total Gain: ~30 lbs.',
-        insight: 'At 20 weeks (halfway through pregnancy) with 15 lbs gained, this woman is tracking comfortably within the IOM normal-BMI range. By week 20, total gain should be roughly 10–15 lbs (including 1–4.4 lbs from first trimester plus 10–13 weeks of second-trimester gain at ~0.8–1 lb/week). Her 15 lbs at the midpoint suggests she is on the higher side of normal but still within range. If she continues gaining at her current overall rate through delivery, her projected total gain of ~30 lbs lands squarely within the 25–35 lb recommendation. She should continue monitoring weekly but no intervention is needed.',
+        result: 'BMI: 23.3 (Normal category). IOM Recommended Total Gain: 25–35 lbs. Weight Gained So Far: 15.0 lbs at Week 20. Gain Status: Above Recommended Range (expected by week 20: about 6.6–11.4 lbs). Weekly Gain Target (2nd/3rd Tri): 0.8–1.0 lbs/week. Projected Total Gain: ~30 lbs.',
+        insight: 'The IOM pace for a normal-BMI pregnancy is 1–4.4 lbs by week 13 plus 0.8–1.0 lb per week after that, which puts the expected gain at week 20 at roughly 6.6–11.4 lbs. Her 15 lbs is ahead of that pace, so the calculator flags it as above range even though a straight-line projection to week 40 (~30 lbs) would still land inside the 25–35 lb total range. The projection assumes she keeps gaining at her average rate so far; if she instead slows to the 0.8–1.0 lb/week target for the remaining 20 weeks she would finish near 31–35 lbs, still inside the total range. This is worth mentioning to her provider, who can check whether the gain reflects fluid, appetite or measurement timing, but it is not an emergency.',
       },
       {
         scenario: 'A woman who was underweight before pregnancy (pre-pregnancy BMI 18.0, 105 lbs at 5\'4") is at week 30. She has gained 22 lbs so far. She eats well but worries the gain is not enough.',
         inputs: { unit: 'imperial', prepregnancyWeight: '105', currentWeight: '127', heightFt: '5', heightIn: '4', currentWeek: '30' },
-        result: 'BMI: 18.0 (Underweight category). IOM Recommended Total Gain: 28–40 lbs. Weight Gained So Far: 22.0 lbs at Week 30. Gain Status: Below Recommended Range. Weekly Gain Target (2nd/3rd Tri): 1.0–1.3 lbs/week. Projected Total Gain: ~29 lbs.',
-        insight: 'For the underweight category, the IOM recommends a higher total gain of 28–40 lbs to support optimal fetal growth. At week 30 with 22 lbs gained, she is tracking below the recommended range — she should have gained approximately 25–32 lbs by now given the higher weekly rate target (1.0–1.3 lbs/week for underweight women in the 2nd/3rd trimester). With 10 weeks remaining, she would need to gain about 1.5 lbs/week to reach the lower end of the target range (28 lbs). She should discuss this with her provider, focusing on calorie-dense nutritious additions: nut butters, avocados, full-fat dairy, olive oil on vegetables, and possibly a protein supplement. This is not alarm-level but warrants attention — inadequate gain in underweight women is associated with higher preterm birth and small-for-gestational-age risks.',
+        result: 'BMI: 18.0 (Underweight category). IOM Recommended Total Gain: 28–40 lbs. Weight Gained So Far: 22.0 lbs at Week 30. Gain Status: Within Recommended Range (expected by week 30: about 18–26.5 lbs). Weekly Gain Target (2nd/3rd Tri): 1.0–1.3 lbs/week. Projected Total Gain: ~29 lbs.',
+        insight: 'For the underweight category, the IOM recommends a higher total gain of 28–40 lbs to support optimal fetal growth. At week 30 the expected gain is 1–4.4 lbs for the first trimester plus 17 weeks at 1.0–1.3 lbs/week, or about 18–26.5 lbs in total, so her 22 lbs is within range and her projected total of ~29 lbs sits just inside the 28–40 lb target. She is on track but near the lower end of the total range, so she should keep gaining roughly 1.0–1.3 lbs/week for the remaining 10 weeks (about 10–13 lbs more) and discuss calorie-dense nutritious additions with her provider: nut butters, avocados, full-fat dairy, olive oil on vegetables, and possibly a protein supplement. Inadequate gain in underweight women is associated with higher preterm birth and small-for-gestational-age risks, so it is worth keeping an eye on.',
       },
       {
         scenario: 'A woman with pre-pregnancy obesity (BMI 34.5, 220 lbs at 5\'7") is at week 16 of pregnancy. She gained 3 lbs in the first trimester (within normal limits) and wants to understand her targets for the full pregnancy.',

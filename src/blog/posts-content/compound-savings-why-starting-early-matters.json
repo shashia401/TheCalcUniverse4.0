@@ -11,7 +11,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Assumptions for every number below: a deposit of $300 at the end of each month until age 65, a 7% annual return credited monthly (7% divided by 12 each month, the same convention as the Savings Calculator), no taxes, no fees and no inflation adjustment. A 7% return is an illustration, not a promise. Past performance does not guarantee future results, and a plain savings account will pay much less."
+      "text": "Assumptions for every number below: a deposit of $300 at the end of each month until age 65, a 7% annual return credited monthly (7% divided by 12 each month, the same convention as the Savings Calculator), no taxes, no fees and no inflation adjustment. A 7% return is an illustration, not a promise. Past performance does not guarantee future results, and the rate on a savings account can be lower or higher than 7% and changes over time."
     },
     {
       "type": "table",
@@ -22,12 +22,42 @@
         "Monthly deposit needed to match the age-25 start"
       ],
       "rows": [
-        ["25", "$144,000", "$787,444", "$300"],
-        ["30", "$126,000", "$540,316", "$437"],
-        ["35", "$108,000", "$365,991", "$645"],
-        ["40", "$90,000", "$243,022", "$972"],
-        ["45", "$72,000", "$156,278", "$1,512"],
-        ["50", "$54,000", "$95,089", "$2,484"]
+        [
+          "25",
+          "$144,000",
+          "$787,444",
+          "$300"
+        ],
+        [
+          "30",
+          "$126,000",
+          "$540,316",
+          "$437"
+        ],
+        [
+          "35",
+          "$108,000",
+          "$365,991",
+          "$645"
+        ],
+        [
+          "40",
+          "$90,000",
+          "$243,022",
+          "$972"
+        ],
+        [
+          "45",
+          "$72,000",
+          "$156,278",
+          "$1,512"
+        ],
+        [
+          "50",
+          "$54,000",
+          "$95,089",
+          "$2,484"
+        ]
       ]
     },
     {
@@ -62,9 +92,27 @@
         "Share of balance that is growth"
       ],
       "rows": [
-        ["Alex", "25 to 35", "$36,000", "$421,453", "91.5%"],
-        ["Ben", "35 to 65", "$108,000", "$365,991", "70.5%"],
-        ["Cara", "25 to 65", "$144,000", "$787,444", "81.7%"]
+        [
+          "Alex",
+          "25 to 35",
+          "$36,000",
+          "$421,453",
+          "91.5%"
+        ],
+        [
+          "Ben",
+          "35 to 65",
+          "$108,000",
+          "$365,991",
+          "70.5%"
+        ],
+        [
+          "Cara",
+          "25 to 65",
+          "$144,000",
+          "$787,444",
+          "81.7%"
+        ]
       ]
     },
     {
@@ -88,9 +136,21 @@
         "Balance at 65 at 7%"
       ],
       "rows": [
-        ["25", "$354,588", "$787,444"],
-        ["35", "$208,215", "$365,991"],
-        ["45", "$110,032", "$156,278"]
+        [
+          "25",
+          "$354,588",
+          "$787,444"
+        ],
+        [
+          "35",
+          "$208,215",
+          "$365,991"
+        ],
+        [
+          "45",
+          "$110,032",
+          "$156,278"
+        ]
       ]
     },
     {

@@ -1,200 +1,176 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Why Diet Matters for Kidney Health"
-    },
-    {
       "type": "paragraph",
-      "text": "Your kidneys process everything you eat and drink. They filter waste products, balance minerals and electrolytes, and maintain fluid balance. When kidney function declines, the kidneys cannot keep up with certain nutrients, which build up in the blood and cause complications. A kidney-friendly diet reduces the workload on your kidneys by limiting the nutrients that are hardest for damaged kidneys to process."
-    },
-    {
-      "type": "paragraph",
-      "text": "The four nutrients most important to manage in CKD are sodium, protein, potassium, and phosphorus. The amount of restriction needed depends on your CKD stage. In early stages (1-3a), moderate sodium restriction and a heart-healthy diet may be sufficient. In later stages (3b-5), more targeted restrictions become necessary."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Sodium: The Universal Restriction"
-    },
-    {
-      "type": "paragraph",
-      "text": "Sodium restriction is recommended for all CKD patients regardless of stage. Excess sodium causes fluid retention, raises blood pressure, increases proteinuria, and accelerates GFR decline. The general recommendation is to limit sodium to <2,000 mg per day — roughly one teaspoon of salt."
-    },
-    {
-      "type": "paragraph",
-      "text": "Most sodium in the American diet comes from processed and restaurant foods, not the salt shaker. Bread, cold cuts, canned soups, frozen dinners, fast food, and sauces are major sources. Cooking from scratch with herbs, spices, and salt-free seasoning blends is the most effective way to control sodium intake."
+      "text": "A kidney-friendly diet is not one fixed menu. It is an eating pattern adjusted to your kidney function, blood test results and medicines, and the main nutrients that may need attention in chronic kidney disease (CKD) are sodium, potassium, phosphorus and protein. The NIDDK and the National Kidney Foundation (NKF) both say the right amounts depend on the person and recommend working with a registered dietitian, ideally one who specialises in kidney disease. This page summarises what those sources say. It does not give you a personal prescription."
     },
     {
       "type": "callout",
-      "variant": "tip",
-      "text": "Read nutrition labels carefully. Look for \"no salt added,\" \"low sodium\" (<140 mg per serving), or \"reduced sodium\" items. Avoid anything with more sodium than calories per serving — that is a sign of a high-sodium food."
+      "variant": "warning",
+      "text": "Do not start restricting or adding any nutrient, supplement or fluid amount on the strength of a web page. Needs differ widely by CKD stage, urine protein, blood potassium and phosphorus levels, medicines and whether you are on dialysis. Ask your nephrologist or renal dietitian for your own targets."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Protein: Quality over Quantity"
+      "text": "Why diet matters when kidney function drops"
     },
     {
       "type": "paragraph",
-      "text": "Protein metabolism produces urea and other waste products that must be filtered by the kidneys. High protein intake increases the workload on damaged kidneys and accelerates GFR decline. Moderate protein intake is recommended for CKD patients not on dialysis."
-    },
-    {
-      "type": "paragraph",
-      "text": "Recommended protein intake varies by CKD stage. For Stage 1-2 CKD, 0.8-1.0 g/kg body weight per day is typical. For Stage 3-5 CKD not on dialysis, 0.6-0.8 g/kg/day. For dialysis patients, higher protein intake (1.2-1.5 g/kg/day) is needed because dialysis removes amino acids."
-    },
-    {
-      "type": "paragraph",
-      "text": "Plant-based proteins (beans, lentils, tofu, quinoa) produce less acid load than animal proteins and may be gentler on kidneys. The DASH diet, modified for CKD, emphasizes plant-based proteins, whole grains, and vegetables while limiting red meat and processed foods."
+      "text": "Healthy kidneys remove waste and balance minerals. When filtration is reduced, some of those substances can build up. The NIDDK says choosing healthy foods and avoiding too much sodium, potassium and phosphorus may prevent or delay some CKD problems. You can see where you stand on the filtration scale with our GFR calculator, but diet decisions should be made with your care team, who can see your full results."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Potassium: Stage-Dependent Management"
+      "text": "Sodium"
     },
     {
       "type": "paragraph",
-      "text": "Potassium management depends on your CKD stage and whether you take certain medications. In advanced CKD, the kidneys cannot excrete excess potassium effectively, and hyperkalemia (high potassium) becomes a dangerous risk that can cause cardiac arrhythmias."
-    },
-    {
-      "type": "table",
-      "headers": [
-        "CKD Stage",
-        "Potassium Risk",
-        "Typical Recommendation"
-      ],
-      "rows": [
-        [
-          "Stage 1-2",
-          "Low risk",
-          "No restriction needed. Eat potassium-rich foods normally (fruits, vegetables)."
-        ],
-        [
-          "Stage 3a",
-          "Low to moderate risk",
-          "Monitor potassium levels. Avoid excessive high-potassium foods if levels are elevated."
-        ],
-        [
-          "Stage 3b",
-          "Moderate risk",
-          "Limit high-potassium foods (bananas, oranges, potatoes, tomatoes, spinach)."
-        ],
-        [
-          "Stage 4",
-          "High risk",
-          "Active potassium restriction. Discuss specific limits with your dietitian."
-        ],
-        [
-          "Stage 5 / Dialysis",
-          "Very high risk",
-          "Strict potassium restriction. Regular monitoring essential."
-        ]
-      ]
-    },
-    {
-      "type": "paragraph",
-      "text": "Note that many blood pressure medications (ACE inhibitors, ARBs, spironolactone) can raise potassium levels, so dietary potassium restriction may be needed even at earlier stages if you take these medications."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Phosphorus: The Hidden Danger"
-    },
-    {
-      "type": "paragraph",
-      "text": "Phosphorus is abundant in processed foods, dairy, nuts, seeds, and dark sodas. In advanced CKD, phosphorus builds up in the blood, leading to bone disease and cardiovascular calcification. Dietary phosphorus restriction becomes important starting around Stage 3b."
-    },
-    {
-      "type": "paragraph",
-      "text": "The highest sources of phosphorus in the modern diet are preservatives in processed foods. Limiting processed foods automatically reduces phosphorus intake. Avoid dark colas and sodas — they contain phosphoric acid. Limit dairy products to one serving per day. Nuts, seeds, organ meats, and whole grains are also high in phosphorus."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Kidney-Friendly Foods by Category"
-    },
-    {
-      "type": "table",
-      "headers": [
-        "Category",
-        "Best Choices",
-        "Limit or Avoid"
-      ],
-      "rows": [
-        [
-          "Vegetables",
-          "Cauliflower, cabbage, carrots, green beans, bell peppers, onions, zucchini",
-          "Potatoes, tomatoes, spinach, avocado (high potassium)"
-        ],
-        [
-          "Fruits",
-          "Apples, berries, grapes, cherries, pineapple, watermelon",
-          "Bananas, oranges, melons, kiwis (high potassium)"
-        ],
-        [
-          "Proteins",
-          "Lean poultry, fish, eggs, tofu, legumes",
-          "Red meat, organ meats, processed meats (bacon, sausage)"
-        ],
-        [
-          "Grains",
-          "White rice, pasta, refined bread, couscous",
-          "Whole grains (high phosphorus), bran cereals"
-        ],
-        [
-          "Dairy",
-          "Rice milk, unsalted butter (limit to 1 serving/day)",
-          "Milk, yogurt, cheese (high phosphorus)"
-        ],
-        [
-          "Drinks",
-          "Water, clear sodas, lemonade",
-          "Dark colas (phosphoric acid), orange juice (potassium)"
-        ],
-        [
-          "Snacks",
-          "Unsalted crackers, popcorn, hard candies, jelly beans",
-          "Nuts, seeds, chocolate, potato chips, pretzels"
-        ]
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Meal Pattern for Kidney Health"
-    },
-    {
-      "type": "paragraph",
-      "text": "A typical kidney-friendly day might look like this:"
+      "text": "The NIDDK says excess sodium can cause fluid retention, swelling, higher blood pressure and strain on the kidneys and heart. Its general recommendation is no more than 2,300 mg of sodium a day, and your own clinician may set a lower figure. For context, sodium is about 39 percent of table salt by weight (22.99 of 58.44 for sodium chloride), so 2,300 mg of sodium corresponds to about 5.8 g of salt. The NKF says your healthcare provider determines the appropriate daily limit for you."
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Breakfast: Oatmeal made with rice milk, topped with blueberries and a boiled egg. Herbal tea.",
-        "Lunch: Grilled chicken salad with lettuce, cucumber, bell peppers, and olive oil dressing. White bread on the side. Apple for dessert.",
-        "Dinner: Baked salmon with lemon and herbs, steamed green beans, white rice. Unsalted butter and herbs for flavor. Water.",
-        "Snack: Unsalted rice crackers with a small amount of unsalted peanut butter. Handful of grapes.",
-        "Total: ~1,800 mg sodium, 55g protein, moderate potassium, controlled phosphorus."
+        "Where it hides: the NIDDK lists packaged, prepared and fast foods; processed meats; canned and frozen foods; chips and crackers; and sauces such as ketchup, mustard, soy, teriyaki and barbecue sauce.",
+        "Label tip from the NIDDK: a % Daily Value of 20 percent or more per serving means a food is high in sodium, and 5 percent or less means it is low.",
+        "NIDDK strategies: choose unprocessed meats, use herbs, spices and sodium-free seasonings instead of salt, drain and rinse canned vegetables and beans, and cook from scratch."
       ]
-    },
-    {
-      "type": "callout",
-      "variant": "warning",
-      "text": "This is a sample only. Dietary needs vary by CKD stage, medications, and individual lab values. Work with a renal dietitian to create a personalized meal plan that meets your specific requirements."
-    },
-    {
-      "type": "cta",
-      "heading": "Know Your Numbers First",
-      "body": "Check your eGFR and CKD stage with our free calculator before making dietary changes. Different stages require different approaches.",
-      "buttonLabel": "Calculate eGFR",
-      "path": "/health/gfr-calculator/"
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
+      "text": "Potassium"
+    },
+    {
+      "type": "paragraph",
+      "text": "The NIDDK says having too little or too much potassium in the blood can cause heart and muscle problems. The NKF adds that the right amount depends on how well your kidneys work and which medicines you take, which is why a blood potassium test guides advice rather than a stage-based rule. Only your own results can tell you which applies."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Foods the NKF lists as high in potassium: milk, meat, bananas, oranges, orange juice, cantaloupe, dried fruits, winter squash and salt substitutes.",
+        "Salt substitutes and any food listing potassium chloride on the label deserve special attention, according to the NIDDK.",
+        "The NIDDK notes that canned fruits and vegetables often have potassium in the liquid, that serving size matters, and that boiling and leaching can lower the potassium in vegetables.",
+        "The NKF notes that potassium from animal foods is absorbed at a higher rate than potassium from plants."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Phosphorus"
+    },
+    {
+      "type": "paragraph",
+      "text": "The NIDDK says too much phosphorus in the blood can harm blood vessels and make bones thin, weak and more likely to break, and can also cause itchy skin and bone and joint pain. Phosphorus occurs naturally in protein-rich foods such as meat, dairy and beans, but the NIDDK states that phosphorus additives are the primary source for many people."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Read ingredient lists for words containing PHOS, such as phosphoric acid, disodium phosphate and monosodium phosphate (NIDDK, and the same advice from the NKF).",
+        "Foods the NKF lists as high in phosphorus: dairy products, organ meats, colas, deli meats and processed foods with phosphate additives.",
+        "The NIDDK says the body absorbs more phosphorus from animal-based foods than from plant-based foods. Some people are prescribed a phosphate binder, which the NIDDK describes as a medicine that soaks up phosphorus in the stomach; that is a medical decision."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Protein"
+    },
+    {
+      "type": "paragraph",
+      "text": "Protein breaks down into waste that the kidneys must remove. The NIDDK says some people with CKD may need moderate amounts of protein so that waste does not build up, but warns that too little protein can lead to malnutrition. The NKF says needs vary with weight, age, urine protein levels and the type of kidney disease, and that a dietitian should determine the right amount. People on dialysis may need more protein, because the NIDDK notes dialysis removes protein from the blood."
+    },
+    {
+      "type": "paragraph",
+      "text": "This is the nutrient where general advice is least useful. The right target for one person can be wrong for another, so we deliberately give no gram figures here. The NKF says plant-based proteins such as beans and nuts are easier on the kidneys than animal proteins, and the NIDDK suggests getting protein from plant-based foods and choosing lean meats that are low in phosphorus, but both frame this as part of a plan made with your dietitian."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Fluids, fats, supplements and calories"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Fluids: the NKF says early-stage CKD typically requires no fluid restriction and limits depend on urine output and complications. The NIDDK says some people with CKD need to limit liquids because damaged kidneys cannot remove extra fluid, and advises contacting your provider if you notice swelling in the face, arms, legs or abdomen. The NKF counts soups, gelatin, frozen desserts and ice as fluids.",
+        "Fats: the NIDDK suggests focusing on unsaturated fats, limiting saturated and trans fats, and grilling, broiling, baking, roasting, air-frying or stir-frying instead of deep-frying.",
+        "Supplements: the NKF warns that some vitamin and mineral supplements may be harmful in kidney disease, that over-the-counter products can contain excess phosphorus and potassium, and that herbal supplements should be avoided unless your dietitian or provider prescribes them.",
+        "Calories: the NKF emphasises adequate calories to prevent muscle breakdown and keep a healthy weight, avoiding both too little and too much."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Putting it together: a table to bring to your appointment"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Nutrient",
+        "Why it can matter in CKD (NIDDK/NKF)",
+        "Where it shows up",
+        "What to ask your dietitian"
+      ],
+      "rows": [
+        [
+          "Sodium",
+          "Fluid retention, high blood pressure, strain on heart and kidneys",
+          "Packaged, fast and processed foods; sauces; canned foods",
+          "What is my daily sodium limit?"
+        ],
+        [
+          "Potassium",
+          "Too little or too much can affect heart and muscle",
+          "Bananas, oranges, dried fruit, winter squash, salt substitutes",
+          "Do my blood results and medicines mean I should limit it?"
+        ],
+        [
+          "Phosphorus",
+          "Can harm blood vessels and weaken bones",
+          "Additives (PHOS on labels), dairy, deli meats, colas",
+          "Which foods and additives should I avoid first?"
+        ],
+        [
+          "Protein",
+          "Waste load on kidneys; too little causes malnutrition",
+          "Meat, dairy, beans, nuts",
+          "How much protein is right for my stage and weight?"
+        ],
+        [
+          "Fluid",
+          "Damaged kidneys may not remove extra fluid",
+          "All liquids, soups, ice, gelatin",
+          "Do I need a fluid limit?"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Copying a diet written for someone else or for another CKD stage. Needs change as kidney function and medicines change.",
+        "Switching to a salt substitute. The NIDDK and NKF flag potassium chloride and salt substitutes as a potassium concern.",
+        "Cutting protein sharply on your own. The NIDDK warns too little protein can lead to malnutrition.",
+        "Starting supplements without checking. The NKF says some can be harmful in kidney disease.",
+        "Ignoring labels. Phosphorus additives are easy to miss unless you look for PHOS in the ingredients."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The NIDDK also notes that medical nutrition therapy, which is counselling from a registered dietitian, can help delay CKD progression, prevent or treat complications and improve quality of life, and that Medicare covers it for people with CKD who have a physician referral. Coverage rules vary, so check your own plan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently asked questions"
     },
     {
       "type": "heading",
@@ -203,34 +179,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Diet cannot reverse established chronic kidney disease, but it can significantly slow progression, reduce symptoms, and delay the need for dialysis. In early CKD (Stage 1-2), dietary changes combined with medication can sometimes stabilize kidney function for years or decades."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Is the DASH diet good for kidneys?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The DASH diet (Dietary Approaches to Stop Hypertension) is an excellent starting point for CKD patients because it emphasizes low sodium, fruits, vegetables, and lean proteins. However, standard DASH is too high in potassium and phosphorus for advanced CKD. A modified DASH diet with lower potassium fruits and vegetables works well."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Should I take a renal vitamin?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Standard multivitamins may contain too much vitamin A, which can accumulate in CKD. A specially formulated renal vitamin (available by prescription) provides the right amounts of water-soluble vitamins. Do not take vitamin or herbal supplements without checking with your nephrologist."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How much water should I drink with CKD?"
-    },
-    {
-      "type": "paragraph",
-      "text": "For early-stage CKD, drink when you are thirsty — typically 6-8 cups per day. There is no evidence that drinking more water than usual improves kidney function or slows CKD progression. In advanced CKD (Stage 4-5), fluid restriction may be needed to prevent fluid overload."
+      "text": "The sources we reviewed say diet can help prevent or delay some problems and slow complications, but none promise reversal. Ask your nephrologist what to expect in your case."
     },
     {
       "type": "heading",
@@ -239,7 +188,23 @@
     },
     {
       "type": "paragraph",
-      "text": "Not necessarily. If your blood potassium is normal, you do not need to restrict potassium. Even with some elevation, you may only need to limit — not eliminate — high-potassium foods. Work with your doctor and dietitian to determine your individual potassium target based on your lab results and medications."
+      "text": "Not necessarily. The NKF says the right amount depends on kidney function and medicines. Your blood potassium result and clinician decide whether you need to limit it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "How much water should I drink?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The NKF says early-stage CKD typically needs no fluid restriction, but advanced CKD or low urine output may. Follow your care team's advice rather than a general number."
+    },
+    {
+      "type": "cta",
+      "heading": "Know Your Numbers First",
+      "body": "Check your estimated eGFR with our free calculator, then bring the result to your nephrologist or renal dietitian. Diet advice depends on your stage, labs and medicines.",
+      "buttonLabel": "Calculate eGFR",
+      "path": "/health/gfr-calculator/"
     }
   ],
   "keywords": [

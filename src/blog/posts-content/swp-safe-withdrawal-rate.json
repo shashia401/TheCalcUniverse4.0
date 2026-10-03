@@ -2,7 +2,7 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "A safe SWP withdrawal rate is the share of your starting corpus you can take out each year, raising the amount for inflation, without the money running out within the period you need it. There is no single safe number. It depends on the return you earn, how much inflation raises your withdrawals, and how many years you must cover. A common rule of thumb is 4% of the starting corpus a year; the table below shows why that figure is a starting point and not an answer."
+      "text": "A safe SWP withdrawal rate is the share of your starting corpus you can take out each year, raising the amount for inflation, without the money running out within the period you need it. There is no single safe number. It depends on the return you earn, how much inflation raises your withdrawals, and how many years you must cover. A common rule of thumb is 4% of the starting corpus a year; the tables below show why that figure is a starting point and not an answer."
     },
     {
       "type": "heading",
@@ -20,7 +20,7 @@
     },
     {
       "type": "paragraph",
-      "text": "I used the SWP calculator's monthly method (balance grows by the annual rate divided by 12, then the withdrawal comes out) and let the withdrawal rise by an assumed 5% inflation each year, starting from the amounts above. Each cell is the number of years the Rs. 1 crore lasts. 'Over 100' means it was still positive after 100 years. The returns and the 5% inflation are assumptions chosen for illustration, applied smoothly, so real outcomes will be rougher. Past performance does not guarantee future results."
+      "text": "This post uses the SWP calculator's monthly method (the balance grows by the annual rate divided by 12, then the withdrawal comes out) and lets the withdrawal rise by an assumed 5% each year, starting from the amounts above. Each cell is the number of years the Rs. 1 crore lasts. 'Over 100' means it was still positive after 100 years. The returns and the 5% inflation are assumptions chosen for illustration, applied smoothly, so real outcomes will be rougher. Past performance does not guarantee future results."
     },
     {
       "type": "table",
@@ -71,7 +71,96 @@
     },
     {
       "type": "paragraph",
-      "text": "Read across a row and you see how much the return assumption matters. At a 4% starting rate the corpus lasts about 30 years if the return is 6% but more than 50 if it is 8%. Read down a column and you see how fast longevity falls as the rate rises: at 7% return, going from 4% to 6% cuts the lasting time from 37.0 to 21.3 years. Someone retiring at 60 who wants cover to 90 needs a cell of 30 years or more, and a person retiring at 45 who wants cover to 90 needs 45 years or more, which only the lower-rate, higher-return corner of the table provides."
+      "text": "Read across a row and you see how much the return assumption matters. At a 4% starting rate the corpus lasts about 30 years if the return is 6% but more than 50 if it is 8%. Read down a column and you see how fast longevity falls as the rate rises: at a 7% return, going from 4% to 6% cuts the lasting time from 37.0 to 21.3 years. Someone retiring at 60 who wants cover to 90 needs a cell of 30 years or more. A person retiring at 45 who wants cover to 90 needs 45 years or more, which in this table only the 3% row at 7% or higher, the 4% row at 8% or higher, and the 5% row at 9% (45.0 years, with no margin) provide."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Reading the table backwards: the highest starting rate for a given period"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you already know how many years you need, the more useful question is the highest starting rate that still lasts that long. The table below solves for it with the same method and the same 5% yearly increase. Each figure is the break-even rate, where the balance reaches zero exactly at the end of the period, rounded to two decimals. A real plan should sit below it."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Period to cover",
+        "Return 6%",
+        "Return 7%",
+        "Return 8%",
+        "Return 9%"
+      ],
+      "rows": [
+        [
+          "20 years",
+          "5.72%",
+          "6.29%",
+          "6.89%",
+          "7.53%"
+        ],
+        [
+          "30 years",
+          "4.02%",
+          "4.62%",
+          "5.26%",
+          "5.95%"
+        ],
+        [
+          "40 years",
+          "3.18%",
+          "3.80%",
+          "4.48%",
+          "5.22%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Notice that at 6% the 30-year break-even is 4.02%, which is why a 4% start lasted 30.3 years in the first table. Stretching the period from 30 to 40 years lowers the break-even rate by between about 0.7 and 0.85 percentage points at every return shown. And a 4% start does not cover 40 years at 6% or 7%, since the break-even rates there are 3.18% and 3.80%."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How much does the inflation assumption matter?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take a 5% starting rate on Rs. 1 crore (Rs. 41,667 a month) and change only the yearly increase in the withdrawal. The table shows years lasted."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Yearly increase in withdrawal",
+        "Return 6%",
+        "Return 8%"
+      ],
+      "rows": [
+        [
+          "0% (flat)",
+          "Over 100",
+          "Over 100"
+        ],
+        [
+          "3%",
+          "31.7 years",
+          "Over 100"
+        ],
+        [
+          "5%",
+          "23.3 years",
+          "32.7 years"
+        ],
+        [
+          "7%",
+          "19.3 years",
+          "23.9 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The same corpus and the same return can last 'forever' or about 23 years depending on how fast your costs rise. That is why a safe-rate figure quoted without its inflation assumption means very little."
     },
     {
       "type": "heading",
@@ -80,7 +169,11 @@
     },
     {
       "type": "paragraph",
-      "text": "The 4% figure is usually traced to a 1998 study by three researchers at Trinity University in the United States. According to the summary on the page this site's calculator cites, they tested withdrawals against US market data from 1925 to 1995 and concluded that withdrawal rates of 3% to 4% continued to produce high portfolio success rates for stock-dominated portfolios over payout periods of 15 to 30 years, with withdrawals adjusted for inflation. That is a study of one market, over particular years, with a particular mix of assets. It does not tell you what happens in India, with different inflation, a different tax system and different returns, or over 40 or 50 years. This post has not verified any Indian equivalent, so treat 4% as a rule of thumb you test, not a rate you copy."
+      "text": "The 4% figure is usually traced to a paper by three finance professors at Trinity University in Texas (Cooley, Hubbard and Walz), published in the AAII Journal in February 1998. According to the Wikipedia article on the study, which this site's calculator cites, the 4% refers to the share of the portfolio withdrawn in the first year, with later withdrawals rising with the consumer price index, and the plan was judged a success if the portfolio lasted the full period. The authors backtested stock and bond mixes against market data compiled by Ibbotson Associates covering 1925 to 1995, over payout periods of 15 to 30 years, and reported that withdrawal rates of 3% to 4% continued to produce high success rates for stock-dominated portfolios when withdrawals rose with inflation. The same article records the authors' own caution that mid-course corrections would likely be needed and that a withdrawal rate is a matter of planning, not a contract."
+    },
+    {
+      "type": "paragraph",
+      "text": "That is a study of one dataset, over particular years and a 30-year horizon at most. Nothing on that page speaks to India, with its different inflation, tax system and returns, or to periods of 40 or 50 years. This post has not found or verified an Indian equivalent, so treat 4% as a rule of thumb to test, not a rate to copy."
     },
     {
       "type": "heading",
@@ -91,11 +184,11 @@
       "type": "list",
       "ordered": true,
       "items": [
-        "Find the monthly amount: yearly spending gap divided by 12, then divide that yearly figure by the corpus to get your rate.",
+        "Find your rate: the yearly spending gap (monthly gap times 12) divided by the corpus.",
         "Run the calculator at your expected return and at two points lower. If the lower case fails inside your period, your rate has no margin.",
         "Lengthen the period by five years and rerun. If it still passes, you have some cover for a longer life.",
-        "Add inflation by raising the withdrawal each year, as in the table, because the calculator itself holds the withdrawal flat.",
-        "Test a bad start by hand: assume a 20% fall in year one. The starting balance after the fall is 80% of the original, so a fixed withdrawal is now a much larger share of what is left."
+        "Add inflation by raising the withdrawal each year, as in the tables above, because the calculator itself holds the withdrawal flat.",
+        "Test a bad start by hand. Suppose the portfolio falls 20% just before you begin. A 4% start (Rs. 33,333 a month on Rs. 1 crore) is now being paid from Rs. 80,00,000, which is a 5% rate on what is left. At a 7% return and 5% yearly increases, the 5% row of the first table applies: 26.9 years instead of 37.0."
       ]
     },
     {
@@ -108,7 +201,7 @@
       "ordered": false,
       "items": [
         "Using the same rate at every age and horizon. A 4% rate that covers 30 years may not cover 45.",
-        "Confusing a flat withdrawal with an inflation-adjusted one. A flat Rs. 50,000 on Rs. 1 crore at 6% never runs out in the smooth model, but its purchasing power shrinks every year.",
+        "Confusing a flat withdrawal with an inflation-adjusted one. A flat Rs. 50,000 on Rs. 1 crore at 6% keeps the balance exactly flat in the smooth model, so it never runs out, but its purchasing power shrinks every year.",
         "Believing a high expected return justifies a high rate. A higher return assumption raises the rate you appear to afford, but it does not make the markets deliver it.",
         "Ignoring flexibility. A rule that cuts spending after a bad year or two lasts much longer than one that never changes. One simple version takes a fixed percentage of the current balance each year: 4% of Rs. 1 crore is Rs. 4,00,000, but after a 20% fall it is 4% of Rs. 80,00,000, or Rs. 3,20,000. The corpus is protected, but your income moves with the market."
       ]

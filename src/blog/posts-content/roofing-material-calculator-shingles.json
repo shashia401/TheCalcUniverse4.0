@@ -2,7 +2,7 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "To estimate shingles, find the roof's actual surface area, not the footprint of the house, then convert it to roofing squares (100 square feet each) and multiply by the bundles per square on the package label. Pitch is the reason the two areas differ: the steeper the roof, the more surface sits over the same footprint. As a worked example, a 36 by 28 foot house with a 8/12 gable roof and a 1 foot overhang comes to about 1,507 square feet of material with 10 percent waste, which is 16 squares, or 48 bundles at 3 bundles per square."
+      "text": "To estimate shingles, find the roof's actual surface area, not the footprint of the house, then convert it to roofing squares (100 square feet each) and multiply by the bundles per square on the package label. Pitch is the reason the two areas differ: the steeper the roof, the more surface sits over the same footprint. As a worked example, a 36 by 28 foot house with an 8/12 gable roof and a 1 foot overhang comes to about 1,507 square feet of material with 10 percent waste, which is 16 squares, or 48 bundles at 3 bundles per square."
     },
     {
       "type": "heading",
@@ -151,7 +151,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Hold a level horizontally against a rafter from inside the attic, mark 12 inches along the level, and measure straight down from that mark to the rafter. That vertical distance in inches is the rise, so 8 inches means 8/12. Measuring from the ground with a photograph, or from the attic, avoids climbing onto the roof. If you must work on a roof, use proper fall protection and do not go up alone."
+      "text": "Hold a level horizontally against the underside of a rafter from inside the attic, mark 12 inches along the level, and measure the vertical distance from that mark to the rafter. That distance in inches is the rise, so 8 inches means 8/12. Measuring from the attic avoids climbing onto the roof. If you must work on a roof, use proper fall protection and do not go up alone."
     },
     {
       "type": "heading",
@@ -162,7 +162,7 @@
       "type": "list",
       "ordered": false,
       "items": [
-        "Using the house footprint as the roof area, which understates the order by 5 to 41 percent across the pitches shown above.",
+        "Using the house footprint as the roof area. The true surface is 5 to 41 percent larger than the footprint across the pitches shown above, so an order based on the footprint falls 5 to 29 percent short of the real area.",
         "Forgetting the overhang, which adds area on every side.",
         "Treating a complex roof as one rectangle. Dormers, valleys, chimneys and several intersecting planes should be measured plane by plane.",
         "Ignoring existing conditions: damaged decking or multiple old layers change the job and the code requirements."

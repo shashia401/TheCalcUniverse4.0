@@ -2,7 +2,7 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "HTML minification removes characters a browser does not need, such as comments, indentation, line breaks and some optional attribute quotes, so the file is smaller but renders the same. On the sample page measured for this guide, minifying cut an HTML file from 2,608 bytes to 1,915 bytes (26.6 percent smaller). After gzip, though, the difference shrank to 75 bytes (617 versus 542). Minification is worth doing, but the saving on the wire is smaller than the headline percentage suggests, and a careless minifier can change what the page shows."
+      "text": "HTML minification removes characters a browser does not need, such as comments, indentation, line breaks and some optional attribute quotes, so the file is smaller but renders the same. On the sample page measured for this guide, minifying cut an HTML file from 2,762 bytes to 1,730 bytes (37.4 percent smaller). After gzip, though, the difference shrank to 155 bytes (768 versus 613, or 20.2 percent). Minification is worth doing, but the saving on the wire is smaller than the headline percentage suggests, and a careless minifier can change what the page shows."
     },
     {
       "type": "heading",
@@ -31,7 +31,7 @@
     },
     {
       "type": "paragraph",
-      "text": "To avoid quoting a number from memory, I built a small product-listing page (doctype, head with meta tags, a three-link nav, a heading, a paragraph, twelve list items and a footer, with comments and two-space indentation) and ran it through the same regex logic the HTML minifier on this site uses. I then compressed both versions with Node's zlib at gzip level 9 and with Brotli at its default quality."
+      "text": "To avoid quoting a number from memory, I built a small product-listing page (doctype, head with two meta tags, a title and a stylesheet link, a three-link nav, a heading, a paragraph, twelve list items and a footer, with comments above the stylesheet link, the nav, each product and the footer, blank lines and two-space indentation) and ran it through the same regex logic the HTML minifier on this site uses. I then compressed both versions with Node's zlib at gzip level 9 and with Brotli at its default quality (11). Sizes are bytes of the UTF-8 text."
     },
     {
       "type": "table",
@@ -44,27 +44,27 @@
       "rows": [
         [
           "Original HTML",
-          "2,608",
-          "617",
-          "402"
+          "2,762",
+          "768",
+          "556"
         ],
         [
           "Minified HTML",
-          "1,915",
-          "542",
-          "359"
+          "1,730",
+          "613",
+          "457"
         ],
         [
           "Saved",
-          "693 (26.6%)",
-          "75 (12.2%)",
-          "43 (10.7%)"
+          "1,032 (37.4%)",
+          "155 (20.2%)",
+          "99 (17.8%)"
         ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "A 485-byte sample stylesheet behaved the same way: minifying it gave 377 bytes (22.3 percent smaller), and gzip took 303 bytes down to 265 (12.5 percent). All figures are for these specific files. A page with less repetition, more inline text or more comments will give different percentages, so run your own file before promising anyone a number."
+      "text": "A 456-byte sample stylesheet (one comment, two-space indentation, five rules) behaved the same way: minifying it gave 342 bytes (25.0 percent smaller), and gzip took 281 bytes down to 240 (14.6 percent). All figures are for these specific files. A page with less repetition, more inline text or fewer comments will give different percentages, so run your own file before promising anyone a number."
     },
     {
       "type": "heading",
@@ -73,7 +73,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Gzip and Brotli work by replacing repeated patterns with short references. Runs of spaces and repeated closing tags are exactly the kind of pattern they handle well, so a lot of the whitespace you strip was already nearly free once compressed. In the table above the original page compressed to 23.7 percent of its raw size on its own, and the minified page to 28.3 percent of its (smaller) raw size. Minification and compression are complementary, not alternatives: serve minified files with compression turned on, and expect the second step to eat part of the first step's benefit."
+      "text": "Gzip and Brotli work by replacing repeated patterns with short references. Runs of spaces and repeated closing tags are exactly the kind of pattern they handle well, so a lot of the whitespace you strip was already nearly free once compressed. In the table above the original page compressed to 27.8 percent of its raw size on its own, and the minified page to 35.4 percent of its (smaller) raw size. Minification and compression are complementary, not alternatives: serve minified files with compression turned on, and expect the second step to eat part of the first step's benefit."
     },
     {
       "type": "callout",
@@ -136,7 +136,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Treat the 20 to 60 percent figures often quoted for minification as a rough range for uncompressed files, not a guarantee. The sample above landed at the lower end for HTML and CSS, and JavaScript results depend heavily on whether the tool renames variables or only strips whitespace. Use the HTML Minifier below to see the numbers for your own markup, then verify the result renders correctly before you ship it."
+      "text": "Treat any headline minification percentage as a property of one file, not a guarantee. The sample page lost 37.4 percent of its raw bytes and the sample stylesheet 25.0 percent, but only 20.2 and 14.6 percent once gzipped. JavaScript results depend heavily on whether the tool renames variables or only strips whitespace. Use the HTML Minifier below to see the numbers for your own markup, then verify the result renders correctly before you ship it."
     },
     {
       "type": "cta",

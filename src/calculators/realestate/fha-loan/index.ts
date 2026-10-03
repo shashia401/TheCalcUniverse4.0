@@ -2,6 +2,10 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import FHAMIPPanel from './FHAMIPPanel';
 
+// ML 2023-05 sets the base-loan threshold to the national conforming loan limit ($726,200 for 2023);
+// the 2026 baseline limit is $832,750 (FHFA, Nov 2025). Update each January.
+const MIP_BASE_LOAN_THRESHOLD = 832750;
+
 const fhaLoanConfig: CalculatorConfig = {
   inputs: [
     {
@@ -76,10 +80,19 @@ const fhaLoanConfig: CalculatorConfig = {
         (Math.pow(1 + monthlyRate, numPayments) - 1);
     }
 
-    // Per HUD Mortgagee Letter 2023-05: the annual MIP rate steps up to 55 bps only when
-    // LTV > 95% (down payment < 5%); loans with 5%+ down (LTV <= 95%) are 50 bps. This is a
-    // different threshold than the 11-year vs life-of-loan duration cutoff below (10% down).
-    const annualMIPRate = downPct < 0.05 ? 0.0055 : 0.005;
+    // Annual MIP schedule: HUD Mortgagee Letter 2023-05 (effective 3/20/2023). Rate depends on
+    // term (<= 15 yrs vs > 15 yrs), base loan amount vs the national conforming limit, and LTV.
+    // The duration cutoff (11 years vs mortgage term) is a separate rule: LTV <= 90% -> 11 years.
+    const ltv = Math.round((1 - downPct) * 1e6) / 1e6;
+    const overLimit = baseLoan > MIP_BASE_LOAN_THRESHOLD;
+    let annualMIPRate: number;
+    if (years > 15) {
+      annualMIPRate = overLimit ? (ltv > 0.95 ? 0.0075 : 0.007) : ltv > 0.95 ? 0.0055 : 0.005;
+    } else if (!overLimit) {
+      annualMIPRate = ltv > 0.9 ? 0.004 : 0.0015;
+    } else {
+      annualMIPRate = ltv > 0.9 ? 0.0065 : ltv > 0.78 ? 0.004 : 0.0015;
+    }
     const monthlyMIP = (baseLoan * annualMIPRate) / 12;
     const totalMonthly = monthlyPI + monthlyMIP;
 
@@ -141,9 +154,9 @@ const fhaLoanConfig: CalculatorConfig = {
       caption: 'FHA loan structure — base loan plus upfront MIP and annual MIP components',
     },
     formulaDescription:
-      'FHA loans require two types of mortgage insurance premiums: an upfront MIP equal to 1.75% of the loan amount (typically financed into the loan itself), and an annual MIP paid in monthly installments at a rate of 0.50% to 0.55% of the loan balance depending on your down payment and loan term. Understanding both components is essential for comparing an FHA loan against a conventional mortgage.',
+      'FHA loans require two types of mortgage insurance premiums: an upfront MIP equal to 1.75% of the loan amount (typically financed into the loan itself), and an annual MIP paid in monthly installments at a rate of 0.50% to 0.55% of the loan balance depending on your down payment and loan term (15-year loans pay 0.15%–0.40%). Understanding both components is essential for comparing an FHA loan against a conventional mortgage.',
     variables: [
-      { symbol: 'Upfront & Annual MIP', name: 'Mortgage Insurance Premiums', description: 'Upfront MIP = 1.75% of loan amount (rolled into the loan). Annual MIP = 0.50%-0.55% of loan balance per year, paid monthly. Upfront MIP is financed; annual MIP lasts 11 years or life of loan depending on down payment.' },
+      { symbol: 'Upfront & Annual MIP', name: 'Mortgage Insurance Premiums', description: 'Upfront MIP = 1.75% of loan amount (rolled into the loan). Annual MIP = 0.50%-0.55% of loan balance per year on 30-year loans (0.15%-0.40% on 15-year loans, higher on base loans above the conforming limit), paid monthly. Upfront MIP is financed; annual MIP lasts 11 years or life of loan depending on down payment.' },
       { symbol: 'P&I', name: 'Principal & Interest', description: 'The standard amortization payment calculated on the total loan amount including the financed upfront MIP, using the standard fixed-rate mortgage formula.' },
       { symbol: 'Base Loan', name: 'Base Loan Amount', description: 'The home purchase price minus your down payment. This is the starting point before the upfront MIP is added.' },
     ],

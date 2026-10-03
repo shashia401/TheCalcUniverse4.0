@@ -71,3 +71,38 @@ describe('FHA loan calculator', () => {
     expect(r).toEqual([]);
   });
 });
+
+describe('FHA annual MIP schedule (HUD ML 2023-05)', () => {
+  const mip = (homePrice: number, downPaymentPct: number, loanTerm: string) =>
+    parseMoney(
+      getValue(
+        config.calculate({ homePrice: String(homePrice), downPaymentPct: String(downPaymentPct), interestRate: '6.5', loanTerm }),
+        'monthlyMIP',
+      ),
+    );
+  const expected = (homePrice: number, downPct: number, bps: number) => (homePrice * (1 - downPct / 100) * (bps / 10000)) / 12;
+
+  it('15-year loan, base <= conforming limit: 15 bps at LTV <= 90%, 40 bps above', () => {
+    expect(mip(300000, 10, '15')).toBeCloseTo(expected(300000, 10, 15), 1);
+    expect(mip(300000, 20, '15')).toBeCloseTo(expected(300000, 20, 15), 1);
+    expect(mip(300000, 5, '15')).toBeCloseTo(expected(300000, 5, 40), 1);
+    expect(mip(300000, 3.5, '15')).toBeCloseTo(expected(300000, 3.5, 40), 1);
+  });
+
+  it('30-year loan keeps 50 bps (LTV <= 95%) / 55 bps (LTV > 95%)', () => {
+    expect(mip(300000, 5, '30')).toBeCloseTo(expected(300000, 5, 50), 1);
+    expect(mip(300000, 3.5, '30')).toBeCloseTo(expected(300000, 3.5, 55), 1);
+  });
+
+  it('base loan above the conforming limit uses the higher rows', () => {
+    // 1,000,000 home, 20% down -> base 800,000 (< 832,750): still the low tier
+    expect(mip(1000000, 20, '30')).toBeCloseTo(expected(1000000, 20, 50), 1);
+    // 1,200,000 home -> base loans above 832,750
+    expect(mip(1200000, 10, '30')).toBeCloseTo(expected(1200000, 10, 70), 1);
+    expect(mip(1200000, 5, '30')).toBeCloseTo(expected(1200000, 5, 70), 1);
+    expect(mip(1200000, 3.5, '30')).toBeCloseTo(expected(1200000, 3.5, 75), 1);
+    expect(mip(1200000, 10, '15')).toBeCloseTo(expected(1200000, 10, 40), 1); // 78% < LTV 90% <= 90%
+    expect(mip(1200000, 20, '15')).toBeCloseTo(expected(1200000, 20, 40), 1); // base 960,000, LTV 80%
+    expect(mip(1200000, 3.5, '15')).toBeCloseTo(expected(1200000, 3.5, 65), 1);
+  });
+});

@@ -18,25 +18,15 @@ export default function DogCatAgePanel({ values, results }: Props) {
   let epigeneticHuman: number | null = null;
 
   if (species === 'dog') {
-    // Traditional method
-    if (petAge < 1) {
-      traditionalHuman = petAge * 15;
-    } else if (petAge < 2) {
-      traditionalHuman = 15;
-    } else {
-      traditionalHuman = 15 + 9 + (petAge - 2) * 4;
-    }
+    // Traditional method (linear within years 1-2: age 1 -> 15, age 2 -> 24)
+    traditionalHuman = petAge < 1 ? petAge * 15 : petAge < 2 ? 15 + (petAge - 1) * 9 : 24 + (petAge - 2) * 4;
     // Epigenetic method (age >= 1)
     if (petAge >= 1) {
       epigeneticHuman = 16 * Math.log(petAge) + 31;
     }
   } else {
-    // Cat
-    if (petAge < 1) {
-      traditionalHuman = petAge * 15;
-    } else {
-      traditionalHuman = 15 + 9 + Math.max(0, (petAge - 2)) * 4;
-    }
+    // Cat (same stepwise table)
+    traditionalHuman = petAge < 1 ? petAge * 15 : petAge < 2 ? 15 + (petAge - 1) * 9 : 24 + (petAge - 2) * 4;
   }
 
   const maxHumanAge = Math.max(
@@ -181,10 +171,10 @@ export default function DogCatAgePanel({ values, results }: Props) {
               <div className="space-y-1.5 text-[11px] text-slate-600">
                 <div className="flex justify-between"><span><strong>Puppy</strong> — Birth to 1 year</span><span className="text-emerald-600 font-bold">Current</span></div>
                 <div className="flex justify-between"><span><strong>Junior</strong> — 1–2 years</span></div>
-                <div className="flex justify-between"><span><strong>Adult</strong> — 2–6 years (small/medium) / 2–5 years (large)</span></div>
-                <div className="flex justify-between"><span><strong>Mature</strong> — 7–10 years (small) / 5–10 years (large)</span></div>
-                <div className="flex justify-between"><span><strong>Senior</strong> — 11–14 years</span></div>
-                <div className="flex justify-between"><span><strong>Geriatric</strong> — 15+ years</span></div>
+                <div className="flex justify-between"><span><strong>Adult</strong> — 2–6 years (small) / 2–7 years (medium) / 2–4 years (large)</span></div>
+                <div className="flex justify-between"><span><strong>Mature</strong> — 7–10 years (small) / 5–6 years (large)</span></div>
+                <div className="flex justify-between"><span><strong>Senior</strong> — 11–14 years (small) / 8–14 years (medium) / 7–11 years (large)</span></div>
+                <div className="flex justify-between"><span><strong>Geriatric</strong> — 15+ years (small/medium) / 12+ years (large)</span></div>
               </div>
             ) : (
               <div className="space-y-1.5 text-[11px] text-slate-600">

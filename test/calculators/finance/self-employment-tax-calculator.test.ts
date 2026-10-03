@@ -106,3 +106,12 @@ describe('self-employment-tax', () => {
     near(parseMoney(getValue(r, 'totalIncome')), 125000, 0.01);
   });
 });
+
+describe('self-employment panel wage base label', () => {
+  it('panel text uses the same 2026 wage base as the calculator ($184,500), not the 2025 figure', async () => {
+    const { readFileSync } = await import('node:fs');
+    const src = readFileSync('src/calculators/finance/self-employment-tax/SelfEmploymentTaxPanel.tsx', 'utf-8');
+    expect(src).toContain('$184,500 wage base (2026)');
+    expect(src).not.toContain('176,100');
+  });
+});

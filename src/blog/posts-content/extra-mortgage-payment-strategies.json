@@ -14,7 +14,7 @@
       "ordered": false,
       "items": [
         "Loan: $300,000, 30-year fixed at 6.5%, giving a principal-and-interest payment of $1,896.20 (taxes and insurance excluded).",
-        "Baseline: paid on schedule, the loan costs $382,633 in interest and ends after 360 payments. All figures below are rounded to the nearest dollar.",
+        "Baseline: paid on schedule using the unrounded payment, the loan costs $382,633 in interest and ends after 360 payments. If you type the rounded $1,896.20 into the calculator instead, the balance is a few cents short at payment 360 and a tiny 361st payment appears, which can add one month to a result. All figures below are rounded to the nearest dollar.",
         "Extra money is applied to principal on the payment date, with no prepayment penalty. Annual lumps follow the calculator's convention: first lump with the 13th payment, then every 12 months. The single lump is paid today.",
         "Bi-weekly: half the payment ($948.10) paid 26 times a year, with interest accruing at one twenty-sixth of the annual rate per payment (6.5% / 26) and each payment credited the day it arrives. This is a simplification, because a daily-interest servicer would give a slightly different result (about $90,400 saved if interest is charged on actual days over 365), and servicers differ, so treat this row as a best case."
       ]
@@ -26,15 +26,71 @@
     },
     {
       "type": "table",
-      "headers": ["Strategy", "Extra cash", "Payoff", "Time saved", "Total interest", "Interest saved"],
+      "headers": [
+        "Strategy",
+        "Extra cash",
+        "Payoff",
+        "Time saved",
+        "Total interest",
+        "Interest saved"
+      ],
       "rows": [
-        ["Baseline", "None", "30 yr 0 mo", "None", "$382,633", "None"],
-        ["Bi-weekly half payments", "About $158/month equivalent", "24 yr 2 mo", "5 yr 10 mo", "$294,512", "$88,122"],
-        ["Extra $100 a month", "$1,200 a year", "26 yr 0 mo", "4 yr 0 mo", "$321,639", "$60,995"],
-        ["Extra $200 a month", "$2,400 a year", "23 yr 1 mo", "6 yr 11 mo", "$279,185", "$103,449"],
-        ["Extra $500 a month", "$6,000 a year", "17 yr 6 mo", "12 yr 6 mo", "$202,874", "$179,759"],
-        ["$5,000 lump each year", "$5,000 a year", "19 yr 1 mo", "10 yr 11 mo", "$225,597", "$157,036"],
-        ["$10,000 once, today", "$10,000 total", "27 yr 3 mo", "2 yr 9 mo", "$328,717", "$53,917"]
+        [
+          "Baseline",
+          "None",
+          "30 yr 0 mo",
+          "None",
+          "$382,633",
+          "None"
+        ],
+        [
+          "Bi-weekly half payments",
+          "About $158/month equivalent",
+          "24 yr 2 mo",
+          "5 yr 10 mo",
+          "$294,512",
+          "$88,122"
+        ],
+        [
+          "Extra $100 a month",
+          "$1,200 a year",
+          "26 yr 0 mo",
+          "4 yr 0 mo",
+          "$321,639",
+          "$60,995"
+        ],
+        [
+          "Extra $200 a month",
+          "$2,400 a year",
+          "23 yr 1 mo",
+          "6 yr 11 mo",
+          "$279,185",
+          "$103,449"
+        ],
+        [
+          "Extra $500 a month",
+          "$6,000 a year",
+          "17 yr 6 mo",
+          "12 yr 6 mo",
+          "$202,874",
+          "$179,759"
+        ],
+        [
+          "$5,000 lump each year",
+          "$5,000 a year",
+          "19 yr 1 mo",
+          "10 yr 11 mo",
+          "$225,597",
+          "$157,036"
+        ],
+        [
+          "$10,000 once, today",
+          "$10,000 total",
+          "27 yr 3 mo",
+          "2 yr 9 mo",
+          "$328,717",
+          "$53,917"
+        ]
       ]
     },
     {
@@ -48,18 +104,48 @@
     },
     {
       "type": "table",
-      "headers": ["Strategy", "Extra dollars you contribute", "Interest saved", "Saved per extra dollar"],
+      "headers": [
+        "Strategy",
+        "Extra dollars you contribute",
+        "Interest saved",
+        "Saved per extra dollar"
+      ],
       "rows": [
-        ["Extra $100 a month", "$31,200", "$60,995", "$1.95"],
-        ["Extra $200 a month", "$55,400", "$103,449", "$1.87"],
-        ["Extra $500 a month", "$105,000", "$179,759", "$1.71"],
-        ["$5,000 lump each year (19 lumps)", "$95,000", "$157,036", "$1.65"],
-        ["$10,000 once, today", "$10,000", "$53,917", "$5.39"]
+        [
+          "Extra $100 a month",
+          "$31,200",
+          "$60,995",
+          "$1.95"
+        ],
+        [
+          "Extra $200 a month",
+          "$55,400",
+          "$103,449",
+          "$1.87"
+        ],
+        [
+          "Extra $500 a month",
+          "$105,000",
+          "$179,759",
+          "$1.71"
+        ],
+        [
+          "$5,000 lump each year (19 lumps)",
+          "$95,000",
+          "$157,036",
+          "$1.65"
+        ],
+        [
+          "$10,000 once, today",
+          "$10,000",
+          "$53,917",
+          "$5.39"
+        ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "Extra dollars are the sum of the extra payments made before the loan ends. The ratio falls as the extra amount grows because a bigger payment ends the loan sooner, leaving each later dollar fewer years to save interest. The single lump looks spectacular per dollar because it lands at the start, but it saves less in total simply because it is a smaller sum."
+      "text": "Extra dollars are the scheduled extra payments made before the loan ends (the final payment is usually smaller, so the true total is slightly lower). The ratio falls as the extra amount grows because a bigger payment ends the loan sooner, leaving each later dollar fewer years to save interest. The single lump looks spectacular per dollar because it lands at the start, but it saves less in total simply because it is a smaller sum."
     },
     {
       "type": "heading",

@@ -103,3 +103,17 @@ describe('sleep', () => {
     expect(panel).toBeNull();
   });
 });
+
+describe('sleep: recommended row is the 5-cycle option (educational text)', () => {
+  it('wake mode: 6:30 AM -> 5 cycles, bedtime 10:46 PM', () => {
+    const r = config.calculate({ mode: 'wake', wakeupTime: '6:30 AM' });
+    expect(getValue(r, 'recommendedBedtime')).toBe('10:46 PM');
+    expect(getValue(r, 'cycleInfo')).toBe('5 complete cycles (7.5 hours)');
+  });
+
+  it('sleep mode: bed 11:00 PM -> 5 cycles, wake 6:44 AM', () => {
+    const r = config.calculate({ mode: 'sleep', bedtime: '11:00 PM' });
+    expect(getValue(r, 'recommendedWakeup')).toBe('6:44 AM');
+    expect(getValue(r, 'cycleInfo')).toBe('5 complete cycles (7.5 hours)');
+  });
+});

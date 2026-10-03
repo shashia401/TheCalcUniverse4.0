@@ -30,7 +30,7 @@
     },
     {
       "type": "paragraph",
-      "text": "The table shows how long Rs. 1,00,00,000 lasts for different monthly withdrawals, computed with the calculator's method. 'Does not run out' means the balance stays positive for the full 100-year limit I tested. These returns are assumptions for illustration, and each is applied smoothly every month, which real markets do not do."
+      "text": "The table shows how long Rs. 1,00,00,000 lasts for different monthly withdrawals, computed with the calculator's method. 'Does not run out' means the balance stays positive for the full 100-year limit used in this test (the calculator itself stops at 50 years). These returns are assumptions for illustration, and each is applied smoothly every month, which real markets do not do."
     },
     {
       "type": "table",

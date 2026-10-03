@@ -1,98 +1,213 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is the Race-Free 2021 eGFR?"
-    },
-    {
       "type": "paragraph",
-      "text": "In 2021, the National Kidney Foundation and American Society of Nephrology jointly recommended a new equation for estimating GFR that removes race as a factor. The 2021 CKD-EPI creatinine equation calculates eGFR using only four variables: serum creatinine, age, sex, and sex-specific kappa coefficients. Race is no longer included."
-    },
-    {
-      "type": "paragraph",
-      "text": "This was a fundamental change. For decades, GFR estimating equations — including the original MDRD (1999) and CKD-EPI (2009) — included a race coefficient that multiplied the eGFR result by approximately 1.16-1.21 for patients identified as Black. This was intended to account for average differences in creatinine generation due to muscle mass, but it had unintended consequences that disproportionately harmed Black patients."
+      "text": "The 2021 race-free eGFR is the CKD-EPI creatinine equation re-fitted without a race term. It uses only serum creatinine, age and sex. The older 2009 CKD-EPI equation multiplied the result by 1.159 when a patient was recorded as Black, and the MDRD equation used a multiplier of 1.210. Removing that step means the number printed on a lab report can change at the switch even though the kidneys did not. In our calculations, a Black patient typically sees a result about 5 to 14 percent lower under the 2021 equation, while a non-Black patient sees a result between about 0 and 11 percent higher."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Was the Race Coefficient Removed?"
+      "text": "What actually changed in the equation"
     },
     {
       "type": "paragraph",
-      "text": "The removal of the race coefficient was driven by a growing body of evidence that the adjustment was causing more harm than good. The race coefficient was based on the observation that Black individuals have higher average serum creatinine levels. This was attributed to higher average muscle mass, but the adjustment was imprecise and failed at the individual level."
+      "text": "The coefficients below come from the NIDDK and NKF pages for the 2021 equation and from the published 2009 equation. Creatinine is in mg/dL, and results are in mL/min/1.73 m2."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Feature",
+        "CKD-EPI 2009",
+        "CKD-EPI 2021"
+      ],
+      "rows": [
+        [
+          "Leading constant",
+          "141 (male) or 144 (female)",
+          "142"
+        ],
+        [
+          "Creatinine exponent above the cutoff",
+          "-1.209",
+          "-1.200"
+        ],
+        [
+          "Age factor per year",
+          "0.9929",
+          "0.9938"
+        ],
+        [
+          "Female adjustment",
+          "built into the 144 constant",
+          "x 1.012"
+        ],
+        [
+          "Race multiplier",
+          "x 1.159 if Black",
+          "none"
+        ],
+        [
+          "Inputs",
+          "creatinine, age, sex, race",
+          "creatinine, age, sex"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "MDRD, the older equation, carried a 1.210 multiplier for African American patients. Because the 2021 equation was re-fitted rather than simply having a multiplier deleted, the effect of the change is not a flat percentage."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How big is the change? Computed examples"
+    },
+    {
+      "type": "paragraph",
+      "text": "We computed both equations for the same lab values. The 2009 columns are shown with and without the race multiplier so you can see both sides of the change. The NKF categories are G1 90 or above, G2 60 to 89, G3a 45 to 59, G3b 30 to 44."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Case (creatinine in mg/dL)",
+        "2009 with multiplier",
+        "2009 without multiplier",
+        "2021",
+        "Change for a patient recorded as Black",
+        "Change for a patient not recorded as Black"
+      ],
+      "rows": [
+        [
+          "Man, 35, 1.0",
+          "112.1",
+          "96.7",
+          "100.7",
+          "-10.2%",
+          "+4.1%"
+        ],
+        [
+          "Man, 50, 1.2",
+          "80.8",
+          "69.7",
+          "73.7",
+          "-8.8%",
+          "+5.6%"
+        ],
+        [
+          "Woman, 55, 1.1",
+          "65.3",
+          "56.3",
+          "59.3",
+          "-9.1%",
+          "+5.3%"
+        ],
+        [
+          "Man, 70, 1.4",
+          "58.2",
+          "50.2",
+          "54.1",
+          "-7.0%",
+          "+7.7%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "One of these rows crosses a category line. The 55-year-old woman moves from 65.3 (G2) to 59.3 (G3a) if she was recorded as Black, because the old multiplier no longer applies. A 65-year-old non-Black woman with a creatinine of 1.0 moves in the other direction, from 58.9 (G3a) to 62.5 (G2). Across ages 20 to 90 and creatinine values giving an eGFR between 15 and 120, the 2021 result was 4.5 to 13.9 percent lower than the multiplied 2009 result and 0.3 percent lower to 10.7 percent higher than the unmultiplied one. The effect is largest at higher eGFR and smaller at lower eGFR, which matches the NKF laboratory guidance that values may differ by more than 10 percent particularly at higher eGFR and younger ages."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the race term was removed"
+    },
+    {
+      "type": "paragraph",
+      "text": "The 2021 development paper in the New England Journal of Medicine (Inker and colleagues) opens with the reason: race in eGFR equations is a social and not a biologic construct. The NKF and the American Society of Nephrology convened a joint task force that recommended the 2021 CKD-EPI creatinine equation, without a race variable, for use in all laboratories, together with wider use of cystatin C."
+    },
+    {
+      "type": "paragraph",
+      "text": "The paper also quantified the trade-offs. Using the 2009 creatinine equation with its race term, measured GFR was overestimated in Black participants by a median of 3.7 mL/min/1.73 m2. Simply deleting the race term from that equation would have underestimated measured GFR in Black participants by a median of 7.1. The refitted 2021 equation underestimated it in Black participants by 3.6 and overestimated it in non-Black participants by 3.9, and 85 percent or more of estimates for both groups fell within 30 percent of measured GFR for all equations. Tufts, which hosts the equations, adds that the 2021 version is somewhat less accurate than 2009 in both groups against measured GFR, though acceptable for clinical use. In other words, the change was chosen to avoid using race as a biological proxy, and it comes with a small accuracy cost that cystatin C is intended to reduce."
+    },
+    {
+      "type": "paragraph",
+      "text": "A published review of the change reported a projected national effect of reclassifying roughly 584,000 Black adults to more advanced CKD stages and expanding nephrology referral for about 41,800. That is a modelled estimate, not a measurement, and it should be read as such."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the change means for your own result"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Race is a social construct, not a biological category — the genetic diversity within racial groups is far greater than average differences between groups. Using race as a variable in medical equations is fundamentally flawed.",
-        "The race coefficient systematically overestimated GFR in Black patients by 10-20%, meaning their kidney disease appeared less severe than it actually was.",
-        "Overestimation led to delayed diagnosis of CKD, missing the window for early intervention and specialist referral.",
-        "Black patients with kidney disease were less likely to be referred to a nephrologist or placed on kidney transplant waiting lists — partly because their eGFR appeared higher than their true kidney function.",
-        "Studies showed that removing the race coefficient improved the accuracy of eGFR for Black patients without significantly affecting accuracy for others."
+        "Your kidneys did not change on the day your lab switched. Only the arithmetic did.",
+        "If your old and new results sit on different sides of 60, compare them using the same equation before concluding anything. You can recompute an older value from the original creatinine if your report lists it.",
+        "Staging requires more than one number. Under KDIGO 2024, CKD is abnormalities of kidney structure or function present for more than 3 months, shown by GFR below 60 or by markers of kidney damage such as albuminuria. NKF classification also says G1 and G2 are not CKD without evidence of kidney damage.",
+        "The NKF laboratory guidance recommends cystatin C confirmation when eGFR from creatinine is 45 to 59 and the urine albumin-to-creatinine ratio is under 30 mg/g, because creatinine alone can be misleading in that zone.",
+        "Creatinine-based equations are affected by muscle mass, diet, pregnancy and some medicines, regardless of race."
       ]
     },
     {
-      "type": "paragraph",
-      "text": "The NKF-ASN task force, convened in 2020, reviewed the evidence and recommended immediate adoption of race-free equations. Their report, published in September 2021, was unequivocal: \"The task force recommends immediate implementation of the CKD-EPI creatinine equation re-expressed without race.\""
-    },
-    {
       "type": "heading",
       "level": 2,
-      "text": "How Does the 2021 Equation Differ from the 2009 Version?"
+      "text": "Common mistakes"
     },
     {
-      "type": "paragraph",
-      "text": "The mathematical difference is straightforward. The 2009 CKD-EPI equation had a single coefficient that multiplied eGFR by 1.159 (or 1.212 for the MDRD equation) for Black patients. The 2021 equation removed this multiplier entirely. For non-Black patients, the equations produce essentially identical results. For Black patients, the race-free equation produces a lower eGFR — more accurately reflecting true kidney function."
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Subtracting an old eGFR from a new one to measure change over time when they came from different equations.",
+        "Applying a race multiplier by hand. The 2021 calculation has none; entering race adds nothing.",
+        "Assuming a lower number means disease. The same patient simply has a different estimate; disease is decided from the trend, urine tests and clinical context.",
+        "Treating the 2021 equation as exact. It is still an estimate with error."
+      ]
     },
     {
       "type": "callout",
-      "variant": "info",
-      "text": "For Black patients, the change is typically a 10-20% decrease in eGFR. A patient whose old eGFR was 68 (Stage 2) might now have an eGFR of 56 (Stage 3a). This is not a decline in actual kidney function — it is a more accurate estimate. The \"drop\" happened on paper, not in your kidneys."
-    },
-    {
-      "type": "paragraph",
-      "text": "The practical consequence is that more Black patients are now correctly identified as having earlier-stage CKD, which triggers earlier intervention — blood pressure control, medication optimization, and specialist referral. This correction is long overdue and will improve outcomes by detecting kidney disease at a stage where treatment is most effective."
+      "variant": "warning",
+      "text": "This page is educational and not medical advice. If your eGFR report changed after your lab updated its equation, or if you are asked to change a medicine dose because of eGFR, discuss it with your clinician, who can see your full results and history."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What This Means for Patients"
+      "text": "Cystatin C: the other half of the 2021 update"
     },
     {
       "type": "paragraph",
-      "text": "If you are Black and had a previous eGFR result using the race-adjusted equation, your new eGFR using the 2021 race-free equation may be 10-20% lower. It is essential to understand that your kidney function did not suddenly decline — the equation used to calculate it was corrected. Your actual kidney function was always this level."
-    },
-    {
-      "type": "paragraph",
-      "text": "If your eGFR changed from 72 to 60 under the new equation, you did not lose 12 points of kidney function overnight. The old equation was overestimating your kidney function by about 12 points. Your true kidney function is better captured by the new number. This correction allows your doctor to make better clinical decisions based on more accurate information."
+      "text": "The 2021 CKD-EPI creatinine-cystatin C equation uses both markers and is stated by NIDDK to be preferred and more accurate than creatinine alone. In the Inker paper, equations that combined creatinine and cystatin C without race were more accurate and gave smaller differences between Black and non-Black participants than creatinine-only or cystatin-only versions. Access to cystatin C testing varies by lab and region, so ask your clinician whether it is appropriate for you."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What This Means for Healthcare"
-    },
-    {
-      "type": "paragraph",
-      "text": "The adoption of race-free eGFR represents an important step toward equitable medical care. However, it is not a complete solution to kidney health disparities. Black Americans are still 3-4 times more likely to develop kidney failure than white Americans, due to higher rates of hypertension, diabetes, and systemic barriers to healthcare access."
-    },
-    {
-      "type": "paragraph",
-      "text": "The race-free eGFR correction addresses one specific source of disparity — the underestimation of kidney disease severity. It does not fix the underlying causes of higher kidney disease rates. Addressing those causes requires broader changes in healthcare access, social determinants of health, and population-level interventions for hypertension and diabetes."
+      "text": "Frequently asked questions"
     },
     {
       "type": "heading",
-      "level": 2,
-      "text": "Cystatin C: The Next Step in Accurate GFR Estimation"
+      "level": 3,
+      "text": "Did my kidney function drop when my lab updated its equation?"
     },
     {
       "type": "paragraph",
-      "text": "While the 2021 creatinine-based equation removed race, it still depends on creatinine, which is affected by muscle mass. Cystatin C is an alternative biomarker that is produced at a constant rate by all cells regardless of muscle mass. Cystatin C-based eGFR equations are more accurate than creatinine-based equations in many populations and are not affected by race, diet, or muscle mass."
+      "text": "No. The blood test was the same. The equation changed. A higher or lower printed number after the update is a calculation effect, and your clinician will interpret it with your history."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Does our calculator ask for race?"
     },
     {
       "type": "paragraph",
-      "text": "The NKF-ASN task force recommended further research into cystatin C-based equations as an even more equitable alternative. Some labs now offer eGFR based on both creatinine and cystatin C (CKD-EPI Cr-Cys equation), which provides the most accurate estimate available without a blood draw."
+      "text": "No. It uses the 2021 CKD-EPI creatinine equation, which has no race input."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is the 2021 equation more accurate than the 2009 one?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Against measured GFR it is slightly less accurate on average according to Tufts, but it avoids using race and is recommended by the NKF and ASN task force. The creatinine-cystatin C version is the most accurate of those tested."
     },
     {
       "type": "cta",
@@ -100,56 +215,6 @@
       "body": "Our free GFR calculator uses the current clinical standard — the 2021 CKD-EPI race-free equation. Get your eGFR in 30 seconds.",
       "buttonLabel": "Calculate eGFR",
       "path": "/health/gfr-calculator/"
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Did my kidney function actually drop when the new equation was adopted?"
-    },
-    {
-      "type": "paragraph",
-      "text": "No. Your actual kidney function did not change. The equation used to estimate it became more accurate. The \"lower\" eGFR number represents the same true kidney function as before — the old number was simply an overestimate."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Why was race used in medical equations in the first place?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Race was used because observed average differences in certain biological measurements (serum creatinine, lung function, bone density) correlate with racial categories. However, these differences are driven by social and environmental factors, not genetics. Using race as a proxy for biological difference in medical algorithms is increasingly recognized as flawed and harmful."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Does our GFR calculator use the race-free equation?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Yes. Our calculator uses the 2021 CKD-EPI creatinine-based equation, which does not include a race coefficient. You do not need to enter your race to get an accurate eGFR estimate."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Will race be removed from other medical equations?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Yes. The same issues apply to other equations that have historically included race adjustments, including pulmonary function tests, bone density assessments, and cardiovascular risk calculators. Many medical societies are reviewing and updating these algorithms to remove race adjustments."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Is the race-free equation less accurate for Black patients?"
-    },
-    {
-      "type": "paragraph",
-      "text": "No — multiple studies have shown the race-free equation is more accurate for Black patients. Removing the race coefficient eliminated a systematic overestimation that was masking the true severity of kidney disease. Accuracy improved for Black patients without decreasing accuracy for other groups."
     }
   ],
   "keywords": [

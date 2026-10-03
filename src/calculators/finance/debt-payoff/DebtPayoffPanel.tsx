@@ -38,7 +38,7 @@ function simulateFull(cards: Card[], extraPayment: number, strategy: 'snowball' 
 
   while (balances.some((b) => b > 0.01) && month < maxMonths) {
     month++;
-    let extra = extraPayment + order.reduce((freed, _, i) => balances[i] <= 0 ? freed + order[i].min : freed, 0);
+    let extra = extraPayment;
 
     const interest = balances.map((b, i) => b > 0 ? b * (order[i].rate / 100 / 12) : 0);
     interest.forEach((int, i) => {
@@ -46,18 +46,19 @@ function simulateFull(cards: Card[], extraPayment: number, strategy: 'snowball' 
       interestPaid[i] += int;
     });
 
-    const minPayments = order.map((c, i) => balances[i] > 0 ? c.min : 0);
+    // Unused minimum on a card that this payment clears also rolls into the pool (same as the calculator)
+    const minPayments = order.map((c, i) => Math.min(c.min, balances[i]));
     balances.forEach((_, i) => {
       balances[i] = Math.max(0, balances[i] - minPayments[i]);
+      extra += order[i].min - minPayments[i];
     });
 
-    for (let i = 0; i < balances.length; i++) {
+    for (let i = 0; i < balances.length && extra > 0; i++) {
       if (balances[i] <= 0.01) continue;
       const pay = Math.min(extra, balances[i]);
       balances[i] -= pay;
       extra -= pay;
       if (balances[i] < 0.01) balances[i] = 0;
-      break;
     }
 
     balances.forEach((b, i) => {

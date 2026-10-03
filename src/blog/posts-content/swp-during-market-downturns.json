@@ -11,7 +11,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Start with Rs. 1,00,00,000 and a withdrawal of Rs. 50,000 a month, which is Rs. 6,00,000 a year or 6% of the corpus. If the portfolio falls 20% in year one and you also take Rs. 6,00,000 out, a rough version is Rs. 80,00,000 minus Rs. 6,00,000, or Rs. 74,00,000. To climb back to Rs. 1 crore from there takes a gain of 35.1% (1,00,00,000 divided by 74,00,000, minus 1), not 20%. Taking the withdrawal out month by month instead, my simulation leaves Rs. 74,57,214 at the end of that year, because some withdrawals come before the fall is fully realised. The lesson stands either way: losses plus withdrawals compound against you."
+      "text": "Start with Rs. 1,00,00,000 and a withdrawal of Rs. 50,000 a month, which is Rs. 6,00,000 a year or 6% of the corpus. If the portfolio falls 20% in year one and you also take Rs. 6,00,000 out, a rough version is Rs. 80,00,000 minus Rs. 6,00,000, or Rs. 74,00,000. To climb back to Rs. 1 crore from there takes a gain of 35.1% (1,00,00,000 divided by 74,00,000, minus 1), not 20%. Taking the withdrawal out month by month instead, a simulation leaves Rs. 74,57,214 at the end of that year, because some withdrawals come before the fall is fully realised. The lesson stands either way: losses plus withdrawals compound against you."
     },
     {
       "type": "heading",
@@ -20,7 +20,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Here are two hypothetical five-year paths made from exactly the same five yearly returns. They are not forecasts or data from any fund. Path A has the losses first: -20%, -5%, +10%, +15%, +20%. Path B reverses them: +20%, +15%, +10%, -5%, -20%. Both multiply to the same overall growth (1.1537 times, about 2.9% a year). Each yearly return is applied as a monthly rate equal to (1 plus the yearly return) to the power 1/12, minus 1, the balance grows first, then Rs. 50,000 is withdrawn. After year five the return is assumed to be 7% or 6% a year. Past performance does not guarantee future results."
+      "text": "Here are two hypothetical five-year paths made from exactly the same five yearly returns. They are not forecasts or data from any fund. Path A has the losses first: -20%, -5%, +10%, +15%, +20%. Path B reverses them: +20%, +15%, +10%, -5%, -20%. Both multiply to the same overall growth (1.1537 times, about 2.9% a year). Each yearly return is applied as a monthly rate equal to (1 plus the yearly return) to the power 1/12, minus 1, the balance grows first, then Rs. 50,000 is withdrawn. After year five the return is assumed to be 7% or 6% a year, converted to a monthly rate the same way. Past performance does not guarantee future results."
     },
     {
       "type": "table",
@@ -47,7 +47,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Identical returns, an identical withdrawal, and a gap of more than Rs. 13 lakh after five years. With a later return of 6%, path A lasts 28.0 years while path B lasts 39.4. For comparison, a smooth 8% every year would leave Rs. 1,10,46,048 after five years. The calculator on this site uses a constant return, so it will always show something closer to that smooth case; it cannot show path A. That is why its own results page warns that a downturn early in withdrawals can deplete a fund faster than the model shows."
+      "text": "Identical returns, an identical withdrawal, and a gap of more than Rs. 13 lakh after five years. With a later return of 6%, path A lasts 28.0 years while path B lasts 39.4. For comparison, a smooth 8% every year would leave Rs. 1,10,46,048 after five years on the same monthly conversion. The calculator on this site uses a constant return and divides the annual rate by 12, so it shows a slightly higher figure for the same 8% (about Rs. 1,12,24,615) and always a smooth path; it cannot show path A. That is why its own results page warns that a downturn early in withdrawals can deplete a fund faster than the model shows."
     },
     {
       "type": "heading",
@@ -100,7 +100,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Spending less in the early years is the most direct defence, and it costs only comfort. The cash buffer works by letting you pay expenses without selling units while prices are low, but it comes with a trade-off I tested too. On path B, where the losses come at the end, the three-year buffer makes the money last 56.1 years instead of not running out in 80 years, because the cash earns less than the invested portion. A buffer is insurance: it pays off in the bad scenario and costs you a little in the good one. My model does not refill the buffer, which a real plan would try to do after good years."
+      "text": "Spending less in the early years is the most direct defence, and it costs only comfort. The cash buffer works by letting you pay expenses without selling units while prices are low, but it comes with a trade-off the test also shows. On path B, where the losses come at the end, the three-year buffer makes the money last 56.1 years instead of not running out in 80 years, because the cash earns less than the invested portion. A buffer is insurance: it pays off in the bad scenario and costs you a little in the good one. The model does not refill the buffer, which a real plan would try to do after good years."
     },
     {
       "type": "heading",

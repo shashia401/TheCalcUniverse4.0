@@ -37,20 +37,98 @@
     },
     {
       "type": "table",
-      "headers": ["Change from the base case", "Projected value", "Difference", "Percent change"],
+      "headers": [
+        "Change from the base case",
+        "Projected value",
+        "Difference",
+        "Percent change"
+      ],
       "rows": [
-        ["Base case (6%, 25 years, $400/month, $25,000 start)", "$388,822", "-", "-"],
-        ["Starting balance $10,000 higher", "$433,472", "+$44,650", "+11.5%"],
-        ["Contribution $100/month higher", "$458,121", "+$69,299", "+17.8%"],
-        ["Return 1 percentage point higher (7%)", "$467,164", "+$78,342", "+20.1%"],
-        ["Return 1 percentage point lower (5%)", "$325,236", "-$63,586", "-16.4%"],
-        ["Five more years (30 years)", "$552,370", "+$163,549", "+42.1%"],
-        ["Five fewer years (20 years)", "$267,571", "-$121,250", "-31.2%"]
+        [
+          "Base case (6%, 25 years, $400/month, $25,000 start)",
+          "$388,822",
+          "-",
+          "-"
+        ],
+        [
+          "Starting balance $10,000 higher",
+          "$433,472",
+          "+$44,650",
+          "+11.5%"
+        ],
+        [
+          "Contribution $100/month higher",
+          "$458,121",
+          "+$69,299",
+          "+17.8%"
+        ],
+        [
+          "Return 1 percentage point higher (7%)",
+          "$467,164",
+          "+$78,342",
+          "+20.1%"
+        ],
+        [
+          "Return 1 percentage point lower (5%)",
+          "$325,236",
+          "-$63,586",
+          "-16.4%"
+        ],
+        [
+          "Five more years (30 years)",
+          "$552,370",
+          "+$163,549",
+          "+42.1%"
+        ],
+        [
+          "Five fewer years (20 years)",
+          "$267,571",
+          "-$121,250",
+          "-31.2%"
+        ]
       ]
     },
     {
       "type": "paragraph",
       "text": "Time is the biggest lever here, and it is also the one you cannot buy back later. The return rate is the second lever, but it is the one you control least, which is why a projection should be run at a lower rate than you hope for. A $100 monthly increase beats a $10,000 one-time boost in this example, although the $100 costs you $30,000 of extra contributions over 25 years while the $10,000 costs you $10,000 once."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Reading the Calculator Outputs"
+    },
+    {
+      "type": "paragraph",
+      "text": "Besides the expected value, the calculator shows an optimistic and a pessimistic scenario by adding and subtracting a return variance from your assumed rate. If the variance field is left blank or at zero, it uses 2 percentage points, and the pessimistic rate never goes below 0 percent. For the base case above:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario",
+        "Annual return",
+        "Projected value after 25 years"
+      ],
+      "rows": [
+        [
+          "Pessimistic (6% minus 2 points)",
+          "4%",
+          "$273,496"
+        ],
+        [
+          "Expected",
+          "6%",
+          "$388,822"
+        ],
+        [
+          "Optimistic (6% plus 2 points)",
+          "8%",
+          "$563,915"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The spread is wide because the return compounds for 25 years. Plan around the pessimistic row and treat the optimistic one as a bonus. Contribution frequency also needs care. A weekly contribution is converted to a monthly equivalent (amount x 52 / 12), so $100 a week counts as $433.33 a month, and the same base case then projects to $411,922 on $155,000 of contributions. An annual contribution is divided by 12 and treated as if it arrived monthly, so $4,800 a year gives the same $388,822 as $400 a month. If you actually deposit $4,800 once at the end of each year, the contribution stream grows to about $269,657 instead of $277,198, and the total comes to about $381,281, roughly 2 percent lower."
     },
     {
       "type": "heading",
@@ -63,12 +141,37 @@
     },
     {
       "type": "table",
-      "headers": ["Annual fee", "Net return used", "Projected value", "Lost to fees"],
+      "headers": [
+        "Annual fee",
+        "Net return used",
+        "Projected value",
+        "Lost to fees"
+      ],
       "rows": [
-        ["0.10%", "5.90%", "$381,852", "$6,969 (1.8%)"],
-        ["0.50%", "5.50%", "$355,382", "$33,440 (8.6%)"],
-        ["1.00%", "5.00%", "$325,236", "$63,586 (16.4%)"],
-        ["2.00%", "4.00%", "$273,496", "$115,326 (29.7%)"]
+        [
+          "0.10%",
+          "5.90%",
+          "$381,852",
+          "$6,969 (1.8%)"
+        ],
+        [
+          "0.50%",
+          "5.50%",
+          "$355,382",
+          "$33,440 (8.6%)"
+        ],
+        [
+          "1.00%",
+          "5.00%",
+          "$325,236",
+          "$63,586 (16.4%)"
+        ],
+        [
+          "2.00%",
+          "4.00%",
+          "$273,496",
+          "$115,326 (29.7%)"
+        ]
       ]
     },
     {

@@ -144,7 +144,7 @@
       "ordered": false,
       "items": [
         "Judging a change from one tank. Weather, traffic, and pump shut-off all move a single reading, so compare averages over several tanks.",
-        "Trusting the dashboard average without checking it. Many displays are estimates; the fill-up method uses the fuel you actually bought.",
+        "Trusting the dashboard average without checking it. The dashboard figure is the car's own estimate; the fill-up method uses the fuel you actually bought, so check one against the other.",
         "Mixing units. A US gallon is not an imperial gallon, so 30 US MPG is about 36 imperial MPG, and L/100 km runs the opposite way: lower is better.",
         "Applying these rules to plug-in hybrids and EVs. Electricity use needs its own accounting, and a single MPG number can mislead.",
         "Expecting window-sticker figures. EPA ratings come from standardized tests, so real-world results can differ from them."

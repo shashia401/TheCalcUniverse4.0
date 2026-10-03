@@ -25,7 +25,7 @@
     },
     {
       "type": "paragraph",
-      "text": "The implied loss uses the calculator's rule of thumb of about 3,500 kcal per lb, so 500 kcal a day is roughly 1 lb a week. The CDC states that people who lose weight at a gradual, steady pace of about 1 to 2 pounds a week are more likely to keep it off than people who lose it faster, and it notes that medications, medical conditions and other individual factors can affect weight. In this example the 500 kcal deficit sits only 18 kcal above her BMR, so for her it is close to the practical limit rather than a safe default."
+      "text": "The implied loss uses the calculator's rule of thumb of about 3,500 kcal per lb, so 500 kcal a day is roughly 1 lb a week. The CDC states that people who lose weight at a gradual, steady pace of about 1 to 2 pounds a week are more likely to keep it off than people who lose it faster. In this example the 500 kcal deficit sits only 18 kcal above her BMR, so for her it is close to the practical limit rather than a safe default."
     },
     {
       "type": "heading",
@@ -52,12 +52,12 @@
         ["0", "70.0 kg (154.3 lb)", "1,898 kcal", "500 kcal", "0 lb", "0 lb"],
         ["12", "64.9 kg (143.1 lb)", "1,828 kcal", "430 kcal", "11.2 lb", "12 lb"],
         ["20", "61.9 kg (136.5 lb)", "1,787 kcal", "389 kcal", "17.8 lb", "20 lb"],
-        ["32", "58.0 kg (127.8 lb)", "1,732 kcal", "335 kcal", "26.5 lb", "32 lb"]
+        ["32", "58.0 kg (127.8 lb)", "1,732 kcal", "334 kcal", "26.5 lb", "32 lb"]
       ]
     },
     {
       "type": "paragraph",
-      "text": "Assumptions: the 3,500 kcal per lb rule holds, the activity factor and height stay fixed, and weight is the only thing that changes. The deficit falls from 500 to 335 kcal, so the plan loses about 5.5 lb less than the straight-line rule by week 32. Real life adds further effects, and a dynamic model of weight change (Hall et al., The Lancet, 2011) reports that bodyweight responds slowly to a change in intake, with half-times of about one year."
+      "text": "Assumptions: the 3,500 kcal per lb rule holds, the activity factor and height stay fixed, and weight is the only thing that changes. The deficit falls from 500 to 334 kcal, so the plan loses about 5.5 lb less than the straight-line rule by week 32. Real life adds further effects, and a dynamic model of weight change (Hall et al., The Lancet, 2011) reports that bodyweight responds slowly to a change in intake, with half-times of about one year."
     },
     {
       "type": "heading",
@@ -90,7 +90,7 @@
     {
       "type": "list",
       "items": [
-        "Applying the same 500 kcal to everyone. As a share of TDEE it ranged from 18% to 36% in the examples above.",
+        "Applying the same 500 kcal to everyone. As a share of TDEE it ranged from 23% to 36% in the examples above.",
         "Picking an activity factor that is too high. The calculator advises choosing the lower option when unsure; one step is 12.7% of TDEE at 1.375 to 1.55.",
         "Cutting further when weight stalls without recalculating first. A lower weight lowers TDEE.",
         "Reading the 3,500 kcal rule as exact. It is a rough conversion, not a promise."

@@ -105,7 +105,7 @@ const sleepConfig: CalculatorConfig = {
         });
       }
 
-      const bestIdx = options.findIndex((o) => o.cycles >= 5 && o.cycles <= 6);
+      const bestIdx = options.findIndex((o) => o.cycles === 5); // educational text: the 5-cycle option is the best balance
       const recommendedItem = bestIdx >= 0 ? options[bestIdx] : options[0];
 
       return [
@@ -147,7 +147,7 @@ const sleepConfig: CalculatorConfig = {
         });
       }
 
-      const bestIdx = options.findIndex((o) => o.cycles >= 5 && o.cycles <= 6);
+      const bestIdx = options.findIndex((o) => o.cycles === 5); // educational text: the 5-cycle option is the best balance
       const recommendedItem = bestIdx >= 0 ? options[bestIdx] : options[0];
 
       return [

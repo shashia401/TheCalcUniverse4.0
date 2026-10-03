@@ -1,117 +1,158 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "BMI is weight in kilograms divided by height in metres squared, and what it really tells you is how heavy you are for your height. It does not measure body fat directly. The CDC states that BMI does not distinguish between fat, muscle and bone mass, and does not indicate what types of fat a person has or where in the body they carry it. That is why BMI works as a quick screen but can mislead for an individual, in both directions."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "What BMI Actually Measures"
+      "text": "The standard categories"
     },
     {
       "type": "paragraph",
-      "text": "BMI is a simple formula: your weight in kilograms divided by your height in meters squared. It was developed in the 1830s by Belgian mathematician Adolphe Quetelet as a way to measure population-level obesity, not as a diagnostic tool for individuals. The key word is population-level. BMI works well for spotting trends across large groups. For individuals, it is a starting point, not a verdict. It correlates reasonably well with body fat percentage for most people, but it does not directly measure body fat, muscle mass, bone density, or fat distribution."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "The BMI Categories"
+      "text": "For adults 20 and older the CDC uses the categories below, applied regardless of age, sex or race. The WHO defines overweight as a BMI of 25 or more and obesity as 30 or more."
     },
     {
       "type": "table",
       "headers": [
-        "Category",
-        "Range",
-        "Risk Level"
+        "Category (CDC, adults 20+)",
+        "BMI"
       ],
       "rows": [
         [
-          "Severely underweight",
-          "Below 16.0",
-          "High"
-        ],
-        [
           "Underweight",
-          "16.0 - 18.4",
-          "Moderate"
+          "Less than 18.5"
         ],
         [
-          "Normal weight",
-          "18.5 - 24.9",
-          "Low"
+          "Healthy weight",
+          "18.5 to less than 25"
         ],
         [
           "Overweight",
-          "25.0 - 29.9",
-          "Low-Moderate"
+          "25 to less than 30"
         ],
         [
-          "Obese Class I",
-          "30.0 - 34.9",
-          "Moderate"
+          "Class 1 obesity",
+          "30 to less than 35"
         ],
         [
-          "Obese Class II",
-          "35.0 - 39.9",
-          "High"
+          "Class 2 obesity",
+          "35 to less than 40"
         ],
         [
-          "Obese Class III",
-          "40.0 and above",
-          "Very High"
+          "Class 3 obesity",
+          "40 or greater"
         ]
       ]
     },
     {
+      "type": "heading",
+      "level": 2,
+      "text": "Limitation 1: muscle and fat look the same to the formula"
+    },
+    {
       "type": "paragraph",
-      "text": "These cutoffs are based on white European populations and may not apply equally to all ethnic groups. Research shows that people of Asian descent have higher health risks at lower BMIs, while some studies suggest Black individuals may have lower risks at the same BMI. The World Health Organization recommends lower BMI cutoffs for Asian populations (overweight at 23 instead of 25)."
+      "text": "Two of the examples we computed show the problem. A competitive rower who is 1.85 m tall and weighs 95 kg has a BMI of 95 / 1.85^2 = 27.8 (rounded), which falls in the overweight category. In imperial units, a person who is 5 ft 10 in and 190 lb has 703 x 190 / 70^2 = 27.3, also overweight. If that weight is largely muscle, BMI has misclassified the person; if the same weight is mostly fat, BMI is correct. The formula cannot tell the difference, so the same number can describe very different bodies."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When BMI Is Wrong"
+      "text": "Limitation 2: as a screening test it misses a lot"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 2010 systematic review and meta-analysis by Okorodudu and colleagues pooled 25 articles and 32 samples covering 31,968 people and compared BMI cutoffs against measured body fat percentage. Using commonly used cutoffs, pooled sensitivity was 0.50 and specificity 0.90. For a BMI cutoff of 30, sensitivity was 0.42 and specificity 0.97. The authors concluded that common BMI cutoffs have high specificity but low sensitivity, failing to identify about half of the people with excess body fat percentage."
+    },
+    {
+      "type": "paragraph",
+      "text": "In plain numbers, and as an illustration only: if 100 people truly had excess body fat and you used a BMI of 30 as the test, about 42 would be flagged and about 58 would be missed. If 100 people did not have excess body fat, about 3 would be flagged wrongly. A BMI at or above the cutoff is therefore informative, but a BMI below it does not rule out excess body fat."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limitation 3: it ignores where fat is carried"
+    },
+    {
+      "type": "paragraph",
+      "text": "The CDC notes BMI does not show where in the body fat is stored. Waist measurements can add information. The NHS advises keeping your waist size to less than half your height and suggests the waist-to-height check when BMI is under 35. For someone 170 cm tall, half their height is 85 cm. Measure your own waist and divide by your height in the same units; a result of 0.5 or more is what the NHS advice is pointing toward."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limitation 4: one scale for all populations"
+    },
+    {
+      "type": "paragraph",
+      "text": "The WHO expert consultation published in The Lancet in 2004 concluded that the proportion of Asian people with a high risk of type 2 diabetes and cardiovascular disease is substantial at BMIs lower than the existing WHO overweight cutoff of 25. It identified 23.0 and 27.5 as potential public health action points rather than new universal definitions, and proposed that countries decide risk definitions for their own populations. In the UK the NHS applies lower thresholds to people from South Asian, Chinese, other Asian, Middle Eastern, Black African or African-Caribbean backgrounds: a BMI of 23 to 27.4 is overweight and 27.5 or higher is obese."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here is what that means in practice. Someone 1.70 m tall and weighing 70 kg has a BMI of 24.2. On the CDC scale that is healthy weight. On the NHS ethnic-specific scale it is overweight, because it is above 23. At 1.70 m, BMI 23 is 66.5 kg, BMI 25 is 72.3 kg and BMI 27.5 is 79.5 kg. Our BMI calculator uses the standard 18.5, 25 and 30 cutoffs and does not adjust for ethnicity, so apply the lower thresholds yourself if they are relevant to you."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limitation 5: height is squared"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Oxford mathematician Nick Trefethen has argued that dividing by height squared penalises tall people and favours short people, and proposes BMI = 1.3 x weight(kg) / height(m)^2.5. This is one expert's argument, not an official standard. Using his formula we computed what a standard BMI of exactly 25 looks like: a person 5 ft (1.524 m) at 58.1 kg scores 26.3, and a person 6 ft (1.829 m) at 83.6 kg scores 24.0. It is a reminder that the cutoffs are conventions that become less precise at the extremes of height."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limitation 6: age, pregnancy and children"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Athletes and bodybuilders: Muscle is denser than fat. A muscular person can have a BMI in the obese range while having very low body fat. LeBron James at his peak had a BMI over 27.",
-        "Older adults: Muscle mass naturally declines with age. An older person might have a normal BMI but low muscle mass and high body fat percentage (sarcopenic obesity).",
-        "Pregnant women: BMI does not account for the weight of the baby, placenta, and amniotic fluid.",
-        "Different ethnicities: As mentioned, the standard BMI cutoffs do not apply equally across all populations.",
-        "Very tall or short people: BMI tends to overestimate body fat in short people and underestimate it in tall people because the formula uses height squared, which is not perfectly proportional."
+        "Children and teens ages 2 to 19: the CDC uses BMI-for-age percentiles instead of fixed cutoffs. Underweight is below the 5th percentile, healthy weight is the 5th to below the 85th, overweight is the 85th to below the 95th and obesity is the 95th or greater. The WHO defines overweight in ages 5 to 19 as BMI-for-age more than 1 standard deviation above the WHO reference median, and obesity as more than 2.",
+        "Older adults: our BMI calculator lists reduced reliability for older adults, who lose muscle, as a limitation.",
+        "Pregnancy: our calculator also lists pregnant people among those for whom BMI is less reliable. Ask your midwife or doctor which measure to use."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Better Metrics to Track"
+      "text": "What to use alongside BMI"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Body fat percentage: Directly measures how much of your weight is fat vs. muscle. Methods include DEXA scans, hydrostatic weighing, skinfold calipers, and bioelectrical impedance.",
-        "Waist-to-height ratio: Waist circumference divided by height. A ratio above 0.5 indicates increased health risk. This is a better predictor of heart disease than BMI.",
-        "Waist-to-hip ratio: Waist divided by hip circumference. Above 0.85 for women and 0.9 for men indicates central obesity.",
-        "Body composition tracking: Monitoring trends in weight, body fat, and muscle mass over time is more useful than any single number."
+        "Waist-to-height ratio, using the NHS guidance above.",
+        "Body fat percentage, measured by a method your clinician or fitness professional recommends.",
+        "Trends over time rather than one reading: 1 kg changes BMI by about 0.33 at 1.75 m, so small daily weight swings do not matter much.",
+        "Clinical context. The CDC says BMI should be considered with other factors, including medical history, health behaviours, physical exam findings and laboratory results."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Treating BMI as a diagnosis. The CDC describes it as a screening measure.",
+        "Assuming a healthy BMI means healthy. Low sensitivity means BMI can miss excess body fat.",
+        "Ignoring a high BMI because you are muscular without checking your waist or body fat.",
+        "Using adult cutoffs for children and teens.",
+        "Applying one set of cutoffs across ethnic groups without considering guidance such as the WHO 2004 consultation."
       ]
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "BMI is a screening tool, not a diagnostic tool. Use it as one data point alongside waist measurement, body fat percentage, blood pressure, and blood work for a complete picture of metabolic health."
+      "text": "This page is general education, not medical advice. If you are worried about your weight, body composition, or an unexplained change in weight, speak with a clinician who can assess your full health picture."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What is a healthy BMI for my age?"
-    },
-    {
-      "type": "paragraph",
-      "text": "For adults over 20, the same BMI categories apply regardless of age. However, a slightly higher BMI in older adults (25-27) is sometimes associated with better outcomes, a phenomenon called the obesity paradox. For children, BMI is plotted on growth charts and compared to age- and sex-specific percentiles."
+      "text": "Frequently asked questions"
     },
     {
       "type": "heading",
@@ -120,12 +161,21 @@
     },
     {
       "type": "paragraph",
-      "text": "Absolutely. A person with high muscle mass and low body fat can have the same BMI as someone with average muscle and high body fat. This is the main limitation of BMI. Two people with BMI 27 could have very different metabolic health depending on body composition and fat distribution."
+      "text": "Yes. Because BMI ignores muscle, fat distribution and population differences, two people with the same number can carry very different risks. That is why the CDC recommends considering it with other factors."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is BMI useless, then?"
+    },
+    {
+      "type": "paragraph",
+      "text": "No. The CDC calls it a quick, safe and reliable screening measure of weight relative to height, and it is useful for tracking population trends. The point is to treat it as a starting point and not a diagnosis."
     },
     {
       "type": "cta",
       "heading": "Calculate Your BMI",
-      "body": "Use our free BMI calculator with visual gauge, healthy weight range, and full category breakdown. Works for men, women, and children.",
+      "body": "Use our free adult BMI calculator with a visual gauge, healthy weight range and category breakdown. It is built for adults; children and teens need age-based percentile charts.",
       "buttonLabel": "Open Calculator",
       "path": "/health/bmi-calculator/"
     }
