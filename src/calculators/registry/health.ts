@@ -5,7 +5,7 @@ export const healthCalculators: CalculatorEntry[] = [
     id: 'bmi-calculator',
     title: 'BMI & Ideal Weight Calculator — WHO Classification Gauge',
     shortTitle: 'BMI Calculator',
-    description: 'Calculate your Body Mass Index and ideal weight range for your height. Features a WHO classification visual gauge with color-coded BMI bands and a needle indicator.',
+    description: 'Calculate your Body Mass Index and ideal weight range for your height, with a WHO classification gauge and color-coded BMI bands.',
     category: 'Health & Fitness',
     categorySlug: 'health',
     subCategory: 'Body Composition',
@@ -19,7 +19,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'tdee-calculator',
-    title: 'Free TDEE Calculator — Find Your Daily Calorie Needs in 60 Seconds',
+    title: 'Free TDEE Calculator — Daily Calorie Needs in 60 Seconds',
     shortTitle: 'TDEE Calculator',
     description: 'Find your maintenance calories in seconds. Uses Mifflin-St Jeor and Katch-McArdle equations with BMR/TEF/EAT/NEAT breakdown.',
     category: 'Health & Fitness',
@@ -37,7 +37,7 @@ export const healthCalculators: CalculatorEntry[] = [
     id: 'due-date-calculator',
     title: 'Pregnancy Due Date Calculator — From LMP, Conception, or IVF',
     shortTitle: 'Due Date Calculator',
-    description: 'Calculate your estimated due date from LMP, conception date, or IVF transfer date. View current pregnancy week, trimester milestones timeline, and days until your due date.',
+    description: 'Calculate your estimated due date from LMP, conception date or IVF transfer date, with current week, trimester timeline and days to go.',
     category: 'Health & Fitness',
     categorySlug: 'health',
     subCategory: 'Pregnancy',
@@ -99,7 +99,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'water-intake-calculator',
-    title: 'Daily Water Intake Calculator — By Weight, Activity & Climate',
+    title: 'Daily Water Intake Calculator — By Weight & Activity',
     shortTitle: 'Water Intake',
     description: 'Calculate your recommended daily water intake based on body weight, activity level, and climate. Free, instant, and accurate.',
     category: 'Health & Fitness',
@@ -117,7 +117,7 @@ export const healthCalculators: CalculatorEntry[] = [
     id: 'body-fat-calculator',
     title: 'Body Fat Percentage Calculator — U.S. Navy Method',
     shortTitle: 'Body Fat Calculator',
-    description: 'Calculate your body fat percentage using the U.S. Navy circumference method. Uses neck, abdomen (men), and waist/hip (women) measurements with anatomical landmark guidance for accurate tape placement.',
+    description: 'Estimate body fat percentage with the U.S. Navy circumference method, using neck, abdomen and waist/hip measurements and tape placement guidance.',
     category: 'Health & Fitness',
     categorySlug: 'health',
     subCategory: 'Body Composition',
@@ -131,7 +131,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'ideal-weight-calculator',
-    title: 'Ideal Body Weight Calculator — 4 Medical Formulas — Calculator',
+    title: 'Ideal Body Weight Calculator — 4 Medical Formulas',
     shortTitle: 'Ideal Weight Calculator',
     description: 'Calculate your ideal body weight using Devine, Robinson, Miller, and Hamwi formulas. Get the average across all four plus healthy BMI range for your height.',
     category: 'Health & Fitness',
@@ -162,7 +162,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'pregnancy-weight-gain-calculator',
-    title: 'Pregnancy Weight Gain Calculator — IOM Guidelines — Calculator',
+    title: 'Pregnancy Weight Gain Calculator — IOM Guidelines',
     shortTitle: 'Pregnancy Weight Gain',
     description: 'Track your pregnancy weight gain against IOM guidelines based on pre-pregnancy BMI. Features worked examples, quick reference BMI-based ranges.',
     category: 'Health & Fitness',
@@ -177,9 +177,9 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'pregnancy-conception-calculator',
-    title: 'Conception Calculator — Find Conception Date from Due Date or LMP',
+    title: 'Conception Calculator — Date from Due Date or LMP',
     shortTitle: 'Conception Calculator',
-    description: 'Find your estimated conception date by working backward from your due date, or forward from your last period. Also calculates your fertile window, peak fertility days, and ovulation date.',
+    description: 'Estimate your conception date from your due date or last period, plus your fertile window, peak fertility days and ovulation date.',
     category: 'Health & Fitness',
     categorySlug: 'health',
     subCategory: 'Pregnancy',
@@ -192,7 +192,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'pace-calculator',
-    title: 'Running Pace Calculator — Split Generator — Free Online Calculator',
+    title: 'Running Pace Calculator — Split Generator',
     shortTitle: 'Pace Calculator',
     description: 'Calculate running pace, time, or distance. Includes auto-generated race split table with wristband view for marathon, half marathon, 10K, 5K, and custom.',
     category: 'Health & Fitness',
@@ -208,7 +208,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'army-body-fat-calculator',
-    title: 'Army Body Fat Calculator — AR 600-9 Tape Test & ABCP Standards',
+    title: 'Army Body Fat Calculator — AR 600-9 Tape Test',
     shortTitle: 'Army Body Fat',
     description: 'Calculate body fat using the official U.S. Army AR 600-9 tape test method. Includes pass/fail by age bracket, screening weight reference.',
     category: 'Health & Fitness',
@@ -226,7 +226,7 @@ export const healthCalculators: CalculatorEntry[] = [
     id: 'carbohydrate-calculator',
     title: 'Carbohydrate Calculator — Training-Based Daily Carb Needs',
     shortTitle: 'Carb Calculator',
-    description: 'Calculate your daily carbohydrate needs based on weight, goal, and training volume. Includes glycogen loading timeline for endurance events and food source equivalents.',
+    description: 'Calculate daily carbohydrate needs from weight, goal and training volume, with a glycogen-loading timeline for endurance events.',
     category: 'Health & Fitness',
     categorySlug: 'health',
     subCategory: 'Nutrition',
@@ -240,7 +240,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'lean-body-mass-calculator',
-    title: 'Lean Body Mass Calculator — 3 Formulas — Free Online Calculator',
+    title: 'Lean Body Mass Calculator — 3 Formulas',
     shortTitle: 'LBM Calculator',
     description: 'Calculate your lean body mass using Boer, James, and Hume formulas simultaneously. Get estimated fat mass and lean mass percentage without body fat.',
     category: 'Health & Fitness',
@@ -286,7 +286,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'calories-burned-calculator',
-    title: 'Calories Burned Calculator — MET Compendium — Free Online Calculator',
+    title: 'Calories Burned Calculator — MET Compendium',
     shortTitle: 'Calories Burned',
     description: 'Calculate calories burned for 100+ activities using MET values from the Compendium of Physical Activities. Free, instant, and accurate.',
     category: 'Health & Fitness',
@@ -302,7 +302,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'one-rep-max-calculator',
-    title: 'One Rep Max Calculator — 3 Formulas + % Table — Free Online Calculator',
+    title: 'One Rep Max Calculator — 3 Formulas + % Table',
     shortTitle: '1RM Calculator',
     description: 'Calculate your one rep max using Epley, Brzycki, and Lombardi formulas. Includes auto-generated 50–100% percentage breakdown table for barbell training.',
     category: 'Health & Fitness',
@@ -317,7 +317,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'protein-calculator',
-    title: 'Protein Calculator — Evidence-Based Daily Intake — Calculator',
+    title: 'Protein Calculator — Evidence-Based Daily Intake',
     shortTitle: 'Protein Calculator',
     description: 'Calculate your daily protein needs based on the evidence-based range of 1.6–2.2 g/kg. Includes per-meal breakdown, MPS optimization, and food equivalent guide.',
     category: 'Health & Fitness',
@@ -348,7 +348,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'period-ovulation-calculator',
-    title: 'Period & Ovulation Calculator — Private Calendar & Fertility Tracking',
+    title: 'Period & Ovulation Calculator — Private Cycle Calendar',
     shortTitle: 'Period & Ovulation',
     description: 'Track your menstrual cycle and predict periods, ovulation dates, and fertile windows for 3 months. Free, instant, and accurate.',
     category: 'Health & Fitness',
@@ -363,9 +363,9 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'gfr-calculator',
-    title: 'GFR Calculator — 2021 CKD-EPI eGFR with CKD Stage (Race-Free)',
+    title: 'GFR Calculator — 2021 CKD-EPI eGFR (Race-Free)',
     shortTitle: 'GFR Calculator',
-    description: 'Free eGFR calculator using the 2021 CKD-EPI race-free equation. Enter creatinine, age, and sex to get your kidney function, CKD stage, normal ranges by age, and what your number means.',
+    description: 'Free eGFR calculator using the 2021 CKD-EPI race-free equation: enter creatinine, age and sex for your CKD stage and normal range by age.',
     category: 'Health & Fitness',
     categorySlug: 'health',
     subCategory: 'Medical',
@@ -394,7 +394,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'bsa-calculator',
-    title: 'Body Surface Area (BSA) Calculator — Mosteller, Du Bois & Haycock',
+    title: 'Body Surface Area (BSA) Calculator — Mosteller & Du Bois',
     shortTitle: 'BSA Calculator',
     description: 'Calculate your body surface area using Mosteller, Du Bois, and Haycock formulas. Includes formula comparison, BSA reference chart, chemotherapy dosing.',
     category: 'Health & Fitness',
@@ -409,7 +409,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'bac-calculator',
-    title: 'BAC Calculator — Widmark Formula, Custom ABV & Impairment Guide',
+    title: 'BAC Calculator — Widmark Formula & Impairment Guide',
     shortTitle: 'BAC Calculator',
     description: 'Estimate your blood alcohol concentration using the Widmark formula with custom ABV support for craft beer, wine, and liquor.',
     category: 'Health & Fitness',
@@ -425,7 +425,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'macro-point-calculator',
-    title: 'Macro Point Calculator — Nutrient Scoring System — Calculator',
+    title: 'Macro Point Calculator — Nutrient Scoring System',
     shortTitle: 'Macro Points',
     description: 'Score any food using a macronutrient-weighted points formula based on calories, saturated fat, sugar, and protein. Not affiliated with Weight Watchers.',
     category: 'Health & Fitness',
@@ -440,7 +440,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'overweight-calculator',
-    title: 'Overweight & Cardiovascular Risk Calculator — Free Online Calculator',
+    title: 'Overweight & Cardiovascular Risk Calculator',
     shortTitle: 'Overweight Risk',
     description: 'Assess your weight and cardiovascular risk by combining BMI with waist-to-height ratio (WHtR). Free, instant, and accurate.',
     category: 'Health & Fitness',
@@ -455,7 +455,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'chocolate-toxicity-calculator',
-    title: 'Dog Chocolate Toxicity Calculator — Theobromine & Caffeine Risk',
+    title: 'Dog Chocolate Toxicity Calculator — Theobromine Risk',
     shortTitle: 'Chocolate Toxicity',
     description: 'Check if chocolate is toxic for your dog. Calculates theobromine and caffeine intake based on chocolate type, amount eaten, and dog weight.',
     category: 'Health & Fitness',
@@ -471,7 +471,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'dog-cat-age-calculator',
-    title: 'Dog & Cat Age in Human Years — Epigenetic Clock Formula + Life Stages',
+    title: 'Dog & Cat Age in Human Years — Epigenetic Clock Formula',
     shortTitle: 'Dog & Cat Age in',
     description: 'Calculate dog and cat age in human years with the NIH epigenetic clock formula. Includes AAHA/AAFP life stages, size-adjusted aging, and reference milestones.',
     category: 'Health & Fitness',
@@ -486,7 +486,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'dog-cat-pregnancy-calculator',
-    title: 'Dog & Cat Pregnancy Calculator — Whelping Due Date & Calendar',
+    title: 'Dog & Cat Pregnancy Calculator — Whelping Due Date',
     shortTitle: 'Pet Pregnancy',
     description: 'Calculate the due date for a pregnant dog (63 days gestation) or cat (65 days gestation). Free online calculator with formula guide and step-by-step results.',
     category: 'Health & Fitness',
@@ -502,7 +502,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'blood-type-calculator',
-    title: 'Blood Type Calculator — Punnett Square & Inheritance Probability',
+    title: 'Blood Type Calculator — Punnett Square & Inheritance',
     shortTitle: 'Blood Type',
     description: 'Predict possible blood types for a child based on parent ABO and Rh types. Visualize inheritance with Punnett square probabilities.',
     category: 'Health & Fitness',
@@ -518,7 +518,7 @@ export const healthCalculators: CalculatorEntry[] = [
   },
   {
     id: 'pig-gestation-calculator',
-    title: 'Pig Gestation Calculator — 3-3-3 Rule & Farrowing Date Predictor',
+    title: 'Pig Gestation Calculator — 3-3-3 Rule & Farrowing Date',
     shortTitle: 'Pig Gestation',
     description: 'Calculate pig farrowing dates using the 3-3-3 rule (114 days). Pregnancy milestones, breed-specific adjustments, and farrowing preparation timeline included.',
     category: 'Health & Fitness',

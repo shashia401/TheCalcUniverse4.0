@@ -51,7 +51,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'bandwidth-calculator',
-    title: 'Bandwidth Calculator — File Transfer Time by Connection Speed',
+    title: 'Bandwidth Calculator — File Transfer Time by Speed',
     shortTitle: 'Bandwidth Calculator',
     description: 'Calculate file transfer times based on connection speed. Includes TCP overhead simulation and clear bit vs byte distinction (Mbps vs MB/s).',
     category: 'Engineering',
@@ -98,7 +98,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'url-encoder-decoder',
-    title: 'URL Encoder / Decoder — Percent-Encoding for Safe Transmission',
+    title: 'URL Encoder / Decoder — Percent-Encoding Tool',
     shortTitle: 'URL Encode',
     description: 'Encode text for safe URL transmission or decode URL-encoded strings. Shows character mappings for special characters. Free, instant, and accurate.',
     category: 'Engineering',
@@ -175,7 +175,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'gear-ratio-calculator',
-    title: 'Gear Ratio & RPM Calculator — Output Torque & Speed Reduction',
+    title: 'Gear Ratio & RPM Calculator — Torque & Speed',
     shortTitle: 'Gear Ratio',
     description: 'Calculate output RPM, output torque, or gear ratio for any gear system. Supports speed reduction, overdrive, and compound gear train analysis.',
     category: 'Engineering',
@@ -206,7 +206,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'flow-rate-calculator',
-    title: 'Fluid Flow Rate & Pipe Velocity Calculator — Continuity Equation',
+    title: 'Fluid Flow Rate & Pipe Velocity Calculator',
     shortTitle: 'Flow Rate Calculator',
     description: 'Calculate pipe flow velocity, volumetric flow rate, or required pipe diameter using the continuity equation. Supports GPM and metric units.',
     category: 'Engineering',
@@ -221,7 +221,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'ai-token-pricing',
-    title: 'AI Token Pricing Calculator — Compare GPT-4o, Claude, Gemini Costs',
+    title: 'AI Token Pricing Calculator — GPT-4o, Claude & Gemini',
     shortTitle: 'AI Token Pricing',
     description: 'Compare token pricing across 12 models from 6 providers: GPT-5, Claude 4.7, Gemini 3.1, DeepSeek V3, Grok 3, Llama 4. Free, instant, and accurate.',
     category: 'Engineering',
@@ -236,7 +236,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'crypto-hash-generator',
-    title: 'Crypto Hash Generator — SHA-256, MD5, SHA-1, SHA-512, Keccak-256',
+    title: 'Crypto Hash Generator — SHA-256, MD5, SHA-1 & More',
     shortTitle: 'Crypto Hash',
     description: 'Generate cryptographic hashes locally in your browser using SHA-256, MD5, SHA-1, SHA-384, SHA-512, and Keccak-256 (SHA-3).',
     category: 'Engineering',
@@ -267,7 +267,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'rate-limit-calculator',
-    title: 'API Rate Limit & Throughput Calculator — RPS, Bandwidth & Burst',
+    title: 'API Rate Limit Calculator — RPS, Bandwidth & Burst',
     shortTitle: 'Rate Limit Calculator',
     description: 'Calculate API throughput including requests per second, bandwidth requirements, daily capacity, and burst limits. Free, instant, and accurate.',
     category: 'Engineering',
@@ -282,7 +282,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'ph-calculator',
-    title: 'pH Calculator — H+ and OH- Concentration, pOH and Acid-Base Scale',
+    title: 'pH Calculator — H+/OH- Concentration, pOH & Acid-Base',
     shortTitle: 'pH Calculator',
     description: 'Calculate pH, pOH, H+ and OH- ion concentrations in aqueous solutions. Enter any known value to get the complete acid-base profile with step-by-step results.',
     category: 'Engineering',
@@ -298,9 +298,9 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'nusselt-number-calculator',
-    title: 'Nusselt Number Calculator — Convection Heat Transfer Analysis',
+    title: 'Nusselt Number Calculator — Convection Heat Transfer',
     shortTitle: 'Nusselt Number',
-    description: 'Calculate the Nusselt number from convective heat transfer coefficient, characteristic length, and fluid thermal conductivity. Includes flow regime interpretation.',
+    description: 'Calculate the Nusselt number from heat transfer coefficient, characteristic length and fluid thermal conductivity, with flow regime notes.',
     category: 'Engineering',
     categorySlug: 'engineering',
     subCategory: 'General',
@@ -313,7 +313,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'buffer-capacity-calculator',
-    title: 'Buffer Capacity Calculator — Van Slyke Equation & Buffer Design',
+    title: 'Buffer Capacity Calculator — Van Slyke Equation',
     shortTitle: 'Buffer Capacity',
     description: 'Calculate buffer capacity (β) using the Van Slyke equation. Find how much acid or base your buffer can neutralize before pH changes. Includes selection guide.',
     category: 'Engineering',
@@ -343,7 +343,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'froude-number-calculator',
-    title: 'Froude Number Calculator — Open Channel Flow & Ship Hull Analysis',
+    title: 'Froude Number Calculator — Open Channel & Ship Hulls',
     shortTitle: 'Froude Number',
     description: 'Calculate the Froude number for open channel flow, spillways, and ship hulls. Determine if flow is subcritical, critical, or supercritical with wave celerity.',
     category: 'Engineering',
@@ -358,7 +358,7 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'lead-screw-calculator',
-    title: 'Lead Screw Calculator — Torque, Efficiency & Mechanical Advantage',
+    title: 'Lead Screw Calculator — Torque & Efficiency',
     shortTitle: 'Lead Screw',
     description: 'Calculate required torque, mechanical advantage, and power for Acme and ball screw drives. Essential for 3D printer, CNC, and linear actuator design.',
     category: 'Engineering',
@@ -373,9 +373,9 @@ export const engineeringCalculators: CalculatorEntry[] = [
   },
   {
     id: 'freezing-point-depression-calculator',
-    title: 'Freezing Point Depression Calculator — Colligative Properties',
+    title: 'Freezing Point Depression Calculator',
     shortTitle: 'Freezing Point Depression',
-    description: 'Calculate freezing point depression using the van\'t Hoff equation. Find how salt, antifreeze, or any solute lowers the freezing point. Includes molality auto-calculation.',
+    description: "Calculate freezing point depression with the van't Hoff equation: how salt, antifreeze or any solute lowers the freezing point.",
     category: 'Engineering',
     categorySlug: 'engineering',
     subCategory: 'General',

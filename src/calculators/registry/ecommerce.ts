@@ -34,9 +34,9 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'break-even-calculator',
-    title: 'Break-Even Point Calculator — Units & Revenue to Profitability',
+    title: 'Break-Even Point Calculator — Units & Revenue',
     shortTitle: 'Break-Even Point',
-    description: 'Calculate your break-even point in units and revenue. Enter fixed costs, selling price, and variable cost per unit to find when your business becomes profitable.',
+    description: 'Find your break-even point in units and revenue from fixed costs, selling price and variable cost per unit.',
     category: 'E-Commerce',
     categorySlug: 'ecommerce',
     subCategory: 'Operations',
@@ -82,7 +82,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'cac-calculator',
-    title: 'Customer Acquisition Cost (CAC) Calculator — Free Online Calculator',
+    title: 'CAC Calculator — Customer Acquisition Cost & Payback',
     shortTitle: 'CAC Calculator',
     description: 'Calculate customer acquisition cost and LTV:CAC ratio. Evaluate the efficiency of your marketing spend and payback period.',
     category: 'E-Commerce',
@@ -98,7 +98,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'margin-calculator',
-    title: 'Margin Calculator — Gross Margin, Markup, Cost & Price (Solve Any One)',
+    title: 'Margin Calculator — Gross Margin, Markup, Cost & Price',
     shortTitle: 'Margin Calculator',
     description: 'Solve for Gross Margin %, Markup %, Cost, or Revenue — choose what you know and calculate what you need. Free, instant, and accurate.',
     category: 'E-Commerce',
@@ -114,7 +114,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'saas-ltv-cac-calculator',
-    title: 'SaaS LTV:CAC Ratio Calculator — Unit Economics & Payback Period',
+    title: 'SaaS LTV:CAC Ratio Calculator — Unit Economics & Payback',
     shortTitle: 'SaaS LTV:CAC',
     description: 'Calculate customer lifetime value (LTV), customer acquisition cost (CAC), LTV:CAC ratio, payback period, and the SaaS Magic Number.',
     category: 'E-Commerce',
@@ -130,9 +130,9 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'payment-fees-calculator',
-    title: 'Stripe & PayPal Fee Calculator — Payment Processor Fee Comparison',
+    title: 'Stripe & PayPal Fee Calculator — Compare Processors',
     shortTitle: 'Payment Fees',
-    description: 'Compare Stripe and PayPal transaction fees side by side. Enter your transaction amount to see the exact fee, net amount, effective rate, and monthly cost across transaction sizes.',
+    description: 'Compare Stripe and PayPal transaction fees side by side: exact fee, net amount, effective rate and monthly cost across transaction sizes.',
     category: 'E-Commerce',
     categorySlug: 'ecommerce',
     subCategory: 'Operations',
@@ -146,7 +146,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'youtube-revenue-calculator',
-    title: 'YouTube / AdSense Revenue Calculator -- CPM, Views & RPM Estimator',
+    title: 'YouTube Revenue Calculator — CPM, Views & RPM Estimator',
     shortTitle: 'YouTube Revenue',
     description: 'Estimate YouTube AdSense revenue from views, CPM, and RPM. Supports 7 niche CPM presets (gaming to finance), mid-roll ad modeling, engagement tracking.',
     category: 'E-Commerce',
@@ -161,7 +161,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'etsy-fees-calculator',
-    title: 'Etsy Fee Calculator — Listing, Transaction, Payment & Offsite Ads',
+    title: 'Etsy Fee Calculator — Listing, Transaction & Payment',
     shortTitle: 'Etsy Fee Calculator',
     description: 'Calculate all Etsy seller fees for any item: listing fee ($0.20), transaction fee (6.5%), payment processing (3% + $0.25), and optional offsite ads fee.',
     category: 'E-Commerce',
@@ -177,7 +177,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'cpm-cpc-calculator',
-    title: 'CPM & CPC Calculator — Reverse Budget Mode with Industry Benchmarks',
+    title: 'CPM & CPC Calculator — Budget Mode with Benchmarks',
     shortTitle: 'CPM & CPC Calculator',
     description: 'Calculate CPM (cost per mille) and CPC (cost per click) from ad spend, impressions, and clicks. Free, instant, and accurate.',
     category: 'E-Commerce',
@@ -192,7 +192,7 @@ export const ecommerceCalculators: CalculatorEntry[] = [
   },
   {
     id: 'engagement-rate-calculator',
-    title: 'TikTok & Instagram Engagement Rate Calculator + Influencer Tier',
+    title: 'Engagement Rate Calculator — TikTok & Instagram',
     shortTitle: 'Engagement Rate',
     description: 'Calculate engagement rate for Instagram, TikTok, and X with platform-specific formulas. Includes influencer tier classification and benchmarks.',
     category: 'E-Commerce',

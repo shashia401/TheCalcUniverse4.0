@@ -20,7 +20,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
     id: 'horsepower-calculator',
     title: 'Horsepower Calculator (Track) — Quarter-Mile ET & Trap Speed',
     shortTitle: 'Horsepower',
-    description: "Estimate your vehicle's horsepower from quarter-mile ET and trap speed using the Hale formula. Includes drivetrain loss estimation (FWD/RWD/AWD) and power-to-weight ratio.",
+    description: 'Estimate vehicle horsepower from quarter-mile ET and trap speed with the Hale formula, plus drivetrain loss and power-to-weight ratio.',
     category: 'Automotive',
     categorySlug: 'automotive',
     subCategory: 'Performance & Maintenance',
@@ -33,7 +33,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'fuel-cost-calculator',
-    title: 'Fuel Cost Calculator — Trip Fuel Expense, MPG & Mileage Estimator',
+    title: 'Fuel Cost Calculator — Trip Expense, MPG & Mileage',
     shortTitle: 'Fuel Cost Calculator',
     description: 'Calculate trip fuel costs for gas, diesel, EV, and PHEV vehicles. Handles MPG, L/100km, km/L, EV efficiency, and PHEV split-mode driving costs.',
     category: 'Automotive',
@@ -80,7 +80,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'auto-loan-calculator',
-    title: 'Auto Loan Calculator — Monthly Payment, Trade-In & Negative Equity',
+    title: 'Auto Loan Calculator — Payment, Trade-In & Negative Equity',
     shortTitle: 'Auto Loan Calculator',
     description: 'Calculate monthly car payments with trade-in value, negative equity rollover, sales tax, and dealer fees. See total interest and out-the-door price.',
     category: 'Automotive',
@@ -96,7 +96,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'auto-lease-calculator',
-    title: 'Auto Lease Calculator — Money Factor, Residual Value & True',
+    title: 'Auto Lease Calculator — Money Factor & Residual Value',
     shortTitle: 'Lease Calculator',
     description: 'The dealer transparency tool. Calculate your exact monthly lease payment using MSRP, negotiated cap cost, residual value, and money factor (or APR).',
     category: 'Automotive',
@@ -112,7 +112,7 @@ export const automotiveCalculators: CalculatorEntry[] = [
   },
   {
     id: 'cash-back-vs-low-interest-calculator',
-    title: 'Cash Back vs. Low Interest Auto Loan Calculator — Which Dealer',
+    title: 'Cash Back vs. Low Interest Auto Loan — Which Deal Wins?',
     shortTitle: 'Cash Back vs. Low Rate',
     description: 'The ultimate dealership survival tool. Instantly compare a cash rebate (at your bank rate) vs. Free, instant, and accurate.',
     category: 'Automotive',

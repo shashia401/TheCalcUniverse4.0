@@ -3,7 +3,7 @@ import type { CalculatorEntry } from '../../types/calculator';
 export const diyCalculators: CalculatorEntry[] = [
   {
     id: 'concrete-calculator',
-    title: 'Concrete Calculator — Cubic Yards & Bags for Slabs, Holes & Columns',
+    title: 'Concrete Calculator — Cubic Yards & Bags for Slabs',
     shortTitle: 'Concrete Calculator',
     description: 'Calculate the exact volume of concrete needed for slabs, holes, columns, and stairs. Outputs cubic yards plus the number of 60-lb and 80-lb bags required.',
     category: 'Home DIY',
@@ -35,7 +35,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'square-footage-calculator',
-    title: 'Square Footage Calculator — Rectangles, Circles & L-Shaped Rooms',
+    title: 'Square Footage Calculator — Rooms, Circles & L-Shapes',
     shortTitle: 'Sq Footage',
     description: 'Calculate square footage for rectangles, circles, and L-shaped rooms. Supports feet and meters, includes wastage for materials, and estimates total cost.',
     category: 'Home DIY',
@@ -51,7 +51,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'tile-calculator',
-    title: 'Tile Calculator — Grid, Brick, Diagonal & Herringbone Layouts',
+    title: 'Tile Calculator — Grid, Brick & Herringbone Layouts',
     shortTitle: 'Tile Calculator',
     description: 'Calculate tiles needed for any room with different layout patterns. Supports grid, brick, diagonal, and herringbone layouts with automatic waste factors.',
     category: 'Home DIY',
@@ -160,7 +160,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'concrete-slab-calculator',
-    title: 'Concrete Slab Calculator — Cubic Yards for Driveways & Foundations',
+    title: 'Concrete Slab Calculator — Cubic Yards for Driveways',
     shortTitle: 'Concrete Calculator',
     description: 'Calculate cubic yards of concrete needed for any slab, driveway, or foundation. Shows cubic yards for ready-mix ordering and equivalent bag counts.',
     category: 'Home DIY',
@@ -176,7 +176,7 @@ export const diyCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mulch-topsoil-calculator',
-    title: 'Mulch & Topsoil Calculator — Cubic Yards for Any Landscaping Material',
+    title: 'Mulch & Topsoil Calculator — Cubic Yards for Landscaping',
     shortTitle: 'Mulch Calculator',
     description: 'Calculate cubic yards of mulch, topsoil, compost, gravel, or sand needed for any landscaping project. Shows bulk yards and equivalent bagged quantities.',
     category: 'Home DIY',

@@ -1,7 +1,7 @@
 ---
 // Base HTML shell for every page. Owns <head>: metadata, canonical, OG, JSON-LD.
 // Canonical always equals the served URL (trailing slash) — never a redirecting URL.
-import { BASE_URL, SITE_NAME } from '../config/constants';
+import { BASE_URL, SITE_NAME, OG_IMAGE_URL } from '../config/constants';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import '../styles/global.css';
@@ -50,11 +50,14 @@ const metaDescription =
     <meta property="og:title" content={title} />
     <meta property="og:description" content={metaDescription} />
     <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:image" content={`${BASE_URL}/og-image.png`} />
+    <meta property="og:image" content={OG_IMAGE_URL} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={metaDescription} />
-    <meta name="twitter:image" content={`${BASE_URL}/og-image.png`} />
+    <meta name="twitter:image" content={OG_IMAGE_URL} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

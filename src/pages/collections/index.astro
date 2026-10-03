@@ -3,18 +3,39 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { collections } from '../../lib/collections';
 import { getCalculatorById } from '../../lib/registry';
-import { SITE_NAME } from '../../config/constants';
+import { SITE_NAME, BASE_URL } from '../../config/constants';
+import { collectionPageSchema } from '../../lib/jsonld';
 
 const list = collections.map((c) => ({
   ...c,
   count: c.calcIds.map((id) => getCalculatorById(id)).filter(Boolean).length,
 }));
+
+const description =
+  "Hand-picked calculator bundles for buying a home, starting a business, planning retirement, and more — the tools you need, grouped by the decision you're making.";
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Collections', item: `${BASE_URL}/collections/` },
+    ],
+  },
+  collectionPageSchema({
+    name: 'Calculator collections',
+    url: `${BASE_URL}/collections/`,
+    description,
+    items: list.map((c) => ({ name: c.title, url: `${BASE_URL}/collections/${c.slug}/` })),
+  }),
+];
 ---
 
 <BaseLayout
   title="Calculator collections — curated for life's big decisions"
-  description="Hand-picked calculator bundles for buying a home, starting a business, planning retirement, and more — the tools you need, grouped by the decision you're making."
+  description={description}
   canonicalPath="/collections/"
+  schemas={schemas}
 >
   <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
     <div class="max-w-[900px] mx-auto px-4 md:px-10 py-10">

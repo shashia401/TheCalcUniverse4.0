@@ -11,6 +11,7 @@ import { accentFor } from '../lib/categoryAccent';
 import { blogPosts } from '../lib/blog';
 import { FlaskConical, FileText, ShieldCheck, Lock } from 'lucide-react';
 import { SITE_NAME, BASE_URL } from '../config/constants';
+import { organizationSchema } from '../lib/jsonld';
 
 const categories = getCategories().filter((cat) => cat.count > 0);
 const total = calculatorRegistry.length;
@@ -18,7 +19,7 @@ const total = calculatorRegistry.length;
 
 // Trust/Safety band — the Marketplace/Directory pattern's missing section
 const trustPoints = [
-  { Icon: FlaskConical, title: 'Tested, not guessed', body: '7,173 automated tests. Deterministic math — never a hallucinated number.', accent: 'text-accent-emerald-600', ring: 'bg-accent-emerald-500/12' },
+  { Icon: FlaskConical, title: 'Tested, not guessed', body: '7,700+ automated tests. Deterministic math — never a hallucinated number.', accent: 'text-accent-emerald-600', ring: 'bg-accent-emerald-500/12' },
   { Icon: FileText, title: 'Shows the work', body: 'Every formula, worked example, and source is on the page — not a black box.', accent: 'text-accent-sky-600', ring: 'bg-accent-sky-500/12' },
   { Icon: ShieldCheck, title: 'Sourced & checkable', body: 'Where a formula has an authoritative source, it’s cited on the page — so you can verify it yourself.', accent: 'text-accent-violet-600', ring: 'bg-accent-violet-500/12' },
   { Icon: Lock, title: 'Private by default', body: 'Runs in your browser. Your inputs never leave your device. No account.', accent: 'text-accent-amber-600', ring: 'bg-accent-amber-500/15' },
@@ -51,15 +52,17 @@ const latestPosts = [...blogPosts]
 
 const faqs = [
   { q: 'Are the calculators free?', a: `Yes — all ${total} of them, with no account, no sign-up, and no paywall.` },
-  { q: 'Can I trust the results?', a: 'Every formula is a tested program, not a language-model guess — backed by 7,173 automated tests, with the formula and its source shown on each page. The math is deterministic: the same inputs always give the same answer. See how we build and verify calculators on our methodology page.' },
+  { q: 'Can I trust the results?', a: 'Every formula is a tested program, not a language-model guess — backed by 7,700+ automated tests, with the formula and its source shown on each page. The math is deterministic: the same inputs always give the same answer. See how we build and verify calculators on our methodology page.' },
   { q: 'Is my data private?', a: 'Completely. Every calculation runs inside your browser — your numbers are never sent to a server, and nothing is stored about you.' },
   { q: 'Do they work on mobile?', a: 'Yes. Every calculator is fully responsive and loads fast, because pages are static and ship almost no JavaScript.' },
 ];
 
 const schemas = [
+  organizationSchema(),
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    publisher: { '@id': `${BASE_URL}/#organization` },
     name: SITE_NAME,
     url: `${BASE_URL}/`,
     description: `${total}+ free calculators with formulas, worked examples, and expert explanations.`,
@@ -132,7 +135,7 @@ const schemas = [
             <dl class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 max-w-lg">
               <div>
                 <dt class="text-xs text-slate-400">tested formulas</dt>
-                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">7,173</dd>
+                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">7,700+</dd>
                 <dd class="sr-only">automated tests</dd>
               </div>
               <div>

@@ -1,8 +1,9 @@
 # ── General crawlers ──────────────────────────────────────────────
 User-agent: *
 Allow: /
-Disallow: /search/
-Disallow: /embed/
+# /search/ and /embed/ are kept OUT of the index with <meta name="robots" content="noindex">.
+# They must stay crawlable: a Disallow hides the noindex from Google, which can then
+# list the blocked URL anyway ("Indexed, though blocked by robots.txt").
 Disallow: /*?utm_*
 Disallow: /*?fbclid=*
 

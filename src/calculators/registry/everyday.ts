@@ -3,9 +3,9 @@
 export const everydayCalculators: CalculatorEntry[] = [
   {
     id: 'wind-chill-calculator',
-    title: 'Wind Chill Calculator — Frostbite Risk & Feels-Like Temperature (NWS)',
+    title: 'Wind Chill Calculator — Frostbite Risk & Feels-Like (NWS)',
     shortTitle: 'Wind Chill',
-    description: 'Calculate the wind chill feels-like temperature using the official NWS formula. Includes frostbite risk timeline, OSHA cold-stress safety guidelines, and both °F/°C and mph/km/h units.',
+    description: 'Calculate the wind chill feels-like temperature with the official NWS formula, plus frostbite risk timeline and OSHA cold-stress guidance.',
     category: 'Everyday',
     categorySlug: 'everyday',
     subCategory: 'Misc',
@@ -19,7 +19,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'heat-index-calculator',
-    title: 'Heat Index Calculator — OSHA Danger Tiers & Heatstroke Prevention',
+    title: 'Heat Index Calculator — OSHA Danger Tiers & Heatstroke',
     shortTitle: 'Heat Index',
     description: 'Calculate the heat index feels-like temperature using the official NOAA formula. Includes OSHA danger tiers, heatstroke warning signs, and sport/worksite.',
     category: 'Everyday',
@@ -35,7 +35,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'dew-point-calculator',
-    title: 'Dew Point Calculator — Comfort Scale, HVAC Mold Prevention & Fog',
+    title: 'Dew Point Calculator — Comfort Scale & Mold Prevention',
     shortTitle: 'Dew Point Calculator',
     description: 'Calculate the dew point from temperature and relative humidity using the Magnus formula. Free online calculator with formula guide and step-by-step results.',
     category: 'Everyday',
@@ -51,7 +51,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'dice-roller',
-    title: 'Dice Roller — D4 to D20 with Modifiers, Cryptographically Random',
+    title: 'Dice Roller — D4 to D20 with Modifiers',
     shortTitle: 'Dice Roller',
     description: 'Roll virtual dice from D4 to D20 with modifiers. Uses cryptographically secure random values. Free, instant, and accurate.',
     category: 'Everyday',
@@ -66,7 +66,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'edpi-calculator',
-    title: 'EDPI Calculator — Mouse Sensitivity Converter (eDPI & cm/360)',
+    title: 'EDPI Calculator — Mouse Sensitivity (eDPI & cm/360)',
     shortTitle: 'eDPI Calculator',
     description: 'Calculate your effective dots per inch (eDPI) from DPI and in-game sensitivity for popular FPS games. Free, instant, and accurate.',
     category: 'Everyday',
@@ -84,7 +84,7 @@ export const everydayCalculators: CalculatorEntry[] = [
     id: 'love-calculator',
     title: 'Love Calculator — Name & Zodiac Compatibility Score',
     shortTitle: 'Love Calculator',
-    description: 'Discover your compatibility score with a fun, deterministic love algorithm. Includes zodiac compatibility insights, a shareable results card, and playful flavor text for your score.',
+    description: 'A fun, deterministic love-compatibility score with zodiac insights, a shareable results card and playful flavor text.',
     category: 'Everyday',
     categorySlug: 'everyday',
     subCategory: 'Misc',
@@ -158,7 +158,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'sleep-calculator',
-    title: 'Sleep Cycle Calculator — 90-Minute REM Cycles & Optimal Bedtime',
+    title: 'Sleep Cycle Calculator — 90-Minute REM Cycles & Bedtime',
     shortTitle: 'Sleep Cycle Calculator',
     description: 'Calculate your optimal bedtime or wake-up time using 90-minute sleep cycles and sleep onset latency. Free, instant, and accurate.',
     category: 'Everyday',
@@ -204,7 +204,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'age-calculator',
-    title: 'Age Calculator — Find Your Exact Age in Years, Months, Days & Hours',
+    title: 'Age Calculator — Exact Age in Years, Months, Days',
     shortTitle: 'Age Calculator',
     description: 'Find exact age in years, months, and days between dates. Shows total days, weeks, months, and hours lived plus a next birthday countdown timer.',
     category: 'Everyday',
@@ -267,7 +267,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'working-days-calculator',
-    title: 'Working Days Between Two Dates — Excludes Weekends & Holidays',
+    title: 'Working Days Between Two Dates — No Weekends or Holidays',
     shortTitle: 'Working Days',
     description: 'Count the exact number of working days (business days) between two dates, excluding weekends and US federal holidays. Free, instant, and accurate.',
     category: 'Everyday',
@@ -282,7 +282,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'word-count-calculator',
-    title: 'Word & Character Count Tool — Flesch-Kincaid Readability, Keyword',
+    title: 'Word & Character Count Tool — Flesch-Kincaid Readability',
     shortTitle: 'Word Count',
     description: 'Count words, characters, sentences, and paragraphs in any text. Estimates reading and speaking time with Flesch-Kincaid grade level, keyword density.',
     category: 'Everyday',
@@ -345,7 +345,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'aspect-ratio-calculator',
-    title: 'Aspect Ratio Calculator — Social Media Presets & Missing Dimension',
+    title: 'Aspect Ratio Calculator — Social Media Presets',
     shortTitle: 'Aspect Ratio',
     description: 'Calculate the aspect ratio from any width and height. Identify common presets (16:9, 4:3, 1:1, 3:2, 21:9, 9:16) or find the missing dimension when you.',
     category: 'Everyday',
@@ -362,7 +362,7 @@ export const everydayCalculators: CalculatorEntry[] = [
     id: 'oven-temperature-converter-everyday',
     title: 'Oven Temperature Converter — °F, °C & Gas Mark',
     shortTitle: 'Oven Temperature Converter',
-    description: 'Convert oven temperatures between Fahrenheit, Celsius, and Gas Mark. Includes a cooking temperature reference table with descriptions (Slow, Moderate, Hot, etc.).',
+    description: 'Convert oven temperatures between Fahrenheit, Celsius and Gas Mark, with a cooking temperature reference table (Slow, Moderate, Hot).',
     category: 'Everyday',
     categorySlug: 'everyday',
     subCategory: 'Conversions',
@@ -422,9 +422,9 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'wedding-alcohol-calculator',
-    title: 'Wedding & Party Alcohol Calculator — Beer, Wine & Cocktails by Guest Count',
+    title: 'Wedding & Party Alcohol Calculator — By Guest Count',
     shortTitle: 'Wedding Alcohol',
-    description: 'Calculate exactly how much beer, wine, and liquor to buy for your wedding or party. Based on guest count, drinking percentage, event duration, and drink preferences.',
+    description: 'Work out how much beer, wine and liquor to buy for a wedding or party from guest count, drinking percentage, event length and preferences.',
     category: 'Everyday',
     categorySlug: 'everyday',
     subCategory: 'Misc',
@@ -468,7 +468,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'betting-odds-calculator',
-    title: 'Betting Odds Converter + Implied Probability — American, Decimal',
+    title: 'Betting Odds Converter + Implied Probability',
     shortTitle: 'Odds Converter',
     description: 'Convert betting odds between American, Decimal, and Fractional formats. See the implied probability, payout, and profit for any stake.',
     category: 'Everyday',
@@ -484,7 +484,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'depth-of-field-calculator',
-    title: 'Depth of Field Calculator — Sensor Size, Aperture & Hyperfocal',
+    title: 'Depth of Field Calculator — Aperture & Hyperfocal',
     shortTitle: 'Depth of Field',
     description: 'Calculate depth of field for any camera setup with 7 sensor formats. Enter sensor size, focal length, aperture, and subject distance to find near/far.',
     category: 'Everyday',
@@ -547,7 +547,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'gestation-period-calculator',
-    title: 'Gestation Period Calculator — 34 Animals, Breeding to Due Date',
+    title: 'Gestation Period Calculator — 34 Animals, Due Date',
     shortTitle: 'Gestation Period',
     description: 'Look up gestation periods for 34 animals from elephant to opossum. Calculate due dates from breeding dates for pets, livestock, and wildlife. Free and instant.',
     category: 'Everyday',

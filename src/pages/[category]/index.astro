@@ -6,6 +6,7 @@ import CategoryIcon from '../../components/CategoryIcon.astro';
 import { getCategories, getCalculatorsByCategory } from '../../lib/registry';
 import { accentFor } from '../../lib/categoryAccent';
 import { SITE_NAME, BASE_URL } from '../../config/constants';
+import { collectionPageSchema, calculatorUrl } from '../../lib/jsonld';
 
 export async function getStaticPaths() {
   return getCategories()
@@ -51,7 +52,15 @@ const metaDescription =
   title={`${categoryLabel} Calculators — ${meta.count} Free Tools | ${SITE_NAME}`}
   description={metaDescription}
   canonicalPath={`/${meta.slug}/`}
-  schemas={[breadcrumb]}
+  schemas={[
+    breadcrumb,
+    collectionPageSchema({
+      name: `${categoryLabel} Calculators`,
+      url: `${BASE_URL}/${meta.slug}/`,
+      description: metaDescription,
+      items: calculators.map((c) => ({ name: c.shortTitle ?? c.title, url: calculatorUrl(c) })),
+    }),
+  ]}
 >
   <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
     <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-8">

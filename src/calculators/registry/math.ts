@@ -3,7 +3,7 @@
 export const mathCalculators: CalculatorEntry[] = [
   {
     id: 'area-perimeter-calculator',
-    title: 'Area & Perimeter Calculator — Circle, Rectangle, Triangle & More',
+    title: 'Area & Perimeter Calculator — Circle, Rectangle & More',
     shortTitle: 'Area & Perimeter',
     description: 'Calculate area and perimeter for seven shapes: circle, rectangle, square, triangle, trapezoid, parallelogram, and hexagon. Includes interactive diagrams.',
     category: 'Mathematics',
@@ -35,7 +35,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'basic-calculator',
-    title: 'Basic Calculator — Number Pad, History & Memory — Calculator',
+    title: 'Basic Calculator — Number Pad, History & Memory',
     shortTitle: 'Basic Calc',
     description: 'A full-featured basic calculator with number pad, history tape, and order-of-operations support. Perfect for quick calculations with a running log.',
     category: 'Mathematics',
@@ -53,7 +53,7 @@ export const mathCalculators: CalculatorEntry[] = [
     id: 'big-number-calculator',
     title: 'Big Integer Calculator — Arbitrary Precision Arithmetic',
     shortTitle: 'Big Integer Calculator',
-    description: 'Free big integer calculator for exact arbitrary-precision arithmetic with BigInt. Add, subtract, multiply, divide, and exponentiate numbers with hundreds of digits online.',
+    description: 'Big integer calculator for exact arbitrary-precision math with BigInt: add, subtract, multiply, divide and exponentiate hundreds of digits.',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'Number Theory',
@@ -67,7 +67,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'binary-hex-calculator',
-    title: 'Binary & Hex Calculator — Decimal, Binary, Hex & Octal Converter',
+    title: 'Binary & Hex Calculator — Decimal, Hex & Octal',
     shortTitle: 'Binary & Hex',
     description: 'Convert between Decimal, Binary, Hex, and Octal with positional value breakdown. Perform arithmetic and bitwise operations (AND, OR, XOR, NOT, shifts).',
     category: 'Mathematics',
@@ -82,7 +82,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'circle-calculator',
-    title: 'Circle Calculator — Radius, Diameter, Circumference & Area Solver',
+    title: 'Circle Calculator — Radius, Diameter, Circumference',
     shortTitle: 'Circle Calculator',
     description: 'Find radius, diameter, circumference, and area from any single known circle measurement. Shows reverse engineering steps for all four circle properties.',
     category: 'Mathematics',
@@ -145,7 +145,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'date-calculator',
-    title: 'Date Calculator — Add & Subtract Days, Weeks, Months & Business Days',
+    title: 'Date Calculator — Add & Subtract Days, Weeks, Months',
     shortTitle: 'Date Calculator',
     description: 'Add or subtract years, months, weeks, and days from any date. Includes a business-days-only mode that skips weekends, leap year handling, and month-end.',
     category: 'Mathematics',
@@ -161,7 +161,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'distance-calculator',
-    title: 'Distance Calculator — Euclidean Distance in 1D, 2D & 3D Space',
+    title: 'Distance Calculator — Euclidean Distance in 1D, 2D, 3D',
     shortTitle: 'Distance Calculator',
     description: 'Calculate the Euclidean distance between two points in 1D, 2D, or 3D space. Shows the distance formula, step-by-step calculation, midpoint, and slope.',
     category: 'Mathematics',
@@ -176,9 +176,9 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'exponent-calculator',
-    title: 'Exponent Calculator — Powers, Roots & Scientific Notation for Any Base',
+    title: 'Exponent Calculator — Powers, Roots & Any Base',
     shortTitle: 'Exponent Calculator',
-    description: 'Raise any base to any power including negative, fractional, and decimal exponents. Shows expanded form, scientific notation, power-rule breakdown, and inverse root/reciprocal views.',
+    description: 'Raise any base to any power, including negative, fractional and decimal exponents, with expanded form, scientific notation and power rules.',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'Algebra',
@@ -192,7 +192,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'factor-calculator',
-    title: 'Factor Calculator — Find All Factors, Factor Pairs & Prime Check',
+    title: 'Factor Calculator — All Factors, Pairs & Prime Check',
     shortTitle: 'Factor Calculator',
     description: 'Find all factors of any positive integer with a complete factor pairs table, total factor count, sum of factors, and primality test.',
     category: 'Mathematics',
@@ -207,7 +207,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'fraction-calculator',
-    title: 'Fraction Calculator — Add, Subtract, Multiply, Divide Fractions',
+    title: 'Fraction Calculator — Add, Subtract, Multiply, Divide',
     shortTitle: 'Fraction Calculator',
     description: 'Add, subtract, multiply, and divide fractions with step-by-step solutions. Shows LCM for common denominators and simplifies using GCD.',
     category: 'Mathematics',
@@ -239,7 +239,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'gcf-calculator',
-    title: 'GCF Calculator — Greatest Common Factor via Euclidean Algorithm',
+    title: 'GCF Calculator — Greatest Common Factor (Euclid)',
     shortTitle: 'Greatest Common Factor',
     description: 'Find the Greatest Common Factor (also called GCD or HCF) of two numbers using both the Euclidean algorithm with step-by-step division and prime factorization.',
     category: 'Mathematics',
@@ -300,7 +300,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'half-life-calculator',
-    title: 'Half-Life Calculator — Exponential Decay, Carbon Dating & Drug Elimination',
+    title: 'Half-Life Calculator — Decay, Carbon Dating & Drugs',
     shortTitle: 'Half-Life Calculator',
     description: 'Calculate radioactive decay, carbon dating, and drug elimination using the exponential decay formula. Free, instant, and accurate.',
     category: 'Mathematics',
@@ -318,7 +318,7 @@ export const mathCalculators: CalculatorEntry[] = [
     id: 'height-calculator',
     title: 'Child Height Predictor — Mid-Parental Height (Tanner Method)',
     shortTitle: 'Height Predictor',
-    description: "Predict a child's adult height using the Mid-Parental Height (Tanner) method with gender-specific adjustments. Includes expected range (±2 in), worked examples for pediatricians and parents, and guidance on when height predictions warrant medical follow-up.",
+    description: "Predict a child's adult height with the Mid-Parental (Tanner) method, with gender adjustments, a ±2 in expected range and worked examples.",
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'Algebra',
@@ -409,7 +409,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mean-median-mode-calculator',
-    title: 'Mean, Median, Mode & Range Calculator — Central Tendency Made Simple',
+    title: 'Mean, Median, Mode & Range Calculator — Central Tendency',
     shortTitle: 'Mean Median Mode',
     description: 'Calculate the mean, median, mode, sum, and range from any data set with step-by-step median breakdown for even-numbered datasets.',
     category: 'Mathematics',
@@ -425,7 +425,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'number-sequence-calculator',
-    title: 'Number Sequence Calculator — Arithmetic, Geometric & Fibonacci',
+    title: 'Number Sequence Calculator — Arithmetic, Geometric',
     shortTitle: 'Number Sequences',
     description: 'Identify arithmetic, geometric, and Fibonacci sequences. Find common difference, common ratio, nth-term formula, and compute next terms.',
     category: 'Mathematics',
@@ -455,7 +455,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'p-value-calculator',
-    title: 'P-value Calculator — Statistical Significance from Z & T Test Scores',
+    title: 'P-value Calculator — Significance from Z & T Scores',
     shortTitle: 'P-value Calculator',
     description: 'Compute p-values from Z-scores or T-scores for one-tailed and two-tailed hypothesis tests. Free online calculator with formula guide and step-by-step results.',
     category: 'Mathematics',
@@ -471,7 +471,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'percent-error-calculator',
-    title: 'Percent Error Calculator — Lab Accuracy & Experimental Precision',
+    title: 'Percent Error Calculator — Lab Accuracy & Precision',
     shortTitle: 'Percent Error',
     description: 'Calculate percent error, absolute error, signed error, accuracy, and relative error between accepted and experimental values.',
     category: 'Mathematics',
@@ -487,7 +487,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'permutation-combination-calculator',
-    title: 'Permutation and Combination Calculator — Free Online Calculator',
+    title: 'Permutation and Combination Calculator (nPr & nCr)',
     shortTitle: 'Permutations & Combos',
     description: 'Calculate permutations (nPr) and combinations (nCr) with step-by-step factorial breakdown. Toggle between order matters vs.',
     category: 'Mathematics',
@@ -503,7 +503,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'prime-factorization-calculator',
-    title: 'Prime Factorization Calculator — Factor Tree & Prime Decomposition',
+    title: 'Prime Factorization Calculator — Factor Tree',
     shortTitle: 'Prime Factors',
     description: 'Break any integer into its unique prime factors with an interactive factor tree. Detects perfect squares, cubes, and handles numbers up to one million.',
     category: 'Mathematics',
@@ -535,7 +535,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'pythagorean-theorem-calculator',
-    title: 'Right Triangle Calculator — Pythagorean Theorem & SOH CAH TOA',
+    title: 'Right Triangle Calculator — Pythagorean & SOH CAH TOA',
     shortTitle: 'Right Triangle',
     description: 'Solve right triangles using the Pythagorean theorem and SOH CAH TOA trigonometry. Find sides, angles, area, and perimeter with a dynamic SVG triangle diagram.',
     category: 'Mathematics',
@@ -551,7 +551,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'quadratic-equation-calculator',
-    title: 'Quadratic Equation Solver — Find Roots, Vertex & Discriminant',
+    title: 'Quadratic Equation Solver — Roots, Vertex & Discriminant',
     shortTitle: 'Quadratic Solver',
     description: 'Solve any quadratic ax²+bx+c=0 with the quadratic formula. Get real or complex roots, discriminant, vertex, axis of symmetry, factored form, and Vieta.',
     category: 'Mathematics',
@@ -567,7 +567,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'random-number-generator',
-    title: 'Random Number Generator — Cryptographically Secure RNG with Web',
+    title: 'Random Number Generator — Cryptographically Secure',
     shortTitle: 'Random Numbers',
     description: 'Generate cryptographically secure random numbers using Web Crypto API. Customizable range, count, decimal precision, unique values, and batch statistics.',
     category: 'Mathematics',
@@ -584,7 +584,7 @@ export const mathCalculators: CalculatorEntry[] = [
     id: 'ratio-calculator',
     title: 'Ratio Calculator — Simplify Ratios & Solve Proportions',
     shortTitle: 'Ratio Calculator',
-    description: 'Simplify ratios, find missing values in proportions, and scale dimensions. Includes common aspect ratio presets (16:9, 4:3, 1:1, 21:9) for photography, video, and social media.',
+    description: 'Simplify ratios, find missing values in proportions and scale dimensions, with common aspect ratio presets (16:9, 4:3, 1:1, 21:9).',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'Algebra',
@@ -597,7 +597,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'rounding-calculator',
-    title: 'Rounding Calculator — Round to Any Place Value with Number Line',
+    title: 'Rounding Calculator — Any Place Value + Number Line',
     shortTitle: 'Rounding Calculator',
     description: 'Round numbers to the nearest million, thousand, hundred, ten, unit, tenth, hundredth, thousandth, or ten-thousandth. Free, instant, and accurate.',
     category: 'Mathematics',
@@ -659,7 +659,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'slope-calculator',
-    title: 'Slope Calculator — Find Line Slope & Equation from Two Points',
+    title: 'Slope Calculator — Line Slope & Equation, Two Points',
     shortTitle: 'Slope Calculator',
     description: 'Calculate slope between two points with all three equation forms, distance, midpoint, and angle. Includes simplified fraction and interactive coordinate graph.',
     category: 'Mathematics',
@@ -675,7 +675,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'standard-deviation-calculator',
-    title: 'Standard Deviation Calculator — Variance, Mean & Coefficient of Variation',
+    title: 'Standard Deviation Calculator — Variance & Mean',
     shortTitle: 'Standard Deviation',
     description: 'Compute standard deviation, variance, mean, median, range, and coefficient of variation from any dataset. Free online calculator with step-by-step results.',
     category: 'Mathematics',
@@ -691,7 +691,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'statistics-calculator',
-    title: 'Statistics Calculator — Box Plot, Quartiles, IQR & Outlier Detector',
+    title: 'Statistics Calculator — Box Plot, Quartiles & IQR',
     shortTitle: 'Statistics',
     description: 'Comprehensive descriptive statistics calculator with a dynamic box-and-whisker plot. Computes the five-number summary, quartiles, IQR, standard deviation.',
     category: 'Mathematics',
@@ -707,7 +707,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'time-calculator',
-    title: 'Time & Hours Calculator — Work Shift Time, Breaks & Gross Pay',
+    title: 'Time & Hours Calculator — Work Shifts, Breaks & Pay',
     shortTitle: 'Time & Hours',
     description: 'Calculate time differences between start and end times with automatic overnight detection, break deductions, and optional gross pay computation.',
     category: 'Mathematics',
@@ -740,7 +740,7 @@ export const mathCalculators: CalculatorEntry[] = [
     id: 'time-zone-calculator',
     title: 'Time Zone Calculator — 24 Zones with Meeting-Time Overlay',
     shortTitle: 'Time Zone Calculator',
-    description: 'Convert time between 24 time zones worldwide with business hours overlay. Green-yellow-gray color-coded grid shows the best meeting times across multiple time zones.',
+    description: 'Convert time across 24 world time zones with a color-coded business-hours grid that shows the best meeting times.',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'General',
@@ -785,9 +785,9 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'z-score-calculator',
-    title: 'Z-Score Calculator — Standard Normal Distribution & Percentile',
+    title: 'Z-Score Calculator — Normal Distribution & Percentile',
     shortTitle: 'Z-Score Calculator',
-    description: 'Calculate the Z-score from a raw score, population mean, and standard deviation. Visualizes the result on a standard normal distribution curve with a shaded probability region.',
+    description: 'Calculate a Z-score from a raw score, mean and standard deviation, shown on a standard normal curve with the shaded probability region.',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'Statistics',
@@ -800,7 +800,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'roman-numeral-converter',
-    title: 'Roman Numeral Converter — Numbers, Dates & Subtractive Notation',
+    title: 'Roman Numeral Converter — Numbers & Dates',
     shortTitle: 'Roman Numerals',
     description: 'Convert numbers to Roman numerals and back, including date conversion. Features subtractive notation breakdown and tattoo verification.',
     category: 'Mathematics',
@@ -816,9 +816,9 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'density-calculator',
-    title: 'Density Calculator — Solve Density, Mass & Volume with Formula',
+    title: 'Density Calculator — Solve Density, Mass & Volume',
     shortTitle: 'Density Calculator',
-    description: 'Calculate density, mass, or volume using ρ = m/V with the formula triangle mnemonic. Includes unit conversion between g/cm³, kg/m³, and lbs/ft³ with a common-material density reference table.',
+    description: 'Solve density, mass or volume with ρ = m/V and the formula triangle, with unit conversion and a common-material density table.',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'Algebra',
@@ -846,7 +846,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'weight-calculator',
-    title: 'Weight Calculator — W = m × g with Planetary Gravity Comparison',
+    title: 'Weight Calculator — W = m × g with Planet Gravity',
     shortTitle: 'Weight Calculator',
     description: 'Calculate weight, mass, or gravitational acceleration using the W = mg formula. Compare weight across Earth, Moon, Mars, Jupiter, and the Sun.',
     category: 'Mathematics',
@@ -862,7 +862,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'speed-calculator',
-    title: 'Speed Calculator — S = D/T with Pace, Unit Conversion & Race Planning',
+    title: 'Speed Calculator — S = D/T, Pace & Race Planning',
     shortTitle: 'Speed Calculator',
     description: 'Calculate speed, distance, or time using S = D/T. Converts between mph, km/h, m/s, and knots with simultaneous display. Free, instant, and accurate.',
     category: 'Mathematics',
@@ -877,7 +877,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'molarity-calculator',
-    title: 'Molarity Calculator — Calculate Solution Concentration in mol/L',
+    title: 'Molarity Calculator — Solution Concentration in mol/L',
     shortTitle: 'Molarity Calculator',
     description: 'Calculate molarity, mass, or volume of chemical solutions. Auto-detects compounds and shows step-by-step derivation of moles and concentration.',
     category: 'Mathematics',
@@ -909,7 +909,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'time-duration-calculator',
-    title: 'Time Duration Calculator — Exact Hours, Days & Weeks Between Dates',
+    title: 'Time Duration Calculator — Hours, Days & Weeks Between Dates',
     shortTitle: 'Time Duration',
     description: 'Calculate the exact duration between two dates and times down to the second. Supports business days mode and multiple output formats for project timelines.',
     category: 'Mathematics',
@@ -924,9 +924,9 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'day-counter-calculator',
-    title: 'Day Counter — Count Days Between Dates with Business Day Mode',
+    title: 'Day Counter — Count Days Between Dates, Business Days',
     shortTitle: 'Day Counter',
-    description: 'Count the exact number of days between two dates with precision down to the day. Includes business days exclusion, end-date inclusion toggle, and quick week/month/year unit conversions.',
+    description: 'Count the exact days between two dates, with business-day exclusion, an end-date inclusion toggle and week/month/year conversions.',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'General',
@@ -940,7 +940,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'day-of-week-calculator',
-    title: "Day of the Week Calculator — Any Date via Zeller's Congruence",
+    title: "Day of the Week Calculator — Zeller's Congruence",
     shortTitle: 'Day of Week',
     description: "Find the day of the week for any date using Zeller's congruence. Features a perpetual calendar algorithm explanation and historical context.",
     category: 'Mathematics',
@@ -988,7 +988,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'descriptive-stats',
-    title: 'Descriptive Statistics Calculator — Mean, Median, Mode, IQR & More',
+    title: 'Descriptive Statistics Calculator — Mean, Median, IQR',
     shortTitle: 'Descriptive Stats',
     description: 'Compute key descriptive statistics for any dataset: mean, median, mode, range, variance, standard deviation, quartiles, and IQR.',
     category: 'Mathematics',
@@ -1050,7 +1050,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'derivative-calculator',
-    title: 'Derivative Calculator — Differentiate Polynomials Step by Step',
+    title: 'Derivative Calculator — Polynomials, Step by Step',
     shortTitle: 'Derivative Calc',
     description: 'Compute derivatives of polynomial expressions using the power rule. Get step-by-step differentiation and evaluate at any point.',
     category: 'Mathematics',
@@ -1065,7 +1065,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'trigonometry-calculator',
-    title: 'Trigonometry Calculator — Compute Sin, Cos, Tan & Inverse Trig',
+    title: 'Trigonometry Calculator — Sin, Cos, Tan & Inverse',
     shortTitle: 'Trig Calculator',
     description: 'Calculate sine, cosine, tangent and their reciprocals for any angle. Also find angles from trig values with reference angles.',
     category: 'Mathematics',
@@ -1096,7 +1096,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'factoring-calculator',
-    title: 'Factoring Calculator — Factor Quadratic Polynomials Step by Step',
+    title: 'Factoring Calculator — Quadratics, Step by Step',
     shortTitle: 'Factoring Calc',
     description: 'Factor quadratic polynomials (ax² + bx + c) into their factored form with step-by-step work. Find the factors and zeros of any quadratic expression.',
     category: 'Mathematics',
@@ -1143,7 +1143,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'factorial-calculator',
-    title: 'Factorial Calculator — Compute n! with Step-by-Step Solutions',
+    title: 'Factorial Calculator — Compute n! Step by Step',
     shortTitle: 'Factorial Calculator',
     description: 'Calculate the factorial of any number from 0 to 170. Shows the step-by-step multiplication, digit count, and trailing zeros.',
     category: 'Mathematics',
@@ -1158,7 +1158,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'fibonacci',
-    title: 'Fibonacci Calculator — Find nth Term & Sequence — Calculator',
+    title: 'Fibonacci Calculator — Find nth Term & Sequence',
     shortTitle: 'Fibonacci Calculator',
     description: 'Calculate the nth Fibonacci number, view the full sequence, and get the sum. Uses iteration and the Binet formula for verification. Free, instant, and accurate.',
     category: 'Mathematics',
@@ -1189,7 +1189,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'law-of-cosines',
-    title: 'Law of Cosines Calculator — Side & Angle Solver — Calculator',
+    title: 'Law of Cosines Calculator — Side & Angle Solver',
     shortTitle: 'Law of Cosines',
     description: 'Solve triangles using the law of cosines. Find missing sides (SSS) or angles (SAS) with step-by-step work. Free, instant, and accurate.',
     category: 'Mathematics',
@@ -1235,7 +1235,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'limit-calculator',
-    title: 'Limit Calculator — Evaluate Limits with Step-by-Step Solutions',
+    title: 'Limit Calculator — Evaluate Limits Step by Step',
     shortTitle: 'Limit Calc',
     description: 'Compute limits of functions as x approaches any value. Evaluate left-hand, right-hand, and two-sided limits with approach tables.',
     category: 'Mathematics',
@@ -1360,7 +1360,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'test-score-calculator',
-    title: 'Test Score Calculator — Final Exam Grade Needed — Calculator',
+    title: 'Test Score Calculator — Final Exam Grade Needed',
     shortTitle: 'Test Score',
     description: 'Calculate what grade you need on your final exam to achieve your target overall grade. Handles weighted grading systems with impossible target detection.',
     category: 'Mathematics',

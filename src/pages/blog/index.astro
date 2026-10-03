@@ -2,19 +2,39 @@
 // Blog index — fully static. Posts sorted newest first.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { blogPosts } from '../../lib/blog';
-import { SITE_NAME } from '../../config/constants';
+import { SITE_NAME, BASE_URL } from '../../config/constants';
+import { collectionPageSchema } from '../../lib/jsonld';
 
 const posts = [...blogPosts].sort(
   (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
 );
 
 const dateFmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+const description = `${posts.length} in-depth guides behind our calculators: mortgages, BMI, retirement, e-commerce fees, and more — with formulas and worked examples.`;
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${BASE_URL}/blog/` },
+    ],
+  },
+  collectionPageSchema({
+    name: 'Guides & Explanations',
+    url: `${BASE_URL}/blog/`,
+    description,
+    items: posts.map((p) => ({ name: p.title, url: `${BASE_URL}/blog/${p.slug}/` })),
+  }),
+];
 ---
 
 <BaseLayout
   title={`Blog — Guides & Explanations | ${SITE_NAME}`}
-  description={`${posts.length} in-depth guides behind our calculators: mortgages, BMI, retirement, e-commerce fees, and more — with formulas and worked examples.`}
+  description={description}
   canonicalPath="/blog/"
+  schemas={schemas}
 >
   <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
     <div class="max-w-[900px] mx-auto px-4 md:px-10 py-10">

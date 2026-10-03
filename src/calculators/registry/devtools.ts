@@ -3,7 +3,7 @@ import type { CalculatorEntry } from '../../types/calculator';
 export const devtoolsCalculators: CalculatorEntry[] = [
   {
     id: 'json-formatter',
-    title: 'JSON Formatter & Validator — Format, Validate & Beautify JSON',
+    title: 'JSON Formatter & Validator — Format & Beautify JSON',
     shortTitle: 'JSON Formatter',
     description: 'Format, validate, and beautify JSON data instantly. Paste messy JSON and get clean, indented output with syntax validation and error highlighting.',
     category: 'Developer Tools',
@@ -19,9 +19,9 @@ export const devtoolsCalculators: CalculatorEntry[] = [
   },
   {
     id: 'regex-tester',
-    title: 'Regex Tester & Debugger — Test JavaScript Regular Expressions Live',
+    title: 'Regex Tester & Debugger — Test JavaScript Regex Live',
     shortTitle: 'Regex Tester',
-    description: 'Test and debug JavaScript regular expressions in real-time. Enter a pattern, flags, and test string to see match count, matched substrings, and whether the pattern matches.',
+    description: 'Test and debug JavaScript regular expressions in real time: enter a pattern, flags and test string to see match count and matched substrings.',
     category: 'Developer Tools',
     categorySlug: 'devtools',
     subCategory: 'Text & Code',
@@ -177,7 +177,7 @@ export const devtoolsCalculators: CalculatorEntry[] = [
   },
   {
     id: 'jwt-debugger',
-    title: 'JWT Debugger — Decode and Inspect JWT Tokens — Calculator',
+    title: 'JWT Debugger — Decode and Inspect JWT Tokens',
     shortTitle: 'JWT Debugger',
     description: 'Decode and inspect JSON Web Tokens (JWT) client-side. View the header, payload, and signature information without sending data to any server.',
     category: 'Developer Tools',

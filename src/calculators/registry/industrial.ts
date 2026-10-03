@@ -5,7 +5,7 @@ export const industrialCalculators: CalculatorEntry[] = [
     id: 'pressure-converter',
     title: 'Pressure Converter — PSI, Bar, kPa, MPa, atm & More',
     shortTitle: 'Pressure Converter',
-    description: 'Convert between PSI, bar, kPa, MPa, atmospheres, torr, and inches of mercury. Free online pressure unit converter with instant results and common reference conversions.',
+    description: 'Convert between PSI, bar, kPa, MPa, atmospheres, torr and inches of mercury with instant results and common reference conversions.',
     category: 'Industrial & Trades',
     categorySlug: 'industrial',
     subCategory: 'Unit Converters',
@@ -65,7 +65,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'force-converter',
-    title: 'Force Converter - Newtons to lbf, kgf, kN, Kips & Dynes Online',
+    title: 'Force Converter — Newtons to lbf, kgf, kN & Kips',
     shortTitle: 'Force Converter',
     description: 'Convert force units: newtons to lbf, kgf to N, kips to kN, dynes to pounds. Free calculator for structural engineering and physics force conversions.',
     category: 'Industrial & Trades',
@@ -81,7 +81,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'density-converter',
-    title: 'Density Converter — kg/m³, g/cm³, lb/ft³, Specific Gravity & More',
+    title: 'Density Converter — kg/m³, g/cm³, lb/ft³ & More',
     shortTitle: 'Density Converter',
     description: 'Convert between kg/m³, g/cm³, lb/ft³, lb/in³, specific gravity, and more. Free online density unit converter for materials science and engineering.',
     category: 'Industrial & Trades',
@@ -97,7 +97,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'angle-converter',
-    title: 'Angle Converter — Degrees, Radians, Gradians, Arcminutes & More',
+    title: 'Angle Converter — Degrees, Radians, Gradians & More',
     shortTitle: 'Angle Converter',
     description: 'Convert between degrees, radians, gradians, arcminutes, arcseconds, milliradians, and turns. Free online calculator with formula guide and step-by-step results.',
     category: 'Industrial & Trades',
@@ -159,7 +159,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'viscosity-converter',
-    title: 'Viscosity Converter — Poise, Stokes, Centipoise, Centistokes & More',
+    title: 'Viscosity Converter — Poise, Stokes, Centipoise & More',
     shortTitle: 'Viscosity Converter',
     description: 'Convert between pascal-seconds, poise, centipoise, stokes, centistokes, and more. Free online viscosity unit converter for lubricants and fluids.',
     category: 'Industrial & Trades',
@@ -190,7 +190,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'temperature-converter',
-    title: 'Temperature Converter — Celsius, Fahrenheit, Kelvin & Rankine',
+    title: 'Temperature Converter — Celsius, Fahrenheit & Kelvin',
     shortTitle: 'Temperature Converter',
     description: 'Convert between Celsius, Fahrenheit, Kelvin, and Rankine instantly. Free online temperature converter for cooking, science, weather, and engineering.',
     category: 'Industrial & Trades',
@@ -236,7 +236,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'volume-converter',
-    title: 'Volume Converter — Liters, Gallons, Cups, Cubic Meters & More',
+    title: 'Volume Converter — Liters, Gallons, Cups & More',
     shortTitle: 'Volume Converter',
     description: 'Convert between liters, gallons, cups, fluid ounces, cubic meters, cubic feet, and more. Free online calculator with formula guide and step-by-step results.',
     category: 'Industrial & Trades',
@@ -267,7 +267,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'area-converter',
-    title: 'Area Converter — m², ft², Acres, Hectares, Square Miles & More',
+    title: 'Area Converter — m², ft², Acres, Hectares & More',
     shortTitle: 'Area Converter',
     description: 'Convert between square meters, square feet, acres, hectares, square kilometers, square miles, and more. Free, instant, and accurate.',
     category: 'Industrial & Trades',
@@ -283,7 +283,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'data-storage-converter',
-    title: 'Data Storage Converter — Bytes, KB, MB, GB, TB, KiB, MiB & More',
+    title: 'Data Storage Converter — Bytes, KB, MB, GB, TB & More',
     shortTitle: 'Data Storage Converter',
     description: 'Convert between bytes, kilobytes, megabytes, gigabytes, terabytes, kibibytes, mebibytes, and more. Free, instant, and accurate.',
     category: 'Industrial & Trades',
@@ -299,7 +299,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'cooking-converter',
-    title: 'Cooking Measurement Converter — Cups, Tbsp, Tsp, mL, Grams & More',
+    title: 'Cooking Measurement Converter — Cups, Tbsp, mL & More',
     shortTitle: 'Cooking Converter',
     description: 'Convert between cups, tablespoons, teaspoons, milliliters, fluid ounces, pints, quarts, gallons, and water-weight equivalents.',
     category: 'Industrial & Trades',
@@ -315,7 +315,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'cbm-calculator',
-    title: 'CBM & Dimensional Weight Calculator — Sea, Air & Courier Freight',
+    title: 'CBM & Dimensional Weight Calculator — Freight',
     shortTitle: 'CBM Calculator',
     description: 'Calculate cubic meters (CBM) and dimensional weight for any shipment. Supports air (1:6000), sea (1:1000), and courier (1:5000) dim factors.',
     category: 'Industrial & Trades',
@@ -331,7 +331,7 @@ export const industrialCalculators: CalculatorEntry[] = [
   },
   {
     id: 'oven-temperature-converter',
-    title: 'Oven Temperature Converter — °C, °F, and Gas Mark Conversions',
+    title: 'Oven Temperature Converter — °C, °F & Gas Mark',
     shortTitle: 'Oven Temperature Converter',
     description: 'Convert oven temperatures between Celsius, Fahrenheit, and Gas Mark instantly. Includes common oven temperature terms and fan oven adjustments.',
     category: 'Industrial & Trades',

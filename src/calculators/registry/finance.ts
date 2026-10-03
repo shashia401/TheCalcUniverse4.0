@@ -19,7 +19,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'canadian-mortgage-calculator',
-    title: 'Canadian Mortgage Calculator — Semi-Annual Compounding & CMHC',
+    title: 'Canadian Mortgage Calculator — Semi-Annual & CMHC',
     shortTitle: 'Canadian Mortgage',
     description: 'Canadian mortgage calculator with legally-correct semi-annual compounding, CMHC insurance premiums, and accelerated bi-weekly payment comparison.',
     category: 'Finance',
@@ -50,7 +50,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'pension-calculator',
-    title: 'Pension Calculator — Contribution Growth Projection & 4% Rule',
+    title: 'Pension Calculator — Growth Projection & 4% Rule',
     shortTitle: 'Pension Calculator',
     description: 'Project your pension balance from now through retirement. See your projected balance, inflation-adjusted value, and 4% Rule monthly payout with a free PDF.',
     category: 'Finance',
@@ -66,7 +66,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'rmd-calculator',
-    title: 'RMD Calculator 2026 — Required Minimum Distribution (SECURE 2.0)',
+    title: 'RMD Calculator 2026 — Required Minimum Distribution',
     shortTitle: 'RMD Calculator',
     description: 'Calculate your RMD using the IRS Uniform Lifetime Table with SECURE 2.0 age rules (73 for born 1951-1959, 75 for born 1960+).',
     category: 'Finance',
@@ -97,7 +97,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'business-loan-calculator',
-    title: 'Business Loan Calculator — DSCR, Payments & Full Amortization',
+    title: 'Business Loan Calculator — DSCR & Amortization',
     shortTitle: 'Business Loan Calculator',
     description: 'Calculate monthly payments, DSCR ratio, origination fees, and cash disbursed. Enter NOI to see lender approval likelihood with a full amortization schedule.',
     category: 'Finance',
@@ -113,7 +113,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'debt-consolidation-calculator',
-    title: 'Debt Consolidation Calculator — Is It Worth It? — Calculator',
+    title: 'Debt Consolidation Calculator — Is It Worth It?',
     shortTitle: 'Debt Consolidation',
     description: 'Compare your current debt path vs. consolidating into a personal loan — including origination fees. Free, instant, and accurate.',
     category: 'Finance',
@@ -129,9 +129,9 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'student-loan-calculator',
-    title: 'Student Loan Calculator — With In-School Interest & Capitalization',
+    title: 'Student Loan Calculator — In-School Interest',
     shortTitle: 'Student Loan Calculator',
-    description: 'Calculate your post-graduation monthly payment and lifetime loan cost. Toggle between subsidized and unsubsidized loans to see the exact impact of in-school interest capitalization.',
+    description: 'Estimate your post-graduation monthly payment and lifetime loan cost, and see the impact of in-school interest capitalization.',
     category: 'Finance',
     categorySlug: 'finance',
     subCategory: 'Debt Management',
@@ -160,7 +160,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'roth-ira-calculator',
-    title: 'Roth IRA Calculator 2026 — Tax-Free Growth & Contribution Limits',
+    title: 'Roth IRA Calculator 2026 — Tax-Free Growth & Limits',
     shortTitle: 'Roth IRA Calculator',
     description: 'Project your Roth IRA balance with 2026 contribution limits ($7,500 base, $8,600 for 50+). See tax-free growth, contributions vs.',
     category: 'Finance',
@@ -192,7 +192,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'estate-tax-calculator',
-    title: 'Estate Tax Calculator 2025 — Federal & State — Free Online Calculator',
+    title: 'Estate Tax Calculator 2025 — Federal & State',
     shortTitle: 'Estate Tax Calculator',
     description: 'Estimate federal estate tax based on your gross estate, deductions, and filing status. Free online calculator with formula guide and step-by-step results.',
     category: 'Finance',
@@ -207,7 +207,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'social-security-calculator',
-    title: 'Social Security Calculator — Age 62 vs 67 vs 70 (2025 Bend Points)',
+    title: 'Social Security Calculator — Age 62 vs 67 vs 70',
     shortTitle: 'Social Security Calculator',
     description: 'Estimate your monthly Social Security benefit using the official PIA bend point formula. Free online calculator with formula guide and step-by-step results.',
     category: 'Finance',
@@ -255,7 +255,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: '401k-calculator',
-    title: '401(k) Calculator — Retirement Projection with Employer Match',
+    title: '401(k) Calculator — Projection with Employer Match',
     shortTitle: '401(k) Calculator',
     description: 'Project your 401(k) balance with salary growth and employer matching. See contribution breakdowns, compounding returns, and monthly retirement income.',
     category: 'Finance',
@@ -288,7 +288,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'sales-tax-calculator',
-    title: 'Sales Tax Calculator — Add Tax or Extract Tax — Free Online Calculator',
+    title: 'Sales Tax Calculator — Add Tax or Extract Tax',
     shortTitle: 'Sales Tax Calculator',
     description: 'Add sales tax to a price or extract the tax from a total amount collected. The "Extract Tax" mode is essential for e-commerce and retail business owners.',
     category: 'Finance',
@@ -336,7 +336,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'tvm-calculator',
-    title: 'TVM Calculator — Time Value of Money (HP 12C / TI BA II+ Compatible)',
+    title: 'TVM Calculator — Time Value of Money, HP 12C Compatible',
     shortTitle: 'TVM Finance Calculator',
     description: 'Professional-grade TVM solver matching the HP 12C and TI BA II+ financial calculators. Free online calculator with formula guide and step-by-step results.',
     category: 'Finance',
@@ -369,7 +369,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mortgage-comparison-calculator',
-    title: 'Mortgage Comparison Calculator — 15-Year vs 30-Year with PMI, Tax',
+    title: 'Mortgage Comparison Calculator — 15-Year vs 30-Year',
     shortTitle: '15-Year vs 30-Year Mortgage',
     description: 'Compare 15-year vs 30-year mortgages side by side with different rates, PMI, property taxes, and insurance. Free, instant, and accurate.',
     category: 'Finance',
@@ -384,7 +384,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'texas-mortgage-calculator',
-    title: 'Texas Mortgage Calculator — Rates, Property Tax & Homestead Exemption',
+    title: 'Texas Mortgage Calculator — Property Tax & Homestead',
     shortTitle: 'Texas Mortgage Calculator',
     description: 'Calculate your Texas mortgage payment including property taxes (~1.8%), PMI, and the Texas Homestead Exemption. Free, instant, and accurate.',
     category: 'Finance',
@@ -415,7 +415,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'california-mortgage-calculator',
-    title: 'California Mortgage Calculator — Prop 13, CalHFA & Mello-Roos',
+    title: 'California Mortgage Calculator — Prop 13 & CalHFA',
     shortTitle: 'California Mortgage Calculator',
     description: 'Estimate CA mortgage payments with Prop 13 taxes, Mello-Roos, and PMI. Includes CalHFA down payment help and state income tax impact.',
     category: 'Finance',
@@ -446,7 +446,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'salary-calculator',
-    title: 'Salary Calculator 2026 — Paycheck Converter with Take-Home Pay',
+    title: 'Salary Calculator 2026 — Paycheck & Take-Home Pay',
     shortTitle: 'Salary Calculator',
     description: 'Convert any salary between hourly, daily, weekly, bi-weekly, semi-monthly, monthly, and annual. Free, instant, and accurate.',
     category: 'Finance',
@@ -462,7 +462,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'retirement-calculator',
-    title: 'Retirement Savings Calculator — 401k & IRA Growth — Calculator',
+    title: 'Retirement Savings Calculator — 401k & IRA Growth',
     shortTitle: 'Retirement Calculator',
     description: 'Find out if you are on track for retirement. Enter your age, current savings, monthly contributions, and target retirement age to see your projected nest.',
     category: 'Finance',
@@ -478,7 +478,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'amortization-calculator',
-    title: 'Amortization Calculator with Extra Payments — Free Online Calculator',
+    title: 'Amortization Calculator with Extra Payments',
     shortTitle: 'Amortization Calculator',
     description: 'See the full amortization schedule for any loan and calculate exactly how much time and interest extra monthly or annual payments save.',
     category: 'Finance',
@@ -494,9 +494,9 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'investment-calculator',
-    title: 'Investment Calculator — Compound Growth with Variance Scenarios',
+    title: 'Investment Calculator — Compound Growth Scenarios',
     shortTitle: 'Investment Calculator',
-    description: 'Project the future value of any investment with regular contributions. See three return scenarios (expected, optimistic, pessimistic) and a breakdown of contributions vs. market growth.',
+    description: 'Project future investment value with regular contributions across three return scenarios, and see contributions vs. market growth.',
     category: 'Finance',
     categorySlug: 'finance',
     subCategory: 'Investing',
@@ -511,7 +511,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'currency-calculator',
-    title: 'Currency Converter — Live Exchange Rates for 30+ Global Currencies',
+    title: 'Currency Converter — Live Rates for 30+ Currencies',
     shortTitle: 'Currency Converter',
     description: 'Convert between 30+ currencies using live ECB exchange rates with mid-market pricing. See exact rate, timestamp, inverse rate, and bank spread comparison.',
     category: 'Finance',
@@ -526,7 +526,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'inflation-calculator',
-    title: 'Inflation Calculator — Historical CPI Data — Free Online Calculator',
+    title: 'Inflation Calculator — Historical CPI Data',
     shortTitle: 'Inflation Calculator',
     description: 'Calculate the inflation-adjusted value of any dollar amount from 1913 to today using official US CPI data from the Bureau of Labor Statistics.',
     category: 'Finance',
@@ -558,7 +558,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'personal-loan-calculator',
-    title: 'Personal Loan Calculator — With Origination Fee & True Cost Breakdown',
+    title: 'Personal Loan Calculator — Origination Fee & True Cost',
     shortTitle: 'Personal Loan Calculator',
     description: 'Calculate your exact monthly payment, cash received, and true total cost with origination fees. Choose fee deducted from proceeds or added to balance.',
     category: 'Finance',
@@ -592,7 +592,7 @@ export const financeCalculators: CalculatorEntry[] = [
     id: 'irr-calculator',
     title: 'IRR Calculator — Internal Rate of Return with NPV (Free)',
     shortTitle: 'IRR Calculator',
-    description: 'Calculate IRR and NPV for any investment with multiple cash flows over time. Add up to 10 years of projected cash flows and benchmark against S&P 500 and custom hurdle rates.',
+    description: 'Calculate IRR and NPV for multi-year cash flows (up to 10 years) and benchmark against the S&P 500 or your own hurdle rate.',
     category: 'Finance',
     categorySlug: 'finance',
     subCategory: 'Business & Accounting',
@@ -605,7 +605,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'apr-calculator',
-    title: 'APR Calculator — True Annual Percentage Rate (vs. Interest Rate)',
+    title: 'APR Calculator — True Annual Percentage Rate',
     shortTitle: 'APR Calculator',
     description: 'Calculate the true APR of any loan by factoring in origination fees, closing costs, and other upfront charges. Free, instant, and accurate.',
     category: 'Finance',
@@ -621,7 +621,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'va-mortgage-calculator',
-    title: 'VA Mortgage Calculator — VA Funding Fee, No PMI Payment Breakdown',
+    title: 'VA Mortgage Calculator — Funding Fee & No-PMI Payment',
     shortTitle: 'VA Loan Calculator',
     description: 'Calculate your VA loan payment including the VA Funding Fee for first vs. subsequent use. Free online calculator with formula guide and step-by-step results.',
     category: 'Finance',
@@ -668,7 +668,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'present-value-calculator',
-    title: 'Present Value Calculator — How Much to Invest Today for a Future Goal',
+    title: 'Present Value Calculator — Invest Today for a Goal',
     shortTitle: 'Present Value Calculator',
     description: 'Calculate how much money you need today to reach a future financial goal. Supports all compounding frequencies with formula display, growth timeline.',
     category: 'Finance',
@@ -684,7 +684,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'interest-calculator',
-    title: 'Interest Calculator — Simple & Compound Interest — Calculator',
+    title: 'Interest Calculator — Simple & Compound Interest',
     shortTitle: 'Interest Calculator',
     description: 'Calculate simple or compound interest for any principal, rate, and time period. Supports annual, monthly, and daily time periods and all compounding.',
     category: 'Finance',
@@ -763,7 +763,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'credit-card-payoff-calculator',
-    title: 'Credit Card Payoff Calculator — Debt-Free Date & Total Interest',
+    title: 'Credit Card Payoff Calculator — Debt-Free Date',
     shortTitle: 'Credit Card Payoff',
     description: 'Calculate how much to pay monthly to be debt-free by a target date, or see your payoff timeline for a fixed payment. Free, instant, and accurate.',
     category: 'Finance',
@@ -811,7 +811,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'rental-property-calculator',
-    title: 'Rental Property Cash Flow Calculator — State-Specific Property Tax',
+    title: 'Rental Property Cash Flow Calculator — State Taxes',
     shortTitle: 'Rental Property',
     description: 'Analyze rental property investments with state-specific tax rates for all 50 states. Calculate cash flow, cap rate, cash-on-cash return, NOI, DSCR, and GRM.',
     category: 'Finance',
@@ -826,7 +826,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mortgage-amortization-calculator',
-    title: 'Mortgage Amortization Calculator — Extra Payment Savings Chart',
+    title: 'Mortgage Amortization Calculator — Extra Payments',
     shortTitle: 'Mortgage Calculator',
     description: 'Calculate your monthly mortgage payment, full amortization schedule, and extra payment savings. Free, instant, and accurate.',
     category: 'Finance',
@@ -843,7 +843,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'home-rent-vs-buy-calculator',
-    title: 'Rent vs. Buy Calculator — Compare Costs Over Time — Calculator',
+    title: 'Rent vs. Buy Calculator — Compare Costs Over Time',
     shortTitle: 'Rent vs. Buy',
     description: 'Compare the true financial cost of renting vs. buying a home over your planned timeline. Accounts for appreciation, equity, taxes, and maintenance.',
     category: 'Finance',
@@ -859,7 +859,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'dti-ratio-calculator',
-    title: 'Debt-to-Income (DTI) Ratio Calculator — Front-End & Back-End DTI',
+    title: 'Debt-to-Income (DTI) Ratio Calculator — Front & Back-End',
     shortTitle: 'DTI Ratio Calculator',
     description: 'Calculate your front-end and back-end debt-to-income ratios to see if you qualify for a mortgage. Lenders typically require a DTI below 43%.',
     category: 'Finance',
@@ -905,7 +905,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'repayment-calculator',
-    title: 'Repayment Calculator — Amortization Schedule & Extra Payment Savings',
+    title: 'Repayment Calculator — Amortization & Extra Payments',
     shortTitle: 'Repayment Calculator',
     description: 'See the full amortization schedule for any loan with interactive year and month views. Add extra payments to see time and interest saved, then export to CSV.',
     category: 'Finance',
@@ -936,7 +936,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'fha-loan-calculator',
-    title: 'FHA Loan Calculator — MIP Cost Breakdown & Upfront Premium Analysis',
+    title: 'FHA Loan Calculator — MIP & Upfront Premium Costs',
     shortTitle: 'FHA Loan Calculator',
     description: 'Calculate your FHA loan monthly payment including all MIP costs. See the complete MIP cost breakdown over time — upfront premium (1.75% financed), annual.',
     category: 'Finance',
@@ -952,7 +952,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'cd-calculator',
-    title: 'CD Calculator 2026 — Compare Rates & Compounding (Ally, Marcus',
+    title: 'CD Calculator 2026 — Compare Rates & Compounding',
     shortTitle: 'CD Calculator',
     description: 'Calculate CD maturity amounts across all major US banks with real benchmark rates from Ally, Marcus, Discover, Capital One, and more.',
     category: 'Finance',
@@ -968,7 +968,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'average-return-calculator',
-    title: 'Average Return Calculator — CAGR vs. Simple Average (Volatility Drag)',
+    title: 'Average Return Calculator — CAGR vs. Simple Average',
     shortTitle: 'Average Return Calculator',
     description: 'Calculate the compound annual growth rate (CAGR) and simple average return for any investment. Free, instant, and accurate.',
     category: 'Finance',
@@ -983,7 +983,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'boat-loan-calculator',
-    title: 'Boat Loan Calculator — True Cost of Ownership (Maintenance & Storage)',
+    title: 'Boat Loan Calculator — True Cost of Ownership',
     shortTitle: 'Boat Loan Calculator',
     description: 'Calculate monthly boat loan payments including insurance, maintenance, and storage costs that can equal the loan payment itself.',
     category: 'Finance',
@@ -1014,7 +1014,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'discount-calculator',
-    title: 'Discount Calculator — Stackable Discounts & Bulk Shopping Cart',
+    title: 'Discount Calculator — Stackable & Bulk Discounts',
     shortTitle: 'Discount Calculator',
     description: 'Calculate stackable discounts applied sequentially (20% + 10% ≠ 30%). Includes a full shopping cart with add/remove items, per-item discounts, sales tax.',
     category: 'Finance',
@@ -1030,7 +1030,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'mutual-fund-calculator',
-    title: 'Mutual Fund Calculator — Expense Ratio Fee Impact (Index vs. Active)',
+    title: 'Mutual Fund Calculator — Expense Ratio Fee Impact',
     shortTitle: 'Mutual Fund Calculator',
     description: 'Compare mutual fund growth with and without expense ratios. See how a 1% fee can cost 25-30% of returns over 30 years with interactive chart.',
     category: 'Finance',
@@ -1045,7 +1045,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'ira-calculator',
-    title: 'IRA Calculator 2026 — Traditional vs. Roth (Side-by-Side Comparison)',
+    title: 'IRA Calculator 2026 — Traditional vs. Roth',
     shortTitle: 'IRA Calculator',
     description: 'Compare Traditional IRA vs. Roth IRA side-by-side with 2026 IRS contribution limits ($7,000 base, $8,000 age 50+). Free, instant, and accurate.',
     category: 'Finance',
@@ -1061,7 +1061,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'paycheck-calculator',
-    title: 'Paycheck Calculator 2026 — Hourly & Salary Take-Home Pay (All 50',
+    title: 'Paycheck Calculator 2026 — Take-Home Pay, All 50 States',
     shortTitle: 'Paycheck Calculator',
     description: 'Calculate your exact per-paycheck take-home pay for any pay frequency (weekly, bi-weekly, semi-monthly, monthly). Free, instant, and accurate.',
     category: 'Finance',
@@ -1077,9 +1077,9 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'refinance-calculator',
-    title: 'Refinance Calculator — Break-Even Analysis & Yes/No Recommendation',
+    title: 'Refinance Calculator — Break-Even Analysis',
     shortTitle: 'Refinance Calculator',
-    description: 'Calculate whether refinancing your mortgage makes financial sense. Enter your current loan terms, new loan offer, closing costs, and planned stay to get a clear yes/no recommendation.',
+    description: 'See whether refinancing makes sense: enter current and new loan terms, closing costs and planned stay for a clear yes/no recommendation.',
     category: 'Finance',
     categorySlug: 'finance',
     subCategory: 'Mortgages',
@@ -1093,7 +1093,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'home-equity-loan-calculator',
-    title: 'Home Equity Loan Calculator — LTV Limits & Equity Stack Visualization',
+    title: 'Home Equity Loan Calculator — LTV Limits & Equity Stack',
     shortTitle: 'Home Equity Loan',
     description: 'Calculate how much home equity you can borrow with a fixed-rate home equity loan. See max LTV by credit profile, monthly payment, and an equity stack bar.',
     category: 'Finance',
@@ -1124,7 +1124,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'payback-period-calculator',
-    title: 'Payback Period Calculator — Simple & Discounted Payback (TVM)',
+    title: 'Payback Period Calculator — Simple & Discounted',
     shortTitle: 'Payback Period Calculator',
     description: 'Calculate the payback period for any investment. Toggle between simple payback and discounted payback (with time value of money).',
     category: 'Finance',
@@ -1139,7 +1139,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'future-value-calculator',
-    title: 'Future Value Calculator — Compound Interest Formula & Growth Chart',
+    title: 'Future Value Calculator — Compound Growth & Chart',
     shortTitle: 'Future Value Calculator',
     description: 'Calculate the future value of any investment with compound interest and optional monthly contributions. Free, instant, and accurate.',
     category: 'Finance',
@@ -1155,9 +1155,9 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'arv-flipping-calculator',
-    title: 'ARV & House Flipping Calculator — MAO, 70% Rule & Profit Gauge',
+    title: 'ARV & House Flipping Calculator — MAO & 70% Rule',
     shortTitle: 'ARV & Flipping',
-    description: 'Calculate your Maximum Allowable Offer (MAO) for any fix-and-flip deal. Enter the After Repair Value, repair costs, holding costs, and target profit to see your MAO against the 70% rule.',
+    description: 'Calculate your Maximum Allowable Offer (MAO) for a fix-and-flip from ARV, repairs, holding costs and target profit, vs. the 70% rule.',
     category: 'Finance',
     categorySlug: 'finance',
     subCategory: 'Real Estate',
@@ -1170,7 +1170,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'self-employment-tax-calculator',
-    title: 'Self-Employment Tax Calculator — SECA, SS & Medicare Breakdown (2026)',
+    title: 'Self-Employment Tax Calculator 2026 — SECA, SS & Medicare',
     shortTitle: 'Self-Employment Tax',
     description: 'Calculate your self-employment (SECA) tax with a full Social Security and Medicare breakdown. Free, instant, and accurate.',
     category: 'Finance',
@@ -1186,7 +1186,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'depreciation-calculator',
-    title: 'Depreciation Calculator — MACRS (200% DB) & Straight Line Methods',
+    title: 'Depreciation Calculator — MACRS & Straight Line',
     shortTitle: 'Depreciation (MACRS/SL)',
     description: 'Calculate year-by-year depreciation schedules using Straight Line or MACRS (200% Declining Balance with half-year convention).',
     category: 'Finance',
@@ -1217,9 +1217,9 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'fire-calculator',
-    title: 'FIRE Calculator — Financial Independence, Retire Early (4% Rule)',
+    title: 'FIRE Calculator — Retire Early with the 4% Rule',
     shortTitle: 'FIRE Calculator',
-    description: 'Calculate your path to financial independence with the FIRE framework. Enter your age, net worth, income, and expenses to see your FIRE number and estimated retirement date.',
+    description: 'Find your FIRE number and estimated retirement date from your age, net worth, income and expenses using the FIRE framework.',
     category: 'Finance',
     categorySlug: 'finance',
     subCategory: 'Retirement',
@@ -1249,7 +1249,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'salary-take-home',
-    title: 'Salary Take-Home Pay Calculator — Net Income After Tax & Deductions',
+    title: 'Salary Take-Home Pay Calculator — Net Income After Tax',
     shortTitle: 'Take-Home Pay',
     description: 'Calculate your true take-home pay after federal income tax, FICA, and state taxes. See your net annual salary, per-paycheck amount, and complete tax.',
     category: 'Finance',
@@ -1264,7 +1264,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'capital-gains-tax-calculator',
-    title: 'Capital Gains Tax Calculator — Short vs. Long Term (2026 Brackets)',
+    title: 'Capital Gains Tax Calculator — Short vs. Long Term 2026',
     shortTitle: 'Capital Gains Tax',
     description: 'Calculate capital gains tax for stocks, crypto, and real estate. Enter purchase price, sale price, holding period, income, and filing status.',
     category: 'Finance',
@@ -1280,7 +1280,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'tax-calculator',
-    title: 'Tax Calculator — Federal Income Tax, Brackets & Effective Rate',
+    title: 'Tax Calculator — Federal Brackets & Effective Rate',
     shortTitle: 'Tax Calculator',
     description: 'Estimate your federal income tax using progressive tax brackets. See marginal rate, effective rate, and whether you will owe or get a refund.',
     category: 'Finance',
@@ -1312,7 +1312,7 @@ export const financeCalculators: CalculatorEntry[] = [
   },
   {
     id: 'swp-calculator',
-    title: 'SWP Calculator — Systematic Withdrawal Plan Income & Corpus Longevity',
+    title: 'SWP Calculator — Systematic Withdrawal Plan Income',
     shortTitle: 'SWP Calculator',
     description: 'Calculate how long your retirement corpus lasts with monthly SWP withdrawals. Simulate month-by-month balance depletion with yearly balance chart.',
     category: 'Finance',
