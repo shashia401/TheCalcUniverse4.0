@@ -1,64 +1,136 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Your emergency fund target is your monthly essential expenses multiplied by the number of months you want covered. If essentials cost $3,000 a month, three months is $9,000 and six months is $18,000. Three to six months is a widely used rule of thumb, not a legal or official requirement, and the right number for you depends on how stable your income is and how many people rely on it. This guide shows how to work out the figure, how long it takes to build, and where to keep the money."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "How Much Do You Need?"
+      "text": "Step 1: Add up your essential expenses"
     },
     {
       "type": "paragraph",
-      "text": "The standard recommendation is 3-6 months of essential living expenses. If you have stable employment, dual income, and strong job security, 3 months may be enough. If you are self-employed, work on commission, or have a single income, aim for 6-12 months. Essential expenses include housing, food, utilities, insurance, transportation, and minimum debt payments."
+      "text": "Count only what you must keep paying if your income stopped: housing, utilities, food, transport, insurance, health costs and minimum debt payments. Leave out dining out, subscriptions you could cancel and savings contributions. Here is an example budget used in the rest of this guide. The amounts are illustrations, so replace them with your own."
     },
     {
       "type": "table",
       "headers": [
-        "Situation",
-        "Target",
-        "Example Monthly Expenses",
-        "Total Needed"
+        "Essential expense",
+        "Monthly amount"
       ],
       "rows": [
-        [
-          "Single, stable job",
-          "3 months",
-          "$3,000",
-          "$9,000"
-        ],
-        [
-          "Single, variable income",
-          "6 months",
-          "$3,000",
-          "$18,000"
-        ],
-        [
-          "Couple, dual income",
-          "3 months",
-          "$4,500",
-          "$13,500"
-        ],
-        [
-          "Couple, single income",
-          "6 months",
-          "$4,500",
-          "$27,000"
-        ],
-        [
-          "Self-employed",
-          "6-12 months",
-          "$5,000",
-          "$30,000-$60,000"
-        ],
-        [
-          "Retired",
-          "6-12 months",
-          "$4,000",
-          "$24,000-$48,000"
-        ]
+        ["Rent or mortgage", "$1,200"],
+        ["Utilities, phone and internet", "$250"],
+        ["Groceries", "$500"],
+        ["Transportation", "$300"],
+        ["Insurance premiums", "$350"],
+        ["Minimum debt payments", "$250"],
+        ["Healthcare and medication", "$150"],
+        ["Total essentials", "$3,000"]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 2: Choose the number of months"
+    },
+    {
+      "type": "paragraph",
+      "text": "The table multiplies monthly essentials by the months you choose. Nothing in it is a recommendation, it is only multiplication."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Monthly essentials",
+        "3 months",
+        "6 months",
+        "9 months",
+        "12 months"
+      ],
+      "rows": [
+        ["$2,500", "$7,500", "$15,000", "$22,500", "$30,000"],
+        ["$3,000", "$9,000", "$18,000", "$27,000", "$36,000"],
+        ["$4,000", "$12,000", "$24,000", "$36,000", "$48,000"],
+        ["$5,000", "$15,000", "$30,000", "$45,000", "$60,000"]
       ]
     },
     {
       "type": "paragraph",
-      "text": "Use our savings calculator to determine how much to save each month to reach your emergency fund target by a specific date."
+      "text": "Which end of the range suits you is a judgment about risk. A longer cushion makes sense when your income varies, you are self-employed, one paycheck supports several people, or a new job in your field could take a long time to find. A shorter one is more reasonable when you have two stable incomes or other sources of cash you can rely on."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Runway: how long a balance actually lasts"
+    },
+    {
+      "type": "paragraph",
+      "text": "Months covered equals savings divided by monthly spending not covered by other income. With $12,000 saved and $3,000 of essentials and no income, you have 12,000 / 3,000 = 4 months. If $1,200 a month of other income continues, the gap is $1,800 and the same $12,000 lasts 12,000 / 1,800 = 6.7 months. Knowing your runway is more useful than a rule of thumb because it uses your real numbers."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 3: Work out the monthly deposit"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take the $18,000 target (six months of the example budget) starting from zero. The Savings Calculator's goal mode solves for the deposit, using the annual rate divided by 12 each month. Interest rates on savings accounts change often, so the 4% below is an assumption for illustration."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Time to reach $18,000",
+        "Monthly deposit at 0%",
+        "Monthly deposit at 4%",
+        "Interest earned at 4%"
+      ],
+      "rows": [
+        ["12 months", "$1,500.00", "$1,472.70", "$328"],
+        ["24 months", "$750.00", "$721.65", "$680"],
+        ["36 months", "$500.00", "$471.43", "$1,028"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "On shorter timelines the interest changes the deposit by only a few dollars, so the deposit amount is what matters. If you deposit $500 a month, you reach $18,000 in 36 months at 0% and in 35 months at 4%. If you start with $2,000 and deposit $300 a month, it takes 54 months at 0% and 49 months at 4%. Splitting the target into stages, such as a first goal of one month of essentials ($3,000), makes the plan easier to follow."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Where to keep it"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Easy access: you should be able to reach the money within a day or two without selling anything.",
+        "Stable value: investments that can fall in value may be worth less at the moment you need them.",
+        "Deposit insurance: in the United States the standard FDIC deposit insurance amount is $250,000 per depositor, per insured bank, per ownership category. Check that your account is covered, and for credit unions check the equivalent NCUA coverage."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "At an assumed 4%, $18,000 earns about $733 in a year, which is the reward for keeping the money in an interest-bearing account instead of idle cash. Compare accounts on the yield they pay, any fees and withdrawal limits."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Basing the target on your income instead of your essential spending. The fund replaces what you must pay, not your salary.",
+        "Never updating the number. If your costs rise 3% a year, $3,000 of monthly essentials becomes about $3,478 after five years, so the target should move too.",
+        "Using the fund for planned costs. Car repairs you can predict, annual insurance bills and holidays belong in separate sinking funds.",
+        "Paying down low-interest debt and leaving no cash at all. Debt payments continue in an emergency, so a small buffer usually comes first."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "This is general arithmetic, not personal financial advice. A planner can help if your income is irregular or you support others."
     },
     {
       "type": "cta",

@@ -1,28 +1,124 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Debunked Myths"
-    },
-    {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Myth: Eating 6 small meals boosts metabolism. Truth: Total daily energy expenditure is the same whether you eat 2 meals or 6. Meal frequency does not affect TDEE. What matters is total calories.",
-        "Myth: Starvation mode slows metabolism to zero. Truth: Metabolic adaptation is real (BMR drops 10-20% with extreme restriction), but it is far from zero. Your body becomes more efficient, not completely stops burning calories.",
-        "Myth: Eating after 8 PM causes weight gain. Truth: Total daily calorie intake determines weight change. When you eat them does not matter. Late-night snacking is problematic because people tend to eat more total calories, not because of timing.",
-        "Myth: Negative calorie foods exist (celery burns more to digest than it contains). Truth: The thermic effect of food maxes out at about 30% of calories (for protein). Even celery has a net positive calorie contribution."
-      ]
+      "type": "paragraph",
+      "text": "Most TDEE myths fail the same test: you can check them against the equation the calculator actually runs, or against published research. Meal frequency does not raise your daily burn, \"starvation mode\" shrinks your burn by tens of calories rather than stopping it, and gaining a few kilograms of muscle adds far less than people expect. Below, each myth is answered either with arithmetic or with a source I opened."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Actually Works"
+      "text": "The test case"
     },
     {
       "type": "paragraph",
-      "text": "The only proven way to increase your TDEE is to increase your muscle mass (which raises BMR permanently) and increase your daily activity (exercise and NEAT). No food timing strategy, specific food combination, or supplement has been shown to meaningfully increase TDEE beyond the effects of muscle mass and activity."
+      "text": "Assumptions: a 36-year-old man, 182 cm, 88 kg, training three to five days a week (factor 1.55), no body fat figure entered, so Mifflin-St Jeor applies. BMR = 10 x 88 + 6.25 x 182 - 5 x 36 + 5 = 1,843 kcal, and TDEE = 1,843 x 1.55 = 2,856 kcal per day. Figures are rounded to the nearest kcal. He is an illustration, not an average."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Myth 1: eating six small meals speeds up your metabolism"
+    },
+    {
+      "type": "paragraph",
+      "text": "TDEE has no meal-count term; the calculator uses sex, age, weight, height, activity and optionally body fat. Research agrees. The International Society of Sports Nutrition position stand on meal frequency concludes that increased meal frequency does not appear to significantly enhance diet-induced thermogenesis, total energy expenditure or resting metabolic rate. It does say that eating more often appears to help some people with hunger and appetite control, so frequency can still be a useful tool for adherence. It just does not change the number the calculator estimates."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Myth 2: starvation mode stops weight loss"
+    },
+    {
+      "type": "paragraph",
+      "text": "Metabolic adaptation, where energy expenditure falls by more than the loss of body mass would predict, is real but modest. A systematic review in the British Journal of Nutrition covering 33 studies and 2,528 adults found adaptive thermogenesis in 27 of them; for resting energy expenditure it ranged between 126 and 418 kJ per day in most cases (about 30 to 100 kcal), with larger values after larger weight losses. The authors also report that well-designed studies found lower or non-significant values, and that the effect seems to be attenuated or absent once weight has stabilised. Set against the test man's 500 kcal deficit, 30 to 100 kcal is roughly 6% to 20% of the deficit. Real plateaus have more ordinary causes: a smaller body burns less (each 5 kg he loses lowers his TDEE by about 78 kcal at factor 1.55), and food logging drifts."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Myth 3: add some muscle and your TDEE jumps"
+    },
+    {
+      "type": "paragraph",
+      "text": "Using the calculator's own Katch-McArdle slope of 21.6 kcal of BMR per kg of lean mass, 2 kg of extra lean mass adds 43 kcal of BMR, or about 67 kcal of TDEE at factor 1.55. Even 5 kg adds 108 kcal of BMR and about 167 kcal of TDEE. That slope applies to lean mass in general, not muscle alone, so treat it as a rough illustration. Building muscle has real benefits for training and body composition, but as a calorie-burning trick it is small."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Myth 4: some foods have negative calories"
+    },
+    {
+      "type": "paragraph",
+      "text": "A food would be net negative only if digesting it cost more than 100% of its calories. The calculator treats the thermic effect of food (TEF) as 10% of TDEE overall, and its explanation cites 20 to 30% for protein, the highest figure it gives. Even at 30%, a food keeps 70% of its energy as net intake. Low-calorie foods are filling and useful, but the sums never come out below zero."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Myth 5: eat back every workout calorie on top of TDEE"
+    },
+    {
+      "type": "paragraph",
+      "text": "The activity factor already includes exercise. Moving from factor 1.2 to 1.55 adds 645 kcal to the test man's day, about 4,514 kcal a week, and that is the allowance for his training and general activity that is already built in. If he also adds a tracker's 400 kcal for each of four workouts, he is adding another 229 kcal a day, which would turn a 500 kcal deficit into a deficit of only about 271 kcal. If you use a factor that reflects your training, do not count the sessions twice."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Myth 6: the calculator's number is exact"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Version of the estimate",
+        "TDEE (kcal/day)",
+        "Difference from base"
+      ],
+      "rows": [
+        [
+          "Mifflin-St Jeor, factor 1.55 (base)",
+          "2,856",
+          "0"
+        ],
+        [
+          "Harris-Benedict BMR x 1.55",
+          "3,001",
+          "+145"
+        ],
+        [
+          "Katch-McArdle at 25% body fat x 1.55",
+          "2,783",
+          "-73"
+        ],
+        [
+          "Mifflin-St Jeor, factor 1.725",
+          "3,178",
+          "+322"
+        ],
+        [
+          "Mifflin-St Jeor, factor 1.375",
+          "2,533",
+          "-322"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Reasonable choices of formula and activity level give answers spread over several hundred kcal. That is why the calculator advises treating the result as a starting estimate: eat near it for two to three weeks, watch your weight trend, and adjust from there."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What this post does not cover"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Meal timing and eating late at night. TDEE is a daily total with no time-of-day term, but I did not open a study on timing, so I make no claim about it.",
+        "Medical conditions, medications, pregnancy and breastfeeding, which change energy needs and are not inputs to the calculator.",
+        "Individual variation. Two people with identical inputs can differ in everyday movement and in how their bodies adapt."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "This is educational, not medical advice. If you plan a large calorie cut, or have a health condition, talk to a doctor or registered dietitian first."
     },
     {
       "type": "cta",

@@ -1,22 +1,95 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "An annuity trades your lump sum for an income that is fixed and lasts as long as you live, while an SWP keeps the money yours but lets the market decide how long it lasts. Neither is better in general. The annuity removes the risk of outliving your money and leaves nothing for heirs in its basic form. The SWP keeps flexibility and a remaining balance but can run out if returns disappoint. This guide puts numbers on that trade using one stated assumption for the annuity, so you can see what each choice costs."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "The annuity rate below is an assumption chosen for illustration. It is not a quote from any provider. Real annuity payouts depend on your age, the product options you choose, and the prevailing interest rates, so get written quotes before deciding. SWP returns are also assumptions, and past performance does not guarantee future results."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Key Differences"
+      "text": "The setup: Rs. 1 crore, two ways to take income"
     },
     {
       "type": "paragraph",
-      "text": "SWP: Your corpus stays invested, you control the withdrawal amount, corpus can be passed to heirs, returns depend on market performance. Annuity: You get guaranteed income for life regardless of how long you live, but the principal is gone (no inheritance), and returns are typically lower (5-7%)."
+      "text": "Assume a basic lifetime annuity pays 6.5% of the purchase price each year, level for life, with nothing returned to heirs. On Rs. 1,00,00,000 that is Rs. 6,50,000 a year, or Rs. 54,167 a month. Now suppose the same Rs. 1 crore stays invested in an SWP and you withdraw the same Rs. 54,167 a month. The SWP uses the calculator's rule: each month the balance grows by the annual return divided by 12, then the withdrawal is subtracted."
+    },
+    {
+      "type": "table",
+      "headers": ["SWP return (assumed)", "How long the SWP lasts", "Balance after 10 years", "Balance after 20 years", "Balance after 30 years"],
+      "rows": [
+        ["5%", "29.4 years", "Rs. 80,58,972", "Rs. 48,62,079", "Rs. 0"],
+        ["6%", "42.9 years", "Rs. 93,17,169", "Rs. 80,74,830", "Rs. 58,14,521"],
+        ["7%", "Does not run out", "Rs. 1,07,21,187", "Rs. 1,21,70,528", "Rs. 1,50,83,212"],
+        ["8%", "Does not run out", "Rs. 1,22,86,825", "Rs. 1,73,62,755", "Rs. 2,86,29,493"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The annuity pays Rs. 54,167 a month for life in every row, with a balance of zero throughout (basic version). The SWP outcome depends entirely on the return. At 5% it runs out after 29 years and 5 months, which is age 89 for someone who starts at 60. At 7% or more it keeps growing. The dividing line is the annual withdrawal of 6.5% of the corpus: if your return stays above it, the balance never falls; below it, the balance falls."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Hybrid Approach"
+      "text": "What the annuity is really selling"
     },
     {
       "type": "paragraph",
-      "text": "Most retirees benefit from a hybrid strategy: use an annuity for essential expenses (rent, groceries, utilities) where guaranteed income provides peace of mind, and use SWP for discretionary expenses (travel, gifts, hobbies) where flexibility and growth potential add value."
+      "text": "An annuity pools many buyers, so those who live long are paid partly from the money of those who do not. That is why it can pay you more per year than a self-managed withdrawal can safely promise when you do not know how long you will live. The cost is that your capital is gone. In this example, payments add up to the Rs. 1 crore purchase price after about 15.4 years (1 / 0.065), so living beyond that is where an annuity starts to come out ahead of simply spending the principal. A taker who dies earlier leaves nothing in the basic form. Some products return part of the purchase price to heirs, usually for a lower regular payout."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The inflation problem for a level annuity"
+    },
+    {
+      "type": "paragraph",
+      "text": "A fixed payment buys less each year. The table shows what Rs. 54,167 a month is worth in today's terms if prices rise at an assumed 3% or 5% a year."
+    },
+    {
+      "type": "table",
+      "headers": ["Years from now", "Worth in today's money at 3% inflation", "Worth in today's money at 5% inflation"],
+      "rows": [
+        ["10", "Rs. 40,305", "Rs. 33,254"],
+        ["20", "Rs. 29,991", "Rs. 20,415"],
+        ["30", "Rs. 22,316", "Rs. 12,533"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "An SWP can be raised each year, but raising it shortens its life. Keeping the same Rs. 1 crore and raising the Rs. 54,167 start by 5% a year lasts 19.3 years at an assumed 7% return and 21.8 years at 8%. Raising it by 3% lasts 24.8 years at 7% and 30.8 years at 8%. Products that raise income over time exist, but they normally start with a lower payment than a level one, so compare like with like."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A hybrid: guarantee the essentials, invest the rest"
+    },
+    {
+      "type": "paragraph",
+      "text": "Suppose essential expenses are Rs. 30,000 a month. At the assumed 6.5% annuity rate, covering them needs Rs. 55,38,462 (30,000 x 12 / 0.065). That leaves Rs. 44,61,538 invested, from which the SWP pays the remaining Rs. 24,167 a month. That SWP portion lasts 29.4 years at an assumed 5% return and 42.9 years at 6%, and does not run out at 7%. At 6% it still holds Rs. 36,02,616 after 20 years. Total income is the same as before, but the Rs. 30,000 is guaranteed whatever markets do."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Comparing an annuity rate to an expected SWP return as if they were the same thing. The annuity payout includes a return of your capital; an SWP return is only the growth.",
+        "Assuming the SWP withdrawal is safe because the average return is high. Real returns arrive in a sequence. A bad start can run the corpus down even when the long-run average looks fine.",
+        "Buying the whole annuity at once without checking the alternatives. Rates change over time, and buying in stages is one way to reduce timing risk.",
+        "Ignoring tax. The two income types are taxed differently and rules change, so check the current rules with an adviser or the tax authority.",
+        "Forgetting that this model is simple: constant return, no costs, no tax, a level annuity with no heir benefit, and a single life."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "This guide is general education, not advice. A SEBI-registered adviser can compare real quotes and your particular health, family and tax position."
     },
     {
       "type": "cta",
@@ -26,11 +99,5 @@
       "path": "/finance/swp-calculator/"
     }
   ],
-  "keywords": [
-    "swp vs annuity",
-    "annuity vs swp",
-    "retirement income comparison",
-    "guaranteed income vs market linked",
-    "swp or annuity better"
-  ]
+  "keywords": ["swp vs annuity","annuity vs swp","retirement income comparison","guaranteed income vs market linked","swp or annuity better"]
 }

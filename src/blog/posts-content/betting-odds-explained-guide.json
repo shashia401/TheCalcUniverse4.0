@@ -2,95 +2,129 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "If you've ever stared at '+200' or '7/2' on a sportsbook screen and felt your brain short-circuit, you're not alone. Betting odds come in three different formats depending on where you live, but they all tell you the same two things: your potential payout and the implied probability of an outcome."
+      "text": "American, decimal and fractional odds are three notations for the same thing: how much a winning stake returns. The fastest way to work with any of them is to convert to decimal odds first, because implied probability is then just 1 divided by the decimal figure. So +200, 3.00 and 2/1 are the same price: a stake returns 3 times its size in total (2 times as profit), and the price implies a 33.33% chance. Add up the implied probabilities of every outcome in a market and you will get more than 100%. That excess is the overround, and it is the part most odds explainers skip."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "The Three Odds Formats at a Glance"
+      "text": "The three formats side by side"
+    },
+    {
+      "type": "paragraph",
+      "text": "The table below was computed with the same arithmetic the odds converter uses. Profit is for a 100 unit stake. Decimal odds include your stake in the return, while fractional odds and positive American odds describe profit only, which is the usual source of confusion."
     },
     {
       "type": "table",
-      "headers": [
-        "Format",
-        "Example",
-        "What It Means",
-        "Where It Is Used"
-      ],
+      "headers": ["American", "Decimal", "Fractional", "Implied probability", "Profit on a 100 stake"],
       "rows": [
-        [
-          "American (positive)",
-          "+200",
-          "Win $200 profit on a $100 bet",
-          "US, Canada"
-        ],
-        [
-          "American (negative)",
-          "-150",
-          "Bet $150 to win $100 profit",
-          "US, Canada"
-        ],
-        [
-          "Decimal",
-          "3.00",
-          "Multiply your stake by 3.00 for total return",
-          "Europe, Australia, Canada"
-        ],
-        [
-          "Fractional",
-          "2/1",
-          "Win $2 for every $1 staked",
-          "UK, Ireland"
-        ]
+        ["-300", "1.333", "1/3", "75.00%", "33.33"],
+        ["-200", "1.500", "1/2", "66.67%", "50.00"],
+        ["-110", "1.909", "10/11", "52.38%", "90.91"],
+        ["+100", "2.000", "1/1", "50.00%", "100.00"],
+        ["+150", "2.500", "3/2", "40.00%", "150.00"],
+        ["+200", "3.000", "2/1", "33.33%", "200.00"],
+        ["+350", "4.500", "7/2", "22.22%", "350.00"],
+        ["+500", "6.000", "5/1", "16.67%", "500.00"]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Convert Between Formats"
+      "text": "The conversion formulas"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Positive American odds A: decimal = A / 100 + 1. For +350, 350 / 100 + 1 = 4.5.",
+        "Negative American odds A: decimal = 100 / |A| + 1. For -150, 100 / 150 + 1 = 1.667.",
+        "Fractional odds n/m: decimal = n / m + 1. For 7/2, 7 / 2 + 1 = 4.5, so 7/2 and +350 are the same price.",
+        "Decimal to American: if decimal is 2.00 or more, American = (decimal - 1) x 100 with a plus sign. If it is below 2.00, American = -100 / (decimal - 1). For 1.909 that gives -110.",
+        "Implied probability = 1 / decimal x 100. For 4.5 that is 22.22%."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "The math is straightforward once you know the rules. For American odds, positive numbers convert to decimal with `(odds / 100) + 1` — so **+200 becomes 3. 00**."
-    },
-    {
-      "type": "paragraph",
-      "text": "Negative odds use `(100 / |odds|) + 1` — so **-150 becomes 1. 667**. Fractional odds are just the decimal minus 1 expressed as a fraction: 3."
-    },
-    {
-      "type": "paragraph",
-      "text": "00 minus 1 is 2/1. An odds converter handles all three instantly, but learning the relationship helps you spot mispriced lines faster when shopping across sportsbooks."
+      "text": "Rounding matters at the margins. The converter shows decimals to three places and American odds as whole numbers. A decimal price of 1.91 converts to -110, but 1.91 implies 52.36% while the exact -110 implies 52.38%. Small differences like that are rounding, not a different price."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Is Implied Probability?"
+      "text": "Worked example: payouts at different stakes"
+    },
+    {
+      "type": "table",
+      "headers": ["Stake", "Odds", "Decimal", "Profit if it wins", "Total returned"],
+      "rows": [
+        ["50", "+200", "3.000", "100.00", "150.00"],
+        ["75", "-150", "1.667", "50.00", "125.00"],
+        ["20", "7/2", "4.500", "70.00", "90.00"],
+        ["110", "-110", "1.909", "100.00", "210.00"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Implied probability is the percentage chance the odds represent. The formula is dead simple: `1 / decimal odds x 100`. Odds of **3."
+      "text": "The -110 row shows what the negative sign means: you risk 110 to win 100. At -150 you risk 150 to win 100, so a 75 stake wins 50."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The overround: why the percentages add to more than 100%"
     },
     {
       "type": "paragraph",
-      "text": "00 imply a 33. 3% chance**. Odds of **1."
+      "text": "If a two-outcome market were priced with no margin, the two implied probabilities would sum to exactly 100%. Real markets do not. Take a market where both sides are priced at -110. Each side implies 52.38%, so the total is 104.76%. The 4.76 percentage points above 100 are the overround."
     },
     {
       "type": "paragraph",
-      "text": "50 imply a 66. 7% chance**. This is the single most useful number for a bettor because it lets you ask the key question: 'Do I think the actual probability is higher or lower than what the odds say?"
+      "text": "You can see the same margin from the other direction. Stake 110 on each side of that market: you risk 220 in total, and whichever side wins returns 210. You lose 10 either way, which is 4.55% of the 220 staked. The two figures, 4.76% and 4.55%, describe one fact measured against different bases: 1 - 1 / 1.0476 = 4.55%. Sources quote either, so check which one you are reading."
+    },
+    {
+      "type": "table",
+      "headers": ["Market", "Prices", "Sum of implied probabilities", "Probabilities with the margin scaled out"],
+      "rows": [
+        ["Two outcomes", "-110 / -110", "104.76%", "50.00% / 50.00%"],
+        ["Two outcomes", "-120 / +100", "104.55%", "52.17% / 47.83%"],
+        ["Two outcomes", "-150 / +130", "103.48%", "57.98% / 42.02%"],
+        ["Three outcomes", "2.40 / 3.30 / 3.10 (decimal)", "104.23%", "39.98% / 29.07% / 30.95%"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "' If you believe an outcome has a 40% chance but the odds only imply 33. 3%, you've found a value bet."
+      "text": "The last column divides each implied probability by the total so the set sums to 100%. That proportional method is the simplest way to strip out the margin. It assumes the margin is spread across outcomes in proportion to their probability, and other methods allocate it differently, so treat the result as an estimate of what the market implies, not a measured truth."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Break-even rates and parlays"
+    },
+    {
+      "type": "paragraph",
+      "text": "The implied probability of a price is also its break-even rate. At -110 you need to win 52.38% of the time just to get your money back. If the true chance of winning were exactly 50%, the expected result of a 110 stake would be 0.5 x 100 - 0.5 x 110 = -5, which is -4.55% of the stake. That is the margin again."
+    },
+    {
+      "type": "paragraph",
+      "text": "Combining several outcomes into one wager multiplies the decimal prices, and the margin compounds. Two legs at -110 give 1.909 x 1.909 = 3.645, which is +264 and implies 27.44%. Two fair 50% events would be 25%. Three legs give 6.958, or +596, implying 14.37% against 12.5%. Books may price combined wagers differently from this simple multiplication, so use the posted price rather than assuming it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating implied probability as the true probability. It includes the margin, so a fair-market probability is lower for every outcome once the sum is scaled back to 100%.",
+        "Confusing profit with total return. Decimal 3.00 returns 3 times the stake including the stake. Fractional 2/1 and American +200 describe 2 times the stake as profit.",
+        "Flipping a fraction. 10/11 (about 52% implied) and 11/10 (about 48% implied) are different prices.",
+        "Comparing prices in different formats without converting them first. Convert to decimal, then compare.",
+        "Mixing up overround and hold. 4.76% and 4.55% in the -110 example measure the same margin on different bases."
+      ]
     },
     {
       "type": "callout",
       "variant": "warning",
-      "text": "Remember: implied probabilities from a bookmaker always add up to more than 100%. That extra percentage is the vig (vigorish), also called the overround. In a fair market, two equally likely outcomes would each be at +100 (50% implied probability each). In reality, you'll see both sides at -110, which works out to 52.4% each for a total of 104.8%. That 4.8% is the bookmaker's built-in profit."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Understanding the Vig and Why It Matters"
+      "text": "This guide explains arithmetic only. It does not predict results and is not betting advice, and every wager carries a risk of loss. The formulas cover standard win-only prices; dead-heat rules, each-way terms, push rules and promotional boosts change the payout. Check the legal age and rules where you live, and if gambling stops being enjoyable, contact a local support service."
     },
     {
       "type": "cta",

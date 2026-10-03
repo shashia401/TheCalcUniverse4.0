@@ -1,33 +1,166 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Asset allocation is how you divide your money among broad categories such as stocks, bonds and cash, and it largely determines both how much your portfolio can grow and how far it can fall. There is no single correct mix. The right one depends on when you need the money, how much loss you can absorb without selling in a panic, and how much return you need. This guide uses hypothetical return assumptions to show the trade-off in numbers, without naming funds or promising any returns."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Why Asset Allocation Matters More Than Stock Picking"
+      "text": "The Core Trade-Off"
     },
     {
       "type": "paragraph",
-      "text": "Studies consistently show that more than 90% of a portfolio's long-term return variability is explained by asset allocation — not individual stock selection or market timing. In other words, deciding how much to put in stocks vs bonds matters far more than which specific stocks you buy."
+      "text": "Stocks are generally assumed to offer higher long-run growth with larger swings, while bonds and cash tend to move less and grow more slowly. To show the arithmetic, assume stocks earn 7% a year and bonds earn 3% a year. Those are illustrative assumptions, not forecasts, and real returns vary every year. A mix's assumed return is the weighted average, for example 60% stocks and 40% bonds gives 0.6 x 7% + 0.4 x 3% = 5.4%. This ignores volatility drag and assumes the mix is rebalanced to its target. The table uses the investment calculator's method with a $20,000 starting balance and $500 added each month."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Stocks / bonds",
+        "Assumed return",
+        "After 10 years",
+        "After 25 years"
+      ],
+      "rows": [
+        [
+          "20 / 80",
+          "3.8%",
+          "$102,082",
+          "$301,399"
+        ],
+        [
+          "40 / 60",
+          "4.6%",
+          "$107,656",
+          "$343,624"
+        ],
+        [
+          "60 / 40",
+          "5.4%",
+          "$113,604",
+          "$393,111"
+        ],
+        [
+          "80 / 20",
+          "6.2%",
+          "$119,954",
+          "$451,213"
+        ],
+        [
+          "100 / 0",
+          "7.0%",
+          "$126,736",
+          "$519,544"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Contributions total $80,000 after 10 years and $170,000 after 25 years. After 25 years the 100% stock assumption ends $218,145 above the 20/80 mix, but only if the higher assumed return actually shows up. The table says nothing about the path taken to get there."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Common Allocation Models"
+      "text": "What a Bad Year Does to Each Mix"
+    },
+    {
+      "type": "paragraph",
+      "text": "The cost of the higher expected return is a deeper loss in bad years. Take a hypothetical one-year fall of 30% in stocks while bonds gain 2%, applied to a $100,000 portfolio. The last column is the gain needed afterward to get back to the starting value."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Stocks / bonds",
+        "One-year change",
+        "Dollar change on $100,000",
+        "Gain needed to recover"
+      ],
+      "rows": [
+        [
+          "20 / 80",
+          "-4.4%",
+          "-$4,400",
+          "4.6%"
+        ],
+        [
+          "40 / 60",
+          "-10.8%",
+          "-$10,800",
+          "12.1%"
+        ],
+        [
+          "60 / 40",
+          "-17.2%",
+          "-$17,200",
+          "20.8%"
+        ],
+        [
+          "80 / 20",
+          "-23.6%",
+          "-$23,600",
+          "30.9%"
+        ],
+        [
+          "100 / 0",
+          "-30.0%",
+          "-$30,000",
+          "42.9%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A drop is a paper loss until you sell. The danger is needing the money during the drop. A person who needs $30,000 in three years and holds it in an 80/20 mix would, in this scenario, have about $22,920 left. In a 20/80 mix it would be about $28,680. This is why money needed soon usually belongs in lower-risk holdings, while money not needed for many years can tolerate more volatility."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rebalancing"
+    },
+    {
+      "type": "paragraph",
+      "text": "Winners grow faster than the rest, so a portfolio drifts away from its target. A 60/40 portfolio of $100,000 in which stocks gain 25% and bonds gain 3% becomes $75,000 in stocks and $41,200 in bonds, $116,200 in total, with stocks at 64.5%. To get back to 60/40 you sell $5,280 of stocks and buy bonds. Left alone with constant assumed returns, a 60/40 mix drifts to about 69% stocks after 10 years and 76% after 20."
+    },
+    {
+      "type": "paragraph",
+      "text": "Rebalancing does not guarantee a better result. If the next year brings a 30% fall in stocks and a 2% gain in bonds, the rebalanced portfolio ends at $96,214 against $94,524 for the drifted one, a difference of $1,690 in favour of rebalancing. If instead stocks gain 20% and bonds 2%, the drifted portfolio ends higher: $132,024 against $131,074. Rebalancing is mainly a risk-control tool that keeps your mix the one you chose. You can also rebalance with new contributions by directing them to the underweight category, which avoids selling."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Ways to Pick a Mix"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Conservative (20% stocks / 80% bonds): For capital preservation, short time horizons, or near retirement.",
-        "Moderate (60% stocks / 40% bonds): The classic balanced portfolio. Suitable for medium-term goals 5-10 years away.",
-        "Aggressive (80% stocks / 20% bonds): For long-term growth, 10+ year horizons, comfortable with volatility.",
-        "Three-fund portfolio: Total US stock + Total international stock + Total bond market. Simple, diversified, low-cost.",
-        "Target-date fund: Set it and forget it. Automatically adjusts allocation based on your target retirement year."
+        "Time horizon. The sooner you need the money, the less risk you can usually afford.",
+        "Risk capacity versus risk tolerance. Capacity is what your finances can absorb; tolerance is what you can stomach. Use the lower of the two.",
+        "Required return. If a modest mix reaches your goal, taking more risk than that is optional.",
+        "Other income. A stable salary or pension can support more volatility than savings alone.",
+        "Simplicity. A broad stock holding, a broad bond holding and sometimes an international stock holding cover most needs with few moving parts. A single fund that gradually shifts to a safer mix as a target date approaches does the shifting for you, but the schedule and fees differ, so read the details."
       ]
     },
     {
-      "type": "paragraph",
-      "text": "Our investment calculator helps you project your portfolio's growth under different return scenarios based on your chosen allocation."
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes and Limits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Choosing a mix from past returns alone. Past performance does not guarantee future results.",
+        "Building a portfolio that looks diversified but holds many similar assets that fall together.",
+        "Changing the mix after every news cycle. Decide a mix, write down why, and revisit it on a schedule or after a life change.",
+        "Ignoring fees and taxes, which reduce returns and differ by account type.",
+        "Treating the blended returns above as a forecast. They are weighted averages of assumptions, with no volatility, sequence risk or inflation included."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "This guide is educational, not personalised investment advice. Every return, loss and portfolio figure above is a hypothetical assumption used to show how the arithmetic works."
     },
     {
       "type": "cta",

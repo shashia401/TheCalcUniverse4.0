@@ -2,54 +2,99 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Thirty years is a long time to pay for a house. The good news? You don't actually have to."
-    },
-    {
-      "type": "paragraph",
-      "text": "With the right strategy, you can own your home free and clear years — even a decade — ahead of schedule."
-    },
-    {
-      "type": "paragraph",
-      "text": "The math behind early payoff is simple. Your mortgage is front-loaded with interest. In year one of a **30-year loan at 6."
-    },
-    {
-      "type": "paragraph",
-      "text": "75%**, over **80% of each payment** goes to interest. Less than 20% touches the balance. Every extra dollar you send to principal today permanently eliminates future interest charges on that dollar for the rest of the loan."
+      "text": "You can pay off a mortgage years early with extra monthly payments, bi-weekly payments or lump sums, and all three work. What decides how much they save is less the method than the start date. On a $350,000 loan at 6.75%, adding $300 a month from day one saves $151,699 in interest and ends the loan 8 years 5 months early. The same $300 started after year 5 saves $99,222."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Strategy 1: Extra monthly payments?"
+      "text": "Why early payments are worth the most"
     },
     {
       "type": "paragraph",
-      "text": "This is the most powerful strategy. Add a fixed amount to every monthly payment. Because each payment immediately reduces the principal that accrues interest in subsequent months, the savings compound over time."
-    },
-    {
-      "type": "paragraph",
-      "text": "On a **$350,000 mortgage at 6. 75%**, sending just **$300 extra per month** saves over **$100,000 in interest** and cuts nearly **9 years** off the loan. Your new payoff date becomes a real month and year — not a theoretical number of months."
-    },
-    {
-      "type": "paragraph",
-      "text": "Use a **mortgage payoff date calculator** to find your specific date."
+      "text": "Mortgage interest is charged on the outstanding balance, so it is heaviest at the start. On a 30-year, $350,000 loan at 6.75%, the monthly principal-and-interest payment is $2,270.09. The first payment carries $1,968.75 of interest, which is 86.7% of it, and only $301.34 reduces the balance. Across year one, interest is $23,511 and principal is $3,730. Every dollar you prepay in those years stops accruing interest for the rest of the loan, which is why timing dominates."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Strategy 2: Biweekly payments"
+      "text": "The cost of waiting"
     },
     {
       "type": "paragraph",
-      "text": "Instead of one monthly payment, make half a payment every two weeks. Since there are 26 biweekly periods per year, that equals 13 full payments annually — one extra payment per year. The additional payment goes entirely to principal."
+      "text": "Assumptions: $350,000, 30-year fixed at 6.75%, payment $2,270.09, no prepayment penalty, extra money applied to principal each month. Baseline interest over the full term is $467,234. Years below are counted from the first payment."
+    },
+    {
+      "type": "table",
+      "headers": ["Start paying an extra $300 a month", "New payoff", "Time saved", "Interest saved"],
+      "rows": [
+        ["Immediately", "21 yr 7 mo", "8 yr 5 mo", "$151,699"],
+        ["After year 5", "23 yr 11 mo", "6 yr 1 mo", "$99,222"],
+        ["After year 10", "25 yr 9 mo", "4 yr 3 mo", "$59,299"],
+        ["After year 15", "27 yr 3 mo", "2 yr 9 mo", "$30,930"],
+        ["After year 20", "28 yr 6 mo", "1 yr 6 mo", "$12,681"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Biweekly payments don't feel painful because the payment amount is smaller and more frequent. But over the life of a 30-year mortgage, this one trick can shave **4 to 6 years** off the loan and save tens of thousands in interest. Check with your servicer — some charge a setup fee for biweekly plans."
+      "text": "Waiting five years costs $52,477 of the potential savings, even though the monthly sacrifice is identical. Late starters still benefit, but the savings fall quickly because less interest remains to be avoided."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Strategy 3: Lump-sum payments"
+      "text": "The same idea for a one-time lump sum"
+    },
+    {
+      "type": "table",
+      "headers": ["Apply a $10,000 lump sum", "New payoff", "Time saved", "Interest saved"],
+      "rows": [
+        ["At closing", "27 yr 6 mo", "2 yr 6 mo", "$59,262"],
+        ["After year 5", "28 yr 2 mo", "1 yr 10 mo", "$40,648"],
+        ["After year 10", "28 yr 8 mo", "1 yr 4 mo", "$26,810"],
+        ["After year 15", "29 yr 1 mo", "11 mo", "$16,627"],
+        ["After year 20", "29 yr 4 mo", "8 mo", "$9,194"]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The three strategies on this loan"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Extra monthly payment: $300 more every month, started on day one, totals about $77,700 of extra payments and saves $151,699 in interest.",
+        "Bi-weekly payments: half the payment every 14 days, 26 times a year, equals 13 monthly payments. Modeled with interest accruing at one twenty-sixth of the annual rate per payment (6.75% / 26) and payments credited on arrival, it ends the loan in about 23 years 11 months and saves $111,478. Real servicers differ, so this is a best case, and it only works if your servicer actually credits each half payment when received.",
+        "Lump sums: a one-time $10,000 at closing saves $59,262 and ends the loan 2 years 6 months early. A lump sum from a bonus or refund helps most when paid as early as possible."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Skipping the principal-only instruction. Ask your servicer how to designate extra money as principal, and confirm it on the next statement.",
+        "Prepaying before the safety net exists. A paid-down mortgage is hard to turn back into cash. Keep an emergency fund, clear higher-rate debts first, and take any employer retirement match before sending extra to the mortgage.",
+        "Assuming the interest saved is certain profit. It is a guaranteed saving at your loan rate, but money invested elsewhere may earn more or less. Returns are uncertain and past performance does not guarantee future results, so this is a trade-off to weigh, not a rule.",
+        "Forgetting other costs. Taxes, insurance and any mortgage insurance are separate from principal and interest and do not shrink because you prepaid."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this does not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "The table assumes a fixed rate that never changes. With an adjustable-rate loan, a rate reset changes the maths. Loans with prepayment penalties can wipe out the benefit, so read your note first. If you plan to sell in a few years, you only avoid the interest that would have accrued until the sale, so most of the savings shown here never materialise; the money simply comes back as equity at closing."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Every number on this page came from a month-by-month simulation using the mortgage payoff calculator's logic. Enter your own balance, rate and payment to see your exact payoff month."
     },
     {
       "type": "cta",

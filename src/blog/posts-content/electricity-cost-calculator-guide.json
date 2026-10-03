@@ -7,11 +7,11 @@
     },
     {
       "type": "paragraph",
-      "text": "The average US household spends roughly **$1,500 per year** on electricity. About $125 a month, give or take. But most people have no idea which devices in their home are actually driving that number."
+      "text": "The average US household spends roughly $1,500 per year on electricity. About $125 a month, give or take. But most people have no idea which devices in their home are actually driving that number."
     },
     {
       "type": "paragraph",
-      "text": "Here's a reality check. Your gaming PC, running six hours a day, can cost **more per year** than your fridge — and that thing runs 24/7."
+      "text": "Here's a reality check. Your gaming PC, running six hours a day, can cost more per year than your fridge — and that thing runs 24/7."
     },
     {
       "type": "paragraph",
@@ -53,7 +53,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Say you've got a **1,500-watt space heater** running 8 hours a day for 30 days at $0.14/kWh. (1,500 × 8 × 30) / 1000 × $0.14 = **$50.40**. That's fifty bucks for one heater. Run two, and it's over a hundred."
+      "text": "Say you've got a 1,500-watt space heater running 8 hours a day for 30 days at $0.14/kWh. (1,500 × 8 × 30) / 1000 × $0.14 = $50.40. That's fifty bucks for one heater. Run two, and it's over a hundred."
     },
     {
       "type": "heading",
@@ -71,7 +71,7 @@
     {
       "type": "callout",
       "variant": "tip",
-      "text": "The US national average is about **$0.14/kWh**, but it varies wildly by state. Hawaii? Over $0.40/kWh. Louisiana, Idaho, Washington? Under $0.10/kWh. Check your latest bill — your rate is printed right there, usually labeled \"energy charge\" or \"electricity supply rate.\""
+      "text": "The US national average is about $0.14/kWh, but it varies wildly by state. Hawaii? Over $0.40/kWh. Louisiana, Idaho, Washington? Under $0.10/kWh. Check your latest bill — your rate is printed right there, usually labeled \"energy charge\" or \"electricity supply rate.\""
     },
     {
       "type": "heading",
@@ -254,15 +254,15 @@
     },
     {
       "type": "paragraph",
-      "text": "Notice that gaming PC? It costs **over four times more** to run than your LED TV — even with the same daily usage. The PC pulls ~500 watts under load. The TV? About 120 watts. That gap is why high-power electronics are worth a second look."
+      "text": "Notice that gaming PC? It costs over four times more to run than your LED TV — even with the same daily usage. The PC pulls ~500 watts under load. The TV? About 120 watts. That gap is why high-power electronics are worth a second look."
     },
     {
       "type": "paragraph",
-      "text": "Here's another one: a space heater running 6 hours a day costs **more per month** than a refrigerator that runs 24/7."
+      "text": "Here's another one: a space heater running 6 hours a day costs more per month than a refrigerator that runs 24/7."
     },
     {
       "type": "paragraph",
-      "text": "Why? The heater pulls 1,500 watts nonstop. The fridge cycles on and off, averaging just **210 watts** over the day. Wattage and duty cycle — both matter."
+      "text": "Why? The heater pulls 1,500 watts nonstop. The fridge cycles on and off, averaging just 210 watts over the day. Wattage and duty cycle — both matter."
     },
     {
       "type": "heading",
@@ -280,7 +280,7 @@
     },
     {
       "type": "paragraph",
-      "text": "So the average power draw is closer to **210 watts** (700 W × 30% duty cycle). Peak is higher, but average is what matters for your bill."
+      "text": "So the average power draw is closer to 210 watts (700 W × 30% duty cycle). Peak is higher, but average is what matters for your bill."
     },
     {
       "type": "paragraph",
@@ -346,20 +346,20 @@
     },
     {
       "type": "paragraph",
-      "text": "EV charging is a big one. A Level 2 charger draws **7,000 watts** (32 amps at 240V). Four hours of charging consumes 28 kWh — about the same as running central AC for 8 hours."
+      "text": "EV charging is a big one. A Level 2 charger draws 7,000 watts (32 amps at 240V). Four hours of charging consumes 28 kWh — about the same as running central AC for 8 hours."
     },
     {
       "type": "paragraph",
-      "text": "Good news: most utilities offer time-of-use (TOU) plans for EV owners. Off-peak power (usually 11 PM to 7 AM) can cost as little as **$0.08/kWh**. Peak afternoon rates? Over $0.30/kWh."
+      "text": "Good news: most utilities offer time-of-use (TOU) plans for EV owners. Off-peak power (usually 11 PM to 7 AM) can cost as little as $0.08/kWh. Peak afternoon rates? Over $0.30/kWh."
     },
     {
       "type": "paragraph",
-      "text": "Charge overnight and you can cut your cost by up to **70%**."
+      "text": "Charge overnight and you can cut your cost by up to 70%."
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "EV charging example at $0.14/kWh flat rate: 7,000 W × 4 hrs/day × 30 days = 840 kWh/month. Cost: **$117.60/month**. At a TOU off-peak rate of $0.08/kWh: same usage drops to **$67.20/month**. That's **$604.80 saved per year** — just by shifting when you charge."
+      "text": "EV charging example at $0.14/kWh flat rate: 7,000 W × 4 hrs/day × 30 days = 840 kWh/month. Cost: $117.60/month. At a TOU off-peak rate of $0.08/kWh: same usage drops to $67.20/month. That's $604.80 saved per year — just by shifting when you charge."
     },
     {
       "type": "heading",
@@ -376,11 +376,11 @@
     },
     {
       "type": "paragraph",
-      "text": "2.4 kWh per day. 72 kWh per month. **876 kWh per year**. At the national average rate, that's about **$122 a year** for doing absolutely nothing."
+      "text": "2.4 kWh per day. 72 kWh per month. 876 kWh per year. At the national average rate, that's about $122 a year for doing absolutely nothing."
     },
     {
       "type": "paragraph",
-      "text": "Smart power strips fix this. They cut power completely when devices go into standby. Plug your entertainment center, computer, or gaming setup into one and save **$30–$50 per year** — zero effort after plugging it in."
+      "text": "Smart power strips fix this. They cut power completely when devices go into standby. Plug your entertainment center, computer, or gaming setup into one and save $30–$50 per year — zero effort after plugging it in."
     },
     {
       "type": "heading",
@@ -398,11 +398,11 @@
     },
     {
       "type": "paragraph",
-      "text": "LEDs use **75–80% less energy** than incandescent bulbs and last 15–25 times longer. Swap a 60W incandescent for a 10W LED and save 50 watts per hour."
+      "text": "LEDs use 75–80% less energy than incandescent bulbs and last 15–25 times longer. Swap a 60W incandescent for a 10W LED and save 50 watts per hour."
     },
     {
       "type": "paragraph",
-      "text": "Run that light 5 hours a day? (50 × 5 × 365) / 1000 × $0.14 = **$12.78 per year, per bulb**. Got 40 bulbs in your house? That's over **$500 a year**."
+      "text": "Run that light 5 hours a day? (50 × 5 × 365) / 1000 × $0.14 = $12.78 per year, per bulb. Got 40 bulbs in your house? That's over $500 a year."
     },
     {
       "type": "heading",
@@ -411,7 +411,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Already covered these above, but they're worth repeating. Smart strips pay for themselves in **under six months** — after that it's pure savings. Put them where idle electronics cluster: entertainment centers, home offices, gaming rigs."
+      "text": "Already covered these above, but they're worth repeating. Smart strips pay for themselves in under six months — after that it's pure savings. Put them where idle electronics cluster: entertainment centers, home offices, gaming rigs."
     },
     {
       "type": "heading",
@@ -420,7 +420,7 @@
     },
     {
       "type": "paragraph",
-      "text": "ENERGY STAR appliances use **10–50% less energy** than standard models. The savings really add up on things that run all the time — fridges, washers, dishwashers, HVAC."
+      "text": "ENERGY STAR appliances use 10–50% less energy than standard models. The savings really add up on things that run all the time — fridges, washers, dishwashers, HVAC."
     },
     {
       "type": "paragraph",
@@ -433,11 +433,11 @@
     },
     {
       "type": "paragraph",
-      "text": "Heating and cooling makes up **40–50%** of the average US home's energy bill. Swap dirty air filters every 1–3 months and cut HVAC energy use by **5–15%**."
+      "text": "Heating and cooling makes up 40–50% of the average US home's energy bill. Swap dirty air filters every 1–3 months and cut HVAC energy use by 5–15%."
     },
     {
       "type": "paragraph",
-      "text": "Annual pro maintenance — cleaning coils, checking refrigerant, sealing duct leaks — can boost efficiency by up to **20%**. Throw in a smart thermostat and save another **10–15%** by letting it adjust temps when you're asleep or away."
+      "text": "Annual pro maintenance — cleaning coils, checking refrigerant, sealing duct leaks — can boost efficiency by up to 20%. Throw in a smart thermostat and save another 10–15% by letting it adjust temps when you're asleep or away."
     },
     {
       "type": "heading",
@@ -450,7 +450,7 @@
     },
     {
       "type": "paragraph",
-      "text": "How much can you save? Earlier we showed over **$600 per year** just by changing when you charge your EV. That's one appliance."
+      "text": "How much can you save? Earlier we showed over $600 per year just by changing when you charge your EV. That's one appliance."
     },
     {
       "type": "heading",
@@ -463,7 +463,7 @@
     },
     {
       "type": "paragraph",
-      "text": "It comes with **20+ preset appliance profiles** — LED bulbs, ceiling fans, fridges, EV chargers, central AC. Each has a realistic average wattage so you don't need to hunt down specs. Got something not in the list? Enter custom values."
+      "text": "It comes with 20+ preset appliance profiles — LED bulbs, ceiling fans, fridges, EV chargers, central AC. Each has a realistic average wattage so you don't need to hunt down specs. Got something not in the list? Enter custom values."
     },
     {
       "type": "table",
@@ -517,7 +517,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Here's a realistic example: a family of four with a typical mix of appliances. All calculated at **$0.14/kWh**."
+      "text": "Here's a realistic example: a family of four with a typical mix of appliances. All calculated at $0.14/kWh."
     },
     {
       "type": "table",
@@ -646,11 +646,11 @@
     },
     {
       "type": "paragraph",
-      "text": "This household's major appliances add up to about **$328 per month** before smaller stuff. The central AC and EV charger alone account for over **70%** of that total."
+      "text": "This household's major appliances add up to about $328 per month before smaller stuff. The central AC and EV charger alone account for over 70% of that total."
     },
     {
       "type": "paragraph",
-      "text": "Switch the EV to a TOU rate ($0.08/kWh off-peak) and it drops from $117.60 to $67.20 — saving **$50.40/month**. Clean the AC filters and bump the thermostat 3 degrees in summer? Another **$12–$18/month** saved."
+      "text": "Switch the EV to a TOU rate ($0.08/kWh off-peak) and it drops from $117.60 to $67.20 — saving $50.40/month. Clean the AC filters and bump the thermostat 3 degrees in summer? Another $12–$18/month saved."
     },
     {
       "type": "paragraph",

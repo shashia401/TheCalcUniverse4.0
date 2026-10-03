@@ -1,31 +1,93 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Core Differences"
-    },
-    {
       "type": "paragraph",
-      "text": "In an SWP, YOU decide how much to withdraw. In a dividend plan, the fund decides how much dividend to distribute. Dividends are not guaranteed and can be reduced or skipped in a bad year. SWP gives you control over your income amount."
+      "text": "An SWP and a dividend plan both turn a mutual fund into regular cash, but they differ in who decides the amount. With an SWP you choose a fixed amount and date, and the fund sells units to pay it. With a dividend plan the fund decides whether and how much to distribute, and the payout lowers the fund's NAV by the same amount. Before tax, a payout is a payout: money leaves the fund either way. What differs is control, predictability and how each payment is classified, which is where the tax difference comes from."
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Tax Treatment"
-    },
-    {
-      "type": "paragraph",
-      "text": "In SWP, you pay capital gains tax only on the profit portion (LTCG over ₹1 lakh per year at 10%). In dividend plans, dividends are added to your income and taxed at your slab rate. For most retirees in the 5-20% tax bracket, SWP is more tax efficient."
+      "type": "callout",
+      "variant": "info",
+      "text": "This post explains mechanics only. It states no tax rates, holding periods or exemption limits, because they change. Check the current rules with the tax authority or a qualified adviser. Fund houses now commonly label dividend options as IDCW (income distribution cum capital withdrawal), a name that reminds you a payout can include your own capital. Check your fund's documents for the exact wording."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Which Is Better for Retirement?"
+      "text": "How each one pays you"
+    },
+    {
+      "type": "list",
+      "items": [
+        "SWP: you pick the amount and the date. On each date the fund sells enough units, at that day's NAV, to raise the amount. The number of units you own falls; the NAV is not touched.",
+        "Dividend plan: the fund declares a payout per unit when it chooses to. Your units stay the same, but the NAV falls by the payout. A payout is not guaranteed in amount, timing or frequency.",
+        "Same money, different packaging: Rs. 6 per unit declared on 1,00,000 units pays Rs. 6,00,000, the same cash an SWP of Rs. 6,00,000 would raise. The only difference is that the SWP gives up units while the dividend lowers the NAV."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: fixed income versus declared income"
     },
     {
       "type": "paragraph",
-      "text": "SWP is generally better for retirement because you control the income amount, the tax treatment is favorable, and the remaining corpus continues to grow. Dividend plans are suitable if you want truly passive income and do not want to manage withdrawal amounts."
+      "text": "Start with Rs. 1,00,00,000 in a fund at NAV Rs. 100 (1,00,000 units) in each option. Assume the fund returns +12%, -5%, +10%, +3% and +9% over five years. These returns are invented, and past performance does not guarantee future results. The SWP option takes Rs. 6,00,000 at the end of every year. For the dividend option, assume the fund follows a hypothetical rule: it pays half of each year's per-unit gain and nothing in a losing year."
+    },
+    {
+      "type": "table",
+      "headers": ["Year", "Fund return", "SWP income", "SWP value after payout", "Dividend payout", "Dividend value after payout"],
+      "rows": [
+        ["1", "+12%", "Rs. 6,00,000", "Rs. 1,06,00,000", "Rs. 6,00,000", "Rs. 1,06,00,000"],
+        ["2", "-5%", "Rs. 6,00,000", "Rs. 94,70,000", "Rs. 0", "Rs. 1,00,70,000"],
+        ["3", "+10%", "Rs. 6,00,000", "Rs. 98,17,000", "Rs. 5,03,500", "Rs. 1,05,73,500"],
+        ["4", "+3%", "Rs. 6,00,000", "Rs. 95,11,510", "Rs. 1,58,602", "Rs. 1,07,32,103"],
+        ["5", "+9%", "Rs. 6,00,000", "Rs. 97,67,546", "Rs. 4,82,945", "Rs. 1,12,15,047"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The SWP delivers Rs. 30,00,000 over five years in five identical payments. The dividend option delivers Rs. 17,45,047 in four payments of different sizes and one year with nothing. If you needed Rs. 6,00,000 every year to live on, years 2, 3, 4 and 5 would leave gaps of Rs. 6,00,000, Rs. 96,500, Rs. 4,41,398 and Rs. 1,17,055."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Is one of them better pre-tax? No"
+    },
+    {
+      "type": "paragraph",
+      "text": "It is tempting to compare the final columns and see Rs. 1,12,15,047 against Rs. 97,67,546. That comparison is not fair, because the dividend option paid out Rs. 12,54,953 less. Add the cash received to the remaining value and the totals are Rs. 1,29,60,094 for the dividend option and Rs. 1,27,67,546 for the SWP, a gap of about 1.5% that comes from selling fewer units in low-NAV years, not from a better strategy. To prove the equivalence, suppose the fund paid exactly Rs. 6 per unit every year: the remaining value would be Rs. 97,67,546, identical to the SWP. When the payouts are the same, so are the outcomes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Where the real differences are"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Predictability. An SWP can be set to match your bills. A dividend payout cannot be planned around.",
+        "Control. You can raise, lower, pause or stop an SWP. With a dividend plan you accept what the fund declares.",
+        "Return of capital. A dividend payout may include your own capital but feels like income, which can lead people to spend more than the fund really earned.",
+        "Tax classification. Payments may be treated differently for tax depending on whether they are dividends or the sale of units. This is why people compare the two, but the answer depends on current law, your income and your holding period, so check before choosing.",
+        "Simplicity. A dividend plan needs no instruction after you buy. An SWP needs a standing instruction and a check that the fund still suits your income needs."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and when this comparison does not apply"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating a high payout as a high return. A payout reduces the NAV, so a fund paying generously may not be earning more.",
+        "Assuming a dividend plan is steady because it paid for a few years. The fund can reduce or skip payouts when markets fall, as year 2 shows.",
+        "Setting an SWP larger than the fund can earn. If the withdrawal exceeds the return, the balance falls month after month. See the guide on how long a retirement corpus lasts.",
+        "Ignoring costs. Exit loads and fund expenses differ between options and funds.",
+        "Using constant-return maths. Real markets move unevenly and early losses hurt an SWP more than the same losses later."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "If predictable monthly income matters most, an SWP gives you the control. If you want zero effort and can live with irregular amounts, a dividend plan fits. For the tax difference, which is real but changeable, get current advice. This post is general education, not personal advice."
     },
     {
       "type": "cta",
@@ -35,11 +97,5 @@
       "path": "/finance/swp-calculator/"
     }
   ],
-  "keywords": [
-    "swp vs dividend",
-    "dividend vs swp",
-    "swp or dividend plan",
-    "mutual fund income options",
-    "retirement income swp dividend"
-  ]
+  "keywords": ["swp vs dividend","dividend vs swp","swp or dividend plan","mutual fund income options","retirement income swp dividend"]
 }

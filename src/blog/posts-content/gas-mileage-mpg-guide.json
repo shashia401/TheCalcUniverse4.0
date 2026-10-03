@@ -2,7 +2,7 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "You don't need a new car to save on fuel -- you just need to know your numbers. Tracking your fuel economy is the first step to cutting costs, and it's easier than you think. Here's how to measure MPG accurately and what to do with that information."
+      "text": "To improve your gas mileage you first need a trustworthy number for it, and the habits that change that number are mostly small. Fuel economy is miles driven divided by gallons used. Measure it over several full tanks, then use cost per mile to decide which fixes are worth the effort. The arithmetic below shows why a 5 MPG gain on a thirsty vehicle saves far more money than the same gain on an efficient one."
     },
     {
       "type": "heading",
@@ -11,80 +11,148 @@
     },
     {
       "type": "paragraph",
-      "text": "Fill your tank completely, reset your trip odometer, and drive at least 100 miles. Then fill up at the same pump and divide miles driven by gallons pumped. For the most reliable number, repeat this over several tanks and take the average."
+      "text": "Fill the tank until the pump clicks off, note the odometer or reset the trip meter, drive normally, then fill up again and record the gallons pumped. MPG is miles divided by gallons. Example: 320 miles between fill-ups and 12.5 gallons pumped gives 320 / 12.5 = 25.6 MPG. The same trip is 9.19 liters per 100 km (235.215 / 25.6) and 30.7 imperial MPG (25.6 x 1.20095), which is the unit used in the UK."
     },
     {
       "type": "paragraph",
-      "text": "Our gas mileage calculator handles both odometer readings and trip distance entry."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What's a Good MPG for Your Car?"
+      "text": "The weak point is the pump. Pumps shut off at slightly different levels, so two fill-ups can differ by a fraction of a gallon even when the tank holds the same fuel. Suppose that error is a quarter of a gallon (an assumption for illustration):"
     },
     {
       "type": "table",
       "headers": [
-        "Vehicle Type",
-        "Combined MPG",
-        "Annual Fuel Cost (est.)"
+        "Interval driven",
+        "Gallons pumped",
+        "Computed MPG",
+        "Swing from a 0.25 gal error"
       ],
       "rows": [
         [
-          "Hybrid",
-          "45-55 MPG",
-          "$764 - $933"
+          "100 miles",
+          "4.00 gal",
+          "25.0 (23.5 to 26.7)",
+          "about 6%"
         ],
         [
-          "Compact Sedan",
-          "30-35 MPG",
-          "$1,200 - $1,400"
-        ],
-        [
-          "Midsize Sedan",
-          "25-30 MPG",
-          "$1,400 - $1,680"
-        ],
-        [
-          "SUV",
-          "20-25 MPG",
-          "$1,680 - $2,100"
-        ],
-        [
-          "Truck",
-          "15-20 MPG",
-          "$2,100 - $2,800"
+          "320 miles",
+          "12.50 gal",
+          "25.6 (25.1 to 26.1)",
+          "about 2%"
         ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "These annual costs assume **$3. 50/gallon** and **12,000 miles** per year. A hybrid saves about **$900/year** compared to a truck."
-    },
-    {
-      "type": "paragraph",
-      "text": "If you drive more, the savings gap widens even further."
+      "text": "A longer interval dilutes the pump error, which is why averaging several tanks beats trusting any single one. Use the same pump, the same shut-off click and the same driving mix when you compare before and after a change."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Driving Habits That Actually Improve Fuel Economy"
+      "text": "What Does Each MPG Gain Actually Save?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Fuel cost depends on gallons used, and gallons used depend on 1 divided by MPG, so the savings from each extra MPG shrink as the number climbs. The table assumes 12,000 miles a year and $3.50 per gallon. Both are assumptions; substitute your own mileage and local price."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "MPG",
+        "Gallons per year",
+        "Fuel cost per year",
+        "Saved by the next 5 MPG"
+      ],
+      "rows": [
+        [
+          "15",
+          "800",
+          "$2,800",
+          "$700 (to 20)"
+        ],
+        [
+          "20",
+          "600",
+          "$2,100",
+          "$420 (to 25)"
+        ],
+        [
+          "25",
+          "480",
+          "$1,680",
+          "$280 (to 30)"
+        ],
+        [
+          "30",
+          "400",
+          "$1,400",
+          "$200 (to 35)"
+        ],
+        [
+          "40",
+          "300",
+          "$1,050",
+          "$117 (to 45)"
+        ],
+        [
+          "45",
+          "267",
+          "$933",
+          "$93 (to 50)"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Going from 15 to 20 MPG saves $700 a year here; going from 45 to 50 MPG saves $93. Cost per mile is the number to track: 25 MPG at $3.50 per gallon is $0.14 per mile, or $14 per 100 miles, which is $1,680 for 12,000 miles. For the 320-mile example above, 12.5 gallons at $3.50 is $43.75, or $0.1367 per mile, which scales to $1,641 per year."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Driving and Maintenance Factors With Published Effects"
+    },
+    {
+      "type": "paragraph",
+      "text": "The following figures come from FuelEconomy.gov, the US government fuel economy site run by the Department of Energy and the EPA. They are averages, so your result will differ."
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Accelerate gently and maintain a steady speed -- hard acceleration burns up to **30% more fuel**",
-        "Use cruise control on highways to avoid speed fluctuations",
-        "Keep tires inflated to the recommended pressure -- under-inflated tires drop MPG by **0.2% per 1 PSI**",
-        "Remove excess weight from your trunk -- every **100 pounds** reduces MPG by about **1%**",
-        "Combine errands into one trip -- cold starts use more fuel than a warm engine"
+        "Aggressive driving (speeding, rapid acceleration, hard braking) can lower gas mileage by roughly 15 to 30 percent at highway speeds and 10 to 40 percent in stop-and-go traffic.",
+        "Speed: each 5 mph you drive over 50 mph is like paying an additional $0.31 per gallon, according to FuelEconomy.gov, which bases that figure on a gas price of $4.47 per gallon.",
+        "Weight: an extra 100 pounds in the vehicle could reduce MPG by about 1 percent.",
+        "Tire pressure: under-inflated tires can lower gas mileage by about 0.2 percent for every 1 psi drop in pressure.",
+        "Motor oil: using the grade the manufacturer recommends improves mileage by 1 to 2 percent compared with the wrong grade.",
+        "Roof-mounted cargo boxes: reductions of roughly 2 to 8 percent in city driving, 6 to 17 percent on the highway and 10 to 25 percent at interstate speeds. Rear-mounted carriers cost much less, about 1 to 2 percent in the city and 1 to 5 percent on the highway."
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "To put these in dollars, take a 25 MPG car at the assumptions above ($1,680 a year). A 15 percent loss from aggressive driving would drop it to 21.3 MPG and raise fuel cost to about $1,976, roughly $296 more. A 30 percent loss would mean 17.5 MPG and about $2,400, roughly $720 more. Cleaning 100 pounds of clutter out of the trunk is worth about 1 percent, or around $17 a year, so it is worth doing but it will not transform your budget."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Set tire pressure to the figure on the placard in the driver's door jamb or the owner's manual, not the maximum printed on the tire sidewall, and check it when the tires are cold."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Cost Per Mile: The Number That Matters"
+      "text": "Common Mistakes and Limits of These Numbers"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Judging a change from one tank. Weather, traffic, and pump shut-off all move a single reading, so compare averages over several tanks.",
+        "Trusting the dashboard average without checking it. Many displays are estimates; the fill-up method uses the fuel you actually bought.",
+        "Mixing units. A US gallon is not an imperial gallon, so 30 US MPG is about 36 imperial MPG, and L/100 km runs the opposite way: lower is better.",
+        "Applying these rules to plug-in hybrids and EVs. Electricity use needs its own accounting, and a single MPG number can mislead.",
+        "Expecting window-sticker figures. EPA ratings come from standardized tests, so real-world results can differ from them."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Category averages for sedans, SUVs and trucks hide wide differences between models, so use your own tracked MPG instead. Fuel prices, annual mileage and the effect sizes above are all assumptions or averages, and the savings from any single habit will vary with your car and routes."
     },
     {
       "type": "cta",

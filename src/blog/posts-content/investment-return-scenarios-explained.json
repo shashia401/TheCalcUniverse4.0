@@ -1,26 +1,112 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What the Three Scenarios Mean"
-    },
-    {
       "type": "paragraph",
-      "text": "Investment calculators typically show three scenarios to account for market uncertainty. The expected scenario uses your entered rate of return (typically 6-8% for a balanced portfolio, reflecting long-term stock market averages). The optimistic scenario uses 1.5 times your expected rate. The pessimistic scenario uses half your expected rate."
-    },
-    {
-      "type": "paragraph",
-      "text": "For retirement planning, it is wise to use the pessimistic or expected scenario — not the optimistic one. Planning for the optimistic scenario risks coming up short. The pessimistic scenario helps ensure you save enough even if markets underperform."
+      "text": "The investment calculator's three scenarios are not forecasts with probabilities attached. The expected scenario uses the return you type in. The optimistic scenario adds a fixed number of percentage points to it, and the pessimistic scenario subtracts the same number (never going below 0%). The default band is plus or minus 2 points, so a 6% input produces 4%, 6% and 8%. A sensible way to use them is to build your plan on the expected line and check that you could live with the pessimistic one."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Historical Context"
+      "text": "What the Three Scenarios Are"
     },
     {
       "type": "paragraph",
-      "text": "The S&P 500 has averaged approximately 10% annual returns before inflation (7% after inflation) over the past century. However, this average masks enormous variability: some years are up 30%, others down 40%. A 7% expected return with a 3.5% pessimistic and 10.5% optimistic range accounts for this variability while remaining historically grounded."
+      "text": "The scenarios are an additive band around your assumption, not multiples of it. Entering 6% with a 2-point variance gives 8% for the optimistic case and 4% for the pessimistic one. Raising the variance to 4 points gives 10% and 2%. The band describes how far you are willing to let your assumption be wrong. It is not drawn from historical data, and nothing in the calculation says how likely any of the three outcomes is."
+    },
+    {
+      "type": "paragraph",
+      "text": "Two details are easy to miss. If your entered return is lower than the variance, the pessimistic scenario is floored at 0%. And the scenarios use the same contributions and time horizon, so only the rate changes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Wide the Band Gets Over Time"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take a $20,000 starting balance and $600 added every month, with 6% as the expected return and the default 2-point variance. These are illustrative assumptions. The figures are rounded to the nearest dollar."
+    },
+    {
+      "type": "table",
+      "headers": ["Years", "Total contributed", "Pessimistic (4%)", "Expected (6%)", "Optimistic (8%)", "Optimistic / pessimistic"],
+      "rows": [
+        ["5", "$56,000", "$64,199", "$68,839", "$73,883", "1.15x"],
+        ["10", "$92,000", "$118,167", "$134,716", "$154,160", "1.30x"],
+        ["20", "$164,000", "$264,516", "$343,429", "$451,948", "1.71x"],
+        ["30", "$236,000", "$482,700", "$723,161", "$1,112,930", "2.31x"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "After 5 years the three outcomes differ by about 15%. After 30 years the optimistic result is more than double the pessimistic one. The band is not symmetrical either: at 20 years the expected case is $78,912 above the pessimistic one but the optimistic case is $108,520 above the expected one, because compounding amplifies each extra point more the longer it runs. Widening the variance has the same effect. At 20 years, a 1-point variance gives a range of $300,873 to $393,331, a 3-point variance gives $233,396 to $520,915, and a 4-point variance gives $206,705 to $602,183."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Turning the Band Into a Savings Target"
+    },
+    {
+      "type": "paragraph",
+      "text": "Suppose the goal is $500,000 in 20 years, starting from $20,000. The monthly contribution you need depends on which scenario turns out to be true."
+    },
+    {
+      "type": "table",
+      "headers": ["Return that actually happens", "Monthly contribution needed", "Total you pay in"],
+      "rows": [
+        ["4% (pessimistic)", "$1,242", "$318,080"],
+        ["6% (expected)", "$939", "$245,360"],
+        ["8% (optimistic)", "$682", "$183,680"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The risk of planning around the optimistic line is visible here. If you save $682 a month expecting 8% and the market delivers 4%, you end with about $294,592, which is $205,408 short of the goal. If you save $939 on the expected line and returns average 4%, you end with about $388,853, still $111,147 short. Saving the amount the pessimistic line demands is the only version of the plan that reaches the target in all three cases."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why an Average Return Is Not the Return You Get"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator assumes the same return every year. Real returns vary, and variation costs money. Compare two paths with the same simple average of 6% (hypothetical returns). One earns exactly 6% each year. The other alternates +30% and -18%. Over 10 years, $100,000 grows to $179,085 on the steady path but only $137,653 on the alternating path, because it compounds at about 3.25% a year even though the arithmetic average is 6%."
+    },
+    {
+      "type": "paragraph",
+      "text": "The order of returns also matters once money is moving in or out. Use this hypothetical 10-year sequence: -20%, -10%, +5%, +10%, +15%, +20%, +10%, +10%, +5%, +10%. Its simple average is 5.5%, and it compounds at about 4.84% a year."
+    },
+    {
+      "type": "table",
+      "headers": ["Situation", "Bad years first", "Bad years last", "Constant 5.5%"],
+      "rows": [
+        ["$100,000 lump sum, no deposits", "$160,384", "$160,384", "$170,814"],
+        ["$10,000 added at the end of each year, no starting balance", "$158,826", "$103,206", "$128,754"],
+        ["$100,000 start, $6,000 withdrawn at the start of each year", "$61,466", "$94,838", "-"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "With a lump sum and no cash flows, the order does not change the result, but the average-return shortcut overstates it by about $10,000. While you are contributing, early losses are cheap because the balance is small. While you are withdrawing, early losses are expensive because you are selling into them. A single constant-rate scenario cannot show either effect."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limits of the Scenario Approach"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The pessimistic scenario is not a worst case. A decade like the bad-first sequence above is not captured by a steady 4%.",
+        "The default 2-point variance is a convenience setting, not a measured range. Choose a wider band if you hold a more volatile mix.",
+        "Fees, taxes and inflation are not modeled, so enter returns after fees and adjust for inflation separately.",
+        "Past performance does not guarantee future results, and no scenario here promises a return."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "This guide is educational and not financial advice. Every rate and return sequence above is hypothetical, chosen to illustrate how the arithmetic behaves."
     },
     {
       "type": "cta",

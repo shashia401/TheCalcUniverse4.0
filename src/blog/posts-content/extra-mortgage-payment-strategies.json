@@ -1,69 +1,103 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "No single extra-payment strategy wins on every measure. In dollars saved, the largest total extra payments win. Per extra dollar spent, small recurring payments that start on day one do well, and a single lump sum paid at the very start does best of all. This post runs the same loan through seven strategies so you can compare them on one set of assumptions."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Strategy Comparison at a Glance"
+      "text": "The loan and the assumptions"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Loan: $300,000, 30-year fixed at 6.5%, giving a principal-and-interest payment of $1,896.20 (taxes and insurance excluded).",
+        "Baseline: paid on schedule, the loan costs $382,633 in interest and ends after 360 payments. All figures below are rounded to the nearest dollar.",
+        "Extra money is applied to principal on the payment date, with no prepayment penalty. Annual lumps follow the calculator's convention: first lump with the 13th payment, then every 12 months. The single lump is paid today.",
+        "Bi-weekly: half the payment ($948.10) paid 26 times a year, with interest accruing at one twenty-sixth of the annual rate per payment (6.5% / 26) and each payment credited the day it arrives. This is a simplification, because a daily-interest servicer would give a slightly different result (about $90,400 saved if interest is charged on actual days over 365), and servicers differ, so treat this row as a best case."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Results side by side"
     },
     {
       "type": "table",
-      "headers": [
-        "Strategy",
-        "Extra Cost/Month",
-        "Interest Saved*",
-        "Payoff Accelerated*"
-      ],
+      "headers": ["Strategy", "Extra cash", "Payoff", "Time saved", "Total interest", "Interest saved"],
       "rows": [
-        [
-          "Bi-weekly (split payment)",
-          "$0 (same total)",
-          "~$52,000",
-          "~4.5 years"
-        ],
-        [
-          "+$100/month extra",
-          "$100",
-          "~$60,000",
-          "~5 years"
-        ],
-        [
-          "+$200/month extra",
-          "$200",
-          "~$105,000",
-          "~9 years"
-        ],
-        [
-          "+$500/month extra",
-          "$500",
-          "~$190,000",
-          "~14 years"
-        ],
-        [
-          "Annual $5,000 lump sum",
-          "$417/mo equivalent",
-          "~$140,000",
-          "~11 years"
-        ],
-        [
-          "Single $10,000 lump sum",
-          "One-time",
-          "~$55,000",
-          "~2.5 years"
-        ]
+        ["Baseline", "None", "30 yr 0 mo", "None", "$382,633", "None"],
+        ["Bi-weekly half payments", "About $158/month equivalent", "24 yr 2 mo", "5 yr 10 mo", "$294,512", "$88,122"],
+        ["Extra $100 a month", "$1,200 a year", "26 yr 0 mo", "4 yr 0 mo", "$321,639", "$60,995"],
+        ["Extra $200 a month", "$2,400 a year", "23 yr 1 mo", "6 yr 11 mo", "$279,185", "$103,449"],
+        ["Extra $500 a month", "$6,000 a year", "17 yr 6 mo", "12 yr 6 mo", "$202,874", "$179,759"],
+        ["$5,000 lump each year", "$5,000 a year", "19 yr 1 mo", "10 yr 11 mo", "$225,597", "$157,036"],
+        ["$10,000 once, today", "$10,000 total", "27 yr 3 mo", "2 yr 9 mo", "$328,717", "$53,917"]
       ]
     },
     {
       "type": "paragraph",
-      "text": "Based on $300,000 at 6.5% for 30 years. Your savings will vary based on your loan amount, rate, and remaining term. Use our calculator for personalized results."
+      "text": "The bi-weekly row works because 26 half payments equal 13 full payments a year, so it behaves like one extra monthly payment spread over the year. Adding one-twelfth of your payment ($158.02) to every monthly payment gives a similar result in the monthly model: payoff in 24 years 2 months and $87,256 of interest saved."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Which Strategy Is Right for You?"
+      "text": "Interest saved per extra dollar"
+    },
+    {
+      "type": "table",
+      "headers": ["Strategy", "Extra dollars you contribute", "Interest saved", "Saved per extra dollar"],
+      "rows": [
+        ["Extra $100 a month", "$31,200", "$60,995", "$1.95"],
+        ["Extra $200 a month", "$55,400", "$103,449", "$1.87"],
+        ["Extra $500 a month", "$105,000", "$179,759", "$1.71"],
+        ["$5,000 lump each year (19 lumps)", "$95,000", "$157,036", "$1.65"],
+        ["$10,000 once, today", "$10,000", "$53,917", "$5.39"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Bi-weekly payments are the easiest to implement — most lenders can set this up automatically, and since it is just splitting your existing payment, you do not need to find extra money in your budget. Monthly extra payments give you flexibility — you can change the amount whenever your financial situation changes. Lump sums work well if you receive irregular income like bonuses, commissions, or tax refunds."
+      "text": "Extra dollars are the sum of the extra payments made before the loan ends. The ratio falls as the extra amount grows because a bigger payment ends the loan sooner, leaving each later dollar fewer years to save interest. The single lump looks spectacular per dollar because it lands at the start, but it saves less in total simply because it is a smaller sum."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Same cash, different timing"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take $2,400 a year of extra money. Paying it as $200 every month saves $103,449 and ends the loan after 23 years 1 month. Paying it as one $2,400 lump every 12 months saves $98,995 and ends after 23 years 3 months. The $4,454 difference comes from the monthly payer reducing principal earlier in each year, so less interest accrues. The gap is real but modest, which supports a practical conclusion: the strategy you will actually keep doing matters more than the exact timing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Not marking extra money as principal-only. Some servicers apply it to the next scheduled payment instead, which saves nothing. Check your statement after the first extra payment.",
+        "Assuming a bi-weekly plan helps automatically. If a third-party service or your servicer holds each half payment until the monthly due date, the interest benefit shrinks or disappears, and some plans charge setup or per-payment fees. Ask exactly when each payment is credited.",
+        "Ignoring prepayment terms. Many loans have none, but read your note and ask your servicer before sending large amounts.",
+        "Comparing totals without comparing alternatives. Interest saved is a guaranteed return at your loan rate only. Before prepaying, weigh an emergency fund, higher-rate debt, and any employer retirement match. If you consider investing instead, remember returns are uncertain and past performance does not guarantee future results."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When these numbers do not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "These results are for a brand-new fixed-rate loan, where extra payments have the longest runway. On the same loan after 15 years of regular payments (balance about $217,677), the same $200 a month saves $20,545 and 2 years 2 months, against $103,449 and 6 years 11 months from day one. Adjustable-rate loans, loans with escrow shortfalls, and loans where you pay mortgage insurance until a balance threshold can behave differently, so run your own balance, rate and payment rather than borrowing these figures."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Every figure here comes from a month-by-month simulation using the same logic as the mortgage payoff calculator. Your servicer's statement is the final authority on how and when payments are credited."
     },
     {
       "type": "cta",

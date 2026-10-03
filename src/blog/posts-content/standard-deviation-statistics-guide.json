@@ -11,11 +11,11 @@
     },
     {
       "type": "paragraph",
-      "text": "Think of it as the average distance each data point sits from the mean. A **low standard deviation** means most values cluster close to the average — everyone scored similarly on a test. A **high standard deviation** means values are spread widely — some students aced it while others bombed."
+      "text": "Think of it as the average distance each data point sits from the mean. A low standard deviation means most values cluster close to the average — everyone scored similarly on a test. A high standard deviation means values are spread widely — some students aced it while others bombed."
     },
     {
       "type": "paragraph",
-      "text": "The formula works by squaring each difference from the mean (to handle negative values), averaging those squared differences to get the **variance**, and then taking the square root to bring the number back to the original unit of measurement."
+      "text": "The formula works by squaring each difference from the mean (to handle negative values), averaging those squared differences to get the variance, and then taking the square root to bring the number back to the original unit of measurement."
     },
     {
       "type": "heading",
@@ -24,7 +24,7 @@
     },
     {
       "type": "paragraph",
-      "text": "The population formula (symbol: **σ**) divides by N — the total number of data points. You use it when you've data for every single member of the group you're studying. The sample formula (symbol: **s**) divides by **n - 1** instead."
+      "text": "The population formula (symbol: σ) divides by N — the total number of data points. You use it when you've data for every single member of the group you're studying. The sample formula (symbol: s) divides by n - 1 instead."
     },
     {
       "type": "paragraph",
@@ -42,15 +42,15 @@
     },
     {
       "type": "paragraph",
-      "text": "In a **normal distribution** (the classic bell curve), standard deviations map neatly to data percentages. About **68%** of all values fall within one standard deviation of the mean. About **95%** fall within two standard deviations."
+      "text": "In a normal distribution (the classic bell curve), standard deviations map neatly to data percentages. About 68% of all values fall within one standard deviation of the mean. About 95% fall within two standard deviations."
     },
     {
       "type": "paragraph",
-      "text": "About **99. 7%** fall within three standard deviations. This means values beyond three SDs from the mean are  rare — less than **0."
+      "text": "About 99. 7% fall within three standard deviations. This means values beyond three SDs from the mean are  rare — less than 0."
     },
     {
       "type": "paragraph",
-      "text": "3%** chance — which is why researchers often flag those as potential outliers."
+      "text": "3% chance — which is why researchers often flag those as potential outliers."
     },
     {
       "type": "table",

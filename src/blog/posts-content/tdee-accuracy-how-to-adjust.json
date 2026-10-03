@@ -3,27 +3,132 @@
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Calculators Are Estimates"
+      "text": "The Short Answer"
     },
     {
       "type": "paragraph",
-      "text": "TDEE calculators use population averages. They do not know your specific muscle mass, NEAT level, or metabolic efficiency. Research shows that actual TDEE can vary by 200-300 calories from the estimate, and in some cases up to 500-600 calories. The solution is a simple 2-3 week tracking protocol."
+      "text": "Treat a TDEE calculator as a starting estimate, not a measurement. Our TDEE calculator says real-world error is around 10%, so an estimate of 2,400 kcal per day could realistically sit anywhere from 2,160 to 2,640. You find your own number by eating a steady, carefully logged amount for two to three weeks, watching the trend in your body weight, and converting that trend back into calories per day."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "The 2-Week Verification Protocol"
+      "text": "Why Estimates Miss"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator takes your age, sex, height, weight and a single activity multiplier. It cannot see your muscle mass, how much you move outside of workouts, or how your own metabolism differs from the population average. It also assumes your choice of activity level is accurate, and the calculator warns that most people overestimate. The result is a good place to start and a poor place to stop. Your own logged intake and weight trend carry information the formula never had, so once you have a few weeks of both, they should outrank the estimate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Tracking Method"
     },
     {
       "type": "list",
       "ordered": true,
       "items": [
-        "Calculate estimated TDEE using the calculator.",
-        "Eat exactly that many calories every day for 2 weeks. Track everything — all food, drinks, oils, condiments.",
-        "Weigh yourself daily under consistent conditions (morning, after bathroom, before food).",
-        "After 2 weeks, average your weight changes.",
-        "If weight stayed exactly stable: calculated TDEE is correct. If you lost or gained weight: adjust by 100-200 calories per pound of change."
+        "Calculate your TDEE with the calculator and choose the lower activity level if you are torn between two.",
+        "Eat close to that number every day for at least two weeks (three is better). Weigh and log everything: oils, drinks, sauces, snacks.",
+        "Weigh yourself every morning under the same conditions (after the bathroom, before food) and average each week rather than reacting to single days.",
+        "Compare the average of the last several days with the average of the first several days to get the change in weight.",
+        "Convert that change into calories per day, using roughly 3,500 kcal per pound of body weight (about 7,700 per kg). Add it to, or subtract it from, your logged intake to get your effective maintenance."
       ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked Example: Estimate 2,400, Log 2,400"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: the calculator estimate is 2,400 kcal per day, you log 2,400 kcal per day for 14 days, and the 3,500 kcal per pound conversion holds (it is a simplification, so treat the outputs as approximate). The daily balance is the weight change times 3,500, divided by 14. Your effective maintenance is the logged intake minus that balance."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Weight change over 14 days",
+        "Implied daily balance (kcal)",
+        "Effective maintenance (kcal/day)"
+      ],
+      "rows": [
+        [
+          "Down 2 lb",
+          "-500",
+          "2,900"
+        ],
+        [
+          "Down 1 lb",
+          "-250",
+          "2,650"
+        ],
+        [
+          "Down 0.5 lb",
+          "-125",
+          "2,525"
+        ],
+        [
+          "No change",
+          "0",
+          "2,400"
+        ],
+        [
+          "Up 0.5 lb",
+          "+125",
+          "2,275"
+        ],
+        [
+          "Up 1 lb",
+          "+250",
+          "2,150"
+        ],
+        [
+          "Up 2 lb",
+          "+500",
+          "1,900"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Notice that one pound over two weeks is a 250 kcal difference per day, not the 100 to 200 kcal per pound that is sometimes quoted. Over three weeks, one pound works out to about 167 kcal per day (3,500 divided by 21). The shorter the period, the larger each pound of movement is in calories, which is also why short windows are noisy."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When the Method Misleads You"
+    },
+    {
+      "type": "paragraph",
+      "text": "The method only works if the logging is accurate. Suppose you log 2,400 kcal but really eat 2,600 because of unmeasured oils and bites. If your true maintenance is 2,400, you gain 200 kcal per day, about 0.8 lb over 14 days, and you would wrongly conclude your maintenance is 2,200. Weight itself also swings from day to day with fluid and the contents of your gut, so a half-pound change over two weeks is too small to act on with confidence. Keep logging and wait for a clearer trend."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "After You Find Your Number"
+    },
+    {
+      "type": "paragraph",
+      "text": "Once the trend settles, set your target relative to the effective maintenance, not the original estimate. If the example above lands at 2,650 kcal and you want a slow loss, the mild loss step of 250 kcal below maintenance gives 2,400 kcal, which is about 0.5 lb per week on the 3,500 kcal rule (250 x 7 / 3,500). Then repeat the weigh-and-log cycle, because your maintenance moves as your weight does."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Changing the plan after three days. Short-term weight moves are mostly water.",
+        "Skipping weekends or drinks in the log, then trusting the result.",
+        "Adjusting by large amounts. Move your target in steps of roughly 100 to 200 kcal and give it another two weeks.",
+        "Forgetting that maintenance shifts as your weight changes. The calculators suggest rerunning your numbers after about every 10 lb of change.",
+        "Using this method during illness, a major change in routine, or pregnancy, when weight changes are not simply energy balance."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This guide is general information, not medical advice. If your weight changes quickly without a change in diet, or you are managing a health condition, talk to a clinician or registered dietitian."
     },
     {
       "type": "cta",

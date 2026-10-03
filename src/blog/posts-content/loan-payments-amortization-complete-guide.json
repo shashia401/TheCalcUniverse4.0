@@ -1,63 +1,182 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is Loan Amortization?"
-    },
-    {
       "type": "paragraph",
-      "text": "Amortization is the process of spreading out a loan into a series of fixed payments over time. Each payment covers the interest owed since the last payment, with the remainder going toward the principal balance. As the principal balance declines, the interest portion decreases and the principal portion increases. This is why amortization schedules show mostly interest in early payments and mostly principal in later ones."
+      "text": "A monthly loan payment is the fixed amount that repays the balance, with interest, in a set number of payments. The amortization schedule shows what that payment does each month: it pays the interest accrued first and applies the remainder to principal. This guide is the whole-loan view, from choosing the amount, rate and term to the final payment, using a $150,000 loan at 6% over 20 years as the worked example. Other posts go deeper on the formula, on reading each row, and on extra payments."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "The Amortization Formula"
+      "text": "The three levers that set the payment"
     },
     {
       "type": "paragraph",
-      "text": "Your monthly payment is calculated using the formula M = P[r(1+r)^n]/[(1+r)^n-1], where M is the monthly payment, P is the principal loan amount, r is the monthly interest rate (annual rate divided by 12), and n is the total number of payments. This formula ensures that the loan is fully paid off after exactly n payments. Every amortized loan — mortgages, auto loans, student loans, personal loans — uses this same formula."
+      "text": "The payment depends on the amount borrowed, the interest rate and the number of payments. Amount scales it exactly: double the amount and the payment doubles. Rate and term do not scale it linearly. Here is the payment and the total interest for $150,000 across rates and terms. Assumptions: fixed rate, monthly payments, interest of one-twelfth of the annual rate on the balance, no fees. The rates are examples, not quotes."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Annual rate",
+        "10 years",
+        "15 years",
+        "20 years",
+        "30 years"
+      ],
+      "rows": [
+        [
+          "5%",
+          "$1,590.98 (interest $40,917.93)",
+          "$1,186.19 ($63,514.28)",
+          "$989.93 ($87,584.07)",
+          "$805.23 ($139,883.68)"
+        ],
+        [
+          "6%",
+          "$1,665.31 ($49,836.90)",
+          "$1,265.79 ($77,841.34)",
+          "$1,074.65 ($107,915.18)",
+          "$899.33 ($173,757.28)"
+        ],
+        [
+          "7%",
+          "$1,741.63 ($58,995.26)",
+          "$1,348.24 ($92,683.63)",
+          "$1,162.95 ($129,107.62)",
+          "$997.95 ($209,263.35)"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Reading across a row: at 6%, stretching from 20 to 30 years lowers the payment by $175.32 a month but adds $65,842.10 of interest. Reading down a column: on 20 years, one extra point of rate adds $88.30 a month, from $1,074.65 to $1,162.95. A longer term buys a lower payment at the price of more interest, and the table shows that the price is steep."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Early Payments Are Mostly Interest"
+      "text": "The whole loan, from first payment to last"
     },
     {
       "type": "paragraph",
-      "text": "In month one of a $400,000 mortgage at 6.5%, the balance is at its highest. The interest owed for that month is $400,000 x (0.065 / 12) = $2,166.67. If the monthly payment is $2,528, only about $361 goes to principal. In month 180 (year 15), the balance is lower, so the interest might be $1,500 and principal $1,028. In month 360 (year 30), the final payment is nearly all principal. This front-loaded interest structure is why paying extra early has such a dramatic impact."
+      "text": "At 6% over 240 months the $150,000 loan has a payment of $1,074.65 and a total interest cost of $107,915.18, which is 72% of the amount borrowed. Selected rows of the schedule:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Payment",
+        "Interest",
+        "Principal",
+        "Balance after",
+        "Interest paid to date",
+        "Principal repaid to date"
+      ],
+      "rows": [
+        [
+          "1",
+          "$750.00",
+          "$324.65",
+          "$149,675.35",
+          "$750.00",
+          "$324.65"
+        ],
+        [
+          "12",
+          "$731.69",
+          "$342.96",
+          "$145,995.30",
+          "$8,891.06",
+          "$4,004.70"
+        ],
+        [
+          "60",
+          "$638.93",
+          "$435.72",
+          "$127,349.40",
+          "$41,828.19",
+          "$22,650.60"
+        ],
+        [
+          "120",
+          "$486.92",
+          "$587.72",
+          "$96,797.13",
+          "$75,754.72",
+          "$53,202.87"
+        ],
+        [
+          "180",
+          "$281.90",
+          "$792.75",
+          "$55,586.70",
+          "$99,023.08",
+          "$94,413.30"
+        ],
+        [
+          "240",
+          "$5.35",
+          "$1,069.30",
+          "$0.00",
+          "$107,915.18",
+          "$150,000.00"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Principal first exceeds interest at payment 103. At the halfway mark the borrower has paid $128,958 in total (120 x $1,074.65) but still owes $96,797.13, 64.5% of the original balance. That slow start is the pattern of every amortized loan, and it is stronger as the term gets longer or the rate higher."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Extra Payments Change the Schedule"
+      "text": "A quick way to size any loan at this rate and term"
     },
     {
       "type": "paragraph",
-      "text": "Every extra dollar you send to principal is a dollar that never accrues interest again. Adding $100/month to a $400,000 mortgage at 6.5% saves roughly $42,000 in interest and pays off the loan 4 years early. The amortization calculator shows you the exact comparison side by side."
+      "text": "Because payment scales with the amount borrowed, you can price any loan at the same rate and term from one unit figure. At 6% over 20 years, each $1,000 borrowed costs $7.16 a month (7.1643 before rounding) and $719.43 in total interest. Multiply by 150 and you recover the $1,074.65 payment above; a $90,000 loan on the same terms would be about $644.79 a month. The shortcut stops working the moment the rate or term changes, so recompute the unit figure for each combination you compare."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What types of loans use amortization?"
+      "text": "What extra payments do to this loan"
     },
     {
       "type": "paragraph",
-      "text": "Fixed-rate mortgages, auto loans, personal loans, and student loans are all amortized. Credit cards, interest-only loans, and balloon loans do not fully amortize — you could reach the end of the term with principal still owed."
+      "text": "Extra money is applied to principal. $100 extra each month pays the loan off in 205 payments (17 years 1 month) instead of 240 and saves $18,285.65 of interest. $250 extra a month pays it off in 168 payments (14 years) and saves $36,107.09. The earlier it starts, the more it saves, and the detail is in the dedicated post on extra payments."
     },
     {
       "type": "heading",
-      "level": 3,
-      "text": "How is amortization different from simple interest?"
+      "level": 2,
+      "text": "Before you sign a loan, check"
     },
     {
-      "type": "paragraph",
-      "text": "Amortized loans recalculate interest each month based on the declining principal balance. Simple interest loans calculate interest on the original principal for the entire term. With amortized loans, extra payments reduce future interest. With simple interest loans, they may not."
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The rate type: fixed, or adjustable and when it can reset.",
+        "The APR as well as the rate, because upfront fees raise the cost of borrowing without changing the payment.",
+        "The total interest over the full term, not only the payment.",
+        "Whether interest is calculated monthly or daily.",
+        "Whether extra payments are applied to principal and whether any prepayment fee applies.",
+        "What else is in the bill: tax and insurance escrow, insurance premiums or add-on products."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this model does not apply"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Credit cards and lines of credit are revolving, with no fixed schedule.",
+        "Interest-only and balloon loans do not reduce principal to zero through regular payments.",
+        "Adjustable-rate loans recompute the payment when the rate changes, so any single schedule is only a forecast.",
+        "Loans with irregular payment dates, grace periods or daily accrual will differ from the monthly model by small amounts."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "All figures are illustrative calculations from stated assumptions, not a loan offer or financial advice. Your lender's disclosure documents are the authority for your actual payment and total cost."
     },
     {
       "type": "cta",

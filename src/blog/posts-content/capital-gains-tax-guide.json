@@ -2,84 +2,169 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Selling an investment isn't just about the profit — it's about how much of that profit you get to keep. The difference between holding for 364 days vs. 366 days can cut your tax bill in half."
-    },
-    {
-      "type": "paragraph",
-      "text": "Here's what you need to know about capital gains tax in 2026."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Short-Term vs. Long-Term Gains — What's the Difference?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The length of time you hold an asset determines how your gain is taxed. **Short-term capital gains** (held 365 days or less) are taxed as ordinary income — at your marginal rate, which can be as high as **37%**. **Long-term capital gains** (held more than 365 days) get preferential rates of **0%, 15%, or 20%**."
-    },
-    {
-      "type": "paragraph",
-      "text": "That's potentially a 17-percentage-point difference — one of the biggest tax breaks in the code."
-    },
-    {
-      "type": "table",
-      "headers": [
-        "Filing Status",
-        "0% Rate",
-        "15% Rate",
-        "20% Rate"
-      ],
-      "rows": [
-        [
-          "Single",
-          "$0 – $47,025",
-          "$47,026 – $518,900",
-          "$518,901+"
-        ],
-        [
-          "Married Filing Jointly",
-          "$0 – $94,050",
-          "$94,051 – $583,750",
-          "$583,751+"
-        ],
-        [
-          "Head of Household",
-          "$0 – $63,000",
-          "$63,001 – $551,350",
-          "$551,351+"
-        ]
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is the Net Investment Income Tax (NIIT)?"
-    },
-    {
-      "type": "paragraph",
-      "text": "If your modified adjusted gross income exceeds **$200,000 (single)** or **$250,000 (married filing jointly)**, an additional **3. 8% NIIT** applies to your net investment income. This surtax was introduced by the Affordable Care Act and applies to capital gains, dividends, interest, and rental income."
-    },
-    {
-      "type": "paragraph",
-      "text": "For a high-earner in the 20% LTCG bracket, NIIT pushes the effective federal rate to **23. 8%**."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Can Capital Losses Offset Your Gains?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Yes — and this is one of the most powerful tax strategies available. Capital losses offset capital gains dollar-for-dollar. If your losses exceed your gains, you can deduct up to **$3,000 ($1,500 if married filing separately)** against ordinary income each year."
-    },
-    {
-      "type": "paragraph",
-      "text": "Remaining losses carry forward indefinitely. This strategy — called tax-loss harvesting — is widely used by investors to reduce taxable gains."
+      "text": "Capital gains tax is tax on the profit when you sell something for more than your cost, and the biggest factor in the rate is how long you held it. Under the IRS rules summarised in Tax Topic 409, an asset held for more than one year produces a long-term gain, taxed at 0%, 15% or 20% depending on your taxable income. An asset held for one year or less produces a short-term gain, taxed as ordinary income at graduated rates. This guide explains the mechanics with clearly labelled hypothetical numbers."
     },
     {
       "type": "callout",
       "variant": "warning",
-      "text": "Beware of the wash-sale rule. If you sell a security at a loss and buy a substantially identical security within 30 days before or after the sale, the loss is disallowed for tax purposes. This applies to stocks, ETFs, and crypto."
+      "text": "Tax rates and income thresholds change, and this guide deliberately does not quote the current year's figures. Every bracket and rate in the examples is hypothetical. For the current thresholds, check IRS Tax Topic 409 for capital gains and Tax Topic 559 for the net investment income tax, or use the Capital Gains Tax Calculator, which applies its own bracket tables."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Gain, Basis and Holding Period"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your gain is the sale proceeds minus your cost basis. Basis is what you paid, including commissions and fees. If a position cost $30,000 and sells for $50,000, the gain is $20,000. If it sells for less than basis, you have a capital loss instead. The holding period runs from acquisition to sale; the IRS publications spell out exactly how to count the days, so check your trade confirmations rather than estimating from memory."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Short-Term Versus Long-Term: The Size of the Difference"
+    },
+    {
+      "type": "paragraph",
+      "text": "Suppose a $20,000 gain and two hypothetical rates: 24% if short-term (an assumed ordinary rate) and 15% if long-term. The short-term tax is $4,800 and the long-term tax is $3,000, a difference of $1,800. If the long-term rate were 0% the tax would be $0, and at 20% it would be $4,000. The gap depends entirely on where your income puts you in each system."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Gains Stack on Top of Ordinary Income"
+    },
+    {
+      "type": "paragraph",
+      "text": "A gain is not taxed at one flat rate. It sits on top of your other taxable income and each slice is taxed at the rate of the bracket it falls in. The table uses hypothetical brackets, which are round numbers and not current law: long-term rates of 0% up to $50,000 of taxable income, 15% up to $500,000, 20% above; and ordinary rates of 10% up to $10,000, 15% up to $40,000, 25% above. The gain is $30,000 in every row."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Other taxable income",
+        "Short-term tax",
+        "Short-term effective",
+        "Long-term tax",
+        "Long-term effective",
+        "Tax saved by holding"
+      ],
+      "rows": [
+        [
+          "$20,000",
+          "$5,500",
+          "18.3%",
+          "$0",
+          "0.0%",
+          "$5,500"
+        ],
+        [
+          "$40,000",
+          "$7,500",
+          "25.0%",
+          "$3,000",
+          "10.0%",
+          "$4,500"
+        ],
+        [
+          "$60,000",
+          "$7,500",
+          "25.0%",
+          "$4,500",
+          "15.0%",
+          "$3,000"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Look at the middle row. With $40,000 of other income, the first $10,000 of the long-term gain fills the hypothetical 0% band and the other $20,000 is taxed at 15%, so the tax is $3,000, an effective rate of 10.0% on the whole gain. A calculator that applied 15% to everything would overstate it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When Waiting for the One-Year Mark Is Not Worth It"
+    },
+    {
+      "type": "paragraph",
+      "text": "Tax savings are not guaranteed profit, because the price keeps moving while you wait. Using the hypothetical 24% and 15% rates, a position with a $30,000 basis and a current value of $50,000 leaves $45,200 after tax if sold now as short-term. Holding until it is long-term gives the same after-tax amount if the price at that time is $47,882, which is a fall of 4.2%. If you expect the price could fall by more than that before the date, the tax saving may not compensate for the risk. This ignores any other reason you might want to sell."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Net Investment Income Tax"
+    },
+    {
+      "type": "paragraph",
+      "text": "The net investment income tax (NIIT) is an extra 3.8% on investment income, including capital gains, for people above certain income levels. According to IRS Tax Topic 559, it applies to the lesser of your net investment income or the amount your modified adjusted gross income (MAGI) exceeds the threshold, which is $200,000 for single or head of household filers, $250,000 for married filing jointly and $125,000 for married filing separately. Wages are not part of net investment income, but they do count toward MAGI."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Wages and other MAGI",
+        "Net investment income (gain)",
+        "MAGI",
+        "Amount taxed at 3.8%",
+        "NIIT (single filer)"
+      ],
+      "rows": [
+        [
+          "$150,000",
+          "$20,000",
+          "$170,000",
+          "$0",
+          "$0"
+        ],
+        [
+          "$180,000",
+          "$50,000",
+          "$230,000",
+          "$30,000",
+          "$1,140"
+        ],
+        [
+          "$300,000",
+          "$50,000",
+          "$350,000",
+          "$50,000",
+          "$1,900"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "In the second row only $30,000 of the gain is taxed because that is how far MAGI exceeds the threshold. In the third row the whole $50,000 is taxed because the excess is larger than the gain."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Losses, Harvesting and the Wash-Sale Rule"
+    },
+    {
+      "type": "paragraph",
+      "text": "Capital losses first offset capital gains. According to IRS Tax Topic 409, if losses exceed gains you can use the lesser of the excess loss or $3,000 ($1,500 if married filing separately) against other income each year, and the remainder carries forward to later years. For example, with $12,000 of gains and $20,000 of losses, the net loss is $8,000; you use $3,000 this year and carry $5,000 forward."
+    },
+    {
+      "type": "paragraph",
+      "text": "Selling at a loss and quickly buying the same thing back does not work. Under the wash-sale rule described in IRS Publication 550, if you buy substantially identical securities within 30 days before or after the sale, the loss is not deductible and is instead added to the basis of the replacement. If you sold at a $1,000 loss and repurchased for $4,100, the new basis would be $5,100."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Thinking a higher bracket taxes the entire gain at the top rate. Only the slice inside each bracket is taxed at that rate.",
+        "Forgetting state tax, which varies widely and is not part of the federal calculation.",
+        "Using the wrong basis. Fees, reinvested distributions and adjustments can change it, so use your brokerage cost-basis report.",
+        "Selling in a hurry to lock in a tax saving without weighing the investment risk of the extra waiting time.",
+        "Assuming every asset follows the same rules. Some asset types and home sales have special treatment, so check the IRS guidance for yours."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "This guide is educational, not tax advice. The rates, brackets and thresholds in the examples are hypothetical unless a source is named. Confirm current figures with the IRS or a tax professional before you sell."
     },
     {
       "type": "cta",

@@ -2,79 +2,177 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "That monthly payment on your loan papers looks simple enough. A fixed number, due every month, done. But behind that single number is a formula that decides exactly how much you'll pay the bank versus paying down what you borrowed."
-    },
-    {
-      "type": "paragraph",
-      "text": "The payment stays the same every month. But the split between principal and interest? That changes with every single payment."
-    },
-    {
-      "type": "paragraph",
-      "text": "Early on, you're mostly covering interest. Later, you're finally shrinking the balance. Understanding this shift can save you thousands."
+      "text": "Your loan payment is set by three inputs: how much you borrow, the interest rate, and the number of payments. The lender solves for the one fixed amount that, paid every period, reduces the balance to exactly zero when the last payment is made. Each payment first pays the interest accrued since the last one, and the rest reduces principal. This post focuses on what moves the payment and what happens in the weeks around the due date, using a $20,000 loan at 8% as the single running example."
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "Lenders use the standard amortization formula: M = P x [r(1+r)^n] / [(1+r)^n - 1]. M is your monthly payment. P is the principal. r is your monthly interest rate (annual rate divided by 12). n is the total number of payments. The same formula works for auto loans, personal loans, and mortgages."
+      "text": "The payment formula is M = P x r(1+r)^n / ((1+r)^n - 1), with r the annual rate divided by 12 and n the number of monthly payments. The same formula applies to auto, personal and fixed-rate mortgage loans; it assumes a fixed rate and equal monthly payments."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why are your early payments mostly interest?"
+      "text": "Anatomy of one payment"
     },
     {
       "type": "paragraph",
-      "text": "When your loan balance is highest, the monthly interest charge is also highest. So in month one, most of your payment covers the interest that accrued since day one. Only a small slice reduces the principal."
-    },
-    {
-      "type": "paragraph",
-      "text": "This is called front-loaded interest, and it's built into every amortized loan."
-    },
-    {
-      "type": "paragraph",
-      "text": "Take a **5-year $20,000 loan at 8%**. Your first payment includes about **$133 in interest** and only **$272 in principal**. By the final payment, it flips to roughly **$5 in interest** and **$400 in principal**."
-    },
-    {
-      "type": "paragraph",
-      "text": "The payment amount never changed — but where your money went changed dramatically."
+      "text": "Assumptions: $20,000, 8% annual rate (0.6667% a month), 60 monthly payments, payments at the end of each month. The payment is $405.53 (the exact value is $405.5279, shown rounded). The first payment splits into $133.33 of interest (20,000 x 0.08 / 12) and $272.19 of principal, leaving a balance of $19,727.81. The second charges interest on that smaller balance: $131.52 interest, $274.01 principal. By payment 30 the split is $75.49 interest and $330.04 principal. Payment 59 is $5.35 interest and $400.17 principal, and the final payment is $2.69 interest and $402.84 principal. Total paid is $24,331.67, of which $4,331.67 is interest."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How much interest will you really pay?"
+      "text": "What moves the payment: term"
     },
     {
       "type": "paragraph",
-      "text": "The total interest cost depends heavily on your loan term. Longer terms mean smaller payments but way more total interest. Here's what a **$20,000 loan at 8%** looks like across different terms:"
+      "text": "Holding $20,000 and 8%, a longer term lowers the payment but raises the total cost."
     },
     {
       "type": "table",
       "headers": [
-        "Loan Term",
-        "Monthly Payment",
-        "Total Interest",
-        "Interest as % of Total"
+        "Term",
+        "Monthly payment",
+        "Total interest",
+        "Interest as share of total paid"
       ],
       "rows": [
         [
-          "3 years (36 months)",
-          "$627",
-          "$2,560",
+          "24 months",
+          "$904.55",
+          "$1,709.10",
+          "7.9%"
+        ],
+        [
+          "36 months",
+          "$626.73",
+          "$2,562.18",
           "11.4%"
         ],
         [
-          "5 years (60 months)",
-          "$406",
-          "$4,330",
+          "48 months",
+          "$488.26",
+          "$3,436.41",
+          "14.7%"
+        ],
+        [
+          "60 months",
+          "$405.53",
+          "$4,331.67",
           "17.8%"
         ],
         [
-          "7 years (84 months)",
-          "$312",
-          "$6,190",
+          "72 months",
+          "$350.66",
+          "$5,247.87",
+          "20.8%"
+        ],
+        [
+          "84 months",
+          "$311.72",
+          "$6,184.84",
           "23.6%"
         ]
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Going from 36 to 84 months cuts the payment by $315.01 a month (50.3%) but more than doubles the interest, from $2,562.18 to $6,184.84."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What moves the payment: rate"
+    },
+    {
+      "type": "paragraph",
+      "text": "Holding $20,000 and 60 months, each percentage point of rate adds about $9 to $10 to the monthly payment. The rates are chosen only to show sensitivity and are not quotes."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Annual rate",
+        "Monthly payment",
+        "Total interest"
+      ],
+      "rows": [
+        [
+          "5%",
+          "$377.42",
+          "$2,645.48"
+        ],
+        [
+          "6%",
+          "$386.66",
+          "$3,199.36"
+        ],
+        [
+          "7%",
+          "$396.02",
+          "$3,761.44"
+        ],
+        [
+          "8%",
+          "$405.53",
+          "$4,331.67"
+        ],
+        [
+          "9%",
+          "$415.17",
+          "$4,910.03"
+        ],
+        [
+          "10%",
+          "$424.94",
+          "$5,496.45"
+        ],
+        [
+          "12%",
+          "$444.89",
+          "$6,693.34"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Working the formula backwards turns a payment into a borrowing limit. A budget of $400 a month for 60 months at 8% supports a loan of about $19,727, so a lender or calculator solving for the amount is using the same equation as one solving for the payment."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When you pay matters"
+    },
+    {
+      "type": "paragraph",
+      "text": "The schedule above assumes interest of exactly one-twelfth of the annual rate each month. Some loans, including some auto loans and other consumer loans, instead accrue simple interest daily, which means the interest in a given period equals balance x annual rate x days elapsed / 365. On the first month of this loan, a 31-day period would accrue $20,000 x 0.08 x 31 / 365 = $135.89 of interest, a 28-day period $122.74, against $133.33 in the monthly model. Paying 10 days late adds about $43.84 of interest on a $20,000 balance, and paying early reduces the interest. The payment amount is usually unchanged, so the difference shows up in how much of each payment goes to principal and in the final payment. Check your loan agreement to see which method your lender uses."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rounding and the final payment"
+    },
+    {
+      "type": "paragraph",
+      "text": "Lenders round the payment to the cent. If you round $405.5279 to $405.53 and carry the balance forward, the 60th payment needed to clear the balance is $405.37, 16 cents less than the others. Seeing a slightly different last payment is normal and not an error."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Comparing loans by payment alone. A lower payment from a longer term usually costs more in total.",
+        "Using the annual rate in the formula. Use the periodic rate, the annual rate divided by 12 for monthly payments.",
+        "Assuming the bill equals the loan payment. Mortgage bills can include tax and insurance, and loans may include fees or add-on products that are not in this arithmetic.",
+        "Forgetting that APR is not the rate used here. The payment is set by the interest rate; fees raise the APR, not the payment, unless they are financed into the loan.",
+        "Expecting an early payment to lower next month's payment. On a standard loan it shortens the term instead."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "All figures are illustrative calculations from the stated assumptions, not loan offers. Your lender's disclosure is the authority for your actual payment, rate and fees."
     },
     {
       "type": "cta",

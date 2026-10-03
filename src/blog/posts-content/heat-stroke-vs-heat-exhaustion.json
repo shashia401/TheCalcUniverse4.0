@@ -1,90 +1,102 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Critical Difference"
-    },
-    {
       "type": "paragraph",
-      "text": "Heat exhaustion is your body overheating and struggling to cool itself. Heat stroke is your body cooling system failing entirely. With heat exhaustion, the person sweats heavily and feels sick. With heat stroke, sweating stops and body temperature rockets to 104°F+. Heat stroke is a medical emergency — it can cause organ damage and death within minutes."
+      "text": "The deciding difference is the brain and body temperature. Heat exhaustion brings heavy sweating, weakness, dizziness, headache and nausea. Heat stroke adds confusion, altered mental status, slurred speech, seizures or loss of consciousness along with a very high body temperature, and it is an emergency: NIOSH and OSHA both say to call 911 and start cooling the person while waiting for help. One point that surprises many people is that skin is not a reliable test. NIOSH lists heat stroke skin as hot and dry or with profuse sweating, so a sweaty person can still be in heat stroke."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This article summarizes guidance published by NIOSH (part of the CDC) and OSHA. It is not medical advice and cannot diagnose anyone. OSHA's own rule of thumb is: when in doubt, call 911."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Symptoms Comparison"
+      "text": "Side-by-side comparison"
     },
     {
       "type": "table",
-      "headers": [
-        "Symptom",
-        "Heat Exhaustion",
-        "Heat Stroke"
-      ],
+      "headers": ["Feature", "Heat exhaustion", "Heat stroke"],
       "rows": [
-        [
-          "Skin",
-          "Heavy sweating, cool/clammy",
-          "Hot, red, dry (no sweating)"
-        ],
-        [
-          "Temperature",
-          "Elevated (up to 104°F)",
-          "Very high (104°F+)"
-        ],
-        [
-          "Mental state",
-          "Dizzy, weak, anxious",
-          "Confusion, unconsciousness, seizures"
-        ],
-        [
-          "Nausea",
-          "Possible",
-          "Common"
-        ],
-        [
-          "Pulse",
-          "Fast and weak",
-          "Fast and strong"
-        ]
+        ["Mental state", "Irritability, weakness, dizziness or lightheadedness", "Confusion, altered mental status, slurred speech, seizures, loss of consciousness"],
+        ["Skin and sweating", "Heavy sweating", "Hot, dry skin or profuse sweating"],
+        ["Body temperature", "Elevated", "Very high; NIOSH says it can reach 106°F or higher within 10 to 15 minutes"],
+        ["Other signs", "Headache, nausea, thirst, decreased urine output; OSHA adds fast heart rate", "Rapid heart rate"],
+        ["Urgency", "Needs prompt medical evaluation", "Call 911 immediately"]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "First Aid for Each"
+      "text": "What the published guidance says to do"
     },
     {
       "type": "paragraph",
-      "text": "For heat exhaustion: move to shade or AC, remove tight clothing, apply cool compresses, sip water slowly. Recovery usually within 30-60 minutes. For heat stroke: CALL 911 IMMEDIATELY. While waiting, move to shade, remove clothing, apply ice packs to armpits/groin/neck, fan the person. Do NOT give fluids if they are unconscious or confused. Heat stroke is a life-threatening emergency."
+      "text": "For suspected heat stroke, NIOSH says to call 911 for emergency medical care, stay with the worker until medical services arrive, move the person to a shaded, cool area and remove outer clothing, and cool them quickly: a cold water or ice bath if possible, wetting the skin, placing cold wet cloths on the skin, or soaking clothing with cool water. OSHA adds cold towels or ice on the head, neck, trunk, armpits and groin, or fans, and says never to leave a worker with heat illness alone."
+    },
+    {
+      "type": "paragraph",
+      "text": "For heat exhaustion, NIOSH says to take the person to a clinic or emergency room for medical evaluation and to call 911 if medical care is unavailable. While that is arranged, remove the person from the hot area, give liquids to drink, and cool them with cold compresses or by having them wash their head, face and neck with cold water. If a person with heat exhaustion gets worse, or if you are unsure which illness you are looking at, treat it as the more serious one."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
+      "text": "Other heat illnesses on the NIOSH list"
+    },
+    {
+      "type": "table",
+      "headers": ["Condition", "Signs listed by NIOSH", "Action listed by NIOSH"],
+      "rows": [
+        ["Heat cramps", "Muscle cramps; pain or spasms in the abdomen, arms or legs", "Drink water and have a snack or drink that replaces carbohydrates and electrolytes every 15 to 20 minutes; avoid salt tablets"],
+        ["Heat syncope", "Brief fainting, dizziness or lightheadedness from standing too long or rising suddenly", "Sit or lie down in a cool place; slowly drink water, clear juice or a sports drink"],
+        ["Heat rash", "Red clusters of pimples or small blisters", "Work in a cooler, less humid place if possible; keep the area dry"],
+        ["Rhabdomyolysis", "Muscle pain or cramps, dark tea or cola-colored urine, weakness", "Stop activity, drink liquids, seek immediate care and ask to be checked for it"]
+      ]
     },
     {
       "type": "heading",
-      "level": 3,
-      "text": "How quickly can heat exhaustion turn into heat stroke?"
+      "level": 2,
+      "text": "How the heat index relates to these illnesses"
     },
     {
       "type": "paragraph",
-      "text": "It can happen in as little as 10-15 minutes in extreme conditions. Do not wait to see if symptoms improve — if someone with heat exhaustion worsens or stops sweating, treat it as a potential heat stroke emergency."
+      "text": "The National Weather Service ties its heat index categories to these illnesses: in Extreme Caution (90 to 103°F) heat stroke, heat cramps or heat exhaustion are possible; in Danger (103 to 124°F) cramps or exhaustion are likely and heat stroke is possible; at 125°F and above heat stroke is highly likely. The table runs five sample conditions through the heat index calculator's formula, rounded to one decimal place, in shade."
+    },
+    {
+      "type": "table",
+      "headers": ["Air temperature and humidity", "Heat index", "NWS category", "Wording from the NWS category"],
+      "rows": [
+        ["88°F, 70%", "100.2°F", "Extreme Caution", "Heat stroke, cramps or exhaustion possible"],
+        ["91°F, 50%", "96.5°F", "Extreme Caution", "Heat stroke, cramps or exhaustion possible"],
+        ["100°F, 40%", "109.3°F", "Danger", "Cramps or exhaustion likely, heat stroke possible"],
+        ["97°F, 55%", "114.5°F", "Danger", "Cramps or exhaustion likely, heat stroke possible"],
+        ["105°F, 50%", "133.9°F", "Extreme Danger", "Heat stroke highly likely"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These categories describe conditions, not individuals. Direct sun can add up to 15°F to a heat index value, hard physical work adds heat the formula does not model, and people can become ill below the thresholds, especially if they are not used to the heat, are unwell or take certain medications."
     },
     {
       "type": "heading",
-      "level": 3,
-      "text": "Can you get heat stroke indoors?"
+      "level": 2,
+      "text": "Common mistakes"
     },
     {
-      "type": "paragraph",
-      "text": "Yes. Without air conditioning, indoor temperatures can reach dangerous levels during heat waves. Elderly people in homes without AC are among the highest risk groups for heat stroke."
+      "type": "list",
+      "items": [
+        "Waiting for dry skin before taking heat stroke seriously. Sweating does not rule it out.",
+        "Waiting to see if confusion passes. Altered mental status is a heat stroke sign, and the guidance is to call 911.",
+        "Leaving a sick person alone to fetch help. OSHA says never to leave a worker with heat illness alone.",
+        "Assuming heat exhaustion needs no medical input. NIOSH lists medical evaluation as part of the response.",
+        "Using salt tablets for cramps. NIOSH specifically says to avoid them.",
+        "Relying on the heat index alone. It says nothing about exertion, sun, wind or the person's health."
+      ]
     },
     {
       "type": "cta",
       "heading": "Check Today Heat Index",
-      "body": "Know the heat index before going outside. Use our free calculator.",
+      "body": "See how hot it feels and which category you are in before heading outdoors.",
       "buttonLabel": "Open Calculator",
       "path": "/everyday/heat-index-calculator/"
     }

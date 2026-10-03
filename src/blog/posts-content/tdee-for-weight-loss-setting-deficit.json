@@ -1,31 +1,105 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Finding Your Deficit"
-    },
-    {
       "type": "paragraph",
-      "text": "Take your TDEE and subtract 300-500 calories for weight loss of 0.5-1 lb per week. A larger deficit means faster weight loss but higher risk of muscle loss, metabolic slowdown, fatigue, and nutritional deficiencies. A smaller deficit is slower but more sustainable."
+      "text": "To set a calorie deficit from your TDEE, subtract a daily amount from your maintenance calories, then check that the result is not so low that it falls under your resting energy (BMR) or the calculator's safe-minimum flag. A 500 kcal deficit is the usual starting point, but it is a very different cut for a person with a TDEE of 2,800 than for someone with a TDEE of 1,400. This post is about sizing the deficit to the person, and about why it shrinks as you lose weight."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "The Minimum Safe Intake Rule"
+      "text": "Worked example: sizing the deficit"
     },
     {
       "type": "paragraph",
-      "text": "Your calorie target should NEVER go below your BMR. If your TDEE is 2,200 and BMR is 1,600, a 500-deficit gives you 1,700 — above BMR. A 700-deficit would give you 1,500 — below BMR and too aggressive. Also: women should not go below 1,200 cal/day, men not below 1,500. If your deficit pushes you below these minimums, increase it through exercise instead of cutting more food."
+      "text": "Example: a 38-year-old woman, 70 kg (154 lb), 165 cm, light exercise one to two days a week (factor 1.375). Mifflin-St Jeor BMR = 10 x 70 + 6.25 x 165 - 5 x 38 - 161 = 1,380 kcal. TDEE = 1,380.25 x 1.375 = 1,898 kcal. Each deficit below is checked against her BMR and against the calculator's 1,200 kcal safe-minimum flag for women (the flag is 1,500 for men)."
+    },
+    {
+      "type": "table",
+      "headers": ["Daily deficit", "Intake", "Deficit as % of TDEE", "Implied loss per week", "Intake minus BMR", "Above 1,200 flag?"],
+      "rows": [
+        ["250 kcal", "1,648 kcal", "13.2%", "0.5 lb", "+268 kcal", "Yes"],
+        ["500 kcal", "1,398 kcal", "26.3%", "1.0 lb", "+18 kcal", "Yes"],
+        ["750 kcal", "1,148 kcal", "39.5%", "1.5 lb", "-232 kcal", "No"],
+        ["1,000 kcal", "898 kcal", "52.7%", "2.0 lb", "-482 kcal", "No"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The implied loss uses the calculator's rule of thumb of about 3,500 kcal per lb, so 500 kcal a day is roughly 1 lb a week. The CDC states that people who lose weight at a gradual, steady pace of about 1 to 2 pounds a week are more likely to keep it off than people who lose it faster, and it notes that medications, medical conditions and other individual factors can affect weight. In this example the 500 kcal deficit sits only 18 kcal above her BMR, so for her it is close to the practical limit rather than a safe default."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Adjusting as You Lose Weight"
+      "text": "When the standard 500 does not fit"
     },
     {
       "type": "paragraph",
-      "text": "As you lose weight, your BMR and TDEE decrease. A person who loses 20 lbs needs about 100-150 fewer calories per day. Recalculate your TDEE every 10-15 lbs of weight loss. If weight loss stalls, recalculate before cutting calories further."
+      "text": "Take a 50-year-old woman, 58 kg, 160 cm, sedentary (factor 1.2). BMR = 580 + 1,000 - 250 - 161 = 1,169 kcal; TDEE = 1,403 kcal. A 500 kcal deficit would mean 903 kcal, which is 35.6% of her TDEE and 297 kcal under the 1,200 flag. The most she can cut before reaching the flag is 203 kcal, about 14.5% of TDEE. For a small or inactive person, the lever is usually more movement rather than less food, and the realistic rate is slower. Compare a 90 kg, 178 cm, 45-year-old man at factor 1.2: TDEE is 2,151 kcal, and a 500 kcal deficit lands at 1,651 kcal, 151 kcal above the men's 1,500 flag."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the deficit shrinks as you lose weight"
+    },
+    {
+      "type": "paragraph",
+      "text": "Back to the first example, eating a fixed 1,398 kcal per day. Each week we recompute Mifflin-St Jeor with her new weight and apply the 3,500 kcal per lb rule. The right-hand column shows what a straight-line 1 lb per week would predict."
+    },
+    {
+      "type": "table",
+      "headers": ["Week", "Weight", "TDEE", "Actual deficit", "Lost so far", "Straight-line prediction"],
+      "rows": [
+        ["0", "70.0 kg (154.3 lb)", "1,898 kcal", "500 kcal", "0 lb", "0 lb"],
+        ["12", "64.9 kg (143.1 lb)", "1,828 kcal", "430 kcal", "11.2 lb", "12 lb"],
+        ["20", "61.9 kg (136.5 lb)", "1,787 kcal", "389 kcal", "17.8 lb", "20 lb"],
+        ["32", "58.0 kg (127.8 lb)", "1,732 kcal", "335 kcal", "26.5 lb", "32 lb"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: the 3,500 kcal per lb rule holds, the activity factor and height stay fixed, and weight is the only thing that changes. The deficit falls from 500 to 335 kcal, so the plan loses about 5.5 lb less than the straight-line rule by week 32. Real life adds further effects, and a dynamic model of weight change (Hall et al., The Lancet, 2011) reports that bodyweight responds slowly to a change in intake, with half-times of about one year."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Recalculate at checkpoints"
+    },
+    {
+      "type": "paragraph",
+      "text": "Rather than waiting for a plateau, re-enter your weight every 10 lb or so. Her recalculated maintenance and 500 kcal target look like this:"
+    },
+    {
+      "type": "table",
+      "headers": ["Weight lost", "New weight", "New TDEE", "Target at 500 kcal deficit"],
+      "rows": [
+        ["0 lb", "70.0 kg", "1,898 kcal", "1,398 kcal"],
+        ["10 lb", "65.5 kg", "1,835 kcal", "1,335 kcal"],
+        ["20 lb", "60.9 kg", "1,773 kcal", "1,273 kcal"],
+        ["30 lb", "56.4 kg", "1,711 kcal", "1,211 kcal"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Every 10 lb lost removes about 62 kcal from TDEE in this model, because Mifflin-St Jeor drops BMR by 10 kcal per kg and the factor multiplies it. By 30 lb the 500 kcal target is within 11 kcal of the 1,200 flag, so the sensible response is a smaller deficit, not a deeper cut."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Applying the same 500 kcal to everyone. As a share of TDEE it ranged from 18% to 36% in the examples above.",
+        "Picking an activity factor that is too high. The calculator advises choosing the lower option when unsure; one step is 12.7% of TDEE at 1.375 to 1.55.",
+        "Cutting further when weight stalls without recalculating first. A lower weight lowers TDEE.",
+        "Reading the 3,500 kcal rule as exact. It is a rough conversion, not a promise."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "General information only, not medical advice. If you are pregnant or breastfeeding, under 18, have diabetes or another medical condition, take medication, or have a history of disordered eating, talk to a clinician or registered dietitian before restricting calories. Intakes under the 1,200 or 1,500 kcal flags should only be used with medical supervision."
     },
     {
       "type": "cta",

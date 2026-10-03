@@ -1,69 +1,99 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is BMR?"
-    },
-    {
       "type": "paragraph",
-      "text": "BMR stands for Basal Metabolic Rate. It's the number of calories your body burns at complete rest — just breathing, circulating blood, repairing cells, and keeping your temperature stable. It accounts for a massive **60–75%** of your total daily calorie burn."
-    },
-    {
-      "type": "paragraph",
-      "text": "By comparison, exercise and walking make up only **10–30%**. That's why knowing your BMR is the foundation of any weight management plan."
+      "text": "Basal metabolic rate (BMR) is an estimate of the energy your body uses at complete rest to keep you alive: breathing, circulation, cell repair and temperature control. Calculators estimate it from your sex, age, height and weight (or, for one equation, your lean mass). It is the starting point for calorie planning, not a calorie target. You multiply it by an activity factor to get your total daily energy expenditure (TDEE), and it is TDEE that tells you roughly how much you can eat to hold your weight steady."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "BMR vs. TDEE — What's the Difference?"
+      "text": "Three BMR equations, one person"
     },
     {
       "type": "paragraph",
-      "text": "Your Total Daily Energy Expenditure (TDEE) is BMR plus everything else: the thermic effect of food (digestion burns about 10% of your calories), NEAT (non-exercise activity like fidgeting and walking), and deliberate exercise. To get your TDEE, multiply your BMR by an activity factor: **1. 2** for sedentary, **1."
+      "text": "Our BMR calculator offers three equations. Mifflin-St Jeor (published in 1990) is the default: BMR = 10 x weight in kg + 6.25 x height in cm - 5 x age + 5 for men, or - 161 for women. Harris-Benedict (revised 1984) uses different coefficients. Katch-McArdle ignores sex, age and height and works from lean body mass: BMR = 370 + 21.6 x lean mass in kg. It needs a body fat percentage, which makes it only as good as that estimate."
     },
     {
       "type": "paragraph",
-      "text": "55** for moderate exercise, up to **1. 9** for  active. Your TDEE is the real number for weight management — BMR is just the starting point."
+      "text": "Here is one example run through all three: a 40-year-old man, 180 cm, 80 kg, assuming 20% body fat for the Katch-McArdle line (lean mass 64 kg)."
+    },
+    {
+      "type": "table",
+      "headers": ["Equation", "Working", "BMR (kcal/day)"],
+      "rows": [
+        ["Mifflin-St Jeor", "10 x 80 + 6.25 x 180 - 5 x 40 + 5", "1,730"],
+        ["Harris-Benedict (1984)", "88.362 + 13.397 x 80 + 4.799 x 180 - 5.677 x 40", "1,797"],
+        ["Katch-McArdle", "370 + 21.6 x 64", "1,752"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "The Mifflin-St Jeor equation is the most accurate formula for estimating BMR in the general population."
+      "text": "The three land within about 70 kcal of each other, roughly 4%. That spread is small next to the uncertainty in any one equation: the calculator's documentation describes the Mifflin-St Jeor result as within about 10% of measured values for most people. Treat the output as a range of a couple of hundred kcal, not a precise figure."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Use BMR for Weight Loss"
+      "text": "From BMR to a maintenance number"
     },
     {
       "type": "paragraph",
-      "text": "To lose weight, you need a calorie deficit — eating fewer calories than your TDEE. But here's the critical rule: never eat below your BMR. Doing so forces your body to break down muscle and organ tissue for fuel."
+      "text": "The calorie calculator multiplies BMR by one of five activity factors. Using the calculator's own worked example (a 30-year-old woman, 165 cm, 65 kg, Mifflin-St Jeor BMR of 1,370 kcal), the table shows what each factor produces and how large BMR is as a share of the result. Values are rounded to the nearest 1 kcal and 1%."
+    },
+    {
+      "type": "table",
+      "headers": ["Activity level", "Factor", "TDEE (kcal/day)", "BMR as share of TDEE"],
+      "rows": [
+        ["Sedentary", "1.2", "1,644", "83%"],
+        ["Light exercise, 1-2 days/week", "1.375", "1,884", "73%"],
+        ["Moderate exercise, 3-5 days/week", "1.55", "2,124", "65%"],
+        ["Active, 6-7 days/week", "1.725", "2,364", "58%"],
+        ["Very active, physical job plus training", "1.9", "2,603", "53%"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "A safe deficit's **250–500 calories below TDEE**, which yields about **0. 5–1 lb of fat loss per week**. Women shouldn't go below **1,200 calories** daily, and men shouldn't go below **1,500**, unless medically supervised."
+      "text": "BMR is therefore the largest single piece of daily energy use for most people, but how large depends on activity: over half in every row, and more than four fifths for a sedentary person. The gap between the first and last row, about 960 kcal for this woman, is bigger than most diet changes. It is also the factor people most often pick wrongly, because the labels are broad."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What moves BMR: age, weight and lean mass"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Age: the Mifflin-St Jeor equation subtracts 5 kcal for every year of age, so 50 kcal per decade. For the 80 kg, 180 cm man that is 1,780 at age 30, 1,730 at 40, 1,680 at 50 and 1,630 at 60, a drop of about 3% per decade at this size. The equation does not tell you why. The calculator attributes most of the decline to loss of muscle with age.",
+        "Weight: each kilogram adds 10 kcal to the Mifflin-St Jeor result, so losing 10 kg lowers BMR by 100 kcal, and about 138 kcal of TDEE at the 1.375 factor. This is why a diet that worked at a heavier weight can stall.",
+        "Lean mass: in Katch-McArdle, each kilogram of lean mass is worth 21.6 kcal. The same 80 kg man comes out at 1,839 kcal at 15% body fat, 1,752 at 20%, 1,666 at 25% and 1,580 at 30%. Two people with the same height, weight and age can therefore have different BMRs if their body composition differs, which the weight-based equations cannot see."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Using BMR in a weight plan"
+    },
+    {
+      "type": "paragraph",
+      "text": "The practical sequence is: estimate BMR, multiply by an honest activity factor to get TDEE, then eat somewhat below it to lose weight or somewhat above it to gain. The calorie deficit and daily intake guides on this site cover the arithmetic of deficits. Two points belong here. First, the calculator shows BMR as a minimum intake, but there is no universal safe floor that a formula can calculate for an individual. How low is too low depends on your health, medications and body size, and a clinician or registered dietitian is the right person to set it, especially if you plan to eat far below your estimated maintenance. Second, recalculate after meaningful weight change, because the weight term in the equation shifts your numbers as you get lighter."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating BMR as a diet target. It excludes digestion, daily movement and exercise, so it is lower than what you actually burn.",
+        "Choosing an activity factor from your exercise plans rather than your typical week. If you sit most of the day and train three times a week, the lighter factors usually fit better than the moderate one.",
+        "Entering a guessed body fat percentage into Katch-McArdle. A 5-point error moves the result by about 86 kcal for an 80 kg person (5% of 80 kg is 4 kg of lean mass, times 21.6).",
+        "Expecting two calculators to agree exactly. Different equations differ by tens of kcal even for the same person, as in the table above."
+      ]
     },
     {
       "type": "callout",
-      "variant": "tip",
-      "text": "Your BMR is the floor. Think of it as your survival budget — the minimum your body needs just to function. Any weight loss plan that asks you to eat below this number is unsustainable and potentially dangerous. If your TDEE is 2,200 and your BMR is 1,500, your safe deficit range is between 1,700 and 1,950 calories per day."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Does Your BMR Change With Age?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Yes. BMR drops about **2% per decade** after age 20. That's roughly 20–30 fewer calories burned per day each decade."
-    },
-    {
-      "type": "paragraph",
-      "text": "The primary cause isn't aging itself — it's sarcopenia, the gradual loss of muscle mass. The good news? Resistance training is the most effective way to slow or even reverse this decline."
-    },
-    {
-      "type": "paragraph",
-      "text": "Muscle tissue burns about **6 calories per pound per day** at rest, while fat tissue burns only about 2."
+      "variant": "warning",
+      "text": "BMR equations are population estimates for generally healthy adults. They are not validated for children, pregnancy or breastfeeding, severe obesity, or medical conditions such as thyroid disease or diabetes. If any of these applies, or if you plan a large calorie reduction, talk to your doctor or a registered dietitian before changing how you eat."
     },
     {
       "type": "cta",

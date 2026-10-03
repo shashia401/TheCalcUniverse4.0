@@ -1,22 +1,96 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Historical Return Ranges"
-    },
-    {
       "type": "paragraph",
-      "text": "Equity mutual funds (large cap): 10-14% annualized over 10+ years. Mid/small cap: 12-18% but with higher volatility. Debt funds: 6-9%. Hybrid funds: 8-12%. These are historical averages, not guaranteed returns. Past performance does not guarantee future results."
+      "text": "A realistic SIP return assumption is a range, not a single figure. Plan on a conservative case, a base case and a stretch case, convert each into today's money, and check that the goal still works in the conservative one. This page deliberately does not print a table of historical fund-category returns: such figures depend on the exact start and end dates, the index and the fund, and they would only anchor you to a number that cannot be promised. It shows instead how a return assumption behaves once it is inside a SIP."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Impact of Time Horizon"
+      "text": "What each assumption does to the same SIP"
     },
     {
       "type": "paragraph",
-      "text": "SIP returns become more predictable over longer periods. Over 1-3 years, equity SIP returns can range from -20% to +40%. Over 5-7 years, the range narrows to 5-15%. Over 10+ years, large cap equity SIPs have historically delivered 10-14% regardless of when you started. Time smooths out market volatility."
+      "text": "The table uses Rs. 10,000 a month for 20 years (Rs. 24,00,000 invested) and the SIP calculator's method: the annual rate divided by 12 applied monthly, instalments at the start of each month. The last column shows what that stated rate compounds to over a full year, which is the figure to compare with an annualised return quoted elsewhere."
+    },
+    {
+      "type": "table",
+      "headers": ["Stated return", "Compounds to (per year)", "Value after 20 years", "Gain over Rs. 24,00,000"],
+      "rows": [
+        ["4%", "4.07%", "Rs. 36,79,972", "Rs. 12,79,972"],
+        ["6%", "6.17%", "Rs. 46,43,511", "Rs. 22,43,511"],
+        ["8%", "8.30%", "Rs. 59,29,472", "Rs. 35,29,472"],
+        ["10%", "10.47%", "Rs. 76,56,969", "Rs. 52,56,969"],
+        ["12%", "12.68%", "Rs. 99,91,479", "Rs. 75,91,479"],
+        ["14%", "14.93%", "Rs. 1,31,63,463", "Rs. 1,07,63,463"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Each 2-point step in the assumed return adds more than the one before it, from about Rs. 9.6 lakh (4% to 6%) to about Rs. 31.7 lakh (12% to 14%) on a Rs. 24 lakh investment. The jump from 8% to 12% adds Rs. 40.6 lakh, so an optimistic assumption can make a plan look comfortable when it is not."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Return after inflation is what you can spend"
+    },
+    {
+      "type": "paragraph",
+      "text": "At an assumed 6% inflation, 12% a year is a real return of about 5.66% ((1.12 / 1.06) minus 1). The Rs. 99,91,479 above is then worth about Rs. 31,15,390 in today's money after 20 years. At a 10% nominal return the real return falls to about 3.77%. Costs and taxes reduce it further: a fund's reported NAV return already has the expense ratio taken out, but tax on gains comes on top and its rules change, so check the current treatment for your fund type."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the order of returns matters for a SIP"
+    },
+    {
+      "type": "paragraph",
+      "text": "Two investors can earn the same annual returns in a different order and finish with very different SIP balances. Take ten years in which five years return +22% and five years return -4%, which compounds to about 8.2% a year. These returns are invented to illustrate the effect and are not market data. Rs. 10,000 a month is invested at the start of each month, with each year's return spread evenly over its months."
+    },
+    {
+      "type": "table",
+      "headers": ["Order of the same ten years", "Final SIP value", "Annualised SIP return"],
+      "rows": [
+        ["Five good years first, then five poor years", "Rs. 13,86,586", "2.84%"],
+        ["Five poor years first, then five good years", "Rs. 25,00,410", "14.06%"],
+        ["Good and poor years alternating", "Rs. 17,28,898", "7.10%"],
+        ["One-time Rs. 12,00,000 lump sum, any order", "Rs. 26,44,457", "8.22%"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A lump sum is unaffected by the order, because the yearly returns just multiply together. A SIP is affected a lot, because instalments paid late face few remaining years but large balances. Poor years early are kind to a SIP, as long as prices later recover, since later instalments buy cheaply. Poor years late hurt, because the biggest balance is exposed when prices fall. This is the real reason to move money out of equity as a goal date approaches."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to read a SIP return correctly"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Use an annualised return measure that accounts for every instalment date (XIRR), not a simple point-to-point figure. A SIP's money is invested for different lengths of time.",
+        "Check the period. A return over one set of dates can be very different from the same fund over another, so prefer several windows over one headline number.",
+        "Compare with the fund's benchmark and its category over the same dates, not with a bank deposit or another investor's gain.",
+        "Separate what is stated from what is promised. A projected rate in a calculator is an assumption, and past performance does not guarantee future results."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Entering the best recent return as the future expectation. Strong years raise the figure you see, not the figure you will earn.",
+        "Using one scenario. Always run at least three and see whether the goal survives the lowest.",
+        "Treating a longer horizon as a guarantee. More years usually narrow the spread of outcomes, but they do not remove the chance of poor results, as the ordering example shows.",
+        "Forgetting costs, taxes and inflation, which all push the usable return below the headline.",
+        "Stopping a SIP after a bad stretch. In the table, the paths where early years were poor still ended well, because instalments kept buying."
+      ]
     },
     {
       "type": "cta",

@@ -1,40 +1,198 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "How Each Strategy Works"
-    },
-    {
       "type": "paragraph",
-      "text": "Refinancing replaces your existing loan with a new one at a lower rate, reducing your monthly payment and total interest. Prepayment means sending extra money to principal, which shortens the loan term and reduces total interest without changing your rate."
+      "text": "Neither strategy wins on its own. What decides it is how long you keep the loan and how far the new rate falls. In the example below, a $300,000 balance at 7.00% with 25 years left, refinancing to 6.00% with $6,000 of closing costs overtakes using that same $6,000 as an extra principal payment after 27 months. A refinance to only 6.75% needs 187 months, about 15.6 years, to do the same."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When to Refinance"
+      "text": "Why compare them head to head"
     },
     {
       "type": "paragraph",
-      "text": "Refinance when: (1) rates have dropped at least 1% below your current rate, (2) you plan to stay in the home long enough to recoup closing costs (typically 3-5 years), (3) you want to change loan terms (e.g., 30-year to 15-year). The refinance calculator shows your break-even point."
+      "text": "The usual refinance test divides closing costs by the monthly payment saving to get a break-even point. That test asks only whether the refinance pays for itself. It does not ask what else the closing costs could have done. The same cash could be sent to the loan as a one-time principal payment, which avoids interest at your current rate. So the real question is whether the new rate saves more than the interest you would avoid by prepaying with that same money."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When to Prepay"
+      "text": "The setup and assumptions"
     },
     {
-      "type": "paragraph",
-      "text": "Prepay when: (1) your rate is already competitive and refinancing would not save enough, (2) you want flexibility (you can stop extra payments anytime), (3) you cannot justify refinance closing costs, (4) you have a short expected timeline and do not want refinance costs."
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Loan: $300,000 balance at 7.00% with 300 months (25 years) left, so the monthly principal-and-interest payment is $2,120.34.",
+        "Refinance: a new 25-year loan at the stated rate, with $6,000 of closing costs paid in cash, not rolled into the loan.",
+        "Prepay: the same $6,000 sent to principal today. The loan, rate and term stay as they are.",
+        "In both cases you keep paying $2,120.34 a month, so your monthly outflow is identical. Only the balance differs. Keeping the old payment also stops a refinance from resetting the clock.",
+        "Do nothing: keep the $6,000 in an account that earns no interest.",
+        "Measure: net debt, meaning the loan balance minus any unspent cash. Lower is better. Fixed rates, monthly compounding, no prepayment penalty."
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Hybrid Approach"
+      "text": "Net debt over time at a 6.00% refinance"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "If you keep the loan",
+        "Do nothing",
+        "Prepay $6,000",
+        "Refinance to 6.00%",
+        "Lowest net debt"
+      ],
+      "rows": [
+        [
+          "1 year",
+          "$289,411",
+          "$288,977",
+          "$292,348",
+          "Prepay"
+        ],
+        [
+          "2 years",
+          "$284,489",
+          "$283,591",
+          "$284,224",
+          "Prepay"
+        ],
+        [
+          "3 years",
+          "$279,212",
+          "$277,815",
+          "$275,598",
+          "Refinance"
+        ],
+        [
+          "5 years",
+          "$267,486",
+          "$264,981",
+          "$256,719",
+          "Refinance"
+        ],
+        [
+          "10 years",
+          "$229,900",
+          "$223,842",
+          "$198,339",
+          "Refinance"
+        ],
+        [
+          "20 years",
+          "$101,081",
+          "$82,849",
+          "$13,379",
+          "Refinance"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Sometimes the best strategy is both: refinance to a lower rate AND make extra payments. The lower rate reduces your required payment, and sending that savings as extra principal accelerates your payoff even faster."
+      "text": "Early on, the refinance trails: after one year it is $3,371 behind the prepayment, because the closing costs are gone while the lower rate has only just started to work. It moves ahead of the prepayment in month 27 and of doing nothing in month 24. After 10 years it is $25,503 ahead of the prepayment. A prepayment is a small, certain gain that fades in relative terms; a lower rate keeps paying on the whole balance every month."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the size of the rate drop changes the answer"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "New rate (25-year loan)",
+        "New payment",
+        "Payment saving",
+        "Simple break-even (costs / saving)",
+        "Month refinance overtakes prepaying"
+      ],
+      "rows": [
+        [
+          "6.75%",
+          "$2,072.73",
+          "$47.60",
+          "127 months",
+          "187 months"
+        ],
+        [
+          "6.50%",
+          "$2,025.62",
+          "$94.72",
+          "64 months",
+          "61 months"
+        ],
+        [
+          "6.00%",
+          "$1,932.90",
+          "$187.43",
+          "33 months",
+          "27 months"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "For small drops the simple break-even is misleadingly kind. At 6.75% it says the costs are recovered in 127 months, yet the prepayment stays ahead for 187 months, because it also earns the full 7.00% on the money it removes from the balance. Put differently, here is the rate drop a refinance needs in order to beat the prepayment, for different time horizons:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "How long you keep the loan",
+        "Rate drop needed to beat prepaying"
+      ],
+      "rows": [
+        [
+          "Sell or move after 3 years",
+          "0.77 points"
+        ],
+        [
+          "After 5 years",
+          "0.50 points"
+        ],
+        [
+          "After 10 years",
+          "0.31 points"
+        ],
+        [
+          "Keep the loan to the end (25 years)",
+          "0.23 points"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These thresholds are specific to this balance, rate and $6,000 cost. They fall as the closing-cost percentage falls and rise as the cost rises, so rerun them with the quote in your Loan Estimate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Taking the lower payment and spending the difference. The table gets its advantage by sending the saving to the loan. If you refinance to 6.00% and let the payment fall to $1,932.90, you gain cash flow, not a lower balance.",
+        "Resetting to a new 30-year term at the minimum payment. At 6.00% over 360 months the payment is $1,798.65, and the interest plus closing costs over the full term come to $353,515, against $336,101 of interest if you simply keep the current loan. A lower rate can still cost more in total.",
+        "Rolling closing costs into the balance and then comparing as if you had paid cash. That is a different calculation, and you pay interest on the fees.",
+        "Prepaying without telling the servicer it is a principal-only payment, or not checking the loan for a prepayment penalty.",
+        "Draining your emergency savings. Both options turn cash into something you cannot easily get back."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this comparison does not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "Prepaying makes more sense when you may sell within a few years, when the rate drop is under the thresholds above, or when you cannot qualify for a lower rate. Refinancing makes more sense when the drop is large and you plan to stay. The two are not exclusive: you can refinance now and still make extra payments later. The numbers also leave out taxes, points paid to buy a lower rate, lender credits, adjustable rates, cash-out loans and whatever the $6,000 might earn elsewhere. Returns on other uses of money are uncertain, and past performance does not guarantee future results."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Every figure was computed month by month, using the same amortization logic as the refinance and mortgage payoff calculators. Enter your own balance, rate and quote to see your own crossover point."
     },
     {
       "type": "cta",

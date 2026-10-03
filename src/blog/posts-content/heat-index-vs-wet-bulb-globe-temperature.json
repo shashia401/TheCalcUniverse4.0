@@ -1,31 +1,182 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "How They Differ"
-    },
-    {
       "type": "paragraph",
-      "text": "The heat index uses only temperature and humidity, measured in shade. WBGT (Wet Bulb Globe Temperature) combines temperature, humidity, wind speed, and solar radiation. This makes WBGT more accurate for assessing heat stress in direct sunlight. WBGT is the standard for military training, athletic events, and occupational safety in many countries."
+      "text": "The heat index uses only air temperature and humidity and is calculated for shady conditions. Wet bulb globe temperature (WBGT) is an indicator of heat stress on the body at work or play in direct sunlight, and it also accounts for wind speed, sun angle and cloud cover. That is the National Weather Service's own distinction. In practice: the heat index is a good everyday check from weather data, and WBGT is the better tool when people will be working hard or exercising outdoors in the sun."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When to Use Each"
+      "text": "What goes into each measure"
     },
     {
-      "type": "paragraph",
-      "text": "Use heat index for quick checks from weather data — when you look at a weather app and want to know if conditions are safe. Use WBGT for formal safety decisions — practices, outdoor work shifts, military training. Many high school athletic associations mandate WBGT-based activity modification. The general rule: WBGT is typically 5-10°F higher than heat index in direct sun with low wind."
+      "type": "table",
+      "headers": [
+        "",
+        "Heat index",
+        "WBGT"
+      ],
+      "rows": [
+        [
+          "Inputs",
+          "Air temperature and relative humidity",
+          "Natural wet-bulb temperature, black globe temperature, dry-bulb (air) temperature"
+        ],
+        [
+          "Sunshine",
+          "Assumes shade",
+          "Measured in direct sunshine, so solar load is included"
+        ],
+        [
+          "Wind",
+          "Assumes light wind",
+          "Included, along with sun angle and cloud cover"
+        ],
+        [
+          "How you get it",
+          "Formula from a forecast or a thermometer and hygrometer",
+          "Instruments, or estimates from weather data"
+        ],
+        [
+          "Typical use",
+          "Day-to-day planning",
+          "Work and vigorous activity in the sun"
+        ]
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "The Human Survivability Limit"
+      "text": "The WBGT formula"
     },
     {
       "type": "paragraph",
-      "text": "Research suggests a WBGT of 35°C (95°F) is the theoretical human survivability limit — the point where the body cannot cool itself even at rest. Climate models project that parts of South Asia, the Persian Gulf, and the US Gulf Coast could experience conditions approaching this limit during extreme heat events by mid-century."
+      "text": "The National Weather Service gives the outdoor formula as WBGT = 0.7 Tw + 0.2 Tg + 0.1 Td, where Tw is the natural wet-bulb temperature, Tg is the temperature of a black globe thermometer, and Td is the ordinary dry-bulb air temperature. The weights matter. The wet-bulb term, which reflects humidity and evaporative cooling, carries 70% of the result. The globe term, which captures sun and radiant heat, carries 20%. Plain air temperature carries only 10%."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: the same air temperature, different sun and humidity"
+    },
+    {
+      "type": "paragraph",
+      "text": "The readings below are assumed for illustration, not measured on a real site, and all are in degrees Fahrenheit. Each WBGT is computed with the formula above and rounded to one decimal place."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario",
+        "Wet bulb (Tw)",
+        "Globe (Tg)",
+        "Air (Td)",
+        "WBGT"
+      ],
+      "rows": [
+        [
+          "Overcast, humid",
+          "78",
+          "90",
+          "92",
+          "81.8"
+        ],
+        [
+          "Full sun, calm, humid",
+          "78",
+          "125",
+          "92",
+          "88.8"
+        ],
+        [
+          "Full sun, calm, drier air",
+          "70",
+          "125",
+          "92",
+          "83.2"
+        ],
+        [
+          "Shade, very humid",
+          "82",
+          "92",
+          "92",
+          "85.0"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Moving from the overcast row to the full-sun row changes only the globe reading, from 90 to 125, and adds 7.0 degrees of WBGT. Moving from humid to drier air in full sun lowers the wet-bulb reading by 8 degrees and takes 5.6 degrees off. A simple sensitivity check using the weights: 5 degrees more wet-bulb adds 3.5, 20 degrees more globe adds 4.0, and 10 degrees more air temperature adds only 1.0. The same formula works in Celsius: a wet bulb of 25°C, globe of 45°C and air of 33°C give a WBGT of 29.8°C, which is 85.6°F."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the heat index misses in the same weather"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take a 92°F afternoon at 65% relative humidity. The heat index calculator's formula gives 108.3°F. The National Weather Service says heat index values assume shade and that full sunshine can add up to 15°F, which would put the felt value near 123.3°F. The heat index cannot tell you whether a particular job site, with a particular sun angle and cloud cover, sits at the low or high end of that range. A globe thermometer can."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which to use when"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Situation",
+        "Better choice",
+        "Why"
+      ],
+      "rows": [
+        [
+          "Deciding whether to walk the dog at noon",
+          "Heat index",
+          "Light activity, quick check, forecast data is enough"
+        ],
+        [
+          "Planning a few hours of yard work",
+          "Heat index with a sun margin",
+          "Add allowance for direct sun"
+        ],
+        [
+          "A shift of physical work outdoors",
+          "WBGT",
+          "Sun and workload dominate the risk"
+        ],
+        [
+          "Organized sports practice in full sun",
+          "WBGT",
+          "NWS pages point to activity-association WBGT thresholds with break guidance"
+        ],
+        [
+          "A heat wave across a region",
+          "Both, plus local heat advisories",
+          "Different audiences, different information"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "WBGT is not a single universal cutoff. OSHA's heat pages refer to WBGT measurement and to limits that depend on the work being done, and the National Weather Service pages on WBGT point to activity-association thresholds that tie rising WBGT to shorter periods between breaks. That is why a team or employer usually adopts one specific table and one specific way of measuring, rather than borrowing numbers from a weather app."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Applying heat index category cutoffs to a WBGT reading. The two are on different scales and are not interchangeable; WBGT limits depend on the guideline in use, the workload and acclimatization.",
+        "Converting between them with a fixed offset. There is no single offset, because the gap depends on sun, wind and humidity, as the table above shows.",
+        "Using a WBGT estimate without knowing its source. Instruments and weather-data estimates can disagree, so follow the method your employer or sport's governing body specifies.",
+        "Treating either number as a personal safety guarantee. Age, medications, health and fitness all change individual risk."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "OSHA describes heat stroke symptoms as confusion, slurred speech, unconsciousness, seizures, very high body temperature and either heavy sweating or hot, dry skin, and says to call 911 immediately and cool the person until help arrives. Check with a clinician about your own risk in the heat."
     },
     {
       "type": "cta",

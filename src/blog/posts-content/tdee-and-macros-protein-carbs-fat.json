@@ -3,60 +3,108 @@
     {
       "type": "heading",
       "level": 2,
-      "text": "Macro Priorities"
+      "text": "The Short Answer"
     },
     {
       "type": "paragraph",
-      "text": "Protein is the most important macro to set first. Minimum 1.6g per kg of body weight for anyone active, up to 2.2g per kg for bodybuilders. Fat minimum is 0.5-0.8g per kg for hormone function. Remaining calories go to carbs. For a person eating 2,000 calories at 80kg: protein 160g (640 cal), fat 60g (540 cal), carbs 205g (820 cal)."
+      "text": "Your TDEE sets the size of your daily calorie budget, and your macros decide how that budget is divided between protein, carbohydrate and fat. A practical order is to set calories first, then protein by body weight, then fat by body weight or as a share of calories, and let carbohydrate fill whatever is left. Protein and carbohydrate each provide 4 kcal per gram and fat provides 9 kcal per gram, so every plan has to add back up to the calorie target."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Macro Splits by Goal"
+      "text": "Worked Example: Grams Built From a TDEE"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: a 35-year-old man, 180 cm, 80 kg, moderate exercise (factor 1.55), no body fat figure. BMR = 10 x 80 + 6.25 x 180 - 5 x 35 + 5 = 1,755 kcal. TDEE = 1,755 x 1.55 = 2,720 kcal. For the macros I chose, as illustrations, protein at 1.8 g/kg (144 g) and fat at 0.8 g/kg (64 g). Both fall inside the ranges used by our macro calculator, which are 1.6 to 2.2 g/kg for protein and 20% to 35% of calories for fat. Carbohydrate takes what remains. Grams are rounded, so totals can differ from the target by a few kcal."
     },
     {
       "type": "table",
       "headers": [
-        "Goal",
+        "Target",
+        "Calories",
         "Protein",
         "Fat",
-        "Carbs"
+        "Carbohydrate",
+        "Share of calories (P / F / C)"
       ],
       "rows": [
         [
-          "Weight loss",
-          "2.0-2.4g/kg",
-          "0.5-0.8g/kg",
-          "Remaining"
+          "Maintain (TDEE)",
+          "2,720",
+          "144 g (576 kcal)",
+          "64 g (576 kcal)",
+          "392 g (1,568 kcal)",
+          "21% / 21% / 58%"
         ],
         [
-          "Maintenance",
-          "1.6-2.0g/kg",
-          "0.5-1.0g/kg",
-          "Remaining"
+          "Loss (TDEE - 500)",
+          "2,220",
+          "144 g (576 kcal)",
+          "64 g (576 kcal)",
+          "267 g (1,068 kcal)",
+          "26% / 26% / 48%"
         ],
         [
-          "Muscle gain",
-          "1.6-2.2g/kg",
-          "0.5-1.0g/kg",
-          "Remaining"
-        ],
-        [
-          "Bodybuilding prep",
-          "2.0-2.6g/kg",
-          "0.3-0.5g/kg",
-          "Remaining"
+          "Lean gain (TDEE + 250)",
+          "2,970",
+          "144 g (576 kcal)",
+          "64 g (576 kcal)",
+          "455 g (1,820 kcal)",
+          "19% / 19% / 61%"
         ]
       ]
     },
     {
+      "type": "paragraph",
+      "text": "Notice that protein and fat stay fixed while carbohydrate absorbs the whole change. Going from maintenance to the 500 kcal deficit removes 125 g of carbohydrate (500 divided by 4). That is a design choice: protein and fat are set by body weight, so they do not shrink just because calories do. Percentages move instead, and that is why protein rises from 21% to 26% of calories in the loss row without you changing a single gram."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Why Protein Is Non-Negotiable"
+      "text": "What the TDEE Calculator Prints"
     },
     {
       "type": "paragraph",
-      "text": "Protein preserves muscle during weight loss and builds muscle during surplus. It also has the highest thermic effect (20-30%), meaning your body burns more calories digesting protein than carbs or fat. If you track only one macro, track protein. Our macro calculator uses your TDEE to set personalized protein, carb, and fat targets for your specific goals."
+      "text": "The TDEE calculator shows one default macro line for the same man: protein at 2.2 g/kg (176 g), fat at 25% of calories (76 g), and carbohydrate as the remainder (333 g). Check it: 176 x 4 + 76 x 9 + 333 x 4 = 704 + 684 + 1,332 = 2,720 kcal. That line is based on maintenance calories, so if you eat in a deficit you need to recompute. Keeping 176 g of protein and 76 g of fat at 2,220 kcal would leave only 208 g of carbohydrate. It is one reasonable default, not a prescription, and 2.2 g/kg is the top of the protein range the macro calculator uses."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Ranges to Sanity-Check Your Numbers"
+    },
+    {
+      "type": "paragraph",
+      "text": "For this man at 2,720 kcal, the macro calculator ranges work out as follows. Protein at 1.6 to 2.2 g/kg is 128 to 176 g. Fat at 20% to 35% of calories is 60 to 106 g. Carbohydrate at 45% to 65% of calories is 306 to 442 g. The plan above (144 g, 64 g and 392 g at maintenance) sits inside all three ranges. If your own numbers fall outside one, that is a prompt to look again, not proof that the plan is wrong."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Turning Daily Grams Into Meals"
+    },
+    {
+      "type": "paragraph",
+      "text": "Daily grams only help if you can eat them. On the maintenance day above, splitting the targets across four meals gives about 36 g of protein, 16 g of fat and 98 g of carbohydrate per meal. The macro calculator suggests spreading protein across three or four meals rather than eating it all at once. On a deficit day the same protein and fat leave about 67 g of carbohydrate per meal. If a number feels impossible to hit, relax carbohydrate or fat within their ranges before you cut protein, and re-check the total."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Setting percentages first. At low calorie targets a fixed percentage can give a small protein figure in grams; check grams per kg of body weight as well.",
+        "Using maintenance macros while eating in a deficit or surplus. Recompute carbohydrate after you change calories.",
+        "Hitting the grams but ignoring the total. Four numbers have to reconcile: calories, protein, fat and carbohydrate.",
+        "Trusting the TDEE too much. If your weight is not moving as expected after two to three weeks, adjust calories first and keep protein and fat steady.",
+        "Treating macro targets as exact. Weekly averages matter more than any single day."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Protein targets are not appropriate for everyone. People with kidney disease are often given protein limits by their care team, and people with diabetes, a history of disordered eating or other medical conditions should get individual guidance. Check with a clinician or registered dietitian before adopting a high-protein plan."
     },
     {
       "type": "cta",

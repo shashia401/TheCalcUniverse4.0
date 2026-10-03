@@ -2,83 +2,169 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "You probably know your age in years, but do you know how many days you've been alive? Or when you'll hit 10,000? Calculating your exact age down to the day gives you more than trivia — it changes your perspective on time itself."
+      "text": "Your exact age is the number of full years, months and days between your date of birth and a chosen date. Someone born on 15 March 1990 is, on 20 December 2025, 35 years, 9 months and 5 days old, which is 13,064 days or 1,866 whole weeks. The hard part is not the subtraction. It is that months have different lengths and leap years add a day, so the answer cannot be found by multiplying years by 365."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Exactly Is Chronological Age?"
+      "text": "How the calculation works"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Subtract the birth year, month and day from the target year, month and day separately.",
+        "If the day difference is negative, borrow one month and add the number of days in the month before the target date.",
+        "If the month difference is negative, borrow one year and add 12 months.",
+        "For the total number of days, count the calendar days between the two dates directly instead of converting from years and months."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Your chronological age is the exact amount of time that has passed since your birth date, measured in years, months, and days. It sounds simple, but month lengths vary and leap years throw a wrench into the math. A proper age calculator accounts for all of this — February 29 birthdays (leaplings) included."
+      "text": "Worked check for the example above: 2025 - 1990 = 35 years, 12 - 3 = 9 months, 20 - 15 = 5 days. Nothing is negative, so no borrowing is needed. Counting calendar days from 15 March 1990 to 20 December 2025 gives 13,064. The hours figure, 13,064 x 24 = 313,536, is approximate because it ignores the time of day you were born."
     },
     {
       "type": "paragraph",
-      "text": "In non-leap years, the calculator treats March 1 as your birthday equivalent, so you never lose track of your countdown."
+      "text": "A borrowing case: from 15 March 1990 to 14 March 2024 the day is one short of the birthday. The raw differences are 34 years, 0 months and -1 day. The negative day borrows a month, and the month before the target date is February 2024, which had 29 days, so -1 + 29 = 28 days. The borrowed month turns 0 months into -1, which borrows a year: 33 years and 11 months. The result is 33 years, 11 months and 28 days. One day later, on 15 March 2024, the age is exactly 34 years."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Milestones Worth Tracking"
+      "text": "Why leap years matter"
+    },
+    {
+      "type": "paragraph",
+      "text": "A year has 365 days except in leap years, which have 366. A year is a leap year when it divides by 4, except for century years, which must divide by 400. So 2000 and 2024 are leap years, while 1900 and 2100 are not. The difference shows up in simple counts:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Period",
+        "Days",
+        "Note"
+      ],
+      "rows": [
+        [
+          "1 Jan 2000 to 1 Jun 2000",
+          "152",
+          "2000 is a leap year"
+        ],
+        [
+          "1 Jan 2001 to 1 Jun 2001",
+          "151",
+          "2001 is not"
+        ],
+        [
+          "15 Mar 1990 to 15 Mar 2020",
+          "10,958",
+          "30 x 365 = 10,950, plus 8 leap days"
+        ],
+        [
+          "Average over 400 years",
+          "365.2425 per year",
+          "146,097 days in 400 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "That is why a 30 year age is not exactly 10,950 days, and why quick estimates such as 365 x years drift by about a day every four years."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Leap-day birthdays"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you were born on 29 February 2000, you reach your 24th birthday on 29 February 2024, exactly 8,766 days after birth. In a non-leap year there is no 29 February, so the date has to be mapped to either 28 February or 1 March. On 28 February 2025 you are 24 years, 11 months and 30 days old; on 1 March 2025 you are 25 years and 9,132 days old. The Age Calculator uses 1 March for its next-birthday countdown in non-leap years. Legal and administrative rules for which day counts differ between countries and organisations, so check the rule that applies to your situation, such as an eligibility date."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Month-end dates need care"
+    },
+    {
+      "type": "paragraph",
+      "text": "Dates such as the 29th, 30th and 31st are the other tricky case, because the next month may be shorter. Take someone born on 31 January 1990 and a target date of 1 March 2024. The day count is unambiguous: 12,448 days. But the years-months-days breakdown depends on the convention. If you add whole months to the birth date and clamp to the end of the month (31 January plus one month becomes 29 February 2024), the result is 34 years, 1 month and 1 day. Other conventions give slightly different breakdowns. When a month-end result looks odd, rely on the total day count, which every correct method agrees on."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Life milestones by day count"
+    },
+    {
+      "type": "paragraph",
+      "text": "Counting days gives milestone dates that ordinary birthdays do not. For a person born on 15 March 1990, a Thursday, the dates below are calculated by adding days to the birth date. The age shown is the calendar age on that date."
     },
     {
       "type": "table",
       "headers": [
         "Milestone",
-        "Age",
-        "Days Lived (approx.)",
-        "Weeks Lived"
+        "Date reached",
+        "Age on that date",
+        "Weeks"
       ],
       "rows": [
         [
-          "10,000 days old",
+          "1,000 weeks (7,000 days)",
+          "14 May 2009",
+          "19 years, 1 month",
+          "1,000"
+        ],
+        [
+          "10,000 days",
+          "31 Jul 2017",
           "27 years, 4 months",
-          "10,000",
           "1,428"
         ],
         [
-          "20,000 days old",
+          "20,000 days",
+          "16 Dec 2044",
           "54 years, 9 months",
-          "20,000",
           "2,857"
         ],
         [
-          "30,000 days old",
+          "30,000 days",
+          "3 May 2072",
           "82 years, 1 month",
-          "30,000",
           "4,285"
-        ],
-        [
-          "1,000 weeks old",
-          "19 years, 2 months",
-          "7,000",
-          "1,000"
         ]
       ]
     },
     {
+      "type": "paragraph",
+      "text": "Across every birth date from 1950 to 2020, 10,000 days always lands at 27 years and 4 months, 20,000 days at 54 years and 9 months, and 30,000 days at 82 years and 1 month. The 1,000 week milestone falls at 19 years and 1 or 2 months depending on the birth date. Weeks are rounded down."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "How a Birthday Countdown Works"
+      "text": "Using an as-of date"
     },
     {
       "type": "paragraph",
-      "text": "Your next birthday countdown calculates the number of days between today and your birthday later this year. If your birthday has already passed this year, it rolls forward to next year. This is useful for **planning parties, booking travel, or just building anticipation**."
+      "text": "The as-of date lets you ask what your age will be, or was, on a specific day. This matters for enrolment cutoffs and eligibility dates. A child born on 2 September 2019 is 4 years, 11 months and 30 days old on 1 September 2024, and turns 5 on 2 September 2024. The one-day difference is why you should enter the exact cutoff date rather than the year alone. Whether a program counts age on the first day, the last day or another date is set by that program, so confirm it with them."
     },
     {
-      "type": "paragraph",
-      "text": "The countdown also helps you track when you become eligible for age-based benefits like senior discounts, car rental rates, or retirement account contributions."
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Multiplying age in years by 365 and ignoring leap days.",
+        "Counting the end date and the start date both. The difference between 1 January and 31 January is 30 days, not 31.",
+        "Assuming that a birthday on the 31st exists in every month.",
+        "Using a total months figure when you need months remaining after full years.",
+        "Treating the hours lived figure as precise. It assumes midnight for the time of birth."
+      ]
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "Did you know that reaching 1,000 weeks old happens at roughly age 19? And hitting 2,000 weeks is age 38. Life measured in weeks passes faster than you think — there are only about 4,000 weeks in an average 80-year lifespan. That perspective is why tracking your age in multiple units can be genuinely motivating."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Ways to Use Your Age Data"
+      "text": "Age calculators work on calendar dates. They do not account for time zones, the exact time of birth, or the different age-counting traditions used in some countries, so use official documents for legal purposes."
     },
     {
       "type": "cta",

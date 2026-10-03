@@ -2,58 +2,257 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Most retirement advice throws around intimidating numbers. You'll hear you need **$1. 5 million** or **$2 million** to retire comfortably."
-    },
-    {
-      "type": "paragraph",
-      "text": "But the actual number depends entirely on one thing: how much you plan to spend."
-    },
-    {
-      "type": "paragraph",
-      "text": "The 4% Rule gives you a simple way to work backward from your spending to your target nest egg. No guesswork. Just math — and it might reveal you need less than you think."
+      "text": "The amount you need is your yearly retirement spending, minus income that is guaranteed to arrive, divided by the share of savings you plan to withdraw each year. For $60,000 of spending, no other income and a 4% withdrawal rate, that is $60,000 divided by 0.04, or $1,500,000 in today's dollars. The answer moves a lot with each input, so the useful exercise is seeing which one matters most for you."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What is the 4% Rule and how does it work?"
+      "text": "The calculation in four steps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Estimate your yearly spending in retirement, in today's dollars. Start from what you spend now, then remove costs that end (a mortgage, commuting, saving for retirement) and add ones that grow (health care, travel).",
+        "Subtract income you can count on, such as a pension or a Social Security estimate from your own statement. The rest is what your savings must supply.",
+        "Divide by a withdrawal rate. A 4% rate means a multiple of 25. A lower rate means a bigger target.",
+        "Convert to future dollars if you want to compare against a projected balance. Prices rise, so the same lifestyle costs more by the time you retire."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The multiples behind the rule"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Yearly spending to cover",
+        "At 3% withdrawal",
+        "At 3.5% withdrawal",
+        "At 4% withdrawal"
+      ],
+      "rows": [
+        [
+          "$40,000",
+          "$1,333,333",
+          "$1,142,857",
+          "$1,000,000"
+        ],
+        [
+          "$60,000",
+          "$2,000,000",
+          "$1,714,286",
+          "$1,500,000"
+        ],
+        [
+          "$80,000",
+          "$2,666,667",
+          "$2,285,714",
+          "$2,000,000"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "The 4% Rule comes from the landmark Trinity Study. It found that a balanced portfolio withdrawing 4% of its starting value annually (adjusted for inflation each year) historically lasted **30 years or more** without running out."
+      "text": "These are today's dollars and no other income. Each row is simply spending divided by the rate, so a 4% rate is 25 times spending and 3% is about 33 times."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the 4% rule is and is not"
     },
     {
       "type": "paragraph",
-      "text": "The math is simple: multiply your desired annual retirement income by 25. Want **$60,000** per year? You need **$1."
+      "text": "The 4% rule is a rule of thumb that comes from historical studies of US stock and bond returns over retirements of roughly 30 years. It says that withdrawing 4% of the starting balance in the first year, then raising the dollar amount with inflation, would have lasted through those historical periods. It does not guarantee the future. Results depend on the period studied, the mix of stocks and bonds, fees, and how long you need the money, which is why people retiring in their 50s often plan for a lower rate. It also does not account for taxes, and a sharp market fall early in retirement does more damage than the same fall later. Treat it as a starting estimate, not a forecast."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the assumptions change the target"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Assumption (today's dollars)",
+        "Savings needed"
+      ],
+      "rows": [
+        [
+          "Baseline: $60,000 spending, 4% withdrawal",
+          "$1,500,000"
+        ],
+        [
+          "Same spending, 3.5% withdrawal",
+          "$1,714,286"
+        ],
+        [
+          "Same spending, 3% withdrawal",
+          "$2,000,000"
+        ],
+        [
+          "$18,000 a year of guaranteed income, 4% withdrawal",
+          "$1,050,000"
+        ],
+        [
+          "$60,000 after-tax need, withdrawals taxed at 15% (4%)",
+          "$1,764,706"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "5 million**. Want **$40,000** per year? You need **$1 million**."
+      "text": "The last row is an illustration of the tax point, not a statement about anyone's actual tax. If your savings are in pre-tax accounts, withdrawals are generally taxable, so the amount you must take out is larger than the amount you spend. The 15% figure is a placeholder."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Bringing the target into future dollars"
     },
     {
       "type": "paragraph",
-      "text": "Divide your target spending by 0. 04, and you get your number."
+      "text": "Assume 3% annual inflation, which is an assumption and not a forecast. The same lifestyle costs more as the years pass, and so does the target that supports it."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Years until retirement",
+        "Yearly income needed then",
+        "Savings needed at 4%"
+      ],
+      "rows": [
+        [
+          "10",
+          "$80,635",
+          "$2,015,875"
+        ],
+        [
+          "20",
+          "$108,367",
+          "$2,709,167"
+        ],
+        [
+          "25",
+          "$125,627",
+          "$3,140,667"
+        ],
+        [
+          "30",
+          "$145,636",
+          "$3,640,894"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: what moves the gap"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take a hypothetical saver aged 40 with $150,000 saved, adding $1,200 a month, planning to retire at 65. Assumptions: 6% a year return compounded monthly, 3% inflation, and a $60,000 spending goal in today's dollars. This follows the retirement calculator's method, which inflates the income goal and divides by 4%. The baseline target is $3,140,667 in future dollars, while the projected balance is $1,501,338, which covers 48% of it. The saver would need about $3,566 a month to close the gap. Each row below changes one thing, apart from the last, which combines three. Returns are assumed, not promised, and past performance does not guarantee future results."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario",
+        "Target at retirement",
+        "Projected balance",
+        "Share of target covered",
+        "Monthly saving needed"
+      ],
+      "rows": [
+        [
+          "Baseline: retire at 65, 6% return",
+          "$3,140,667",
+          "$1,501,338",
+          "48%",
+          "$3,566"
+        ],
+        [
+          "Spend $48,000 instead of $60,000",
+          "$2,512,534",
+          "$1,501,338",
+          "60%",
+          "$2,660"
+        ],
+        [
+          "$18,000 of guaranteed income (today's dollars)",
+          "$2,198,467",
+          "$1,501,338",
+          "68%",
+          "$2,206"
+        ],
+        [
+          "Retire at 70 instead of 65",
+          "$3,640,894",
+          "$2,108,804",
+          "58%",
+          "$2,726"
+        ],
+        [
+          "Use a 3.5% withdrawal rate",
+          "$3,589,334",
+          "$1,501,338",
+          "42%",
+          "$4,214"
+        ],
+        [
+          "Return of 5% instead of 6%",
+          "$3,140,667",
+          "$1,236,805",
+          "39%",
+          "$4,398"
+        ],
+        [
+          "Return of 7% instead of 6%",
+          "$3,140,667",
+          "$1,830,899",
+          "58%",
+          "$2,817"
+        ],
+        [
+          "Spend $48,000, $18,000 guaranteed, retire at 70",
+          "$1,820,447",
+          "$2,108,804",
+          "116%",
+          "Already above target"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "No single change fixes the baseline, but guaranteed income and lower spending each shrink the gap more than a one-point difference in return does. Spending sets the size of the target, which is why it is the place to look first."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using a round number. Many headline figures assume a spending level that may have nothing to do with yours.",
+        "Mixing nominal and real. Comparing a future-dollar balance with a today's-dollar target hides the gap in either direction.",
+        "Leaving out taxes and health costs.",
+        "Treating 4% as safe for any horizon. A 40-year retirement needs a more cautious rate than a 25-year one.",
+        "Counting your home as spendable savings unless you plan to sell or downsize."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this approach does not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "A fixed withdrawal rule assumes steady spending. Real spending is uneven, and returns arrive in an uneven order. If you hold annuities, a large pension or a paid-off home, your target is different. A planner who can model taxes and your actual accounts can refine the estimate. For your own numbers, enter your ages, savings, contributions and income goal in the retirement calculator."
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "The 4% withdrawal rate has survived every market cycle in modern US history, including the Great Depression, the 1970s stagflation, the 2008 financial crisis, and the 2022 bear market."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What is your FIRE number?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The FIRE (Financial Independence, Retire Early) movement popularized this simple formula. Your FIRE number is **annual expenses × 25**. If you spend **$50,000** per year, your FIRE number is **$1."
-    },
-    {
-      "type": "paragraph",
-      "text": "25 million**."
-    },
-    {
-      "type": "paragraph",
-      "text": "Variations include Lean FIRE (under **$40,000/year** spending), Fat FIRE (over **$75,000/year**), and Coast FIRE — where you've saved enough that your nest egg will reach your FIRE number by traditional retirement age without further contributions."
+      "text": "All dollar figures were computed with the same future-value and 4% target formulas as the retirement calculator. Every rate here is an assumption for illustration, not a prediction."
     },
     {
       "type": "cta",

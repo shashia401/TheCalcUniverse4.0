@@ -2,78 +2,157 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "One gallon of paint covers about **350 square feet** per coat. That sounds simple until you factor in doors, windows, multiple coats, and waste. You don’t want to run out mid-roller, so here’s the exact method to calculate how much paint you need for any room."
+      "text": "For a typical room, work out the wall area, subtract the doors and windows, multiply by the number of coats, divide by the coverage on the paint label, and add about 10 percent. Using a planning figure of 350 square feet per gallon, a 14 by 12 foot bedroom with 9 foot ceilings, two doors and three windows needs about 2.4 gallons for two coats, so you would buy 3 gallons. The steps below show every number, so you can repeat them for your own room."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Much Paint Do You Need for One Room?"
+      "text": "Step by Step: One Bedroom"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Wall area = perimeter x ceiling height = 2 x (14 + 12) x 9 = 468 square feet.",
+        "Subtract openings. The calculator uses 21 square feet per door and 15 per window: 2 x 21 + 3 x 15 = 87 square feet. Paintable area = 468 - 87 = 381 square feet.",
+        "Multiply by coats: 381 x 2 = 762 square feet of coverage needed.",
+        "Divide by the coverage rate: 762 / 350 = 2.18 gallons.",
+        "Add 10 percent for waste, spills and touch-ups: 2.18 x 1.1 = 2.39 gallons. Round up to 3 gallons."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Calculate your total wall area (perimeter times ceiling height), subtract doors (**21 sq ft each**) and windows (**15 sq ft each**), multiply by the number of coats, then divide by **350**. Add **10%** for waste from spills and touch-ups. A standard **12x14 foot** bedroom with **8-foot ceilings**, two doors, and three windows has about **390 sq ft** of paintable wall space."
+      "text": "The door and window sizes are averages. A standard 80 by 36 inch door is 20 square feet and a 48 by 36 inch window is 12 square feet. Measure your own if there are large or unusual openings, since a patio door or picture window changes the total noticeably."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Paint Coverage by Room Size"
+      "text": "Paint Needed by Room Size"
+    },
+    {
+      "type": "paragraph",
+      "text": "The table uses the same method with two coats, 350 square feet per gallon and 10 percent waste. Door and window counts are assumptions, shown in the first column."
     },
     {
       "type": "table",
       "headers": [
-        "Room Size",
-        "Paintable Area (2 coats)",
-        "Gallons Needed",
+        "Room (ceiling), openings",
+        "Wall area (sq ft)",
+        "Paintable (sq ft)",
+        "Gallons with waste",
         "Buy"
       ],
       "rows": [
         [
-          "10x10 bedroom",
-          "~360 sq ft",
-          "2.3 gallons",
-          "1 gal + 2 qt"
+          "10x10 (8 ft), 1 door, 1 window",
+          "320",
+          "284",
+          "1.79",
+          "2 gallons"
         ],
         [
-          "12x14 bedroom",
-          "~440 sq ft",
-          "2.8 gallons",
+          "12x14 (8 ft), 2 doors, 3 windows",
+          "416",
+          "329",
+          "2.07",
           "3 gallons"
         ],
         [
-          "14x18 living room",
-          "~550 sq ft",
-          "3.5 gallons",
-          "4 gallons"
+          "14x18 (8 ft), 2 doors, 3 windows",
+          "512",
+          "425",
+          "2.67",
+          "3 gallons"
         ],
         [
-          "20x20 master",
-          "~720 sq ft",
-          "4.5 gallons",
-          "5 gallons"
+          "20x20 (9 ft), 2 doors, 4 windows",
+          "720",
+          "618",
+          "3.88",
+          "4 gallons"
         ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "These estimates include the **10% waste buffer** and assume standard door and window counts. Always round up to the nearest gallon or quart -- leftover paint is great for touch-ups later."
+      "text": "Notice the 12 by 14 room: 2.07 gallons is only just over 2, so buying 2 gallons and a quart is also reasonable if you want to avoid a nearly full spare can. Paint is often sold in quarts as well as gallons, so check what your store stocks for your color."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Two Coats Matter"
+      "text": "How Much Do Coats and Coverage Rate Change the Answer?"
     },
     {
       "type": "paragraph",
-      "text": "The first coat seals the surface and provides a base. The second coat delivers even color and full coverage. One coat usually leaves thin spots and uneven sheen, especially when you're covering dark colors with light paint."
+      "text": "The 350 square feet per gallon figure is a planning default, not a law of nature. Rough, textured or porous walls absorb more paint, and different products cover differently. Here is the same 14 by 12 foot bedroom (381 square feet paintable, 10 percent waste) under different assumptions."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario",
+        "Gallons with waste",
+        "Buy"
+      ],
+      "rows": [
+        [
+          "1 coat, 350 sq ft per gallon",
+          "1.20",
+          "2 gallons"
+        ],
+        [
+          "2 coats, 400 sq ft per gallon",
+          "2.10",
+          "3 gallons"
+        ],
+        [
+          "2 coats, 350 sq ft per gallon",
+          "2.39",
+          "3 gallons"
+        ],
+        [
+          "2 coats, 300 sq ft per gallon",
+          "2.79",
+          "3 gallons"
+        ],
+        [
+          "3 coats, 350 sq ft per gallon",
+          "3.59",
+          "4 gallons"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Going from a dark to light color may require **3 coats**. Use a primer on bare drywall to reduce the number of finish coats needed."
+      "text": "Three gallons covers every two-coat case above, which is why a conservative planner rounds up. A third coat pushes you to a fourth gallon. The manufacturer's coverage figure on the can supersedes the default used here, so check the label before you buy, and ask the store about primer if you are covering a strong color or bare drywall."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Choosing the Right Paint Finish"
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Forgetting the ceiling. Walls only is the standard calculation. Ceiling area is length x width: 14 x 12 = 168 square feet, which is about 1.06 gallons for two coats or 0.53 gallons for one, using the same assumptions. Ceiling paint is usually a separate product.",
+        "Skipping the waste allowance. Without the 10 percent, the bedroom needs 2.18 gallons instead of 2.39; a small shortfall in a tight estimate can leave you one wall short.",
+        "Treating the estimate as exact. Cut-in work, textured surfaces, deep color changes and dark-to-light jobs all increase use.",
+        "Mixing batches. Buy all the paint for a room at the same time and check the label so one wall does not come out a slightly different shade.",
+        "Ignoring built-ins. Fireplaces, bookcases and large alcoves change the area and are not in the basic formula."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When This Method Does Not Apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "The formula assumes a rectangular room with flat walls and standard ceilings. For sloped or vaulted ceilings, open stairwells, exterior siding, or rooms with many angles, measure each wall segment separately and add them up. Exterior paint behaves differently, with different surface types and weather limits, and often calls for a different coverage rate. For projects that involve scraping or sanding old paint in an older home, check current guidance on lead-safe work practices before you start; that is outside what a quantity calculator can tell you."
+    },
+    {
+      "type": "paragraph",
+      "text": "Sheen choices such as flat, eggshell or semi-gloss change appearance and how easily a surface cleans, but they are a separate decision from quantity. Pick the finish on the label for the room you are painting, then use the label's coverage rate in the calculation above."
     },
     {
       "type": "cta",

@@ -1,66 +1,204 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Basic Formula"
+      "type": "paragraph",
+      "text": "To calculate the square footage of a room, measure the length and width in feet and multiply them. A room that is 12 feet by 15 feet has 12 x 15 = 180 square feet. If your tape reads feet and inches, convert the inches to decimal feet first (divide by 12), because multiplying feet by inches gives a meaningless number. For rooms that are not a single rectangle, split the floor plan into rectangles, calculate each one, and add them together."
     },
     {
       "type": "paragraph",
-      "text": "For a rectangular room: length x width = square footage. A room that is 12 feet wide and 15 feet long has 180 square feet (12 x 15 = 180). Always measure in feet. If your tape measure shows inches, divide by 12 to convert to feet first. For example, 12 feet 6 inches = 12.5 feet."
+      "text": "This guide focuses on the measuring workflow rather than the formulas alone: how to handle feet-and-inches readings, how to break a real floor plan into pieces, how rounding changes the answer, and how to turn a floor area into an order quantity. All figures below were calculated, and the unit assumptions are stated each time."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Irregular Shapes"
+      "text": "Step 1: Convert feet and inches to decimal feet"
+    },
+    {
+      "type": "paragraph",
+      "text": "Most tape measures read in feet and inches, but the area formula needs one consistent unit. Divide the inches by 12 and add them to the feet. The conversions you will use most often:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Inches",
+        "Decimal feet"
+      ],
+      "rows": [
+        [
+          "1 in",
+          "0.083 ft"
+        ],
+        [
+          "3 in",
+          "0.250 ft"
+        ],
+        [
+          "4 in",
+          "0.333 ft"
+        ],
+        [
+          "6 in",
+          "0.500 ft"
+        ],
+        [
+          "8 in",
+          "0.667 ft"
+        ],
+        [
+          "9 in",
+          "0.750 ft"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Worked example: a room measures 14 ft 8 in by 11 ft 3 in. In decimal feet that is 14.667 by 11.25, and 14.667 x 11.25 = 165.0 square feet. Keep the extra decimals through the multiplication and round only the final answer."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 2: Split an irregular floor plan into rectangles"
+    },
+    {
+      "type": "paragraph",
+      "text": "Real floor plans are rarely one clean box. Sketch the plan, label every dimension, and divide it into rectangles that do not overlap. Here is a small example with assumed dimensions:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Section",
+        "Dimensions",
+        "Area"
+      ],
+      "rows": [
+        [
+          "Living room",
+          "18 ft x 14 ft",
+          "252 sq ft"
+        ],
+        [
+          "Kitchen",
+          "12 ft x 11.5 ft",
+          "138 sq ft"
+        ],
+        [
+          "Bathroom",
+          "8 ft x 6 ft",
+          "48 sq ft"
+        ],
+        [
+          "Hallway",
+          "3.5 ft x 14 ft",
+          "49 sq ft"
+        ],
+        [
+          "Total",
+          "",
+          "487 sq ft"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "If part of a rectangle is not floor, subtract it. A 20 ft by 15 ft room is 300 square feet; if a 4 ft by 6 ft stair opening cuts through it, the floor area is 300 - 24 = 276 square feet. The same idea works for L-shaped rooms: a 12 ft by 10 ft section plus a 6 ft by 8 ft section is 120 + 48 = 168 square feet, which is 15.6 square meters."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Triangles and circles"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "L-shaped rooms: Divide the room into two rectangles, calculate each separately, and add them together.",
-        "Triangular spaces: (Base x Height) / 2. A triangular bay window area with an 8-foot base and 4-foot depth = (8 x 4) / 2 = 16 square feet.",
-        "Circular areas: Pi x radius squared (3.14 x r²). A 10-foot diameter circle has a 5-foot radius: 3.14 x 25 = 78.5 square feet.",
-        "Add 10% for waste when buying flooring materials to account for cuts and mistakes."
+        "Triangle: half the base times the height. A bay area with an 8 ft base and 4 ft depth is (8 x 4) / 2 = 16 square feet.",
+        "Circle: pi times the radius squared. A 10 ft diameter circle has a 5 ft radius, so the area is 3.14159 x 25 = 78.54 square feet. Using 3.14 gives 78.5, which is close enough for a rough estimate but not worth the rounding error when pi is one keystroke away."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Common Mistakes"
+      "text": "How rounding changes the answer"
+    },
+    {
+      "type": "paragraph",
+      "text": "Rounding each measurement before you multiply is the most common source of a wrong order. Take a room of 12 ft 7 in by 9 ft 5 in. The exact area is 12.583 x 9.417 = 118.49 square feet. Compare three ways of handling it:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Method",
+        "Calculation",
+        "Area",
+        "Difference from exact"
+      ],
+      "rows": [
+        [
+          "Exact decimal feet",
+          "12.583 x 9.417",
+          "118.49 sq ft",
+          "0.0%"
+        ],
+        [
+          "Round each side to nearest foot",
+          "13 x 9",
+          "117 sq ft",
+          "-1.3%"
+        ],
+        [
+          "Round each side up",
+          "13 x 10",
+          "130 sq ft",
+          "+9.7%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Rounding up each side overstates the area by 9.7 percent. That is about the same size as the 10 percent waste allowance you would add next, so you would be adding extra material twice. Measure precisely, compute the exact area, and apply the waste allowance once, at the end."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "From floor area to order quantity"
+    },
+    {
+      "type": "paragraph",
+      "text": "Floor area is not the same as the amount of material to buy. Cuts, offcuts and mistakes mean you order more than the area. For a 180 square foot room (12 x 15), a waste allowance of 5, 10 or 15 percent gives 189, 198 or 207 square feet. These percentages are planning assumptions: the right figure depends on the material and layout, and your supplier or installer can advise."
+    },
+    {
+      "type": "paragraph",
+      "text": "Some materials come in fixed widths, which changes the arithmetic. If carpet is sold from a 12 ft wide roll, a 10 ft by 10 ft room needs a piece 12 ft by 10 ft, which is 120 square feet or 13.3 square yards (square feet divided by 9), not the 100 square feet of floor. Confirm the roll width with the supplier before you calculate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Metric measurements"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you measure in meters, multiply the two sides in meters to get square meters. A room of 4.2 m by 3.6 m is 15.12 square meters. To convert to square feet, multiply by 10.7639, which gives 162.75 square feet. To go the other way, divide square feet by 10.7639."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Measuring from the outside of walls: Measure from interior wall to interior wall for livable floor area.",
-        "Forgetting closets: Include closet floor space in your total square footage.",
-        "Rounding too early: Keep measurements in decimal feet or carry inches through the calculation.",
-        "Mixing units: Do not multiply feet by inches. Convert everything to the same unit first."
+        "Multiplying feet by inches. Convert everything to one unit first.",
+        "Measuring only at one point. Walls are rarely perfectly square, so measure each dimension in two or three places and use the longest for ordering.",
+        "Forgetting closets, alcoves and bump-outs that will receive the same flooring.",
+        "Counting space that will not be covered, such as a stair opening or a fixed cabinet footprint, when it should be subtracted.",
+        "Assuming the number on a property listing matches your flooring area. Listings and appraisals follow their own rules about which spaces count, so a listing figure is not a flooring quantity."
       ]
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How is square footage calculated for a house?"
-    },
-    {
-      "type": "paragraph",
-      "text": "House square footage typically includes all finished, livable areas above grade. Unfinished basements, garages, and attics are usually not counted. Measure each room, add them together, and multiply by the number of levels. For multi-story homes, measure each floor separately."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What is the difference between square footage and square feet?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Square footage and square feet refer to the same thing: the area of a space measured in square feet. They are used interchangeably in real estate and construction."
+      "type": "callout",
+      "variant": "info",
+      "text": "This guide covers floor area only. Wall area for paint is a different calculation (perimeter times ceiling height, minus openings). If the measurement feeds a structural, electrical or permitted project, check your local building codes and confirm dimensions with the contractor or inspector."
     },
     {
       "type": "cta",

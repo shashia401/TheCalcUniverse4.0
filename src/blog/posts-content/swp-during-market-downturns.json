@@ -1,27 +1,136 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "A market fall hurts an SWP more than it hurts someone who is not withdrawing, because every month you sell units at the lower price to pay your expenses, and those units cannot take part in the recovery. This is called sequence-of-returns risk: the same set of returns can leave you with very different money depending on the order they arrive in. The worked example below uses invented return paths, labelled as hypothetical, to show the size of the effect and which defences help."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "The Sequence-of-Return Risk"
+      "text": "The arithmetic of a bad first year"
     },
     {
       "type": "paragraph",
-      "text": "Sequence-of-return risk is the danger of experiencing poor market returns in the early years of your SWP. If your corpus drops 20% in year one and you keep withdrawing, the remaining balance may never recover. A ₹1 crore corpus losing 20% becomes ₹80 lakhs, minus ₹6 lakhs SWP = ₹74 lakhs. It now needs 35% returns just to get back to ₹1 crore."
+      "text": "Start with Rs. 1,00,00,000 and a withdrawal of Rs. 50,000 a month, which is Rs. 6,00,000 a year or 6% of the corpus. If the portfolio falls 20% in year one and you also take Rs. 6,00,000 out, a rough version is Rs. 80,00,000 minus Rs. 6,00,000, or Rs. 74,00,000. To climb back to Rs. 1 crore from there takes a gain of 35.1% (1,00,00,000 divided by 74,00,000, minus 1), not 20%. Taking the withdrawal out month by month instead, my simulation leaves Rs. 74,57,214 at the end of that year, because some withdrawals come before the fall is fully realised. The lesson stands either way: losses plus withdrawals compound against you."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Protection Strategies"
+      "text": "Worked example: the same returns, in a different order"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here are two hypothetical five-year paths made from exactly the same five yearly returns. They are not forecasts or data from any fund. Path A has the losses first: -20%, -5%, +10%, +15%, +20%. Path B reverses them: +20%, +15%, +10%, -5%, -20%. Both multiply to the same overall growth (1.1537 times, about 2.9% a year). Each yearly return is applied as a monthly rate equal to (1 plus the yearly return) to the power 1/12, minus 1, the balance grows first, then Rs. 50,000 is withdrawn. After year five the return is assumed to be 7% or 6% a year. Past performance does not guarantee future results."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Path",
+        "Balance after year 5",
+        "Years the corpus lasts if later return is 7%",
+        "Years it lasts if later return is 6%"
+      ],
+      "rows": [
+        [
+          "A: losses first",
+          "Rs. 75,77,575",
+          "33.8 years",
+          "28.0 years"
+        ],
+        [
+          "B: losses last",
+          "Rs. 88,85,383",
+          "Did not run out in the 80 years tested",
+          "39.4 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Identical returns, an identical withdrawal, and a gap of more than Rs. 13 lakh after five years. With a later return of 6%, path A lasts 28.0 years while path B lasts 39.4. For comparison, a smooth 8% every year would leave Rs. 1,10,46,048 after five years. The calculator on this site uses a constant return, so it will always show something closer to that smooth case; it cannot show path A. That is why its own results page warns that a downturn early in withdrawals can deplete a fund faster than the model shows."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What helps, and what it costs"
+    },
+    {
+      "type": "paragraph",
+      "text": "Each defence below was tested on path A, with a 7% return afterwards. All figures are hypothetical."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Defence",
+        "Balance after year 5",
+        "Years the corpus lasts"
+      ],
+      "rows": [
+        [
+          "None (withdraw Rs. 50,000 throughout)",
+          "Rs. 75,77,575",
+          "33.8 years"
+        ],
+        [
+          "Cut withdrawals by 15% for the first 2 years",
+          "Rs. 78,28,448",
+          "37.1 years"
+        ],
+        [
+          "Cut withdrawals by 15% for the first 3 years",
+          "Rs. 79,58,243",
+          "39.1 years"
+        ],
+        [
+          "Cut withdrawals by 20% for the first 2 years",
+          "Rs. 79,12,073",
+          "38.3 years"
+        ],
+        [
+          "Two years of withdrawals held in cash earning an assumed 5%",
+          "Rs. 79,63,936",
+          "39.2 years"
+        ],
+        [
+          "Three years of withdrawals held in cash earning an assumed 5%",
+          "Rs. 82,41,612",
+          "44.8 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Spending less in the early years is the most direct defence, and it costs only comfort. The cash buffer works by letting you pay expenses without selling units while prices are low, but it comes with a trade-off I tested too. On path B, where the losses come at the end, the three-year buffer makes the money last 56.1 years instead of not running out in 80 years, because the cash earns less than the invested portion. A buffer is insurance: it pays off in the bad scenario and costs you a little in the good one. My model does not refill the buffer, which a real plan would try to do after good years."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Practical steps for a downturn"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Cash bucket strategy: Keep 2-3 years of withdrawals in a liquid fund or savings account. During market downturns, draw from this bucket instead of redeeming equity units.",
-        "Reduce withdrawal temporarily: If markets drop 20%+, reduce your SWP amount by 10-15%. Even a temporary reduction can significantly improve corpus longevity.",
-        "Dividend route in downturns: Switch any equity holdings to dividend options temporarily. Dividends provide income without redeeming units at depressed prices.",
-        "Rebalance annually: If your equity allocation has grown significantly in good years, rebalance to lock in gains and increase the safety buffer."
+        "Decide your response before the fall. A rule such as 'cut withdrawals by 10-15% if the portfolio is down 20% from its peak' is easier to follow than a decision made in a panic.",
+        "Keep one to three years of withdrawals in low-risk holdings, sized to your comfort, and refill them only after markets recover.",
+        "Rebalance on a schedule rather than on headlines. Selling the holdings that did well to restore your intended mix is a way of refilling the safe portion.",
+        "Do not stop the plan and withdraw everything in a fall. That locks in the loss. Pausing or lowering the SWP can be less damaging than closing it.",
+        "Check the rules of the scheme before changing anything, including exit loads and how any switch or redemption is taxed. Those rules change, so confirm them with the fund house or a registered adviser."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limits of this analysis"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Only two return orders are shown. Real sequences are far more varied, and some are worse than path A.",
+        "The fall in path A is one I chose. The size and length of real falls differ, and so do recoveries.",
+        "Taxes, costs and inflation are left out. Raising the withdrawal for inflation would make every row worse.",
+        "These are illustrations, not advice. For a real corpus, speak to a SEBI-registered investment adviser."
       ]
     },
     {

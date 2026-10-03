@@ -1,85 +1,187 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Your healthy weight range for a given height is the span of weights that gives a BMI from 18.5 up to the 25 cutoff, using the CDC adult categories. For someone 5 ft 10 in (177.8 cm) tall, that works out to about 129 to 174 lb (58.5 to 78.7 kg). The range is wide because BMI is a screening index, and it is calculated from weight and height only. It does not know your muscle mass, frame or where you carry fat, so treat the range as a reference band rather than a target to hit exactly."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "How Healthy Weight Ranges Are Determined"
+      "text": "How the range is calculated"
     },
     {
       "type": "paragraph",
-      "text": "The most common method uses your BMI to calculate a weight range. Since a healthy BMI is 18.5-24.9, your healthy weight range is the weight that puts you in that BMI zone. For a person 5'9\" (175 cm): healthy weight range is approximately 125-169 lbs (56.7-76.7 kg). The range is wide because body composition varies — the lower end works for someone with less muscle mass, while the upper end works for someone more muscular."
+      "text": "BMI is weight in kilograms divided by height in metres squared, so for any height you can reverse it: weight = BMI x height squared. Plug in 18.5 for the lower end and 24.9 for the upper end (our calculators use 24.9, which sits just under the 25 line where the CDC overweight category starts). Height is converted exactly, using 1 inch = 2.54 cm and 1 lb = 0.45359237 kg, and the results are rounded to the nearest pound or 0.1 kg."
+    },
+    {
+      "type": "paragraph",
+      "text": "Worked example for 5 ft 6 in (66 in, 167.6 cm, 1.6764 m): height squared is 2.8103 m2. Lower end: 18.5 x 2.8103 = 52.0 kg, or 115 lb. Upper end: 24.9 x 2.8103 = 70.0 kg, or 154 lb."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Ideal Weight Formulas Compared"
+      "text": "Healthy weight range by height"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Height",
+        "Metric",
+        "BMI 18.5 to 24.9 (lb)",
+        "BMI 18.5 to 24.9 (kg)"
+      ],
+      "rows": [
+        [
+          "4 ft 10 in",
+          "147.3 cm",
+          "89 to 119 lb",
+          "40.2 to 54.0 kg"
+        ],
+        [
+          "5 ft 0 in",
+          "152.4 cm",
+          "95 to 127 lb",
+          "43.0 to 57.8 kg"
+        ],
+        [
+          "5 ft 2 in",
+          "157.5 cm",
+          "101 to 136 lb",
+          "45.9 to 61.8 kg"
+        ],
+        [
+          "5 ft 4 in",
+          "162.6 cm",
+          "108 to 145 lb",
+          "48.9 to 65.8 kg"
+        ],
+        [
+          "5 ft 6 in",
+          "167.6 cm",
+          "115 to 154 lb",
+          "52.0 to 70.0 kg"
+        ],
+        [
+          "5 ft 8 in",
+          "172.7 cm",
+          "122 to 164 lb",
+          "55.2 to 74.3 kg"
+        ],
+        [
+          "5 ft 10 in",
+          "177.8 cm",
+          "129 to 174 lb",
+          "58.5 to 78.7 kg"
+        ],
+        [
+          "6 ft 0 in",
+          "182.9 cm",
+          "136 to 184 lb",
+          "61.9 to 83.3 kg"
+        ],
+        [
+          "6 ft 2 in",
+          "188.0 cm",
+          "144 to 194 lb",
+          "65.4 to 88.0 kg"
+        ],
+        [
+          "6 ft 4 in",
+          "193.0 cm",
+          "152 to 205 lb",
+          "68.9 to 92.8 kg"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These ranges are for adults. They are not meant for children and teens, who are assessed with growth percentiles, or for pregnancy. The CDC applies the same adult categories regardless of age, sex or race, but it also says BMI should be considered with other factors when assessing an individual's health."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Ideal weight formulas: what they add and what they do not"
+    },
+    {
+      "type": "paragraph",
+      "text": "Four older formulas estimate a single ideal weight from height and sex. They all start from 5 feet and add a fixed amount for each inch above it (our ideal weight calculator sets the extra inches to zero below 5 feet). Devine is 50 kg for men or 45.5 kg for women plus 2.3 kg per inch. Robinson is 52 kg plus 1.9 kg per inch for men and 49 kg plus 1.7 kg per inch for women. Miller is 56.2 kg plus 1.41 kg per inch for men and 53.1 kg plus 1.36 kg per inch for women. Hamwi is 106 lb plus 6 lb per inch for men and 100 lb plus 5 lb per inch for women."
     },
     {
       "type": "table",
       "headers": [
         "Formula",
-        "Man 5'10\"",
-        "Woman 5'4\"",
-        "Notes"
+        "Man, 5 ft 10 in",
+        "Woman, 5 ft 4 in"
       ],
       "rows": [
         [
           "Devine",
-          "166 lbs",
-          "120 lbs",
-          "Most common, used in medical dosing"
+          "161 lb (73.0 kg)",
+          "121 lb (54.7 kg)"
         ],
         [
           "Robinson",
-          "165 lbs",
-          "119 lbs",
-          "Similar to Devine, slightly different"
+          "157 lb (71.0 kg)",
+          "123 lb (55.8 kg)"
         ],
         [
           "Miller",
-          "161 lbs",
-          "117 lbs",
-          "More recent adjustment"
+          "155 lb (70.3 kg)",
+          "129 lb (58.5 kg)"
         ],
         [
           "Hamwi",
-          "178 lbs",
-          "140 lbs",
-          "Gives highest values of any formula"
+          "166 lb (75.3 kg)",
+          "120 lb (54.4 kg)"
+        ],
+        [
+          "BMI 18.5 to 24.9 range",
+          "129 to 174 lb",
+          "108 to 145 lb"
         ]
       ]
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Why Ideal Weight Is a Range, Not a Number"
-    },
-    {
       "type": "paragraph",
-      "text": "The concept of a single ideal weight is misleading. Your healthy weight depends on your frame size, muscle mass, bone density, and body fat distribution. A muscular athlete might be at their healthiest at the top of the BMI range, while someone with less muscle mass might be healthiest in the middle. The best approach is to use the BMI-based healthy weight range as a guideline, then adjust based on how you feel, your energy levels, and your blood work results."
+      "text": "Two things stand out. The formulas disagree by about 11 lb for the man and 9 lb for the woman, and none of them is consistently highest. And every figure falls inside the BMI-based range. For the man, the four values correspond to BMIs of about 22.2 to 23.8. The formulas were designed for clinical reference such as estimating dosing, not as personal goals, and the single numbers hide how wide a healthy range really is."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What is the ideal weight for a 5'6\" woman?"
+      "text": "Frame size and the position within the range"
     },
     {
       "type": "paragraph",
-      "text": "The healthy BMI range (18.5-24.9) for 5'6\" (66 inches) gives a range of 115-154 lbs. Different formulas give different ideals: Devine formula says 125 lbs, Hamwi says 129 lbs. The right weight for you depends on your body composition, frame size, and personal health goals."
+      "text": "Our healthy weight calculator positions a frame-adjusted target inside the range: 45% of the way up for a small frame, 50% for medium and 55% for large. For 5 ft 6 in that gives about 132, 134 and 136 lb. The difference is only 4 lb across the three frames, which is a useful reminder that frame size moves the target less than the range itself is wide (about 40 lb at this height). That frame rule is the calculator's own convention, so treat it as a rough guide."
     },
     {
       "type": "heading",
-      "level": 3,
-      "text": "How much should a 5'10\" man weigh?"
+      "level": 2,
+      "text": "Worked example: how far from the range?"
     },
     {
       "type": "paragraph",
-      "text": "The healthy BMI range for 5'10\" gives a range of 129-173 lbs. Devine formula: 166 lbs. Hamwi: 178 lbs. Our ideal weight calculator shows results from multiple formulas so you can see the range and find what is realistic for your body type."
+      "text": "Assume someone who is 5 ft 6 in and weighs 160 lb. BMI = 703 x 160 / 66 squared = 25.8, which is in the CDC overweight category (25 to under 30). The top of the 5 ft 6 in range, using BMI 24.9, is 154 lb, so they are about 6 lb above it. Whether that matters depends on more than the scale. A person with a lot of muscle, or a small waist for their height, may be perfectly healthy there."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating one formula result as the answer. The four formulas above differ by around 10 lb at the same height, and the BMI range is about 45 lb wide at 5 ft 10 in.",
+        "Using the range for athletes and heavily muscled people without checking body fat or waist size.",
+        "Ignoring ethnicity. The WHO has described lower BMI action points for Asian populations, so a standard chart may understate risk for some people.",
+        "Using height in the wrong unit. Convert feet and inches to total inches first, then to metres.",
+        "Aiming for the bottom of the range because lower feels safer. The bottom of the range is not a better target than the middle."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "A healthy weight range is a screening reference, not a diagnosis or a prescription. If you are far outside the range, losing or gaining weight without trying, or have a medical condition, talk to a doctor or registered dietitian before setting a target. Adding waist-to-height ratio and body fat gives a fuller picture than weight alone."
     },
     {
       "type": "cta",

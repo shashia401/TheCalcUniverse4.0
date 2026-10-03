@@ -1,53 +1,164 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "A secured loan is backed by an asset, called collateral, that the lender can take if you stop paying. An unsecured loan has no collateral, so the lender relies on your promise to repay and your credit history. The collateral usually makes a secured loan cheaper, but it also puts something you own at risk. Unsecured borrowing costs more because the lender has fewer ways to recover its money."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Key Differences"
+      "text": "How each type works"
     },
     {
       "type": "table",
       "headers": [
         "Feature",
-        "Secured",
-        "Unsecured"
+        "Secured loan",
+        "Unsecured loan"
       ],
       "rows": [
         [
-          "Collateral",
-          "Yes (house, car, etc.)",
-          "No"
+          "What backs the loan",
+          "A specific asset the lender holds a legal claim on, such as a home, a vehicle, or a savings balance",
+          "Your credit record and your promise to repay"
         ],
         [
-          "Interest rate",
-          "3-8% typical",
-          "6-36% typical"
+          "If you stop paying",
+          "The lender can generally take and sell the collateral under the loan agreement and local law",
+          "The lender can charge fees, report the missed payments, and pursue collection, which can include a lawsuit"
         ],
         [
-          "Loan amount",
-          "Up to asset value",
-          "Usually under $100K"
+          "Why the price differs",
+          "The lender has a way to recover part of the loss, so it can charge a lower rate",
+          "The lender carries more risk and normally prices it into the rate"
         ],
         [
-          "Approval time",
-          "Days to weeks",
-          "Same day possible"
+          "How much you can borrow",
+          "Usually limited by the value of the collateral",
+          "Usually limited by your income and credit"
         ],
         [
-          "Risk",
-          "Lose collateral if default",
-          "Credit damage if default"
+          "Common examples",
+          "Mortgages, auto loans, home equity loans, loans secured by savings",
+          "Most credit cards, many personal loans"
         ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The rules for repossession, foreclosure, and collection vary by country and by state or province, so the second row is a general description only. Read the default and security sections of your agreement."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the rate gap is worth in dollars"
+    },
+    {
+      "type": "paragraph",
+      "text": "The table below uses an example $15,000 loan over 60 months with equal monthly payments, at five illustrative annual rates. The rates are for demonstration and are not quotes or typical market rates for either loan type."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Annual rate",
+        "Monthly payment",
+        "Total interest over 60 months"
+      ],
+      "rows": [
+        [
+          "6%",
+          "$289.99",
+          "$2,399.52"
+        ],
+        [
+          "9%",
+          "$311.38",
+          "$3,682.52"
+        ],
+        [
+          "12%",
+          "$333.67",
+          "$5,020.00"
+        ],
+        [
+          "15%",
+          "$356.85",
+          "$6,410.94"
+        ],
+        [
+          "18%",
+          "$380.90",
+          "$7,854.08"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Suppose a secured loan is offered at 9% and an unsecured loan at 15%, both for $15,000 over 60 months. The unsecured payment is $356.85 against $311.38, a difference of $45.47 a month, or about $2,728 in extra interest by the end of the term. That is the amount you would be paying the lender, in effect, to avoid pledging an asset. Whether it is worth paying depends on how confident you are in your ability to repay and how much the pledged asset matters to you."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Term matters as much as type"
+    },
+    {
+      "type": "paragraph",
+      "text": "Stretching a loan to lower the payment can erase the savings from a lower rate. On the same $15,000 at 15%, a 36-month term costs $3,719 in interest and a 60-month term costs $6,411. Compare total cost over the full term, not just the monthly payment, and make sure the loans you compare have the same length."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The collateral problem: owing more than the asset is worth"
+    },
+    {
+      "type": "paragraph",
+      "text": "Collateral can lose value while you still owe the money. Assume a $20,000 loan at 9% over 60 months against a vehicle worth $20,000, and assume the vehicle loses 20% of its value in the first year (an illustrative figure, not a forecast). After 12 payments the balance is about $16,683, while the vehicle is worth about $16,000. You would owe roughly $683 more than the asset could be sold for. If you then sold or lost the vehicle, you could still owe the difference, depending on the agreement and local law. Lenders often lend less than the full value of the collateral for this reason, for example 80% of $20,000, or $16,000, and a down payment helps the same way."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which to choose: questions to ask"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "What is the purpose? Large purchases where an asset naturally secures the loan, such as a home or vehicle, are usually secured. Smaller or short-term needs are often unsecured.",
+        "What would you lose if you fell behind? Pledging an asset you need, such as your car for commuting or your home, raises the stakes of a missed payment.",
+        "What is the effective cost? Add the origination fee, if any, to the interest and compare the true APR across offers.",
+        "Can you afford the payment on a lean month? A lower rate does not help if the payment is too tight.",
+        "Is there a middle path? A co-signer, a shorter term, a smaller amount, or a secured credit product built on your own deposit can change what is on offer."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When to Choose Each"
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Putting a home up as collateral for something that is easy to pay for another way, such as a holiday or a depreciating purchase.",
+        "Choosing a secured loan only for the lower rate without checking the fees and the penalties for early payoff.",
+        "Assuming \"unsecured\" means \"no consequences\". Missed payments still damage your credit and can lead to legal action.",
+        "Comparing payments across different terms and concluding one loan is cheaper.",
+        "Skipping the fine print on exactly what is pledged. Confirm which asset secures the loan and what the agreement lets the lender do if you default."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When these numbers do not apply"
     },
     {
       "type": "paragraph",
-      "text": "Choose secured for large amounts (mortgage, auto) where rates matter most. Choose unsecured for smaller, short-term needs (debt consolidation, emergency expenses) where you do not want to risk assets. Never take a secured loan for depreciating assets (except cars). Do not take an unsecured loan with a rate above 15% if you can make a payment plan instead."
+      "text": "The examples use fixed rates and equal payments. Variable-rate loans, interest-only periods, balloon payments and revolving credit lines change the arithmetic. This article explains how the two types work and does not state what rates lenders charge today, which change with markets and with your credit profile. Get written quotes and enter the exact rate, amount and term into the loan calculator to compare them side by side."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "All payments, interest totals and balances were computed with the standard loan payment formula used by the loan calculator. The rates, collateral values and value decline are illustrative assumptions."
     },
     {
       "type": "cta",

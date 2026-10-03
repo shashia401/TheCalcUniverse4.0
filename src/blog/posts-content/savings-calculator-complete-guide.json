@@ -1,31 +1,113 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "How the Savings Calculator Works"
-    },
-    {
       "type": "paragraph",
-      "text": "Our savings calculator solves two problems: how much your savings will be worth in the future (given your current balance, monthly deposit, and interest rate), and how much you need to save each month to reach a specific goal by a target date. It handles regular savings accounts, high-yield accounts, CDs, and investment accounts."
+      "text": "The Savings Calculator answers one of two questions. Either it tells you what balance you will have after regular deposits, or it tells you how much to deposit each month to reach a target by a date. Both modes use the same compound-growth formula with interest credited monthly at the annual rate divided by 12. This guide shows each formula with a worked example you can check by hand, then explains one rate convention that can make your result differ slightly from your bank's."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Compound Interest in Savings"
+      "text": "Mode 1: How much will I have?"
     },
     {
       "type": "paragraph",
-      "text": "Compound interest is interest earned on interest. In a savings account earning 4% APY compounded monthly, a $10,000 balance earning $400 in year one also earns interest on that $400 in year two. Over 10 years, that $10,000 grows to $14,888 — with $4,888 of that being compound interest (more than the simple interest of $4,000)."
+      "text": "With a starting deposit P, a monthly deposit PMT, a monthly rate r equal to the annual rate divided by 12, and n months, the balance is FV = P x (1 + r)^n + PMT x [(1 + r)^n - 1] / r. Deposits are assumed to land at the end of each month."
+    },
+    {
+      "type": "paragraph",
+      "text": "Example: $5,000 to start, $500 a month for 5 years (60 months) at a 5% annual rate. The result is $40,420. You deposited $35,000 ($5,000 plus 60 x $500), so $5,420 is interest, which is 13.4% of the final balance. The balance and rate are example inputs, not a promise of what any account will pay."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Setting Realistic Savings Goals"
+      "text": "Mode 2: How much do I need to save each month?"
     },
     {
       "type": "paragraph",
-      "text": "A common rule is to save 20% of your income. For specific goals: emergency fund = 3-6 months of expenses. Down payment on a home = 20% of the purchase price. Retirement = 10-15% of income including employer match. Vacation = total estimated cost divided by months until travel. Our calculator helps you determine the monthly savings needed for any goal."
+      "text": "Rearranging the formula gives PMT = (Goal - P x (1 + r)^n) x r / [(1 + r)^n - 1]. The calculator first grows your starting deposit, subtracts that from the goal, and spreads the remainder over the months. If the starting deposit alone will reach the goal, it says so instead of showing a deposit."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Goal",
+        "Start",
+        "Time",
+        "Rate",
+        "Monthly deposit",
+        "Your deposits",
+        "Interest covers"
+      ],
+      "rows": [
+        ["$25,000", "$5,000", "5 years", "5%", "$273.26", "$21,395", "$3,605"],
+        ["$25,000", "$0", "3 years", "4%", "$654.77", "$23,572", "$1,428"],
+        ["$20,000", "$0", "4 years", "4.5%", "$381.07", "$18,291", "$1,709"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "In the second row, the same goal with no interest would need $694.44 a month, so a 4% rate saves you about $40 a month. The calculator also shows a weekly equivalent by dividing the monthly figure by 4.333, which is $151.11 a week for that row. Short timelines depend almost entirely on your deposits, while long ones depend more and more on interest."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A rate convention that can change the answer"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator divides the rate you enter by 12 each month. That is how a nominal annual rate compounded monthly works. APY, the annual percentage yield, is different: it is the effective rate after a year of compounding. A nominal 4% credited monthly produces an APY of 4.074%, because (1 + 0.04/12)^12 - 1 = 0.04074."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Case",
+        "Result",
+        "Why"
+      ],
+      "rows": [
+        ["$10,000 at 4% compounded monthly, 10 years", "$14,908.33", "Monthly rate 0.3333%, 120 months"],
+        ["$10,000 at 4% APY, 10 years", "$14,802.44", "Effective 4% once per year"],
+        ["$10,000 at 5% entered, 5 years", "$12,833.59", "Calculator convention (rate / 12)"],
+        ["$10,000 at 5% APY, 5 years", "$12,762.82", "Effective 5% once per year"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "If your bank quotes APY and you want an exact match, enter the equivalent nominal rate instead. A 5% APY corresponds to a nominal rate of 12 x (1.05^(1/12) - 1) = 4.889%. Entering that gives $12,762.82, which equals the true 5% APY result. Entering 5% directly overstates it by about $71 over five years on $10,000. The gap is small, but it is the reason a calculator result and a bank statement can differ."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Turn a goal into inputs"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Write down the goal as a total cost, including taxes and fees, and the date you need it.",
+        "Enter any money you already have as the starting deposit. If the goal is in months, switch the time unit to months.",
+        "Use the rate your account is paying today, and rerun the calculation with a lower rate to see how sensitive the plan is.",
+        "Read the required monthly deposit against your budget. If it is too high, lengthen the timeline or lower the goal instead of assuming a higher return."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using the rate from an introductory offer for the whole period. Savings rates can change, and the calculator holds your rate fixed.",
+        "Ignoring tax on interest and any account fees, neither of which is modeled.",
+        "Forgetting inflation. A $25,000 goal today may cost more in five years, so leave margin for price rises.",
+        "Mixing up years and months in the time field.",
+        "Assuming a high return for a short goal. Money needed within a few years should not depend on investment growth, and past performance does not guarantee future results."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator is a planning aid, not a quote from a bank. Treat the monthly deposit it returns as a target to adjust once your actual account rate and timeline are clear."
     },
     {
       "type": "cta",

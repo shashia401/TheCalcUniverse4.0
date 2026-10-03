@@ -1,40 +1,143 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is a Systematic Investment Plan (SIP)?"
-    },
-    {
       "type": "paragraph",
-      "text": "A SIP is a method of investing a fixed amount regularly (monthly or quarterly) into a mutual fund scheme. Instead of trying to time the market with one lump sum, you invest consistently regardless of market conditions. When markets are high, you buy fewer units. When markets are low, you buy more units. Over time, this averages out your purchase cost — a concept called rupee cost averaging."
+      "text": "SIP investing means putting a fixed amount into a mutual fund at regular intervals, usually monthly, and leaving it there for years. What it builds depends on three things you control (the monthly amount, the number of years and the type of fund you pick) and one you do not, which is the return the market delivers. This guide uses a Rs. 10,000 monthly SIP to show how much each factor matters, then turns that into a setup checklist."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Power of Compounding"
+      "text": "What a Rs. 10,000 monthly SIP projects to"
     },
     {
       "type": "paragraph",
-      "text": "The real wealth builder in SIP is compounding. Each monthly investment starts earning returns from the month it is invested. Those returns earn their own returns in subsequent months. Over 20-30 years, the compounding effect dominates. A ₹10,000 monthly SIP at 12% returns grows to just ₹12 lakh total invested — but the final corpus is over ₹1 crore. The returns contribute far more than the contributions in long-term SIPs."
+      "text": "All figures use the SIP calculator's method: the annual rate divided by 12 as a monthly rate, instalments invested at the start of each month, and future value = instalment times ((1 + i) to the power n, minus 1) divided by i, times (1 + i), where i is the monthly rate and n the number of months. Returns are held constant, which real markets never do, so read the table as arithmetic and not as a forecast."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Years",
+        "Total invested",
+        "At 8% a year",
+        "At 10% a year",
+        "At 12% a year",
+        "At 14% a year"
+      ],
+      "rows": [
+        [
+          "10",
+          "Rs. 12,00,000",
+          "Rs. 18,41,657",
+          "Rs. 20,65,520",
+          "Rs. 23,23,391",
+          "Rs. 26,20,914"
+        ],
+        [
+          "20",
+          "Rs. 24,00,000",
+          "Rs. 59,29,472",
+          "Rs. 76,56,969",
+          "Rs. 99,91,479",
+          "Rs. 1,31,63,463"
+        ],
+        [
+          "30",
+          "Rs. 36,00,000",
+          "Rs. 1,50,02,952",
+          "Rs. 2,27,93,253",
+          "Rs. 3,52,99,138",
+          "Rs. 5,55,70,556"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Two readings matter. First, years beat rate: 8% for 30 years (about Rs. 1.50 crore) ends above 14% for 20 years (about Rs. 1.32 crore). Second, Rs. 12 lakh invested over 10 years at 12% becomes about Rs. 23 lakh, not a crore. Getting to roughly Rs. 1 crore at 12% takes 20 years of Rs. 10,000 instalments, with Rs. 24 lakh paid in."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Rupee Cost Averaging Explained"
+      "text": "Where the final corpus comes from"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Years",
+        "Paid in",
+        "Value at 12%",
+        "Share that is growth"
+      ],
+      "rows": [
+        [
+          "10",
+          "Rs. 12,00,000",
+          "Rs. 23,23,391",
+          "48.4%"
+        ],
+        [
+          "20",
+          "Rs. 24,00,000",
+          "Rs. 99,91,479",
+          "76.0%"
+        ],
+        [
+          "30",
+          "Rs. 36,00,000",
+          "Rs. 3,52,99,138",
+          "89.8%"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Rupee cost averaging is the benefit of investing the same amount regularly regardless of market conditions. When the NAV (Net Asset Value) is high, your fixed amount buys fewer units. When NAV is low, it buys more units. Over time, the average cost per unit is lower than the average NAV. This protects you from the emotional trap of trying to time the market."
+      "text": "The growth share rises with the horizon because each instalment has more months to compound. It is also back-loaded. At 12%, the balance after 15 years is Rs. 50,45,760 and after 20 years is Rs. 99,91,479, so the last five years add Rs. 49.5 lakh, about half of the 20-year result. In the 30-year plan, the final five years (years 26 to 30) add about Rs. 1.63 crore, 46% of the end value. Stopping early gives up the most valuable stretch."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "SIP vs Lump Sum"
+      "text": "How to set up a SIP that you can keep running"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Name the goal and the date. A goal ten years away and a goal two years away call for different kinds of funds.",
+        "Choose an amount you can pay through a job loss scare or a bad quarter, and keep an emergency fund outside the SIP.",
+        "Match the fund type to the horizon. Equity-oriented funds suit long horizons because their value can fall sharply along the way; for money needed within a few years, lower-risk categories are the usual choice.",
+        "Plan with a conservative return, then test a higher and a lower one. Running 8%, 10% and 12% shows you the range.",
+        "Set the debit date a day or two after your salary credit so the mandate does not bounce.",
+        "Review once a year: is the fund still doing its job against its benchmark and category, and can the instalment go up?"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rupee cost averaging in one paragraph"
     },
     {
       "type": "paragraph",
-      "text": "SIP is better when you have regular income and want to build wealth over time. Lump sum is better when you have a large amount available and markets are undervalued. In most market conditions, SIP reduces risk through averaging. Over 10+ year periods, the difference between SIP and lump sum narrows significantly."
+      "text": "Because the amount is fixed, each instalment buys more units when the NAV is low and fewer when it is high. Mathematically, your average cost per unit then never exceeds the simple average of the NAVs on your purchase dates. That is a modest cushion against buying everything at a peak. It is not a guard against a fund that keeps falling, and it only works if the instalments continue, which is why the amount you choose has to be one you can sustain in a bad year."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and honest limits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Starting late. Rs. 10,000 a month for 30 years reaches Rs. 3.53 crore at 12%, but for 25 years only Rs. 1.90 crore. The five missed years cost about Rs. 1.63 crore.",
+        "Trying to make up for lost time with a higher instalment alone. Rs. 15,000 a month for 15 years reaches Rs. 75.7 lakh, still well below Rs. 10,000 a month for 20 years at Rs. 99.9 lakh.",
+        "Ignoring inflation. If prices rise 6% a year (an assumption, not a forecast), Rs. 3.53 crore in 30 years has the buying power of about Rs. 61.5 lakh today.",
+        "Assuming a straight line. Equity funds can lose value for a year or more at a time, and no fund is obliged to deliver 12%. Past returns do not guarantee future ones.",
+        "Holding too many funds. Several overlapping schemes make the portfolio harder to review without making it safer."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Every projection on this page assumes a constant return. Actual SIP outcomes vary with market cycles, fund choice, costs and taxes, and your own pause or stop decisions. Use the numbers to compare plans, not to promise yourself a result."
     },
     {
       "type": "cta",

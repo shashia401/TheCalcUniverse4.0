@@ -1,84 +1,170 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Interest Rate vs APR: The Simple Difference"
-    },
-    {
       "type": "paragraph",
-      "text": "The interest rate is the cost of borrowing the principal amount. The APR includes the interest rate plus any additional fees. Think of the interest rate as the base price and APR as the out-the-door price. For mortgages, APR includes origination fees, points, broker fees, and certain closing costs. For credit cards, APR includes the interest rate plus annual fees."
-    },
-    {
-      "type": "callout",
-      "variant": "info",
-      "text": "APR = Interest Rate + Fees spread across the loan term. The APR is always equal to or higher than the interest rate."
+      "text": "The interest rate is the yearly price of borrowing the outstanding balance. The APR (annual percentage rate) is a broader yearly figure that also counts certain upfront lender charges, so for the same loan it is usually higher than the interest rate. The US Consumer Financial Protection Bureau describes the APR as including points, mortgage broker fees and other charges you pay to get the loan, and recommends comparing APRs across offers while not relying on the APR alone. Below, one 30-year loan is worked through to the decimal so you can see exactly where the gap comes from."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why APR Matters More Than the Interest Rate"
-    },
-    {
-      "type": "paragraph",
-      "text": "Lenders can advertise a low interest rate while charging high fees that make the loan more expensive overall. The APR reveals this. Loan A might have a 6.0% rate with $5,000 in fees (APR 6.5%), while Loan B has a 6.3% rate with $1,000 in fees (APR 6.4%). Comparing APRs gives you an apples-to-apples comparison. This is especially important for mortgages where fees can vary dramatically."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "When APR Can Be Misleading"
-    },
-    {
-      "type": "paragraph",
-      "text": "APR assumes you keep the loan for its full term. If you refinance or sell within a few years, the one-time fees should not be spread across 30 years. For a mortgage you plan to keep only 5 years, a lower rate with higher fees might actually cost less than a lower-APR option. Always estimate your holding period."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Real-World Examples"
-    },
-    {
-      "type": "paragraph",
-      "text": "Compare two mortgages: Mortgage A at 6.0% with $5,000 in fees has an APR of 6.21%. Mortgage B at 6.25% with $1,500 in fees has an APR of 6.35%. Mortgage A looks better by APR, but if you sell in 3 years, the $5,000 in fees spread over only 36 months makes it more expensive per month. The APR calculator lets you compare both scenarios."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How to Use the APR Calculator"
+      "text": "What the two numbers measure"
     },
     {
       "type": "list",
-      "ordered": true,
       "items": [
-        "Enter the loan amount.",
-        "Enter the interest rate.",
-        "Add origination fees, points, or closing costs.",
-        "Enter the loan term.",
-        "Review the true APR."
+        "Interest rate: sets the monthly payment. Payment = P x r(1+r)^n / ((1+r)^n - 1), with r the annual rate divided by 12.",
+        "APR: the yearly rate that makes the payments you will make equal to the cash you actually receive after upfront fees. Regulation Z (12 CFR 1026.22) defines it as a measure of the cost of credit that relates the amount and timing of value received to the amount and timing of payments made.",
+        "No fees, no gap: with zero upfront charges the APR equals the interest rate."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Does APR apply to all loans?"
+      "text": "Worked example: finding the APR by iteration"
     },
     {
       "type": "paragraph",
-      "text": "Yes, but its usefulness varies. For mortgages, APR is heavily regulated. For auto loans and personal loans, APR is simpler since there are fewer fees. For credit cards, APR is just the interest rate."
+      "text": "Assumptions (illustrative, not a market quote): a $300,000 loan, 6.00% interest rate, 360 monthly payments, and $6,000 of upfront fees deducted from the loan proceeds. The payment is $1,798.65, based on the full $300,000. You receive only $294,000. The APR is the monthly rate at which 360 payments of $1,798.65 have a present value of $294,000. There is no closed-form answer, so the rate is found by repeated guessing (Newton-Raphson, the same method the APR calculator uses). Start at the 0.5% monthly rate (the nominal 6.00%):"
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "Can APR change after closing?"
+      "type": "table",
+      "headers": [
+        "Step",
+        "Monthly rate",
+        "Annualised (x12)",
+        "Present value of the 360 payments",
+        "Gap versus $294,000"
+      ],
+      "rows": [
+        [
+          "0",
+          "0.50000%",
+          "6.0000%",
+          "$300,000.00",
+          "$6,000.00 too high"
+        ],
+        [
+          "1",
+          "0.51554%",
+          "6.1865%",
+          "$294,092.45",
+          "$92.45 too high"
+        ],
+        [
+          "2",
+          "0.51579%",
+          "6.1895%",
+          "$294,000.02",
+          "$0.02 too high"
+        ],
+        [
+          "3",
+          "0.51579%",
+          "6.1895%",
+          "$294,000.00",
+          "converged"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "For fixed-rate loans, APR is locked at closing. Credit card APRs can change with market rate adjustments, typically with 45 days notice."
+      "text": "Result: APR = 6.189%, about 0.19 percentage points above the 6.00% rate. If the same $6,000 is instead added to the loan (a $306,000 balance, payment $1,834.62, you still receive $300,000), the APR comes out at 6.186%. The two treatments are almost identical in APR terms; financing the fees mainly raises the payment by $35.97 a month and the lifetime interest from $347,514.57 to $354,464.86."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Comparing two offers, and why holding time matters"
+    },
+    {
+      "type": "paragraph",
+      "text": "Offer A is the loan above: 6.00% with $6,000 fees, APR 6.189%. Offer B is 6.25% with $1,000 fees on the same $300,000, APR 6.282%. A has the lower APR, but its payment is lower by $48.50 a month while it costs $5,000 more upfront, so the extra fee needs time to pay back. The table adds fees to the interest paid so far (rounded to the dollar):"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Time held",
+        "Offer A: fees + interest",
+        "Offer B: fees + interest",
+        "Cheaper"
+      ],
+      "rows": [
+        [
+          "36 payments",
+          "$59,004",
+          "$56,258",
+          "B by $2,745"
+        ],
+        [
+          "60 payments",
+          "$93,082",
+          "$91,841",
+          "B by $1,241"
+        ],
+        [
+          "80 payments",
+          "$120,604",
+          "$120,612",
+          "A by $8 (crossover)"
+        ],
+        [
+          "120 payments",
+          "$172,895",
+          "$175,371",
+          "A by $2,476"
+        ],
+        [
+          "360 payments",
+          "$353,515",
+          "$365,975",
+          "A by $12,460"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Offer A only wins if you keep the loan beyond about 6 years 8 months. The APR assumes you hold it for the full 30 years, which is why it ranks A first. If you expect to sell or refinance sooner, compare the cumulative cost at your expected exit date instead of relying on the APR."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How term length changes the gap"
+    },
+    {
+      "type": "paragraph",
+      "text": "The same upfront fee is spread over fewer payments on a shorter loan, so the APR gap widens. With the same $6,000 fee and 6.00% rate on $300,000, a 15-year term gives an APR of 6.317% (0.317 points above the rate) versus 6.189% over 30 years. A small personal loan shows it more starkly: $10,000 at 9.00% over 60 months has a $207.58 payment; with a 5% origination fee ($500) you receive $9,500 and the APR is 11.217%, more than two points above the rate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When APR can mislead"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Short holding periods: shown above, the APR spreads fees over the whole term.",
+        "Adjustable-rate loans: the CFPB notes the APR does not show the maximum possible rate, and warns against comparing fixed-rate and adjustable-rate loans on APR alone.",
+        "Which charges count is set by rules: this calculator and this article treat whatever fee total you type in as a financing charge. Items such as property taxes and insurance escrow are not part of the APR, so ask the lender which fees their disclosed APR includes.",
+        "Disclosed figures may differ slightly: for regular transactions Regulation Z treats a disclosed APR as accurate if it is within one-eighth of a percentage point of the actual figure."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Comparing a headline rate on one loan to an APR on another.",
+        "Ignoring fees entirely because the rate is lower.",
+        "Using the APR to decide how long to keep a loan; the break-even calculation above is the better tool.",
+        "Forgetting that financing the fees raises the balance you owe and the interest charged on it."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Illustrative numbers only. Rates, fees and which charges are included vary by lender and loan type. Use the figures on your own Loan Estimate or loan disclosure, which also states the lender APR, when you compare real offers."
     },
     {
       "type": "cta",

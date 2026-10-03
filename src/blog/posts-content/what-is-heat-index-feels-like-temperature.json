@@ -1,36 +1,114 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Simple Explanation"
-    },
-    {
       "type": "paragraph",
-      "text": "Your body cools itself through sweating. When sweat evaporates, it takes heat with it. High humidity means the air is already full of water vapor, so sweat cannot evaporate as efficiently. Your body keeps producing heat but cannot release it. The heat index quantifies this effect. It was developed by Robert Steadman in 1979 and later refined by NOAA. In simple terms: the heat index is what the temperature feels like to the human body."
+      "text": "The heat index, also called the apparent temperature, is what the temperature feels like to the human body when relative humidity is combined with the air temperature. That is how the National Weather Service describes it. It is reported in degrees Fahrenheit, so it can be read against a normal thermometer: at an air temperature of 94°F and 60% relative humidity, the calculator's formula gives a heat index of 110.2°F, meaning the day puts a heat load on you that a thermometer alone would not show."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Temperature + Humidity = Heat Index"
+      "text": "Why humidity changes how hot it feels"
     },
     {
       "type": "paragraph",
-      "text": "When humidity is low (under 40%), the heat index is close to the actual temperature. As humidity rises above 50%, the heat index starts climbing faster than the temperature. At 80°F with 40% humidity: heat index 80°F. At 80°F with 80% humidity: heat index 84°F. At 95°F with 50% humidity: heat index 107°F."
+      "text": "Your body gets rid of heat largely by sweating, and sweat only cools you when it evaporates. The National Weather Service explains that the rate of evaporation depends on the relative humidity: the more water vapor the air already holds, the slower sweat evaporates, and the less cooling you get from each drop. The heat index translates that loss of cooling into a single number on the temperature scale. Dry air at a given temperature lets sweat work well, so it feels more bearable. Humid air at the same temperature does not, so it feels hotter."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When to Check the Heat Index"
+      "text": "How the number is calculated"
     },
     {
       "type": "paragraph",
-      "text": "Above 80°F, the heat index starts to matter. Check it before planning outdoor exercise, sports practices, yard work, or any extended time outside. Many weather apps now show heat index alongside temperature. Our calculator lets you check specific combinations and understand the risk level."
+      "text": "The calculator uses a nine-term regression equation of air temperature T in °F and relative humidity R in percent: HI = -42.379 + 2.049T + 10.143R - 0.2248TR - 0.00684T squared - 0.0548R squared + 0.00123T squared R + 0.000853T R squared - 0.00000199T squared R squared. The calculator's documentation traces the idea to R.G. Steadman's 1979 model of human thermoregulation, simplified into a two-variable fit for public use. Below 80°F the calculator simply returns the air temperature. Published charts and weather services may apply extra adjustments in some temperature and humidity ranges, so a chart value can differ slightly from the calculator's output."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: one thermometer reading, five humidity levels"
+    },
+    {
+      "type": "paragraph",
+      "text": "To isolate the effect of humidity, hold the air temperature at 94°F and change only the relative humidity. Every figure below comes from the calculator's formula, rounded to one decimal place, and assumes shade with light wind."
+    },
+    {
+      "type": "table",
+      "headers": ["Relative humidity", "Heat index", "Difference from 94°F", "Tier (80 / 90 / 103 / 125 cutoffs)"],
+      "rows": [
+        ["20%", "90.4°F", "-3.6°F", "Extreme Caution"],
+        ["40%", "97.2°F", "+3.2°F", "Extreme Caution"],
+        ["50%", "102.9°F", "+8.9°F", "Extreme Caution"],
+        ["60%", "110.2°F", "+16.2°F", "Danger"],
+        ["70%", "119.0°F", "+25.0°F", "Danger"],
+        ["80%", "129.4°F", "+35.4°F", "Extreme Danger"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Going from 40% to 80% humidity at the same 94°F adds 32.2 degrees of felt heat. The 20% row is a reminder that the heat index is not always higher than the air temperature: in very dry air the formula returns a lower number. It is also outside the range where the calculator's documentation says the formula is most accurate (about 80°F to 110°F and 40% to 80% humidity), so treat that row as indicative only."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The four National Weather Service categories"
+    },
+    {
+      "type": "table",
+      "headers": ["Category", "Heat index", "Effects listed by the NWS"],
+      "rows": [
+        ["Caution", "80°F to 90°F", "Fatigue possible with prolonged exposure and/or physical activity"],
+        ["Extreme Caution", "90°F to 103°F", "Heat stroke, heat cramps, or heat exhaustion possible"],
+        ["Danger", "103°F to 124°F", "Heat cramps or heat exhaustion likely, heat stroke possible"],
+        ["Extreme Danger", "125°F or higher", "Heat stroke highly likely"]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the heat index leaves out"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Sunshine. The NWS notes that heat index values were devised for shady, light-wind conditions, and that exposure to full sunshine can increase them by up to 15°F. A 92°F afternoon at 65% humidity computes to 108.3°F in the shade; in full sun the felt value could approach 123.3°F.",
+        "Strong wind. The NWS warns that strong winds combined with very hot, dry air can also be hazardous, which the heat index does not capture.",
+        "You. The calculator's own limitations note that age, medications, body size and how used to the heat you are all shift personal risk, and that exertion adds heat the formula does not model.",
+        "The edge of the range. Under 80°F the calculator returns the air temperature, and near that edge the raw formula can land a fraction of a degree under it (80°F at 40% gives 79.9°F)."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes when reading it"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Treating it as the air temperature. A heat index of 110°F does not mean the thermometer will read 110°F; it means the body is under a load comparable to that.",
+        "Forgetting the shade assumption. If you will be working or exercising in direct sun, add a margin rather than reading the shaded value at face value.",
+        "Using stale or mismatched inputs. Humidity swings through the day; use the temperature and humidity measured at the same time and place.",
+        "Using it as the only tool for hard work in the sun. The NWS says that for day-to-day activities the heat index serves you well, but if you work outside or plan vigorous activity in full sun, use wet bulb globe temperature instead."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "The heat index is a screening number, not a medical assessment. If anyone shows confusion, slurred speech, seizures or unconsciousness in the heat, OSHA's guidance is to call 911 immediately and cool the person until help arrives. For personal health concerns in hot weather, talk to a clinician."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When to check it"
+    },
+    {
+      "type": "paragraph",
+      "text": "The heat index only differs meaningfully from the air temperature once it is warm and reasonably humid, which is why the calculator starts at 80°F. Check it before planning a long walk, yard work, a sports session or an outdoor event, and compare the result with the categories above. Then adjust for sun, wind, how hard you will be working and who is going to be outside with you."
     },
     {
       "type": "cta",
       "heading": "Check the Heat Index",
-      "body": "Our free heat index calculator shows the feels-like temperature instantly.",
+      "body": "Enter a temperature and a humidity level to see the feels-like value and its category.",
       "buttonLabel": "Open Calculator",
       "path": "/everyday/heat-index-calculator/"
     }

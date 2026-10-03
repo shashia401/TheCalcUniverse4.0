@@ -1,65 +1,148 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "A due date is a calendar estimate, not a prediction of the day your baby will arrive. Our calculator gives you the date that falls 280 days after the first day of your last period, and only a small minority of babies are born on that exact day: our calculator says about 5 percent, and an encyclopedia summary of the data says about 4 percent. The date is best read as the middle of a window of several weeks."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "How Due Dates Are Calculated"
+      "text": "How the date is calculated"
     },
     {
       "type": "paragraph",
-      "text": "The standard method is Naegele rule: first day of your last menstrual period (LMP) plus 280 days (40 weeks). This assumes a 28-day cycle with ovulation on day 14. For women with irregular cycles, conception date or early ultrasound dating is more accurate. Ultrasound measurement of the fetus in the first trimester (crown-rump length) is considered the most accurate method, with an error margin of about 5-7 days."
+      "text": "The method is Naegele's rule: due date = first day of last menstrual period (LMP) + 280 days, or 40 weeks. It assumes a 28-day cycle with ovulation on day 14. The classic shortcut, add one year, subtract three months and add seven days, is the same idea, but it can differ from the 280-day count by a few days because months have different lengths. For an LMP of May 31, 2027, counting 280 days gives March 6, 2028, while the month shortcut gives March 9, 2028. The calculator uses the 280-day count. For an LMP of January 11, 2027 both methods agree on October 18, 2027."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Factors That Affect Accuracy"
+      "text": "Why your cycle length changes the answer"
     },
     {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Cycle length: Women with cycles longer or shorter than 28 days will have different actual due dates. A 35-day cycle means ovulation happens around day 21, pushing the due date back by a week.",
-        "Irregular cycles: If your cycle length varies significantly month to month, LMP-based calculation is less reliable. Early ultrasound dating is strongly recommended.",
-        "Conception date uncertainty: If you are unsure of your LMP or have irregular cycles, ultrasound dating in the first trimester is the best option.",
-        "Multiple pregnancies: Twins and triplets often arrive earlier than singleton pregnancies. The average gestational age for twins is 36 weeks."
+      "type": "paragraph",
+      "text": "If your cycle is not 28 days, ovulation probably did not fall on day 14. The calculator handles this by shifting the date by the difference between your cycle length and 28 days, which assumes the time from ovulation to the next period stays constant. Here is the effect for the same LMP of January 11, 2027:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Average cycle length",
+        "Shift from 28-day date",
+        "Estimated due date",
+        "Assumed ovulation (LMP + days)"
+      ],
+      "rows": [
+        [
+          "24 days",
+          "-4 days",
+          "October 14, 2027",
+          "day 10"
+        ],
+        [
+          "28 days",
+          "none",
+          "October 18, 2027",
+          "day 14"
+        ],
+        [
+          "32 days",
+          "+4 days",
+          "October 22, 2027",
+          "day 18"
+        ],
+        [
+          "35 days",
+          "+7 days",
+          "October 25, 2027",
+          "day 21"
+        ],
+        [
+          "40 days",
+          "+12 days",
+          "October 30, 2027",
+          "day 26"
+        ]
       ]
     },
     {
+      "type": "paragraph",
+      "text": "The shift applies only to the LMP method. If you enter a conception date or an IVF transfer date, the cycle-length field is ignored, because those dates already tell the calculator when the pregnancy began. Cycle length is also an average. If your cycles vary by a week or more, no adjustment fixes the uncertainty, and an early ultrasound is the better way to set the date."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "What the Research Says"
+      "text": "A due date is a window, not a day"
     },
     {
       "type": "paragraph",
-      "text": "Studies show that only about 4-5% of babies are born on their exact due date. About 60% are born within one week of their due date (either side). Full-term pregnancy is defined as 37-42 weeks. Babies born at 37-38 weeks are considered early-term, 39-40 weeks full-term, and 41-42 weeks late-term. Due dates shifted by 3-5 days based on ultrasound measurements are common and normal."
+      "text": "The US National Institute of Child Health and Human Development describes a typical pregnancy as about 40 weeks, full term as 39 weeks 0 days through 40 weeks 6 days, early term as 37 to 38 weeks and preterm as before 37 weeks. The calculator's reference list adds late term (41 weeks 0 days to 41 weeks 6 days) and post-term (42 weeks and beyond). For an estimated due date of October 18, 2027, those labels fall on these dates:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Stage",
+        "Gestational age",
+        "Dates for this example"
+      ],
+      "rows": [
+        [
+          "Preterm",
+          "Before 37w0d",
+          "Before September 27, 2027"
+        ],
+        [
+          "Early term",
+          "37w0d to 38w6d",
+          "September 27, 2027 to October 10, 2027"
+        ],
+        [
+          "Full term",
+          "39w0d to 40w6d",
+          "October 11, 2027 to October 24, 2027"
+        ],
+        [
+          "Late term",
+          "41w0d to 41w6d",
+          "October 25, 2027 to October 31, 2027"
+        ],
+        [
+          "Post-term",
+          "42w0d and beyond",
+          "November 1, 2027 onward"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Notice that the due date itself, October 18, 2027, is the 40-week mark, in the middle of the full-term stretch. A birth on October 4, 2027 falls in the early-term stretch and one on October 28, 2027 in the late-term stretch; neither is on the date, which is why providers talk about windows."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What ultrasound dating changes"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator's references, which cite the American College of Obstetricians and Gynecologists, say that crown-rump length measured by ultrasound at 8 to 13 weeks dates a pregnancy to within about 5 to 7 days, and that a provider usually revises the LMP-based date when the scan differs from it by 7 days or more. In our example, 8 weeks falls on March 8, 2027 and 13 weeks 6 days on April 18, 2027. Suppose a scan in that window suggests a date 9 days earlier than the LMP estimate. Because that is more than 7 days, the due date would typically move from October 18, 2027 to October 9, 2027. A 4-day difference, by contrast, would normally leave the LMP date alone. That example is an illustration of the rule, not a prediction about any real scan, and the decision belongs to your provider."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating the date as a deadline. The window above spans five weeks, from the start of early term to the start of post-term.",
+        "Entering a conception date as if it were the LMP. The calculator subtracts 14 days from a conception date to find the equivalent LMP, so enter the date you believe ovulation and conception happened.",
+        "Using the wrong IVF offset. For a day-5 blastocyst transfer the calculator counts back 19 days to an LMP equivalent, which means the due date is the transfer date plus 261 days.",
+        "Confusing gestational age with fetal age. Gestational age counts from the LMP and is what providers use; fetal age counts from conception and is about two weeks less.",
+        "Comparing results from tools that ignore cycle length. They can differ from ours by a week or more for long or short cycles."
+      ]
     },
     {
       "type": "callout",
-      "variant": "tip",
-      "text": "Treat your due date as a target, not a deadline. A healthy pregnancy can go 2 weeks past the due date. Your healthcare provider will monitor you closely if you go past 41 weeks."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Can I make my due date more accurate?"
-    },
-    {
-      "type": "paragraph",
-      "text": "First trimester ultrasound is the most accurate method. If you have a dating ultrasound before 13 weeks, the due date from that measurement is more reliable than LMP-based calculation. Discuss with your provider whether an early ultrasound would be beneficial."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How is due date calculated for IVF pregnancies?"
-    },
-    {
-      "type": "paragraph",
-      "text": "For IVF pregnancies, the due date is calculated from the embryo transfer date plus the age of the embryo. A day-5 blastocyst transfer would have a due date of transfer date plus 263 days. Your fertility clinic will provide an exact due date."
+      "variant": "warning",
+      "text": "This calculator gives a general estimate and cannot assess an individual pregnancy. Your due date, and what to do if you pass it, are decisions for your midwife or doctor; talk to them about any concerns."
     },
     {
       "type": "cta",

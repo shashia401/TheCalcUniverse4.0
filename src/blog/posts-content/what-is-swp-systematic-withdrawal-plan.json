@@ -1,29 +1,181 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "An SWP (systematic withdrawal plan) is a standing instruction to a mutual fund to redeem a fixed amount from your holding on a fixed date, usually every month, and pay it into your bank account. To raise that cash the fund sells the number of units that the amount buys at that day's NAV (net asset value per unit). Whatever units remain stay invested and keep moving with the market. An SWP is the mirror image of a SIP: a SIP buys units on a schedule, an SWP sells them on a schedule. It creates a paycheque-like cash flow by selling a slice of your own money, not by producing any extra return."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "How SWP Works"
+      "text": "How an SWP works, step by step"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "You hold units in a scheme, bought as a lump sum or built up through a SIP.",
+        "You give the fund house the amount, the date or frequency, and the start and end (or 'until the balance runs out'). Minimum amounts, allowed frequencies and exit-load rules differ by scheme, so check the scheme's offer document.",
+        "On each date, units redeemed = withdrawal amount divided by that day's NAV.",
+        "The proceeds reach your bank account after the scheme's normal settlement period.",
+        "The units you did not sell stay invested, so next month's NAV changes the value of a smaller holding."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: how many units each payout sells"
     },
     {
       "type": "paragraph",
-      "text": "You set up an SWP in your mutual fund folio specifying: the amount you want to receive monthly, the frequency (monthly/quarterly), and the duration. Every month, units equivalent to your withdrawal amount are redeemed from your fund, and the proceeds are credited to your bank account. Meanwhile, your remaining units continue to participate in market movements and earn returns."
+      "text": "Suppose you invest Rs. 10,00,000 at a NAV of Rs. 100, which buys 10,000 units, and set up an SWP of Rs. 10,000 a month. The NAVs below are invented to show the arithmetic; they are not data from any fund. The last column is the part of each payout that is profit over your purchase NAV of Rs. 100 (a negative figure is a loss on those units)."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Month",
+        "NAV (Rs.)",
+        "Units sold",
+        "Units left",
+        "Value of units left",
+        "Profit in payout"
+      ],
+      "rows": [
+        [
+          "1",
+          "100",
+          "100.00",
+          "9,900.00",
+          "Rs. 9,90,000",
+          "Rs. 0"
+        ],
+        [
+          "2",
+          "104",
+          "96.15",
+          "9,803.85",
+          "Rs. 10,19,600",
+          "Rs. 385"
+        ],
+        [
+          "3",
+          "98",
+          "102.04",
+          "9,701.81",
+          "Rs. 9,50,777",
+          "-Rs. 204"
+        ],
+        [
+          "4",
+          "92",
+          "108.70",
+          "9,593.11",
+          "Rs. 8,82,566",
+          "-Rs. 870"
+        ],
+        [
+          "5",
+          "97",
+          "103.09",
+          "9,490.02",
+          "Rs. 9,20,532",
+          "-Rs. 309"
+        ],
+        [
+          "6",
+          "105",
+          "95.24",
+          "9,394.78",
+          "Rs. 9,86,452",
+          "Rs. 476"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The payout is the same Rs. 10,000 every month, but the units sold range from 95.24 to 108.70. A fixed rupee amount sells more units when the NAV is low, which is the price of a steady income. After six months you have received Rs. 60,000 and hold units worth Rs. 9,86,452, a combined Rs. 10,46,452 against Rs. 10,00,000 invested, in a period when the NAV ended 5% above where it began. The split in the last column matters because each payout is part return of your original cost and part gain or loss. How that gain is taxed depends on rules that change over time, so check the current rules or ask a registered tax adviser instead of relying on a blog post."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Key SWP Benefits"
+      "text": "Worked example: will the money last?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The SWP calculator on this site simulates the plan month by month: the balance first grows by one month of return (the annual rate divided by 12), then the withdrawal is subtracted. Take Rs. 40,00,000, an assumed 8% a year and Rs. 25,000 a month for 30 years. That is Rs. 3,00,000 a year, or 7.5% of the starting amount. The 8% is an assumption chosen for illustration, not a forecast, and past performance does not guarantee future results."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Year",
+        "Balance at end of year",
+        "Cumulative withdrawn"
+      ],
+      "rows": [
+        [
+          "5",
+          "Rs. 41,22,461",
+          "Rs. 15,00,000"
+        ],
+        [
+          "10",
+          "Rs. 43,04,910",
+          "Rs. 30,00,000"
+        ],
+        [
+          "15",
+          "Rs. 45,76,730",
+          "Rs. 45,00,000"
+        ],
+        [
+          "20",
+          "Rs. 49,81,701",
+          "Rs. 60,00,000"
+        ],
+        [
+          "25",
+          "Rs. 55,85,044",
+          "Rs. 75,00,000"
+        ],
+        [
+          "30",
+          "Rs. 64,83,932",
+          "Rs. 90,00,000"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Because the withdrawal is below the assumed growth, the balance rises slowly even while you spend it. Now raise the payout. At Rs. 30,000 a month (9% of the starting amount) the same corpus runs out after about 27.6 years; at Rs. 35,000 (10.5%) after 18.0 years; at Rs. 40,000 (12%) after 13.8 years. The result is very sensitive to the withdrawal, so a few thousand rupees a month changes the answer from lasting forever to lasting a working lifetime."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "A stated 8% in the calculator means 0.6667% per month, which compounds to about 8.30% over a full year. If a fund reports an annualised return, put it on the same basis before you compare."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Regular income: Predictable cash flow every month for retirement expenses.",
-        "Growth potential: Remaining corpus stays invested and continues earning returns.",
-        "Tax efficient: Only capital gains are taxed, not the entire withdrawal amount.",
-        "Flexibility: Change withdrawal amount, frequency, or stop anytime.",
-        "No TDS: Unlike FD interest, SWP does not attract TDS (tax is paid on capital gains at the time of filing)."
+        "Treating the payout as income the fund earns. Part of every payout can be your own capital. If you withdraw more than the portfolio grows, the balance shrinks, and it shrinks faster the lower it gets.",
+        "Assuming a smooth return. The calculator applies the same return every month. A fall early in the plan hurts more than the same fall later, because you are selling units while they are cheap. A separate post on SWP during market downturns works this through with hypothetical return paths.",
+        "Ignoring inflation. A fixed Rs. 25,000 buys less each year. At an assumed 5% inflation its purchasing power is about Rs. 15,348 in today's money after 10 years and about Rs. 9,422 after 20 years (25,000 divided by 1.05 to the power of the years).",
+        "Overlooking costs and rules. Exit loads, taxes and the lock-in or holding conditions of the units being sold are not in the calculator and can change what lands in your account.",
+        "Using an SWP from a fund you cannot afford to see fall. A scheme that holds mostly shares can swing widely from year to year, and an SWP forces you to sell through the swings."
       ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When an SWP fits and when it does not"
+    },
+    {
+      "type": "paragraph",
+      "text": "An SWP suits someone who already has a lump of money in funds and wants regular cash from it without closing the whole holding: a retiree, a person living off a maturity amount, or anyone covering a fixed monthly expense. It fits poorly if you cannot tolerate the balance fluctuating, if you need a guaranteed income for life regardless of how long you live, or if the withdrawal is so large relative to the corpus that it exhausts it in a few years. Use the calculator with several return assumptions, such as 6%, 8% and 10%, and treat the lowest one as your planning case. A SEBI-registered adviser can look at your whole situation, including taxes and health costs, which no calculator can."
     },
     {
       "type": "cta",

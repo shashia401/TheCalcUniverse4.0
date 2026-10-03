@@ -1,37 +1,238 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "To read an amortization schedule, follow one row at a time: each row takes the balance left after the previous payment, charges one month of interest on it, treats the rest of the fixed payment as principal, and shows the new balance. The five columns are payment number, interest, principal, payment (the same every row) and remaining balance. This guide reads a real schedule line by line using a $200,000 loan at 7% over 30 years, whose payment is $1,330.60."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Anatomy of an Amortization Schedule"
+      "text": "Read one row before reading the table"
     },
     {
       "type": "paragraph",
-      "text": "A standard amortization schedule has five columns: payment number, payment amount, principal portion, interest portion, and remaining balance. Some schedules also show cumulative interest paid. The schedule starts at payment 1 and ends at the final payment (e.g., payment 360 for a 30-year mortgage)."
+      "text": "Take payment 1. Interest = balance x annual rate / 12 = $200,000 x 0.07 / 12 = $1,166.67. Principal = payment - interest = $1,330.60 - $1,166.67 = $163.94 (the difference is rounding). New balance = $200,000 - $163.94 = $199,836.06. Payment 2 starts from that balance: $199,836.06 x 0.07 / 12 = $1,165.71 of interest and $164.89 of principal. If a row on your own schedule does not reproduce this way, the lender is using a different payment date convention, fees or rounding, and that is worth asking about."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Key Numbers to Look For"
+      "text": "The schedule at selected payments"
     },
     {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "First payment interest: This is your highest interest payment ever. For a $300,000 mortgage at 6%, this is $1,500.",
-        "Crossover point: The payment where principal exceeds interest. For a 30-year mortgage at 6%, this happens around year 18. For a 15-year mortgage, it is much sooner.",
-        "Total interest: The sum of all interest payments. This is often more than you expect.",
-        "Extra payment impact: Many amortization calculators show a side-by-side comparison of normal vs extra payment schedules."
+      "type": "paragraph",
+      "text": "Assumptions: $200,000, 7% annual rate, 360 monthly payments, payment $1,330.60 (unrounded figures in the calculation, displayed to the cent)."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Payment no.",
+        "Interest",
+        "Principal",
+        "Balance after payment",
+        "Cumulative interest"
+      ],
+      "rows": [
+        [
+          "1",
+          "$1,166.67",
+          "$163.94",
+          "$199,836.06",
+          "$1,166.67"
+        ],
+        [
+          "2",
+          "$1,165.71",
+          "$164.89",
+          "$199,671.17",
+          "$2,332.38"
+        ],
+        [
+          "3",
+          "$1,164.75",
+          "$165.86",
+          "$199,505.31",
+          "$3,497.13"
+        ],
+        [
+          "12",
+          "$1,155.84",
+          "$174.77",
+          "$197,968.38",
+          "$13,935.64"
+        ],
+        [
+          "60",
+          "$1,099.55",
+          "$231.06",
+          "$188,263.18",
+          "$68,099.48"
+        ],
+        [
+          "120",
+          "$1,003.06",
+          "$327.55",
+          "$171,624.77",
+          "$131,297.37"
+        ],
+        [
+          "180",
+          "$866.26",
+          "$464.34",
+          "$148,037.73",
+          "$187,546.63"
+        ],
+        [
+          "242",
+          "$664.64",
+          "$665.97",
+          "$113,272.09",
+          "$235,278.49"
+        ],
+        [
+          "300",
+          "$397.43",
+          "$933.17",
+          "$67,198.20",
+          "$266,379.70"
+        ],
+        [
+          "359",
+          "$15.39",
+          "$1,315.22",
+          "$1,322.89",
+          "$279,010.08"
+        ],
+        [
+          "360",
+          "$7.72",
+          "$1,322.89",
+          "$0.00",
+          "$279,017.80"
+        ]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Use the Schedule"
+      "text": "Three numbers to find"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Crossover payment. The first row where principal exceeds interest is payment 242 (year 20, month 2): interest $664.64, principal $665.97. Until then, interest takes the larger share, and in payment 1 it takes 87.7% of the money. For a 15-year loan with the same amount and rate (payment $1,797.66) the crossover comes at payment 62.",
+        "Half-way is not half the balance. After 180 payments, half the term, the balance is still $148,037.73, 74% of the original loan. The balance only drops below $100,000 at payment 261, which is 72.5% of the way through the term.",
+        "Total interest. Cumulative interest ends at $279,017.80, about 1.4 times the amount borrowed. Interest in the first 12 payments alone is $13,935.64, against $2,031.62 of principal."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Year-end view"
     },
     {
       "type": "paragraph",
-      "text": "Most people check the first few payments and the total interest. Savvy borrowers look for the crossover point and experiment with extra payment scenarios. Even one extra payment per year can shift the crossover point years earlier. Our amortization calculator generates a full schedule and shows extra payment comparisons."
+      "text": "Lenders often show an annual summary instead. It is easier to see principal build up:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Point in time",
+        "Principal repaid so far",
+        "Interest paid so far",
+        "Balance"
+      ],
+      "rows": [
+        [
+          "End of year 1",
+          "$2,031.62",
+          "$13,935.64",
+          "$197,968.38"
+        ],
+        [
+          "End of year 5",
+          "$11,736.82",
+          "$68,099.48",
+          "$188,263.18"
+        ],
+        [
+          "End of year 10",
+          "$28,375.23",
+          "$131,297.37",
+          "$171,624.77"
+        ],
+        [
+          "End of year 15",
+          "$51,962.27",
+          "$187,546.63",
+          "$148,037.73"
+        ],
+        [
+          "End of year 20",
+          "$85,399.84",
+          "$233,945.35",
+          "$114,600.16"
+        ],
+        [
+          "End of year 25",
+          "$132,801.80",
+          "$266,379.70",
+          "$67,198.20"
+        ],
+        [
+          "End of year 30",
+          "$200,000.00",
+          "$279,017.80",
+          "$0.00"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What extra principal does to the rows"
+    },
+    {
+      "type": "paragraph",
+      "text": "An extra payment shows up in the principal column and lowers every later balance, which lowers every later interest charge. If you added $200 in payment 1, principal for that row would be $363.94 instead of $163.94, and the balance would be $199,636.06. Payment 2 interest would then be $1,164.54 instead of $1,165.71. Small numbers, but the saving repeats every month for the rest of the loan. The article on extra payments quantifies this for a different loan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Questions the schedule answers"
+    },
+    {
+      "type": "list",
+      "items": [
+        "What do I owe if I pay off now? The balance column after your most recent payment, plus any interest accrued since and any lender payoff fees. After 60 payments on this loan that balance is $188,263.18.",
+        "How much of what I have paid was interest? After five years the borrower has paid about $79,836 in total (60 x $1,330.60), of which $68,099.48 (85.3%) was interest and $11,736.82 (14.7%) was principal.",
+        "How much would one extra payment save? Find the row, then compare. An extra $5,000 applied with payment 60 removes $5,000 from the balance on that row, so every later month starts from a lower number and accrues less interest.",
+        "When will principal start doing the heavy lifting? Look for the crossover row described above, then at the balance column, not the principal column: the balance is the number that actually falls and the one your next interest charge is based on."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions for every figure in this guide: fixed 7.00% annual rate, interest charged monthly at one-twelfth of the annual rate on the balance after the previous payment, payments at the end of each month, unrounded payment carried through the schedule and displayed to the cent. Real lenders round each payment, so your own schedule can differ by a few cents per row."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes when reading a schedule"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating the principal column as equity in the property. Equity is the market value minus the balance, and value can move either way.",
+        "Comparing schedules with different payment dates or day-count conventions. Lenders that accrue daily interest can show slightly different rows.",
+        "Forgetting that the payment on your bill may include escrow for tax and insurance, which never appears in an interest-and-principal schedule.",
+        "Reading the last row as a typical payment. Payment 360 here has just $7.72 of interest, and rounding adjusts the final payment by a few cents.",
+        "Assuming the schedule is fixed. It applies to a fixed rate; adjustable-rate loans are recalculated after each rate change."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "To check your own schedule, recompute row 1 yourself: balance x rate / 12 should equal the interest shown. If it does, the rest of the schedule follows from the same arithmetic."
     },
     {
       "type": "cta",

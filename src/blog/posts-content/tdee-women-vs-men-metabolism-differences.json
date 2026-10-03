@@ -1,37 +1,171 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "In our calculator, sex changes the result through one number: the Mifflin-St Jeor equation adds 5 kcal for men and subtracts 161 kcal for women, a gap of 166 kcal of basal metabolic rate (BMR) when weight, height and age are identical. At the moderate activity factor of 1.55 that becomes about 257 kcal of daily energy expenditure (TDEE). That constant is best read as a stand-in for typical differences in body composition, not as a law of biology, and the Katch-McArdle equation shows why: it has no sex term at all."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Why the Difference Exists"
+      "text": "Same stats, different sex"
     },
     {
       "type": "paragraph",
-      "text": "The difference is primarily body composition. Men average 10-20% more muscle mass and 10-20% less body fat than women at the same weight. Muscle is metabolically active (burns more calories at rest), while fat is less active. This means a man and woman of the same weight and age typically differ by 100-300 calories in TDEE."
+      "text": "Take two 35-year-olds who are both 170 cm tall and weigh 70 kg. Mifflin-St Jeor gives a man 10 x 70 + 6.25 x 170 - 5 x 35 + 5 = 1,592.5 kcal and a woman 10 x 70 + 6.25 x 170 - 5 x 35 - 161 = 1,426.5 kcal. Multiplying by each activity factor:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Activity level",
+        "Factor",
+        "Man TDEE (kcal)",
+        "Woman TDEE (kcal)",
+        "Gap (kcal)"
+      ],
+      "rows": [
+        [
+          "Sedentary",
+          "1.2",
+          "1,911",
+          "1,712",
+          "199"
+        ],
+        [
+          "Light exercise",
+          "1.375",
+          "2,190",
+          "1,961",
+          "228"
+        ],
+        [
+          "Moderate exercise",
+          "1.55",
+          "2,468",
+          "2,211",
+          "257"
+        ],
+        [
+          "Heavy exercise",
+          "1.725",
+          "2,747",
+          "2,461",
+          "286"
+        ],
+        [
+          "Athlete or physical job",
+          "1.9",
+          "3,026",
+          "2,710",
+          "315"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The gap is the same 166 kcal multiplied by the activity factor, so it grows from about 199 kcal for a sedentary person to about 315 kcal at the top factor. All figures are rounded to the nearest kcal and describe these two hypothetical people only."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Other Factors Affecting Women TDEE"
+      "text": "Why the equation has a sex term"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Katch-McArdle equation, BMR = 370 + 21.6 x lean mass in kg, works from lean mass rather than total weight. If body composition is what really drives the difference, then two people with the same lean mass should get the same BMR whatever their sex. This table holds weight at 70 kg and changes only body fat:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Body fat",
+        "Lean mass (kg)",
+        "Katch-McArdle BMR (kcal)",
+        "TDEE at 1.55 (kcal)"
+      ],
+      "rows": [
+        [
+          "15%",
+          "59.5",
+          "1,655",
+          "2,566"
+        ],
+        [
+          "20%",
+          "56.0",
+          "1,580",
+          "2,448"
+        ],
+        [
+          "25%",
+          "52.5",
+          "1,504",
+          "2,331"
+        ],
+        [
+          "30%",
+          "49.0",
+          "1,428",
+          "2,214"
+        ],
+        [
+          "35%",
+          "45.5",
+          "1,353",
+          "2,097"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Between 20% and 30% body fat the BMR differs by 151 kcal, which is close to the 166 kcal that the Mifflin-St Jeor sex term assigns. So body composition alone can produce a gap of the same size as the sex term. I am not claiming that is how the constant was derived, only that composition is a plausible explanation for it. The same table also makes the limit obvious. A man at 30% body fat and a woman at 20% body fat, both 70 kg, would have Katch-McArdle BMRs of 1,428 and 1,580 kcal, so the woman comes out higher. If both are at 25%, the difference is zero. I am not quoting population averages here because I did not source them; the point is that individuals overlap widely and sex is a weak shortcut for composition."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why real gaps are usually bigger"
+    },
+    {
+      "type": "paragraph",
+      "text": "People rarely have identical measurements, and size does most of the work. Compare a man of 80 kg and 178 cm with a woman of 62 kg and 165 cm, both 35. Mifflin-St Jeor gives 1,743 kcal and 1,315 kcal of BMR, a gap of 427 kcal. The pieces: 18 kg of extra weight contributes 180 kcal, 13 cm of extra height contributes about 81 kcal, and the sex constant contributes 166 kcal, so the sex term is about 39% of this particular gap. At factor 1.55 their TDEEs are 2,701 and 2,039 kcal, a difference of 662. These are two invented people, chosen to show the arithmetic, not typical men and women."
+    },
+    {
+      "type": "paragraph",
+      "text": "This is why copying a partner's or friend's calorie target backfires. A 1,800 kcal day is a 239 kcal deficit for the woman above and a 901 kcal deficit for the man. Work from your own TDEE, not someone else's."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the calculator does not model"
+    },
+    {
+      "type": "paragraph",
+      "text": "The sex setting in the calculator has two values, and it makes no adjustment for pregnancy, breastfeeding, the menstrual cycle or menopause. What can be said, using sources I opened:"
     },
     {
       "type": "list",
-      "ordered": false,
       "items": [
-        "Menstrual cycle: Metabolism may increase 5-10% during the luteal phase (after ovulation). Some women experience increased appetite during this phase.",
-        "Pregnancy: TDEE increases significantly, especially in the second and third trimesters. The energy cost of pregnancy totals about 80,000 calories.",
-        "Breastfeeding: Adds 300-500 calories to TDEE daily.",
-        "Menopause: Declining estrogen and progesterone are associated with decreased BMR and increased fat storage, particularly visceral fat."
+        "Pregnancy and breastfeeding: the US National Institute of Diabetes and Digestive and Kidney Diseases says you need no extra calories in the first trimester, about 340 extra calories a day in the second and about 450 in the third, and that you may not need extra in the final weeks. For breastfeeding it says needs depend on how much body fat you have and how active you are, and advises talking to your health care professional.",
+        "Menstrual cycle: a systematic review and meta-analysis of 26 studies covering 318 women found a small but statistically significant tendency toward higher resting metabolic rate in the luteal phase. In studies published since 2000 the effect was smaller and not statistically significant, the studies were mostly small, and the authors could not express the difference reliably in kcal per day. It is not a number to build a diet around.",
+        "Menopause and hormone treatment: I found no source I could open that gives a reliable calorie adjustment, so I give none. If your situation is not captured by the male and female settings, a clinician or dietitian can advise."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What This Means For Diet Planning"
+      "text": "Common mistakes"
     },
     {
-      "type": "paragraph",
-      "text": "Women should not compare their calorie intake to men. A 1,800-calorie diet might be a 300-calorie deficit for a woman with TDEE 2,100, while it would be a 700-calorie deficit for a man with TDEE 2,500. Use your own TDEE, not someone else is. Women should also never go below 1,200 calories per day without medical supervision."
+      "type": "list",
+      "items": [
+        "Assuming the sex setting is a measurement. It is an average-based shortcut; if you know your body fat percentage, entering it makes the calculator use Katch-McArdle and removes the sex term entirely.",
+        "Entering a body fat percentage that is a guess. Katch-McArdle is only as good as the figure you give it.",
+        "Eating below the calculator's floors of 1,200 kcal (women) and 1,500 kcal (men) to match a faster plan. The calculator flags these as minimums; going lower belongs under medical supervision.",
+        "Using a single estimate for months. TDEE changes as weight changes, so recalculate and check against the scale."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "These figures are educational estimates from standard equations, not medical advice. If you are pregnant, breastfeeding, have a medical condition or take medication that affects weight, talk to your clinician before changing how much you eat."
     },
     {
       "type": "cta",

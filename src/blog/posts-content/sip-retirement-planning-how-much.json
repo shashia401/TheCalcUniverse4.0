@@ -1,22 +1,156 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "SIP for Retirement — The Advantage of Starting Early"
-    },
-    {
       "type": "paragraph",
-      "text": "Retirement SIPs benefit enormously from time. The monthly investment needed drops dramatically the earlier you start. For a ₹2 crore retirement corpus at age 60 assuming 12% returns: starting at 25 needs ₹4,500/month, at 30 needs ₹8,000/month, at 35 needs ₹14,000/month, at 40 needs ₹25,000/month, at 45 needs ₹47,000/month."
+      "text": "The SIP you need for retirement depends on the monthly spending you want at retirement, not on a round-number corpus. Using Rs. 50,000 a month in today's money, 6% inflation, a retirement at 60 and a 25-year retirement, a 30-year-old needs a corpus of about Rs. 6.46 crore, which takes a flat SIP of about Rs. 18,289 a month at an assumed 12%. These are assumptions, not forecasts, and the range below shows how quickly the answer moves when they change."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "From SIP to SWP in Retirement"
+      "text": "Step 1: Convert today's spending into spending at 60"
     },
     {
       "type": "paragraph",
-      "text": "During your working years, you build the corpus through SIP. In retirement, you use an SWP (Systematic Withdrawal Plan) to generate monthly income from that corpus. A well-planned SIP-to-SWP strategy ensures your savings last throughout retirement. The SWP calculator helps you plan the withdrawal phase."
+      "text": "Prices compound. Rs. 50,000 a month today, grown at an assumed 6% a year for 30 years, becomes 50,000 times 1.06 to the power 30, or Rs. 2,87,175 a month at age 60. A figure like Rs. 2 crore sounds large, but at 6% inflation it has the buying power of only Rs. 34.8 lakh in today's money after 30 years. Spent at that age-60 rate of Rs. 2,87,175 a month, with the balance earning 8% a year, Rs. 2 crore lasts 77 months, about 6.4 years."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 2: Size the corpus for a 25-year retirement"
+    },
+    {
+      "type": "paragraph",
+      "text": "The corpus must pay a monthly amount that rises 6% every year for 25 years while the balance earns an assumed 8%. I simulated this month by month, using the same order of steps as the SWP calculator (growth first, then the withdrawal) and raising the withdrawal once a year, and searched for the smallest starting balance that never runs out. As a check, with no inflation indexing the same routine matches the standard annuity formula to the paisa (Rs. 1,29,56,452 for Rs. 1,00,000 a month over 25 years at 8%). With indexing, the corpus comes to about 18.7 times the first year's spending."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 3: Work back to the SIP, by starting age"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Start age",
+        "Years to 60",
+        "Monthly spend at 60",
+        "Corpus needed",
+        "Flat SIP at 12%",
+        "Start SIP with 8% yearly step-up"
+      ],
+      "rows": [
+        [
+          "25",
+          "35",
+          "Rs. 3,84,304",
+          "Rs. 8.64 crore",
+          "Rs. 13,301",
+          "Rs. 6,251"
+        ],
+        [
+          "30",
+          "30",
+          "Rs. 2,87,175",
+          "Rs. 6.46 crore",
+          "Rs. 18,289",
+          "Rs. 9,116"
+        ],
+        [
+          "35",
+          "25",
+          "Rs. 2,14,594",
+          "Rs. 4.82 crore",
+          "Rs. 25,422",
+          "Rs. 13,628"
+        ],
+        [
+          "40",
+          "20",
+          "Rs. 1,60,357",
+          "Rs. 3.60 crore",
+          "Rs. 36,079",
+          "Rs. 21,147"
+        ],
+        [
+          "45",
+          "15",
+          "Rs. 1,19,828",
+          "Rs. 2.69 crore",
+          "Rs. 53,387",
+          "Rs. 34,874"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The flat SIP column solves the SIP calculator's formula for the instalment, with 12% applied as 1% a month and instalments at the start of each month. The target is the same Rs. 50,000 a month in today's money for every age, so someone starting at 25 needs a bigger nominal corpus (more years of inflation) but a smaller monthly SIP. Each five-year delay raises the required instalment by roughly 40% at these ages: from Rs. 18,289 at 30 to Rs. 25,422 at 35 to Rs. 36,079 at 40."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What if the SIP earns less than 12%?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The age-30 plan above assumes 12% while you save. Keep the same Rs. 18,289 instalment for 30 years and the result at other returns is: Rs. 2,74,38,899 at 8% (42.5% of the target), Rs. 4,16,86,581 at 10% (64.6%) and Rs. 6,45,58,593 at 12%. Holding the target fixed, a 10% return would need Rs. 28,323 a month instead, roughly 55% more. Treat the 12% plan as the optimistic one, and decide now whether you would raise the SIP, work longer or spend less if the first decade disappoints."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What if the return in retirement is not 8%?"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Return in retirement",
+        "Corpus needed (age 30 case)"
+      ],
+      "rows": [
+        [
+          "7%",
+          "Rs. 7.25 crore"
+        ],
+        [
+          "8%",
+          "Rs. 6.46 crore"
+        ],
+        [
+          "9%",
+          "Rs. 5.78 crore"
+        ],
+        [
+          "10%",
+          "Rs. 5.20 crore"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "One percentage point on the retirement return moves the corpus by roughly Rs. 58 to 80 lakh. This is why a retirement plan should be tested at lower returns than you hope for, and why most people shift part of the corpus to lower-risk holdings as retirement approaches."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "From SIP to SWP"
+    },
+    {
+      "type": "paragraph",
+      "text": "In retirement, a systematic withdrawal plan (SWP) redeems units on a schedule to pay you a monthly amount. The SWP calculator uses a fixed withdrawal, so it does not index to inflation. For example, Rs. 2 crore withdrawn at Rs. 1,50,000 a month with 8% growth lasts about 27.6 years, but Rs. 1,50,000 buys steadily less each year. Taxes and fund costs on withdrawals are not included, and tax treatment changes over time, so check the current rules."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Picking a round target such as Rs. 2 crore without converting it into today's money first.",
+        "Assuming the equity return of the accumulation years continues unchanged through retirement.",
+        "Planning for only 15 or 20 years of retirement. Living longer than planned is the risk the corpus exists to cover.",
+        "Treating a flat SIP as fixed forever. If your income rises, a yearly step-up reduces the starting instalment as shown in the last column.",
+        "Counting EPF, NPS or other savings twice, or not at all. Subtract what other sources will provide from the target before sizing the SIP."
+      ]
     },
     {
       "type": "cta",

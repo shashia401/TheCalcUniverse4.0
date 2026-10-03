@@ -1,90 +1,102 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "OSHA Heat Safety Recommendations"
-    },
-    {
       "type": "paragraph",
-      "text": "OSHA recommends heat safety programs for any workplace where employees may be exposed to heat indexes above 80°F. Key elements include: acclimatization (gradual exposure over 7-14 days), water availability (8 oz every 20 minutes), rest breaks in shaded or air-conditioned areas, heat illness training for all employees, and emergency response planning."
+      "text": "Employers must keep workers safe from heat, but the legal route is narrower than many people assume. OSHA's heat pages state that there is no federal OSHA heat standard; instead OSHA relies on the General Duty Clause, which requires employers to provide a workplace free from recognized hazards that are causing or likely to cause death or serious harm. Five states, which OSHA lists as California, Colorado, Minnesota, Oregon and Washington, have their own heat rules. Whatever the legal setting, OSHA's practical guidance rests on three things: water, rest and shade, plus time for new workers to adjust to the heat."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Heat rules can change, and they differ by state and employer. This article summarizes OSHA's published guidance as we read it and is not legal advice. Check osha.gov and your state agency for the rules that apply to your job."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Work/Rest Ratios by Heat Index"
+      "text": "Water, rest and shade"
     },
     {
-      "type": "table",
-      "headers": [
-        "Heat Index",
-        "Work/Rest Ratio (Light)",
-        "Work/Rest Ratio (Heavy)",
-        "Water per Hour"
-      ],
-      "rows": [
-        [
-          "80-90°F",
-          "Normal, watch for symptoms",
-          "50 min work, 10 min rest",
-          "32 oz"
-        ],
-        [
-          "90-100°F",
-          "40 min work, 20 min rest",
-          "30 min work, 30 min rest",
-          "48 oz"
-        ],
-        [
-          "100-105°F",
-          "30 min work, 30 min rest",
-          "15 min work, 45 min rest",
-          "64 oz"
-        ],
-        [
-          "105°F+",
-          "Suspended",
-          "Suspended",
-          "N/A"
-        ]
+      "type": "list",
+      "items": [
+        "Water: OSHA says workers should be encouraged to drink water frequently while working in the heat, not just when they are thirsty. Its page does not set a fixed number of ounces. For jobs lasting longer than two hours, it says to provide electrolyte-containing drinks such as sports drinks.",
+        "Rest: OSHA says workers should take hourly breaks whenever heat stress exceeds the limits in its own table of recommended limits, that breaks should lengthen and become more frequent as heat stress rises, and that in hot conditions skipping breaks is not safe.",
+        "Shade: workers need a cool place to recover. For outdoor jobs OSHA names a shady area, an air-conditioned vehicle, a nearby building or tent, or an area with fans and misting devices. Indoor workers need a cool area away from heat sources such as ovens and furnaces."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Employer Responsibilities"
+      "text": "Acclimatization: the rule of 20 percent"
     },
     {
       "type": "paragraph",
-      "text": "Employers should monitor weather forecasts, check heat index before shifts, provide cool water and shaded rest areas, train workers on heat illness symptoms, implement buddy systems, and have a heat illness emergency plan. Several states (California, Oregon, Washington, Minnesota) have specific heat safety regulations that go beyond federal OSHA guidelines."
+      "text": "People who have not recently spent time in warm or hot conditions need time to build tolerance. OSHA's guidance for new workers is the rule of 20 percent: work no more than 20 percent of a normal day on day one, then add 20 percent each day until a normal schedule is reached. OSHA stresses reducing the duration of the work, not its intensity. It says the rule protects most physically fit workers but that others may need up to 14 days. The schedule below is simple arithmetic from that rule."
+    },
+    {
+      "type": "table",
+      "headers": ["Day", "Share of normal shift", "8-hour shift", "10-hour shift"],
+      "rows": [
+        ["1", "20%", "96 min (1 h 36 min)", "120 min (2 h)"],
+        ["2", "40%", "192 min (3 h 12 min)", "240 min (4 h)"],
+        ["3", "60%", "288 min (4 h 48 min)", "360 min (6 h)"],
+        ["4", "80%", "384 min (6 h 24 min)", "480 min (8 h)"],
+        ["5", "100%", "480 min (8 h)", "600 min (10 h)"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The same protections apply to returning workers. OSHA's guidance covers people back after an absence of a week or more, workers in the spring as temperatures climb after winter, and anyone facing a sudden heat wave, and it advises keeping the extra protections in place for at least a week."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What is acclimatization and why does it matter?"
+      "text": "Worked example: turning a forecast into a plan"
     },
     {
       "type": "paragraph",
-      "text": "Acclimatization is the process where your body adapts to working in heat over 7-14 days. New workers and workers returning from breaks of 2+ weeks are most vulnerable to heat illness. OSHA recommends starting new workers at 20% exposure and increasing by 20% each day."
+      "text": "OSHA's overview refers to wet bulb globe temperature (WBGT) measurement and does not give heat index category thresholds, so the heat index is best treated as a quick screening number. The National Weather Service says heat index values assume shade and that direct sunshine can add up to 15°F. The table applies both ideas to four sample forecasts using the heat index calculator's formula, rounded to one decimal place, with the NWS cutoffs of 80, 90, 103 and 125."
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "Can workers be fired for refusing to work in extreme heat?"
+      "type": "table",
+      "headers": ["Forecast", "Heat index in shade", "Shade category", "With the full 15°F sun allowance", "Category"],
+      "rows": [
+        ["88°F, 50% humidity", "91.0°F", "Extreme Caution", "106.0°F", "Danger"],
+        ["92°F, 65% humidity", "108.3°F", "Danger", "123.3°F", "Danger"],
+        ["96°F, 55% humidity", "111.7°F", "Danger", "126.7°F", "Extreme Danger"],
+        ["104°F, 25% humidity", "106.0°F", "Danger", "121.0°F", "Danger"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "OSHA protects workers who refuse to work in conditions they reasonably believe pose an imminent danger. If there is no time to fix the hazard through normal OSHA enforcement channels, and the worker has asked the employer to fix it with no result, they may be protected in refusing to work in dangerously hot conditions."
+      "text": "A forecast that looks like Extreme Caution in the shade can sit in the Danger category for a crew working in an open field. That is the reason to plan from the sun-adjusted number, to confirm with WBGT where an employer measures it, and to schedule the heaviest tasks for the cooler part of the day."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Recognizing heat illness and responding"
+    },
+    {
+      "type": "paragraph",
+      "text": "OSHA lists fatigue, irritability, thirst, nausea or vomiting, dizziness or lightheadedness, heavy sweating, and an elevated body temperature or fast heart rate as heat exhaustion signs. For heat stroke it lists confusion, slurred speech, unconsciousness, seizures, heavy sweating or hot, dry skin, very high body temperature and a rapid heart rate. OSHA's instruction when heat stroke symptoms appear is to call 911 immediately and cool the worker with ice or cold water until help arrives. It also says never to leave a worker with heat illness alone, and when in doubt, call 911."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Waiting for thirst. OSHA says to drink frequently, not just when thirsty.",
+        "Skipping breaks to finish a job. OSHA's guidance is blunt that this is not safe in hot conditions.",
+        "Treating a returning worker like an acclimatized one after a week away.",
+        "Using the shaded heat index for crews in direct sun.",
+        "Assuming one rule covers everyone. The five states with their own heat rules apply them to different settings, from outdoor work to indoor workplaces and agriculture."
+      ]
     },
     {
       "type": "cta",
       "heading": "Check Heat Index for Your Worksite",
-      "body": "Use our heat index calculator to plan work/rest schedules.",
+      "body": "Enter the forecast temperature and humidity, then add a margin for direct sun.",
       "buttonLabel": "Open Calculator",
       "path": "/everyday/heat-index-calculator/"
     }

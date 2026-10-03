@@ -2,80 +2,205 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Your net worth is the truest measure of your financial health. Not your income, not your savings account balance, not your 401(k) — but the single number that represents everything you own minus everything you owe. Two people earning identical salaries can have radically different net worths depending on how they save, invest, and manage debt."
+      "text": "Net worth is the total value of everything you own minus the total of everything you owe, measured on one date. In the worked example below, a household with $423,500 of assets and $271,700 of debts has a net worth of $151,800. Calculating it takes about ten minutes, and the useful part is repeating it each year to see which of your decisions moved the number."
     },
     {
       "type": "heading",
-      "text": "The Net Worth Formula",
-      "level": 2
+      "level": 2,
+      "text": "The formula and what goes in each column"
     },
     {
       "type": "paragraph",
-      "text": "The formula couldn't be simpler: **Net Worth = Total Assets minus Total Liabilities. ** Assets are everything you own that has monetary value. Liabilities are everything you owe."
-    },
-    {
-      "type": "paragraph",
-      "text": "The difference is your net worth — and it can be positive, zero, or negative."
-    },
-    {
-      "type": "paragraph",
-      "text": "Financial independence is typically defined as having a net worth large enough to generate passive income that covers your living expenses. The classic benchmark is **25 times your annual spending** (the 4% rule). But that's a long-term goal."
-    },
-    {
-      "type": "paragraph",
-      "text": "For today, just knowing your number is the first step."
+      "text": "Net worth equals total assets minus total liabilities. Assets are things with a market value you could, in principle, convert to cash. Liabilities are amounts you are legally obliged to repay. The number can be positive, zero or negative, and a negative figure is common after student loans or a recent home purchase. Use the amount something would sell for today, not what you paid, and use the amount you owe today, not the original loan."
     },
     {
       "type": "table",
       "headers": [
-        "Category",
-        "What to Include",
-        "Where to Find the Value"
+        "Item",
+        "Where to find the value",
+        "Watch out for"
       ],
       "rows": [
         [
-          "Cash & Savings",
-          "Checking, savings, money market accounts",
-          "Bank statements or online banking"
+          "Cash and savings",
+          "Bank statements",
+          "Include only money that is yours, not funds held for a bill you have already received."
         ],
         [
           "Investments",
-          "Stocks, bonds, mutual funds, ETFs, brokerage accounts",
-          "Brokerage statements or portfolio dashboard"
+          "Brokerage statement for the same date",
+          "Use market value, not what you invested."
         ],
         [
-          "Retirement",
-          "401(k), IRA, Roth IRA, pension value",
-          "Latest quarterly or annual statement"
+          "Retirement accounts",
+          "Latest account statement",
+          "Pre-tax balances will be taxed when withdrawn, so the figure overstates what you can spend."
         ],
         [
-          "Real Estate",
-          "Current market value of property you own",
-          "Zestimate, recent comps, or appraisal"
+          "Home and other property",
+          "Recent comparable sales, an appraisal, or an online estimate",
+          "Estimates can be well off. Use a conservative value."
+        ],
+        [
+          "Vehicles",
+          "A used-car valuation guide",
+          "Value falls every year. Never use the purchase price."
+        ],
+        [
+          "Mortgage, car, student and card debt",
+          "Latest lender statement",
+          "Use the payoff balance, not the original loan."
         ]
       ]
     },
     {
       "type": "heading",
-      "text": "What Counts as an Asset?",
-      "level": 2
+      "level": 2,
+      "text": "A worked example"
     },
     {
       "type": "paragraph",
-      "text": "Assets fall into five main categories: **cash and savings** (checking, savings, money market), **investments** (stocks, bonds, mutual funds, ETFs), **retirement accounts** (401k, IRA, Roth IRA, pension value), **real estate** (your home, rental properties, land), and **other assets** (vehicles, jewelry, business equity, collectibles)."
+      "text": "The numbers below describe a hypothetical household, not an average or a target. Home value is an estimate, retirement accounts are at statement value, and personal belongings are included at a rough resale figure."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Assets",
+        "Amount",
+        "Liabilities",
+        "Amount"
+      ],
+      "rows": [
+        [
+          "Cash and savings",
+          "$12,000",
+          "Mortgage",
+          "$238,000"
+        ],
+        [
+          "Taxable investments",
+          "$18,500",
+          "Car loan",
+          "$9,500"
+        ],
+        [
+          "Retirement accounts",
+          "$64,000",
+          "Student loans",
+          "$21,000"
+        ],
+        [
+          "Home (estimated market value)",
+          "$310,000",
+          "Credit card",
+          "$3,200"
+        ],
+        [
+          "Car (used-car valuation)",
+          "$14,000",
+          "",
+          ""
+        ],
+        [
+          "Other belongings (resale)",
+          "$5,000",
+          "",
+          ""
+        ],
+        [
+          "Total assets",
+          "$423,500",
+          "Total liabilities",
+          "$271,700"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Use current market values, not what you paid. For your home, use a realistic estimate from comparable sales or an online valuation. For vehicles, use a site like Kelley Blue Book."
+      "text": "Net worth is $423,500 minus $271,700, which is $151,800. The debt-to-asset ratio, which is total liabilities divided by total assets, is 64.2%. This follows the same definitions as the net worth calculator. Home equity, the home value less the mortgage, accounts for $72,000 of the total. Without it, net worth would be $79,800. That second number is worth knowing, because you cannot spend the equity in a house you live in without selling it or borrowing against it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What actually moves the number in a year"
     },
     {
       "type": "paragraph",
-      "text": "For investments and retirement, use your latest statement balance."
+      "text": "Net worth changes through two different channels. The first is what you do from your income: add to savings, retirement and investments, and repay debt principal. The second is a change in the value of things you already own. Suppose the same household repeats the exercise a year later under these assumptions: it adds $6,000 to cash, $9,600 to retirement and $3,000 to investments; investments and retirement balances grow 5% (the beginning balance only, for simplicity); the home gains 2%; the car loses 12%; the mortgage is 6.00% with 27 years left, so $3,640 of principal is repaid in 12 payments of $1,485.09; and the car loan, student loans and credit card fall by $3,000, $2,400 and $3,200. These are illustrative assumptions, not forecasts, and past performance does not guarantee future results."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Source of change",
+        "Amount",
+        "Type"
+      ],
+      "rows": [
+        [
+          "Added to savings, retirement and investments",
+          "$18,600",
+          "From income"
+        ],
+        [
+          "Debt principal repaid",
+          "$12,240",
+          "From income"
+        ],
+        [
+          "Investment and retirement growth (5%)",
+          "$4,125",
+          "Market value"
+        ],
+        [
+          "Home value change (+2%)",
+          "$6,200",
+          "Market value"
+        ],
+        [
+          "Car depreciation (-12%)",
+          "-$1,680",
+          "Market value"
+        ],
+        [
+          "Total change in net worth",
+          "$39,485",
+          ""
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The new net worth is $191,285, up $39,485, and the debt-to-asset ratio falls from 64.2% to 57.6%. Of the gain, $30,840 came from income decisions the household controls, and $8,645 came from market values it does not. In a year when investments or home prices fall, the second line can turn negative while the first stays steady. That is why a falling net worth in a bad market is not the same as a failed plan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using purchase prices. A home bought years ago and a car bought last year are both worth something different today.",
+        "Counting retirement balances as spendable. They belong in net worth, but withdrawals from pre-tax accounts are generally taxed, so the usable amount is lower.",
+        "Leaving out small debts. Card balances, medical bills, and money owed to relatives are liabilities.",
+        "Tracking too often. Market prices move daily. Once or twice a year, on a consistent date, shows the trend without the noise.",
+        "Comparing yourself with a stranger. Age, income, family size, and local home prices make a single average a weak benchmark."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When net worth is not enough"
+    },
+    {
+      "type": "paragraph",
+      "text": "Net worth does not show whether you can pay next month's bills. A household can have a large net worth that is almost entirely home equity and retirement savings and still be short of cash. It also leaves out future income, pensions and other benefits that are not account balances, and it ignores risk, because a figure that depends on one stock or one property is more fragile than the same figure spread across assets. Pair it with a look at monthly cash flow and an emergency fund. If a large share of your wealth sits in a business or in assets that are hard to value, a financial professional can help you value it consistently."
     },
     {
       "type": "callout",
-      "text": "Which asset category do people most often forget? Retirement accounts. Your 401(k) and IRA balances absolutely count toward your net worth, even though you can't access the money penalty-free until retirement age. they're still assets you own.",
-      "variant": "info"
+      "variant": "info",
+      "text": "Figures in this article were computed with the same subtraction and ratio definitions as the net worth calculator, plus a month-by-month mortgage schedule for the principal repaid. The household is hypothetical."
     },
     {
       "type": "cta",

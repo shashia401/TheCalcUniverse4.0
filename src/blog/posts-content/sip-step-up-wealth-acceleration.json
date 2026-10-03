@@ -1,22 +1,139 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is a Step-Up SIP?"
-    },
-    {
       "type": "paragraph",
-      "text": "A step-up SIP increases your monthly investment by a fixed percentage (typically 10%) every year. This aligns with your expected income growth. As your salary increases, your SIP increases automatically. The impact on your final corpus is dramatic because the additional investments also benefit from compounding."
+      "text": "A step-up SIP raises your monthly instalment by a set percentage or amount every year, so the plan grows with your income. Starting at Rs. 10,000 a month and raising it 10% a year, a 20-year plan at an assumed 12% reaches about Rs. 1.99 crore, roughly double the Rs. 99.9 lakh of a flat Rs. 10,000 SIP. But it does so by putting in Rs. 68.7 lakh instead of Rs. 24 lakh, so the real benefit is that you can begin with a small instalment and let it climb, not that the step-up is free."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Step-Up vs Fixed SIP Comparison"
+      "text": "The main example: Rs. 10,000 start, 20 years, 12%"
     },
     {
       "type": "paragraph",
-      "text": "A ₹10,000 monthly SIP at 12% returns for 20 years with no step-up grows to ₹99 lakhs (total invested: ₹24 lakhs). With a 10% annual step-up, the same SIP grows to ₹1.85 crores (total invested: ₹38 lakhs). The step-up nearly doubles the final corpus while increasing total invested by only 58%."
+      "text": "The method matches the SIP calculator: a monthly rate of 1%, with each instalment invested at the start of the month. The instalment stays constant within a year and rises on each anniversary. Each instalment is grown to month 240 and the results are summed. With a 0% step-up this reproduces the calculator's Rs. 99,91,479 exactly. The calculator itself has no step-up input, so these are separate calculations."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Annual step-up",
+        "Instalment in year 20",
+        "Total invested",
+        "Corpus after 20 years",
+        "Corpus per Rs. 1 invested"
+      ],
+      "rows": [
+        [
+          "0% (flat)",
+          "Rs. 10,000",
+          "Rs. 24,00,000",
+          "Rs. 99,91,479",
+          "Rs. 4.16"
+        ],
+        [
+          "5%",
+          "Rs. 25,270",
+          "Rs. 39,67,914",
+          "Rs. 1,37,37,623",
+          "Rs. 3.46"
+        ],
+        [
+          "10%",
+          "Rs. 61,159",
+          "Rs. 68,73,000",
+          "Rs. 1,98,88,715",
+          "Rs. 2.89"
+        ],
+        [
+          "15%",
+          "Rs. 1,42,318",
+          "Rs. 1,22,93,230",
+          "Rs. 3,02,55,942",
+          "Rs. 2.46"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Two things stand out. The corpus rises with the step-up, but each extra rupee is invested later and compounds for fewer years, so the corpus per rupee invested falls from Rs. 4.16 to Rs. 2.89 at a 10% step. And the instalment in year 20 at a 10% step is Rs. 61,159, six times the starting amount. That is only comfortable if your income grows at a similar pace."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step-up is not better than investing more at the start"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you could afford it, a flat SIP with the same total contribution as the 10% step-up plan would beat it. Spreading Rs. 68,73,000 evenly over 240 months is Rs. 28,637 a month, and that flat SIP reaches Rs. 2,86,13,098 against the step-up plan's Rs. 1,98,88,715. The step-up plan loses because its money arrives later. A step-up is a response to limited cash flow today, not a way to out-earn a larger flat SIP."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Where step-up really helps: starting smaller"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Plan (20 years, 12%)",
+        "Starting instalment",
+        "Total invested",
+        "Corpus"
+      ],
+      "rows": [
+        [
+          "Flat SIP",
+          "Rs. 10,000",
+          "Rs. 24,00,000",
+          "Rs. 99,91,479"
+        ],
+        [
+          "10% step-up",
+          "Rs. 5,000",
+          "Rs. 34,36,500",
+          "Rs. 99,44,358"
+        ],
+        [
+          "Rs. 1,000 more each year",
+          "Rs. 10,000",
+          "Rs. 46,80,000",
+          "Rs. 1,58,49,640"
+        ],
+        [
+          "10% step-up for 9 raises, then flat",
+          "Rs. 10,000",
+          "Rs. 47,42,028",
+          "Rs. 1,66,15,016"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A 10% step-up starting at just Rs. 5,000 lands within half a percent of the flat Rs. 10,000 plan's corpus (Rs. 99.4 lakh against Rs. 99.9 lakh), and you pay in Rs. 34.4 lakh instead of Rs. 24 lakh. If Rs. 10,000 is out of reach in your first job, that is a workable path. A fixed-amount step (Rs. 1,000 more each year) and a capped percentage step both produce a high corpus without a huge instalment late in the plan. In the capped case the instalment stops at Rs. 23,579 after nine raises."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Shorter horizons"
+    },
+    {
+      "type": "paragraph",
+      "text": "Step-ups matter most over long plans, since each raise needs years to compound. Over 10 years at 12%, a flat Rs. 10,000 SIP reaches Rs. 23,23,391 with Rs. 12,00,000 paid in, while the same SIP with a 10% yearly step-up reaches Rs. 33,74,326 with Rs. 19,12,491 paid in. The corpus rises by about 45%, but you also contribute about 59% more, so the gain per extra rupee is smaller than in the 20-year case. Choose the step-up by what you can afford each year, not by how large the final number looks."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Choosing a step-up higher than your income growth. If your salary rises 6% a year and the SIP rises 10%, the SIP takes about twice its original share of your income by year 20, because (1.10 / 1.06) to the power 19 is about 2.02. Many people then cancel the plan.",
+        "Comparing step-up with a flat SIP on corpus alone. Always compare the amount invested too, as the table above shows.",
+        "Forgetting to set the top-up. Many fund houses offer an automatic top-up option, but availability, frequency and limits differ by scheme, so check the facility before relying on it. Otherwise raise the SIP yourself on a fixed date each year.",
+        "Reading the 12% as a promise. At 8% a year the same 10% step-up plan reaches Rs. 1,32,74,911 and at 10% Rs. 1,61,45,403, against Rs. 59,29,472 and Rs. 76,56,969 for the flat plan. Returns vary, and equity funds can lose value for years at a time.",
+        "Changing the schedule in reaction to market moves. Decide the step-up rule when markets are calm and apply it every year."
+      ]
     },
     {
       "type": "cta",

@@ -2,80 +2,175 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "You look at an amortization schedule and see a grid of numbers stretching years into the future. Row after row of payments, split between interest and principal. It looks monotonous."
-    },
-    {
-      "type": "paragraph",
-      "text": "But buried in that table is a huge opportunity most borrowers miss."
-    },
-    {
-      "type": "paragraph",
-      "text": "Every single row is a chance to save money. The trick is understanding how the split changes over time — and what happens when you add just a small extra payment to the mix."
+      "text": "An extra payment saves money because every dollar sent above the required payment goes straight to principal, so it stops accruing interest for the rest of the loan. On a $250,000 loan at 6.5% over 30 years, an extra $200 a month cuts the payoff from 30 years to 22 years 1 month and reduces total interest from $318,861.22 to $221,243.10, a saving of $97,618.12. The earlier the extra money arrives, the more it saves, because it has more months left to avoid interest."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What exactly is an amortization schedule?"
+      "text": "The baseline schedule"
     },
     {
       "type": "paragraph",
-      "text": "An amortization schedule is a full breakdown of every loan payment from start to finish. Each row shows the payment number, how much goes to interest, how much goes to principal, and the remaining balance. It's the complete story of your loan."
+      "text": "Assumptions for every figure here: $250,000 borrowed, 6.5% fixed annual rate, 360 monthly payments of $1,580.17, interest charged monthly at one-twelfth of the annual rate on the remaining balance, payments at the end of each month, and any extra money applied entirely to principal. These are illustrative and not a loan offer. Figures were computed with the same logic as the amortization calculator."
     },
     {
       "type": "paragraph",
-      "text": "In the early years, each payment is mostly interest. In the later years, it's mostly principal. The crossover point depends on your interest rate and term length."
-    },
-    {
-      "type": "paragraph",
-      "text": "For a **30-year mortgage at 6. 5%**, the first year of payments includes over **$16,000 in interest** but less than **$3,500 in principal reduction**."
+      "text": "Month 1 interest is $250,000 x 0.065 / 12 = $1,354.17, so only $226.00 of the $1,580.17 payment reduces the balance. Across the first 12 payments the borrower pays $16,167.73 of interest and $2,794.31 of principal. At payment 120 the split is $1,150.34 interest and $429.83 principal, at payment 240 it is $758.25 and $821.92, and at payment 360 it is $8.51 and $1,571.66. Total interest over the full term is $318,861.22, more than the amount borrowed."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How does each payment break down over time?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Here's what a **$250,000 loan at 6.5%** looks like across its life. Notice how the split flips over time:"
+      "text": "What different extra amounts do"
     },
     {
       "type": "table",
       "headers": [
-        "Year",
-        "Monthly Payment",
-        "Interest Portion",
-        "Principal Portion"
+        "Extra each month",
+        "Payoff time",
+        "Total interest",
+        "Interest saved",
+        "Time saved"
       ],
       "rows": [
         [
-          "Year 1",
-          "$1,580",
-          "$1,354 (86%)",
-          "$226 (14%)"
+          "$0",
+          "30 yr 0 mo",
+          "$318,861.22",
+          "$0",
+          "0"
         ],
         [
-          "Year 10",
-          "$1,580",
-          "$1,086 (69%)",
-          "$494 (31%)"
+          "$50",
+          "27 yr 5 mo",
+          "$285,950.20",
+          "$32,911.02",
+          "2 yr 7 mo"
         ],
         [
-          "Year 20",
-          "$1,580",
-          "$675 (43%)",
-          "$905 (57%)"
+          "$100",
+          "25 yr 4 mo",
+          "$260,001.34",
+          "$58,859.89",
+          "4 yr 8 mo"
         ],
         [
-          "Year 30",
-          "$1,580",
-          "$7 (0.4%)",
-          "$1,573 (99.6%)"
+          "$200",
+          "22 yr 1 mo",
+          "$221,243.10",
+          "$97,618.12",
+          "7 yr 11 mo"
+        ],
+        [
+          "$300",
+          "19 yr 8 mo",
+          "$193,347.21",
+          "$125,514.01",
+          "10 yr 4 mo"
+        ],
+        [
+          "$500",
+          "16 yr 3 mo",
+          "$155,345.27",
+          "$163,515.95",
+          "13 yr 9 mo"
         ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "In year one, **86%** of each payment goes to interest. By year 30, almost the entire payment hits principal. The payment never changed — but where it went shifted dramatically."
+      "text": "The savings are not proportional. Doubling the extra payment from $100 to $200 raises the interest saved from $58,859.89 to $97,618.12, about 1.66 times as much rather than twice, because most of the interest to be avoided sits in the early years and each added dollar overlaps with dollars already sent. Even $50 a month, about $1.64 a day, saves $32,911.02 here. The saving is measured against interest only: with $200 extra the borrower pays more each month, but total money paid over the life of the loan falls from $568,861.22 to $471,243.10."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Once a year instead of every month"
+    },
+    {
+      "type": "paragraph",
+      "text": "Some borrowers prefer one larger payment a year, such as from a bonus. Adding one extra full payment of $1,580.17 each year, starting with payment 13, pays the loan off in 24 years 5 months and saves $69,501.31. A flat extra $2,000 each year, again starting with payment 13, pays it off in 23 years 3 months and saves $82,495.99. Spreading the same $2,000 evenly ($166.67 a month) pays off in 23 years 1 month and saves $86,207.33, about $3,711 more, because monthly money starts avoiding interest sooner than money held back until the year turns over."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why timing matters more than size"
+    },
+    {
+      "type": "paragraph",
+      "text": "A single lump sum of $10,000 applied at different points shows how the same dollars lose value as the loan ages."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "$10,000 applied with payment",
+        "Payoff time",
+        "Interest saved",
+        "Time saved"
+      ],
+      "rows": [
+        [
+          "1 (first month)",
+          "26 yr 9 mo",
+          "$52,539.61",
+          "3 yr 3 mo"
+        ],
+        [
+          "61 (start of year 6)",
+          "27 yr 7 mo",
+          "$36,520.94",
+          "2 yr 5 mo"
+        ],
+        [
+          "121 (start of year 11)",
+          "28 yr 3 mo",
+          "$24,364.93",
+          "1 yr 9 mo"
+        ],
+        [
+          "181 (start of year 16)",
+          "28 yr 9 mo",
+          "$15,248.87",
+          "1 yr 3 mo"
+        ],
+        [
+          "241 (start of year 21)",
+          "29 yr 1 mo",
+          "$8,473.49",
+          "11 mo"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The same $10,000 saves $52,539.61 at the start and $8,473.49 at payment 241. A recurring $200 behaves the same way. Starting at payment 1 saves $97,618.12, starting at payment 61 saves $63,737.31, at payment 121 saves $38,063.91 and at payment 181 saves $19,858.48. Waiting five years before starting does not cost five years of extra payments, it costs roughly a third of the total saving."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How an extra payment appears in the schedule"
+    },
+    {
+      "type": "paragraph",
+      "text": "An extra payment does not lower the next required payment, it lowers the balance. Every later row then has less interest and more principal, and the loan ends sooner. If you pay $200 extra with payment 1, principal for that row is $426.00 instead of $226.00, the balance drops to $249,574.00 instead of $249,774.00, and payment 2 carries $1,351.86 of interest instead of $1,352.94. The difference is $1.08 in the second month. It compounds into five figures only because it repeats and grows every month for the rest of the loan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Not telling the servicer the money is principal. Some servicers apply an unlabelled extra amount to the next scheduled payment instead, which saves nothing until that payment is due. Check the payment instructions for an option to apply it to principal only.",
+        "Ignoring the contract. Some loans, particularly some personal and auto loans, may charge a prepayment fee or use a precomputed method where early payoff saves less. Read the loan agreement before paying extra.",
+        "Paying extra while carrying higher-rate debt. A dollar extra on a 6.5% loan avoids 6.5% interest, which is a guaranteed return, but it is a smaller one than avoiding interest on a card or loan charging more.",
+        "Draining emergency savings. Extra principal cannot be withdrawn again, and the lower required payment you hoped for does not appear, so keep a cash reserve first.",
+        "Forgetting the other uses of the money. The return from extra payments equals the loan rate and carries no market risk; investments may earn more or less. Past performance does not guarantee future results."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Results use fixed-rate, monthly-interest assumptions. Loans that accrue interest daily, adjustable-rate loans and loans with fees will differ. Use the figures as an illustration, not as a promise."
     },
     {
       "type": "cta",

@@ -1,99 +1,159 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Asian BMI cutoffs are lower because, in many Asian populations, the risk of type 2 diabetes and cardiovascular disease is already substantial at BMI values below the standard overweight line of 25. A 2004 WHO expert consultation reviewed that evidence. Its conclusion is more careful than the phrase \"Asian cutoffs\" suggests: WHO kept 18.5, 25 and 30 as the international classification, and added 23.0, 27.5, 32.5 and 37.5 as extra public health action points. This post explains what that means, shows the arithmetic at a real height, and lists the ways people misread it."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "BMI is a screening tool, not a diagnosis. Where your number falls on any chart is a prompt for a conversation with a doctor or other clinician, who can look at blood pressure, blood glucose, waist size and family history. Nothing here is medical advice."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Why Ethnicity Matters for BMI"
+      "text": "What the WHO consultation actually said"
     },
     {
       "type": "paragraph",
-      "text": "The standard BMI cutoffs (overweight at 25, obese at 30) were developed primarily using data from white European populations. Research has consistently shown that people of Asian descent tend to have higher body fat percentages and greater cardiometabolic risk at lower BMIs compared to white populations. A person of Chinese descent with a BMI of 24 may have similar metabolic health risks as a white person with a BMI of 28."
+      "text": "The consultation, published in The Lancet in 2004, found that Asian populations have different relationships between BMI, percentage body fat and health risk than European populations. It concluded that the share of Asian people at high risk of type 2 diabetes and cardiovascular disease is substantial at BMIs below the existing overweight cutoff of 25."
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "WHO Asian-Specific BMI Recommendations"
+      "type": "paragraph",
+      "text": "It did not draw one new line for everyone. The BMI at which risk starts to show varied from 22 to 25 across different Asian populations, and the BMI at which risk is high varied from 26 to 31. Because of that spread, the panel made no attempt to redefine cutoffs for each population, and agreed the standard WHO cutoffs should stay as the international classification. What it added were the action points in the table below."
     },
     {
       "type": "table",
       "headers": [
-        "Category",
-        "Standard BMI",
-        "Asian BMI",
-        "Difference"
+        "BMI point",
+        "Role",
+        "Source"
       ],
       "rows": [
-        [
-          "Underweight",
-          "Under 18.5",
-          "Under 18.5",
-          "Same"
-        ],
-        [
-          "Normal",
-          "18.5-24.9",
-          "18.5-22.9",
-          "Lower top end"
-        ],
-        [
-          "Overweight",
-          "25.0-29.9",
-          "23.0-27.4",
-          "2 points lower"
-        ],
-        [
-          "Obese",
-          "30.0+",
-          "27.5+",
-          "2.5 points lower"
-        ]
+        ["18.5", "Underweight below this line", "Standard WHO classification"],
+        ["23.0", "Additional public health action point", "WHO expert consultation, 2004"],
+        ["25.0", "International overweight cutoff, retained", "Standard WHO classification"],
+        ["27.5", "Additional public health action point", "WHO expert consultation, 2004"],
+        ["30.0", "International obesity cutoff, retained", "Standard WHO classification"],
+        ["32.5 and 37.5", "Further action points along the scale", "WHO expert consultation, 2004"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "This is why many tables that label 23.0 to 27.4 as \"Asian overweight\" and 27.5 or above as \"Asian obese\" are a simplification. They are widely used shorthand, but WHO itself framed 23.0 and 27.5 as trigger points for public health action, and left each country to decide how to define increased risk for its own population."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: what the lines mean in kilograms"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: adult, height 170 cm (1.70 m), so height squared is 2.89 m2. BMI is weight in kilograms divided by height in metres squared, so the weight at any BMI is that BMI multiplied by 2.89. Figures are rounded to the nearest 0.1 kg and the nearest pound."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "BMI line",
+        "Weight at 170 cm (kg)",
+        "Weight at 170 cm (lb)"
+      ],
+      "rows": [
+        ["18.5", "53.5", "118"],
+        ["23.0", "66.5", "147"],
+        ["25.0", "72.3", "159"],
+        ["27.5", "79.5", "175"],
+        ["30.0", "86.7", "191"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "So for this height, the gap between the 23.0 action point and the international overweight cutoff of 25 is about 5.8 kg (roughly 13 lb). That is a real difference, but it is a gap of a few kilograms, not a different category of person. Now four hypothetical people at the same height:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Weight",
+        "BMI",
+        "International category",
+        "Position against WHO action points"
+      ],
+      "rows": [
+        ["64 kg (141 lb)", "22.1", "Normal weight", "Below 23.0"],
+        ["68 kg (150 lb)", "23.5", "Normal weight", "Above 23.0, below 25"],
+        ["75 kg (165 lb)", "26.0", "Overweight", "Above 23.0, below 27.5"],
+        ["85 kg (187 lb)", "29.4", "Overweight", "Above 27.5, below 30"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Check one row: 68 divided by 2.89 is 23.5. A person at 68 kg is in the normal range on the standard chart, yet already past the 23.0 action point. Whether that matters for them depends on things BMI cannot see, such as where they carry fat, their blood pressure and glucose, and family history."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes when using ethnicity-adjusted BMI"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Treating 23.0 as a diagnosis. It is a point at which WHO suggested public health attention, not a medical condition. A BMI of 22.9 is not safe and 23.1 is not dangerous; the lines are arbitrary cuts on a continuum.",
+        "Assuming one number fits every Asian population. WHO found the risk threshold ranged from 22 to 25 depending on the population studied, which is exactly why it declined to set separate cutoffs.",
+        "Relying on BMI alone. BMI does not distinguish fat from muscle and bone, and does not show where fat sits (CDC states both limits). Waist measurement, body fat estimates and blood tests add information BMI lacks.",
+        "Applying adult lines to children. Children and teens use BMI-for-age percentiles instead.",
+        "Assuming the same shift applies to every other group. The WHO consultation covered Asian populations. For anyone else, ask a clinician rather than guessing a custom cutoff."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What This Means for Your Health Assessment"
+      "text": "What to do with this information"
     },
     {
       "type": "paragraph",
-      "text": "If you are of Asian descent and your BMI is 24, under standard charts you would be considered normal weight. Under Asian-specific cutoffs, you are overweight and may benefit from metabolic screening. This is not about body image — it is about catching elevated diabetes and cardiovascular risk early. Studies show that Asian populations develop type 2 diabetes at significantly lower BMIs than white populations. Our BMI calculator includes a toggle for Asian-adjusted categories that uses these modified thresholds."
+      "text": "Calculate your BMI, then read it against both the standard lines and the WHO action points. If it sits between 23 and 25, or between 25 and 27.5, treat that as a reason to look at other measures, not as a verdict. The sensible next step is a routine check with a clinician who can order blood pressure, glucose and lipid tests and interpret them alongside your family history. Guidance differs between countries and changes over time, so the clinician you see will apply the guidance used where you live."
+    },
+    {
+      "type": "paragraph",
+      "text": "A tape measure adds useful information. Waist circumference divided by height is easy to track at home, and a ratio that creeps up while BMI looks stable is worth mentioning to a clinician."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Other Ethnicity Considerations"
-    },
-    {
-      "type": "paragraph",
-      "text": "Research also suggests that Black populations may have slightly lower health risks at higher BMIs, though standardized cutoff adjustments for Black individuals are not as widely adopted as Asian cutoffs. Hispanic and Indigenous populations also show different risk patterns. The key takeaway: BMI is a population screening tool, not an individual diagnostic instrument. Your personal health assessment should include blood work, blood pressure, and body composition, not just BMI."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
+      "text": "Frequently asked questions"
     },
     {
       "type": "heading",
       "level": 3,
-      "text": "Does the BMI calculator support Asian cutoffs?"
+      "text": "Does the BMI calculator on this site use Asian cutoffs?"
     },
     {
       "type": "paragraph",
-      "text": "Yes. Our BMI calculator includes an Asian-adjusted mode that uses WHO-recommended lower thresholds. Simply toggle the setting to see your BMI classified under both standard and Asian-specific cutoffs."
+      "text": "No. The calculator classifies results with the international WHO categories (below 18.5, 18.5 to 24.9, 25 to 29.9, and 30 or above) and does not switch cutoffs by ethnicity. To apply the WHO action points, compare your BMI with 23.0 and 27.5 yourself, as in the tables above."
     },
     {
       "type": "heading",
       "level": 3,
-      "text": "Are there different cutoffs for South Asian vs East Asian?"
+      "text": "Are South Asian and East Asian cutoffs different?"
     },
     {
       "type": "paragraph",
-      "text": "The WHO recommends the same adjusted cutoffs for all Asian subpopulations, but some studies suggest South Asians (Indian, Pakistani, Bangladeshi) may be at even higher risk than East Asians at the same BMI. If you are South Asian, consider being especially vigilant about metabolic health screening even at BMIs in the normal range."
+      "text": "The WHO consultation did not issue separate cutoffs for sub-groups. It reported that the BMI at which risk appears varied between Asian populations, from 22 to 25, and concluded that no single cutoff for all Asians could be defined from the data. If you are unsure which reading applies to you, a clinician familiar with your background is the right person to ask."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Is this different from the lines used for white or European populations?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The international lines (18.5, 25, 30) are the general WHO classification used for all adults. The Asian-specific discussion is about adding earlier action points because risk shows up at lower BMI in the populations WHO reviewed."
     },
     {
       "type": "cta",
       "heading": "Try the BMI Calculator",
-      "body": "Includes Asian-adjusted BMI categories for more accurate health assessment.",
+      "body": "Get your BMI on the standard WHO scale, then compare it with the 23.0 and 27.5 action points discussed above.",
       "buttonLabel": "Open Calculator",
       "path": "/health/bmi-calculator/"
     }

@@ -1,1 +1,108 @@
-{"sections":[{"type":"paragraph","text":"Determining how much rent you can afford is one of the most important financial decisions you will make. The general rule of thumb is to spend no more than 30% of your gross monthly income on rent. For example, if you earn $5,000 per month, your rent should be at most $1,500. However, this rule does not account for other debts, savings goals, or the cost of utilities and parking. A more thorough approach considers your full budget including student loans, car payments, groceries, and discretionary spending."}],"keywords":["rent affordability","rent calculator","how much rent","30 percent rule","rent budget"]}
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "A common rule of thumb is to keep rent at or below 30% of your gross (pre-tax) monthly income. Divide your annual income by 12, multiply by 0.30, and you have a ceiling: on 75,000 a year that is 6,250 a month and a maximum rent of 1,875. This is a guideline, not a law and not a lending standard. It ignores your debts, your taxes, your savings goals and the extra costs that come with a rental, so use it as a starting point and then test it against your real budget."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the rent affordability calculator works"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator turns your income into a monthly figure and then applies one of four rules. Annual income is divided by 12. Hourly income is converted by assuming 40 hours a week for 52 weeks, so 25 an hour becomes 25 x 40 x 52 / 12 = 4,333.33 a month. The rules are 25% of gross monthly income (a more conservative option), 30%, the 40x rule, and a custom percentage between 10% and 60%. It then subtracts your maximum rent and your existing monthly debt payments from gross income to show what is left."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: 75,000 a year with 350 in monthly debts"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: annual gross income of 75,000, so 6,250 a month, and 350 a month in existing debt payments such as a car loan. These are illustrative numbers, not typical figures for any city. Every row below uses the calculator's own formulas."
+    },
+    {
+      "type": "table",
+      "headers": ["Rule", "Maximum rent", "Left from gross after rent and debts", "Annual rent"],
+      "rows": [
+        ["25%", "1,562.50", "4,337.50", "18,750"],
+        ["30%", "1,875.00", "4,025.00", "22,500"],
+        ["40x (annual income / 40)", "1,875.00", "4,025.00", "22,500"],
+        ["Custom 35%", "2,187.50", "3,712.50", "26,250"],
+        ["Custom 40%", "2,500.00", "3,400.00", "30,000"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Notice that the remaining figure is measured from gross income. It is not your take-home pay, because income tax and other deductions have not been taken out yet. Treat it as an upper bound on what you would have left."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The 40x rule is the 30% rule written differently"
+    },
+    {
+      "type": "paragraph",
+      "text": "Some landlords screen applicants by asking for annual income of at least 40 times the monthly rent. Algebraically this is the same as the 30% rule, because annual income / 40 equals (monthly income x 12) / 40, which is 0.30 x monthly income. A rent of 2,000 therefore needs 2,000 x 40 = 80,000 a year, which matches 2,000 / 0.30 x 12 = 80,000. The 25% rule would need 2,000 / 0.25 x 12 = 96,000 for the same rent. Whether a particular landlord uses this test, and what income counts, is the landlord's choice. The calculator's last result line tells you the monthly income a landlord would need to see for the rent it calculated; with the 35% custom rule above, that is 7,291.67 a month, higher than the 6,250 in the example, so the answer is no."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Where the percentage rule hides risk"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "It ignores debt. Take someone earning 4,000 a month with 600 in debt payments. The 30% rule allows 1,200 in rent, and rent plus debt then takes (1,200 + 600) / 4,000 = 45% of gross income. At 36,000 a year with 400 in debts, 30% rent is 900, and rent plus debt is 1,300 of 3,000, or 43.3%.",
+        "It uses gross income. If we assume, for illustration only, that 22% of gross pay is withheld, a 6,250 gross month is 4,875 take-home, and a rent of 1,875 is then 38.5% of what you receive. Your own withholding will differ, so use your actual pay stub.",
+        "It covers rent only. If utilities and renters insurance add 220 a month in your area (an assumed figure), a 1,875 rent costs 2,095 a month, which is 33.5% of gross income.",
+        "It ignores one-time costs. Deposits, moving costs and fees come before the first month and are not part of the monthly ratio."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Turning the number into a budget"
+    },
+    {
+      "type": "paragraph",
+      "text": "The most reliable method is to work from take-home pay. List your fixed costs (debt payments, insurance, phone, transport), set a savings target, and see what remains for housing including utilities. If that number is below the rent ceiling from the calculator, the lower figure is your real limit. If it is above, the calculator's ceiling is the upper bound and you may prefer to stay under it. A cheaper rent is not automatically better either: if the lower rent means a long commute or a poorer location that raises your transport costs, compare the total, not the rent alone."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When these rules do not apply"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Variable or irregular income, such as freelance work. Use a conservative average of recent months rather than your best month.",
+        "Shared housing. If you split rent, apply the rule to your share and to your own income, but also check that your partner or roommate can cover their share if circumstances change.",
+        "Subsidized or income-restricted housing. Programs of this kind set their own formulas and definitions of income, so check the rules with the program, not a general rule of thumb.",
+        "Very high or very low incomes. A fixed percentage of a low income can leave too little for essentials, while on a high income it may be needlessly generous."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "This guide gives general budgeting information, not financial advice. The percentages are rules of thumb, not legal requirements, and landlords and housing programs set their own criteria. The examples use assumed figures and say nothing about actual rents in any city."
+    },
+    {
+      "type": "cta",
+      "heading": "Check Your Rent Budget",
+      "body": "Enter your income and debts to see the maximum rent under the 25%, 30%, 40x or a custom rule.",
+      "buttonLabel": "Open Rent Calculator",
+      "path": "/finance/rent-affordability-calculator/"
+    }
+  ],
+  "keywords": [
+    "rent affordability",
+    "rent calculator",
+    "how much rent",
+    "30 percent rule",
+    "rent budget"
+  ]
+}

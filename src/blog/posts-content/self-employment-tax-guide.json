@@ -2,93 +2,106 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "When you work for yourself, you're the employer and the employee — and the IRS wants both halves of FICA. That's the single biggest surprise for new freelancers. Here's how self-employment (SECA) tax works, what you can deduct, and how to avoid penalties."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is SECA Tax and How Is It Calculated?"
-    },
-    {
-      "type": "paragraph",
-      "text": "SECA (Self-Employment Contributions Act) is the self-employed version of FICA. You pay **15. 3%** on **92."
-    },
-    {
-      "type": "paragraph",
-      "text": "35%** of your net self-employment income. That 15. 3% breaks into **12."
-    },
-    {
-      "type": "paragraph",
-      "text": "4% for Social Security** (up to the wage base of $176,100 in 2026) and **2. 9% for Medicare** (no cap). The 92."
-    },
-    {
-      "type": "paragraph",
-      "text": "35% multiplier accounts for the fact that you can deduct half the tax."
+      "text": "Self-employment tax is the Social Security and Medicare tax you pay on your own business profit. The IRS sets it at 12.4% for Social Security plus 2.9% for Medicare, a combined 15.3%, and it applies to 92.35% of your net earnings. In practice that works out to about 14.13% of your net profit until the Social Security cap applies. It is separate from income tax, and you pay both. This guide shows the arithmetic, what actually lowers the bill, and where a simple calculation stops being accurate."
     },
     {
       "type": "callout",
-      "variant": "info",
-      "text": "Employees pay 7.65% of their wages and their employer pays the other 7.65%. Self-employed individuals pay the full 15.3% — but you can deduct half (7.65% of your SE earnings) as an above-the-line adjustment on Form 1040. This deduction reduces your income tax, not your SE tax itself."
+      "variant": "warning",
+      "text": "Tax limits change every year. This guide states only the rates and rules published on the IRS self-employment tax page (12.4%, 2.9%, 92.35%, the $400 filing trigger and the half-tax deduction). It does not state the current Social Security wage base, additional Medicare thresholds, or estimated-payment dates, because they change. Check irs.gov for the current year before you file."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Self-Employed vs. Employee — Real Dollar Comparison"
-    },
-    {
-      "type": "table",
-      "headers": [
-        "Factor",
-        "Employee ($100K)",
-        "Self-Employed ($100K profit)"
-      ],
-      "rows": [
-        [
-          "FICA/SECA tax",
-          "$7,650 (half paid by employer)",
-          "$14,129 (full 15.3%)"
-        ],
-        [
-          "Deductible portion",
-          "$0",
-          "$7,064 (deductible half)"
-        ],
-        [
-          "Health insurance",
-          "$5,000–$15,000 (employer subsidized)",
-          "You pay full cost"
-        ],
-        [
-          "Paid time off",
-          "2–4 weeks paid",
-          "$0 — every day off = lost income"
-        ],
-        [
-          "401(k) match",
-          "3–6% of salary",
-          "You fund both sides"
-        ]
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What Expenses Reduce Your Self-Employment Tax?"
+      "text": "Where the 15.3% and the 92.35% come from"
     },
     {
       "type": "paragraph",
-      "text": "Your SE tax is based on net profit — revenue minus deductible business expenses. Every legitimate deduction reduces your SE tax. Here are the most common deductions available to self-employed individuals."
+      "text": "An employee pays half of the payroll tax and the employer pays the other half. That is 7.65% each: 6.2% Social Security and 1.45% Medicare. When you work for yourself you are both, so you pay 12.4% plus 2.9%. The IRS says that you usually must pay self-employment tax if your net earnings from self-employment were $400 or more."
+    },
+    {
+      "type": "paragraph",
+      "text": "The 92.35% figure puts you on equal footing with an employee, whose employer-paid half is not counted as wages. It equals 100% minus 7.65% (1 - 0.0765 = 0.9235). So the formula is: net profit x 0.9235 x 0.153. The IRS also lets you deduct one-half of the self-employment tax when you work out your adjusted gross income on Form 1040. That deduction lowers your income tax, not the self-employment tax itself."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: four profit levels"
+    },
+    {
+      "type": "paragraph",
+      "text": "The table applies the formula to four net profits. It assumes each profit is below the Social Security wage base for the year, so the full 12.4% applies. It also assumes no wages from a job. Results are rounded to the cent, as the Self-Employment Tax Calculator does."
+    },
+    {
+      "type": "table",
+      "headers": ["Net profit", "Taxed base (x 92.35%)", "Social Security (12.4%)", "Medicare (2.9%)", "Total SE tax", "Deductible half"],
+      "rows": [
+        ["$20,000", "$18,470.00", "$2,290.28", "$535.63", "$2,825.91", "$1,412.96"],
+        ["$50,000", "$46,175.00", "$5,725.70", "$1,339.08", "$7,064.78", "$3,532.39"],
+        ["$80,000", "$73,880.00", "$9,161.12", "$2,142.52", "$11,303.64", "$5,651.82"],
+        ["$100,000", "$92,350.00", "$11,451.40", "$2,678.15", "$14,129.55", "$7,064.78"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The effective rate is 14.13% at every level in this range, because the formula is a flat percentage. Compare that with an employee earning $100,000 in wages: the employee sees $7,650 withheld, while the employer separately pays another $7,650. The self-employed person at $100,000 profit pays $14,129.55 in one bill. The total payroll tax load is similar. What changes is that you see the whole cost."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the cap does to the calculation"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Social Security part stops at an annual wage base set by law, while the Medicare part has no cap. The IRS page says this amount changes annually, so use the current figure from irs.gov. To show the mechanism, here is a hypothetical: assume a cap of $150,000 (an invented number for illustration only) and a net profit of $200,000."
+    },
+    {
+      "type": "table",
+      "headers": ["Step", "Amount"],
+      "rows": [
+        ["Taxed base ($200,000 x 0.9235)", "$184,700.00"],
+        ["Social Security: 12.4% of the first $150,000 (hypothetical cap)", "$18,600.00"],
+        ["Medicare: 2.9% of the full $184,700", "$5,356.30"],
+        ["Total SE tax", "$23,956.30"],
+        ["Effective rate on $200,000", "11.98%"],
+        ["Total with no cap, for comparison", "$28,259.10"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Above the cap, each extra dollar of profit adds only the 2.9% Medicare portion (applied to 92.35% of the profit), which is why the effective rate falls. If you also earn wages, those wages count toward the Social Security base first, so your self-employment income may hit the cap sooner."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What lowers the bill, and what only moves it"
     },
     {
       "type": "list",
-      "ordered": false,
       "items": [
-        "**Home office deduction** — $5/sq ft simplified method (up to 300 sq ft) or actual expense method",
-        "**Health insurance premiums** — deducted on Form 1040, not Schedule C",
-        "**SEP IRA / Solo 401(k)** — contribute up to 25% of net earnings, reducing both income and SE tax",
-        "**Business use of vehicle** — $0.67/mile standard mileage rate for 2026",
-        "**QBI deduction** — up to 20% of qualified business income under Section 199A"
+        "Legitimate business expenses reduce net profit, and so reduce self-employment tax. Each $1,000 of deductible expense at the $100,000 level lowers SE tax by about $141.30 (0.9235 x 0.153 x $1,000), plus whatever income tax it saves.",
+        "The deductible half is not a credit. At an assumed 22% income tax rate (an assumption, not your rate), deducting $7,064.78 saves about $1,554.25, so the real net cost of the $14,129.55 is roughly $12,575, or 12.6% of profit.",
+        "A deduction for qualified business income may reduce your income tax. It does not reduce self-employment tax. Eligibility and limits depend on your situation, so check the IRS rules.",
+        "Retirement contributions for the self-employed generally reduce income tax. Whether they also reduce SE tax depends on the plan type, so confirm with the IRS or a tax professional before assuming either way."
       ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and when the simple formula fails"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Setting aside only the SE tax. It is one of two bills. Income tax comes on top, and many states and countries add their own.",
+        "Using revenue instead of net profit. The formula applies to profit after expenses, not to what clients paid you.",
+        "Forgetting you may owe estimated payments during the year. The IRS expects tax to be paid as you earn, usually in quarterly installments, and underpaying can trigger a penalty. Get the current due dates from the IRS.",
+        "Ignoring the additional Medicare tax on high earnings and any wages you also have. The simple calculator does not model them.",
+        "Assuming this applies outside the United States. Self-employment contributions in other countries use different rules and rates."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "This is a general explanation using the published IRS formula, not tax advice. Partnerships, farm income, church employee income, and business structures such as S corporations can change the calculation. If your situation is anything other than a single sole proprietorship, talk to a qualified tax professional."
     },
     {
       "type": "cta",
@@ -98,16 +111,5 @@
       "path": "/finance/self-employment-tax-calculator/"
     }
   ],
-  "keywords": [
-    "self employment tax",
-    "SECA tax",
-    "self employed tax",
-    "1099 tax",
-    "self employed social security",
-    "quarterly estimated tax",
-    "self employment deductions",
-    "QBI deduction",
-    "self employment tax rate 2026",
-    "self employed fica"
-  ]
+  "keywords": ["self employment tax","SECA tax","self employed tax","1099 tax","self employed social security","quarterly estimated tax","self employment deductions","QBI deduction","self employment tax rate 2026","self employed fica"]
 }

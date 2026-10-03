@@ -1,84 +1,133 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Why the 8-Glasses-a-Day Rule doesn't Fit Everyone"
-    },
-    {
       "type": "paragraph",
-      "text": "you've heard it your whole life: drink eight glasses of water a day. it's one of the most repeated health rules — and also one of the least accurate. Your water needs are as individual as your fingerprint, depending on your body weight, activity level, and climate."
+      "text": "The water intake calculator estimates your daily water target as 0.5 ounces per pound of body weight (about 33 mL per kilogram), plus a fixed amount for how active you are and a fixed amount for the climate you live or work in. A 150 lb person with a sedentary day in a temperate climate gets 75 oz (about 2.2 L). The same person with moderate exercise in a hot, humid climate gets 107 oz (about 3.2 L). It is a planning estimate, not a medical requirement, and the calculator itself says thirst and pale-yellow urine are better day-to-day guides than hitting an exact number."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Much Water Does Your Body Actually Need?"
+      "text": "The formula, step by step"
     },
     {
       "type": "paragraph",
-      "text": "The most widely cited evidence-based baseline is **0. 5 ounces of water per pound of body weight**. For a 150 lb person, that works out to about **75 ounces (2."
-    },
-    {
-      "type": "paragraph",
-      "text": "2 liters)** per day. And that's just the starting point — physical activity and your environment add more to that number."
+      "text": "The calculator adds three pieces: baseline ounces (body weight in pounds times 0.5), an activity adjustment, and a climate adjustment. Weights entered in kilograms are converted to pounds first. Ounces are converted to liters with 0.0295735 L per ounce, and the cups figure is total ounces divided by 8, always rounded up."
     },
     {
       "type": "table",
-      "headers": [
-        "Body Weight",
-        "Baseline (oz/day)",
-        "Baseline (L/day)"
-      ],
+      "headers": ["Choice in the calculator", "Added ounces"],
       "rows": [
-        [
-          "120 lbs (54 kg)",
-          "60 oz",
-          "1.8 L"
-        ],
-        [
-          "150 lbs (68 kg)",
-          "75 oz",
-          "2.2 L"
-        ],
-        [
-          "180 lbs (82 kg)",
-          "90 oz",
-          "2.7 L"
-        ],
-        [
-          "200 lbs (91 kg)",
-          "100 oz",
-          "3.0 L"
-        ],
-        [
-          "250 lbs (113 kg)",
-          "125 oz",
-          "3.7 L"
-        ]
+        ["Sedentary", "0"],
+        ["Lightly active", "8"],
+        ["Moderately active", "16"],
+        ["Very active", "24"],
+        ["Athlete or physical job", "32"],
+        ["Temperate climate", "0"],
+        ["Hot or humid", "16"],
+        ["Very hot or desert", "24"],
+        ["High altitude (above 8,000 ft)", "16"]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Factors Push Your Daily Needs Higher?"
+      "text": "Baseline by body weight"
+    },
+    {
+      "type": "table",
+      "headers": ["Body weight", "Baseline ounces", "Liters", "Milliliters", "Cups (rounded up)"],
+      "rows": [
+        ["120 lb (54 kg)", "60", "1.8", "1,774", "8"],
+        ["150 lb (68 kg)", "75", "2.2", "2,218", "10"],
+        ["180 lb (82 kg)", "90", "2.7", "2,662", "12"],
+        ["200 lb (91 kg)", "100", "3.0", "2,957", "13"],
+        ["250 lb (113 kg)", "125", "3.7", "3,697", "16"]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: one 150 lb adult, every activity and climate"
     },
     {
       "type": "paragraph",
-      "text": "Exercise can add **8 to 32 ounces** depending on intensity and duration. Hot or humid weather adds **16 to 24 ounces**, and high-altitude environments increase respiratory water loss. A solid daily water intake target accounts for all of these variables, which is why a personalized **hydration calculator** gives you a much more accurate number than a generic rule."
+      "text": "Each cell shows total ounces and liters from the calculator's formula for a 150 lb adult, with liters rounded to one decimal place."
+    },
+    {
+      "type": "table",
+      "headers": ["Activity level", "Temperate", "Hot or humid", "Very hot or desert", "High altitude"],
+      "rows": [
+        ["Sedentary", "75 oz (2.2 L)", "91 oz (2.7 L)", "99 oz (2.9 L)", "91 oz (2.7 L)"],
+        ["Lightly active", "83 oz (2.5 L)", "99 oz (2.9 L)", "107 oz (3.2 L)", "99 oz (2.9 L)"],
+        ["Moderately active", "91 oz (2.7 L)", "107 oz (3.2 L)", "115 oz (3.4 L)", "107 oz (3.2 L)"],
+        ["Very active", "99 oz (2.9 L)", "115 oz (3.4 L)", "123 oz (3.6 L)", "115 oz (3.4 L)"],
+        ["Athlete or physical job", "107 oz (3.2 L)", "123 oz (3.6 L)", "131 oz (3.9 L)", "123 oz (3.6 L)"]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Three more examples, including kilograms"
+    },
+    {
+      "type": "table",
+      "headers": ["Person", "Calculation", "Total", "Cups (rounded up)"],
+      "rows": [
+        ["150 lb, sedentary, temperate", "75 + 0 + 0", "75 oz (2.2 L)", "10"],
+        ["70 kg (154.3 lb), very active, desert", "77.2 + 24 + 24", "125.2 oz (3.7 L)", "16"],
+        ["200 lb, athlete, desert", "100 + 32 + 24", "156 oz (4.6 L)", "20"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Because the activity and climate additions are fixed amounts, they matter more in proportion for smaller people. The hot-climate addition of 16 oz is 16% of a 200 lb person's 100 oz baseline, 21% of a 150 lb person's, and 27% of a 120 lb person's."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Does the target include water from food?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator's note says the target already accounts for activity and climate, and that about 20% of daily fluid comes from food, so you do not need to drink every ounce. If you apply that assumption literally, a 75 oz target means roughly 60 oz from drinks, and a 107 oz target means roughly 86 oz. The 20% figure is the calculator's assumption and varies with diet. The National Academies report on dietary reference intakes sets adequate intakes for total water, covering drinking water, beverages and food together, which is the same idea of counting every source."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the calculator does not use eight glasses"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator describes the eight-glasses rule as an oversimplification. Eight 8 oz glasses is 64 oz, which equals the weight-based baseline of a 128 lb person with a sedentary day in a temperate climate and nothing else added. Anyone heavier, more active or in a hotter place lands above that on this method."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Heat, work and drinking"
+    },
+    {
+      "type": "paragraph",
+      "text": "The climate options are broad categories, not live weather. On a day with a high heat index you may need more than the calculator's hot-climate figure, and for outdoor work OSHA says to drink water frequently rather than only when thirsty and to provide electrolyte drinks such as sports drinks on jobs longer than two hours. The CDC advises older adults to drink more water than usual in the heat and not to wait until they are thirsty. The CDC also notes that drinking water can help prevent dehydration, which may cause unclear thinking, mood change, overheating, constipation and kidney stones."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
     },
     {
       "type": "list",
       "items": [
-        "Dark yellow urine, thirst, dry mouth, and fatigue are early signs of dehydration",
-        "Dehydration of just **1–2% of body weight** impairs cognitive function, mood, and physical performance",
-        "Older adults have reduced thirst sensation and should be more intentional about regular drinking",
-        "Athletes should weigh before and after workouts — drink **16–24 oz per pound lost** during exercise"
+        "Treating the result as a prescription. It is a rule-of-thumb starting point built from three inputs.",
+        "Ignoring what you already drink and eat. Count tea, coffee, soups and food moisture before adding more.",
+        "Drinking an entire target in one sitting. Spread intake through the day and use thirst and urine color as checks.",
+        "Using it for situations it does not model. It has no inputs for age, pregnancy, illness or medications.",
+        "Assuming more is always better. Do not push far beyond your thirst without advice from a clinician."
       ]
     },
     {
       "type": "callout",
-      "variant": "tip",
-      "text": "Coffee and tea count toward your hydration total. Despite being mild diuretics, caffeinated beverages still provide net hydration at normal consumption levels. Roughly **20% of your daily water intake** also comes from food, especially fruits and vegetables like watermelon, cucumbers, and oranges."
+      "variant": "warning",
+      "text": "If you have kidney, heart or liver disease, have been told to limit fluids, take diuretics or other medicines that affect fluid balance, are pregnant or are caring for a child, ask a clinician for a fluid target instead of relying on this calculator."
     },
     {
       "type": "cta",

@@ -1,82 +1,171 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is Mortgage Amortization?"
-    },
-    {
       "type": "paragraph",
-      "text": "Amortization is the process of spreading out a loan into fixed payments over time. Each payment has two components: interest (the cost of borrowing) and principal (paying down the loan balance). In a standard amortizing mortgage, your payment amount stays the same each month, but the split between interest and principal changes over time."
-    },
-    {
-      "type": "paragraph",
-      "text": "In the early years, most of your payment goes to interest. In the later years, most goes to principal. This gradual shift is called amortization. The schedule showing this breakdown month by month is an amortization schedule. Our mortgage amortization calculator generates this schedule for any loan — and shows how extra payments change the numbers."
+      "text": "Mortgage amortization is the schedule that turns a home loan into equal monthly payments of principal and interest, each month charging interest on the remaining balance and applying the rest to principal. On a 30-year loan the early payments are mostly interest: on a $320,000 mortgage at 6.75%, 86.3% of the first year of payments is interest, and the balance is still $316,589.61 after twelve payments. This guide covers what is specific to mortgages: the long term, the extra items on the bill, a 15-year comparison, and how extra payments change the schedule."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Early Payments Are Mostly Interest"
+      "text": "The example loan and its schedule"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions (illustrative, not a quote): a $320,000 loan, 6.75% fixed rate, 360 monthly payments, interest of one-twelfth of the annual rate each month, payments at the end of the month. The principal-and-interest payment is $2,075.51. Payment 1 splits into $1,800.00 of interest ($320,000 x 0.0675 / 12) and $275.51 of principal. Total paid is $747,185.01, so total interest is $427,185.01, or 1.33 times the amount borrowed."
     },
     {
       "type": "table",
       "headers": [
-        "Year",
-        "Payment",
-        "Interest",
-        "Principal",
-        "Remaining Balance"
+        "End of year",
+        "Interest in the year",
+        "Principal in the year",
+        "Interest share",
+        "Balance"
       ],
       "rows": [
         [
-          "Year 1",
-          "$18,996",
-          "$15,192 (80%)",
-          "$3,804 (20%)",
-          "$296,196"
+          "1",
+          "$21,495.77",
+          "$3,410.39",
+          "86.3%",
+          "$316,589.61"
         ],
         [
-          "Year 5",
-          "$18,996",
-          "$13,847 (73%)",
-          "$5,149 (27%)",
-          "$274,993"
+          "5",
+          "$20,442.05",
+          "$4,464.12",
+          "82.1%",
+          "$300,402.27"
         ],
         [
-          "Year 10",
-          "$18,996",
-          "$11,434 (60%)",
-          "$7,562 (40%)",
-          "$239,023"
+          "10",
+          "$18,655.89",
+          "$6,250.28",
+          "74.9%",
+          "$272,963.20"
         ],
         [
-          "Year 20",
-          "$18,996",
-          "$5,308 (28%)",
-          "$13,688 (72%)",
-          "$110,869"
+          "15",
+          "$16,155.06",
+          "$8,751.10",
+          "64.9%",
+          "$234,545.34"
         ],
         [
-          "Year 30",
-          "$18,996",
-          "$0",
-          "$18,996 (100%)",
-          "$0"
+          "20",
+          "$12,653.62",
+          "$12,252.55",
+          "50.8%",
+          "$180,755.93"
+        ],
+        [
+          "25",
+          "$7,751.19",
+          "$17,154.98",
+          "31.1%",
+          "$105,444.56"
+        ],
+        [
+          "30",
+          "$887.22",
+          "$24,018.94",
+          "3.6%",
+          "$0.00"
         ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "Based on a $300,000 mortgage at 6% for 30 years. Total interest paid over 30 years: $347,515."
+      "text": "Principal first exceeds interest at payment 238, in year 20. The balance reaches half of the original loan only at payment 259, about 21.6 years into a 30-year loan. After 10 years, a third of the way through, the borrower has repaid $47,036.80 of principal, 14.7% of the loan, while paying $202,024.87 in interest."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Extra Payments Change Your Amortization"
+      "text": "What else is in the monthly bill"
     },
     {
       "type": "paragraph",
-      "text": "An extra $200 per month on the same $300,000 mortgage at 6% saves approximately $88,000 in interest and shortens the loan by 8 years. The earlier you start making extra payments, the greater the impact because you are reducing the principal that future years of interest would be calculated on."
+      "text": "The figures above are only principal and interest. Many lenders collect property tax and homeowners insurance monthly in an escrow account, and add mortgage insurance on some loans. As an illustration, assume a $400,000 home with 20% down, property tax of 1.2% of value ($400.00 a month) and insurance of $1,500 a year ($125.00 a month). The full payment becomes $2,600.51, of which principal and interest is 79.8%. These tax and insurance figures are placeholders and vary widely by location and policy. If the same $400,000 home were bought with 10% down, the loan would be $360,000, the principal-and-interest payment $2,334.95, and total interest $480,583.13. Mortgage insurance, if charged, comes on top; the mortgage amortization calculator models it as 0.8% of the loan a year, which would be $240.00 a month on $360,000, and that rate is a calculator assumption rather than a market figure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "15 years versus 30 years"
+    },
+    {
+      "type": "paragraph",
+      "text": "At the same 6.75% rate on $320,000, a 15-year loan has a payment of $2,831.71 against $2,075.51, which is $756.20 more a month, and total interest of $189,707.85 against $427,185.01, a difference of $237,477.16. In practice a shorter loan usually carries a different rate, so use the rate you are actually offered; this comparison isolates the effect of term only. The question is whether the extra $756.20 a month is affordable without leaving no cushion, and whether you would put the difference to better use elsewhere."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Extra payments on this mortgage"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Strategy",
+        "Payoff time",
+        "Total interest",
+        "Interest saved"
+      ],
+      "rows": [
+        [
+          "Required payment only",
+          "30 yr 0 mo",
+          "$427,185.01",
+          "$0"
+        ],
+        [
+          "$100 extra each month",
+          "26 yr 2 mo",
+          "$361,337.40",
+          "$65,847.61"
+        ],
+        [
+          "$200 extra each month",
+          "23 yr 4 mo",
+          "$315,107.29",
+          "$112,077.71"
+        ],
+        [
+          "One extra payment ($2,075.51) each year, starting with payment 13",
+          "24 yr 2 mo",
+          "$330,720.65",
+          "$96,464.36"
+        ],
+        [
+          "One twelfth of a payment extra each month ($172.96)",
+          "24 yr 0 mo",
+          "$326,237.71",
+          "$100,947.30"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The monthly version of the extra payment saves slightly more than the annual one because the money starts working sooner. A biweekly plan that pays half the monthly payment every two weeks results in 26 half payments, which equals 13 full payments a year. Its effect is close to the one-extra-payment-a-year row, but how a lender applies biweekly money varies, so confirm it is credited to principal when received before relying on it. Fees charged by third-party biweekly services can also erase the benefit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating principal reduction as equity. Equity is the market value minus the balance, and home values can fall as well as rise.",
+        "Comparing mortgage offers by payment alone. A longer term lowers the payment but raises total interest.",
+        "Ignoring escrow changes. Taxes and insurance can rise, so the full payment can change even on a fixed-rate loan.",
+        "Assuming an adjustable-rate mortgage follows one schedule. It is recalculated each time the rate resets.",
+        "Sending extra money without instructions. Make sure it is applied to principal, not held toward a future payment.",
+        "Overlooking prepayment terms. Many mortgages allow prepayment, but check your note."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "These are illustrative calculations from stated assumptions, not a mortgage offer or financial advice. Your loan estimate and note are the authority for your actual payment and terms."
     },
     {
       "type": "cta",

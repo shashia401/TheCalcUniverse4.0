@@ -3,46 +3,34 @@
     {
       "type": "heading",
       "level": 2,
-      "text": "What Are Macronutrients?"
+      "text": "The Short Answer"
     },
     {
       "type": "paragraph",
-      "text": "Macronutrients — protein, carbohydrates, and fat — are the three nutrients your body needs in large amounts. Protein provides **4 calories per gram** and is essential for muscle repair and satiety. Carbs also provide **4 cal/g** and are your body's preferred fuel."
-    },
-    {
-      "type": "paragraph",
-      "text": "Fat provides **9 cal/g** and is critical for hormone production and nutrient absorption. Every food you eat is a combination of these three."
+      "text": "For weight loss, total calories decide whether you lose weight, while your macro split (the share of calories from protein, carbohydrate and fat) affects hunger, performance and what the weight loss is made of. Our macro calculator takes your calorie target, multiplies it by a split percentage, and divides by the energy in each gram: 4 kcal for protein, 4 for carbohydrate and 9 for fat. The key trap is that a percentage split can give a low protein figure when calories are low, so always check the grams."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Macros Matter for Weight Loss"
-    },
-    {
-      "type": "paragraph",
-      "text": "Total calories determine whether you lose or gain weight. But your macro split determines what you lose. At the same calorie deficit, a high-protein diet preserves more muscle than a low-protein one."
-    },
-    {
-      "type": "paragraph",
-      "text": "More muscle means a higher metabolism and a better shape as you slim down. The right macro split also affects your energy levels, hunger, and how easy the diet is to stick with — which is ultimately what determines long-term success."
+      "text": "The Five Presets"
     },
     {
       "type": "table",
       "headers": [
-        "Diet Type",
+        "Preset",
         "Protein",
-        "Carbs",
+        "Carbohydrate",
         "Fat"
       ],
       "rows": [
         [
-          "Standard (Balanced)",
+          "Standard (balanced)",
           "20%",
           "50%",
           "30%"
         ],
         [
-          "Low-Carb",
+          "Low-carb",
           "30%",
           "25%",
           "45%"
@@ -54,7 +42,7 @@
           "70%"
         ],
         [
-          "High-Protein",
+          "High-protein",
           "35%",
           "35%",
           "30%"
@@ -68,30 +56,114 @@
       ]
     },
     {
+      "type": "paragraph",
+      "text": "Each row adds to 100%. Grams = calories x percentage / kcal per gram. For example, 1,500 kcal at 35% protein is 1,500 x 0.35 / 4 = about 131 g."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "How Much Protein Do You Need?"
+      "text": "Worked Example: A Woman Aiming for 1 lb per Week"
     },
     {
       "type": "paragraph",
-      "text": "The evidence-backed recommendation is **1. 6–2. 2 grams per kilogram of body weight** (0."
+      "text": "Assumptions: a 40-year-old woman, 5 ft 6 in (167.6 cm), 170 lb (77.1 kg), light exercise (factor 1.375), no body fat figure, goal set to weight loss at the 500 kcal deficit step. BMR = 10 x 77.1 + 6.25 x 167.6 - 5 x 40 - 161 = 1,458 kcal. TDEE = 1,458 x 1.375 = 2,005 kcal. Target = 2,005 - 500 = 1,505 kcal, which is above the 1,200 kcal minimum that our calculators flag for women. Grams are rounded, so each row totals within a few kcal of 1,505."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Preset",
+        "Protein",
+        "Carbohydrate",
+        "Fat",
+        "Protein per kg of body weight"
+      ],
+      "rows": [
+        [
+          "Standard",
+          "75 g",
+          "188 g",
+          "50 g",
+          "0.97 g/kg"
+        ],
+        [
+          "Low-carb",
+          "113 g",
+          "94 g",
+          "75 g",
+          "1.47 g/kg"
+        ],
+        [
+          "Keto",
+          "94 g",
+          "19 g",
+          "117 g",
+          "1.22 g/kg"
+        ],
+        [
+          "High-protein",
+          "132 g",
+          "132 g",
+          "50 g",
+          "1.71 g/kg"
+        ],
+        [
+          "Mediterranean",
+          "75 g",
+          "169 g",
+          "59 g",
+          "0.97 g/kg"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the Table Shows"
     },
     {
       "type": "paragraph",
-      "text": "73–1. 0 g per lb). For a 180 lb (82 kg) person, that's **130–180 grams of protein per day**."
+      "text": "The macro calculator uses 1.6 to 2.2 g of protein per kg of body weight as its protein range. For this woman that is 123 to 170 g per day. Only the high-protein preset reaches the bottom of that range (1.71 g/kg). The standard and Mediterranean presets give 0.97 g/kg, because 20% of a 1,505 kcal budget is only 75 g. The same 20% would look fine at 3,000 kcal, which is exactly why the percentage alone is misleading in a deficit."
     },
     {
       "type": "paragraph",
-      "text": "The higher end is better during a calorie deficit or if you're training hard. Spread it across 3–4 meals for optimal muscle protein synthesis. Even 2."
+      "text": "The calculator also suggests fat between 20% and 35% of calories, which here is 33 to 59 g, and carbohydrate between 45% and 65%, or 169 to 244 g. Several presets fall outside one range or another, which is normal: the ranges are guides, and a preset is a pattern, not a rule."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Fixing a Low-Protein Split"
     },
     {
       "type": "paragraph",
-      "text": "2+ g/kg is safe for healthy people but offers diminishing returns. Protein isn't just for bodybuilders — it's the single most important macro for anyone trying to lose weight while preserving muscle."
+      "text": "Instead of picking a preset, you can set protein first. For the same woman, protein at 1.6 g/kg is 123 g (492 kcal). Fat at 25% of 1,505 kcal is 42 g (378 kcal). Carbohydrate takes the rest: (1,505 - 492 - 378) / 4 = 159 g (636 kcal). That is 33% protein, 25% fat and 42% carbohydrate, so it has a protein share close to the high-protein preset but more carbohydrate and less fat, with the calories adding to 1,506 after rounding. The point is the order of operations, not the exact figures: pick protein in grams, then fat, then fill with carbohydrate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Choosing a Split"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Start with calories. Whatever split you pick, the deficit does the work on the scale.",
+        "Check protein in grams per kg. If a preset lands below your range, raise protein and take the calories from carbohydrate or fat.",
+        "Choose the pattern you can keep following. The calculator text says the best split is the one you can sustain.",
+        "Spread protein across three or four meals, as the calculator suggests, rather than loading it into one."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When This Does Not Apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "The keto preset gives only 19 g of carbohydrate in this example. The calculator describes it as restrictive and best pursued with professional guidance, and notes that for general weight loss it is not superior to other patterns when calories and protein are matched. The tool is also not suitable for clinical nutrition planning such as eating disorders, metabolic diseases, kidney disease or pre- and post-surgery diets. The calculator itself lists kidney disease as a case where protein may be restricted, so anyone with kidney problems should follow their clinician, not these ranges."
     },
     {
       "type": "callout",
       "variant": "tip",
-      "text": "The best macro split's the one you can sustain. A high-protein diet wins on science, but if you hate eating that much meat, a standard split with adequate protein works too. The perfect diet is the one you stick with. Our calculator lets you compare all five splits so you can see which one fits your lifestyle before committing."
+      "text": "Protein ranges and calorie floors are general guidance, not medical advice. If you have a medical condition, are pregnant, take medication, or are under 18, ask a clinician or registered dietitian before changing how you eat."
     },
     {
       "type": "cta",

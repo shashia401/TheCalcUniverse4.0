@@ -1,43 +1,112 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "A retirement corpus lasts until the money you withdraw each month exceeds what the remaining balance can earn, and then it falls faster every month. For example, Rs. 60,00,000 with Rs. 50,000 withdrawn monthly at an assumed 7% a year lasts 207 months, which is 17 years and 3 months. Start at 60 and the money is gone at about 77. This guide shows how to find that number yourself, how sharply it changes with small differences in return, and what to change when the answer is shorter than you need."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Factors Affecting Corpus Longevity"
+      "text": "How the calculation works"
     },
     {
       "type": "paragraph",
-      "text": "Four variables determine how long your money lasts: the size of your initial corpus, how much you withdraw monthly, the rate of return your investments earn, and inflation eroding your purchasing power."
+      "text": "The SWP calculator on this site uses a month-by-month rule. Each month the balance first grows by the annual rate divided by 12, then the withdrawal is subtracted. Every figure in this guide uses that rule with a constant return, no tax, no fees and no inflation. The returns are assumptions for illustration, not forecasts, and past performance does not guarantee future results."
+    },
+    {
+      "type": "paragraph",
+      "text": "You can also get the answer with one formula. Let P be the corpus, W the monthly withdrawal and i the annual rate divided by 12. If W is no more than P x i, the corpus never runs out. Otherwise the number of months is n = -ln(1 - P x i / W) / ln(1 + i). For Rs. 60,00,000, Rs. 50,000 and 7%: P x i = Rs. 35,000, so 1 - 35,000 / 50,000 = 0.3, and n = 207 months. A direct simulation gives the same 207."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: where the money goes"
+    },
+    {
+      "type": "paragraph",
+      "text": "In the first year the corpus earns about Rs. 4,20,000 at 7%, while Rs. 6,00,000 is withdrawn (Rs. 50,000 x 12). The withdrawals are 10% of the starting corpus, above the 7% return, so the balance falls. Because a smaller balance earns less interest, the fall speeds up."
     },
     {
       "type": "table",
-      "headers": [
-        "Withdrawal Rate",
-        "Corpus Lasts at 8%",
-        "Corpus Lasts at 6%"
-      ],
+      "headers": ["End of year", "Balance", "Total withdrawn so far"],
       "rows": [
-        [
-          "4%",
-          "30+ years",
-          "28 years"
-        ],
-        [
-          "5%",
-          "25 years",
-          "20 years"
-        ],
-        [
-          "6%",
-          "20 years",
-          "16 years"
-        ],
-        [
-          "8%",
-          "14 years",
-          "11 years"
-        ]
+        ["1", "Rs. 58,14,111", "Rs. 6,00,000"],
+        ["5", "Rs. 49,26,106", "Rs. 30,00,000"],
+        ["10", "Rs. 34,03,728", "Rs. 60,00,000"],
+        ["15", "Rs. 12,45,566", "Rs. 90,00,000"],
+        ["17.25", "Rs. 0 (after the 207th withdrawal)", "About Rs. 1,03,50,000"]
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Notice that at year 10 about Rs. 34 lakh is still left, yet the last Rs. 12 lakh disappears in a little over two years. The chart of a depleting SWP always has this shape, so by the time the balance looks worrying, little time remains to act."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How long each combination lasts"
+    },
+    {
+      "type": "paragraph",
+      "text": "The grid below keeps the Rs. 60,00,000 corpus and varies the monthly withdrawal and the assumed annual return. Entries are in years until the balance reaches zero. Where the monthly withdrawal is no more than the monthly interest on the starting corpus, the money does not run out."
+    },
+    {
+      "type": "table",
+      "headers": ["Monthly withdrawal (yearly share of corpus)", "Return 5%", "Return 6%", "Return 7%", "Return 8%", "Return 9%"],
+      "rows": [
+        ["Rs. 30,000 (6.0%)", "35.9", "Does not run out", "Does not run out", "Does not run out", "Does not run out"],
+        ["Rs. 35,000 (7.0%)", "25.2", "32.6", "Does not run out", "Does not run out", "Does not run out"],
+        ["Rs. 40,000 (8.0%)", "19.7", "23.2", "29.8", "Does not run out", "Does not run out"],
+        ["Rs. 45,000 (9.0%)", "16.3", "18.4", "21.6", "27.6", "Does not run out"],
+        ["Rs. 50,000 (10.0%)", "13.9", "15.3", "17.3", "20.3", "25.8"],
+        ["Rs. 60,000 (12.0%)", "10.8", "11.6", "12.6", "13.8", "15.5"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Two patterns stand out. First, the rows near the edge of 'does not run out' are the most sensitive: at Rs. 40,000, a 7% return lasts 29.8 years and an 8% return lasts forever. Second, a higher withdrawal shortens life more than a lower return does. Moving from Rs. 40,000 to Rs. 50,000 at 7% cuts 29.8 years to 17.3."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Fixing a corpus that is too short"
+    },
+    {
+      "type": "paragraph",
+      "text": "If the answer is shorter than the years you need, solve the other way round: the level monthly withdrawal that empties the corpus exactly at the end of your target period is W = P x i / (1 - (1 + i)^-n). For Rs. 60,00,000:"
+    },
+    {
+      "type": "table",
+      "headers": ["Years the money must last", "At 6%", "At 7%", "At 8%"],
+      "rows": [
+        ["20", "Rs. 42,986", "Rs. 46,518", "Rs. 50,186"],
+        ["25", "Rs. 38,658", "Rs. 42,407", "Rs. 46,309"],
+        ["30", "Rs. 35,973", "Rs. 39,918", "Rs. 44,026"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "At 7%, Rs. 50,000 a month would need a corpus of about Rs. 70,74,000 to last 25 years, or Rs. 85,71,000 to last indefinitely. Those figures show the three levers: a larger corpus, a lower withdrawal, or a longer wait before you start."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What this calculation leaves out"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Inflation. The calculator keeps the withdrawal fixed. If the Rs. 50,000 rises 5% each year (an assumption), the same corpus at 7% lasts about 11.6 years, not 17.25. If it rises 3%, about 13.2 years. Fixed-withdrawal answers are the best case.",
+        "Uneven returns. A constant 7% is not how markets behave. A fall early in retirement does more damage than the same fall later, because you are selling units at low prices.",
+        "Taxes, fund costs and exit charges, which reduce the effective return. Check the current rules for your fund type.",
+        "Changes in spending. Healthcare and one-off costs make real spending lumpy.",
+        "Longevity. The last years are the ones you most need to cover and the ones you cannot predict."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "These figures are arithmetic on assumed inputs, not a financial plan. A SEBI-registered adviser can test your corpus against inflation, taxes and your specific spending."
     },
     {
       "type": "cta",
@@ -47,12 +116,5 @@
       "path": "/finance/swp-calculator/"
     }
   ],
-  "keywords": [
-    "how long corpus lasts",
-    "retirement corpus longevity",
-    "corpus depletion",
-    "when will corpus run out",
-    "sustainable withdrawal period",
-    "longevity calculator retirement"
-  ]
+  "keywords": ["how long corpus lasts","retirement corpus longevity","corpus depletion","when will corpus run out","sustainable withdrawal period","longevity calculator retirement"]
 }

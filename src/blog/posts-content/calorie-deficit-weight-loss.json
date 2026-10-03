@@ -1,72 +1,90 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "A calorie deficit means eating fewer calories than you burn. To find a starting target, estimate your maintenance calories (TDEE) and subtract a deficit from it. A common rule of thumb treats 7,700 kcal as about 1 kg of body fat (3,500 kcal per pound), so a 500 kcal daily deficit projects to roughly 0.45 kg or 1 lb per week. That rule is an approximation, and as the example below shows, it overstates progress over a long diet because your maintenance level falls as you get lighter."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "What Is a Calorie Deficit?"
+      "text": "Worked example: choosing a deficit"
     },
     {
       "type": "paragraph",
-      "text": "A calorie deficit simply means eating fewer calories than your body burns. Your body then uses stored fat to make up the difference, resulting in weight loss. One pound of body fat contains roughly 3,500 calories. To lose one pound per week, you need a deficit of about 500 calories per day. This can come from eating less, moving more, or ideally a combination of both."
+      "text": "Assumptions: a 38-year-old man, 183 cm, 95 kg, lightly active (activity factor 1.375). The Mifflin-St Jeor equation gives a BMR of 1,909 kcal and a TDEE of about 2,625 kcal. The table applies three deficits using the 7,700 kcal per kg approximation. Figures are rounded."
+    },
+    {
+      "type": "table",
+      "headers": ["Daily deficit", "Daily intake", "Deficit as % of TDEE", "Projected loss per week", "Weeks to lose 5 kg"],
+      "rows": [
+        ["250 kcal", "2,375 kcal", "9.5%", "0.23 kg (0.5 lb)", "22"],
+        ["500 kcal", "2,125 kcal", "19.1%", "0.45 kg (1.0 lb)", "11"],
+        ["750 kcal", "1,875 kcal", "28.6%", "0.68 kg (1.5 lb)", "7.3"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The CDC says people who lose weight at a gradual, steady pace of about 1 to 2 pounds a week are more likely to keep it off than people who lose it faster. The calculator's own documentation suggests 300 to 500 kcal a day as a typical deficit and warns that very low intakes can bring muscle loss and nutrient shortfalls. A bigger deficit is not automatically better: it is harder to sustain, and anyone with a medical condition, who takes medication or who is considering a very large cut should plan it with a doctor or registered dietitian."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Finding Your Deficit Sweet Spot"
+      "text": "Why the projection drifts as you lose weight"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your maintenance calories are not fixed. In the Mifflin-St Jeor equation each kilogram of body weight is worth 10 kcal of BMR, so at the 1.375 activity factor each kilogram lost lowers TDEE by about 14 kcal. If the man above keeps eating 2,125 kcal a day, his deficit shrinks as he loses weight:"
+    },
+    {
+      "type": "table",
+      "headers": ["Body weight", "Estimated TDEE", "Deficit at 2,125 kcal intake"],
+      "rows": [
+        ["95 kg", "2,625 kcal", "500 kcal"],
+        ["90 kg", "2,556 kcal", "431 kcal"],
+        ["85 kg", "2,487 kcal", "363 kcal"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Simulated week by week under the same assumptions (7,700 kcal per kg, activity factor unchanged, BMR changing only through the weight term), losing 10 kg takes about 26 weeks rather than the 22 weeks the constant-deficit arithmetic implies. This is a simplified model. Real bodies also change in other ways, such as appetite, movement and water, which this model does not capture. The practical lesson is to recalculate your TDEE every 5 kg or so, and to judge progress by your actual weight trend over several weeks rather than by the projection."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: the plateau that is a small deficit"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take a 30-year-old woman, 165 cm, 65 kg, moderately active (factor 1.55). Her BMR is 1,370 kcal and her TDEE is 2,124 kcal. She eats about 2,000 kcal a day and says she is stuck. Her deficit is only 124 kcal a day, which projects to 0.11 kg per week, or about 62 days per kilogram of fat. Day-to-day scale changes from water, food in the gut and hormones are larger than that, so a real but tiny trend is invisible. For a 500 kcal deficit she would need a target of about 1,624 kcal a day, which the calculator would show as roughly 0.45 kg a week."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why you may not be losing weight"
     },
     {
       "type": "list",
-      "ordered": false,
       "items": [
-        "Small deficit (200-300 cal/day): Slow, sustainable weight loss of 0.5 lb/week. Easy to maintain, minimal muscle loss.",
-        "Moderate deficit (300-500 cal/day): Standard recommendation. 0.5-1 lb/week. Good balance of speed and sustainability.",
-        "Aggressive deficit (500-800 cal/day): 1-1.5 lb/week. Short-term only. Risk of muscle loss, fatigue, and nutrient deficiencies.",
-        "Very aggressive deficit (800+ cal/day): Not recommended without medical supervision. Rapid weight loss but high risk of muscle loss, gallstones, and metabolic adaptation."
+        "The activity factor is too generous. For the man above, choosing 1.55 instead of 1.375 adds 334 kcal to his estimated TDEE, which erases most of a 500 kcal deficit.",
+        "Intake is not what you think. Portions, oils, drinks and weekend meals are the usual gaps. Weighing food for a couple of weeks is the usual way to find out.",
+        "Exercise calories are overcounted. Treat machine and watch estimates as rough and avoid eating them all back.",
+        "Not enough time. A weekly change of 0.2 to 0.5 kg is smaller than normal day-to-day fluctuation, so compare weekly averages over three to four weeks.",
+        "The deficit is real but the equation is wrong for you. BMR estimates can be off by around 10 percent, which for a 2,000 kcal intake is a couple of hundred calories."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Use the Calorie Calculator"
+      "text": "Limits of the calorie-deficit model"
     },
     {
-      "type": "list",
-      "ordered": true,
-      "items": [
-        "Enter your age, gender, height, and weight.",
-        "Select your activity level (sedentary to very active).",
-        "Choose your weight loss goal (mild, moderate, or aggressive).",
-        "Review your TDEE (maintenance calories) and recommended calorie target.",
-        "Use the macro breakdown to plan your meals."
-      ]
+      "type": "paragraph",
+      "text": "The 7,700 kcal per kg (3,500 per pound) figure is an average, and the calculator documentation says it becomes less accurate as weight loss progresses. The model also ignores what you lose: some of the weight is lean tissue and water, not only fat. The calculator is not suitable for children, pregnant or breastfeeding people, people with an eating disorder or a metabolic condition such as diabetes or thyroid disease. If any of these applies, get individual advice."
     },
     {
       "type": "callout",
-      "variant": "info",
-      "text": "Never eat below 1,200 calories/day (women) or 1,500 calories/day (men) without medical supervision. Very low calorie diets can cause nutrient deficiencies, muscle loss, and metabolic slowdown."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Why am I not losing weight even with a deficit?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Possible reasons: underestimating calorie intake (people typically under-report by 20-50%), overestimating exercise calorie burn, water retention from sodium or carbs, hormonal factors, or metabolic adaptation from prolonged dieting. Track accurately for 2 weeks before adjusting."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Should I eat back exercise calories?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Generally no. Exercise calorie estimates on machines and fitness trackers can be 30-50% inaccurate. If you feel overly fatigued, try eating back 25-50% of estimated exercise calories and see how your energy and progress respond."
+      "variant": "warning",
+      "text": "This page gives estimates for generally healthy adults. It is not medical advice. Talk to a doctor or registered dietitian before starting a significant calorie reduction, especially if you have a health condition or take medicines that affect appetite, blood sugar or weight."
     },
     {
       "type": "cta",

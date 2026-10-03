@@ -1,77 +1,176 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "How Is Your Due Date Actually Calculated?"
-    },
-    {
       "type": "paragraph",
-      "text": "The due date you get at your first prenatal visit follows a formula called **Naegele's Rule**, developed by a German obstetrician in the early 1800s. The rule adds **280 days (40 weeks)** from the first day of your last menstrual period. Despite being nearly 200 years old, it remains the standard clinical method used today."
+      "text": "Your due date is the date 280 days (40 weeks) after the first day of your last menstrual period, and our calculator can work it out from three different starting points: that period, a conception date, or an IVF transfer date. If the starting dates are consistent, all three methods land on the same day. This guide walks one pregnancy through all three and then lays out the calendar of trimesters and week numbers that follows from the result."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Methods Can You Use to Estimate Your Due Date?"
+      "text": "Three starting points, one answer"
     },
     {
       "type": "paragraph",
-      "text": "Depending on your situation, there are three ways to estimate your **pregnancy due date**: from your last period, from your conception date, or from an IVF transfer date. Each uses a different offset to arrive at the same 40-week target, and a good **due date calculator** should support all three."
+      "text": "Each method works back to an LMP-equivalent date and then adds 280 days. Take a pregnancy whose LMP was March 8, 2027. The conception date the calculator assumes is 14 days later, and a day-5 blastocyst transfer is assumed to happen 19 days after the LMP-equivalent date."
     },
     {
       "type": "table",
       "headers": [
         "Method",
-        "Starting Point",
-        "Calculation",
-        "Best For"
+        "Date you enter",
+        "Rule the calculator applies",
+        "Estimated due date"
       ],
       "rows": [
         [
-          "Last Menstrual Period (LMP)",
-          "First day of last period",
-          "Add 280 days",
-          "Regular 28-day cycles"
+          "Last menstrual period (LMP)",
+          "March 8, 2027",
+          "Add 280 days (adjusted if cycle is not 28 days)",
+          "December 13, 2027"
         ],
         [
-          "Conception Date",
-          "Ovulation date",
-          "Add 266 days",
-          "Women tracking ovulation"
+          "Conception or ovulation date",
+          "March 22, 2027",
+          "Subtract 14 days to find the LMP equivalent, then add 280 (same as adding 266)",
+          "December 13, 2027"
         ],
         [
-          "IVF Transfer (Day 5)",
-          "Embryo transfer date",
-          "Add 261 days",
-          "IVF pregnancies"
+          "IVF day-5 blastocyst transfer",
+          "March 27, 2027",
+          "Subtract 19 days, then add 280 (same as adding 261)",
+          "December 13, 2027"
         ]
       ]
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "How Accurate Is the Estimated Due Date?"
-    },
-    {
       "type": "paragraph",
-      "text": "Only about **5% of babies** arrive on their exact estimated due date. Full-term delivery is considered anywhere between **37 and 42 weeks** — a five-week window. First-trimester ultrasound, measuring crown-rump length at 8–13 weeks, is the most accurate dating method with an error margin of just **±5–7 days**."
-    },
-    {
-      "type": "paragraph",
-      "text": "Your provider may revise your due date if the ultrasound differs significantly from the LMP-based estimate."
+      "text": "All dates in this guide are computed with straight calendar arithmetic and assume a 28-day cycle unless stated. The conception and IVF rows only agree with the LMP row because the example was built that way; in a real pregnancy the dates come from different sources and may disagree by days, which is why your provider sets the final date."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Are the Key Trimester Milestones?"
+      "text": "What a different cycle length does"
+    },
+    {
+      "type": "paragraph",
+      "text": "The cycle-length field applies only to the LMP method. For a 35-day cycle the calculator assumes ovulation about 7 days later than in a 28-day cycle and moves the due date by 7 days, from December 13, 2027 to December 20, 2027. A 24-day cycle moves it 4 days earlier, to December 9, 2027. If your cycles vary from month to month, the average is a weak guide, and the scan date matters more."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Gestational age and fetal age"
+    },
+    {
+      "type": "paragraph",
+      "text": "Providers count pregnancy weeks from the LMP, which is called gestational age. Fetal age counts from conception, roughly two weeks later. For this example, 12 weeks 0 days of gestational age is May 31, 2027, when the fetal age is about 10 weeks. \"How many weeks pregnant am I?\" always refers to gestational age. A person at 12w3d has completed 12 weeks and 3 days; they are in their 13th week, which is why week numbers can look off by one between sources."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The trimester calendar"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator divides the 280 days into three trimesters using fixed day counts. The boundaries below are the calculator's convention, and other sources may place them a few days differently, so follow your provider's dating for care decisions."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Trimester",
+        "Gestational age",
+        "Dates for this example"
+      ],
+      "rows": [
+        [
+          "First",
+          "LMP to 13w6d (day 97)",
+          "Mar 8, 2027 to Jun 13, 2027"
+        ],
+        [
+          "Second",
+          "14w0d to 27w6d (days 98 to 195)",
+          "Jun 14, 2027 to Sep 19, 2027"
+        ],
+        [
+          "Third",
+          "28w0d to the due date (day 196 to 280)",
+          "Sep 20, 2027 to Dec 13, 2027"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator summarises the trimesters briefly: the first is organ formation, the second is growth and movement being felt, and the third is final growth and lung maturation. That is a general outline, not a schedule of what will happen to you. It also lists a first-trimester ultrasound window of 8 to 13 weeks, which here runs from May 3, 2027 to June 13, 2027."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Week-to-date lookup for the example"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Gestational age",
+        "Date"
+      ],
+      "rows": [
+        [
+          "8 weeks",
+          "May 3, 2027"
+        ],
+        [
+          "12 weeks",
+          "May 31, 2027"
+        ],
+        [
+          "14 weeks",
+          "June 14, 2027"
+        ],
+        [
+          "20 weeks",
+          "July 26, 2027"
+        ],
+        [
+          "28 weeks",
+          "September 20, 2027"
+        ],
+        [
+          "37 weeks",
+          "November 22, 2027"
+        ],
+        [
+          "39 weeks",
+          "December 6, 2027"
+        ],
+        [
+          "40 weeks",
+          "December 13, 2027"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The 37-week row marks the start of early term and the 39-week row the start of full term, using the term definitions published by the National Institute of Child Health and Human Development. Only the 40-week row is the due date, and most pregnancies end on a different day."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
     },
     {
       "type": "list",
       "items": [
-        "**First trimester (Weeks 1–13):** Major organ formation happens. Fatigue, nausea, and breast tenderness are common. Miscarriage risk is highest during this period, which is why many wait until week 12 to share the news.",
-        "**Second trimester (Weeks 14–27):** Energy often returns and morning sickness usually subsides. you'll start feeling fetal movement (quickening) around weeks 16–22. Most prenatal screening tests happen in this window.",
-        "**Third trimester (Weeks 28–40):** Rapid fetal weight gain and lung maturation accelerate. Physical discomfort increases as the baby grows. Braxton Hicks contractions may begin, and you'll start preparing for delivery."
+        "Using the date of intercourse or a positive test as the LMP. The LMP method needs the first day of your last period.",
+        "Entering a cycle length for a conception or IVF date. The calculator ignores it for those methods.",
+        "Counting weeks from conception. Providers use gestational age, so quote that.",
+        "Reading the trimester dates as medical milestones. They are a counting convention; your care schedule comes from your provider.",
+        "Treating the result as final. If you have an early ultrasound, the date from that scan may replace the calculator's LMP-based date."
       ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "This calculator gives a general estimate and does not replace advice from your midwife or doctor, who will confirm your due date and plan your care."
     },
     {
       "type": "cta",

@@ -1,57 +1,93 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Neither wins every time, and often you do not get to choose. If the money comes from your monthly salary, a SIP is the only way to invest it. If you already hold a lump sum, investing it all at once usually ends higher when markets rise, while spreading it over several months gives up some of that gain in exchange for a softer landing if prices fall soon after you invest. The right answer depends on how you would react to an early 20% drop, not on a formula."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "The Core Difference"
+      "text": "The comparison that misleads: Rs. 12 lakh lump sum versus a Rs. 10,000 SIP"
     },
     {
       "type": "paragraph",
-      "text": "SIP spreads your investment over time, reducing the risk of investing at a market peak. Lump sum invests everything at once, which can generate higher returns if the market rises but carries higher risk if the market drops immediately after your investment."
+      "text": "Both options below put in Rs. 12,00,000 in total over 10 years at an assumed 12% a year (1% per month), using the SIP calculator's method. The lump sum is invested on day one: 12,00,000 times 1.01 to the power 120. The SIP invests Rs. 10,000 at the start of each month."
     },
     {
       "type": "table",
-      "headers": [
-        "Factor",
-        "SIP",
-        "Lump Sum"
-      ],
+      "headers": ["Option", "Money invested", "Value after 10 years", "Average time invested"],
       "rows": [
-        [
-          "Risk",
-          "Lower (averaging)",
-          "Higher (market timing)"
-        ],
-        [
-          "Best for",
-          "Regular income, long-term",
-          "Windfall, bonus, inheritance"
-        ],
-        [
-          "Returns in rising market",
-          "Good",
-          "Better"
-        ],
-        [
-          "Returns in falling market",
-          "Better",
-          "Worse"
-        ],
-        [
-          "Discipline",
-          "Built-in",
-          "Requires self-control"
-        ]
+        ["Lump sum on day one", "Rs. 12,00,000", "Rs. 39,60,464", "10 years"],
+        ["Rs. 10,000 SIP for 120 months", "Rs. 12,00,000", "Rs. 23,23,391", "About 5 years"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The lump sum wins by a wide margin, but only because all of its money was invested for the full decade while the average SIP rupee was invested for about half of it. The two have the same assumed return. Saying that a lump sum beat a SIP here tells you nothing about which approach is smarter. The honest comparison uses the same money available on the same day."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Same money, two ways: all at once or staged over 12 months"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take Rs. 12,00,000 in hand today. Option one invests it all now. Option two invests Rs. 1,00,000 at the start of each of the next 12 months, with the waiting cash earning nothing (a conservative assumption). With a steady 12% for 10 years from today, the lump sum reaches Rs. 39,60,464 and the staged plan Rs. 37,51,757, a gap of Rs. 2,08,707. Staging over 6 months narrows that gap to Rs. 96,746. That gap is the certain cost of staging if markets rise steadily. What you buy with it is protection against a falling start."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What happens on four invented price paths"
+    },
+    {
+      "type": "paragraph",
+      "text": "These paths are hypothetical and chosen to illustrate the trade-off, not drawn from any market. Prices move by the stated percentage each month for 24 months. The lump sum buys at month 0. The staged plan buys Rs. 1,00,000 at the start of each of months 0 to 11. Idle cash earns nothing."
+    },
+    {
+      "type": "table",
+      "headers": ["Price path (24 months)", "Final price vs start", "Lump sum", "Staged over 12 months", "Staged minus lump"],
+      "rows": [
+        ["Steady rise, +1% a month", "1.270", "Rs. 15,23,682", "Rs. 14,43,387", "-Rs. 80,294"],
+        ["Fall 3% a month for 8 months, then rise 2% a month", "1.076", "Rs. 12,91,094", "Rs. 14,93,067", "+Rs. 2,01,973"],
+        ["Rise 2% a month for 8 months, then fall 2% a month", "0.848", "Rs. 10,17,653", "Rs. 9,32,161", "-Rs. 85,492"],
+        ["Flat for 24 months", "1.000", "Rs. 12,00,000", "Rs. 12,00,000", "Rs. 0"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Staging helped in one of three moving paths: the one where the fall came first, so later tranches bought cheaply. It cost money when prices rose, and it also cost money when prices rose first and fell afterwards, because the later tranches bought near the top and had less time to recover. Nothing here says dips come first. Staging is insurance with a price, and sometimes the insurance is not needed."
+    },
+    {
+      "type": "table",
+      "headers": ["Factor", "SIP from income", "Lump sum"],
+      "rows": [
+        ["Source of money", "Monthly salary or business income", "Bonus, sale proceeds, maturity, inheritance"],
+        ["Timing risk", "Spread across many dates", "Concentrated on one date"],
+        ["Expected result if markets keep rising", "Good, but less money is invested early", "Highest, because all money works longest"],
+        ["Result if a large fall comes right after investing", "Later instalments buy at lower prices", "Entire amount takes the full fall"],
+        ["Behavioural demand", "Mandate runs automatically", "You must hold through the drop"]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When to Choose SIP"
+      "text": "Common mistakes"
     },
     {
-      "type": "paragraph",
-      "text": "Choose SIP when you have a regular monthly income, want to build wealth over 5+ years, want to avoid the stress of timing the market, or are a first-time investor. SIP is the default recommendation for most retail investors."
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Waiting for a dip with the lump sum. Holding Rs. 12,00,000 in cash for 12 months and then investing it, in the steady 12% world, ends at Rs. 35,14,711 instead of Rs. 39,60,464, a loss of Rs. 4,45,753. A dip may or may not arrive during that wait.",
+        "Comparing a SIP and a lump sum by rupee gain without checking how much money was invested and for how long.",
+        "Parking the waiting cash somewhere risky or locked. If you stage a lump sum, keep the waiting money in a low-risk, easily redeemable place and check the exit costs and tax treatment, which differ by product and change over time.",
+        "Treating staging as a way to avoid risk. It changes when you take market risk, not whether you take it. A 20% fall right after a one-time Rs. 12,00,000 investment leaves Rs. 31,68,371 after 10 years in the steady 12% world instead of Rs. 39,60,464, so the horizon still matters.",
+        "Stopping a SIP because it has had a poor first year. Poor early prices are exactly when later instalments buy more units."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Practical rule of thumb: put salary into a SIP, and decide in advance how a windfall will be staged, for example equal parts over 3 to 6 months, so you are not tempted to change the plan after a bad week. Whatever you choose, returns are not guaranteed and your capital can lose value."
     },
     {
       "type": "cta",

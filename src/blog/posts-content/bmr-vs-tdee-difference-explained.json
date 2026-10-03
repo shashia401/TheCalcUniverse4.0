@@ -3,20 +3,131 @@
     {
       "type": "heading",
       "level": 2,
-      "text": "The Simple Difference"
+      "text": "The Short Answer"
     },
     {
       "type": "paragraph",
-      "text": "BMR is what your body would burn if you stayed in bed all day doing nothing. TDEE is BMR plus everything else: walking to the kitchen, digesting food, typing, exercise, fidgeting. For a sedentary person, TDEE is about 20% higher than BMR. For an active person, it can be 90% higher. Using your BMR as your calorie target would cause you to eat 20-90% fewer calories than you actually burn — an aggressive deficit that causes fatigue, muscle loss, and metabolic slowdown."
+      "text": "BMR (basal metabolic rate) is the energy your body uses at complete rest. TDEE (total daily energy expenditure) is BMR plus everything else you do in a day: moving around, exercising and digesting food. TDEE is the number to compare your food intake against, because it estimates what you actually burn. BMR is only one input to it. In the equations our TDEE calculator uses, TDEE is BMR multiplied by an activity factor from 1.2 to 1.9, so TDEE always comes out 20% to 90% above BMR."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why People Confuse Them"
+      "text": "What Each Number Includes"
     },
     {
       "type": "paragraph",
-      "text": "Many people calculate their BMR and think that is their maintenance level. It is not. Your BMR is the absolute floor — never eat below it. Your TDEE is what you should compare your intake to. If your BMR is 1,600 and your TDEE is 2,200, eating 1,900 calories (300 deficit) is healthy. Eating 1,600 calories (BMR) would be a 600-calorie deficit — too aggressive for most people."
+      "text": "BMR covers the work your body does while lying still: breathing, circulation, cell repair and temperature regulation. The calculators estimate it with the Mifflin-St Jeor equation, which is 10 x weight in kg + 6.25 x height in cm - 5 x age + 5 for men or - 161 for women. If you enter a body fat percentage, they switch to Katch-McArdle, which is 370 + 21.6 x lean body mass in kg."
+    },
+    {
+      "type": "paragraph",
+      "text": "TDEE takes that BMR and multiplies it by the activity factor you pick. The result is your estimated maintenance level: eat roughly that much and your weight should hold steady, eat less and it should fall, eat more and it should rise."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked Example: One Man, Five Activity Levels"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: a 40-year-old man, 180 cm tall, 85 kg, no body fat figure entered, so Mifflin-St Jeor applies. BMR = 10 x 85 + 6.25 x 180 - 5 x 40 + 5 = 850 + 1,125 - 200 + 5 = 1,780 kcal per day, or about 74 kcal per hour. The table multiplies that by each factor in the calculator. All figures are rounded to the nearest kcal."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Activity level (calculator wording)",
+        "Factor",
+        "TDEE (kcal/day)",
+        "Added on top of BMR",
+        "Percent above BMR"
+      ],
+      "rows": [
+        [
+          "Sedentary (desk job, little or no exercise)",
+          "1.2",
+          "2,136",
+          "356",
+          "20%"
+        ],
+        [
+          "Light exercise (1-2 days/week)",
+          "1.375",
+          "2,448",
+          "668",
+          "38%"
+        ],
+        [
+          "Moderate exercise (3-5 days/week)",
+          "1.55",
+          "2,759",
+          "979",
+          "55%"
+        ],
+        [
+          "Heavy exercise (6-7 days/week)",
+          "1.725",
+          "3,071",
+          "1,291",
+          "73%"
+        ],
+        [
+          "Athlete or physical job (2x per day)",
+          "1.9",
+          "3,382",
+          "1,602",
+          "90%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The gap between the first and last row is 1,246 kcal per day for the same body. That is why picking the activity level honestly matters more than the BMR formula you choose."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Eating at Your BMR Is Not a Plan"
+    },
+    {
+      "type": "paragraph",
+      "text": "Suppose this man trains one or two days a week (factor 1.375, TDEE 2,448) and decides his BMR of 1,780 is his target. That is 668 kcal below his estimated maintenance, about 27% of his TDEE. Using the common rule of thumb of roughly 3,500 kcal per pound, which the TDEE calculator itself calls a simplification, that is a deficit of about 1.3 lb per week on paper. Real results vary, and a deficit that size is much larger than the 250 to 500 kcal steps the calculators offer for loss. Treat BMR as a building block, not a goal."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Different BMR Formulas, Different Answers"
+    },
+    {
+      "type": "paragraph",
+      "text": "For the same man, the Harris-Benedict equation gives 1,864 kcal against Mifflin-St Jeor 1,780, a difference of 84 kcal (about 5%). Because TDEE multiplies BMR, that gap grows: at factor 1.55 it becomes about 130 kcal per day. The BMR calculator describes Mifflin-St Jeor as the more validated equation for the general population and notes that individual estimates carry roughly a 10% error. For this man that is about 178 kcal on BMR alone, before the activity factor adds its own uncertainty."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which Number to Use for What"
+    },
+    {
+      "type": "paragraph",
+      "text": "Use BMR to understand your baseline and to compare formulas. Use TDEE to set an intake. The calculators then move from TDEE in steps: 250 or 500 kcal below it for loss, 250 or 500 above it for gain. For the same man at factor 1.375, those steps give roughly 2,200 or 1,950 kcal for loss and 2,700 or 2,950 for gain, all built on his TDEE of about 2,450 rather than on his BMR. Whatever target you pick, check it against your real weight trend after two to three weeks."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating BMR as maintenance. Maintenance is TDEE; BMR leaves out all movement and digestion.",
+        "Choosing a higher activity level than you really live. The calculator warns that most people overestimate, and one level too high on the table above adds roughly 300 kcal.",
+        "Never recalculating. BMR depends on weight and age, so the calculators suggest rerunning after about every 10 lb of change.",
+        "Mixing numbers from different formulas without noticing that Harris-Benedict and Mifflin-St Jeor give different BMRs.",
+        "Treating either number as exact. Both are population-level estimates; track your weight for a few weeks and adjust."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Rules such as never eating below your BMR are rules of thumb, not medical standards. Our calculators flag 1,200 kcal per day for women and 1,500 for men as minimum levels, and intakes below those should only be used under medical supervision. If you have a medical condition, take medication that affects weight, or are pregnant, ask a clinician or registered dietitian before changing your calorie intake."
     },
     {
       "type": "cta",

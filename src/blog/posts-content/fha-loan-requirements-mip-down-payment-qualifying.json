@@ -2,88 +2,208 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "An FHA loan can get you into a house with as little as 3. 5% down. For first-time buyers or anyone with less-than-perfect credit, that's a game changer."
-    },
-    {
-      "type": "paragraph",
-      "text": "But those low upfront requirements come with real costs you need to understand before signing."
-    },
-    {
-      "type": "paragraph",
-      "text": "FHA loans are insured by the Federal Housing Administration and issued by approved lenders. They exist to help lower-income and first-time buyers access homeownership. The trade-off?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Mandatory mortgage insurance — and it works differently than conventional PMI."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What are the FHA down payment requirements?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The minimum down payment depends on your credit score. With a score of **580 or higher**, you can put down just **3. 5%**."
-    },
-    {
-      "type": "paragraph",
-      "text": "With a score between **500 and 579**, you need **10% down**. Scores below 500 aren't eligible for FHA financing."
+      "text": "An FHA loan is a mortgage insured by the Federal Housing Administration that allows a down payment as low as 3.5% (HUD and the Consumer Financial Protection Bureau both state this) and requires mortgage insurance on every loan. The price of the low down payment is the mortgage insurance premium (MIP): an upfront charge of 1.75% of the base loan amount plus an annual premium paid monthly. On a $300,000 home with 3.5% down at an assumed 6.8%, the principal, interest and MIP payment is $2,053.04 a month, before property tax and homeowner's insurance."
     },
     {
       "type": "callout",
-      "variant": "info",
-      "text": "Individual lenders can set higher requirements than the FHA minimums — these are called overlay requirements. Even if the FHA approves a 580 score, your lender might require 620 or higher. Always check with multiple lenders."
+      "variant": "warning",
+      "text": "FHA rules and premium schedules change, and lenders can add their own requirements. The premium figures below come from HUD Mortgagee Letter 2023-05 (effective March 20, 2023) and may have been updated since. Confirm the current schedule, county loan limits and credit requirements with HUD or a lender. The interest rate is an assumption for illustration, not a quote."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How does FHA MIP work?"
+      "text": "What Lenders Look At"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Down payment. The minimum is 3.5% of the purchase price. HUD ties the minimum to credit score: the calculator's guidance lists 580 or higher for the 3.5% minimum and a 10% down payment for scores from 500 to 579, and many lenders set stricter minimums of their own (called overlays).",
+        "Debt-to-income ratio. Lenders compare your monthly debts, including the new housing payment, with your gross monthly income. Limits depend on the lender and the underwriting findings, so this guide does not quote one.",
+        "Property and occupancy. FHA loans are generally intended for a home you will live in, and the home must meet appraisal and condition standards.",
+        "Loan limits. HUD sets maximum loan amounts that vary by county and are revised periodically.",
+        "Income, employment history and the source of your down payment funds, which you document to the lender."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the Mortgage Insurance Premium Works"
     },
     {
       "type": "paragraph",
-      "text": "Every FHA loan requires Mortgage Insurance Premiums (MIP). There are two components. First, an **upfront MIP of 1."
-    },
-    {
-      "type": "paragraph",
-      "text": "75%** of the loan amount — this is usually financed into the loan itself. Second, an **annual MIP of 0. 50% to 0."
-    },
-    {
-      "type": "paragraph",
-      "text": "55%** paid in monthly installments."
-    },
-    {
-      "type": "paragraph",
-      "text": "Here's what MIP looks like on a **$300,000 home purchase with 3.5% down at 6.8%**:"
+      "text": "There are two parts. The upfront premium is 1.75% of the base loan amount for most mortgages covered by the letter, and it is usually financed, meaning added to the loan. The annual premium is a percentage of the loan paid monthly, and its rate and duration depend on loan term, loan amount and loan-to-value (LTV). For loans with terms longer than 15 years and a base loan amount at or below $726,200 (the threshold in that letter), the schedule is:"
     },
     {
       "type": "table",
       "headers": [
-        "Component",
-        "Amount",
-        "Notes"
+        "LTV at closing",
+        "Annual MIP rate",
+        "How long it lasts"
       ],
       "rows": [
         [
-          "Upfront MIP (1.75%)",
-          "$5,066",
-          "Financed into the loan"
+          "90.00% or less (10% or more down)",
+          "0.50%",
+          "11 years"
         ],
         [
-          "Annual MIP rate",
+          "Above 90.00% up to 95.00%",
+          "0.50%",
+          "Mortgage term"
+        ],
+        [
+          "Above 95.00% (under 5% down)",
           "0.55%",
-          "$1,592 per year"
-        ],
-        [
-          "Monthly MIP payment",
-          "$133",
-          "Added to your monthly payment"
-        ],
-        [
-          "MIP duration",
-          "Life of loan",
-          "Can't cancel with <10% down"
+          "Mortgage term"
         ]
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Higher loan amounts and loans of 15 years or less follow different rows in the same letter, with the 15-year rates lower. That is why you should look up your own loan type rather than rely on a single headline number."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked Example: $300,000 Home, 6.8% for 30 Years"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Down payment",
+        "Base loan",
+        "Upfront MIP",
+        "Total loan",
+        "Principal and interest",
+        "Monthly MIP",
+        "Payment with MIP",
+        "MIP lasts"
+      ],
+      "rows": [
+        [
+          "3.5% ($10,500)",
+          "$289,500",
+          "$5,066.25",
+          "$294,566.25",
+          "$1,920.35",
+          "$132.69",
+          "$2,053.04",
+          "Mortgage term"
+        ],
+        [
+          "5.0% ($15,000)",
+          "$285,000",
+          "$4,987.50",
+          "$289,987.50",
+          "$1,890.50",
+          "$118.75",
+          "$2,009.25",
+          "Mortgage term"
+        ],
+        [
+          "10.0% ($30,000)",
+          "$270,000",
+          "$4,725.00",
+          "$274,725.00",
+          "$1,791.00",
+          "$112.50",
+          "$1,903.50",
+          "11 years"
+        ],
+        [
+          "20.0% ($60,000)",
+          "$240,000",
+          "$4,200.00",
+          "$244,200.00",
+          "$1,592.00",
+          "$100.00",
+          "$1,692.00",
+          "11 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These figures follow the FHA Mortgage Insurance calculator's convention: the annual premium is the rate times the original base loan divided by 12, held flat, and the upfront premium is financed. Real premiums can be recalculated on the balance as it falls, so ask your lender for the actual schedule."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the Upfront Premium Really Costs"
+    },
+    {
+      "type": "paragraph",
+      "text": "Financing $5,066.25 of upfront MIP raises the principal and interest payment from $1,887.32 to $1,920.35, a difference of $33.03 a month. Over 360 payments that adds up to $11,890.14 for a $5,066.25 charge, because you pay interest on it for the life of the loan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the Monthly Premium Adds Up To"
+    },
+    {
+      "type": "paragraph",
+      "text": "At 3.5% down the monthly MIP is $132.69. On the flat convention that is $17,514.75 over the first 11 years and $47,767.50 over 30 years. At 10% down the monthly MIP is $112.50 and it stops after 11 years, so the total is $14,850.00. Putting down more reduces the loan, the upfront charge, and in this case the duration of the premium. HUD's table links the end of premiums at 11 years to an LTV of 90% or less at closing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rate Sensitivity"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Interest rate (assumed)",
+        "Payment with MIP at 3.5% down"
+      ],
+      "rows": [
+        [
+          "6.55%",
+          "$2,004.24"
+        ],
+        [
+          "6.8%",
+          "$2,053.04"
+        ],
+        [
+          "7.05%",
+          "$2,102.35"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A quarter-point change in the rate moves the payment by roughly $49 a month on this loan. By comparison, the gap between the 0.55% and 0.50% premium rates is only $12.06 a month on the same base loan, so on this loan the rate moves the payment more than the premium tier does."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the Debt-to-Income Ratio Is Calculated"
+    },
+    {
+      "type": "paragraph",
+      "text": "Suppose gross monthly income is $6,500, property tax and insurance are assumed at $450, and other monthly debts are $350. Housing cost is $2,053.04 plus $450, or $2,503.04, which is 38.5% of income. Adding the other debts gives $2,853.04, or 43.9%. These are only examples of the arithmetic; lenders set their own limits."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes and Limits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Comparing only the down payment. Compare the total monthly payment and the lifetime cost of mortgage insurance.",
+        "Forgetting that the upfront premium is financed and accrues interest.",
+        "Assuming the premium can be cancelled. With under 10% down it lasts for the loan term, so the usual way out is refinancing, which has its own costs.",
+        "Using the calculator for a 15-year loan without checking: it applies the same 0.50% and 0.55% rates to both terms, while the HUD table shows lower rates for terms of 15 years or less, so its 15-year MIP is overstated.",
+        "Ignoring taxes, homeowner's insurance, HOA dues and closing costs, none of which are in the payment shown."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "This guide is educational, not lending or financial advice. The 6.8% rate, tax and debt figures are illustrative assumptions."
     },
     {
       "type": "cta",

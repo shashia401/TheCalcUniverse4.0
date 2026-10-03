@@ -2,20 +2,57 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Your monthly car payment comes down to four things: the amount you finance, your interest rate, the loan term, and what you bring in cash and trade-in value. Get any of them wrong and you could overpay by thousands. Here's how each piece works so you can calculate your real payment before you step foot in a dealership."
+      "text": "Your monthly car payment is set by four things: the amount you finance, the APR, the length of the loan, and how much cash and trade-in value you put in first. The amount financed is usually larger than the sticker price, because sales tax, title and registration fees, and any negative equity from a trade-in are often added on top. Below, one example deal is built line by line, with every figure computed from the standard loan formula, so you can see where a dealer's monthly number comes from."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Do Auto Loan Rates Work?"
+      "text": "How Is the Amount Financed Built Up?"
     },
     {
       "type": "paragraph",
-      "text": "Your APR includes the interest rate plus any lender fees, and it's determined largely by your credit score. Excellent credit (750+) gets you **5-7%**, while fair credit lands in the **12-15%** range. A **2%** rate difference on a $30,000 loan adds over $2,000 in interest over five years."
+      "text": "The example uses a $34,000 vehicle, a $4,000 cash down payment, a $9,000 trade-in that is fully paid off, 7 percent sales tax, $500 in title and registration fees, a 7.0 percent APR and a 60-month term. These are illustrative assumptions, not quotes. The sales tax follows the rule the Auto Loan Calculator uses: tax on the price minus the trade-in value. Tax rules differ by state, so check yours."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Line",
+        "Amount"
+      ],
+      "rows": [
+        [
+          "Vehicle price",
+          "$34,000.00"
+        ],
+        [
+          "Sales tax (7% of $34,000 minus $9,000 = $25,000)",
+          "$1,750.00"
+        ],
+        [
+          "Title, registration and doc fees",
+          "$500.00"
+        ],
+        [
+          "Out-the-door price",
+          "$36,250.00"
+        ],
+        [
+          "Minus cash down payment",
+          "-$4,000.00"
+        ],
+        [
+          "Minus trade-in value",
+          "-$9,000.00"
+        ],
+        [
+          "Amount financed",
+          "$23,250.00"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Check your score and get pre-approved from a credit union before you shop."
+      "text": "At 7.0 percent for 60 months the payment is $460.38 a month, and total interest is $4,372.67. The monthly payment uses the standard amortization formula, M = P x r(1+r)^n / ((1+r)^n - 1), where P is the amount financed, r is the APR divided by 12, and n is the number of months. If the APR were zero, the payment would simply be P divided by n."
     },
     {
       "type": "heading",
@@ -23,57 +60,120 @@
       "text": "Does a Longer Loan Term Save You Money?"
     },
     {
+      "type": "paragraph",
+      "text": "A longer term lowers the payment but not the cost. Here is the same $23,250 at the same 7.0 percent APR over five different terms."
+    },
+    {
       "type": "table",
       "headers": [
-        "Loan Term",
-        "Monthly Payment",
-        "Total Interest",
-        "Total Cost"
+        "Term",
+        "Monthly payment",
+        "Total interest"
       ],
       "rows": [
         [
           "36 months",
-          "$925",
-          "$3,300",
-          "$33,300"
+          "$717.89",
+          "$2,594.13"
         ],
         [
           "48 months",
-          "$718",
-          "$4,464",
-          "$34,464"
+          "$556.75",
+          "$3,474.01"
         ],
         [
           "60 months",
-          "$593",
-          "$5,580",
-          "$35,580"
+          "$460.38",
+          "$4,372.67"
         ],
         [
           "72 months",
-          "$511",
-          "$6,792",
-          "$36,792"
+          "$396.39",
+          "$5,290.04"
+        ],
+        [
+          "84 months",
+          "$350.90",
+          "$6,226.00"
         ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "Longer terms drop your monthly payment but add thousands in total interest. A 72-month term saves **$414/month** over 36 months but costs **$3,492 more** in interest. That trade-off is worth understanding before you let the dealer stretch your term to hit a payment target."
+      "text": "Going from 36 to 84 months cuts the payment by $366.99 a month but adds $3,631.87 in interest. Going from 60 to 84 months saves $109.47 a month and costs $1,853.33 more. A dealer who asks what monthly payment you want can often hit it by stretching the term, so negotiate the out-the-door price first and compare terms afterward. Cars also lose value while the balance falls slowly on a long loan, which raises the chance you will owe more than the car is worth."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Down Payment and Trade-In: Your Biggest Levers"
+      "text": "How Much Does the APR Matter?"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "APR (assumed)",
+        "Monthly payment",
+        "Total interest, 60 months"
+      ],
+      "rows": [
+        [
+          "5%",
+          "$438.76",
+          "$3,075.37"
+        ],
+        [
+          "7%",
+          "$460.38",
+          "$4,372.67"
+        ],
+        [
+          "9%",
+          "$482.63",
+          "$5,707.91"
+        ],
+        [
+          "11%",
+          "$505.51",
+          "$7,080.68"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Your down payment reduces the loan principal directly -- every **$1,000 down** saves about **$20/month** on a 5-year loan. Your trade-in works the same way if you've positive equity. If you owe more than it's worth, that negative equity gets rolled into your new loan, making your payment higher than you budgeted for."
+      "text": "On this loan each 2-point step in APR adds about $1,300 in interest over five years (5 to 7 percent adds $1,297.30, 7 to 9 percent adds $1,335.23) and about $22 to the monthly payment. Your actual APR depends on your credit, the lender, the vehicle and the term, so treat these rates as placeholders and collect real quotes. The Consumer Financial Protection Bureau advises asking questions and comparing financing sources before you shop, and says negotiating can save hundreds or even thousands of dollars over the life of a loan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Down Payment and Trade-In"
+    },
+    {
+      "type": "paragraph",
+      "text": "Every extra $1,000 you put down lowers the amount financed by $1,000. At 7.0 percent over 60 months that is $19.80 less per month, plus the interest on that $1,000. A trade-in with positive equity works like extra down payment. A trade-in with negative equity does the opposite: if you owe more than the car is worth, the shortfall is added to the new loan."
     },
     {
       "type": "callout",
       "variant": "warning",
-      "text": "Negative equity is when you owe more on your trade-in than it's worth. That difference gets added to your new loan principal. If your trade-in has $3,000 in negative equity on a $30,000 car, you're actually financing $33,000. Check your trade-in value before you walk into the dealership."
+      "text": "Negative equity is financed at the new loan's rate. Rolling $3,000 of it into a 7.0 percent, 60-month loan adds $59.40 a month and $564.22 of interest on top of the $3,000 itself."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes and Where Estimates Fall Short"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Budgeting from the payment alone. Compare the total cost (payments plus down payment and trade-in) across offers, not just the monthly figure.",
+        "Forgetting fees. Tax, title, registration and dealer documentation fees all enter the amount financed, and they vary widely by state and dealer.",
+        "Assuming one tax rule. How a trade-in affects sales tax depends on the state. The calculator taxes the price minus any positive trade-in equity, and applies tax to the full price when the trade-in is underwater, which may overstate tax where a state credits the full trade-in value.",
+        "Ignoring add-ons. Extended warranties, GAP coverage and similar products can be rolled into the loan; price them separately and decide on each.",
+        "Skipping the paperwork check. Confirm the final contract matches the agreed price, APR, term and fees before you sign."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculation also assumes a fixed APR and equal monthly payments. Some lenders use simple-interest loans that accrue interest daily, so a payment made early or late shifts the interest slightly. Promotional offers, rebates, and insurance and fuel costs are not included. Use the numbers here to compare scenarios, then confirm the real figures on the lender's loan estimate. This is general education, not financial advice."
     },
     {
       "type": "cta",

@@ -1,30 +1,87 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "A mortgage recast keeps your interest rate and end date but lowers your monthly payment after you make a large principal payment. A refinance replaces the whole loan, usually to get a lower rate. Recasting makes sense when your rate is already fine and you want cash-flow relief. Refinancing only pays off when the new rate is low enough to recover the closing costs before you move or sell."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "What Is Mortgage Recasting?"
+      "text": "How a recast works"
     },
     {
       "type": "paragraph",
-      "text": "Mortgage recasting is a process where you make a large lump sum payment toward your principal, and the lender re-amortizes your loan. This means they recalculate your remaining payments based on the new lower balance, keeping your original rate and remaining term. Your monthly payment goes down, but your interest rate and loan term stay the same."
+      "text": "You send a lump sum to your servicer, ask for a recast, and the servicer re-amortizes the remaining balance over the remaining term at the same rate. The payment is recalculated with the standard amortization formula applied to the lower balance. Nothing else changes: same rate, same maturity date, same lender. Because the loan is not replaced, there is no new loan to underwrite, but servicers set their own rules, so confirm the details before you send money."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Recasting vs Refinancing"
+      "text": "The same $50,000, four ways"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions for the example: a $400,000 30-year fixed loan at 6.0% with a payment of $2,398.20. Five years in (60 payments made) the balance is $372,217 with 300 payments left, and the remaining interest on the current schedule is $347,243. You have $50,000 to apply, which brings the balance to $322,217. The 5.5% refinance rate and the closing cost of 2% of the new $322,217 loan ($6,444, paid in cash) are illustrative assumptions, not quotes. Figures are rounded to the nearest dollar."
+    },
+    {
+      "type": "table",
+      "headers": ["Option", "Monthly payment", "Payoff", "Interest from today", "Compared with no lump sum"],
+      "rows": [
+        ["No lump sum (reference)", "$2,398.20", "25 yr 0 mo", "$347,243", "None"],
+        ["Lump sum, then recast", "$2,076.05", "25 yr 0 mo", "$300,598", "Saves $46,645 and cuts the payment by $322.15"],
+        ["Lump sum, keep the old payment", "$2,398.20", "18 yr 8 mo", "$213,486", "Saves $133,757 and ends 6 yr 4 mo early"],
+        ["Lump sum, refinance to 5.5% for 25 years", "$1,978.70", "25 yr 0 mo", "$271,392 plus $6,444 closing = $277,836", "Saves $69,407 net and cuts the payment by $419.50"]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the table shows"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Recasting: Keep your existing rate. Typical fee $150-$500. No credit check. No appraisal. Must have a conventional loan (not FHA or VA). Typically need to pay at least $5,000-$10,000 toward principal.",
-        "Refinancing: Get a new rate. Closing costs 2-5% of loan amount. Credit check and appraisal required. Works with all loan types. Takes 30-45 days to close."
+        "Recasting trades savings for flexibility. Keeping the old payment saves $87,112 more interest than recasting ($133,757 against $46,645), and that difference is the price of a payment that is $322.15 lower each month.",
+        "The refinance beats the recast only because of the assumed half-point rate drop. Against the recast, it lowers the payment by a further $97.35 and saves $22,762 over the full 25 years after closing costs.",
+        "A refinance takes time to earn back its closing costs. $6,444 divided by $97.35 a month is about 66 months, roughly 5.5 years, before the lower payment covers them (a simple break-even that ignores interest). If you might move sooner, the recast wins.",
+        "With no rate drop, a refinance has no interest benefit, so the same $6,444 would be a pure cost. A recast has no such hurdle."
       ]
     },
     {
-      "type": "paragraph",
-      "text": "Recasting is ideal if you have a good rate already and want to lower your payment. Refinancing is better when rates have dropped significantly."
+      "type": "heading",
+      "level": 2,
+      "text": "Recast, refinance or just keep paying"
+    },
+    {
+      "type": "table",
+      "headers": ["Your situation", "Usually the better fit"],
+      "rows": [
+        ["Rate is already low and you want a smaller payment", "Recast"],
+        ["Market rates are well below your rate and you will stay past break-even", "Refinance"],
+        ["You want the loan gone sooner and can handle the current payment", "Keep the payment and pay the lump sum"],
+        ["You need to change loan type, remove a co-borrower or change the term", "Refinance"],
+        ["Cash is tight and you want a cushion", "Recast, but keep an emergency fund outside the house"]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Assuming every servicer offers a recast. Some do not, and rules on fees, minimum lump sums and eligible loan types vary. Ask your servicer for the fee, the minimum and the loan types that qualify before planning around it.",
+        "Treating a lower payment as a saving. A recast does reduce interest because the balance is lower, but you save far more by keeping the old payment, as the table shows.",
+        "Forgetting escrow. A recast changes only principal and interest. Property tax and insurance are separate, so your total housing payment still moves when those change.",
+        "Locking up liquidity. Cash sent to your mortgage cannot easily come back out. A recast does not give you the money back, so confirm you still hold an emergency fund and compare the alternatives, since returns elsewhere are uncertain and past performance does not guarantee future results."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "All payments, interest totals and payoff times above were computed month by month with the same amortization logic as the mortgage payoff calculator. The recast payment uses the standard payment formula on the new balance over 300 remaining months. Real quotes will differ, especially closing costs."
     },
     {
       "type": "cta",

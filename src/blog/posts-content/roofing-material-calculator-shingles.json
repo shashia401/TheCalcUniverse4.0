@@ -1,60 +1,176 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "To estimate shingles, find the roof's actual surface area, not the footprint of the house, then convert it to roofing squares (100 square feet each) and multiply by the bundles per square on the package label. Pitch is the reason the two areas differ: the steeper the roof, the more surface sits over the same footprint. As a worked example, a 36 by 28 foot house with a 8/12 gable roof and a 1 foot overhang comes to about 1,507 square feet of material with 10 percent waste, which is 16 squares, or 48 bundles at 3 bundles per square."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Why Roof Pitch Changes Everything"
+      "text": "Why Roof Pitch Changes the Area"
     },
     {
       "type": "paragraph",
-      "text": "A roof with a 6/12 pitch (6 inches of rise per 12 inches of run) has about 12% more surface area than the ground footprint of the house. A 12/12 pitch (45 degrees) has 41% more surface area. This means a 1,500 sq ft ground footprint with a steep roof could require over 2,100 sq ft of roofing materials. The roofing calculator accounts for pitch automatically."
+      "text": "Pitch is written as rise over 12 inches of horizontal run. A 6/12 roof rises 6 inches for every 12 inches across. The sloped surface is longer than the run by the factor square root of (1 + (rise/12)^2), which is the pitch multiplier. Multiply the footprint area by it to get the true roof surface. For equal-pitch roofs, including hip roofs, the same multiplier applies to every plane."
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "How Many Shingles Do You Need?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Shingles are sold in bundles. Standard 3-tab shingles: 3 bundles per square (100 sq ft). Architectural shingles: 4 bundles per square. For a 2,000 sq ft roof (20 squares) with standard shingles: 20 x 3 = 60 bundles. Add 10-15% for waste (starter strips, hips, ridges, mistakes). That is 66-69 bundles. Always round up when ordering."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Additional Materials"
-    },
-    {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Underlayment: One roll of 15-lb felt covers about 4 squares (400 sq ft). Ice and water shield is needed for valleys and eaves in cold climates.",
-        "Drip edge: Measure the total perimeter of your roof edges. Comes in 10-foot lengths.",
-        "Ridge vents: One vent covers about 20 linear feet of ridge. Measure your roof ridge length.",
-        "Nails: 1 lb per square for standard shingles (about 320 nails per square for 4 nails per shingle)."
+      "type": "table",
+      "headers": [
+        "Pitch",
+        "Angle",
+        "Multiplier",
+        "Extra area vs footprint",
+        "Surface of a 1,500 sq ft footprint"
+      ],
+      "rows": [
+        [
+          "4/12",
+          "18.4 degrees",
+          "1.054",
+          "5.4%",
+          "1,581 sq ft"
+        ],
+        [
+          "6/12",
+          "26.6 degrees",
+          "1.118",
+          "11.8%",
+          "1,677 sq ft"
+        ],
+        [
+          "8/12",
+          "33.7 degrees",
+          "1.202",
+          "20.2%",
+          "1,803 sq ft"
+        ],
+        [
+          "10/12",
+          "39.8 degrees",
+          "1.302",
+          "30.2%",
+          "1,953 sq ft"
+        ],
+        [
+          "12/12",
+          "45.0 degrees",
+          "1.414",
+          "41.4%",
+          "2,121 sq ft"
+        ]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
+      "text": "Worked Example: A 36 x 28 ft House, 8/12 Pitch"
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "How do I measure roof pitch?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Place a level on your roof, hold it level, measure 12 inches from the bottom end along the level, then measure straight down from that point to the roof surface. That measurement is the rise. A 6-inch rise = 6/12 pitch. The roofing calculator includes a pitch measurement guide."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Should I add extra for waste?"
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Add the eave overhang to each side. With 1 foot all round, the roof footprint is (36 + 2) x (28 + 2) = 38 x 30 = 1,140 square feet.",
+        "Apply the pitch multiplier: 1,140 x 1.202 = 1,370 square feet of actual surface.",
+        "Add waste. At 10 percent for a simple gable roof: 1,370 x 1.10 = 1,507 square feet.",
+        "Convert to squares: 1,507 / 100 = 15.07, rounded up to 16 squares.",
+        "Convert to bundles: 16 x 3 = 48 bundles, using 3 bundles per square."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Yes. 10% minimum for simple gable roofs, 15% for roofs with valleys, hips, and dormers. Complex roofs with multiple intersecting planes may need 20% waste factor. It is better to have extra shingles than to run out mid-project."
+      "text": "The bundle count depends on the product. Three bundles per square is a common figure and is what this guide and the roofing calculator assume, but the package states its coverage per bundle, and you should use that number instead. Round up when ordering and keep the manufacturer's installation instructions on hand."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Much Waste Should You Allow?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Waste covers cut-offs, starter courses, ridge caps, valleys and mistakes. The percentages below are common planning rules of thumb, not standards, and the calculator also adds 5 percent for hip roofs. Using the same house:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Case",
+        "Material area",
+        "Squares",
+        "Bundles (3 per square)"
+      ],
+      "rows": [
+        [
+          "Gable, 5% waste",
+          "1,439 sq ft",
+          "15",
+          "45"
+        ],
+        [
+          "Gable, 10% waste",
+          "1,507 sq ft",
+          "16",
+          "48"
+        ],
+        [
+          "Gable, 15% waste",
+          "1,576 sq ft",
+          "16",
+          "48"
+        ],
+        [
+          "Hip, 15% waste (+5% hip allowance)",
+          "1,644 sq ft",
+          "17",
+          "51"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The same footprint at 4/12 would need 14 squares (42 bundles) and at 12/12 would need 18 squares (54 bundles) with 10 percent waste, so a wrong pitch guess can move the order by a dozen bundles."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Other Materials to List"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Underlayment: roll coverage varies by product, so read the package. At 400 square feet per roll, the 1,507 square foot example needs 4 rolls (1,507 / 400 = 3.77).",
+        "Drip edge: measure the eave and rake lengths and divide by the piece length on the package.",
+        "Ridge and hip caps: measure the linear feet of ridge and hips and compare with the coverage stated for the cap product.",
+        "Fasteners and flashing: the number of nails per shingle and the flashing details come from the shingle manufacturer's instructions and local code, not from a quantity formula.",
+        "Ice and water protection: whether it is required along eaves and valleys depends on your climate and local code."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How Do You Measure Pitch Safely?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Hold a level horizontally against a rafter from inside the attic, mark 12 inches along the level, and measure straight down from that mark to the rafter. That vertical distance in inches is the rise, so 8 inches means 8/12. Measuring from the ground with a photograph, or from the attic, avoids climbing onto the roof. If you must work on a roof, use proper fall protection and do not go up alone."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes and Limits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using the house footprint as the roof area, which understates the order by 5 to 41 percent across the pitches shown above.",
+        "Forgetting the overhang, which adds area on every side.",
+        "Treating a complex roof as one rectangle. Dormers, valleys, chimneys and several intersecting planes should be measured plane by plane.",
+        "Ignoring existing conditions: damaged decking or multiple old layers change the job and the code requirements."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculation gives a material estimate for a straightforward roof, not a bid. Local building codes, wind and fire ratings, manufacturer instructions and warranty terms govern what you may install and how, so confirm them with your building department and the shingle manufacturer, and consider getting a written quote from a licensed roofer."
     },
     {
       "type": "cta",

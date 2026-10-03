@@ -2,77 +2,131 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "A $50/hour contract and a $95,000 salaried position might sound similar, but they're not even close to equal. The difference comes down to benefits, taxes, and how you value your time. Here's how to compare any pay structure and negotiate with confidence."
+      "text": "Negotiating pay is worth the discomfort because a higher starting salary keeps paying you every year afterward. On a $75,000 offer, getting $5,000 more (about 6.7%) adds up to $237,877 of extra pay over 30 years if your raises are a steady 3% of salary. If you saved that extra pay each year at an assumed 6%, it would grow to about $552,705. This guide shows how to put every offer on the same footing and how to value the parts of a package that are not salary."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Hourly vs. Salary — What's the Real Difference?"
+      "text": "What a higher starting salary is worth over time"
     },
     {
       "type": "paragraph",
-      "text": "Hourly workers get paid for every hour worked — including overtime. Salaried employees get a fixed annual amount regardless of hours. That $50/hour rate works out to **$104,000/year** (50 × 40 × 52), which is 9% more than $95,000."
-    },
-    {
-      "type": "paragraph",
-      "text": "But salaried roles typically include benefits worth $15,000–$30,000 that contractors must pay themselves."
+      "text": "Most raises are a percentage of your current pay, so a bigger base means bigger raises. Assumptions for the table: the extra $5,000 is in your first-year pay, every later raise is 3% (applied to both salaries), you stay on the same career track for 30 years, and extra pay is invested at the end of each year at 6%. These rates are examples, not predictions, and investment returns are never guaranteed."
     },
     {
       "type": "table",
       "headers": [
-        "Pay Period",
-        "Calculation",
-        "Example ($75,000/year)"
+        "Year",
+        "Extra pay that year",
+        "Cumulative extra pay",
+        "Cumulative if saved at 6%"
       ],
       "rows": [
-        [
-          "Hourly",
-          "Annual ÷ (hrs/wk × 52)",
-          "$36.06/hr"
-        ],
-        [
-          "Weekly",
-          "Annual ÷ 52",
-          "$1,442/wk"
-        ],
-        [
-          "Bi-Weekly",
-          "Annual ÷ 26",
-          "$2,885/paycheck"
-        ],
-        [
-          "Monthly",
-          "Annual ÷ 12",
-          "$6,250/mo"
-        ]
+        ["1", "$5,000", "$5,000", "$5,000"],
+        ["5", "$5,628", "$26,546", "$29,825"],
+        ["10", "$6,524", "$57,319", "$74,489"],
+        ["20", "$8,768", "$134,352", "$233,504"],
+        ["30", "$11,783", "$237,877", "$552,705"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The same logic applies to hourly pay. A $2 an hour raise at 40 hours a week for 52 weeks is $4,160 a year. Before taxes, the number to anchor on is the annual figure, not the hourly one."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Put every offer in the same units"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Salary Calculator converts everything through the annual amount, using 52 weeks and 40 hours a week (2,080 hours a year) unless you change them. Here is $75,000 a year in each unit."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Pay period",
+        "Calculation",
+        "Result for $75,000"
+      ],
+      "rows": [
+        ["Hourly", "75,000 / 2,080", "$36.06"],
+        ["Weekly", "75,000 / 52", "$1,442.31"],
+        ["Bi-weekly", "75,000 / 26", "$2,884.62"],
+        ["Semi-monthly", "75,000 / 24", "$3,125.00"],
+        ["Monthly", "75,000 / 12", "$6,250.00"]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Is Your Total Compensation Really Worth?"
+      "text": "Contract rate versus salary: a worked comparison"
     },
     {
       "type": "paragraph",
-      "text": "Your salary is only part of the picture. Total compensation includes base pay plus benefits like health insurance (worth $5,000–$15,000), 401(k) match (3–6% of salary), paid time off (2–4 weeks), and bonuses. A $95,000 salary with full benefits could be worth **$110,000–$125,000** in total compensation."
+      "text": "A $50 an hour contract works out to $104,000 a year at 2,080 hours, which is 9.5% more than a $95,000 salary. That does not mean the contract pays more. As a contractor you pay for the benefits and the employer's share of payroll taxes yourself, and you are not paid for time off. To find the contract rate that matches the salary, make the assumptions explicit. These are placeholders, so replace them with the real numbers from your offer."
     },
     {
-      "type": "callout",
-      "variant": "tip",
-      "text": "When comparing a salaried job offer to a freelance contract, multiply the equivalent hourly rate by 1.5–2x. That $50/hr salary equivalent becomes **$75–$100/hr as a freelancer** — which accounts for self-employment tax, unpaid time off, and no benefits."
+      "type": "table",
+      "headers": [
+        "Item",
+        "Assumption",
+        "Amount"
+      ],
+      "rows": [
+        ["Salary", "Offer", "$95,000"],
+        ["Benefits you would buy yourself", "20% of salary (assumed)", "$19,000"],
+        ["Employer payroll tax share", "7.65% of salary", "$7,267.50"],
+        ["Revenue needed", "Sum of the above", "$121,267.50"],
+        ["Billable hours", "48 weeks x 40 hours (4 unpaid weeks assumed)", "1,920"],
+        ["Break-even contract rate", "121,267.50 / 1,920", "$63.16 per hour"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The salaried equivalent is $95,000 / 2,080 = $45.67 an hour, so under these assumptions the contract rate has to be about 1.38 times higher. Your multiple will differ if your benefits cost more or less, or if you take more or less unpaid time. The self-employment tax rate is 15.3% according to the IRS, which is the 7.65% employee share plus the 7.65% employer share, and this table uses only the employer share as the extra burden."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Calculate Your Minimum Acceptable Rate"
+      "text": "Put a dollar value on the non-salary items"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Paid time off: one day is worth salary / 260 working days. At $95,000 that is $365.38, so three extra days are worth $1,096.15.",
+        "Employer retirement match: multiply the match percentage by salary. A 4% match (assumed) on $95,000 is $3,800 a year.",
+        "Sign-on bonus: one-time money, while base salary repeats and compounds with each raise."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Before you negotiate, know your floor. Start with your current total compensation, add the value of benefits, factor in commute costs, and add your desired raise. Then convert that number to the pay period your employer uses."
+      "text": "Take a $95,000 base against a $92,000 base plus a $6,000 sign-on bonus, with 3% raises on base pay only. The second offer is ahead by $3,000 in year one. In year two the first offer is ahead by $3,090, which more than cancels it, and the cumulative gap is already about $90 in favor of the first. By year five the base-salary offer is ahead by $9,927 in total. A bonus is a good trade only when the base difference is small or you expect to leave soon."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Gross pay is not take-home pay. The calculator's take-home estimate is a simplified single-filer model with a flat 4.5% state tax, so use it for comparison, not for budgeting to the dollar."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits of this math"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Comparing hourly and salaried offers without adjusting for unpaid time, benefits and payroll taxes.",
+        "Negotiating only the headline number and ignoring the base, the review date and the raise percentage, which together drive the long-run total.",
+        "Accepting a verbal promise such as a review in six months. If it matters, get it in the offer letter.",
+        "Assuming the 3% raise and 6% return above will happen. They are illustrations, and your actual path depends on your employer, field and market."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "The Salary Calculator handles all these conversions instantly."
+      "text": "None of this guarantees that an employer will agree to a higher figure. What the arithmetic does is tell you how much a successful ask is worth, so you can decide how hard to push and which trade-offs are worth making."
     },
     {
       "type": "cta",

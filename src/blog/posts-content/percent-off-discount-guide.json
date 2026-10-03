@@ -2,90 +2,215 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "You see a sign that says '30% off, plus an extra 20% at the register. ' Your brain adds them up and thinks 50% off. But the register thinks differently — and the gap costs you real money."
-    },
-    {
-      "type": "paragraph",
-      "text": "here's how discount math actually works."
+      "text": "Two percentage discounts do not add up. A sign that says 30 percent off plus an extra 20 percent off gives you 44 percent off, not 50, because the second discount is taken from the already-reduced price. On a 100 dollar item the first discount leaves 70 dollars, and 20 percent of 70 is 14, so you pay 56. The shortfall of 6 percentage points is the stacking gap, and it is pure arithmetic: each discount multiplies the price by (1 - rate)."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why 20% Off + 10% Off doesn't Equal 30% Off"
+      "text": "The formula"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Final price = original price x (1 - d1) x (1 - d2) x ... where each d is a decimal (20 percent is 0.20).",
+        "Effective discount = 1 - (1 - d1) x (1 - d2) x ...",
+        "Sale tax, if applied after the discounts, = final price x tax rate."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Percentages multiply, they don't add. When a store applies two discounts sequentially, the second discount is taken from the already-reduced price, not the original. On a $100 item: **20% off drops it to $80."
-    },
-    {
-      "type": "paragraph",
-      "text": "Then 10% off $80 saves $8 more, bringing you to $72**. that's a 28% effective discount, not 30%. This is called the 'stacking gap,' and it's how retailers make 'up to 50% off' claims mathematically true but practically misleading."
+      "text": "The Percent Off Calculator applies up to two stacked discounts followed by a sales tax rate, and it shows the stacking gap against the simple sum. It treats tax as a final step on the discounted price, which matches many ordinary retail checkouts but not every case."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Real Stacking Scenarios"
+      "text": "Stacked discounts, with proof"
+    },
+    {
+      "type": "paragraph",
+      "text": "Each row below starts from 100 dollars, so the final price is also the percentage of the original you still pay."
     },
     {
       "type": "table",
       "headers": [
-        "Advertised Deal",
-        "What It Looks Like",
-        "Actual Math",
-        "Effective Discount"
+        "Advertised stack",
+        "Simple sum",
+        "Calculation",
+        "Price paid",
+        "Effective discount",
+        "Gap"
       ],
       "rows": [
         [
           "30% + 20%",
-          "50% off",
-          "$100 x 0.70 x 0.80",
-          "44.0% off"
+          "50%",
+          "100 x 0.70 x 0.80",
+          "56.00",
+          "44.0%",
+          "6.0 pts"
         ],
         [
           "25% + 15%",
-          "40% off",
-          "$100 x 0.75 x 0.85",
-          "36.3% off"
+          "40%",
+          "100 x 0.75 x 0.85",
+          "63.75",
+          "36.25%",
+          "3.75 pts"
         ],
         [
           "40% + 10%",
-          "50% off",
-          "$100 x 0.60 x 0.90",
-          "46.0% off"
+          "50%",
+          "100 x 0.60 x 0.90",
+          "54.00",
+          "46.0%",
+          "4.0 pts"
         ],
         [
           "50% + 25%",
-          "75% off",
-          "$100 x 0.50 x 0.75",
-          "62.5% off"
+          "75%",
+          "100 x 0.50 x 0.75",
+          "37.50",
+          "62.5%",
+          "12.5 pts"
+        ],
+        [
+          "10% + 10%",
+          "20%",
+          "100 x 0.90 x 0.90",
+          "81.00",
+          "19.0%",
+          "1.0 pt"
         ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Two patterns are worth remembering. The gap grows as the discounts get larger, and it is biggest when both are large. And for percentage-only stacks, order does not matter: 20 percent then 10 percent gives 72, and so does 10 percent then 20 percent, because multiplication gives the same product in either order."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example with tax"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take an item listed at 129.99 dollars, with 30 percent off and an extra 20 percent off at the register, and a sales tax rate of 7.5 percent. The tax rate is an illustrative assumption; use your local rate."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Step",
+        "Calculation",
+        "Result"
+      ],
+      "rows": [
+        [
+          "After 30% off",
+          "129.99 x 0.70",
+          "90.99"
+        ],
+        [
+          "After extra 20% off",
+          "90.99 x 0.80",
+          "72.79"
+        ],
+        [
+          "Sales tax at 7.5%",
+          "72.79 x 0.075",
+          "5.46"
+        ],
+        [
+          "Total paid",
+          "72.79 + 5.46",
+          "78.25"
+        ],
+        [
+          "Saved before tax",
+          "129.99 - 72.79",
+          "57.20"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The effective discount is 44.0 percent, the same as in the table above, because it depends only on the two rates and not on the price. Intermediate values are rounded to cents for display; the totals use unrounded numbers and agree to the cent."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Percentage discount vs dollar coupon"
+    },
+    {
+      "type": "paragraph",
+      "text": "Order does matter when you mix a percentage with a fixed-dollar coupon. On a 100 dollar item with 20 percent off and a 10 dollar coupon:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Order",
+        "Calculation",
+        "Price paid"
+      ],
+      "rows": [
+        [
+          "Percentage first, then coupon",
+          "100 x 0.80 - 10",
+          "70.00"
+        ],
+        [
+          "Coupon first, then percentage",
+          "(100 - 10) x 0.80",
+          "72.00"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Taking the percentage first and the coupon second is cheaper for you by 2 dollars, because the coupon then removes a full 10 dollars from a smaller number. The difference equals the percentage applied to the coupon value (20 percent of 10). Which order a retailer applies is decided by its own terms, so read the coupon conditions."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Reversing a discount"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Find the original price from a sale price: divide by (1 - discount). An item that costs 63 dollars at 30 percent off was 63 / 0.70 = 90 dollars.",
+        "With two stacked discounts, divide by both factors. Paying 56 dollars after 30 percent and 20 percent means the original price was 56 / (0.70 x 0.80) = 100 dollars.",
+        "Restoring a price takes a larger percentage than the discount. A 20 percent discount must be reversed by a 25 percent increase, a 30 percent discount by 42.9 percent, and a 50 percent discount by 100 percent."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Does the Order of Discounts Matter?"
+      "text": "Comparing offers"
     },
     {
       "type": "paragraph",
-      "text": "For pure percentage discounts, no — multiplication is commutative. **20% off then 10% off is the same as 10% off then 20% off**. Both give you 28% off."
-    },
-    {
-      "type": "paragraph",
-      "text": "But if a store combines a percentage discount with a fixed-dollar coupon, order matters enormously. A '$10 off' coupon applied before a 20% discount saves you more than applying it after. Stores know this and set the order in their POS to minimize their loss on each transaction."
+      "text": "To compare deals, convert each to an effective discount. A 30 percent plus 20 percent stack (44.0 percent effective) loses to a flat 45 percent off. To reach 50 percent off after a first 30 percent discount, the second discount would need to be 28.57 percent, since 1 - 0.50 / 0.70 = 0.2857. Quantity deals convert the same way: buy two get the third free is a 33.3 percent saving per item, and buy one get one at 50 percent off is 25 percent on the pair."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Sales Tax Interacts With Discounts"
+      "text": "Common mistakes"
     },
     {
-      "type": "paragraph",
-      "text": "Sales tax is always applied after all discounts in every US state. Tax is a percentage of the price you actually pay, not the sticker price. So a $100 item with 25% off and 8% sales tax: you pay **$75 + ($75 x 0."
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Adding discount percentages together instead of multiplying them.",
+        "Assuming tax is calculated on the original price. Check whether your retailer taxes the discounted amount, since some coupons are treated differently from price reductions depending on the place, and rules vary.",
+        "Judging a sale by the percentage alone. A larger discount on an inflated list price can cost more than a smaller discount on a fair one.",
+        "Forgetting that rounding at each step can move the total by a cent."
+      ]
     },
     {
-      "type": "paragraph",
-      "text": "08) = $81 total**. The discount actually reduces your tax bill — another reason to run the full numbers before you buy. The percent-off calculator accounts for this automatically."
+      "type": "callout",
+      "variant": "info",
+      "text": "This guide covers arithmetic only. Sales tax rules, coupon rules and advertising rules differ by place and retailer, so confirm anything that affects what you actually pay with the retailer or your local tax authority."
     },
     {
       "type": "cta",

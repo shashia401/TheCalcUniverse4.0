@@ -1,67 +1,115 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Dew point tells you how much water vapor is actually in the air, while relative humidity only tells you how full the air is compared with what it could hold at its current temperature. Because warm air can hold more vapor than cool air, the same relative humidity can mean very different amounts of moisture. Dew point does not have that problem, which is why it is the better guide to how muggy a day feels, and why it explains most of the gap between a 90°F day that is merely warm and one that is oppressive."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Dew Point vs Relative Humidity"
+      "text": "What each measure means"
     },
     {
       "type": "paragraph",
-      "text": "Relative humidity changes with temperature — warm air can hold more water vapor than cool air. This means a 50% humidity reading at 80°F contains much more water than 50% at 60°F. Dew point is the temperature at which air would need to be cooled to reach 100% humidity. It is an absolute measure of moisture content. A dew point of 60°F feels the same regardless of whether the air temperature is 70°F or 95°F. This makes dew point a more consistent measure of mugginess."
+      "text": "Dew point is the temperature to which air would have to be cooled before it became saturated and water began to condense. A high dew point means a lot of moisture. Relative humidity is a ratio: the moisture present divided by the most the air could hold at the current temperature. When the temperature climbs and no moisture is added, the dew point stays put while the relative humidity falls. That is why relative humidity is usually highest in the cool early morning and lowest in the afternoon even when the air is equally damp."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Dew Point Comfort Scale"
+      "text": "Worked example 1: same relative humidity, very different moisture"
+    },
+    {
+      "type": "paragraph",
+      "text": "Hold relative humidity at 60% and change only the air temperature. Dew points come from the Magnus formula the dew point calculator uses (a = 17.27, b = 237.7, temperature converted to Celsius and back). Heat index values come from the heat index calculator's formula. All numbers are rounded to one decimal place."
     },
     {
       "type": "table",
-      "headers": [
-        "Dew Point",
-        "Comfort Level",
-        "Heat Index Effect"
-      ],
+      "headers": ["Air temperature", "Relative humidity", "Dew point", "Heat index"],
       "rows": [
-        [
-          "Below 50°F",
-          "Very comfortable",
-          "Minimal effect on heat index"
-        ],
-        [
-          "50-55°F",
-          "Comfortable",
-          "Slight increase"
-        ],
-        [
-          "55-60°F",
-          "Slightly humid",
-          "Noticeable increase"
-        ],
-        [
-          "60-65°F",
-          "Humid",
-          "Heat index 5-10°F above air temp"
-        ],
-        [
-          "65-70°F",
-          "Very humid, uncomfortable",
-          "Heat index 10-15°F above"
-        ],
-        [
-          "70°F+",
-          "Oppressive",
-          "Heat index 15-20°F+ above, dangerous"
-        ]
+        ["70°F", "60%", "55.5°F", "70.0°F"],
+        ["80°F", "60%", "64.8°F", "81.8°F"],
+        ["90°F", "60%", "74.2°F", "99.7°F"],
+        ["100°F", "60%", "83.6°F", "129.5°F"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A relative humidity of 60% at 70°F is a comfortable day. The same 60% at 100°F means a dew point above 83°F, far more water in the air. The percentage did not change; the moisture did."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example 2: same dew point, different relative humidity"
+    },
+    {
+      "type": "paragraph",
+      "text": "Now hold the dew point at 65°F and let the air temperature rise. Relative humidity is found by inverting the Magnus formula, and each row was checked by feeding it back in to confirm a 65.0°F dew point."
+    },
+    {
+      "type": "table",
+      "headers": ["Air temperature", "Dew point", "Relative humidity", "Heat index"],
+      "rows": [
+        ["75°F", "65°F", "71.1%", "75.0°F"],
+        ["85°F", "65°F", "51.3%", "86.8°F"],
+        ["95°F", "65°F", "37.5%", "97.7°F"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The amount of moisture is identical in all three rows, yet relative humidity falls from 71% to 37.5%. A weather app that showed only relative humidity would make the 95°F afternoon look drier than the 75°F morning, even though the air holds the same water vapor."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example 3: a 90°F day at different dew points"
+    },
+    {
+      "type": "table",
+      "headers": ["Dew point", "Relative humidity at 90°F", "Heat index", "Heat index tier", "Dew point comfort label"],
+      "rows": [
+        ["50°F", "25.6%", "87.1°F", "Caution", "Dry and comfortable"],
+        ["55°F", "30.7%", "88.1°F", "Caution", "Comfortable"],
+        ["60°F", "36.8%", "89.7°F", "Caution", "Slightly humid"],
+        ["65°F", "43.8%", "92.0°F", "Extreme Caution", "Becoming sticky"],
+        ["70°F", "52.1%", "95.5°F", "Extreme Caution", "Uncomfortable (oppressive)"],
+        ["75°F", "61.6%", "100.6°F", "Extreme Caution", "Very uncomfortable"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Raising the dew point from 50°F to 75°F at a fixed 90°F adds 13.5 degrees of heat index. The comfort labels are the ones used by the dew point calculator; they are comfort descriptions rather than medical thresholds. As a cross-check, the calculator's own example of 85°F at 70% humidity gives a dew point of 74.1°F, which falls in its oppressive band."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which one should you use?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "To judge muggy versus dry air, use dew point. It does not swing with the daily temperature cycle.",
+        "To judge heat stress on a body, use the heat index, which combines temperature and relative humidity. Dew point alone ignores how hot the air is.",
+        "For hard work or vigorous exercise in direct sun, neither is enough; the National Weather Service recommends wet bulb globe temperature for that."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why This Matters for the Heat Index"
+      "text": "Common mistakes and limits"
     },
     {
-      "type": "paragraph",
-      "text": "The heat index rises sharply as dew point increases. A 90°F day with dew point 60°F (moderate humidity) gives a heat index of about 97°F. The same 90°F with dew point 75°F (extreme humidity, typical of tropical regions or after heavy rain) gives a heat index above 115°F. This is why the combination of high temperature and high dew point is uniquely dangerous."
+      "type": "list",
+      "items": [
+        "Assuming a given dew point feels the same at any air temperature. The table above shows a 65°F dew point with a heat index near the air temperature at 75°F, but 97.7°F at 95°F. Moisture and heat both matter.",
+        "Reading the comfort labels as health thresholds. They describe how people tend to feel, not when illness occurs.",
+        "Using the Magnus constants below freezing. The calculator's documentation says its constants are for temperatures above 0°C (32°F) and that different constants apply over ice.",
+        "Mixing readings. Dew point, temperature and humidity must be measured at the same time and place."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Heat index values assume shade and light wind. The National Weather Service says full sunshine can add up to 15°F. People with medical conditions or on certain medications should ask a clinician how to handle hot, humid weather."
     },
     {
       "type": "cta",

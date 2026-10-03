@@ -2,99 +2,205 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "you're at dinner with friends, the bill arrives, and suddenly everyone is doing mental math on their phones. Should you tip on the pre-tax amount? What is standard for good service?"
-    },
-    {
-      "type": "paragraph",
-      "text": "And why does the UK feel so different from the US? let's settle this once and for all."
+      "text": "To calculate a tip, multiply the bill by the tip percentage as a decimal, then add it to the bill. On an 85.50 dollar bill with a 20 percent tip, the tip is 85.50 x 0.20 = 17.10 and the total is 102.60. To split that evenly four ways, divide the total by 4 for 25.65 each. This guide is about the arithmetic: percentages, tax, rounding and fair splitting. It does not tell you what percentage you should leave, because that is a custom that varies by place and situation."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Standard Tipping Percentages by Service"
-    },
-    {
-      "type": "table",
-      "headers": [
-        "Service",
-        "Standard",
-        "Good Service",
-        "Exceptional"
-      ],
-      "rows": [
-        [
-          "Sit-down restaurant",
-          "15%",
-          "18-20%",
-          "22-25%"
-        ],
-        [
-          "Bar (per drink)",
-          "$1-2 or 15%",
-          "$2-3 or 20%",
-          "$5+ per round"
-        ],
-        [
-          "Food delivery",
-          "15%",
-          "18-20%",
-          "25% (bad weather)"
-        ],
-        [
-          "Hotel housekeeping",
-          "$2/night",
-          "$3-4/night",
-          "$5+/night"
-        ],
-        [
-          "Salon / barber",
-          "15%",
-          "18-20%",
-          "25%"
-        ]
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Should You Tip on Pre-Tax or the Total?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Traditionally, you tip on the pre-tax subtotal — the cost of the food and drink before sales tax. In practice, the difference is tiny. On a $100 meal with 8% tax, tipping **18**% on the subtotal is $18; on the total it's $19."
-    },
-    {
-      "type": "paragraph",
-      "text": "44. that's $1. 44."
-    },
-    {
-      "type": "paragraph",
-      "text": "Most servers won't notice, and either is fine. What matters is tipping something fair. The calc handles both: just enter the optional tax amount to tip on pre-tax, or leave it blank to tip on the full bill."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How to Split a Restaurant Bill Fairly"
+      "text": "The formulas"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Equal split: The easiest method. Everyone pays the same regardless of what they ordered. Works best when everyone ordered similar-priced items and shared appetizers.",
-        "Itemized split: Fair but awkward. Each person pays for their own meal plus a proportional share of the tip. Best for groups with wildly different spending.",
-        "Separate checks: Ask your server upfront. Some restaurants allow individual checks for parties of 6 or fewer.",
-        "The venmo shuffle: One person pays the full bill and everyone transfers their share. This is the most common approach among friends."
+        "Tip = bill x (tip percent / 100).",
+        "Total = bill + tip, which is the same as bill x (1 + tip percent / 100).",
+        "Per person = total / number of people.",
+        "Tip as a share of a different base: tip / base x 100."
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The Tip Calculator uses these formulas. You enter a bill amount, pick 15, 18 or 20 percent or a custom rate, set the number of people, and choose a rounding mode."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Tipping Etiquette Around the World"
+      "text": "Quick mental math"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 10 percent tip is the bill with the decimal point moved one place left: 10 percent of 84.50 is 8.45. Double it for 20 percent (16.90). Add half of it for 15 percent (12.68, rounded from 12.675). For 18 percent, take 20 percent and subtract a tenth of that. Mental math gives a close figure, and the calculator gives the exact one."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Pre-tax or after-tax: what the difference is"
+    },
+    {
+      "type": "paragraph",
+      "text": "Some people calculate the tip on the pre-tax amount, others on the full total. The calculator does not have a separate tax field. If you want to tip on the pre-tax amount, enter that subtotal as the bill amount; if you want to tip on the printed total, enter the total instead. The difference is the tip rate multiplied by the tax. On a 100 dollar subtotal with 8 percent tax (an illustrative rate):"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Tip rate",
+        "Tip on 100 pre-tax",
+        "Tip on 108 total",
+        "Difference"
+      ],
+      "rows": [
+        [
+          "15%",
+          "15.00",
+          "16.20",
+          "1.20"
+        ],
+        [
+          "18%",
+          "18.00",
+          "19.44",
+          "1.44"
+        ],
+        [
+          "20%",
+          "20.00",
+          "21.60",
+          "1.60"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "So the choice changes the tip by 1.20 to 1.60 dollars on this bill. Either way, the final amount you pay is the subtotal plus tax plus tip."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rounding modes, with numbers"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator offers four rounding choices. Using the same 85.50 dollar bill and a 20 percent tip:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Mode",
+        "Tip",
+        "Total",
+        "Effective tip"
+      ],
+      "rows": [
+        [
+          "No rounding",
+          "17.10",
+          "102.60",
+          "20.00%"
+        ],
+        [
+          "Round tip up",
+          "18.00",
+          "103.50",
+          "21.05%"
+        ],
+        [
+          "Round total up",
+          "17.50",
+          "103.00",
+          "20.47%"
+        ],
+        [
+          "Round both",
+          "18.50",
+          "104.00",
+          "21.64%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Rounding always goes up, so the effective tip rises. In the round-both mode the tip is rounded first, to 18.00, which makes the total 103.50, and then the total is rounded to 104.00, which pushes the tip to 18.50. On a small bill the percentage effect is larger. A 12.40 dollar bill with a 15 percent tip is 1.86 without rounding and 2.60 with both rounded, which is an effective 20.97 percent."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Splitting a bill: equal or itemized"
+    },
+    {
+      "type": "paragraph",
+      "text": "An equal split is just total divided by people. It is simple, but it is only fair when everyone ordered about the same. An itemized split divides tax and tip in proportion to each person's share of the subtotal. Take a 100 dollar subtotal with 8 percent tax and an 18 percent tip on the pre-tax amount, so every dollar of food carries 1.26 dollars including tax and tip:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Person",
+        "Ordered",
+        "Tax",
+        "Tip",
+        "Pays itemized",
+        "Pays equal split"
+      ],
+      "rows": [
+        [
+          "A",
+          "20.00",
+          "1.60",
+          "3.60",
+          "25.20",
+          "42.00"
+        ],
+        [
+          "B",
+          "35.00",
+          "2.80",
+          "6.30",
+          "44.10",
+          "42.00"
+        ],
+        [
+          "C",
+          "45.00",
+          "3.60",
+          "8.10",
+          "56.70",
+          "42.00"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The two methods collect the same 126 dollars. The difference is who bears it: person A pays 16.80 dollars more under an equal split than under an itemized split, and person C pays 14.70 less. If the amounts are close, splitting equally saves time. If they are not, itemizing is the better choice."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Cents and uneven splits"
+    },
+    {
+      "type": "paragraph",
+      "text": "Some totals do not divide cleanly. A 100 dollar total split three ways is 33.33 each, which adds to 99.99, so one person needs to add a cent. A group of six sharing 213.40 dollars owes 35.57 each, which adds to 213.42, so the group is over by two cents. Agree in advance who covers the difference, or round each share up and let the extra go to the tip."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Tipping on a total that already includes a service charge. Check the bill for a line that is already a gratuity before you add another, and add the tip only if you intend to.",
+        "Mixing the pre-tax and after-tax bases between the calculator and the card reader.",
+        "Entering the number of people as the number of couples or households.",
+        "Rounding the per-person amount down, so the group is short.",
+        "Using a tip percentage as if it were a rule. The right amount depends on the place, the service and your own judgement."
+      ]
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "In the US, many service workers earn a tipped minimum wage of just $2.13 per hour, so tips are their primary income. In Japan, tipping is considered rude — excellent service is the baseline expectation. In much of Europe, a service charge is included in the bill, and leaving 5-10% extra shows appreciation but isn't expected. In Australia, the minimum wage is high enough that tipping is purely optional, usually rounding up or leaving small change. Always check if your bill includes a 'service charge' before adding a tip."
+      "text": "This guide covers arithmetic only. Customs, service charges and the way tips are shared with staff differ between countries, businesses and payment methods, so check the local practice and the bill itself."
     },
     {
       "type": "cta",

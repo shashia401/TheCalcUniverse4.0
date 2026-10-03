@@ -2,72 +2,180 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Inflation is often called the **silent thief** because it slowly erodes your purchasing power over time without you noticing. At 3% average annual inflation, **$100 loses half its purchasing power in about 24 years. ** That $100 bill in your wallet today will buy roughly $50 worth of goods in 2049."
-    },
-    {
-      "type": "paragraph",
-      "text": "Understanding inflation is essential for saving, investing, and planning for retirement."
+      "text": "Inflation is a sustained rise in the general level of prices, so each dollar buys less over time. In the United States it is usually measured by the Consumer Price Index (CPI) from the Bureau of Labor Statistics (BLS). At an assumed steady 3% a year, $100 of purchasing power falls to $74.41 after 10 years and to about half, $50, after 23.4 years. The 3% is an assumption for illustration, not a forecast, and real inflation changes from year to year."
     },
     {
       "type": "heading",
-      "text": "What Is the Consumer Price Index (CPI)?",
-      "level": 2
+      "level": 2,
+      "text": "The Formula"
     },
     {
       "type": "paragraph",
-      "text": "The Consumer Price Index (CPI) measures the average price level of a fixed basket of goods and services purchased by urban consumers. it's the most widely used measure of inflation in the United States, published monthly by the Bureau of Labor Statistics."
+      "text": "The CPI adjustment is simple: adjusted value = original amount divided by the CPI in the starting year, times the CPI in the ending year. If prices doubled between two years, you need twice as many dollars to buy the same basket. For a constant rate, purchasing power after n years is the original amount divided by (1 + inflation rate) raised to the power n, and the time for purchasing power to halve is ln(2) divided by ln(1 + inflation rate)."
     },
     {
-      "type": "paragraph",
-      "text": "The CPI basket includes food, housing, energy, transportation, medical care, education, and recreation — weighted by typical consumer spending patterns. The basket is periodically updated to reflect changing consumption (streaming services and smartphones are now included, for example)."
+      "type": "heading",
+      "level": 2,
+      "text": "What Different Rates Do to $100"
     },
     {
       "type": "table",
       "headers": [
-        "CPI Component",
-        "Typical Weight",
-        "Examples"
+        "Assumed inflation",
+        "After 10 years",
+        "After 20 years",
+        "After 30 years",
+        "Years to halve"
       ],
       "rows": [
         [
-          "Housing",
-          "~33%",
-          "Rent, mortgage interest, utilities, furniture"
+          "2%",
+          "$82.03",
+          "$67.30",
+          "$55.21",
+          "35.0"
         ],
         [
-          "Transportation",
-          "~16%",
-          "New and used vehicles, gas, airfare, insurance"
+          "3%",
+          "$74.41",
+          "$55.37",
+          "$41.20",
+          "23.4"
         ],
         [
-          "Food & Beverages",
-          "~14%",
-          "Groceries, restaurant meals, alcohol"
-        ],
-        [
-          "Medical Care",
-          "~8%",
-          "Doctor visits, hospital services, prescriptions"
+          "4%",
+          "$67.56",
+          "$45.64",
+          "$30.83",
+          "17.7"
         ]
       ]
     },
     {
+      "type": "paragraph",
+      "text": "The table shows how much of today's purchasing power remains. Equivalently, a basket costing $100 today would cost $134.39 in 10 years, $180.61 in 20 years and $242.73 in 30 years at 3%. The common shortcut of 72 divided by the rate gives 24 years for 3%, close to the exact 23.4, since 72 is only an approximation."
+    },
+    {
       "type": "heading",
-      "text": "How Does the Inflation Formula Work?",
-      "level": 2
+      "level": 2,
+      "text": "What Actual CPI Data Shows"
     },
     {
       "type": "paragraph",
-      "text": "The inflation adjustment formula is straightforward: **Adjusted Value = (Original Amount / CPI in Start Year) x CPI in End Year.** If prices in year B are 50% higher than in year A, then $100 in year A has the same purchasing power as $150 in year B."
+      "text": "The BLS publishes annual average CPI-U values (index base 1982-84 = 100). Using four of its published annual averages, the table compares real periods. The CPI figures come from the BLS historical table; the other columns are calculated from them."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Period",
+        "Years",
+        "CPI start",
+        "CPI end",
+        "Total price rise",
+        "Average per year",
+        "$100 then equals",
+        "$100 now buys (then-dollars)"
+      ],
+      "rows": [
+        [
+          "1990 to 2000",
+          "10",
+          "130.7",
+          "172.2",
+          "31.8%",
+          "2.80%",
+          "$131.75",
+          "$75.90"
+        ],
+        [
+          "2000 to 2010",
+          "10",
+          "172.2",
+          "218.056",
+          "26.6%",
+          "2.39%",
+          "$126.63",
+          "$78.97"
+        ],
+        [
+          "2010 to 2019",
+          "9",
+          "218.056",
+          "255.657",
+          "17.2%",
+          "1.78%",
+          "$117.24",
+          "$85.29"
+        ],
+        [
+          "1990 to 2019",
+          "29",
+          "130.7",
+          "255.657",
+          "95.6%",
+          "2.34%",
+          "$195.61",
+          "$51.12"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "The cumulative inflation rate tell you the total price change over a period. The average annual rate smooths that into a per-year percentage. Both are calculated directly from the CPI ratio between the two years."
+      "text": "Between 1990 and 2019, prices rose 95.6%, about 2.34% a year, so it took about $195.61 in 2019 to match what $100 bought in 1990. The pace was uneven: about 2.8% a year in the 1990s and about 1.8% a year from 2010 to 2019. The Inflation Calculator rounds CPI to one decimal place, so its results can differ from these by a few cents."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Nominal Versus Real Returns"
+    },
+    {
+      "type": "paragraph",
+      "text": "Interest is quoted in nominal terms, before inflation. The real return is (1 + nominal) divided by (1 + inflation) minus 1. With an assumed 5% nominal return and 3% inflation, the real return is 1.94%, a little less than the 2% you get by subtracting. Starting with $10,000, 10 years at 5% grows to $16,288.95 in future dollars, but that is only worth $12,120.51 in today's purchasing power. Left in cash earning 0%, the $10,000 would be worth $7,440.94 in today's terms. Past performance does not guarantee future results, and these rates are illustrative."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Planning for Rising Costs"
+    },
+    {
+      "type": "paragraph",
+      "text": "If a household needs $40,000 a year today, the amount required in 20 years depends on the rate: $59,438 at 2%, $72,244 at 3% and $87,645 at 4%. To keep pace with 3% inflation, a $60,000 salary needs a raise to $61,800 just to stand still. Fixed incomes that do not adjust lose purchasing power every year, while income that is linked to prices is partly protected. Test your plan with more than one inflation assumption, as the spread widens the longer the horizon."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limits of CPI and of These Numbers"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "CPI is a national average of a basket of goods and services bought by urban consumers. Your own inflation depends on what you buy: renters, drivers and families with young children can differ.",
+        "Annual averages smooth out month-to-month swings. For a specific month, use the BLS monthly tables.",
+        "CPI cannot fully capture quality changes. A product that costs more may also do more.",
+        "A constant inflation rate is a simplification. Real inflation varies and can be much higher or lower than the rates in the tables.",
+        "Historical CPI shows what happened. It does not predict future inflation."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Comparing old and new prices without adjusting. A salary or price from decades ago looks small until adjusted.",
+        "Subtracting inflation from interest and treating the result as exact. For large rates or long periods, use the division formula.",
+        "Leaving cash savings unexamined. If an account pays less than inflation, its purchasing power shrinks even as the balance grows.",
+        "Using a single inflation number for every cost. Healthcare, housing and education can move differently from the overall index."
+      ]
     },
     {
       "type": "callout",
-      "text": "This inflation calculator uses the same official CPI data from the Bureau of Labor Statistics that powers bls.gov. Annual average CPI values are used for each year. For month-to-month precision, the BLS provides monthly CPI data for calculations within a single year.",
-      "variant": "info"
+      "variant": "info",
+      "text": "This guide is educational, not financial advice. The CPI values are BLS annual averages; every other rate in the examples is an illustrative assumption."
     },
     {
       "type": "cta",

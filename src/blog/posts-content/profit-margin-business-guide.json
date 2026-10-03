@@ -2,86 +2,219 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "A 50% markup doesn't equal a 50% margin. Confusing these two numbers is one of the most expensive pricing mistakes you can make. Here's the difference, why it matters, and how to set prices that protect your bottom line."
+      "text": "Margin and markup measure the same profit against different bases. Margin is profit divided by the selling price. Markup is profit divided by the cost. If an item costs 100 dollars and sells for 150, the profit is 50 dollars, the markup is 50 percent and the margin is 33.3 percent. Because the selling price is always larger than the cost, margin is always the smaller number, and confusing the two is how businesses end up with less profit than they planned."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What's the Difference Between Margin and Markup?"
+      "text": "The formulas"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Profit = selling price - cost.",
+        "Margin % = profit / selling price x 100.",
+        "Markup % = profit / cost x 100.",
+        "Markup from margin: markup = margin / (100 - margin), as percentages.",
+        "Margin from markup: margin = markup / (100 + markup), as percentages.",
+        "Price for a target margin = cost / (1 - margin as a decimal). Price for a target markup = cost x (1 + markup as a decimal)."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Margin is your profit as a percentage of the selling price. Markup is your profit as a percentage of the cost. If your cost is **$100** and you sell for **$150**, your markup is **50%** but your margin is only **33%**."
-    },
-    {
-      "type": "paragraph",
-      "text": "The denominators are different, so the percentages are always different for the same profit in dollars."
+      "text": "These are the same formulas the Profit Margin Calculator uses. It reports gross margin, meaning revenue minus cost of goods, before overhead."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Margin vs. Markup Conversion"
+      "text": "Markup to margin conversion"
     },
     {
       "type": "table",
       "headers": [
-        "Markup %",
-        "Selling Price ($100 Cost)",
-        "Resulting Margin %"
+        "Markup",
+        "Price on a 100 cost",
+        "Margin"
       ],
       "rows": [
         [
           "25%",
-          "$125",
-          "20%"
+          "125",
+          "20.0%"
+        ],
+        [
+          "40%",
+          "140",
+          "28.6%"
         ],
         [
           "50%",
-          "$150",
+          "150",
           "33.3%"
         ],
         [
           "75%",
-          "$175",
+          "175",
           "42.9%"
         ],
         [
           "100%",
-          "$200",
-          "50%"
+          "200",
+          "50.0%"
         ],
         [
-          "150%",
-          "$250",
-          "60%"
+          "200%",
+          "300",
+          "66.7%"
         ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "The quick conversion formula: Margin = Markup / (100 + Markup). If you want a **40% margin**, you need a **66. 7% markup**."
-    },
-    {
-      "type": "paragraph",
-      "text": "If you use a **40% markup**, you'll only get a **28. 6% margin**. This distinction is critical when negotiating wholesale pricing or setting retail prices."
+      "text": "Read it the other way as well. A 40 percent margin requires a 66.7 percent markup, and a 50 percent margin requires a 100 percent markup, which is simply doubling the cost. Applying a 40 percent markup when you wanted a 40 percent margin leaves you with a 28.6 percent margin."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Gross Margin vs. Net Margin: What's the Difference?"
+      "text": "Worked example: pricing a 40 dollar product"
     },
     {
       "type": "paragraph",
-      "text": "Gross margin only subtracts the cost of goods sold from your revenue. Net margin subtracts everything -- COGS, salaries, rent, marketing, platform fees, and shipping. A business can show **60% gross margin** but only **3% net margin** if overhead is high."
+      "text": "Suppose a product costs 40 dollars to buy or make. Compare three target margins with the markup that each one implies:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Target margin",
+        "Selling price",
+        "Profit per unit",
+        "Equivalent markup"
+      ],
+      "rows": [
+        [
+          "30%",
+          "57.14",
+          "17.14",
+          "42.9%"
+        ],
+        [
+          "40%",
+          "66.67",
+          "26.67",
+          "66.7%"
+        ],
+        [
+          "50%",
+          "80.00",
+          "40.00",
+          "100.0%"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "You need both numbers for a complete profitability picture."
+      "text": "Now the common error. Add a flat 30 percent markup instead and the price is 52.00, profit is 12.00, and the margin is 23.1 percent, not 30. That is a gap of 5.14 dollars per unit against the price that actually delivers a 30 percent margin."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Pricing when fees are a percentage of the price"
+    },
+    {
+      "type": "paragraph",
+      "text": "Marketplace, payment and commission fees are often a percentage of the selling price, which means they sit inside the margin calculation. Assume a fee of 15 percent of the price, which is an illustrative figure, not a quote from any platform. To keep a 30 percent margin after that fee, the price is cost / (1 - 0.30 - 0.15) = 40 / 0.55 = 72.73 dollars, giving profit after fees of 21.82 dollars."
+    },
+    {
+      "type": "paragraph",
+      "text": "If you ignore the fee and charge the 57.14 dollars from the table above, the fee takes 8.57 dollars and your profit falls to 8.57 dollars, a 15 percent margin instead of 30. Subtracting percentage fees from the margin target before dividing is the safe order of operations."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Gross margin vs net margin"
+    },
+    {
+      "type": "paragraph",
+      "text": "Gross margin only subtracts the direct cost of what you sold. Net margin subtracts everything else too: rent, salaries, software, advertising, and similar overheads. As an illustration, a business with 100,000 dollars of revenue, 60,000 of cost of goods and 32,000 of other expenses has a 40 percent gross margin, an 8,000 dollar profit and an 8 percent net margin. Gross margin shows whether the product is priced sensibly. Net margin shows whether the business is."
+    },
+    {
+      "type": "paragraph",
+      "text": "Note that the calculator on this site works at the gross level. Overheads vary by business, so build them into your own spreadsheet or bookkeeping."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why a discount hurts more than it looks"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take an item that sells for 100 dollars with a cost of 60, so the margin is 40 percent and profit is 40 dollars. Discounting reduces the price but not the cost, so each percentage point comes straight out of profit. How many extra units do you need to sell to earn the same total profit?"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Discount",
+        "New price",
+        "New margin",
+        "Profit per unit",
+        "Units needed vs before"
+      ],
+      "rows": [
+        [
+          "5%",
+          "95",
+          "36.8%",
+          "35",
+          "1.14x"
+        ],
+        [
+          "10%",
+          "90",
+          "33.3%",
+          "30",
+          "1.33x"
+        ],
+        [
+          "15%",
+          "85",
+          "29.4%",
+          "25",
+          "1.60x"
+        ],
+        [
+          "20%",
+          "80",
+          "25.0%",
+          "20",
+          "2.00x"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A 20 percent discount on a 40 percent margin item needs twice the volume just to stand still. This assumes costs per unit stay fixed and ignores any change in fees."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using markup and margin interchangeably in conversations with suppliers, accountants or buyers. State which one you mean.",
+        "Applying a markup when the goal is stated as a margin.",
+        "Comparing margin percentages across items without looking at dollar profit. A 50 percent margin on a 20 dollar item earns 10 dollars; a 20 percent margin on a 1,000 dollar item earns 200.",
+        "Forgetting returns, shipping, payment fees and discounts when you calculate cost.",
+        "Quoting a single margin for the whole business when product lines differ."
+      ]
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "Industry benchmarks: Retail gross margins typically range from 20-60%. Grocery stores operate on 1-5% net margins. Apparel brands see 50-60% gross margins. SaaS businesses can exceed 70-80% gross margins. Luxury goods often hit 60-80% gross margins due to brand premium."
+      "text": "This guide uses illustrative numbers and gives no benchmark for what margin is normal in any industry; that varies widely and should come from your own accounts or a source you trust. Taxes and accounting treatment differ by country, so confirm them with an accountant."
     },
     {
       "type": "cta",

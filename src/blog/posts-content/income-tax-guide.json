@@ -2,77 +2,195 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "You hear 'tax bracket' all the time, but most people misunderstand what it actually means. Getting into a higher bracket doesn't mean all your income gets taxed at that rate — it only applies to the money within that bracket. Here's how progressive taxation really works and why your effective rate is always lower than you think."
+      "text": "A tax bracket is a band of taxable income with its own rate, and you pay each rate only on the income inside that band. Moving into a higher bracket never taxes all your income at the higher rate, and it can never make a raise leave you with less take-home pay. Your marginal rate is the rate on your next dollar; your effective rate is total tax divided by income, and it is always lower than the top bracket you reach. The examples below use a hypothetical bracket schedule so that the arithmetic stays correct however the real figures change."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Real brackets, standard deductions and credits change over time and differ by filing status. This guide does not quote current figures. Look up the current tables on IRS.gov, or enter your own numbers in the Income Tax Calculator, which applies the federal tables built into it. Everything here labelled hypothetical is for illustration only."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Do Tax Brackets Work in the US?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The US uses a progressive tax system: higher income is taxed at higher rates, but only the portion that falls in each bracket. If you're single and earn $75,000 in 2025, you don't pay 22% on the full amount. You pay 10% on the first $11,925, 12% on the next $36,550, and 22% only on the remaining $26,525."
-    },
-    {
-      "type": "paragraph",
-      "text": "That misunderstanding alone costs people thousands in unnecessary tax fear."
+      "text": "The Hypothetical Brackets"
     },
     {
       "type": "table",
       "headers": [
-        "Tax Rate",
-        "Income Range",
-        "Tax Owed"
+        "Taxable income band",
+        "Rate",
+        "Maximum tax from this band"
       ],
       "rows": [
         [
+          "First $10,000",
           "10%",
-          "$0 – $11,925",
-          "$1,192.50"
+          "$1,000"
         ],
         [
-          "12%",
-          "$11,926 – $48,475",
-          "$4,386.00"
+          "$10,000 to $40,000",
+          "15%",
+          "$4,500"
         ],
         [
-          "22%",
-          "$48,476 – $103,350",
-          "Depends on income"
-        ],
-        [
-          "24%+",
-          "$103,351+",
-          "Higher brackets apply"
+          "Above $40,000",
+          "25%",
+          "25% of the amount above $40,000"
         ]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Marginal vs. Effective Rate — What's the Difference?"
+      "text": "From Gross Pay to Tax Owed"
     },
     {
       "type": "paragraph",
-      "text": "Your **marginal rate** is the rate on your last dollar earned — the highest bracket your income touches. Your **effective rate** is your total tax divided by your total income — the actual percentage you pay. For a single filer earning $75,000, the marginal rate is 22%, but the federal effective rate is roughly 13–14%."
+      "text": "Tax is not computed on gross pay. A simplified path is: gross income, minus adjustments such as pre-tax retirement contributions, minus the standard deduction or itemized deductions, equals taxable income. The bracket rates apply to taxable income, and credits are then subtracted from the tax itself. Using a hypothetical $67,000 salary and a hypothetical $12,000 deduction, taxable income is $55,000."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Band",
+        "Income taxed in band",
+        "Rate",
+        "Tax"
+      ],
+      "rows": [
+        [
+          "First $10,000",
+          "$10,000",
+          "10%",
+          "$1,000"
+        ],
+        [
+          "$10,000 to $40,000",
+          "$30,000",
+          "15%",
+          "$4,500"
+        ],
+        [
+          "Above $40,000",
+          "$15,000",
+          "25%",
+          "$3,750"
+        ],
+        [
+          "Total",
+          "$55,000",
+          "",
+          "$9,250"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "That's a massive difference, and understanding it changes how you think about raises, bonuses, and tax planning."
-    },
-    {
-      "type": "callout",
-      "variant": "info",
-      "text": "Many people turn down raises or bonuses because they think the extra income will be 'taxed at 22%.' It will be — but that's still better than keeping $0. Earning $1,000 more and paying $220 in tax leaves you with $780 you didn't have before. Never turn down money because of taxes."
+      "text": "The marginal rate is 25% because the last dollar falls in the top band. The effective rate is $9,250 divided by $55,000, which is 16.8% of taxable income, or 13.8% of the $67,000 gross salary. If the whole $55,000 had been taxed at 25%, the bill would have been $13,750, which is $4,500 too high. That is the common misunderstanding."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Lowers Your Taxable Income?"
+      "text": "Marginal Versus Effective Across Income Levels"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Taxable income",
+        "Tax",
+        "Effective rate",
+        "Marginal rate"
+      ],
+      "rows": [
+        [
+          "$8,000",
+          "$800",
+          "10.0%",
+          "10%"
+        ],
+        [
+          "$25,000",
+          "$3,250",
+          "13.0%",
+          "15%"
+        ],
+        [
+          "$40,000",
+          "$5,500",
+          "13.8%",
+          "15%"
+        ],
+        [
+          "$55,000",
+          "$9,250",
+          "16.8%",
+          "25%"
+        ],
+        [
+          "$100,000",
+          "$20,500",
+          "20.5%",
+          "25%"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Your gross income isn't what gets taxed. You subtract adjustments, then the standard or itemized deduction, to arrive at taxable income. Here are the most powerful ways to reduce it."
+      "text": "The effective rate climbs toward the top rate but never reaches it, because the lower bands keep taxing the first dollars at lower rates."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A Raise Never Costs You Money"
+    },
+    {
+      "type": "paragraph",
+      "text": "Suppose taxable income rises from $39,000 to $41,000, a $2,000 raise before any deduction changes. The first $1,000 is in the 15% band and the second $1,000 is in the 25% band, so the extra tax is $400, which is 20% of the raise. You keep $1,600. Only the portion above the threshold is taxed at the higher rate. Real tax systems have exceptions where a credit or benefit phases out as income rises, which can make the true cost of extra earnings higher than the bracket rate. Check any credits you receive before assuming the bracket rate is the whole story."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Deductions Versus Credits"
+    },
+    {
+      "type": "paragraph",
+      "text": "A deduction lowers taxable income, so its value equals the deduction times your marginal rate. A $5,000 pre-tax retirement contribution lowers taxable income from $55,000 to $50,000, and the hypothetical tax falls from $9,250 to $8,000, a saving of $1,250, which is exactly $5,000 times 25%. A credit reduces the tax itself, so a $1,000 credit saves $1,000 regardless of bracket, while a $1,000 deduction saves $250 at 25% or $150 at 15%. The pre-tax contribution defers tax rather than avoiding it forever, because withdrawals are generally taxed later, so the comparison is about timing and rates, not free money."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Is Not in the Bracket Calculation"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Payroll taxes. Social Security and Medicare are separate taxes calculated on wages, not through income tax brackets.",
+        "State and local income taxes, which have their own structures.",
+        "Capital gains and some other income types, which can use different rates. See the capital gains guide for how those stack on top of ordinary income.",
+        "Self-employment tax for people who work for themselves.",
+        "Credits, itemizing and phase-outs, which can change the result substantially."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Believing that a raise can push you into a bracket where you take home less. It cannot.",
+        "Estimating tax as gross income times your top bracket rate. Use taxable income and add the bands.",
+        "Ignoring withholding. What your employer withholds is an estimate, and your actual liability is settled when you file.",
+        "Using last year's bracket numbers for planning. Check the current year's tables.",
+        "Mixing up deductions and credits. A deduction is worth your marginal rate; a credit is worth its face value."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This guide is educational, not tax advice. The brackets, deduction and incomes in the examples are hypothetical and do not match any tax year. Your own situation may involve credits, phase-outs and state taxes not shown here, so confirm with the IRS or a tax professional."
     },
     {
       "type": "cta",

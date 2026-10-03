@@ -1,59 +1,206 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Snowball Method: Smallest Balance First"
-    },
-    {
       "type": "paragraph",
-      "text": "List all debts from smallest balance to largest. Pay minimums on everything except the smallest debt, and throw every extra dollar at that one. Once it is paid off, roll that payment to the next smallest. The psychological win of knocking out debts quickly keeps you motivated. Studies show the snowball method has a higher completion rate because the early wins create momentum."
+      "text": "The avalanche method (extra money goes to the highest interest rate first) costs the least interest, and the snowball method (extra money goes to the smallest balance first) clears accounts sooner at a higher interest cost. In the example below, three debts totalling $12,700 are paid off with a fixed $645 a month. Avalanche finishes in 24 months with $2,419.15 of interest. Snowball finishes in 25 months with $3,015.93. The avalanche saves $596.78 and one month."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Avalanche Method: Highest Interest First"
+      "text": "The Example and Its Assumptions"
     },
     {
-      "type": "paragraph",
-      "text": "List all debts from highest APR to lowest. Pay minimums on everything except the highest-interest debt. This method saves the most money in interest because high-rate debts are eliminated first. The avalanche method is mathematically optimal but requires more discipline because the first debt on the list may be the largest one, taking months to pay off."
+      "type": "table",
+      "headers": [
+        "Debt",
+        "Balance",
+        "APR",
+        "Minimum payment"
+      ],
+      "rows": [
+        [
+          "Store card",
+          "$1,500",
+          "17%",
+          "$45"
+        ],
+        [
+          "Credit card",
+          "$7,200",
+          "24%",
+          "$180"
+        ],
+        [
+          "Personal loan",
+          "$4,000",
+          "11%",
+          "$120"
+        ]
+      ]
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Total monthly budget: $645, which is $345 in minimums plus $300 extra.",
+        "Interest accrues monthly at APR divided by 12 on the balance, rounded to the cent, and each payment is made after interest is added.",
+        "APRs stay fixed, nothing new is charged, and there are no fees or promotional rates.",
+        "When a debt is paid off, its minimum payment is added to the next target, so the total paid each month stays at the full budget until the last debt is gone."
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Side-by-Side Comparison"
+      "text": "The Two Orders"
     },
     {
       "type": "paragraph",
-      "text": "A $5,000 debt at 22% APR, a $2,000 debt at 18%, and a $15,000 debt at 6% with a $500 monthly payoff budget. Avalanche: pay $2,000 first (18%), then $5,000 (22%), then $15,000 (6%). Total interest: $3,124. Time: 42 months. Snowball: pay $2,000 first, then $5,000, then $15,000. Total interest: $3,347. Time: 43 months. The avalanche saves $223 total but takes the same time because the interest rate difference between the first two debts was small."
+      "text": "Snowball order is by balance: Store card, then Personal loan, then Credit card. Avalanche order is by rate: Credit card, then Store card, then Personal loan. The $7,200 credit card is last under snowball and first under avalanche, and it carries the highest rate, which is why the two methods diverge here."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Month-by-Month Results"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Measure",
+        "Snowball",
+        "Avalanche"
+      ],
+      "rows": [
+        [
+          "First debt cleared",
+          "Store card, month 5",
+          "Credit card, month 19"
+        ],
+        [
+          "Second debt cleared",
+          "Personal loan, month 13",
+          "Store card, month 20"
+        ],
+        [
+          "Last debt cleared",
+          "Credit card, month 25",
+          "Personal loan, month 24"
+        ],
+        [
+          "Debt-free after",
+          "25 months",
+          "24 months"
+        ],
+        [
+          "Total interest",
+          "$3,015.93",
+          "$2,419.15"
+        ],
+        [
+          "Total paid",
+          "$15,715.93",
+          "$15,119.15"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Snowball gives you a win in month 5, 14 months before avalanche clears its first account. That early win is the whole case for it. The remaining balance across all debts shows how the paths separate."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Point in time",
+        "Snowball: total still owed",
+        "Avalanche: total still owed"
+      ],
+      "rows": [
+        [
+          "Month 6",
+          "$9,950",
+          "$9,921"
+        ],
+        [
+          "Month 12",
+          "$7,007",
+          "$6,833"
+        ],
+        [
+          "Month 18",
+          "$3,818",
+          "$3,400"
+        ],
+        [
+          "Month 24",
+          "$231",
+          "$0"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Avalanche owes less at every checkpoint because the $7,200 balance stops accruing 24% interest sooner. At month 24 avalanche owes nothing and snowball owes $231."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When the Gap Shrinks"
+    },
+    {
+      "type": "paragraph",
+      "text": "The saving comes from the spread between rates, and from how big the high-rate balance is. Change only the rates to 19%, 20% and 18% (store card, credit card, personal loan) and both methods finish in 24 months, with $2,733.95 of interest for snowball and $2,641.35 for avalanche. The gap falls from $596.78 to $92.60. When rates are close, choose the order you will stick to."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What Doing Nothing Costs"
+    },
+    {
+      "type": "paragraph",
+      "text": "If each debt only gets its own minimum and nothing is added, the same debts take 81 months and cost $8,737.57 in interest. If you paid the $345 total but rolled each freed minimum forward, it takes 59 months and $7,427.42. The extra $300 a month, aimed well, is what shortens the plan to about two years."
     },
     {
       "type": "callout",
-      "variant": "tip",
-      "text": "Choose snowball if you need motivation to stay on track. Choose avalanche if you are disciplined and want to minimize total interest. Either method beats paying minimums forever."
+      "variant": "info",
+      "text": "Convention note: this guide keeps the total payment fixed and rolls freed minimums forward. The debt payoff calculator holds the extra payment fixed and does not add a cleared debt's minimum to the next target, so for the same inputs it reports longer plans: 31 months and $3,551 for snowball, 27 months and $2,487 for avalanche. Compare the methods' relative difference, not the absolute months."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Should I use savings to pay off debt?"
+      "text": "Picking a Method"
     },
     {
       "type": "paragraph",
-      "text": "Keep a $1,000 emergency fund before starting aggressive debt payoff. Once the debt is gone, rebuild to 3-6 months of expenses. Paying off high-interest (18%+) debt with savings makes sense. Low-interest debt (under 5%) is less urgent."
+      "text": "The dollar cost of choosing snowball here is $596.78 over about two years, roughly $23.87 a month. Whether that is worth early wins is a personal call, not a mathematical one, and this guide does not claim a measured completion rate for either method. A sensible compromise is to clear any tiny balance first for the quick win and then switch to highest rate first. If you are already motivated and organised, avalanche is the cheaper default."
     },
     {
       "type": "heading",
-      "level": 3,
-      "text": "What if I have debt and want to invest?"
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Adding new charges to cards you are paying off. The plan assumes balances only fall.",
+        "Skipping minimums on non-target debts. Late fees and penalty rates can erase the saving.",
+        "Choosing a method for its reputation instead of your own numbers. Run both.",
+        "Ignoring promotional rates that expire. A low rate today can jump later, so recheck when terms change.",
+        "Starting with no cushion at all. A small emergency buffer stops an unexpected bill from going back on a card, though how much is a personal judgement."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Should Extra Cash Go to Debt or Investments?"
     },
     {
       "type": "paragraph",
-      "text": "If your debt APR is higher than expected investment returns (7-8%), pay the debt first. If your debt is low interest (under 5%), consider splitting extra money between debt and investing. Our debt payoff calculator shows the breakeven point."
+      "text": "Paying off a debt is a guaranteed return equal to its interest rate: a dollar used on a 24% card avoids 24% a year in interest. An investment return is uncertain and varies, and past performance does not guarantee future results. That arithmetic favours paying down high-rate debt first; for low-rate debt the comparison is closer and depends on your goals and comfort with risk."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This guide is educational, not personal financial advice. All balances, rates and budgets are illustrative, and your own lender terms can differ."
     },
     {
       "type": "cta",

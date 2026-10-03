@@ -2,46 +2,115 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "The decision of when to claim Social Security is worth hundreds of thousands of dollars — possibly more than your entire 401(k) balance. Yet most people claim at 62, the earliest possible age, locking in a permanently reduced benefit for life."
+      "text": "Claiming Social Security later gives you a larger monthly check for life, but you collect it for fewer years, so the right age depends on how long you live and what else you can live on until then. The way to compare ages is a break-even calculation: how old must you be before the extra monthly amount has made up for the checks you skipped? In the example below, with assumed benefit amounts, that age is about 79 for 67 versus 62, 80 for 70 versus 62, and 82 for 70 versus 67."
     },
     {
-      "type": "paragraph",
-      "text": "The difference between claiming at 62 and waiting until 70 can be **$1,000+ per month**. Over a 20-year retirement, that's **$240,000+** in lost income. Here's how to make the right call."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How is your Social Security benefit calculated?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The SSA calculates your Primary Insurance Amount (PIA) using your highest 35 years of indexed earnings. The formula uses three bend points: **90%** of the first **$1,174** of monthly earnings, **32%** from **$1,174** to **$7,078**, and **15%** above **$7,078**."
-    },
-    {
-      "type": "paragraph",
-      "text": "This progressive formula means lower-income workers get a higher percentage of their pre-retirement earnings replaced. If you worked fewer than 35 years, zeros are averaged in, reducing your benefit."
+      "type": "callout",
+      "variant": "warning",
+      "text": "Every benefit amount in this guide is an assumption chosen to make the arithmetic easy to follow. It is not an SSA figure and not a prediction for you. The real reduction for claiming early and the real increase for claiming late depend on your birth year and your earnings record. Get your own estimates from your my Social Security account at ssa.gov."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What is your Full Retirement Age?"
+      "text": "What changes when you pick a claiming age"
     },
     {
       "type": "paragraph",
-      "text": "FRA depends on your birth year. Born between 1943-1954? Your FRA is **66**."
-    },
-    {
-      "type": "paragraph",
-      "text": "Born in **1960 or later**? Your FRA is **67**. For birth years in between, FRA increases by 2 months per year."
-    },
-    {
-      "type": "paragraph",
-      "text": "Claiming at FRA gives you 100% of your PIA. Claiming before FRA permanently reduces it. Claiming after FRA permanently increases it."
+      "text": "Social Security first works out a basic benefit from your lifetime earnings record, using a progressive formula that replaces a larger share of lower earnings than of higher ones. That basic amount is what you get at your full retirement age, which depends on the year you were born. Claim before that age and the monthly amount is permanently reduced. Claim after it and the amount is permanently increased, up to age 70. The Social Security Calculator estimates all three so you can compare them. This guide does not repeat the exact percentages because they vary by birth year; use the SSA tables for your own case."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What happens if you claim at 62?"
+      "text": "Worked example: a break-even calculation with assumed amounts"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assume a worker would receive $1,400 a month if claiming at 62, $2,000 a month at 67, and $2,500 a month at 70. These are round illustrative figures. Cost-of-living increases are ignored (they would scale every amount equally), taxes are ignored, and money has no time value yet. The table shows total benefits received by each age."
+    },
+    {
+      "type": "table",
+      "headers": ["Age reached", "Claimed at 62 ($1,400/mo)", "Claimed at 67 ($2,000/mo)", "Claimed at 70 ($2,500/mo)"],
+      "rows": [
+        ["67", "$84,000", "$0", "$0"],
+        ["70", "$134,400", "$72,000", "$0"],
+        ["75", "$218,400", "$192,000", "$150,000"],
+        ["80", "$302,400", "$312,000", "$300,000"],
+        ["82", "$336,000", "$360,000", "$360,000"],
+        ["85", "$386,400", "$432,000", "$450,000"],
+        ["90", "$470,400", "$552,000", "$600,000"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The break-even age is where two cumulative totals are equal. For 62 versus 67: 1,400 x 12 x (T - 62) = 2,000 x 12 x (T - 67), which gives T = 78.7. For 62 versus 70, T = 80.2. For 67 versus 70, T = 82.0. A month-by-month check agrees to within a month or so (78.6, 80.2 and 81.9). If you live past those ages, the later claim has paid more in total. If you die earlier, the earlier claim did."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why waiting is partly a trade of cash now for cash later"
+    },
+    {
+      "type": "paragraph",
+      "text": "Waiting from 62 to 67 means giving up $84,000 of checks (1,400 x 12 x 5) in this example. The payoff is $600 more per month, or $7,200 a year, so it takes about 11.7 years of the higher payment to recover the $84,000. Waiting from 67 to 70 gives up $72,000 to gain $6,000 a year, which takes 12 years. In both cases the delay is not free: you also need enough savings or work income to cover living costs in the gap."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Adding the time value of money"
+    },
+    {
+      "type": "paragraph",
+      "text": "A dollar received at 62 can be invested or spent, while a dollar received at 80 is worth less to you today. If you discount future checks at a steady yearly rate, the break-even ages move later. This table repeats the monthly calculation with two assumed discount rates. They are illustrations, not forecasts of investment returns."
+    },
+    {
+      "type": "table",
+      "headers": ["Assumed discount rate", "62 vs 67", "62 vs 70", "67 vs 70"],
+      "rows": [
+        ["0% (no discounting)", "78.6", "80.2", "81.9"],
+        ["2% per year", "81.0", "82.4", "84.2"],
+        ["4% per year", "84.9", "86.1", "87.6"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "At 4% a year, the break-even for waiting until 70 rather than 67 is nearly 88. That is why people who need the money now, or who can invest it at a good return, sometimes reasonably claim earlier. Investment returns are not guaranteed, and past performance does not guarantee future results, while a Social Security check is set by formula."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits of break-even analysis"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating break-even as a prediction. Nobody knows their own lifespan. Think of the later claim as insurance against a long life: it pays most when you live longest, which is the case in which you need the most income.",
+        "Ignoring the spouse. If you are married, your claiming choice can affect what a surviving spouse receives. Ask the SSA how survivor benefits work for your situation before you decide.",
+        "Forgetting the earnings test. If you claim before full retirement age and keep working, part of the benefit may be withheld for a while. The limits change yearly, so check ssa.gov.",
+        "Overlooking taxes. Some retirees pay income tax on part of their benefits. The thresholds are set in the tax code and are best checked with the IRS.",
+        "Using wrong inputs. A calculator that guesses your earnings from current income will differ from your official record. Replace its estimate with the numbers on your SSA statement.",
+        "Assuming the rules will not change. Laws governing benefits can change. Treat any projection as based on current rules."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A practical way to decide"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Get your personal estimates at each age from your SSA account.",
+        "Run the break-even for each pair of ages with your own amounts, using the same formula as above.",
+        "Compare the break-even ages with your health, family history and need for cash. A break-even in the early 80s is a realistic horizon for many people but not for everyone.",
+        "Check whether you can cover your expenses without the benefit during the delay.",
+        "If you are married, model both spouses together, since the higher earner's choice may matter for the survivor.",
+        "For a final decision, consider speaking with a fee-only financial planner or an SSA representative."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "This guide is for general education, not individualized advice. Confirm the current rules, including any limits on changing your mind after you apply, with the SSA before you file."
     },
     {
       "type": "cta",
@@ -51,12 +120,5 @@
       "path": "/finance/social-security-calculator/"
     }
   ],
-  "keywords": [
-    "social security calculator",
-    "social security benefits calculator",
-    "when to claim social security",
-    "social security age 62 vs 67 vs 70",
-    "social security retirement calculator",
-    "ss benefit estimator"
-  ]
+  "keywords": ["social security calculator","social security benefits calculator","when to claim social security","social security age 62 vs 67 vs 70","social security retirement calculator","ss benefit estimator"]
 }

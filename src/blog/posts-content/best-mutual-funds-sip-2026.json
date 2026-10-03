@@ -1,31 +1,100 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Fund Selection Criteria for SIP"
-    },
-    {
       "type": "paragraph",
-      "text": "For SIP investing, look for consistency over 5-10 years, lower expense ratios (below 1% for regular plans), same fund manager tenure, AUM above ₹1,000 crores, and rolling returns that consistently beat the benchmark. Avoid funds that were one-year wonders or have high portfolio turnover."
+      "text": "There is no single best mutual fund for a SIP, and any ranked list of funds goes out of date long before a SIP ends. The better question is how to judge a fund yourself. A good SIP fund matches the length of your goal, charges as little as it reasonably can, has a record of staying close to or ahead of its benchmark across several different time windows, and is one you can keep funding through a fall. This page gives you that method, with the cost arithmetic worked out. It does not name or rank any fund, and nothing here is personal investment advice."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Category Recommendations"
+      "text": "Step 1: Start with the goal, then the category"
+    },
+    {
+      "type": "table",
+      "headers": ["Time until you need the money", "Broad kind of fund usually considered", "Reason"],
+      "rows": [
+        ["Under 3 years", "Low-risk debt-oriented funds or deposits", "Equity values can fall sharply and may not recover in time"],
+        ["3 to 7 years", "Hybrid funds that mix equity and debt", "Some growth with a smaller swing in value"],
+        ["7 years or more", "Equity-oriented funds, including index funds", "Long enough to ride out falls, if you actually hold"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Large cap: Look for funds with consistent performance across market cycles. Mid cap: Higher returns but higher volatility — suitable for 10+ year horizons. Small cap: Only for high-risk investors with 15+ year horizons. Hybrid: Balanced approach for moderate risk investors. Index funds: Lowest cost, market-matching returns, ideal for passive investors."
+      "text": "These bands are a common rule of thumb, not a regulation, and your own tolerance for a falling balance matters as much as the calendar. A fund category tells you what kind of risk you are taking. It says nothing about whether one fund within it is any good."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Many SIPs Should You Have?"
+      "text": "Step 2: Put a rupee value on costs"
     },
     {
       "type": "paragraph",
-      "text": "3-5 SIPs across different categories is ideal for most investors. One large cap, one mid cap, one hybrid, and one index fund provides diversification without over-complicating your portfolio. Avoid having 10+ SIPs — it becomes hard to track and rebalance."
+      "text": "A fund's annual expense ratio is deducted from the fund's assets, so the NAV you see is already net of it. To see its effect, take four funds that earn an identical 12% a year before costs and differ only in expense ratio. Rs. 10,000 a month for 20 years, using the SIP calculator's method (annual rate divided by 12, instalments at the start of each month), produces the following."
+    },
+    {
+      "type": "table",
+      "headers": ["Expense ratio", "Net return", "Value after 20 years", "Lost to costs versus 0%", "Share of the 0% result lost"],
+      "rows": [
+        ["0.5%", "11.5%", "Rs. 93,39,666", "Rs. 6,51,813", "6.5%"],
+        ["1.0%", "11.0%", "Rs. 87,35,731", "Rs. 12,55,749", "12.6%"],
+        ["1.5%", "10.5%", "Rs. 81,75,968", "Rs. 18,15,511", "18.2%"],
+        ["2.0%", "10.0%", "Rs. 76,56,969", "Rs. 23,34,510", "23.4%"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The gap between a 0.5% fund and a 2.0% fund is Rs. 16,82,697 over 20 years, about 18% of the cheaper fund's result, and it widens with time: over 30 years the same two funds end at Rs. 3.16 crore and Rs. 2.28 crore. Real funds do not earn identical gross returns, so a cheaper fund is not automatically the better one. But cost is the one factor you know in advance. Two plans of the same fund, direct and regular, hold the same portfolio, and the regular plan has a distributor commission built into its expense ratio. Compare the ratios of both on the fund's current factsheet."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 3: Look past one good year"
+    },
+    {
+      "type": "paragraph",
+      "text": "A recent top return tempts people to extrapolate it. The arithmetic shows why that is unsafe: Rs. 10,000 a month for 20 years gives Rs. 6,85,90,952 at 25%, Rs. 99,91,479 at 12% and Rs. 59,29,472 at 8%. A 25% annual return over 20 years is not a planning assumption. Instead, check the following for the fund you are considering."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Rolling returns: results over many overlapping 3-year and 5-year windows, not a single trailing figure that depends on the end date.",
+        "Benchmark and peers: returns against the fund's stated benchmark and against funds in the same category over identical dates.",
+        "Behaviour in falls: how much the fund lost in past market declines and how long it took to recover. Ask whether you would have kept the SIP running through it.",
+        "Stability: how long the current manager has run the fund and whether the investment style has stayed consistent.",
+        "Size and liquidity: very small funds can be closed or merged, while in some categories very large ones can find it hard to trade. Read the scheme documents for the category you choose.",
+        "Overlap: holding several funds that own mostly the same shares adds paperwork, not diversification."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 4: Keep the structure simple"
+    },
+    {
+      "type": "paragraph",
+      "text": "A SIP portfolio is easier to review and rebalance with a few funds that do different jobs than with many that overlap. A broad, low-cost core fund for the long-term money, plus a conservative holding for nearer goals, covers most people's needs. Each extra fund should earn its place by doing something the others do not."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Choosing a category with higher risk than your horizon can bear, because last year's returns in that category looked good.",
+        "Switching funds every time another tops a list. Each switch can trigger exit loads and tax, and you restart a record you have not tested.",
+        "Ignoring the expense ratio because it looks small. A 1-point difference (0.5% against 1.5%) was worth Rs. 11,63,698 on the 20-year plan above.",
+        "Stopping the SIP in a downturn, which is when instalments buy the most units.",
+        "Judging by the star rating or a social media post rather than by your own checklist."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Past performance does not guarantee future returns, and fund categories, costs and tax rules change. Check the latest factsheet, scheme document and tax rules before investing, and consider speaking with a registered adviser about your own situation."
     },
     {
       "type": "cta",

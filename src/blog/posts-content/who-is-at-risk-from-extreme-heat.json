@@ -1,67 +1,121 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Who Is Most Vulnerable?"
-    },
-    {
       "type": "paragraph",
-      "text": "Extreme heat affects everyone, but some groups face disproportionate risk. Elderly adults (65+) have reduced ability to regulate body temperature and may be on medications that impair heat response. Infants and children under 4 have higher surface-to-body-mass ratios, less developed temperature regulation, and cannot communicate discomfort. Outdoor workers face prolonged occupational exposure. People with chronic conditions (heart disease, diabetes, obesity) have reduced physiological reserve to handle heat stress."
+      "text": "The CDC lists seven groups at increased risk of heat-related illness: adults aged 65 and older, infants and young children, people with chronic medical conditions, people without air conditioning, athletes, outdoor workers and pregnant people. The groups fall into two types. Some people are at risk because their bodies cope with heat less well (age, health conditions, pregnancy, certain medications). Others are at risk because of what they are doing or where they live (exercise, outdoor work, no cooling at home). Many people belong to more than one group, and risks stack."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "This article summarizes CDC guidance and does not replace advice from your own clinician. If you have a medical condition or take prescription medicine, ask a clinician how hot weather affects you and what to do on a hot day."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Medications That Increase Heat Risk"
+      "text": "The CDC risk groups and the reasons given"
     },
     {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Diuretics (blood pressure meds): Reduce body water, impair sweating.",
-        "Beta-blockers: Reduce heart rate response to heat.",
-        "Antihistamines: Reduce sweat production.",
-        "Antidepressants: Can impair temperature regulation.",
-        "Antipsychotics: Reduce thirst sensation and impair cooling.",
-        "Alcohol: Impairs judgment and dehydrates."
+      "type": "table",
+      "headers": ["Group", "Why the CDC says they are at higher risk", "What to check"],
+      "rows": [
+        ["Adults 65 and older", "Do not adjust as well to sudden temperature changes; more likely to have a chronic condition that changes normal responses to heat; more likely to take prescription medicines that affect temperature control or sweating", "Working cooling at home, regular fluids, someone checking in on you"],
+        ["Infants and young children", "Rely on others to keep them cool and hydrated", "Shade, fluids offered regularly, never relying on a child to ask"],
+        ["People with chronic conditions", "Hot days can be especially dangerous", "A plan agreed with a clinician for hot weather"],
+        ["People without air conditioning", "Need to prepare in advance for heat", "A cool place to go, such as a friend's home or a public cooled space"],
+        ["Athletes", "More likely to become dehydrated and get heat-related illness when exercising in heat", "Training time, fluids, rest"],
+        ["Outdoor workers", "More likely to become dehydrated and get heat-related illness", "Water, rest, shade and a gradual start (see the OSHA article)"],
+        ["Pregnant people", "Pregnancy can make illness more likely in very hot weather", "Advice from the prenatal care team"]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Urban Heat Island Effect"
+      "text": "Medications that change how the body handles heat"
     },
     {
       "type": "paragraph",
-      "text": "Cities are significantly hotter than surrounding rural areas, sometimes by 10-20°F during evening hours. This urban heat island effect is caused by dark surfaces (roads, roofs) absorbing and re-radiating heat, reduced vegetation, and waste heat from buildings and vehicles. Low-income neighborhoods often have fewer trees and less green space, making them disproportionately hotter during heat waves."
+      "text": "The CDC's clinician guidance on heat and medications names several classes and the mechanism for each. The table repeats those entries. Only a clinician or pharmacist can say whether a specific medicine matters for a specific person."
+    },
+    {
+      "type": "table",
+      "headers": ["Medicine class", "Mechanism the CDC lists"],
+      "rows": [
+        ["Diuretics", "Electrolyte imbalance; volume depletion, dehydration and a higher risk of fainting and falls"],
+        ["Beta blockers", "Reduced widening of blood vessels near the skin and decreased sweating"],
+        ["Calcium channel blockers", "Lower blood pressure and a higher risk of fainting and falls"],
+        ["ACE inhibitors and ARBs", "Reduced thirst sensation and a risk of low blood pressure"],
+        ["Lithium", "Electrolyte imbalance and a risk of toxicity when dehydrated"],
+        ["Antipsychotics", "Impaired sweating"],
+        ["SSRIs and SNRIs", "Increased or altered sweating"],
+        ["Tricyclic antidepressants", "Decreased sweating"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The CDC also lists antihistamines, stimulants, antiseizure medicines, NSAIDs and antibiotics among the classes with relevant effects. Its patient advice is to avoid stopping any medicine abruptly without a plan in place, to discuss adjustments for hot weather with a clinician, and to know when to seek medical care and which symptoms are an emergency."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "At what temperature does heat become dangerous for elderly?"
+      "text": "Worked example: a home without cooling"
     },
     {
       "type": "paragraph",
-      "text": "For elderly adults, any heat index above 90°F carries risk. Many cities activate cooling centers when the heat index reaches 95°F. If you have elderly relatives, check on them during heat waves and make sure they have working air conditioning and are staying hydrated."
+      "text": "Indoor heat is easy to underestimate. Suppose a home without air conditioning holds the following conditions during a heat wave. Heat index values come from the heat index calculator's formula, rounded to one decimal place. The formula was built for shade and light wind, so treat indoor figures as a rough guide."
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "How many people die from heat in the US each year?"
+      "type": "table",
+      "headers": ["Indoor temperature and humidity", "Heat index", "NWS category"],
+      "rows": [
+        ["82°F, 50%", "82.8°F", "Caution"],
+        ["86°F, 55%", "89.4°F", "Caution"],
+        ["90°F, 60%", "99.7°F", "Extreme Caution"],
+        ["88°F, 70%", "100.2°F", "Extreme Caution"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Heat is the number one weather-related killer in the United States, causing an average of 700-1,500 deaths per year. This exceeds combined deaths from hurricanes, tornadoes, floods, and lightning."
+      "text": "The National Weather Service describes Extreme Caution as a category in which heat stroke, cramps or exhaustion are possible. That wording is for the general public. The calculator's own documentation notes that its number does not account for age, medications, obesity or acclimatization, so a person from one of the groups above can face real risk at a lower heat index than a healthy adult would."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Practical steps the CDC gives for older adults"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Stay in air-conditioned buildings as much as possible.",
+        "Drink more water than usual and do not wait until you are thirsty.",
+        "Wear loose, lightweight, light-colored clothing.",
+        "Check on a friend or neighbor, and have someone do the same for you.",
+        "Seek immediate medical attention for muscle cramps, headaches, nausea or vomiting."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Assuming only the old and the very young are at risk. Athletes and outdoor workers are on the CDC list because exertion and dehydration are risks in themselves.",
+        "Relying on thirst. The CDC tells older adults not to wait until they are thirsty, and it lists ACE inhibitors and ARBs with reduced thirst sensation.",
+        "Stopping a medicine on your own in hot weather. The CDC advises against abrupt changes without a plan.",
+        "Treating the heat index as a personal safety line. It is a general-public figure for shade and light wind.",
+        "Skipping a check on neighbors who live alone. Checking on others is among the CDC's own recommendations.",
+        "Expecting this article to give statistics. The CDC page cited here gives none for these groups, so none are quoted."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "If someone becomes confused, slurs speech, has a seizure or loses consciousness in the heat, OSHA's guidance is to call 911 immediately and cool the person until help arrives."
     },
     {
       "type": "cta",
       "heading": "Check the Heat Index",
-      "body": "Know the conditions before heading outside with our free heat index calculator.",
+      "body": "Enter the temperature and humidity at home or outdoors to see which category you are in.",
       "buttonLabel": "Open Calculator",
       "path": "/everyday/heat-index-calculator/"
     }

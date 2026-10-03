@@ -1,22 +1,120 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Ideal Surplus"
-    },
-    {
       "type": "paragraph",
-      "text": "A surplus of 300-500 calories above TDEE is the sweet spot for muscle gain with minimal fat gain. A smaller surplus (100-200 calories) — sometimes called maingaining or body recomposition — may work for beginners but is too slow for advanced lifters. A larger surplus (500+ calories) adds mostly fat, not muscle."
+      "text": "To use TDEE for muscle gain, work out your maintenance calories, then eat a fixed amount above them and let your training log and the scale tell you whether it is working. A bulking target is just TDEE plus a surplus. The part that decides whether the plan holds up is how that surplus behaves over weeks, because your TDEE rises as you gain weight and the surplus you set on day one quietly shrinks."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Tracking Surplus Results"
+      "text": "Step 1: Get a maintenance number you can defend"
     },
     {
       "type": "paragraph",
-      "text": "Gaining 0.5-1 lb per week is the sweet spot for most people. If you are gaining faster than 1 lb per week, reduce your surplus. If you are not gaining at all after 3-4 weeks, increase by 100-200 calories. Strength gains in the gym are the best indicator that your surplus is working. If your lifts go up, you are building muscle. If only your weight goes up, you are gaining fat."
+      "text": "The TDEE calculator multiplies your resting energy (BMR) by an activity factor from 1.2 to 1.9. The Mifflin-St Jeor equation behind it was fitted on 498 healthy adults aged 19 to 78 (Mifflin et al., American Journal of Clinical Nutrition, 1990). Example used throughout this post: a 28-year-old man, 80 kg (176 lb), 180 cm, training three to five days a week (factor 1.55). BMR = 10 x 80 + 6.25 x 180 - 5 x 28 + 5 = 1,790 kcal. TDEE = 1,790 x 1.55 = 2,774.5, shown as 2,775 kcal per day."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 2: Choose a surplus and see what it implies"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator uses the common rule of thumb that 500 kcal per day is about 1 lb per week on the scale (3,500 kcal per lb). Dividing each surplus by that rule gives the scale gain it implies if every extra calorie were stored. It says nothing about how much of that gain is muscle."
+    },
+    {
+      "type": "table",
+      "headers": ["Daily surplus", "Daily intake", "Surplus as % of TDEE", "Implied scale gain per week"],
+      "rows": [
+        ["+100 kcal", "2,875 kcal", "3.6%", "0.2 lb (0.09 kg)"],
+        ["+250 kcal", "3,025 kcal", "9.0%", "0.5 lb (0.23 kg)"],
+        ["+350 kcal", "3,125 kcal", "12.6%", "0.7 lb (0.32 kg)"],
+        ["+500 kcal", "3,275 kcal", "18.0%", "1.0 lb (0.45 kg)"],
+        ["+750 kcal", "3,525 kcal", "27.0%", "1.5 lb (0.68 kg)"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Rounded to the nearest unit. The calculator's own presets are +250 kcal (a lean gain) and +500 kcal (an aggressive gain). We could not verify, from a source we opened, a single surplus that is best for the muscle-to-fat split, so this post does not claim one. A smaller surplus moves the scale more slowly and a larger one faster; which trade-off suits you depends on your training experience, how much fat you are willing to add, and how your body responds."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why a fixed surplus shrinks"
+    },
+    {
+      "type": "paragraph",
+      "text": "Mifflin-St Jeor adds 10 kcal of BMR for every kilogram of body weight, so a heavier body has a higher TDEE. Suppose you eat 3,075 kcal every day (TDEE plus 300) and gain weight at the 3,500 kcal per lb rule. Recomputing TDEE each week with your new weight gives this simplified model:"
+    },
+    {
+      "type": "table",
+      "headers": ["Week", "Body weight", "TDEE", "Actual surplus at 3,075 kcal"],
+      "rows": [
+        ["0", "80.0 kg", "2,775 kcal", "300 kcal"],
+        ["8", "82.1 kg", "2,807 kcal", "268 kcal"],
+        ["16", "83.9 kg", "2,835 kcal", "239 kcal"],
+        ["24", "85.6 kg", "2,861 kcal", "214 kcal"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: all surplus is stored at about 7,716 kcal per kg, the activity factor and height stay fixed, and no other metabolic adaptation occurs. Real bodies are messier, but the direction is reliable: after about 5.6 kg of gain the surplus has dropped by roughly 86 kcal. If progress stalls after a couple of months, re-running the calculator with your new weight is the first thing to check."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How wrong can the starting estimate be?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Two inputs move the answer more than the surplus does. The first is the activity factor: one step in the multiplier (1.375 to 1.55, or 1.55 to 1.725) changes this example by 313 kcal per day, which is more than a 250 kcal surplus. The second is body composition. If you enter a body fat percentage, the calculator switches to Katch-McArdle, BMR = 370 + 21.6 x lean mass in kg. At the same 80 kg and factor 1.55:"
+    },
+    {
+      "type": "table",
+      "headers": ["Body fat entered", "Katch-McArdle BMR", "TDEE", "Eating 3,075 kcal is a surplus of"],
+      "rows": [
+        ["12%", "1,891 kcal", "2,930 kcal", "145 kcal"],
+        ["15%", "1,839 kcal", "2,850 kcal", "225 kcal"],
+        ["20%", "1,752 kcal", "2,716 kcal", "359 kcal"],
+        ["25%", "1,666 kcal", "2,582 kcal", "493 kcal"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The same plate of food is a 145 kcal surplus for one body and a 493 kcal surplus for another, and body fat percentages from scales or calipers are themselves estimates. That is why the calculator says to treat its output as a starting estimate: track weight for two to three weeks and adjust by 100 to 200 kcal."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Tracking and adjusting"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Weigh daily or several times a week under the same conditions and compare weekly averages, not single readings.",
+        "Keep a training log. If your weight rises but your lifts do not, the surplus is not being turned into much training progress.",
+        "After two to three weeks, change intake by 100 to 200 kcal in the direction the data points, then wait again.",
+        "Recompute TDEE after every few kilograms of gain, using your current weight."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Choosing an activity factor for the training you plan to do instead of the week you actually have. The calculator advises picking the lower option when unsure.",
+        "Treating the 3,500 kcal per lb rule as exact. A dynamic model of weight change (Hall et al., The Lancet, 2011) reports that bodyweight responds slowly to a change in energy intake, with half-times of about one year, so straight-line predictions drift.",
+        "Using these numbers for adolescents, during pregnancy, or with a medical condition. The equation was fitted on healthy adults."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This is general information, not medical or nutrition advice. If you have diabetes, heart, kidney or thyroid conditions, take medication that affects appetite or weight, or have a history of disordered eating, talk to a clinician or registered dietitian before deliberately eating above maintenance."
     },
     {
       "type": "cta",

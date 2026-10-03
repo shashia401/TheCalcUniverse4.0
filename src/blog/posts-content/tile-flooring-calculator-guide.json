@@ -2,69 +2,200 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "How many tiles you need depends on your room size, tile dimensions, and layout pattern. A simple grid layout wastes less tile than a herringbone pattern, and that difference can mean an extra box or two. Here's how to calculate it right."
+      "text": "To find how many tiles you need, divide the room area by the area of one tile, round up, then add a waste allowance for cuts and breakage. For a 12 ft by 10 ft room (120 square feet) tiled with 12 in by 24 in tiles, each tile covers 2 square feet, so you need 60 tiles. Adding a 10 percent allowance gives 66 tiles, which is 7 boxes if a box holds 10 tiles. The waste percentage changes with the layout pattern, and that is where most ordering mistakes happen."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Many Tiles Do You Need?"
+      "text": "The formula, step by step"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Room area in square feet = length x width. Here 12 x 10 = 120.",
+        "Tile area in square feet = (tile length in inches x tile width in inches) / 144. Here (12 x 24) / 144 = 2.",
+        "Base tile count = room area / tile area, rounded up. Here 120 / 2 = 60.",
+        "Total tiles = base count x (1 + waste percentage), rounded up. Here 60 x 1.10 = 66.",
+        "Boxes = total tiles / tiles per box, rounded up. Here 66 / 10 = 6.6, so 7 boxes."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Divide your room area by the area of a single tile, then multiply by your waste factor. For a **12x10 foot** room (**120 sq ft**) with **12x24 inch tiles** covering **2 sq ft each**, you need at least 60 tiles. With the standard **10% waste factor**, that becomes **66 tiles** -- or about **7 boxes** at 10 tiles per box."
+      "text": "The Tile Calculator uses exactly this method with fixed layout allowances: 10 percent for a standard grid or brick pattern, 15 percent for diagonal and 20 percent for herringbone. You can override the percentage if your installer recommends a different figure. It also assumes 10 tiles per box, which may not match your product, so always check the tiles per box and square feet per box printed on the carton."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Waste Factor by Layout Pattern"
+      "text": "Same room, different layouts"
+    },
+    {
+      "type": "paragraph",
+      "text": "The table below uses the same 12 ft by 10 ft room with 12 in by 24 in tiles. Only the layout changes. The cost column assumes an illustrative price of 3.50 dollars per tile, which is a placeholder and not a market price."
     },
     {
       "type": "table",
       "headers": [
-        "Layout Pattern",
-        "Waste Factor",
-        "Best For"
+        "Layout",
+        "Waste allowance",
+        "Total tiles",
+        "Boxes of 10",
+        "Cost at 3.50 per tile"
       ],
       "rows": [
         [
-          "Standard Grid",
+          "Standard grid",
           "10%",
-          "Large rooms, simple installation"
+          "66",
+          "7",
+          "231.00"
         ],
         [
-          "Brick / Staggered",
+          "Brick / staggered",
           "10%",
-          "Subway tiles, classic look"
+          "66",
+          "7",
+          "231.00"
         ],
         [
           "Diagonal",
           "15%",
-          "Small rooms, adding visual space"
+          "69",
+          "7",
+          "241.50"
         ],
         [
           "Herringbone",
           "20%",
-          "Feature walls, accent areas"
+          "72",
+          "8",
+          "252.00"
         ]
       ]
     },
     {
       "type": "paragraph",
-      "text": "Herringbone creates the most waste because of the complex angle cuts at every edge. Grid layouts are the most efficient -- you'll cut fewer tiles and have less leftover scrap."
+      "text": "Notice what the numbers say. Going from a grid to herringbone adds 6 tiles, or 21 dollars at the assumed price. The tile itself is a small part of the risk. The bigger costs are the extra cutting time and the chance of running short and finding that the next lot does not match."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Tile Size and Grout Lines Matter"
+      "text": "Same room, different tile sizes"
     },
     {
       "type": "paragraph",
-      "text": "Larger tiles cover more area with fewer grout lines, which means less cutting and lower waste. But a single miscut on a **24x48 inch** tile costs more than a miscut on a **12x12 inch** tile. Grout lines also affect your count -- a **1/8-inch** grout line between 12-inch tiles reduces the tile quantity by about **1-2%** since each tile's effective coverage area expands slightly."
+      "text": "Tile size changes both the count and how coarse the waste allowance is. The table uses the same 120 square foot room with a 10 percent grid allowance."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Tile size",
+        "Tiles in 120 sq ft",
+        "With 10% waste",
+        "Spare tiles"
+      ],
+      "rows": [
+        [
+          "12 in x 12 in",
+          "120",
+          "132",
+          "12"
+        ],
+        [
+          "12 in x 24 in",
+          "60",
+          "66",
+          "6"
+        ],
+        [
+          "24 in x 48 in",
+          "15",
+          "17",
+          "2"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "With large-format tile, 10 percent rounds up to just 2 spare pieces, and each piece is 8 square feet. A single miscut or a tile that arrives chipped uses up half of your cushion. For large-format tile or very small rooms it can be sensible to plan more than the standard percentage. Ask your installer rather than relying on a single rule."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Do grout lines change the count?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Slightly. Each tile plus its grout joint occupies a little more than the tile alone, so you need marginally fewer tiles. Assuming a 1/8 in joint and the nominal tile sizes, the raw count in 120 square feet falls as follows:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Tile size",
+        "Count without grout",
+        "Count with 1/8 in grout",
+        "Reduction"
+      ],
+      "rows": [
+        [
+          "6 in x 6 in",
+          "480",
+          "460.6",
+          "4.0%"
+        ],
+        [
+          "12 in x 12 in",
+          "120",
+          "117.5",
+          "2.0%"
+        ],
+        [
+          "12 in x 24 in",
+          "60",
+          "59.1",
+          "1.5%"
+        ],
+        [
+          "24 in x 48 in",
+          "15",
+          "14.9",
+          "0.8%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The Tile Calculator accepts a grout width but does not subtract it from the tile count, so its answer is slightly conservative. The reduction is smaller than the waste allowance, so most people ignore it. Wider joints, rectified edges and actual versus nominal tile sizes all shift the numbers a little, so use the sizes printed on the box."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Entering the tile size in feet when the calculator expects inches, or the reverse. Always confirm the unit label.",
+        "Ordering exactly the base count with no waste. Every edge tile needs a cut, and some cuts fail.",
+        "Treating a box as the unit of purchase without checking its coverage. Boxes are sold by tile count or by square feet, and the two differ between products.",
+        "Ignoring rooms that are not rectangles. For an L-shaped room, add the areas of the two sections first (for example 168 square feet for a 12 x 10 plus a 6 x 8), then apply the allowance once.",
+        "Not keeping spare tile. Product lines get discontinued and dye lots vary, so leftover boxes are your repair supply."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this method does not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculation assumes a flat, rectangular floor covered edge to edge. It does not model walls, backsplashes, stair risers, patterned tile that must be matched, or trim pieces such as bullnose edging, which you count separately by length. Substrate preparation, tile adhesive and grout quantities depend on the manufacturer instructions, and wet areas may be governed by local building codes. Confirm the layout and the product requirements with the manufacturer or a licensed installer before you order."
     },
     {
       "type": "callout",
       "variant": "tip",
-      "text": "Always order at least one extra box beyond your calculated amount. Store it safely -- if a tile breaks in the future or the product line gets discontinued, you'll be glad you've matching tiles from the same dye lot."
+      "text": "Lay out a dry run of a few rows before you spread any adhesive. It shows you where the cuts will fall and whether you need to shift the starting line so edge tiles are not slivers."
     },
     {
       "type": "cta",

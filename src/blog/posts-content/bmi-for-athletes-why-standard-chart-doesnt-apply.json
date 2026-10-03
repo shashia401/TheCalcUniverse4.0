@@ -1,42 +1,116 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "The standard BMI chart does not apply well to athletes because BMI is calculated from weight and height only, so it cannot tell muscle from fat. The CDC states plainly that BMI does not distinguish between fat, muscle and bone mass, and does not show where on the body fat is carried. A strength athlete with a lot of lean tissue can therefore land in the overweight range while carrying little body fat, and two people with the same BMI can have very different bodies."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "BMI is a screening tool, not a diagnosis. If a BMI result worries you, or you are changing your training or eating in response to it, talk to a doctor or a sports medicine clinician. This post is general information, not medical advice."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "The Athlete BMI Problem"
+      "text": "Worked example: same BMI, different bodies"
     },
     {
       "type": "paragraph",
-      "text": "Muscle is about 18% denser than fat. This means athletes and bodybuilders often have BMIs in the overweight (25-29.9) or even obese (30+) range while having very low body fat percentages. Studies of NFL players found that over 50% had BMIs in the obese category, yet only a fraction had body fat percentages above 25%. The BMI formula does not know whether your weight comes from muscle or fat."
+      "text": "Assumptions: two adults, both 180 cm tall and 85 kg. BMI = 85 divided by (1.80 x 1.80) = 85 divided by 3.24 = 26.2, which falls in the overweight category (25.0 to 29.9) on the standard chart. The body fat percentages below are hypothetical values, of the kind a body composition scan might report. Fat mass is weight times body fat percentage, and lean mass is the remainder."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Person",
+        "Weight",
+        "BMI",
+        "Body fat",
+        "Fat mass",
+        "Lean mass"
+      ],
+      "rows": [
+        ["Trained lifter", "85 kg", "26.2", "12%", "10.2 kg", "74.8 kg"],
+        ["Person with low muscle mass", "85 kg", "26.2", "28%", "23.8 kg", "61.2 kg"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "BMI reports exactly the same number for both. The gap is about 13.6 kg of fat mass, which BMI cannot see. For this height, BMI 25 corresponds to 81.0 kg and BMI 30 to 97.2 kg (multiply the BMI by 3.24), so both people are 4 kg past the overweight line even though their bodies are very different."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Better Metrics for Athletes"
+      "text": "Better numbers to track"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Body fat percentage: The most relevant metric. Healthy athletic ranges are 6-13% for men and 14-20% for women. Our body fat calculator uses the Navy circumference method.",
-        "Lean body mass (LBM): Your total weight minus fat mass. This is what actually matters for performance.",
-        "Waist-to-height ratio: Keep your waist under half your height. This is a better cardiometabolic risk predictor than BMI.",
-        "Performance metrics: Track measurable performance data (lift numbers, run times, vertical jump) rather than body composition numbers."
+        "Body fat percentage. The American Council on Exercise chart lists 6 to 13 percent for men and 14 to 20 percent for women in its athlete category, and 14 to 17 percent for men and 21 to 24 percent for women in its fitness category. These are fitness categories, not medical diagnoses.",
+        "Lean mass. Total weight minus fat mass. Tracking it shows whether a weight change came from muscle or fat.",
+        "Waist-to-height ratio. Waist circumference divided by height, in the same units. For a 180 cm athlete with an 82 cm waist, 82 divided by 180 is 0.46, below the 0.5 benchmark this site's healthy weight calculator uses.",
+        "Performance data. Strength, speed and endurance numbers show training progress that no body measurement does."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What to Tell Your Doctor"
+      "text": "Estimating body fat with a tape measure"
     },
     {
       "type": "paragraph",
-      "text": "If your doctor flags your BMI as overweight, explain your training history and ask for a body fat measurement instead. Most doctors will use a different assessment for athletes. If they still insist on BMI, ask about the \"athlete adjustment\" or consider switching to a sports medicine specialist who understands body composition. The BMI chart was designed for population screening, not athletic assessment."
+      "text": "The U.S. Navy circumference method used by our body fat calculator estimates body fat from height, neck and abdomen (men) or waist, hip and neck (women). It is convenient, but it comes with caveats for muscular people. For men it uses 86.010 x log10(abdomen minus neck) - 70.041 x log10(height) + 36.76, with all measures in centimetres. The calculator states an accuracy of about 2 to 3 percentage points against hydrostatic weighing when measurements are taken correctly."
+    },
+    {
+      "type": "paragraph",
+      "text": "The neck term matters for lifters. Holding height at 180 cm and abdomen at 82 cm, here is how the estimate moves with neck size:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Neck (cm)",
+        "Abdomen (cm)",
+        "Height (cm)",
+        "Navy estimate"
+      ],
+      "rows": [
+        ["38", "82", "180", "20.2%"],
+        ["40", "82", "180", "18.4%"],
+        ["42", "82", "180", "16.6%"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A 4 cm difference in neck circumference shifts the estimate by 3.6 percentage points, more than the stated error range. If your neck grows with training, the number can drift downward without any change in actual fat. Track the trend with consistent measurements and treat a single value as approximate. For clinical decisions, methods such as DEXA, Bod Pod or hydrostatic weighing are more accurate than tape measurements."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Assuming a high BMI is always muscle. Without a body fat or waist measurement you cannot know, so measure instead of guessing.",
+        "Ignoring BMI entirely. It is a reasonable first screen for most people. It is the interpretation for very muscular people that breaks down.",
+        "Chasing a single body fat number. Estimates differ between methods, so compare readings from the same method over time.",
+        "Cutting weight to hit a BMI target. Doing so can reduce muscle along with fat, which is the opposite of the usual training goal. Talk to a clinician or sports dietitian before making large changes."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Talking to your doctor"
+    },
+    {
+      "type": "paragraph",
+      "text": "If a clinician flags your BMI, explain your training history and ask what other measurements make sense. The CDC advises that BMI be considered alongside medical history, health behaviours, physical exam findings and lab results, not on its own. A waist measurement, blood pressure and routine blood tests give much more information about your metabolic health than BMI does."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Frequently asked questions"
     },
     {
       "type": "heading",
@@ -45,16 +119,16 @@
     },
     {
       "type": "paragraph",
-      "text": "There is no \"normal\" BMI for bodybuilders because the formula does not account for muscle mass. Most bodybuilders will have BMIs in the overweight (25-29.9) or obese (30+) category regardless of how lean they are. Focus on body fat percentage instead."
+      "text": "There is no bodybuilder-specific BMI range. The formula has no way to account for muscle mass, so the chart categories simply do not describe a very muscular person well. Body fat percentage and waist-to-height ratio are more informative."
     },
     {
       "type": "heading",
       "level": 3,
-      "text": "Do professional athletes care about BMI?"
+      "text": "Does BMI matter in weight-class sports?"
     },
     {
       "type": "paragraph",
-      "text": "No. Professional sports teams use body fat percentage, lean body mass, and performance metrics. BMI is rarely mentioned in athletic training contexts. The one exception is weight-class sports (wrestling, boxing) where absolute weight matters."
+      "text": "In sports such as boxing or wrestling, scale weight sets the competition class regardless of BMI. Athletes in those sports still benefit from tracking body composition, because the same body weight can come from different amounts of lean mass."
     },
     {
       "type": "cta",

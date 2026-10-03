@@ -1,31 +1,176 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Amortization in Plain English"
-    },
-    {
       "type": "paragraph",
-      "text": "Amortization is a fancy word for a simple concept: a loan that gets paid off with equal payments over time. Each payment is the same amount, but what that payment covers changes. Think of it like a see-saw. At the beginning, the interest side is heavy and the principal side is light. Over time, they balance out. By the end, the principal side is heavy and the interest side is light."
+      "text": "Amortization means paying off a loan in scheduled, equal installments so that the balance reaches exactly zero on the last payment. Each installment is split in two: first it covers the interest that built up since the previous payment, and whatever is left reduces the amount you owe. Because the interest is charged on the balance still outstanding, the interest part gets smaller and the principal part gets larger every month while the total payment stays the same. This guide uses one small loan so you can follow every number."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Simple Example"
+      "text": "Four words you need"
     },
     {
-      "type": "paragraph",
-      "text": "A $10,000 loan at 5% interest for 3 years (36 months). Monthly payment: $299.71. Month 1: $41.67 interest + $258.04 principal = $299.71. Month 12: $28.73 interest + $270.98 principal. Month 36: $1.24 interest + $298.47 principal."
+      "type": "list",
+      "items": [
+        "Principal: the amount you still owe, not counting interest. It starts at the amount you borrowed.",
+        "Interest: the price of using the lender's money, charged each period on the current principal. This guide uses a monthly charge of one-twelfth of the annual rate.",
+        "Term: the number of payments, for example 36 for a three-year loan paid monthly.",
+        "Amortization schedule: the table listing each payment and how it splits between interest and principal, with the balance left afterwards."
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Your Lender Uses Amortization"
+      "text": "A small example, payment by payment"
     },
     {
       "type": "paragraph",
-      "text": "Amortization ensures the lender gets most of their interest early when the risk is highest (the full balance is outstanding). It also ensures the loan is fully paid by the end of the term. The monthly payment stays predictable, making it easier for borrowers to budget. Without amortization, loans would either have variable payments or large final balloon payments."
+      "text": "Assumptions: borrow $10,000 at a fixed 5% annual rate and repay over 36 monthly payments. The payment is $299.71 (rounded), which comes from the standard payment formula. Month 1 interest is $10,000 x 0.05 / 12 = $41.67, so $258.04 of the payment reduces the balance to $9,741.96. Month 2 interest is charged on that smaller balance: $40.59, leaving $259.12 for principal. Selected rows:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Payment",
+        "Interest",
+        "Principal",
+        "Balance after",
+        "Interest share of payment"
+      ],
+      "rows": [
+        [
+          "1",
+          "$41.67",
+          "$258.04",
+          "$9,741.96",
+          "13.9%"
+        ],
+        [
+          "6",
+          "$36.25",
+          "$263.46",
+          "$8,435.53",
+          "12.1%"
+        ],
+        [
+          "12",
+          "$29.59",
+          "$270.12",
+          "$6,831.54",
+          "9.9%"
+        ],
+        [
+          "18",
+          "$22.77",
+          "$276.94",
+          "$5,187.02",
+          "7.6%"
+        ],
+        [
+          "24",
+          "$15.77",
+          "$283.94",
+          "$3,500.97",
+          "5.3%"
+        ],
+        [
+          "30",
+          "$8.60",
+          "$291.11",
+          "$1,772.32",
+          "2.9%"
+        ],
+        [
+          "36",
+          "$1.24",
+          "$298.47",
+          "$0.00",
+          "0.4%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Over the 36 payments the borrower pays $10,789.52 in total, so the interest cost is $789.52. Of that, $428.04 is paid in the first 12 payments, $265.94 in the second year and $95.54 in the third. The loan is short and the rate is modest, so interest is a small slice from the start. On a 30-year mortgage the same mechanics produce a payment that is mostly interest for years."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the split changes"
+    },
+    {
+      "type": "paragraph",
+      "text": "There is no scheduling trick here, only arithmetic. Interest in any month equals the balance times the monthly rate. The payment is fixed, so principal is the payment minus that interest. When the balance falls, next month's interest falls, so more of the same payment is left for principal, which lowers the balance further. The loan gets cheaper to carry as it shrinks. This is why paying extra principal early saves more than the same extra amount paid late, and why the first years of a long loan reduce the balance so slowly."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Loans that are not fully amortized"
+    },
+    {
+      "type": "paragraph",
+      "text": "Not every loan works this way. Comparing three alternatives on the same $10,000 at 5% for 36 months shows what the amortizing payment actually buys:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Loan structure",
+        "Monthly payment",
+        "Balance after 36 payments",
+        "What it means"
+      ],
+      "rows": [
+        [
+          "Fully amortizing",
+          "$299.71",
+          "$0.00",
+          "Paid off on the last payment"
+        ],
+        [
+          "Interest-only",
+          "$41.67",
+          "$10,000.00",
+          "You paid $1,500.00 in interest and still owe everything"
+        ],
+        [
+          "Balloon (payments sized as if the loan ran 120 months)",
+          "$106.07",
+          "$7,504.33",
+          "Low payment, but a single large balloon payment is due at month 36"
+        ],
+        [
+          "Underpaying (pays $30)",
+          "$30.00",
+          "$10,452.12",
+          "The payment is below the monthly interest, so the balance grows (negative amortization)"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Interest-only and balloon structures are sometimes used on purpose, for example for short-term financing, but they leave a large amount due later. Negative amortization usually happens only where a loan contract allows payments below the interest charged, and the unpaid interest is added to the balance. Credit cards are revolving rather than amortized: there is no fixed schedule, and the minimum payment is set by the card agreement, so the payoff time depends on how much you pay."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What amortization does not tell you"
+    },
+    {
+      "type": "list",
+      "items": [
+        "The real cost of borrowing. The rate used in a schedule is the interest rate. Upfront fees raise the cost, which is what an APR measures.",
+        "Other things in your bill. A mortgage payment may include property tax and insurance collected by the lender, and these are not part of the amortization schedule.",
+        "What you will earn elsewhere. A schedule shows the cost of the loan, not whether it is better to repay early or invest.",
+        "The effect of rate changes. A schedule is built for a fixed rate. On an adjustable-rate loan the payment is recalculated when the rate changes."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "A quick sanity check for any schedule: month 1 interest should equal the starting balance times the annual rate divided by 12. If your own lender's figure is different, ask which day-count convention or fees they use."
+    },
+    {
+      "type": "paragraph",
+      "text": "All figures are illustrative calculations from stated assumptions, not a loan offer. Payments here are rounded to the cent for display; the underlying calculation carries the unrounded value."
     },
     {
       "type": "cta",

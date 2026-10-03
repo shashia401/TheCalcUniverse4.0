@@ -2,46 +2,143 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Millions of Americans leave free money on the table with their 401(k) every year. You might be one of them. The difference between contributing enough for the full employer match and maxing out could be **$1 million** or more over your career."
-    },
-    {
-      "type": "paragraph",
-      "text": "Your 401(k) isn't just a retirement account. It's the most powerful tax-advantaged savings tool available to most workers — especially when you factor in the employer match and decades of compound growth. The math works so well because three forces combine: your contributions, your employer's contributions, and investment returns on top of both."
+      "text": "A 401(k) grows from three sources: what you contribute, what your employer adds, and the investment returns on both. The employer match is usually the first lever to pull, because it adds money you only receive if you contribute. In the example below, a 30-year-old earning $80,000 who contributes 6% with a 50%-up-to-6% match is projected to reach about $1.64 million at 65, against about $1.13 million for the same person if the match did not exist. All figures are assumptions-based projections, not predictions or promises."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How does your employer match work?"
+      "text": "The assumptions behind every number"
     },
     {
       "type": "paragraph",
-      "text": "The employer match is the closest thing to free money you'll ever get. A common structure is \"50% up to 6% of salary.\" If you earn **$80,000** and contribute 6% (**$4,800**), your employer adds another **$2,400** — an instant **50% return** on that piece of your contribution."
+      "text": "Age 30, retiring at 65 (35 years). Salary $80,000 now, rising 3% a year. Starting balance $10,000. Investment return 7% a year, a flat assumption compounded monthly, with contributions added at the end of each month. Employer match of 50% of your contribution, up to 6% of salary, fully vested. Results are nominal dollars, not adjusted for inflation, and ignore fees, taxes and annual contribution limits. Real returns vary year to year, and past performance does not guarantee future results. The calculation uses the same method as the 401(k) calculator and reproduces its published worked examples."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the match works in dollars"
     },
     {
       "type": "paragraph",
-      "text": "Not contributing at least up to the match limit means you're walking away from a guaranteed return. No investment can reliably deliver a 50-100% immediate return with zero risk. The employer match should always be your first savings priority."
+      "text": "A match has two parts: a percentage and a cap. With 50% up to 6%, your employer adds 50 cents for each dollar you contribute, but only on contributions up to 6% of salary. At $80,000, contributing 6% is $4,800 and the employer adds $2,400. Contributing 3% is $2,400, and the employer adds $1,200. Contributing more than 6% adds nothing further from the employer. Different formulas can be equivalent: a 100% match up to 3% also gives 3% of salary once you contribute at least 3%. Your plan document states the actual formula and any vesting rules."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What different contribution rates do"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Your contribution rate",
+        "Year 1: you",
+        "Year 1: employer",
+        "35-year total: you",
+        "35-year total: employer",
+        "Projected balance at 65"
+      ],
+      "rows": [
+        [
+          "0%",
+          "$0",
+          "$0",
+          "$0",
+          "$0",
+          "$115,062"
+        ],
+        [
+          "3%",
+          "$2,400",
+          "$1,200",
+          "$145,109",
+          "$72,554",
+          "$879,212"
+        ],
+        [
+          "4%",
+          "$3,200",
+          "$1,600",
+          "$193,479",
+          "$96,739",
+          "$1,133,929"
+        ],
+        [
+          "6%",
+          "$4,800",
+          "$2,400",
+          "$290,218",
+          "$145,109",
+          "$1,643,362"
+        ],
+        [
+          "10%",
+          "$8,000",
+          "$2,400",
+          "$483,697",
+          "$145,109",
+          "$2,322,607"
+        ],
+        [
+          "15%",
+          "$12,000",
+          "$2,400",
+          "$725,545",
+          "$145,109",
+          "$3,171,663"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Three things stand out. First, the 0% row shows what the starting balance alone grows to under these assumptions. Second, moving from 3% to 6% raises the projected balance from $879,212 to $1,643,362, because both your contribution and the employer's double. Third, above 6% the employer's dollars stop growing, so each extra point is your own money working at the assumed return. The jump from 6% to 15% adds $1,528,301 to the balance for $435,327 more of your own contributions."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the match is worth"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take the 6% contributor. With the match, the projected balance is $1,643,362. With the same contributions and no match it would be $1,133,929. The $509,433 difference comes from $145,109 of employer contributions and the growth on them over the years, which is why this is called free money. It is not unconditional. The match is typically subject to the plan's vesting schedule, so leaving a job early can mean forfeiting part of it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why starting early matters"
+    },
+    {
+      "type": "paragraph",
+      "text": "Compare two otherwise identical people who both contribute 6% with the match, starting from a zero balance and with the same career salary path. The one who starts at 30 and retires at 65 is projected to have $1,528,301. The one who starts at 40 is projected to have $858,123, which is 43.9% less, even though they save for 25 years rather than 35. The extra ten years do not just add contributions, they give the earliest dollars the longest time to compound."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Sensitivity to the return assumption"
+    },
+    {
+      "type": "paragraph",
+      "text": "The projection is far more sensitive to the assumed return than to small changes in contributions. For the 6% contributor: at 4% the projected balance is $881,507, at 5% it is $1,073,857, at 7% it is $1,643,362 and at 9% it is $2,612,251. With a 0% return the person would have only the $445,327 they and their employer put in, plus the starting balance. Treat any single projected number as one point in a wide range."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Contributing less than the match cap. At 3% instead of 6%, the first-year employer money halves from $2,400 to $1,200.",
+        "Ignoring vesting. The match may not be fully yours until you have worked a set number of years, which varies by plan.",
+        "Forgetting the annual contribution limits. They change regularly and include separate rules for older workers, so check the current limits on the IRS website before setting a high rate.",
+        "Using a single return figure as a forecast. Markets are volatile, and sequence of returns matters.",
+        "Cashing out when changing jobs. Early withdrawals can bring income tax and an additional penalty, so look at rollover options and read the IRS guidance before acting.",
+        "Treating the nominal projection as today's spending power. $1.64 million in 35 years buys much less than $1.64 million today."
+      ]
     },
     {
       "type": "callout",
-      "variant": "tip",
-      "text": "Always contribute at least enough to get the full employer match. It's an instant, risk-free return on your money that beats any stock market investment. If your match is \"50% up to 6%,\" contribute at least 6% of your salary."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What are the 2025 401(k) contribution limits?"
-    },
-    {
-      "type": "paragraph",
-      "text": "For 2025, the IRS allows you to contribute up to **$23,500** to your 401(k). If you're 50 or older, you can add a catch-up contribution of **$7,500**, bringing your total to **$31,000**. The combined employee-plus-employer limit's **$70,000**."
-    },
-    {
-      "type": "paragraph",
-      "text": "The SECURE 2. 0 Act introduced even higher catch-up limits. If you're aged 60-63, you can contribute up to **$34,750** in total employee deferrals."
-    },
-    {
-      "type": "paragraph",
-      "text": "These provisions are designed to help you accelerate savings in your peak earning years."
+      "variant": "info",
+      "text": "This is education, not financial or tax advice. Contribution limits, match formulas, vesting and tax treatment (traditional versus Roth) vary by plan and change over time, so check your plan documents and the IRS."
     },
     {
       "type": "cta",

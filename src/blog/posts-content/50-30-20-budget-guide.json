@@ -2,75 +2,282 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Most people think budgeting means tracking every cent, cutting all fun spending, and feeling deprived. No wonder so many quit after two weeks. The 50/30/20 rule flips that approach."
+      "text": "The 50/30/20 rule says to split your after-tax income three ways: 50% for needs, 30% for wants, and 20% for savings and debt repayment above the minimums. It is a rule of thumb, not a law of personal finance, and it is most useful as a quick audit: add up what you actually spend in each bucket and see how far you are from the targets. On a $4,800 monthly take-home pay the targets are $2,400 for needs, $1,440 for wants and $960 for savings."
     },
     {
       "type": "paragraph",
-      "text": "It gives you a simple structure — **50% of your after-tax income for needs, 30% for wants, and 20% for savings** — while leaving plenty of room for the things you actually enjoy."
+      "text": "The rule is commonly attributed to Elizabeth Warren, and it is popular because it needs three numbers instead of thirty. The trade-off is that it ignores where you live, what you earn and what you owe, so treat the percentages as a starting point you adjust, not a grade you pass or fail."
     },
     {
       "type": "heading",
-      "text": "What Is the 50/30/20 Rule?",
-      "level": 2
-    },
-    {
-      "type": "paragraph",
-      "text": "Popularized by Senator Elizabeth Warren, the 50/30/20 rule is a budgeting framework that divides your after-tax income into three broad categories. The goal isn't perfection — it's awareness. The categories are intentionally wide to make budgeting sustainable rather than restrictive."
-    },
-    {
-      "type": "paragraph",
-      "text": "here's how the split works: half your income covers essentials, about a third goes to lifestyle choices, and the remaining fifth builds your financial future. You can adjust the ratios to fit your situation, but the framework gives you a clear starting point."
+      "level": 2,
+      "text": "What Goes in Each Bucket"
     },
     {
       "type": "table",
       "headers": [
-        "Category",
-        "Target %",
-        "What Goes Here",
-        "Examples"
+        "Bucket",
+        "Target share",
+        "Dollars at $4,800 a month",
+        "Typical contents"
       ],
       "rows": [
         [
           "Needs",
           "50%",
-          "Essential living expenses",
-          "Rent, groceries, utilities, insurance, minimum debt payments"
+          "$2,400",
+          "Housing, utilities, groceries, basic transport, insurance, minimum debt payments"
         ],
         [
           "Wants",
           "30%",
-          "Discretionary lifestyle spending",
-          "Dining out, streaming, travel, shopping, hobbies"
+          "$1,440",
+          "Dining out, subscriptions, shopping, entertainment, travel"
         ],
         [
           "Savings",
           "20%",
-          "Future financial security",
-          "Emergency fund, 401(k), IRA, extra debt payoff"
+          "$960",
+          "Emergency fund, retirement contributions, investing, extra debt payments above the minimum"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Use after-tax income, meaning what lands in your account. If your employer takes retirement contributions or insurance premiums out before the deposit, add them back to the right bucket (savings and needs respectively) so the percentages reflect your real spending. A useful test for a need: if you stopped paying it, would you face serious consequences within weeks? Groceries pass that test and restaurant meals do not."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The Same Rule at Different Incomes"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Monthly take-home",
+        "Needs (50%)",
+        "Wants (30%)",
+        "Savings (20%)",
+        "Saved per year"
+      ],
+      "rows": [
+        [
+          "$3,000",
+          "$1,500",
+          "$900",
+          "$600",
+          "$7,200"
+        ],
+        [
+          "$4,800",
+          "$2,400",
+          "$1,440",
+          "$960",
+          "$11,520"
+        ],
+        [
+          "$7,500",
+          "$3,750",
+          "$2,250",
+          "$1,500",
+          "$18,000"
         ]
       ]
     },
     {
       "type": "heading",
-      "text": "What Counts as a Need vs. a Want?",
-      "level": 2
+      "level": 2,
+      "text": "A Realistic Budget Measured Against the Rule"
     },
     {
       "type": "paragraph",
-      "text": "A need is something you can't eliminate without a major life disruption. Housing, utilities, groceries, transportation, health insurance, childcare, and minimum loan payments all qualify. If you stopped paying for them, you would face serious consequences within weeks."
+      "text": "Take a household with $4,800 of monthly take-home pay and the spending below. These are illustrative figures, not averages for any group."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Category",
+        "Monthly amount",
+        "Share of income"
+      ],
+      "rows": [
+        [
+          "Rent",
+          "$1,650",
+          "34.4%"
+        ],
+        [
+          "Utilities and internet",
+          "$210",
+          "4.4%"
+        ],
+        [
+          "Groceries",
+          "$480",
+          "10.0%"
+        ],
+        [
+          "Transport (fuel, insurance share, upkeep)",
+          "$380",
+          "7.9%"
+        ],
+        [
+          "Health insurance and medical",
+          "$240",
+          "5.0%"
+        ],
+        [
+          "Minimum debt payments",
+          "$180",
+          "3.8%"
+        ],
+        [
+          "Total needs",
+          "$3,140",
+          "65.4%"
+        ],
+        [
+          "Dining out and takeout",
+          "$260",
+          "5.4%"
+        ],
+        [
+          "Subscriptions",
+          "$60",
+          "1.3%"
+        ],
+        [
+          "Shopping",
+          "$150",
+          "3.1%"
+        ],
+        [
+          "Entertainment",
+          "$200",
+          "4.2%"
+        ],
+        [
+          "Travel fund",
+          "$100",
+          "2.1%"
+        ],
+        [
+          "Total wants",
+          "$770",
+          "16.0%"
+        ],
+        [
+          "Emergency fund",
+          "$200",
+          "4.2%"
+        ],
+        [
+          "Retirement account",
+          "$300",
+          "6.3%"
+        ],
+        [
+          "Extra debt payment",
+          "$100",
+          "2.1%"
+        ],
+        [
+          "Total savings",
+          "$600",
+          "12.5%"
+        ],
+        [
+          "Unassigned",
+          "$290",
+          "6.0%"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "A want is something you choose to spend money on. Dining out, entertainment, subscriptions, shopping, travel, and hobbies fall here. The line can get blurry — internet is a need for remote workers, but premium cable is a want."
+      "text": "Needs take 65.4% of income, wants take 16.0%, and savings are 12.5%. Needs are well above the 50% target, wants are well below 30%, and $290 is unassigned. Unassigned money rarely stays unassigned. If it all went to savings, the savings share would rise to 18.5%, still short of 20% but much closer. The budget does not miss the rule because of the wants; it misses because housing and fixed costs are heavy, and that points to a different fix than cutting coffee."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When Needs Run Above 50%"
     },
     {
       "type": "paragraph",
-      "text": "Groceries are a need; restaurant takeout is a want. Be honest about which category each expense truly belongs in."
+      "text": "In many places rent alone takes a large part of take-home pay, so a strict 50% is unrealistic. The common adjustment is to keep savings protected and squeeze wants. The table shows three splits of the same income. None is correct for everyone; they show the trade-off."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Split (needs / wants / savings)",
+        "Needs",
+        "Wants",
+        "Savings",
+        "Saved per year"
+      ],
+      "rows": [
+        [
+          "50 / 30 / 20",
+          "$2,400",
+          "$1,440",
+          "$960",
+          "$11,520"
+        ],
+        [
+          "60 / 25 / 15",
+          "$2,880",
+          "$1,200",
+          "$720",
+          "$8,640"
+        ],
+        [
+          "65 / 20 / 15",
+          "$3,120",
+          "$960",
+          "$720",
+          "$8,640"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the 20% Can Build"
+    },
+    {
+      "type": "paragraph",
+      "text": "Saving 20% of $4,800 is $960 a month, or $115,200 of contributions over 10 years. Assuming a 5% annual return compounded monthly (an assumption, not a forecast), that grows to about $149,071. At 15% ($720 a month) the same assumption gives about $111,803 from $86,400 of contributions. Past performance does not guarantee future results, and real returns vary from year to year."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes and When the Rule Does Not Fit"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using gross income. The percentages apply to take-home pay.",
+        "Putting everything you dislike paying in the needs bucket. Honest sorting matters more than the exact split.",
+        "Treating minimum debt payments as savings. The minimum is a need; only the extra above it counts toward the 20%.",
+        "Forgetting irregular costs such as annual insurance, car repairs and gifts. Divide each expected yearly cost by 12 and set that amount aside monthly.",
+        "Following the rule while carrying high-interest debt. A card charging 20% or more costs more than most savings earn, so extra payments there come first.",
+        "Using it at very low or very high incomes. When take-home pay is small, needs can consume most of it; when it is large, saving more than 20% is usually easy and worthwhile."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to Use the Rule Without Obsessing"
+    },
+    {
+      "type": "paragraph",
+      "text": "Check your numbers once a month, not once a day. Add up three totals, compare them with the targets, and change one thing: move a fixed cost, trim one want, or raise an automatic transfer. Automating the savings transfer on payday removes the temptation to spend first and save what is left. If your numbers are far from the targets, the gap tells you which bucket to investigate first."
     },
     {
       "type": "callout",
-      "text": "A reliable used car might be a need for commuting, but a luxury vehicle lease is a want. When in doubt, ask yourself: 'Could I reasonably reduce or eliminate this without losing my job or housing?' If yes, it's probably a want.",
-      "variant": "tip"
+      "variant": "info",
+      "text": "This guide is educational, not personal financial advice. The percentages are a rule of thumb, and every dollar figure and return above is an illustrative assumption."
     },
     {
       "type": "cta",

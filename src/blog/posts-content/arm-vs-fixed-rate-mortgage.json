@@ -1,30 +1,171 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Fixed vs Adjustable: The Core Difference"
-    },
-    {
       "type": "paragraph",
-      "text": "A fixed-rate mortgage locks your interest rate for the entire loan term — typically 15 or 30 years. Your payment never changes. An adjustable-rate mortgage (ARM) offers a lower initial rate for a fixed period (3, 5, 7, or 10 years), after which the rate resets periodically based on market indexes plus a margin."
-    },
-    {
-      "type": "paragraph",
-      "text": "The tradeoff is simple: ARMs offer lower initial payments but carry future uncertainty. Fixed rates offer predictability at a higher initial cost. A 5/1 ARM might start at 5.5% vs a 30-year fixed at 6.5%, saving $200/month for the first 5 years — but after that, the rate could rise as high as 8.5%."
+      "text": "An adjustable-rate mortgage (ARM) costs less if you sell or refinance before the rate climbs far enough to erase the early savings. A fixed-rate mortgage costs less if rates rise a lot and you keep the loan. In the example below, a $320,000 5/1 ARM that starts one point below a 6.50% fixed loan stays cheaper through year 10 even if its rate jumps to 6.50% at the first reset. It only falls behind if the rate after year 5 stays above about 7.66%, or climbs toward its caps."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When Each Makes Sense"
+      "text": "How a rate reset works"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 5/1 ARM keeps its starting rate for 5 years and then adjusts once a year, in the usual structure. At each adjustment the lender sets a new rate from a market index plus a fixed margin, subject to caps, and recalculates the payment so the remaining balance is repaid over the remaining term. Caps are written in your loan note as a first-adjustment limit, a per-year limit and a lifetime limit. They differ between loans, so the 2/2/5 pattern used here (up to 2 points at the first adjustment, up to 2 points a year after, 5 points over the starting rate in total) is an assumption for illustration, not a typical or current figure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The example and its assumptions"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "ARM is better if: You plan to move within the fixed period (5-7 years), rates are high and expected to drop, you need a lower payment to qualify, or you expect higher income later.",
-        "Fixed is better if: You plan to stay 10+ years, you prefer payment certainty, rates are historically low, or you are on a fixed income and cannot absorb payment increases."
+        "Loan amount $320,000 over 30 years, payments monthly, no points or fees compared.",
+        "Fixed loan: 6.50% for the whole term, payment $2,022.62.",
+        "5/1 ARM: 5.50% for years 1 to 5, payment $1,816.92. These rates are hypothetical and chosen only to give a 1-point initial gap. They are not market quotes.",
+        "After year 5 the rate is set once per year. The table tests five paths. Payments are recalculated every year on the remaining balance over the remaining months.",
+        "Cost is measured as interest paid in the first 10 years. The lower ARM payment in years 1 to 5 is not invested in this comparison."
       ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Ten-year cost under five rate paths"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario after year 5",
+        "Payment, years 1-5",
+        "Payment in year 6",
+        "Highest payment in years 1-10",
+        "Interest paid, years 1-10",
+        "Versus fixed loan"
+      ],
+      "rows": [
+        [
+          "Fixed-rate 30-year at 6.50%",
+          "n/a",
+          "$2,022.62",
+          "$2,022.62",
+          "$193,998",
+          "$0"
+        ],
+        [
+          "Rate falls to 4.50%",
+          "$1,816.92",
+          "$1,644.56",
+          "$1,816.92",
+          "$147,638",
+          "-$46,360"
+        ],
+        [
+          "Rate stays at 5.50%",
+          "$1,816.92",
+          "$1,816.92",
+          "$1,816.92",
+          "$162,162",
+          "-$31,836"
+        ],
+        [
+          "Rate rises to 6.50% (same as fixed)",
+          "$1,816.92",
+          "$1,997.76",
+          "$1,997.76",
+          "$176,831",
+          "-$17,167"
+        ],
+        [
+          "Rate rises to 7.50% (first-reset cap)",
+          "$1,816.92",
+          "$2,186.48",
+          "$2,186.48",
+          "$191,617",
+          "-$2,381"
+        ],
+        [
+          "Rate climbs 2 points a year to the 10.50% cap",
+          "$1,816.92",
+          "$2,186.48",
+          "$2,773.57",
+          "$223,808",
+          "+$29,811"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Through year 5 the ARM saves $205.69 a month, or $12,342 in payments, and pays $16,023 less interest than the fixed loan. After the reset, even a rate of 6.50% leaves the ARM ahead on interest through year 10, because its balance is lower going into the reset. In the worst-case path the payment reaches $2,773.57 in year 8, which is 53% above the starting ARM payment and 37% above the fixed payment, and the 10-year interest is $29,811 higher than the fixed loan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How high can the rate go before the ARM loses?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Suppose the rate after year 5 moves once to a new level and stays there. The table shows the level at which total interest paid equals the fixed loan at each horizon. If you expect the rate to stay below the figure, the ARM costs less up to that year."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "If you keep the loan for",
+        "Post-reset rate at which the ARM and the fixed loan cost the same"
+      ],
+      "rows": [
+        [
+          "5 years",
+          "No break-even: the ARM is always ahead, since the reset has not happened yet"
+        ],
+        [
+          "7 years",
+          "9.28%"
+        ],
+        [
+          "10 years",
+          "7.66%"
+        ],
+        [
+          "30 years (full term)",
+          "6.85%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The first-reset cap of 2 points in this example means the rate cannot exceed 7.50% in year 6, so the 9.28% needed to break even by year 7 cannot be reached at the first adjustment. Even the worst-case path above, at 7.50% and then 9.50%, has cost $134,505 in interest by the end of year 7, against $139,232 for the fixed loan. Over the full 30 years the break-even level is 6.85%, only 0.35 points above the fixed rate. A one-point head start is easy to lose over a long period if the rate stays higher than the fixed rate for years."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Qualifying on the starting payment only. Check whether you could carry the highest payment the caps allow. In this example that payment is much larger than the starting one.",
+        "Counting on a refinance as the exit. A later refinance depends on the rates, your credit and your home value at that time, and it carries closing costs.",
+        "Comparing rates without the caps and the index. Two ARMs with the same start can behave very differently after the reset.",
+        "Forgetting what you do with the early savings. This comparison credits the ARM with nothing for them. If you put them toward principal, the balance going into the reset is lower than modeled here, which softens any later increase.",
+        "Assuming the reset is a once-and-done event. Annual adjustments can move the payment up or down every year."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this comparison does not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "These paths are illustrative, not forecasts. They use one cap structure, annual adjustments after the initial period, and a 1-point starting gap. Loans with different terms, interest-only periods, rate floors, or conversion options change the arithmetic. Taxes, insurance, and mortgage insurance are left out. Read the adjustable-rate disclosure you receive from the lender, and use the mortgage amortization or comparison calculator with the exact rates, caps and term from your offer."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "All payments and interest totals were computed month by month with standard amortization, recalculating the payment at each annual adjustment. Rates are assumptions, not predictions, and nothing here is advice about a specific loan."
     },
     {
       "type": "cta",

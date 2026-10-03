@@ -1,22 +1,148 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The SWP + STP Strategy"
-    },
-    {
       "type": "paragraph",
-      "text": "Keep 3-5 years of living expenses in debt funds (lower returns, lower tax). Set up an STP to transfer a fixed amount monthly from debt to equity funds. Run your SWP from the debt fund. This way, your equity allocation continues to grow for the long term while your short-term withdrawals come from the more stable debt portion."
+      "text": "An STP (systematic transfer plan) moves a fixed amount at set intervals from one fund into another, usually within the same fund house, and an SWP then pays money out of the fund you want to draw income from. Used together they decide where your withdrawals come from and when gains are realised. They do not create returns, and whether the combination saves tax depends on rules that change, so this post teaches the mechanics with invented numbers and asks you to check the current tax rules yourself. No tax rates, holding periods or exemption limits are stated here."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Tax Benefits"
+      "text": "What each plan does"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "SWP: redeems a fixed amount from one fund each period and pays it to your bank account. Money leaves the fund system.",
+        "STP: redeems a fixed amount from a source fund each period and buys units of a destination fund. Money stays invested but changes funds.",
+        "SWP plus STP: the STP keeps topping up a fund from which the SWP pays, or spreads a large shift between funds over many months instead of doing it on a single day."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: refilling the income fund by STP"
     },
     {
       "type": "paragraph",
-      "text": "Debt fund withdrawals are taxed at your income slab rate but only on the capital gains portion. By keeping 3-5 years of expenses in debt, you avoid having to sell equity units when markets are down. The STP ensures your equity allocation is gradually built back up over time."
+      "text": "Take Rs. 1,00,00,000 split Rs. 30,00,000 in a lower-risk fund and Rs. 70,00,000 in a growth fund, with an SWP of Rs. 50,000 a month paid from the lower-risk fund. I assumed the lower-risk fund earns 6% a year and tested the growth fund two ways: a flat 10% a year, and a hypothetical bad start of -20%, -5%, +10%, +15% and +20% in years one to five and 10% afterwards. These are inventions for illustration; past performance does not guarantee future results. The monthly growth rate is the annual rate converted to its monthly equivalent (so 10% a year compounds to exactly 10% over twelve months). Each month both funds grow, then the STP amount moves from growth to lower-risk, then the SWP is paid from the lower-risk fund. If the lower-risk fund runs dry, the SWP draws on the growth fund. The table shows the total value after 20 years."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Set-up",
+        "Growth fund flat 10%",
+        "Growth fund with bad start"
+      ],
+      "rows": [
+        [
+          "Everything in the growth fund, SWP from it",
+          "Rs. 3,13,62,038",
+          "Rs. 1,17,31,215"
+        ],
+        [
+          "Everything in the lower-risk fund, SWP from it",
+          "Rs. 93,99,423",
+          "Rs. 93,99,423"
+        ],
+        [
+          "30/70 split, no STP",
+          "Rs. 2,93,86,184",
+          "Rs. 1,60,28,138"
+        ],
+        [
+          "30/70 split, STP Rs. 25,000 a month",
+          "Rs. 2,72,49,085",
+          "Rs. 1,36,17,089"
+        ],
+        [
+          "30/70 split, STP Rs. 50,000 a month",
+          "Rs. 2,08,00,945",
+          "Rs. 70,84,442"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Look at the pattern, not at the exact figures. With the growth fund rising smoothly, the all-growth set-up wins, and every other set-up gives some of that up for safety. With the bad start, the best result is the split with no STP, because the lower-risk fund pays the expenses while the growth fund is down, so no growth units are sold during the fall. The STP of Rs. 50,000 a month, equal to the SWP, does the opposite: it keeps selling growth units through the fall to refill the lower-risk fund, and it ends with the least money. An STP is therefore a decision about when you sell growth assets, not a free improvement. If you automate refills, you may be refilling at the worst moment."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: how an STP spreads gains over time"
+    },
+    {
+      "type": "paragraph",
+      "text": "Suppose you hold Rs. 40,00,000 in a source fund that you originally bought for Rs. 30,00,000, so Rs. 10,00,000 of the value is gain. To simplify, assume the NAV stays flat during the transfer; in real life the NAV moves and the gain share changes each month. The table shows how much gain each transfer method realises."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Method",
+        "Transfer per month",
+        "Gain realised per month",
+        "Gain realised in 12 months"
+      ],
+      "rows": [
+        [
+          "All at once, in one month",
+          "Rs. 40,00,000",
+          "Rs. 10,00,000",
+          "Rs. 10,00,000"
+        ],
+        [
+          "STP over 12 months",
+          "Rs. 3,33,333",
+          "Rs. 83,333",
+          "Rs. 10,00,000"
+        ],
+        [
+          "STP over 24 months",
+          "Rs. 1,66,667",
+          "Rs. 41,667",
+          "Rs. 5,00,000"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The total gain is the same Rs. 10,00,000 whichever method you choose. What changes is how much of it is realised in any one year. Whether that matters depends on how the tax rules treat gains in a year, including any exemption, slab or holding-period conditions, which differ between fund types and change over time. Look up the current rules for the specific funds, or ask a registered tax adviser, before building a plan around the timing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Things to check before you set one up"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "How the fund house processes a transfer. In many schemes it works as a redemption from the source and a purchase in the destination, so exit loads, holding conditions and gain rules for the source can apply to every instalment.",
+        "The minimum amount, frequency and number of instalments the scheme allows for an STP.",
+        "The risk of the destination fund, because the money you move is now exposed to it.",
+        "The cost of the funds on both sides, because costs reduce what is left to compound.",
+        "What the plan does in a bad year. As the table showed, an automatic transfer can run through a fall."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Treating an STP as a tax saver. It changes timing; it does not remove the gain.",
+        "Setting the STP larger than the SWP. The income fund then grows while the growth fund is drained faster than you may have intended.",
+        "Skipping reviews. Revisit the split and the STP amount at least once a year, and after any large market move.",
+        "Assuming past tax treatment will continue. Tax and fund rules change from time to time, so confirm them every time you change the plan."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This is a mechanics explainer, not tax or investment advice. The numbers come from assumed returns and assumed NAVs, not from any fund. Speak to a SEBI-registered adviser and a tax professional before acting."
     },
     {
       "type": "cta",

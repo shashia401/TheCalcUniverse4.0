@@ -1,92 +1,195 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Body fat percentage describes what your weight is made of, while BMI only compares your weight with your height. BMI is weight in kilograms divided by height in metres squared, so a muscular person and a person with little muscle can land on the same number. Body fat percentage separates fat mass from lean mass, which is why it can disagree with BMI in both directions. Neither one is a diagnosis. BMI is a quick screen, and a body fat estimate is only as good as the method behind it."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "The Core Difference"
+      "text": "What each measure can and cannot tell you"
     },
     {
       "type": "paragraph",
-      "text": "BMI tells you your weight relative to your height. Body fat percentage tells you what proportion of that weight is fat versus everything else (muscle, bone, organs, water). Two people with a BMI of 27 can have body fat percentages of 12% (athlete) and 30% (overfat). They would get the same BMI result but have completely different health profiles. The athlete likely has excellent metabolic health while the overfat individual may be at risk for diabetes and heart disease."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Healthy Body Fat Ranges"
+      "text": "The CDC describes BMI as a quick screening measure and states that it does not distinguish between fat, muscle and bone mass, and does not show where fat is stored. Body fat percentage addresses the first of those gaps directly. It does not address the second, because a single percentage says nothing about whether the fat is under the skin or around the organs. For that you need something like waist size, covered in our waist-to-height article."
     },
     {
       "type": "table",
       "headers": [
-        "Category",
-        "Women",
-        "Men"
+        "Question",
+        "BMI",
+        "Body fat percentage"
       ],
       "rows": [
         [
-          "Essential fat",
-          "10-13%",
-          "2-5%"
+          "Needs",
+          "Weight and height",
+          "Tape measures, calipers, a scale with sensors, or a scan"
         ],
         [
-          "Athletes",
-          "14-20%",
-          "6-13%"
+          "Separates fat from muscle",
+          "No",
+          "Yes, within the error of the method"
         ],
         [
-          "Fitness",
-          "21-24%",
-          "14-17%"
+          "Shows where fat sits",
+          "No",
+          "No"
         ],
         [
-          "Acceptable",
-          "25-31%",
-          "18-24%"
+          "Easy to repeat at home",
+          "Very",
+          "Depends on the method"
         ],
         [
-          "Obese",
-          "32%+",
-          "25%+"
+          "Established cutoffs",
+          "CDC adult categories",
+          "Fitness bands that are not medical diagnoses"
         ]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Methods of Measuring Body Fat"
+      "text": "Worked example: same BMI, different body composition"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: both men are 70 in (5 ft 10 in) tall, weigh 170 lb and have a 16 in neck, so both have a BMI of 24.4, which is in the CDC healthy weight range. They differ only in abdomen measurement. Body fat comes from the U.S. Navy equation for men, 86.010 x log10(abdomen - neck) - 70.041 x log10(height) + 36.76, with measurements in inches. These measurements are hypothetical, and results are rounded to one decimal."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "",
+        "Man A",
+        "Man B"
+      ],
+      "rows": [
+        [
+          "BMI",
+          "24.4",
+          "24.4"
+        ],
+        [
+          "Abdomen",
+          "33 in",
+          "38 in"
+        ],
+        [
+          "Navy body fat",
+          "13.4%",
+          "23.0%"
+        ],
+        [
+          "Fat mass",
+          "22.7 lb",
+          "39.1 lb"
+        ],
+        [
+          "Lean mass",
+          "147.3 lb",
+          "130.9 lb"
+        ],
+        [
+          "Waist-to-height ratio",
+          "0.471",
+          "0.543"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The scale and BMI cannot tell these two apart, yet Man B carries about 16 lb more fat and about 16 lb less lean mass. On our calculator's bands, Man A sits in the athletic range (6% up to 14%) and Man B in the average range (18% up to 25%) for men."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Normal BMI, high body fat"
+    },
+    {
+      "type": "paragraph",
+      "text": "The same thing can happen with a normal BMI. Take a woman who is 65 in tall and weighs 135 lb, so her BMI is 22.5. Her neck is 13 in. Using the Navy equation for women, 163.205 x log10(waist + hip - neck) - 97.684 x log10(height) - 78.387:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Waist / hip",
+        "Navy body fat",
+        "Fat mass",
+        "Lean mass",
+        "Band (women)",
+        "Waist-to-height"
+      ],
+      "rows": [
+        [
+          "27 in / 37 in",
+          "23.2%",
+          "31.3 lb",
+          "103.7 lb",
+          "Fitness (21% up to 25%)",
+          "0.415"
+        ],
+        [
+          "33 in / 40 in",
+          "34.7%",
+          "46.9 lb",
+          "88.1 lb",
+          "Top band (32% and above)",
+          "0.508"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Both have the same BMI of 22.5. The second woman's measurements put her in the top band, and her waist is just over half her height. People describe this pattern as normal weight obesity: a healthy BMI with a high fat share. The sources used for this article do not give a reliable prevalence figure, so none is quoted here."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The body fat bands"
+    },
+    {
+      "type": "paragraph",
+      "text": "Our body fat calculator sorts results into five bands. The lower edges are 6%, 14%, 18% and 25% for men and 14%, 21%, 25% and 32% for women, and the same table is widely reproduced and commonly attributed to the American Council on Exercise. They are fitness categories, not medical thresholds. A label such as obese in this table describes a body composition band and does not replace a clinician's assessment. Do not aim below the essential-fat band without medical advice."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How much measurement error to expect"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Navy method uses surface measurements, so small tape errors matter. For Man A and B's equation, one inch on the abdomen moves the result by about two points: abdomen 33, 34 and 35 in give 13.4%, 15.5% and 17.5%. Other methods, such as skinfold calipers, impedance scales and DEXA scans, give different numbers for the same person. Pick one method and compare it only with itself over time."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
     },
     {
       "type": "list",
-      "ordered": false,
       "items": [
-        "DEXA scan: Most accurate, uses X-ray technology. Expensive but gold standard.",
-        "Hydrostatic weighing: Measures displacement. Very accurate but inconvenient.",
-        "Skinfold calipers: Good accuracy with experienced practitioner. Inexpensive.",
-        "Bioelectrical impedance (BIA): Found on many smart scales. Convenient but accuracy varies with hydration.",
-        "Navy circumference method: Uses tape measurements. Our body fat calculator uses this — decent accuracy, free, instant."
+        "Comparing numbers across methods. A scale reading and a tape estimate are not interchangeable.",
+        "Measuring in different places or conditions. Use the same landmarks, the same tape, and a similar time of day.",
+        "Treating one reading as fact. Average two or three measurements and watch the trend over weeks.",
+        "Ignoring muscle in the neck or trunk. The tape method can misjudge people with a large neck or trunk muscle, wide hips, or a lot of bloating.",
+        "Not checking a calculator against a worked example. Enter a known case, such as Man A above, and compare the output with the published equation before relying on it.",
+        "Using a military-derived equation for everyone. It was developed on a military population, so it may fit less well for older adults, adolescents and very muscular athletes."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What body fat percentage is considered obese?"
+      "text": "Which should you use?"
     },
     {
       "type": "paragraph",
-      "text": "Body fat percentage above 25% for men and 32% for women is generally considered obese. Compare this to BMI obesity threshold which is a BMI of 30. Body fat percentage is more directly linked to health outcomes than BMI."
+      "text": "Use BMI as the first, cheap screen and body fat percentage when BMI looks misleading: for people who lift or play sport, for older adults who may have lost muscle, or for anyone with a normal BMI and a larger waist than expected. Add waist-to-height ratio as a check on where the fat is. Using two or three measures together is more informative than trusting any single one."
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "Can I have a normal BMI but high body fat?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Yes — this is called normal weight obesity. This occurs when someone has low muscle mass and high body fat despite a normal BMI. It is estimated that 15-30% of people with a normal BMI have normal weight obesity, and they face increased metabolic health risks despite appearing to be at a healthy weight."
+      "type": "callout",
+      "variant": "info",
+      "text": "BMI is a screening tool, not a diagnosis, and a body fat estimate from a tape measure is an approximation. If a result worries you, or you are making decisions about weight, medication or a medical condition, talk to a clinician about a measured assessment."
     },
     {
       "type": "cta",

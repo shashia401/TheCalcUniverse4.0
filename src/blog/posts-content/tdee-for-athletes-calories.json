@@ -3,20 +3,104 @@
     {
       "type": "heading",
       "level": 2,
-      "text": "Athlete TDEE Is Significantly Higher"
+      "text": "The Short Answer"
     },
     {
       "type": "paragraph",
-      "text": "Standard TDEE calculators only go up to \"very active\" (1.9x BMR), which may not capture elite athlete needs. Professional cyclists during the Tour de France burn 6,000-8,000 calories per day. Marathon runners burn 3,500-5,000 on training days. Even recreational athletes who train 1-2 hours daily often have TDEEs of 2,800-3,500."
+      "text": "Athletes need more calories than the same-sized non-athlete, but the exact number is hard to pin down because the biggest variable is how much you really train. Our TDEE calculator stops at an activity factor of 1.9, labelled athlete or physical job (2x per day). For a heavy training load, the realistic task is to choose between the top few factors, cross-check with logged training, and watch your performance and weight trend. The calculator number is where you begin, not where you stop."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Signs You Are Under-fueling"
+      "text": "Worked Example: Choosing the Multiplier"
     },
     {
       "type": "paragraph",
-      "text": "Chronic fatigue, poor recovery, frequent illness, decreased performance, irritability, loss of menstrual cycle (women), and constant cravings all signal you may not be eating enough relative to your TDEE. RED-S (Relative Energy Deficiency in Sport) is a serious condition caused by chronic under-fueling relative to exercise energy expenditure."
+      "text": "Assumptions: a 28-year-old man, 180 cm, 75 kg, with a self-estimated 12% body fat, so Katch-McArdle applies (his lean mass is 66 kg). BMR by Katch-McArdle = 370 + 21.6 x 66 = 1,796 kcal. For comparison, Mifflin-St Jeor gives 10 x 75 + 6.25 x 180 - 5 x 28 + 5 = 1,740 kcal. Multiplying by the factors an athlete might consider:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Activity level",
+        "Factor",
+        "TDEE using Mifflin-St Jeor",
+        "TDEE using Katch-McArdle"
+      ],
+      "rows": [
+        [
+          "Moderate exercise (3-5 days/week)",
+          "1.55",
+          "2,697",
+          "2,783"
+        ],
+        [
+          "Heavy exercise (6-7 days/week)",
+          "1.725",
+          "3,002",
+          "3,097"
+        ],
+        [
+          "Athlete or physical job (2x per day)",
+          "1.9",
+          "3,306",
+          "3,412"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Two points. Moving one step up from 1.725 to 1.9 adds roughly 300 kcal per day (about 304 on Mifflin-St Jeor and 314 on Katch-McArdle), which is the size of error the calculator warns about when people choose the wrong level. And the formula choice shifts TDEE by about 95 kcal at 1.725. Body fat estimates from scales or calipers are themselves uncertain, which is a reason to treat the Katch-McArdle result as one reading among two."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Cross-Checking With Logged Training"
+    },
+    {
+      "type": "paragraph",
+      "text": "A second approach is to take BMR at the sedentary factor and add the calories from your logged sessions. As an assumption only, suppose a typical training day includes 1,000 kcal of exercise. Mifflin-St Jeor gives 1,740 x 1.2 + 1,000 = 3,088 kcal, and Katch-McArdle gives 1,796 x 1.2 + 1,000 = 3,155 kcal. Both land between the 1.725 and 1.9 rows above. Wearables and gym machines estimate exercise energy with real error, and the sedentary factor already includes some movement, so treat this as a sanity check on the multiplier, not a replacement for it. Rest days will need a lower figure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Using the Number in Practice"
+    },
+    {
+      "type": "paragraph",
+      "text": "Pick the factor that matches a typical training week, not your best week, and eat close to that level for two to three weeks while you log intake and weigh yourself. If your weight drifts down while training performance or mood suffers, raise intake in steps of 100 to 200 kcal, as the TDEE calculator suggests for any adjustment. Rest days differ a lot: with no training, the same athlete at the sedentary factor would sit near 2,088 kcal (Mifflin-St Jeor), about 1,000 kcal below the training-day cross-check above. Many athletes therefore plan intake around the day rather than using one flat number."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Energy Availability: Why Under-Fuelling Matters"
+    },
+    {
+      "type": "paragraph",
+      "text": "Sports medicine uses the term low energy availability for eating too little relative to what training costs. According to a published article discussing the 2023 International Olympic Committee consensus, Relative Energy Deficiency in Sport (REDs) is a syndrome of impaired physiological or psychological functioning in female and male athletes, caused by exposure to problematic low energy availability. Energy availability is calculated as (energy intake - exercise energy expenditure) divided by fat-free mass. The same article reports about 45 kcal per kg of fat-free mass per day as healthy and below 30 as problematic."
+    },
+    {
+      "type": "paragraph",
+      "text": "Using the example athlete (66 kg fat-free mass) and the assumed 1,000 kcal of exercise, an intake of 3,000 kcal gives (3,000 - 1,000) / 66 = 30.3. At 3,400 kcal it is 36.4, and at 3,800 kcal it is 42.4. Because both intake and exercise energy are estimates, these figures are approximate, so a number near a threshold is a reason to ask for help, not a diagnosis."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Choosing the 1.9 factor every day. It assumes heavy training twice a day or a physically demanding job, not just a hard workout.",
+        "Using one number for training and rest days. Needs vary with the day.",
+        "Treating wearable calorie estimates as exact.",
+        "Cutting calories for body composition during the heaviest training blocks without professional guidance.",
+        "Ignoring symptoms that worry you, such as persistent fatigue, and not mentioning them to a clinician."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This is general information, not medical advice. If you train hard and suspect you are under-fuelling, speak to a sports physician or sports dietitian. They can assess your energy availability and your health, which no online calculator can do."
     },
     {
       "type": "cta",

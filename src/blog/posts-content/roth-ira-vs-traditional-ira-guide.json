@@ -2,46 +2,94 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "The choice between a Roth IRA and a Traditional IRA is one of the most consequential financial decisions you'll make. Get it right, and you save tens of thousands in taxes. Get it wrong, and the IRS takes a big cut of your retirement savings."
-    },
-    {
-      "type": "paragraph",
-      "text": "Both accounts let your investments grow tax-deferred. The difference is when you pay taxes — and that timing gap can mean hundreds of thousands of dollars over a lifetime of saving."
+      "text": "Neither account saves more tax by default. With the same tax rate now and in retirement, a Roth IRA and a Traditional IRA end up with exactly the same spendable money. The Roth wins when your tax rate in retirement is higher than your rate today, and the Traditional wins when it is lower. The rest of this guide shows that arithmetic with numbers you can reproduce, so you can see why."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What's the real difference between Roth and Traditional IRA?"
+      "text": "What is actually different between the two accounts"
     },
     {
       "type": "paragraph",
-      "text": "It all comes down to when you pay taxes. With a Traditional IRA, contributions are tax-deductible today. You pay income tax when you withdraw in retirement."
+      "text": "Both accounts let investments grow without yearly tax on the growth. The difference is when income tax is collected. The IRS states that you cannot deduct contributions to a Roth IRA, and that qualified distributions are tax-free if you meet the requirements. A Traditional IRA works the other way around: contributions may be deductible when you make them, and withdrawals are generally taxed as income later. Whether your Traditional contribution is deductible depends on your income and whether you are covered by a workplace plan, so check the IRS rules for your situation."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The after-tax equivalence math"
     },
     {
       "type": "paragraph",
-      "text": "With a Roth IRA, you contribute with after-tax dollars. All growth and withdrawals are completely tax-free."
+      "text": "Assume you have $7,500 of pre-tax income to set aside. In the Traditional IRA, all $7,500 goes in and grows. In the Roth IRA you pay income tax first, so only $7,500 x (1 - tax rate now) goes in. Both options cost you the same amount of take-home pay. Assume 7% a year for 30 years, which is a growth factor of 1.07^30 = 7.6123. All rates below are illustrative assumptions, not forecasts."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Tax rate now",
+        "Tax rate in retirement",
+        "Traditional, after tax",
+        "Roth, after tax",
+        "Better choice"
+      ],
+      "rows": [
+        ["22%", "22%", "$44,532", "$44,532", "Tie"],
+        ["22%", "12%", "$50,241", "$44,532", "Traditional by $5,709"],
+        ["22%", "32%", "$38,823", "$44,532", "Roth by $5,709"],
+        ["12%", "22%", "$44,532", "$50,241", "Roth by $5,709"],
+        ["24%", "15%", "$48,528", "$43,390", "Traditional by $5,138"],
+        ["12%", "12%", "$50,241", "$50,241", "Tie"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Think of it this way: do you want to pay taxes on the seed or on the harvest? A **$1 million** Roth balance is truly yours. A **$1 million** Traditional IRA might be worth closer to **$780,000** after taxes, depending on your withdrawal rate."
+      "text": "The tie is not a coincidence. The Traditional result is 7,500 x 7.6123 x (1 - tax rate in retirement). The Roth result is 7,500 x (1 - tax rate now) x 7.6123. The growth factor is identical, so the only thing left to compare is the two tax rates. This also means the investment return does not decide the choice. Only the tax-rate gap does."
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "Roth IRA contributions (not earnings) can be withdrawn at any time and any age, tax-free and penalty-free. This makes a Roth IRA a flexible emergency backup as well as a retirement account."
+      "text": "A Traditional balance is not all yours. At an assumed 22% retirement tax rate, a $1,000,000 Traditional IRA is worth about $780,000 after tax. The same $1,000,000 in a Roth is worth $1,000,000, but it was funded with money that was already taxed."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What are the 2026 Roth IRA contribution limits?"
+      "text": "The contribution limit changes the comparison"
     },
     {
       "type": "paragraph",
-      "text": "For 2026, the base contribution limit's **$7,500** per year if you're under 50. If you're 50 or older, you can add a catch-up contribution of **$1,100**, bringing your total to **$8,600**. These limits apply to combined contributions across all your IRA accounts — Roth and Traditional combined."
+      "text": "The IRS lists the 2026 IRA contribution limit as $7,500, with a $1,100 catch-up for people 50 and older. The limit applies to the dollars you deposit, across all your Roth and Traditional IRAs combined. Because a Roth deposit is made with after-tax dollars, a $7,500 Roth deposit takes more pre-tax income to fund: $7,500 / (1 - 0.22) = $9,615 at a 22% rate. So if you can afford to fill the limit, the Roth shelters more money, even when the tax rates are equal."
     },
     {
       "type": "paragraph",
-      "text": "At **$7,500/year** with a **7%** return over 35 years, your contributions total roughly **$260,000** while your tax-free balance reaches well over **$1 million**. That's the Roth IRA's irreplaceable value proposition."
+      "text": "Using the same 30-year, 7% assumptions, a full $7,500 Roth deposit grows to $57,092 and comes out tax-free. A full $7,500 Traditional deposit also grows to $57,092, but at a 22% retirement rate it leaves $44,532. The Roth is ahead by $12,560, though it cost about $2,115 more in pre-tax income to fund. Limits change most years, so confirm the current figure on the IRS site before you contribute."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A long-run example with the calculator's convention"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Roth IRA calculator adds one contribution at the end of each year. Contributing $7,500 a year for 35 years at 7% gives a balance of $1,036,777. You put in $262,500, so about 74.7% of the final balance is growth. That growth is what a Roth keeps tax-free and a Traditional IRA taxes later. These figures assume a steady 7% every year. Real returns vary, and past performance does not guarantee future results."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and when this does not apply"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Comparing your average tax rate to your marginal rate. The relevant number is the rate on the last dollar you contribute now versus the rate on the dollars you will withdraw later.",
+        "Assuming your retirement rate will be lower. Other retirement income, your savings in pre-tax accounts and future tax law can all push it up. Nobody knows the future rate, which is why splitting contributions between both account types is a reasonable hedge.",
+        "Ignoring income limits. Roth contributions are limited by income, and Traditional deductions are limited if you are covered by a workplace plan. The limits are adjusted periodically, so look them up on the IRS site for the current year.",
+        "Treating the Roth as a pure retirement account. The rules for taking money out early differ for contributions and earnings, so read IRS Publication 590-B before relying on it as an emergency source.",
+        "Forgetting state tax. If your state taxes retirement income differently, your real rate now and later can differ from the federal figure."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "This guide explains arithmetic, not tax advice. Use the calculator to test your own ages, return assumption and tax rates, and consider a tax professional for anything involving conversions or high incomes."
     },
     {
       "type": "cta",

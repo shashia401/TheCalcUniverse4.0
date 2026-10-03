@@ -1,87 +1,183 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Is the 7-Year Rule for Dog Years Wrong?"
-    },
-    {
       "type": "paragraph",
-      "text": "Yes, it's surprisingly inaccurate. A 1-year-old dog isn't 7 in human years — according to modern epigenetics, that dog is closer to **31 human years old**. The old multiply-by-7 rule fails because dogs age much faster in their early years and then the rate slows down significantly."
-    },
-    {
-      "type": "paragraph",
-      "text": "it's a rough approximation that science has now replaced with a much better model."
+      "text": "The multiply-by-seven rule is wrong at both ends of a dog's life, and the better question is usually not \"how old is my dog in human years\" but \"what life stage is my dog in\". A 2020 study of Labrador retrievers fitted the formula human age = 16 x ln(dog age) + 31, which gives 31 for a 1-year-old dog and 66.2 for a 9-year-old dog, where seven times gives 7 and 63. This guide focuses on what that number can and cannot tell you, with size and breed as the deciding factors. For the three-method comparison table, see our dog age calculator post."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Is the Epigenetic Method for Calculating Dog Age?"
+      "text": "Where the formula comes from, and its limit"
     },
     {
       "type": "paragraph",
-      "text": "In 2020, researchers at UC San Diego published a landmark study in Cell Systems analyzing DNA methylation patterns — an **epigenetic clock** — in Labrador retrievers and comparing them to human methylation profiles. They discovered the relationship between dog and human age follows a logarithmic curve, not a straight line. The formula is: **Human Age = 16 x ln(Dog Age) + 31**."
+      "text": "The paper (Wang and colleagues, Cell Systems, 2020, from the University of California San Diego) measured DNA methylation, chemical marks on DNA that change with age, in 104 Labrador retrievers from about 4 weeks to 16 years old, and compared the pattern with human methylation data. The fitted curve is logarithmic, so dogs age fast early and more slowly later. As a sense check, a 12-year-old dog comes out at 70.8 human years, which matches the authors' statement that the average 12-year Labrador lifespan lines up with a human life expectancy of about 70. The researchers acknowledge the finding is specific to one breed and that other breeds with different lifespans could change the picture. Treat the output as an estimate of molecular age for a Labrador-like dog, not a measurement of yours."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Life stage is set by lifespan, not by a human-age number"
+    },
+    {
+      "type": "paragraph",
+      "text": "The American Animal Hospital Association's 2019 canine life stage guidelines divide a dog's life into puppy, young adult, mature adult, senior and end of life. A puppy is a dog from birth until rapid growth stops, at roughly 6 to 9 months depending on breed and size. A young adult has finished growing but not yet physical and social maturity, which most dogs reach by 3 to 4 years. Senior is defined as the last 25% of the dog's estimated lifespan, and that estimate is breed and size dependent. The guidelines deliberately do not propose fixed ages for mature adult and senior, because variation increases in later years. So the age at which a dog becomes a senior depends on how long that particular dog is expected to live."
+    },
+    {
+      "type": "paragraph",
+      "text": "The table applies that 25% rule to illustrative lifespans. The lifespans are assumptions chosen to show the arithmetic, not facts about any breed; your veterinarian can give a better estimate for yours."
     },
     {
       "type": "table",
       "headers": [
-        "Dog Age (years)",
-        "Traditional x7 Method",
-        "Epigenetic (NIH 2020)"
+        "Assumed lifespan (years)",
+        "Senior stage begins (75% of lifespan)",
+        "Epigenetic formula at that age (human years)",
+        "Seven-times rule at that age"
       ],
       "rows": [
         [
-          "1",
-          "7 human years",
-          "31.0 human years"
-        ],
-        [
-          "3",
-          "21 human years",
-          "48.6 human years"
-        ],
-        [
-          "5",
-          "35 human years",
-          "56.8 human years"
-        ],
-        [
           "8",
-          "56 human years",
-          "64.2 human years"
+          "6 years",
+          "59.7",
+          "42"
+        ],
+        [
+          "10",
+          "7.5 years",
+          "63.2",
+          "52.5"
         ],
         [
           "12",
-          "84 human years",
-          "70.8 human years"
+          "9 years",
+          "66.2",
+          "63"
+        ],
+        [
+          "14",
+          "10.5 years",
+          "68.6",
+          "73.5"
+        ],
+        [
+          "16",
+          "12 years",
+          "70.8",
+          "84"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The seven-times column shows the problem: for the shortest-lived assumed dog, a senior stage starting at 6 years corresponds to 42 by the old rule and 59.7 by the formula. Across these assumed lifespans the senior stage starts anywhere from 6 to 12 years, while the formula's value at that moment only moves from 59.7 to 70.8. The human-equivalent number cannot tell you when senior care starts. Lifespan can."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: two 9-year-old dogs"
+    },
+    {
+      "type": "paragraph",
+      "text": "Dog A is a 9-year-old with an assumed lifespan of 15 years. Dog B is also 9, with an assumed lifespan of 10 years. The formula gives both 66.2 human years, because it has no breed or size input. But Dog A has used 9 / 15 = 60% of its expected life and reaches senior at 11.3 years, so it is still a mature adult. Dog B has used 90% of its life, reached senior at 7.5 years and has been senior for 1.5 years. Same number, different stage and different care conversation with a vet."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the calculator labels life stages"
+    },
+    {
+      "type": "paragraph",
+      "text": "Our calculator asks for a size band (small under 9 kg, medium 9 to 23 kg, large over 23 kg) and uses it to label the stage. Because AAHA does not publish fixed ages, these labels are a simplification you should check with your veterinarian. This is what they look like at selected whole-year ages:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Dog age",
+        "Small",
+        "Medium",
+        "Large",
+        "Formula (human years)"
+      ],
+      "rows": [
+        [
+          "2 years",
+          "Adult",
+          "Adult",
+          "Adult",
+          "42.1"
+        ],
+        [
+          "5 years",
+          "Adult",
+          "Adult",
+          "Mature",
+          "56.8"
+        ],
+        [
+          "7 years",
+          "Mature",
+          "Senior",
+          "Senior",
+          "62.1"
+        ],
+        [
+          "9 years",
+          "Mature",
+          "Senior",
+          "Senior",
+          "66.2"
+        ],
+        [
+          "11 years",
+          "Senior",
+          "Senior",
+          "Senior",
+          "69.4"
+        ],
+        [
+          "13 years",
+          "Senior",
+          "Senior",
+          "Senior",
+          "72.0"
+        ],
+        [
+          "15 years",
+          "Geriatric",
+          "Geriatric",
+          "Geriatric",
+          "74.3"
         ]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Does Breed Size Affect How Dogs Age?"
+      "text": "Cats are different"
     },
     {
       "type": "paragraph",
-      "text": "**Larger breeds age faster** and have shorter lifespans. A Great Dane reaches senior status around **age 6 or 7**, while a Chihuahua may not be considered senior until **age 11 or 12**. The best **dog age calculator** accounts for these differences through size-based life stage classification."
-    },
-    {
-      "type": "paragraph",
-      "text": "Small breeds live longer on average, which means their epigenetic and traditional age equivalents need to be interpreted differently."
+      "text": "The calculator treats cats with a stepwise rule instead of the dog formula, because the epigenetic fit was built on dog data: the second year adds 9 human years to the first year's 15, and each year after that adds 4. A 7-year-old cat is 44 on that rule against 49 from multiplying by seven, and a 10-year-old cat is 56 against 70."
     },
     {
       "type": "heading",
-      "level": 3,
-      "text": "How Do Cats Compare?"
+      "level": 2,
+      "text": "Common mistakes and limits"
     },
     {
-      "type": "paragraph",
-      "text": "Cats follow a slightly different pattern. The standard veterinary formula is: first year = **15 human years**, second year = **9 additional years** (total 24 at age 2), and each year after that = **4 human years**. Large-scale epigenetic studies for cats aren't yet available, so this formula relies on observed developmental milestones rather than molecular clocks."
+      "type": "list",
+      "items": [
+        "Using the logarithmic formula for puppies. At 0.25 years it returns 8.8, and the calculator limits it to dogs of 1 year and older.",
+        "Reading a human-equivalent age as a health report. Weight, teeth, joints and breed matter more than the number.",
+        "Picking the size band by guess. If a mixed-breed dog is near a boundary, ask your veterinarian which fits.",
+        "Applying a Labrador-derived curve to every breed without caution.",
+        "Waiting for a \"senior\" label to start asking about screening. Life stage is a prompt for a conversation, not a trigger."
+      ]
     },
     {
-      "type": "paragraph",
-      "text": "A dedicated **cat age calculator** uses this stepwise approach as the best available method."
+      "type": "callout",
+      "variant": "info",
+      "text": "This guide is educational and is not veterinary advice. Questions about diet, exercise, screening or changes in behavior belong with your veterinarian, who can assess your dog as an individual."
     },
     {
       "type": "cta",

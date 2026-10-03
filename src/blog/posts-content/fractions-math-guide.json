@@ -2,82 +2,107 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Fractions are everywhere — recipes use half-cups, carpenters work in sixteenths of an inch, and finance deals in stock splits. If you've ever struggled with adding or dividing fractions, you're not alone. The good news is that fraction arithmetic follows a handful of simple rules, and once you learn them, they click forever."
+      "text": "To add or subtract fractions, rewrite them over a common denominator and combine the numerators. To multiply, multiply the tops and multiply the bottoms. To divide, multiply by the reciprocal of the second fraction. To simplify, divide the top and bottom by their greatest common divisor. Everything else in fraction arithmetic is a variation on those four rules. Every result in this guide was computed with exact integer arithmetic, so none of them is a rounded decimal."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What exactly is a fraction telling you?"
+      "text": "Adding and subtracting: common denominators"
     },
     {
       "type": "paragraph",
-      "text": "A fraction has two parts: the **numerator** (top number) tells you how many pieces you've, and the **denominator** (bottom number) tells you how many equal pieces make up one whole. If you've three-quarters of a pizza, the numerator is **3** and the denominator is **4** — three pieces out of four total. That simple idea of \"parts of a whole\" is the foundation for everything that follows."
+      "text": "You can only combine pieces of the same size. Find the least common multiple (LCM) of the denominators, convert each fraction to that denominator, then add or subtract the numerators and simplify."
+    },
+    {
+      "type": "list",
+      "items": [
+        "3/4 + 2/3: the LCM of 4 and 3 is 12. 3/4 = 9/12 and 2/3 = 8/12, so the sum is 17/12, which is 1 5/12 as a mixed number.",
+        "1/6 + 1/10: the LCM of 6 and 10 is 30. 1/6 = 5/30 and 1/10 = 3/30, giving 8/30. The GCD of 8 and 30 is 2, so this simplifies to 4/15.",
+        "5/8 - 3/16: the LCM of 8 and 16 is 16. 5/8 = 10/16, so the difference is 7/16.",
+        "1/3 - 3/4: the LCM is 12. 4/12 - 9/12 = -5/12. A negative result simply means the second fraction is larger."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "You can use any common denominator, not only the least one. The product of the two denominators always works (for example 4 x 3 = 12), but it can leave larger numbers to simplify. In 1/6 + 1/10 the product is 60, which gives 16/60 and needs a GCD of 4 to reach the same 4/15."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How do you add and subtract fractions?"
+      "text": "Multiplying and dividing"
     },
     {
       "type": "paragraph",
-      "text": "You can only add or subtract fractions directly when they share the same denominator. When they don't, you need to find the **least common multiple** (LCM) of the two denominators — the smallest number both divide into evenly. For one-third plus one-quarter, the LCM of 3 and 4 is **12**."
+      "text": "Multiplication needs no common denominator. 2/3 x 9/10 = 18/30, which simplifies to 3/5. You can save work by cancelling first: the 9 on top and the 3 below share a factor of 3, leaving 2/1 x 3/10 = 6/10 = 3/5. A whole number is a fraction over 1, so 3 x 5/8 = 15/8, or 1 7/8."
     },
     {
       "type": "paragraph",
-      "text": "You convert each fraction to an equivalent over 12: 1/3 becomes 4/12 and 1/4 becomes 3/12, giving you **7/12**."
-    },
-    {
-      "type": "callout",
-      "variant": "info",
-      "text": "Think of denominators as different-sized slices. You can't directly combine half-pizza slices with quarter-pizza slices. you've to cut them all into the same size first — that's what finding a common denominator does."
+      "text": "To divide, keep the first fraction, change the sign to multiplication, and flip the second. Division asks how many times the second fits into the first. For 3/4 divided by 1/8 you flip to 8/1 and multiply: 3/4 x 8 = 24/4 = 6. That makes sense, because there are six eighths in three-quarters. Another: 5/6 divided by 2/3 is 5/6 x 3/2 = 15/12, which simplifies to 5/4 = 1 1/4."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How do you multiply and divide fractions?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Multiplication is the simplest operation: multiply the numerators together and the denominators together. **1/2 × 3/4 = 3/8**. No common denominator needed."
-    },
-    {
-      "type": "paragraph",
-      "text": "Division adds one extra step: flip the second fraction upside down (its reciprocal) and then multiply. **1/2 ÷ 3/4** becomes **1/2 × 4/3 = 4/6**, which simplifies to **2/3**. that's why it's sometimes called \"keep, change, flip\" — keep the first fraction, change division to multiplication, flip the second."
+      "text": "Summary table of verified examples"
     },
     {
       "type": "table",
-      "headers": [
-        "Operation",
-        "Rule",
-        "Example",
-        "Result"
-      ],
+      "headers": ["Operation", "Method", "Example", "Result", "Decimal"],
       "rows": [
-        [
-          "Addition",
-          "Find LCM, then add numerators",
-          "1/3 + 1/4",
-          "7/12"
-        ],
-        [
-          "Subtraction",
-          "Find LCM, then subtract numerators",
-          "3/4 - 1/2",
-          "1/4"
-        ],
-        [
-          "Multiplication",
-          "Multiply numerators and denominators",
-          "2/3 × 3/5",
-          "2/5"
-        ],
-        [
-          "Division",
-          "Multiply by the reciprocal",
-          "2/3 ÷ 3/4",
-          "8/9"
-        ]
+        ["Addition", "Common denominator, add tops", "3/4 + 2/3", "17/12 (1 5/12)", "1.41667"],
+        ["Subtraction", "Common denominator, subtract tops", "5/8 - 3/16", "7/16", "0.4375"],
+        ["Subtraction (negative)", "Common denominator, subtract tops", "1/3 - 3/4", "-5/12", "-0.41667"],
+        ["Multiplication", "Tops times tops, bottoms times bottoms", "2/3 x 9/10", "3/5", "0.6"],
+        ["Multiplication by whole number", "Write the whole number over 1", "3 x 5/8", "15/8 (1 7/8)", "1.875"],
+        ["Division", "Multiply by the reciprocal", "5/6 / 2/3", "5/4 (1 1/4)", "1.25"],
+        ["Division", "Multiply by the reciprocal", "1/2 / 3/4", "2/3", "0.66667"],
+        ["Mixed numbers", "Convert to improper, then add", "2 1/3 + 1 3/4", "49/12 (4 1/12)", "4.08333"]
       ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Simplifying with the greatest common divisor"
+    },
+    {
+      "type": "paragraph",
+      "text": "A fraction is in lowest terms when its top and bottom share no factor except 1. To simplify, find the GCD with Euclid's method and divide both numbers by it. For 84/126: 126 = 1 x 84 + 42, then 84 = 2 x 42 + 0, so the GCD is 42. Dividing gives 2/3. The method works for any pair of whole numbers without listing factors, and it is what the Fraction Calculator uses."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Mixed numbers, comparing and decimals"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Mixed to improper: 2 1/3 is (2 x 3 + 1)/3 = 7/3, and 1 3/4 is 7/4. Their sum is 28/12 + 21/12 = 49/12 = 4 1/12.",
+        "Comparing: cross-multiply. To compare 5/7 and 7/10, calculate 5 x 10 = 50 and 7 x 7 = 49. Since 50 is larger, 5/7 is the larger fraction (0.714 against 0.700).",
+        "To decimal: divide the top by the bottom. 7/8 = 0.875 and 3/16 = 0.1875 end, while 1/3 = 0.333... and 5/12 = 0.41666... repeat. A fraction in lowest terms ends only if its denominator has no prime factors except 2 and 5."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Real uses, and where mistakes happen"
+    },
+    {
+      "type": "paragraph",
+      "text": "A recipe that needs 3/4 cup of one ingredient and 2/3 cup of another uses 1 5/12 cups in total. Scaling that 3/4 cup by one and a half times means 3/4 x 3/2 = 9/8, or 1 1/8 cups. A carpenter cutting 3/16 inch off a 5/8 inch board leaves 7/16 inch. Check measurements on the actual tools you are using, and if you cut or build something, follow the plans and any safety guidance for the material."
+    },
+    {
+      "type": "list",
+      "items": [
+        "Adding the denominators. 1/2 + 1/3 is not 2/5. The sum must be larger than 1/2, and 2/5 is only 0.4. The correct answer is 5/6.",
+        "Forgetting to flip when dividing. 1/2 divided by 3/4 is 2/3, not 3/8, which is the product.",
+        "Using a common denominator when multiplying. It is unnecessary and creates work.",
+        "Leaving the answer unsimplified or as an improper fraction when the question asks for a mixed number.",
+        "Dividing by zero. A fraction with denominator zero is undefined, and you cannot divide by a fraction whose numerator is zero.",
+        "Losing a negative sign when subtracting a larger fraction from a smaller one."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Always sanity-check with decimals: if your answer disagrees with a rough decimal estimate, recheck the steps."
     },
     {
       "type": "cta",
@@ -87,13 +112,5 @@
       "path": "/math/fraction-calculator/"
     }
   ],
-  "keywords": [
-    "fraction calculator",
-    "add fractions",
-    "subtract fractions",
-    "multiply fractions",
-    "divide fractions",
-    "fraction solver",
-    "fraction arithmetic"
-  ]
+  "keywords": ["fraction calculator","add fractions","subtract fractions","multiply fractions","divide fractions","fraction solver","fraction arithmetic"]
 }

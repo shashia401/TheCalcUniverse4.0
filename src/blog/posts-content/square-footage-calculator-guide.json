@@ -7,7 +7,7 @@
     },
     {
       "type": "paragraph",
-      "text": "You hear 'square footage' every time you look at a house listing or buy flooring. It's just the area of a room measured in square feet. A **10x10 room** is **100 square feet**. Nothing fancy."
+      "text": "You hear 'square footage' every time you look at a house listing or buy flooring. It's just the area of a room measured in square feet. A 10x10 room is 100 square feet. Nothing fancy."
     },
     {
       "type": "paragraph",
@@ -38,7 +38,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Say you've got a **12x16 bedroom** — that's **192 sq ft**. A **10x10 room**? **100 sq ft**. Measure in feet, get square feet. Measure in meters, get square meters."
+      "text": "Say you've got a 12x16 bedroom — that's 192 sq ft. A 10x10 room? 100 sq ft. Measure in feet, get square feet. Measure in meters, get square meters."
     },
     {
       "type": "paragraph",
@@ -60,7 +60,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Got a round dining area with an **8-foot radius**? That's π × 8² = **201 sq ft**. Only have the diameter? Cut it in half to get the radius."
+      "text": "Got a round dining area with an 8-foot radius? That's π × 8² = 201 sq ft. Only have the diameter? Cut it in half to get the radius."
     },
     {
       "type": "heading",
@@ -78,7 +78,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Take a living room that's **18x14** with an attached dining area that's **10x8**: (18 × 14) + (10 × 8) = **332 sq ft**. Our calculator does this automatically, but it's good to know the logic."
+      "text": "Take a living room that's 18x14 with an attached dining area that's 10x8: (18 × 14) + (10 × 8) = 332 sq ft. Our calculator does this automatically, but it's good to know the logic."
     },
     {
       "type": "heading",
@@ -134,7 +134,7 @@
     },
     {
       "type": "paragraph",
-      "text": "So there you go. With a 10% waste factor (standard for LVP flooring), order **481 sq ft**. At **$4.50/sq ft**, that's **$2,163.65** in materials."
+      "text": "So there you go. With a 10% waste factor (standard for LVP flooring), order 481 sq ft. At $4.50/sq ft, that's $2,163.65 in materials."
     },
     {
       "type": "heading",
@@ -203,7 +203,7 @@
     },
     {
       "type": "paragraph",
-      "text": "A **12x12 room** is **144 sq ft**. Add 10% for waste and you're ordering **159 sq ft**."
+      "text": "A 12x12 room is 144 sq ft. Add 10% for waste and you're ordering 159 sq ft."
     },
     {
       "type": "heading",
@@ -212,7 +212,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Multiply sq ft by **0.092903** to get square meters. Going the other way? Multiply square meters by **10.7639**. Or just use the calculator — it does both for you."
+      "text": "Multiply sq ft by 0.092903 to get square meters. Going the other way? Multiply square meters by 10.7639. Or just use the calculator — it does both for you."
     },
     {
       "type": "heading",

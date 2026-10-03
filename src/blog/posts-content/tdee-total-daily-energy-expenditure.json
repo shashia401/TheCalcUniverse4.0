@@ -1,54 +1,215 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Four Components of TDEE"
-    },
-    {
       "type": "paragraph",
-      "text": "TDEE has four components: BMR (basal metabolic rate, 60-75% of TDEE), TEF (thermic effect of food, ~10%), EAT (exercise activity thermogenesis, 5-15%), and NEAT (non-exercise activity thermogenesis, 15-30%). BMR is the calories needed for basic life functions at complete rest. TEF is the energy used to digest and process food. EAT is deliberate exercise. NEAT is everything else — walking, fidgeting, standing, cleaning."
+      "text": "Total daily energy expenditure (TDEE) is the number of calories you burn in a typical day, and the calculator estimates it as basal metabolic rate (BMR) multiplied by an activity factor from 1.2 to 1.9. For a 34-year-old man who is 175 cm tall, weighs 78 kg and trains three to five days a week, that works out to about 2,649 kcal per day. It is an estimate built from four inputs, not a measurement, and the useful question is which of those inputs can move it most."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Activity Level Affects TDEE"
+      "text": "The two-step calculation"
     },
     {
       "type": "paragraph",
-      "text": "The difference between sedentary and very active is enormous: a person with a 1,600-calorie BMR who is sedentary might have a TDEE of 1,920 (1,600 x 1.2). That same person who is very active (exercise 6-7 days/week) would have a TDEE of 2,768 (1,600 x 1.725). That is an 848-calorie difference per day — enough to significantly change weight loss or maintenance targets."
+      "text": "Step one is BMR, the energy your body uses at complete rest. Our calculator uses the Mifflin-St Jeor equation: 10 x weight in kg + 6.25 x height in cm - 5 x age + 5 for men (minus 161 for women). For this man that is 780 + 1,093.75 - 170 + 5 = 1,709 kcal. Step two multiplies BMR by the activity factor you choose. Everything the body does on top of resting, from walking to the car to a hard workout, is folded into that single number."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Activity level (calculator wording)",
+        "Factor",
+        "TDEE (kcal/day)"
+      ],
+      "rows": [
+        [
+          "Sedentary (desk job, little or no exercise)",
+          "1.2",
+          "2,051"
+        ],
+        [
+          "Light exercise (1-2 days a week)",
+          "1.375",
+          "2,350"
+        ],
+        [
+          "Moderate exercise (3-5 days a week)",
+          "1.55",
+          "2,649"
+        ],
+        [
+          "Heavy exercise (6-7 days a week)",
+          "1.725",
+          "2,948"
+        ],
+        [
+          "Athlete or physical job (twice-daily training)",
+          "1.9",
+          "3,247"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions for every figure in this post: male, 34 years old, 175 cm, 78 kg, no body fat percentage entered, so Mifflin-St Jeor applies. Values are rounded to the nearest kcal. The person is illustrative, not an average."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Use TDEE for Weight Goals"
+      "text": "What moves the estimate, and by how much"
     },
     {
       "type": "paragraph",
-      "text": "To maintain weight: eat at TDEE. To lose weight: eat 300-500 calories below TDEE for 0.5-1 lb per week. To gain weight: eat 300-500 calories above TDEE. Recalculate TDEE every 10-15 lbs of weight change because your BMR changes with your body weight."
+      "text": "Because TDEE is a product of two terms, you can change one input at a time and see its effect. The table starts from the moderate-exercise result and changes a single input."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Change one input",
+        "New TDEE (kcal/day)",
+        "Difference from base"
+      ],
+      "rows": [
+        [
+          "Base: 78 kg, 175 cm, age 34, factor 1.55",
+          "2,649",
+          "0"
+        ],
+        [
+          "Weight 5 kg higher",
+          "2,726",
+          "+78"
+        ],
+        [
+          "Weight 5 kg lower",
+          "2,571",
+          "-78"
+        ],
+        [
+          "Height 5 cm taller",
+          "2,697",
+          "+48"
+        ],
+        [
+          "Ten years older (age 44)",
+          "2,571",
+          "-78"
+        ],
+        [
+          "Activity factor one step lower (1.375)",
+          "2,350",
+          "-299"
+        ],
+        [
+          "Activity factor one step higher (1.725)",
+          "2,948",
+          "+299"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The pattern is clear. A 5 kg change in weight shifts the result by about 78 kcal, and ten years of age shifts it by about 78 kcal, because Mifflin-St Jeor subtracts 5 kcal of BMR per year, which is 50 kcal per decade, or about 2.9% of this man's BMR. Choosing the wrong activity step moves the answer by about 299 kcal, several times more than any of the body measurements. The input you are most likely to guess wrong is also the one that matters most."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How accurate are TDEE calculators?"
+      "text": "How the calculator splits TDEE into components"
     },
     {
       "type": "paragraph",
-      "text": "TDEE calculators provide a starting estimate accurate to about 200-300 calories. Individual variations in metabolism, muscle mass, and NEAT can change the actual number. Track your weight for 2-3 weeks eating at the calculated TDEE and adjust up or down based on results."
+      "text": "The results panel breaks TDEE into BMR, thermic effect of food (TEF), exercise (EAT) and everyday movement (NEAT). Be clear about how: TEF is set to 10% of TDEE, EAT to a fixed share that rises with the activity level (2%, 5%, 10%, 15% and 20% for the five factors), and NEAT is simply what remains. For this man at factor 1.55 that gives BMR 1,709, TEF 265, EAT 265 and NEAT 410 kcal. The breakdown is an allocation model that always adds back to the total. It is a helpful picture of where calories go, not a measurement of your own TEF or NEAT, which differ from person to person."
     },
     {
       "type": "heading",
-      "level": 3,
-      "text": "Does TDEE change with age?"
+      "level": 2,
+      "text": "When you know your body fat percentage"
     },
     {
       "type": "paragraph",
-      "text": "Yes. BMR decreases about 1-2% per decade after age 20, primarily due to muscle loss. Strength training helps maintain muscle mass and keeps TDEE higher as you age, which is why resistance training is recommended for long-term weight management."
+      "text": "If you enter a body fat percentage the calculator switches to the Katch-McArdle equation, BMR = 370 + 21.6 x lean mass in kg. It ignores age, height and sex and looks only at lean mass. Here is the same man at different body fat levels, still at factor 1.55:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Body fat",
+        "Lean mass (kg)",
+        "Katch-McArdle BMR",
+        "TDEE at 1.55",
+        "Versus Mifflin-St Jeor"
+      ],
+      "rows": [
+        [
+          "12%",
+          "68.6",
+          "1,853",
+          "2,872",
+          "+223"
+        ],
+        [
+          "15%",
+          "66.3",
+          "1,802",
+          "2,793",
+          "+145"
+        ],
+        [
+          "20%",
+          "62.4",
+          "1,718",
+          "2,663",
+          "+14"
+        ],
+        [
+          "25%",
+          "58.5",
+          "1,634",
+          "2,532",
+          "-116"
+        ],
+        [
+          "30%",
+          "54.6",
+          "1,549",
+          "2,402",
+          "-247"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The two equations agree almost exactly at 20% body fat for this man and drift apart on either side, by roughly 223 kcal at 12% and 247 kcal at 30%. A rough guess at body fat can therefore swing the answer by hundreds of kcal, so only enter a figure you trust. Harris-Benedict, which the calculator shows for comparison, gives a BMR of 1,780 kcal and a TDEE of 2,759 kcal for this man, about 111 kcal above Mifflin-St Jeor."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Using the number"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treat 2,649 kcal as the first guess for maintenance. Eat near it for two to three weeks while weighing yourself the same way each day, then adjust from what the scale average does.",
+        "The calculator's goal rows are simple offsets: 250 or 500 kcal below TDEE for loss and 250 or 500 above for gain, with the rough rule of 500 kcal a day being about 1 lb a week. That rule is an approximation that drifts as your body changes.",
+        "TDEE falls as weight falls. If this man drops 8 kg (78 to 70 kg), Mifflin-St Jeor lowers his BMR by 80 kcal and his TDEE at 1.55 by 124 kcal, so recalculate every few kilograms."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Picking the activity factor by ambition. Choose by what an average week actually looks like, and if you are between two levels, start with the lower one.",
+        "Eating at BMR. BMR excludes all movement, so for this man it sits about 940 kcal below his estimated maintenance.",
+        "Treating the components as personal facts. The 10% TEF and fixed EAT shares are model assumptions.",
+        "Ignoring conditions the equations cannot see. Medical conditions, medications, pregnancy and breastfeeding all change energy needs, and none is an input."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This is an educational estimate, not medical advice. The calculator flags 1,200 kcal (women) and 1,500 kcal (men) as minimums; if your plan would go below them, or you have a medical condition, talk to a doctor or registered dietitian first."
     },
     {
       "type": "cta",

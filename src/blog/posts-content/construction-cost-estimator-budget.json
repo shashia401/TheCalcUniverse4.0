@@ -1,85 +1,205 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Understanding Construction Cost Breakdown"
+      "type": "paragraph",
+      "text": "A construction budget is built from three layers: hard costs (the physical work), soft costs (design, permits, insurance, legal), and a contingency held back for what you cannot foresee. Add financing costs if you are borrowing. Estimate each layer separately, then total them. The worked example below uses invented round numbers for a 2,000 square foot new build so you can see how the layers stack: 400,000 dollars of hard cost becomes 481,800 once soft costs and a 10 percent contingency are added, and 491,800 with construction-period interest."
     },
     {
       "type": "paragraph",
-      "text": "Construction costs fall into two main categories: hard costs (materials and labor directly related to building) and soft costs (permits, design, engineering, legal, financing). Hard costs typically represent 70-80% of total project cost. Soft costs take up the remaining 20-30%. Within hard costs, materials and labor are roughly equal at 50-50 for most projects, though material-heavy trades like concrete and steel may shift this ratio."
+      "text": "Important: every unit cost and percentage in this article is an illustrative assumption chosen to make the arithmetic readable. They are not quotes, local prices or industry averages. Replace them with written bids from contractors and suppliers in your area."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Cost Per Square Foot Benchmarks"
+      "text": "Layer 1: hard costs"
+    },
+    {
+      "type": "paragraph",
+      "text": "Hard costs are the materials and labor that become the building. A simple way to build the estimate is area times an assumed cost per square foot for each trade. With a 2,000 square foot floor area:"
     },
     {
       "type": "table",
       "headers": [
-        "Project Type",
-        "Low-End/sq ft",
-        "Mid-Range/sq ft",
-        "High-End/sq ft"
+        "Trade",
+        "Assumed cost per sq ft",
+        "Line total"
       ],
       "rows": [
         [
-          "Basic residential",
-          "$150",
-          "$200",
-          "$300+"
+          "Site work and foundation",
+          "25",
+          "50,000"
         ],
         [
-          "Custom home",
-          "$250",
-          "$350",
-          "$500+"
+          "Framing",
+          "30",
+          "60,000"
         ],
         [
-          "Commercial shell",
-          "$100",
-          "$150",
-          "$250+"
+          "Roof and exterior",
+          "28",
+          "56,000"
         ],
         [
-          "Renovation",
-          "$75",
-          "$150",
-          "$300+"
+          "Plumbing, electrical, HVAC",
+          "45",
+          "90,000"
+        ],
+        [
+          "Insulation and drywall",
+          "17",
+          "34,000"
+        ],
+        [
+          "Interior finishes and fixtures",
+          "55",
+          "110,000"
+        ],
+        [
+          "Hard cost total",
+          "200",
+          "400,000"
         ]
       ]
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Regional Cost Variations"
-    },
-    {
       "type": "paragraph",
-      "text": "Construction costs vary significantly by region. The national average is the baseline, but costs in major cities can be 30-50% higher. Labor costs in high-cost-of-living areas, permitting fees, and material transportation costs all contribute. The construction cost estimator allows regional adjustment factors."
+      "text": "The 200 dollars per square foot is the sum of the assumed trade rates, not a benchmark. Its value as a method is that you can change one line when a bid arrives and see the whole total move. A change of just 10 dollars per square foot across the project is 20,000 dollars on a 2,000 square foot building."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What contingency should I include?"
+      "text": "Layer 2: soft costs"
     },
     {
       "type": "paragraph",
-      "text": "10-15% for new construction, 15-20% for renovations. Renovations have more unknowns (what is behind the walls), so the higher contingency is warranted. For major infrastructure or commercial projects, 5-10% is standard with a separate management reserve."
+      "text": "Soft costs are the project costs that are not materials or labor on site. Using assumed percentages of the hard cost:"
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "How do I account for material price fluctuations?"
+      "type": "table",
+      "headers": [
+        "Item",
+        "Assumed rate",
+        "Amount"
+      ],
+      "rows": [
+        [
+          "Design and engineering",
+          "6.0% of hard cost",
+          "24,000"
+        ],
+        [
+          "Permits and fees",
+          "2.0% of hard cost",
+          "8,000"
+        ],
+        [
+          "Insurance and legal",
+          "1.5% of hard cost",
+          "6,000"
+        ],
+        [
+          "Soft cost total",
+          "9.5% of hard cost",
+          "38,000"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Include a 3-5% escalation factor for projects lasting more than 6 months. Lumber, steel, and fuel prices can fluctuate significantly. Getting fixed-price bids from suppliers within 30 days of ordering locks in current pricing."
+      "text": "Permit fees and required inspections come from your local building department, so get the real schedule early. Design fees depend on the scope of work and the professional you hire."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Layer 3: contingency"
+    },
+    {
+      "type": "paragraph",
+      "text": "Contingency is money reserved for problems you cannot price yet, such as ground conditions, changed specifications or a delayed delivery. It is a percentage of the costs it covers. The base here is hard plus soft cost, 438,000 dollars. The table shows what a few assumed percentages do to the total:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Contingency",
+        "Amount",
+        "Total budget",
+        "Cost per sq ft"
+      ],
+      "rows": [
+        [
+          "5%",
+          "21,900",
+          "459,900",
+          "229.95"
+        ],
+        [
+          "10%",
+          "43,800",
+          "481,800",
+          "240.90"
+        ],
+        [
+          "15%",
+          "65,700",
+          "503,700",
+          "251.85"
+        ],
+        [
+          "20%",
+          "87,600",
+          "525,600",
+          "262.80"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Two cautions. First, the base matters: 10 percent of hard cost alone is 40,000, while 10 percent of hard plus soft is 43,800, so state which one you mean. Second, a contingency is only useful if you hold it. If the hard cost rises by 8 percent (32,000 dollars) the 10 percent contingency absorbs it and leaves 11,800 dollars. Spending the reserve on upgrades removes your protection."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Adding financing and price changes"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you borrow to build, interest accrues while you build. A simple estimate is the loan amount times the average share drawn, times the rate, times the period. For a 300,000 dollar construction loan at an assumed 8 percent, with half of it drawn on average over 10 months: 300,000 x 0.5 x 0.08 x 10/12 = 10,000 dollars. Adding that gives a total of 491,800 dollars, or 245.90 per square foot. Real draw schedules, fees and rates differ by lender, so this is a planning figure."
+    },
+    {
+      "type": "paragraph",
+      "text": "Prices can also change between estimate and purchase. As a sensitivity check, a 3 percent rise in hard cost adds 12,000 dollars and a 5 percent rise adds 20,000. If your project runs for many months, ask suppliers how long their quotes are valid."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "After the build: the permanent loan"
+    },
+    {
+      "type": "paragraph",
+      "text": "Once the building is complete, a long-term loan payment follows the standard amortization formula, M = P x r x (1 + r)^n / ((1 + r)^n - 1), which is the formula used by the Loan Calculator. Assuming a 300,000 dollar balance, a 30 year term and monthly payments, a 6.5 percent rate gives 1,896.20 dollars a month, and 7.5 percent gives 2,097.64 dollars, which is 201.44 dollars more every month. The rates are examples, not forecasts."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using a single cost per square foot from a headline number instead of building the estimate from trades and bids.",
+        "Leaving out soft costs, which are easy to forget because they do not appear on the contractor invoice.",
+        "Setting the contingency too low for a design that is not finished, or counting it as spare cash.",
+        "Applying a contingency percentage to the wrong base.",
+        "Forgetting interest, utilities during construction, landscaping, and moving costs.",
+        "Comparing bids that do not cover the same scope."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Construction work is subject to building codes, permits and inspections that differ by location. Confirm requirements with your local building department, and obtain written bids from licensed contractors before you commit to a budget."
     },
     {
       "type": "cta",

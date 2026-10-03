@@ -2,85 +2,207 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "You work 40 hours, get your paycheck, and a chunk is already gone. Federal tax, FICA, state tax, benefits — it adds up fast. Here's exactly where each dollar goes and how to make sure you're not overpaying."
+      "text": "Your paycheck is your gross pay minus four layers of deductions: federal income tax withholding, payroll taxes (Social Security and Medicare), state and local taxes where they apply, and benefit or other deductions. In the example below, a $2,500 biweekly gross check turns into $1,742.75 of take-home pay, or 69.7% of gross, and every figure is labelled as either a published rate or an illustrative assumption."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Is FICA and How Much Comes Out?"
+      "text": "The four layers on a pay stub"
     },
     {
-      "type": "paragraph",
-      "text": "FICA stands for the Federal Insurance Contributions Act. It funds Social Security and Medicare. From every paycheck, your employer deducts **6."
-    },
-    {
-      "type": "paragraph",
-      "text": "2% for Social Security** (up to the wage base of $176,100 in 2026) and **1. 45% for Medicare** (uncapped). Your employer matches both."
-    },
-    {
-      "type": "paragraph",
-      "text": "If you earn over $200,000 (single) or $250,000 (MFJ), an additional **0. 9% Medicare surtax** kicks in."
-    },
-    {
-      "type": "callout",
-      "variant": "info",
-      "text": "The Social Security wage base means once you've earned $176,100 in a year, the 6.2% deduction stops for the rest of the year. Medicare keeps going on every dollar. High earners see the SS deduction disappear mid-year while Medicare continues."
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Federal income tax withholding. Your employer withholds it according to your Form W-4 and the IRS withholding tables in Publication 15-T. It is a prepayment toward your annual tax bill, not the bill itself.",
+        "Social Security and Medicare (FICA). The IRS states the employee rates as 6.2% for Social Security and 1.45% for Medicare, with the employer paying a matching share on top. Social Security applies only up to an annual wage base that the IRS updates each year, and Medicare has no wage base. Employers also withhold an extra 0.9% Additional Medicare Tax on wages above $200,000 in a calendar year. Check the IRS site for the current wage base before relying on any figure you read elsewhere.",
+        "State and local income taxes. These vary by state and sometimes by city. Some states have no wage income tax, so the line may be zero or absent.",
+        "Benefits and other deductions. Health premiums, retirement contributions, union dues, and similar items. Some are taken before income tax is calculated, some after, and which taxes they reduce depends on the type of benefit. Your pay stub and plan documents say how each one is treated."
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Federal Income Tax Withholding Works"
+      "text": "Pay frequency changes the size of each check, not the year"
     },
     {
       "type": "paragraph",
-      "text": "Your employer uses the information on your W-4 form to determine how much federal income tax to withhold from each paycheck. The IRS withholding tables apply the same progressive brackets used for your annual return — but prorated per pay period. If you withhold too little, you may owe at tax time plus penalties."
-    },
-    {
-      "type": "paragraph",
-      "text": "Too much, and you're giving the IRS an interest-free loan."
+      "text": "The same $65,000 annual salary is paid out in different-sized pieces depending on how often you are paid. This matters for budgeting. A biweekly schedule has 26 checks against 24 for semimonthly, so in a typical year two months contain three biweekly paychecks."
     },
     {
       "type": "table",
       "headers": [
-        "Pay Frequency",
-        "Paychecks/Year",
-        "Example Period"
+        "Pay frequency",
+        "Checks per year",
+        "Gross per check on $65,000"
       ],
       "rows": [
         [
-          "Weekly (52)",
+          "Weekly",
           "52",
-          "Every Friday"
+          "$1,250.00"
         ],
         [
-          "Bi-Weekly (26)",
+          "Biweekly",
           "26",
-          "Every other Friday"
+          "$2,500.00"
         ],
         [
-          "Semi-Monthly (24)",
+          "Semimonthly",
           "24",
-          "1st and 15th"
+          "$2,708.33"
         ],
         [
-          "Monthly (12)",
+          "Monthly",
           "12",
-          "1st of month"
+          "$5,416.67"
         ]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Which States Have No Income Tax?"
+      "text": "Worked example: one biweekly paycheck"
     },
     {
       "type": "paragraph",
-      "text": "Eight states have no individual income tax: **Alaska, Florida, Nevada, South Dakota, Tennessee, Texas, Washington, and Wyoming**. New Hampshire has no tax on earned wages. Living in one of these states means the state tax line on your paycheck is $0."
+      "text": "Assumptions: a $65,000 salary paid biweekly, a $150 pre-tax benefit premium per check that reduces income-tax wages but not FICA wages (some benefits differ, so check your own stub), a flat 12% illustrative federal withholding rate and a flat 4% illustrative state rate, and a $40 post-tax deduction. The flat rates are not real brackets or withholding tables. They are placeholders to show how the layers stack. The 6.2% and 1.45% payroll rates are the IRS figures above."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Line",
+        "Amount",
+        "Basis"
+      ],
+      "rows": [
+        [
+          "Gross pay",
+          "$2,500.00",
+          "Salary of $65,000 divided by 26 paychecks"
+        ],
+        [
+          "Pre-tax benefit premium",
+          "-$150.00",
+          "Reduces income-tax wages in this example"
+        ],
+        [
+          "Federal income tax withholding",
+          "-$282.00",
+          "Illustrative flat 12% of taxable wages"
+        ],
+        [
+          "State income tax withholding",
+          "-$94.00",
+          "Illustrative flat 4% of taxable wages"
+        ],
+        [
+          "Social Security",
+          "-$155.00",
+          "6.2% of gross pay"
+        ],
+        [
+          "Medicare",
+          "-$36.25",
+          "1.45% of gross pay"
+        ],
+        [
+          "Post-tax deduction",
+          "-$40.00",
+          "Illustrative voluntary deduction"
+        ],
+        [
+          "Net pay (take-home)",
+          "$1,742.75",
+          "69.7% of gross"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "In contrast, states like California (top rate **9. 3%** effective), Oregon (**9%**), and Minnesota (**7. 85%**) take a significant bite."
+      "text": "Total deductions are $757.25 of the $2,500.00. Notice that income tax is calculated on $2,350.00, not on the full gross, while Social Security and Medicare are calculated on the full $2,500.00. Because the two bases differ, a pre-tax benefit does not reduce every line equally. The calculator on this site applies its pre-tax input to both bases, so for a benefit that does not reduce FICA wages, its result will be a little different."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What a pre-tax contribution really costs in take-home pay"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you move $100 from your take-home pay into a pre-tax account that reduces only income-tax wages, your take-home pay falls by less than $100, because the withholding on that $100 stops. The table uses illustrative marginal rates, not brackets that apply to any particular person, and assumes FICA is unchanged."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Illustrative combined marginal rate",
+        "Contribution per paycheck",
+        "Drop in take-home pay",
+        "Income tax withholding avoided"
+      ],
+      "rows": [
+        [
+          "10% federal + 4% state = 14%",
+          "$100.00",
+          "-$86.00",
+          "$14.00"
+        ],
+        [
+          "12% federal + 4% state = 16%",
+          "$100.00",
+          "-$84.00",
+          "$16.00"
+        ],
+        [
+          "22% federal + 4% state = 26%",
+          "$100.00",
+          "-$74.00",
+          "$26.00"
+        ],
+        [
+          "24% federal + 4% state = 28%",
+          "$100.00",
+          "-$72.00",
+          "$28.00"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Withholding is an estimate, not your tax bill"
+    },
+    {
+      "type": "paragraph",
+      "text": "Your actual tax is calculated when you file. If your W-4 leads to $30 too much being withheld on each of 26 checks, you have lent the government $780.00 interest-free by the end of the year and will receive it back as a refund. If too little is withheld, you can owe at filing and, in some cases, a penalty. Update your W-4 after a marriage, a new job, a second job in the household, or a change in dependents."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Budgeting from gross pay. Plan from the net figure on a real stub.",
+        "Assuming the same deductions all year. Social Security withholding stops once your wages pass the annual wage base, so high earners see their take-home rise late in the year.",
+        "Treating a large refund as a bonus. It is your own money returned after being withheld too early.",
+        "Ignoring a second job. Each employer withholds as if its paycheck were your only income, which can lead to under-withholding overall.",
+        "Forgetting that three-paycheck months exist on biweekly schedules, and spending them as if they were regular income."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this example does not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "Real withholding uses the IRS tables and the details from your W-4. It is not a flat percentage, and state and local rules differ widely. Bonuses and other supplemental pay can be withheld differently from regular wages. Self-employed people and contractors pay payroll taxes on their own instead of through an employer. Always compare against a real pay stub, and use a tax professional for questions about your own situation."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Payroll rates and the employer match come from the IRS page on Social Security and Medicare tax rates, which also gives the Additional Medicare Tax threshold. The 12% and 4% rates and the dollar benefit amounts are illustrative. The arithmetic was computed by script, not by hand."
     },
     {
       "type": "cta",

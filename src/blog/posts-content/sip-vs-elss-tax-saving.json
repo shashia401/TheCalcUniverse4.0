@@ -1,52 +1,86 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is ELSS?"
+      "type": "paragraph",
+      "text": "SIP and ELSS are not rivals: a SIP is a way of buying, and ELSS (Equity Linked Savings Scheme) is a category of equity mutual fund that is designed to qualify for a tax deduction in return for a compulsory lock-in. You can run a SIP into an ELSS fund. The real question is whether the deduction is available and valuable for you, and whether you can leave the money untouched for the lock-in period. Tax rules, limits and available tax regimes change, so this page works with the arithmetic and leaves the current rates and limits for you to confirm."
     },
     {
-      "type": "paragraph",
-      "text": "ELSS (Equity Linked Savings Scheme) is a type of mutual fund that offers tax deductions under Section 80C of the Income Tax Act, up to ₹1.5 lakhs per year. It has the shortest lock-in period among 80C investments (3 years). ELSS funds invest primarily in equities, offering potential for higher returns than PPF or tax-saving FDs."
+      "type": "heading",
+      "level": 2,
+      "text": "What changes when the SIP goes into an ELSS fund"
     },
     {
       "type": "table",
-      "headers": [
-        "Feature",
-        "ELSS SIP",
-        "PPF",
-        "Tax-Saving FD",
-        "NPS"
-      ],
+      "headers": ["Question", "SIP in an ordinary equity fund", "SIP in an ELSS fund"],
       "rows": [
-        [
-          "Lock-in",
-          "3 years",
-          "15 years",
-          "5 years",
-          "Till 60"
-        ],
-        [
-          "Returns",
-          "10-14%",
-          "7-8%",
-          "6-7%",
-          "8-12%"
-        ],
-        [
-          "Tax on returns",
-          "LTCG over ₹1L",
-          "Tax-free",
-          "Taxable",
-          "Partially taxable"
-        ],
-        [
-          "SIP available",
-          "Yes",
-          "Monthly",
-          "No",
-          "Yes"
-        ]
+        ["Tax deduction on the amount invested", "None", "May be available, up to a cap, depending on the tax regime you file under and the rules in force"],
+        ["Lock-in", "Usually none, though some schemes charge an exit load", "Mandatory, as set out in the scheme document"],
+        ["Lock-in with a SIP", "Not applicable", "Normally each instalment has its own lock-in clock from its purchase date, so a monthly SIP unlocks one instalment at a time (confirm in the scheme document)"],
+        ["Market risk", "Equity risk, value can fall", "Equity risk, value can fall, and you cannot sell during the lock-in"],
+        ["Tax on gains when sold", "Depends on holding period and rules in force", "Depends on the rules in force, which can differ from other equity funds"]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: what the deduction is worth"
+    },
+    {
+      "type": "paragraph",
+      "text": "The tax saved each year is the deductible amount times your marginal tax rate. To keep the arithmetic clean, assume a Rs. 12,500 monthly ELSS SIP (Rs. 1,50,000 a year), all of it deductible, for 15 years, at an assumed 12% return, using the SIP calculator's method. The corpus is Rs. 63,07,200 for Rs. 22,50,000 paid in. I tried marginal rates of 0%, 10%, 20% and 30% as examples. Use the rate that applies to you. If the deduction is not available to you, the first row is the one that applies."
+    },
+    {
+      "type": "table",
+      "headers": ["Marginal rate", "Tax saved a year", "Your net outlay over 15 years", "Corpus per Rs. 1 of net outlay", "Return an ordinary SIP needs to match"],
+      "rows": [
+        ["0%", "Rs. 0", "Rs. 22,50,000", "Rs. 2.80", "12.00%"],
+        ["10%", "Rs. 15,000", "Rs. 20,25,000", "Rs. 3.11", "13.09%"],
+        ["20%", "Rs. 30,000", "Rs. 18,00,000", "Rs. 3.50", "14.29%"],
+        ["30%", "Rs. 45,000", "Rs. 15,75,000", "Rs. 4.00", "15.63%"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The last column answers a useful question: if you cut each instalment by the tax saved and put it into an ordinary SIP instead, what return would that fund need to build the same Rs. 63,07,200? At a 20% marginal rate it needs 14.29% against ELSS's 12%. That treats the saving as a lower monthly outlay, whereas in practice it arrives once a year, so the true benefit is a little smaller. It also ignores tax on gains for both choices. The deduction is a one-time boost to what you put in. It does not change what the fund earns."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the rolling lock-in looks in practice"
+    },
+    {
+      "type": "paragraph",
+      "text": "This example assumes a 36-month lock-in for every instalment. Confirm the lock-in period in the scheme document and current rules. Because each instalment starts its own clock, the money that is locked is always the most recent stretch of instalments."
+    },
+    {
+      "type": "table",
+      "headers": ["After this many years of SIP", "Instalments free to sell", "Instalments still locked", "Share of corpus still locked", "Total corpus"],
+      "rows": [
+        ["3", "1", "35", "96.7%", "Rs. 5,43,846"],
+        ["5", "25", "35", "51.0%", "Rs. 10,31,080"],
+        ["10", "85", "35", "18.1%", "Rs. 29,04,238"],
+        ["15", "145", "35", "8.3%", "Rs. 63,07,200"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "With Rs. 12,500 a month at 12%, the locked slice stays near Rs. 5.26 lakh once the SIP is three years old, because the latest 35 instalments are always the same ages. Early on that is nearly everything you own. If you need money in the first three to four years, nearly all of it will be out of reach."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When ELSS does not fit, and common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Investing for the deduction without checking eligibility. Whether you can claim it depends on the tax regime you choose and the rules for the year, so confirm before you invest.",
+        "Investing beyond the deduction cap. Anything above the cap gets no deduction, and the lock-in still applies.",
+        "Using ELSS money for a goal within a few years. The lock-in and equity risk make it a poor fit for near-term needs.",
+        "Leaving it for March. One large year-end lump sum buys at a single price, while a SIP spreads purchases over the year and is easier to afford.",
+        "Treating the saved tax as the fund's return. The saving is a separate benefit and the fund can still lose value, as any equity fund can.",
+        "Comparing ELSS with deposits or government schemes by headline return alone. The risk, lock-in, liquidity and tax on maturity differ, so compare the current terms of each for your own situation."
       ]
     },
     {

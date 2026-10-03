@@ -1,22 +1,178 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Formula"
-    },
-    {
       "type": "paragraph",
-      "text": "M = P [ r(1+r)^n ] / [ (1+r)^n - 1 ] where M is the monthly payment, P is the principal, r is the monthly interest rate (annual rate / 12), and n is the number of payments (loan term in months). For a $300,000 mortgage at 6% for 30 years: P = 300,000, r = 0.005, n = 360. This gives M = 300,000 [ 0.005(1.005)^360 ] / [ (1.005)^360 - 1 ] = $1,798.65."
+      "text": "Your fixed monthly payment is the one number M that, paid n times, exactly repays a balance P charged interest at a monthly rate r. The formula is M = P x r(1+r)^n / ((1+r)^n - 1). This article derives it from a one-line idea, runs it on a $300,000 loan, and shows which input moves the payment most. The question here is where the formula comes from and how sensitive it is, not how to read a schedule."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Each Variable Does"
+      "text": "Deriving the formula in four lines"
     },
     {
       "type": "paragraph",
-      "text": "A higher principal (P) increases the payment proportionally. A higher rate (r) increases both the payment and the total interest dramatically. A longer term (n) reduces the payment but increases total interest paid. Doubling the rate from 4% to 8% increases the payment by about 45% but doubles the total interest."
+      "text": "Start with how a balance evolves. Each month interest of r times the balance is added, then you pay M. After payment k the balance is B(k) = B(k-1) x (1+r) - M, with B(0) = P."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Unroll the recursion n times: B(n) = P(1+r)^n - M x [(1+r)^(n-1) + ... + (1+r) + 1].",
+        "The bracket is a geometric series with sum ((1+r)^n - 1) / r.",
+        "A loan that is fully repaid has B(n) = 0, so P(1+r)^n = M x ((1+r)^n - 1) / r.",
+        "Solve for M: M = P x r(1+r)^n / ((1+r)^n - 1). Dividing top and bottom by (1+r)^n gives the equivalent form M = P x r / (1 - (1+r)^-n)."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "If the rate is zero the formula divides zero by zero, and the payment is simply P / n: $300,000 over 360 months is $833.33."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A full calculation, $300,000 at 6% for 30 years"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: annual rate 6%, so r = 0.06 / 12 = 0.005; term 30 years, so n = 360; payments at the end of each month."
+    },
+    {
+      "type": "list",
+      "items": [
+        "(1.005)^360 = 6.02258 (rounded).",
+        "Numerator: 300,000 x 0.005 x 6.02258 = 9,033.86. Denominator: 6.02258 - 1 = 5.02258.",
+        "M = 9,033.86 / 5.02258 = $1,798.65.",
+        "Rule of thumb that follows: each $1,000 borrowed at 6% over 30 years costs $5.9955 a month."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Check against the schedule: month 1 interest is $300,000 x 0.005 = $1,500.00, so $298.65 reduces the balance to $299,701.35. Month 2 interest is $1,498.51 and principal $300.14. Carrying this to payment 360 brings the balance to zero. Total paid is about $647,514.57 and total interest about $347,514.57. A lender rounds the payment to the cent, so the last payment differs from the others by a few cents, and the totals above use the unrounded payment, as the amortization calculator does."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A hand-checkable miniature"
+    },
+    {
+      "type": "paragraph",
+      "text": "To see the mechanics without a calculator, borrow $1,000 at 12% a year (r = 1% a month) for 3 months. The formula gives M = 1,000 x 0.01 x 1.01^3 / (1.01^3 - 1) = $340.02. Month 1: interest $10.00, principal $330.02, balance $669.98. Month 2: interest $6.70, principal $333.32, balance $336.66. Month 3: interest $3.37, principal $336.66, balance $0.00. Each payment is identical, the interest shrinks as the balance shrinks, and the balance lands on zero exactly because M was derived to make that happen."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Running the formula backwards"
+    },
+    {
+      "type": "paragraph",
+      "text": "The same equation answers other questions if you rearrange it. Loan size from a payment: P = M x (1 - (1+r)^-n) / r. At 6% over 30 years, a $1,500 monthly payment supports a loan of about $250,187 and a $2,000 payment supports about $333,583. Payoff time from a payment: n = -ln(1 - P x r / M) / ln(1+r). Paying $1,900 a month on the $300,000 loan instead of $1,798.65 gives n of about 312 payments, roughly 26 years, which is how extra payments shorten a loan."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which input moves the payment most?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Payment is exactly proportional to the loan amount: a $150,000 loan at 6% over 30 years has a $899.33 payment, half of $1,798.65. The rate and the term are not proportional. Holding $300,000 and 30 years, changing the rate gives:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Annual rate",
+        "Monthly payment",
+        "Total interest"
+      ],
+      "rows": [
+        [
+          "4%",
+          "$1,432.25",
+          "$215,608.52"
+        ],
+        [
+          "5%",
+          "$1,610.46",
+          "$279,767.35"
+        ],
+        [
+          "6%",
+          "$1,798.65",
+          "$347,514.57"
+        ],
+        [
+          "7%",
+          "$1,995.91",
+          "$418,526.69"
+        ],
+        [
+          "8%",
+          "$2,201.29",
+          "$492,465.74"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Going from 4% to 8% raises the payment by 53.7% ($1,432.25 to $2,201.29), while total interest rises 2.28 times. Now hold 6% and change the term:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Term",
+        "Monthly payment",
+        "Total interest"
+      ],
+      "rows": [
+        [
+          "10 years",
+          "$3,330.62",
+          "$99,673.81"
+        ],
+        [
+          "15 years",
+          "$2,531.57",
+          "$155,682.69"
+        ],
+        [
+          "20 years",
+          "$2,149.29",
+          "$215,830.36"
+        ],
+        [
+          "25 years",
+          "$1,932.90",
+          "$279,871.26"
+        ],
+        [
+          "30 years",
+          "$1,798.65",
+          "$347,514.57"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Stretching from 15 to 30 years cuts the payment from $2,531.57 to $1,798.65 but more than doubles the interest, from $155,682.69 to $347,514.57. The lower payment is paid for with years of extra interest."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes with the formula"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Plugging in the annual rate: r must be the periodic rate, the annual rate divided by 12 for monthly payments.",
+        "Mixing units: n counts payments, so a 30-year loan is 360, not 30.",
+        "Forgetting what the payment excludes: a mortgage bill may also include property tax, insurance or mortgage insurance, which are not part of M.",
+        "Expecting it to fit every loan: the formula assumes a fixed rate, equal payments and a monthly period. Adjustable-rate loans recompute it each time the rate changes, and loans that accrue interest daily or have fees will differ slightly.",
+        "Treating the first-year payment split as typical: the formula fixes M, but interest and principal inside M change every month."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "All figures are illustrative calculations using stated assumptions, not a loan offer. Your lender's disclosure is the authority for your actual payment."
     },
     {
       "type": "cta",

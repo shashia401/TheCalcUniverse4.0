@@ -11,11 +11,11 @@
     },
     {
       "type": "paragraph",
-      "text": "Two events are **independent** when one doesn't affect the other. Flipping a coin twice gives independent outcomes — knowing the first flip was heads tells you nothing about the second. **Dependent** events work the other way: the probability of the second event changes based on the first."
+      "text": "Two events are independent when one doesn't affect the other. Flipping a coin twice gives independent outcomes — knowing the first flip was heads tells you nothing about the second. Dependent events work the other way: the probability of the second event changes based on the first."
     },
     {
       "type": "paragraph",
-      "text": "Drawing two cards from a deck without replacement is a classic example — the probability of drawing an ace on the second draw depends on whether the first card was an ace. Our Probability Calculator handles independent and **mutually exclusive** events (events that can't happen at the same time, like drawing a single card that's both a heart and a spade)."
+      "text": "Drawing two cards from a deck without replacement is a classic example — the probability of drawing an ace on the second draw depends on whether the first card was an ace. Our Probability Calculator handles independent and mutually exclusive events (events that can't happen at the same time, like drawing a single card that's both a heart and a spade)."
     },
     {
       "type": "heading",
@@ -24,7 +24,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Two rules handle most cases. The **multiplication rule** finds the probability of A and B both happening: multiply their individual probabilities if they're independent (P(A∩B) = P(A) × P(B)). The **addition rule** finds the probability of A or B happening: P(A∪B) = P(A) + P(B) − P(A∩B)."
+      "text": "Two rules handle most cases. The multiplication rule finds the probability of A and B both happening: multiply their individual probabilities if they're independent (P(A∩B) = P(A) × P(B)). The addition rule finds the probability of A or B happening: P(A∪B) = P(A) + P(B) − P(A∩B)."
     },
     {
       "type": "paragraph",
@@ -72,11 +72,11 @@
     },
     {
       "type": "paragraph",
-      "text": "Conditional probability answers the question: \"Given that B happened, how does that change the likelihood of A? \" it's written as **P(A|B)** and calculated as P(A∩B) ÷ P(B). For independent events, P(A|B) = P(A) — knowing B happened tells you nothing new about A."
+      "text": "Conditional probability answers the question: \"Given that B happened, how does that change the likelihood of A? \" it's written as P(A|B) and calculated as P(A∩B) ÷ P(B). For independent events, P(A|B) = P(A) — knowing B happened tells you nothing new about A."
     },
     {
       "type": "paragraph",
-      "text": "But for dependent events, it can shift probabilities dramatically. This is the foundation of **Bayes' theorem**, which powers email spam filters, medical diagnostic reasoning, and machine learning classifiers. Your spam filter doesn't just ask \"what is the probability this is spam?"
+      "text": "But for dependent events, it can shift probabilities dramatically. This is the foundation of Bayes' theorem, which powers email spam filters, medical diagnostic reasoning, and machine learning classifiers. Your spam filter doesn't just ask \"what is the probability this is spam?"
     },
     {
       "type": "paragraph",

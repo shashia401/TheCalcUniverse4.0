@@ -1,105 +1,102 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Percentage Change Formula"
-    },
-    {
       "type": "paragraph",
-      "text": "Percentage change measures how much a value has grown or shrunk relative to its original value. The formula is: (New Value - Original Value) / Original Value x 100. If the result is positive, it is an increase. If negative, it is a decrease. For example, if a stock goes from $50 to $60: ($60 - $50) / $50 x 100 = 20% increase. If it drops from $50 to $40: ($40 - $50) / $50 x 100 = -20% decrease."
+      "text": "To calculate a percentage increase or decrease, subtract the old value from the new value, divide the result by the old value, and multiply by 100. A positive answer is an increase and a negative answer is a decrease. A price that moves from 25 to 30 gives (30 - 25) / 25 x 100 = +20%, and a price that moves from 50 to 40 gives (40 - 50) / 50 x 100 = -20%. The rest of this guide covers the three situations where people go wrong: reading rates in percentage points, reversing a percentage, and chaining several changes."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Real-World Examples"
+      "text": "Worked examples"
     },
     {
       "type": "table",
-      "headers": [
-        "Scenario",
-        "Old Value",
-        "New Value",
-        "Change",
-        "Formula"
-      ],
+      "headers": ["Scenario", "Old", "New", "Calculation", "Change"],
       "rows": [
-        [
-          "Price increase",
-          "$25",
-          "$30",
-          "+20%",
-          "(30-25)/25 x 100"
-        ],
-        [
-          "Grade improvement",
-          "72%",
-          "85%",
-          "+18.1%",
-          "(85-72)/72 x 100"
-        ],
-        [
-          "Population decline",
-          "10,000",
-          "9,200",
-          "-8%",
-          "(9200-10000)/10000 x 100"
-        ],
-        [
-          "Salary raise",
-          "$50,000",
-          "$54,000",
-          "+8%",
-          "(54000-50000)/50000 x 100"
-        ]
+        ["Price increase", "25", "30", "(30 - 25) / 25 x 100", "+20%"],
+        ["Test score", "72", "85", "(85 - 72) / 72 x 100", "+18.06%"],
+        ["Population decline", "10,000", "9,200", "(9,200 - 10,000) / 10,000 x 100", "-8%"],
+        ["Salary raise", "50,000", "54,000", "(54,000 - 50,000) / 50,000 x 100", "+8%"],
+        ["Monthly rent", "1,500", "1,350", "(1,350 - 1,500) / 1,500 x 100", "-10%"],
+        ["Small base", "1", "3", "(3 - 1) / 1 x 100", "+200%"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The test score result is 18.0556% before rounding, shown here to two decimal places. The last row shows why a large percentage can mislead: a rise of 2 units on a base of 1 is +200%, while a rise of 4,000 on a base of 50,000 is only +8%. Always quote the absolute change alongside the percentage when the base is small."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Percent change is not symmetric"
+    },
+    {
+      "type": "paragraph",
+      "text": "Going from 50 to 75 is a 50% increase. Going back from 75 to 50 is a 33.3% decrease, not 50%, because the base is now 75. This asymmetry is the source of most percentage arithmetic errors. The table shows how large a rise you need to recover from a fall."
+    },
+    {
+      "type": "table",
+      "headers": ["Fall", "Rise needed to recover", "Check (rounded)"],
+      "rows": [
+        ["10%", "11.1%", "0.90 x 1.1111 = 1"],
+        ["20%", "25%", "0.80 x 1.25 = 1"],
+        ["25%", "33.3%", "0.75 x 1.3333 = 1"],
+        ["40%", "66.7%", "0.60 x 1.6667 = 1"],
+        ["50%", "100%", "0.50 x 2 = 1"],
+        ["75%", "300%", "0.25 x 4 = 1"]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Common Mistakes to Avoid"
+      "text": "Percentage points versus percent change"
+    },
+    {
+      "type": "paragraph",
+      "text": "When a quantity is itself a percentage, such as an interest rate or a pass rate, there are two different ways to describe a change. A rate moving from 4% to 5% rose by 1 percentage point, but its relative increase is (5 - 4) / 4 x 100 = 25%. A rate moving from 3.5% to 4.25% rose by 0.75 percentage points, which is a relative increase of 21.4%. A rate moving from 10% to 15% rose by 5 points, or 50%. A headline that says a rate \"rose 2%\" is ambiguous, so check whether the writer means points or relative change before you use the figure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Reverse percentages: finding the original value"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you know the new value and the percentage change, divide the new value by (1 + rate) for an increase, or by (1 - rate) for a decrease. A salary of 54,000 after an 8% raise was 54,000 / 1.08 = 50,000. A bill of 1,260 after a 10% reduction was 1,260 / 0.90 = 1,400. The shortcut of subtracting the percentage from the new value is wrong: 10% of 1,260 is 126, and 1,260 + 126 = 1,386, not 1,400. The reason is that the percentage was taken from the original value, so you must divide back through the same multiplier."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Chaining several changes"
+    },
+    {
+      "type": "paragraph",
+      "text": "Successive percentage changes multiply; they do not add. Convert each change to a multiplier, multiply them, then subtract 1. Three yearly rises of 10% give 1.10 x 1.10 x 1.10 = 1.331, a total rise of 33.1%, not 30%. A rise of 20% followed by a rise of 30% gives 1.2 x 1.3 = 1.56, so 56%. A fall of 20% followed by a fall of 30% gives 0.8 x 0.7 = 0.56, a total fall of 44%. A rise of 50% followed by a fall of 50% gives 1.5 x 0.5 = 0.75, a 25% net loss, which shows that averaging the two changes to get 0% is incorrect."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Percent change versus percent difference"
+    },
+    {
+      "type": "paragraph",
+      "text": "Percent change treats one value as the original, so it has a direction. Percent difference is used when neither value is the original, and one common convention divides the gap by the average of the two values. For 50 and 75, the gap is 25 and the average is 62.5, so the difference is 40%, while the percent change from 50 to 75 is 50%. The two numbers answer different questions. Which convention applies depends on the field, so state the formula you used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Dividing by the new value instead of the original: Always use the original (starting) value as the denominator.",
-        "Confusing percentage points with percent change: A rate going from 4% to 5% is a 25% increase (relative), not a 1% increase.",
-        "Forgetting to multiply by 100: The formula gives a decimal; multiply by 100 to express as a percentage.",
-        "Using percentage change for very small bases: If something goes from 1 to 3, that is a 200% increase — impressive sounding but maybe misleading without context."
+        "Dividing by the new value instead of the old one. The old value is always the denominator.",
+        "Forgetting to multiply by 100, which leaves a decimal such as 0.2 instead of 20%.",
+        "Calculating a change from zero. The formula divides by zero and has no answer, so report the absolute change.",
+        "Using percent change when the old value is negative. The calculator on this site divides by the absolute value of the old number, so a move from -50 to -25 shows as +50%. That convention is debated, so describe such results in words as well.",
+        "Quoting a huge percentage from a tiny base without the underlying numbers."
       ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Percentage Increase vs Percentage Points"
-    },
-    {
-      "type": "paragraph",
-      "text": "This is a common point of confusion. If an interest rate rises from 5% to 6%, that is a 1 percentage point increase. But it is a 20% increase relative to the starting rate (1/5 = 0.20 = 20%). In news reporting, \"inflation rose by 2%\" could mean either 2 percentage points or a 2% relative increase. Always check which one is meant."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How do I calculate percentage decrease for discounts?"
-    },
-    {
-      "type": "paragraph",
-      "text": "A 20% discount on a $100 item means you pay $80. The formula: Discount Amount = Original Price x (Discount % / 100). Sale Price = Original Price - Discount Amount. Our percentage calculator handles both increase and decrease scenarios instantly."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What is the difference between percentage change and percentage difference?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Percentage change compares a new value to an original value (directional). Percentage difference compares two values without designating one as the original (non-directional). Percentage difference uses the average of the two values as the denominator, giving a symmetric result."
     },
     {
       "type": "cta",

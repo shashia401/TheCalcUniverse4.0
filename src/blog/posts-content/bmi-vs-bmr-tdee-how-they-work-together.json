@@ -1,57 +1,195 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "BMI, BMR and TDEE answer three different questions. BMI says how your weight compares with your height. BMR is an estimate of the calories your body uses at complete rest. TDEE is BMR multiplied by an activity factor, which gives an estimate of the calories you use on a typical day. BMI does not feed into the BMR or TDEE formulas, but the three numbers are linked because weight appears in all of them. This article follows one person through all three so you can see how a change in weight changes the others."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "The Three Numbers and What Each Tells You"
+      "text": "What each number is, in one line"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Number",
+        "Question it answers",
+        "Inputs",
+        "Unit"
+      ],
+      "rows": [
+        [
+          "BMI",
+          "Where does my weight sit for my height?",
+          "Weight, height",
+          "kg/m2"
+        ],
+        [
+          "BMR",
+          "What does my body use at rest?",
+          "Weight, height, age, sex (or lean mass)",
+          "kcal/day"
+        ],
+        [
+          "TDEE",
+          "What do I use on a typical day?",
+          "BMR and an activity factor",
+          "kcal/day"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "BMI, BMR, and TDEE are three different numbers that serve different purposes. BMI (body mass index) classifies your weight relative to height. BMR (basal metabolic rate) is the calories your body burns at complete rest. TDEE (total daily energy expenditure) is the total calories you burn including activity. BMI tells you where you are now, BMR tells you the baseline, and TDEE tells you what you need to eat to maintain, lose, or gain weight."
+      "text": "BMI is weight in kilograms divided by height in metres squared. Our BMR and TDEE calculators default to the Mifflin-St Jeor equation: 10 x weight (kg) + 6.25 x height (cm) - 5 x age + 5 for men, or - 161 for women. TDEE multiplies that by 1.2 (sedentary), 1.375 (light exercise 1 to 2 days a week), 1.55 (moderate, 3 to 5 days), 1.725 (heavy, 6 to 7 days) or 1.9 (athlete or very physical job)."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Use Them Together"
+      "text": "Worked example: one person, three numbers"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: a 35-year-old woman, 165 cm tall, 82 kg (about 181 lb), light exercise one or two days a week. All figures are hypothetical and rounded to the nearest whole number or one decimal."
     },
     {
       "type": "list",
-      "ordered": false,
+      "ordered": true,
       "items": [
-        "Step 1: Calculate your BMI to establish your starting category and healthy weight range.",
-        "Step 2: Calculate your BMR to understand your baseline metabolic needs.",
-        "Step 3: Calculate your TDEE by adding your activity level. This is your maintenance calorie target.",
-        "Step 4: Set your goal: subtract 300-500 calories from TDEE for weight loss, or add 300-500 for weight gain.",
-        "Step 5: Track your progress and recalculate every 10-15 lbs of weight change."
+        "BMI = 82 / 1.65 squared = 82 / 2.7225 = 30.1. That is in the CDC obesity range (30 or above), class 1.",
+        "The weight range for BMI 18.5 to 24.9 at 165 cm is 50.4 to 67.8 kg (about 111 to 149 lb).",
+        "BMR = 10 x 82 + 6.25 x 165 - 5 x 35 - 161 = 1,515 kcal/day.",
+        "TDEE at the light-exercise factor = 1,515 x 1.375 = 2,083 kcal/day."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The BMI step tells her which category she is in and what a BMI-based weight range looks like. The BMR and TDEE steps give a maintenance estimate. Neither step is a diagnosis or a prescription."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the numbers move as weight changes"
+    },
+    {
+      "type": "paragraph",
+      "text": "Because weight is an input to the BMR equation, BMR and TDEE fall as weight falls. In the Mifflin-St Jeor equation each kilogram changes BMR by 10 kcal/day. The table recalculates the same woman at lower weights, with age, height and the 1.375 factor held constant."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Weight",
+        "BMI",
+        "BMR (kcal/day)",
+        "TDEE at 1.375 (kcal/day)"
+      ],
+      "rows": [
+        [
+          "82 kg",
+          "30.1",
+          "1,515",
+          "2,083"
+        ],
+        [
+          "77 kg",
+          "28.3",
+          "1,465",
+          "2,015"
+        ],
+        [
+          "72 kg",
+          "26.4",
+          "1,415",
+          "1,946"
+        ],
+        [
+          "67.8 kg",
+          "24.9",
+          "1,373",
+          "1,888"
+        ],
+        [
+          "65 kg",
+          "23.9",
+          "1,345",
+          "1,850"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "From 82 kg to 67.8 kg, her maintenance estimate drops by about 195 kcal/day (2,083 to 1,888). That is the reason a calorie target set at the start of a weight change goes out of date. Recalculate when your weight has changed noticeably rather than keeping the original number for months."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the same BMI can mean a different BMR"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Mifflin-St Jeor equation uses total weight, so it cannot see body composition. The Katch-McArdle equation, which our TDEE calculator uses when body fat is entered, works from lean mass: BMR = 370 + 21.6 x lean mass (kg). Take two people who both weigh 82 kg at 165 cm, so both have a BMI of 30.1."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Body fat",
+        "Lean mass",
+        "BMR (Katch-McArdle)",
+        "TDEE at 1.375"
+      ],
+      "rows": [
+        [
+          "25%",
+          "61.5 kg",
+          "1,698 kcal/day",
+          "2,335 kcal/day"
+        ],
+        [
+          "40%",
+          "49.2 kg",
+          "1,433 kcal/day",
+          "1,970 kcal/day"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Same BMI, same weight, and a gap of about 265 kcal/day in estimated BMR because one has more lean mass. The body fat percentages here are hypothetical, and a body fat estimate from a tape measure or a scale carries its own error, so treat the gap as an illustration of direction rather than a precise figure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Using BMI to set calories. BMI classifies weight for height; it does not enter the energy formulas, and two people with the same BMI can have different energy needs.",
+        "Picking an optimistic activity factor. Moving from 1.375 to 1.55 raises this example from 2,083 to 2,349 kcal/day, an overestimate of about 266 kcal/day if the lower factor is the honest one.",
+        "Treating TDEE as exact. It is a formula estimate. Real maintenance can differ, so use your own weight trend over several weeks to adjust.",
+        "Never recalculating. As the second table shows, estimates shift by roughly 10 kcal/day for each kilogram of weight change in the BMR part alone.",
+        "Chasing a BMI cutoff as the goal. BMI is a screening tool, so combine it with waist size and how you feel."
       ]
     },
     {
       "type": "callout",
-      "variant": "tip",
-      "text": "A person with a higher BMI will typically have a higher BMR because they have more body mass to maintain. This means a larger person burns more calories at rest than a smaller person — even doing nothing."
+      "variant": "warning",
+      "text": "These are estimates, not medical advice. BMI is a screening tool, not a diagnosis. Very low calorie intakes should only be followed under medical supervision. If you have a medical condition, are pregnant, take medication, or are under 18 or over 65, talk to a clinician or registered dietitian before changing your eating or exercise."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
+      "text": "A simple order of operations"
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "Does BMI affect metabolism?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Indirectly, yes. A higher BMI means more body mass, which generally means a higher BMR. However, the type of mass matters: muscle is metabolically active (burns calories at rest), while fat tissue is less active. Two people with the same BMI can have different BMRs if they have different body compositions."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Should I calculate BMR before starting a diet?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Yes. Your BMR is the absolute minimum you should eat in a day. Eating below your BMR triggers metabolic adaptation — your body slows down to conserve energy. Always set your calorie target above your BMR, ideally between BMR and TDEE. Never eat below 1,200 calories (women) or 1,500 (men) without medical supervision."
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Check BMI and the weight range for your height, as a starting reference only.",
+        "Estimate BMR with a calculator and note which equation it used.",
+        "Choose an activity factor you would defend honestly, then read TDEE as a maintenance estimate.",
+        "Decide any change in calories with a professional, using the TDEE figure as the baseline.",
+        "Weigh yourself consistently, watch the trend, and recalculate when your weight has moved."
+      ]
     },
     {
       "type": "cta",

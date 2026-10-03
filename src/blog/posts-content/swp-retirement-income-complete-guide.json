@@ -1,31 +1,147 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is a Systematic Withdrawal Plan (SWP)?"
-    },
-    {
       "type": "paragraph",
-      "text": "An SWP allows you to withdraw a fixed amount from your mutual fund investments at regular intervals (monthly, quarterly, or annually). Unlike a lump sum redemption where you withdraw everything at once, an SWP provides a steady income stream while the remaining balance continues to earn returns. SWPs are widely used by retirees in India to generate pension-like income from their retirement corpus."
+      "text": "A systematic withdrawal plan can turn a retirement corpus into monthly income, and whether it lasts comes down to one comparison: the yearly withdrawal as a share of the corpus versus the return the corpus earns. If the withdrawal is smaller than the return, the balance grows; if it is about equal, the balance stays flat; if it is larger, the balance falls until it reaches zero. This guide gives you the framework for working that out for your own numbers, using the same month-by-month logic as the SWP calculator on this site: each month the balance first grows by the annual rate divided by 12, and then the withdrawal is subtracted."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "The 4% Rule for Indian Investors"
+      "text": "The four inputs that decide the outcome"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Corpus: the amount invested when withdrawals begin.",
+        "Monthly withdrawal: what you take out. This is the lever you control most directly.",
+        "Return: the average growth rate you assume. Treat it as an assumption, never a promise, and remember that past performance does not guarantee future results.",
+        "Period: how many years you need the money to last. For someone retiring at 60 and planning to age 90, that is 30 years."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "The 4% rule, developed from US market data, suggests withdrawing 4% of your initial corpus annually (adjusted for inflation) for a 30-year retirement. For Indian investors, a 5-6% withdrawal rate is often considered sustainable given potentially higher equity returns. Using our SWP calculator, a ₹1 crore corpus at 8% returns with ₹50,000/month withdrawal lasts about 22 years."
+      "text": "Everything else, including inflation, tax, fund choice and emergencies, adjusts one of these four. The break-even point is simple: a monthly withdrawal equal to corpus times annual rate divided by 12 keeps the balance flat. For Rs. 1 crore that is Rs. 50,000 at 6%, Rs. 66,667 at 8% and Rs. 83,333 at 10%."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "SWP vs Lump Sum Withdrawal"
+      "text": "Worked example: Rs. 1 crore at three return assumptions"
     },
     {
       "type": "paragraph",
-      "text": "Taking the entire corpus as a lump sum risks spending it too quickly and losing future growth potential. An SWP ensures: (a) Regular income every month, (b) Remaining balance continues to grow, (c) Tax efficiency — only the capital gains portion is taxed. The SWP calculator helps you find the sustainable withdrawal amount for your corpus."
+      "text": "The table shows how long Rs. 1,00,00,000 lasts for different monthly withdrawals, computed with the calculator's method. 'Does not run out' means the balance stays positive for the full 100-year limit I tested. These returns are assumptions for illustration, and each is applied smoothly every month, which real markets do not do."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Monthly withdrawal",
+        "Yearly share of corpus",
+        "At 6% a year",
+        "At 8% a year",
+        "At 10% a year"
+      ],
+      "rows": [
+        [
+          "Rs. 40,000",
+          "4.8%",
+          "Does not run out",
+          "Does not run out",
+          "Does not run out"
+        ],
+        [
+          "Rs. 50,000",
+          "6.0%",
+          "Does not run out",
+          "Does not run out",
+          "Does not run out"
+        ],
+        [
+          "Rs. 60,000",
+          "7.2%",
+          "30.0 years",
+          "Does not run out",
+          "Does not run out"
+        ],
+        [
+          "Rs. 70,000",
+          "8.4%",
+          "21.0 years",
+          "38.3 years",
+          "Does not run out"
+        ],
+        [
+          "Rs. 80,000",
+          "9.6%",
+          "16.4 years",
+          "22.5 years",
+          "Does not run out"
+        ],
+        [
+          "Rs. 90,000",
+          "10.8%",
+          "13.6 years",
+          "17.0 years",
+          "26.2 years"
+        ],
+        [
+          "Rs. 1,00,000",
+          "12.0%",
+          "11.6 years",
+          "13.8 years",
+          "18.0 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Two things stand out. First, the cliff: at 8%, going from Rs. 60,000 to Rs. 80,000 a month changes the answer from never running out to 22.5 years. Second, the cushion from return is worth less than it looks, because the return you will actually get is the unknown. A plan that lasts only if the optimistic column comes true is a bet, not a plan. For reference, at 8% and Rs. 50,000 a month the balance after 30 years is Rs. 3,48,39,324 (this matches the calculator's own worked example), and that comfortable result depends entirely on the smooth 8%."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Using the framework step by step"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Write down your monthly expenses in retirement, then subtract income that does not come from the corpus, such as a pension or rent. The gap is what the SWP must cover.",
+        "Divide the gap times 12 by the corpus. That is your starting withdrawal rate.",
+        "Run the calculator at a low, a middle and a high return, for example 6%, 8% and 10%. Plan on the low one.",
+        "Pick a period longer than you expect to need. Living past the plan is the risk you are insuring against.",
+        "Decide in advance what you will do if the balance falls behind the plan: cut spending, work part-time, or draw less for a few years.",
+        "Review once a year, comparing the actual balance with the projected one."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "SWP versus taking the whole corpus out"
+    },
+    {
+      "type": "paragraph",
+      "text": "Withdrawing everything at once gives you control of all the money but also the full responsibility of making it last. An SWP spreads the redemptions over time and leaves the rest invested, so it can keep growing, but it also keeps the rest exposed to market falls. Neither is automatically better. How the gains in each redemption are taxed depends on rules that change, so check the current rules with the tax authority or a registered adviser before choosing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using the first-year amount for 30 years. Costs rise. Rs. 50,000 a month at an assumed 5% inflation is worth about Rs. 30,696 in today's money after 10 years. If you step the withdrawal up each year to keep pace, the corpus has to be larger or the rate lower.",
+        "Treating a rule of thumb as a guarantee. Rules like the 4% rule are starting points drawn from particular historical data. Your corpus, markets and costs differ.",
+        "Ignoring the order of returns. A fall in the first few years does more damage than the same fall later, because withdrawals are taken from a smaller base. The calculator cannot show this, so test it separately.",
+        "Forgetting one-off costs. Medical bills, home repairs and family needs rarely arrive as a smooth monthly figure. Keep a cash reserve outside the SWP corpus.",
+        "Skipping advice. For a large corpus or complicated finances, a SEBI-registered adviser can model taxes and insurance, which this simple calculator leaves out."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Used honestly, the SWP calculator tells you one thing very clearly: how sensitive your plan is to the withdrawal amount. Spend a few minutes moving that one number up and down before you commit to a monthly figure."
     },
     {
       "type": "cta",

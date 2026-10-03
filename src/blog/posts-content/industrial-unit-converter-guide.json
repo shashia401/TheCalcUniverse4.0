@@ -1,1 +1,234 @@
-{"sections":[{"type":"paragraph","text":"Industrial unit conversion is essential for engineers, technicians, and professionals working across different measurement systems. Whether you are converting pressure from PSI to bar or torque from Nm to lb-ft, accuracy matters. Our unit converter covers 18 categories including pressure, torque, energy, power, force, density, angle, frequency, viscosity, hardness, temperature, length, weight, volume, speed, area, data storage, and cooking. Each category supports multiple units with a consistent formula: multiply the input value by the source unit's conversion factor and divide by the target unit's factor."}],"keywords":["unit converter","industrial units","pressure conversion","torque converter","unit conversion guide"]}
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "To convert industrial units accurately, convert everything through one base unit and keep full precision until the last step. Our converters do this with one rule: result = value x (factor of the source unit / factor of the target unit), where each factor is how many base units (pascals, newton metres, watts and so on) one source unit equals. The method is simple. Accuracy depends on three habits: using correct factors, knowing which unit variant you mean, and rounding only once at the end."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The factors behind the common industrial conversions"
+    },
+    {
+      "type": "paragraph",
+      "text": "Many US customary units are defined from metric ones, so their conversion is exact rather than approximate. 1 in = 25.4 mm exactly, 1 ft = 0.3048 m, 1 mi = 1,609.344 m, and 1 lb = 0.45359237 kg. Standard gravity of 9.80665 m/s2 gives 1 kgf = 9.80665 N exactly. Pounds-force and everything built from it follow from those definitions. The values below were calculated in code from those definitions and agree with the NIST Guide to the SI, Appendix B conversion factors, which our length converter cites."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Unit",
+        "Equals",
+        "Basis"
+      ],
+      "rows": [
+        [
+          "1 in",
+          "25.4 mm",
+          "Exact"
+        ],
+        [
+          "1 lbf",
+          "4.448222 N",
+          "0.45359237 kg x 9.80665 m/s2"
+        ],
+        [
+          "1 psi",
+          "6,894.757 Pa",
+          "1 lbf / (0.0254 m)2"
+        ],
+        [
+          "1 bar",
+          "100,000 Pa",
+          "Exact"
+        ],
+        [
+          "1 atm",
+          "101,325 Pa",
+          "Exact"
+        ],
+        [
+          "1 mmHg (conventional)",
+          "133.3224 Pa",
+          "13,595.1 kg/m3 x 9.80665 m/s2 x 1 mm"
+        ],
+        [
+          "1 lbf-ft",
+          "1.355818 N-m",
+          "1 lbf x 0.3048 m"
+        ],
+        [
+          "1 mechanical hp",
+          "745.6999 W",
+          "550 ft-lbf/s"
+        ],
+        [
+          "1 electrical hp",
+          "746 W",
+          "Exact"
+        ],
+        [
+          "1 metric hp",
+          "735.4988 W",
+          "75 kgf-m/s"
+        ],
+        [
+          "1 kWh",
+          "3.6 MJ",
+          "Exact"
+        ],
+        [
+          "1 thermochemical calorie",
+          "4.184 J",
+          "Exact"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Our converters round some of these to about six significant figures, for example 6,894.76 for psi and 1.35582 for lbf-ft. Compared with the exact values above, the rounding differs by less than 0.0005 percent in every case compared (psi, mmHg, inHg, lbf, lbf-ft, and mechanical and metric horsepower), so any difference shows up only past the fifth significant figure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked examples with computed results"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: exact factors from the table, standard atmospheric pressure where an atmosphere is needed, and results rounded to the digits shown."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Conversion",
+        "Working",
+        "Result"
+      ],
+      "rows": [
+        [
+          "35 psi to bar",
+          "35 x 6,894.757 / 100,000",
+          "2.413 bar (241.3 kPa)"
+        ],
+        [
+          "3,000 psi to MPa",
+          "3,000 x 6,894.757 / 1,000,000",
+          "20.68 MPa (206.8 bar)"
+        ],
+        [
+          "90 lbf-ft to N-m",
+          "90 x 1.355818",
+          "122.02 N-m (12.44 kgf-m)"
+        ],
+        [
+          "150 N-m to lbf-ft",
+          "150 / 1.355818",
+          "110.63 lbf-ft"
+        ],
+        [
+          "12.7 mm to in",
+          "12.7 / 25.4",
+          "0.5 in"
+        ],
+        [
+          "1 kWh to BTU",
+          "3,600,000 / 1,055.056",
+          "3,412 BTU (International Table)"
+        ],
+        [
+          "30 kW to mechanical hp",
+          "30,000 / 745.6999",
+          "40.23 hp"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Three horsepower values, one name"
+    },
+    {
+      "type": "paragraph",
+      "text": "Horsepower is the clearest case of a unit with more than one meaning. For a 40 hp motor, the answer depends on which horsepower is meant."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Horsepower type",
+        "Watts per hp",
+        "40 hp in kW"
+      ],
+      "rows": [
+        [
+          "Mechanical",
+          "745.6999",
+          "29.83"
+        ],
+        [
+          "Electrical",
+          "746",
+          "29.84"
+        ],
+        [
+          "Metric",
+          "735.4988",
+          "29.42"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Mechanical and electrical differ by about 0.04 percent, while mechanical and metric differ by about 1.4 percent (745.7 / 735.5 = 1.0139). That is small for a rough estimate but not for a procurement or sizing check, so confirm which definition the nameplate or datasheet uses."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Rounding in the middle. Converting 35 psi to 2.41 bar and then to kPa gives 241 kPa, against 241.3 kPa from the direct conversion, a difference of about 0.13 percent. Convert in one step or carry full precision.",
+        "Mixing gauge and absolute pressure. Absolute equals gauge plus atmospheric. At standard atmosphere (14.696 psi), 35 psig is about 49.70 psia, or 241.3 kPa gauge and 342.6 kPa absolute. Real atmospheric pressure varies with weather and altitude.",
+        "Treating torque and energy as interchangeable. Both reduce to N-m, but a joule measures energy and a torque value is a force at a distance. A converter does not warn you if you convert one into the other.",
+        "Using a ratio factor for temperature. Temperature has an offset, so use degrees F = degrees C x 9/5 + 32, which gives 100 C = 212 F and 25 C = 298.15 K. A temperature difference of 10 C is 18 F, with no offset.",
+        "Expecting hardness scales to convert exactly. Rockwell, Brinell, Vickers and Shore use different tests, so conversions come from approximate tables such as ASTM E140 for steel, not a fixed factor.",
+        "Confusing similar names. A US gallon is 231 cubic inches, or 3.785411784 L, and tons, cups and pints also have regional variants. State which one you mean."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Conversion is arithmetic and does not replace specifications. For safety-critical items such as fastener torque, pressure vessels, relief valves or electrical sizing, use the values and units from the manufacturer or the governing code, check them with a calibrated instrument, and follow local codes and standards."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A short checklist before you trust a result"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Write down the unit exactly as printed, including variant words such as mechanical, metric, gauge, absolute or US.",
+        "Check the factor against a reference such as the NIST conversion tables, or against a case you can work by hand, such as 1 in = 25.4 mm.",
+        "Convert once from source to target, without intermediate rounding.",
+        "Round at the end to the precision your measurement actually supports.",
+        "Sanity-check the magnitude: 35 psi should be a little over 2 bar, not 20 or 0.2."
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "Convert Pressure Units",
+      "body": "Convert between psi, bar, kPa, MPa, atm and more with our free pressure converter.",
+      "buttonLabel": "Open Pressure Converter",
+      "path": "/industrial/pressure-converter/"
+    }
+  ],
+  "keywords": [
+    "unit converter",
+    "industrial units",
+    "pressure conversion",
+    "torque converter",
+    "unit conversion guide"
+  ]
+}

@@ -3,6 +3,29 @@ import { CalculatorConfig } from '../../../types/calculator';
 import BodyFatPanel from './BodyFatPanel';
 import { fixed1 as fmt } from '../../../lib/format';
 
+// U.S. Navy (Hodgdon & Beckett) log equations. The published coefficients are
+// for INCHES, so convert from cm before applying them (feeding cm into them
+// overstates body fat by several points).
+const CM_PER_INCH = 2.54;
+function navyBodyFatPct(
+  isMale: boolean,
+  heightCm: number,
+  neckCm: number,
+  abdomenCm: number,
+  waistCm: number,
+  hipCm: number,
+): number | null {
+  const h = heightCm / CM_PER_INCH;
+  if (isMale) {
+    const d = (abdomenCm - neckCm) / CM_PER_INCH;
+    if (d <= 0) return null;
+    return 86.010 * Math.log10(d) - 70.041 * Math.log10(h) + 36.76;
+  }
+  const d = (waistCm + hipCm - neckCm) / CM_PER_INCH;
+  if (d <= 0) return null;
+  return 163.205 * Math.log10(d) - 97.684 * Math.log10(h) - 78.387;
+}
+
 function cmFromInput(values: Record<string, string>, unit: string): number {
   if (unit === 'imperial') {
     const ft = parseFloat(values.heightFt) || 0;
@@ -159,21 +182,11 @@ const bodyFatConfig: CalculatorConfig = {
     const hip = parseFloat(values.hip);
     if ([heightCm, neck].some(isNaN) || heightCm <= 0 || neck <= 0) return null;
     const isMale = sex === 'male';
-    const neckCm = unit === 'imperial' ? neck * 2.54 : neck;
-    let bf: number;
-    if (isMale) {
-      if (isNaN(abdomen) || abdomen <= 0) return null;
-      const abdomenCm = unit === 'imperial' ? abdomen * 2.54 : abdomen;
-      if (abdomenCm - neckCm <= 0) return null;
-      bf = 86.010 * Math.log10(abdomenCm - neckCm) - 70.041 * Math.log10(heightCm) + 36.76;
-    } else {
-      if (isNaN(waist) || waist <= 0 || isNaN(hip) || hip <= 0) return null;
-      const waistCm = unit === 'imperial' ? waist * 2.54 : waist;
-      const hipCm = unit === 'imperial' ? hip * 2.54 : hip;
-      if (waistCm + hipCm - neckCm <= 0) return null;
-      bf = 163.205 * Math.log10(waistCm + hipCm - neckCm) - 97.684 * Math.log10(heightCm) - 78.387;
-    }
-    bf = Math.max(2, Math.min(bf, 70));
+    const toCm = (v: number) => (unit === 'imperial' ? v * 2.54 : v);
+    if (isMale ? isNaN(abdomen) || abdomen <= 0 : isNaN(waist) || waist <= 0 || isNaN(hip) || hip <= 0) return null;
+    const raw = navyBodyFatPct(isMale, heightCm, toCm(neck), toCm(abdomen), toCm(waist), toCm(hip));
+    if (raw === null) return null;
+    const bf = Math.max(2, Math.min(raw, 70));
     const cat = isMale
       ? (bf < 6 ? 'Athlete' : bf < 14 ? 'Athletic' : bf < 18 ? 'Fitness' : bf < 25 ? 'Average' : 'High')
       : (bf < 14 ? 'Athlete' : bf < 21 ? 'Athletic' : bf < 25 ? 'Fitness' : bf < 32 ? 'Average' : 'High');
@@ -218,22 +231,11 @@ const bodyFatConfig: CalculatorConfig = {
     if (isMale && (isNaN(abdomen) || abdomen <= 0)) return [];
     if (!isMale && (isNaN(waist) || waist <= 0 || isNaN(hip) || hip <= 0)) return [];
 
-    // U.S. Navy circumference method — all measurements in cm
-    const neckCm = unit === 'imperial' ? neck * 2.54 : neck;
-    let bodyFatPct: number;
-
-    if (isMale) {
-      const abdomenCm = unit === 'imperial' ? abdomen * 2.54 : abdomen;
-      if (abdomenCm - neckCm <= 0) return []; // log10 domain error guard
-      bodyFatPct = 86.010 * Math.log10(abdomenCm - neckCm) - 70.041 * Math.log10(heightCm) + 36.76;
-    } else {
-      const waistCm = unit === 'imperial' ? waist * 2.54 : waist;
-      const hipCm = unit === 'imperial' ? hip * 2.54 : hip;
-      if (waistCm + hipCm - neckCm <= 0) return []; // log10 domain error guard
-      bodyFatPct = 163.205 * Math.log10(waistCm + hipCm - neckCm) - 97.684 * Math.log10(heightCm) - 78.387;
-    }
-
-    bodyFatPct = Math.max(2, Math.min(bodyFatPct, 70));
+    // U.S. Navy circumference method (inputs normalised to cm, equation applied in inches)
+    const toCm = (v: number) => (unit === 'imperial' ? v * 2.54 : v);
+    const rawPct = navyBodyFatPct(isMale, heightCm, toCm(neck), toCm(abdomen), toCm(waist), toCm(hip));
+    if (rawPct === null) return []; // log10 domain error guard
+    const bodyFatPct = Math.max(2, Math.min(rawPct, 70));
 
     // Body fat categories
     const getCategory = (pct: number, sex: string): string => {
@@ -379,11 +381,11 @@ const bodyFatConfig: CalculatorConfig = {
           'Neck': '16 in',
           'Abdomen': '36 in',
         },
-        result: 'Body Fat: 25.0%. Category: Obese (male, 25%+). Fat Mass: 48.8 lbs. Lean Mass: 146.3 lbs.',
-        insight: 'At 195 lbs and 6\'0", Marcus has a BMI of 26.4 (Overweight). But the Navy circumference method reveals body fat at 25.0% — crossing into the Obese category by body composition standards. This illustrates why BMI alone is insufficient: Marcus carries fat predominantly around his midsection (36-inch abdomen vs. 16-inch neck), which the Navy formula detects through the abdomen-minus-neck difference. His lean mass of 146.3 lbs suggests he could aim to reach ~175 lbs at 16-18% body fat, which would mean losing about 20 lbs of fat while preserving muscle. Marcus should pair this estimate with a waist-to-height ratio check and, ideally, a DEXA scan for clinical confirmation.',
+        result: 'Body Fat: 18.6%. Category: Average (male, 18–25%). Fat Mass: 36.2 lbs. Lean Mass: 158.8 lbs.',
+        insight: 'At 195 lbs and 6\'0", Marcus has a BMI of 26.4 (Overweight). The Navy circumference method puts his body fat at 18.6%, just inside the Average band, so the scale alone overstates the problem or understates it depending on how much of the weight is muscle. The formula uses the abdomen-minus-neck difference (36 in − 16 in = 20 in) and height. His lean mass is 158.8 lbs; keeping that and reaching 15% body fat (the Fitness band) would mean a weight of about 186.8 lbs, roughly 8 lbs of fat lost. Marcus should pair this estimate with a waist-to-height ratio check and, ideally, a DEXA scan for clinical confirmation.',
       },
       {
-        scenario: 'Elena is 28 years old, 5\'5" tall, 140 lbs, with a 12.5-inch neck, 24-inch waist, and 29-inch hips. She is training for a half-marathon and wants to track body composition changes.',
+        scenario: 'Elena is 28 years old, 5\'5" tall, 140 lbs, with a 12.5-inch neck, 27-inch waist, and 36-inch hips. She is training for a half-marathon and wants to track body composition changes.',
         inputs: {
           'Unit System': 'Imperial',
           'Biological Sex': 'Female',
@@ -391,11 +393,11 @@ const bodyFatConfig: CalculatorConfig = {
           'Weight': '140 lbs',
           'Height': '5\'5" (65 in)',
           'Neck': '12.5 in',
-          'Waist': '24 in',
-          'Hip': '29 in',
+          'Waist': '27 in',
+          'Hip': '36 in',
         },
-        result: 'Body Fat: 33.4%. Category: Obese (female, 32%+). Fat Mass: 46.8 lbs. Lean Mass: 93.2 lbs.',
-        insight: 'At 140 lbs and 5\'5", Elena has a BMI of 23.3 (Normal weight). However, the Navy female formula estimates 33.4% body fat — in the Obese category. This apparent contradiction highlights a key limitation of the circumference method: it can overestimate body fat in women with wider hip-to-waist ratios (Elena\'s ratio is 0.83), because the formula treats hip circumference as a proxy for fat storage. Elena\'s 29-inch hip measurement relative to a 24-inch waist influences the calculation. For a half-marathon trainee who is likely leaner than the formula suggests, Elena should use this number as a baseline trend marker rather than a precise measurement. The value is in tracking change over time — if her measurements stay consistent but weight drops, the formula will show decreasing body fat %. DEXA or Bod Pod would provide more accurate absolute numbers.',
+        result: 'Body Fat: 22.5%. Category: Fitness (female, 21–25%). Fat Mass: 31.5 lbs. Lean Mass: 108.5 lbs.',
+        insight: 'At 140 lbs and 5\'5", Elena has a BMI of 23.3 (Normal weight) and the Navy female formula estimates 22.5% body fat, in the Fitness band. The female equation adds waist and hip and subtracts neck (27 + 36 − 12.5 = 50.5 in), so hip measurement carries real weight in the result and a one-inch tape-placement difference moves the estimate by a percentage point or more. For a half-marathon trainee, the value is in tracking change over time: if her measurements are taken the same way each week and weight drops, the formula will show decreasing body fat %. DEXA or Bod Pod would provide more accurate absolute numbers.',
       },
     ],
 

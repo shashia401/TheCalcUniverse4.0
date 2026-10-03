@@ -1,94 +1,107 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Body fat percentage is the share of your total body weight that is fat, as opposed to lean tissue such as muscle, bone, organs and water. It matters because weight alone cannot tell the two apart: two people can weigh the same and carry very different amounts of fat. A tape measure and the U.S. Navy formula give a rough estimate at home, but the number is only useful if you understand what the categories mean, how the formula works and how easily a small measuring error moves the result."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Why Body Fat Percentage Matters More Than Weight"
+      "text": "Why the same weight can mean different things"
     },
     {
       "type": "paragraph",
-      "text": "Two people can weigh the same but have completely different health profiles. The difference? Body composition."
+      "text": "Take a person who weighs 185 lb. At 20% body fat they carry 37 lb of fat and 148 lb of lean mass. At 30% they carry 55.5 lb of fat and 129.5 lb of lean mass. The scale reads the same in both cases. That is the practical argument for tracking body composition: when you change your diet or start training, the scale cannot tell you whether the change is fat, muscle or water."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The category bands"
     },
     {
       "type": "paragraph",
-      "text": "Body fat percentage tells you how much of your weight is fat versus lean tissue (muscle, bone, organs, water). It's a far better health indicator than the scale because it reveals what your weight is actually made of. A person at **20% body fat** is  different from someone at **35% body fat**, even at the same weight."
+      "text": "Our body fat calculator sorts results into five bands. The same five-band table is widely reproduced and is commonly attributed to the American Council on Exercise (ACE). The calculator applies the cutoffs below, with the lower edge of each band starting at 6%, 14%, 18% and 25% for men and 14%, 21%, 25% and 32% for women."
     },
     {
       "type": "table",
-      "headers": [
-        "Category",
-        "Men",
-        "Women"
-      ],
+      "headers": ["Category", "Men", "Women"],
       "rows": [
-        [
-          "Essential Fat",
-          "2–5%",
-          "10–13%"
-        ],
-        [
-          "Athletic",
-          "6–13%",
-          "14–20%"
-        ],
-        [
-          "Fitness",
-          "14–17%",
-          "21–24%"
-        ],
-        [
-          "Average",
-          "18–24%",
-          "25–31%"
-        ],
-        [
-          "Obese",
-          "25%+",
-          "32%+"
-        ]
+        ["Essential fat", "2-5%", "10-13%"],
+        ["Athletes", "6-13%", "14-20%"],
+        ["Fitness", "14-17%", "21-24%"],
+        ["Average", "18-24%", "25-31%"],
+        ["Obese (top band)", "25% and above", "32% and above"]
       ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How Is Body Fat Measured?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The U. S. Navy circumference method is one of the simplest and most validated tape-measure techniques."
-    },
-    {
-      "type": "paragraph",
-      "text": "You take a few body measurements — neck, abdomen (for men), or waist and hip (for women) — and plug them into a formula. No expensive equipment, no appointments. The standard error is about **±2–3%** compared to hydrostatic weighing."
-    },
-    {
-      "type": "paragraph",
-      "text": "For the most accurate results, measure in the morning before eating, use a non-stretchable tape, and have someone else take the measurements."
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "For men, the formula uses neck and abdomen circumference. For women, it uses neck, waist, and hip. The key measurement is the difference between your trunk and neck — this correlates strongly with total body density. Take each measurement 2–3 times and use the average for the best accuracy. Don't measure after a workout: water loss can give falsely low readings."
+      "text": "These are fitness categories, not diagnoses. A label such as obese in this table is a body composition band, and it does not replace a clinician's assessment. The women's bands sit higher than the men's because the table assumes a higher essential-fat level in women. A person below the essential-fat band should speak to a doctor rather than aim lower."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Improve Your Body Composition"
+      "text": "How the Navy tape method works"
+    },
+    {
+      "type": "paragraph",
+      "text": "The method comes from Hodgdon and Beckett (1984, Naval Health Research Center). It uses circumferences in inches and height in inches. For men: body fat % = 86.010 x log10(abdomen - neck) - 70.041 x log10(height) + 36.76. For women: body fat % = 163.205 x log10(waist + hip - neck) - 97.684 x log10(height) - 78.387. The same equations are published in a body-density form for centimetre measurements, and the two forms give nearly identical answers. For example, a man with a 36 in abdomen, 16 in neck and 72 in height comes out at 18.6% from the inch equation and 18.5% from the centimetre density form."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: a 45-year-old man"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: 70 in (5 ft 10 in) tall, 185 lb, neck 15.5 in, abdomen measured at the navel 38 in. Abdomen minus neck is 22.5 in. The equation gives 23.8%. That puts him in the average band (18-24%), 1.2 points under the top band. His fat mass is 185 x 0.238 = 44.1 lb and lean mass is 140.9 lb. His BMI is 26.5, which is in the overweight range, and the body fat estimate adds the information that the extra weight is mostly fat in his case rather than a sign of heavy muscle. If he kept all his lean mass and dropped to 20% body fat, he would weigh about 176 lb (140.9 / 0.80), so roughly 9 lb of fat loss."
+    },
+    {
+      "type": "paragraph",
+      "text": "Now see how fragile the category is. Measure the abdomen 1 inch larger (39 in) and the result becomes 25.5%, which lands in the top band. Measure it 1 inch smaller (37 in) and it falls to 22.1%. Half an inch of tape position or tension is worth about 0.8 to 0.9 points here. A half-inch error in the neck measurement has about the same effect in the opposite direction (neck 15 in gives 24.7%, neck 16 in gives 23.0%)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: a 35-year-old woman"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: 66 in (5 ft 6 in) tall, 150 lb, neck 13 in, waist 29 in, hip 39 in. Waist plus hip minus neck is 55 in. The equation gives 27.9%, in the average band for women (25-31%). Fat mass is about 41.9 lb and lean mass about 108.1 lb. Changing the waist by 1 inch moves the estimate by about 1.3 points (26.6% for a 28 in waist, 29.2% for 30 in), and the same is true of the hip."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limits of a tape measure"
     },
     {
       "type": "list",
       "items": [
-        "Prioritize protein. Aim for **1.6–2.2 g per kg** of body weight daily to preserve muscle during fat loss.",
-        "Lift weights, don't just do cardio. Resistance training signals your body to keep muscle while losing fat.",
-        "Create a moderate calorie deficit. **300–500 calories below TDEE** targets fat without triggering muscle loss.",
-        "Sleep at least **7 hours** per night. Poor sleep increases cortisol and ghrelin, making fat loss harder.",
-        "Track trends, not daily numbers. Body fat changes slowly — measure every 2–4 weeks and look for direction over time."
+        "It estimates body fat from the shape of your trunk. Circumferences cannot separate fat from muscle, or fat under the skin from fat around the organs.",
+        "Large neck or trunk muscle, wide hips or bone structure, and bloating can all shift the result without any change in fat. The calculator's own documentation says the formula can overestimate in some lean or muscular people.",
+        "The equation was developed on a military population, so it may fit less well for older adults, adolescents and very muscular athletes.",
+        "Other methods such as DXA scans, skinfold callipers and body-fat scales give different numbers for the same person. Compare like with like and stick to one method when tracking change."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Body Fat vs. BMI — Which Is Better?"
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Measuring at different places each time. Use the navel for the abdomen (men), the narrowest point for the waist and the widest point for the hips (women), and the same spot below the larynx for the neck.",
+        "Pulling the tape tight or letting it sag. It should lie flat against the skin without compressing it.",
+        "Reading a single measurement as fact. Take each measurement two or three times, average them, and look at the trend over weeks rather than a one-off reading.",
+        "Measuring in different conditions, such as after a large meal or hard workout, then comparing.",
+        "Chasing a very low number. Essential fat is needed for normal body function."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "Use the estimate as a trend line, not a verdict. If you are making health decisions based on body composition, ask your doctor or a qualified professional about a measured assessment."
     },
     {
       "type": "cta",

@@ -1,66 +1,173 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "For adults over 65, BMI still uses the same cutoffs as for younger adults, but it is a less reliable number. The CDC applies one set of adult categories to everyone aged 20 and over, regardless of age. In older people, loss of height and loss of muscle both distort the result, and BMI cannot see where fat is stored. That is why researchers who study the so-called obesity paradox keep arriving at the same practical advice: look at waist size and strength alongside the scale, and do not chase a lower BMI without a clinician involved."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "The Obesity Paradox in Older Adults"
+      "text": "What the standard categories say, and what they miss"
     },
     {
       "type": "paragraph",
-      "text": "The obesity paradox is a fascinating phenomenon: in older adults (65+), being in the overweight BMI category (25-29.9) is associated with lower mortality than being in the normal BMI category (18.5-24.9). This does not mean obesity is healthy. It likely reflects that older adults with slightly higher BMIs have more muscle mass and nutritional reserves to weather illness, surgery, and hospitalizations. A normal BMI in an older adult can sometimes mask sarcopenic obesity — low muscle mass with hidden high body fat."
+      "text": "The CDC lists the adult categories as underweight below 18.5, healthy weight from 18.5 to under 25, overweight from 25 to under 30, and obesity at 30 or above, with obesity split into class 1 (30 to under 35), class 2 (35 to under 40) and class 3 (40 or more). The CDC also states that BMI does not distinguish between fat, muscle and bone mass and does not show where fat is distributed. A published geriatric review adds that BMI is a less accurate indicator in older people because of loss of height and loss of muscle, and that waist circumference is a more sensitive marker of visceral fat in this age group."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Sarcopenic Obesity — The Hidden Risk"
+      "text": "Why the same weight gives a different BMI as you age"
     },
     {
       "type": "paragraph",
-      "text": "Sarcopenic obesity occurs when muscle mass declines with age (sarcopenia) while body fat stays the same or increases. The result: a person can have a normal BMI but dangerously low muscle mass and high body fat percentage. This is invisible to BMI but carries significant health risks — metabolic disease, functional decline, falls, and frailty. For seniors, body composition assessment (body fat percentage, muscle mass, waist circumference) is far more informative than BMI alone."
+      "text": "Height loss alone can move you across a line. The table below keeps weight fixed at 70 kg and lets height shrink. BMI is weight in kilograms divided by height in metres squared."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Height",
+        "Weight",
+        "BMI",
+        "CDC category"
+      ],
+      "rows": [
+        [
+          "170 cm",
+          "70 kg",
+          "24.2",
+          "Healthy weight"
+        ],
+        [
+          "168 cm",
+          "70 kg",
+          "24.8",
+          "Healthy weight"
+        ],
+        [
+          "166 cm",
+          "70 kg",
+          "25.4",
+          "Overweight"
+        ],
+        [
+          "164 cm",
+          "70 kg",
+          "26.0",
+          "Overweight"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Nothing about this person's weight changed, yet a 4 cm loss of height moves the reading from 24.2 to 26.0. The reverse also happens. If muscle shrinks while fat grows, weight can stay the same, BMI stays the same, and body composition gets worse without any number on the scale warning you."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "BMI Guidelines for Seniors"
+      "text": "Worked example: three 75-year-olds with similar BMI"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: all three are 168 cm tall, and the weights and waists are hypothetical. For this height the BMI 18.5 to 25 range is about 52 to 70 kg. Waist-to-height ratio (WHtR) is waist divided by height in the same units. NICE guidance, as summarised in a published review, describes WHtR of 0.4 to 0.49 as healthy central adiposity, 0.5 to 0.59 as increased, and 0.6 or more as high. Those bands are written for adults in general, not specifically for older adults."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Person",
+        "Weight",
+        "Waist",
+        "BMI",
+        "WHtR",
+        "What each number says"
+      ],
+      "rows": [
+        [
+          "A",
+          "62 kg",
+          "80 cm",
+          "22.0",
+          "0.476",
+          "Healthy weight; waist under half of height"
+        ],
+        [
+          "B",
+          "66 kg",
+          "88 cm",
+          "23.4",
+          "0.524",
+          "Healthy weight, but waist is above half of height"
+        ],
+        [
+          "C",
+          "74 kg",
+          "94 cm",
+          "26.2",
+          "0.560",
+          "Overweight; waist is above half of height"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Person B is the one BMI misses. Half of 168 cm is 84 cm, so a waist of 88 cm is over the line even though the BMI looks fine. Person C is flagged by both. Person A is fine on both, but neither number says anything about grip strength, walking speed or how much of the 62 kg is muscle."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the obesity paradox does and does not show"
+    },
+    {
+      "type": "paragraph",
+      "text": "The obesity paradox is the repeated finding that, in older adults, a higher BMI is sometimes linked with better survival than a BMI in the middle of the normal range. One study that looked at this directly followed 758,471 Korean adults aged over 75 (mean age 79.24 years) for an average of 6.94 years. For myocardial infarction, lower BMI was associated with a higher hazard, and higher BMI with a lower hazard. For waist circumference the pattern reversed: as waist increased, hazard increased. The authors concluded that the paradox applies to BMI but not to waist circumference."
+    },
+    {
+      "type": "paragraph",
+      "text": "That supports a cautious reading. A higher BMI may partly reflect reserves such as muscle, while a low BMI in later life may reflect illness or frailty. It does not show that extra abdominal fat is harmless. This is one observational study of one outcome in one population, so it cannot tell you what is right for you."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Sarcopenic obesity"
+    },
+    {
+      "type": "paragraph",
+      "text": "Sarcopenic obesity means low muscle together with high fat. A geriatric review notes that this combination, especially alongside other conditions, is linked with reduced physical activity, functional limitation, disability, fatigue and frailty. It also notes that the number of cases is expected to rise as obesity and population ageing converge. A normal BMI can hide it, which is one reason waist size and strength tests are useful additions."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
     },
     {
       "type": "list",
-      "ordered": false,
       "items": [
-        "Below 22: Underweight — may indicate frailty or malnutrition risk. Nutritional assessment recommended.",
-        "22-27: Healthy range for seniors. This is slightly higher than the general adult range.",
-        "27-30: Overweight but may be protective. Unnecessary weight loss could be harmful.",
-        "Above 30: Obesity — associated with health risks even in seniors. Weight management should prioritize preserving muscle mass.",
-        "Above 35: Moderate-severe obesity — health risks likely outweigh any protective effect."
+        "Treating a BMI of 25 to 29.9 as an automatic reason to diet. In later life the body composition behind the number matters more.",
+        "Treating a normal BMI as proof of good health. Person B above shows how it can sit alongside a large waist.",
+        "Using an old height. Measure height again; a loss of a few centimetres changes BMI as the first table shows.",
+        "Setting a target BMI from a single source. The sources used for this article give no age-specific BMI bands, so this article does not quote any.",
+        "Losing weight quickly. The geriatric review advises a gradual, start-low approach that combines diet change with aerobic and resistance exercise to protect muscle."
       ]
     },
     {
       "type": "callout",
-      "variant": "info",
-      "text": "If you are over 65, do not pursue weight loss without medical supervision. Unintended weight loss in seniors is associated with higher mortality. Focus on maintaining muscle and strength rather than achieving a specific BMI number."
+      "variant": "warning",
+      "text": "BMI is a screening tool, not a diagnosis. Unexplained weight loss, loss of strength, or a big change in waist size at any age is a reason to talk to a clinician. If you are over 65 and thinking about losing weight, discuss the plan with your doctor first, especially if you take medication or have a chronic condition."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
+      "text": "A practical way to use the numbers"
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "What is a healthy BMI for a 70-year-old?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Research suggests a BMI of 24-27 is optimal for adults over 65. This is slightly higher than the general adult healthy range. A BMI below 22 in seniors is associated with increased mortality risk and may indicate frailty or malnutrition."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Should seniors lose weight if their BMI is high?"
-    },
-    {
-      "type": "paragraph",
-      "text": "If a senior has a high BMI but is metabolically healthy and physically active, weight loss may not be beneficial. If there are obesity-related health problems (diabetes, joint pain, sleep apnea), modest weight loss of 5-10% can help — but it should include strength training to preserve muscle mass. Crash dieting in seniors is dangerous."
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Re-measure height and weight, and write both down with the date.",
+        "Calculate BMI and note the CDC category, but treat it as one input.",
+        "Measure waist at the navel and divide by height. Compare with half of your height.",
+        "Track strength and function too, such as standing up from a chair without using your hands.",
+        "Bring the figures to your next appointment and ask what they mean for you."
+      ]
     },
     {
       "type": "cta",

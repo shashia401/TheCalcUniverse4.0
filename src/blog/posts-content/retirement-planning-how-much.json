@@ -1,100 +1,222 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "The monthly amount you need to save depends mostly on how many years you have left to let it grow. To reach $1,000,000 by age 65 with nothing saved today, a 30-year-old needs about $555 a month at a 7% assumed return, while a 40-year-old needs about $1,234 and a 50-year-old about $3,155. Each five years of delay raises the required monthly amount by about 1.5 times at 7% and 1.3 to 1.4 times at 5%."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "The 4% Rule Explained"
+      "text": "Start from the monthly amount, not a benchmark"
     },
     {
       "type": "paragraph",
-      "text": "The 4% rule says you can withdraw 4% of your retirement savings in your first year of retirement, then adjust for inflation each year, with a high probability that your money lasts 30 years. Under this rule, if you need $40,000 per year from investments, you need $1 million saved ($40,000 / 0.04 = $1,000,000). The rule was based on historical US stock and bond returns from 1926-1995 and is a guideline, not a guarantee. Many experts now recommend 3-3.5% for longer retirements."
+      "text": "Rules that say you should have a certain multiple of salary saved by a given age are shortcuts, and different sources give different multiples. They do not know your spending, your other income or when you want to stop working. A more useful question is concrete: given where you are, how much must you set aside each month to reach a target by a chosen age? This post answers that with a fixed target. For how to pick the target itself, see the companion piece on spending and the 4% rule."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Savings Benchmarks by Age"
+      "text": "Assumptions"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Target: $1,000,000 at age 65, in future dollars. It is a round number used for comparison, not a recommendation.",
+        "Starting balance: zero. If you already have savings, the required amount is lower.",
+        "Level contributions at the end of each month, with no raises over time, and returns compounded monthly. This is the future-value formula the retirement calculator uses.",
+        "Returns of 5% and 7% a year are assumptions chosen to show a range. Actual returns vary from year to year and can be negative. Past performance does not guarantee future results."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Monthly saving needed by starting age"
     },
     {
       "type": "table",
       "headers": [
-        "Age",
-        "Target (1x Salary)",
-        "Target (3x Expenses)"
+        "Starting age",
+        "Years to 65",
+        "Monthly at 5%",
+        "Monthly at 7%",
+        "Total you contribute at 7%",
+        "Share of $1M from growth at 7%"
+      ],
+      "rows": [
+        [
+          "25",
+          "40",
+          "$655.30",
+          "$380.98",
+          "$182,870",
+          "82%"
+        ],
+        [
+          "30",
+          "35",
+          "$880.21",
+          "$555.23",
+          "$233,197",
+          "77%"
+        ],
+        [
+          "35",
+          "30",
+          "$1,201.55",
+          "$819.69",
+          "$295,089",
+          "70%"
+        ],
+        [
+          "40",
+          "25",
+          "$1,679.23",
+          "$1,234.46",
+          "$370,338",
+          "63%"
+        ],
+        [
+          "45",
+          "20",
+          "$2,432.89",
+          "$1,919.66",
+          "$460,717",
+          "54%"
+        ],
+        [
+          "50",
+          "15",
+          "$3,741.27",
+          "$3,154.95",
+          "$567,891",
+          "43%"
+        ],
+        [
+          "55",
+          "10",
+          "$6,439.88",
+          "$5,777.51",
+          "$693,302",
+          "31%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The 25-year-old contributes about $182,870 and lets growth supply the rest, while a 55-year-old contributes $693,302 and gets far less help from compounding. At 7% the starting-age effect is steep: from age 30 to age 50, the monthly requirement rises from $555 to $3,155."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What waiting costs"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Delay",
+        "Years",
+        "Required increase at 5%",
+        "Required increase at 7%"
+      ],
+      "rows": [
+        [
+          "25 to 30",
+          "5 years",
+          "1.34 times",
+          "1.46 times"
+        ],
+        [
+          "30 to 35",
+          "5 years",
+          "1.37 times",
+          "1.48 times"
+        ],
+        [
+          "35 to 40",
+          "5 years",
+          "1.40 times",
+          "1.51 times"
+        ],
+        [
+          "30 to 40",
+          "10 years",
+          "1.91 times",
+          "2.22 times"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These multiples are ratios of the monthly amounts in the table above. Waiting 5 years raises the requirement by roughly a third to a half. It takes about a 10-year delay to roughly double it, which is why consistency in your 20s and 30s matters more than a single big catch-up later."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A million dollars in the future is not a million today"
+    },
+    {
+      "type": "paragraph",
+      "text": "Inflation reduces what a fixed number can buy. At an assumed 3% a year, $1,000,000 at age 65 would equal about $355,383 in today's purchasing power for a 30-year-old. If you want $1,000,000 of today's purchasing power instead, the future-dollar target is larger and so is the monthly amount:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Starting age",
+        "Future-dollar target for $1M of today's buying power",
+        "Monthly at 7%",
+        "Monthly at 5%"
       ],
       "rows": [
         [
           "30",
-          "1x salary",
-          "$90,000"
-        ],
-        [
-          "35",
-          "2x salary",
-          "$180,000"
+          "$2,813,862",
+          "$1,562.34",
+          "$2,476.79"
         ],
         [
           "40",
-          "3x salary",
-          "$270,000"
-        ],
-        [
-          "45",
-          "4x salary",
-          "$360,000"
+          "$2,093,778",
+          "$2,584.68",
+          "$3,515.94"
         ],
         [
           "50",
-          "6x salary",
-          "$540,000"
-        ],
-        [
-          "55",
-          "7x salary",
-          "$630,000"
-        ],
-        [
-          "60",
-          "8x salary",
-          "$720,000"
-        ],
-        [
-          "65",
-          "10x salary",
-          "$900,000"
+          "$1,557,967",
+          "$4,915.31",
+          "$5,828.78"
         ]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Social Security and Pensions"
+      "text": "Common mistakes"
     },
     {
-      "type": "paragraph",
-      "text": "Social Security replaces about 40% of pre-retirement income for the average worker. If you have a pension, factor that into your calculations too. The retirement calculator lets you include Social Security and pension income to see how much you still need from your savings. Remember: Social Security benefits increase by about 8% per year if you delay claiming from age 62 to 70."
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Waiting for a larger paycheck. A smaller amount started early can beat a larger one started later, as the table shows.",
+        "Leaving out the employer contribution. If your employer adds to your account, count it as part of the monthly figure, and check the plan terms for what you must contribute to receive it.",
+        "Choosing a high return to make the number look affordable. The 7% column is not a forecast, and the 5% column is not a floor.",
+        "Ignoring inflation. A target that is not adjusted will feel smaller than expected when you reach it.",
+        "Setting a level contribution and never raising it. In practice, raising your savings when your pay rises shrinks the starting amount, which these tables do not model."
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What if I want to retire early (before 59.5)?"
+      "text": "When this does not apply"
     },
     {
       "type": "paragraph",
-      "text": "Early retirement requires a higher savings rate (typically 50%+ of income) and careful tax planning. You can access 401(k) funds penalty-free through Roth conversion ladders or SEPP (72t) distributions. Health insurance before Medicare also needs to be factored in. The retirement calculator includes early retirement scenarios."
+      "text": "These tables assume a steady return and level contributions, which markets and careers rarely provide. They do not model taxes on withdrawals, Social Security or pensions, or the order in which good and bad years arrive, which matters a great deal close to retirement. If you are within about ten years of retiring, or have a defined-benefit pension, a planner who can model your actual accounts will give a more reliable answer. Use the retirement calculator with your own balance, age and expected return to get a number that fits your situation."
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "How do I account for inflation in my retirement plan?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Use real (after-inflation) return rates in your calculations. If you expect 7% market returns and 3% inflation, use 4% as your real return. The retirement calculator has an inflation toggle to show both nominal and real (inflation-adjusted) projections."
+      "type": "callout",
+      "variant": "info",
+      "text": "Every figure came from the future-value formula used by the retirement calculator, solved for the monthly payment. Returns and inflation are assumptions, not predictions."
     },
     {
       "type": "cta",

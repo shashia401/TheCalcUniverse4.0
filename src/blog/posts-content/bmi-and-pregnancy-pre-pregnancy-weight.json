@@ -1,80 +1,108 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Pre-Pregnancy BMI and Weight Gain Guidelines"
+      "type": "paragraph",
+      "text": "Your BMI before pregnancy decides which recommended range of total weight gain applies to you. The Institute of Medicine (IOM) 2009 guidelines, which the pregnancy weight gain calculator on this site uses, recommend 28 to 40 lb for a pre-pregnancy BMI under 18.5, 25 to 35 lb for 18.5 to 24.9, 15 to 25 lb for 25 to 29.9, and 11 to 20 lb for 30 or above. These are population guidelines for a single baby, not personal targets. Your own range should be set with your midwife or doctor."
     },
     {
-      "type": "paragraph",
-      "text": "The Institute of Medicine (IOM) recommends different weight gain ranges based on pre-pregnancy BMI. These guidelines aim to balance the health of both mother and baby — too little gain risks low birth weight, too much gain risks gestational diabetes, cesarean delivery, and postpartum weight retention."
+      "type": "callout",
+      "variant": "warning",
+      "text": "This is general information, not medical advice. Pregnancy weight can reflect fluid, a health condition, or a medical plan that differs from the guideline. Never start a diet or try to lose weight during pregnancy without talking to your clinician. If your weight is changing quickly, or you cannot keep food or fluids down, contact your care team."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The recommended total gain by pre-pregnancy BMI"
     },
     {
       "type": "table",
-      "headers": [
-        "Pre-Pregnancy BMI",
-        "Category",
-        "Recommended Gain (lbs)",
-        "Recommended Gain (kg)"
-      ],
+      "headers": ["Pre-pregnancy BMI", "Category", "Total gain (lb)", "Total gain (kg, as published)"],
       "rows": [
-        [
-          "Under 18.5",
-          "Underweight",
-          "28-40 lbs",
-          "12.5-18 kg"
-        ],
-        [
-          "18.5-24.9",
-          "Normal weight",
-          "25-35 lbs",
-          "11.5-16 kg"
-        ],
-        [
-          "25.0-29.9",
-          "Overweight",
-          "15-25 lbs",
-          "7-11.5 kg"
-        ],
-        [
-          "30.0 and above",
-          "Obese",
-          "11-20 lbs",
-          "5-9 kg"
-        ]
+        ["Under 18.5", "Underweight", "28 to 40", "12.5 to 18"],
+        ["18.5 to 24.9", "Normal weight", "25 to 35", "11.5 to 16"],
+        ["25.0 to 29.9", "Overweight", "15 to 25", "7 to 11.5"],
+        ["30.0 and above", "Obese", "11 to 20", "5 to 9"]
       ]
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "First Trimester Weight Gain"
-    },
-    {
       "type": "paragraph",
-      "text": "In the first trimester (weeks 1-12), total recommended weight gain is only 1-4.5 lbs regardless of pre-pregnancy BMI. If you gain significantly more in the first trimester, it is mostly fluid and fat rather than fetal growth. This is a common source of excessive total pregnancy weight gain. Focus on eating nutritious foods rather than eating for two — the fetus is only about the size of a lime at 12 weeks."
+      "text": "The pound figures are the ones used by the calculator and the sources it cites (IOM, ACOG and CDC). The kilogram figures are the rounded values published with the IOM guidelines, which a published systematic review of the IOM guidance also reports. Converting the pound ranges directly gives slightly different numbers (28 to 40 lb is 12.7 to 18.1 kg), so small differences between sources are rounding, not disagreement. The guideline is lower for higher BMIs because the body already carries more reserves."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Can I lose weight during pregnancy if my BMI is high?"
+      "text": "Working out your pre-pregnancy BMI"
     },
     {
       "type": "paragraph",
-      "text": "Weight loss during pregnancy is generally not recommended, but weight gain can be safely minimized for women with high pre-pregnancy BMI. Some studies show that modest weight loss in severely obese women under strict medical supervision may have benefits, but this should only be attempted with your obstetrician guidance."
+      "text": "BMI is weight in kilograms divided by height in metres squared. Use your weight before pregnancy, or from the very start of it, not your weight today. The table shows examples checked with that formula."
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "How does BMI affect fertility?"
+      "type": "table",
+      "headers": ["Height", "Pre-pregnancy weight", "BMI", "Category", "Total gain range"],
+      "rows": [
+        ["5 ft 5 in (165.1 cm)", "140 lb", "23.3", "Normal weight", "25 to 35 lb"],
+        ["5 ft 4 in (162.6 cm)", "105 lb", "18.0", "Underweight", "28 to 40 lb"],
+        ["5 ft 5 in (165.1 cm)", "170 lb", "28.3", "Overweight", "15 to 25 lb"],
+        ["5 ft 7 in (170.2 cm)", "220 lb", "34.5", "Obese", "11 to 20 lb"],
+        ["165 cm", "62 kg", "22.8", "Normal weight", "11.5 to 16 kg"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Both high and low BMI can affect fertility. Women with BMI over 30 have higher rates of ovulatory infertility, and weight loss often improves fertility outcomes. Women with BMI under 18.5 may have irregular periods and ovulatory dysfunction. Achieving a healthy BMI before trying to conceive is one of the best things you can do for fertility."
+      "text": "Category edges matter. At 5 ft 5 in, 150 lb gives a BMI of 24.96 (normal weight) and 151 lb gives 25.13 (overweight). One pound of difference moves the total range from 25 to 35 lb to 15 to 25 lb. That is a sign that the ranges are guides, and a clinician who knows your history may recommend something different."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the weekly pace adds up"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator also shows a weekly target for the second and third trimesters, plus about 1 to 4.4 lb in the first trimester. Adding these together over weeks 14 to 40 (27 weeks) gives a rough check on the totals. The right-hand column is simple arithmetic on the cited rates, not a published figure."
+    },
+    {
+      "type": "table",
+      "headers": ["Category", "Weekly gain, weeks 14 to 40 (lb)", "Weekly gain (kg)", "First trimester plus 27 weeks (lb)"],
+      "rows": [
+        ["Underweight", "1.0 to 1.3", "0.45 to 0.59", "28.0 to 39.5"],
+        ["Normal weight", "0.8 to 1.0", "0.36 to 0.45", "22.6 to 31.4"],
+        ["Overweight", "0.5 to 0.7", "0.23 to 0.32", "14.5 to 23.3"],
+        ["Obese", "0.4 to 0.6", "0.18 to 0.27", "11.8 to 20.6"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The sums fall close to the published totals, though the normal-weight sum is lower (22.6 to 31.4 lb against 25 to 35 lb). That is because weekly rates describe an average pace, not a rule. Real gain is uneven: many people gain little early on, often because of nausea, and more later."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why the ranges differ by BMI"
+    },
+    {
+      "type": "paragraph",
+      "text": "According to the guidance the calculator cites, gaining below the range is associated with a higher chance of a small baby or an early birth, and gaining above it is associated with a larger baby, caesarean delivery and keeping weight after birth. These are associations seen in populations, not predictions for one person, and the same guidance notes that the ranges balance several risks."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and limits"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Using today's weight to find your BMI. The category is based on your weight before pregnancy.",
+        "Treating the range as a goal to hit. It is a range for most singleton pregnancies. Twins and other multiples have separate ranges, which this guide does not cover.",
+        "Trying to lose weight to stay in range. Weight loss in pregnancy is generally not advised without medical supervision. If you are above the range, talk to your clinician about pace and food quality, not dieting.",
+        "Relying on BMI alone. BMI does not separate muscle from fat, and the IOM acknowledges that BMI categories may not predict outcomes equally across all ethnic groups.",
+        "Reading a mid-pregnancy 'within range' as 'on track'. After week 13 this site's calculator compares your gain so far with the whole-pregnancy range, which is wide. Use the weekly pace above and your clinic's weigh-ins for a better check.",
+        "Comparing yourself with other people. Two women at the same week can have different healthy weights."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "This guide covers weight gain once you are pregnant. How BMI relates to fertility or to conceiving is a separate question for your clinician, and it is not addressed here. Use the calculators for orientation, bring your numbers to your appointment, and let your midwife or doctor decide what is right for you."
     },
     {
       "type": "cta",
@@ -84,12 +112,5 @@
       "path": "/health/bmi-calculator/"
     }
   ],
-  "keywords": [
-    "bmi and pregnancy",
-    "pregnancy bmi",
-    "pre-pregnancy bmi",
-    "pregnancy weight gain bmi",
-    "bmi and fertility",
-    "bmi pregnancy risks"
-  ]
+  "keywords": ["bmi and pregnancy","pregnancy bmi","pre-pregnancy bmi","pregnancy weight gain bmi","bmi and fertility","bmi pregnancy risks"]
 }

@@ -7,7 +7,7 @@
     },
     {
       "type": "paragraph",
-      "text": "BMI stands for Body Mass Index. It is your weight in kilograms divided by your height in meters squared (kg/m²). For example, a person who is 1.75m tall and weighs 70kg has a BMI of 22.9 (70 Ã· 3.06). The formula was developed by Belgian mathematician Adolphe Quetelet in the 1830s as a way to measure population-level obesity, not as a diagnostic tool for individuals. In the US imperial system, the formula is (weight in pounds / height in inches²) x 703."
+      "text": "BMI stands for Body Mass Index. It is your weight in kilograms divided by your height in meters squared (kg/m²). For example, a person who is 1.75m tall and weighs 70kg has a BMI of 22.9 (70 ÷ 3.06). The formula was developed by Belgian mathematician Adolphe Quetelet in the 1830s as a way to measure population-level obesity, not as a diagnostic tool for individuals. In the US imperial system, the formula is (weight in pounds / height in inches²) x 703."
     },
     {
       "type": "heading",

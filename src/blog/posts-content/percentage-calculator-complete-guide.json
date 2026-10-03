@@ -1,43 +1,103 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Three Types of Percentage Calculations"
-    },
-    {
       "type": "paragraph",
-      "text": "Most percentage problems fall into three categories. Find what percent of Y is X (e.g., what percent of 200 is 50?). Find what is X% of Y (e.g., what is 15% of 80?). Find the percentage change (e.g., what is the percent increase from 50 to 75?). Our calculator handles all three instantly."
-    },
-    {
-      "type": "paragraph",
-      "text": "The basic formula is: percentage = (part / whole) × 100. But you can also work backward: part = (percentage × whole) / 100. Our calculator handles both directions and also calculates percentage increase and decrease between two numbers."
+      "text": "Almost every percentage problem is one of six questions, and each has one formula. You are either finding a percentage of a number, finding what percent one number is of another, finding the percent change between two numbers, adding a percentage to a number, taking a percentage off a number, or working backward from a result to the original number. This guide lists all six with computed answers, so you can find the one that matches your problem and check your own arithmetic against it."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Common Uses"
+      "text": "The six percentage problems and their formulas"
+    },
+    {
+      "type": "paragraph",
+      "text": "A percent is a fraction out of 100, so 15% means 15 / 100 = 0.15. Every formula below is that one idea applied in a different direction. The first five question types match the five modes of the TheCalcUniverse percentage calculator; the sixth, the reverse problem, has no mode of its own, but you can check it with the calculator by running the answer forward."
+    },
+    {
+      "type": "table",
+      "headers": ["Question", "Formula", "Example", "Answer"],
+      "rows": [
+        ["What is X% of Y?", "(X / 100) x Y", "15% of 80", "12"],
+        ["X is what % of Y?", "(X / Y) x 100", "42 out of 50", "84%"],
+        ["X is what % of Y?", "(X / Y) x 100", "17 out of 68", "25%"],
+        ["Percent change, old to new", "(new - old) / old x 100", "80 to 100", "+25%"],
+        ["Percent change, old to new", "(new - old) / old x 100", "240 to 210", "-12.5%"],
+        ["Add X% to Y", "Y x (1 + X / 100)", "120 plus 8.5%", "130.20"],
+        ["Subtract X% from Y", "Y x (1 - X / 100)", "90 minus 35%", "58.50"],
+        ["Original before a rise of X%", "new / (1 + X / 100)", "138 after a 15% rise", "120"],
+        ["Original before a cut of X%", "new / (1 - X / 100)", "68 after a 20% cut", "85"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Every answer in the table was computed rather than estimated. The calculator's percent-change mode divides by the absolute value of the starting number, which only matters when the starting number is negative (covered below)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A worked example for each situation"
     },
     {
       "type": "list",
       "ordered": false,
       "items": [
-        "Shopping discounts: A $80 jacket at 25% off saves you $20. You pay $60.",
-        "Restaurant tips: 15% of a $65 bill is $9.75. 20% is $13.00.",
-        "Sales tax: 8% tax on a $40 purchase adds $3.20 for a total of $43.20.",
-        "Test scores: 42 correct out of 50 questions = 84%.",
-        "Investment returns: A $10,000 investment growing to $12,500 is a 25% gain.",
-        "Weight loss: Losing 15 lbs from 180 lbs is an 8.3% reduction."
+        "Percent of a number: a 7.5% commission on a 64-unit order is 0.075 x 64 = 4.8 units.",
+        "Percent above 100%: 120% of 45 is 1.2 x 45 = 54. Percentages over 100 are normal when something has grown.",
+        "What percent: you scored 42 of 50, so 42 / 50 = 0.84, which is 84%.",
+        "Share of a total: if 18 of 60 survey answers were \"yes\", that is 18 / 60 x 100 = 30%. The other 42 answers are 70%, and 30% + 70% = 100%.",
+        "Change over time: a price of 240 that falls to 210 changed by (210 - 240) / 240 = -0.125, which is a 12.5% decrease.",
+        "Tax added: 8.5% tax on a 120 purchase is 10.20, so the total is 130.20.",
+        "Discount taken off: 35% off a 90 item removes 31.50, leaving 58.50.",
+        "Working backward: a price of 68 after a 20% discount was 68 / 0.80 = 85 before the discount."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Percentage Change: Increase vs Decrease"
+      "text": "Working backward is the one people get wrong"
     },
     {
       "type": "paragraph",
-      "text": "To calculate percentage change, subtract the original value from the new value, divide by the original value, and multiply by 100. A positive result is an increase; a negative result is a decrease. For example, a stock going from $50 to $60 is a 20% increase. Rent dropping from $1,500 to $1,350 is a 10% decrease."
+      "text": "Suppose a total of 138 includes a 15% increase and you want the amount before the increase. The tempting move is to take 15% of 138 and subtract it, which gives 138 x 0.85 = 117.30. That is wrong, because the 15% was calculated on the smaller original number, not on 138. The correct step is to divide: 138 / 1.15 = 120. Check it by going forward: 120 x 1.15 = 138. The same applies to a discount, where you divide by (1 - rate) instead of subtracting."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using the wrong base. Percent change always divides by the starting value. Going from 75 to 50 is a 33.3% decrease, but going from 50 back to 75 is a 50% increase. The same gap of 25 units gives two different percentages because the starting values differ.",
+        "Treating a rise and a matching fall as cancelling. Start at 100, add 20% to reach 120, then take 20% off: 120 x 0.80 = 96, not 100. To undo a 20% fall you need a 25% rise.",
+        "Adding percentages that apply to different bases. A 10% rise followed by another 10% rise is 1.10 x 1.10 = 1.21, so 21% in total, not 20%. A 50% rise followed by a 50% fall leaves you at 1.5 x 0.5 = 0.75, which is a 25% loss.",
+        "Confusing percent with percentage points. A rate moving from 10% to 15% is up 5 percentage points but up 50% in relative terms.",
+        "Rounding too early. Keep full precision through the calculation and round only the final answer, especially for money, so that fractions of a cent are rounded once, at the end."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When a plain percentage is not enough"
+    },
+    {
+      "type": "paragraph",
+      "text": "The formulas above assume a single step on a single base. Percent change is undefined when the starting value is zero, because you cannot divide by zero; report the absolute change instead. When the starting value is negative, the result needs care: the calculator treats a move from -50 to -25 as +50% because it divides by the absolute value of -50, which reads as an improvement, but plain division by -50 would show -50%. Many analysts avoid percent change altogether for values that can be zero or negative. Repeated percentages, such as interest earned every year, compound rather than add, so use a compound interest tool instead. Tax brackets, tiered pricing and sliding-scale fees apply different percentages to different slices of an amount, so one percentage multiplication will not reproduce them."
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "text": "To sanity-check any result, estimate it first. 15% of 80 should be more than 10% of 80 (which is 8) and less than 25% of 80 (which is 20). If your result falls outside that range, one of the inputs is likely in the wrong box."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which guide to read next"
+    },
+    {
+      "type": "paragraph",
+      "text": "This guide is the reference for the basic types. For a deeper treatment of percent change, percentage points and reverse percentages, read the guide on calculating percentage increase and decrease. For shortcuts to do these sums without a calculator, read the guide on percentage mental math. For stacked discounts and sales tax together, use the discount guide and the percent off calculator."
     },
     {
       "type": "cta",

@@ -3,98 +3,164 @@
     {
       "type": "heading",
       "level": 2,
-      "text": "What Is TDEE?"
+      "text": "What TDEE Is and How It Is Calculated"
     },
     {
       "type": "paragraph",
-      "text": "TDEE stands for Total Daily Energy Expenditure — the total number of calories your body burns in a day. Every breath, every step, every meal you digest, every workout rep — it all adds up. Think of TDEE as your daily calorie budget. Eat exactly that number and your weight stays the same. Eat less and you are in a deficit for weight loss. Eat more and you have a surplus for muscle gain. Every nutrition plan starts with getting this number right."
+      "text": "TDEE (total daily energy expenditure) is the estimated number of calories your body uses in a day, including rest, movement, exercise and digestion. Eat about that much and your weight should stay roughly stable; eat less and it should fall; eat more and it should rise. Our TDEE calculator gets there in two steps. First it estimates BMR (basal metabolic rate) with the Mifflin-St Jeor equation, or Katch-McArdle if you enter body fat. Then it multiplies BMR by an activity factor from 1.2 (sedentary) to 1.9 (athlete or physical job)."
+    },
+    {
+      "type": "paragraph",
+      "text": "The four parts that make up TDEE are BMR, TEF (digesting food), EAT (planned exercise) and NEAT (all other movement). The calculator models the last three with fixed shares, so treat that split as a rough picture, not a measurement."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "The Four Components of TDEE"
+      "text": "Worked Example: Start to Finish"
     },
     {
       "type": "paragraph",
-      "text": "BMR (basal metabolic rate, 60-75% of TDEE) — calories your body burns at complete rest just staying alive. TEF (thermic effect of food, ~10%) — calories burned digesting and processing food. Protein has the highest TEF (20-30%), carbs moderate (5-10%), fat lowest (0-3%). EAT (exercise activity thermogenesis, 5-15%) — deliberate exercise. NEAT (non-exercise activity thermogenesis, 15-30%) — everything else: walking, fidgeting, standing, cleaning. NEAT varies the most between people."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How TDEE Changes With Activity Level"
+      "text": "Assumptions: a 45-year-old woman, 5 ft 4 in (162.6 cm), 150 lb (68.0 kg), light exercise one or two days a week (factor 1.375), no body fat figure. BMR = 10 x 68.04 + 6.25 x 162.56 - 5 x 45 - 161 = 680 + 1,016 - 225 - 161 = 1,310 kcal. TDEE = 1,310 x 1.375 = 1,802 kcal. For comparison, here is the same woman at each activity factor."
     },
     {
       "type": "table",
       "headers": [
-        "Activity",
-        "Description",
-        "Multiplier",
-        "Example (180lb man)"
+        "Activity level",
+        "Factor",
+        "TDEE (kcal/day)"
       ],
       "rows": [
         [
           "Sedentary",
-          "Desk job, minimal exercise",
           "1.2",
-          "2,200 cal"
+          "1,572"
         ],
         [
-          "Light",
-          "1-3 days/week",
+          "Light exercise (1-2 days/week)",
           "1.375",
-          "2,500 cal"
+          "1,802"
         ],
         [
-          "Moderate",
-          "3-5 days/week",
+          "Moderate exercise (3-5 days/week)",
           "1.55",
-          "2,850 cal"
+          "2,031"
         ],
         [
-          "Active",
-          "6-7 days/week",
+          "Heavy exercise (6-7 days/week)",
           "1.725",
-          "3,150 cal"
+          "2,260"
         ],
         [
-          "Very active",
-          "2x/day or physical job",
+          "Athlete or physical job (2x per day)",
           "1.9",
-          "3,500 cal"
+          "2,490"
         ]
       ]
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Using TDEE for Your Goals"
-    },
-    {
       "type": "paragraph",
-      "text": "Weight maintenance: eat at TDEE. Weight loss: subtract 300-500 calories from TDEE for 0.5-1 lb/week. Muscle gain: add 300-500 calories above TDEE. Never eat below BMR. Never go below 1,200 cal (women) or 1,500 cal (men) without medical supervision. Recalculate TDEE every 10-15 lbs of weight change because your BMR changes with your body weight."
+      "text": "The distance between the lowest and highest row is 918 kcal per day for the same person, so the activity level is the single choice with the biggest effect on the answer. The calculator advises picking the lower option when you are unsure."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How accurate is the TDEE calculator?"
+      "text": "Turning TDEE Into a Goal"
     },
     {
       "type": "paragraph",
-      "text": "TDEE calculators provide a starting estimate accurate to about 200-300 calories. Individual variations in metabolism, muscle mass, and NEAT change the actual number. The best approach: calculate TDEE, eat at that level for 2 weeks, track your weight, and adjust up or down."
+      "text": "The calculators move from TDEE in fixed steps. Here are the targets for the same woman."
     },
     {
-      "type": "heading",
-      "level": 3,
-      "text": "Does TDEE decrease with age?"
+      "type": "table",
+      "headers": [
+        "Goal",
+        "Change from TDEE",
+        "Daily calories",
+        "Rough weekly effect"
+      ],
+      "rows": [
+        [
+          "Maintain",
+          "0",
+          "1,802",
+          "Weight steady"
+        ],
+        [
+          "Mild loss",
+          "-250",
+          "1,552",
+          "About 0.5 lb per week"
+        ],
+        [
+          "Loss",
+          "-500",
+          "1,302",
+          "About 1 lb per week"
+        ],
+        [
+          "Lean gain",
+          "+250",
+          "2,052",
+          "About 0.5 lb per week"
+        ],
+        [
+          "Aggressive gain",
+          "+500",
+          "2,302",
+          "About 1 lb per week"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Yes. BMR decreases about 1-2% per decade after 20, primarily due to muscle loss. But this decline is mostly preventable with strength training. A 60-year-old who lifts weights can have a higher TDEE than a 30-year-old who is sedentary. Muscle mass is the most important controllable factor in maintaining metabolism as you age."
+      "text": "The weekly effects use the common rule of thumb of roughly 3,500 kcal per pound, which the calculator describes as a simplification: adaptation and body composition mean real results differ. Note how close the 500 kcal loss row sits to the 1,200 kcal floor our calculators flag for women: only 102 kcal above it. For a person this size, the mild step is the more sensible starting point, and anything below the floor belongs under medical supervision."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How TDEE Changes Over Time"
+    },
+    {
+      "type": "paragraph",
+      "text": "The Mifflin-St Jeor equation subtracts 5 kcal of BMR for every year of age. Twenty extra years therefore lower BMR by 100 kcal, and at factor 1.375 that lowers TDEE by about 138 kcal. For this woman, TDEE would be about 1,939 kcal at 25 instead of 1,802 at 45, with every other input held the same. The equation does not know how much muscle you have, so it cannot show whether strength training or other habits offset that drift. Separately, BMR also falls as you lose weight, and our BMR calculator suggests recalculating after about every 10 lb of change."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Checking the Estimate"
+    },
+    {
+      "type": "paragraph",
+      "text": "Our TDEE calculator describes its own error as about 10%. For the woman above, that is a range of roughly 1,622 to 1,982 kcal. The practical fix is to eat near your target for two to three weeks, log honestly, weigh yourself under the same conditions, and adjust by 100 to 200 kcal if the scale does not move as expected."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "From Calories to Macros"
+    },
+    {
+      "type": "paragraph",
+      "text": "Once you have a calorie target, our macro calculator splits it into grams. For the mild-loss target of 1,552 kcal with the high-protein preset (35% protein, 35% carbohydrate, 30% fat), the grams are about 136 g protein, 136 g carbohydrate and 52 g fat. The 136 g of protein is roughly 2.0 g per kg for her 68 kg, inside the 1.6 to 2.2 g/kg range the calculator uses. The preset is only one pattern, so see the macro guides on this site before copying it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Using BMR as the calorie target. Maintenance is TDEE, not BMR.",
+        "Picking an activity level for the person you plan to be rather than the week you actually have.",
+        "Cutting by the largest step available. Start small and see how you respond.",
+        "Forgetting to recalculate after significant weight change.",
+        "Expecting the calculator to know about medical conditions, medications, pregnancy or recovery from illness. It does not."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Calorie targets are general estimates, not medical advice. If you have a medical condition, are pregnant or breastfeeding, take medication, are under 18 or have a history of disordered eating, ask a clinician or registered dietitian before restricting calories."
     },
     {
       "type": "cta",

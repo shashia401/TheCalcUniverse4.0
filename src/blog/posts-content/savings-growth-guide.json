@@ -2,105 +2,129 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "The difference between a traditional savings account and a high-yield savings account isn't a few basis points. On $10,000 over 5 years, it's the difference between earning **$5** in interest and earning **$2,762**. But the real secret to growing your savings isn't just the rate — it's consistency."
+      "text": "Your savings grow fastest when you control the three levers in the right order: how much you deposit each month, how long you keep depositing, and only then the interest rate. In a typical five-year plan, an extra $50 a month adds about five times more to the final balance than a full percentage point of extra yield. This guide tests each lever one at a time on the same example, so you can see which change is worth your effort before you open a new account or raise a transfer."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Compound Interest: The Eighth Wonder of the World"
+      "text": "The base case and the rules behind the numbers"
     },
     {
       "type": "paragraph",
-      "text": "Compound interest means you earn interest on your interest. Every month, the bank adds interest to your balance, and then *that new balance* earns interest the next month. The effect accelerates over time."
+      "text": "Every figure below uses the same assumptions as the Savings Calculator. You start with $2,000, deposit $300 at the end of each month for 5 years (60 deposits), and the balance earns interest credited monthly at the annual rate divided by 12. The base rate is 4%. Taxes, fees and rate changes are ignored. The 4% is an illustration, not a forecast, and the rates real accounts pay change over time. Past performance does not guarantee future results."
     },
     {
       "type": "paragraph",
-      "text": "After 10 years of saving $500/month at 5% APY, you would have over **$77,000**, with more than $17,000 from interest alone. APY (Annual Percentage Yield) already accounts for compounding frequency — always compare APY, not the nominal rate, when choosing an account."
+      "text": "The base case ends at $22,332. You deposited $20,000 ($2,000 plus 60 x $300), so interest contributed $2,332, about 10% of the final balance. That small share is the first thing to notice: over five years, most of a savings balance is your own money."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Much Should You Save Each Month?"
+      "text": "Which lever moves the result most?"
     },
     {
       "type": "paragraph",
-      "text": "That depends on your goal. For an **emergency fund**, target 3–6 months of essential expenses ($12,000–$24,000 if your monthly costs are $4,000). For a **down payment**, identify your target home price and desired percentage."
-    },
-    {
-      "type": "paragraph",
-      "text": "For a **vacation or car**, calculate the total cost and divide by the months until you need it. The Savings Calculator lets you work backward: enter the goal, timeline, and APY to find the exact monthly contribution required."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "The $100/Month Difference"
-    },
-    {
-      "type": "paragraph",
-      "text": "Saving $400/month vs. $500/month in a 5% APY account for 5 years with a $5,000 starting balance produces dramatically different results. The $400/month path yields ~$32,700."
-    },
-    {
-      "type": "paragraph",
-      "text": "The $500/month path yields ~$38,900. That extra **$100/month** — just $25/week — grows into a **$6,200 difference** thanks to compound interest. Over 10 years, that gap widens to over $15,000."
-    },
-    {
-      "type": "paragraph",
-      "text": "Small changes in monthly savings rate compound into enormous differences."
+      "text": "The table changes one input at a time and leaves the rest at the base case. The last column shows the change from $22,332."
     },
     {
       "type": "table",
-      "headers": [
-        "Year",
-        "Balance",
-        "Total Deposited",
-        "Interest Earned",
-        "Interest % of Balance"
-      ],
+      "headers": ["Change from base case", "Final balance", "Your deposits", "Interest earned", "Change vs base"],
       "rows": [
-        [
-          "1",
-          "~$11,300",
-          "$11,000",
-          "~$300",
-          "2.7%"
-        ],
-        [
-          "3",
-          "~$25,400",
-          "$23,000",
-          "~$2,400",
-          "9.4%"
-        ],
-        [
-          "5",
-          "~$40,700",
-          "$35,000",
-          "~$5,700",
-          "14.0%"
-        ],
-        [
-          "10",
-          "~$83,400",
-          "$65,000",
-          "~$18,400",
-          "22.1%"
-        ],
-        [
-          "20",
-          "~$203,000",
-          "$125,000",
-          "~$78,000",
-          "38.4%"
-        ]
+        ["Base case ($2,000 start, $300/month, 4%, 5 years)", "$22,332", "$20,000", "$2,332", "$0"],
+        ["Rate 1 point higher (5%)", "$22,969", "$20,000", "$2,969", "+$637"],
+        ["Rate 1 point lower (3%)", "$21,717", "$20,000", "$1,717", "-$614"],
+        ["Deposit $50 more ($350/month)", "$25,647", "$23,000", "$2,647", "+$3,315"],
+        ["Deposit $50 less ($250/month)", "$19,017", "$17,000", "$2,017", "-$3,315"],
+        ["Keep going one more year (6 years)", "$26,908", "$23,600", "$3,308", "+$4,577"],
+        ["Start with $5,000 instead of $2,000", "$25,995", "$23,000", "$2,995", "+$3,663"],
+        ["A 0.5% account instead of 4%", "$20,274", "$20,000", "$274", "-$2,058"]
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Rate matters, but at these balances a one-point swing is worth roughly $600 either way. The deposit amount and the number of years are worth several times that. The exception is the last row: parking the same money in a 0.5% account instead of 4% costs $2,058 over five years, which is why checking your account's yield once is worth the ten minutes, while chasing a quarter-point difference each year usually is not."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Working backward from a goal"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you already have a target, the calculator's goal mode solves for the monthly deposit. Take a $20,000 goal in 5 years with a $2,000 head start. The required monthly deposit barely moves across a wide range of rates."
+    },
+    {
+      "type": "table",
+      "headers": ["Account rate", "Monthly deposit needed (start $2,000)", "Monthly deposit needed (start $0)"],
+      "rows": [
+        ["0.5%", "$295.49", "$329.25"],
+        ["3%", "$273.44", "$309.37"],
+        ["4%", "$264.83", "$301.66"],
+        ["5%", "$256.35", "$294.09"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Going from a 0.5% account to a 5% account lowers the required deposit by about $39 a month. Having the $2,000 head start lowers it by roughly $34 to $38 a month at every rate. A goal date works the same way: the sooner you need the money, the more of it must come from deposits rather than interest."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why time helps more in year ten than in year one"
+    },
+    {
+      "type": "paragraph",
+      "text": "Depositing $300 a month from zero at 4% shows how interest accelerates as the balance builds."
+    },
+    {
+      "type": "table",
+      "headers": ["Years", "Balance", "Your deposits", "Interest earned"],
+      "rows": [
+        ["1", "$3,667", "$3,600", "$67"],
+        ["2", "$7,483", "$7,200", "$283"],
+        ["3", "$11,454", "$10,800", "$654"],
+        ["5", "$19,890", "$18,000", "$1,890"],
+        ["10", "$44,175", "$36,000", "$8,175"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Interest in year one is $67. Between year five and year ten it is $6,285 on top of $18,000 of new deposits. Early on, savings look like they barely grow, and that is when most people quit. The second half of any long plan does much more work than the first."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes and when this math does not apply"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Ignoring inflation. If prices rise 3% a year (an assumption, not a forecast), the base-case $22,332 buys about what $19,264 buys today. That is less than the $20,000 you deposited, so a 4% account that is taxed or pays below inflation can lose purchasing power even while the balance rises.",
+        "Treating a high advertised rate as permanent. Variable savings rates can fall. The projections here hold the rate constant, which real accounts rarely do.",
+        "Counting interest as income you can spend. Interest is usually taxable, and tax rules vary by country and by account type, so check your own situation with your tax authority or a qualified adviser.",
+        "Pausing deposits to chase a better rate. In the table above, skipping the deposit increase costs far more than the rate gain would add.",
+        "Using this for volatile investments. The calculator assumes a steady rate. Stocks and funds do not pay one, so use an investment projection with a range of returns for those."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Rate convention: this calculator divides the annual rate by 12 each month. If your bank quotes APY, which already includes compounding, the monthly-division method gives a slightly higher result than the bank will actually pay. Treat the output as a close estimate and expect small differences from your statement."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A simple order of operations"
     },
     {
       "type": "list",
       "ordered": true,
       "items": [
-        "Set a specific goal — name it, put a dollar amount on it, and pick a target date",
-        "Choose the right account — open a high-yield savings account (4.5–5.5% APY), not a traditional one (0.01–0.1% APY)",
-        "Automate it — set up an automatic transfer from checking to savings on payday. you'll spend less and save more without thinking about it"
+        "Name the goal and the date, then use goal mode to find the monthly deposit.",
+        "Set that deposit up as an automatic transfer the day after payday, so it happens before you spend.",
+        "Check your account's rate once. If it is far below what comparable accounts pay, move; if it is close, leave it.",
+        "Raise the deposit whenever your income rises, even by $25 or $50. The table shows how large a small increase becomes.",
+        "Keep money you may need within a few months in an easy-access account, separate from long-term goals. See the emergency fund guide for how to size that cushion."
       ]
     },
     {
@@ -111,14 +135,5 @@
       "path": "/finance/savings-calculator/"
     }
   ],
-  "keywords": [
-    "savings calculator",
-    "savings growth calculator",
-    "how to grow savings",
-    "compound interest savings",
-    "high yield savings account",
-    "monthly savings goal",
-    "savings goal planner",
-    "emergency fund calculator"
-  ]
+  "keywords": ["savings calculator","savings growth calculator","how to grow savings","compound interest savings","high yield savings account","monthly savings goal","savings goal planner","emergency fund calculator"]
 }

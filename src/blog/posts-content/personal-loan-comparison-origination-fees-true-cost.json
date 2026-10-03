@@ -2,50 +2,200 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "You found a personal loan with a great advertised rate. That number looks good — maybe 11. 5%."
-    },
-    {
-      "type": "paragraph",
-      "text": "But here's what the ad doesn't tell you: origination fees could make your real cost much higher."
-    },
-    {
-      "type": "paragraph",
-      "text": "Personal loans often come with upfront fees that change the true cost of borrowing in ways that aren't obvious from the interest rate alone. Understand these fees, and you'll never shop for a loan the same way again."
+      "text": "A 3% origination fee on a $20,000, 36-month personal loan quoted at 11.5% raises your true cost of borrowing to about 13.6% a year. You receive $19,400 in cash but repay the monthly payment of a $20,000 loan, so the fee is paid for with interest-bearing borrowed money. The same $600 fee adds 3.08 points on a 24-month term and 1.34 points on a 60-month term. The shorter the loan, the more a fixed fee distorts the quoted rate."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What is a personal loan origination fee?"
+      "text": "Why the advertised rate is not the price"
     },
     {
       "type": "paragraph",
-      "text": "An origination fee is what the lender charges to process your loan. It typically ranges from **1% to 8%** of the loan amount. Online lenders tend to charge more (3-8%), while credit unions and banks may charge less or nothing at all."
+      "text": "A quoted interest rate only describes the interest charged on the loan balance. An origination fee is a separate charge for setting the loan up, usually stated as a percentage of the amount borrowed. The calculators on this site treat it in two ways, because lenders do both. With a deducted fee, the lender subtracts it from the money it sends you. You borrow $20,000 and receive $19,400, but your payments are calculated on the full $20,000. With an added fee, you receive the full $20,000 and the fee is rolled into the balance, so your payments are calculated on $20,600 and you pay interest on the fee itself."
     },
     {
       "type": "paragraph",
-      "text": "The fee can be handled in two ways. It can be deducted from your proceeds, meaning you receive less cash than you borrowed. Or it can be added to your loan balance, meaning you pay interest on the fee itself for the entire loan term."
+      "text": "For our example the two methods land close together. The effective rate is 13.63% with the fee deducted and 13.56% with it added. The dollar cost differs, though: $4,342.72 (interest plus the fee) for $19,400 in hand with a deducted fee, against $4,455.01 for $20,000 in hand with an added fee."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How does a deducted origination fee affect your true cost?"
+      "text": "Worked example: one fee, four loan terms"
     },
     {
       "type": "paragraph",
-      "text": "When the fee is deducted, you receive less money but still repay the full loan amount plus interest. This raises your effective APR above the stated rate."
+      "text": "Assumptions: a $20,000 loan at a quoted 11.5% a year, charged monthly (11.5% divided by 12 per month), a 3% fee of $600 deducted from the proceeds, equal monthly payments, and no other fees or insurance. The effective APR is the monthly rate at which the payments, discounted back, equal the $19,400 you actually received, multiplied by 12. This is the same method the APR calculator on this site uses. Figures are rounded to the cent or to two decimals."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Term",
+        "Monthly payment",
+        "Cash received",
+        "Effective APR",
+        "Points above quoted 11.5%"
+      ],
+      "rows": [
+        [
+          "24 months",
+          "$936.81",
+          "$19,400",
+          "14.58%",
+          "3.08"
+        ],
+        [
+          "36 months",
+          "$659.52",
+          "$19,400",
+          "13.63%",
+          "2.13"
+        ],
+        [
+          "48 months",
+          "$521.78",
+          "$19,400",
+          "13.14%",
+          "1.64"
+        ],
+        [
+          "60 months",
+          "$439.85",
+          "$19,400",
+          "12.84%",
+          "1.34"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Take a **$20,000 loan at 11. 5% APR with a 3% origination fee ($600)**. If the fee is deducted, you receive only **$19,400** but must repay the full $20,000 plus interest."
-    },
-    {
-      "type": "paragraph",
-      "text": "Your effective APR jumps to roughly **13. 5%** — 2 full points above the advertised rate."
+      "text": "The fee is a fixed $600 whether you borrow for two years or five, but on a short loan you have the money for less time, so the same dollars translate into a higher annual rate. As a rule of thumb from this example, each 1% of fee adds roughly 0.7 points to the effective rate on a 36-month loan at this rate. That relationship is specific to this term and rate and should be recomputed for yours."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How does an added origination fee change things?"
+      "text": "A lower quoted rate can be the more expensive loan"
+    },
+    {
+      "type": "paragraph",
+      "text": "Now compare four hypothetical offers for the same $20,000 over 36 months, each with the fee deducted from the proceeds. The rates and fees are illustrative, not quotes from any lender."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Offer",
+        "Quoted rate",
+        "Origination fee",
+        "Cash received",
+        "Monthly payment",
+        "Interest plus fee",
+        "Effective APR"
+      ],
+      "rows": [
+        [
+          "Offer A",
+          "9.5%",
+          "6.0% ($1,200)",
+          "$18,800",
+          "$640.66",
+          "$4,263.72",
+          "13.79%"
+        ],
+        [
+          "Offer B",
+          "11.5%",
+          "3.0% ($600)",
+          "$19,400",
+          "$659.52",
+          "$4,342.72",
+          "13.63%"
+        ],
+        [
+          "Offer C",
+          "12.5%",
+          "0.0% ($0)",
+          "$20,000",
+          "$669.07",
+          "$4,086.61",
+          "12.50%"
+        ],
+        [
+          "Offer D",
+          "10.5%",
+          "1.5% ($300)",
+          "$19,700",
+          "$650.05",
+          "$3,701.76",
+          "11.54%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Offer A has the lowest quoted rate and the highest effective APR. Offer C has no fee and a higher quoted rate, yet beats both A and B. Notice also that Offer A costs fewer dollars in total than Offer B while having a higher APR. That happens because A hands you $600 less cash, so the dollar totals are not comparing the same thing. When the cash received differs, compare the effective APR, and use the dollar total as a second check."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Paying the loan off early makes the fee costlier"
+    },
+    {
+      "type": "paragraph",
+      "text": "The origination fee is paid on day one and is not refunded if you repay early, so every month you shorten the loan raises the effective rate. Using the 36-month loan above (11.5%, $600 fee deducted) and assuming no prepayment penalty, the effective APR depends on when you clear it:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Loan repaid after",
+        "Effective APR on the cash received"
+      ],
+      "rows": [
+        [
+          "6 months",
+          "18.21%"
+        ],
+        [
+          "12 months",
+          "15.24%"
+        ],
+        [
+          "24 months",
+          "13.88%"
+        ],
+        [
+          "36 months",
+          "13.63%"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Comparing quoted rates instead of effective APRs. A lender that shows a low rate may be recovering the difference through the fee.",
+        "Comparing monthly payments. In the table above Offer A has the lowest payment of the four, which is exactly why it looks attractive and is not.",
+        "Ignoring the cash you actually receive. If you need exactly $20,000 for a purpose, a deducted fee means you must borrow more than that, so the fee percentage applies to a larger loan.",
+        "Forgetting the fee when you plan to repay early. Fees favour borrowers who keep the loan to term.",
+        "Treating a fee-free loan as automatically cheaper. It can be, but only after you compare its effective APR with the alternatives."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When these numbers do not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "The examples assume a fixed rate, equal monthly payments and a single upfront fee. Loans with variable rates, optional insurance or add-on products, late fees, or fees that are a flat amount instead of a percentage need their own calculation, and the percentage-based shortcuts above do not carry over. Lenders may also compute their disclosed APR slightly differently, for example by day count, so a number on a loan offer can differ a little from one computed here. Ask each lender for its written loan estimate, enter the fee, rate and term into the personal loan calculator, and compare the results."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "All figures on this page were computed with the same payment and APR formulas as the personal loan and APR calculators. Rates and fees are illustrative. This is general information, not advice about any particular loan."
     },
     {
       "type": "cta",

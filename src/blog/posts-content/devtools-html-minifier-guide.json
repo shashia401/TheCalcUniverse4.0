@@ -1,1 +1,156 @@
-{"sections":[{"type":"paragraph","text":"Code minification is a critical optimization step in modern web development. By removing whitespace, comments, and optional syntax tokens, minification can reduce file sizes by 20-60% without changing functionality. This directly translates to faster page loads, lower bandwidth costs, and improved user experience. HTML minification strips comments, collapses whitespace, and removes optional quotes. CSS minification removes comments and spaces around syntax tokens. JavaScript minification is the most sophisticated, handling variable renaming and dead code elimination in advanced tools."}],"keywords":["html minifier","css minifier","js minifier","code minification","web optimization"]}
+{
+  "sections": [
+    {
+      "type": "paragraph",
+      "text": "HTML minification removes characters a browser does not need, such as comments, indentation, line breaks and some optional attribute quotes, so the file is smaller but renders the same. On the sample page measured for this guide, minifying cut an HTML file from 2,608 bytes to 1,915 bytes (26.6 percent smaller). After gzip, though, the difference shrank to 75 bytes (617 versus 542). Minification is worth doing, but the saving on the wire is smaller than the headline percentage suggests, and a careless minifier can change what the page shows."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What an HTML Minifier Actually Removes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Comments between <!-- and --> that visitors never see.",
+        "Indentation and line breaks between tags, collapsed to nothing or to a single space.",
+        "Spaces around the equals sign in attributes, so class = \"nav\" becomes class=\"nav\".",
+        "Quotes around attribute values that are simple enough not to need them.",
+        "The trailing slash on void elements such as img and meta, which HTML does not require."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The HTML Standard says an unquoted attribute value must not be empty and must not contain whitespace, quotation marks, apostrophes, equals signs, less-than or greater-than signs, or grave accents. That is why a careful minifier drops the quotes in class=nav but keeps them in content=\"width=device-width, initial-scale=1\". CSS minifiers do a parallel job on stylesheets: they remove comments and the spaces around braces, colons and semicolons."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked Example: Measured Savings on a Real Page"
+    },
+    {
+      "type": "paragraph",
+      "text": "To avoid quoting a number from memory, I built a small product-listing page (doctype, head with meta tags, a three-link nav, a heading, a paragraph, twelve list items and a footer, with comments and two-space indentation) and ran it through the same regex logic the HTML minifier on this site uses. I then compressed both versions with Node's zlib at gzip level 9 and with Brotli at its default quality."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Version",
+        "Raw bytes",
+        "Gzip bytes",
+        "Brotli bytes"
+      ],
+      "rows": [
+        [
+          "Original HTML",
+          "2,608",
+          "617",
+          "402"
+        ],
+        [
+          "Minified HTML",
+          "1,915",
+          "542",
+          "359"
+        ],
+        [
+          "Saved",
+          "693 (26.6%)",
+          "75 (12.2%)",
+          "43 (10.7%)"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A 485-byte sample stylesheet behaved the same way: minifying it gave 377 bytes (22.3 percent smaller), and gzip took 303 bytes down to 265 (12.5 percent). All figures are for these specific files. A page with less repetition, more inline text or more comments will give different percentages, so run your own file before promising anyone a number."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why Gzip Shrinks the Gap"
+    },
+    {
+      "type": "paragraph",
+      "text": "Gzip and Brotli work by replacing repeated patterns with short references. Runs of spaces and repeated closing tags are exactly the kind of pattern they handle well, so a lot of the whitespace you strip was already nearly free once compressed. In the table above the original page compressed to 23.7 percent of its raw size on its own, and the minified page to 28.3 percent of its (smaller) raw size. Minification and compression are complementary, not alternatives: serve minified files with compression turned on, and expect the second step to eat part of the first step's benefit."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Percent savings quoted for minification usually describe uncompressed bytes. What a visitor downloads is normally the compressed size, so measure both."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes: When a Simple Minifier Breaks the Page"
+    },
+    {
+      "type": "paragraph",
+      "text": "Whitespace is sometimes content. A minifier built from search-and-replace rules does not know that, and I confirmed each of the failures below by running the site's regex minifier on a one-line input:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Text that contains an equals sign changes. The paragraph \"Set x = 5 and y = 10.\" came out as \"Set x=5 and y=10.\", because the rule that tidies attributes also hits visible text.",
+        "A meaningful space between inline elements disappears. \"<b>world</b> <i>again</i>\" came out as \"<b>world</b><i>again</i>\", so the two words render run together.",
+        "Textarea content is flattened. A textarea holding two indented lines came out as one line with single spaces. The preformatted pre element was left alone, but textarea was not.",
+        "Inline scripts can stop working. A script with a // comment on its first line had its line breaks collapsed to spaces, which turns everything after the comment into part of the comment."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These are limits of simple pattern-matching tools, not of minification itself. Dedicated production minifiers, such as html-minifier-terser, are built to handle cases like these more carefully, but you should still check the output instead of assuming it is safe."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "A Sensible Minification Workflow"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Keep readable, commented source in version control. Minify only as a build step for production, never edit minified files by hand.",
+        "Run the minifier in your build tool (Vite, webpack or similar) rather than pasting files into a web page for every release.",
+        "Compare the rendered page before and after, including forms, code samples, and any inline script, instead of trusting the byte count.",
+        "Turn on gzip or Brotli at the server or CDN, then measure the transferred size in the browser's network panel.",
+        "Keep source maps for JavaScript so production errors can be traced back to readable code."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When Minification Will Not Help Much"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Pages whose weight is mostly images, video or fonts: the HTML is a small slice of the total download.",
+        "Files that are already minified, such as vendor libraries: a second pass finds almost nothing.",
+        "Very small files: saving 100 bytes on a document that arrives in one network packet changes nothing the visitor can feel.",
+        "Slow pages caused by server response time, render-blocking scripts or large images: fix those first."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Treat the 20 to 60 percent figures often quoted for minification as a rough range for uncompressed files, not a guarantee. The sample above landed at the lower end for HTML and CSS, and JavaScript results depend heavily on whether the tool renames variables or only strips whitespace. Use the HTML Minifier below to see the numbers for your own markup, then verify the result renders correctly before you ship it."
+    },
+    {
+      "type": "cta",
+      "heading": "See how much your own code shrinks",
+      "body": "Paste HTML, CSS or JavaScript into the HTML Minifier to see the minified output and the byte savings. Always test the result before deploying.",
+      "buttonLabel": "Open the HTML Minifier",
+      "path": "/devtools/html-minifier/"
+    }
+  ],
+  "keywords": [
+    "html minifier",
+    "css minifier",
+    "js minifier",
+    "code minification",
+    "web optimization"
+  ]
+}

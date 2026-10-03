@@ -1,22 +1,133 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Building Your SWP Income Plan"
-    },
-    {
       "type": "paragraph",
-      "text": "Step 1: Calculate your monthly expenses in retirement. Step 2: Factor in other income sources (pension, rental, part-time work). Step 3: The gap needs to come from your SWP. Step 4: Use the SWP calculator to check if your corpus can sustain that withdrawal. Step 5: Choose the right fund for SWP (balanced advantage or hybrid funds work well for SWP)."
+      "text": "To use an SWP as a monthly pension, start from your expenses, not from your corpus: subtract the income you will receive from other sources, and the gap is the amount the SWP must pay, adjusted every year for rising costs. Then test whether your corpus can fund that rising gap for the number of years you need. This post walks through that build with one household and one set of stated assumptions. The assumptions are illustrations, not forecasts, and past performance does not guarantee future results."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Recommended Funds for SWP"
+      "text": "Step 1: find the monthly gap"
     },
     {
       "type": "paragraph",
-      "text": "For SWP, choose funds with lower volatility than pure equity: balanced advantage funds dynamically manage equity/debt allocation, hybrid aggressive funds maintain 65-80% equity, and short-term debt funds for the first 3-5 years of withdrawals."
+      "text": "Take a household that expects to spend Rs. 60,000 a month in retirement and to receive a pension of Rs. 15,000 a month. The gap is Rs. 45,000 a month, or Rs. 5,40,000 a year. With a corpus of Rs. 1,50,00,000 that is a starting withdrawal rate of 3.6% a year (5,40,000 divided by 1,50,00,000). Be honest about the expenses: include insurance premiums, medical costs, taxes and an amount for the unexpected, not only groceries and utilities."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 2: let the withdrawal rise with costs"
+    },
+    {
+      "type": "paragraph",
+      "text": "A flat Rs. 45,000 loses value every year. The calculator on this site holds the withdrawal fixed, so to see the effect of rising costs I ran the same month-by-month logic (grow by the annual rate divided by 12, then withdraw) and increased the withdrawal once a year. As a cross-check, with zero increases my run gives the same Rs. 6,68,48,767 closing balance as the calculator for Rs. 1.5 crore, 7% and Rs. 45,000 for 30 years. The table assumes a 7% return and a 30-year plan."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Yearly increase in withdrawal",
+        "Withdrawal in year 30",
+        "Balance after 30 years",
+        "Does the corpus last?"
+      ],
+      "rows": [
+        [
+          "0% (fixed Rs. 45,000)",
+          "Rs. 45,000",
+          "Rs. 6,68,48,767",
+          "Yes"
+        ],
+        [
+          "4%",
+          "Rs. 1,40,339",
+          "Rs. 3,75,86,514",
+          "Yes"
+        ],
+        [
+          "5%",
+          "Rs. 1,85,226",
+          "Rs. 2,68,13,053",
+          "Yes"
+        ],
+        [
+          "6%",
+          "Rs. 2,43,827",
+          "Rs. 1,40,71,544",
+          "Lasts 30 years, but runs out after 34.8 years"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "At a 6% yearly increase the corpus just survives the 30-year mark, but the balance has fallen to Rs. 1,40,71,544 by year 30, and it runs out after 34.8 years. The point is not that 6% is the right inflation figure. It is that a one-percentage-point change in an assumption you cannot know moves the outcome from comfortable to marginal. Use a range, and re-run the plan with actual inflation as the years pass."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 3: check how big the corpus needs to be"
+    },
+    {
+      "type": "paragraph",
+      "text": "Working the same arithmetic backwards gives the smallest corpus that just lasts 30 years for a Rs. 45,000 starting gap that rises 5% a year."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Assumed return",
+        "Corpus needed (5% yearly increase)",
+        "Multiple of first-year spending (Rs. 5,40,000)"
+      ],
+      "rows": [
+        [
+          "6%",
+          "Rs. 1,34,22,652",
+          "24.9 times"
+        ],
+        [
+          "7%",
+          "Rs. 1,16,96,475",
+          "21.7 times"
+        ],
+        [
+          "8%",
+          "Rs. 1,02,67,727",
+          "19.0 times"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These are the break-even amounts, with nothing left at year 30, so they leave no margin. The household's Rs. 1.5 crore clears all three with room to spare in this smooth model. If returns arrive in a bad order, or the plan has to last beyond 30 years, the margin is what protects you."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 4: decide where the money sits"
+    },
+    {
+      "type": "paragraph",
+      "text": "A pension-like SWP is only as steady as the fund it draws from. The more of the corpus sits in assets that can fall sharply, the more the monthly cheque is exposed to market swings, and the more units you must sell in a bad year to pay the same rupee amount. A common approach is to split the corpus: a portion in lower-risk holdings to cover the next few years of withdrawals, and the rest in growth assets for the long term. This blog cannot tell you what mix suits you, and I have not named any fund, because that depends on your age, health, other income and temperament. Compare funds on cost, the risk the fund document describes, and the scheme's own rules for withdrawals, not on last year's return."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Setting the amount before checking the gap. Many people pick a round monthly figure that feels right and never test it against their actual expenses.",
+        "Starting at the maximum the calculator allows. If your plan only works at the optimistic return, it has no margin.",
+        "Forgetting that a pension may not rise with inflation. Check whether your other income is fixed or indexed.",
+        "Ignoring tax. Rules on how redemption gains are taxed change, and they are not in the calculator, so look up the current rules or ask a registered adviser.",
+        "Never reviewing. Compare the balance with the plan every year and adjust the withdrawal, rather than waiting for the shortfall to be obvious."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "This post is general education, not personal financial advice. For decisions about a retirement corpus, speak to a SEBI-registered investment adviser who can see your whole situation."
     },
     {
       "type": "cta",

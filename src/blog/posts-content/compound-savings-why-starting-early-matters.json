@@ -1,22 +1,120 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Starting early matters because your oldest deposits get the most time to grow, and each extra decade roughly doubles what an existing balance becomes. Saving $300 a month from age 25 to 65 at an assumed 7% reaches $787,444. Starting the same $300 a month at 35 reaches $365,991, which is less than half, even though the late starter only deposits $36,000 less. This guide measures the cost of waiting and shows what it takes to make up for it."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "The Numbers: Early vs Late Starter"
+      "text": "The cost of waiting, year by year"
     },
     {
       "type": "paragraph",
-      "text": "Consider two savers. Alex starts at 25, saves $300/month for 10 years (total: $36,000), then stops contributing but leaves the money invested. Ben starts at 35, saves $300/month for 30 years (total: $108,000), until age 65. At 7% annual return: Alex has $592,000. Ben has $365,000. Alex contributed one-third as much money but ended up with 62% more — because of the extra 10 years of compounding."
+      "text": "Assumptions for every number below: a deposit of $300 at the end of each month until age 65, a 7% annual return credited monthly (7% divided by 12 each month, the same convention as the Savings Calculator), no taxes, no fees and no inflation adjustment. A 7% return is an illustration, not a promise. Past performance does not guarantee future results, and a plain savings account will pay much less."
     },
     {
-      "type": "callout",
-      "variant": "info",
-      "text": "Alex: $36,000 total contributions → $592,000 final balance. Ben: $108,000 total contributions → $365,000 final balance. Starting 10 years earlier is worth 3 times more money invested. This is the power of compound savings."
+      "type": "table",
+      "headers": [
+        "Start age",
+        "Total deposited",
+        "Balance at 65",
+        "Monthly deposit needed to match the age-25 start"
+      ],
+      "rows": [
+        ["25", "$144,000", "$787,444", "$300"],
+        ["30", "$126,000", "$540,316", "$437"],
+        ["35", "$108,000", "$365,991", "$645"],
+        ["40", "$90,000", "$243,022", "$972"],
+        ["45", "$72,000", "$156,278", "$1,512"],
+        ["50", "$54,000", "$95,089", "$2,484"]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "The formula driving this is exponential: each year of compound growth is a multiplier on top of all previous years' growth. Ten extra years at 7% means your money gets multiplied by (1.07)^10 = 1.97 — nearly 2x. This is why financial advisors stress starting early far more than saving large amounts."
+      "text": "Read the last column as the price of delay. A saver who waits until 35 has to deposit $645 a month, more than double, to finish with the same $787,444. Waiting from 25 to 30 alone costs $247,128 of final balance, while it only saves you 60 deposits of $300, or $18,000."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each decade roughly doubles the balance"
+    },
+    {
+      "type": "paragraph",
+      "text": "At 7% a year credited monthly, a balance grows by a factor of (1 + 0.07/12)^120 = 2.0097 over ten years. A balance doubles in about 119 months, which is just under ten years. The common rule of thumb, dividing 72 by the rate, gives 72 / 7 = 10.3 years, which is close. Over 40 years the growth factor is 16.3, over 20 years it is 4.0. So a single deposit made at 25 is worth about 16 times its size at 65, while one made at 45 is worth about 4 times its size. Each year you wait removes growth from the part of the future balance that has the most time to compound."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Early and stopping versus late and continuing"
+    },
+    {
+      "type": "paragraph",
+      "text": "A common question is whether saving only in your first decade is enough. Compare three savers with the same $300 a month and the same 7% assumption. Alex deposits from 25 to 35 and then stops but leaves the money invested. Ben deposits from 35 to 65. Cara deposits from 25 to 65."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Saver",
+        "Deposit years",
+        "Total deposited",
+        "Balance at 65",
+        "Share of balance that is growth"
+      ],
+      "rows": [
+        ["Alex", "25 to 35", "$36,000", "$421,453", "91.5%"],
+        ["Ben", "35 to 65", "$108,000", "$365,991", "70.5%"],
+        ["Cara", "25 to 65", "$144,000", "$787,444", "81.7%"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Alex finishes about 15% ahead of Ben after depositing one third as much. That is a real effect of time, but it is not a reason to stop at 35. Cara, who keeps going, ends with nearly double Alex. Early deposits are powerful, and later deposits are still valuable."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What if the return is lower"
+    },
+    {
+      "type": "paragraph",
+      "text": "The benefit of time shrinks when the rate is lower, but it does not disappear. At an assumed 4% a year, $300 a month from 25 reaches $354,588, against $208,215 from 35, so the early starter is ahead by a factor of 1.70. At 7% the factor is 2.15. A higher rate rewards time even more, which is why the choice of account matters as much as the start date."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Start age",
+        "Balance at 65 at 4%",
+        "Balance at 65 at 7%"
+      ],
+      "rows": [
+        ["25", "$354,588", "$787,444"],
+        ["35", "$208,215", "$365,991"],
+        ["45", "$110,032", "$156,278"]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "If you are starting late"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Raise the deposit. The table above shows the monthly amount needed to match an earlier start, so you can see what a realistic target looks like.",
+        "Keep depositing longer. A 35-year-old who deposits $300 a month needs until age 75, 40 years in total, to match the balance of the age-25 saver at 65.",
+        "Start small and automate it. A balance that exists compounds, and a balance that does not exist cannot."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Limits of this math"
+    },
+    {
+      "type": "paragraph",
+      "text": "A steady return every year is a simplification. Real investments rise and fall, and the order of good and bad years affects the outcome when you are adding and later withdrawing money. The figures also ignore inflation, which reduces what the final balance buys, and taxes and fees, which reduce the growth. Treat the table as a way to compare start dates, not as a forecast of your balance. The Savings Calculator lets you enter your own deposit, rate and time."
     },
     {
       "type": "cta",

@@ -2,83 +2,171 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "you've heard it before: get eight hours of sleep. But if you wake up feeling like a zombie, the problem might not be the hours — it's the cycles. Your sleep runs in roughly 90-minute cycles, and waking up in the middle of one is what leaves you groggy, not the total time in bed."
+      "text": "A sleep cycle calculator picks a bedtime so that your alarm falls at the end of a block of 90 minute cycles. For a 6:30 AM alarm, five cycles plus 14 minutes to fall asleep puts the bedtime at 10:46 PM, and six cycles puts it at 9:16 PM. The 90 minute length is a convention that the calculator uses as an approximation, not a measurement of your own sleep, so treat the output as a starting point for a schedule rather than a precise prediction."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Are Sleep Cycles, Really?"
+      "text": "The arithmetic the calculator uses"
     },
     {
       "type": "paragraph",
-      "text": "Each night, your brain cycles through four stages: light sleep, deep sleep (slow-wave), and REM sleep. One complete cycle takes about 90 minutes on average. Your first cycle is shorter and heavier on deep sleep; later cycles tilt toward more REM, which is why you dream more toward morning."
+      "text": "The formula is simple. Bedtime = wake time - (number of cycles x 90 minutes) - 14 minutes. The 14 minutes is a fixed allowance for falling asleep. Everything is done in minutes after midnight, and the result wraps around the 24 hour clock. For the other direction, wake time = bedtime + 14 minutes + (cycles x 90 minutes)."
     },
     {
       "type": "paragraph",
-      "text": "If you wake up during deep sleep, you experience sleep inertia — that disoriented, heavy-headed feeling that takes 30 minutes to shake."
+      "text": "Why 90 minutes? It is a commonly used average for the length of one pass through the stages of sleep. Individual cycles vary from person to person and from night to night, and the calculator does not measure them. Nothing in the arithmetic knows your actual sleep."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Many Cycles Do You Actually Need?"
+      "text": "Bedtimes for a fixed alarm"
+    },
+    {
+      "type": "paragraph",
+      "text": "Here are the four options the calculator lists for two alarm times. The last column is the total time in bed, including the 14 minute allowance."
     },
     {
       "type": "table",
       "headers": [
         "Cycles",
-        "Total Sleep",
-        "How You Feel",
-        "Best For"
+        "Sleep time",
+        "Bed for 6:30 AM",
+        "Bed for 7:00 AM",
+        "Time in bed"
       ],
       "rows": [
         [
-          "3 cycles",
-          "4.5 hours",
-          "Bare minimum",
-          "Survival mode, not sustainable"
+          "6",
+          "9.0 hours",
+          "9:16 PM",
+          "9:46 PM",
+          "9 h 14 min"
         ],
         [
-          "4 cycles",
-          "6 hours",
-          "Tolerable for some",
-          "Short sleepers (rare genetic trait)"
-        ],
-        [
-          "5 cycles",
+          "5",
           "7.5 hours",
-          "Refreshed",
-          "Most adults — the sweet spot"
+          "10:46 PM",
+          "11:16 PM",
+          "7 h 44 min"
         ],
         [
-          "6 cycles",
-          "9 hours",
-          "Optimal",
-          "Active recovery, teens, athletes"
+          "4",
+          "6.0 hours",
+          "12:16 AM",
+          "12:46 AM",
+          "6 h 14 min"
+        ],
+        [
+          "3",
+          "4.5 hours",
+          "1:46 AM",
+          "2:16 AM",
+          "4 h 44 min"
         ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculator lists these from six cycles down to three. Its highlighted recommendation is the first row that has five or six cycles, which in practice is the six cycle row. That is a rule inside the tool, not advice about your needs, so read the whole table and choose the row that matches the sleep you want."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Working forward from a bedtime"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you already know when you will be in bed, run it the other way. Getting into bed at 11:00 PM gives these wake times:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Cycles",
+        "Wake time"
+      ],
+      "rows": [
+        [
+          "6",
+          "8:14 AM"
+        ],
+        [
+          "5",
+          "6:44 AM"
+        ],
+        [
+          "4",
+          "5:14 AM"
+        ],
+        [
+          "3",
+          "3:44 AM"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Only the first two are realistic for most mornings. The point of the exercise is to see how late a given bedtime pushes the earliest sensible alarm."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How sensitive is the answer?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Because the model fixes two numbers, small differences in your real sleep move the result. Both effects below are straightforward arithmetic on the 10:46 PM, five cycle plan for a 6:30 AM alarm:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "If you fall asleep in 5 minutes instead of 14, five cycles end at 6:21 AM instead of 6:30. If it takes 30 minutes, they end at 6:46 AM.",
+        "If your cycles are 80 minutes instead of 90, five cycles end 50 minutes early. If they are 100 minutes, they end 50 minutes late. The calculator has no way to know which applies to you."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "This is why a rigid schedule built on the 90 minute number can be wrong by half an hour or more. Using the output as a guide and then adjusting according to how you actually feel is more sensible than following it to the minute."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How much sleep to aim for"
+    },
+    {
+      "type": "paragraph",
+      "text": "Cycle counts and sleep needs are separate questions. The Centers for Disease Control and Prevention says adults aged 18 to 60 need 7 or more hours of sleep a day. Five cycles (7.5 hours) and six cycles (9.0 hours) in the table above meet that, while four cycles (6.0 hours) and three cycles (4.5 hours) fall below it. Needs differ by age and health, so check the current guidance for your situation instead of relying on a cycle count."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Treating 90 minutes and 14 minutes as facts about you. They are modelling assumptions.",
+        "Entering the time you start winding down as your bedtime, when the calculation expects the time you get into bed.",
+        "Counting time spent awake on a phone in bed as part of the 14 minutes.",
+        "Cutting down to four or three cycles on a regular basis because the arithmetic looks tidy.",
+        "Changing the alarm to match a cycle boundary while ignoring the total hours, which matter more."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Find Your Ideal Bedtime"
+      "text": "When this does not apply"
     },
     {
       "type": "paragraph",
-      "text": "The trick is simple: pick a wake-up time and subtract complete 90-minute cycles plus the average 14 minutes it takes you to fall asleep. For a 6:30 AM wake-up, **5 cycles back lands you at 10:46 PM** — that's the target. Waking at the end of cycle 5 or 6 means you rise during light sleep, not from deep sleep, which eliminates that dreaded alarm-clock disorientation."
-    },
-    {
-      "type": "paragraph",
-      "text": "The calculator shows you four options (3 through 6 cycles) and highlights the recommended one."
+      "text": "The method assumes regular sleep at night. Shift work, jet lag, a baby that wakes you, medication that affects sleep, and conditions that disrupt sleep can all make the model a poor fit. If you wake unrefreshed despite enough time in bed, snore loudly, or feel sleepy during the day, talk to a doctor or other qualified clinician rather than adjusting a schedule."
     },
     {
       "type": "callout",
-      "variant": "tip",
-      "text": "Pro tip: don't obsess over the exact minute. If your calculated bedtime is 10:46 PM, getting in bed by 10:30 and winding down works fine. The 14-minute fall-asleep average is just that — an average."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Common Sleep Timing Mistakes"
+      "variant": "info",
+      "text": "This guide offers scheduling arithmetic only. It is not medical advice and the calculator cannot diagnose or treat any sleep problem."
     },
     {
       "type": "cta",

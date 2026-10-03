@@ -156,7 +156,7 @@ describe('Body Fat calculator (U.S. Navy method)', () => {
       heightIn: '11',
       heightCm: '',
       neck: '16',
-      abdomen: '30',
+      abdomen: '32',
       waist: '',
       hip: '',
     });
@@ -164,6 +164,21 @@ describe('Body Fat calculator (U.S. Navy method)', () => {
     expect(bf).toBeGreaterThan(6);
     expect(bf).toBeLessThan(14);
     expect(getValue(r, 'category')).toContain('Athletic');
+  });
+
+  it('matches the published Navy inch equation, in both unit systems', () => {
+    // 72 in tall, abdomen 36 in, neck 16 in -> 86.010*log10(20) - 70.041*log10(72) + 36.76 = 18.57
+    const expected = 86.010 * Math.log10(20) - 70.041 * Math.log10(72) + 36.76;
+    const imperial = config.calculate({
+      unit: 'imperial', sex: 'male', age: '30', weight: '180',
+      heightFt: '6', heightIn: '0', heightCm: '', neck: '16', abdomen: '36', waist: '', hip: '',
+    });
+    expect(parseFloat(getValue(imperial, 'bodyFatPct'))).toBeCloseTo(expected, 1);
+    const metric = config.calculate({
+      unit: 'metric', sex: 'male', age: '30', weight: '81.6',
+      heightFt: '', heightIn: '', heightCm: '182.88', neck: '40.64', abdomen: '91.44', waist: '', hip: '',
+    });
+    expect(parseFloat(getValue(metric, 'bodyFatPct'))).toBeCloseTo(expected, 1);
   });
 
   it('classifies obese category correctly', () => {

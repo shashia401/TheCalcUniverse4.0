@@ -1,91 +1,99 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "There is no single number of calories everyone should eat. A reasonable estimate for an adult comes in three steps: estimate resting energy use (BMR) from sex, age, height and weight, multiply by an activity factor to get total daily energy expenditure (TDEE), then set a target above, at or below TDEE depending on whether you want to gain, hold or lose weight. Eating at TDEE is your estimated maintenance level. The result is an estimate for a healthy adult, so expect to adjust it using your own weight trend."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "How Many Calories Do You Need per Day?"
+      "text": "Step by step: a 45-year-old woman"
     },
     {
       "type": "paragraph",
-      "text": "There's no universal number. Your daily calorie needs depend on your age, sex, weight, height, and activity level. The starting point is your BMR — the calories you burn at rest."
-    },
-    {
-      "type": "paragraph",
-      "text": "From there, you multiply by an activity factor to get your Total Daily Energy Expenditure (TDEE), which is your maintenance number. Eat that many calories and your weight stays stable."
+      "text": "Assumptions: 5 ft 7 in, 160 lb, entered in imperial units. The calculator converts to 170.18 cm and 72.57 kg. The Mifflin-St Jeor equation for women is 10 x 72.57 + 6.25 x 170.18 - 5 x 45 - 161, which gives a BMR of about 1,403 kcal. Multiplying by each activity factor gives:"
     },
     {
       "type": "table",
-      "headers": [
-        "Activity Level",
-        "Description",
-        "Multiplier"
-      ],
+      "headers": ["Activity level", "Factor", "Woman, 45, 72.6 kg, 170 cm", "Man, 25, 75 kg, 180 cm"],
       "rows": [
-        [
-          "Sedentary",
-          "Desk job, little to no exercise",
-          "BMR x 1.2"
-        ],
-        [
-          "Light Exercise",
-          "1–2 days per week",
-          "BMR x 1.375"
-        ],
-        [
-          "Moderate Exercise",
-          "3–5 days per week",
-          "BMR x 1.55"
-        ],
-        [
-          "Active",
-          "6–7 days per week",
-          "BMR x 1.725"
-        ],
-        [
-          "Very Active",
-          "Physical job + daily training",
-          "BMR x 1.9"
-        ]
+        ["Sedentary", "1.2", "1,684 kcal", "2,106 kcal"],
+        ["Light exercise (1-2 days/week)", "1.375", "1,930 kcal", "2,413 kcal"],
+        ["Moderate exercise (3-5 days/week)", "1.55", "2,175 kcal", "2,720 kcal"],
+        ["Active (6-7 days/week)", "1.725", "2,421 kcal", "3,027 kcal"],
+        ["Very active (physical job plus training)", "1.9", "2,666 kcal", "3,335 kcal"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The second column of numbers is a different person for comparison: a 25-year-old man, 180 cm, 75 kg, with a BMR of 1,755 kcal. Rounded to the nearest kcal, the two differ by 420 to 670 kcal a day at the same activity level. The BMR gap of 352 kcal splits into the sex constant in the equation (+5 for men, -161 for women, worth 166 kcal), the 20-year age difference (100 kcal) and body size (about 86 kcal). This is why advice like 2,000 calories a day for everyone means little for any one person."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Turning TDEE into a goal"
+    },
+    {
+      "type": "paragraph",
+      "text": "Take the woman's light-exercise TDEE of 1,930 kcal. Common planning adjustments are a deficit of 300 to 500 kcal for weight loss and a surplus of 250 to 500 kcal for weight gain. The weekly change uses the approximation of 7,700 kcal per kg (3,500 per lb), which is a rule of thumb and not an exact law."
+    },
+    {
+      "type": "table",
+      "headers": ["Goal", "Adjustment", "Daily target", "Approx. weekly change"],
+      "rows": [
+        ["Lose, moderate", "-500 kcal", "1,430 kcal", "-0.45 kg (-1.0 lb)"],
+        ["Lose, gentle", "-300 kcal", "1,630 kcal", "-0.27 kg (-0.6 lb)"],
+        ["Maintain", "0", "1,930 kcal", "about 0"],
+        ["Gain, gentle", "+250 kcal", "2,180 kcal", "+0.23 kg (+0.5 lb)"],
+        ["Gain, moderate", "+500 kcal", "2,430 kcal", "+0.45 kg (+1.0 lb)"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Notice that for a smaller person a 500 kcal deficit is a bigger slice of intake: 26% of this woman's TDEE, against 19% for a 95 kg man in our calorie deficit guide. A fixed number of calories is not equally gentle for everyone. If a plan leaves you with a very low target, that is the moment to get individual advice from a doctor or registered dietitian rather than pushing on."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Picking the activity level honestly"
+    },
+    {
+      "type": "paragraph",
+      "text": "The activity factor is the largest source of avoidable error. The calculator's own example shows how big the range is: with a BMR of 1,600 kcal, sedentary (1.2) gives 1,920 kcal and very active (1.9) gives 3,040 kcal, a difference of 1,120 kcal. For the woman above, choosing moderate (1.55) when light (1.375) fits better would overstate her maintenance level by 245 kcal a day. Choose the level that matches your typical week, including your job and daily movement, not the week you hope to have."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Calibrate with your own data"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Eat roughly your estimated maintenance for two weeks while weighing yourself at a consistent time.",
+        "Compare the average weight of week one with week two. If it is stable, your estimate is close.",
+        "If it moves, convert it back: a drift of 0.25 kg a week is roughly 250 kcal a day by the 7,700 kcal per kg rule. Adjust your target by about that amount and repeat.",
+        "Recalculate after any large change in weight or activity."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Many Calories for Weight Loss?"
+      "text": "Common mistakes"
     },
     {
-      "type": "paragraph",
-      "text": "To lose weight, eat **300–500 calories below your TDEE**. This creates a deficit that burns roughly **0. 5–1 lb (0."
-    },
-    {
-      "type": "paragraph",
-      "text": "2–0. 5 kg) per week**. That's the sweet spot for sustainable fat loss — fast enough to see progress, slow enough to preserve muscle and avoid metabolic slowdown."
-    },
-    {
-      "type": "paragraph",
-      "text": "A larger deficit might seem better, but it often backfires: you lose muscle, your metabolism adapts, and you're more likely to regain the weight. A 2,500-calorie TDEE means a weight loss target around **2,000–2,200 calories per day**."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How Many Calories for Muscle Gain?"
-    },
-    {
-      "type": "paragraph",
-      "text": "To build muscle, eat **250–500 calories above your TDEE**. This surplus gives your body the extra energy it needs to synthesize new muscle tissue. A slower surplus of +250 (roughly **0."
-    },
-    {
-      "type": "paragraph",
-      "text": "5 lb gain per week**) is better for lean gains with minimal fat. A larger surplus of +500 works for aggressive bulking but will add more fat along with muscle. Pair your surplus with adequate protein — at least **1."
-    },
-    {
-      "type": "paragraph",
-      "text": "6 g per kg of body weight** — and consistent resistance training."
+      "type": "list",
+      "items": [
+        "Copying a calorie target from someone else with a different size, age or activity pattern.",
+        "Counting exercise twice by choosing a high activity factor and then also eating back workout calories.",
+        "Using a number to the exact calorie. The equation is an estimate that can be around 10 percent off for an individual.",
+        "Ignoring who the equation does not cover: children, pregnant or breastfeeding people, and people with conditions such as diabetes or thyroid disease need individual guidance."
+      ]
     },
     {
       "type": "callout",
-      "variant": "tip",
-      "text": "Don't trust calculators that ask you to eat fewer than 1,200 calories (women) or 1,500 calories (men). Those aren't personalized — they're hard safety floors. A truly personalized calorie target accounts for your specific body stats and activity level. Our calculator adjusts your deficit based on your real TDEE, not a one-size-fits-all minimum."
+      "variant": "info",
+      "text": "These figures are estimates for generally healthy adults, not medical advice. Talk to your doctor or a registered dietitian before making a large change to how much you eat, especially if you have a health condition, take medicines, or are pregnant."
     },
     {
       "type": "cta",

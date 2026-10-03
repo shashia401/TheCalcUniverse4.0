@@ -3,29 +3,134 @@
     {
       "type": "heading",
       "level": 2,
-      "text": "The Four Components"
+      "text": "The Short Answer"
     },
     {
       "type": "paragraph",
-      "text": "BMR (60-75%) is the dominant component. TEF (~10%) is the energy cost of digesting food — protein requires the most energy. EAT (5-15%) is exercise. NEAT (15-30%) is everything else. The most interesting component is NEAT because it varies enormously between people. Two people with the same weight, height, age, and exercise routine can have a 500-calorie difference in TDEE because one fidgets and paces while the other sits still."
+      "text": "TDEE is made of four parts: BMR (energy at rest), TEF (the thermic effect of food, the energy used to digest and absorb what you eat), EAT (exercise activity thermogenesis, your planned workouts) and NEAT (non-exercise activity thermogenesis, all other movement such as walking, standing, chores and fidgeting). BMR is the largest part for most people. The other three are harder to measure, which is why every calculator, ours included, treats their split as an estimate."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Increasing Your TDEE Without Exercise"
+      "text": "How Our Calculator Splits Them"
     },
     {
       "type": "paragraph",
-      "text": "The easiest way to increase TDEE is to increase NEAT. Walk while on phone. Use a standing desk. Pace during meetings. Take stairs. Park farther away. Fidget. Studies show that NEAT can vary by up to 2,000 calories per day between an active non-exerciser and a completely sedentary person. The TEF can be increased by eating more protein (which has the highest thermic effect)."
+      "text": "Only BMR comes from a published equation. For the rest, the TDEE calculator uses simple modelling assumptions: TEF is fixed at 10% of TDEE, EAT is a share of TDEE that depends on the activity level you choose (2%, 5%, 10%, 15% and 20% for factors 1.2 to 1.9), and NEAT is whatever remains after subtracting the other three. These shares are a teaching model, not measurements of your body."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why NEAT Matters Most for Non-Exercisers"
+      "text": "Worked Example: A 32-Year-Old Woman"
     },
     {
       "type": "paragraph",
-      "text": "For someone who does not exercise, EAT is close to zero. Their TDEE is almost entirely BMR, TEF, and NEAT. The only component they can influence significantly is NEAT. Walking 10,000 steps per day (versus 3,000-5,000) can add 300-500 calories to TDEE — the same effect as a moderate workout. For weight loss without formal exercise, increasing daily steps is the single most effective strategy."
+      "text": "Assumptions: female, 32 years old, 168 cm, 64 kg, Mifflin-St Jeor. BMR = 10 x 64 + 6.25 x 168 - 5 x 32 - 161 = 640 + 1,050 - 160 - 161 = 1,369 kcal. TDEE = BMR x factor. TEF = 10% of TDEE, EAT = the listed share of TDEE, NEAT = TDEE - BMR - TEF - EAT. Figures are in kcal per day, rounded."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Factor",
+        "TDEE",
+        "BMR",
+        "TEF",
+        "EAT",
+        "NEAT",
+        "BMR share of TDEE"
+      ],
+      "rows": [
+        [
+          "1.2 (sedentary)",
+          "1,643",
+          "1,369",
+          "164",
+          "33",
+          "77",
+          "83.3%"
+        ],
+        [
+          "1.375 (light)",
+          "1,882",
+          "1,369",
+          "188",
+          "94",
+          "231",
+          "72.7%"
+        ],
+        [
+          "1.55 (moderate)",
+          "2,122",
+          "1,369",
+          "212",
+          "212",
+          "329",
+          "64.5%"
+        ],
+        [
+          "1.725 (heavy)",
+          "2,362",
+          "1,369",
+          "236",
+          "354",
+          "403",
+          "58.0%"
+        ],
+        [
+          "1.9 (athlete)",
+          "2,601",
+          "1,369",
+          "260",
+          "520",
+          "452",
+          "52.6%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Two things stand out. First, BMR stays fixed while everything around it grows, so its share of TDEE falls from 83% to 53% as the activity factor rises. The often-quoted idea that BMR is 60 to 75% of TDEE only holds in the middle of the range, roughly factors 1.375 to 1.725 here. Second, the NEAT figure at the sedentary level (77 kcal) is small purely because of the fixed percentages in this model. In real life NEAT differs a great deal between people with the same exercise habits, and the calculator text calls it the most variable component."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What You Can Actually Change"
+    },
+    {
+      "type": "paragraph",
+      "text": "BMR is largely set by your body size, age and sex, though weight loss or gain moves it. TEF scales with how much you eat, and protein has a higher thermic effect than carbohydrate or fat, but the effect is small and is not a practical lever by itself. EAT and NEAT are the components you control day to day."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here is an illustration with an assumption, not a measurement: suppose this woman adds 200 kcal per day of extra everyday movement. Her moderate-activity TDEE of 2,122 becomes 2,322, which divided by her BMR of 1,369 is an effective factor of 1.70, close to the next activity bucket. Over a week that is 1,400 kcal, or about 0.4 lb by the 3,500 kcal per pound rule of thumb. Small, but it adds up if you keep it going, and it needs no gym session."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Using the Breakdown in Practice"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you know your body fat percentage, enter it. For this woman, a body fat of 28% would mean 46.1 kg of lean mass, and Katch-McArdle gives 370 + 21.6 x 46.08 = 1,365 kcal, almost the same as the 1,369 from Mifflin-St Jeor. The two equations will not always agree this closely, so the calculator shows both and you can see the spread for your own numbers. Then read the breakdown as a map of where your energy goes: BMR is your baseline, TEF follows how much you eat, and any extra calories you want to burn have to come from EAT or NEAT."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes and Limits"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Reading the split as a measurement. The TEF, EAT and NEAT numbers above come from fixed percentages, so two different people with the same inputs get the same split.",
+        "Counting exercise twice. If you pick a high activity factor and then add logged workout calories on top, you count the same effort twice.",
+        "Assuming a fitness tracker gives your exact EAT. Devices estimate; do not treat their figure as exact.",
+        "Forgetting that all four parts shift when your weight changes, because BMR falls as you get lighter.",
+        "Using this model for medical conditions. Illness, medication and thyroid conditions can change energy use in ways no calculator captures."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Because the model is an estimate, the practical check is your own scale: log your intake and weight for two to three weeks and compare with the calculator, as the TDEE accuracy guide on this site explains. If you have a medical condition, ask a clinician before making large changes to your intake."
     },
     {
       "type": "cta",

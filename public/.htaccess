@@ -25,6 +25,16 @@ ErrorDocument 404 /404.html
   RewriteRule ^en/?$ / [R=301,L]
   RewriteRule ^en/(.*)$ /$1 [R=301,L,QSA]
 
+  # Retired duplicate blog posts: 301 to the stronger page on the same topic.
+  RewriteRule ^blog/race-free-egfr-2021-why-it-changed/?$ /blog/race-free-egfr-2021-explained/ [R=301,L]
+  RewriteRule ^blog/what-is-gfr-kidney-function/?$ /blog/what-is-gfr-glomerular-filtration-rate/ [R=301,L]
+  RewriteRule ^blog/bmi-guide-health/?$ /blog/bmi-limitations-what-it-really-means/ [R=301,L]
+  RewriteRule ^blog/ckd-epi-vs-mdrd-gfr-formula-comparison/?$ /blog/ckd-epi-vs-mdrd-gfr-formulas-comparison/ [R=301,L]
+  RewriteRule ^blog/kidney-friendly-diet-ckd/?$ /blog/kidney-friendly-diet-for-ckd/ [R=301,L]
+  RewriteRule ^blog/mortgage-refinance-vs-payoff/?$ /blog/refinance-vs-prepayment-which-saves-more/ [R=301,L]
+  RewriteRule ^blog/investment-calculator-guide/?$ /blog/investment-growth-projecting-portfolio/ [R=301,L]
+  RewriteRule ^blog/investment-growth-calculator-guide/?$ /blog/investment-growth-projecting-portfolio/ [R=301,L]
+
   # Legacy flat calculator slugs (pre-category-nesting URLs, no known inbound
   # backlinks per Semrush audit) — single-hop 301 to the canonical nested route.
   RewriteRule ^age-calculator/?$ /everyday/age-calculator/ [R=301,L]

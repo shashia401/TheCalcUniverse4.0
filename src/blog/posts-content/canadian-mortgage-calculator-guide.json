@@ -49,7 +49,7 @@
     },
     {
       "type": "paragraph",
-      "text": "On a $500,000 mortgage with a 25-year amortization, the correct Canadian payment is about **$2,767/month**. The US-style calculation gives you **$2,780**. Only $13 a month difference. But over 25 years? That's **$3,900**. And the gap gets bigger at higher rates."
+      "text": "On a $500,000 mortgage with a 25-year amortization, the correct Canadian payment is about $2,767/month. The US-style calculation gives you $2,780. Only $13 a month difference. But over 25 years? That's $3,900. And the gap gets bigger at higher rates."
     },
     {
       "type": "paragraph",
@@ -74,7 +74,7 @@
     },
     {
       "type": "paragraph",
-      "text": "As of 2026, the stress test rate is whichever is higher: your contract rate plus 2%, or **5.25%**. So even if you snag a 3.99% rate, you need to prove you can handle payments at **5.99%**."
+      "text": "As of 2026, the stress test rate is whichever is higher: your contract rate plus 2%, or 5.25%. So even if you snag a 3.99% rate, you need to prove you can handle payments at 5.99%."
     },
     {
       "type": "paragraph",
@@ -133,16 +133,16 @@
     },
     {
       "type": "paragraph",
-      "text": "Take someone with a 4.49% rate who can afford $3,000/month. The stress test limits them to **$447,000** — even though the actual payment on that amount is only **$2,765**. Without the stress test, they could borrow the full $500,000. That's **$53,000** less purchasing power."
+      "text": "Take someone with a 4.49% rate who can afford $3,000/month. The stress test limits them to $447,000 — even though the actual payment on that amount is only $2,765. Without the stress test, they could borrow the full $500,000. That's $53,000 less purchasing power."
     },
     {
       "type": "paragraph",
-      "text": "At 5.99%? The stress test cuts borrowing power by over **$107,000**."
+      "text": "At 5.99%? The stress test cuts borrowing power by over $107,000."
     },
     {
       "type": "callout",
       "variant": "warning",
-      "text": "Here's the trap. You see a $600,000 house and figure you need a $540,000 mortgage. At 4.49%, the payment looks doable at **$2,986/month**. But at the stress test rate of 6.49%, the qualifying payment jumps to **$3,623**. If your income supports $3,500/month, you won't qualify — even though you could easily handle the actual payments. Always check your stress-test number before you start shopping."
+      "text": "Here's the trap. You see a $600,000 house and figure you need a $540,000 mortgage. At 4.49%, the payment looks doable at $2,986/month. But at the stress test rate of 6.49%, the qualifying payment jumps to $3,623. If your income supports $3,500/month, you won't qualify — even though you could easily handle the actual payments. Always check your stress-test number before you start shopping."
     },
     {
       "type": "paragraph",
@@ -220,15 +220,15 @@
     },
     {
       "type": "paragraph",
-      "text": "Let's look at a real example. A $500,000 home with 5% down ($25,000). You're financing $475,000. The 4% CMHC premium adds **$19,000** to your mortgage, so your total principal becomes **$494,000**."
+      "text": "Let's look at a real example. A $500,000 home with 5% down ($25,000). You're financing $475,000. The 4% CMHC premium adds $19,000 to your mortgage, so your total principal becomes $494,000."
     },
     {
       "type": "paragraph",
-      "text": "At 4.5% over 25 years, your payment goes from $2,628 to **$2,733** — an extra **$105/month** that's all interest on the insurance."
+      "text": "At 4.5% over 25 years, your payment goes from $2,628 to $2,733 — an extra $105/month that's all interest on the insurance."
     },
     {
       "type": "paragraph",
-      "text": "Here's the kicker: over 25 years, that $19,000 premium ends up costing you roughly **$31,500** once you account for the interest on it. A good CMHC calculator will show you both numbers."
+      "text": "Here's the kicker: over 25 years, that $19,000 premium ends up costing you roughly $31,500 once you account for the interest on it. A good CMHC calculator will show you both numbers."
     },
     {
       "type": "callout",
@@ -237,11 +237,11 @@
     },
     {
       "type": "paragraph",
-      "text": "One more thing: if you put under 20% down, you're capped at a **25-year amortization**. The government tightened this rule to cool the market and help you build equity faster."
+      "text": "One more thing: if you put under 20% down, you're capped at a 25-year amortization. The government tightened this rule to cool the market and help you build equity faster."
     },
     {
       "type": "paragraph",
-      "text": "Shorter amortization means higher payments but way less interest. On a $500,000 loan at 4.5%, stretching from 25 to 30 years drops your payment by about **$268/month** — but adds roughly **$96,000** in total interest."
+      "text": "Shorter amortization means higher payments but way less interest. On a $500,000 loan at 4.5%, stretching from 25 to 30 years drops your payment by about $268/month — but adds roughly $96,000 in total interest."
     },
     {
       "type": "paragraph",
@@ -315,16 +315,16 @@
     },
     {
       "type": "paragraph",
-      "text": "See the difference between regular bi-weekly and accelerated? Regular bi-weekly splits your monthly payment by 2.333, giving you a smaller payment of **$1,376**. Your annual total stays roughly the same as monthly."
+      "text": "See the difference between regular bi-weekly and accelerated? Regular bi-weekly splits your monthly payment by 2.333, giving you a smaller payment of $1,376. Your annual total stays roughly the same as monthly."
     },
     {
       "type": "paragraph",
-      "text": "Accelerated takes exactly half your monthly payment (**$1,491**) and charges it every two weeks. Same per-payment as semi-monthly, but you make 26 payments instead of 24. That extra **$2,994** in principal each year adds up fast."
+      "text": "Accelerated takes exactly half your monthly payment ($1,491) and charges it every two weeks. Same per-payment as semi-monthly, but you make 26 payments instead of 24. That extra $2,994 in principal each year adds up fast."
     },
     {
       "type": "callout",
       "variant": "info",
-      "text": "The numbers are hard to ignore. On a $500,000 mortgage at 5.25%, switching to accelerated bi-weekly saves you about **$48,280** in interest and cuts your amortization from 25 years to just over **21 years**. That's nearly 4 years of payments gone. On a $700,000 mortgage? Savings exceed **$67,000** with more than 4 years shaved off. Most Canadian lenders offer this as a free option at origination. No refinancing, no fees. Just ask. An accelerated bi-weekly mortgage calculator can show you exactly how much you'd save at your specific rate and loan amount."
+      "text": "The numbers are hard to ignore. On a $500,000 mortgage at 5.25%, switching to accelerated bi-weekly saves you about $48,280 in interest and cuts your amortization from 25 years to just over 21 years. That's nearly 4 years of payments gone. On a $700,000 mortgage? Savings exceed $67,000 with more than 4 years shaved off. Most Canadian lenders offer this as a free option at origination. No refinancing, no fees. Just ask. An accelerated bi-weekly mortgage calculator can show you exactly how much you'd save at your specific rate and loan amount."
     },
     {
       "type": "paragraph",
@@ -332,7 +332,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Self-employed or variable income? You might prefer lump-sum prepayments instead. Many Canadian mortgages let you prepay **10% to 20%** of the original principal each year without penalty."
+      "text": "Self-employed or variable income? You might prefer lump-sum prepayments instead. Many Canadian mortgages let you prepay 10% to 20% of the original principal each year without penalty."
     },
     {
       "type": "paragraph",
@@ -408,11 +408,11 @@
     },
     {
       "type": "paragraph",
-      "text": "So on a $500,000 home in Toronto, you're looking at **$6,475** provincial LTT plus **$3,975** municipal LTT. That's **$10,450** total. And you have to pay it out of pocket — it can't go into your mortgage."
+      "text": "So on a $500,000 home in Toronto, you're looking at $6,475 provincial LTT plus $3,975 municipal LTT. That's $10,450 total. And you have to pay it out of pocket — it can't go into your mortgage."
     },
     {
       "type": "paragraph",
-      "text": "A $1 million home in Toronto? The total jumps to **$32,950**."
+      "text": "A $1 million home in Toronto? The total jumps to $32,950."
     },
     {
       "type": "paragraph",
@@ -421,15 +421,15 @@
     {
       "type": "callout",
       "variant": "tip",
-      "text": "First-time buyer? Good news. Ontario offers a rebate of up to **$4,000** on provincial LTT, and Toronto adds up to **$4,475** on the municipal portion. Combined, that's **$8,475** off your bill. BC has a similar exemption on homes up to $500,000, with partial exemptions up to $525,000. Always check your province's rebate programs. They can free up serious cash for renovations or your emergency fund."
+      "text": "First-time buyer? Good news. Ontario offers a rebate of up to $4,000 on provincial LTT, and Toronto adds up to $4,475 on the municipal portion. Combined, that's $8,475 off your bill. BC has a similar exemption on homes up to $500,000, with partial exemptions up to $525,000. Always check your province's rebate programs. They can free up serious cash for renovations or your emergency fund."
     },
     {
       "type": "paragraph",
-      "text": "Since LTT can't go into your mortgage, you need cash at closing. And it's not just LTT — budget for legal fees (**$1,000 to $2,500**), home inspection (**$400 to $800**), appraisal (**$300 to $500**), title insurance (**$200 to $400**), and GST/HST on new builds."
+      "text": "Since LTT can't go into your mortgage, you need cash at closing. And it's not just LTT — budget for legal fees ($1,000 to $2,500), home inspection ($400 to $800), appraisal ($300 to $500), title insurance ($200 to $400), and GST/HST on new builds."
     },
     {
       "type": "paragraph",
-      "text": "Good rule of thumb: set aside **1.5% to 4%** of the purchase price for all closing costs, depending on your province and whether you're a first-time buyer."
+      "text": "Good rule of thumb: set aside 1.5% to 4% of the purchase price for all closing costs, depending on your province and whether you're a first-time buyer."
     },
     {
       "type": "paragraph",

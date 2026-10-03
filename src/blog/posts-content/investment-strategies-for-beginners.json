@@ -1,63 +1,107 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Starter Portfolio"
-    },
-    {
       "type": "paragraph",
-      "text": "For most beginners, the optimal portfolio is surprisingly simple: a single low-cost total market index fund or a two-fund portfolio of a total US stock market fund and a total international stock market fund. The specific investments matter less than starting early, contributing consistently, and staying invested during market downturns."
-    },
-    {
-      "type": "paragraph",
-      "text": "Dollar-cost averaging — investing a fixed amount at regular intervals regardless of market conditions — removes the stress of trying to time the market. It ensures you buy more shares when prices are low and fewer when prices are high, naturally averaging your entry price over time."
+      "text": "A beginner's investment strategy is mostly about order and habits rather than picking products: build a cash cushion, deal with expensive debt, then invest a fixed amount on a schedule in broadly diversified, low-cost holdings, and leave it alone through the dips. The arithmetic below shows why each of those steps matters. Every rate in this guide is a hypothetical assumption used to illustrate the math, not a prediction, and nothing here is personal financial advice."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Asset Allocation by Age"
+      "text": "Step One: Get the Order Right"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Hold enough cash for emergencies so that a car repair or job gap does not force you to sell investments at a bad moment.",
+        "Check whether an employer adds money when you contribute to a workplace plan. Confirm the terms with your plan administrator, because a match is a return you do not have to earn in the market.",
+        "Pay down expensive debt, especially credit cards.",
+        "Invest the rest on a regular schedule."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The debt step is where beginners most often get it backwards. Take $10,000 that could either pay off a card charging 22% APR or be invested. If the card balance would otherwise sit unpaid for a year, monthly compounding makes the effective annual rate about 24.36%, so the interest avoided is roughly $2,436. The same $10,000 invested at an assumed 6% would earn about $617 over the year. The card saving is certain, while the investment return is only an assumption."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step Two: Invest on a Schedule"
+    },
+    {
+      "type": "paragraph",
+      "text": "Dollar-cost averaging means investing a fixed amount at regular intervals. For most people it is simply how paychecks work. The math below uses made-up prices to show what it does: you buy more units when the price is low and fewer when it is high."
     },
     {
       "type": "table",
-      "headers": [
-        "Age",
-        "Stocks",
-        "Bonds",
-        "Typical Portfolio"
-      ],
+      "headers": ["Month", "Price per unit", "Amount invested", "Units bought"],
       "rows": [
-        [
-          "20s-30s",
-          "90%",
-          "10%",
-          "Total stock market + small bond allocation"
-        ],
-        [
-          "40s",
-          "80%",
-          "20%",
-          "Broad diversification, start adding bonds"
-        ],
-        [
-          "50s",
-          "65%",
-          "35%",
-          "Move toward capital preservation"
-        ],
-        [
-          "60s",
-          "50%",
-          "50%",
-          "Near retirement — protect what you have"
-        ],
-        [
-          "70+",
-          "30-40%",
-          "60-70%",
-          "Income-focused, minimize volatility"
-        ]
+        ["1", "$10", "$200", "20.00"],
+        ["2", "$8", "$200", "25.00"],
+        ["3", "$9", "$200", "22.22"],
+        ["4", "$7", "$200", "28.57"],
+        ["5", "$8", "$200", "25.00"],
+        ["6", "$10", "$200", "20.00"],
+        ["Total", "Average price $8.67", "$1,200", "140.79"]
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Your average cost is $8.52 per unit, below the $8.67 simple average of the prices, and the 140.79 units are worth $1,408 when the price returns to $10. The result depends entirely on the price path. If the price had risen every month, buying everything at the start would have bought more units. Scheduled investing does not guarantee a profit or protect against loss. Its real benefit is that it removes the temptation to guess the right moment."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step Three: Match Risk to Your Timeline"
+    },
+    {
+      "type": "paragraph",
+      "text": "Holding some lower-volatility assets alongside stocks cushions a fall. The table uses a hypothetical drop of 30% for stocks and 5% for bonds, applied to a $50,000 portfolio."
+    },
+    {
+      "type": "table",
+      "headers": ["Stocks / bonds", "Portfolio loss", "Loss on $50,000", "Gain needed to recover"],
+      "rows": [
+        ["100 / 0", "30.0%", "$15,000", "42.9%"],
+        ["90 / 10", "27.5%", "$13,750", "37.9%"],
+        ["60 / 40", "20.0%", "$10,000", "25.0%"],
+        ["40 / 60", "15.0%", "$7,500", "17.6%"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A loss is harder to recover from than its size suggests, because the gain needed is 1 / (1 - loss) - 1. Rules of thumb that tie the stock share to your age exist, but they are heuristics, not requirements. The more useful question is how soon you will need the money and how you would react to seeing the balance fall by the amounts above. Over time the mix also drifts. If a 70/30 portfolio's stocks rise 20% while bonds stay flat, stocks become 73.7% of the total, so rebalancing means selling a little of what grew."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step Four: Watch Costs and Time"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assume you invest $300 a month at a hypothetical 6% return. After 30 years you would have about $301,355 from $108,000 of contributions. Starting 5 years later, with 25 years of contributions, gives about $207,898, which is $93,457 less. Costs matter in the same way. If the underlying holdings return 7% before costs, a 0.05% annual fee leaves about $362,401 after 30 years of $300 monthly deposits, while a 1.00% fee leaves about $301,355, a difference of $61,046."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common Mistakes"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Investing money you may need within a few years, then being forced to sell after a drop.",
+        "Carrying high-interest debt while investing for a return that is uncertain.",
+        "Concentrating in one company or sector because it recently did well. Recent performance does not guarantee future results.",
+        "Stopping contributions after a decline, which removes the buying-low effect shown in the schedule table.",
+        "Ignoring fees, because a small annual percentage becomes a large dollar figure over decades.",
+        "Treating a projection as a promise. Use the calculator to test different contribution levels and return rates, then plan on a conservative one."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "Investing involves risk, including the loss of the amount invested. Past performance does not guarantee future results. Tax treatment, account types and contribution limits vary by country and change over time, so check the current rules with your tax authority or a qualified professional."
     },
     {
       "type": "cta",

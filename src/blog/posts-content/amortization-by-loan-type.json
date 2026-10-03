@@ -1,65 +1,135 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Mortgages, auto loans, personal loans and installment student loans all use the same amortization arithmetic, so what differs between them is the size, the term and the rate, not the method. The long term of a mortgage is what makes its early payments overwhelmingly interest, while a five-year auto loan or a three-year personal loan repays principal much faster. Credit cards and interest-only loans are different: they do not amortize on a fixed schedule at all. This post compares the mechanics of each type on four illustrative loans."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "How Different Loans Amortize"
+      "text": "Four loans, same arithmetic"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: all four are fixed-rate with equal monthly payments and interest of one-twelfth of the annual rate on the balance each month. The sizes, terms and rates are examples chosen to show the mechanics. They are not current market rates and not offers."
     },
     {
       "type": "table",
       "headers": [
-        "Loan Type",
-        "Amortization Method",
-        "Early Interest",
-        "Prepayment Penalty?"
+        "Loan",
+        "Amount, rate, term",
+        "Monthly payment",
+        "Total interest",
+        "Interest share of year-1 payments",
+        "Principal repaid by halfway"
       ],
       "rows": [
         [
-          "Mortgage (fixed)",
-          "Full amortization",
-          "Very high (80%+ in year 1)",
-          "Usually no"
+          "Mortgage",
+          "$280,000, 6.5%, 30 years",
+          "$1,769.79",
+          "$357,124.57",
+          "85.3%",
+          "27.4%"
         ],
         [
           "Auto loan",
-          "Simple interest",
-          "High (50-70% in year 1)",
-          "Usually no"
+          "$30,000, 7%, 60 months",
+          "$594.04",
+          "$5,642.16",
+          "27.2%",
+          "45.6%"
         ],
         [
           "Personal loan",
-          "Fixed installment",
-          "Moderate (40-60% in year 1)",
-          "Sometimes"
+          "$12,000, 11%, 36 months",
+          "$392.86",
+          "$2,143.13",
+          "24.3%",
+          "45.9%"
         ],
         [
-          "Student loan (fed)",
-          "Standard or graduated",
-          "Moderate",
-          "No"
-        ],
-        [
-          "Credit card",
-          "Revolving (no amortization)",
-          "N/A (pays interest on daily balance)",
-          "No"
-        ],
-        [
-          "Interest-only",
-          "No principal paid initially",
-          "100% of payment",
-          "Varies"
+          "Student loan (installment)",
+          "$27,000, 6.5%, 120 months",
+          "$306.58",
+          "$9,789.54",
+          "46.1%",
+          "42.0%"
         ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The mortgage balance after 12 payments is $276,870.37, only 1.12% below the amount borrowed, and principal first exceeds interest at payment 233. By its halfway point of 180 payments the balance is still 72.6% of the original. The auto loan, by contrast, has paid off 17.31% of its principal after one year, and its balance is $16,305.38 (54.4%) at payment 30. For the other three loans principal already exceeds interest in payment 1."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Mortgages: long term, escrow, and adjustable rates"
+    },
+    {
+      "type": "paragraph",
+      "text": "The long term is what front-loads interest. In the example, payment 1 is $1,516.67 of interest and $253.12 of principal. A mortgage bill often includes property tax and insurance collected by the lender, plus mortgage insurance in some cases, none of which is in the amortization schedule. Adjustable-rate mortgages recompute the payment from the remaining balance and remaining term whenever the rate resets, so a single schedule only holds until the first reset."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Auto loans: shorter term, possibly daily interest"
+    },
+    {
+      "type": "paragraph",
+      "text": "A shorter term means a larger principal share from the start: payment 1 on the auto loan is $175.00 of interest and $419.04 of principal. Some auto loans accrue simple interest daily rather than using a fixed one-twelfth of the annual rate. Then the interest for a period equals the balance x rate x days / 365. For the first month, a 31-day period gives $30,000 x 0.07 x 31 / 365 = $178.36 and a 30-day period $172.60, compared with $175.00 under the monthly model, and a late or early payment shifts the split. Other lenders use precomputed interest, where the total interest is fixed at signing. Which method applies, and whether paying early saves interest, is stated in the contract."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Personal loans: fees change the real cost"
+    },
+    {
+      "type": "paragraph",
+      "text": "Personal loans are usually the simplest installment product: fixed rate, fixed term, equal payments. The common twist is an origination fee deducted from the proceeds. If the example loan carries a 5% fee ($600), the borrower receives $11,400 but repays as if $12,000 were borrowed, and the payment stays $392.86. Solving for the rate that equates $11,400 to 36 payments of $392.86 gives an APR of about 14.58% against the 11% interest rate. The amortization schedule uses the interest rate and does not show fees."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Student loans: what happens before repayment"
+    },
+    {
+      "type": "paragraph",
+      "text": "A student loan can behave like any installment loan once repayment begins, but interest may accrue during school or other periods when payments are not required, and that interest may be added to the balance. As an illustration, suppose $27,000 at 6.5% accrues simple interest for 48 months before repayment: 27,000 x 0.065 / 12 x 48 = $7,020. If that amount is added to the balance, repayment starts on $34,020 and the 120-month payment is $386.29 instead of $306.58. Measured against the original $27,000, total interest including the accrued amount is $19,354.83, versus $9,789.54 with no accrual. Federal rules on accrual, capitalization and repayment plans vary by loan type and change, so check the official source for your loan, such as Federal Student Aid."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Loans that do not amortize like this"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Credit cards are revolving. There is no fixed term, the minimum payment is set by the card agreement, and the payoff date depends on how much you pay.",
+        "Interest-only loans have payments covering interest only for a period, so the balance does not fall until the principal payments begin.",
+        "Balloon loans use a long schedule to set a low payment but require a large lump sum at the end.",
+        "Home equity lines of credit usually have a draw period followed by a repayment period, so the schedule depends on how much is borrowed and when."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Loan Type Matters for Extra Payments"
+      "text": "Common mistakes when comparing loan types"
     },
     {
-      "type": "paragraph",
-      "text": "Extra payments on a fully amortizing loan (mortgage, auto, personal) reduce future interest charges by lowering the principal balance earlier. The sooner you make extra payments in the loan term, the greater the savings. On simple interest loans (most auto loans), interest is calculated daily, so extra payments save interest immediately. Our amortization calculator works for any loan type and shows you the exact savings."
+      "type": "list",
+      "items": [
+        "Assuming every loan is front-loaded to the same degree. In these examples the share of year-1 payments going to interest ranges from 24.3% to 85.3%, driven mainly by term length.",
+        "Comparing payments without totals. A lower payment on a longer loan raises total interest.",
+        "Assuming early payoff is free. Some contracts include prepayment fees or precomputed interest, so confirm before paying extra.",
+        "Using the same extra-payment assumption for every lender. If the lender applies extra money to the next installment rather than to principal, nothing is saved yet."
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "All numbers here are illustrative calculations from stated assumptions. Real loans differ in rate, fees, accrual method and terms; your loan disclosure is the authority."
     },
     {
       "type": "cta",

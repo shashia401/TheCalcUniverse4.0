@@ -1,85 +1,136 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "How Child BMI Differs From Adult BMI"
-    },
-    {
       "type": "paragraph",
-      "text": "Adult BMI uses the same categories regardless of age. Child BMI uses percentile curves that account for normal growth patterns. A child BMI of 23 might be normal at one age and overweight at another because children grow at different rates. The CDC growth charts track BMI-for-age percentiles from age 2 to 19. These charts show where your child falls compared to other children of the same age and sex."
+      "text": "A child's BMI is worked out with the same formula as an adult's (weight in kilograms divided by height in metres squared), but the result is not read against fixed adult categories. For ages 2 through 19 the CDC compares the number with other children of the same age and sex and reports a percentile. A child at the 85th percentile has a BMI higher than about 85 out of 100 children of the same age and sex in the reference data, and that percentile, not the raw number, decides the category."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "text": "BMI is a screening tool, not a diagnosis, and this is especially true for children, who are still growing. Do not label a child or change their eating based on a BMI number. If you have a concern, talk to your pediatrician or another qualified clinician."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Child BMI Categories (Percentile-Based)"
+      "text": "The CDC percentile categories"
     },
     {
       "type": "table",
       "headers": [
         "Category",
-        "Percentile Range",
-        "What It Means"
+        "BMI-for-age percentile"
       ],
       "rows": [
-        [
-          "Underweight",
-          "Below 5th percentile",
-          "May need nutritional evaluation"
-        ],
-        [
-          "Healthy weight",
-          "5th to 84th percentile",
-          "Normal growth pattern"
-        ],
-        [
-          "Overweight",
-          "85th to 94th percentile",
-          "At risk — monitor trends"
-        ],
-        [
-          "Obese",
-          "95th percentile and above",
-          "Recommend medical evaluation"
-        ]
+        ["Underweight", "Less than the 5th percentile"],
+        ["Healthy weight", "5th percentile to less than the 85th percentile"],
+        ["Overweight", "85th percentile to less than the 95th percentile"],
+        ["Obesity", "95th percentile or greater"],
+        ["Severe obesity", "120 percent of the 95th percentile or greater, or a BMI of 35 or greater"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These are the CDC's published categories for children and teens aged 2 to 19. The CDC notes that race is not a factor in calculating BMI percentiles, and that adult categories (underweight below 18.5, healthy 18.5 to under 25, overweight 25 to under 30, obesity 30 and above) apply from age 20. A 17-year-old and a 21-year-old with the same BMI are therefore read on different scales."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example: why the number alone is not enough"
+    },
+    {
+      "type": "paragraph",
+      "text": "Assumptions: four hypothetical children measured on the same day. BMI = weight in kg divided by height in metres squared. The ages shown are examples only. The key point is what the last column says."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Example child",
+        "Height",
+        "Weight",
+        "BMI",
+        "Percentile known?"
+      ],
+      "rows": [
+        ["Age 5", "110 cm", "18 kg", "14.9", "No, needs age and sex"],
+        ["Age 8", "130 cm", "28 kg", "16.6", "No, needs age and sex"],
+        ["Age 12", "150 cm", "42 kg", "18.7", "No, needs age and sex"],
+        ["Age 15", "165 cm", "55 kg", "20.2", "No, needs age and sex"]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Check the second row: 130 cm is 1.30 m, squared is 1.69; 28 divided by 1.69 is 16.6. You cannot say whether 16.6 is healthy, overweight or underweight without the child's age in months and their sex, because the percentile is defined relative to children of that age and sex. The same arithmetic result can sit in different categories at different ages. Notice also that the 12-year-old's 18.7 falls inside the adult healthy range of 18.5 to 24.9, but that adult range does not apply to children, so it should not be used to reassure or to alarm."
+    },
+    {
+      "type": "paragraph",
+      "text": "The severe obesity rule also works as a calculation. If, hypothetically, the 95th percentile BMI for some age and sex were 22, then 120 percent of it is 22 x 1.2 = 26.4, so a BMI of 26.4 or more would meet the first part of the definition. The real 95th percentile values depend on age and sex and come from the CDC growth chart data, which is why you should use the CDC child BMI calculator for an actual result."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How to read a result sensibly"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Get the percentile from a child-specific tool. The CDC provides a child and teen BMI calculator for ages 2 through 19, based on its growth charts.",
+        "Look at more than one measurement. One reading is a single point. Several measurements over time, plotted on the same chart, tell you far more, and your pediatrician can interpret the pattern.",
+        "Remember what BMI leaves out. As the CDC explains, BMI does not directly measure body fat and does not show what type of fat a person has or where it is. A clinician considers medical history, health behaviours, physical examination and lab results alongside it.",
+        "Ask about the whole picture. Sleep, activity, appetite changes, family history and how the child is growing in height all matter to a pediatrician."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "When to Be Concerned"
+      "text": "Common mistakes"
     },
     {
-      "type": "paragraph",
-      "text": "A single high BMI percentile is not automatically concerning. Kids have growth spurts and body composition changes during puberty that can temporarily shift their percentile. What matters more is the trend: a child who has been at the 50th percentile and jumps to the 90th needs a conversation with their pediatrician. Similarly, a child dropping from the 50th to the 10th percentile needs evaluation. Rapid changes in either direction warrant attention, not a single high or low reading."
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Using adult categories for a child. A child's number needs a percentile, not the 18.5 and 25 adult lines.",
+        "Treating the percentile as a grade. The 50th percentile is the middle of the reference group, not a target. The healthy range is wide, from the 5th to below the 85th.",
+        "Starting a diet because of one reading. Children are growing, and weight management in childhood should be guided by a pediatrician or registered dietitian.",
+        "Using the wrong tool. The site's BMI calculator uses adult formulas and categories and is not calibrated for children, so use a child-specific percentile tool for anyone under 20."
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
+      "text": "Frequently asked questions"
     },
     {
       "type": "heading",
       "level": 3,
-      "text": "At what age can I start calculating my child BMI?"
+      "text": "At what age can I start calculating a child's BMI?"
     },
     {
       "type": "paragraph",
-      "text": "BMI is measured for children starting at age 2. For infants and toddlers under 2, doctors use weight-for-length charts instead of BMI. These are different growth standards that assess whether a child weight is proportional to their length."
+      "text": "The CDC child and teen BMI tool covers ages 2 through 19. For a child under 2, ask your pediatrician how growth is being assessed rather than using a BMI category."
     },
     {
       "type": "heading",
       "level": 3,
-      "text": "Does puberty affect child BMI accuracy?"
+      "text": "Does race or ethnicity change the child percentile?"
     },
     {
       "type": "paragraph",
-      "text": "Yes. During puberty, children gain weight and height at different rates, which can temporarily shift BMI percentiles. Body fat distribution also changes during puberty. A single BMI measurement during this time may not reflect the overall growth pattern. Your pediatrician tracks the trajectory over multiple visits, not just one number."
+      "text": "According to the CDC, race is not a factor used in calculating BMI percentiles. Percentiles are based on age and sex. If you have a specific concern about your child's growth, your pediatrician can discuss it with you."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What if my child's percentile changes between visits?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Percentiles can shift as a child grows, and a change is a reason to mention it at the next visit, not a reason to panic. Bring the earlier measurements if you have them, because the pattern over time is more informative than any single reading."
     },
     {
       "type": "cta",
       "heading": "Use the BMI Calculator",
-      "body": "Our BMI calculator includes child percentile mode for ages 2-19.",
+      "body": "Work out the raw BMI number here, then plot it by age and sex on a child BMI-for-age chart. Adult categories do not apply to children.",
       "buttonLabel": "Open Calculator",
       "path": "/health/bmi-calculator/"
     }
