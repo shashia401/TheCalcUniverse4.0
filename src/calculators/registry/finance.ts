@@ -124,7 +124,7 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'consolidated_payment = new_loan_P × r(1+r)^n / ((1+r)^n − 1) | current_total_payments = Σ(existing_minimum_payments) | monthly_savings = current_total − consolidated_payment | total_interest_saved = existing_interest − new_interest',
     lastVerified: '2026-01-15',
     relatedIds: ['debt-payoff-calculator', 'credit-card-payoff-calculator', 'student-loan-calculator', 'personal-loan-calculator'],
-    relatedPosts: ['debt-consolidation-guide', 'credit-card-debt-payoff-guide'],
+    relatedPosts: ['debt-consolidation-guide', 'debt-payoff-snowball-vs-avalanche'],
     loader: () => import('../finance/debt-consolidation/index'),
   },
   {
@@ -250,7 +250,7 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'snowball: pay_minimum_on_all_except_smallest_balance | avalanche: pay_minimum_on_all_except_highest_APR | total_interest = Σ(monthly_interest for each debt under strategy) | months_to_debt_free = earliest month where all balances ≤ 0',
     lastVerified: '2026-05-18',
     relatedIds: ['debt-consolidation-calculator', 'credit-card-payoff-calculator', 'student-loan-calculator'],
-    relatedPosts: ['credit-card-debt-payoff-guide', 'debt-consolidation-guide'],
+    relatedPosts: ['debt-payoff-snowball-vs-avalanche', 'debt-consolidation-guide'],
     loader: () => import('../finance/debt-payoff/index'),
   },
   {
@@ -569,7 +569,7 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'cash_received = loan_amount − origination_fee | M = loan_amount × r(1+r)^n / ((1+r)^n − 1) | total_cost = M × n + origination_fee | true_APR computed from net_proceeds and payment_stream using iterative solver',
     lastVerified: '2026-01-15',
     relatedIds: ['loan-calculator', 'apr-calculator', 'business-loan-calculator', 'debt-consolidation-calculator'],
-    relatedPosts: ['credit-card-debt-payoff-guide', 'debt-consolidation-guide', 'how-loan-payments-work', 'personal-loan-comparison-origination-fees-true-cost'],
+    relatedPosts: ['debt-payoff-snowball-vs-avalanche', 'debt-consolidation-guide', 'how-loan-payments-work', 'personal-loan-comparison-origination-fees-true-cost'],
     loader: () => import('../finance/personal-loan/index'),
   },
   {
@@ -774,7 +774,7 @@ export const financeCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'months_to_payoff_fixed = solve for n: balance = PMT × (1 − (1+r)^(−n)) / r | months_to_payoff_min = iterative where payment = max(balance×min_pct, min_fee) | total_interest = PMT × n − balance | target_payment = solver for PMT given target_date_n',
     lastVerified: '2026-01-15',
     relatedIds: ['debt-payoff-calculator', 'debt-consolidation-calculator', 'student-loan-calculator'],
-    relatedPosts: ['credit-card-debt-payoff-guide', 'debt-consolidation-guide'],
+    relatedPosts: ['debt-payoff-snowball-vs-avalanche', 'debt-consolidation-guide'],
     loader: () => import('../finance/credit-card-payoff/index'),
   },
   {

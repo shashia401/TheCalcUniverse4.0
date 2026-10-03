@@ -2,106 +2,156 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Business loans look simple on the surface — borrow X, pay back X plus interest. But lenders evaluate your application using a metric you might not have heard of, and fees you could overlook can dramatically increase your true cost. Here are the three things every business owner needs to understand before applying."
+      "text": "A business loan is judged on two numbers: whether your income covers the payment, and what the money really costs once fees and the term are included. The first is the debt service coverage ratio (DSCR), which is monthly net operating income divided by the monthly loan payment. On a $180,000 loan at an assumed 9.5% with $6,500 of monthly operating income, DSCR is 0.41 over 12 months, 1.13 over 36 months and 1.72 over 60 months. The same business and the same loan look unaffordable or comfortable depending only on the term."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "DSCR: The Number Lenders Actually Care About?"
+      "text": "DSCR: what it measures and how to use it"
     },
     {
       "type": "paragraph",
-      "text": "DSCR stands for Debt Service Coverage Ratio, and it's the single most important metric lenders use to decide whether to approve your business loan. The formula: DSCR = Monthly Net Operating Income / Monthly Loan Payment. A DSCR of 1."
-    },
-    {
-      "type": "paragraph",
-      "text": "25 means your business generates $1. 25 for every $1. 00 of debt payment."
-    },
-    {
-      "type": "paragraph",
-      "text": "Most SBA lenders require at least 1. 25. Below 1."
-    },
-    {
-      "type": "paragraph",
-      "text": "0 means approval is  unlikely. A DSCR of 1. 5 or higher puts you in a strong negotiating position for lower rates and better terms."
+      "text": "DSCR = monthly net operating income / monthly loan payment. A ratio of 1.00 means income exactly covers the payment; 1.25 means $1.25 of income for every $1.00 owed. The Business Loan Calculator labels a result of 1.5 or more as strong, 1.25 to 1.5 as good, 1.0 to 1.25 as marginal and below 1.0 as insufficient. Those bands are a screening guide, not a published lender requirement. Lenders define operating income in their own ways, may count your other debt payments too, and set their own minimums, so ask any lender for its definition and threshold. The SBA publishes the rules for its own programs on sba.gov, and they change, so check there rather than relying on a figure in an article."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "SBA Loans vs. Conventional vs. Online Lenders"
+      "text": "Worked example and assumptions"
     },
     {
-      "type": "paragraph",
-      "text": "SBA loans (7(a) and 504 programs) offer the lowest rates — typically 5–10% — with longer terms (up to 25 years for real estate). The trade-offs: extensive paperwork, longer approval times, and personal guarantee requirements. Conventional bank loans are faster but require stronger credit and collateral."
-    },
-    {
-      "type": "paragraph",
-      "text": "Online lenders offer the fastest funding but charge significantly higher rates — 15–40% APR when all fees are included."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Why Origination Fees Matter More Than You Think"
-    },
-    {
-      "type": "paragraph",
-      "text": "An origination fee of 1–5% is deducted upfront, so you receive less cash than the loan amount — but you still repay the full principal plus interest. On a $250,000 loan with a 2% fee, you receive $245,000 but repay the full $250,000 plus interest. That raises your effective APR by roughly 0."
-    },
-    {
-      "type": "paragraph",
-      "text": "4–0. 5 points. Comparing loan terms: a 1-year term costs ~$11,672 in interest, a 5-year term costs ~$57,740, and a 10-year term costs ~$122,120 — always match the term to the asset's useful life."
+      "type": "list",
+      "items": [
+        "Loan $180,000 at 9.5% a year, fixed, with equal monthly payments. The rate is an assumption for illustration, not a quote for any loan type.",
+        "Monthly net operating income $6,500, treated as steady. No other debt payments.",
+        "Interest is charged monthly at one-twelfth of the annual rate. Origination fees are zero in this table and added in the next one."
+      ]
     },
     {
       "type": "table",
       "headers": [
         "Term",
-        "Monthly Payment",
-        "Total Interest",
-        "Total Cost"
+        "Monthly payment",
+        "Total interest",
+        "Total repaid",
+        "DSCR"
       ],
       "rows": [
         [
-          "1 year (12 months)",
-          "~$21,806",
-          "~$11,672",
-          "~$261,672"
+          "12 months",
+          "$15,783.03",
+          "$9,396.39",
+          "$189,396.39",
+          "0.41"
         ],
         [
-          "3 years (36 months)",
-          "~$7,899",
-          "~$34,364",
-          "~$284,364"
+          "36 months",
+          "$5,765.93",
+          "$27,573.51",
+          "$207,573.51",
+          "1.13"
         ],
         [
-          "5 years (60 months)",
-          "~$5,129",
-          "~$57,740",
-          "~$307,740"
+          "60 months",
+          "$3,780.34",
+          "$46,820.10",
+          "$226,820.10",
+          "1.72"
         ],
         [
-          "7 years (84 months)",
-          "~$4,007",
-          "~$86,588",
-          "~$336,588"
+          "84 months",
+          "$2,941.92",
+          "$67,121.00",
+          "$247,121.00",
+          "2.21"
         ],
         [
-          "10 years (120 months)",
-          "~$3,101",
-          "~$122,120",
-          "~$372,120"
+          "120 months",
+          "$2,329.16",
+          "$99,498.72",
+          "$279,498.72",
+          "2.79"
         ]
       ]
     },
     {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Check your DSCR — aim for 1.25 or higher. Use the calculator below to find yours.",
-        "Review your personal and business credit scores — most lenders want 680+",
-        "Know your time in business — most SBA lenders require 2+ years of operating history",
-        "Compare the true APR including all fees, not just the stated rate",
-        "Understand whether you're personally guaranteeing the loan (most small business loans require it)"
+      "type": "paragraph",
+      "text": "A longer term raises DSCR and makes the loan easier to qualify for, but total interest climbs. Moving from 60 to 84 months lowers the payment by $838.42 and adds $20,300.90 of interest. At these numbers, the shortest term that reaches a DSCR of 1.25 is 41 months, and 1.5 needs 51 months. Choosing the term is a trade-off between approval, cash flow and total cost, and it should also match how long the financed asset will be useful."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How much could this business borrow?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Reverse the same logic to find a borrowing limit. With $6,500 of income, a lender who wants 1.25 would allow a payment of up to $5,200 ($6,500 divided by 1.25). At 9.5% that supports a loan of about $247,597 over 60 months, or $318,160 over 84 months. At a target of 1.5, the payment cap is $4,333.33, supporting about $206,331 over 60 months. If the business already has $800 a month in other debt service, DSCR on the $180,000, 60-month loan falls from 1.72 to 1.42."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why origination fees matter"
+    },
+    {
+      "type": "paragraph",
+      "text": "An origination fee is usually deducted from the loan, so you receive less than you borrow but repay the full amount. The effective annual rate on the cash you actually receive is higher than the stated rate. On this loan over 60 months, a 2% fee raises the effective rate from 9.50% to 10.37%, a 3% fee to 10.82% and a 5% fee to 11.73%. The same 3% fee costs more per year the shorter the loan:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Term with a 3% fee",
+        "Cash received",
+        "Effective annual rate"
+      ],
+      "rows": [
+        [
+          "12 months",
+          "$174,600",
+          "15.29%"
+        ],
+        [
+          "36 months",
+          "$174,600",
+          "11.60%"
+        ],
+        [
+          "60 months",
+          "$174,600",
+          "10.82%"
+        ],
+        [
+          "120 months",
+          "$174,600",
+          "10.22%"
+        ]
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Effective rates here come from solving for the rate at which the payments equal the cash received, the same approach used in the APR calculation. Compare lenders on that effective rate and on total dollars repaid, because a lender with a lower stated rate and a larger fee can cost more."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Before you apply"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Compute your DSCR at several terms and see which one clears the threshold you expect.",
+        "Get written quotes that show the rate, every fee, the term and any prepayment charge.",
+        "Ask whether a personal guarantee or collateral is required, and what happens if the business cannot pay.",
+        "Match the term to the asset. Financing equipment that lasts 5 years over 10 leaves you paying for it after it is gone.",
+        "Check whether the loan can be repaid early without a penalty."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this analysis does not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "The table assumes fixed rates, level payments and steady income. Variable rates, balloon payments, lines of credit, seasonal income, and revenue-based repayment work differently. Income that varies by month can make an average DSCR misleading, so look at your weakest months too. Treat these figures as illustrations, not an offer or advice. Enter your own amount, term, rate, fee and income into the Business Loan Calculator, then confirm every number against the lender's disclosure."
     },
     {
       "type": "cta",

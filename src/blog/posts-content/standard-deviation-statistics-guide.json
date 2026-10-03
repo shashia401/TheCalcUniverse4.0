@@ -1,101 +1,26 @@
 {
   "sections": [
-    {
-      "type": "paragraph",
-      "text": "Standard deviation is the single most important measure of spread in statistics. It tells you how much your data wobbles around the average — and it's the key to understanding normal distributions, confidence intervals, and hypothesis testing. Whether you're analyzing test scores, investment returns, or manufacturing quality, standard deviation is the tool that separates signal from noise."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What does standard deviation actually tell you?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Think of it as the average distance each data point sits from the mean. A low standard deviation means most values cluster close to the average — everyone scored similarly on a test. A high standard deviation means values are spread widely — some students aced it while others bombed."
-    },
-    {
-      "type": "paragraph",
-      "text": "The formula works by squaring each difference from the mean (to handle negative values), averaging those squared differences to get the variance, and then taking the square root to bring the number back to the original unit of measurement."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What is the difference between sample and population standard deviation?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The population formula (symbol: σ) divides by N — the total number of data points. You use it when you've data for every single member of the group you're studying. The sample formula (symbol: s) divides by n - 1 instead."
-    },
-    {
-      "type": "paragraph",
-      "text": "This is Bessel's correction, and it compensates for the fact that a sample tends to slightly underestimate the true variability of the population. In practice, you'll almost always use the sample formula, because real-world research rarely has access to an entire population."
-    },
-    {
-      "type": "callout",
-      "variant": "info",
-      "text": "The Standard Deviation Calculator on this site lets you toggle between sample and population mode. If you're not sure which to use, choose sample — it's the standard choice for almost all real-world data analysis."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What is the 68-95-99.7 rule?"
-    },
-    {
-      "type": "paragraph",
-      "text": "In a normal distribution (the classic bell curve), standard deviations map neatly to data percentages. About 68% of all values fall within one standard deviation of the mean. About 95% fall within two standard deviations."
-    },
-    {
-      "type": "paragraph",
-      "text": "About 99. 7% fall within three standard deviations. This means values beyond three SDs from the mean are  rare — less than 0."
-    },
-    {
-      "type": "paragraph",
-      "text": "3% chance — which is why researchers often flag those as potential outliers."
-    },
-    {
-      "type": "table",
-      "headers": [
-        "Range",
-        "Data Contained",
-        "Interpretation"
-      ],
-      "rows": [
-        [
-          "Mean ± 1 SD",
-          "68%",
-          "Most data lives here; expected range"
-        ],
-        [
-          "Mean ± 2 SD",
-          "95%",
-          "Uncommon but still normal values"
-        ],
-        [
-          "Mean ± 3 SD",
-          "99.7%",
-          "Very rare; potential outliers or anomalies"
-        ],
-        [
-          "Beyond 3 SD",
-          "0.3%",
-          "Extremely unusual; worth investigating"
-        ]
-      ]
-    },
-    {
-      "type": "cta",
-      "heading": "Calculate your data's standard deviation now",
-      "body": "Use our Standard Deviation & Variance Calculator to compute SD, variance, mean, median, range, and coefficient of variation for any data set. Choose between sample and population mode.",
-      "buttonLabel": "Try the Standard Deviation Calculator",
-      "path": "/math/standard-deviation-calculator/"
-    }
+    {"type":"paragraph","text":"Standard deviation tells you how far a typical value in a data set sits from that data set's mean, in the same units as the data. A small standard deviation means the values are bunched near the average; a large one means they are spread out. It is the square root of the variance, which is the average squared distance from the mean."},
+    {"type":"heading","level":2,"text":"How is standard deviation calculated, step by step?"},
+    {"type":"paragraph","text":"Take eight delivery times in minutes: 32, 35, 29, 41, 38, 30, 36 and 33. The steps are: find the mean, subtract it from every value, square each difference, add the squares, then divide and take the square root."},
+    {"type":"table","headers":["Value (min)","Difference from mean 34.25","Squared difference"],"rows":[["32","-2.25","5.0625"],["35","0.75","0.5625"],["29","-5.25","27.5625"],["41","6.75","45.5625"],["38","3.75","14.0625"],["30","-4.25","18.0625"],["36","1.75","3.0625"],["33","-1.25","1.5625"],["Total","0","115.5"]]},
+    {"type":"paragraph","text":"The eight values add to 274, so the mean is 274 / 8 = 34.25 minutes. The differences always sum to zero, which is why they must be squared before they are added. The squares sum to 115.5. Dividing by n - 1 = 7 gives a sample variance of 16.5 and a sample standard deviation of about 4.06 minutes. Dividing by n = 8 gives a population variance of 14.4375 and a population standard deviation of about 3.80 minutes. These figures match the Standard Deviation Calculator's own method: sum the squared differences from the mean, divide, then take the square root."},
+    {"type":"heading","level":2,"text":"Should you divide by n or n - 1?"},
+    {"type":"paragraph","text":"Use the population formula (divide by N) only when your data covers every member of the group you care about, such as every order in a complete list. Use the sample formula (divide by n - 1) when your data is a sample used to learn about a larger group. Dividing by n - 1 is called Bessel's correction. A sample's values sit closer to their own mean than to the true population mean, so dividing by n gives a variance that is too small on average."},
+    {"type":"paragraph","text":"A tiny exact check shows this. Take a population of four values, 2, 4, 6 and 8, whose population variance is 5. Draw every possible ordered pair with replacement (16 pairs) and compute each pair's variance. Dividing by n = 2 averages 2.5, half the truth. Dividing by n - 1 = 1 averages exactly 5. The correction makes the variance unbiased; the standard deviation, its square root, is still slightly low on average, a smaller effect that matters little in practice."},
+    {"type":"heading","level":2,"text":"What does the 68-95-99.7 rule really say?"},
+    {"type":"paragraph","text":"For data that follows a normal (bell-shaped) distribution, the share of values within 1, 2 and 3 standard deviations of the mean is fixed. The values below were computed from the normal distribution's error function and rounded to two decimals; the familiar 68, 95 and 99.7 are rounded versions. Chebyshev's inequality, a separate result, guarantees at least 1 - 1/k squared of values within k standard deviations for any distribution with a finite variance."},
+    {"type":"table","headers":["Distance from mean","Share inside (normal data)","Share outside","Guaranteed minimum for any data (Chebyshev)"],"rows":[["1 SD","68.27%","31.73%","none (the bound is 0%)"],["2 SD","95.45%","4.55%","75%"],["3 SD","99.73%","0.27%","88.9%"]]},
+    {"type":"paragraph","text":"The rule is a property of the normal distribution, not of standard deviation itself. In our delivery sample, 5 of 8 values (62.5%) fall within one sample standard deviation (30.19 to 38.31 minutes) and all 8 fall within two. With only eight values, that is consistent with a bell shape but proves nothing about it."},
+    {"type":"heading","level":2,"text":"How much can one outlier change the answer?"},
+    {"type":"paragraph","text":"A lot, because differences are squared. Add a ninth delivery that took 90 minutes (a breakdown, say). The mean rises from 34.25 to 40.44 minutes, the sample standard deviation jumps from 4.06 to 18.97, and the coefficient of variation (standard deviation divided by the mean) goes from 11.9% to 46.9%. The median only moves from 34 to 35 minutes. When a few extreme values drive the result, report the median and the interquartile range alongside the standard deviation, or investigate the extreme value before relying on it."},
+    {"type":"heading","level":2,"text":"Why does the same mean not mean the same consistency?"},
+    {"type":"paragraph","text":"Compare the deliveries above with a second route whose times are 34, 35, 34, 34, 35, 34, 35 and 33 minutes. Both routes average exactly 34.25 minutes. The second route's sample standard deviation is 0.71 minutes against 4.06, and its coefficient of variation is 2.06% against 11.86%. A customer promised a 35-minute window would be treated very differently by the two routes even though their averages match."},
+    {"type":"heading","level":2,"text":"Common mistakes and limits"},
+    {"type":"list","items":["Using the population formula on a sample, which understates the spread, most noticeably for small n.","Quoting the variance as if it were in the data's units. Variance is in squared units (minutes squared here); the standard deviation is in minutes.","Applying 68-95-99.7 to skewed or bimodal data such as incomes or waiting times with a long tail. Use percentiles instead.","Computing a standard deviation of ordinal ratings (such as 1 to 5 survey scales) and treating the gaps as equal.","Using the coefficient of variation when the mean is near zero, where it blows up and says nothing useful.","Reading much into a standard deviation from very few values. With n = 3 the estimate itself is highly uncertain."]},
+    {"type":"callout","variant":"tip","text":"Check your hand calculation with the calculator: enter 32, 35, 29, 41, 38, 30, 36, 33, choose sample mode, and you should see a mean of 34.25 and a standard deviation of about 4.062. Switch to population mode and you should see about 3.800."},
+    {"type":"callout","variant":"info","text":"All numbers in this article were computed by script from the stated data. The delivery times are made up for illustration and do not describe any real service."},
+    {"type":"cta","heading":"Calculate your data's standard deviation now","body":"Use our Standard Deviation & Variance Calculator to compute SD, variance, mean, median, range, and coefficient of variation for any data set. Choose between sample and population mode.","buttonLabel":"Try the Standard Deviation Calculator","path":"/math/standard-deviation-calculator/"}
   ],
-  "keywords": [
-    "standard deviation calculator",
-    "variance calculator",
-    "statistics calculator",
-    "mean median calculator",
-    "sample standard deviation",
-    "population standard deviation"
-  ]
+  "keywords": ["standard deviation calculator","variance calculator","statistics calculator","mean median calculator","sample standard deviation","population standard deviation"]
 }

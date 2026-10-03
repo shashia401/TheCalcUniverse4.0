@@ -2,89 +2,205 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Every time mortgage rates drop, you hear the same question: *should I refinance? * The answer isn't about the rate alone. it's about whether you'll stay in your home long enough for your monthly savings to cover the upfront closing costs."
-    },
-    {
-      "type": "paragraph",
-      "text": "here's exactly how to run the math."
+      "text": "A refinance is worth it only if you keep the new loan longer than its break-even point, which is the closing costs divided by the monthly payment you save. In the example below, a $225,000 balance at 7.25% with 28 years left, refinanced to 6.25% with $6,750 in closing costs, saves $146.65 a month and breaks even after 47 months. A drop of only half a point on the same loan takes 92 months. Rate alone does not decide it; the rate drop, the costs and your time horizon do."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Is a Mortgage Refinance?"
+      "text": "The break-even formula"
     },
     {
       "type": "paragraph",
-      "text": "Refinancing replaces your current mortgage with a new one, ideally at a lower interest rate. A 1% rate drop on a $250,000 loan saves roughly $150/month. But refinancing isn't free."
-    },
-    {
-      "type": "paragraph",
-      "text": "Closing costs typically run 2–5% of the loan amount, covering origination fees, appraisal, title insurance, and recording fees. The key question: will your monthly savings outpace those upfront costs before you move?"
+      "text": "Break-even in months = closing costs / (old monthly payment - new monthly payment), rounded up to a whole month. This is the same test the Refinance Calculator uses. If you stay in the loan longer than that number of months, the payment savings add up to more than you paid to refinance. If you sell or refinance again sooner, you lose money. The test is a quick filter, not a full valuation, and later sections show where it is too crude."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "The Only Number That Matters: Break-Even Point"
+      "text": "Worked example and its assumptions"
     },
     {
-      "type": "paragraph",
-      "text": "The break-even point is the number of months it takes for your monthly savings to equal your closing costs. The formula: Break-Even = Closing Costs / Monthly Savings. If closing costs are $6,000 and you save $250/month, your break-even is 24 months."
-    },
-    {
-      "type": "paragraph",
-      "text": "A break-even under 24 months is excellent. Between 24 and 36 months is standard. Over 48 months?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Only refinance if you're certain you'll stay long-term. don't refinance if you plan to move within 2–3 years, your rate drop is less than 0. 5%, or you would need to roll closing costs into the loan."
+      "type": "list",
+      "items": [
+        "Current loan: $225,000 balance, 7.25% fixed, 336 months (28 years) remaining. Payment of principal and interest: $1,566.35.",
+        "Closing costs: 3% of the balance, $6,750. This is an assumption for illustration; your Loan Estimate shows the real figure, and it varies by lender and location.",
+        "New rates of 6.25% and 6.75% are hypothetical, not quotes. The new loan is sized to the current balance, with costs either paid in cash or added to the loan.",
+        "Taxes, insurance, escrow, and any interest earned on the money you save each month are ignored."
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Does a Lower Rate Always Mean Lower Total Cost?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Not always. If you refinance from a 20-year remaining term into a new 30-year loan, you reset the amortization clock. you'll pay mostly interest again for years, potentially increasing your lifetime interest cost even at a lower rate."
-    },
-    {
-      "type": "paragraph",
-      "text": "Always compare total interest paid over the remaining life of the loan. A rate-and-term refinance that matches your remaining term preserves your equity-building progress. Cash-out refinancing lets you borrow more than you owe and pocket the difference — useful for high-return improvements or debt consolidation, but it increases your loan balance and may carry a slightly higher rate."
+      "text": "Four ways to refinance the same loan"
     },
     {
       "type": "table",
       "headers": [
         "Scenario",
-        "Break-Even",
-        "Planned Stay",
-        "Verdict"
+        "New payment",
+        "Monthly saving",
+        "Simple break-even",
+        "Balance-adjusted break-even"
       ],
       "rows": [
         [
-          "7.5% to 6.0%, $6K closing costs",
-          "24 months",
-          "60 months",
-          "Yes — Refi now, save $9K+"
+          "6.25%, same 336-month term, costs paid in cash",
+          "$1,419.71",
+          "$146.65",
+          "47 months",
+          "36 months"
         ],
         [
-          "7.5% to 6.0%, $6K closing costs",
-          "24 months",
-          "12 months",
-          "No — you'll lose $3K"
+          "6.75%, same 336-month term, costs paid in cash",
+          "$1,492.26",
+          "$74.09",
+          "92 months",
+          "72 months"
         ],
         [
-          "7.5% to 7.25%, $6K closing costs",
-          "~120 months",
-          "60 months",
-          "No — Rate drop too small"
+          "6.25%, same term, $6,750 added to the loan",
+          "$1,462.30",
+          "$104.06",
+          "65 months",
+          "44 months"
         ],
         [
-          "Cash-out refi for improvements",
-          "Varies",
-          "N/A",
-          "Consider if ROI exceeds cost"
+          "6.25%, new 360-month term, costs paid in cash",
+          "$1,385.36",
+          "$180.99",
+          "38 months",
+          "37 months"
         ]
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The simple break-even divides costs by the payment saving. The balance-adjusted figure also counts that a lower rate sends more of each payment to principal. It is the first month in which the cash you have saved on payments exceeds the extra net debt you carry (the new balance plus any costs, minus the old balance). It assumes you hold the saved cash without investing it. For the first row the simple test says 47 months and the fuller test says 36, so the simple rule is slightly conservative when the term stays the same."
+    },
+    {
+      "type": "paragraph",
+      "text": "Adding the costs to the loan makes the saving look smaller and delays break-even from 47 to 65 months on the simple test, because you now pay interest on the $6,750 for years."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "How the size of the rate drop changes the answer"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "New rate (same term, costs in cash)",
+        "New payment",
+        "Monthly saving",
+        "Simple break-even"
+      ],
+      "rows": [
+        [
+          "7.00%",
+          "$1,529.12",
+          "$37.23",
+          "182 months"
+        ],
+        [
+          "6.75%",
+          "$1,492.26",
+          "$74.09",
+          "92 months"
+        ],
+        [
+          "6.50%",
+          "$1,455.78",
+          "$110.57",
+          "62 months"
+        ],
+        [
+          "6.25%",
+          "$1,419.71",
+          "$146.65",
+          "47 months"
+        ],
+        [
+          "6.00%",
+          "$1,384.03",
+          "$182.32",
+          "38 months"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Each quarter-point takes off roughly $36 a month on this loan. A small drop leaves a break-even of many years, which is longer than many people stay in a home. As a scale check on a different loan, moving a $250,000 30-year loan from 7.5% to 6.5% lowers the payment from $1,748.04 to $1,580.17, a saving of $167.87 a month."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The term reset: a lower payment can still cost more"
+    },
+    {
+      "type": "paragraph",
+      "text": "The last row of the first table has the biggest payment cut because it restarts the clock at 360 months. That is where a lower rate can mislead. Total interest plus closing costs over the life of each new 30-year loan, compared with the $301,294.65 of interest still due on the existing loan, comes out like this:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "New rate on a fresh 30-year loan",
+        "Interest plus $6,750 costs",
+        "Versus keeping the old loan"
+      ],
+      "rows": [
+        [
+          "6.75%",
+          "$307,114",
+          "$5,819 more"
+        ],
+        [
+          "6.50%",
+          "$293,725",
+          "$7,570 less"
+        ],
+        [
+          "6.25%",
+          "$280,481",
+          "$20,814 less"
+        ],
+        [
+          "6.00%",
+          "$267,386",
+          "$33,909 less"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "At 6.75% the payment falls by $107 to $1,459.35 on the fresh loan, yet you pay more in total because you borrow for 24 extra months. If you refinance into a longer term, you can protect yourself by continuing to pay your old payment of $1,566.35 on the new loan. At 6.25% that retires the loan in 266 months, 70 months sooner than the existing schedule, with $190,782.67 of interest plus the $6,750 in costs."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Judging by the new payment alone. Always compare total interest and the remaining term, not just the monthly figure.",
+        "Ignoring the planned stay. A 92-month break-even is a loss if you expect to move in four years.",
+        "Rolling costs into the balance without re-running the numbers. It lengthens break-even and increases total interest.",
+        "Assuming a quote is final. Rates, points and fees change between the initial quote and closing, so compare Loan Estimates from several lenders.",
+        "Treating cash-out as a free rate cut. Borrowing more against your home raises the balance and puts the home behind the new debt."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this analysis does not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "The figures assume fixed rates, a single refinance, costs you know in advance, and no change in taxes or insurance. They do not model points paid to buy down the rate, lender credits, adjustable-rate loans, mortgage insurance, or whether your income and home value qualify you for the quoted rate. They are illustrations, not forecasts or advice on a specific loan. Enter your own balance, rate, remaining term, quote and planned stay into the Refinance Calculator, and check the final numbers against your Loan Estimate."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "text": "Every figure here was computed month by month with standard amortization, using the same break-even formula as the Refinance Calculator. Rates and costs are assumptions, not market data."
     },
     {
       "type": "cta",

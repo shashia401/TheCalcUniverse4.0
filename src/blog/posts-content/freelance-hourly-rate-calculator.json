@@ -1,71 +1,204 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Formula for a Sustainable Freelance Rate"
-    },
-    {
       "type": "paragraph",
-      "text": "Your true hourly rate needs to cover more than your time. It must cover your desired salary, taxes (self-employment tax is ~15.3%), health insurance, equipment, software subscriptions, retirement savings, paid time off, and business expenses. A common rule: triple your desired hourly rate. If you want to earn $50/hour after expenses, charge $150/hour. This accounts for the 50%+ of your time spent on non-billable work (admin, marketing, proposals)."
+      "text": "Your freelance hourly rate is the revenue you need in a year divided by the hours you can actually bill, and the second number is almost always smaller than people expect. In the example below, a freelancer who wants the equivalent of a $70,000 salary needs about $103,632 of revenue a year. Billing 24 hours a week for 46 weeks, that is $93.87 an hour, 2.79 times the $33.65 you get by dividing $70,000 by 2,080 working hours. The difference is unbilled time, business costs, benefits and self-employment tax. This guide shows the formula and which inputs move it."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Step-by-Step Rate Calculation"
+      "text": "The formula"
     },
     {
       "type": "list",
-      "ordered": true,
       "items": [
-        "Determine your desired annual salary (e.g., $80,000).",
-        "Add 30% for taxes and benefits ($80,000 x 1.3 = $104,000).",
-        "Add annual business expenses (software, equipment, insurance: ~$10,000).",
-        "Total annual need: $114,000.",
-        "Estimate billable hours per year: 52 weeks - 4 weeks PTO - 1 week holidays - 2 weeks sick = 45 weeks x 30 billable hours/week = 1,350 hours.",
-        "Rate: $114,000 / 1,350 = $84/hour."
+        "Target income: the pre-income-tax salary you want, the same figure you would compare with a job offer.",
+        "Benefits you now buy yourself: health insurance and retirement contributions.",
+        "Business expenses: software, equipment, insurance, accounting, anything you must pay to work.",
+        "Self-employment tax: the IRS lists the rate as 15.3%, made up of 12.4% for Social Security and 2.9% for Medicare, and lets you deduct the employer-equivalent half when figuring income tax. The Self-Employment Tax Calculator on this site applies the rate to a reduced base of net earnings, so using 15.3% of full net profit here is a cautious simplification.",
+        "Billable hours: weeks worked x hours per week x the share of those hours you can invoice."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Required revenue = business expenses + (target income + benefits) / (1 - 0.153). Hourly rate = required revenue / billable hours. Income tax is left out because your target is a pre-tax figure, like a salary."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Worked example and assumptions"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Target income $70,000. Health insurance $6,000 a year and retirement contributions $5,000 a year are assumptions; use your own quotes.",
+        "Business expenses $8,000 a year, also an assumption.",
+        "46 working weeks (52 minus 6 weeks for vacation, holidays and sick time), 40 hours a week at work, 60% of those hours billable: 24 hours a week, 1,104 hours a year.",
+        "No state or local taxes, no unpaid invoices, and no income variation between months."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Profit needed before self-employment tax: ($70,000 + $6,000 + $5,000) / 0.847 = $95,632, of which $14,632 is self-employment tax. Add $8,000 of expenses for required revenue of $103,632. Dividing by 1,104 hours gives $93.87 an hour. As a check, $93.87 x 1,104 = $103,632; subtracting expenses leaves $95,632; subtracting self-employment tax, health insurance and retirement leaves exactly $70,000."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Billable share is the biggest lever"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Billable share of a 40-hour week",
+        "Billable hours per week",
+        "Billable hours per year",
+        "Hourly rate needed"
+      ],
+      "rows": [
+        [
+          "40%",
+          "16",
+          "736",
+          "$140.80"
+        ],
+        [
+          "50%",
+          "20",
+          "920",
+          "$112.64"
+        ],
+        [
+          "60%",
+          "24",
+          "1,104",
+          "$93.87"
+        ],
+        [
+          "70%",
+          "28",
+          "1,288",
+          "$80.46"
+        ],
+        [
+          "80%",
+          "32",
+          "1,472",
+          "$70.40"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Selling and administration, proposals, invoicing, learning and gaps between projects are real work, but not billable. A new freelancer who can bill half the week needs a rate about 20% higher than one who bills 60%. Track a month of actual hours before committing to a percentage."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Weeks worked, expenses and unpaid time"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Change (all else as above)",
+        "Hourly rate needed"
+      ],
+      "rows": [
+        [
+          "42 working weeks",
+          "$102.81"
+        ],
+        [
+          "46 working weeks",
+          "$93.87"
+        ],
+        [
+          "50 working weeks",
+          "$86.36"
+        ],
+        [
+          "5% of revenue lost to discounts or unpaid invoices",
+          "$98.81"
+        ],
+        [
+          "Business expenses $2,000 higher",
+          "$95.68"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Time off matters more than small expenses: going from 50 to 42 working weeks raises the rate by $16.45, while an extra $2,000 of expenses adds $1.81."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What a lower rate actually pays"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Hourly rate",
+        "Revenue (1,104 hours)",
+        "After expenses",
+        "After self-employment tax, health and retirement"
+      ],
+      "rows": [
+        [
+          "$50",
+          "$55,200",
+          "$47,200",
+          "$28,978"
+        ],
+        [
+          "$75",
+          "$82,800",
+          "$74,800",
+          "$52,356"
+        ],
+        [
+          "$95",
+          "$104,880",
+          "$96,880",
+          "$71,057"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The last column is before income tax. At $50 an hour, the same schedule leaves about $28,978 to live on, well under half the $70,000 target. To earn $103,632 at $60 an hour you would need 1,727 billable hours, 37.5 a week for 46 weeks, which leaves no time for finding work."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Hourly rate or fixed fee"
+    },
+    {
+      "type": "paragraph",
+      "text": "Use the hourly rate as your floor. A 20-hour project at $93.87 costs $1,877.40 if billed hourly. A fixed fee should be at least your estimated hours times your rate plus a buffer for revisions, because overruns come out of your pay. Charging more than the floor because the work is valuable to the client is reasonable, but you cannot know the value without asking, and a fee below the floor means you are subsidizing the project."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Dividing a salary by 2,080 hours and calling it a rate.",
+        "Assuming every working hour can be billed.",
+        "Forgetting that you now pay both halves of the Social Security and Medicare tax. Set aside money for quarterly estimated taxes; a tax professional can confirm the right amounts for you.",
+        "Ignoring benefits you used to get: paid leave, employer retirement contributions and insurance.",
+        "Never revisiting the rate. Re-run the numbers when expenses, hours or targets change."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Most Freelancers Undercharge"
+      "text": "When this does not apply"
     },
     {
       "type": "paragraph",
-      "text": "The number one mistake freelancers make is comparing their rate to an employee salary. As an employee, your actual cost to an employer is 1.3-1.5x your salary. As a freelancer, you pay both sides of payroll tax, buy your own benefits, cover your own equipment, and eat the cost of unpaid time between projects. Charging $50/hour as a freelancer is equivalent to earning about $35/hour as an employee — less than you think. Use the freelance rate calculator to get a number that actually works for your situation."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Value-Based Pricing vs Hourly Rates"
-    },
-    {
-      "type": "paragraph",
-      "text": "While hourly rates are a good baseline, the most profitable freelancers shift to value-based pricing. Instead of charging $100/hour for a project that takes 20 hours ($2,000), charge based on the value delivered. If your work saves the client $50,000, charging $5,000-$10,000 is reasonable and makes your hourly effective rate much higher. Start with hourly to cover your costs, then move to value-based as you gain experience and results."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How do I know if my rate is too high or too low?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Track your close rate. If you win every proposal, your rate may be too low. If you win less than 25% of proposals, your rate may be too high (or your targeting is off). A healthy close rate is 30-50% for most freelancers."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Should I charge different rates for different clients?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Yes, but transparently. Agencies often charge higher rates than direct clients because they add management overhead. Non-profits may have lower budgets. Geographic differences matter too. The key is knowing your minimum viable rate and never going below it regardless of the client."
+      "text": "This model is for U.S.-style self-employment tax and a single rate. Other countries have different taxes, and clients, agencies and projects may set rates you cannot negotiate. Market rates also limit what you can charge. If your computed rate is far above what clients pay, the answer may be to lower costs, raise billable hours, or reconsider the target, not to ignore the math. The Salary to Hourly Calculator converts a salary into an hourly figure, the Self-Employment Tax Calculator estimates the tax, and a tax professional can confirm how rules apply to you."
     },
     {
       "type": "cta",

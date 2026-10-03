@@ -1,119 +1,25 @@
 {
   "sections": [
-    {
-      "type": "paragraph",
-      "text": "Your GPA is one of the most important numbers in your academic life. Whether you're planning for college applications, tracking your semester progress, or trying to figure out what grades you need to reach a goal, understanding how GPA works can make all the difference. The good news: the math behind it's simpler than you might think."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What is the difference between weighted and unweighted GPA?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Unweighted GPA treats every class the same. An A in gym is worth the same 4. 0 points as an A in AP Calculus."
-    },
-    {
-      "type": "paragraph",
-      "text": "Weighted GPA gives you extra credit for tougher courses. That same A in AP Calculus might be worth 5. 0 points instead of 4."
-    },
-    {
-      "type": "paragraph",
-      "text": "0, reflecting the fact that the course demands more work. Colleges look at both: unweighted for a standardized apples-to-apples comparison, and weighted to see how much academic rigor you took on."
-    },
-    {
-      "type": "table",
-      "headers": [
-        "Factor",
-        "Unweighted GPA",
-        "Weighted GPA"
-      ],
-      "rows": [
-        [
-          "Scale",
-          "4.0 (A = 4.0, B = 3.0, C = 2.0)",
-          "Up to 5.0 (AP/IB get +1.0 bonus)"
-        ],
-        [
-          "Course difficulty",
-          "All courses treated equally",
-          "Bonus points for honors, AP, IB"
-        ],
-        [
-          "Colleges prefer",
-          "Standardized comparison across applicants",
-          "Shows academic ambition and rigor"
-        ],
-        [
-          "Class rank impact",
-          "Level playing field",
-          "Students taking advanced courses rank higher"
-        ]
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How do you calculate your GPA?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The formula is straightforward: GPA equals total grade points divided by total credits. Each letter grade maps to a numeric value — A = 4. 0, B = 3."
-    },
-    {
-      "type": "paragraph",
-      "text": "0, C = 2. 0, D = 1. 0, F = 0."
-    },
-    {
-      "type": "paragraph",
-      "text": "0 — with plus and minus grades getting intermediate values (A- is 3. 67, B+ is 3. 33)."
-    },
-    {
-      "type": "paragraph",
-      "text": "For weighted GPA, you multiply each course's grade points by its weight multiplier before adding them up. A typical AP or IB class gets a 1. 1x multiplier, while honors gets 1."
-    },
-    {
-      "type": "paragraph",
-      "text": "05x."
-    },
-    {
-      "type": "paragraph",
-      "text": "Say you took four courses: Math (A, 4 credits, AP), English (B+, 3 credits, Regular), Science (A-, 4 credits, Honors), and History (B, 3 credits, Regular). Your unweighted GPA might land around 3. 5, but your weighted GPA would be higher because the AP and Honors courses add bonus points."
-    },
-    {
-      "type": "paragraph",
-      "text": "The GPA Calculator on this site does all the heavy lifting — just enter your courses and it handles the rest."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What is the difference between semester and cumulative GPA?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Your semester GPA covers just one term — fall or spring. Your cumulative GPA averages every course you've taken across all semesters. Colleges care most about cumulative GPA, but semester GPA helps you track short-term trends."
-    },
-    {
-      "type": "paragraph",
-      "text": "A strong semester can pull your cumulative GPA up, and a weak one can drag it down. The key takeaway: improvement matters. A rising trend in semester GPAs over time looks great on college applications, even if your cumulative number isn't perfect yet."
-    },
-    {
-      "type": "cta",
-      "heading": "Ready to calculate your GPA?",
-      "body": "Use our GPA Calculator to compute your weighted and unweighted GPA, track semester and cumulative averages, and find out what grades you need to reach your target.",
-      "buttonLabel": "Calculate Your GPA",
-      "path": "/math/gpa-calculator/"
-    }
+    {"type":"paragraph","text":"GPA (grade point average) is your total grade points divided by your total credits, where each course's grade points are its letter-grade value multiplied by its credit hours. An unweighted GPA counts every course on the same scale. A weighted GPA gives extra value to courses your school classes as harder, such as honors or AP. The exact scale and weighting are set by each school or college, so always check yours."},
+    {"type":"heading","level":2,"text":"How is GPA calculated, step by step?"},
+    {"type":"paragraph","text":"Convert each letter grade to a point value, multiply by the credits for that course, add the results, then divide by total credits. The GPA Calculator on this site uses this scale: A+ 4.33, A 4.0, A- 3.67, B+ 3.33, B 3.0, B- 2.67, C+ 2.33, C 2.0, C- 1.67, D+ 1.33, D 1.0, D- 0.67 and F 0. Many schools cap an A+ at 4.0 or do not use plus and minus grades at all, so this is one common convention, not a universal rule."},
+    {"type":"paragraph","text":"Here is a four-course example. The calculator applies a multiplier for course level: 1.05 for honors and 1.1 for AP or IB, with 1.0 for regular courses."},
+    {"type":"table","headers":["Course","Grade","Credits","Level","Unweighted points","Weighted points"],"rows":[["Math","A","4","AP","16.00","17.60"],["English","B+","3","Regular","9.99","9.99"],["Science","A-","4","Honors","14.68","15.41"],["History","B","3","Regular","9.00","9.00"],["Total","","14","","49.67","52.00"]]},
+    {"type":"paragraph","text":"Unweighted GPA is 49.67 / 14 = 3.55 (3.5479 before rounding). Weighted GPA is 52.00 / 14 = 3.71 (3.7146). The weighted figure is higher because the AP and honors courses carry extra value, and it can rise above the normal maximum of the scale."},
+    {"type":"heading","level":2,"text":"Why can two schools get different weighted GPAs from the same grades?"},
+    {"type":"paragraph","text":"There is no single national formula for weighting. This calculator multiplies a course's points by a factor. Other schools add a fixed bonus instead, such as one extra point for AP or half a point for honors. Using that alternative on the same four courses (and treating the bonus as applying to the grade points of A and A-) gives (20.00 + 9.99 + 16.68 + 9.00) / 14 = 3.98, a very different number from 3.71 even though the grades are identical. The lesson is to compare GPAs only when they come from the same method, and to use your school's own published policy for transcripts and applications."},
+    {"type":"heading","level":2,"text":"How do semester and cumulative GPA differ?"},
+    {"type":"paragraph","text":"Semester GPA covers one term. Cumulative GPA covers every graded course so far and weights each course by its credits. That means you cannot average two semester GPAs unless the credit loads are equal."},
+    {"type":"table","headers":["Term","Credits","Grade points","GPA"],"rows":[["Semester 1","15","45.99","3.07"],["Semester 2","12","45.00","3.75"],["Cumulative","27","90.99","3.37"],["Simple average of the two GPAs","","","3.41 (incorrect)"]]},
+    {"type":"paragraph","text":"The credit-weighted result is 3.37; the simple average of the two semester GPAs is 3.41, because the lighter second semester is given too much weight. In this example, Semester 1 holds A-, B, B+ and C+ with credit loads of 4, 4, 3 and 4, and Semester 2 holds A, A-, B+ and A at 3 credits each."},
+    {"type":"heading","level":2,"text":"What grades do you need to reach a target GPA?"},
+    {"type":"paragraph","text":"The calculator's target mode solves for the average GPA you need on the remaining credits: needed = (target x total credits - current GPA x credits completed) / remaining credits. Suppose you have a 3.20 GPA after 60 credits and want a 3.40 by the end of 90 credits. You need (3.40 x 90 - 3.20 x 60) / 30 = 3.80 on the remaining 30 credits, which means averaging at least a letter A on the scale above."},
+    {"type":"table","headers":["Current GPA / credits","Target / remaining credits","Average needed","Reading"],"rows":[["3.20 / 60","3.40 / 30","3.80","Nearly straight A grades"],["3.20 / 60","3.40 / 60","3.60","About an A- average"],["3.00 / 90","3.50 / 15","6.50","Impossible on this scale"]]},
+    {"type":"paragraph","text":"The table shows why early credits matter: the same target is far easier with more credits left to earn it. A single course also moves a large cumulative GPA slowly. From 3.20 after 60 credits, a 3-credit A brings you to 3.24, a B to 3.19, a C to 3.14 and an F to 3.05."},
+    {"type":"heading","level":2,"text":"Common mistakes and limits"},
+    {"type":"list","items":["Averaging semester GPAs instead of weighting by credits.","Using a scale your school does not use. Some schools ignore plus and minus grades: the four-course example above would be 3.57 without them instead of 3.55.","Assuming weighted and unweighted GPAs from different schools are comparable.","Counting pass/fail, withdrawn or repeated courses the way your school does not. Repeat and forgiveness policies differ, and this calculator counts every course you enter.","Treating a calculator result as official. Your registrar's transcript is the record that counts, and admissions offices may recalculate GPAs on their own scale."]},
+    {"type":"callout","variant":"tip","text":"To check the first table in the calculator, enter the four courses with their grades, credits and levels. You should see an unweighted GPA of 3.55, a weighted GPA of 3.71 and 14 total credits."},
+    {"type":"cta","heading":"Ready to calculate your GPA?","body":"Use our GPA Calculator to compute your weighted and unweighted GPA, track semester and cumulative averages, and find out what grades you need to reach your target.","buttonLabel":"Calculate Your GPA","path":"/math/gpa-calculator/"}
   ],
-  "keywords": [
-    "GPA calculator",
-    "grade point average",
-    "weighted GPA",
-    "unweighted GPA",
-    "target GPA",
-    "college GPA",
-    "semester GPA",
-    "cumulative GPA",
-    "grade calculator"
-  ]
+  "keywords": ["GPA calculator","grade point average","weighted GPA","unweighted GPA","target GPA","college GPA","semester GPA","cumulative GPA","grade calculator"]
 }

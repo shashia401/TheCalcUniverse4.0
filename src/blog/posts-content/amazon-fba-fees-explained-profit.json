@@ -1,124 +1,257 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Your true FBA margin is the selling price minus your landed cost, the referral fee, the fulfillment fee and storage, divided by the selling price, and then reduced further by advertising and returns. Using the Amazon FBA Calculator's fee model, a product that sells for $26.99 and costs $8.40 landed leaves $9.31 per unit, a 34.5% net margin, before advertising. Spending 15% of the price on ads and allowing for some unsellable returns takes that to $4.51, or 16.7%. This post shows the arithmetic, so you can rerun it with the fee schedule that applies to you."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Understanding Amazon FBA Fee Structure"
+      "text": "The formula and the fee assumptions"
     },
     {
       "type": "paragraph",
-      "text": "Amazon FBA (Fulfillment by Amazon) fees consist of several components: referral fees (8-15% of the sale price depending on category), fulfillment fees (picking, packing, and shipping), monthly storage fees (based on cubic footage, higher during peak Q4 months), and optional fees like advertising, returns processing, and removal orders. Together, these fees typically consume 30-45% of your selling price. For a $25 product, you might keep only $13-17 after all Amazon fees."
+      "text": "Net profit per unit = price - landed cost - referral fee - fulfillment fee - storage per unit. The fee amounts below come from the calculator's own simplified model and are assumptions, not Amazon's current published fees. Amazon changes its fee schedules, and the calculator itself warns that its numbers may lag. Check the current FBA and referral fee pages in Seller Central before you price a product."
+    },
+    {
+      "type": "list",
+      "items": [
+        "Selling price $26.99. Landed cost $8.40 (product, freight to the warehouse, duties and prep, per unit).",
+        "Packaged weight 1.4 lb. In the calculator, units between 1 and 2 lb carry a $4.18 fulfillment fee, and storage is estimated at $0.75 per pound for one month, which is $1.05.",
+        "Referral fee 15% of the selling price, the calculator's rate for a general category. Other categories in the calculator use rates from 8% to 20%.",
+        "Not included: advertising, returns, long-term storage, removal fees, inbound shipping to the warehouse, taxes, and any seller subscription."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Check: the calculator's own worked example, a garlic press at $24.99 with $6.50 cost and 0.8 lb weight, gives fees of $7.57, profit of $10.92 and a 43.7% margin using the same formula, which matches this calculation."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Fee Breakdown by Category"
+      "text": "How price changes the margin"
     },
     {
       "type": "table",
       "headers": [
-        "Category",
-        "Referral Fee",
-        "Min Fee",
-        "Notes"
+        "Selling price",
+        "Referral fee",
+        "Total Amazon fees",
+        "Net profit",
+        "Net margin",
+        "ROI on cost"
       ],
       "rows": [
         [
-          "Electronics",
-          "8%",
-          "$1.00",
-          "Lower rate for high-value items"
+          "$19.99",
+          "$3.00",
+          "$8.23",
+          "$3.36",
+          "16.8%",
+          "40.0%"
         ],
         [
-          "Clothing",
-          "15%",
-          "$1.00",
-          "$15 max fee on apparel"
+          "$22.99",
+          "$3.45",
+          "$8.68",
+          "$5.91",
+          "25.7%",
+          "70.4%"
         ],
         [
-          "Sports",
-          "15%",
-          "$1.00",
-          "Standard rate"
+          "$24.99",
+          "$3.75",
+          "$8.98",
+          "$7.61",
+          "30.5%",
+          "90.6%"
         ],
         [
-          "Home & Kitchen",
-          "15%",
-          "$1.00",
-          "Most common category"
+          "$26.99",
+          "$4.05",
+          "$9.28",
+          "$9.31",
+          "34.5%",
+          "110.9%"
         ],
         [
-          "Collectibles",
+          "$29.99",
+          "$4.50",
+          "$9.73",
+          "$11.86",
+          "39.6%",
+          "141.2%"
+        ],
+        [
+          "$34.99",
+          "$5.25",
+          "$10.48",
+          "$16.11",
+          "46.0%",
+          "191.8%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Fixed per-unit fees take a larger share of a cheap item: they are 41.2% of a $19.99 price and 29.9% of a $34.99 price. Net margin is profit divided by price. ROI is profit divided by cost, and markup is price minus cost divided by cost. At $26.99 the same unit shows a 34.5% margin, 110.9% ROI and 221.3% markup. Compare products on the same measure."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Break-even price and target price"
+    },
+    {
+      "type": "paragraph",
+      "text": "Set profit to zero and solve for the price: price = (landed cost + fulfillment + storage) / (1 - referral rate). Here that is (8.40 + 4.18 + 1.05) / 0.85 = $16.04. To target a net margin m, divide by (1 - referral rate - m) instead:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Target net margin (before ads)",
+        "Minimum price"
+      ],
+      "rows": [
+        [
+          "0%",
+          "$16.04"
+        ],
+        [
+          "10%",
+          "$18.17"
+        ],
+        [
           "20%",
-          "$1.00",
-          "Higher rate for collectibles"
+          "$20.97"
         ],
         [
-          "Grocery",
-          "8%",
-          "$1.00",
-          "Lower rate for consumables"
+          "30%",
+          "$24.78"
         ]
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Use the FBA Calculator"
+      "text": "Advertising and returns"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Ad spend as % of price (at $26.99)",
+        "Net profit",
+        "Net margin",
+        "ROI on cost"
+      ],
+      "rows": [
+        [
+          "0%",
+          "$9.31",
+          "34.5%",
+          "110.9%"
+        ],
+        [
+          "10%",
+          "$6.61",
+          "24.5%",
+          "78.7%"
+        ],
+        [
+          "15%",
+          "$5.26",
+          "19.5%",
+          "62.7%"
+        ],
+        [
+          "20%",
+          "$3.91",
+          "14.5%",
+          "46.6%"
+        ],
+        [
+          "25%",
+          "$2.56",
+          "9.5%",
+          "30.5%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Profit reaches zero when ad spend equals the pre-ad margin, 34.5% of the price here. The share of revenue that ads cost depends on your category, listing and competition, so treat 10% to 25% as a range to test, not a forecast. For returns, assume as an illustration that 6% of units come back unsellable and you lose the cost and fulfillment fee on each: 0.06 x (8.40 + 4.18) = $0.75 per unit sold. With 15% ads and that return allowance, profit is $4.51, a margin of 16.7% and ROI of 53.7%. Actual return policies and fees vary by category and change, so use your own return data."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Other levers: weight, category and price cuts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Change at $26.99",
+        "Net profit",
+        "Net margin"
+      ],
+      "rows": [
+        [
+          "Packaged weight 0.9 lb",
+          "$10.65",
+          "39.4%"
+        ],
+        [
+          "Packaged weight 1.4 lb (base)",
+          "$9.31",
+          "34.5%"
+        ],
+        [
+          "Packaged weight 2.4 lb",
+          "$7.45",
+          "27.6%"
+        ],
+        [
+          "Referral rate 8%",
+          "$11.20",
+          "41.5%"
+        ],
+        [
+          "Referral rate 20%",
+          "$7.96",
+          "29.5%"
+        ],
+        [
+          "Price cut of 10% to $24.29",
+          "$7.02",
+          "28.9%"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A 10% price cut reduces profit by 24.6% because the fixed costs stay the same, so test discounts before you run them. Smaller or lighter packaging can drop a product into a cheaper tier; the calculator's tiers are one example, and dimensional weight can raise real fees for bulky, light items. At $9.31 a unit, you need 108 units to earn $1,000 before ads."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
     },
     {
       "type": "list",
-      "ordered": true,
       "items": [
-        "Enter your product sale price.",
-        "Select the product category to auto-fill the referral fee percentage.",
-        "Enter your product dimensions and weight for fulfillment fee calculation.",
-        "Add your cost of goods sold (COGS) and any shipping costs to Amazon.",
-        "Review your net profit, ROI percentage, and break-even analysis."
+        "Using the factory price instead of the landed cost. Freight, duties, inspection and prep belong in cost.",
+        "Reading a high ROI as a safe product. A 110.9% ROI still leaves a 16.7% margin after ads and returns in this example.",
+        "Using last year's fees. Recheck the schedule when you reorder.",
+        "Ignoring storage time. Slow-moving stock accrues storage each month, and aged inventory can carry extra charges.",
+        "Comparing sellers' margins without knowing whether ads are included."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Profitability Strategies"
-    },
-    {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Target 30%+ net margins: After all Amazon fees and COGS, aim for at least 30% remaining. If you are below 20%, your pricing or cost structure needs adjustment.",
-        "Use smaller, lighter products: Fulfillment fees are based on size and weight. Lowering dimensional weight by optimizing packaging can significantly reduce fees.",
-        "Avoid Q4 storage overages: Monthly storage fees triple from October through December. Plan inventory to avoid long-term storage surcharges.",
-        "Consider FBM for slow movers: Fulfillment by Merchant (FBM) can be cheaper for products that sell fewer than 10 units per month."
-      ]
-    },
-    {
-      "type": "callout",
-      "variant": "tip",
-      "text": "Amazon fees change every January. Always check the current fee schedule before setting prices or ordering inventory. The FBA calculator is updated with the latest rates."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What is the minimum profit margin I should accept on Amazon?"
+      "text": "When this does not apply"
     },
     {
       "type": "paragraph",
-      "text": "Aim for at least 20-30% net profit margin after ALL costs including Amazon fees, COGS, advertising, and returns. Below 15%, you are vulnerable to price wars, rising fees, or a single bad review wiping out your profit. Use the FBA calculator before ordering inventory."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How do Amazon returns affect my profit?"
-    },
-    {
-      "type": "paragraph",
-      "text": "When a customer returns an item, Amazon does not refund the referral fee (they deduct it from your account). You also lose the fulfillment fee. If the item is unsellable (damaged returns), you lose the product cost too. Factor in a 5-10% return rate when calculating true profit margins."
+      "text": "The model uses fixed assumptions: one price, one category rate, one weight tier and no seasonal changes. Amazon's real fees depend on exact dimensions, size tier, category and time of year, and may differ from the calculator. Treat the results as a way to compare scenarios and find the price where a product stops working, not as a quote. Enter your own price, cost, weight and category in the Amazon FBA Calculator, then confirm against the fee pages in Seller Central. This is general information, not tax or business advice."
     },
     {
       "type": "cta",

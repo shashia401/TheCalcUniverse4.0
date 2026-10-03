@@ -1,100 +1,24 @@
 {
   "sections": [
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What Are Heart Rate Training Zones?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Your heart doesn't beat at one speed — it responds to how hard you're working. Heart rate training zones categorize those responses into five distinct ranges, each triggering a different physiological adaptation. Knowing your zones is the difference between guessing your effort and training with real precision."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How Do You Calculate Your Personal Heart Rate Zones?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The simplest method estimates your max heart rate as 220 minus your age, then applies percentage ranges. But the Karvonen formula — which factors in your resting heart rate — is significantly more accurate. It calculates your Heart Rate Reserve (Max HR minus Resting HR) and applies intensity percentages to that, making your target heart rate zones truly personal to your fitness level."
-    },
-    {
-      "type": "table",
-      "headers": [
-        "Zone",
-        "Name",
-        "% of Max HR",
-        "Training Benefit"
-      ],
-      "rows": [
-        [
-          "Zone 1",
-          "Warm Up / Recovery",
-          "50–60%",
-          "Active recovery, blood flow, light movement"
-        ],
-        [
-          "Zone 2",
-          "Fat Burn / Aerobic Base",
-          "60–70%",
-          "Optimal fat oxidation, endurance building, conversational pace"
-        ],
-        [
-          "Zone 3",
-          "Aerobic / Cardio",
-          "70–80%",
-          "Cardiovascular efficiency, lactate threshold"
-        ],
-        [
-          "Zone 4",
-          "Anaerobic / Threshold",
-          "80–90%",
-          "Speed and power development, pushes lactate threshold higher"
-        ],
-        [
-          "Zone 5",
-          "VO2 Max / All-Out",
-          "90–100%",
-          "Maximum oxygen uptake, short bursts only (30–60 seconds)"
-        ]
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Why Is Zone 2 the Most Underrated Training Zone?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Zone 2 is the foundation of endurance. Training here builds aerobic capacity, improves fat-burning efficiency, increases capillary density in your muscles, and requires  little recovery time. Elite endurance athletes spend 80% of their training in this zone."
-    },
-    {
-      "type": "paragraph",
-      "text": "Most recreational athletes skip it because it feels too easy, but that easy feeling is exactly the point."
-    },
-    {
-      "type": "paragraph",
-      "text": "Zone 3 is what coaches call the grey zone — not easy enough for optimal aerobic adaptation and not hard enough for anaerobic gains. If most of your runs feel moderately hard, you're probably stuck here. The 80/20 rule (also called polarized training) recommends 80% of weekly training in Zones 1–2 and only 20% in Zones 4–5, a pattern validated in studies of Olympic-level rowers, cyclists, and runners."
-    },
-    {
-      "type": "callout",
-      "variant": "tip",
-      "text": "Measure your resting heart rate first thing in the morning before getting out of bed. Take it on multiple mornings and average the readings. A lower resting HR generally indicates better cardiovascular fitness, and entering it into a heart rate zone calculator using the Karvonen method will give you significantly more accurate training zones."
-    },
-    {
-      "type": "cta",
-      "heading": "Find Your Personal Heart Rate Zones",
-      "body": "Enter your age and resting heart rate to get your personalized training zones using the Karvonen formula. Know exactly which heart rate to target for every workout.",
-      "buttonLabel": "Calculate Your Heart Rate Zones",
-      "path": "/health/heart-rate-zones-calculator/"
-    }
+    {"type":"paragraph","text":"The Karvonen formula sets a target heart rate as your resting heart rate plus a chosen percentage of your heart rate reserve, which is your estimated maximum heart rate minus your resting rate. Target = (maximum - resting) x intensity + resting. The Heart Rate Zones Calculator on this site applies it to five 10-point bands from 50% to 100% of reserve, using 220 minus age as the maximum. That maximum is only an estimate, so every zone built from it is a guide rather than a measurement."},
+    {"type":"heading","level":2,"text":"How are the zones calculated, step by step?"},
+    {"type":"paragraph","text":"Take a 40-year-old with a resting heart rate of 60 beats per minute (bpm). The estimated maximum is 220 - 40 = 180 bpm, so the reserve is 180 - 60 = 120 bpm. Zone 2's lower edge (60% of reserve) is 0.60 x 120 + 60 = 132 bpm, and its upper edge (70%) is 0.70 x 120 + 60 = 144 bpm. Results are rounded to whole beats."},
+    {"type":"table","headers":["Zone","Calculator's label","Intensity band","Karvonen range (rest 60)","Simple % of max range"],"rows":[["1","Warm up / recovery","50-60%","120-132 bpm","90-108 bpm"],["2","Aerobic base","60-70%","132-144 bpm","108-126 bpm"],["3","Aerobic / cardio","70-80%","144-156 bpm","126-144 bpm"],["4","Threshold","80-90%","156-168 bpm","144-162 bpm"],["5","All-out","90-100%","168-180 bpm","162-180 bpm"]]},
+    {"type":"paragraph","text":"The last column applies the same percentages directly to the 180 bpm maximum, which is the calculator's other method. The two columns are not interchangeable. A 60% reserve target of 132 bpm is 73% of this person's maximum, and a 70% reserve target of 144 bpm is 80% of it. If you read a zone table written in percent of maximum heart rate and then use percent of reserve, you will set your targets too high."},
+    {"type":"heading","level":2,"text":"Why does resting heart rate move the zones?"},
+    {"type":"paragraph","text":"Because the reserve is smaller or larger. Keep age 40 (maximum 180) and change only the resting rate, using the calculator's Karvonen method:"},
+    {"type":"table","headers":["Resting heart rate","Reserve","Zone 2 (60-70%)","Zone 4 (80-90%)"],"rows":[["50 bpm","130 bpm","128-141 bpm","154-167 bpm"],["60 bpm","120 bpm","132-144 bpm","156-168 bpm"],["75 bpm","105 bpm","138-149 bpm","159-170 bpm"]]},
+    {"type":"paragraph","text":"The resting rate shifts the zone edges by up to about 10 bpm in this example. If you leave the resting rate blank while using the Karvonen method, the calculator assumes 60 bpm, so the zones will look like the middle row. For a usable resting value, measure it on several mornings before you get out of bed and average the readings."},
+    {"type":"heading","level":2,"text":"How reliable is 220 minus age?"},
+    {"type":"paragraph","text":"Less than it looks. The calculator's own note says true maximum can run 10 to 15 bpm either way. A 2001 analysis in the Journal of the American College of Cardiology, pooling 351 studies of 18,712 people, proposed 208 minus 0.7 times age instead and concluded that 220 minus age underestimates maximum heart rate in older adults. In a study of recreational marathon runners, measured maximum averaged 178.2 bpm with a standard deviation of 10.2, and 220 minus age overestimated it by about 5 bpm in women and underestimated it by about 3 bpm in men. Neither study says one equation fits every person."},
+    {"type":"table","headers":["Age","220 - age","208 - 0.7 x age","Difference"],"rows":[["25","195","190.5","-4.5"],["40","180","180.0","0.0"],["60","160","166.0","+6.0"],["70","150","159.0","+9.0"]]},
+    {"type":"paragraph","text":"The sensitivity is easy to see. For the 40-year-old above, if the true maximum were 170 instead of 180, Zone 2 would be 126 to 137 bpm instead of 132 to 144; if it were 190, Zone 2 would be 138 to 151 bpm. A measured maximum requires a maximal-effort test, which is a decision for you and a qualified professional."},
+    {"type":"heading","level":2,"text":"What do the zone names promise?"},
+    {"type":"list","items":["The names (such as fat burn or aerobic base) and the five-band layout are conventions. Other systems use three zones, different percentages or lactate and power-based thresholds, so a zone number from one app does not match another.","This article makes no claim about an ideal share of training in any one zone. Training plans differ, and a coach or clinician can advise on yours.","Heart rate on any given day depends on more than effort, so treat a reading as one input alongside how hard the effort actually feels."]},
+    {"type":"heading","level":2,"text":"Common mistakes"},
+    {"type":"list","items":["Using percent-of-maximum zone tables with the reserve method, or the reverse.","Treating the estimated maximum as a measured limit and pushing past how you feel to reach a number.","Using a resting rate taken after activity. The calculator advises measuring it first thing in the morning, before getting up.","Forgetting that some medicines and conditions change heart rate response. If you have heart disease, take heart or blood pressure medication, or have symptoms such as chest pain or dizziness with exercise, ask a clinician before using targets from a calculator."]},
+    {"type":"callout","variant":"warning","text":"Stop exercising and seek medical help for chest pain, severe breathlessness, fainting or an irregular heartbeat. A heart rate calculator cannot assess your health or tell you what is safe for you."},
+    {"type":"cta","heading":"Find Your Personal Heart Rate Zones","body":"Enter your age and resting heart rate to get your personalized training zones using the Karvonen formula. Know exactly which heart rate to target for every workout.","buttonLabel":"Calculate Your Heart Rate Zones","path":"/health/heart-rate-zones-calculator/"}
   ],
-  "keywords": [
-    "heart rate zone calculator",
-    "target heart rate calculator",
-    "fat burning heart rate",
-    "karvonen formula",
-    "max heart rate calculator",
-    "training zones"
-  ]
+  "keywords": ["heart rate zone calculator","target heart rate calculator","fat burning heart rate","karvonen formula","max heart rate calculator","training zones"]
 }

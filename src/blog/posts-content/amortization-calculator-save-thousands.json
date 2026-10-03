@@ -1,90 +1,134 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is an Amortization Calculator?"
-    },
-    {
       "type": "paragraph",
-      "text": "An amortization calculator does more than tell you your monthly payment. It generates a full payment-by-payment breakdown showing exactly how much of each payment goes toward principal versus interest over the entire life of the loan. This schedule reveals a surprising truth: in the early years of a 30-year mortgage, the vast majority of each payment goes toward interest, not principal. Understanding this dynamic is the key to building a strategy that can save you tens of thousands of dollars."
+      "text": "An amortization calculator saves you money by letting you test changes before you make them: enter your loan, add an extra payment, and read the new payoff time and interest next to the original. On a $340,000 loan at an assumed 6.25% over 30 years, adding $150 a month cuts the term to 25 years and saves $81,011.53 of interest. This guide shows the workflow, what each result means, and how to compare scenarios fairly. For how to read the schedule row by row, see the dedicated schedule guide; this post is about using the tool."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Read an Amortization Schedule"
-    },
-    {
-      "type": "paragraph",
-      "text": "An amortization schedule lists every single payment over the life of your loan. Each row shows the payment number, the principal portion, the interest portion, and the remaining balance. In month one of a typical ,000 mortgage at 6.5%, roughly ,166 goes to interest and only  goes to principal. By year 15, those numbers start to flip. By year 25, most of your payment goes to principal. This front-loaded interest structure is why paying extra early has such an outsized impact."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How Extra Payments Save You Money"
-    },
-    {
-      "type": "paragraph",
-      "text": "Every extra dollar you send to principal is a dollar that never accrues interest again. On that same ,000 mortgage at 6.5%, adding just  per month saves roughly ,000 in interest and pays off the loan 4 years early. An extra  per month saves over ,000 and cuts 7 years off the term. The amortization calculator shows you these exact numbers side by side so you can decide what fits your budget."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How to Use the Calculator"
+      "text": "Step 1: enter the loan correctly"
     },
     {
       "type": "list",
       "ordered": true,
       "items": [
-        "Enter your loan amount, interest rate, and loan term.",
-        "View the full amortization schedule showing every payment.",
-        "Enter an extra monthly payment to see the side-by-side comparison.",
-        "Review the savings: interest saved, years cut, new payoff date.",
-        "Adjust the extra amount until you find the right balance."
+        "Loan amount: for a new loan, the amount borrowed; for a loan in progress, your current principal balance from the latest statement.",
+        "Annual interest rate: the note rate, not the APR.",
+        "Term: choose years or months. For a loan in progress, switch to months and enter the payments you have left.",
+        "Extra monthly payment and extra annual payment: leave at zero for the baseline run."
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The baseline for the example, $340,000 at 6.25% for 360 months, is a payment of $2,093.44 and total interest of $413,637.85. In month one, interest is $340,000 x 0.0625 / 12 = $1,770.83, so only $322.61 of the payment reduces the balance. The calculator works out the payment itself, so it may differ by a few cents from the rounded figure on your statement."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Strategies That Work"
+      "text": "Step 2: change one input at a time"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scenario",
+        "Payoff time",
+        "Total interest",
+        "Interest saved"
+      ],
+      "rows": [
+        [
+          "Baseline: $2,093.44 payment",
+          "30 yr 0 mo",
+          "$413,637.85",
+          "$0"
+        ],
+        [
+          "Extra $150 a month",
+          "25 yr 0 mo",
+          "$332,626.32",
+          "$81,011.53"
+        ],
+        [
+          "Extra $300 a month",
+          "21 yr 8 mo",
+          "$280,415.89",
+          "$133,221.96"
+        ],
+        [
+          "Extra $3,000 once a year",
+          "22 yr 11 mo",
+          "$300,691.89",
+          "$112,945.97"
+        ],
+        [
+          "Extra $150 a month and $3,000 a year",
+          "20 yr 1 mo",
+          "$258,452.47",
+          "$155,185.39"
+        ],
+        [
+          "One extra payment of $2,093.44 a year",
+          "24 yr 7 mo",
+          "$326,669.48",
+          "$86,968.37"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The annual amount in this calculator is applied with every twelfth payment, starting with payment 13. The savings are not additive: $150 a month alone saves $81,011.53 and $3,000 a year alone saves $112,945.97, but together they save $155,185.39, not $193,957.50, because the second source of extra money works on a balance the first has already lowered."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 3: compare with the alternative of a different loan"
+    },
+    {
+      "type": "paragraph",
+      "text": "Run the same loan with a shorter term to see whether extra payments are doing something a different loan could do. A 25-year loan at 6.25% has a payment of $2,242.88 and costs $332,862.77 in interest. Paying the 30-year loan's $2,093.44 plus $150 gives $2,243.44 a month and costs $332,626.32 in interest, only $236 less. The two are almost the same, with one difference: the extra payment is voluntary. If money gets tight, you can drop back to $2,093.44, which a 25-year loan would not allow. A 20-year loan costs $391.72 more a month than the 30-year one at the same rate (payment $2,485.16) and its interest is $256,437.41. Real shorter loans may also carry different rates, so enter the rate you are quoted."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 4: test rate and balance changes"
+    },
+    {
+      "type": "paragraph",
+      "text": "Raising the rate to 6.75% on the same loan lifts the payment to $2,205.23 and total interest to $453,884.07. Adding $150 there shortens the term to 24 years 10 months and saves $92,077.26. A higher rate makes each extra dollar worth more, because it avoids more interest. To model a loan already in progress, balance and months remaining are enough. After 48 payments the balance here is $322,459.00 with 312 payments left. Entering that balance with 312 months and an extra $200 a month gives 254 further payments, which with the 48 already made is 302 in total, the same as running the whole loan with $200 extra starting at payment 49."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 5: pick the plan you can keep"
+    },
+    {
+      "type": "paragraph",
+      "text": "A saving that you stop paying after a year is worth nothing. Rounding the payment up to $2,100, only $6.56 above the required amount, saves $4,511.29 of interest and ends the loan three months early. Choose an amount that fits your budget in a bad month, automate it, and re-run the calculator once a year."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
     },
     {
       "type": "list",
-      "ordered": false,
       "items": [
-        "Biweekly payments: Pay half every two weeks. This results in 13 full payments per year instead of 12, shaving years off automatically.",
-        "Round up: Round your payment to the nearest  or  for painless extra principal.",
-        "Annual lump sums: Use tax refunds or bonuses as a one-time principal reduction.",
-        "Refinance strategically: If rates drop, a shorter-term refinance locks in savings."
+        "Entering the original loan amount for a loan in progress. Use the current balance and the months remaining.",
+        "Not specifying that extra money goes to principal. Confirm with your lender how to label it and check the next statement.",
+        "Comparing runs that change several inputs at once. Change one thing per run.",
+        "Forgetting prepayment terms. Some loans, especially non-mortgage loans, may charge a fee or compute interest in ways that reduce the savings. Read the loan agreement.",
+        "Ignoring other uses of the money. Interest saved equals your loan rate, a certain return, but other uses such as an emergency fund or higher-rate debt may come first."
       ]
-    },
-    {
-      "type": "callout",
-      "variant": "tip",
-      "text": "Even one extra payment per year can shorten a 30-year mortgage by 4 to 5 years. Use the amortization calculator to find the strategy that works for your budget."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Is it better to make extra mortgage payments or invest?"
+      "text": "When the calculator's answer will differ from your statement"
     },
     {
       "type": "paragraph",
-      "text": "If your mortgage rate is under 4%, investing historically earns a better return. At rates above 6%, paying down debt gives you a guaranteed risk-free return equal to your rate."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Can I lose my extra payments if I sell early?"
-    },
-    {
-      "type": "paragraph",
-      "text": "No. Every dollar of extra principal builds equity. When you sell, that equity comes back to you as cash."
+      "text": "The tool assumes a fixed rate, monthly interest on the remaining balance and payments made on schedule. Adjustable-rate loans, daily-interest loans, escrow changes, fees and skipped payments all move real figures. Use the results as a comparison between scenarios, which is where the calculator is most reliable, and treat your lender's statement as the authority on the exact balance."
     },
     {
       "type": "cta",

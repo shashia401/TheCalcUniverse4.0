@@ -2,62 +2,175 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "you've heard it a hundred times: 'Renting is throwing money away. ' But that's not the full picture. Buying comes with closing costs, maintenance, property taxes, PMI, and selling costs that can easily total tens of thousands of dollars."
-    },
-    {
-      "type": "paragraph",
-      "text": "The real question: *how long do you need to stay for buying to actually beat renting?"
+      "text": "Buying beats renting only after you have owned long enough to recover the transaction costs, and that point depends heavily on the assumptions. In the example below, a $380,000 home against $2,300 monthly rent breaks even in year 9 in the Rent vs. Buy Calculator, not in year 3 or 4. Move the home's annual appreciation from 3% to 0% and it becomes year 22; move it to 5% and it becomes year 4. The break-even year is a result of your inputs, so the useful skill is knowing which inputs matter."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "The Break-Even Year: The One Number That Matters?"
+      "text": "How the calculator defines break-even"
     },
     {
       "type": "paragraph",
-      "text": "The break-even year is the point at which the cumulative net cost of buying becomes cheaper than renting. Before that year, renting wins. After it, buying wins."
-    },
-    {
-      "type": "paragraph",
-      "text": "Most simple calculators get this wrong by ignoring opportunity cost — the investment returns you give up by using your down payment on a house instead of investing in the stock market. The national average break-even is roughly 3–5 years, but it varies dramatically. In high-cost markets like San Francisco or NYC, it can stretch to 7–10+ years."
+      "text": "For each year, the calculator adds up the net cost of each path. For buying: the down payment and closing costs, mortgage principal and interest, property tax, maintenance and mortgage insurance while the loan is above 80% of the price, minus the cash you would get from selling after selling costs and repaying the loan. For renting: all rent (rising each year) plus renters insurance, minus the growth the down payment and closing costs would have earned if invested instead. The break-even year is the first year buying has the lower net cost."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What the Calculator Actually Compares"
+      "text": "The example and its assumptions"
     },
     {
-      "type": "paragraph",
-      "text": "The buying path tracks principal and interest, property taxes, maintenance (1–2% of home value per year), PMI, closing costs at purchase, and selling costs (5–8%) at exit, then subtracts your net sale proceeds. The renting path tracks all rent payments adjusted for annual increases, renters insurance, and adds back the investment gains your down payment would have earned in stocks at 7%. The result is an apples-to-apples net cost comparison."
-    },
-    {
-      "type": "paragraph",
-      "text": "Your break-even year depends on several variables you control — a larger down payment, lower mortgage rate, or lower selling costs all shorten the timeline."
+      "type": "list",
+      "items": [
+        "Home price $380,000, 10% down ($38,000), 30-year fixed at 6.5%. Loan $342,000, payment of principal and interest $2,162.",
+        "Closing costs 3% ($11,400), selling costs 6%, property tax 1.2% of the price a year, maintenance 1.5% of the home value a year, mortgage insurance 0.7% of the loan a year until the balance reaches 80% of the price, home appreciation 3% a year.",
+        "Rent $2,300 a month, rising 3% a year, plus $180 a year for renters insurance.",
+        "The renter invests the down payment and closing costs at an assumed 7% a year. That figure is built into the calculator and is an assumption, not a promise. Past performance does not guarantee future results.",
+        "Taxes on investment gains, mortgage interest deductions and the sale gain are left out."
+      ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Why Transaction Costs Are the Hidden Barrier"
+      "text": "Year-by-year cost of each path"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "If you stay",
+        "Net cost of renting",
+        "Net cost of buying",
+        "Buying minus renting"
+      ],
+      "rows": [
+        [
+          "1 year",
+          "$24,322",
+          "$58,255",
+          "+$33,933"
+        ],
+        [
+          "3 years",
+          "$74,732",
+          "$105,125",
+          "+$30,394"
+        ],
+        [
+          "5 years",
+          "$127,546",
+          "$150,189",
+          "+$22,643"
+        ],
+        [
+          "7 years",
+          "$182,818",
+          "$193,247",
+          "+$10,429"
+        ],
+        [
+          "8 years",
+          "$211,390",
+          "$213,755",
+          "+$2,365"
+        ],
+        [
+          "10 years",
+          "$270,426",
+          "$248,585",
+          "-$21,841"
+        ],
+        [
+          "15 years",
+          "$429,134",
+          "$323,514",
+          "-$105,620"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "The biggest reason buying doesn't always win is transaction costs. Buying costs 3–5% upfront in closing costs and 5–8% at sale in realtor commissions and transfer taxes. On a $400,000 home, that's $12,000–$20,000 to buy and $20,000–$32,000 to sell."
+      "text": "A positive difference means buying has cost more so far. The gap closes slowly because the early years carry $11,400 of closing costs, mortgage insurance, and a sale cost of 6% that you would pay if you left. After year 8, rent keeps rising while the mortgage payment does not, and the gap flips."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Which input changes the answer the most"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Input changed (all else as above)",
+        "Values tested",
+        "Break-even year"
+      ],
+      "rows": [
+        [
+          "Annual home appreciation",
+          "0% / 2% / 3% / 4% / 5%",
+          "22 / 13 / 9 / 6 / 4"
+        ],
+        [
+          "Monthly rent",
+          "$1,800 / $2,300 / $2,800",
+          "16 / 9 / 5"
+        ],
+        [
+          "Mortgage rate",
+          "5.5% / 6.5% / 7.5%",
+          "6 / 9 / 12"
+        ],
+        [
+          "Annual rent increase",
+          "0% / 3% / 5%",
+          "14 / 9 / 7"
+        ],
+        [
+          "Selling costs",
+          "3% / 6% / 8%",
+          "7 / 9 / 10"
+        ],
+        [
+          "Down payment",
+          "5% / 10% / 20%",
+          "8 / 9 / 8"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Combined, you're out $32,000–$52,000 in friction costs before you've built any equity. It takes years of appreciation and principal paydown just to break even on those costs alone."
+      "text": "Three inputs dominate: how fast the home gains value, how high rent is compared with the monthly cost of owning, and the mortgage rate. Appreciation is the least certain and the most powerful, so test it at 0% as well as your best guess. The down payment barely matters here, partly because a bigger one saves interest but gives up more investment growth."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the calculator leaves out"
     },
     {
       "type": "paragraph",
-      "text": "The calculator focuses on the financial comparison, but some benefits are harder to quantify. Renting offers flexibility — you can move with one month's notice and zero selling costs. Buying offers stability — no landlord, no unexpected rent hikes, no risk of non-renewal."
+      "text": "The model charges the buyer the extra monthly cost of owning but does not credit the renter for investing that monthly difference. In the first year, owning costs about $11,000 more in cash than renting in this example, so the renter could be investing that cash, which would push the true break-even later. Other simplifications cut both ways: it assumes steady 3% appreciation and a steady 7% investment return, and it omits tax effects on both sides. Treat the year as an estimate with a wide margin."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Comparing the mortgage payment with rent. Property tax, insurance, maintenance and mortgage insurance often add a large share on top of principal and interest.",
+        "Assuming prices always rise. Test a flat-price case.",
+        "Ignoring selling costs. At a 6% assumption, selling a home worth $380,000 costs $22,800, and more as the home appreciates: $26,431 at the value it reaches in year 5.",
+        "Treating \"rent is wasted money\" as a fact. Rent buys housing; interest, taxes and maintenance are also costs that never come back.",
+        "Leaving out the intangible side: renting offers flexibility, owning offers stability. The numbers cannot value either."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When this analysis does not apply"
     },
     {
       "type": "paragraph",
-      "text": "Ask yourself: How confident am I that i'll stay for X years? If I had to move in 2 years, could I absorb the loss? Is my down payment my only savings, or do i've a separate emergency fund?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Would I actually invest the difference if I kept renting?"
+      "text": "If you may move within a few years, buying is rarely cheaper unless prices rise fast. If rent is far below ownership costs where you live, the break-even can be decades away or never come. If you plan to stay for life and can afford the payment, the comparison becomes a question of budget and lifestyle. Enter your own price, rent, rate and expected stay into the Rent vs. Buy Calculator, and read the year-by-year chart, not just the headline year."
     },
     {
       "type": "cta",

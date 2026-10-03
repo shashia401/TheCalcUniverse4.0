@@ -1,76 +1,22 @@
 {
   "sections": [
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "The Math of Lowering Your BMI"
-    },
-    {
-      "type": "paragraph",
-      "text": "Since BMI = weight in kg / height in meters squared, and height is fixed, the only way to lower BMI is to reduce weight. But losing weight is not the same as losing fat. Rapid weight loss causes muscle loss, which lowers metabolism and leads to rebound weight gain. The goal is fat loss with muscle preservation. A realistic target: lower your BMI by 0.5-1 point per month through a moderate calorie deficit of 300-500 calories per day combined with strength training."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Strategies That Work"
-    },
-    {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Calorie deficit: Eat 300-500 calories below your TDEE. Use our TDEE calculator to find your maintenance level.",
-        "Protein priority: Eat 1.6-2.2g of protein per kg of body weight per day. Protein preserves muscle during weight loss.",
-        "Strength training: Lift weights 3-4 times per week. This signals your body to keep muscle while losing fat.",
-        "Sleep: Poor sleep increases cravings and reduces willpower. Aim for 7-9 hours per night.",
-        "Consistency: The best diet is the one you can stick to. Aim for 80% compliance — perfection is not required."
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Expected Timeline"
-    },
-    {
-      "type": "paragraph",
-      "text": "With a 500-calorie daily deficit, expect to lose about 1 lb per week. For someone with a BMI of 30, this means 2-3 months to reach the overweight range, then another 2-4 months to reach the top of the healthy range. The weight comes off faster initially (water weight) then slows down. Do not get discouraged by the slowdown — it is normal and expected. Use measurements other than BMI to track progress: how your clothes fit, your waist measurement, and body fat percentage."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "Can I lower my BMI without losing weight?"
-    },
-    {
-      "type": "paragraph",
-      "text": "No — BMI only considers weight and height. However, you can improve your metabolic health without changing your BMI by losing fat and gaining muscle. This is called body recomposition and it is possible with strength training and adequate protein, especially if you are new to exercise."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How much do I need to lose to lower my BMI by 1 point?"
-    },
-    {
-      "type": "paragraph",
-      "text": "For a person 5'9\" (175 cm, ~3.06 m²), each BMI point represents about 3 kg (6.6 lbs). So to go from BMI 30 to BMI 25, you would need to lose about 15 kg (33 lbs). Use our BMI calculator to see exactly how your weight changes affect your BMI number."
-    },
-    {
-      "type": "cta",
-      "heading": "Track Your Progress",
-      "body": "Use our free BMI calculator and calorie calculator to plan your weight loss journey.",
-      "buttonLabel": "Open Calculator",
-      "path": "/health/bmi-calculator/"
-    }
+    {"type":"paragraph","text":"BMI is your weight in kilograms divided by your height in meters squared, so for an adult whose height is fixed, the only way to lower BMI is to lower body weight. This article does the arithmetic: how many kilograms equal one BMI point at your height, how much change a given BMI target needs, and how long that takes at a pace the CDC describes. It does not prescribe a diet or exercise plan, which should come from a clinician or registered dietitian who knows your health."},
+    {"type":"heading","level":2,"text":"How much weight is one BMI point?"},
+    {"type":"paragraph","text":"One BMI point equals your height in meters squared, in kilograms. At 1.70 m that is 1.70 x 1.70 = 2.89 kg per point, so a 5-point drop takes 14.45 kg. Taller people need more weight change per point, which is why the same BMI target means a different number of kilograms at each height. Conversely, 1 kg changes BMI by 0.44 at 150 cm, 0.35 at 170 cm and 0.28 at 190 cm, so day-to-day scale fluctuations barely move it."},
+    {"type":"table","headers":["Height","1 BMI point","Weight at BMI 30","Loss to reach BMI 25.0","Weeks at 1 lb/week","Weeks at 2 lb/week","5% of BMI-30 weight"],"rows":[["150 cm","2.25 kg (5.0 lb)","67.5 kg","11.3 kg (24.8 lb)","25","12","3.4 kg"],["160 cm","2.56 kg (5.6 lb)","76.8 kg","12.8 kg (28.2 lb)","28","14","3.8 kg"],["170 cm","2.89 kg (6.4 lb)","86.7 kg","14.5 kg (31.9 lb)","32","16","4.3 kg"],["180 cm","3.24 kg (7.1 lb)","97.2 kg","16.2 kg (35.7 lb)","36","18","4.9 kg"],["190 cm","3.61 kg (8.0 lb)","108.3 kg","18.1 kg (39.8 lb)","40","20","5.4 kg"]]},
+    {"type":"paragraph","text":"The CDC adult categories used here are: underweight below 18.5, healthy weight 18.5 to less than 25, overweight 25 to less than 30, and obesity 30 or greater. Reaching BMI 25.0 is the boundary, so getting just inside the healthy weight range takes a little more than the table shows. The calculator's own BMI formula gives the same result: 86.7 kg at 170 cm returns a BMI of 30.0."},
+    {"type":"heading","level":2,"text":"What pace does the CDC describe?"},
+    {"type":"paragraph","text":"The CDC says people who lose weight at a gradual, steady pace of about 1 to 2 pounds a week are more likely to keep the weight off. The two pace columns above use those figures purely as arithmetic. At 175 cm, 1 pound a week is about 1.97 kg a month, or 0.64 BMI points a month; 2 pounds a week is about 3.94 kg a month, or 1.29 points. A straight line is a simplification, since weight change in real life is uneven."},
+    {"type":"paragraph","text":"The CDC also gives a modest example: a 5% weight reduction for a person who weighs 200 pounds is 10 pounds, and this change could lower the risk of some chronic diseases such as heart disease, prediabetes and type 2 diabetes. A 5% loss from BMI 30 lands at BMI 28.5 regardless of height, so a meaningful health change can happen well before a BMI category changes."},
+    {"type":"callout","variant":"info","text":"A common rule of thumb says one pound of body fat is about 3,500 kcal, so 1 lb per week matches roughly a 500 kcal daily deficit. That figure is an approximation and gets less accurate as weight changes; the calorie deficit calculators on this site explain the limits. Talk to a health care provider before making a significant change to how you eat or exercise."},
+    {"type":"heading","level":2,"text":"What a BMI number cannot tell you"},
+    {"type":"list","items":["BMI is weight relative to height, not body composition. The CDC describes it as a screening measure that should be considered with other factors when assessing an individual's health. A lower BMI may come from fat, muscle, water or a mix.","The adult categories apply to ages 20 and over in CDC guidance and 18 and over in the calculator. Children and teens are assessed differently, so use a pediatrician's advice, not this table.","A BMI of 25 or more is not a diagnosis, and a BMI in the healthy range does not rule out health concerns. Waist measurements and a clinician's assessment add information.","If your BMI is already in the healthy range or below it, lowering it is not an automatic goal. Below 18.5 is classed underweight."]},
+    {"type":"heading","level":2,"text":"Common mistakes with BMI targets"},
+    {"type":"list","items":["Treating BMI 25.0 as a finish line. The category boundary is a convention, and health depends on more than one number.","Expecting a smooth, linear drop. The table assumes a constant pace, which real life rarely follows.","Ignoring height in goal-setting. A 14 kg change means very different BMI shifts for a 150 cm and a 190 cm person.","Comparing yourself with a table built for another height. Use the Calculator with your own measurements.","Chasing a fast result. The CDC's pace guidance links gradual change with keeping weight off.","Using BMI alone for athletes, older adults or anyone with a lot of muscle, where it can mislead."]},
+    {"type":"heading","level":2,"text":"Worked check with the calculator"},
+    {"type":"paragraph","text":"Enter 170 cm and 86.7 kg: BMI is 30.0. Enter 72.2 kg instead (about 14.5 kg lighter): BMI is 25.0, since 25 x 2.89 = 72.25. For a 5% reduction, 86.7 x 0.95 = 82.4 kg gives a BMI of 28.5. These are just numbers on a formula; whether to change your weight, and how, is a question for you and your clinician."},
+    {"type":"callout","variant":"warning","text":"This article is general information, not medical advice. Do not use BMI arithmetic to set a rapid or extreme weight-loss plan. If you are concerned about your weight, take medication that affects weight, are pregnant, or have a history of disordered eating, speak with a health care provider first."},
+    {"type":"cta","heading":"Track Your Progress","body":"Use our free BMI calculator and calorie calculator to plan your weight loss journey.","buttonLabel":"Open Calculator","path":"/health/bmi-calculator/"}
   ],
-  "keywords": [
-    "how to lower bmi",
-    "reduce bmi",
-    "bmi weight loss",
-    "healthy bmi tips",
-    "lower body mass index",
-    "sustainable weight loss bmi"
-  ]
+  "keywords": ["how to lower bmi","reduce bmi","bmi weight loss","healthy bmi tips","lower body mass index","sustainable weight loss bmi"]
 }

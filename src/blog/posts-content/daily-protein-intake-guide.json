@@ -1,112 +1,25 @@
 {
   "sections": [
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How Much Protein Do You Actually Need per Day?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Walk into any gym and you'll hear the rule: one gram of protein per pound of body weight. it's a simple guideline, but it overestimates for most people. The real evidence-based range from the ISSN and ACSM consensus is 1."
-    },
-    {
-      "type": "paragraph",
-      "text": "6 to 2. 2 grams per kilogram of body weight — about 0. 73 to 1."
-    },
-    {
-      "type": "paragraph",
-      "text": "0 grams per pound."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How Your Goal Changes Your Protein Needs"
-    },
-    {
-      "type": "paragraph",
-      "text": "Your daily protein intake target shifts depending on what you're trying to achieve. Someone maintaining weight with light activity needs less than someone in a calorie deficit trying to preserve muscle. The higher end of the range is most valuable during fat loss, where protein's thermic effect and satiety help you stick to your deficit and retain lean mass."
-    },
-    {
-      "type": "table",
-      "headers": [
-        "Goal",
-        "Range (g/kg)",
-        "Range (g/lb)",
-        "Best For"
-      ],
-      "rows": [
-        [
-          "Maintain",
-          "1.2–1.6 g/kg",
-          "0.55–0.73 g/lb",
-          "Sedentary to light activity"
-        ],
-        [
-          "Fat Loss (Cut)",
-          "1.6–2.2 g/kg",
-          "0.73–1.0 g/lb",
-          "Calorie deficit with resistance training"
-        ],
-        [
-          "Muscle Gain (Bulk)",
-          "1.6–2.2 g/kg",
-          "0.73–1.0 g/lb",
-          "Calorie surplus with resistance training"
-        ],
-        [
-          "Endurance Athlete",
-          "1.4–1.8 g/kg",
-          "0.64–0.82 g/lb",
-          "6+ hours of cardio per week"
-        ]
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "When and How Should You Eat Your Protein?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The anabolic window is wider than commonly thought — you've 4 to 6 hours post-workout, not 30 minutes. However, consuming 30–40 grams of protein within 2 hours of training is still optimal timing. The single most important factor for muscle growth is total daily intake, not precise timing."
-    },
-    {
-      "type": "paragraph",
-      "text": "What matters more is spreading that total across the day."
-    },
-    {
-      "type": "paragraph",
-      "text": "Your body has a per-meal ceiling for muscle protein synthesis (MPS) of roughly 0. 4 grams per kilogram of body weight. Anything beyond that in a single meal is oxidized for energy rather than used to build muscle."
-    },
-    {
-      "type": "paragraph",
-      "text": "The solution is to spread your daily protein across 3 to 5 meals, each hitting that threshold to maximally stimulate MPS throughout the day."
-    },
-    {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Chicken breast (3 oz): ~26g protein — lean and versatile for any meal",
-        "Greek yogurt (3/4 cup): ~17g protein — excellent for breakfast or a high-protein snack",
-        "Whey protein (1 scoop): ~25g protein — fast-digesting and ideal post-workout",
-        "Eggs (1 large): ~6g protein — a complete protein with all essential amino acids",
-        "Salmon (3 oz): ~22g protein — rich in omega-3s alongside high-quality protein"
-      ]
-    },
-    {
-      "type": "cta",
-      "heading": "Calculate Your Daily Protein Needs",
-      "body": "Get your personalized protein target based on your weight, goal, and training frequency. Includes a per-meal breakdown and food equivalents for practical planning.",
-      "buttonLabel": "Calculate Your Protein Intake",
-      "path": "/health/protein-calculator/"
-    }
+    {"type":"paragraph","text":"There is no single number, because the answer depends on what you are measuring against. The U.S. Recommended Dietary Allowance for adults is 0.8 grams of protein per kilogram of body weight per day, set to meet the needs of about 97.5% of healthy adults. The International Society of Sports Nutrition (ISSN) says 1.4 to 2.0 grams per kilogram per day is sufficient for most exercising individuals. For a 70 kg (154 lb) person that is 56 grams versus 98 to 140 grams."},
+    {"type":"heading","level":2,"text":"What do the main reference points say?"},
+    {"type":"table","headers":["Reference point","g per kg per day","g per lb per day","For a 70 kg person"],"rows":[["Adult RDA, general population","0.8","0.36","56 g"],["ISSN, most exercising individuals","1.4 to 2.0","0.64 to 0.91","98 to 140 g"],["ISSN, resistance-trained during a calorie deficit (may be needed)","2.3 to 3.1","1.04 to 1.41","161 to 217 g"]]},
+    {"type":"paragraph","text":"The RDA figure and its meaning come from a published review of U.S. protein recommendations; the ISSN ranges come from its position stand on protein and exercise. The ISSN says the RDA is not an appropriate amount for a training athlete, and that the higher 2.3 to 3.1 range may be needed to retain lean mass in resistance-trained people during periods of lower calorie intake. These are statements about particular groups, not targets for everyone."},
+    {"type":"heading","level":2,"text":"Is one gram per pound the right rule?"},
+    {"type":"paragraph","text":"One gram per pound equals 2.2 grams per kilogram. That is slightly above the top of the ISSN range for most exercising individuals (2.0 g/kg, or 0.91 g/lb) and about two and three quarter times the RDA. It is a convenient round number, not a threshold at which benefits start, and it assumes your current body weight is the right reference."},
+    {"type":"heading","level":2,"text":"How does the calculator choose a number?"},
+    {"type":"paragraph","text":"The Protein Calculator uses its own planning ranges by goal: 1.2 to 1.6 g/kg for maintaining, 1.6 to 2.2 g/kg for fat loss or muscle gain, and 1.4 to 1.8 g/kg for endurance training. These are the calculator's presets and they are not all taken from the ISSN, whose range is 1.4 to 2.0. Within the range, it moves the target up with the number of resistance-training days. For example, 170 lb (77.1 kg) with a fat-loss goal and 3 to 4 training days returns a range of 123 to 170 g and a target of 143 g, about 1.85 g/kg. The same person set to maintain returns 93 to 123 g with a target of 105 g."},
+    {"type":"heading","level":2,"text":"How do you spread protein across the day?"},
+    {"type":"paragraph","text":"The ISSN position stand recommends about 0.25 g/kg per meal, or an absolute dose of 20 to 40 g, spread roughly every 3 to 4 hours. For a 70 kg person, 0.25 g/kg is 17.5 g, so the 20 to 40 g range is the practical guide. Four meals at 98 to 140 g a day average 24.5 to 35 g each; five meals average 19.6 to 28 g. The calculator's per-meal figure uses 0.4 g/kg (31 g for the 170 lb example), which is higher than the ISSN's 0.25 g/kg, so treat per-meal numbers as rough."},
+    {"type":"heading","level":2,"text":"What does the number look like in food?"},
+    {"type":"paragraph","text":"The protein values below are from USDA FoodData Central (Standard Reference data), per 100 g. Cooked weights are used where noted. Protein content varies by brand and preparation."},
+    {"type":"table","headers":["Food (USDA description)","Protein per 100 g","Amount for 25 g of protein"],"rows":[["Chicken breast, meat only, cooked, roasted","31.0 g","81 g"],["Tofu, raw, firm, prepared with calcium sulfate","17.3 g","145 g"],["Egg, whole, raw, fresh","12.6 g","198 g"],["Lentils, mature seeds, cooked, boiled, without salt","9.02 g","277 g"]]},
+    {"type":"paragraph","text":"A sample combination: 150 g of whole egg (18.9 g protein), 150 g of cooked chicken breast (46.5 g), 250 g of cooked lentils (22.6 g) and 150 g of firm tofu (26.0 g) add up to 113.9 g from those foods alone. Other foods such as bread, dairy and vegetables add more, so a day does not need to be built only from high-protein items."},
+    {"type":"heading","level":2,"text":"What about calories?"},
+    {"type":"paragraph","text":"Protein supplies about 4 kilocalories per gram. A 140 g day is 560 kcal, which is 25% of a 2,200 kcal diet; 98 g is 18% and the 56 g RDA is 10%. The National Academy of Medicine's acceptable range for protein is 10 to 35% of energy, which these figures sit inside."},
+    {"type":"heading","level":2,"text":"Common mistakes and limits"},
+    {"type":"list","items":["Using total body weight when you carry a lot of excess fat or are far from a typical weight. The ranges are written per kilogram of body weight, and individuals should ask a dietitian how to apply them.","Treating a performance-focused range as a requirement. The ISSN statements are for exercising people; the RDA is the benchmark for the general population.","Eating most of the day's protein in one sitting. The ISSN recommends even doses roughly every 3 to 4 hours.","Using a single food source. Variety also provides other nutrients.","Ignoring health conditions. People with kidney disease, liver disease, or who are pregnant, older, or taking certain medications can have different needs. The sources used here do not make safety statements for those groups, so ask a doctor or registered dietitian before changing protein intake."]},
+    {"type":"callout","variant":"info","text":"Sources used: the ISSN position stand on protein and exercise, a published review of the U.S. protein RDA and acceptable macronutrient range, and USDA FoodData Central. Numbers in the tables were calculated from them and rounded."},
+    {"type":"cta","heading":"Calculate Your Daily Protein Needs","body":"Get your personalized protein target based on your weight, goal, and training frequency. Includes a per-meal breakdown and food equivalents for practical planning.","buttonLabel":"Calculate Your Protein Intake","path":"/health/protein-calculator/"}
   ],
-  "keywords": [
-    "protein calculator",
-    "how much protein per day",
-    "protein intake calculator",
-    "protein for muscle gain",
-    "protein for fat loss",
-    "daily protein needs"
-  ]
+  "keywords": ["protein calculator","how much protein per day","protein intake calculator","protein for muscle gain","protein for fat loss","daily protein needs"]
 }

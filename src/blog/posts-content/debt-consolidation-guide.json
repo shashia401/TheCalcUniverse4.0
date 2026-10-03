@@ -2,67 +2,165 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "Debt consolidation sounds simple: take out one loan at a lower rate, pay off all your high-interest debts, and make a single monthly payment. But the math is more complicated than a lower interest rate. Origination fees, longer repayment terms, and your credit score all determine whether consolidation actually saves you money."
+      "text": "Debt consolidation saves money only when the new loan or card costs less in total than the old debts, after fees, over the time you will actually take to repay it. In the example below, $12,200 across three cards averages 23.30% APR and costs $7,347.85 in interest if each card keeps its current payment. A 13% five-year personal loan with a 4% fee cuts that to $5,121.46 including the fee, while a 0% balance transfer for 18 months with a 3% fee cuts it to as little as $366 if the balance is cleared in time. The result depends on the rate, fee, term and discipline, not the label."
     },
     {
       "type": "heading",
-      "text": "How Debt Consolidation Works?",
-      "level": 2
-    },
-    {
-      "type": "paragraph",
-      "text": "Debt consolidation replaces multiple debts — usually credit cards, personal loans, or medical bills — with a single new loan. The new loan should have a lower interest rate than your current weighted average rate. You use the loan proceeds to pay off your existing balances, then make one monthly payment on the consolidation loan."
-    },
-    {
-      "type": "paragraph",
-      "text": "The math works best when you've high-interest credit card debt (20%+ APR) and can qualify for a personal loan at 7-15%. The savings come from the interest rate gap — but fees and term length can erode or eliminate those savings entirely."
+      "level": 2,
+      "text": "The example and its assumptions"
     },
     {
       "type": "table",
       "headers": [
-        "Method",
-        "How It Works",
-        "Typical Rates",
-        "Best For"
+        "Debt",
+        "Balance",
+        "APR",
+        "Current payment"
       ],
       "rows": [
         [
-          "Personal Loan",
-          "Borrow a lump sum, pay off debts, repay in fixed installments",
-          "7-25% depending on credit",
-          "Larger balances, longer payoff timeline, predictable payments"
+          "Card A",
+          "$6,800",
+          "24%",
+          "$200"
         ],
         [
-          "Balance Transfer Card",
-          "Transfer balances to a card with 0% intro APR",
-          "0% for 12-21 months, then 18-25%",
-          "Smaller balances you can pay off during the intro period"
+          "Card B",
+          "$3,100",
+          "19%",
+          "$100"
         ],
         [
-          "Home Equity Loan",
-          "Borrow against home equity at a lower secured rate",
-          "6-10%",
-          "Large debt amounts, but puts your home at risk if you default"
+          "Card C",
+          "$2,300",
+          "27%",
+          "$80"
+        ],
+        [
+          "Total",
+          "$12,200",
+          "23.30% weighted",
+          "$380"
         ]
       ]
     },
     {
+      "type": "list",
+      "items": [
+        "Interest is charged monthly at APR divided by 12. Nothing new is charged, and no payments are missed.",
+        "The baseline follows the Debt Consolidation Calculator: each debt keeps its own payment, and a cleared debt's payment is not redirected. That plan takes 58 months and pays $7,347.85 of interest. If you redirected freed payments to the next card within the same $380, it would take 52 months and $7,183.31, so the baseline is not unusually weak.",
+        "Personal-loan fees are added to the balance and financed, as in the calculator. Rates, terms and fees below are hypothetical, not offers. Your credit and the lender decide what you are actually quoted.",
+        "The balance transfer assumes a 3% fee added to the balance ($366), 0% for 18 months, then 22% on whatever remains. These terms are also assumptions."
+      ]
+    },
+    {
       "type": "heading",
-      "text": "The Hidden Cost: Origination Fees",
-      "level": 2
+      "level": 2,
+      "text": "Five options compared"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Option",
+        "Monthly payment",
+        "Time to debt-free",
+        "Interest plus fee",
+        "Saved vs current plan"
+      ],
+      "rows": [
+        [
+          "Keep the three payments",
+          "$380",
+          "58 months",
+          "$7,347.85",
+          "$0"
+        ],
+        [
+          "Personal loan, 13%, 60 months, 4% fee",
+          "$288.69",
+          "60 months",
+          "$5,121.46",
+          "$2,226.39"
+        ],
+        [
+          "Personal loan, 13%, 36 months, 4% fee",
+          "$427.51",
+          "36 months",
+          "$3,190.32",
+          "$4,157.53"
+        ],
+        [
+          "Personal loan, 11%, 36 months, 3% fee",
+          "$411.39",
+          "36 months",
+          "$2,610.21",
+          "$4,737.64"
+        ],
+        [
+          "Balance transfer, paying $380 a month",
+          "$380",
+          "36 months",
+          "$1,403.25",
+          "$5,944.60"
+        ],
+        [
+          "Balance transfer, paying $700 a month",
+          "$700",
+          "18 months",
+          "$366.00",
+          "$6,981.85"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Most personal loans charge an origination fee of 1-5% of the loan amount. This fee is deducted upfront or added to your balance. A $15,000 loan with a 3% origination fee costs $450 immediately."
+      "text": "Read the table in two directions. The five-year loan lowers the payment by $91.31 a month, but most of that comes from stretching repayment to 60 months, and it saves the least in total. The three-year loans raise the payment above $380 and save much more. A lower payment feels like progress, but it is the total cost that matters."
     },
     {
       "type": "paragraph",
-      "text": "That fee changes the math significantly. You need to save at least $450 in interest before you break even — and that's $450 you wouldn't owe if you kept paying the original debts separately. Always check the total lifetime savings after fees figure rather than just looking at the monthly payment reduction."
+      "text": "You can capture both benefits by keeping the payment high. If you take the five-year 13% loan and still pay $380 a month, it clears in 42 months with $3,634.34 of interest plus fee, saving $3,713.51 against the baseline. A longer term only hurts if you let the payment shrink to match."
     },
     {
-      "type": "callout",
-      "text": "Divide the origination fee by your monthly savings to find the break-even month. If the fee is $300 and you save $75/month, you break even in 4 months. Every month after that's pure financial gain. If the break-even is longer than you plan to keep the loan, consolidation may not be worth it.",
-      "variant": "tip"
+      "type": "heading",
+      "level": 2,
+      "text": "Why the balance transfer wins here, and when it does not"
+    },
+    {
+      "type": "paragraph",
+      "text": "Paying no interest during the promotional period means almost every dollar goes to principal. With $380 a month, $5,726 of the balance remains when the 18 months end, and the remaining months at 22% cost $1,037.25. To clear it all inside the promotional window you would need about $698 a month ($12,566 divided by 18). The transfer therefore rewards a high payment and punishes a low one. It also assumes you do not charge anything new to the cleared cards, and that the issuer does not withdraw the promotional rate if you pay late, which many terms allow. Read the disclosure for the post-promotion rate, the fee, and what ends the promotion."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check the fee before you compare rates"
+    },
+    {
+      "type": "paragraph",
+      "text": "A 4% fee on $12,200 is $488, about two months of the interest the original debts generate at the start ($12,200 x 23.30% / 12 is about $237 a month). Divide the fee by the monthly saving to see how long it takes to earn back: if consolidation saves you $150 a month in interest, a $488 fee is recovered in a little over three months. A fee-free loan at a higher rate can beat a lower rate with a fee: the 16% loan with no fee over 60 months costs $5,600.82 in interest, only $479.36 more than the 13% loan with a fee at $5,121.46."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Comparing only the monthly payment. A payment that falls because the term doubled usually costs more in total interest unless the rate drop is large.",
+        "Running the cards up again. If the cleared cards are used and carry balances, you now owe both the new loan and the new card debt.",
+        "Ignoring the offered rate. Consolidation helps only when the rate you qualify for is meaningfully below your weighted average APR. If the best offer is close to 23%, skip it.",
+        "Treating a home equity loan as just another low-rate option. It converts unsecured debt into debt secured by your home, so missed payments put the house at risk.",
+        "Closing accounts without a plan. Check how it affects your overall credit before closing old cards."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When consolidation does not make sense"
+    },
+    {
+      "type": "paragraph",
+      "text": "If you can pay the balances off in a few months with the cash you have, extra fees and applications are not worth it. If spending, not interest, is the cause of the debt, consolidating moves the problem rather than fixing it. If you cannot qualify for a rate below your current average, the best choice may be paying the highest-rate card first. These figures are illustrations from stated assumptions, not advice about a specific loan. Enter your own balances, rates and offer into the Debt Consolidation Calculator and read the lender's full disclosure before signing."
     },
     {
       "type": "cta",

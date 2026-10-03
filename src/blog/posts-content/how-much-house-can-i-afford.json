@@ -2,79 +2,171 @@
   "sections": [
     {
       "type": "paragraph",
-      "text": "you've probably heard the rule of thumb — spend no more than 28% of your income on housing. But lenders don't just look at your mortgage payment. They look at all your debts through the debt-to-income (DTI) ratio, and that single number determines exactly how much house you can afford."
+      "text": "Lenders work backward from your income: they take a share of gross monthly income, subtract your existing debt payments, set aside room for taxes and insurance, and turn what is left into a maximum loan. For a household earning $84,000 a year with $600 a month in other debts and $45,000 for a down payment, at an assumed 6.5% rate on a 30-year loan, a 36% debt ratio gives a maximum price of about $288,012. At 28% it is $217,133. The ratio you pick moves the answer by tens of thousands of dollars, so it is worth understanding what it means."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "What Is the 28/36 Rule?"
+      "text": "What the 28/36 rule is"
     },
     {
       "type": "paragraph",
-      "text": "The 28/36 rule is the lending industry's standard framework. Your monthly housing costs — principal, interest, taxes, and insurance, or PITI — shouldn't exceed 28% of your gross monthly income. Your total debt payments, housing plus car loans, student loans, and credit cards, should stay under 36%."
+      "text": "The 28/36 rule is a traditional lending rule of thumb with two tests. The front-end ratio says housing costs (principal, interest, taxes and insurance, called PITI) should not exceed 28% of gross monthly income. The back-end ratio says all monthly debt payments, housing included, should not exceed 36%. The Consumer Financial Protection Bureau defines the debt-to-income ratio as monthly debt payments divided by gross monthly income and notes that different loan products and lenders set different limits. So treat 28/36 as a conservative guideline, not a legal threshold, and ask your lender which limits apply to your loan."
     },
     {
       "type": "paragraph",
-      "text": "Lenders use the 36% back-end ratio as their hard ceiling, with FHA and Fannie Mae allowing up to 43% in some cases. here's the counterintuitive part: lenders start with your income, not the home price. They multiply your monthly income by the DTI limit, subtract your existing debts, deduct a buffer for taxes and insurance (roughly 20% of PITI), and then reverse-engineer the mortgage formula to find your maximum loan."
+      "text": "Here the monthly gross income is $7,000. The front-end test allows 28% of that, or $1,960, for housing. The back-end test allows 36% of $7,000, which is $2,520, minus $600 of other debts, or $1,920 for housing. The lower of the two controls, so the back-end test binds at $1,920 a month."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Your Down Payment Changes the Equation"
+      "text": "How the calculator converts that payment into a price"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Maximum total debt = monthly income x chosen ratio.",
+        "Housing budget = maximum total debt - existing monthly debts.",
+        "The calculator reserves 20% of the housing budget for taxes and insurance, and the other 80% is the principal and interest payment.",
+        "The maximum loan is the amount that payment would repay over the term at the entered rate.",
+        "Maximum price = maximum loan + down payment."
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Your down payment affects three things: the loan amount you need, whether you'll pay PMI (Private Mortgage Insurance), and your monthly payment. Put down less than 20%, and you'll typically pay 0. 5–1."
-    },
-    {
-      "type": "paragraph",
-      "text": "5% of the loan amount per year in PMI — money that protects the lender, not you. PMI automatically drops off once your loan-to-value ratio reaches 78%, but a 20% down payment eliminates it from day one. PMI isn't the same as homeowners insurance; PMI covers the lender if you default, while homeowners insurance covers you."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Should You Buy the Most Expensive House the Bank Approves?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Probably not. The bank's maximum is based solely on DTI ratios, not your lifestyle. If you max out at 43% DTI, you'll have less room for retirement savings, travel, emergencies, and everyday flexibility."
-    },
-    {
-      "type": "paragraph",
-      "text": "Most financial advisors recommend targeting 28–33% back-end DTI for a comfortable financial cushion. To find your real number: calculate your gross monthly income and total debts, choose your DTI target, estimate your down payment, enter the current mortgage rate, and use the calculator below."
+      "text": "Note that the House Affordability Calculator applies whichever percentage you choose as the total debt ratio, not as a separate front-end cap. That is why its 28% setting is stricter than the classic rule."
     },
     {
       "type": "table",
       "headers": [
-        "DTI Target",
-        "Max Housing Payment",
-        "Existing Debts",
-        "Available for PITI",
-        "Est. Max Home Price"
+        "Ratio chosen",
+        "Max total debt",
+        "Housing budget (PITI)",
+        "Principal and interest",
+        "Max loan",
+        "Max price",
+        "Down payment share"
       ],
       "rows": [
         [
-          "28% (Conservative)",
-          "$2,333/mo",
-          "$500/mo",
-          "$1,833/mo",
-          "~$273,000"
+          "28%",
+          "$1,960",
+          "$1,360",
+          "$1,088",
+          "$172,133",
+          "$217,133",
+          "20.7%"
         ],
         [
-          "36% (Moderate)",
-          "$3,000/mo",
-          "$500/mo",
-          "$2,500/mo",
-          "~$388,000"
+          "36%",
+          "$2,520",
+          "$1,920",
+          "$1,536",
+          "$243,012",
+          "$288,012",
+          "15.6%"
         ],
         [
-          "43% (Aggressive)",
-          "$3,583/mo",
-          "$500/mo",
-          "$3,083/mo",
-          "~$490,000"
+          "43%",
+          "$3,010",
+          "$2,410",
+          "$1,928",
+          "$305,030",
+          "$350,030",
+          "12.9%"
         ]
       ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The 43% row shows what a higher setting does. Some loan programs allow ratios that high, but approval at that level leaves little room for repairs, savings or a pay cut. The bank's maximum is not a recommendation."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What moves the answer most"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Change (from the 36% case)",
+        "Max price",
+        "Difference"
+      ],
+      "rows": [
+        [
+          "Baseline: 6.5%, $600 other debts, 30 years",
+          "$288,012",
+          "-"
+        ],
+        [
+          "Rate 5.5%",
+          "$315,523",
+          "+$27,511"
+        ],
+        [
+          "Rate 7.5%",
+          "$264,675",
+          "-$23,337"
+        ],
+        [
+          "Other debts $0",
+          "$363,953",
+          "+$75,941"
+        ],
+        [
+          "Other debts $1,200",
+          "$212,071",
+          "-$75,941"
+        ],
+        [
+          "15-year loan",
+          "$221,327",
+          "-$66,685"
+        ],
+        [
+          "Income $96,000",
+          "$333,577",
+          "+$45,565"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Each $100 of monthly debt removes about $12,657 from the price in this case, so clearing a $300 car payment adds roughly $37,971 of buying power. That often beats saving for a larger down payment. A one-point change in the rate moves the price by roughly $23,000 to $28,000 here, which is why a real quote matters more than a headline rate."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Taxes, insurance and mortgage insurance"
+    },
+    {
+      "type": "paragraph",
+      "text": "At the 36% price, the 20% reserve is $384 a month. That equals 1.6% of the price a year, for example property tax of 1.2% and insurance of 0.4%. Those percentages are assumptions; tax rates and insurance premiums vary widely by location, so replace them with the real figures for homes you are considering. The calculator does not add mortgage insurance. With $45,000 down on $288,012 you are at 15.6%, below 20%, so a conventional loan usually brings mortgage insurance. At an assumed 0.7% of the loan per year that is about $141.76 a month, which would come out of the same housing budget and reduce the loan you can carry. The CFPB explains that you can request cancellation when the balance is scheduled to fall to 80% of the original home value, and lenders must end it automatically at 78% if you are current."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Treating the maximum as the target. Choose the price that leaves room for savings, repairs and income changes, then confirm it with your own monthly budget.",
+        "Leaving out non-mortgage housing costs: utilities, maintenance, condo or association fees. They are not in PITI.",
+        "Counting only the down payment as cash needed. Closing costs and moving expenses come on top.",
+        "Using the starting rate for a loan whose rate can change. For an adjustable loan, test the payment at a higher rate.",
+        "Comparing gross ratios with take-home pay. A 36% share of gross income is a larger share of what lands in your account."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When these numbers do not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "The calculation uses fixed assumptions: a fixed rate, a flat 20% tax and insurance reserve, and no mortgage insurance. It ignores credit score, which affects rates, and lender rules about reserves and employment. It also assumes your listed debts are accurate. Treat the result as a planning range, then get pre-approval for a real limit. Enter your own income, debts, down payment and quoted rate into the House Affordability Calculator."
     },
     {
       "type": "cta",

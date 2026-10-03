@@ -5,7 +5,7 @@
     "metaTitle": "How to Calculate ROI (Formula & Examples)",
     "metaDescription": "What ROI means, the ROI formula, and worked examples for stocks, real estate and marketing, plus a free online ROI calculator.",
     "publishedAt": "2024-11-15",
-    "updatedAt": "2025-03-20",
+    "updatedAt": "2026-10-02",
     "readingMinutes": 4,
     "category": "Finance",
     "categorySlug": "finance",
@@ -55,7 +55,7 @@
     "metaTitle": "Commission Calculator Guide",
     "metaDescription": "How flat, tiered and real estate broker commission splits work, with real-world examples and a free commission calculator.",
     "publishedAt": "2026-04-26",
-    "updatedAt": "2026-04-26",
+    "updatedAt": "2026-10-02",
     "readingMinutes": 10,
     "category": "Finance",
     "categorySlug": "finance",
@@ -176,15 +176,15 @@
   },
   {
     "slug": "square-footage-calculator-guide",
-    "title": "Square Footage Calculator: How to Measure Any Room for Flooring, Paint & More",
-    "metaTitle": "Square Footage Calculator Guide",
-    "metaDescription": "How to measure the square footage of rectangles, circles and L-shaped rooms, with waste factors, cost estimates and a free calculator.",
+    "title": "Square Footage Formulas for Any Room Shape",
+    "metaTitle": "Square Footage Formulas for Any Room Shape",
+    "metaDescription": "Square footage formulas for any room shape with checked examples: trapezoid, circle, ring, bay window, irregular outlines and wall area.",
     "publishedAt": "2026-04-26",
-    "updatedAt": "2026-04-26",
-    "readingMinutes": 3,
+    "updatedAt": "2026-10-02",
+    "readingMinutes": 5,
     "category": "Home DIY",
     "categorySlug": "diy",
-    "excerpt": "Installing flooring? Ordering carpet? Listing a home for sale? You need to know square footage. Here's how to measure any room shape, with real examples and waste factors that'll save your project.",
+    "excerpt": "Area formulas for rectangles, triangles, trapezoids, circles, rings and polygons, plus how to split bay windows and irregular outlines, and wall area for paint.",
     "relatedCalculators": [
       "square-footage-calculator",
       "concrete-calculator",
@@ -676,38 +676,14 @@
     "updatedAt": "2026-10-02"
   },
   {
-    "slug": "credit-card-debt-payoff-guide",
-    "title": "Credit Card Debt Payoff Guide: Avalanche vs. Snowball and How to Break Free",
-    "metaDescription": "Pay off credit card debt faster with a clear strategy. Compare the debt avalanche and snowball methods, understand total interest costs, and find your…",
-    "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
-    "category": "Finance",
-    "categorySlug": "finance",
-    "excerpt": "Credit card debt is some of the most expensive money you can borrow. Here is how the avalanche and snowball methods work, why minimum payments keep you trapped, and how to find your fastest path to debt-free.",
-    "relatedCalculators": [
-      "credit-card-payoff",
-      "debt-payoff-calculator",
-      "personal-loan-calculator"
-    ],
-    "author": {
-      "name": "TheCalcUniverse Editorial",
-      "role": "Finance & Analytics Team"
-    },
-    "relatedCalculatorId": "credit-card-payoff-calculator",
-    "relatedCalculatorPath": "/finance/credit-card-payoff-calculator/",
-    "relatedCalculatorLabel": "Try the Credit Card Payoff Calculator",
-    "hasContent": true,
-    "metaTitle": "Credit Card Payoff Guide"
-  },
-  {
     "slug": "debt-consolidation-guide",
     "title": "Debt Consolidation Guide: Personal Loan vs. Balance Transfer and When It Actually Works",
-    "metaDescription": "Is debt consolidation worth it? Compare personal loans vs. balance transfers, learn how origination fees affect your savings, and find out when…",
+    "metaDescription": "Compare debt consolidation options with worked numbers: personal loan vs balance transfer vs your current plan, including fees, terms and common mistakes.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 5,
     "category": "Finance",
     "categorySlug": "finance",
-    "excerpt": "Debt consolidation can save you money — or cost you more. Learn how to compare personal loans vs. balance transfers, factor in origination fees, and know exactly when consolidation makes financial sense.",
+    "excerpt": "Compare keeping your payments, a personal loan with a fee and a 0% balance transfer on one $12,200 example, with total interest, fees and what makes each one fail.",
     "relatedCalculators": [
       "debt-payoff-calculator",
       "credit-card-payoff",
@@ -721,7 +697,8 @@
     "relatedCalculatorPath": "/finance/debt-consolidation-calculator/",
     "relatedCalculatorLabel": "Try the Debt Consolidation Calculator",
     "hasContent": true,
-    "metaTitle": "Debt Consolidation Guide"
+    "metaTitle": "Debt Consolidation Guide",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "net-worth-guide",
@@ -775,13 +752,13 @@
   },
   {
     "slug": "how-much-house-can-i-afford",
-    "title": "How Much House Can You Really Afford? DTI, Down Payments & Monthly Payments Explained",
-    "metaDescription": "How lenders judge what you can afford using the 28/36 DTI rule, how down payments affect PMI, and why not to max out your approval.",
+    "title": "How Much House Can You Afford? DTI and Payments",
+    "metaDescription": "How much house can you afford? Worked DTI examples at 28%, 36% and 43%, plus rate, debt, term and down payment effects, with assumptions stated.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 5,
     "category": "Finance",
     "categorySlug": "finance",
-    "excerpt": "Wondering how much house you can afford? Lenders use the 28/36 DTI rule to work backward from your income. Here is exactly how it works, what role your down payment plays, and why the bank's max number is not always the right one for you.",
+    "excerpt": "See how lenders turn income, debts and a debt-to-income ratio into a maximum price, which inputs move it most, and why the maximum is not the same as comfortable.",
     "relatedCalculators": [
       "house-affordability-calculator",
       "mortgage-calculator",
@@ -795,17 +772,18 @@
     "relatedCalculatorPath": "/finance/house-affordability-calculator/",
     "relatedCalculatorLabel": "House Affordability Calculator",
     "hasContent": true,
-    "metaTitle": "How Much House Can I Afford?"
+    "metaTitle": "How Much House Can You Afford? DTI and Payments",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "mortgage-refinance-guide",
     "title": "When Should You Refinance Your Mortgage? A Break-Even Analysis Guide",
-    "metaDescription": "How to decide if refinancing makes sense: break-even analysis, closing costs, rate drops, and why your planned time in the home matters most.",
+    "metaDescription": "Work out your refinance break-even: payment savings versus closing costs, how a term reset changes total cost, and when a rate drop is too small to matter.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 5,
     "category": "Finance",
     "categorySlug": "finance",
-    "excerpt": "Refinancing can save you hundreds per month — but only if you stay in your home past the break-even point. Here is how to calculate whether a refi makes sense for *your* timeline and budget.",
+    "excerpt": "Whether a refinance pays off depends on the rate drop, closing costs and how long you stay. See break-even math, a term-reset warning and the cost of rolling in fees.",
     "relatedCalculators": [
       "refinance-calculator",
       "mortgage-calculator",
@@ -819,17 +797,18 @@
     "relatedCalculatorPath": "/finance/refinance-calculator/",
     "relatedCalculatorLabel": "Refinance Calculator",
     "hasContent": true,
-    "metaTitle": "When to Refinance Your Mortgage"
+    "metaTitle": "When to Refinance Your Mortgage",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "rent-vs-buy-analysis",
-    "title": "Rent vs. Buy: Find Your Break-Even Year and Make the Right Financial Call",
-    "metaDescription": "Rent vs. buy analysis: how the break-even year works, why opportunity cost matters, and how long you need to stay for buying to pay off.",
+    "title": "Rent vs Buy: Find Your Break-Even Year",
+    "metaDescription": "Find your rent vs buy break-even year with a worked example, year-by-year costs and a sensitivity table for appreciation, rent, rate and selling costs.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 4,
     "category": "Finance",
     "categorySlug": "finance",
-    "excerpt": "The rent vs. buy decision comes down to one number: your break-even year. If you stay longer than this, buying wins. If you move sooner, renting wins. Here is exactly how to calculate yours.",
+    "excerpt": "The rent vs buy break-even year depends on appreciation, rent, rate and selling costs. One worked example shows year-by-year costs and which inputs matter most.",
     "relatedCalculators": [
       "rent-vs-buy-calculator",
       "mortgage-calculator",
@@ -843,17 +822,18 @@
     "relatedCalculatorPath": "/finance/rent-vs-buy-calculator/",
     "relatedCalculatorLabel": "Rent vs. Buy Calculator",
     "hasContent": true,
-    "metaTitle": "Rent vs Buy: Find Your Break-Even"
+    "metaTitle": "Rent vs Buy: Find Your Break-Even Year",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "business-loan-guide",
-    "title": "The Complete Guide to Business Loans: DSCR, SBA Loans and Term Comparison",
-    "metaDescription": "Everything you need to know about business loans — how DSCR works, what SBA loans involve, how to compare loan terms, and why origination fees matter more…",
+    "title": "Business Loan Guide: DSCR, Terms and Fees",
+    "metaDescription": "Business loan guide with worked DSCR, term and origination fee examples: see payments, total interest, borrowing limits and effective rates side by side.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 4,
     "category": "Finance",
     "categorySlug": "finance",
-    "excerpt": "Business loans are not just about the interest rate. DSCR, origination fees, and loan terms all affect your true cost of capital. Here is what every business owner needs to know before signing.",
+    "excerpt": "Learn how DSCR works, how the loan term changes it, how much a business could borrow at a target ratio, and how origination fees raise the effective rate.",
     "relatedCalculators": [
       "business-loan-calculator",
       "loan-calculator",
@@ -867,7 +847,8 @@
     "relatedCalculatorPath": "/finance/business-loan-calculator/",
     "relatedCalculatorLabel": "Business Loan Calculator",
     "hasContent": true,
-    "metaTitle": "Business Loan Guide"
+    "metaTitle": "Business Loan Guide: DSCR, Terms and Fees",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "savings-growth-guide",
@@ -1020,13 +1001,13 @@
   },
   {
     "slug": "heart-rate-zone-training-guide",
-    "title": "Heart Rate Zones for Training: Zone 2, Fat Burn, and How to Use the Karvonen Formula",
-    "metaDescription": "Learn how to use heart rate training zones to optimize your workouts. Understand the Karvonen formula, zone 2 fat burning, the 80/20 rule, and how to…",
+    "title": "Heart Rate Zones and the Karvonen Formula Explained",
+    "metaDescription": "Worked Karvonen heart rate zones for age 40, why resting rate shifts them, and how reliable 220 minus age is, with safety limits.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 4,
     "category": "Health & Fitness",
     "categorySlug": "health",
-    "excerpt": "Stop training in the grey zone. Learn the five heart rate zones, how to calculate your personal ranges with the Karvonen formula, and why 80% of your workouts should feel easy.",
+    "excerpt": "How the Karvonen formula turns age and resting heart rate into five zones, why reserve and percent-of-max tables differ, and how uncertain 220 minus age is.",
     "relatedCalculators": [
       "heart-rate-calculator",
       "calories-burned-calculator",
@@ -1040,7 +1021,8 @@
     "relatedCalculatorPath": "/health/heart-rate-zones-calculator/",
     "relatedCalculatorLabel": "Heart Rate Zones Calculator",
     "hasContent": true,
-    "metaTitle": "Heart Rate Zones for Training"
+    "metaTitle": "Heart Rate Zones and the Karvonen Formula Explained",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "pregnancy-due-date-guide",
@@ -1069,13 +1051,13 @@
   },
   {
     "slug": "daily-protein-intake-guide",
-    "title": "How Much Protein Do You Need per Day? An Evidence-Based Protein Intake Guide",
-    "metaDescription": "Estimate daily protein needs from your weight, goals and activity level, with intake ideas for muscle gain and fat loss and meal timing.",
+    "title": "How Much Protein Do You Need per Day?",
+    "metaDescription": "Compare the 0.8 g/kg RDA with the ISSN 1.4-2.0 g/kg range for exercisers, with worked gram targets, per-meal doses and USDA food values.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 5,
     "category": "Health & Fitness",
     "categorySlug": "health",
-    "excerpt": "The '1 gram per pound' rule overestimates for most people. Here is the actual evidence-based range for protein intake, how to time it, and which foods deliver the most protein per serving.",
+    "excerpt": "The RDA is 0.8 g/kg; the ISSN says 1.4 to 2.0 g/kg suits most exercising people. See what that means in grams, per meal and in foods, with the limits.",
     "relatedCalculators": [
       "protein-calculator",
       "macro-calculator",
@@ -1089,7 +1071,8 @@
     "relatedCalculatorPath": "/health/protein-calculator/",
     "relatedCalculatorLabel": "Protein Calculator",
     "hasContent": true,
-    "metaTitle": "Daily Protein Intake Guide"
+    "metaTitle": "How Much Protein Do You Need per Day?",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "dog-age-human-years-guide",
@@ -1118,13 +1101,13 @@
   },
   {
     "slug": "gpa-calculator-guide",
-    "title": "GPA Calculator Guide: Weighted vs Unweighted, Semester vs Cumulative",
-    "metaDescription": "How to calculate GPA, weighted vs unweighted grading, semester and cumulative averages, and what grades you need to reach a target.",
+    "title": "GPA Guide: Weighted vs Unweighted, Semester vs Cumulative",
+    "metaDescription": "Worked GPA examples: weighted vs unweighted, cumulative vs semester credit weighting, and the average grade needed to hit a target GPA.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 4,
     "category": "Mathematics",
     "categorySlug": "math",
-    "excerpt": "Your GPA is one of the most important numbers in your academic life. Whether you are planning for college applications, tracking your semester progress, or trying to figure out what grades you need to reach a goal, understanding how GPA works — weighted vs unweighted, semester vs cumulative — can make all the difference.",
+    "excerpt": "How GPA is computed from grade points and credits, why weighting methods differ by school, why semester GPAs cannot be averaged, and the grades needed for a target.",
     "relatedCalculators": [
       "gpa-calculator",
       "percentage-calculator",
@@ -1138,7 +1121,8 @@
     "relatedCalculatorPath": "/math/gpa-calculator/",
     "relatedCalculatorLabel": "GPA Calculator",
     "hasContent": true,
-    "metaTitle": "GPA Calculator Guide"
+    "metaTitle": "GPA Guide: Weighted vs Unweighted, Semester vs Cumulative",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "fractions-math-guide",
@@ -1167,13 +1151,13 @@
   },
   {
     "slug": "pythagorean-theorem-guide",
-    "title": "Pythagorean Theorem Guide: Applications, Proofs, and Real-World Use",
-    "metaDescription": "Master the Pythagorean theorem — a² + b² = c². Learn how to solve for any side of a right triangle, discover Pythagorean triples, and explore real-world…",
+    "title": "Pythagorean Theorem: Formula, Triples and Uses",
+    "metaDescription": "Pythagorean theorem with checked examples: squaring a deck corner, ladders, screen sizes, Euclid's triples and the converse test.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 5,
     "category": "Mathematics",
     "categorySlug": "math",
-    "excerpt": "The Pythagorean theorem is one of the oldest and most widely used relationships in all of mathematics. Over 3,500 years old, it bridges ancient geometry with modern technology — from building pyramids to rendering 3D graphics and navigating with GPS.",
+    "excerpt": "Solve for any side of a right triangle, square a corner with measured diagonals, generate Pythagorean triples and test whether a triangle is right-angled.",
     "relatedCalculators": [
       "pythagorean-calculator",
       "circle-calculator",
@@ -1187,17 +1171,18 @@
     "relatedCalculatorPath": "/math/pythagorean-theorem-calculator/",
     "relatedCalculatorLabel": "Right Triangle Calculator",
     "hasContent": true,
-    "metaTitle": "Pythagorean Theorem Guide"
+    "metaTitle": "Pythagorean Theorem: Formula, Triples and Uses",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "standard-deviation-statistics-guide",
-    "title": "Standard Deviation Explained: Variance, Normal Distribution, and How to Interpret It",
-    "metaDescription": "Learn what standard deviation tells you about your data, the difference between sample and population formulas, the 68-95-99.7 rule, and how to interpret…",
+    "title": "Standard Deviation Explained with a Worked Example",
+    "metaDescription": "Step-by-step standard deviation on real numbers: n vs n-1, exact normal-curve shares, Chebyshev bounds, outlier effects and mistakes.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 5,
     "category": "Mathematics",
     "categorySlug": "math",
-    "excerpt": "Standard deviation is the single most important measure of spread in statistics. It tells you how much your data wobbles around the average — and it is the key to understanding normal distributions, confidence intervals, and hypothesis testing.",
+    "excerpt": "A step-by-step standard deviation calculation, sample versus population, the exact 68-95-99.7 figures, how one outlier shifts the result, and common mistakes.",
     "relatedCalculators": [
       "standard-deviation-calculator",
       "probability-calculator",
@@ -1211,17 +1196,18 @@
     "relatedCalculatorPath": "/math/standard-deviation-calculator/",
     "relatedCalculatorLabel": "Standard Deviation & Variance Calculator",
     "hasContent": true,
-    "metaTitle": "Standard Deviation Explained"
+    "metaTitle": "Standard Deviation Explained with a Worked Example",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "probability-math-guide",
-    "title": "Probability Guide: Independent vs Dependent Events, Combinations, and the Binomial Distribution",
-    "metaDescription": "Master the fundamentals of probability theory. Learn the difference between independent and dependent events, how to use the addition and multiplication…",
+    "title": "Probability Guide: Independent Events and the Binomial",
+    "metaDescription": "Independent vs dependent events, addition and multiplication rules, combinations, binomial odds and a base-rate example, all computed.",
     "publishedAt": "2025-04-26",
-    "readingMinutes": 2,
+    "readingMinutes": 4,
     "category": "Mathematics",
     "categorySlug": "math",
-    "excerpt": "Probability is the mathematics of uncertainty — it tells you how likely things are to happen, how to combine multiple events, and how to update your beliefs when new information comes in. From weather forecasts to medical tests to the algorithms that recommend your next video, probability runs the modern world.",
+    "excerpt": "When to multiply, add or condition: independent versus dependent events, cards with and without replacement, combinations, binomial odds and a Bayes example.",
     "relatedCalculators": [
       "probability-calculator",
       "standard-deviation-calculator",
@@ -1235,7 +1221,8 @@
     "relatedCalculatorPath": "/math/probability-calculator/",
     "relatedCalculatorLabel": "Probability Calculator",
     "hasContent": true,
-    "metaTitle": "Probability Guide: Events & Odds"
+    "metaTitle": "Probability Guide: Independent Events and the Binomial",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "sleep-cycle-calculator-guide",
@@ -1555,14 +1542,14 @@
   },
   {
     "slug": "amortization-calculator-save-thousands",
-    "title": "How to Use an Amortization Calculator to Save Thousands on Your Mortgage",
-    "metaTitle": "Amortization Calculator Guide",
-    "metaDescription": "Learn how to use an amortization calculator to see exactly how extra payments shorten your mortgage term and save tens of thousands in interest.",
+    "title": "How to Use an Amortization Calculator",
+    "metaTitle": "How to Use an Amortization Calculator",
+    "metaDescription": "How to use an amortization calculator: enter your loan, test extra payments, compare terms and rates, and see interest saved on one worked example.",
     "publishedAt": "2026-05-10",
-    "readingMinutes": 2,
+    "readingMinutes": 4,
     "category": "Finance",
     "categorySlug": "finance",
-    "excerpt": "An amortization calculator reveals something your lender won't: exactly how much interest you can save by making extra payments. Here's how to read the schedule and build a payoff plan.",
+    "excerpt": "A step-by-step way to use an amortization calculator: enter the loan, change one input at a time, compare scenarios and choose an extra payment you can keep.",
     "relatedCalculators": [
       "amortization-calculator",
       "mortgage-calculator",
@@ -1576,7 +1563,8 @@
     "relatedCalculatorId": "amortization-calculator",
     "relatedCalculatorPath": "/finance/amortization-calculator/",
     "relatedCalculatorLabel": "Free Amortization Calculator",
-    "hasContent": true
+    "hasContent": true,
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "apr-vs-interest-rate-difference",
@@ -1633,12 +1621,12 @@
   {
     "slug": "home-renovation-budgeting-estimate-costs",
     "title": "Home Renovation Budgeting: How to Estimate Costs Accurately",
-    "metaDescription": "Planning a home renovation? Learn how to estimate costs accurately, build a realistic budget with contingency, and avoid common budget-busting mistakes.",
+    "metaDescription": "A bottom-up renovation budget: quantities from measurements, labor, permits, contingency scenarios and financing math, using illustrative costs.",
     "publishedAt": "2026-05-10",
-    "readingMinutes": 2,
+    "readingMinutes": 4,
     "category": "Home DIY",
     "categorySlug": "diy",
-    "excerpt": "Home renovations almost always cost more than expected. A good budget is the difference between a successful remodel and a stressful money pit. Here is how to estimate yours accurately.",
+    "excerpt": "Build a renovation budget from measured quantities, add labor, permits and a separate contingency, and test it against overruns. Prices are illustrative.",
     "relatedCalculators": [
       "renovation-budget-calculator",
       "square-footage-calculator",
@@ -1654,17 +1642,18 @@
     "relatedCalculatorPath": "/finance/budget-calculator/",
     "relatedCalculatorLabel": "Free Renovation Budget Calculator",
     "hasContent": true,
-    "metaTitle": "Home Renovation Budgeting: How to Estimate Costs Accurately"
+    "metaTitle": "Home Renovation Budgeting: How to Estimate Costs Accurately",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "power-of-compound-interest",
-    "title": "The Power of Compound Interest: Start Saving in Your 20s",
-    "metaDescription": "Why starting to save in your 20s instead of your 40s changes your retirement outcome so much, shown with real compound-interest math.",
+    "title": "The Power of Compound Interest: Rule of 72 Explained",
+    "metaDescription": "The Rule of 72 versus exact compound interest: accuracy by rate, time versus rate sensitivity, compounding frequency, fees and inflation.",
     "publishedAt": "2026-05-10",
-    "readingMinutes": 3,
+    "readingMinutes": 5,
     "category": "Finance",
     "categorySlug": "finance",
-    "excerpt": "Starting to invest at 25 vs 35 can mean a difference of $500,000+ at retirement. Here is how compound interest rewards early starters and what you can do about it at any age.",
+    "excerpt": "Use the Rule of 72 with exact numbers: where it works, where it drifts, and why a decade of time beats two points of rate in a lump-sum example.",
     "relatedCalculators": [
       "compound-interest-calculator",
       "investment-calculator",
@@ -1679,7 +1668,8 @@
     "relatedCalculatorPath": "/finance/compound-interest-calculator/",
     "relatedCalculatorLabel": "Free Compound Interest Calculator",
     "hasContent": true,
-    "metaTitle": "The Power of Compound Interest: Start Saving in Your 20s"
+    "metaTitle": "The Power of Compound Interest: Rule of 72 Explained",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "how-to-calculate-percentage-increase",
@@ -1710,12 +1700,12 @@
     "slug": "amazon-fba-fees-explained-profit",
     "title": "Amazon FBA Fees Explained: How to Calculate Your True Profit Margin",
     "metaTitle": "Amazon FBA Calculator Guide: Fees, Profit & ROI for Sellers",
-    "metaDescription": "How Amazon FBA referral, fulfillment and storage fees work, and how to calculate your true profit margin on a product.",
+    "metaDescription": "Calculate FBA profit per unit: margin versus ROI, break-even and target prices, and how ads, returns and weight cut profit. Fees are labelled assumptions.",
     "publishedAt": "2026-05-10",
-    "readingMinutes": 2,
+    "readingMinutes": 5,
     "category": "E-Commerce",
     "categorySlug": "ecommerce",
-    "excerpt": "Amazon FBA fees are complex but predictable once you understand the structure. Here is every fee type, how to estimate costs, and what margin you actually keep.",
+    "excerpt": "Work out FBA unit economics with the calculator's fee model: net margin, ROI, break-even price, and the effect of ads, returns, weight and referral rate.",
     "relatedCalculators": [
       "amazon-fba-calculator",
       "profit-margin-calculator",
@@ -1729,17 +1719,18 @@
     "relatedCalculatorId": "amazon-fba-calculator",
     "relatedCalculatorPath": "/ecommerce/amazon-fba-calculator/",
     "relatedCalculatorLabel": "Free Amazon FBA Calculator",
-    "hasContent": true
+    "hasContent": true,
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "time-zone-calculator-guide",
     "title": "Time Zone Calculator: How to Schedule Across Time Zones",
-    "metaDescription": "Working across time zones? Learn how to calculate time differences, handle daylight saving, and schedule meetings across multiple zones without confusion.",
+    "metaDescription": "Schedule across time zones: UTC conversion, computed 2026 daylight saving examples, working-hours overlap and what fixed offsets miss.",
     "publishedAt": "2026-05-10",
-    "readingMinutes": 2,
+    "readingMinutes": 5,
     "category": "Everyday",
     "categorySlug": "everyday",
-    "excerpt": "Scheduling across time zones is harder than it should be. Here is how to calculate time differences correctly, handle daylight saving, and avoid the most common mistakes.",
+    "excerpt": "Convert meeting times via UTC, see how the New York-London gap changes with daylight saving, and why the calculator's fixed offsets need a DST check.",
     "relatedCalculators": [
       "time-zone-calculator",
       "world-clock-calculator",
@@ -1753,18 +1744,19 @@
     "relatedCalculatorPath": "/math/time-zone-calculator/",
     "relatedCalculatorLabel": "Free Time Zone Calculator",
     "hasContent": true,
-    "metaTitle": "Time Zone Calculator: How to Schedule Across Time Zones"
+    "metaTitle": "Time Zone Calculator: How to Schedule Across Time Zones",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "freelance-hourly-rate-calculator",
-    "title": "How Freelancers Can Calculate Their Hourly Rate (Free Template)",
-    "metaTitle": "Freelance Rate Calculator: How to Set Your Hourly Rate",
-    "metaDescription": "Stop guessing your freelance rates. Learn how to calculate an hourly rate that covers expenses, taxes, time off, and still leaves room for profit.",
+    "title": "How to Calculate Your Freelance Hourly Rate",
+    "metaTitle": "How to Calculate Your Freelance Hourly Rate",
+    "metaDescription": "Calculate a sustainable freelance hourly rate with a worked example: target income, expenses, self-employment tax and billable hours.",
     "publishedAt": "2026-05-10",
-    "readingMinutes": 2,
+    "readingMinutes": 4,
     "category": "Finance",
     "categorySlug": "finance",
-    "excerpt": "Setting freelance rates is not about what others charge. It is about what you need to earn. Here is the formula that covers expenses, taxes, and still leaves a profit.",
+    "excerpt": "Build a freelance rate from your target income, benefits, expenses, self-employment tax and billable hours, and see how billable share and time off change it.",
     "relatedCalculators": [
       "freelance-rate-calculator",
       "salary-calculator",
@@ -1777,7 +1769,8 @@
     "relatedCalculatorId": "freelance-rate-calculator",
     "relatedCalculatorPath": "/finance/salary-to-hourly-calculator/",
     "relatedCalculatorLabel": "Free Freelance Rate Calculator",
-    "hasContent": true
+    "hasContent": true,
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "calorie-deficit-weight-loss",
@@ -1804,30 +1797,6 @@
     "hasContent": true,
     "metaTitle": "Calorie Deficit Calculator: How Many Calories to Lose Weight",
     "updatedAt": "2026-10-02"
-  },
-  {
-    "slug": "fixed-vs-variable-rate-mortgage",
-    "title": "How to Choose Between Fixed and Variable Rate Mortgages",
-    "metaTitle": "Fixed vs Variable Rate Mortgage: Which Is Right for You?",
-    "metaDescription": "Fixed vs variable rate mortgages: how to choose based on your timeline, risk tolerance and the current rate environment.",
-    "publishedAt": "2026-05-10",
-    "readingMinutes": 2,
-    "category": "Finance",
-    "categorySlug": "finance",
-    "excerpt": "The fixed vs variable mortgage decision depends on how long you plan to stay in the home, your risk tolerance, and where rates are headed. Here is how to decide.",
-    "relatedCalculators": [
-      "mortgage-calculator",
-      "mortgage-comparison-calculator",
-      "amortization-calculator"
-    ],
-    "author": {
-      "name": "TheCalcUniverse Editorial",
-      "role": "Finance & Analytics Team"
-    },
-    "relatedCalculatorId": "mortgage-calculator",
-    "relatedCalculatorPath": "/finance/mortgage-amortization-calculator/",
-    "relatedCalculatorLabel": "Free Mortgage Calculator",
-    "hasContent": true
   },
   {
     "slug": "investment-growth-projecting-portfolio",
@@ -2204,13 +2173,13 @@
     "slug": "can-you-improve-your-gfr-science-based-strategies",
     "title": "Can You Improve Your GFR? Science-Based Strategies to Slow Decline and Protect Kidneys",
     "metaTitle": "Can You Improve Your GFR?",
-    "metaDescription": "What the evidence says about improving GFR: strategies to slow kidney decline, when improvement is possible and why some damage is irreversible.",
+    "metaDescription": "Can you improve your GFR? What NIDDK, CDC, KDIGO and trials such as SPRINT and UKPDS show about slowing kidney decline, with worked eGFR examples.",
     "publishedAt": "2026-05-10",
-    "updatedAt": "2026-05-10",
-    "readingMinutes": 5,
+    "updatedAt": "2026-10-02",
+    "readingMinutes": 7,
     "category": "Health & Fitness",
     "categorySlug": "health",
-    "excerpt": "Can you actually improve your GFR? The answer depends on why it is low. This evidence-based guide explains when improvement is possible, proven strategies to slow kidney decline, and how to protect your remaining kidney function.",
+    "excerpt": "Can GFR improve? Sometimes, if the cause is temporary. For CKD the goal is a slower decline. What NIDDK, CDC, KDIGO and trials like SPRINT and UKPDS actually show, with computed examples.",
     "relatedCalculators": [
       "gfr-calculator"
     ],
@@ -2268,29 +2237,6 @@
       "name": "TheCalcUniverse Editorial",
       "role": "Health & Medical Team"
     },
-    "hasContent": true
-  },
-  {
-    "slug": "can-you-improve-gfr-naturally",
-    "title": "Can You Improve Your GFR? Science-Based Strategies to Protect Kidney Function",
-    "metaTitle": "How to Improve GFR Naturally",
-    "metaDescription": "Can GFR improve? What the science says about slowing kidney decline, managing blood pressure, diet changes, and when improvement is possible.",
-    "publishedAt": "2026-05-10",
-    "readingMinutes": 2,
-    "category": "Health & Fitness",
-    "categorySlug": "health",
-    "excerpt": "If your eGFR is low, you probably want to know if you can improve it. Here is what the evidence says about which strategies actually work and what is unrealistic.",
-    "relatedCalculators": [
-      "gfr-calculator",
-      "bmi-calculator"
-    ],
-    "author": {
-      "name": "TheCalcUniverse Editorial",
-      "role": "Health & Fitness Team"
-    },
-    "relatedCalculatorId": "gfr-calculator",
-    "relatedCalculatorPath": "/health/gfr-calculator/",
-    "relatedCalculatorLabel": "Free GFR Calculator",
     "hasContent": true
   },
   {
@@ -2525,14 +2471,14 @@
   },
   {
     "slug": "how-to-lower-bmi-science-strategies",
-    "title": "How to Lower Your BMI — Science-Based Strategies That Actually Work",
-    "metaTitle": "How to Lower BMI: Science Tips",
-    "metaDescription": "BMI is determined by height and weight. The only way to lower it is to lose fat while preserving muscle. Here are science-based strategies that work.",
+    "title": "How to Lower Your BMI: The Numbers Behind the Goal",
+    "metaTitle": "How to Lower Your BMI: The Numbers Behind the Goal",
+    "metaDescription": "How much weight is one BMI point? Height-based tables, timelines at the CDC's 1-2 lb/week pace, and the limits of BMI as a goal.",
     "publishedAt": "2026-05-10",
-    "readingMinutes": 2,
+    "readingMinutes": 5,
     "category": "Health & Fitness",
     "categorySlug": "health",
-    "excerpt": "The only way to lower your BMI is to reduce your weight. But losing weight without losing muscle is the real challenge. Here is how to lower BMI the right way.",
+    "excerpt": "BMI changes only when weight does. See how many kilograms equal one BMI point at your height, what a 1-2 lb/week pace means, and what BMI cannot tell you.",
     "relatedCalculators": [
       "bmi-calculator",
       "calorie-calculator",
@@ -2546,7 +2492,8 @@
     "relatedCalculatorId": "bmi-calculator",
     "relatedCalculatorPath": "/health/bmi-calculator/",
     "relatedCalculatorLabel": "Free BMI Calculator",
-    "hasContent": true
+    "hasContent": true,
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "bmi-and-pregnancy-pre-pregnancy-weight",
@@ -2575,14 +2522,14 @@
   },
   {
     "slug": "heat-index-heat-safety-complete-guide",
-    "title": "Heat Index & Heat Safety — Complete Guide to Feels-Like Temperature",
-    "metaTitle": "Heat Index & Heat Safety Guide",
-    "metaDescription": "The heat index explained: how it is calculated, the NOAA chart, danger levels and heat safety tips for outdoor activity and workers.",
+    "title": "Heat Index and Heat Safety: Plan Your Day",
+    "metaTitle": "Heat Index and Heat Safety: Plan Your Day",
+    "metaDescription": "Plan a hot day with the heat index: NWS categories, a computed hourly example with a sun margin, CDC/OSHA safety steps and emergency signs.",
     "publishedAt": "2026-05-10",
-    "readingMinutes": 3,
+    "readingMinutes": 5,
     "category": "Everyday",
     "categorySlug": "everyday",
-    "excerpt": "The heat index tells you how hot it really feels when humidity is factored in. Here is how to read the chart, understand danger levels, and stay safe in extreme heat.",
+    "excerpt": "Use the heat index hour by hour, add the NWS sun margin, and follow CDC and OSHA heat safety basics. Includes a worked day plan and when to call for help.",
     "relatedCalculators": [
       "heat-index-calculator",
       "dew-point-calculator",
@@ -2596,18 +2543,19 @@
     "relatedCalculatorId": "heat-index-calculator",
     "relatedCalculatorPath": "/everyday/heat-index-calculator/",
     "relatedCalculatorLabel": "Free Heat Index Calculator",
-    "hasContent": true
+    "hasContent": true,
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "what-is-heat-index-feels-like-temperature",
     "title": "What Is the Heat Index? Why It Is Called the Feels-Like Temperature",
     "metaTitle": "What Is Heat Index? Apparent Temperature Explained Simply",
-    "metaDescription": "What the heat index is and why humidity changes it, with a computed 94F example, the four NWS categories and what the number leaves out.",
+    "metaDescription": "What the heat index is and why humidity raises it: a computed 94F example, the four NWS categories, the regression's limits and what it omits.",
     "publishedAt": "2026-05-10",
     "readingMinutes": 5,
     "category": "Everyday",
     "categorySlug": "everyday",
-    "excerpt": "The heat index is the apparent temperature once humidity is added to air temperature. A 94F worked example shows how it changes with humidity.",
+    "excerpt": "The heat index is the apparent temperature once humidity is added to air temperature. A computed 94F example, the four NWS categories and what the number leaves out.",
     "relatedCalculators": [
       "heat-index-calculator",
       "dew-point-calculator"
@@ -2625,12 +2573,12 @@
   {
     "slug": "heat-index-chart-explained",
     "title": "Heat Index Chart Explained — How to Read the Danger Levels",
-    "metaDescription": "How to read the NOAA heat index chart: danger levels at each temperature and humidity combination and what each color zone means.",
+    "metaDescription": "Read the heat index chart with a recomputed grid, humidity thresholds for each NWS category, sun and low-humidity limits.",
     "publishedAt": "2026-05-10",
-    "readingMinutes": 3,
+    "readingMinutes": 5,
     "category": "Everyday",
     "categorySlug": "everyday",
-    "excerpt": "The heat index chart turns temperature and humidity into a single danger rating. Here is how to read the color zones and what actions to take in each.",
+    "excerpt": "How to read a heat index chart, with a recomputed temperature-by-humidity grid, the humidity that triggers each NWS category, and what the chart leaves out.",
     "relatedCalculators": [
       "heat-index-calculator",
       "temperature-converter"
@@ -2643,7 +2591,8 @@
     "relatedCalculatorPath": "/everyday/heat-index-calculator/",
     "relatedCalculatorLabel": "Free Heat Index Calculator",
     "hasContent": true,
-    "metaTitle": "Heat Index Chart Explained — How to Read the Danger Levels"
+    "metaTitle": "Heat Index Chart Explained — How to Read the Danger Levels",
+    "updatedAt": "2026-10-02"
   },
   {
     "slug": "heat-stroke-vs-heat-exhaustion",
@@ -3165,15 +3114,15 @@
   },
   {
     "slug": "mortgage-payoff-complete-guide",
-    "title": "Mortgage Payoff Guide: How to Pay Off Your Mortgage Early and Save Thousands",
-    "metaTitle": "Mortgage Payoff Guide",
-    "metaDescription": "Pay off your mortgage faster with extra payments, bi-weekly plans and lump sums. See your savings with our free payoff calculator.",
+    "title": "Mortgage Payoff Guide: Plan Your Payoff Date",
+    "metaTitle": "Mortgage Payoff Guide: Plan Your Payoff Date",
+    "metaDescription": "Plan a mortgage payoff date: required payment for 10, 15, 20 or 25 years, extra-payment what-ifs and lump-sum targets, with every assumption shown.",
     "publishedAt": "2026-05-10",
-    "updatedAt": "2026-05-10",
-    "readingMinutes": 2,
+    "updatedAt": "2026-10-02",
+    "readingMinutes": 4,
     "category": "Finance",
     "categorySlug": "finance",
-    "excerpt": "Paying off your mortgage early can save you tens of thousands in interest. This guide covers extra payment strategies, bi-weekly plans, lump sum tactics, and how our mortgage payoff calculator shows your exact savings.",
+    "excerpt": "Pick a target payoff date and see the payment it needs, the interest it saves, and the lump sum that would get you there, using one worked $265,000 example.",
     "relatedCalculators": [
       "mortgage-payoff-calculator",
       "mortgage-amortization-calculator"

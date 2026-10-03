@@ -45,7 +45,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Going from 40% to 80% humidity at the same 94°F adds 32.2 degrees of felt heat. The 20% row is a reminder that the heat index is not always higher than the air temperature: in very dry air the formula returns a lower number. It is also outside the range where the calculator's documentation says the formula is most accurate (about 80°F to 110°F and 40% to 80% humidity), so treat that row as indicative only."
+      "text": "Going from 40% to 80% humidity at the same 94°F adds 32.2 degrees of felt heat. The 20% row is a reminder that the heat index is not always higher than the air temperature: in very dry air the formula returns a lower number. The calculator applies the raw regression only. The NWS states that the regression is not appropriate when the heat index would fall below about 80°F, and that it is not valid for extreme temperature and humidity conditions beyond the data Steadman considered. The NWS also lists two adjustments for relative humidity below 13% or above 85%, which this calculator does not apply, and neither of them covers the rows in this table."
     },
     {
       "type": "heading",
@@ -88,7 +88,7 @@
         "Treating it as the air temperature. A heat index of 110°F does not mean the thermometer will read 110°F; it means the body is under a load comparable to that.",
         "Forgetting the shade assumption. If you will be working or exercising in direct sun, add a margin rather than reading the shaded value at face value.",
         "Using stale or mismatched inputs. Humidity swings through the day; use the temperature and humidity measured at the same time and place.",
-        "Using it as the only tool for hard work in the sun. The NWS says that for day-to-day activities the heat index serves you well, but if you work outside or plan vigorous activity in full sun, use wet bulb globe temperature instead."
+        "Using it as the only tool for hard work in the sun. The NWS describes wet bulb globe temperature, which also accounts for wind and solar radiation, as a particularly effective indicator of heat stress for active people such as outdoor workers and athletes."
       ]
     },
     {

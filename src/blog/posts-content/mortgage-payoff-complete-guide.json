@@ -1,60 +1,220 @@
 {
   "sections": [
     {
-      "type": "heading",
-      "level": 2,
-      "text": "Why Pay Off Your Mortgage Early?"
-    },
-    {
       "type": "paragraph",
-      "text": "Your mortgage is likely your largest debt. Paying it off early saves the interest you would have paid over the remaining years. On a $300,000 mortgage at 6.5%, you will pay approximately $383,000 in interest over 30 years. By paying just $200 extra each month, you can save over $100,000 in interest and own your home 9 years sooner."
+      "text": "To pay off a mortgage by a chosen date, work backward from the date: the monthly payment needed is the standard payment formula applied to your current balance and the months you want left. On a $265,000 balance at an assumed 6.25% with 27 years remaining, finishing in 20 years takes $1,936.96 a month instead of $1,695.16, which is $241.80 more and saves $84,360.57 of interest. Finishing in 15 years takes $2,272.17. This guide is about picking and testing a payoff date, not about extra-payment tactics, which other guides on this site cover."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Extra Payment Strategies"
+      "text": "Step 1: gather four numbers"
     },
     {
       "type": "list",
-      "ordered": false,
+      "ordered": true,
       "items": [
-        "Monthly extra payments: Add $100-$500 to each monthly payment. Even small amounts compound significantly.",
-        "Bi-weekly payments: Pay half your monthly payment every two weeks. This results in 26 half-payments (13 full payments per year) without feeling the pinch.",
-        "Annual lump sums: Apply bonuses, tax refunds, or gifts as one-time principal reductions.",
-        "Mortgage recasting: Make a large lump sum payment and recast to lower your monthly payment.",
-        "Refinance to a shorter term: Switch from a 30-year to a 15-year mortgage when rates are favorable."
+        "Current principal balance, from your latest statement (not the original loan amount).",
+        "Interest rate on the loan.",
+        "Months remaining on the schedule.",
+        "Current principal-and-interest payment. Leave out taxes and insurance in escrow, as the Mortgage Payoff Calculator does."
       ]
     },
     {
       "type": "paragraph",
-      "text": "Each strategy has different tradeoffs. Bi-weekly plans are easy to automate and cost nothing extra beyond your regular budget. Lump sums require cash availability but have the most dramatic impact. The best strategy is the one you can stick with consistently."
+      "text": "The example uses a $265,000 balance, 6.25% fixed, 324 months (27 years) remaining. Rate and balance are assumptions for illustration, not a market quote. Standard payment: $1,695.16, with $284,230.91 of total interest left on the schedule. The first payment includes $1,380.21 of interest, 81.4% of the payment."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How Extra Payments Save Interest"
+      "text": "Step 2: price the target date"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Payoff in",
+        "Payment needed",
+        "Extra vs now",
+        "Increase",
+        "Total interest",
+        "Interest saved"
+      ],
+      "rows": [
+        [
+          "27 years (current)",
+          "$1,695.16",
+          "$0",
+          "0%",
+          "$284,230.91",
+          "$0"
+        ],
+        [
+          "25 years",
+          "$1,748.12",
+          "$52.97",
+          "3.1%",
+          "$259,437.16",
+          "$24,793.75"
+        ],
+        [
+          "20 years",
+          "$1,936.96",
+          "$241.80",
+          "14.3%",
+          "$199,870.34",
+          "$84,360.57"
+        ],
+        [
+          "15 years",
+          "$2,272.17",
+          "$577.01",
+          "34.0%",
+          "$143,990.71",
+          "$140,240.20"
+        ],
+        [
+          "12 years",
+          "$2,620.42",
+          "$925.26",
+          "54.6%",
+          "$112,340.11",
+          "$171,890.79"
+        ],
+        [
+          "10 years",
+          "$2,975.42",
+          "$1,280.27",
+          "75.5%",
+          "$92,050.71",
+          "$192,180.20"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "Mortgage interest is front-loaded — in the early years, most of your payment goes to interest, not principal. In year one of a 30-year mortgage at 6.5%, roughly 80% of each payment goes to interest. Extra payments made early in the loan term have the highest impact because they reduce the principal that future interest is calculated on."
+      "text": "The cost of each year removed rises as the target gets shorter. Going from 27 to 26 years adds $25.25 a month, from 16 to 15 years adds $85.41, and from 11 to 10 years adds $194.26. Early years are cheap, late ones are not, so a target of 20 to 25 years may fit a budget that 10 years will not."
     },
     {
-      "type": "callout",
-      "variant": "info",
-      "text": "A $200 monthly extra payment on a $300,000 mortgage at 6.5% saves approximately $105,000 in interest and pays off the loan 9 years early. Use our mortgage payoff calculator to see your exact numbers."
+      "type": "paragraph",
+      "text": "The rate matters less than the date. For a 15-year payoff of the same $265,000 balance, the required payment is $2,130.28 at 5.25%, $2,272.17 at 6.25% and $2,419.09 at 7.25%. A full percentage point changes the payment by roughly $140 to $150, while moving the target from 20 to 15 years changes it by $335.21. Choose the date first, then see what your rate makes of it."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Is Paying Off Early Always Best?"
+      "text": "Step 3: test what-ifs against your budget"
     },
     {
       "type": "paragraph",
-      "text": "Paying off your mortgage early is not always the optimal financial move. Consider these alternatives: investing extra cash may earn higher returns than your mortgage rate (historically, the S&P 500 averages 8-10% annually). Mortgage interest may be tax-deductible if you itemize. Having a cash emergency fund is more important than accelerating mortgage payments. High-interest debt (credit cards, personal loans) should be paid first."
+      "text": "If a target payment is too high, check what a fixed extra amount buys instead. Each row assumes the extra is added to the $1,695.16 payment every month from now on and applied to principal."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Extra each month",
+        "Payoff time",
+        "Total interest",
+        "Interest saved"
+      ],
+      "rows": [
+        [
+          "$100",
+          "23 yr 6 mo",
+          "$241,149.63",
+          "$43,081.27"
+        ],
+        [
+          "$250",
+          "19 yr 10 mo",
+          "$197,946.10",
+          "$86,284.81"
+        ],
+        [
+          "$500",
+          "15 yr 11 mo",
+          "$153,715.60",
+          "$130,515.30"
+        ],
+        [
+          "$1,000",
+          "11 yr 7 mo",
+          "$107,334.16",
+          "$176,896.74"
+        ]
+      ]
     },
     {
       "type": "paragraph",
-      "text": "A balanced approach: maintain 3-6 months of emergency savings, pay off high-interest debt, contribute enough to retirement accounts to get the full employer match, then consider extra mortgage payments. Our mortgage payoff calculator helps you compare the scenarios side by side."
+      "text": "An amount that does not land on a round year still moves the date. Rounding the payment up from $1,695.16 to $1,700 shortens the loan by two months and saves $2,490.00 of interest, with almost no change in your budget."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 4: one lump sum instead of a higher payment"
+    },
+    {
+      "type": "paragraph",
+      "text": "You can also pull the date in with a single payment now while keeping the same $1,695.16. These lump sums are what the balance must drop by today to finish on a given date."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Target payoff",
+        "Lump sum today",
+        "Interest saved"
+      ],
+      "rows": [
+        [
+          "25 years",
+          "$8,029",
+          "$32,654"
+        ],
+        [
+          "20 years",
+          "$33,082",
+          "$109,312"
+        ],
+        [
+          "15 years",
+          "$67,296",
+          "$176,806"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "A lump sum and a higher payment are not exclusive. Splitting the difference, for example some cash now and a modest increase, is how many plans end up working."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Step 5: re-check once a year"
+    },
+    {
+      "type": "paragraph",
+      "text": "A payoff date is a plan, not a contract. Each year, compare your statement balance with the schedule, and re-run the calculation if you changed the payment, received a windfall, or refinanced. If your balance is ahead of schedule, you may be able to finish earlier than planned at the same payment."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Using the original loan amount or a rounded balance. The date depends on the current balance, so refresh the numbers with each statement.",
+        "Forgetting to mark extra money as principal-only. If it is applied to a future payment, it may not shorten the loan.",
+        "Skipping the safety net. A paid-down mortgage cannot be turned back into cash easily, so keep an emergency reserve and clear higher-rate debt first.",
+        "Ignoring that interest saved equals your loan rate. Money kept elsewhere could earn more or less. Returns are uncertain, and past performance does not guarantee future results, so weigh the trade-off rather than treating either choice as a rule.",
+        "Forgetting taxes and insurance. They sit outside principal and interest, and they can rise even as your loan shrinks."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "When these numbers do not apply"
+    },
+    {
+      "type": "paragraph",
+      "text": "The figures assume a fixed rate, interest charged monthly, no prepayment penalty and extra money applied the day the payment is due. Adjustable-rate loans, loans with penalties, and plans that include selling the house within a few years behave differently. If you will sell soon, the interest you avoid is only what would have accrued until the sale. Use your own balance, rate, remaining term and payment in the Mortgage Payoff Calculator to see the exact payoff month."
     },
     {
       "type": "cta",

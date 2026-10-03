@@ -1,97 +1,22 @@
 {
   "sections": [
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How Time Zones Work"
-    },
-    {
-      "type": "paragraph",
-      "text": "The world is divided into 24 time zones, each roughly 15 degrees of longitude wide. UTC (Coordinated Universal Time) is the reference point. Each zone is UTC plus or minus a certain number of hours. For example, New York is UTC-5 (Eastern Standard Time) and London is UTC+0 (Greenwich Mean Time). The difference between them is 5 hours. When it is 12 PM in New York, it is 5 PM in London."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Daylight Saving Time Complications"
-    },
-    {
-      "type": "paragraph",
-      "text": "Daylight saving time (DST) adds complexity because not all regions observe it. The US, Canada, and most of Europe spring forward in March and fall back in November. But Arizona, Hawaii, and most of Asia and Africa do not observe DST. When the US is in DST (March-November), New York is UTC-4 instead of UTC-5. If you are scheduling a meeting between New York and London, the 5-hour difference becomes 4 hours during US DST and 5 hours outside DST."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Best Practices for Cross-Time Zone Scheduling"
-    },
-    {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Use UTC for reference: Convert all times to UTC before comparing. This eliminates the mental math of working across multiple offsets.",
-        "Avoid early Monday and late Friday: These are the most time-zone-sensitive slots. Aim for 9-11 AM ET / 2-4 PM GMT which works for most US-Europe meetings.",
-        "Use meeting polls with time zone detection: Tools like Calendly automatically detect the recipient timezone.",
-        "Specify the time zone in every invitation: \"3 PM ET\" is clearer than \"3 PM\" when participants span multiple zones.",
-        "Account for half-hour zones: India (UTC+5:30), Nepal (UTC+5:45), and Newfoundland (UTC-3:30) use 30 or 45 minute offsets."
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How to Use the Time Zone Calculator"
-    },
-    {
-      "type": "list",
-      "ordered": true,
-      "items": [
-        "Select your current time zone from the dropdown.",
-        "Select the target time zone you want to convert to.",
-        "Enter the time and date you want to convert.",
-        "View the converted time with DST adjustment applied automatically.",
-        "Use the world clock view to see current times across multiple zones at once."
-      ]
-    },
-    {
-      "type": "callout",
-      "variant": "tip",
-      "text": "When sending meeting invitations across time zones, always double-check DST status. Our time zone calculator shows whether DST is active for each zone."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How do I add multiple time zones to my calendar?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Both Google Calendar and Outlook allow you to display multiple time zones simultaneously. In Google Calendar, go to Settings > General > Time zone. In Outlook, go to File > Options > Calendar > Time zones. This lets you see your home time zone alongside the target zone."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What is the best time for a US-India meeting?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The overlap between US Eastern Time and India Standard Time (UTC+5:30) is roughly 7-9 AM ET (4:30-6:30 PM IST). For US-Pacific and India, the window is 4-6 AM PT (4:30-6:30 PM IST). Morning US time works because it is evening in India."
-    },
-    {
-      "type": "cta",
-      "heading": "Try the Time Zone Calculator",
-      "body": "Convert times between any two time zones with automatic DST adjustment. No signup required.",
-      "buttonLabel": "Open Calculator",
-      "path": "/math/time-zone-calculator/"
-    }
+    {"type":"paragraph","text":"To schedule across time zones, convert every participant's local time to UTC, compare on that common scale, and then convert back, using each place's offset for that specific date. The offset is the catch: a place's difference from UTC can change during the year when it observes daylight saving time (DST), so the gap between two cities is not always the same number of hours."},
+    {"type":"heading","level":2,"text":"How does the conversion work?"},
+    {"type":"paragraph","text":"Target time = source time - source offset + target offset. A 9:00 AM meeting in New York at UTC-5 is 14:00 UTC (9 - (-5) = 14). In London at UTC+0 that is 2:00 PM, and in India at UTC+5:30 it is 7:30 PM. Add or subtract whole days when the result passes midnight."},
+    {"type":"heading","level":2,"text":"Why does the gap between two cities change during the year?"},
+    {"type":"paragraph","text":"Because cities change their clocks on different dates, or not at all. The table below was computed with the IANA time zone database (release 2026a) built into the Node.js runtime used for this article. It shows what a 9:00 AM Monday meeting in New York is in other cities on five dates in 2026. Rules are set by governments and can change, so confirm important dates against a current source."},
+    {"type":"table","headers":["Date (2026)","New York","London","Kolkata","Sydney","New York to London gap"],"rows":[["Mon 2 Mar","9:00 AM (UTC-5)","2:00 PM (UTC+0)","7:30 PM (UTC+5:30)","1:00 AM Tue (UTC+11)","5 hours"],["Mon 16 Mar","9:00 AM (UTC-4)","1:00 PM (UTC+0)","6:30 PM (UTC+5:30)","12:00 AM Tue (UTC+11)","4 hours"],["Mon 6 Apr","9:00 AM (UTC-4)","2:00 PM (UTC+1)","6:30 PM (UTC+5:30)","11:00 PM Mon (UTC+10)","5 hours"],["Wed 28 Oct","9:00 AM (UTC-4)","1:00 PM (UTC+0)","6:30 PM (UTC+5:30)","12:00 AM Thu (UTC+11)","4 hours"],["Mon 9 Nov","9:00 AM (UTC-5)","2:00 PM (UTC+0)","7:30 PM (UTC+5:30)","1:00 AM Tue (UTC+11)","5 hours"]]},
+    {"type":"paragraph","text":"Several things show up in the table. New York moved from UTC-5 to UTC-4 on 8 March, while London did not move to UTC+1 until 29 March, so the gap was 4 hours between those dates and 5 hours otherwise. The same happens in autumn: London returned to UTC+0 on 25 October and New York to UTC-5 on 1 November, so 28 October has a 4-hour gap. Kolkata stays at UTC+5:30 all year, so the India gap moves with the other city. Sydney is in the southern hemisphere, so its DST runs the opposite way (UTC+11 in March and November, UTC+10 in April)."},
+    {"type":"callout","variant":"warning","text":"The Time Zone Calculator on this site uses fixed standard offsets for each zone. It does not adjust for daylight saving time based on the date you pick. For example, it treats Eastern time as UTC-5 and London as UTC+0, so for 9:00 AM Eastern on 16 March 2026 it would show 2:00 PM London, while the real time that day is 1:00 PM. Use it for standard-time conversions and the business-hours overlap view, and check any date near a clock change with a calendar app or a tool built on the IANA database."},
+    {"type":"heading","level":2,"text":"How much working-hours overlap do two cities have?"},
+    {"type":"paragraph","text":"Take 9 AM to 5 PM as working hours in both places and convert both windows to UTC; the overlap is the stretch where they intersect. Using the same arithmetic as the calculator's overlay:"},
+    {"type":"table","headers":["Pair (standard offsets)","Overlap of 9-to-5 days","Comment"],"rows":[["New York (UTC-5) and London (UTC+0)","3 hours","9 AM to 12 PM in New York, 2 PM to 5 PM in London"],["New York and London when New York is on DST but London is not (UTC-4 and UTC+0)","4 hours","Only during the weeks the two clock changes do not line up"],["London (UTC+0) and Kolkata (UTC+5:30)","2.5 hours","Becomes 3.5 hours while London is on UTC+1"],["New York (UTC-5) and Kolkata (UTC+5:30)","0 hours","Someone has to work outside 9 to 5"],["London (UTC+0) and Tokyo (UTC+9)","0 hours","Also none under a 9 to 5 definition"]]},
+    {"type":"paragraph","text":"The last rows explain why meetings between the Americas and South Asia usually fall in one side's early morning or the other's evening: a 9:00 AM New York start is 7:30 PM in Kolkata in January (6:30 PM in the weeks when New York is on UTC-4)."},
+    {"type":"heading","level":2,"text":"Best practices for scheduling"},
+    {"type":"list","items":["Write the time with its zone and date: '9:00 AM New York time, Monday 2 March' beats '9:00 AM'. Better still, add the UTC time.","Use calendar invitations that store the event in a named zone (such as America/New_York) rather than a fixed offset, so the invite follows the clock changes.","For recurring meetings, re-check the weeks around each clock change, especially March and October to November, when the gap can shift for some pairs of cities but not others.","Remember zones with half or quarter-hour offsets, such as India (UTC+5:30), Nepal (UTC+5:45) and Newfoundland (UTC-3:30 in standard time). A whole-hour assumption will be wrong for them.","Watch the date line: when the result crosses midnight, the other participant's date is different. In the table above Sydney sees the Monday meeting as Tuesday morning for part of the year.","Offer two or three candidate slots and show each in every participant's local time."]},
+    {"type":"heading","level":2,"text":"Common mistakes"},
+    {"type":"list","items":["Using 'EST' year-round. EST is the standard-time name; during DST the name and offset change.","Assuming everyone changes clocks on the same date or at all. Some places never change, such as Kolkata and Phoenix (which stayed at UTC-7 on every date tested here).","Doing mental arithmetic across midnight and mixing up the date.","Trusting a screenshot or old chart of offsets: rules are updated, and a fixed table does not follow them."]},
+    {"type":"cta","heading":"Try the Time Zone Calculator","body":"Convert times between common time zones using standard UTC offsets and see the business-hours overlap. No signup required.","buttonLabel":"Open Calculator","path":"/math/time-zone-calculator/"}
   ],
-  "keywords": [
-    "time zone calculator",
-    "time zone converter",
-    "meeting across time zones",
-    "world clock calculator",
-    "time difference calculator",
-    "daylight saving time"
-  ]
+  "keywords": ["time zone calculator","time zone converter","meeting across time zones","world clock calculator","time difference calculator","daylight saving time"]
 }

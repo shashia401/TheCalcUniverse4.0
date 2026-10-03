@@ -1,91 +1,212 @@
 {
   "sections": [
     {
+      "type": "paragraph",
+      "text": "Compound interest grows money in doublings, and the Rule of 72 is a mental shortcut for how often they happen: divide 72 by the annual rate in percent to estimate the years to double. At 6% that gives 12 years, and the exact answer is 11.90. The shortcut is very good between about 4% and 10% and drifts at the extremes. This post uses exact calculations to show where the rule works, where it fails, and what matters more for growth: time or rate. All growth rates here are assumptions for illustration, and past performance does not guarantee future results."
+    },
+    {
       "type": "heading",
       "level": 2,
-      "text": "Why Compound Interest Rewards Early Starters"
+      "text": "How the rule works and how accurate it is"
     },
     {
       "type": "paragraph",
-      "text": "Compound interest is interest on interest. When you earn returns on your investments and those returns themselves earn returns, growth accelerates over time. The key insight is that the acceleration is not linear — it is exponential. In the first few years, compounding looks unimpressive. But somewhere around year 15-20, the curve bends sharply upward. This is why the single most important factor in building wealth is not how much you invest, but how early you start."
+      "text": "With annual compounding, the exact doubling time is ln(2) / ln(1 + r). For small rates, ln(1 + r) is close to r, which gives 69.3 / r. The number 72 is used because it divides evenly by 2, 3, 4, 6, 8, 9 and 12 and sits closer to the exact answer for rates around 8%. The table compares the rule with the exact time for annual compounding and for monthly compounding."
     },
     {
-      "type": "heading",
-      "level": 2,
-      "text": "The Numbers: Starting at 25 vs 35 vs 45"
-    },
-    {
-      "type": "paragraph",
-      "text": "Consider three people: Alice starts investing $5,000/year at 25 and stops at 35 (10 years of contributions, $50,000 total). Bob starts at 35 and invests $5,000/year until 65 (30 years, $150,000 total). Charlie starts at 45 and invests $5,000/year until 65 (20 years, $100,000 total). Assuming 7% average annual return, Alice ends up with $602,000 — more than Bob ($540,000) despite contributing one-third as much. Charlie ends with $219,000. Alice contributed the least but ended with the most because her money had more time to compound."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "The Rule of 72"
-    },
-    {
-      "type": "paragraph",
-      "text": "The Rule of 72 is a quick way to estimate how long it takes your money to double: divide 72 by your annual return rate. At 7%, your money doubles roughly every 10 years. At 10%, every 7.2 years. This means $10,000 invested at 25 becomes $20,000 by 35, $40,000 by 45, $80,000 by 55, and $160,000 by 65 — without adding another dollar."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What If You Started Late? Strategies That Still Work"
-    },
-    {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Increase your savings rate: Saving 20-30% of income later can still build significant wealth — you just need to save more aggressively.",
-        "Maximize tax-advantaged accounts: 401(k), IRA, HSA — every dollar of tax savings is another dollar compounding.",
-        "Consider catch-up contributions: At 50+, you can contribute an extra $7,500/year to 401(k)s and $1,000/year to IRAs.",
-        "Delay Social Security: Waiting from 62 to 70 increases your monthly benefit by about 8% per year — a 76% total increase."
+      "type": "table",
+      "headers": [
+        "Annual rate",
+        "Rule of 72",
+        "Exact, annual compounding",
+        "Exact, monthly compounding",
+        "Rule vs annual exact"
+      ],
+      "rows": [
+        [
+          "2%",
+          "36.00 years",
+          "35.00 years",
+          "34.69 years",
+          "+2.8%"
+        ],
+        [
+          "4%",
+          "18.00 years",
+          "17.67 years",
+          "17.36 years",
+          "+1.9%"
+        ],
+        [
+          "6%",
+          "12.00 years",
+          "11.90 years",
+          "11.58 years",
+          "+0.9%"
+        ],
+        [
+          "8%",
+          "9.00 years",
+          "9.01 years",
+          "8.69 years",
+          "-0.1%"
+        ],
+        [
+          "10%",
+          "7.20 years",
+          "7.27 years",
+          "6.96 years",
+          "-1.0%"
+        ],
+        [
+          "12%",
+          "6.00 years",
+          "6.12 years",
+          "5.81 years",
+          "-1.9%"
+        ],
+        [
+          "18%",
+          "4.00 years",
+          "4.19 years",
+          "3.88 years",
+          "-4.5%"
+        ],
+        [
+          "24%",
+          "3.00 years",
+          "3.22 years",
+          "2.92 years",
+          "-6.9%"
+        ]
       ]
     },
     {
-      "type": "callout",
-      "variant": "info",
-      "text": "The best time to start investing was 10 years ago. The second best time is today. Even small amounts compound into meaningful sums over 20-30 year horizons."
+      "type": "paragraph",
+      "text": "The rule is within 3% of the exact figure from 2% to 12% and within 7% at 24%. It also works in reverse: to double in 10 years you need 72 / 10 = 7.2%, and the exact annual rate is 7.18%. The same shortcut applies to debt. A balance on a 24% card that is left alone doubles in about 3 years under the rule, and the exact figure is 3.22 years with annual compounding or 2.92 with monthly compounding."
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "How to Use the Compound Interest Calculator"
+      "text": "Using doublings to project a balance"
+    },
+    {
+      "type": "paragraph",
+      "text": "Doublings turn long horizons into small arithmetic. At 7%, the exact doubling time is 10.24 years, and the rule says 10.29. A single $10,000 deposit grows like this with annual compounding:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "After",
+        "Balance",
+        "Multiple of the start"
+      ],
+      "rows": [
+        [
+          "10 years",
+          "$19,672",
+          "1.97x"
+        ],
+        [
+          "20 years",
+          "$38,697",
+          "3.87x"
+        ],
+        [
+          "30 years",
+          "$76,123",
+          "7.61x"
+        ],
+        [
+          "40 years",
+          "$149,745",
+          "14.97x"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Rounding the doubling time to exactly 10 years would suggest four doublings and 16x, which overstates. Using the rule (72 divided by 7, about 10.29 years) gives about 3.89 doublings, or 14.81x, close to the exact 14.97x. Note how late the growth arrives. The first ten years add $9,672, while the last ten add $73,622, 52.7% of all the growth over 40 years. That back-loading is the real argument for starting early, and for not stopping."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Time versus rate"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Annual rate",
+        "20 years",
+        "30 years",
+        "40 years"
+      ],
+      "rows": [
+        [
+          "4%",
+          "$21,911",
+          "$32,434",
+          "$48,010"
+        ],
+        [
+          "6%",
+          "$32,071",
+          "$57,435",
+          "$102,857"
+        ],
+        [
+          "8%",
+          "$46,610",
+          "$100,627",
+          "$217,245"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These are $10,000 lump sums compounded annually. Starting from 6% for 20 years ($32,071), adding ten years multiplies the result by 1.79, while adding two percentage points of return multiplies it by 1.45. To reach the 8% result of $46,610 at 6%, you need 26.4 years instead of 20. Time and rate both matter, but a decade of time is worth more than two points of rate in this range. Rate is also the part you control least. You cannot choose the return, though you can choose costs: a fee that takes 1 point of a 7% return leaves 6%, and over 30 years $10,000 becomes $57,435 instead of $76,123, about 25% less. Doubling time changes from 10.24 years to 11.90."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Does compounding frequency matter?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Somewhat, but less than rate or time. On $10,000 at 7% for 30 years, annual compounding gives $76,123, quarterly $80,192, monthly $81,165 and daily $81,645. Going from annual to monthly adds 6.6%, and from monthly to daily only 0.6%. The frequency that applies to you is set by the account or investment, so compare accounts on their stated annual yield rather than guessing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Adjusting for inflation"
+    },
+    {
+      "type": "paragraph",
+      "text": "Prices rise too, so a 7% nominal return does not double your buying power in 10 years. If inflation is 3%, an assumption, the real return is (1.07 / 1.03) - 1 = 3.88%, and the real doubling time is 18.19 years. Rule of 72 with 4% gives 18, a good estimate. Use a real return when asking what a balance will buy."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Common mistakes"
     },
     {
       "type": "list",
-      "ordered": true,
       "items": [
-        "Enter your starting principal (initial investment amount).",
-        "Enter your annual contribution amount and frequency.",
-        "Set your expected annual return rate (7-8% is a reasonable long-term stock market average).",
-        "Choose your compounding frequency (monthly or annually).",
-        "Set your time horizon in years.",
-        "Review the growth chart showing how your money compounds over time."
+        "Using the rule with rates above about 20% or below 1%, where error grows. Compute exactly in those cases.",
+        "Treating a long-run average as a yearly guarantee. Real returns vary, and a bad early year can matter.",
+        "Forgetting fees and taxes, which reduce the net rate that compounds.",
+        "Counting doublings without checking whether you add or withdraw money, which changes the path. The Compound Interest Calculator handles regular contributions.",
+        "Assuming that starting late means giving up. Higher contributions and more years still help; the tables show the cost of waiting, not that growth stops."
       ]
     },
     {
       "type": "heading",
       "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What is a realistic compound interest rate to expect?"
+      "text": "Where the Rule of 72 does not apply"
     },
     {
       "type": "paragraph",
-      "text": "The S&P 500 has historically returned about 10% annually before inflation (7% after inflation). Bond returns are lower, typically 3-5%. A diversified portfolio of 80% stocks and 20% bonds might average 7-8%. Use conservative estimates (5-6%) for planning purposes."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "How often should interest compound for best results?"
-    },
-    {
-      "type": "paragraph",
-      "text": "More frequent compounding grows money faster, but the difference is small. Daily compounding on a long-term investment might add 0.1-0.3% vs annual compounding. The compounding frequency matters much less than your contribution amount, rate of return, and time horizon."
+      "text": "The rule assumes one fixed rate and no deposits or withdrawals. It does not describe variable returns, regular contributions, taxes, or fees that change the rate. It is for rough checking, not planning. Enter your own deposit, contribution, rate and years into the Compound Interest Calculator for a precise projection, and use conservative rates."
     },
     {
       "type": "cta",

@@ -1,121 +1,24 @@
 {
   "sections": [
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "What Is the Heat Index?"
-    },
-    {
-      "type": "paragraph",
-      "text": "The heat index is how hot it feels when relative humidity is combined with air temperature. Also called the apparent temperature or feels-like temperature. When humidity is high, sweat does not evaporate as quickly, so your body struggles to cool itself. The heat index accounts for this. For example, when the air temperature is 90°F with 60% humidity, the heat index is 100°F — meaning it feels like 100°F even though the thermometer reads 90°F."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "NOAA Heat Index Chart"
-    },
-    {
-      "type": "paragraph",
-      "text": "The National Oceanic and Atmospheric Administration publishes a heat index chart that shows the apparent temperature at different combinations of air temperature and relative humidity. At 80°F with 40% humidity, the heat index is 80°F — no change. At 80°F with 90% humidity, it is 86°F. At 100°F with 40% humidity, it is 109°F. At 100°F with 60% humidity, it is a dangerous 132°F. The chart turns from yellow (caution) to orange (extreme caution) to red (danger) to purple (extreme danger)."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Danger Categories"
-    },
-    {
-      "type": "table",
-      "headers": [
-        "Category",
-        "Heat Index Range",
-        "Health Risk"
-      ],
-      "rows": [
-        [
-          "Caution",
-          "80-90°F",
-          "Fatigue possible with prolonged exposure"
-        ],
-        [
-          "Extreme caution",
-          "90-103°F",
-          "Heat cramps and heat exhaustion possible"
-        ],
-        [
-          "Danger",
-          "103-124°F",
-          "Heat cramps/heat exhaustion likely. Heat stroke possible."
-        ],
-        [
-          "Extreme danger",
-          "126°F+",
-          "Heat stroke highly likely with continued exposure"
-        ]
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "How the Heat Index Is Calculated"
-    },
-    {
-      "type": "paragraph",
-      "text": "The heat index uses the Rothfusz regression equation, which NOAA developed in 1990. The full equation is complex with over 26 terms involving temperature and humidity squared and multiplied together. A simplified version works for typical conditions: HI = c1 + c2T + c3R + c4TR + c5T² + c6R² + c7T²R + c8TR² + c9T²R², where T is temperature and R is relative humidity. For conditions below 80°F, adjustments are made because the heat index effect is minimal. Our calculator handles all of this math instantly."
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Heat Safety Tips"
-    },
-    {
-      "type": "list",
-      "ordered": false,
-      "items": [
-        "Stay hydrated: Drink water before you feel thirsty. During heavy activity in heat, drink 8 oz every 20 minutes.",
-        "Avoid peak sun: Schedule outdoor activities before 10 AM or after 4 PM when the sun is less intense.",
-        "Wear appropriate clothing: Light-colored, loose-fitting, breathable fabrics help your body regulate temperature.",
-        "Take breaks: In extreme heat, take 15-minute breaks in the shade or air conditioning every hour.",
-        "Know the warning signs: Headache, dizziness, nausea, confusion, hot dry skin — these signal heat stroke, a medical emergency."
-      ]
-    },
-    {
-      "type": "heading",
-      "level": 2,
-      "text": "Frequently Asked Questions"
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "What is the difference between heat index and real feel?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Heat index only considers temperature and humidity. Wind chill considers temperature and wind. Some weather services use a real feel or apparent temperature that combines both plus solar radiation. The heat index is a subset of what goes into a full feels-like calculation."
-    },
-    {
-      "type": "heading",
-      "level": 3,
-      "text": "At what heat index should I cancel outdoor activities?"
-    },
-    {
-      "type": "paragraph",
-      "text": "Heat index above 90°F (extreme caution): Modify activity — take more breaks, watch for symptoms. Above 103°F (danger): Reschedule strenuous outdoor activities. Above 125°F (extreme danger): Cancel all outdoor activities. For athletes, many organizations use wet bulb globe temperature instead of heat index for practice decisions."
-    },
-    {
-      "type": "cta",
-      "heading": "Calculate the Heat Index",
-      "body": "Use our free heat index calculator to check conditions before heading outside.",
-      "buttonLabel": "Open Calculator",
-      "path": "/everyday/heat-index-calculator/"
-    }
+    {"type":"paragraph","text":"The heat index is the National Weather Service's estimate of how hot the air feels to the body when humidity is combined with air temperature, and it is the starting point for deciding how careful to be on a hot day. This guide turns it into a routine: check the number for the hours you will be outside, add a margin for sun, choose the category's precautions, and know what an emergency looks like. It is general information, not medical advice."},
+    {"type":"heading","level":2,"text":"What do the categories mean?"},
+    {"type":"paragraph","text":"The National Weather Service groups the heat index into four categories. These are the ranges and the effects it lists for prolonged exposure or physical activity."},
+    {"type":"list","items":["Caution, 80°F to 90°F: fatigue possible.","Extreme Caution, 90°F to 103°F: heat stroke, heat cramps or heat exhaustion possible.","Danger, 103°F to 124°F: heat cramps or heat exhaustion likely, and heat stroke possible.","Extreme Danger, 125°F or higher: heat stroke highly likely."]},
+    {"type":"heading","level":2,"text":"How do you plan a day around the heat index?"},
+    {"type":"paragraph","text":"Use the forecast for each hour you will be outside, not the daily high. The table uses an invented forecast to show the method. The shade values come from the Heat Index Calculator's formula. The last two columns add the NWS upper estimate of 15°F for full sun, which is a maximum, so the real value in sun falls somewhere between the two."},
+    {"type":"table","headers":["Hour","Air temp","Humidity","Heat index in shade","Category","Up to, in full sun","Category in sun"],"rows":[["8 AM","82°F","70%","86.4°F","Caution","101.4°F","Extreme Caution"],["10 AM","88°F","60%","95.1°F","Extreme Caution","110.1°F","Danger"],["12 PM","92°F","52%","99.7°F","Extreme Caution","114.7°F","Danger"],["2 PM","95°F","48%","103.8°F","Danger","118.8°F","Danger"],["4 PM","94°F","50%","102.9°F","Extreme Caution","117.9°F","Danger"],["6 PM","90°F","58%","98.6°F","Extreme Caution","113.6°F","Danger"],["8 PM","85°F","66%","91.2°F","Extreme Caution","106.2°F","Danger"]]},
+    {"type":"paragraph","text":"Three things stand out. First, the cutoffs are not sharp: 4 PM is 102.9°F, a tenth of a degree below the Danger line, and should be treated like 2 PM. Second, the evening is not safe just because the thermometer falls: at 8 PM the heat index is still above 90°F because humidity has risen. Third, the 8 AM slot is the only one in the Caution band, so it is the only window in this sample where the shade value alone is low. For work in the sun, the margin pushes almost every slot into a higher category."},
+    {"type":"heading","level":2,"text":"What should you do at each level?"},
+    {"type":"paragraph","text":"The NWS and the Centers for Disease Control and Prevention (CDC) do not give a single prescription for each band, so treat the following as the common, general steps they and workplace regulators describe, applied with judgement."},
+    {"type":"list","items":["Stay cool: the CDC advises staying in an air-conditioned indoor location as much as you can. If you have no air conditioning at home, it suggests going somewhere that does, such as a mall, a library or a community relief shelter.","Drink fluids even if you do not feel thirsty, according to the CDC, and avoid alcohol and high-sugar drinks. OSHA's worker guidance likewise says to drink water frequently while working in heat, not only when thirsty. Neither source in this article gives an ounces-per-hour figure, so ask a clinician what is right for you if you have a health condition or fluid restriction.","Wear loose, lightweight, light-colored clothing and sunscreen (CDC).","Schedule outdoor activities carefully and pace yourself (CDC). OSHA says rest breaks should get longer and more frequent as heat stress rises.","Check on a friend or neighbor and have someone check on you (CDC).","Never leave children or pets in a parked car (CDC)."]},
+    {"type":"heading","level":2,"text":"When is it an emergency?"},
+    {"type":"paragraph","text":"NIOSH, the CDC's workplace safety institute, lists heat stroke symptoms as confusion, altered mental state or slurred speech, loss of consciousness, seizures, a very high body temperature and either hot, dry skin or heavy sweating. Its first aid advice is to call 911 for emergency medical care, stay with the person, move them to a shaded, cool area, remove outer clothing, and cool them with cold water or wet cloths until help arrives. Do not wait to see whether symptoms pass. For milder symptoms, stop the activity and move somewhere cool, and get medical advice if they do not improve."},
+    {"type":"heading","level":2,"text":"When the heat index is the wrong tool"},
+    {"type":"list","items":["Hard work or exercise in direct sun. The heat index assumes shade and light wind; for that situation wet bulb globe temperature is used instead.","Below about 80°F. The formula is not designed for those conditions, and the calculator reports the air temperature itself.","Very dry or very humid extremes. The NWS describes small adjustments for humidity below 13% or above 85%, which the calculator does not apply.","People who are more vulnerable. Older adults, young children, people with health conditions and those taking certain medications may need to be more cautious than a category suggests; a clinician or pharmacist can say whether your medicines matter in the heat."]},
+    {"type":"heading","level":2,"text":"Common mistakes"},
+    {"type":"list","items":["Using the daily high temperature instead of the heat index at the hour of exposure.","Treating the shade number as the sun number.","Skipping breaks because you feel fine. OSHA says rest breaks should get longer and more frequent as heat stress rises.","Ignoring the night: warm, humid evenings give the body little chance to recover.","Waiting for thirst or for symptoms before acting."]},
+    {"type":"callout","variant":"warning","text":"The 8 PM and 4 PM numbers here come from an invented forecast, not real weather. Use current local forecasts and any heat advisories issued for your area, and follow the guidance of your employer, school or health provider where it applies."},
+    {"type":"cta","heading":"Calculate the Heat Index","body":"Use our free heat index calculator to check conditions before heading outside.","buttonLabel":"Open Calculator","path":"/everyday/heat-index-calculator/"}
   ],
-  "keywords": [
-    "heat index calculator",
-    "heat index chart",
-    "heat index explained",
-    "feels like temperature",
-    "heat safety",
-    "noaa heat index",
-    "heat danger levels"
-  ]
+  "keywords": ["heat index calculator","heat index chart","heat index explained","feels like temperature","heat safety","noaa heat index","heat danger levels"]
 }
