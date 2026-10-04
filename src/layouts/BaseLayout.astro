@@ -59,12 +59,7 @@ const metaDescription =
     <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={OG_IMAGE_URL} />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preload" href="/fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin />
 
     {/* Apply saved theme before first paint — prevents light/dark flash */}
     <script is:inline>

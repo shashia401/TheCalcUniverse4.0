@@ -107,7 +107,7 @@ export const industrialCalculators: CalculatorEntry[] = [
     schema: 'both',
     mathSolverExpression: 'Î¸ = s / r | convert between deg, rad, grad, arcmin, arcsec',
     lastVerified: '2026-01-15',
-    relatedIds: ['speed-converter', 'length-converter', 'torque-converter', 'frequency-converter'],
+    relatedIds: ['speed-converter', 'length-converter', 'torque-converter', 'frequency-converter', 'data-storage-converter'],
     relatedPosts: ['industrial-unit-converter-guide'],
     loader: () => import('../industrial/angle-converter/index'),
   },
@@ -278,7 +278,7 @@ export const industrialCalculators: CalculatorEntry[] = [
     mathSolverExpression: 'A = l x w | convert between m², ft², ac, ha, km², mi²',
     lastVerified: '2026-05-17',
     relatedPosts: ['btu-calculator-guide'],
-    relatedIds: ['length-converter', 'volume-converter', 'speed-converter', 'cooking-converter'],
+    relatedIds: ['length-converter', 'volume-converter', 'speed-converter', 'cooking-converter', 'data-storage-converter'],
     loader: () => import('../industrial/area-converter/index'),
   },
   {
@@ -294,7 +294,7 @@ export const industrialCalculators: CalculatorEntry[] = [
     mathSolverExpression: '1 KB = 1024 B | convert between B, KB, MB, GB, TB, KiB, MiB',
     lastVerified: '2026-05-17',
     relatedPosts: ['btu-calculator-guide'],
-    relatedIds: ['electrical-converter', 'frequency-converter', 'speed-converter'],
+    relatedIds: ['electrical-converter', 'frequency-converter', 'speed-converter', 'fuel-economy-converter', 'cbm-calculator'],
     loader: () => import('../industrial/data-storage-converter/index'),
   },
   {
@@ -310,7 +310,7 @@ export const industrialCalculators: CalculatorEntry[] = [
     mathSolverExpression: '1 cup = 240 mL | convert between cup, tbsp, tsp, mL, fl oz, pt, qt, gal',
     lastVerified: '2026-05-17',
     relatedPosts: ['btu-calculator-guide'],
-    relatedIds: ['volume-converter', 'weight-converter', 'temperature-converter', 'oven-temperature-converter'],
+    relatedIds: ['volume-converter', 'weight-converter', 'temperature-converter', 'oven-temperature-converter', 'cbm-calculator'],
     loader: () => import('../industrial/cooking-converter/index'),
   },
   {
@@ -342,7 +342,7 @@ export const industrialCalculators: CalculatorEntry[] = [
     mathSolverExpression: '°C = (°F - 32) x 5/9 | Gas Mark | convert between °C, °F, Gas Mark',
     relatedPosts: ['btu-calculator-guide'],
     lastVerified: '2026-01-15',
-    relatedIds: ['temperature-converter', 'cooking-converter', 'volume-converter'],
+    relatedIds: ['temperature-converter', 'cooking-converter', 'volume-converter', 'fuel-economy-converter'],
     loader: () => import('../industrial/oven-temperature-converter/index'),
   },
 ];

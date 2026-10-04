@@ -1,7 +1,7 @@
 export const BASE_URL = 'https://thecalcuniverse.com';
 export const SITE_NAME = 'TheCalcUniverse';
 export const OG_IMAGE_URL = `${BASE_URL}/og-image.jpg`;
-export const LOGO_URL = `${BASE_URL}/android-chrome-512x512.png`;
+export const LOGO_URL = `${BASE_URL}/android-chrome-512x512.webp`;
 
 export const SOCIAL_LINKS = {
   about: `${BASE_URL}/about/`,
