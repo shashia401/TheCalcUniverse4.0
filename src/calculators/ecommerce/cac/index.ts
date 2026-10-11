@@ -88,11 +88,11 @@ const cacConfig: CalculatorConfig = {
     ];
 
     if (!isNaN(ltv) && ltv > 0) {
-      const ltvCacRatio = ltv / cac;
+      const ltvCacRatio = cac > 0 ? ltv / cac : Infinity;
       results.push({
         id: 'ltvCac',
         label: 'LTV:CAC Ratio',
-        value: `${ltvCacRatio.toFixed(2)}x`,
+        value: isFinite(ltvCacRatio) ? `${ltvCacRatio.toFixed(2)}x` : 'N/A (no spend)',
         color: ltvCacRatio >= 3 ? 'positive' as const : ltvCacRatio >= 1 ? 'neutral' as const : 'negative' as const,
       });
     }

@@ -38,3 +38,19 @@ describe('purchasePrice', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: blank interest rate', () => {
+  const base = { purchasePrice: '350000', downPayment: '70000', closingCosts: '10000', interestRate: '7.25', loanTerm: '30', monthlyRent: '2500' };
+  it('blank rate returns [] (required input incomplete)', () => {
+    expect(config.calculate({ ...base, interestRate: '' })).toEqual([]);
+  });
+  it('0% rate and normal input stay clean', () => {
+    noGarbage(config.calculate({ ...base, interestRate: '0' }));
+    const r = config.calculate(base);
+    noGarbage(r);
+    expect(r.length).toBeGreaterThan(0);
+  });
+});

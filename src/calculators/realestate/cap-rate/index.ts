@@ -132,7 +132,8 @@ const capRateConfig: CalculatorConfig = {
     const noi = effectiveGrossIncome - totalExpenses;
     const capRate = (noi / propertyValue) * 100;
     const grossRentMultiplier = propertyValue / grossRent;
-    const expenseRatio = totalExpenses > 0 ? (totalExpenses / effectiveGrossIncome) * 100 : 0;
+    // Undefined (÷0) at 100% vacancy: Infinity here is only used for the color; the value shows N/A
+    const expenseRatio = totalExpenses > 0 ? (effectiveGrossIncome > 0 ? (totalExpenses / effectiveGrossIncome) * 100 : Infinity) : 0;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -195,7 +196,7 @@ const capRateConfig: CalculatorConfig = {
       {
         id: 'expenseRatio',
         label: 'Expense Ratio',
-        value: totalExpenses > 0 ? `${expenseRatio.toFixed(1)}% of effective income` : 'N/A',
+        value: !isFinite(expenseRatio) ? 'N/A (no effective income)' : totalExpenses > 0 ? `${expenseRatio.toFixed(1)}% of effective income` : 'N/A',
         color: expenseRatio > 50 ? ('negative' as const) : ('neutral' as const),
       },
       {

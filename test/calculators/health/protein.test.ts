@@ -71,3 +71,17 @@ describe('Protein calculator', () => {
     expect(r).toEqual([]);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: tiny body weight', () => {
+  it.each(['metric', 'imperial'])('%s 0.0001 returns [] (no 0-0 g/day)', (unit) => {
+    expect(config.calculate({ unit, weight: '0.0001', goal: 'maintain', trainingFrequency: 'moderate' })).toEqual([]);
+  });
+  it('normal weight unchanged', () => {
+    const r = config.calculate({ unit: 'metric', weight: '70', goal: 'maintain', trainingFrequency: 'moderate' });
+    noGarbage(r);
+    expect(getValue(r, 'dailyProteinRange')).not.toMatch(/^0–0/);
+  });
+});

@@ -56,6 +56,7 @@ const savingsConfig: CalculatorConfig = {
       defaultValue: '5',
       placeholder: '5',
       min: 0,
+      max: 1200,
       step: 0.25,
       required: true,
       helpText: 'Length of time your savings will be invested and growing.',

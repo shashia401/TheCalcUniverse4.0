@@ -73,6 +73,8 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
       type: 'number',
       unit: '%',
       placeholder: '6.75',
+      min: 0,
+      max: 100,
       step: 0.01,
       required: true,
     },

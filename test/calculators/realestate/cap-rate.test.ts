@@ -117,3 +117,20 @@ describe('Cap Rate Calculator', () => {
     expect(results).toEqual([]);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: 100% vacancy', () => {
+  const base = { propertyValue: '300000', annualRent: '36000', vacancyRate: '7', propertyTax: '3600', insurance: '1200', hoa: '0', maintenance: '2000', propertyManagement: '2520', otherExpenses: '500' };
+  it('100% vacancy shows N/A expense ratio, not Infinity', () => {
+    const r = config.calculate({ ...base, vacancyRate: '100' });
+    noGarbage(r);
+    expect(getValue(r, 'expenseRatio')).toBe('N/A (no effective income)');
+  });
+  it('normal input unchanged', () => {
+    const r = config.calculate(base);
+    noGarbage(r);
+    expect(getValue(r, 'expenseRatio')).toMatch(/^\d+\.\d% of effective income$/);
+  });
+});

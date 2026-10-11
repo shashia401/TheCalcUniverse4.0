@@ -61,6 +61,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       min: 0,
+      max: 600,
       step: 1,
       helpText: 'Leave blank if calculating loan term',
     },
@@ -84,6 +85,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
       if ([P, termRaw].some(isNaN) || P <= 0 || termRaw <= 0) return [];
 
       const n = termUnit === 'years' ? Math.round(termRaw * 12) : Math.round(termRaw);
+      if (n < 1) return []; // term rounds to zero payments
       let M: number;
       if (monthlyRate === 0) {
         M = P / n;
@@ -137,6 +139,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
       if ([M, termRaw].some(isNaN) || M <= 0 || termRaw <= 0) return [];
 
       const n = termUnit === 'years' ? Math.round(termRaw * 12) : Math.round(termRaw);
+      if (n < 1) return []; // term rounds to zero payments
       let P: number;
       if (monthlyRate === 0) {
         P = M * n;

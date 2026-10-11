@@ -61,6 +61,7 @@ const sipConfig: CalculatorConfig = {
       unit: 'years',
       inputMode: 'decimal',
       min: 0,
+      max: 100,
       step: 1,
       required: true,
       helpText: 'Number of years you plan to invest',

@@ -136,7 +136,9 @@ const socialSecurityConfig: CalculatorConfig = {
     const benefitAt70 = getMonthlyBenefit(pia, 70, fra);
     const benefitAtChosen = getMonthlyBenefit(pia, retirementAge, fra);
 
-    const pctOfFRA = new Decimal(benefitAtChosen).div(benefitAtFRA).times(100).toFixed(1);
+    // No earnings -> no benefit -> a percent-of-FRA ratio is undefined (0/0)
+    const pctOf = (b: number, dp: number) => benefitAtFRA > 0 ? `${new Decimal(b).div(benefitAtFRA).times(100).toFixed(dp)}%` : null;
+    const pctOfFRA = pctOf(benefitAtChosen, 1);
     const annualBenefit = new Decimal(benefitAtChosen).times(12).toNumber();
 
     const spousalBenefit = new Decimal(pia).times(0.5).toNumber();
@@ -170,19 +172,19 @@ const socialSecurityConfig: CalculatorConfig = {
       {
         id: 'at62',
         label: 'Benefit if Claimed at Age 62 (Earliest)',
-        value: `${fmt(benefitAt62)}/mo (${new Decimal(benefitAt62).div(benefitAtFRA).times(100).toFixed(0)}% of FRA benefit)`,
+        value: pctOf(benefitAt62, 0) ? `${fmt(benefitAt62)}/mo (${pctOf(benefitAt62, 0)} of FRA benefit)` : `${fmt(benefitAt62)}/mo`,
         color: 'neutral' as const,
       },
       {
         id: 'at70',
         label: 'Benefit if Delayed to Age 70 (Maximum)',
-        value: `${fmt(benefitAt70)}/mo (${new Decimal(benefitAt70).div(benefitAtFRA).times(100).toFixed(0)}% of FRA benefit)`,
+        value: pctOf(benefitAt70, 0) ? `${fmt(benefitAt70)}/mo (${pctOf(benefitAt70, 0)} of FRA benefit)` : `${fmt(benefitAt70)}/mo`,
         color: 'positive' as const,
       },
       {
         id: 'vs62',
         label: `Your Benefit vs. Age 62 Claim`,
-        value: `${pctOfFRA}% — ${retirementAge > 62 ? '+' : ''}${fmt(benefitAtChosen - benefitAt62)}/mo`,
+        value: `${pctOfFRA ?? 'n/a'} — ${retirementAge > 62 ? '+' : ''}${fmt(benefitAtChosen - benefitAt62)}/mo`,
         color: benefitAtChosen >= benefitAt62 ? 'positive' as const : 'neutral' as const,
       },
     ];

@@ -69,6 +69,7 @@ const closingCostsConfig: CalculatorConfig = {
     const party = values.party || 'buyer';
 
     if (isNaN(homePrice) || homePrice <= 0) return [];
+    if (isNaN(annualRate) && party !== 'seller') return []; // rate drives buyer prepaid interest
 
     const loanAmount = homePrice * (1 - downPct);
     if (loanAmount <= 0 && party !== 'seller') return [];

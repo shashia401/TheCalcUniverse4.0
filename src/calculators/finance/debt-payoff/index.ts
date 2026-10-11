@@ -43,6 +43,7 @@ const debtPayoffConfig: CalculatorConfig = {
       placeholder: '22.99',
       unit: '%',
       min: 0,
+      max: 100,
       step: 0.01,
       inputMode: 'decimal',
       helpText: 'Annual Percentage Rate (interest rate) charged on this card.',
@@ -85,6 +86,7 @@ const debtPayoffConfig: CalculatorConfig = {
       placeholder: '19.99',
       unit: '%',
       min: 0,
+      max: 100,
       step: 0.01,
       inputMode: 'decimal',
       helpText: 'Annual Percentage Rate (interest rate) charged on this card.',
@@ -129,6 +131,7 @@ const debtPayoffConfig: CalculatorConfig = {
       placeholder: '28.99',
       unit: '%',
       min: 0,
+      max: 100,
       step: 0.01,
       inputMode: 'decimal',
       helpText: 'Annual Percentage Rate (interest rate) charged on this card.',
@@ -166,6 +169,7 @@ const debtPayoffConfig: CalculatorConfig = {
 
       while (balances.some((b) => b > 0) && month < maxMonths) {
         month++;
+        if (balances.some((b) => !Number.isFinite(b))) break;
         // Extra pool = user's extra payment + minimums freed up by cards already paid off ("rollover")
         let extra = extraPayment;
         const paid: number[] = balances.map((b, i) => {
@@ -193,7 +197,9 @@ const debtPayoffConfig: CalculatorConfig = {
         }
       }
 
-      return { months: month, totalInterest: totalInterest.toNumber() };
+      // Not cleared in 50 years (payments don't outrun interest) -> results would be meaningless
+      const paidOff = !balances.some((b) => b > 0);
+      return { months: month, totalInterest: totalInterest.toNumber(), paidOff };
     };
 
     const snowballOrder = [...cards].sort((a, b) => a.balance - b.balance);
@@ -202,6 +208,7 @@ const debtPayoffConfig: CalculatorConfig = {
     const snowball = simulate(snowballOrder);
     const avalanche = simulate(avalancheOrder);
 
+    const allPaid = snowball.paidOff && avalanche.paidOff;
     const totalDebt = cards.reduce((s, c) => s + c.balance, 0);
     const totalMin = cards.reduce((s, c) => s + c.min, 0);
 
@@ -231,36 +238,40 @@ const debtPayoffConfig: CalculatorConfig = {
       {
         id: 'snowballTime',
         label: 'Snowball Strategy — Debt Free In',
-        value: months2Str(snowball.months),
+        value: snowball.paidOff ? months2Str(snowball.months) : '50+ years (payments too low)',
         highlight: true,
         color: 'positive' as const,
-        interpretation: snowball.totalInterest > avalanche.totalInterest
+        interpretation: !allPaid
+          ? 'At these payments, interest outpaces what you pay, so at least one card is not cleared within 50 years. Raise the extra payment or the minimums.'
+          : snowball.totalInterest > avalanche.totalInterest
           ? `For your ${cards.length} card${cards.length === 1 ? '' : 's'} totaling ${fmtDollar(totalDebt)}, Avalanche (highest rate first) beats Snowball by ${fmtDollar(snowball.totalInterest - avalanche.totalInterest)} in interest${avalanche.months < snowball.months ? ` and gets you debt-free ${snowball.months - avalanche.months} month${snowball.months - avalanche.months === 1 ? '' : 's'} sooner` : ''}. Snowball's smallest-first wins are better only if you need the early motivation boost.`
           : `For your balances, both strategies cost about the same — pick Snowball (smallest balance first) for the motivational quick wins.`,
       },
       {
         id: 'snowballInterest',
         label: 'Snowball — Total Interest Paid',
-        value: fmtDollar(snowball.totalInterest),
+        value: snowball.paidOff ? fmtDollar(snowball.totalInterest) : 'N/A',
         color: 'negative' as const,
       },
       {
         id: 'avalancheTime',
         label: 'Avalanche Strategy — Debt Free In',
-        value: months2Str(avalanche.months),
+        value: avalanche.paidOff ? months2Str(avalanche.months) : '50+ years (payments too low)',
         highlight: true,
         color: 'positive' as const,
       },
       {
         id: 'avalancheInterest',
         label: 'Avalanche — Total Interest Paid',
-        value: fmtDollar(avalanche.totalInterest),
+        value: avalanche.paidOff ? fmtDollar(avalanche.totalInterest) : 'N/A',
         color: 'negative' as const,
       },
       {
         id: 'interestSaved',
         label: 'Interest Saved (Avalanche vs. Snowball)',
-        value: snowball.totalInterest > avalanche.totalInterest
+        value: !allPaid
+          ? 'N/A (not paid off within 50 years)'
+          : snowball.totalInterest > avalanche.totalInterest
           ? `${fmtDollar(snowball.totalInterest - avalanche.totalInterest)} saved with Avalanche`
           : snowball.totalInterest < avalanche.totalInterest
             ? `${fmtDollar(avalanche.totalInterest - snowball.totalInterest)} saved with Snowball`

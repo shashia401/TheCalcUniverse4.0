@@ -237,7 +237,7 @@ const rentalPropertyConfig: CalculatorConfig = {
     const maintenancePct = parseFloat(values.maintenancePct) / 100 || 0.10;
     const mgmtPct = parseFloat(values.propertyMgmtPct) / 100 || 0;
 
-    if (isNaN(purchasePrice) || isNaN(monthlyRent) || purchasePrice <= 0 || monthlyRent <= 0) return [];
+    if (isNaN(purchasePrice) || isNaN(monthlyRent) || isNaN(annualRate) || purchasePrice <= 0 || monthlyRent <= 0) return [];
 
     const loanAmount = purchasePrice - downPayment;
     const totalCashInvested = downPayment + closingCosts;

@@ -102,7 +102,7 @@ const rothIRAConfig: CalculatorConfig = {
     const annualReturn = parseFloat(values.annualReturn) / 100;
     const retirementTaxRate = parseFloat(values.expectedRetirementTaxRate) / 100 || 0.12;
 
-    if (isNaN(currentAge) || isNaN(retirementAge) || retirementAge <= currentAge) return [];
+    if (isNaN(currentAge) || isNaN(retirementAge) || isNaN(annualReturn) || retirementAge <= currentAge) return [];
 
     const years = retirementAge - currentAge;
     const isCatchup = currentAge >= 50;

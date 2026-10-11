@@ -86,9 +86,9 @@ const saasLtvCacConfig: CalculatorConfig = {
     const marginDecimal = grossMargin / 100;
     const ltv = arpu * lifetimeMonths * marginDecimal;
     const cac = marketingSpend / customersAcquired;
-    const ltvCacRatio = cac > 0 ? ltv / cac : 0;
+    const ltvCacRatio = cac > 0 ? ltv / cac : Infinity;
     const paybackMonths = marginDecimal > 0 ? cac / (arpu * marginDecimal) : Infinity;
-    const magicNumber = lifetimeMonths > 0 ? (arpu * customersAcquired) / marketingSpend : 0;
+    const magicNumber = marketingSpend > 0 ? (arpu * customersAcquired) / marketingSpend : Infinity;
     const totalRevenue = arpu * customersAcquired * lifetimeMonths;
 
     const fmt = (val: number) =>
@@ -119,7 +119,7 @@ const saasLtvCacConfig: CalculatorConfig = {
       {
         id: 'ltvCacRatio',
         label: 'LTV:CAC Ratio',
-        value: `${ltvCacRatio.toFixed(2)}:1`,
+        value: isFinite(ltvCacRatio) ? `${ltvCacRatio.toFixed(2)}:1` : 'N/A (no spend)',
         highlight: true,
         interpretation: `3:1 is the widely cited healthy target — below that, acquisition costs are eating too much of what each customer is worth; well above 5:1 can actually mean you're under-investing in growth and leaving market share on the table. This is a lifetime projection built on retention assumptions, so it's only as reliable as your churn estimate.`,
         color: ratioColor,
@@ -151,7 +151,7 @@ const saasLtvCacConfig: CalculatorConfig = {
       {
         id: 'magicNumber',
         label: 'SaaS Magic Number',
-        value: `${magicNumber.toFixed(2)}x`,
+        value: isFinite(magicNumber) ? `${magicNumber.toFixed(2)}x` : 'N/A (no spend)',
         color: magicNumber >= 1 ? 'positive' : magicNumber >= 0.5 ? 'neutral' : 'negative',
       },
       {

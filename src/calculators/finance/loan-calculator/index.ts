@@ -48,6 +48,7 @@ const loanCalculatorConfig: CalculatorConfig = {
       defaultValue: '5',
       placeholder: '5',
       min: 1,
+      max: 600,
       step: 1,
       required: true,
       helpText: 'Personal loans are often 24–60 months. Enter years or months using the toggle above.',

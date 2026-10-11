@@ -49,6 +49,31 @@ const sanitizeNumeric = (s: string): string => {
   return (negative ? '-' : '') + cleaned;
 };
 
+// Out-of-range guard. `calculate()` runs on every keystroke, so a typed or
+// deep-linked value far outside an input's declared min/max (e.g. 1e12 years)
+// could freeze the tab in a long loop or produce NaN/Infinity. Blank and
+// non-numeric text are left to each calculator's own "incomplete input" handling.
+const rangeErrors = (inputs: InputField[], vals: Record<string, string>): Record<string, string> => {
+  const errs: Record<string, string> = {};
+  for (const i of inputs) {
+    if (i.type !== 'number' && i.type !== 'percentage') continue;
+    if (i.showWhen && !i.showWhen(vals)) continue;
+    const raw = (vals[i.id] ?? '').replace(/,/g, '').trim();
+    if (raw === '') continue;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) continue;
+    if ((i.min !== undefined && n < i.min) || (i.max !== undefined && n > i.max)) {
+      errs[i.id] =
+        i.min !== undefined && i.max !== undefined
+          ? `Enter a value between ${i.min.toLocaleString()} and ${i.max.toLocaleString()}.`
+          : i.max !== undefined
+            ? `Enter a value of ${i.max.toLocaleString()} or less.`
+            : `Enter a value of ${i.min!.toLocaleString()} or more.`;
+    }
+  }
+  return errs;
+};
+
 // A plain rAF-timed cursor restore races React's own re-render of a controlled
 // input's value — React can reset the caret to the end on commit regardless
 // of what a later rAF callback sets. useLayoutEffect keyed to the displayed
@@ -294,7 +319,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
       setConfig(cfg);
       setValues(seeded);
       try {
-        setResults(cfg.calculate(seeded));
+        setResults(Object.keys(rangeErrors(cfg.inputs, seeded)).length ? [] : cfg.calculate(seeded));
       } catch {
         setResults([]);
       }
@@ -337,7 +362,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     const next = { ...values, [id]: value };
     setValues(next);
     try {
-      setResults(config.calculate(next));
+      setResults(Object.keys(rangeErrors(config.inputs, next)).length ? [] : config.calculate(next));
     } catch {
       // invalid intermediate state (e.g. mid-typing) — keep last good results
     }
@@ -349,6 +374,8 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
       (!visibleInputIds || visibleInputIds.includes(input.id)) &&
       (!input.showWhen || input.showWhen(values))
   );
+
+  const fieldErrors = rangeErrors(config.inputs, values);
 
   // Deep-link to the full calculator page, carrying the current inputs so the
   // hero scenario continues seamlessly on the dedicated page. Same whitelist +
@@ -496,6 +523,9 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                 onChange={(e) => handleChange(input.id, e.target.value)}
                 className="mt-2 w-full accent-[var(--brand-default)] cursor-pointer"
               />
+            )}
+            {fieldErrors[input.id] && (
+              <p role="alert" className="mt-1 text-tiny font-medium text-accent-rose-700">{fieldErrors[input.id]}</p>
             )}
             {input.helpText && (
               <p className="mt-1 text-tiny text-[var(--surface-text-muted)]">{input.helpText}</p>

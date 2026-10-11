@@ -130,3 +130,21 @@ describe('roth-ira', () => {
     expect(r).toHaveLength(0);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: blank annual return', () => {
+  const base = { currentAge: '30', retirementAge: '65', currentBalance: '15000', annualContribution: '7500', annualReturn: '7' };
+  it('blank return returns [] (required input incomplete)', () => {
+    expect(config.calculate({ ...base, annualReturn: '' })).toEqual([]);
+  });
+  it('0% return and normal input stay clean', () => {
+    const z = config.calculate({ ...base, annualReturn: '0' });
+    noGarbage(z);
+    expect(getValue(z, 'taxFreeTotal')).toBe('$277,500');
+    const r = config.calculate(base);
+    noGarbage(r);
+    expect(getValue(r, 'taxFreeTotal')).toMatch(/M$/);
+  });
+});

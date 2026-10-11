@@ -139,3 +139,18 @@ describe('MTBF Calculator', () => {
     expect((config.educational.limitations as unknown[]).length).toBeGreaterThanOrEqual(3);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: zero operating hours', () => {
+  it('returns [] (no MTBF without observed hours)', () => {
+    expect(config.calculate({ mode: 'mtbf', operatingHours: '0', numberOfFailures: '5' })).toEqual([]);
+  });
+  it('normal input unchanged', () => {
+    const r = config.calculate({ mode: 'mtbf', operatingHours: '50000', numberOfFailures: '5' });
+    noGarbage(r);
+    expect(getValue(r, 'mtbf')).toBe('10,000 hours');
+    expect(getValue(r, 'failureRate')).toContain('1.0000e-4');
+  });
+});

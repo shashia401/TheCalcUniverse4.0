@@ -233,7 +233,7 @@ const discountConfig: CalculatorConfig = {
   calculate: (values) => {
     const price = parseFloat(values.originalPrice);
     const d1 = parseFloat(values.discount1) / 100;
-    const d2 = parseFloat(values.discount2) / 100;
+    const d2 = parseFloat(values.discount2) / 100 || 0; // optional: blank means no second discount
     const tax = parseFloat(values.salesTaxRate) / 100 || 0;
 
     if (isNaN(price) || isNaN(d1) || price <= 0) return [];

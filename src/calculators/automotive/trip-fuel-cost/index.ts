@@ -99,7 +99,8 @@ const tripFuelCostConfig: CalculatorConfig = {
     const gallonsNeeded = distanceMiles / mpg;
     const totalCost = gallonsNeeded * fuelPrice;
     const costPerPerson = totalCost / passengers;
-    const costPer100Miles = (100 / distanceMiles) * totalCost;
+    // Independent of trip length (and well-defined for 0 distance): 100 miles / mpg × price
+    const costPer100Miles = (100 / mpg) * fuelPrice;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });

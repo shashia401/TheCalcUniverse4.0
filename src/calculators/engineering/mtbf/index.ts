@@ -72,7 +72,7 @@ const mtbfConfig: CalculatorConfig = {
     const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
     if (mode === 'mtbf') {
-      if (isNaN(operatingHours) || isNaN(failures) || failures <= 0) return [];
+      if (isNaN(operatingHours) || isNaN(failures) || failures <= 0 || operatingHours <= 0) return [];
       const mtbf = operatingHours / failures;
       const failureRate = 1 / mtbf;
       const reliability1yr = Math.exp(-8760 / mtbf) * 100;

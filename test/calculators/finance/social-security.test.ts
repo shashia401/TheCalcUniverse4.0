@@ -38,3 +38,24 @@ describe('birthYear', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: zero income', () => {
+  const base = { birthYear: '1965', annualIncome: '85000', maritalStatus: 'single', retirementAge: '67' };
+  it('zero income gives $0 benefits with no NaN', () => {
+    for (const retirementAge of ['62', '67', '70']) {
+      for (const maritalStatus of ['single', 'married']) {
+        const r = config.calculate({ ...base, annualIncome: '0', retirementAge, maritalStatus });
+        noGarbage(r);
+        expect(r.find((x) => x.id === 'at62')?.value).toBe('$0/mo');
+      }
+    }
+  });
+  it('normal input keeps the percent-of-FRA text', () => {
+    const r = config.calculate(base);
+    noGarbage(r);
+    expect(r.find((x) => x.id === 'at62')?.value).toMatch(/^\$[\d,]+\/mo \(\d+% of FRA benefit\)$/);
+  });
+});

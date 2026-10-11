@@ -94,6 +94,8 @@ const interestRateConfig: CalculatorConfig = {
     }
 
     if (!isFinite(rate) || rate < 0) return [{ id: 'error', label: 'Result', value: 'Invalid inputs — check values and try again.', color: 'negative' as const }];
+    // Absurdly short periods imply astronomically large rates (and overflow the EAR); treat as invalid
+    if (rate > 100) return [{ id: 'error', label: 'Result', value: 'Implied rate is unrealistically high (over 10,000% a year) — check the time period and amounts.', color: 'negative' as const }];
 
     const pct = (r: number) => `${(r * 100).toFixed(4)}%`;
     const fmtD = (n: number) =>

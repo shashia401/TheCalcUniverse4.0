@@ -120,7 +120,8 @@ const proteinConfig: CalculatorConfig = {
       weightKg = weight;
     }
 
-    if (isNaN(weightKg) || weightKg <= 0) return [];
+    // Below ~2.5 kg every rounded gram figure is 0 (and per-meal max 0 -> NaN); not a real body weight
+    if (isNaN(weightKg) || weightKg < 2.5) return [];
 
     const ranges = GOAL_RANGES[goal] ?? GOAL_RANGES.maintain;
 

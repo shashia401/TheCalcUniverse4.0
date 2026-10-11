@@ -23,6 +23,8 @@ const presentValueConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '10',
       inputMode: 'numeric',
+      min: 0,
+      max: 200,
       required: true,
       helpText:
         'Enter the number of years. The calculator multiplies by compounding frequency internally.',

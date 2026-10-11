@@ -48,3 +48,18 @@ describe('discount calculator', () => {
     expect(r).toEqual([]);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: optional second discount', () => {
+  it.each(['', '0'])('discount2=%j means no second discount', (d2) => {
+    const r = config.calculate({ originalPrice: '100', discount1: '20', discount2: d2, salesTaxRate: '' });
+    noGarbage(r);
+    expect(parseMoney(getValue(r, 'finalPrice'))).toBe(80);
+  });
+  it('stacked discount unchanged', () => {
+    const r = config.calculate({ originalPrice: '100', discount1: '20', discount2: '10', salesTaxRate: '0' });
+    expect(parseMoney(getValue(r, 'finalPrice'))).toBe(72);
+  });
+});

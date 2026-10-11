@@ -38,3 +38,19 @@ describe('totalMarketingSpend', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: zero marketing spend', () => {
+  const base = { totalMarketingSpend: '50000', newCustomers: '500', ltv: '400' };
+  it('zero spend shows N/A, not Infinity', () => {
+    const r = config.calculate({ ...base, totalMarketingSpend: '0' });
+    noGarbage(r);
+    expect(r.find((x) => x.id === 'ltvCac')?.value).toBe('N/A (no spend)');
+  });
+  it('normal input unchanged', () => {
+    const r = config.calculate(base);
+    expect(r.find((x) => x.id === 'ltvCac')?.value).toBe('4.00x');
+  });
+});

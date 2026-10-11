@@ -102,3 +102,22 @@ describe('interest-rate', () => {
     expect(ear).toBeGreaterThan(nominal);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: tiny time period', () => {
+  const base = { principal: '10000', finalAmount: '14500', timePeriod: '5', timeUnit: 'years', compoundFrequency: '12' };
+  it.each(['years', 'months', 'days'])('0.0001 %s yields a clear notice, not absurd/Infinity rates', (timeUnit) => {
+    for (const compoundFrequency of ['12', '365', '0']) {
+      const r = config.calculate({ ...base, timePeriod: '0.0001', timeUnit, compoundFrequency });
+      noGarbage(r);
+      expect(r.find((x) => x.id === 'nominalRate')).toBeUndefined();
+    }
+  });
+  it('normal input unchanged', () => {
+    const r = config.calculate(base);
+    noGarbage(r);
+    expect(getValue(r, 'nominalRate')).toBe('7.4543%');
+  });
+});

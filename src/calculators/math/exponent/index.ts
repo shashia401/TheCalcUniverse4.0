@@ -106,6 +106,8 @@ const exponentConfig: CalculatorConfig = {
     }
 
     const fmt = (n: number) => {
+      // e.g. the k-th root for a tiny k, or 1/result of a denormal, overflows a double
+      if (!isFinite(n)) return 'too large to display';
       if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
       const s = parseFloat(n.toPrecision(12)).toString();
       return s;

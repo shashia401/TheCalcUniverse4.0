@@ -124,3 +124,21 @@ describe('payment-calculator', () => {
     expect(pct).toMatch(/%$/);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: tiny loan term', () => {
+  it('payment mode: term rounding to 0 payments returns []', () => {
+    expect(config.calculate({ solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'years', loanTerm: '0.0001' })).toEqual([]);
+    expect(config.calculate({ solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'months', loanTerm: '0.4' })).toEqual([]);
+  });
+  it('loanAmount mode: term rounding to 0 payments returns []', () => {
+    expect(config.calculate({ solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '7', termUnit: 'years', loanTerm: '0.0001' })).toEqual([]);
+  });
+  it('normal input unchanged', () => {
+    const r = config.calculate({ solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'years', loanTerm: '5' });
+    noGarbage(r);
+    expect(getValue(r, 'payment')).toBe('$495.03');
+  });
+});

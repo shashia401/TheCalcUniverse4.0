@@ -89,3 +89,24 @@ describe('Closing Costs Calculator', () => {
     expect(results).toEqual([]);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: blank interest rate', () => {
+  const base = { homePrice: '400000', downPaymentPct: '20', loanTerm: '30', interestRate: '6.8', party: 'buyer' };
+  it('buyer/both with blank rate returns []', () => {
+    expect(config.calculate({ ...base, interestRate: '' })).toEqual([]);
+    expect(config.calculate({ ...base, interestRate: '', party: 'both' })).toEqual([]);
+  });
+  it('seller does not need a rate and stays clean', () => {
+    const r = config.calculate({ ...base, interestRate: '', party: 'seller' });
+    expect(r.length).toBeGreaterThan(0);
+    noGarbage(r);
+  });
+  it('normal input unchanged', () => {
+    const r = config.calculate(base);
+    noGarbage(r);
+    expect(getValue(r, 'totalBuyer')).toMatch(/^\$[\d,]+ \(\d+\.\d% of price\)$/);
+  });
+});

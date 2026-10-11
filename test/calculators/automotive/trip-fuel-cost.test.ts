@@ -38,3 +38,21 @@ describe('distance', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 });
+
+// ── Edge-input regression: no NaN / Infinity / ∞ in any output ──
+const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Infinity|∞/);
+
+describe('edge inputs: zero distance', () => {
+  const base = { distance: '500', distanceUnit: 'miles', fuelEfficiency: '25', efficiencyUnit: 'mpg', fuelPrice: '3.5', passengers: '1' };
+  it('zero distance has no NaN and costs $0', () => {
+    const r = config.calculate({ ...base, distance: '0' });
+    noGarbage(r);
+    expect(r.find((x) => x.id === 'totalCost')?.value).toBe('$0.00');
+    expect(r.find((x) => x.id === 'costPer100')?.value).toBe('$14.00');
+  });
+  it('normal input unchanged', () => {
+    const r = config.calculate(base);
+    expect(r.find((x) => x.id === 'totalCost')?.value).toBe('$70.00');
+    expect(r.find((x) => x.id === 'costPer100')?.value).toBe('$14.00');
+  });
+});
