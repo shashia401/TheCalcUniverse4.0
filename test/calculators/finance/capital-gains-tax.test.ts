@@ -143,3 +143,30 @@ describe('capital-gains-tax', () => {
     expect(r).toEqual([]);
   });
 });
+
+describe('capital-gains-tax – audit regressions', () => {
+  const base = {
+    assetType: 'Stocks', costBasis: '10000', saleProceeds: '20000', annualIncome: '80000',
+    filingStatus: 'Single', stateTaxRate: '0',
+  };
+  it('one-year test uses the calendar anniversary: Mar 1 2023 -> Mar 1 2024 (366 days, leap year) is still short-term', () => {
+    const r = config.calculate({ ...base, purchaseDate: '2023-03-01', saleDate: '2024-03-01' });
+    expect(getValue(r, 'holdingPeriodType')).toContain('Short-Term');
+    // the next day is the first long-term day (held MORE than one year)
+    const r2 = config.calculate({ ...base, purchaseDate: '2023-03-01', saleDate: '2024-03-02' });
+    expect(getValue(r2, 'holdingPeriodType')).toContain('Long-Term');
+  });
+  it('taxable income of $0 is valid: $10,000 LTCG fully inside the 0% bracket (<= $49,450) -> $0 federal tax', () => {
+    const r = config.calculate({ ...base, annualIncome: '0', purchaseDate: '2024-01-01', saleDate: '2026-02-01' });
+    expect(parseNumber(getValue(r, 'federalTax'))).toBe(0);
+  });
+  it('long-term collectibles gain is taxed at ordinary rate capped at 28%: $50K at 35% bracket -> $14,000 (stocks would pay 15% = $7,500)', () => {
+    const v = { ...base, annualIncome: '300000', saleProceeds: '60000', purchaseDate: '2024-01-01', saleDate: '2026-02-01' };
+    expect(getValue(config.calculate({ ...v, assetType: 'Collectibles' }), 'federalTax')).toBe('$14,000.00');
+    expect(getValue(config.calculate({ ...v, assetType: 'Stocks' }), 'federalTax')).toBe('$7,500.00');
+  });
+  it('results never contain raw HTML entities', () => {
+    const r = config.calculate({ ...base, purchaseDate: '2024-01-01', saleDate: '2026-02-01' });
+    expect(getValue(r, 'holdingPeriodType')).not.toMatch(/&[a-z]+;/);
+  });
+});

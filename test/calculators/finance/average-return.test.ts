@@ -56,3 +56,19 @@ describe('average return calculator', () => {
     expect(r).toEqual([]);
   });
 });
+
+describe('average-return – audit regressions', () => {
+  it('annual mode: impossible return below -100% yields no result (was "NaN%")', () => {
+    expect(config.calculate({ inputMode: 'annual', returnsInput: '10, -150, 5' })).toEqual([]);
+  });
+  it('annual mode: +50,-50,+35,+45,-10 -> arithmetic 14.00%, CAGR 5.73% (product 1.3213^(1/5)-1), not 7.4%', () => {
+    const r = config.calculate({ inputMode: 'annual', returnsInput: '50, -50, 35, 45, -10' });
+    expect(r.find((x: any) => x.id === 'simpleAvg')!.value).toBe('14.00%');
+    expect(r.find((x: any) => x.id === 'cagr')!.value).toBe('5.73%');
+  });
+  it('Marcus example: 22,-8,15,5,-3 -> CAGR 5.62%, average 6.20%', () => {
+    const r = config.calculate({ inputMode: 'annual', returnsInput: '22, -8, 15, 5, -3' });
+    expect(r.find((x: any) => x.id === 'cagr')!.value).toBe('5.62%');
+    expect(r.find((x: any) => x.id === 'simpleAvg')!.value).toBe('6.20%');
+  });
+});

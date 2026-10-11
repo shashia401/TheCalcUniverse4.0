@@ -229,7 +229,7 @@ const businessLoanConfig: CalculatorConfig = {
     },
     formulaDescription:
       'The standard loan amortization formula calculates your fixed monthly payment. M = monthly payment, P = principal loan amount, r = monthly interest rate (annual rate divided by 12), n = total number of monthly payments. Origination fees reduce the actual cash you receive while you still repay the full principal — this means your true cost of capital (effective APR) is always higher than the stated interest rate when fees are present. This calculator uses decimal.js high-precision arithmetic for all monetary calculations.',
-    formulaSource: 'Standard loan amortization formula (PMT formula) used by CFPB, SBA, and all major commercial lenders. DSCR methodology per SBA Standard Operating Procedure 50 10 7.',
+    formulaSource: 'Standard loan amortization formula (PMT formula) used by CFPB, SBA, and all major commercial lenders. SBA maximum rates and lending terms per sba.gov 7(a) terms and conditions; minimum DSCR per SBA Procedural Notice 5000-846607 (SOP 50 10 series).',
     variables: [
       {
         symbol: 'M',
@@ -285,7 +285,7 @@ const businessLoanConfig: CalculatorConfig = {
     ],
     proTips: [
       'A DSCR above 1.50 gives you negotiating leverage — ask for a lower rate, reduced origination fee, or longer term to improve cash flow.',
-      'SBA 7(a) loans cap interest rates (prime + 2.25-4.75% depending on loan size) and origination fees (3% max for SBA-guaranteed portion) — always compare against SBA caps.',
+      'SBA 7(a) loans cap variable interest rates by loan size (base rate + 6.5% up to $50,000, + 6.0% to $250,000, + 4.5% to $350,000, + 3.0% above $350,000) and charge an upfront guaranty fee on the guaranteed portion that SBA sets each fiscal year — always compare any quote against the SBA caps.',
       'When comparing loan offers, always look at the total cost including ALL fees, not just the stated interest rate. A loan with a lower rate but higher fees can cost more overall.',
       'If your DSCR is below 1.25, consider a longer loan term to lower monthly payments and improve your ratio, or increase your NOI before applying.',
     ],
@@ -295,19 +295,19 @@ const businessLoanConfig: CalculatorConfig = {
       'Loan approval depends on factors beyond DSCR: personal credit score, time in business, collateral, and industry risk. A good DSCR is necessary but not sufficient for approval.',
     ],
     quickReference: [
-      { label: 'SBA 7(a) Max Rate (2025)', value: 'Prime + 2.25-4.75%' },
-      { label: 'Minimum DSCR (SBA)', value: '1.25' },
+      { label: 'SBA 7(a) Max Variable Rate', value: 'Base + 3.0% to 6.5% (by loan size)' },
+      { label: 'Minimum DSCR (SBA 7(a))', value: '1.15 (many banks want 1.25+)' },
       { label: 'Typical Origination Fee', value: '1-5% of loan amount' },
-      { label: 'SBA Guarantee Fee (>$1M)', value: 'Up to 3.75%' },
+      { label: 'SBA Guaranty Fee', value: 'Set yearly by SBA, on guaranteed portion' },
       { label: 'Typical Bank Term', value: '1-10 years' },
     ],
     explanation:
-      'DSCR (Debt Service Coverage Ratio) is the single most important number that lenders evaluate when considering a business loan application. The concept was formalized by commercial banks in the mid-20th century as a standardized way to measure a business ability to service debt. A DSCR of 1.25 means your business earns $1.25 for every $1.00 of debt payment — the minimum most SBA lenders require for approval. A higher DSCR signals stronger cash flow and increases your negotiating power for better rates. Origination fees, while often overlooked, reduce your effective cash received and increase your true cost of capital. A 2% origination fee on a 5-year $250,000 loan at 8.5% raises your effective APR by roughly 0.4-0.5 percentage points, even though the stated rate stays the same.',
+      'DSCR (Debt Service Coverage Ratio) is the single most important number that lenders evaluate when considering a business loan application. A DSCR of 1.25 means your business earns $1.25 for every $1.00 of debt payment — a common bank benchmark (the SBA minimum is 1.15). A higher DSCR signals stronger cash flow and increases your negotiating power for better rates. Origination fees, while often overlooked, reduce your effective cash received and increase your true cost of capital. A 2% origination fee on a 5-year $250,000 loan at 8.5% raises your effective APR to about 9.4% (roughly 0.9 percentage points higher), even though the stated rate stays the same.',
     faqs: [
       {
         question: 'What DSCR do most lenders require for a business loan?',
         answer:
-          'Most traditional banks and SBA lenders require a minimum DSCR of 1.25, meaning your net operating income must be at least 25% higher than your proposed monthly debt payments. Some lenders may accept a DSCR as low as 1.15 for otherwise strong borrowers with good credit and collateral. Online lenders may be more flexible on DSCR but typically charge higher rates. A DSCR above 1.50 significantly improves your negotiating position for better terms.',
+          'SBA 7(a) requires a minimum DSCR of 1.15, and most traditional banks look for 1.25 or higher, meaning your net operating income must be at least 25% higher than your proposed monthly debt payments. Some lenders may accept a DSCR as low as 1.15 for otherwise strong borrowers with good credit and collateral. Online lenders may be more flexible on DSCR but typically charge higher rates. A DSCR above 1.50 significantly improves your negotiating position for better terms.',
       },
       {
         question: 'How does an origination fee affect my true cost of borrowing?',
@@ -327,7 +327,7 @@ const businessLoanConfig: CalculatorConfig = {
       {
         question: 'Should I choose a longer loan term to lower my monthly payment?',
         answer:
-          'A longer term lowers monthly payments and improves DSCR, but increases total interest significantly. For example, extending a $250,000 loan at 8.5% from 5 to 10 years drops payments from $5,129 to $3,099 but adds roughly $67,000 in extra interest. Choose the shortest term you can comfortably afford with a DSCR above 1.25. Some lenders will let you make extra principal payments without penalty to pay off early.',
+          'A longer term lowers monthly payments and improves DSCR, but increases total interest significantly. For example, extending a $250,000 loan at 8.5% from 5 to 10 years drops payments from $5,129 to $3,099 but adds roughly $64,000 in extra interest. Choose the shortest term you can comfortably afford with a DSCR above 1.25. Some lenders will let you make extra principal payments without penalty to pay off early.',
       },
     ],
     citations: [

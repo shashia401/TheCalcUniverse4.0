@@ -357,7 +357,7 @@ const budgetCalculatorConfig: CalculatorConfig = {
       'Track your essential expenses, discretionary spending, and savings rate to find opportunities for better financial balance.',
     ],
     explanation:
-      'The 50/30/20 rule is a simple budgeting framework popularized by Senator Elizabeth Warren. Allocate 50% of after-tax income to needs (essential living expenses), 30% to wants (lifestyle spending), and 20% to savings and debt elimination. The goal is not perfection \u2014 it is awareness. The categories are intentionally wide to make budgeting sustainable rather than restrictive. Needs include anything you must pay to survive and work: housing, utilities, groceries, transportation, insurance, and minimum loan payments. Wants are everything else you spend money on by choice: dining out, entertainment, subscriptions, travel, and shopping. Savings encompass not just retirement and emergency funds but also any extra payments on debt above the minimum required amount. If you have a surplus at the end of the month, consider directing it toward an emergency fund (3-6 months of expenses is the standard target) or increasing retirement contributions. A deficit means you are spending more than you earn and need to cut back \u2014 typically starting with wants before considering reductions in needs like downsizing housing or refinancing loans. The 50/30/20 rule is especially useful for people new to budgeting because it is flexible enough to accommodate different lifestyles while still enforcing financial discipline.',
+      'The 50/30/20 rule is a simple budgeting framework popularized by Elizabeth Warren and Amelia Warren Tyagi in their 2005 book All Your Worth. Allocate 50% of after-tax income to needs (essential living expenses), 30% to wants (lifestyle spending), and 20% to savings and debt elimination. The goal is not perfection \u2014 it is awareness. The categories are intentionally wide to make budgeting sustainable rather than restrictive. Needs include anything you must pay to survive and work: housing, utilities, groceries, transportation, insurance, and minimum loan payments. Wants are everything else you spend money on by choice: dining out, entertainment, subscriptions, travel, and shopping. Savings encompass not just retirement and emergency funds but also any extra payments on debt above the minimum required amount. If you have a surplus at the end of the month, consider directing it toward an emergency fund (3-6 months of expenses is the standard target) or increasing retirement contributions. A deficit means you are spending more than you earn and need to cut back \u2014 typically starting with wants before considering reductions in needs like downsizing housing or refinancing loans. The 50/30/20 rule is especially useful for people new to budgeting because it is flexible enough to accommodate different lifestyles while still enforcing financial discipline.',
     variables: [
       {
         symbol: 'Needs (50%)',
@@ -400,7 +400,7 @@ const budgetCalculatorConfig: CalculatorConfig = {
       {
         question: 'Should I use gross or net income?',
         answer:
-          "Use your net (after-tax) take-home pay. 401(k) contributions made pre-tax are counted in the savings bucket even though they don't appear in your take-home. If your employer deducts them before your paycheck, add them back to your \"savings\" total. Similarly, health insurance premiums deducted from your paycheck are a need, so include them in that category even though they are deducted before you receive your net pay. This ensures an accurate picture of your true spending allocation.",
+          "Use your net (after-tax) take-home pay. Amounts your employer deducts before the paycheck lands (a pre-tax 401(k) contribution, health insurance premiums) are already out of that number, so either leave them out of the expense fields, or add the deducted amounts to your income figure and then enter them as savings or needs. Entering them as expenses without adding them to income double-counts them and understates your surplus.",
       },
       {
         question: 'What counts as a "need" vs. a "want"?',
@@ -444,10 +444,10 @@ const budgetCalculatorConfig: CalculatorConfig = {
       },
     ],
     proTips: [
-      'Track every dollar for 30 days before setting your budget. Most people underestimate their "wants" spending by 20-30% because small daily purchases (coffee, lunch, apps) add up without being noticed. Use a budgeting app that auto-categorizes transactions.',
+      'Track every dollar for 30 days before setting your budget. Many people underestimate their "wants" spending because small daily purchases (coffee, lunch, apps) add up without being noticed. Use a budgeting app that auto-categorizes transactions.',
       'Treat savings as your most important "bill." Automate transfers to savings and investment accounts on payday \u2014 before you see the money in checking. This "pay yourself first" approach makes saving effortless and removes the temptation to spend first and save what is left.',
       'Use separate bank accounts for needs, wants, and savings. Many banks now offer "buckets" or sub-accounts. When your wants account is empty for the month, you stop discretionary spending \u2014 no mental math required.',
-      'Re-evaluate subscriptions quarterly. The average American spends $219/month on subscriptions, many of which go unused. Set a calendar reminder every 3 months to audit all recurring charges. Cancel anything you have not used in the past 30 days.',
+      'Re-evaluate subscriptions quarterly. Subscriptions are easy to forget, and many go unused. Set a calendar reminder every 3 months to audit all recurring charges. Cancel anything you have not used in the past 30 days.',
     ],
     limitations: [
       'The 50/30/20 rule is a guideline, not a one-size-fits-all prescription. In very high cost-of-living areas (NYC, SF, Boston), housing alone may consume 40-50% of take-home pay, making a strict 50% needs target unrealistic.',

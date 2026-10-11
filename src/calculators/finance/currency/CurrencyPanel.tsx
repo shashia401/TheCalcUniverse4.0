@@ -37,6 +37,10 @@ function formatRate(rate: number): string {
   return rate.toFixed(6);
 }
 
+// The ECB / Frankfurter feed has no AED or SAR quote. Both are officially pegged to the USD,
+// so they are priced through USD at their fixed pegs (units of currency per 1 USD).
+const USD_PEGS: Record<string, number> = { AED: 3.6725, SAR: 3.75 };
+
 export default function CurrencyPanel({ amount, from, to }: CurrencyPanelProps) {
   const [rateData, setRateData] = useState<RateData>({
     rate: 0,
@@ -62,16 +66,25 @@ export default function CurrencyPanel({ amount, from, to }: CurrencyPanelProps) 
 
     setRateData((prev) => ({ ...prev, loading: true, error: null }));
     try {
-      const res = await fetch(`https://api.frankfurter.app/latest?from=${from}&to=${to}`, { signal: controller.signal });
-      if (!res.ok) throw new Error('Rate unavailable');
-      const json = await res.json();
-      if (controller.signal.aborted) return;
-      const rate = json.rates[to];
-      if (!rate) throw new Error(`Rate for ${to} not found`);
+      const apiFrom = USD_PEGS[from] ? 'USD' : from;
+      const apiTo = USD_PEGS[to] ? 'USD' : to;
+      let baseRate = 1;
+      let date = new Date().toISOString().split('T')[0];
+      if (apiFrom !== apiTo) {
+        const res = await fetch(`https://api.frankfurter.dev/v1/latest?from=${apiFrom}&to=${apiTo}`, { signal: controller.signal });
+        if (!res.ok) throw new Error('Rate unavailable');
+        const json = await res.json();
+        if (controller.signal.aborted) return;
+        baseRate = json.rates[apiTo];
+        if (!baseRate) throw new Error(`Rate for ${to} not found`);
+        date = json.date;
+      }
+      // from -> USD -> to when a pegged currency is involved: multiply by (to per USD) / (from per USD)
+      const rate = baseRate * (USD_PEGS[to] ?? 1) / (USD_PEGS[from] ?? 1);
       setRateData({
         rate,
         inverseRate: 1 / rate,
-        date: json.date,
+        date,
         loading: false,
         error: null,
       });
@@ -177,7 +190,7 @@ export default function CurrencyPanel({ amount, from, to }: CurrencyPanelProps) 
                 {' '}So {fmtAmount(amount, from)} × {formatRate(rateData.rate)} = <strong>{fmtAmount(converted, to)}</strong>.
               </p>
               <p className="text-[10px] text-slate-500 mt-2">
-                Source: European Central Bank via Frankfurter API · This is the interbank reference rate. Bank and card rates include a spread of 1–3%.
+                Source: European Central Bank via Frankfurter API · This is the interbank reference rate. Bank and card rates include a spread of 1–3%.{(USD_PEGS[from] || USD_PEGS[to]) ? ' AED and SAR are not published by the ECB, so they are converted through USD at their official fixed pegs (3.6725 AED and 3.75 SAR per USD).' : ''}
               </p>
             </div>
 

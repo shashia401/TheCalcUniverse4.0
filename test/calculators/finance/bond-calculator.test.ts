@@ -58,3 +58,16 @@ describe('bond-calculator', () => {
     expect(config.calculate({})).toHaveLength(0);
   });
 });
+
+describe('bond-calculator – audit regressions', () => {
+  const ytm = (v: Record<string, string>) => parseFloat(config.calculate(v).find((r: any) => r.id === 'ytm')!.value);
+  it('$1000 5% semi-annual 10y at $950 -> YTM 5.6617% (bisection on PV of 20 coupons + face)', () => {
+    expect(ytm({ faceValue: '1000', couponRate: '5', marketPrice: '950', yearsToMaturity: '10', paymentFrequency: '2' })).toBeCloseTo(5.6617, 3);
+  });
+  it('annual 6% bond at $1100, 5y -> 3.7683%', () => {
+    expect(ytm({ faceValue: '1000', couponRate: '6', marketPrice: '1100', yearsToMaturity: '5', paymentFrequency: '1' })).toBeCloseTo(3.7683, 3);
+  });
+  it('zero-coupon priced above face has a NEGATIVE yield: 2*((1000/1100)^(1/10)-1) = -1.8971% (was clamped to +0.02%)', () => {
+    expect(ytm({ faceValue: '1000', couponRate: '0', marketPrice: '1100', yearsToMaturity: '5', paymentFrequency: '2' })).toBeCloseTo(-1.8971, 3);
+  });
+});

@@ -48,3 +48,20 @@ describe('asset-depreciation', () => {
     expect(getValue(r, 'ddbRate')).toMatch(/\d+%/);
   });
 });
+
+describe('asset-depreciation – hand-derived schedules (audit)', () => {
+  const sched = (v: Record<string, string>) =>
+    JSON.parse(config.calculate(v).find((r: any) => r.id === '_schedule')!.value) as { depreciationExpense: number; endingValue: number }[];
+  it('DDB $50k/$5k/5y: 40% of book value, SL switch in yr 5 lands exactly on salvage', () => {
+    // hand: 20000, 12000, 7200, 4320, then min(BV-salvage=1480, ...) = 1480
+    const s = sched({ assetCost: '50000', salvageValue: '5000', usefulLife: '5', depreciationMethod: 'ddb' });
+    expect(s.map((r) => Math.round(r.depreciationExpense))).toEqual([20000, 12000, 7200, 4320, 1480]);
+    expect(s[4].endingValue).toBeCloseTo(5000, 6);
+  });
+  it('SYD $200k/$30k/7y: fractions 7/28..1/28 of 170,000', () => {
+    const s = sched({ assetCost: '200000', salvageValue: '30000', usefulLife: '7', depreciationMethod: 'syd' });
+    expect(s[0].depreciationExpense).toBeCloseTo(42500, 6);
+    expect(s[6].depreciationExpense).toBeCloseTo(6071.43, 2);
+    expect(s[6].endingValue).toBeCloseTo(30000, 6);
+  });
+});

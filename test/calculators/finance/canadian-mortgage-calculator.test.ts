@@ -74,8 +74,8 @@ describe('canadian-mortgage-calculator', () => {
     expect(getValue(r, 'error')).toContain('Minimum');
   });
 
-  it('minimum down payment for $1M+ property requires 20%', () => {
-    const r = config.calculate({ ...base, price: '1200000', downPayment: '150000' });
+  it('minimum down payment for $1.5M+ property requires 20% (insured cap raised from $1M, Dec 15 2024)', () => {
+    const r = config.calculate({ ...base, price: '1600000', downPayment: '150000' });
     expect(getValue(r, 'error')).toContain('Minimum');
   });
 
@@ -142,5 +142,59 @@ describe('canadian-mortgage-calculator', () => {
     const monthlyPmt = parseMoney(getValue(rMonthly, 'payment'));
     const semiPmt = parseMoney(getValue(rSemi, 'payment'));
     expect(semiPmt * 2).toBeCloseTo(monthlyPmt, 0);
+  });
+});
+
+describe('canadian-mortgage – audit regressions (LTT tables 2026, insured rules)', () => {
+  const base = {
+    price: '800000', downPayment: '160000', province: 'ontario', municipality: 'none',
+    firstTimeBuyer: 'no', amortization: '25', rate: '5.25', frequency: 'monthly', stressTest: 'no',
+  };
+  const ltt = (v: Record<string, string>) => parseMoney(getValue(config.calculate({ ...base, ...v }), 'lttTotal'));
+
+  it('Ontario $800K: 275 + 1,950 + 2,250 + 2%x400K = $12,475 (was quoted as $11,475 in FAQ)', () => {
+    expect(ltt({})).toBeCloseTo(12475, 0);
+  });
+  it('Toronto $800K non-first-time buyer pays full municipal tax (no automatic $4,475 rebate): 12,475 x 2', () => {
+    expect(ltt({ municipality: 'Toronto' })).toBeCloseTo(24950, 0);
+  });
+  it('Toronto $800K first-time buyer: 24,950 - 4,000 provincial - 4,475 municipal = 16,475', () => {
+    expect(ltt({ municipality: 'Toronto', firstTimeBuyer: 'yes' })).toBeCloseTo(16475, 0);
+  });
+  it('Toronto $3.5M uses the Apr-2026 graduated rate: ON-bracket sum 83,475 (2.5% to $3M, 4.4% above)', () => {
+    // province: 275+1950+2250+32000+25000+2.5%*500K = 73,975? -> provincial 2.5% above $2M:
+    //   0.5%*55K + 1%*195K + 1.5%*150K + 2%*1.6M + 2.5%*1.5M = 275+1950+2250+32000+37500 = 73,975
+    // Toronto: ... + 2.5%*1M + 4.4%*500K = 275+1950+2250+32000+25000+22000 = 83,475
+    expect(ltt({ price: '3500000', downPayment: '700000', municipality: 'Toronto' })).toBeCloseTo(73975 + 83475, 0);
+  });
+  it('BC $700K first-time buyer: tax 2,000+2%x500K = 12,000, exempt $8,000 -> 4,000', () => {
+    expect(ltt({ province: 'bc', price: '700000', downPayment: '140000', firstTimeBuyer: 'yes' })).toBeCloseTo(4000, 0);
+  });
+  it('BC $850K first-time buyer: tax 15,000 less partial exemption 8,000x(860K-850K)/25K = 3,200 -> 11,800', () => {
+    expect(ltt({ province: 'bc', price: '850000', downPayment: '170000', firstTimeBuyer: 'yes' })).toBeCloseTo(11800, 0);
+  });
+  it('BC $900K first-time buyer gets no exemption (above $860K): 2,000+2%x700K = 16,000', () => {
+    expect(ltt({ province: 'bc', price: '900000', downPayment: '180000', firstTimeBuyer: 'yes' })).toBeCloseTo(16000, 0);
+  });
+  it('Quebec $400K (2026 brackets): 0.5%x62,900 + 1%x252,100 + 1.5%x85,000 = 4,110.50, no FTB rebate', () => {
+    expect(ltt({ province: 'quebec', price: '400000', downPayment: '80000', firstTimeBuyer: 'yes' })).toBeCloseTo(4110.5, 1);
+  });
+  it('Saskatchewan has no land transfer tax', () => {
+    expect(getValue(config.calculate({ ...base, province: 'saskatchewan' }), 'lttTotal')).toContain('No provincial LTT');
+  });
+
+  it('insured 30-yr amortization allowed for first-time buyers, still blocked otherwise (Dec 15 2024 rule)', () => {
+    const ins = { ...base, province: 'alberta', price: '700000', downPayment: '70000', amortization: '30' };
+    expect(config.calculate({ ...ins, firstTimeBuyer: 'no' }).find((x: any) => x.id === 'error')).toBeDefined();
+    expect(config.calculate({ ...ins, firstTimeBuyer: 'yes' }).find((x: any) => x.id === 'error')).toBeUndefined();
+  });
+  it('$1.2M purchase with 5%/10% tiered minimum ($95,000) is allowed (insured cap now $1.5M)', () => {
+    const r = config.calculate({ ...base, province: 'alberta', price: '1200000', downPayment: '95000' });
+    expect(r.find((x: any) => x.id === 'error')).toBeUndefined();
+  });
+  it('accelerated bi-weekly on $500K, 25y, 5.25%: ~3.6 years and ~$66K interest saved (semi-annual compounding, independent sim)', () => {
+    const r = config.calculate({ ...base, province: 'alberta', price: '625000', downPayment: '125000', frequency: 'accelbiweekly' });
+    near(parseMoney(getValue(r, 'savedInterest')), 66089, 5);
+    near(parseFloat(getValue(r, 'savedYears')), 3.62, 0.01);
   });
 });

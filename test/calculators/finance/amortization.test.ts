@@ -38,3 +38,12 @@ describe('loanAmount', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 });
+
+describe('amortization – audit: educational example numbers (independent month-by-month schedule)', () => {
+  it('$250K @6.5% 30y + $200/mo extra: 265 months (22y 1m), ~$97,618 interest saved, 95 payments saved', () => {
+    const r = config.calculate({ loanAmount: '250000', interestRate: '6.5', termUnit: 'years', loanTerm: '30', extraMonthly: '200', extraAnnual: '0' });
+    expect(r.find((x: any) => x.id === 'newTerm')!.value).toBe('22 yrs 1 mo');
+    expect(r.find((x: any) => x.id === 'timeSaved')!.value).toBe('7 years and 11 months');
+    expect(parseFloat(r.find((x: any) => x.id === 'interestSaved')!.value.replace(/[$,]/g, ''))).toBeCloseTo(97618.12, 1);
+  });
+});

@@ -89,3 +89,37 @@ describe('annuity-payout', () => {
     expect(r).toHaveLength(0);
   });
 });
+
+describe('annuity-payout – audit regressions', () => {
+  const pay = {
+    solveFor: 'payout', principal: '500000', annualReturn: '5', payoutFrequency: 'monthly',
+    desiredYears: '30', inflationAdjust: 'adjusted',
+  };
+  it('inflation-adjusted payout deflates by 1.03^years (3% ANNUAL inflation)', () => {
+    const r = config.calculate(pay);
+    // independent: 2684.1081 / 1.03^30 = 1105.82 (old monthly-compounded 1.0025^360 gave 1092.50)
+    expect(getValue(r, 'infAdjPmt')).toBe('$1,105.82/mo');
+  });
+  it('duration: $400k @6%, $3,000/mo lasts n = ln(3000/(3000-2000))/ln(1.005) = 220.27 mo = 18y 4m', () => {
+    const r = config.calculate({
+      solveFor: 'duration', principal: '400000', annualReturn: '6', payoutFrequency: 'monthly',
+      payoutAmount: '3000', inflationAdjust: 'nominal',
+    });
+    expect(getValue(r, 'duration')).toBe('18 years and 4 months');
+  });
+  it('duration never renders "12 months" (59.7 months -> 5 years)', () => {
+    const r = config.calculate({
+      solveFor: 'duration', principal: '59700', annualReturn: '0', payoutFrequency: 'monthly',
+      payoutAmount: '1000', inflationAdjust: 'nominal',
+    });
+    expect(getValue(r, 'duration')).toBe('5 years');
+  });
+  it('annual payout duration keeps the fractional year (100k @5%, 20k/yr = 5.896 yr -> 5y 11m)', () => {
+    const r = config.calculate({
+      solveFor: 'duration', principal: '100000', annualReturn: '5', payoutFrequency: 'annually',
+      payoutAmount: '20000', inflationAdjust: 'nominal',
+    });
+    // independent: ln(20000/15000)/ln(1.05) = 5.8963 yr = 70.76 mo -> 71 mo
+    expect(getValue(r, 'duration')).toBe('5 years and 11 months');
+  });
+});

@@ -42,6 +42,19 @@ function getNIITThreshold(filingStatus: string): number {
   return thresholds[filingStatus] || 200000;
 }
 
+// IRS: long-term means held MORE than one year. The holding period starts the day
+// after acquisition, so the first long-term sale date is the day after the next
+// calendar anniversary (Feb 29 acquisitions use Feb 28). Counting 365 days instead
+// misclassifies sales that span a leap day (e.g. Mar 1 2023 -> Mar 1 2024 is 366 days
+// but exactly one year, so still short-term). Dates are 'YYYY-MM-DD' = UTC midnight.
+function isLongTerm(purchase: Date, sale: Date): boolean {
+  const y = purchase.getUTCFullYear() + 1;
+  const m = purchase.getUTCMonth();
+  const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  const anniversary = Date.UTC(y, m, Math.min(purchase.getUTCDate(), lastDay));
+  return sale.getTime() > anniversary;
+}
+
 function daysBetween(d1: Date, d2: Date): number {
   const ms = d2.getTime() - d1.getTime();
   return Math.round(ms / (1000 * 60 * 60 * 24));
@@ -170,12 +183,13 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     const saleProceeds = parseFloat(values.saleProceeds);
     const annualIncome = parseFloat(values.annualIncome);
     const filingStatus = values.filingStatus || 'Single';
+    const assetType = values.assetType || 'Stocks';
     const stateTaxRate = parseFloat(values.stateTaxRate) || 0;
 
     if (
       !purchaseDateStr || !saleDateStr ||
       isNaN(costBasis) || isNaN(saleProceeds) || isNaN(annualIncome) ||
-      costBasis <= 0 || saleProceeds <= 0 || annualIncome <= 0
+      costBasis <= 0 || saleProceeds <= 0 || annualIncome < 0
     ) {
       return [];
     }
@@ -192,7 +206,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     }
 
     const holdingPeriod = daysBetween(purchaseDate, saleDate);
-    const isShortTerm = holdingPeriod <= 365;
+    const isShortTerm = !isLongTerm(purchaseDate, saleDate);
     const gain = saleProceeds - costBasis;
 
     if (gain <= 0) {
@@ -214,7 +228,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
         {
           id: 'holdingPeriodType',
           label: 'Holding Period Type',
-          value: isShortTerm ? 'Short-Term (&le; 365 days)' : 'Long-Term (&gt; 365 days)',
+          value: isShortTerm ? 'Short-Term (held one year or less)' : 'Long-Term (held more than one year)',
           color: 'neutral',
         },
         {
@@ -229,8 +243,9 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     let federalTaxRate: number;
     let federalTax: number;
 
-    if (isShortTerm) {
-      // Short-term: taxed as ordinary income. Pull the filing-status brackets
+    if (isShortTerm || assetType === 'Collectibles') {
+      // Short-term: taxed as ordinary income. Long-term collectibles gains (art, coins,
+      // bullion, etc.) are also taxed at ordinary rates but capped at 28% (IRC 1(h)(4)). Pull the filing-status brackets
       // from the shared, actively-maintained utils/taxData.ts (same fix as
       // income-tax/taxData.ts) instead of a local hardcoded copy — the old
       // local copy here was stuck on stale 2025 thresholds (e.g. Single
@@ -242,7 +257,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
         'Head of Household': 'hoh',
       };
       const bracketSet = FEDERAL_BRACKETS[ST_STATUS_MAP[filingStatus] || 'single']
-        .map((b) => ({ threshold: b.to, rate: b.rate * 100 }));
+        .map((b) => ({ threshold: b.to, rate: isShortTerm ? b.rate * 100 : Math.min(b.rate * 100, 28) }));
       // Short-term gains stack on top of ordinary income and are taxed
       // bracket-by-bracket like ordinary income, not at one flat rate.
       const { tax, topRate } = stackedBracketTax(
@@ -303,12 +318,12 @@ const capitalGainsTaxConfig: CalculatorConfig = {
       {
         id: 'holdingPeriodType',
         label: 'Holding Period Type',
-        value: isShortTerm ? 'Short-Term (&le; 365 days)' : 'Long-Term (&gt; 365 days)',
+        value: isShortTerm ? 'Short-Term (held one year or less)' : 'Long-Term (held more than one year)',
         color: isShortTerm ? 'negative' : 'positive',
       },
       {
         id: 'federalTax',
-        label: `Federal Tax${isShortTerm ? ` (up to ${federalTaxRate}% ordinary rate)` : ` (up to ${federalTaxRate}% LTCG rate)`}`,
+        label: `Federal Tax${isShortTerm ? ` (up to ${federalTaxRate}% ordinary rate)` : assetType === 'Collectibles' ? ` (up to ${federalTaxRate}% collectibles rate, 28% max)` : ` (up to ${federalTaxRate}% LTCG rate)`}`,
         value: fmtMoney(federalTax),
         color: 'negative',
       },
@@ -361,6 +376,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     formula: 'Gain = Proceeds − Cost Basis  |  LTCG Rate = 0%/15%/20% based on income  |  NIIT = 3.8% on investment income above threshold',
     formulaDescription:
       'Capital gains tax is calculated based on the holding period (short-term vs. long-term), your total taxable income, and filing status. Short-term gains are taxed at ordinary income rates, while long-term gains benefit from preferential rates of 0%, 15%, or 20%. An additional 3.8% Net Investment Income Tax (NIIT) may apply for high-income taxpayers.',
+    formulaSource: 'IRS Revenue Procedure 2025-32 (2026 capital gains rate thresholds and ordinary brackets); IRS Topic 409 (Capital gains and losses); IRC section 1411 (3.8% NIIT, thresholds $200,000 single / $250,000 joint, not indexed).',
     diagram: {
       svg: '<svg viewBox="0 0 460 140" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="230" y="18" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">2026 Long-Term Capital Gains Tax Brackets (Single Filer)</text><!-- 0% bracket --><rect x="20" y="35" width="140" height="28" rx="5" fill="var(--svg-22c55e)" opacity="0.2" stroke="var(--svg-22c55e)" stroke-width="1.5"/><text x="90" y="53" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">0% rate</text><text x="90" y="73" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">$0 — $49,450</text><!-- 15% bracket --><rect x="170" y="35" width="160" height="28" rx="5" fill="var(--svg-f59e0b)" opacity="0.2" stroke="var(--svg-f59e0b)" stroke-width="1.5"/><text x="250" y="53" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">15% rate</text><text x="250" y="73" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">$49,451 — $545,500</text><!-- 20% bracket --><rect x="340" y="35" width="100" height="28" rx="5" fill="var(--svg-ef4444)" opacity="0.2" stroke="var(--svg-ef4444)" stroke-width="1.5"/><text x="390" y="53" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">20% rate</text><text x="390" y="73" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">$545,501+</text><!-- NIIT note --><rect x="70" y="90" width="320" height="22" rx="5" fill="var(--svg-f1f5f9)" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="230" y="104" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-1e293b)" text-anchor="middle">+3.8% NIIT if AGI &gt; $200k (single) or &gt; $250k (MFJ)</text><!-- Short-term note --><text x="230" y="126" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">Short-term (&le;365 days): taxed at ordinary income rates (10%-37%) | Holding period starts day after purchase</text></svg>',
       alt: 'Diagram of 2026 long-term capital gains tax brackets for single filers: 0% up to $49,450, 15% from $49,451 to $545,500, and 20% above $545,501',
@@ -433,16 +449,16 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     
     workedExamples: [
       {
-        scenario: 'Elena in Seattle, WA sold Apple stock that she bought on January 15, 2023 for $12,500 (including commissions) and sold on March 20, 2025 for $31,000. As a single filer with $92,000 in ordinary income, she wants to know her capital gains tax liability.',
-        inputs: { assetType: 'Stocks', purchaseDate: '2023-01-15', saleDate: '2025-03-20', costBasis: '12500', saleProceeds: '31000', annualIncome: '92000', filingStatus: 'Single', stateTaxRate: '0' },
-        result: 'Holding period: 795 days (Long-Term). Capital gain: $18,500. Total income ($92,000 + $18,500 = $110,500) falls in the 15% LTCG bracket. Federal tax: $2,775 (15%). Washington has no state income tax. Elena keeps $28,225 after federal tax.',
-        insight: 'Elena held her Apple shares for just over two years, qualifying for the preferential long-term capital gains rate. Her $18,500 gain was taxed at only 15% instead of stacking on top of her ordinary income at the short-term rate, saving her approximately $1,391 in federal taxes compared to selling before the one-year holding period. Short-term treatment would have pushed part of the gain into the 24% bracket (her $92,000 income plus the $18,500 gain crosses the $105,700 top of the 22% bracket for single filers in 2026), costing about $4,166 in federal tax versus $2,775 long-term — making the long-term holding period worth the wait.',
+        scenario: 'Elena in Seattle, WA sold Apple stock that she bought on January 15, 2023 for $12,500 (including commissions) and sold on March 20, 2026 for $31,000. As a single filer with $92,000 in ordinary income, she wants to know her capital gains tax liability.',
+        inputs: { assetType: 'Stocks', purchaseDate: '2023-01-15', saleDate: '2026-03-20', costBasis: '12500', saleProceeds: '31000', annualIncome: '92000', filingStatus: 'Single', stateTaxRate: '0' },
+        result: 'Holding period: 1,160 days (Long-Term). Capital gain: $18,500. Total income ($92,000 + $18,500 = $110,500) falls in the 15% LTCG bracket. Federal tax: $2,775 (15%). Washington has no state income tax. Elena keeps $28,225 after federal tax.',
+        insight: 'Elena held her Apple shares for more than three years, qualifying for the preferential long-term capital gains rate. Her $18,500 gain was taxed at only 15% instead of stacking on top of her ordinary income at the short-term rate, saving her approximately $1,391 in federal taxes compared to selling before the one-year holding period. Short-term treatment would have pushed part of the gain into the 24% bracket (her $92,000 income plus the $18,500 gain crosses the $105,700 top of the 22% bracket for single filers in 2026), costing about $4,166 in federal tax versus $2,775 long-term — making the long-term holding period worth the wait.',
       },
       {
-        scenario: 'James and Maria Johnson in Portland, OR are a married couple filing jointly with $175,000 in combined ordinary income. They bought Bitcoin on November 5, 2023 for $8,000 and sold it on October 1, 2024 for $22,000. Oregon has a 9.9% state income tax.',
-        inputs: { assetType: 'Crypto', purchaseDate: '2023-11-05', saleDate: '2024-10-01', costBasis: '8000', saleProceeds: '22000', annualIncome: '175000', filingStatus: 'Married Filing Jointly', stateTaxRate: '9.9' },
-        result: 'Holding period: 331 days (Short-Term). Capital gain: $14,000. Because the holding period is 331 days (< 365), the gain is taxed as ordinary income. Their $175,000 ordinary income places them in the 22% MFJ marginal bracket for 2026. Federal tax: $3,080 (22% of $14,000). State tax: $1,386 (9.9% of $14,000). Total tax: $4,466. After-tax proceeds: $17,534.',
-        insight: 'The Johnsons missed long-term capital gains treatment by just 34 days. Had they waited until November 6, 2024, their gain would have been taxed at the 15% LTCG rate instead of their 22% ordinary rate — saving $980 in federal taxes. This example illustrates why timing matters enormously in crypto and stock sales: holding just 34 more days would have cut their federal tax bill by nearly a third. For high-income taxpayers in states like Oregon with high state taxes, the combined short-term burden still exceeds 30% of the gain even at the 22% federal bracket.',
+        scenario: 'James and Maria Johnson in Portland, OR are a married couple filing jointly with $175,000 in combined ordinary income. They bought Bitcoin on November 5, 2025 for $8,000 and sold it on October 1, 2026 for $22,000. Oregon has a 9.9% state income tax.',
+        inputs: { assetType: 'Crypto', purchaseDate: '2025-11-05', saleDate: '2026-10-01', costBasis: '8000', saleProceeds: '22000', annualIncome: '175000', filingStatus: 'Married Filing Jointly', stateTaxRate: '9.9' },
+        result: 'Holding period: 330 days (Short-Term). Capital gain: $14,000. Because the holding period is 330 days (under one year), the gain is taxed as ordinary income. Their $175,000 ordinary income places them in the 22% MFJ marginal bracket for 2026. Federal tax: $3,080 (22% of $14,000). State tax: $1,386 (9.9% of $14,000). Total tax: $4,466. After-tax proceeds: $17,534.',
+        insight: 'The Johnsons missed long-term capital gains treatment by just 36 days. Had they waited until November 6, 2026, their gain would have been taxed at the 15% LTCG rate instead of their 22% ordinary rate — saving $980 in federal taxes. This example illustrates why timing matters enormously in crypto and stock sales: holding just 36 more days would have cut their federal tax bill by nearly a third. For high-income taxpayers in states like Oregon with high state taxes, the combined short-term burden still exceeds 30% of the gain even at the 22% federal bracket.',
       },
     ],
 
@@ -465,14 +481,15 @@ const capitalGainsTaxConfig: CalculatorConfig = {
     ],
 
     limitations: [
-      'The holding period calculation counts calendar days and starts the day after purchase. The calculator treats 365 days as short-term per IRS rules (must exceed 365 days for long-term). However, weekends, holidays, and market closures are not considered — the actual trade settlement date may differ from your entered dates.',
-      'The short-term tax rate uses a simplified marginal bracket lookup based on annual ordinary income alone. Real tax calculations consider deductions, credits, phase-outs, and the stacking of capital gains on top of ordinary income. The actual marginal rate may differ by one bracket.',
+      'The holding period calculation counts calendar days and starts the day after purchase. A sale is long-term only if it happens after the one-year anniversary of the purchase date (so a sale spanning a leap day can take 366 days). However, weekends, holidays, and market closures are not considered — the actual trade settlement date may differ from your entered dates.',
+      'Enter your taxable income (after the standard or itemized deduction), not gross income. The gain is stacked on top of it bracket by bracket, but credits, phase-outs, and the NIIT base (which uses modified AGI) are simplified, so the real result can differ.',
       'State tax treatment is simplified to a flat rate. Many states have graduated brackets, special capital gains exclusions (like the home sale exclusion), or exemption thresholds. Consult your state\'s tax authority for precise rates.',
-      'This calculator does not handle wash sales (selling and repurchasing the same security within 30 days), which disallow loss deductions under IRS rules. It also does not model the qualified small business stock exclusion (Section 1202) or opportunity zone deferrals.',
+      'This calculator does not handle wash sales (selling and repurchasing the same security within 30 days), which disallow loss deductions under IRS rules. It also does not model the qualified small business stock exclusion (Section 1202), opportunity zone deferrals, the home-sale exclusion (up to $250,000 single / $500,000 joint on a primary residence), or the 25% rate on unrecaptured Section 1250 real estate depreciation. Long-term collectibles gains are taxed at your ordinary rate capped at 28%.',
     ],
 citations: [
       { source: 'Wikipedia', title: 'Capital Gains Tax', url: 'https://en.wikipedia.org/wiki/Capital_gains_tax' },
       { source: 'IRS', title: 'Capital Gains and Losses', url: 'https://www.irs.gov/taxtopics/tc409' },
+      { source: 'IRS', title: 'Revenue Procedure 2025-32 (2026 inflation adjustments)', url: 'https://www.irs.gov/pub/irs-drop/rp-25-32.pdf' },
     ],
   },
   extraPanel: (values, results) => {

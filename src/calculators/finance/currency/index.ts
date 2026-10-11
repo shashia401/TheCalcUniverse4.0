@@ -131,7 +131,7 @@ const currencyConfig: CalculatorConfig = {
       caption: 'The mid-market rate (shown) has no markup, but banks and exchanges add a 1-3% spread that makes the actual rate less favorable',
     },
     formulaDescription:
-      'Exchange rates are fetched live from the Frankfurter API, which sources data from the European Central Bank. Rates are updated on banking business days. The multiplication is straightforward, but the rate behind it reflects complex global macroeconomic forces including monetary policy, trade balances, inflation differentials, and market sentiment.',
+      'Exchange rates are fetched live from the Frankfurter API, which sources data from the European Central Bank. Rates are updated on banking business days. The ECB does not publish AED or SAR, so those two are converted through USD at their official fixed pegs (3.6725 AED and 3.75 SAR per USD). The multiplication is straightforward, but the rate behind it reflects complex global macroeconomic forces including monetary policy, trade balances, inflation differentials, and market sentiment.',
     variables: [
       { symbol: 'Rate', name: 'Exchange Rate', description: 'How many units of the target currency equal 1 unit of the source currency. This rate reflects the relative value between two economies and fluctuates continuously during market hours based on supply and demand in the global foreign exchange market.' },
       { symbol: 'ECB', name: 'European Central Bank', description: 'The authoritative source for reference exchange rates, updated daily at approximately 16:00 CET on banking business days. The ECB reference rates are calculated using a consolidated dataset of electronic trading platform inputs and are used by financial institutions worldwide as benchmark mid-market rates.' },
@@ -162,7 +162,7 @@ const currencyConfig: CalculatorConfig = {
       },
       {
         question: 'What is the Frankfurter API?',
-        answer: 'Frankfurter is an open-source foreign exchange rates API that sources its data from the European Central Bank. It provides free, accurate, daily reference rates for 33+ currencies. It is widely used by developers and financial applications because it requires no API key, has no rate limits for reasonable use, and provides historical data going back to 1999 when the euro was introduced.',
+        answer: 'Frankfurter is an open-source foreign exchange rates API that sources its data from the European Central Bank. It provides free daily reference rates for about 30 currencies (the ECB set; AED and SAR are handled here through their USD pegs). It is widely used by developers and financial applications because it requires no API key, has no rate limits for reasonable use, and provides historical data going back to 1999 when the euro was introduced.',
       },
       {
         question: 'What factors cause exchange rates to change?',
@@ -183,19 +183,19 @@ const currencyConfig: CalculatorConfig = {
     ],
     workedExamples: [
       {
-        scenario: 'Sarah is traveling from New York to Paris and wants to convert $2,000 USD to Euros for her trip. The current EUR/USD rate is 1.0850.',
+        scenario: 'Sarah is traveling from New York to Paris and wants to convert $2,000 USD to Euros for her trip. Suppose the EUR/USD rate is 1.0850 (an illustrative rate, not a live quote).',
         inputs: { amount: '2000', fromCurrency: 'USD', toCurrency: 'EUR' },
         result: '€1,843.32 EUR — Sarah gets approximately €1,843 for her $2,000 at the mid-market rate.',
         insight: 'The mid-market rate is what banks trade at. Sarah will likely get a worse rate from her bank or airport kiosk, which adds a spread of 2-5%. Using a specialized transfer service or multi-currency card can save $40-100 on this conversion alone.',
       },
       {
-        scenario: 'Raj in Mumbai receives a $5,000 USD freelance payment and wants to convert it to Indian Rupees. The USD/INR rate is 83.25.',
+        scenario: 'Raj in Mumbai receives a $5,000 USD freelance payment and wants to convert it to Indian Rupees. Suppose the USD/INR rate is 83.25 (illustrative, not a live quote).',
         inputs: { amount: '5000', fromCurrency: 'USD', toCurrency: 'INR' },
         result: '₹416,250 INR — Raj receives approximately 4.16 lakh rupees before any bank fees or transfer charges.',
         insight: 'Freelancers receiving international payments should compare platforms like Wise, Payoneer, and direct bank transfers. The difference in exchange rates and fees between platforms can be 2-4%, which on $5,000 means $100-200 lost to poor rates.',
       },
       {
-        scenario: 'The Chen family in San Francisco is planning a month-long trip to Japan and wants to budget $8,000 USD for spending money. The current USD/JPY exchange rate is 145.50.',
+        scenario: 'The Chen family in San Francisco is planning a month-long trip to Japan and wants to budget $8,000 USD for spending money. Suppose the USD/JPY rate is 145.50 (illustrative, not a live quote).',
         inputs: { amount: '8000', fromCurrency: 'USD', toCurrency: 'JPY' },
         result: '¥1,164,000 JPY — the Chen family receives approximately 1.16 million yen for their $8,000 at the mid-market rate before any fees or spreads are applied.',
         insight: 'Japan remains a largely cash-based society, so the Chens should carry a mix of yen cash and a no-foreign-transaction-fee card. Withdrawing ¥1,164,000 from ATMs in Japan (at ~1.5% above mid-market) would cost about $120 in hidden fees compared to the mid-market rate. Using a Wise multi-currency card pre-loaded with yen at the time of conversion could cut that to about $40. Planning the currency exchange strategy in advance saves enough to cover a nice kaiseki dinner in Kyoto.',
@@ -219,11 +219,11 @@ const currencyConfig: CalculatorConfig = {
       { label: 'Most traded pair', value: 'EUR/USD (Euro / US Dollar)' },
       { label: 'Typical bank spread', value: '2-5% above mid-market rate' },
       { label: 'Credit card foreign fee', value: '1-3% per transaction' },
-      { label: 'Wise/TransferWise spread', value: '~0.5% above mid-market' },
+      { label: 'Low-cost online transfer services', value: 'Often under 1% all-in; compare fee + rate' },
       { label: 'Best time to convert', value: 'Weekdays 8am-5pm GMT (forex open)' },
-      { label: 'USD to EUR (May 2026)', value: '~0.92 EUR per 1 USD' },
-      { label: 'USD to GBP (May 2026)', value: '~0.78 GBP per 1 USD' },
-      { label: 'USD to JPY (May 2026)', value: '~145 JPY per 1 USD' },
+      { label: 'USD to EUR (ECB, 9 Oct 2026 — indicative)', value: '0.892 EUR per 1 USD' },
+      { label: 'USD to GBP (ECB, 9 Oct 2026 — indicative)', value: '0.756 GBP per 1 USD' },
+      { label: 'USD to JPY (ECB, 9 Oct 2026 — indicative)', value: '158.3 JPY per 1 USD' },
     ],
     citations: [
       { source: 'Federal Reserve', url: 'https://www.federalreserve.gov' },

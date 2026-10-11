@@ -107,7 +107,8 @@ const compoundInterestConfig: CalculatorConfig = {
     const nt = n * t;
     const perPeriod = r / n;
     const futureP = P * Math.pow(1 + perPeriod, nt);
-    const mr = r / 12;
+    // Monthly rate equivalent to the chosen compounding: (1 + r/n)^(n/12) - 1 (= r/12 when n = 12)
+    const mr = Math.pow(1 + r / n, n / 12) - 1;
     const months = t * 12;
     const futurePMT = mr === 0 ? monthly * months : monthly * ((Math.pow(1 + mr, months) - 1) / mr);
     const fv = futureP + futurePMT;
@@ -162,7 +163,8 @@ const compoundInterestConfig: CalculatorConfig = {
     if (isNaN(r) || isNaN(t) || t <= 0) return [];
 
     const calcFV = (rate: number) => {
-      const mr = rate / 12;
+      // Monthly deposits earn the monthly rate equivalent to the chosen compounding frequency
+      const mr = Math.pow(1 + rate / n, n / 12) - 1;
       const months = t * 12;
       const futureP = P * Math.pow(1 + rate / n, n * t);
       const futurePMT = mr === 0
@@ -193,7 +195,7 @@ const compoundInterestConfig: CalculatorConfig = {
         highlight: true,
         color: 'positive' as const,
         interpretation: totalContributed > 0
-          ? `Your money grows ${(fv / totalContributed).toFixed(1)}× over ${t} year${t === 1 ? '' : 's'}: of the ${fmt(fv)} total, ${fmt(totalContributed)} is what you put in and ${fmt(interest)} (${totalGrowthPct.toFixed(0)}%) comes from compounding. ${interest > totalContributed ? 'Compounding earns more than you contribute — time in the market is doing most of the work.' : `At ${(r * 100).toFixed(1)}% it takes roughly ${Math.ceil(72 / (r * 100))} years for money to double (Rule of 72).`}`
+          ? `Your money grows ${(fv / totalContributed).toFixed(1)}× over ${t} year${t === 1 ? '' : 's'}: of the ${fmt(fv)} total, ${fmt(totalContributed)} is what you put in and ${fmt(interest)} (${totalGrowthPct.toFixed(0)}%) comes from compounding. ${interest > totalContributed ? 'Compounding earns more than you contribute — time in the market is doing most of the work.' : (r > 0 ? `At ${(r * 100).toFixed(1)}% it takes roughly ${Math.ceil(72 / (r * 100))} years for money to double (Rule of 72).` : 'At a 0% rate your money does not grow — only your contributions add up.')}`
           : undefined,
       },
       {
@@ -231,9 +233,9 @@ const compoundInterestConfig: CalculatorConfig = {
     return createElement(CompoundInterestPanel, { principal: P, monthlyContribution: monthly, rate: r, variance, years: t, compoundFrequency: n });
   },
   educational: {
-    formula: 'FV = P×(1 + r/n)^(n×t) + PMT×[(1 + r/12)^(12t) − 1]/(r/12)',
+    formula: 'FV = P×(1 + r/n)^(n×t) + PMT×[(1 + i)^(12t) − 1]/i, where i = (1 + r/n)^(n/12) − 1',
     formulaDescription:
-      'The first term compounds the initial lump sum at the chosen frequency. The second term calculates the future value of regular monthly contributions compounded monthly. Together they show the full power of compounding over time, capturing both the growth of a starting nest egg and the impact of consistent saving habits.',
+      'The first term compounds the initial lump sum at the chosen frequency. The second term calculates the future value of regular monthly contributions (made at the end of each month), earning the monthly rate i that is equivalent to the chosen compounding frequency (i = r/12 for monthly compounding). Together they show the full power of compounding over time, capturing both the growth of a starting nest egg and the impact of consistent saving habits.',
     diagram: {
       svg: compoundInterestSvg,
       alt: 'Line chart showing compound interest growing exponentially (curved blue line) vs simple interest growing linearly (straight red dashed line)',
@@ -276,7 +278,7 @@ const compoundInterestConfig: CalculatorConfig = {
       },
       {
         question: 'How does a monthly contribution change the result?',
-        answer: 'Regular contributions dramatically amplify growth beyond what compounding alone provides. $500/month for 30 years at 7% grows to about $606,000 — from only $180,000 contributed out of pocket. The other $426,000 comes entirely from compounding working on both the principal and the accumulated contributions. This is why consistent investing, even in small amounts, is the most reliable path to building long-term wealth.',
+        answer: 'Regular contributions dramatically amplify growth beyond what compounding alone provides. $500/month for 30 years at 7% (compounded monthly) grows to about $610,000 — from only $180,000 contributed out of pocket. The other $430,000 comes entirely from compounding working on both the principal and the accumulated contributions. This is why consistent investing, even in small amounts, is the most reliable path to building long-term wealth.',
       },
       {
         question: 'What is a realistic rate of return to use for planning?',

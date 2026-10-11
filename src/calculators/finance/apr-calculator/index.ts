@@ -36,7 +36,7 @@ const aprSvg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" st
   <text x="80" y="127" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-15803d)" font-family="system-ui,sans-serif">Net Proceeds</text>
   <text x="80" y="142" text-anchor="middle" font-size="9" fill="var(--svg-64748b)" font-family="system-ui,sans-serif">$196,000</text>
   <rect x="185" y="118" width="120" height="32" rx="6" fill="var(--svg-fef3c7)" stroke="var(--svg-f59e0b)" stroke-width="1.5"/>
-  <text x="245" y="135" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-b45309)" font-family="system-ui,sans-serif">APR = 6.72%</text>
+  <text x="245" y="135" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-b45309)" font-family="system-ui,sans-serif">APR = 6.70%</text>
   <text x="245" y="146" text-anchor="middle" font-size="8" fill="var(--svg-64748b)" font-family="system-ui,sans-serif">vs 6.50% nominal</text>
   <line x1="135" y1="130" x2="183" y2="130" stroke="var(--svg-f59e0b)" stroke-width="1.5"/>
   <text x="160" y="178" text-anchor="middle" font-size="9" fill="var(--svg-64748b)" font-family="system-ui,sans-serif">APR = interest rate applied to net cash</text>
@@ -71,6 +71,8 @@ const aprCalculatorConfig: CalculatorConfig = {
       label: 'Loan Term',
       type: 'number',
       placeholder: '30',
+      min: 1,
+      max: 600,
       required: true,
       helpText: 'Length of the loan — enter the numeric value, then select years or months below.',
     },
@@ -90,6 +92,7 @@ const aprCalculatorConfig: CalculatorConfig = {
       type: 'number',
       prefix: '$',
       placeholder: '4,000',
+      min: 0,
       helpText:
         'Include: origination fees, discount points, broker fees, admin fees. Do NOT include prepaid items (escrow, insurance, taxes) which are not part of APR.',
     },
@@ -105,6 +108,9 @@ const aprCalculatorConfig: CalculatorConfig = {
     if (isNaN(loanAmount) || loanAmount <= 0) return [];
     if (isNaN(nominalRate) || nominalRate < 0) return [];
     if (isNaN(loanTermValue) || loanTermValue <= 0) return [];
+
+    // Fees at/above the loan amount leave no cash received — APR is undefined
+    if (loanAmount - upfrontFees <= 0) return [];
 
     const termMonths = loanTermUnit === 'years' ? loanTermValue * 12 : loanTermValue;
     const monthlyNominalRate = nominalRate / 100 / 12;
@@ -203,6 +209,7 @@ const aprCalculatorConfig: CalculatorConfig = {
 
   educational: {
     formula: 'APR = Annual rate r such that: Net Proceeds = Payment × [1 − (1+r/12)^−n] / (r/12)',
+    formulaSource: 'Regulation Z (12 CFR 1026.22 and Appendix J, actuarial method): APR is the periodic rate that equates the present value of scheduled payments to the amount financed, multiplied by the number of periods per year.',
     formulaDescription:
       'The APR is the interest rate that, applied to the actual cash you receive (loan amount minus fees), produces the same monthly payment as your loan. It is always equal to or higher than the nominal rate. The higher the fees, the higher the gap. APR is the single best number for comparing loan offers because it captures both the interest rate and the fee cost in one percentage figure.',
     diagram: {
@@ -253,7 +260,7 @@ const aprCalculatorConfig: CalculatorConfig = {
       {
         question: 'What fees are included in APR?',
         answer:
-          'APR must include origination fees, discount points, mortgage broker fees, and certain closing fees directly associated with the loan. It does NOT include prepaid interest, property taxes, homeowner insurance, or title insurance — these are excluded by regulation (RESPA/TILA). Always ask your lender for the APR, not just the rate. The APR disclosure is legally required in the Loan Estimate document you receive within 3 days of applying for a mortgage.',
+          'APR must include origination fees, discount points, mortgage broker fees, and certain closing fees directly associated with the loan. Prepaid (per-diem) interest and mortgage insurance premiums ARE counted, but property taxes, homeowner insurance premiums, and bona fide, reasonable title, appraisal and credit-report fees in a real-estate loan are excluded under Regulation Z (TILA). Note that this calculator only knows the fees you enter. Always ask your lender for the APR, not just the rate. The APR disclosure is legally required in the Loan Estimate document you receive within 3 business days of applying for a mortgage.',
       },
       {
         question: 'Should I choose the lowest APR loan?',

@@ -47,7 +47,7 @@ const arvFlippingConfig: CalculatorConfig = {
       max: 100,
       step: 1,
       required: true,
-      helpText: 'Your desired profit margin on the total project cost (typical: 15-25%)',
+      helpText: 'Your desired profit as a percentage of the ARV (sale price), e.g. 20% of a $300,000 ARV = $60,000 (typical: 15-25%)',
     },
   ],
 
@@ -76,8 +76,10 @@ const arvFlippingConfig: CalculatorConfig = {
         label: 'Maximum Allowable Offer (MAO)',
         value: `$${fmt(maxAllowableOffer)}`,
         highlight: true,
-        color: 'positive' as const,
-        interpretation: `This is a ceiling, not a target offer — it's what keeps your ${targetProfitMargin}% margin intact after repairs and holding costs. The 70% rule (roughly $${fmt(seventyPercentRule)} here) is a rougher gut-check some investors use; treat both as starting points and verify repair estimates before committing.`,
+        color: (maoRaw < 0 ? 'negative' : 'positive') as 'negative' | 'positive',
+        interpretation: maoRaw < 0
+          ? `Repairs and holding costs alone eat the ARV left after your ${targetProfitMargin}% profit target, so no purchase price works at this margin — lower the target, cut costs, or pass on the deal.`
+          : `This is a ceiling, not a target offer — it's what keeps your ${targetProfitMargin}% margin intact after repairs and holding costs. The 70% rule (roughly $${fmt(seventyPercentRule)} here) is a rougher gut-check some investors use; treat both as starting points and verify repair estimates before committing.`,
       },
       {
         id: 'maxAllowableOffer',
@@ -153,7 +155,7 @@ const arvFlippingConfig: CalculatorConfig = {
       'Enter the After Repair Value (ARV) — the estimated sale price after renovations. Research comparable sold properties in the same neighborhood.',
       'Enter your estimated repair and renovation costs. Get contractor bids before making an offer — do not rely on rough estimates.',
       'Enter holding costs: loan interest, property taxes, insurance, utilities during the flip period. A typical flip takes 3-6 months.',
-      'Set your target profit margin as a percentage of the total project cost. Most investors target 15-25% minimum.',
+      'Set your target profit as a percentage of the ARV (the sale price). Most investors target 15-25% minimum. The ROI shown is profit divided by your total project cost, so it will be higher than this margin.',
       'The calculator shows your MAO, estimated profit, and ROI. Compare against the 70% Rule as a sanity check on your numbers.',
     ],
     commonUses: [
@@ -172,7 +174,7 @@ const arvFlippingConfig: CalculatorConfig = {
       {
         question: 'What are typical holding costs for a flip?',
         answer:
-          'Holding costs include: loan interest (hard money or conventional), property taxes, insurance, utilities (electric, water, gas), HOA fees, and lawn maintenance. For a 3-6 month flip, these typically run 3-8% of the purchase price. Hard money loans are particularly expensive — 10-15% interest — which is why experienced flippers prioritize speed and often use cash or conventional financing when possible.',
+          'Holding costs include: loan interest (hard money or conventional), property taxes, insurance, utilities (electric, water, gas), HOA fees, and lawn maintenance. For a 3-6 month flip, the total depends on the purchase price, loan terms and how long the project runs. Hard money loans are particularly expensive — 10-15% interest — which is why experienced flippers prioritize speed and often use cash or conventional financing when possible.',
       },
       {
         question: 'What is a good profit margin for a flip?',

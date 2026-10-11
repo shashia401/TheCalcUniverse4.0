@@ -452,3 +452,26 @@ describe('cd calculator', () => {
     near(parseMoney(getValue(r, 'totalPrincipal')), 68000, 1);
   });
 });
+
+describe('cd-calculator – audit regressions', () => {
+  const g = (r: any[], id: string) => r.find((x) => x.id === id)!.value as string;
+  it('$5,000, 3 months @4.5% APY daily: interest = 5000*(1.045^0.25-1) = $55.32, so balance $5,055 (daily period rounding no longer shaves the term)', () => {
+    const r = config.calculate({ initialDeposit: '5000', termUnit: 'months', termLength: '3', apy: '4.5', compounding: 'daily', additionalDeposit: '0' });
+    expect(g(r, 'balance')).toBe('$5,055');
+    expect(g(r, 'totalInterest')).toBe('$55');
+  });
+  it('$50,000, 2 years @5.25% APY: 50000*1.0525^2 = $55,388', () => {
+    const r = config.calculate({ initialDeposit: '50000', termUnit: 'years', termLength: '2', apy: '5.25', compounding: 'monthly', additionalDeposit: '0' });
+    expect(g(r, 'balance')).toBe('$55,388');
+  });
+  it('additional deposit is MONTHLY regardless of compounding choice ($50K + $500/mo, 3y, 4.85% APY = $76,937 for daily and monthly alike)', () => {
+    const v = { initialDeposit: '50000', termUnit: 'years', termLength: '3', apy: '4.85', additionalDeposit: '500' };
+    expect(g(config.calculate({ ...v, compounding: 'monthly' }), 'balance')).toBe('$76,937');
+    expect(g(config.calculate({ ...v, compounding: 'daily' }), 'balance')).toBe('$76,937');
+    expect(g(config.calculate({ ...v, compounding: 'daily' }), 'totalPrincipal')).toBe('$68,000');
+  });
+  it('1-year term in years unit is labelled "12 months"', () => {
+    const r = config.calculate({ initialDeposit: '1000', termUnit: 'years', termLength: '1', apy: '4', compounding: 'monthly' });
+    expect(r.find((x: any) => x.id === 'balance')!.label).toContain('12 months');
+  });
+});

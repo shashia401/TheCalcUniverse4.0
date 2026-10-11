@@ -10,8 +10,10 @@ function simulatePayoff(balance: number, _apr: number, monthlyPayment: number, m
 
   while (remaining > 0.005 && months < 1200) {
     const interestCharge = remaining * monthlyRate;
-    remaining = Math.max(0, remaining + interestCharge - monthlyPayment);
-    totalPaid += monthlyPayment;
+    // The final payment is only what is still owed (balance + that month's interest), not the full payment
+    const payment = Math.min(monthlyPayment, remaining + interestCharge);
+    remaining = Math.max(0, remaining + interestCharge - payment);
+    totalPaid += payment;
     totalInterest += interestCharge;
     months++;
   }
@@ -214,7 +216,7 @@ const creditCardPayoffConfig: CalculatorConfig = {
     formulaDescription:
       'The first formula calculates the exact number of months needed to pay off a credit card balance with a fixed monthly payment. The second calculates the required monthly payment to be debt-free by a target date. Both are derived from the standard loan amortization formula adapted for revolving credit.',
     variables: [
-      { symbol: 'Balance & Timeline', name: 'Debt Amount & Payoff Duration', description: 'Your current credit card balance (B) directly determines the pay-off timeline. At 22% APR on a $5,000 balance, paying $200/month takes about 30 months; paying only the minimum takes over 8 years.' },
+      { symbol: 'Balance & Timeline', name: 'Debt Amount & Payoff Duration', description: 'Your current credit card balance (B) directly determines the pay-off timeline. At 22% APR on a $5,000 balance, paying $200/month takes about 34 months; paying only $100/month takes over 11 years.' },
       { symbol: 'r', name: 'Monthly Rate', description: 'Your APR divided by 12. Credit card APRs are typically quoted as annual rates, but interest is charged monthly on the average daily balance.' },
       { symbol: 'P', name: 'Monthly Payment', description: 'The fixed amount you plan to pay each month. If this amount does not exceed the monthly interest charge, the balance will never decrease.' },
     ],
@@ -229,11 +231,11 @@ const creditCardPayoffConfig: CalculatorConfig = {
       'See how increasing your monthly payment by even a small amount dramatically reduces total interest and accelerates your payoff timeline.',
     ],
     explanation:
-      'Credit card debt is among the most expensive debt available to consumers, with average APRs currently exceeding 20%. The insidious nature of compound interest means that making only minimum payments keeps you in debt for decades. On a $5,000 balance at 22% APR, paying only the 2% minimum ($100/month initially) costs over $4,500 in interest and takes more than 8 years to pay off. Even worse, if your monthly payment does not exceed the monthly interest charge, your balance never decreases — you are treading water financially. This calculator makes the true cost visible and helps you find a realistic payoff strategy that fits your budget.',
+      'Credit card debt is among the most expensive debt available to consumers, with average APRs currently exceeding 20%. The insidious nature of compound interest means that making only minimum payments keeps you in debt for decades. On a $5,000 balance at 22% APR, paying a flat $100/month (2% of the starting balance) takes about 11 years and costs roughly $8,700 in interest. Even worse, if your monthly payment does not exceed the monthly interest charge, your balance never decreases — you are treading water financially. This calculator makes the true cost visible and helps you find a realistic payoff strategy that fits your budget.',
     faqs: [
       {
         question: 'What is the minimum payment trap?',
-        answer: 'Minimum payments (typically 1-2% of the balance) often barely cover the interest each month. At a typical 22% APR, a $5,000 balance generates about $92 in interest every month. If your minimum payment is $100, only $8 goes toward principal. At that rate, it would take over 30 years to pay off the balance and cost more than $12,000 in interest. This calculator warns you if your payment is too low to ever pay off the balance.',
+        answer: 'Minimum payments (typically 1-2% of the balance) often barely cover the interest each month. At a typical 22% APR, a $5,000 balance generates about $92 in interest every month. If your minimum payment is $100, only $8 goes toward principal. Paying a flat $100 every month, it would take over 11 years to pay off the balance and cost roughly $8,700 in interest. This calculator warns you if your payment is too low to ever pay off the balance.',
       },
       {
         question: 'Should I pay off my credit card or save first?',
@@ -254,13 +256,13 @@ const creditCardPayoffConfig: CalculatorConfig = {
         scenario: 'Tanya in Denver, CO has a $5,000 balance on her Chase credit card at 21.99% APR. She wants to know how long it will take if she pays $200/month, and whether she can afford to pay it off in 24 months instead.',
         inputs: { balance: '5000', apr: '21.99', payoffMode: 'fixed', monthlyPayment: '200' },
         result: 'At $200/month fixed payment, Tanya will be debt-free in approximately 2 years 10 months (34 months). She will pay about $1,749 in total interest — roughly 35% of her original balance. Total amount paid: $6,749.',
-        insight: 'Tanya\'s $200/month payment covers her first month\'s interest charge of about $92 and applies only $108 toward principal. The slow start is the nature of credit card debt — early payments are mostly interest. Adding just $50 more per month ($250 total) would cut her payoff time to roughly 2 years 1 month (25 months) and save approximately $550 in interest. This demonstrates the most powerful debt-reduction insight: the best return on investment is paying down high-interest credit card debt.',
+        insight: 'Tanya\'s $200/month payment covers her first month\'s interest charge of about $92 and applies only $108 toward principal. The slow start is the nature of credit card debt — early payments are mostly interest. Adding just $50 more per month ($250 total) would cut her payoff time to roughly 2 years 2 months (26 months) and save approximately $464 in interest. This demonstrates the most powerful debt-reduction insight: the best return on investment is paying down high-interest credit card debt.',
       },
       {
         scenario: 'David in Miami, FL wants to pay off his $8,200 credit card at 24.99% APR by his daughter\'s college graduation, which is exactly 36 months away. He uses the "pay off by date" mode to find the required monthly payment.',
         inputs: { balance: '8200', apr: '24.99', payoffMode: 'bydate', targetMonths: '36' },
         result: 'David needs to pay $325.99/month to be debt-free in 36 months. Over that time he will pay $3,536 in total interest — about 43% of his original balance. Total repayment: $11,736 on an $8,200 balance.',
-        insight: 'The required monthly payment of nearly $326 is significantly higher than the 2% minimum payment his card statement shows (~$164/month). If David paid only the minimum, he would be in debt for over 10 years and pay more than $9,000 in interest. The target-date mode reveals the uncomfortable truth about credit card debt: short payoff timelines require large monthly payments, and the interest cost is punishing even on "reasonable" timelines. David\'s 43% interest-to-balance ratio shows why paying only the minimum is financial quicksand.',
+        insight: 'The required monthly payment of nearly $326 is roughly double a 2%-of-balance minimum payment (~$164/month), which would not even cover his first month of interest (about $171), so the balance would never shrink. The target-date mode reveals the uncomfortable truth about credit card debt: short payoff timelines require large monthly payments, and the interest cost is punishing even on "reasonable" timelines. David\'s 43% interest-to-balance ratio shows why paying only the minimum is financial quicksand.',
       },
     ],
 
@@ -273,7 +275,7 @@ const creditCardPayoffConfig: CalculatorConfig = {
 
     quickReference: [
       { label: 'Average Credit Card APR (2026)', value: '20-23% — among the most expensive consumer debt' },
-      { label: '2% Minimum Payment on $5,000', value: '~$100/month — takes 10+ years to pay off, costs $5,000+ in interest' },
+      { label: 'Flat $100/month on $5,000 at 22%', value: 'About 11.4 years to pay off, roughly $8,700 in interest' },
       { label: 'Payoff Formula (Fixed Payment)', value: 'Months = −log(1 − rB/P) ÷ log(1 + r) where r = monthly rate, B = balance, P = payment' },
       { label: 'Payoff Formula (By Date)', value: 'P = B × [r(1+r)^n] ÷ [(1+r)^n − 1] — standard loan amortization formula' },
       { label: 'Balance Transfer Typical Fee', value: '3-5% of transferred balance — still far cheaper than 20%+ APR if paid during promo period' },

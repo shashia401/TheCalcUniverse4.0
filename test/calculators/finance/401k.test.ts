@@ -79,3 +79,18 @@ describe('401k', () => {
     near(employerContribs, yourContribs * 0.5, 1);
   });
 });
+
+describe('401k – explicit 0% salary increase (audit regression)', () => {
+  it('treats salaryIncrease "0" as 0%, not the 3% blank default', () => {
+    const r = config.calculate({
+      currentAge: '45', retirementAge: '67', currentBalance: '30000',
+      annualSalary: '75000', salaryIncrease: '0', yourContribution: '10',
+      employerMatch: '50', employerMatchLimit: '6', rateOfReturn: '7',
+    });
+    // Flat salary: contributions = 10% x 75,000 x 22 yrs and 3% x 75,000 x 22 yrs (hand arithmetic)
+    near(parseMoney(getValue(r, 'yourContribs')), 165_000, 1);
+    near(parseMoney(getValue(r, 'employerContribs')), 49_500, 1);
+    // Closed form: FV = 30000(1+i)^264 + pmt((1+i)^264-1)/i, i=0.07/12, pmt=(7500+2250)/12
+    near(parseMoney(getValue(r, 'totalBalance')), 646_838, 2);
+  });
+});

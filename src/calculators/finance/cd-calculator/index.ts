@@ -1,6 +1,5 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
-import { fvLumpSum } from '../../../utils/financial';
 import CDPanel from './CDPanel';
 
 const COMPOUND_LABELS: Record<string, { label: string; n: number }> = {
@@ -101,13 +100,13 @@ const cdConfig: CalculatorConfig = {
     },
     {
       id: 'additionalDeposit',
-      label: 'Additional Deposits (Optional)',
+      label: 'Additional Monthly Deposit (Optional)',
       type: 'number',
       placeholder: '0',
       prefix: '$',
       min: 0,
       step: 50,
-      helpText: 'Recurring deposit amount added each compounding period',
+      helpText: 'Amount added at the end of every month (only for add-on CDs that accept ongoing deposits)',
     },
   ],
 
@@ -125,35 +124,33 @@ const cdConfig: CalculatorConfig = {
     const years = termUnit === 'months' ? termRaw / 12 : termRaw;
     const { n: periodsPerYear, label: compLabel } = COMPOUND_LABELS[compoundingKey] || COMPOUND_LABELS.monthly;
 
-    // APY is already the effective ANNUAL rate (the input's own helpText says
-    // so), not a nominal rate to re-compound — so the per-period rate must be
-    // the one that, compounded `periodsPerYear` times, reproduces exactly
-    // that APY: (1+apy)^(1/n) - 1. Dividing apy/n here would treat it as a
-    // nominal rate and silently change the balance based on which
-    // compounding frequency the user picks, even though APY is defined to
-    // make that frequency irrelevant.
+    // APY is already the effective ANNUAL rate, so growth over t years is simply
+    // (1 + APY)^t no matter how often the bank compounds (that is the point of APY).
+    // Using t directly (rather than rounding to a whole number of daily/weekly
+    // periods) keeps short terms exact, e.g. 3 months = 1.045^0.25.
     const ratePerPeriod = Math.pow(1 + apy, 1 / periodsPerYear) - 1;
-    const totalPeriods = Math.round(years * periodsPerYear);
+    const totalMonths = Math.round(years * 12);
+    const monthlyRate = Math.pow(1 + apy, 1 / 12) - 1;
 
-    // Future value
-    let balance = fvLumpSum(deposit, ratePerPeriod, totalPeriods);
+    // Future value of the initial deposit
+    let balance = deposit * Math.pow(1 + apy, years);
 
-    // Additional deposits
-    if (additionalDeposit > 0 && ratePerPeriod > 0) {
-      balance += additionalDeposit * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
+    // Additional deposits: one per month (end of month), regardless of compounding frequency
+    if (additionalDeposit > 0 && monthlyRate > 0) {
+      balance += additionalDeposit * ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate);
     } else if (additionalDeposit > 0) {
-      balance += additionalDeposit * totalPeriods;
+      balance += additionalDeposit * totalMonths;
     }
 
-    const totalInterest = balance - deposit - additionalDeposit * totalPeriods;
+    const totalInterest = balance - deposit - additionalDeposit * totalMonths;
     const interestPct = balance > 0 ? (totalInterest / balance) * 100 : 0;
 
     const fmtLarge = (n: number) =>
       n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
     return [
-      { id: 'balance', label: `Balance at Maturity (${termUnit === 'months' ? termRaw : termRaw * 12} ${termRaw === 1 ? 'month' : 'months'})`, value: fmtLarge(balance), highlight: true, color: 'positive' as const, interpretation: `Of this balance, ${interestPct.toFixed(1)}% (${fmtLarge(totalInterest)}) is interest the bank pays you — the rest is your own money back. A CD's return is fixed and guaranteed, but locked: withdrawing early usually forfeits several months of that interest.` },
-      { id: 'totalPrincipal', label: 'Total Principal Deposited', value: fmtLarge(deposit + additionalDeposit * totalPeriods), color: 'neutral' as const },
+      { id: 'balance', label: `Balance at Maturity (${totalMonths} ${totalMonths === 1 ? 'month' : 'months'})`, value: fmtLarge(balance), highlight: true, color: 'positive' as const, interpretation: `Of this balance, ${interestPct.toFixed(1)}% (${fmtLarge(totalInterest)}) is interest the bank pays you — the rest is your own money back. A CD's return is fixed and guaranteed, but locked: withdrawing early usually forfeits several months of that interest.` },
+      { id: 'totalPrincipal', label: 'Total Principal Deposited', value: fmtLarge(deposit + additionalDeposit * totalMonths), color: 'neutral' as const },
       { id: 'totalInterest', label: 'Total Interest Earned', value: fmtLarge(totalInterest), color: 'positive' as const },
       { id: 'interestPct', label: 'Interest as % of Final Balance', value: `${interestPct.toFixed(1)}%`, color: interestPct > 20 ? 'positive' as const : 'neutral' as const },
       { id: 'apyResult', label: 'APY', value: `${(apy * 100).toFixed(2)}%`, color: 'neutral' as const },
@@ -173,14 +170,14 @@ const cdConfig: CalculatorConfig = {
   },
 
   educational: {
-    formula: 'A = P × (1 + r/n)^(n×t)',
+    formula: 'A = P × (1 + APY)^t',
     diagram: {
       svg: cdSvg,
       alt: 'CD ladder strategy diagram showing four staggered CDs (3mo, 6mo, 1yr, 2yr) with rollover arrows and compounding formula',
       caption: 'CD laddering staggers maturities for regular liquidity access while earning higher long-term rates on most of your deposit',
     },
     formulaDescription:
-      'The compound interest formula: A = final amount at maturity, P = initial deposit, r = APY expressed as a decimal, n = compounding periods per year, t = time in years. More frequent compounding results in more interest earned on interest over the same time period.',
+      'A = final amount at maturity, P = initial deposit, APY = annual percentage yield as a decimal, t = time in years. Because APY already includes the effect of compounding, it equals (1 + r/n)^n − 1 for a nominal rate r compounded n times a year — so the maturity value depends on the APY and the term, not on the compounding frequency you pick. Optional monthly add-on deposits are added at the end of each month.',
     variables: [
       { symbol: 'A', name: 'Maturity Balance', description: 'The total value of the CD at the end of its term — includes both the original principal and all compounded interest earned over the full term.' },
       { symbol: 'P', name: 'Initial Deposit', description: 'The principal amount you deposit to open the CD. Most banks require a minimum deposit of $500 to $5,000.' },
@@ -191,7 +188,7 @@ const cdConfig: CalculatorConfig = {
       'Choose the term unit (months or years) and enter the length of the CD term.',
       'Enter the APY offered by the bank (or use the benchmark rates table below as a reference for current market rates).',
       'Select the compounding frequency — daily compounding is most common for high-yield CDs.',
-      'Optionally add recurring deposits if your bank allows "add-on" CD contributions.',
+      'Optionally add a monthly deposit if your bank allows "add-on" CD contributions.',
       'Review the maturity balance, total principal versus interest breakdown, and effective APY.',
     ],
     commonUses: [
@@ -200,7 +197,7 @@ const cdConfig: CalculatorConfig = {
       'Decide between a high-yield savings account and a fixed-term CD by projecting the total interest earned under each option.',
     ],
     explanation:
-      'Certificates of Deposit (CDs) offer a guaranteed fixed return in exchange for locking your money away for a predetermined term. The key advantage over regular savings accounts is the higher fixed interest rate that is guaranteed for the entire term. Banks issue CDs as a way to secure stable deposits they can use for lending, and in return they offer depositors a premium over standard savings rates. The trade-off is the loss of liquidity during the CD term — if you need access to your funds before maturity, you will typically face an early withdrawal penalty. Because APY already bakes in the effect of compounding, a given APY produces the same maturity balance no matter how often the bank compounds it — that is the entire reason regulators require APY disclosure instead of a nominal rate: it lets you compare CDs apples-to-apples without doing the compounding math yourself. The real strategy for maximizing CD returns is known as "CD laddering": splitting your total deposit across multiple CDs with staggered maturity dates (3-month, 6-month, 1-year, 2-year, etc.) so that some portion of your money matures at regular intervals, giving you ongoing liquidity access while keeping the bulk of your savings earning the higher long-term rates. CD laddering works especially well in a rising rate environment because as shorter-term CDs mature, you reinvest at higher current rates. This calculator also accounts for additional recurring deposits, which some banks offer through "add-on" CDs that allow you to continue contributing during the term rather than making only a single initial deposit. This is also why comparing the advertised APY across banks is always safe even if two offers compound at different intervals — a 4.5% APY is a 4.5% yield regardless of whether it is credited monthly or daily; the bank has already done that math for you. When comparing CD offers, always look at the APY rather than the nominal rate — the APY is required by federal law (Truth in Savings Act) to reflect the true annual return including compounding, making it the most honest basis for comparison. FDIC insurance coverage of up to $250,000 per depositor per bank makes CDs one of the safest places to park cash, alongside Treasury securities and high-yield savings accounts.',
+      'Certificates of Deposit (CDs) offer a guaranteed fixed return in exchange for locking your money away for a predetermined term. The key advantage over regular savings accounts is the higher fixed interest rate that is guaranteed for the entire term. Banks issue CDs as a way to secure stable deposits they can use for lending, and in return they offer depositors a premium over standard savings rates. The trade-off is the loss of liquidity during the CD term — if you need access to your funds before maturity, you will typically face an early withdrawal penalty. Because APY already bakes in the effect of compounding, a given APY produces the same maturity balance no matter how often the bank compounds it — that is the entire reason regulators require APY disclosure instead of a nominal rate: it lets you compare CDs apples-to-apples without doing the compounding math yourself. The real strategy for maximizing CD returns is known as "CD laddering": splitting your total deposit across multiple CDs with staggered maturity dates (3-month, 6-month, 1-year, 2-year, etc.) so that some portion of your money matures at regular intervals, giving you ongoing liquidity access while keeping the bulk of your savings earning the higher long-term rates. CD laddering works especially well in a rising rate environment because as shorter-term CDs mature, you reinvest at higher current rates. This calculator also accounts for an optional monthly deposit, which some banks offer through "add-on" CDs that allow you to continue contributing during the term rather than making only a single initial deposit. This is also why comparing the advertised APY across banks is always safe even if two offers compound at different intervals — a 4.5% APY is a 4.5% yield regardless of whether it is credited monthly or daily; the bank has already done that math for you. When comparing CD offers, always look at the APY rather than the nominal rate — the APY is required by federal law (Truth in Savings Act) to reflect the true annual return including compounding, making it the most honest basis for comparison. FDIC insurance coverage of up to $250,000 per depositor per bank makes CDs one of the safest places to park cash, alongside Treasury securities and high-yield savings accounts.',
     faqs: [
       {
         question: 'What is the difference between APY and APR?',
@@ -212,7 +209,7 @@ const cdConfig: CalculatorConfig = {
       },
       {
         question: 'What happens if I withdraw early from a CD?',
-        answer: 'Early withdrawal penalties vary by bank and are outlined in the CD terms. Typical penalties are 3 months of interest for CDs under 1 year, and 6-12 months of interest for longer terms. Some banks (like Ally) offer no-penalty CDs that allow early withdrawal with just 7 days of interest forfeited. Always understand the early withdrawal penalty before opening a CD account.',
+        answer: 'Early withdrawal penalties vary by bank and are outlined in the CD terms. Typical penalties are 3 months of interest for CDs under 1 year, and 6-12 months of interest for longer terms. Some banks offer no-penalty CDs that allow full withdrawal after a short initial waiting period (often about a week). Always understand the early withdrawal penalty before opening a CD account.',
       },
       {
         question: 'Are CDs FDIC-insured?',
@@ -231,12 +228,12 @@ const cdConfig: CalculatorConfig = {
         answer: 'CD interest is taxable as ordinary income in the year it is earned, even if you do not withdraw it or the CD has not yet matured. Your bank will issue a Form 1099-INT each year showing the interest credited to your account. You must report this on your federal and state tax returns. For CDs with terms longer than one year where interest compounds but is not paid out until maturity, you still owe tax annually on the accrued interest (called "original issue discount" or OID rules). Consider holding CDs in a tax-advantaged account like an IRA to defer or avoid taxes on the interest.',
       },
     ],
-    formulaSource: 'Compound interest formula A = P(1 + r/n)^(nt) is the standard future value equation from time value of money theory. The Truth in Savings Act (12 CFR Part 1030) requires banks to disclose APY calculated as (1 + r/n)^n - 1, ensuring consistent comparison across products with different compounding frequencies.',
+    formulaSource: 'Truth in Savings Regulation DD (12 CFR Part 1030, Appendix A) defines APY = 100[(1 + Interest/Principal)^(365/days in term) − 1], so a term deposit grows as P(1 + APY)^t; equivalent to the standard future value equation A = P(1 + r/n)^(nt) for nominal rate r.',
     proTips: [
       'Build a CD ladder instead of buying one long-term CD. Split your deposit across 3-month, 6-month, 1-year, and 2-year CDs. As each matures, reinvest at the current (potentially higher) rate. This gives you regular liquidity while capturing higher long-term yields.',
       'Always compare APY, not the nominal interest rate. Banks are required by law to disclose APY, which already includes the effect of compounding — a 4.25% APY is a 4.25% yield whether it is credited daily or monthly, so you never need to adjust for compounding frequency yourself when comparing offers.',
       'Watch for promotional "special" CD rates that are significantly above market. These are often limited to new customers or require a minimum deposit. Read the fine print: some promotional CDs automatically renew at much lower rates unless you act during a narrow grace period.',
-      'Consider no-penalty CDs if you might need early access. These CDs (offered by Ally, Marcus, and others) allow full withdrawal after a short lock-up period (typically 6-7 days) with no penalty. The trade-off is a slightly lower APY — typically 0.25-0.50% below standard CD rates.',
+      'Consider no-penalty CDs if you might need early access. These CDs (offered by several online banks) allow full withdrawal after a short lock-up period with no penalty. The trade-off is usually a slightly lower APY than a comparable standard CD.',
     ],
     limitations: [
       'This calculator assumes the APY and compounding frequency remain constant throughout the CD term. It does not account for early withdrawal penalties, which vary by bank (typically 3-12 months of interest).',
@@ -250,20 +247,20 @@ const cdConfig: CalculatorConfig = {
       {
         scenario: 'Sarah in Phoenix has $20,000 in emergency savings sitting in a 0.01% checking account. She wants to earn more without risking her principal and needs access every 3 months.',
         inputs: { initialDeposit: '5000', termUnit: 'months', termLength: '3', apy: '4.50', compounding: 'daily', additionalDeposit: '0' },
-        result: 'Each $5,000 3-month CD earns approximately $56 in interest at maturity. With four CDs in a ladder, she earns about $224/year.',
-        insight: 'By laddering four $5,000 CDs with 3-month maturities staggered one month apart, Sarah has $5,000 maturing every month. She earns 450x more interest than her checking account while maintaining near-full liquidity — a perfect use case for CD laddering as an emergency fund strategy.',
+        result: 'Each $5,000 3-month CD earns about $55 in interest at maturity (5,000 x (1.045^0.25 - 1)). Four of them earn about $221 per quarter, roughly $900 a year when rolled over at the same rate.',
+        insight: 'By splitting her $20,000 into four $5,000 CDs and rolling each one as it matures (or staggering the purchase dates), Sarah always has part of her money coming due soon. She earns 450x the 0.01% checking rate while keeping near-full liquidity — a perfect use case for CD laddering as an emergency fund strategy.',
       },
       {
         scenario: 'Robert has $50,000 from a bonus and wants the highest guaranteed return for a 2-year horizon when he plans to buy a home.',
         inputs: { initialDeposit: '50000', termUnit: 'years', termLength: '2', apy: '5.25', compounding: 'monthly', additionalDeposit: '0' },
-        result: 'Balance at maturity: approximately $55,500. Total interest earned: about $5,500 over 2 years.',
-        insight: 'A single 2-year CD locks in the rate for the full term -- useful when rates are expected to decline. Robert knows exactly how much he will have for his down payment in 2 years, making his home-buying budget more predictable. He should confirm the early withdrawal penalty (likely 6 months of interest or about $1,375) in case plans change.',
+        result: 'Balance at maturity: approximately $55,388. Total interest earned: about $5,388 over 2 years.',
+        insight: 'A single 2-year CD locks in the rate for the full term -- useful when rates are expected to decline. Robert knows exactly how much he will have for his down payment in 2 years, making his home-buying budget more predictable. He should confirm the early withdrawal penalty (likely 6 months of interest, about $1,300) in case plans change.',
       },
       {
         scenario: 'Jennifer has $100,000 from a home sale and wants to max FDIC coverage while earning competitive returns. She splits across two banks using add-on CDs.',
         inputs: { initialDeposit: '50000', termUnit: 'years', termLength: '3', apy: '4.85', compounding: 'monthly', additionalDeposit: '500' },
         result: 'Balance at maturity: approximately $76,937 per bank. Total interest earned: about $8,937 across 3 years per bank, plus additional deposit growth.',
-        insight: 'By splitting $100,000 evenly between two FDIC-insured banks (each with the full $250,000 coverage), Jennifer ensures all her principal is protected. The add-on CD feature allows her to deposit an extra $500 each month from her paycheck, turning a fixed-term CD into a forced savings vehicle. After 3 years, she will have contributed $68,000 total (initial deposit plus additions) per bank, with interest pushing the total to nearly $77,000. Note: this calculator adds recurring deposits once per compounding period, so the "additional deposit" cadence must match the compounding frequency selected (here, monthly) — pairing a monthly deposit with daily compounding would incorrectly add $500 every day instead of every month.',
+        insight: 'By splitting $100,000 evenly between two FDIC-insured banks (each with the full $250,000 coverage), Jennifer ensures all her principal is protected. The add-on CD feature allows her to deposit an extra $500 each month from her paycheck, turning a fixed-term CD into a forced savings vehicle. After 3 years, she will have contributed $68,000 total (initial deposit plus additions) per bank, with interest pushing the total to nearly $77,000.',
       },
     ],
     quickReference: [

@@ -15,7 +15,7 @@ function cmhcPremiumRate(loanToValue: number): number {
   return 0.04;
 }
 
-/// ─── Provincial Land Transfer Tax (LTT) Rates (2024) ────────────────
+/// ─── Provincial Land Transfer Tax (LTT) Rates (verified against provincial/city sources, 2026) ───
 interface LTTBracket { min: number; max: number; rate: number }
 interface LTTData {
   provincial: LTTBracket[];
@@ -25,9 +25,9 @@ interface LTTData {
 }
 
 const LAND_TRANSFER_TAXES: Record<string, LTTData> = {
-  alberta: { description: 'No provincial land transfer tax. Only a small registration fee (~$50–$200).', provincial: [] },
+  alberta: { description: 'No land transfer tax. Land Titles registration fees apply instead: $50 + $5 per $5,000 of value for the transfer, and the same formula on the mortgage amount (since Oct. 20, 2024).', provincial: [] },
   bc: {
-    description: '1% on first $200K, 2% on $200K–$2M, 3% on $2M–$3M, 5% above $3M. First-time buyers get up to $8,000 rebate.',
+    description: '1% on first $200K, 2% on $200K–$2M, 3% on $2M–$3M, 5% above $3M. Eligible first-time buyers are exempt from up to $8,000 of tax on homes up to $835,000 (phasing out to $0 at $860,000).',
     provincial: [
       { min: 0, max: 200000, rate: 0.01 },
       { min: 200000, max: 2000000, rate: 0.02 },
@@ -47,19 +47,13 @@ const LAND_TRANSFER_TAXES: Record<string, LTTData> = {
     ],
   },
   newfoundland: {
-    description: '0.4% on first $50K, 0.5% on $50K–$100K, 0.6% on $100K–$200K, 0.7% on $200K–$500K, 0.8% above $500K.',
-    provincial: [
-      { min: 0, max: 50000, rate: 0.004 },
-      { min: 50000, max: 100000, rate: 0.005 },
-      { min: 100000, max: 200000, rate: 0.006 },
-      { min: 200000, max: 500000, rate: 0.007 },
-      { min: 500000, max: Infinity, rate: 0.008 },
-    ],
+    description: 'No land transfer tax. Deed registration fee of $100 + $0.40 per $100 above $500 (about 0.4% of value); a mortgage registration fee on the same formula applies separately and is not included.',
+    provincial: [{ min: 500, max: Infinity, rate: 0.004 }],
   },
-  'nova-scotia': { description: 'Flat 1.5% of the purchase price.', provincial: [{ min: 0, max: Infinity, rate: 0.015 }] },
+  'nova-scotia': { description: 'Deed transfer tax is set by each municipality (typically 0.5%–1.5%). Estimate uses Halifax and many other municipalities at 1.5%; check your municipality.', provincial: [{ min: 0, max: Infinity, rate: 0.015 }] },
   'new-brunswick': { description: 'Flat 1% of the purchase price.', provincial: [{ min: 0, max: Infinity, rate: 0.01 }] },
   ontario: {
-    description: '0.5% on first $55K, 1% on $55K–$250K, 1.5% on $250K–$400K, 2% on $400K–$2M, 2.5% above $2M. First-time buyers get up to $4,000 rebate. Toronto adds a municipal tax.',
+    description: '0.5% on first $55K, 1% on $55K–$250K, 1.5% on $250K–$400K, 2% on $400K–$2M, 2.5% above $2M. First-time buyers get up to $4,000 rebate. Toronto adds a municipal tax (up to $4,475 first-time buyer refund).',
     provincial: [
       { min: 0, max: 55000, rate: 0.005 },
       { min: 55000, max: 250000, rate: 0.01 },
@@ -74,23 +68,32 @@ const LAND_TRANSFER_TAXES: Record<string, LTTData> = {
         { min: 55000, max: 250000, rate: 0.01 },
         { min: 250000, max: 400000, rate: 0.015 },
         { min: 400000, max: 2000000, rate: 0.02 },
-        { min: 2000000, max: Infinity, rate: 0.025 },
+        { min: 2000000, max: 3000000, rate: 0.025 },
+        // Graduated high-value rates effective April 1, 2026 (1-2 single-family residences)
+        { min: 3000000, max: 4000000, rate: 0.044 },
+        { min: 4000000, max: 5000000, rate: 0.0545 },
+        { min: 5000000, max: 10000000, rate: 0.065 },
+        { min: 10000000, max: 20000000, rate: 0.0755 },
+        { min: 20000000, max: Infinity, rate: 0.086 },
       ],
       rebate: 4475,
     }],
     firstTimeRebate: 4000,
   },
-  'prince-edward-island': { description: '1% on first $100K, 2% above $100K.', provincial: [{ min: 0, max: 100000, rate: 0.01 }, { min: 100000, max: Infinity, rate: 0.02 }] },
-  quebec: {
-    description: '0.5% on first $50K, 1% on $50K–$250K, 1.5% above $250K. First-time buyers get up to $5,477 rebate.',
-    provincial: [
-      { min: 0, max: 50000, rate: 0.005 },
-      { min: 50000, max: 250000, rate: 0.01 },
-      { min: 250000, max: Infinity, rate: 0.015 },
-    ],
-    firstTimeRebate: 5477,
+  'prince-edward-island': {
+    description: '1% of the greater of purchase price or assessed value. Qualifying first-time buyers (residency and prior-ownership conditions apply) can have the tax waived.',
+    provincial: [{ min: 0, max: Infinity, rate: 0.01 }],
+    firstTimeRebate: Infinity,
   },
-  saskatchewan: { description: '0.5% on first $100K, 1% above $100K.', provincial: [{ min: 0, max: 100000, rate: 0.005 }, { min: 100000, max: Infinity, rate: 0.01 }] },
+  quebec: {
+    description: 'Welcome tax (2026 brackets): 0.5% on first $62,900, 1% on $62,900–$315,000, 1.5% above $315,000. Brackets are indexed yearly; some municipalities (e.g. Montréal) charge higher rates on the slice above $500,000. First-time buyers receive at most an $875 tax credit, not modelled here.',
+    provincial: [
+      { min: 0, max: 62900, rate: 0.005 },
+      { min: 62900, max: 315000, rate: 0.01 },
+      { min: 315000, max: Infinity, rate: 0.015 },
+    ],
+  },
+  saskatchewan: { description: 'No land transfer tax. A land titles transfer fee of roughly 0.3%–0.4% of value applies instead (confirm the current ISC fee schedule); not included here.', provincial: [] },
 };
 
 function provinceLabel(slug: string): string {
@@ -107,34 +110,40 @@ function provinceLabel(slug: string): string {
 function calculateLTT(price: number, province: string, firstTimeBuyer: string, municipal?: string): { total: number; breakdown: { label: string; amount: number }[] } {
   const data = LAND_TRANSFER_TAXES[province];
   if (!data || data.provincial.length === 0) return { total: 0, breakdown: [] };
+  const taxOn = (brackets: LTTBracket[]) =>
+    brackets.reduce((sum, b) => sum + Math.max(0, Math.min(price, b.max) - b.min) * b.rate, 0);
+  const isFtb = firstTimeBuyer === 'yes';
   const breakdown: { label: string; amount: number }[] = [];
-  let provincialTax = 0;
-  for (const b of data.provincial) {
-    const taxable = Math.min(price, b.max) - b.min;
-    if (taxable > 0) provincialTax += taxable * b.rate;
-  }
+
+  const provincialTax = taxOn(data.provincial);
   breakdown.push({ label: `${provinceLabel(province)} LTT`, amount: provincialTax });
+
+  // Municipal tax (Toronto) - its own first-time-buyer refund applies to the municipal tax only
   let municipalTax = 0;
-  if (municipal && data.municipal) {
-    const cityData = data.municipal.find((m) => m.city === municipal);
-    if (cityData) {
-      for (const b of cityData.rates) {
-        const taxable = Math.min(price, b.max) - b.min;
-        if (taxable > 0) municipalTax += taxable * b.rate;
-      }
-      if (cityData.rebate) {
-        municipalTax = Math.max(0, municipalTax - cityData.rebate);
-        breakdown.push({ label: `${municipal} Municipal LTT (after $${cityData.rebate.toLocaleString()} rebate)`, amount: municipalTax });
-      } else {
-        breakdown.push({ label: `${municipal} Municipal LTT`, amount: municipalTax });
+  const cityData = municipal && data.municipal ? data.municipal.find((m) => m.city === municipal) : undefined;
+  if (cityData) {
+    municipalTax = taxOn(cityData.rates);
+    breakdown.push({ label: `${municipal} Municipal LTT`, amount: municipalTax });
+  }
+
+  let total = provincialTax + municipalTax;
+  if (isFtb) {
+    // BC: exemption of up to $8,000 (tax on first $500K) for FMV <= $835K, phasing out linearly to $0 at $860K
+    const provRebateMax = province === 'bc'
+      ? 8000 * Math.min(1, Math.max(0, (860000 - price) / 25000))
+      : data.firstTimeRebate ?? 0;
+    const provRebate = Math.min(provRebateMax, provincialTax);
+    if (provRebate > 0) {
+      total -= provRebate;
+      breakdown.push({ label: 'First-Time Buyer Rebate', amount: -provRebate });
+    }
+    if (cityData?.rebate) {
+      const muniRebate = Math.min(cityData.rebate, municipalTax);
+      if (muniRebate > 0) {
+        total -= muniRebate;
+        breakdown.push({ label: `${municipal} First-Time Buyer Refund`, amount: -muniRebate });
       }
     }
-  }
-  let total = provincialTax + municipalTax;
-  if (firstTimeBuyer === 'yes' && data.firstTimeRebate) {
-    const rebate = Math.min(data.firstTimeRebate, total);
-    total -= rebate;
-    breakdown.push({ label: 'First-Time Buyer Rebate', amount: -rebate });
   }
   return { total, breakdown };
 }
@@ -157,7 +166,7 @@ const canadianMortgageConfig: CalculatorConfig = {
       placeholder: '75,000',
       prefix: '$',
       required: true,
-      helpText: 'Min 5% on first $500K, 10% on portion above. Under 20% triggers CMHC.',
+      helpText: 'Min 5% on first $500K, 10% on portion above (homes of $1.5M or more need 20%). Under 20% triggers CMHC.',
     },
     {
       id: 'province',
@@ -210,9 +219,9 @@ const canadianMortgageConfig: CalculatorConfig = {
         { label: '15 years', value: '15' },
         { label: '20 years', value: '20' },
         { label: '25 years (max for insured)', value: '25' },
-        { label: '30 years (uninsured only)', value: '30' },
+        { label: '30 years (uninsured, or insured for first-time / new-build buyers)', value: '30' },
       ],
-      helpText: 'Total time to repay the mortgage. Insured mortgages (<20% down) are capped at 25 years.',
+      helpText: 'Total time to repay the mortgage. Insured mortgages (<20% down) are capped at 25 years, or 30 for first-time buyers and new builds.',
     },
     {
       id: 'rate',
@@ -270,18 +279,20 @@ const canadianMortgageConfig: CalculatorConfig = {
 
     // Minimum down payment check
     let minDown: number;
-    if (price >= 1_000_000) { minDown = price * 0.20; }
+    // Insured-mortgage price cap raised from $1M to $1.5M on Dec. 15, 2024
+    if (price >= 1_500_000) { minDown = price * 0.20; }
     else if (price > 500_000) { minDown = 500_000 * 0.05 + (price - 500_000) * 0.10; }
     else { minDown = price * 0.05; }
     if (down < minDown - 0.01) {
-      return [{ id: 'error', label: 'Down Payment Below Canadian Minimum', value: `Minimum: $${fmt(minDown)} (${((minDown / price) * 100).toFixed(2)}%). ${price >= 1_000_000 ? '$1M+ requires 20%.' : '5% on first $500K, 10% above.'}`, color: 'negative' as const, highlight: true }];
+      return [{ id: 'error', label: 'Down Payment Below Canadian Minimum', value: `Minimum: $${fmt(minDown)} (${((minDown / price) * 100).toFixed(2)}%). ${price >= 1_500_000 ? '$1.5M+ requires 20%.' : '5% on first $500K, 10% above.'}`, color: 'negative' as const, highlight: true }];
     }
 
     // CMHC Insurance
     let cmhcRate = 0, cmhcPremium = 0;
     let principal = baseLoan;
     if (ltv > 0.80) {
-      if (years > 25) return [{ id: 'error', label: 'CMHC Error', value: 'CMHC-insured mortgages (<20% down) capped at 25-year amortization.', color: 'negative' as const, highlight: true }];
+      // Since Dec. 15, 2024 insured 30-year amortizations are allowed for first-time buyers and buyers of new builds
+      if (years > 25 && values.firstTimeBuyer !== 'yes') return [{ id: 'error', label: 'CMHC Error', value: 'CMHC-insured mortgages (<20% down) are capped at 25-year amortization, except for first-time buyers (select "Yes" above) and buyers of new builds.', color: 'negative' as const, highlight: true }];
       cmhcRate = cmhcPremiumRate(ltv);
       cmhcPremium = baseLoan * cmhcRate;
       principal = baseLoan + cmhcPremium;
@@ -389,8 +400,8 @@ const canadianMortgageConfig: CalculatorConfig = {
           color: item.amount < 0 ? 'positive' as const : 'neutral' as const,
         });
       }
-    } else if (province === 'alberta') {
-      results.push({ id: 'lttTotal', label: 'Land Transfer Tax (Alberta)', value: 'No provincial LTT ($0)', color: 'positive' as const });
+    } else if (province === 'alberta' || province === 'saskatchewan') {
+      results.push({ id: 'lttTotal', label: `Land Transfer Tax (${provinceLabel(province)})`, value: 'No provincial LTT ($0) — land titles registration fees apply separately', color: 'positive' as const });
     }
 
     return results;
@@ -403,7 +414,7 @@ const canadianMortgageConfig: CalculatorConfig = {
   educational: {
     formula: 'Effective Annual = (1 + r/2)² − 1 | Periodic Rate = (1 + Effective Annual)^(1/m) − 1 | Stress Test Rate = max(Contract + 2%, 5.25%)',
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect width="440" height="340" fill="var(--svg-f8fafc)" rx="8"/><text x="220" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--svg-1e293b)">Canadian Mortgage Essentials</text><text x="220" y="44" text-anchor="middle" font-size="11" fill="var(--svg-64748b)">Semi-annual compounding, stress test, and land transfer tax</text><g transform="translate(30,65)"><!-- House icon --><polygon points="170,0 220,15 220,32 120,32 120,15" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><rect x="143" y="10" width="55" height="22" rx="3" fill="var(--svg-f1f5f9)"/><text x="170" y="26" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e40af)">$750K</text><text x="170" y="48" text-anchor="middle" font-size="9" fill="var(--svg-475569)">Property Price</text><!-- Down payment bar --><rect x="30" y="55" width="100" height="28" rx="4" fill="var(--svg-f59e0b)"/><text x="80" y="73" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">Down: $75K (10%)</text><rect x="135" y="55" width="245" height="28" rx="4" fill="var(--svg-3b82f6)"/><text x="257" y="73" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Base Mortgage: $675,000</text><!-- CMHC if applicable --><rect x="135" y="88" width="245" height="22" rx="4" fill="var(--svg-ef4444)"/><text x="257" y="103" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">+ CMHC Insurance (3.1%): $20,925</text><text x="170" y="120" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-dc2626)">Total Principal: $695,925</text></g><!-- Key differences --><g transform="translate(40,135)"><rect x="10" y="0" width="370" height="95" rx="10" fill="var(--svg-f1f5f9)"/><text x="195" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">How Canada Differs from the US</text><text x="65" y="36" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">Semi-annual compounding</text><text x="65" y="50" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">vs US monthly compounding</text><text x="65" y="66" text-anchor="middle" font-size="9" fill="var(--svg-8b5cf6)">B-20 Stress Test:</text><text x="65" y="80" text-anchor="middle" font-size="9" fill="var(--svg-8b5cf6)">qualify at rate+2% or 5.25%</text><text x="290" y="36" text-anchor="middle" font-size="9" fill="var(--svg-f59e0b)">CMHC insurance for <20% down</text><text x="290" y="50" text-anchor="middle" font-size="9" fill="var(--svg-f59e0b)">premium 0.6%-4.0% of loan</text><text x="290" y="66" text-anchor="middle" font-size="9" fill="var(--svg-ef4444)">Land Transfer Tax (LTT)</text><text x="290" y="80" text-anchor="middle" font-size="9" fill="var(--svg-ef4444)">progressive, provincial+municipal</text></g><!-- Accelerated Bi-Weekly savings --><g transform="translate(40,245)"><rect x="10" y="0" width="370" height="82" rx="10" fill="var(--svg-fef3c7)" stroke="var(--svg-f59e0b)" stroke-width="1"/><text x="195" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-b45309)">The Biggest "Free Win": Accelerated Bi-Weekly</text><text x="80" y="38" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">Standard Monthly: $3,825/mo</text><text x="80" y="52" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">Accelerated Bi-Weekly: $1,912/2wk</text><text x="80" y="68" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">= 13 payments/yr (1 extra principal-only payment)</text><text x="300" y="38" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">Saves 3-5 years</text><text x="300" y="52" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">Saves $30K-$60K</text><text x="300" y="68" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">on $500K mortgage</text></g></svg>',
+      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect width="440" height="340" fill="var(--svg-f8fafc)" rx="8"/><text x="220" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--svg-1e293b)">Canadian Mortgage Essentials</text><text x="220" y="44" text-anchor="middle" font-size="11" fill="var(--svg-64748b)">Semi-annual compounding, stress test, and land transfer tax</text><g transform="translate(30,65)"><!-- House icon --><polygon points="170,0 220,15 220,32 120,32 120,15" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><rect x="143" y="10" width="55" height="22" rx="3" fill="var(--svg-f1f5f9)"/><text x="170" y="26" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e40af)">$750K</text><text x="170" y="48" text-anchor="middle" font-size="9" fill="var(--svg-475569)">Property Price</text><!-- Down payment bar --><rect x="30" y="55" width="100" height="28" rx="4" fill="var(--svg-f59e0b)"/><text x="80" y="73" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">Down: $75K (10%)</text><rect x="135" y="55" width="245" height="28" rx="4" fill="var(--svg-3b82f6)"/><text x="257" y="73" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Base Mortgage: $675,000</text><!-- CMHC if applicable --><rect x="135" y="88" width="245" height="22" rx="4" fill="var(--svg-ef4444)"/><text x="257" y="103" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">+ CMHC Insurance (3.1%): $20,925</text><text x="170" y="120" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-dc2626)">Total Principal: $695,925</text></g><!-- Key differences --><g transform="translate(40,135)"><rect x="10" y="0" width="370" height="95" rx="10" fill="var(--svg-f1f5f9)"/><text x="195" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">How Canada Differs from the US</text><text x="65" y="36" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">Semi-annual compounding</text><text x="65" y="50" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">vs US monthly compounding</text><text x="65" y="66" text-anchor="middle" font-size="9" fill="var(--svg-8b5cf6)">B-20 Stress Test:</text><text x="65" y="80" text-anchor="middle" font-size="9" fill="var(--svg-8b5cf6)">qualify at rate+2% or 5.25%</text><text x="290" y="36" text-anchor="middle" font-size="9" fill="var(--svg-f59e0b)">CMHC insurance for <20% down</text><text x="290" y="50" text-anchor="middle" font-size="9" fill="var(--svg-f59e0b)">premium 0.6%-4.0% of loan</text><text x="290" y="66" text-anchor="middle" font-size="9" fill="var(--svg-ef4444)">Land Transfer Tax (LTT)</text><text x="290" y="80" text-anchor="middle" font-size="9" fill="var(--svg-ef4444)">progressive, provincial+municipal</text></g><!-- Accelerated Bi-Weekly savings --><g transform="translate(40,245)"><rect x="10" y="0" width="370" height="82" rx="10" fill="var(--svg-fef3c7)" stroke="var(--svg-f59e0b)" stroke-width="1"/><text x="195" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-b45309)">The Biggest "Free Win": Accelerated Bi-Weekly</text><text x="80" y="38" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">Standard Monthly: $4,147/mo</text><text x="80" y="52" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">Accelerated Bi-Weekly: $2,074/2wk</text><text x="80" y="68" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">= 13 payments/yr (1 extra principal-only payment)</text><text x="300" y="38" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">Saves ~3.6 years</text><text x="300" y="52" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">Saves ~$66K</text><text x="300" y="68" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">on $500K at 5.25%, 25 yr</text></g></svg>',
       alt: 'Canadian mortgage diagram showing property price ($750K) split into down payment ($75K) and base mortgage ($675K) plus CMHC insurance ($20,925), with key differences from US mortgages and accelerated bi-weekly savings',
       caption: 'Canadian mortgages are compounded semi-annually (not monthly like the US), require a stress test to qualify, and may include costly Land Transfer Tax at closing',
     },
@@ -433,7 +444,7 @@ const canadianMortgageConfig: CalculatorConfig = {
       'Determine your maximum affordable home price under the Canadian mortgage stress test using the contract rate plus qualifying rate.',
     ],
     explanation:
-      'Accelerated bi-weekly payments are the single biggest "free win" in Canadian mortgages. By paying half your monthly amount every two weeks, you make 26 half-payments = 13 full monthly payments per year — one extra principal-only payment. On a $500K mortgage at 5.25%, this saves 3–5 years and $30K–$60K+ in interest. The stress test determines how much you can borrow, not what you pay. Land Transfer Tax is a major closing cost (e.g., ~$11,500+ in Ontario on an $800K home) that first-time buyers often underestimate.',
+      'Accelerated bi-weekly payments are the single biggest "free win" in Canadian mortgages. By paying half your monthly amount every two weeks, you make 26 half-payments = 13 full monthly payments per year — one extra principal-only payment. On a $500K mortgage at 5.25% over 25 years, this saves about 3.6 years and roughly $66,000 in interest. The stress test determines how much you can borrow, not what you pay. Land Transfer Tax is a major closing cost (e.g., about $12,475 in Ontario on an $800K home) that first-time buyers often underestimate.',
     faqs: [
       {
         question: 'Why are Canadian mortgages compounded semi-annually?',
@@ -445,11 +456,11 @@ const canadianMortgageConfig: CalculatorConfig = {
       },
       {
         question: 'What is Land Transfer Tax and how much is it?',
-        answer: 'LTT is a provincial (sometimes municipal) tax on property purchase, calculated with progressive brackets. On an $800K Ontario home: ~$11,475 provincial + up to ~$11,475 Toronto municipal = ~$23K. First-time buyers in Ontario get up to $4,000 rebate, BC up to $8,000. Select your province for a precise estimate.',
+        answer: 'LTT is a provincial (sometimes municipal) tax on property purchase, calculated with progressive brackets. On an $800K Ontario home: $12,475 provincial + up to $12,475 Toronto municipal = about $25K. First-time buyers in Ontario get up to $4,000 back (plus up to $4,475 in Toronto), and in BC up to $8,000 on homes up to $835,000. Select your province for a precise estimate.',
       },
       {
         question: 'Accelerated bi-weekly or regular bi-weekly?',
-        answer: 'Accelerated. Regular divides annual total by 26 (same total cost). Accelerated is half your monthly payment every 2 weeks = 13 monthly payments/year. The extra payment goes 100% to principal, saving 3–5 years and $30K–$60K+ in interest on a typical mortgage.',
+        answer: 'Accelerated. Regular divides annual total by 26 (same total cost). Accelerated is half your monthly payment every 2 weeks = 13 monthly payments/year. The extra payment goes 100% to principal, saving roughly 3.6 years and $66,000 in interest on a $500K, 25-year mortgage at 5.25%.',
       },
       {
         question: 'When is CMHC insurance required?',

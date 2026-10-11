@@ -15,7 +15,7 @@ describe('college cost calculator', () => {
       collegeYears: '4',
     });
     const totalCost = parseMoney(getValue(r, 'projectedCost'));
-    // 10 years until college, $11,260 + $12,770 = $24,030/yr now
+    // 10 years until college, $11,950 + $13,900 = $25,850/yr now (College Board 2025-26)
     // with 5% inflation for 10-13 years → $39K-$45K/yr → ~$160K-$180K total
     expect(totalCost).toBeGreaterThan(100000);
     expect(totalCost).toBeLessThan(300000);
@@ -49,10 +49,10 @@ describe('college cost calculator', () => {
       growthRate: '6',
       collegeYears: '4',
     });
-    expect(parseMoney(getValue(r, 'projectedCost'))).toBeCloseTo(168708, -2);
+    expect(parseMoney(getValue(r, 'projectedCost'))).toBeCloseTo(181486, -2);
     expect(parseMoney(getValue(r, 'savingsAtCollege'))).toBeCloseTo(50970, -2);
-    expect(parseMoney(getValue(r, 'fundingGap'))).toBeCloseTo(117739, -2);
-    expect(parseMoney(getValue(r, 'monthlyNeeded'))).toBeCloseTo(718, 0);
+    expect(parseMoney(getValue(r, 'fundingGap'))).toBeCloseTo(130516, -2);
+    expect(parseMoney(getValue(r, 'monthlyNeeded'))).toBeCloseTo(796, 0);
   });
 
   it('matches the "newborn private university" worked example figures (regression: educational text previously understated the cost by ~$180K and the required monthly savings by ~$935/mo — stale TUITION_DATA constants)', () => {
@@ -66,8 +66,8 @@ describe('college cost calculator', () => {
       growthRate: '6',
       collegeYears: '4',
     });
-    expect(parseMoney(getValue(r, 'projectedCost'))).toBeCloseTo(582849, -2);
-    expect(parseMoney(getValue(r, 'monthlyNeeded'))).toBeCloseTo(1467, 0);
+    expect(parseMoney(getValue(r, 'projectedCost'))).toBeCloseTo(631913, -2);
+    expect(parseMoney(getValue(r, 'monthlyNeeded'))).toBeCloseTo(1593, 0);
   });
 
   it('shows fully funded when savings are sufficient', () => {
@@ -168,7 +168,7 @@ describe('college cost calculator', () => {
       growthRate: '6',
       collegeYears: '4',
     });
-    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(11260);
+    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(11950);
   });
 
   it('shows percent funded', () => {
@@ -198,7 +198,7 @@ describe('college cost calculator', () => {
       growthRate: '6',
       collegeYears: '4',
     });
-    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(41540);
+    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(45000);
   });
 
   it('accounts for additional costs in current annual cost', () => {
@@ -214,8 +214,8 @@ describe('college cost calculator', () => {
       growthRate: '6',
       collegeYears: '4',
     });
-    // base tuition: 11260 + additional: 4000 = 15260
-    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(15260);
+    // base tuition: 11950 + additional: 4000 = 15950
+    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(15950);
   });
 
   it('reduces annual cost with financial aid', () => {
@@ -231,8 +231,8 @@ describe('college cost calculator', () => {
       growthRate: '6',
       collegeYears: '4',
     });
-    // base tuition: 41540 - aid: 20000 = 21540
-    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(21540);
+    // base tuition: 45000 - aid: 20000 = 25000
+    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(25000);
   });
 
   it('shows base cost breakdown when additional costs or aid are provided', () => {
@@ -249,8 +249,8 @@ describe('college cost calculator', () => {
       collegeYears: '4',
     });
     expect(getValue(r, 'currentBaseCost')).toBeDefined();
-    // base: 11260 + 12770 = 24030
-    expect(parseMoney(getValue(r, 'currentBaseCost'))).toBe(24030);
+    // base: 11950 + 13900 = 25850
+    expect(parseMoney(getValue(r, 'currentBaseCost'))).toBe(25850);
   });
 
   it('projects total cost for out-of-state public', () => {
@@ -265,7 +265,7 @@ describe('college cost calculator', () => {
       collegeYears: '4',
     });
     const totalCost = parseMoney(getValue(r, 'projectedCost'));
-    // 13 years until college, out-state: 22980 + 12770 = 35750/yr
+    // 13 years until college, out-state: 31880 + 13900 = 45780/yr
     // with 5% inflation for 13-16 years → much higher
     expect(totalCost).toBeGreaterThan(120000);
   });
@@ -328,6 +328,27 @@ describe('college cost calculator', () => {
     // Without additional costs or aid, base cost = net cost, so currentBaseCost row won't appear
     const baseCostRow = r.find((row) => row.id === 'currentBaseCost');
     expect(baseCostRow).toBeUndefined();
-    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(24030);
+    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(25850);
+  });
+});
+
+describe('college cost – audit regressions (independent calc)', () => {
+  const base = {
+    childAge: '8', currentSavings: '10000', monthlyContribution: '200', institutionType: 'in-state',
+    includeRoomBoard: 'yes', tuitionInflation: '5', growthRate: '6', collegeYears: '4',
+  };
+  it('uses College Board 2025-26 data: in-state $11,950 + $13,900 housing & food; total = sum 25,850*1.05^(10..13) = $181,486', () => {
+    const r = config.calculate(base);
+    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(25850);
+    expect(parseMoney(getValue(r, 'projectedCost'))).toBeCloseTo(181486, -1);
+  });
+  it('out-of-state public = $31,880 tuition (+ $13,900 housing) per College Board 2025-26', () => {
+    const r = config.calculate({ ...base, institutionType: 'out-state', includeRoomBoard: 'no' });
+    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(31880);
+  });
+  it('financial aid larger than the cost never yields a negative cost or negative % funded', () => {
+    const r = config.calculate({ ...base, financialAid: '99999' });
+    expect(parseMoney(getValue(r, 'currentAnnualCost'))).toBe(0);
+    expect(parseNumber(getValue(r, 'pctFunded'))).toBeGreaterThanOrEqual(0);
   });
 });

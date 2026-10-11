@@ -258,11 +258,16 @@ const commissionConfig: CalculatorConfig = {
           const c3 = remaining * (t3Rate / 100);
           tierGross += c3;
           breakdown.push(`Tier 3 (> $${fmt(t2Limit)}): $${fmt(remaining)} × ${t3Rate}% = $${fmt(c3)}`);
+        } else if (remaining > 0) {
+          breakdown.push(`Above Tier 2 ($${fmt(t2Limit)}+): $${fmt(remaining)} × 0% = $0.00 (no Tier 3 rate entered)`);
         }
       } else if (remaining > 0 && !isNaN(t2Rate) && isNaN(t2Limit)) {
         const c2 = remaining * (t2Rate / 100);
         tierGross += c2;
         breakdown.push(`Tier 2 (> $${fmt(t1Limit)}): $${fmt(remaining)} × ${t2Rate}% = $${fmt(c2)}`);
+      } else if (remaining > 0) {
+        // No Tier 2 rate: the plan is treated as capped at Tier 1 - make the $0 on the excess visible
+        breakdown.push(`Above Tier 1 ($${fmt(t1Limit)}+): $${fmt(remaining)} × 0% = $0.00 (no Tier 2 rate entered)`);
       }
 
       gross = tierGross;

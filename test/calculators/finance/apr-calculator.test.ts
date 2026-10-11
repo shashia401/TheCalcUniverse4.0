@@ -77,3 +77,19 @@ describe('apr-calculator', () => {
     near(parseMoney(getValue(r, 'netCashReceivedResult')), 97000);
   });
 });
+
+describe('apr-calculator – audit regressions', () => {
+  const base = { loanAmount: '200000', nominalRate: '6.5', loanTermValue: '30', loanTermUnit: 'years' };
+  it('$200k @6.5% 30y with $4,000 fees: APR = 6.695% (bisection on PV of payments = net proceeds)', () => {
+    const r = config.calculate({ ...base, upfrontFees: '4000' });
+    near(parseFloat(getValue(r, 'aprResult')), 6.695, 0.0006);
+  });
+  it('short, high-fee loan: $200k @5% 5y with $10,000 fees -> APR 7.134%', () => {
+    const r = config.calculate({ ...base, nominalRate: '5', loanTermValue: '5', upfrontFees: '10000' });
+    near(parseFloat(getValue(r, 'aprResult')), 7.134, 0.001);
+  });
+  it('fees >= loan amount: no cash received, so no result rather than a bogus 0.000% APR', () => {
+    expect(config.calculate({ ...base, loanTermValue: '1', loanTermUnit: 'years', upfrontFees: '200000' })).toEqual([]);
+    expect(config.calculate({ ...base, upfrontFees: '250000' })).toEqual([]);
+  });
+});

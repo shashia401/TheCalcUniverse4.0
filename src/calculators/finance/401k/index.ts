@@ -136,7 +136,9 @@ const k401Config: CalculatorConfig = {
     const retirementAge = parseFloat(values.retirementAge);
     const currentBalance = parseFloat(values.currentBalance) || 0;
     const annualSalary = parseFloat(values.annualSalary);
-    const salaryIncrease = (parseFloat(values.salaryIncrease) || 3) / 100;
+    // Blank -> 3% default; an explicit 0 must stay 0 (0% raise)
+    const rawRaise = parseFloat(values.salaryIncrease);
+    const salaryIncrease = (isNaN(rawRaise) ? 3 : rawRaise) / 100;
     const yourContrib = parseFloat(values.yourContribution) / 100;
     const employerMatch = (parseFloat(values.employerMatch) || 0) / 100;
     const employerMatchLimit = (parseFloat(values.employerMatchLimit) || 0) / 100;
@@ -229,7 +231,8 @@ const k401Config: CalculatorConfig = {
     const retirementAge = parseFloat(values.retirementAge);
     const currentBalance = parseFloat(values.currentBalance) || 0;
     const annualSalary = parseFloat(values.annualSalary);
-    const salaryIncrease = (parseFloat(values.salaryIncrease) || 3) / 100;
+    const rawRaise = parseFloat(values.salaryIncrease);
+    const salaryIncrease = (isNaN(rawRaise) ? 3 : rawRaise) / 100;
     const yourContrib = parseFloat(values.yourContribution) / 100;
     const employerMatch = (parseFloat(values.employerMatch) || 0) / 100;
     const employerMatchLimit = (parseFloat(values.employerMatchLimit) || 0) / 100;
@@ -251,7 +254,7 @@ const k401Config: CalculatorConfig = {
     },
     formulaDescription:
       'Each year, contributions grow on a monthly compounding basis. The employer match is calculated as: min(yourContribRate, matchLimit) × matchPercent × salary, added alongside your own contributions before compounding. Over a 35-year career, investment returns typically account for 60-80% of the ending balance — contributions alone are rarely enough. This calculator uses high-precision decimal arithmetic to ensure accurate projections for retirement planning.',
-    formulaSource: 'Future Value of Annuity formula (standard time value of money equation); IRS Publication 590-A for contribution limits and tax treatment of 401(k) plans.',
+    formulaSource: 'Future Value of Annuity formula (standard time value of money equation); IRS Notice for 2026 retirement plan limits (IRS news release "401(k) limit increases to $24,500 for 2026", Nov. 2025) for contribution limits.',
     variables: [
       { symbol: 'Employer Match', name: 'Employer Match', description: 'Free money added to your account. A "50% match up to 6%" means: if you contribute 6% of your salary, your employer adds another 3% (50% of 6%). Not contributing at least up to the match limit is leaving free money on the table.' },
       { symbol: '4% Rule', name: 'Safe Withdrawal Rate', description: 'A widely cited guideline suggesting you can withdraw 4% of your portfolio annually in retirement without running out of money over a 30-year retirement.' },
@@ -282,14 +285,14 @@ const k401Config: CalculatorConfig = {
         scenario: 'David, 45, plays catch-up after starting late with only $30,000 saved and a $75,000 salary — he contributes 10% to close the gap',
         inputs: { currentAge: '45', retirementAge: '67', currentBalance: '30,000', annualSalary: '75,000', yourContribution: '10', employerMatch: '50', employerMatchLimit: '6', rateOfReturn: '7' },
         result: 'After 22 years of catch-up contributions, your 401(k) grows to approximately $788,751. Total employee contributions: $229,026. Total employer match: $68,708. Investment returns: $461,017.',
-        insight: 'Even starting at 45, David accumulates nearly $789,000 by age 67. Because the employer match caps out at 6% of salary while he contributes 10%, only the first 6 points of his contribution are matched — the match is 30% of his own contribution, not 50%. Catch-up contributions after age 50 (an extra $7,500/year in 2025) would push this even higher.',
+        insight: 'Even starting at 45, David accumulates nearly $789,000 by age 67. Because the employer match caps out at 6% of salary while he contributes 10%, only the first 6 points of his contribution are matched — the match is 30% of his own contribution, not 50%. Catch-up contributions after age 50 (an extra $8,000/year in 2026) would push this even higher.',
       },
     ],
     proTips: [
       'Never leave free money on the table: always contribute at least enough to get the full employer match. A 50% match on 6% is an instant 50% return.',
       'Increase contributions by 1% per year (auto-escalation) — most people do not notice the difference in take-home pay but compound growth makes it massive over decades.',
       'If your employer offers a Roth 401(k) option, consider it if you are early in your career and expect higher tax rates in retirement.',
-      'After age 50, maximize catch-up contributions: the IRS allows an extra $7,500 in 2025, which is a powerful boost to late-career savings.',
+      'After age 50, maximize catch-up contributions: the IRS allows an extra $8,000 in 2026 ($11,250 at ages 60-63), which is a powerful boost to late-career savings.',
       'When changing jobs, roll your old 401(k) into your new employer plan or an IRA — cashing out triggers income tax plus a 10% early withdrawal penalty before age 59½.',
     ],
     // Know when not to rely on calculator outputs — see limitations below
@@ -300,18 +303,18 @@ const k401Config: CalculatorConfig = {
       'IRS contribution limits change annually and are not enforced by this calculator — verify current-year limits before relying on projections.',
     ],
     quickReference: [
-      { label: '2025 Employee Limit (under 50)', value: '$23,500' },
-      { label: '2025 Catch-Up (50+)', value: '$7,500 extra' },
+      { label: '2026 Employee Limit (under 50)', value: '$24,500' },
+      { label: '2026 Catch-Up (50+)', value: '$8,000 extra ($11,250 at 60-63)' },
       { label: 'Early Withdrawal Penalty', value: '10% + income tax' },
       { label: 'RMD Starting Age', value: '73 (SECURE 2.0)' },
       { label: 'S&P 500 Historical Return', value: '~10% nominal, ~7% real' },
     ],
     explanation:
-      'The 401(k) is a tax-advantaged retirement savings account offered by employers, first introduced in 1978 as part of the Revenue Act and named after the century-old Internal Revenue Code section that created it. It is the most powerful savings tool available to most Americans. Contributions reduce your taxable income today (traditional 401k), and the employer match is an instant 50-100% return on that portion of your contribution — no investment can reliably beat that. The magic, however, is in the compounding returns: Einstein reportedly called compound interest the "eighth wonder of the world." For a 30-year-old who maxes out their 401(k), investment returns will typically account for 70-80% of the final balance at retirement. The stacked area chart below makes this exponential effect immediately visible.',
+      'The 401(k) is a tax-advantaged retirement savings account offered by employers, first introduced in 1978 as part of the Revenue Act and named after section 401(k) of the Internal Revenue Code, which that Act added. It is the most powerful savings tool available to most Americans. Contributions reduce your taxable income today (traditional 401k), and the employer match is an instant 50-100% return on that portion of your contribution — no investment can reliably beat that. The magic, however, is in the compounding returns: Einstein reportedly called compound interest the "eighth wonder of the world." For a 30-year-old who maxes out their 401(k), investment returns will typically account for 70-80% of the final balance at retirement. The stacked area chart below makes this exponential effect immediately visible.',
     faqs: [
       {
-        question: 'What is the 2025 401(k) contribution limit?',
-        answer: 'In 2025, the IRS employee contribution limit is $23,500 ($31,000 if age 50+, and up to $34,750 for ages 60-63 under SECURE 2.0). The total combined limit (employee + employer) is $70,000.',
+        question: 'What is the 2026 401(k) contribution limit?',
+        answer: 'For 2026, the IRS employee deferral limit is $24,500 ($32,500 if age 50+, and $35,750 for ages 60-63 under SECURE 2.0). The total combined limit (employee + employer, excluding catch-up) is $72,000. These limits are not enforced by this calculator (IRS, November 2025).',
       },
       {
         question: 'How does the employer match work?',
@@ -331,7 +334,7 @@ const k401Config: CalculatorConfig = {
       },
     ],
     citations: [
-      { source: 'IRS Publication 590-A — Contributions to Individual Retirement Arrangements', url: 'https://www.irs.gov/publications/p590a' },
+      { source: 'IRS — 401(k) limit increases to $24,500 for 2026, IRA limit increases to $7,500', url: 'https://www.irs.gov/newsroom/401k-limit-increases-to-24500-for-2026-ira-limit-increases-to-7500' },
       { source: 'US Securities and Exchange Commission — Investor.gov Retirement Tools', url: 'https://www.investor.gov' },
       { source: 'SECURE 2.0 Act of 2022 — Retirement Savings Provisions', url: 'https://www.congress.gov/bill/117th-congress/house-bill/2617' },
     ],

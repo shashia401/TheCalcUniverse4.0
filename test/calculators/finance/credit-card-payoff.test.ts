@@ -73,3 +73,24 @@ describe('credit-card-payoff', () => {
     expect(getValue(r, 'interestRatio')).toMatch(/%$/);
   });
 });
+
+describe('credit-card-payoff – audit regressions', () => {
+  const g = (r: any[], id: string) => r.find((x) => x.id === id)!.value as string;
+  it('Total paid = balance + interest (final payment is partial): $5,000 @21.99%, $200/mo -> 34 mo, interest $1,748.69, paid $6,748.69 (was 34 x $200 = $6,800)', () => {
+    const r = config.calculate({ balance: '5000', apr: '21.99', payoffMode: 'fixed', monthlyPayment: '200' });
+    expect(g(r, 'totalInterest')).toBe('$1,748.69');
+    expect(g(r, 'totalPaid')).toBe('$6,748.69');
+    expect(g(r, 'payoffTime')).toBe('2yr 10mo');
+  });
+  it('by-date: $8,200 @24.99% over 36 months -> $325.99/mo, interest $3,535.54, total $11,735.54', () => {
+    const r = config.calculate({ balance: '8200', apr: '24.99', payoffMode: 'bydate', targetMonths: '36' });
+    expect(g(r, 'requiredPayment')).toBe('$325.99/mo');
+    expect(g(r, 'totalInterest')).toBe('$3,535.54');
+    expect(g(r, 'totalPaid')).toBe('$11,735.54');
+  });
+  it('a flat $100/mo on $5,000 @22% takes 137 months (11.4 yrs) and ~$8,678 interest', () => {
+    const r = config.calculate({ balance: '5000', apr: '22', payoffMode: 'fixed', monthlyPayment: '100' });
+    expect(g(r, 'payoffTime')).toBe('11yr 5mo');
+    expect(g(r, 'totalInterest')).toBe('$8,678.06');
+  });
+});

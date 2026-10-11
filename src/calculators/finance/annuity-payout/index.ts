@@ -184,11 +184,14 @@ const annuityPayoutConfig: CalculatorConfig = {
         totalInterest = new Decimal(totalPaid).minus(principal).toNumber();
       }
 
-      const years = Math.floor(months / periodsPerYear);
-      const remainingPeriods = Math.round(months % periodsPerYear);
-      const durationStr = frequency === 'monthly'
-        ? `${years} year${years !== 1 ? 's' : ''} and ${remainingPeriods} month${remainingPeriods !== 1 ? 's' : ''}`
-        : `${years} year${years !== 1 ? 's' : ''}`;
+      // Round once to whole months so "4 years and 12 months" can never appear
+      const totalMonthsRounded = Math.round((months * 12) / periodsPerYear);
+      const dYears = Math.floor(totalMonthsRounded / 12);
+      const dMonths = totalMonthsRounded % 12;
+      const durationParts: string[] = [];
+      if (dYears > 0) durationParts.push(`${dYears} year${dYears !== 1 ? 's' : ''}`);
+      if (dMonths > 0 || dYears === 0) durationParts.push(`${dMonths} month${dMonths !== 1 ? 's' : ''}`);
+      const durationStr = durationParts.join(' and ');
 
       results.push(
         { id: 'duration', label: 'Your Money Will Last', value: durationStr, highlight: true, color: 'positive' as const },
@@ -210,10 +213,9 @@ const annuityPayoutConfig: CalculatorConfig = {
           const denom = new Decimal(1).minus(new Decimal(1).plus(rD).pow(-n));
           pmt = new Decimal(principal).times(rD).div(denom).toNumber();
         }
-        const infAdj = new Decimal(pmt).div(
-          new Decimal(1).plus(new Decimal(0.03).div(periodsPerYear)).pow(n)
-        );
-        results.push({ id: 'infAdjPmt', label: 'Inflation-Adjusted Payout (3% annual inflation)', value: `$${fmtD(infAdj.toNumber())}${freqLabel}`, color: 'neutral' as const });
+        // 3% *annual* inflation compounded over the payout years (1.03^years)
+        const infAdj = new Decimal(pmt).div(new Decimal(1.03).pow(desiredYears));
+        results.push({ id: 'infAdjPmt', label: "Final-Year Payout in Today's Dollars (3% annual inflation)", value: `$${fmtD(infAdj.toNumber())}${freqLabel}`, color: 'neutral' as const });
       }
     }
 
@@ -267,18 +269,18 @@ const annuityPayoutConfig: CalculatorConfig = {
         scenario: 'You have $500,000 in retirement savings and want it to last 30 years with a 5% annual return. How much can you withdraw monthly?',
         inputs: { solveFor: 'payout', principal: '500000', annualReturn: '5', payoutFrequency: 'monthly', desiredYears: '30', inflationAdjust: 'adjusted' },
         result: 'Monthly payout: $2,684.11/month. Inflation-adjusted: $1,093.05/month in today\'s dollars.',
-        insight: 'The $2,684/month nominal payout sounds comfortable, but after 3% annual inflation over 30 years, it is worth only $1,093/month in today\'s purchasing power. This is the "inflation trap" of fixed annuities — your check stays the same while prices rise. This is exactly why the 4% Rule includes an annual inflation adjustment: start at $1,667/month ($500K x 4% / 12) and increase by inflation each year.',
+        insight: 'The $2,684/month nominal payout sounds comfortable, but after 3% annual inflation over 30 years, it is worth only about $1,106/month in today\'s purchasing power. This is the "inflation trap" of fixed annuities — your check stays the same while prices rise. This is exactly why the 4% Rule includes an annual inflation adjustment: start at $1,667/month ($500K x 4% / 12) and increase by inflation each year.',
       },
       {
         scenario: 'You plan to withdraw $3,000/month from a $400,000 portfolio earning 6% annually. How long will your money last?',
         inputs: { solveFor: 'duration', principal: '400000', annualReturn: '6', payoutFrequency: 'monthly', payoutAmount: '3000', inflationAdjust: 'nominal' },
-        result: 'Money lasts approximately 15 years and 2 months.',
-        insight: 'At $3,000/month, you are withdrawing $36,000/year from $400,000 — a 9% withdrawal rate. Even at a 6% return, that is unsustainable long-term. The 4% rule would suggest $16,000/year or $1,333/month. To make $3,000/month last 30 years at 6%, you would need approximately $546,000 — nearly 37% more saved.',
+        result: 'Money lasts approximately 18 years and 4 months.',
+        insight: 'At $3,000/month, you are withdrawing $36,000/year from $400,000 — a 9% withdrawal rate. Even at a 6% return, that is unsustainable long-term. The 4% rule would suggest $16,000/year or $1,333/month. To make $3,000/month last 30 years at 6%, you would need approximately $500,400 — about 25% more saved.',
       },
       {
         scenario: 'You inherit $250,000 at age 55 and want to know: if you earn 4%, what monthly payout would last exactly 20 years?',
         inputs: { solveFor: 'payout', principal: '250000', annualReturn: '4', payoutFrequency: 'monthly', desiredYears: '20', inflationAdjust: 'nominal' },
-        result: 'Monthly payout: $1,514.87/month for 20 years.',
+        result: 'Monthly payout: $1,514.95/month for 20 years.',
         insight: 'Simple division would tell you $250,000 / 240 months = $1,041.67/month. But because the remaining balance earns 4% while being withdrawn, you can actually take $1,515/month — 45% more. The $473/month difference is the "interest boost" that makes annuities and systematic withdrawals more powerful than naive division suggests.',
       },
     ],
@@ -303,7 +305,7 @@ const annuityPayoutConfig: CalculatorConfig = {
       { label: 'Conservative WR (early retire)', value: '3.0-3.5% for 40-50yr horizons' },
     ],
     explanation:
-      'An annuity payout calculator answers one of the most anxiety-inducing questions in retirement planning: "Will I outlive my money?" The key insight is that your remaining balance continues to earn investment returns even as you make regular withdrawals. A $500,000 portfolio earning 5% annually can generate $2,688/month for 25 years before reaching zero — significantly more than the simple division of $500,000 divided by 300 months which only gives $1,667/month with no investment return. The difference between a 0% return and a 5% return on the same starting principal is enormous: it can add 10 or more years of payout duration. This calculator also accounts for the self-sustaining threshold — if your withdrawal rate is low enough that it does not exceed the interest earned, your principal can last indefinitely.',
+      'An annuity payout calculator answers one of the most anxiety-inducing questions in retirement planning: "Will I outlive my money?" The key insight is that your remaining balance continues to earn investment returns even as you make regular withdrawals. A $500,000 portfolio earning 5% annually can generate about $2,923/month for 25 years before reaching zero — significantly more than the simple division of $500,000 divided by 300 months which only gives $1,667/month with no investment return. The difference between a 0% return and a 5% return on the same starting principal is enormous: it can add 10 or more years of payout duration. This calculator also accounts for the self-sustaining threshold — if your withdrawal rate is low enough that it does not exceed the interest earned, your principal can last indefinitely.',
     faqs: [
       {
         question: 'What is a realistic expected rate of return for a retirement portfolio?',

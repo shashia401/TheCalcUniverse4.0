@@ -18,7 +18,7 @@ const depreciationSvg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/200
   <text x="145" y="95" font-size="9" fill="var(--svg-10b981)" font-weight="bold" font-family="system-ui,sans-serif">SYD</text>
   <text x="160" y="185" text-anchor="middle" font-size="8" fill="var(--svg-64748b)" font-family="system-ui,sans-serif">Time (asset useful life in years)</text>
   <text x="20" y="100" text-anchor="middle" font-size="8" fill="var(--svg-64748b)" font-family="system-ui,sans-serif" transform="rotate(-90,20,100)">Book Value</text>
-  <text x="160" y="196" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-family="system-ui,sans-serif">DDB front-loads deductions: Year 1 deduction is 2x SL</text>
+  <text x="160" y="196" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-family="system-ui,sans-serif">DDB front-loads deductions: Year 1 deduction is about 2x SL</text>
 </svg>`;
 
 const depreciationConfig: CalculatorConfig = {
@@ -275,7 +275,7 @@ const depreciationConfig: CalculatorConfig = {
       caption: 'DDB front-loads deductions with Year 1 at roughly 2x SL — accelerating tax benefits to early asset years',
     },
     formulaDescription:
-      'Straight-Line spreads cost evenly over the asset life. Double Declining Balance accelerates deductions in early years — useful for assets that lose value quickly. Sum-of-the-Years\'-Digits is a moderate accelerated method that tapers off more gradually than DDB. The choice of method directly affects taxable income each year: accelerated methods front-load deductions, reducing near-term tax liability at the cost of smaller deductions later. This calculator uses decimal.js for precision in all depreciation calculations, ensuring IRS-compliant rounding to the cent.',
+      'Straight-Line spreads cost evenly over the asset life. Double Declining Balance accelerates deductions in early years — useful for assets that lose value quickly. Sum-of-the-Years\'-Digits is a moderate accelerated method that tapers off more gradually than DDB. The choice of method directly affects taxable income each year: accelerated methods front-load deductions, reducing near-term tax liability at the cost of smaller deductions later. Amounts are shown rounded to the cent.',
     formulaSource: 'IRS Publication 946 (How to Depreciate Property), MACRS (Modified Accelerated Cost Recovery System) guidelines, and GAAP accounting standards for depreciation methods.',
     variables: [
       {
@@ -332,7 +332,7 @@ const depreciationConfig: CalculatorConfig = {
     ],
     proTips: [
       'For tax purposes, use MACRS (IRS default accelerated system) rather than GAAP Straight-Line — MACRS front-loads deductions without requiring you to justify a shorter lifespan.',
-      'Section 179 expensing allows you to deduct up to $1,220,000 of qualified asset purchases in the year placed in service (2025 limit), bypassing depreciation entirely for small businesses.',
+      'Section 179 expensing lets you deduct up to $2,500,000 of qualified asset purchases in the year placed in service (2025 limit under the One Big Beautiful Bill Act, reduced dollar-for-dollar once purchases exceed $4,000,000), bypassing depreciation entirely for qualifying businesses.',
       'Keep separate depreciation schedules for book (financial reporting) and tax — using SL for shareholders and accelerated for the IRS is both legal and common.',
       'For vehicles, the luxury auto depreciation limits cap annual deductions regardless of method — be aware of these caps when buying high-cost company vehicles.',
     ],
@@ -340,17 +340,17 @@ const depreciationConfig: CalculatorConfig = {
     limitations: [
       'This calculator uses GAAP formulas, not IRS MACRS tables. MACRS uses specific recovery periods and conventions (half-year, mid-quarter) that differ from the simplified methods shown here.',
       'The DDB method shown includes an automatic switch to SL when SL becomes larger (the "DDB-SL switch"), which is standard practice but may differ from some software implementations.',
-      'Bonus depreciation (60% for 2025, phasing down to 40% in 2026 and 20% in 2027) is not modeled — consult a CPA for current-year bonus depreciation rules.',
+      'Bonus depreciation (100% for qualified property acquired after January 19, 2025, per the One Big Beautiful Bill Act) and Section 179 expensing are not modeled — consult a CPA for current-year rules.',
     ],
     quickReference: [
       { label: 'SL Formula', value: '(Cost − Salvage) / Life' },
       { label: 'DDB Rate', value: '2 × (1 / Life)' },
-      { label: 'MACRS Default', value: '150% DB for most property' },
-      { label: 'Section 179 Limit (2025)', value: '$1,220,000' },
-      { label: 'Bonus Depreciation (2025)', value: '60% of qualified assets' },
+      { label: 'MACRS Default', value: '200% DB for 3-, 5-, 7- and 10-year property' },
+      { label: 'Section 179 Limit (2025)', value: '$2,500,000 (phase-out above $4,000,000)' },
+      { label: 'Bonus Depreciation (acquired after Jan. 19, 2025)', value: '100% of qualified assets' },
     ],
     explanation:
-      'Depreciation is the accounting method of allocating an asset cost over its useful life, dating back to the Industrial Revolution when railroads first needed a systematic way to account for track and equipment wear. Businesses use depreciation to match the cost of a long-term asset against the revenue it generates each year. Straight-Line is the simplest and most common for book accounting — it spreads the cost evenly, making financial statements easy to forecast. Accelerated methods like DDB and SYD front-load the expense, which reduces taxable income more in early years — a common tax planning strategy that defers tax payments. The IRS MACRS system uses declining balance with a SL switch, similar to the DDB method shown here. For tax purposes, most businesses prefer accelerated methods because a dollar of tax saved today is worth more than a dollar saved next year (the time value of money principle). However, for financial reporting to shareholders, many companies use Straight-Line because it presents more consistent earnings.',
+      'Depreciation is the accounting method of allocating an asset cost over its useful life. Businesses use depreciation to match the cost of a long-term asset against the revenue it generates each year. Straight-Line is the simplest and most common for book accounting — it spreads the cost evenly, making financial statements easy to forecast. Accelerated methods like DDB and SYD front-load the expense, which reduces taxable income more in early years — a common tax planning strategy that defers tax payments. The IRS MACRS system uses declining balance with a SL switch, similar to the DDB method shown here. For tax purposes, most businesses prefer accelerated methods because a dollar of tax saved today is worth more than a dollar saved next year (the time value of money principle). However, for financial reporting to shareholders, many companies use Straight-Line because it presents more consistent earnings.',
     faqs: [
       {
         question: 'When should I use Double Declining Balance vs. Straight-Line depreciation?',
@@ -365,22 +365,22 @@ const depreciationConfig: CalculatorConfig = {
       {
         question: "Can I switch from DDB to Straight-Line during the asset's life?",
         answer:
-          'Yes — and this calculator does exactly that automatically. Under DDB, once the Straight-Line amount for the remaining life exceeds the DDB amount, you switch to SL. This switch ensures you fully depreciate the asset to its salvage value by the end of its useful life, and is required under standard accounting rules. Without this switch, DDB would never fully depreciate the asset to zero.',
+          'Yes — and this calculator does exactly that automatically. Under DDB, once the Straight-Line amount for the remaining life exceeds the DDB amount, you switch to SL. This switch ensures you fully depreciate the asset to its salvage value by the end of its useful life, and is standard practice (the IRS MACRS tables build in the same switch). Without this switch, DDB would never fully depreciate the asset to zero.',
       },
       {
         question: 'What is bonus depreciation and how does it interact with regular depreciation?',
         answer:
-          'Bonus depreciation allows businesses to deduct a percentage of the asset cost in the first year, on top of regular depreciation. For 2025, the bonus rate is 60% (phasing down from 100% in 2022). The remaining basis is then depreciated normally. This calculator does not include bonus depreciation — consult your CPA about current-year eligibility and how it affects your specific asset class and placed-in-service date.',
+          'Bonus depreciation allows businesses to deduct a percentage of the asset cost in the first year, on top of regular depreciation. The One Big Beautiful Bill Act (2025) made 100% bonus depreciation permanent for qualified property acquired after January 19, 2025 (it had been phasing down: 60% for 2024 and 40% for 2025 under prior law), and taxpayers may elect a lower rate. Any basis not expensed is then depreciated normally. This calculator does not include bonus depreciation — consult your CPA about current-year eligibility and how it affects your specific asset class and placed-in-service date.',
       },
       {
         question: 'What are the IRS useful life guidelines for common business assets?',
         answer:
-          'The IRS publishes Asset Class Lives in Publication 946: office furniture and fixtures (7 years), computers and peripheral equipment (5 years), light general-purpose trucks (5 years), heavy general-purpose trucks (6 years), residential rental property (27.5 years), nonresidential real property (39 years), land improvements (15 years), and farm buildings (20 years). Using the wrong life can trigger an audit — always verify against IRS guidelines.',
+          'IRS Publication 946 lists MACRS recovery periods such as: office furniture and fixtures (7 years), computers and peripheral equipment (5 years), light general-purpose trucks (5 years), heavy general-purpose trucks (5 years), residential rental property (27.5 years), nonresidential real property (39 years), land improvements (15 years), and farm buildings (20 years). Using the wrong life can trigger an audit — always verify against IRS guidelines.',
       },
     ],
     citations: [
       { source: 'Internal Revenue Service (Publication 946)', url: 'https://www.irs.gov/publications/p946' },
-
+      { source: 'IRS Revenue Procedure 2025-32 (Section 179 limits as amended by the OBBBA)', url: 'https://www.irs.gov/pub/irs-drop/rp-25-32.pdf' },
       { source: 'Investopedia — Depreciation Methods', url: 'https://www.investopedia.com/terms/d/depreciation.asp' },
     ],
   },

@@ -38,3 +38,21 @@ describe('afterRepairValue', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 });
+
+describe('arv-flipping – audit regressions', () => {
+  const g = (r: any[], id: string) => r.find((x) => x.id === id)!;
+  it('MAO = ARV(1-20%) - repairs - holding = 300000*0.8 - 50000 - 15000 = 175,000; profit 60,000; ROI 60000/240000 = 25%', () => {
+    const r = config.calculate({ afterRepairValue: '300000', repairCosts: '50000', holdingCosts: '15000', targetProfitMargin: '20' });
+    expect(g(r, 'mao').value).toBe('$175,000');
+    expect(g(r, 'estimatedProfit').value).toBe('$60,000');
+    expect(g(r, 'roiPercent').value).toBe('25.0%');
+    expect(g(r, 'seventyPercentRule').value).toBe('$160,000'); // 300000*0.7-50000
+  });
+  it('flags a deal where costs exceed the ARV left after the profit target (raw MAO < 0)', () => {
+    const r = config.calculate({ afterRepairValue: '100000', repairCosts: '60000', holdingCosts: '30000', targetProfitMargin: '20' });
+    // 100000*0.8 - 90000 = -10000 -> no workable offer
+    expect(g(r, 'mao').value).toBe('$0');
+    expect(g(r, 'mao').color).toBe('negative');
+    expect(g(r, 'mao').interpretation).toMatch(/no purchase price works/);
+  });
+});

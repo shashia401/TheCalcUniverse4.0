@@ -90,3 +90,19 @@ describe('business-loan', () => {
     near(parseMoney(getValue(r, 'totalCost')), 312747.97, 0.5);
   });
 });
+
+describe('business-loan – audit: worked-example numbers (independent annuity calc)', () => {
+  it('$250k @8.5% 60 mo: payment 5129.13, interest 57,747.97; DSCR 8500/5129.13 = 1.66', () => {
+    const r = config.calculate({ loanAmount: '250000', loanTermMonths: '60', interestRate: '8.5', originationFee: '2', monthlyNOI: '8500' });
+    expect(getValue(r, 'monthlyPayment')).toBe('$5129.13');
+    expect(getValue(r, 'totalInterest')).toBe('$57747.97');
+    expect(getValue(r, 'dscrResult')).toMatch(/^1\.66/);
+  });
+  it('extending $250k @8.5% from 60 to 120 mo: payment 3,099.64 and ~$64,209 more interest', () => {
+    const a = config.calculate({ loanAmount: '250000', loanTermMonths: '60', interestRate: '8.5' });
+    const b = config.calculate({ loanAmount: '250000', loanTermMonths: '120', interestRate: '8.5' });
+    expect(getValue(b, 'monthlyPayment')).toBe('$3099.64');
+    const extra = parseFloat(getValue(b, 'totalInterest').slice(1)) - parseFloat(getValue(a, 'totalInterest').slice(1));
+    expect(extra).toBeCloseTo(64209.1, 0);
+  });
+});

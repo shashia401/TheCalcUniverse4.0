@@ -24,7 +24,8 @@ function buildData(P: number, monthly: number, rate: number, variance: number, y
   const points: DataPoint[] = [];
 
   for (let y = 0; y <= years; y++) {
-    const mr = rate / 12;
+    // Monthly rate equivalent to the chosen compounding frequency (matches the calculator)
+    const mr = Math.pow(1 + rate / n, n / 12) - 1;
     const months = y * 12;
     const futureP = P * Math.pow(1 + rate / n, n * y);
     const futurePMT = mr === 0 ? monthly * months : monthly * ((Math.pow(1 + mr, months) - 1) / mr);
@@ -32,7 +33,7 @@ function buildData(P: number, monthly: number, rate: number, variance: number, y
     const contributed = P + monthly * 12 * y;
 
     const calcFV = (r: number) => {
-      const m = r / 12;
+      const m = Math.pow(1 + r / n, n / 12) - 1;
       const fP = P * Math.pow(1 + r / n, n * y);
       const fPMT = m === 0 ? monthly * months : monthly * ((Math.pow(1 + m, months) - 1) / m);
       return fP + fPMT;

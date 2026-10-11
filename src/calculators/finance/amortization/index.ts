@@ -65,6 +65,7 @@ const amortizationConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '30',
       min: 1,
+      max: 600,
       step: 1,
       required: true,
       helpText: 'Duration of the loan in the unit selected above.',
@@ -285,6 +286,7 @@ const amortizationConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'M = P × [r(1+r)^n] / [(1+r)^n − 1]',
+    formulaSource: 'Standard level-payment annuity (present value of an ordinary annuity) formula used for fixed-rate amortizing loans; CFPB consumer guidance on loan amortization.',
     formulaDescription:
       'The standard amortization formula calculates your fixed monthly payment by dividing the outstanding balance into equal installments over the loan term. Each payment covers the interest accrued since the last payment and reduces the principal balance. Extra payments reduce the principal directly, which shrinks future interest charges and shortens the loan term.',
     diagram: {
@@ -310,7 +312,7 @@ const amortizationConfig: CalculatorConfig = {
       'Plan a debt payoff strategy by understanding when equity builds fastest during the amortization schedule.',
     ],
     explanation:
-      'In the early years of a loan, the vast majority of each payment goes toward interest — almost none reduces the balance. This phenomenon, called front-loaded interest, is the reason extra payments are so powerful. By attacking principal directly in the early years, you prevent future interest from ever accruing on that principal. For a 30-year $250,000 mortgage at 6.5%, the first year of payments results in over $16,000 in interest but less than $3,500 in principal reduction. Paying just $200 extra per month can cut over 5 years off the loan and save tens of thousands in interest. The amortization table below shows exactly how each payment is split month by month.',
+      'In the early years of a loan, the vast majority of each payment goes toward interest — almost none reduces the balance. This phenomenon, called front-loaded interest, is the reason extra payments are so powerful. By attacking principal directly in the early years, you prevent future interest from ever accruing on that principal. For a 30-year $250,000 mortgage at 6.5%, the first year of payments results in over $16,000 in interest but less than $3,500 in principal reduction. Paying just $200 extra per month cuts nearly 8 years off that loan and saves about $97,600 in interest. The amortization table below shows exactly how each payment is split month by month.',
     faqs: [
       {
         question: 'What is the difference between extra monthly vs. extra annual payments?',
@@ -326,7 +328,7 @@ const amortizationConfig: CalculatorConfig = {
       },
       {
         question: 'What is the difference between simple interest and amortized interest?',
-        answer: 'Simple interest accrues daily based on the current balance, so paying early reduces interest for that month. Amortized interest is calculated monthly based on a fixed schedule set at the beginning of the loan. Most mortgages use simple interest, meaning the date you make your payment within the month affects how much interest accrues. Paying biweekly instead of monthly can reduce total interest because you effectively make one extra payment per year.',
+        answer: 'Simple-interest loans (common for auto loans and some personal loans) accrue interest daily on the current balance, so paying early reduces the interest for that month. An amortized loan like a typical mortgage charges one month of interest on the balance at each payment date, so paying a few days early within the month does not change the interest; only extra principal does. Paying biweekly instead of monthly can reduce total interest because you effectively make one extra payment per year.',
       },
     ],
   citations: [
