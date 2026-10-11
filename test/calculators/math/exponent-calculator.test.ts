@@ -139,10 +139,12 @@ describe('Exponent Calculator', () => {
   });
 
   // ── New feature tests ─────────────────────────────────────────────
-  it('handles large positive result with Infinity', () => {
+  // 10^1000 exceeds the largest double (~1.8e308): report overflow in words, not "Infinity".
+  it('reports overflow in words for a result beyond double precision', () => {
     const r = config.calculate({ base: '10', exponent: '1000' });
     const result = getValue(r, 'result');
-    expect(result).toContain('Infinity');
+    expect(result).toContain('Overflow');
+    expect(JSON.stringify(r)).not.toMatch(/Infinity|NaN|∞/);
   });
 
   it('negative base with odd-denominator rational exponent gives real result', () => {

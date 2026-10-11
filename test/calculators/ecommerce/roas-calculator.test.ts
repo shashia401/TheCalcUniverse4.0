@@ -8,11 +8,11 @@ describe('roas', () => {
       adSpend: '5000',
       revenue: '20000',
     });
-    expect(r).toHaveLength(3);
+    expect(r).toHaveLength(2);
 
     // ROAS = 20000 / 5000 = 4.00x
     // Profit = 20000 - 5000 = 15000
-    // CPA = 5000 / (20000 / 50) = 12.50
+    // (no CPA row without an order count — it used to assume a $50 average order)
     near(parseNumber(getValue(r, 'roas')), 4.0);
     near(parseNumber(getValue(r, 'profitFromAds')), 15000);
   });
@@ -23,7 +23,7 @@ describe('roas', () => {
       revenue: '20000',
       grossMargin: '50',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(3);
 
     // min break-even ROAS = 1 / 0.50 = 2.00x
     near(parseNumber(getValue(r, 'minROAS')), 2.0);
@@ -36,7 +36,7 @@ describe('roas', () => {
       revenue: '15000',
       grossMargin: '25',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(3);
 
     // ROAS = 15000 / 10000 = 1.50x
     // break-even = 1 / 0.25 = 4.00x
@@ -50,7 +50,7 @@ describe('roas', () => {
       revenue: '5000',
       grossMargin: '10',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(3);
 
     // ROAS = 5.00x
     // break-even = 1 / 0.10 = 10.00x
@@ -64,7 +64,7 @@ describe('roas', () => {
       revenue: '10000',
       grossMargin: '50',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(3);
 
     // ROAS = 2.00x
     // break-even = 1 / 0.50 = 2.00x
@@ -97,7 +97,7 @@ describe('roas', () => {
       adSpend: '5000',
       revenue: '0',
     });
-    expect(r).toHaveLength(3);
+    expect(r).toHaveLength(2);
 
     near(parseNumber(getValue(r, 'roas')), 0);
     near(parseNumber(getValue(r, 'profitFromAds')), -5000);
@@ -116,7 +116,7 @@ describe('roas', () => {
       revenue: '5000',
       grossMargin: '100',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(3);
     near(parseNumber(getValue(r, 'roas')), 5.0);
     near(parseNumber(getValue(r, 'minROAS')), 1.0);
     expect(getValue(r, 'minROAS')).toContain('Profitable');
@@ -169,5 +169,22 @@ describe('ROAS educational content', () => {
     numberInputs.forEach((i) => {
       expect(i.inputMode).toBeDefined();
     });
+  });
+
+  // CPA = ad spend / orders, from the user's own order count (hand arithmetic):
+  // 5000 / 400 = 12.50; 1234 / 7 = 176.2857...
+  it('shows cost per acquisition only when orders are entered', () => {
+    const r = config.calculate({ adSpend: '5000', revenue: '20000', orders: '400' });
+    expect(r).toHaveLength(3);
+    expect(getValue(r, 'cpa')).toBe('$12.50');
+    const r2 = config.calculate({ adSpend: '1234', revenue: '9000', orders: '7' });
+    expect(getValue(r2, 'cpa')).toBe('$176.29');
+    expect(config.calculate({ adSpend: '5000', revenue: '20000', orders: '0' }).some((x) => x.id === 'cpa')).toBe(false);
+  });
+
+  it('never invents an order count: tiny revenue gives no CPA and no Infinity', () => {
+    const r = config.calculate({ adSpend: '5000', revenue: '0.0001' });
+    expect(JSON.stringify(r)).not.toMatch(/Infinity|NaN|∞/);
+    expect(r.some((x) => x.id === 'cpa')).toBe(false);
   });
 });

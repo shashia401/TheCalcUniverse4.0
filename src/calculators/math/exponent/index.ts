@@ -99,7 +99,7 @@ const exponentConfig: CalculatorConfig = {
     const result = Math.pow(base, exp);
     if (!isFinite(result)) {
       return [
-        { id: 'result', label: 'Result', value: result > 0 ? 'Infinity' : '-Infinity', highlight: true, color: 'negative' },
+        { id: 'result', label: 'Result', value: result > 0 ? 'Overflow: more than 1.8 × 10^308' : 'Overflow: less than -1.8 × 10^308', highlight: true, color: 'negative' },
         { id: 'explanation', label: 'Overflow', value: `The result exceeds the maximum representable floating-point number (≈ 1.8 × 10^308). Try a smaller exponent.`, color: 'negative' },
         { id: 'reciprocal', label: 'Reciprocal', value: '0', color: 'neutral' },
       ];

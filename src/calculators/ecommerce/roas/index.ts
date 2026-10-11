@@ -29,6 +29,17 @@ const roasConfig: CalculatorConfig = {
       helpText: 'Total revenue attributed to the advertising campaign',
     },
     {
+      id: 'orders',
+      label: 'Orders from Ads (optional)',
+      type: 'number',
+      placeholder: '400',
+      min: 0,
+      max: 1000000000,
+      step: 1,
+      inputMode: 'numeric',
+      helpText: 'Number of purchases the ads drove — enter it to see cost per acquisition',
+    },
+    {
       id: 'grossMargin',
       label: 'Gross Margin %',
       type: 'number',
@@ -50,7 +61,8 @@ const roasConfig: CalculatorConfig = {
 
     const roas = revenue / adSpend;
     const profitFromAds = revenue - adSpend;
-    const cpa = adSpend / (revenue > 0 ? Math.round(revenue / 50) : 1);
+    const orders = parseFloat(values.orders);
+    const cpa = orders > 0 ? adSpend / orders : null;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -64,12 +76,14 @@ const roasConfig: CalculatorConfig = {
         interpretation: `ROAS is revenue, not profit — a 4x ROAS can still lose money if your product margin is thin, since it doesn't subtract cost of goods or overhead. A more accurate profitability check divides ad spend against gross profit (not revenue); use ROAS to compare campaigns against each other, not as a standalone profit signal.`,
         color: roas >= 4 ? 'positive' as const : roas >= 2 ? 'neutral' as const : 'negative' as const,
       },
-      {
-        id: 'cpa',
-        label: 'Cost per Acquisition',
-        value: `$${fmt(cpa)}`,
-        color: 'neutral' as const,
-      },
+      ...(cpa === null
+        ? []
+        : [{
+            id: 'cpa',
+            label: 'Cost per Acquisition',
+            value: `$${fmt(cpa)}`,
+            color: 'neutral' as const,
+          }]),
       {
         id: 'profitFromAds',
         label: 'Revenue Minus Ad Spend',

@@ -1,6 +1,6 @@
 import type React from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import MiniRing from '../../../components/calculator/MiniRing';
 
 interface Props {
   values: Record<string, string>;
@@ -9,21 +9,9 @@ interface Props {
 
 function FractionPie({ numerator, denominator, label, color }: { numerator: number; denominator: number; label: string; color: string }) {
   if (denominator <= 0 || denominator > 20) return null;
-  const filled = Math.min(Math.max(numerator, 0), denominator);
-  const data = [
-    { name: 'Filled', value: filled },
-    { name: 'Empty', value: denominator - filled },
-  ];
   return (
     <div className="flex flex-col items-center gap-1">
-      <ResponsiveContainer width={100} height={100}>
-        <PieChart>
-          <Pie data={data} dataKey="value" cx="50%" cy="50%" innerRadius={28} outerRadius={45} startAngle={90} endAngle={-270} paddingAngle={0}>
-            <Cell fill={color} />
-            <Cell fill="#e2e8f0" />
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
+      <MiniRing value={numerator} total={denominator} color={color} label={`${label}: ${Math.min(Math.max(numerator, 0), denominator)} of ${denominator} parts`} />
       <span className="text-[10px] font-bold text-slate-500 text-center leading-tight">{label}</span>
     </div>
   );
