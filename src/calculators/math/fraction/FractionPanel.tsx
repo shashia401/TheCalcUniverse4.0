@@ -112,13 +112,13 @@ export default function FractionPanel({ values, results }: Props) {
             {renderFraction(aNum, aDen)}
             <span className="text-slate-500 mx-1">→</span>
             {renderFraction(adjustedANum, commonLcm)}
-            <span className="text-slate-300 mx-1">(×{fmt(factorA)})</span>
+            <span className="text-slate-500 mx-1">(×{fmt(factorA)})</span>
           </p>
           <p className="text-xs font-mono text-slate-700 mt-1 flex items-center flex-wrap">
             {renderFraction(bNum, bDen)}
             <span className="text-slate-500 mx-1">→</span>
             {renderFraction(adjustedBNum, commonLcm)}
-            <span className="text-slate-300 mx-1">(×{fmt(factorB)})</span>
+            <span className="text-slate-500 mx-1">(×{fmt(factorB)})</span>
           </p>
         </div>
 

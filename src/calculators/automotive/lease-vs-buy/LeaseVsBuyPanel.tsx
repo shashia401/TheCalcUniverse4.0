@@ -43,8 +43,8 @@ export default function LeaseVsBuyPanel({ results }: Props) {
         </div>
 
         <div className="space-y-1.5">
-          {bar('Lease Cost', leaseVal, maxVal, 'bg-blue-500')}
-          {bar('Net Buy Cost', buyVal, maxVal, 'bg-purple-500')}
+          {bar('Lease Cost', leaseVal, maxVal, 'bg-blue-700')}
+          {bar('Net Buy Cost', buyVal, maxVal, 'bg-purple-700')}
         </div>
 
         {residual && (

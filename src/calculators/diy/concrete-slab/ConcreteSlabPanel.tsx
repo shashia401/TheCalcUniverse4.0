@@ -50,9 +50,9 @@ export default function ConcreteSlabPanel({ results }: Props) {
           <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Cubic Yards Needed</p>
           <p className="text-3xl font-bold text-emerald-700">{cubicYards.value}</p>
         </div>
-        {cubicFeet && bar('Cubic Feet', parseNum(cubicFeet.value), parseNum(cubicFeet.value), 'bg-blue-500', 'ft')}
-        {bags60 && bar('60-lb Bags', bags60Val * 0.6, maxVal, 'bg-amber-500', 'bags')}
-        {bags80 && bar('80-lb Bags', bags80Val * 0.8, maxVal, 'bg-orange-500', 'bags')}
+        {cubicFeet && bar('Cubic Feet', parseNum(cubicFeet.value), parseNum(cubicFeet.value), 'bg-blue-700', 'ft')}
+        {bags60 && bar('60-lb Bags', bags60Val * 0.6, maxVal, 'bg-amber-700', 'bags')}
+        {bags80 && bar('80-lb Bags', bags80Val * 0.8, maxVal, 'bg-orange-700', 'bags')}
       </div>
     </div>
   );

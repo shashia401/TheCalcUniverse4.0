@@ -46,9 +46,9 @@ export default function DepreciationPanel({ results }: Props) {
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Depreciation Summary</span>
       </div>
       <div className="p-5 space-y-2">
-        {bar('Future Value', futureVal, 'bg-emerald-500')}
-        {bar('Total Depreciation', totalVal, 'bg-red-500')}
-        {annualVal > 0 && bar('Annual Depreciation', annualVal, 'bg-amber-500')}
+        {bar('Future Value', futureVal, 'bg-emerald-700')}
+        {bar('Total Depreciation', totalVal, 'bg-red-700')}
+        {annualVal > 0 && bar('Annual Depreciation', annualVal, 'bg-amber-700')}
         {monthlyDep && (
           <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-xs text-slate-500">{monthlyDep.label}</p>

@@ -7,11 +7,11 @@ interface Props {
 }
 
 const ZONE_DEFS = [
-  { num: 1, name: 'Zone 1 — Warm Up / Recovery', low: 0.5, high: 0.6, color: 'bg-slate-400', textColor: 'text-slate-600' },
-  { num: 2, name: 'Zone 2 — Fat Burn / Aerobic Base', low: 0.6, high: 0.7, color: 'bg-emerald-500', textColor: 'text-emerald-700' },
-  { num: 3, name: 'Zone 3 — Aerobic / Cardio', low: 0.7, high: 0.8, color: 'bg-amber-500', textColor: 'text-amber-700' },
-  { num: 4, name: 'Zone 4 — Anaerobic / Threshold', low: 0.8, high: 0.9, color: 'bg-orange-500', textColor: 'text-orange-700' },
-  { num: 5, name: 'Zone 5 — VO2 Max / All-Out', low: 0.9, high: 1.0, color: 'bg-red-500', textColor: 'text-red-700' },
+  { num: 1, name: 'Zone 1 — Warm Up / Recovery', low: 0.5, high: 0.6, color: 'bg-slate-600', textColor: 'text-slate-600' },
+  { num: 2, name: 'Zone 2 — Fat Burn / Aerobic Base', low: 0.6, high: 0.7, color: 'bg-emerald-700', textColor: 'text-emerald-700' },
+  { num: 3, name: 'Zone 3 — Aerobic / Cardio', low: 0.7, high: 0.8, color: 'bg-amber-700', textColor: 'text-amber-700' },
+  { num: 4, name: 'Zone 4 — Anaerobic / Threshold', low: 0.8, high: 0.9, color: 'bg-orange-700', textColor: 'text-orange-700' },
+  { num: 5, name: 'Zone 5 — VO2 Max / All-Out', low: 0.9, high: 1.0, color: 'bg-red-700', textColor: 'text-red-700' },
 ];
 
 export default function HRZonesPanel({ results }: Props) {

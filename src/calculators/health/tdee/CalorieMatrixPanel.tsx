@@ -88,7 +88,7 @@ export default function CalorieMatrixPanel({ results }: Props) {
             <div className="h-7 bg-slate-100 rounded-xl overflow-hidden flex">
               {bmr > 0 && (
                 <div
-                  className="bg-violet-400 h-full flex items-center justify-center text-[10px] font-bold text-white"
+                  className="bg-violet-600 h-full flex items-center justify-center text-[10px] font-bold text-white"
                   style={{ width: `${barPct(bmr)}%` }}
                   title={`BMR: ${bmr} kcal`}
                   onMouseEnter={() => setHoverInfo({ type: 'segment', label: 'BMR', detail: `${bmr} kcal`, subdetail: `${Math.round(pctOfTotal(bmr))}% of TDEE` })}
@@ -99,7 +99,7 @@ export default function CalorieMatrixPanel({ results }: Props) {
               )}
               {tef > 0 && (
                 <div
-                  className="bg-blue-400 h-full flex items-center justify-center text-[10px] font-bold text-white"
+                  className="bg-blue-600 h-full flex items-center justify-center text-[10px] font-bold text-white"
                   style={{ width: `${barPct(tef)}%` }}
                   title={`TEF: ${tef} kcal`}
                   onMouseEnter={() => setHoverInfo({ type: 'segment', label: 'TEF', detail: `${tef} kcal`, subdetail: `${Math.round(pctOfTotal(tef))}% of TDEE` })}
@@ -110,7 +110,7 @@ export default function CalorieMatrixPanel({ results }: Props) {
               )}
               {eat > 0 && (
                 <div
-                  className="bg-emerald-400 h-full flex items-center justify-center text-[10px] font-bold text-white"
+                  className="bg-emerald-700 h-full flex items-center justify-center text-[10px] font-bold text-white"
                   style={{ width: `${barPct(eat)}%` }}
                   title={`EAT: ${eat} kcal`}
                   onMouseEnter={() => setHoverInfo({ type: 'segment', label: 'EAT', detail: `${eat} kcal`, subdetail: `${Math.round(pctOfTotal(eat))}% of TDEE` })}
@@ -121,7 +121,7 @@ export default function CalorieMatrixPanel({ results }: Props) {
               )}
               {neat > 0 && (
                 <div
-                  className="bg-amber-400 h-full flex items-center justify-center text-[10px] font-bold text-white"
+                  className="bg-amber-700 h-full flex items-center justify-center text-[10px] font-bold text-white"
                   style={{ width: `${barPct(neat)}%` }}
                   title={`NEAT: ${neat} kcal`}
                   onMouseEnter={() => setHoverInfo({ type: 'segment', label: 'NEAT', detail: `${neat} kcal`, subdetail: `${Math.round(pctOfTotal(neat))}% of TDEE` })}
@@ -135,19 +135,19 @@ export default function CalorieMatrixPanel({ results }: Props) {
             {/* Legend */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="flex items-center gap-2 text-[10px] text-slate-600">
-                <div className="w-3 h-3 rounded bg-violet-400 flex-shrink-0" />
+                <div className="w-3 h-3 rounded bg-violet-600 flex-shrink-0" />
                 <span>BMR ({Math.round(pctOfTotal(bmr))}%)</span>
               </div>
               <div className="flex items-center gap-2 text-[10px] text-slate-600">
-                <div className="w-3 h-3 rounded bg-blue-400 flex-shrink-0" />
+                <div className="w-3 h-3 rounded bg-blue-600 flex-shrink-0" />
                 <span>TEF ({Math.round(pctOfTotal(tef))}%)</span>
               </div>
               <div className="flex items-center gap-2 text-[10px] text-slate-600">
-                <div className="w-3 h-3 rounded bg-emerald-400 flex-shrink-0" />
+                <div className="w-3 h-3 rounded bg-emerald-700 flex-shrink-0" />
                 <span>EAT ({Math.round(pctOfTotal(eat))}%)</span>
               </div>
               <div className="flex items-center gap-2 text-[10px] text-slate-600">
-                <div className="w-3 h-3 rounded bg-amber-400 flex-shrink-0" />
+                <div className="w-3 h-3 rounded bg-amber-700 flex-shrink-0" />
                 <span>NEAT ({Math.round(pctOfTotal(neat))}%)</span>
               </div>
             </div>
@@ -156,23 +156,23 @@ export default function CalorieMatrixPanel({ results }: Props) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
               <div className="rounded-lg bg-violet-50 border border-violet-100 p-3 text-center">
                 <p className="text-[18px] font-bold text-violet-700">{bmr}</p>
-                <p className="text-[10px] text-violet-500 font-semibold">BMR kcal</p>
-                <p className="text-[9px] text-violet-400">Basal metabolism</p>
+                <p className="text-[10px] text-violet-700 font-semibold">BMR kcal</p>
+                <p className="text-[9px] text-violet-700">Basal metabolism</p>
               </div>
               <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-center">
                 <p className="text-[18px] font-bold text-blue-700">{tef}</p>
-                <p className="text-[10px] text-blue-500 font-semibold">TEF kcal</p>
-                <p className="text-[9px] text-blue-400">Digesting food</p>
+                <p className="text-[10px] text-blue-700 font-semibold">TEF kcal</p>
+                <p className="text-[9px] text-blue-700">Digesting food</p>
               </div>
               <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-3 text-center">
                 <p className="text-[18px] font-bold text-emerald-700">{eat}</p>
-                <p className="text-[10px] text-emerald-500 font-semibold">EAT kcal</p>
-                <p className="text-[9px] text-emerald-400">Exercise</p>
+                <p className="text-[10px] text-emerald-700 font-semibold">EAT kcal</p>
+                <p className="text-[9px] text-emerald-700">Exercise</p>
               </div>
               <div className="rounded-lg bg-amber-50 border border-amber-100 p-3 text-center">
                 <p className="text-[18px] font-bold text-amber-700">{neat}</p>
-                <p className="text-[10px] text-amber-500 font-semibold">NEAT kcal</p>
-                <p className="text-[9px] text-amber-400">Non-exercise movement</p>
+                <p className="text-[10px] text-amber-700 font-semibold">NEAT kcal</p>
+                <p className="text-[9px] text-amber-700">Non-exercise movement</p>
               </div>
             </div>
             {hoverInfo?.type === 'segment' && (

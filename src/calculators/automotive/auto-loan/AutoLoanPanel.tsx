@@ -27,10 +27,10 @@ export default function AutoLoanPanel({ results }: Props) {
   const bar = (label: string, val: number, color: string, highlight?: boolean) => {
     const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
     const barColor =
-      color === 'green' ? 'bg-emerald-500' :
-      color === 'red' ? 'bg-red-500' :
-      color === 'blue' ? 'bg-blue-500' :
-      'bg-slate-400';
+      color === 'green' ? 'bg-emerald-700' :
+      color === 'red' ? 'bg-red-700' :
+      color === 'blue' ? 'bg-blue-700' :
+      'bg-slate-600';
     return (
       <div className={`flex items-center gap-3 py-1.5 ${highlight ? 'bg-blue-50/50 -mx-4 px-4 rounded-lg' : ''}`}>
         <span className="text-xs font-semibold text-slate-600 w-36 flex-shrink-0">{label}</span>

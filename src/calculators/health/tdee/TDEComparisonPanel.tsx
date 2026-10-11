@@ -27,9 +27,9 @@ export default function TDEComparisonPanel({ results }: Props) {
 
   const bar = (label: string, val: number, color: string, isPrimary: boolean) => {
     const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
-    const barColor = color === 'green' ? 'bg-emerald-500'
-      : color === 'amber' ? 'bg-amber-500'
-      : 'bg-blue-500';
+    const barColor = color === 'green' ? 'bg-emerald-700'
+      : color === 'amber' ? 'bg-amber-700'
+      : 'bg-blue-700';
 
     return (
       <div

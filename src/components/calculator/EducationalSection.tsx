@@ -67,7 +67,7 @@ export default function EducationalSection({ content, calculatorTitle, customInp
       )}
 
       {/* Diagram: visual understanding, static SVG in the HTML */}
-      {content.diagram && (
+      {content.diagram?.svg && (
         <figure className={card}>
           <div
             role="img"

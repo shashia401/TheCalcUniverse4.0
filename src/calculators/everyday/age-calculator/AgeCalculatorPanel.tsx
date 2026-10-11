@@ -51,15 +51,15 @@ export default function AgeCalculatorPanel({ results }: Props) {
         <div className="flex gap-3 justify-center">
           <div className="rounded-xl bg-blue-50 border border-blue-200 px-5 py-3 text-center flex-1">
             <span className="text-2xl font-bold text-blue-600">{years}</span>
-            <p className="text-[10px] font-semibold text-blue-400 uppercase">Years</p>
+            <p className="text-[10px] font-semibold text-blue-700 uppercase">Years</p>
           </div>
           <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-3 text-center flex-1">
             <span className="text-2xl font-bold text-emerald-600">{monthsV}</span>
-            <p className="text-[10px] font-semibold text-emerald-400 uppercase">Months</p>
+            <p className="text-[10px] font-semibold text-emerald-700 uppercase">Months</p>
           </div>
           <div className="rounded-xl bg-amber-50 border border-amber-200 px-5 py-3 text-center flex-1">
             <span className="text-2xl font-bold text-amber-600">{daysV}</span>
-            <p className="text-[10px] font-semibold text-amber-400 uppercase">Days</p>
+            <p className="text-[10px] font-semibold text-amber-700 uppercase">Days</p>
           </div>
         </div>
 
@@ -75,7 +75,7 @@ export default function AgeCalculatorPanel({ results }: Props) {
 
         {nextBirthday && (
           <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Next Birthday In</p>
+            <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Next Birthday In</p>
             <p className="text-lg font-bold text-indigo-700">{nextBirthday.value}</p>
           </div>
         )}
