@@ -156,4 +156,42 @@ describe('Heart Rate Zones Calculator', () => {
     expect(config.educational!.quickReference).toBeDefined();
     expect(config.educational!.quickReference!.length).toBeGreaterThanOrEqual(5);
   });
+
+  // ── Audit regressions (expected values hand-derived: Fox maxHR = 220 - age; Karvonen = HRR * p + RHR) ──
+  it('James 35 / RHR 62 Karvonen: maxHR 185, HRR 123, Zone 2 = 135.8-148.1 -> 136-148', () => {
+    const r = config.calculate({ age: '35', restingHR: '62', method: 'karvonen' });
+    expect(getValue(r, 'hrr')).toBe('123 bpm');
+    expect(getValue(r, 'zone2')).toMatch(/^136–148 bpm/);
+    // 80/20 band = Zone 1 low (0.5*123+62 = 123.5 -> 124) to Zone 2 high (148)
+    expect(getValue(r, 'eightTwenty')).toContain('124–148 bpm');
+  });
+
+  it('Maria 42 / RHR 48: %Max HR Zone 2 = 106.8-124.6 -> 107-125; Karvonen Zone 2 = 126-139', () => {
+    const pct = config.calculate({ age: '42', restingHR: '48', method: 'maxpct' });
+    expect(getValue(pct, 'zone2')).toMatch(/^107–125 bpm/);
+    // %Max 80/20 band must not add RHR: 0.5*178 = 89 to 0.7*178 = 124.6 -> 125
+    expect(getValue(pct, 'eightTwenty')).toContain('89–125 bpm');
+    const kar = config.calculate({ age: '42', restingHR: '48', method: 'karvonen' });
+    expect(getValue(kar, 'zone2')).toMatch(/^126–139 bpm/);
+  });
+
+  it('Tom 28 / RHR 65: zones 141-154, 154-167, 167-179, 179-192 (HRR 127)', () => {
+    const r = config.calculate({ age: '28', restingHR: '65', method: 'karvonen' });
+    expect(getValue(r, 'zone2')).toMatch(/^141–154 bpm/);
+    expect(getValue(r, 'zone3')).toMatch(/^154–167 bpm/);
+    expect(getValue(r, 'zone4')).toMatch(/^167–179 bpm/);
+    expect(getValue(r, 'zone5')).toMatch(/^179–192 bpm/);
+  });
+
+  it('Karvonen without a resting HR states the assumed 60 bpm instead of hiding it', () => {
+    const r = config.calculate({ age: '35', method: 'karvonen' });
+    expect(getValue(r, 'methodUsed')).toContain('assumed RHR 60');
+    expect(r.find((x) => x.id === 'maxHR')!.interpretation).toContain('assume a resting rate of 60');
+  });
+
+  it('resting HR at or above estimated max HR is rejected (HRR would be <= 0)', () => {
+    expect(config.calculate({ age: '100', restingHR: '120', method: 'karvonen' })).toEqual([]);
+    const ok = config.calculate({ age: '100', restingHR: '100', method: 'karvonen' });
+    expect(getValue(ok, 'hrr')).toBe('20 bpm'); // 120 - 100
+  });
 });

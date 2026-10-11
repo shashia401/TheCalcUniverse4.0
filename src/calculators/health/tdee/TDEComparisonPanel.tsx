@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
 
 interface Props {
   values: Record<string, string>;
@@ -18,39 +18,15 @@ export default function TDEComparisonPanel({ results }: Props) {
     return m ? parseFloat(m[1]) : 0;
   };
 
-  const mifflinVal = parseNum(mifflin.value);
-  const harrisVal = parseNum(harris.value);
-  const katchVal = katch ? parseNum(katch.value) : 0;
-  const maxVal = Math.max(mifflinVal, harrisVal, katchVal || 0);
-
-  const [hoverInfo, setHoverInfo] = useState<{ label: string; value: number } | null>(null);
-
-  const bar = (label: string, val: number, color: string, isPrimary: boolean) => {
-    const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
-    const barColor = color === 'green' ? 'bg-emerald-700'
-      : color === 'amber' ? 'bg-amber-700'
-      : 'bg-blue-700';
-
-    return (
-      <div
-        className={`flex items-center gap-3 py-2 ${isPrimary ? 'bg-amber-50/50 -mx-4 px-4 rounded-lg' : ''}`}
-        onMouseEnter={() => setHoverInfo({ label, value: val })}
-        onMouseLeave={() => setHoverInfo(null)}
-      >
-        <span className="text-xs font-semibold text-[var(--surface-text-secondary)] w-32 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-5 rounded overflow-hidden" style={{ background: 'var(--surface-bg)' }}>
-          <div className={`h-full rounded ${barColor} transition-all flex items-center justify-end pr-1.5 ${pct < 15 ? 'min-w-[40px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[10px] font-bold text-white drop-shadow-sm">{val.toLocaleString()}</span>
-          </div>
-        </div>
-        {isPrimary && (
-          <span className="text-[10px] font-bold text-[var(--accent-rust)] uppercase tracking-wider flex-shrink-0">Selected</span>
-        )}
-      </div>
-    );
-  };
-
   const primaryFormula = results.find(r => r.id === 'formulaLabel')?.value || '';
+
+  // -700 backgrounds keep the white value labels at >= 4.5:1 (shared HBarRow replaces the local bar()).
+  const formulas = [
+    { label: 'Mifflin-St Jeor', value: parseNum(mifflin.value), color: 'bg-emerald-700' },
+    { label: 'Harris-Benedict', value: parseNum(harris.value), color: 'bg-amber-700' },
+    ...(katch ? [{ label: 'Katch-McArdle', value: parseNum(katch.value), color: 'bg-blue-700' }] : []),
+  ];
+  const maxVal = Math.max(...formulas.map(f => f.value));
 
   return (
     <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--border-warm)', background: 'var(--surface-card)' }}>
@@ -62,33 +38,42 @@ export default function TDEComparisonPanel({ results }: Props) {
       </div>
 
       <div className="p-5 space-y-1">
-        {bar('Mifflin-St Jeor', mifflinVal, 'green', primaryFormula === 'Mifflin-St Jeor' || (!katch && primaryFormula.includes('Mifflin')))}
-        {bar('Harris-Benedict', harrisVal, 'amber', primaryFormula === 'Harris-Benedict')}
-        {katch && bar('Katch-McArdle', katchVal, 'blue', primaryFormula === 'Katch-McArdle')}
-
-        {hoverInfo && (
-          <div className="text-xs text-center rounded-lg px-3 py-2 mt-2" style={{ background: 'var(--surface-bg)', color: 'var(--surface-text-secondary)' }}>
-            <span className="font-semibold">{hoverInfo.label}</span>
-            <span className="mx-1" style={{ color: 'var(--surface-text-muted)' }}>—</span>
-            <span className="font-bold" style={{ color: 'var(--surface-text)' }}>{hoverInfo.value.toLocaleString()} kcal/day BMR</span>
-          </div>
-        )}
+        <div role="group" aria-label="Basal metabolic rate by formula, kcal per day">
+          {formulas.map(f => (
+            <div key={f.label} className="flex items-center gap-2">
+              <div className="flex-1">
+                <HBarRow
+                  label={f.label}
+                  value={f.value}
+                  max={maxVal}
+                  color={f.color}
+                  display={f.value.toLocaleString()}
+                  height="h-5"
+                  className="py-2"
+                />
+              </div>
+              {primaryFormula === f.label && (
+                <span className="text-[10px] font-bold text-[var(--accent-rust)] uppercase tracking-wider flex-shrink-0">Selected</span>
+              )}
+            </div>
+          ))}
+        </div>
 
         <div className="mt-4 rounded-xl px-4 py-3" style={{ border: '1px solid var(--border-warm)', background: 'var(--surface-bg)' }}>
           <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--surface-text-muted)' }}>What Do the Differences Mean?</p>
           <ul className="text-xs space-y-1.5 leading-relaxed" style={{ color: 'var(--surface-text-secondary)' }}>
             <li className="flex items-start gap-2">
-              <span className="text-emerald-500 mt-0.5">•</span>
+              <span className="text-emerald-700 mt-0.5">•</span>
               <span><strong style={{ color: 'var(--surface-text)' }}>Mifflin-St Jeor (1990):</strong> Most validated for the general population. TDEE uses this by default.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-amber-500 mt-0.5">•</span>
-              <span><strong style={{ color: 'var(--surface-text)' }}>Harris-Benedict (revised 1984):</strong> Older formula that tends to overestimate BMR by ~5%.</span>
+              <span className="text-amber-700 mt-0.5">•</span>
+              <span><strong style={{ color: 'var(--surface-text)' }}>Harris-Benedict (revised 1984):</strong> Older formula that usually reads higher than Mifflin-St Jeor and tends to overestimate resting energy expenditure.</span>
             </li>
             {katch && (
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">•</span>
-                <span><strong style={{ color: 'var(--surface-text)' }}>Katch-McArdle (1996):</strong> Most accurate for lean athletes because it uses lean body mass.</span>
+                <span className="text-blue-700 mt-0.5">•</span>
+                <span><strong style={{ color: 'var(--surface-text)' }}>Katch-McArdle (1996):</strong> Works from lean body mass, so it suits lean or muscular people whose body fat % is known accurately.</span>
               </li>
             )}
           </ul>

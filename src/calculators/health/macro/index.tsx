@@ -51,7 +51,8 @@ const macroConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '170',
       inputMode: 'decimal',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.1,
       required: true,
       helpText: 'Pounds (lbs) for Imperial · Kilograms (kg) for Metric',
@@ -63,10 +64,11 @@ const macroConfig: CalculatorConfig = {
       placeholder: '5',
       unit: 'ft',
       inputMode: 'decimal',
-      min: 0,
-      max: 9,
+      min: 3,
+      max: 8,
       step: 1,
       helpText: 'Imperial only',
+      showWhen: (v) => v.unit === 'imperial',
     },
     {
       id: 'heightIn',
@@ -79,6 +81,7 @@ const macroConfig: CalculatorConfig = {
       max: 11,
       step: 1,
       helpText: 'Imperial only — remaining inches (0–11)',
+      showWhen: (v) => v.unit === 'imperial',
     },
     {
       id: 'heightCm',
@@ -87,9 +90,11 @@ const macroConfig: CalculatorConfig = {
       placeholder: '178',
       unit: 'cm',
       inputMode: 'decimal',
-      min: 0,
+      min: 90,
+      max: 275,
       step: 0.1,
       helpText: 'Metric only',
+      showWhen: (v) => v.unit === 'metric',
     },
     {
       id: 'activityLevel',
@@ -195,7 +200,11 @@ const macroConfig: CalculatorConfig = {
     const calAdj = goalAdjust[goal] ?? 0;
     const adjustedCalories = tdee + calAdj;
     const safeMin = sex === 'female' ? 1200 : 1500;
-    const finalCalories = Math.max(adjustedCalories, safeMin);
+    // The safety minimum only stops a DEFICIT from going too low; it never pushes a
+    // maintain/gain target above TDEE, and never forces a deficit-free TDEE below itself.
+    const finalCalories = calAdj < 0 ? Math.max(adjustedCalories, Math.min(safeMin, tdee)) : adjustedCalories;
+    const limitedByMin = calAdj < 0 && finalCalories > adjustedCalories;
+    const actualAdj = Math.round(finalCalories - tdee);
 
     // Calculate macros
     const diet = DIET_PRESETS[dietKey] ?? DIET_PRESETS.standard;
@@ -273,8 +282,8 @@ const macroConfig: CalculatorConfig = {
       {
         id: 'calorieAdjustment',
         label: 'Calorie Adjustment for Goal',
-        value: `${calAdj >= 0 ? '+' : ''}${calAdj} kcal`,
-        color: calAdj >= 0 ? 'positive' : 'neutral',
+        value: `${actualAdj >= 0 ? '+' : ''}${actualAdj} kcal${limitedByMin ? ` (deficit limited by the ${fmt(safeMin)} kcal safety minimum)` : ''}`,
+        color: actualAdj >= 0 ? 'positive' : 'neutral',
       },
     ];
   },
@@ -379,12 +388,12 @@ const macroConfig: CalculatorConfig = {
     proTips: [
       'Hitting your calorie target matters far more for weight change than hitting exact macro ratios. If you go over on fat but stay under on calories, you will still lose weight. The macros primarily affect body composition quality and satiety, not the calorie math.',
       'Protein timing matters almost as much as total intake. Spread your protein across 3–4 meals (30–40 g each) rather than one large portion, to maximize muscle protein synthesis throughout the day. A pre-sleep casein-rich snack (~30 g) can improve overnight recovery.',
-      'If you log your body fat percentage, the calculator switches to the Katch-McArdle BMR formula which is more accurate for lean or muscular individuals. Mifflin-St Jeor (used without BF%) assumes average body composition and can underestimate BMR by 5–10% in muscular people.',
+      'If you log your body fat percentage, the calculator switches to the Katch-McArdle BMR formula which is more accurate for lean or muscular individuals. Mifflin-St Jeor (used without BF%) assumes average body composition and can underestimate BMR in very muscular people.',
       'The "Mild Weight Loss" goal at -250 kcal creates roughly a 0.5 lb/week deficit. This is more sustainable long-term than the -500 kcal "Weight Loss" option, which can trigger hunger-related non-compliance. Choose mild for cuts longer than 8 weeks; aggressive only for short-term goals.',
     ],
 
     limitations: [
-      'BMR formulas (Mifflin-St Jeor and Katch-McArdle) are population-level estimates with a standard error of ~10% for individuals. Your actual BMR can differ by 150–300 kcal from the calculated value depending on genetics, thyroid function, and body composition.',
+      'BMR formulas (Mifflin-St Jeor and Katch-McArdle) are population-level estimates: Mifflin-St Jeor lands within 10% of measured resting energy expenditure for roughly 80% of non-obese adults, so for some people the error is larger. Your actual BMR can differ by 150–300 kcal from the calculated value depending on genetics, thyroid function, and body composition.',
       'TDEE multipliers (1.2–1.9) are coarse estimates of activity. Someone with a desk job who does 3 intense CrossFit sessions per week may not fit neatly into any single category — the calculator cannot account for the timing and intensity distribution of exercise.',
       'This calculator is not suitable for clinical nutrition planning (eating disorders, metabolic diseases, pre-/post-surgery nutrition). These conditions require individualized medical nutrition therapy from a registered dietitian.',
       'The keto preset at 5% carbs is extremely restrictive and should only be used with medical supervision for specific therapeutic purposes (e.g., drug-resistant epilepsy). For general weight loss, ketosis is not superior to other diets when calories and protein are equated.',

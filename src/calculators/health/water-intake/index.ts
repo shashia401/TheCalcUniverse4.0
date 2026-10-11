@@ -10,10 +10,11 @@ const waterIntakeConfig: CalculatorConfig = {
       label: 'Body Weight',
       type: 'number',
       placeholder: '170',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.5,
       required: true,
-      helpText: 'Base water intake is 0.5 oz per pound of body weight',
+      helpText: 'Base water intake is 0.5 oz per pound of body weight (a rule of thumb, about 33 mL per kg)',
     },
     {
       id: 'unit',
@@ -91,7 +92,7 @@ const waterIntakeConfig: CalculatorConfig = {
         value: `${fmt(totalLiters)} liters (${fmt(totalOz)} oz)`,
         highlight: true,
         color: 'positive',
-        interpretation: `This target already accounts for your activity and climate — and about 20% of daily fluid comes from food, so you don't need to drink every ounce. Thirst and pale-yellow urine are better day-to-day guides than hitting an exact number.`,
+        interpretation: `This target already accounts for your activity and climate — and about 20% of daily fluid comes from food, so you don't need to drink every ounce. For comparison, the US National Academies set an adequate total water intake of about 3.7 L a day for men and 2.7 L for women, including water from food. Thirst and pale-yellow urine are better day-to-day guides than hitting an exact number.`,
       },
       {
         id: 'cups',
@@ -111,6 +112,13 @@ const waterIntakeConfig: CalculatorConfig = {
         value: `${fmt(baseOz * 0.0295735)} liters`,
         color: 'neutral',
       },
+      {
+        // Panel data, so the panel never has to scrape numbers out of display strings.
+        id: '_water',
+        label: '_water',
+        value: JSON.stringify({ liters: totalLiters, oz: totalOz, cups: Math.ceil(totalCups), ml: Math.round(totalMl), baseLiters: baseOz * 0.0295735 }),
+        color: 'neutral',
+      },
     ];
   },
   extraPanel: (values, results) => {
@@ -125,7 +133,7 @@ const waterIntakeConfig: CalculatorConfig = {
       caption: 'Daily water intake is 0.5 oz per pound of body weight plus adjustments for activity and climate',
     },
     formulaDescription:
-      'Daily water intake is estimated at 0.5 oz per pound of body weight as a baseline, adjusted upward for physical activity and environmental heat. Individual needs vary significantly, so this provides a starting point for personal hydration planning.',
+      'Daily water intake is estimated at 0.5 oz per pound of body weight as a baseline, adjusted upward for physical activity and environmental heat. The 0.5 oz per pound baseline and the activity and climate add-ons are common rules of thumb rather than a published standard; for comparison, the US National Academies adequate total water intake is about 3.7 L (men) and 2.7 L (women) per day, about 20% of which comes from food. Individual needs vary significantly, so this provides a starting point for personal hydration planning.',
     variables: [
       { symbol: 'Base', name: 'Weight-Based Baseline', description: '0.5 oz of water per pound of body weight (or ~33 mL per kg). A 170 lb person needs ~85 oz (2.5 L) at baseline.' },
       { symbol: 'Activity Add', name: 'Activity Adjustment', description: 'Additional 8-32 oz based on exercise intensity and duration. A 60-minute run in warm weather can require 24+ oz of additional water.' },
@@ -143,11 +151,11 @@ const waterIntakeConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'Does coffee or tea count toward my water intake?',
-        answer: 'Yes. Despite being mild diuretics, caffeinated beverages still contribute net hydration. The fluid in coffee and tea exceeds the diuretic effect in normal consumption amounts. A cup of coffee provides roughly 80% of the hydration of the same volume of water.',
+        answer: 'Yes. Despite being mild diuretics, caffeinated beverages still contribute net hydration. The fluid in coffee and tea exceeds the diuretic effect in normal consumption amounts. Studies comparing beverages have found that tea and coffee in normal amounts hydrate about as well as water.',
       },
       {
         question: 'What are signs of dehydration?',
-        answer: 'Dark yellow urine, thirst, dry mouth, fatigue, and headache are early signs. Pale yellow urine is the goal. Clear urine may indicate overhydration. For athletes, a good rule is to weigh yourself before and after exercise — any weight lost is mostly water, and you should drink 16-24 oz per pound lost during your workout.',
+        answer: 'Dark yellow urine, thirst, dry mouth, fatigue, and headache are early signs. Pale yellow urine is the goal. Clear urine may indicate overhydration. For athletes, a good rule is to weigh yourself before and after exercise — any weight lost is mostly water, and you should drink about 16-24 oz for each pound lost over the hours after your workout.',
       },
       {
         question: 'Can you drink too much water?',

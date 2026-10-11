@@ -3,10 +3,10 @@ import { CalculatorConfig } from '../../../types/calculator';
 import PregnancyGainPanel from './PregnancyGainPanel';
 
 const IOM_BY_BMI: Record<string, { label: string; totalMin: number; totalMax: number; t1Min: number; t1Max: number; weeklyMin: number; weeklyMax: number }> = {
-  underweight: { label: 'Underweight (< 18.5)', totalMin: 28, totalMax: 40, t1Min: 1, t1Max: 4.4, weeklyMin: 1, weeklyMax: 1.3 },
-  normal: { label: 'Normal (18.5–24.9)', totalMin: 25, totalMax: 35, t1Min: 1, t1Max: 4.4, weeklyMin: 0.8, weeklyMax: 1 },
-  overweight: { label: 'Overweight (25–29.9)', totalMin: 15, totalMax: 25, t1Min: 1, t1Max: 4.4, weeklyMin: 0.5, weeklyMax: 0.7 },
-  obese: { label: 'Obese (≥ 30)', totalMin: 11, totalMax: 20, t1Min: 1, t1Max: 4.4, weeklyMin: 0.4, weeklyMax: 0.6 },
+  underweight: { label: 'Underweight (< 18.5)', totalMin: 28, totalMax: 40, t1Min: 1.1, t1Max: 4.4, weeklyMin: 1, weeklyMax: 1.3 },
+  normal: { label: 'Normal (18.5–24.9)', totalMin: 25, totalMax: 35, t1Min: 1.1, t1Max: 4.4, weeklyMin: 0.8, weeklyMax: 1 },
+  overweight: { label: 'Overweight (25–29.9)', totalMin: 15, totalMax: 25, t1Min: 1.1, t1Max: 4.4, weeklyMin: 0.5, weeklyMax: 0.7 },
+  obese: { label: 'Obese (≥ 30)', totalMin: 11, totalMax: 20, t1Min: 1.1, t1Max: 4.4, weeklyMin: 0.4, weeklyMax: 0.6 },
 };
 
 const pregnancyGainConfig: CalculatorConfig = {
@@ -27,7 +27,8 @@ const pregnancyGainConfig: CalculatorConfig = {
       label: 'Pre-Pregnancy Weight',
       type: 'number',
       placeholder: '150',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.5,
       required: true,
       inputMode: 'decimal',
@@ -38,7 +39,8 @@ const pregnancyGainConfig: CalculatorConfig = {
       label: 'Current Weight',
       type: 'number',
       placeholder: '165',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.5,
       required: true,
       inputMode: 'decimal',
@@ -50,12 +52,12 @@ const pregnancyGainConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       unit: 'ft',
-      min: 0,
-      max: 9,
+      min: 3,
+      max: 8,
       step: 1,
-      required: true,
       inputMode: 'decimal',
       helpText: 'Imperial only — feet portion of your height',
+      showWhen: (v) => v.unit === 'imperial',
     },
     {
       id: 'heightIn',
@@ -68,6 +70,7 @@ const pregnancyGainConfig: CalculatorConfig = {
       step: 1,
       inputMode: 'decimal',
       helpText: 'Remaining inches (0–11)',
+      showWhen: (v) => v.unit === 'imperial',
     },
     {
       id: 'heightCm',
@@ -75,10 +78,12 @@ const pregnancyGainConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '163',
       unit: 'cm',
-      min: 0,
+      min: 90,
+      max: 275,
       step: 0.1,
       inputMode: 'decimal',
       helpText: 'Metric only — total height in centimeters',
+      showWhen: (v) => v.unit === 'metric',
     },
     {
       id: 'currentWeek',
@@ -122,7 +127,8 @@ const pregnancyGainConfig: CalculatorConfig = {
 
     if ([preWeightKg, curWeightKg, currentWeek].some(isNaN) || preWeightKg <= 0 || curWeightKg <= 0 || currentWeek < 0) return [];
 
-    const preBmi = preWeightKg / (heightM * heightM);
+    // Categorise on the DISPLAYED (1-decimal) BMI so 24.96 -> "25.0" lands in Overweight, never "25.0 — Normal".
+    const preBmi = Math.round((preWeightKg / (heightM * heightM)) * 10) / 10;
 
     let bmiCategory: string;
     if (preBmi < 18.5) bmiCategory = 'underweight';
@@ -142,7 +148,9 @@ const pregnancyGainConfig: CalculatorConfig = {
     // than the mother had already gained. Before any weeks have elapsed there is no
     // rate to extrapolate, so fall back to the IOM's midpoint total estimate.
     const iomMidpointTotalLbs = (iom.totalMin + iom.totalMax) / 2;
-    const projectedGainKg = currentWeek > 0
+    const projectedGainKg = currentWeek >= 40
+      ? gainSoFar // already at term: nothing left to extrapolate (a week-42 rate would project BELOW the gain so far)
+      : currentWeek > 0
       ? (gainSoFar / currentWeek) * 40
       : iomMidpointTotalLbs * 0.45359237;
     const projectedGainDisplay = unit === 'imperial' ? (projectedGainKg / 0.45359237).toFixed(0) + ' lbs' : projectedGainKg.toFixed(1) + ' kg';
@@ -200,11 +208,21 @@ const pregnancyGainConfig: CalculatorConfig = {
         label: 'Projected Total Gain (at current rate)',
         value: projectedGainDisplay,
         color: 'neutral',
+        interpretation: currentWeek < 14
+          ? 'Early-pregnancy gain is small and uneven, so a straight-line projection before week 14 is unreliable; compare the first-trimester target instead.'
+          : 'A straight-line projection of your average gain so far to week 40; real gain is rarely linear.',
       },
       {
         id: 't1Gain',
         label: 'First Trimester Target',
-        value: unit === 'imperial' ? `1–4.4 lbs total` : `0.5–2.0 kg total`,
+        value: unit === 'imperial' ? `1.1–4.4 lbs total` : `0.5–2.0 kg total`,
+        color: 'neutral',
+      },
+      {
+        // Panel data: the BMI category key, so the panel never has to match display strings.
+        id: '_category',
+        label: '_category',
+        value: bmiCategory,
         color: 'neutral',
       },
       {
@@ -222,7 +240,7 @@ const pregnancyGainConfig: CalculatorConfig = {
   educational: {
     formula: 'IOM Guidelines: BMI-based total gain range + trimester-specific weekly rates',
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Weight Gain by Trimester</text><rect x="20" y="55" width="128" height="70" rx="6" fill="var(--svg-3b82f6)" opacity=".15"/><text x="84" y="78" text-anchor="middle" font-size="12" fill="var(--svg-3b82f6)" font-weight="bold">1st Tri</text><text x="84" y="98" text-anchor="middle" font-size="10" fill="var(--svg-333333)">Weeks 1-13 &middot; 1-4.4 lbs</text><rect x="153" y="55" width="128" height="70" rx="6" fill="var(--svg-22c55e)" opacity=".15"/><text x="217" y="78" text-anchor="middle" font-size="12" fill="var(--svg-22c55e)" font-weight="bold">2nd Tri</text><text x="217" y="98" text-anchor="middle" font-size="10" fill="var(--svg-333333)">Weeks 14-27 &middot; 0.8-1 lb/wk</text><rect x="286" y="55" width="128" height="70" rx="6" fill="var(--svg-f59e0b)" opacity=".15"/><text x="350" y="78" text-anchor="middle" font-size="12" fill="var(--svg-f59e0b)" font-weight="bold">3rd Tri</text><text x="350" y="98" text-anchor="middle" font-size="10" fill="var(--svg-333333)">Weeks 28-40 &middot; 0.8-1 lb/wk</text><text x="220" y="170" text-anchor="middle" font-size="12" fill="var(--svg-8b5cf6)" font-weight="bold">Total Gain by Pre-Preg BMI:</text><text x="220" y="195" text-anchor="middle" font-size="11" fill="var(--svg-333333)">Underweight 28-40 &middot; Normal 25-35 &middot; Overweight 15-25 &middot; Obese 11-20 lbs</text></svg>',
+      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Weight Gain by Trimester</text><rect x="20" y="55" width="128" height="70" rx="6" fill="var(--svg-3b82f6)" opacity=".15"/><text x="84" y="78" text-anchor="middle" font-size="12" fill="var(--svg-3b82f6)" font-weight="bold">1st Tri</text><text x="84" y="98" text-anchor="middle" font-size="10" fill="var(--svg-333333)">Weeks 1-13 &middot; 1.1-4.4 lbs</text><rect x="153" y="55" width="128" height="70" rx="6" fill="var(--svg-22c55e)" opacity=".15"/><text x="217" y="78" text-anchor="middle" font-size="12" fill="var(--svg-22c55e)" font-weight="bold">2nd Tri</text><text x="217" y="98" text-anchor="middle" font-size="10" fill="var(--svg-333333)">Weeks 14-27 &middot; 0.8-1 lb/wk</text><rect x="286" y="55" width="128" height="70" rx="6" fill="var(--svg-f59e0b)" opacity=".15"/><text x="350" y="78" text-anchor="middle" font-size="12" fill="var(--svg-f59e0b)" font-weight="bold">3rd Tri</text><text x="350" y="98" text-anchor="middle" font-size="10" fill="var(--svg-333333)">Weeks 28-40 &middot; 0.8-1 lb/wk</text><text x="220" y="170" text-anchor="middle" font-size="12" fill="var(--svg-8b5cf6)" font-weight="bold">Total Gain by Pre-Preg BMI:</text><text x="220" y="195" text-anchor="middle" font-size="11" fill="var(--svg-333333)">Underweight 28-40 &middot; Normal 25-35 &middot; Overweight 15-25 &middot; Obese 11-20 lbs</text></svg>',
       alt: 'Three-column chart showing pregnancy weight gain by trimester with IOM BMI-based totals',
       caption: 'IOM guidelines recommend trimester-specific gain rates with total ranges varying by pre-pregnancy BMI',
     },
@@ -241,7 +259,7 @@ const pregnancyGainConfig: CalculatorConfig = {
       'Use the weekly gain target to monitor your rate of gain going forward.',
     ],
     explanation:
-      'The Institute of Medicine (IOM) 2009 gestational weight gain guidelines are the clinical standard in the US. They reflect research showing that both inadequate and excessive gain increase risks for mother and baby. Inadequate gain is associated with small-for-gestational-age infants and preterm birth. Excessive gain is associated with large-for-gestational-age infants, cesarean delivery, and postpartum weight retention. The guidelines differ by pre-pregnancy BMI because underweight women need more gain to support fetal growth, while obese women carry more reserves and need less incremental gain. First trimester gain is minimal (1–4.4 lbs total regardless of BMI), with most gain occurring in the second and third trimesters at the recommended weekly rate. The total recommended gain reflects the weight of the baby (7–8 lbs), placenta (1.5 lbs), amniotic fluid (2 lbs), increased blood volume (3–4 lbs), enlarged uterus (2 lbs), breast tissue (1–2 lbs), and maternal fat stores (5–9 lbs). These are guidelines, not rigid targets — individual variation is normal and expected. Women carrying multiples (twins, triplets) have different guidelines with higher weight gain targets. Women who start pregnancy at a BMI above 30 are advised to gain only 11–20 lbs total, as their existing fat reserves provide additional energy for fetal development. Always discuss your weight gain with your healthcare provider, as individual circumstances may warrant adjustments to these general guidelines.',
+      'The Institute of Medicine (IOM) 2009 gestational weight gain guidelines are the clinical standard in the US. They reflect research showing that both inadequate and excessive gain increase risks for mother and baby. Inadequate gain is associated with small-for-gestational-age infants and preterm birth. Excessive gain is associated with large-for-gestational-age infants, cesarean delivery, and postpartum weight retention. The guidelines differ by pre-pregnancy BMI because underweight women need more gain to support fetal growth, while obese women carry more reserves and need less incremental gain. First trimester gain is minimal (1.1–4.4 lbs total regardless of BMI), with most gain occurring in the second and third trimesters at the recommended weekly rate. The total recommended gain reflects the weight of the baby (7–8 lbs), placenta (1.5 lbs), amniotic fluid (2 lbs), increased blood volume (3–4 lbs), enlarged uterus (2 lbs), breast tissue (1–2 lbs), and maternal fat stores (5–9 lbs). These are guidelines, not rigid targets — individual variation is normal and expected. Women carrying multiples (twins, triplets) have different guidelines with higher weight gain targets. Women who start pregnancy at a BMI above 30 are advised to gain only 11–20 lbs total, as their existing fat reserves provide additional energy for fetal development. Always discuss your weight gain with your healthcare provider, as individual circumstances may warrant adjustments to these general guidelines.',
     faqs: [
       {
         question: 'What happens if I gain too much or too little?',
@@ -253,7 +271,7 @@ const pregnancyGainConfig: CalculatorConfig = {
       },
       {
         question: 'Do the IOM guidelines apply to twin pregnancies?',
-        answer: 'The IOM also has twin pregnancy guidelines: Underweight/Normal BMI: 37–54 lbs. Overweight: 31–50 lbs. Obese: 25–42 lbs. This calculator uses singleton pregnancy guidelines. Consult your provider for twin or higher-order multiples.',
+        answer: 'The IOM also has provisional twin pregnancy guidelines: Normal BMI: 37–54 lbs. Overweight: 31–50 lbs. Obese: 25–42 lbs. It gives no twin recommendation for underweight women. This calculator uses singleton pregnancy guidelines. Consult your provider for twin or higher-order multiples.',
       },
       {
         question: 'What if I am in my first trimester and losing weight?',
@@ -261,12 +279,12 @@ const pregnancyGainConfig: CalculatorConfig = {
       },
       {
         question: 'Do the guidelines change for women having twins or triplets?',
-        answer: 'Yes. The IOM has separate guidelines for twin pregnancies: Normal BMI: 37–54 lbs total gain. Overweight: 31–50 lbs. Obese: 25–42 lbs. Twin pregnancies almost always deliver earlier than singletons, so the weekly gain rate in the second and third trimesters is higher. This calculator covers singleton guidelines only — consult your provider for multiples.',
+        answer: 'Yes. The IOM has separate (provisional) guidelines for twin pregnancies, with none for underweight women: Normal BMI: 37–54 lbs total gain. Overweight: 31–50 lbs. Obese: 25–42 lbs. Twin pregnancies almost always deliver earlier than singletons, so the weekly gain rate in the second and third trimesters is higher. This calculator covers singleton guidelines only — consult your provider for multiples.',
       },
     ],
     commonUses: [
       'Prenatal weight monitoring — track weight gain against IOM guidelines by pre-pregnancy BMI category to ensure both maternal health and optimal fetal growth',
-      'Trimester-specific planning — use first trimester gain targets (1-4.4 lbs) and second/third trimester weekly rates to pace weight gain appropriately',
+      'Trimester-specific planning — use first trimester gain targets (1.1-4.4 lbs) and second/third trimester weekly rates to pace weight gain appropriately',
       'High-risk pregnancy management — for women with pre-pregnancy obesity, use the lower gain ranges (11-20 lbs) to minimize complications while supporting fetal development',
       'Postpartum preparation — track projected total gain to anticipate postpartum weight retention and plan for healthy post-delivery weight management'
     ],
@@ -274,19 +292,19 @@ const pregnancyGainConfig: CalculatorConfig = {
       {
         scenario: 'A woman with a pre-pregnancy weight of 140 lbs at 5\'5" (BMI 23.3, Normal category) is at week 20 of pregnancy. Her current weight is 155 lbs. She wants to know if her 15 lb gain is on track and what her total gain should be.',
         inputs: { unit: 'imperial', prepregnancyWeight: '140', currentWeight: '155', heightFt: '5', heightIn: '5', currentWeek: '20' },
-        result: 'BMI: 23.3 (Normal category). IOM Recommended Total Gain: 25–35 lbs. Weight Gained So Far: 15.0 lbs at Week 20. Gain Status: Above Recommended Range (expected by week 20: about 6.6–11.4 lbs). Weekly Gain Target (2nd/3rd Tri): 0.8–1.0 lbs/week. Projected Total Gain: ~30 lbs.',
-        insight: 'The IOM pace for a normal-BMI pregnancy is 1–4.4 lbs by week 13 plus 0.8–1.0 lb per week after that, which puts the expected gain at week 20 at roughly 6.6–11.4 lbs. Her 15 lbs is ahead of that pace, so the calculator flags it as above range even though a straight-line projection to week 40 (~30 lbs) would still land inside the 25–35 lb total range. The projection assumes she keeps gaining at her average rate so far; if she instead slows to the 0.8–1.0 lb/week target for the remaining 20 weeks she would finish near 31–35 lbs, still inside the total range. This is worth mentioning to her provider, who can check whether the gain reflects fluid, appetite or measurement timing, but it is not an emergency.',
+        result: 'BMI: 23.3 (Normal category). IOM Recommended Total Gain: 25–35 lbs. Weight Gained So Far: 15.0 lbs at Week 20. Gain Status: Above Recommended Range (expected by week 20: about 6.7–11.4 lbs). Weekly Gain Target (2nd/3rd Tri): 0.8–1.0 lbs/week. Projected Total Gain: ~30 lbs.',
+        insight: 'The IOM pace for a normal-BMI pregnancy is 1.1–4.4 lbs by week 13 plus 0.8–1.0 lb per week after that, which puts the expected gain at week 20 at roughly 6.7–11.4 lbs. Her 15 lbs is ahead of that pace, so the calculator flags it as above range even though a straight-line projection to week 40 (~30 lbs) would still land inside the 25–35 lb total range. The projection assumes she keeps gaining at her average rate so far; if she instead slows to the 0.8–1.0 lb/week target for the remaining 20 weeks she would finish near 31–35 lbs, still inside the total range. This is worth mentioning to her provider, who can check whether the gain reflects fluid, appetite or measurement timing, but it is not an emergency.',
       },
       {
         scenario: 'A woman who was underweight before pregnancy (pre-pregnancy BMI 18.0, 105 lbs at 5\'4") is at week 30. She has gained 22 lbs so far. She eats well but worries the gain is not enough.',
         inputs: { unit: 'imperial', prepregnancyWeight: '105', currentWeight: '127', heightFt: '5', heightIn: '4', currentWeek: '30' },
-        result: 'BMI: 18.0 (Underweight category). IOM Recommended Total Gain: 28–40 lbs. Weight Gained So Far: 22.0 lbs at Week 30. Gain Status: Within Recommended Range (expected by week 30: about 18–26.5 lbs). Weekly Gain Target (2nd/3rd Tri): 1.0–1.3 lbs/week. Projected Total Gain: ~29 lbs.',
-        insight: 'For the underweight category, the IOM recommends a higher total gain of 28–40 lbs to support optimal fetal growth. At week 30 the expected gain is 1–4.4 lbs for the first trimester plus 17 weeks at 1.0–1.3 lbs/week, or about 18–26.5 lbs in total, so her 22 lbs is within range and her projected total of ~29 lbs sits just inside the 28–40 lb target. She is on track but near the lower end of the total range, so she should keep gaining roughly 1.0–1.3 lbs/week for the remaining 10 weeks (about 10–13 lbs more) and discuss calorie-dense nutritious additions with her provider: nut butters, avocados, full-fat dairy, olive oil on vegetables, and possibly a protein supplement. Inadequate gain in underweight women is associated with higher preterm birth and small-for-gestational-age risks, so it is worth keeping an eye on.',
+        result: 'BMI: 18.0 (Underweight category). IOM Recommended Total Gain: 28–40 lbs. Weight Gained So Far: 22.0 lbs at Week 30. Gain Status: Within Recommended Range (expected by week 30: about 18.1–26.5 lbs). Weekly Gain Target (2nd/3rd Tri): 1.0–1.3 lbs/week. Projected Total Gain: ~29 lbs.',
+        insight: 'For the underweight category, the IOM recommends a higher total gain of 28–40 lbs to support optimal fetal growth. At week 30 the expected gain is 1.1–4.4 lbs for the first trimester plus 17 weeks at 1.0–1.3 lbs/week, or about 18.1–26.5 lbs in total, so her 22 lbs is within range and her projected total of ~29 lbs sits just inside the 28–40 lb target. She is on track but near the lower end of the total range, so she should keep gaining roughly 1.0–1.3 lbs/week for the remaining 10 weeks (about 10–13 lbs more) and discuss calorie-dense nutritious additions with her provider: nut butters, avocados, full-fat dairy, olive oil on vegetables, and possibly a protein supplement. Inadequate gain in underweight women is associated with higher preterm birth and small-for-gestational-age risks, so it is worth keeping an eye on.',
       },
       {
         scenario: 'A woman with pre-pregnancy obesity (BMI 34.5, 220 lbs at 5\'7") is at week 16 of pregnancy. She gained 3 lbs in the first trimester (within normal limits) and wants to understand her targets for the full pregnancy.',
         inputs: { unit: 'imperial', prepregnancyWeight: '220', currentWeight: '223', heightFt: '5', heightIn: '7', currentWeek: '16' },
-        result: 'BMI: 34.5 (Obese category, ≥30). IOM Recommended Total Gain: 11–20 lbs. Weight Gained So Far: 3.0 lbs at Week 16. Gain Status: Within Recommended Range. Weekly Gain Target (2nd/3rd Tri): 0.4–0.6 lbs/week. First Trimester Target: 1–4.4 lbs.',
+        result: 'BMI: 34.5 (Obese category, ≥30). IOM Recommended Total Gain: 11–20 lbs. Weight Gained So Far: 3.0 lbs at Week 16. Gain Status: Within Recommended Range. Weekly Gain Target (2nd/3rd Tri): 0.4–0.6 lbs/week. First Trimester Target: 1.1–4.4 lbs.',
         insight: 'For women with obesity (BMI ≥30), the IOM recommends a restricted total gain of 11–20 lbs — notably less than other categories because existing maternal fat stores provide energy for fetal development. At 16 weeks with 3 lbs gained, she is within range. Her remaining budget is approximately 8–17 lbs over 24 weeks, requiring a gain rate of about 0.3–0.7 lbs/week — right at the 0.4–0.6 lb target. Weight loss during pregnancy is not recommended even with obesity; the goal is controlled minimal gain. She should focus on nutrient density (lean proteins, vegetables, whole grains) rather than "eating for two," which is a harmful myth. Regular monitoring with her provider is recommended, and she may benefit from a referral to a registered dietitian specializing in prenatal nutrition for individualized meal planning.',
       },
     ],
@@ -299,18 +317,18 @@ const pregnancyGainConfig: CalculatorConfig = {
       'If your gain is consistently above the recommended range, do not attempt weight loss during pregnancy. Instead, focus on slowing the rate of gain by improving food quality while maintaining adequate nutrition. Swap refined carbohydrates for whole grains, reduce liquid calories (soda, juice, sweetened coffee drinks), and increase non-starchy vegetables. Involve your provider or a registered dietitian rather than self-restricting.',
     ],
     limitations: [
-      'These IOM 2009 guidelines are for singleton pregnancies only. Women carrying twins, triplets, or higher-order multiples have different weight gain targets: Normal BMI twin pregnancy: 37–54 lbs; Overweight twin: 31–50 lbs; Obese twin: 25–42 lbs. This calculator does not adjust for multiples.',
+      'These IOM 2009 guidelines are for singleton pregnancies only. Women carrying twins, triplets, or higher-order multiples have different weight gain targets: Normal BMI twin pregnancy: 37–54 lbs; Overweight twin: 31–50 lbs; Obese twin: 25–42 lbs (provisional, with no recommendation for underweight women). This calculator does not adjust for multiples.',
       'The IOM guidelines provide population-level recommendations, not individual prescriptions. Your optimal weight gain may differ based on age, ethnicity, medical history (gestational diabetes, preeclampsia, hyperemesis gravidarum), and fetal growth patterns. Always follow your healthcare provider\'s individualized guidance, which may differ from the IOM ranges based on your specific clinical picture.',
       'Pre-pregnancy BMI is a screening tool with limitations. It does not distinguish between fat mass and lean mass (a muscular athlete may have a high BMI but low body fat), and it was developed from primarily white European populations. The IOM acknowledges that BMI-based categories may not equally predict outcomes across all racial and ethnic groups.',
       'This calculator uses self-reported weights and provides a snapshot comparison, not a continuous medical monitoring tool. Weight gain interpretation should consider the overall trajectory over multiple prenatal visits, not a single data point. A woman who tracks "above range" at one visit may be "within range" at the next if gain rate adjusts.',
-      'Projected total gain uses the midpoint of the weekly rate range and assumes consistent gain through delivery. Actual gain trajectories are rarely linear — many women experience a plateau or slight loss near term, and fluid retention can spike in the final weeks. The projection is an estimate, not a prediction.',
+      'Projected total gain extrapolates your average weekly gain so far to week 40 and assumes consistent gain through delivery. Actual gain trajectories are rarely linear — many women experience a plateau or slight loss near term, and fluid retention can spike in the final weeks. The projection is an estimate, not a prediction.',
     ],
     quickReference: [
       { label: 'Underweight BMI (<18.5)', value: 'Gain 28–40 lbs (12.7–18.1 kg) total' },
       { label: 'Normal BMI (18.5–24.9)', value: 'Gain 25–35 lbs (11.3–15.9 kg) total' },
       { label: 'Overweight BMI (25–29.9)', value: 'Gain 15–25 lbs (6.8–11.3 kg) total' },
       { label: 'Obese BMI (≥30)', value: 'Gain 11–20 lbs (5.0–9.1 kg) total' },
-      { label: 'First Trimester (all BMI)', value: '1–4.4 lbs (0.5–2.0 kg) total' },
+      { label: 'First Trimester (all BMI)', value: '1.1–4.4 lbs (0.5–2.0 kg) total' },
       { label: 'Underweight Weekly Rate', value: '1.0–1.3 lbs/week in 2nd/3rd trimester' },
       { label: 'Normal Weekly Rate', value: '0.8–1.0 lbs/week in 2nd/3rd trimester' },
       { label: 'Overweight Weekly Rate', value: '0.5–0.7 lbs/week in 2nd/3rd trimester' },

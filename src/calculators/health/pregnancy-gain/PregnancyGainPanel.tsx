@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
 
 interface Props {
@@ -6,23 +5,24 @@ interface Props {
   results: CalculatorResult[];
 }
 
+// IOM 2009 singleton recommendations (the same values as IOM_BY_BMI in index.ts, shown in lbs).
 const RANGES = [
-  { label: 'Underweight', bmiRange: '< 18.5', totalGain: '28–40 lbs', weeklyGain: '1.0–1.3 lbs', color: 'bg-amber-500', detail: 'For women with BMI below 18.5, additional weight gain supports both maternal reserves and fetal development. Close monitoring recommended.' },
-  { label: 'Normal Weight', bmiRange: '18.5–24.9', totalGain: '25–35 lbs', weeklyGain: '0.8–1.0 lbs', color: 'bg-emerald-500', detail: 'The standard IOM recommendation for healthy BMI. Most women in this category have uncomplicated pregnancies with appropriate fetal growth.' },
-  { label: 'Overweight', bmiRange: '25–29.9', totalGain: '15–25 lbs', weeklyGain: '0.5–0.7 lbs', color: 'bg-orange-500', detail: 'Reduced gain range helps lower risk of gestational diabetes, preeclampsia, and cesarean delivery while still supporting fetal growth.' },
-  { label: 'Obese', bmiRange: '≥ 30', totalGain: '11–20 lbs', weeklyGain: '0.4–0.6 lbs', color: 'bg-red-400', detail: 'Lower gain range minimizes pregnancy complications. Individualized medical supervision is strongly recommended for optimal outcomes.' },
+  { key: 'underweight', label: 'Underweight', bmiRange: '< 18.5', totalGain: '28–40 lbs', weeklyGain: '1.0–1.3 lbs', color: 'bg-amber-700', detail: 'For women with BMI below 18.5, additional weight gain supports both maternal reserves and fetal development. Close monitoring recommended.' },
+  { key: 'normal', label: 'Normal Weight', bmiRange: '18.5–24.9', totalGain: '25–35 lbs', weeklyGain: '0.8–1.0 lbs', color: 'bg-emerald-700', detail: 'The standard IOM recommendation for healthy BMI. Most women in this category have uncomplicated pregnancies with appropriate fetal growth.' },
+  { key: 'overweight', label: 'Overweight', bmiRange: '25–29.9', totalGain: '15–25 lbs', weeklyGain: '0.5–0.7 lbs', color: 'bg-orange-700', detail: 'Reduced gain range helps lower risk of gestational diabetes, preeclampsia, and cesarean delivery while still supporting fetal growth.' },
+  { key: 'obese', label: 'Obese', bmiRange: '≥ 30', totalGain: '11–20 lbs', weeklyGain: '0.4–0.6 lbs', color: 'bg-red-700', detail: 'Lower gain range minimizes pregnancy complications. Individualized medical supervision is strongly recommended for optimal outcomes.' },
 ];
 
 export default function PregnancyGainPanel({ results }: Props) {
   const bmiCat = results.find(r => r.id === 'bmiCategory');
   const gainStatus = results.find(r => r.id === 'gainStatus');
   const gainSoFar = results.find(r => r.id === 'gainSoFar');
+  const categoryKey = results.find(r => r.id === '_category')?.value;
 
   if (!bmiCat) return null;
 
-  const currentCategory = RANGES.findIndex(r => bmiCat.value.endsWith(r.label));
-
-  const [hoverRow, setHoverRow] = useState<number | null>(null);
+  const currentCategory = RANGES.findIndex(r => r.key === categoryKey);
+  const mine = currentCategory >= 0 ? RANGES[currentCategory] : null;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -38,21 +38,19 @@ export default function PregnancyGainPanel({ results }: Props) {
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Pre-Pregnancy BMI</th>
-                <th scope="col" className="text-center px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">BMI Range</th>
-                <th scope="col" className="text-center px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Total Gain (40 wk)</th>
-                <th scope="col" className="text-center px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Weekly (2nd/3rd Tri)</th>
-                <th scope="col" className="text-center px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Your Category</th>
+                <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Pre-Pregnancy BMI</th>
+                <th scope="col" className="text-center px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">BMI Range</th>
+                <th scope="col" className="text-center px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Total Gain (40 wk)</th>
+                <th scope="col" className="text-center px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Weekly (2nd/3rd Tri)</th>
+                <th scope="col" className="text-center px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Your Category</th>
               </tr>
             </thead>
             <tbody>
               {RANGES.map((r, i) => (
                 <tr
                   key={r.label}
-                  onMouseEnter={() => setHoverRow(i)}
-                  onMouseLeave={() => setHoverRow(null)}
-                  className={`border-b border-slate-100 last:border-0 cursor-pointer transition-all ${
-                    i === currentCategory ? 'bg-blue-50' : hoverRow === i ? 'bg-indigo-50/70' : i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
+                  className={`border-b border-slate-100 last:border-0 ${
+                    i === currentCategory ? 'bg-blue-50' : i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
                   }`}
                 >
                   <td className="px-4 py-2.5">
@@ -61,7 +59,7 @@ export default function PregnancyGainPanel({ results }: Props) {
                       <span className="font-bold text-slate-700">{r.label}</span>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5 text-center text-slate-500">{r.bmiRange}</td>
+                  <td className="px-3 py-2.5 text-center text-slate-600">{r.bmiRange}</td>
                   <td className="px-3 py-2.5 text-center font-bold text-slate-700">{r.totalGain}</td>
                   <td className="px-3 py-2.5 text-center text-slate-600">{r.weeklyGain}</td>
                   <td className="px-3 py-2.5 text-center">
@@ -73,7 +71,7 @@ export default function PregnancyGainPanel({ results }: Props) {
                         You
                       </span>
                     ) : (
-                      <span className="text-slate-300">—</span>
+                      <span className="text-slate-600" aria-label="not your category">—</span>
                     )}
                   </td>
                 </tr>
@@ -82,20 +80,15 @@ export default function PregnancyGainPanel({ results }: Props) {
           </table>
         </div>
 
-        {/* Hover tooltip row detail */}
-        {hoverRow !== null && (
-          <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 flex items-start gap-3">
-            <svg className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <div>
-              <p className="text-xs font-bold text-indigo-800">{RANGES[hoverRow].label} — IOM Recommendation</p>
-              <p className="text-[11px] text-indigo-600 mt-0.5">{RANGES[hoverRow].detail}</p>
-              <div className="flex gap-4 mt-1.5">
-                <span className="text-[10px] text-indigo-500"><strong>Total:</strong> {RANGES[hoverRow].totalGain}</span>
-                <span className="text-[10px] text-indigo-500"><strong>Weekly:</strong> {RANGES[hoverRow].weeklyGain}</span>
-                <span className="text-[10px] text-indigo-500"><strong>BMI:</strong> {RANGES[hoverRow].bmiRange}</span>
-              </div>
+        {/* Detail for your category (always visible; no hover-only content) */}
+        {mine && (
+          <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+            <p className="text-xs font-bold text-blue-900">{mine.label} — IOM Recommendation</p>
+            <p className="text-[11px] text-blue-900 mt-0.5">{mine.detail}</p>
+            <div className="flex gap-4 mt-1.5">
+              <span className="text-[10px] text-blue-900"><strong>Total:</strong> {mine.totalGain}</span>
+              <span className="text-[10px] text-blue-900"><strong>Weekly:</strong> {mine.weeklyGain}</span>
+              <span className="text-[10px] text-blue-900"><strong>BMI:</strong> {mine.bmiRange}</span>
             </div>
           </div>
         )}
@@ -103,18 +96,18 @@ export default function PregnancyGainPanel({ results }: Props) {
         {/* Gain visualization */}
         {gainStatus && gainSoFar && (
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Your Gain Status</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-3">Your Gain Status</p>
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <span className="text-[11px] text-slate-500">Gain So Far</span>
+                <span className="text-[11px] text-slate-600">Gain So Far</span>
                 <p className="text-sm font-bold text-slate-800">{gainSoFar.value}</p>
               </div>
               <div className="text-right">
-                <span className="text-[11px] text-slate-500">Status</span>
+                <span className="text-[11px] text-slate-600">Status</span>
                 <p className={`text-sm font-bold ${
-                  gainStatus.value === 'Within Recommended Range' ? 'text-emerald-600'
-                  : gainStatus.value === 'Above Recommended Range' ? 'text-red-600'
-                  : 'text-amber-600'
+                  gainStatus.value === 'Within Recommended Range' ? 'text-emerald-700'
+                  : gainStatus.value === 'Above Recommended Range' ? 'text-red-700'
+                  : 'text-amber-700'
                 }`}>{gainStatus.value}</p>
               </div>
             </div>
@@ -123,7 +116,7 @@ export default function PregnancyGainPanel({ results }: Props) {
 
         {/* Disclaimer */}
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Medical Disclaimer</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-1">Medical Disclaimer</p>
           <p className="text-xs text-amber-800 leading-relaxed">
             The IOM weight gain guidelines are clinical recommendations based on pre-pregnancy BMI. Individual variation
             is normal and expected. These guidelines apply to singleton pregnancies in women with healthy pregnancies.

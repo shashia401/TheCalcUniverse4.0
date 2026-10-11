@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import config from '../../../src/calculators/health/pregnancy-gain/index';
-import { getValue } from '../../helpers';
+import { getValue, getResult } from '../../helpers';
 
 describe('Pregnancy Weight Gain calculator', () => {
   it('calculates IOM category for normal BMI', () => {
@@ -218,5 +218,91 @@ describe('Pregnancy Weight Gain calculator', () => {
     const uses = config.educational.commonUses;
     expect(uses).toBeDefined();
     expect(uses!.length).toBeGreaterThanOrEqual(3);
+  });
+  // ── Audit regressions: IOM 2009 singleton table (Institute of Medicine, Weight Gain During Pregnancy) ──
+  describe('Audit regressions (IOM 2009)', () => {
+    const imp = (pre: string, cur: string, ft: string, inch: string, week: string) =>
+      config.calculate({ unit: 'imperial', prepregnancyWeight: pre, currentWeight: cur, heightFt: ft, heightIn: inch, heightCm: '', currentWeek: week });
+
+    it('table: totals 28-40 / 25-35 / 15-25 / 11-20 lb and weekly 1-1.3 / 0.8-1 / 0.5-0.7 / 0.4-0.6 lb; first trimester 1.1-4.4 lb (0.5-2 kg)', () => {
+      // heights chosen so BMI lands in each class: 5ft4 -> 105 lb = 18.0, 140 lb = 24.0, 165 lb = 28.3, 200 lb = 34.3
+      const rows: [string, string, string][] = [['105', '28–40 lbs', '1–1.3 lbs/week'], ['140', '25–35 lbs', '0.8–1 lbs/week'], ['165', '15–25 lbs', '0.5–0.7 lbs/week'], ['200', '11–20 lbs', '0.4–0.6 lbs/week']];
+      for (const [w, total, weekly] of rows) {
+        const r = imp(w, String(Number(w) + 10), '5', '4', '20');
+        expect(getValue(r, 'totalRange')).toBe(total);
+        expect(getValue(r, 'weeklyGain')).toBe(weekly);
+        expect(getValue(r, 't1Gain')).toBe('1.1–4.4 lbs total');
+      }
+      const m = config.calculate({ unit: 'metric', prepregnancyWeight: '60', currentWeight: '65', heightFt: '', heightIn: '', heightCm: '165', currentWeek: '20' });
+      expect(getValue(m, 't1Gain')).toBe('0.5–2.0 kg total');
+      expect(getValue(m, 'totalRange')).toBe('11.3 kg–15.9 kg'); // 25-35 lb
+    });
+
+    it('BMI class follows the displayed value: 72.13 kg @ 170 cm = 24.9585 -> "25.0" -> Overweight (not Normal)', () => {
+      const run = (kg: string) => config.calculate({ unit: 'metric', prepregnancyWeight: kg, currentWeight: String(Number(kg) + 5), heightFt: '', heightIn: '', heightCm: '170', currentWeek: '20' });
+      expect(getValue(run('72.13'), 'bmiCategory')).toBe('BMI 25.0 — Overweight (25–29.9)');
+      expect(getValue(run('72'), 'bmiCategory')).toBe('BMI 24.9 — Normal (18.5–24.9)');
+      expect(getValue(run('72.13'), '_category')).toBe('overweight');
+    });
+
+    it('worked example 1: 140 lb, 5ft5, week 20, now 155 -> BMI 23.3, above range (expected 6.7-11.4 lb), projected 30 lb', () => {
+      const r = imp('140', '155', '5', '5', '20');
+      expect(getValue(r, 'bmiCategory')).toBe('BMI 23.3 — Normal (18.5–24.9)');
+      expect(getValue(r, 'gainStatus')).toBe('Above Recommended Range');
+      expect(getValue(r, 'projectedGain')).toBe('30 lbs'); // 15 / 20 * 40
+    });
+
+    it('worked example 2: 105 lb, 5ft4, week 30, now 127 -> BMI 18.0, within range (expected 18.1-26.5 lb), projected 29 lb', () => {
+      const r = imp('105', '127', '5', '4', '30');
+      expect(getValue(r, 'bmiCategory')).toBe('BMI 18.0 — Underweight (< 18.5)');
+      expect(getValue(r, 'gainStatus')).toBe('Within Recommended Range');
+      expect(getValue(r, 'projectedGain')).toBe('29 lbs'); // 22 / 30 * 40 = 29.3
+    });
+
+    it('worked example 3: 220 lb, 5ft7, week 16, now 223 -> BMI 34.5, within range (2.3-6.2 lb expected), weekly 0.4-0.6', () => {
+      const r = imp('220', '223', '5', '7', '16');
+      expect(getValue(r, 'bmiCategory')).toBe('BMI 34.5 — Obese (≥ 30)');
+      expect(getValue(r, 'gainStatus')).toBe('Within Recommended Range');
+      expect(getValue(r, 'weeklyGain')).toBe('0.4–0.6 lbs/week');
+    });
+
+    it('status bounds at week 20, normal BMI: expected 1.1 + 7*0.8 = 6.7 to 4.4 + 7*1.0 = 11.4 lb', () => {
+      const st = (gain: number) => getValue(imp('140', String(140 + gain), '5', '5', '20'), 'gainStatus');
+      expect(st(6.5)).toBe('Below Recommended Range');
+      expect(st(6.8)).toBe('Within Recommended Range');
+      expect(st(11.3)).toBe('Within Recommended Range');
+      expect(st(11.5)).toBe('Above Recommended Range');
+    });
+
+    it('first-trimester rule through week 13: 4.3 lb within, 4.5 lb above, 1.0 lb below (IOM 1.1-4.4)', () => {
+      const st = (gain: number) => getValue(imp('140', String(140 + gain), '5', '5', '13'), 'gainStatus');
+      expect(st(4.3)).toBe('Within Recommended Range');
+      expect(st(4.5)).toBe('Above Recommended Range');
+      expect(st(1.0)).toBe('Below Recommended Range');
+    });
+
+    it('projection at/after week 40 is the gain so far (week 42 used to project below it); early weeks carry a caveat', () => {
+      const r = imp('140', '170', '5', '5', '42');
+      expect(getValue(r, 'projectedGain')).toBe('30 lbs');
+      expect(getResult(imp('140', '143', '5', '5', '8'), 'projectedGain').interpretation).toContain('before week 14');
+      expect(getResult(imp('140', '155', '5', '5', '20'), 'projectedGain').interpretation).not.toContain('before week 14');
+    });
+
+    it('twin figures quoted in the text match IOM (37-54 normal, 31-50 overweight, 25-42 obese; none for underweight)', () => {
+      const text = JSON.stringify(config.educational);
+      expect(text).toContain('37–54');
+      expect(text).toContain('31–50');
+      expect(text).toContain('25–42');
+      expect(text).not.toContain('Underweight/Normal BMI: 37–54');
+    });
+
+    it('bounds are realistic for both unit systems and height fields follow the unit', () => {
+      const f = (id: string) => config.inputs.find((i) => i.id === id)!;
+      expect(f('prepregnancyWeight').max).toBeGreaterThanOrEqual(1000);
+      expect(f('currentWeight').min).toBeGreaterThan(0);
+      expect(f('heightCm').max).toBeLessThanOrEqual(275);
+      expect(f('heightFt').showWhen!({ unit: 'metric' })).toBe(false);
+      expect(f('heightCm').showWhen!({ unit: 'imperial' })).toBe(false);
+    });
   });
 });

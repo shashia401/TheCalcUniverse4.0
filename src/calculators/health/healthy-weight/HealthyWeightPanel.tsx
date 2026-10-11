@@ -35,7 +35,7 @@ export default function HealthyWeightPanel({ values, results }: Props) {
   const bmiHealthyEnd = ((24.9 - bmiMin) / bmiRange) * 100;
 
   const bmiCategory = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese';
-  const bmiColor = bmiCategory === 'Normal' ? '#22c55e' : bmiCategory === 'Underweight' ? '#f59e0b' : '#ef4444';
+  const bmiColor = bmiCategory === 'Normal' ? '#15803d' : bmiCategory === 'Underweight' ? '#b45309' : '#b91c1c';
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -49,7 +49,7 @@ export default function HealthyWeightPanel({ values, results }: Props) {
       <div className="p-6 space-y-5">
         <div className="text-center">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">BMI Scale</p>
-          <div className="relative h-8 bg-slate-100 rounded-full overflow-hidden mx-2">
+          <div role="img" aria-label={`BMI ${bmi.toFixed(1)} on a scale from 14 to 35; healthy range 18.5 to 24.9`} className="relative h-8 bg-slate-100 rounded-full overflow-hidden mx-2">
             <div className="absolute inset-0 flex">
               <div className="h-full bg-amber-300 opacity-50" style={{ width: `${bmiHealthyStart}%` }} />
               <div className="h-full bg-emerald-400 opacity-50" style={{ width: `${bmiHealthyEnd - bmiHealthyStart}%` }} />
@@ -66,7 +66,7 @@ export default function HealthyWeightPanel({ values, results }: Props) {
               ▼
             </div>
           </div>
-          <div className="flex justify-between text-[9px] text-slate-400 mt-1 px-2">
+          <div className="flex justify-between text-[10px] text-slate-600 mt-1 px-2">
             <span>14</span>
             <span>18.5</span>
             <span>24.9</span>
@@ -81,7 +81,7 @@ export default function HealthyWeightPanel({ values, results }: Props) {
 
         {firstWeight > 0 && secondWeight > 0 && (
           <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-3 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">Healthy Weight Range</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-1">Healthy Weight Range</p>
             <p className="text-sm font-black text-emerald-700">{rangeRes.value}</p>
           </div>
         )}
@@ -104,7 +104,7 @@ export default function HealthyWeightPanel({ values, results }: Props) {
         {whtrRes && (
           <div className="rounded-xl bg-slate-50 border border-slate-200 px-5 py-3">
             <p className="text-xs font-bold text-slate-600 mb-1">Waist-to-Height Ratio</p>
-            <p className="text-[11px] text-slate-500 leading-relaxed">{whtrRes.value}</p>
+            <p className="text-[11px] text-slate-600 leading-relaxed">{whtrRes.value}</p>
           </div>
         )}
       </div>

@@ -197,4 +197,71 @@ describe('Macro calculator', () => {
       expect(parseInt(fatVal.match(/(\d+)/)![0])).toBeGreaterThan(0);
     }
   });
+  // ── Audit regressions (Mifflin-St Jeor / Katch-McArdle recomputed by hand) ──
+  const num = (s: string) => parseInt(s.replace(/,/g, ''), 10);
+  const base = { heightFt: '', heightIn: '', bodyFatPct: '', diet: 'standard', goal: 'maintain', activityLevel: '1.55' };
+
+  it('worked example David: 28 M, 5ft10, 180 lb, 1.55, mild loss, high-protein -> 2,529 kcal; P 221 g, C 221 g, F 84 g', () => {
+    // BMR = 10*81.6466 + 6.25*177.8 - 5*28 + 5 = 1792.7; TDEE = 2778.7; target 2528.7
+    const r = config.calculate({ unit: 'imperial', sex: 'male', age: '28', weight: '180', heightFt: '5', heightIn: '10', heightCm: '', activityLevel: '1.55', goal: 'mildLoss', diet: 'highProtein', bodyFatPct: '' });
+    expect(getValue(r, 'bmrValue')).toBe('Mifflin-St Jeor: 1,793 kcal');
+    expect(getValue(r, 'tdeeForMacros')).toBe('2,779 kcal');
+    expect(num(getValue(r, 'dailyCalories'))).toBe(2529);
+    expect(getValue(r, 'proteinGrams')).toBe('221 g · 884 kcal');
+    expect(getValue(r, 'carbGrams')).toBe('221 g · 884 kcal');
+    expect(getValue(r, 'fatGrams')).toBe('84 g · 756 kcal');
+    expect(getValue(r, 'calorieAdjustment')).toBe('-250 kcal');
+    // insight: same calories on the standard split -> carbs 316 g, protein 126 g
+    const std = config.calculate({ unit: 'imperial', sex: 'male', age: '28', weight: '180', heightFt: '5', heightIn: '10', heightCm: '', activityLevel: '1.55', goal: 'mildLoss', diet: 'standard', bodyFatPct: '' });
+    expect(getValue(std, 'carbGrams')).toMatch(/^316 g/);
+    expect(getValue(std, 'proteinGrams')).toMatch(/^126 g/);
+  });
+
+  it('worked example Lina: 35 F, 165 cm, 70 kg, sedentary, Mediterranean -> BMR 1,395, 1,674 kcal; P 84, C 188, F 65', () => {
+    const r = config.calculate({ ...base, unit: 'metric', sex: 'female', age: '35', weight: '70', heightCm: '165', activityLevel: '1.2', diet: 'mediterranean' });
+    expect(getValue(r, 'bmrValue')).toBe('Mifflin-St Jeor: 1,395 kcal');
+    expect(num(getValue(r, 'dailyCalories'))).toBe(1674);
+    expect(getValue(r, 'proteinGrams')).toBe('84 g · 336 kcal');
+    expect(getValue(r, 'carbGrams')).toBe('188 g · 752 kcal');
+    expect(getValue(r, 'fatGrams')).toBe('65 g · 585 kcal');
+    // insight: switching to Light Exercise (1.375) -> TDEE 1,918 and protein 96 g
+    const light = config.calculate({ ...base, unit: 'metric', sex: 'female', age: '35', weight: '70', heightCm: '165', activityLevel: '1.375', diet: 'mediterranean' });
+    expect(getValue(light, 'tdeeForMacros')).toBe('1,918 kcal');
+    expect(getValue(light, 'proteinGrams')).toMatch(/^96 g/);
+  });
+
+  it('explanation example: 2,200 kcal on 35/35/30 = 193 P, 193 C, 73 F; 20/50/30 = 110 P, 275 C (4/4/9 kcal per g)', () => {
+    expect(Math.round(2200 * 0.35 / 4)).toBe(193);
+    expect(Math.round(2200 * 0.3 / 9)).toBe(73);
+    expect(Math.round(2200 * 0.2 / 4)).toBe(110);
+    expect(Math.round(2200 * 0.5 / 4)).toBe(275);
+  });
+
+  it('Katch-McArdle: 80 kg at 15% fat = 370 + 21.6*68 = 1838.8 BMR, TDEE 2,850', () => {
+    const r = config.calculate({ ...base, unit: 'metric', sex: 'male', age: '30', weight: '80', heightCm: '180', bodyFatPct: '15' });
+    expect(getValue(r, 'bmrValue')).toBe('Katch-McArdle: 1,839 kcal');
+    expect(getValue(r, 'tdeeForMacros')).toBe('2,850 kcal');
+  });
+
+  it('safety floor limits a deficit only: TDEE 1566, -500 -> held at 1,500 (adjustment -66)', () => {
+    // 50 kg / 160 cm / 40 y male sedentary: BMR 1305, TDEE 1566
+    const r = config.calculate({ ...base, unit: 'metric', sex: 'male', age: '40', weight: '50', heightCm: '160', activityLevel: '1.2', goal: 'moderateLoss' });
+    expect(num(getValue(r, 'dailyCalories'))).toBe(1500);
+    expect(getValue(r, 'calorieAdjustment')).toBe('-66 kcal (deficit limited by the 1,500 kcal safety minimum)');
+  });
+
+  it('safety floor never lifts a maintain target above TDEE (TDEE 977 stays 977, not 1,200)', () => {
+    // 40 kg / 140 cm / 60 y female sedentary: BMR 814, TDEE 976.8
+    const maintain = config.calculate({ ...base, unit: 'metric', sex: 'female', age: '60', weight: '40', heightCm: '140', activityLevel: '1.2' });
+    expect(num(getValue(maintain, 'dailyCalories'))).toBe(977);
+    const loss = config.calculate({ ...base, unit: 'metric', sex: 'female', age: '60', weight: '40', heightCm: '140', activityLevel: '1.2', goal: 'moderateLoss' });
+    expect(num(getValue(loss, 'dailyCalories'))).toBe(977); // no deficit below TDEE when TDEE is already under the minimum
+  });
+
+  it('input bounds are realistic for both unit systems', () => {
+    const f = (id: string) => config.inputs.find((i) => i.id === id)!;
+    expect(f('weight').max).toBeGreaterThanOrEqual(1000);
+    expect(f('heightCm').max).toBeLessThanOrEqual(275);
+    expect(f('heightCm').min).toBeGreaterThan(0);
+  });
 });

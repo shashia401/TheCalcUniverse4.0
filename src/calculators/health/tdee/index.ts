@@ -3,6 +3,22 @@ import { CalculatorConfig } from '../../../types/calculator';
 import CalorieMatrixPanel from './CalorieMatrixPanel';
 import TDEComparisonPanel from './TDEComparisonPanel';
 
+const LB_TO_KG = 0.45359237;
+
+/** Weight (kg) and height (cm) from either unit system; null when the inputs are incomplete. */
+function parseBody(values: Record<string, string>): { weightKg: number; heightCm: number } | null {
+  let weightKg: number;
+  let heightCm: number;
+  if ((values.unit || 'imperial') === 'imperial') {
+    weightKg = parseFloat(values.weight) * LB_TO_KG;
+    heightCm = ((parseFloat(values.heightFt) || 0) * 12 + (parseFloat(values.heightIn) || 0)) * 2.54;
+  } else {
+    weightKg = parseFloat(values.weight);
+    heightCm = parseFloat(values.heightCm) || 0;
+  }
+  return isNaN(weightKg) || weightKg <= 0 || heightCm <= 0 ? null : { weightKg, heightCm };
+}
+
 const tdeeConfig: CalculatorConfig = {
   inputs: [
     {
@@ -48,7 +64,8 @@ const tdeeConfig: CalculatorConfig = {
       defaultValue: '170',
       placeholder: '170',
       inputMode: 'decimal',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.1,
       required: true,
       helpText: 'Pounds (lbs) for Imperial · Kilograms (kg) for Metric',
@@ -61,8 +78,8 @@ const tdeeConfig: CalculatorConfig = {
       placeholder: '5',
       unit: 'ft',
       inputMode: 'decimal',
-      min: 0,
-      max: 9,
+      min: 3,
+      max: 8,
       step: 1,
       helpText: 'Your height in feet (imperial only). For 5 ft 10 in, enter 5 here and 10 in the inches field.',
       showWhen: (v) => v.unit === 'imperial',
@@ -88,7 +105,8 @@ const tdeeConfig: CalculatorConfig = {
       placeholder: '178',
       unit: 'cm',
       inputMode: 'decimal',
-      min: 0,
+      min: 90,
+      max: 275,
       step: 0.1,
       helpText: 'Metric only',
       showWhen: (v) => v.unit === 'metric',
@@ -128,20 +146,9 @@ const tdeeConfig: CalculatorConfig = {
     const activityFactor = parseFloat(values.activityLevel || '1.55');
     const bodyFatPct = parseFloat(values.bodyFatPct);
 
-    let weightKg: number;
-    let heightCm: number;
-
-    if (unit === 'imperial') {
-      weightKg = parseFloat(values.weight) * 0.45359237;
-      const ft = parseFloat(values.heightFt) || 0;
-      const inches = parseFloat(values.heightIn) || 0;
-      heightCm = (ft * 12 + inches) * 2.54;
-    } else {
-      weightKg = parseFloat(values.weight);
-      heightCm = parseFloat(values.heightCm) || 0;
-    }
-
-    if ([weightKg, heightCm, age, activityFactor].some(isNaN) || weightKg <= 0 || heightCm <= 0) return [];
+    const body = parseBody(values);
+    if (!body || isNaN(age) || isNaN(activityFactor)) return [];
+    const { weightKg, heightCm } = body;
 
     const fmt = (n: number) => Math.round(n).toLocaleString(undefined);
     const usingKatch = !isNaN(bodyFatPct) && bodyFatPct > 0 && values.bodyFatPct !== '';
@@ -195,20 +202,9 @@ const tdeeConfig: CalculatorConfig = {
     const activityFactor = parseFloat(values.activityLevel || '1.55');
     const bodyFatPct = parseFloat(values.bodyFatPct);
 
-    let weightKg: number;
-    let heightCm: number;
-
-    if (unit === 'imperial') {
-      weightKg = parseFloat(values.weight) * 0.45359237;
-      const ft = parseFloat(values.heightFt) || 0;
-      const inches = parseFloat(values.heightIn) || 0;
-      heightCm = (ft * 12 + inches) * 2.54;
-    } else {
-      weightKg = parseFloat(values.weight);
-      heightCm = parseFloat(values.heightCm) || 0;
-    }
-
-    if ([weightKg, heightCm, age, activityFactor].some(isNaN) || weightKg <= 0 || heightCm <= 0) return [];
+    const body = parseBody(values);
+    if (!body || isNaN(age) || isNaN(activityFactor)) return [];
+    const { weightKg, heightCm } = body;
 
     // Always compute all BMR formulas for comparison
     let mifflinBMR: number, harrisBMR: number, katchBMR: number | null = null;
@@ -274,18 +270,18 @@ const tdeeConfig: CalculatorConfig = {
         value: `${fmt(tdee)} kcal/day`,
         highlight: true,
         color: 'neutral',
-        interpretation: `Eating ${fmt(tdee)} kcal/day keeps your weight stable. Your body burns ${fmt(bmr)} kcal (${Math.round((bmr / tdee) * 100)}%) just existing — activity adds the remaining ${fmt(tdee - bmr)} kcal. To lose ~1 lb/week eat ${fmt(cutting500)} kcal/day; to gain, eat ${fmt(bulking500)}. Treat this as a starting estimate (real-world error is ±10%, or ${fmt(tdee * 0.1)} kcal): track your weight for 2–3 weeks and adjust by 100–200 kcal if it isn't moving as expected.`,
+        interpretation: `Eating ${fmt(tdee)} kcal/day keeps your weight stable. Your body burns ${fmt(bmr)} kcal (${Math.round((bmr / tdee) * 100)}%) just existing — activity adds the remaining ${fmt(tdee - bmr)} kcal. To lose ~1 lb/week eat ${fmt(cutting500)} kcal/day${cutting500 < safeMin ? ` (below the ${fmt(safeMin)} kcal safe minimum, so use a smaller deficit)` : ''}; to gain, eat ${fmt(bulking500)}. Treat this as a starting estimate (real-world error is ±10%, or ${fmt(tdee * 0.1)} kcal): track your weight for 2–3 weeks and adjust by 100–200 kcal if it isn't moving as expected.`,
       },
       {
         id: 'bmrBreakdown',
-        label: 'BMR & TDEE Breakdown',
+        label: 'BMR & TDEE Breakdown (illustrative split)',
         value: `BMR: ${fmt(bmr)} · TEF: ${fmt(tef)} · EAT: ${fmt(eat)} · NEAT: ${fmt(Math.max(neat, 0))} kcal/day`,
         color: 'neutral',
       },
       {
         id: 'calorieTargets',
         label: 'Calorie Targets',
-        value: `Maintain: ${fmt(tdee)} · Cut (-500 deficit, ~1 lb/wk): ${fmt(cutting500)} · Bulk (+500 surplus, ~1 lb/wk): ${fmt(bulking500)} kcal/day`,
+        value: `Maintain: ${fmt(tdee)} · Cut (-500 deficit, ~1 lb/wk): ${fmt(cutting500)}${cutting500 < safeMin ? ' (below safe minimum)' : ''} · Bulk (+500 surplus, ~1 lb/wk): ${fmt(bulking500)} kcal/day`,
         color: 'neutral',
       },
       // Internal-only: granular per-goal breakdown consumed by CalorieMatrixPanel's
@@ -370,7 +366,7 @@ const tdeeConfig: CalculatorConfig = {
         '<text x="110" y="106" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" text-anchor="middle" font-weight="700">TDEE</text>' +
         '<text x="110" y="122" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)" text-anchor="middle">100%</text>' +
         '<rect x="230" y="20" width="12" height="12" rx="3" fill="var(--svg-3b82f6)"/>' +
-        '<text x="248" y="31" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)">BMR (60-75%)</text>' +
+        '<text x="248" y="31" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)">BMR (~53-83%)</text>' +
         '<rect x="230" y="45" width="12" height="12" rx="3" fill="var(--svg-22c55e)"/>' +
         '<text x="248" y="56" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)">NEAT (10-15%)</text>' +
         '<rect x="230" y="70" width="12" height="12" rx="3" fill="var(--svg-a855f7)"/>' +
@@ -397,7 +393,7 @@ const tdeeConfig: CalculatorConfig = {
       'Optionally enter body fat % to switch to the more accurate Katch-McArdle formula.',
       'Use the goal matrix table to find your personalized calorie targets for any fitness goal.',
     ],
-    explanation: 'TDEE is the total calories your body burns each day, combining your resting metabolism with all physical activity. The TDEE pie breaks into four components: BMR (60–75% — the largest chunk by far), TEF (~10% — energy to digest, absorb, and metabolize food, with protein having the highest thermic effect at 20–30%), EAT (exercise calories — highly variable from 0% for sedentary people to 20%+ for athletes), and NEAT (non-exercise movement — the most variable component, ranging from 200 to 900+ calories per day between a desk worker and someone with an active job). NEAT is the component you can most easily increase without formal exercise: standing instead of sitting, taking the stairs, fidgeting, and walking while on the phone can add 200–500 calories of daily burn. Eating at TDEE = maintain weight. Eating 500 kcal below = lose ~1 lb/week. Eating 500 kcal above = gain ~1 lb/week. However, these are approximations — the actual weight change per 500 kcal varies by individual due to metabolic adaptation, body composition, and the fact that not all calories are absorbed equally. The macro split uses a standard high-protein approach: ~1g protein per pound of bodyweight, 25% of calories from fat, and the remainder from carbohydrates. Adjust macros based on your specific training goals and dietary preferences. A 180 lb moderately active person has a TDEE of roughly 2,600 calories — a comfortable maintenance level that allows for flexible dieting while supporting their training.',
+    explanation: 'TDEE is the total calories your body burns each day, combining your resting metabolism with all physical activity. The TDEE pie breaks into four components: BMR (about 53–83% depending on the activity factor, since BMR = TDEE ÷ factor — the largest chunk by far), TEF (~10% — energy to digest, absorb, and metabolize food, with protein having the highest thermic effect at 20–30%), EAT (exercise calories — highly variable from 0% for sedentary people to 20%+ for athletes), and NEAT (non-exercise movement — the most variable component, ranging from 200 to 900+ calories per day between a desk worker and someone with an active job). NEAT is the component you can most easily increase without formal exercise: standing instead of sitting, taking the stairs, fidgeting, and walking while on the phone can add 200–500 calories of daily burn. Eating at TDEE = maintain weight. Eating 500 kcal below = lose ~1 lb/week. Eating 500 kcal above = gain ~1 lb/week. However, these are approximations — the actual weight change per 500 kcal varies by individual due to metabolic adaptation, body composition, and the fact that not all calories are absorbed equally. The macro split uses a standard high-protein approach: ~1g protein per pound of bodyweight, 25% of calories from fat, and the remainder from carbohydrates. Adjust macros based on your specific training goals and dietary preferences. A 30-year-old man who is 5 ft 10 in, weighs 180 lb and exercises moderately has a TDEE of about 2,760 calories (BMR 1,783 × 1.55) — a comfortable maintenance level that allows for flexible dieting while supporting their training.',
     faqs: [
       {
         question: 'What is the difference between BMR and TDEE?',
@@ -405,11 +401,11 @@ const tdeeConfig: CalculatorConfig = {
       },
       {
         question: 'Is it safe to eat below 1,200 or 1,500 calories?',
-        answer: 'For most people, eating below 1,200 calories (women) or 1,500 calories (men) is considered a Very Low Calorie Diet (VLCD) and should only be done under medical supervision. Such low intakes risk nutrient deficiencies, muscle loss, gallstones, and metabolic adaptation. The calculator flags this in red.',
+        answer: 'Eating below 1,200 calories (women) or 1,500 calories (men) is generally considered too low to do without medical supervision (a clinical very-low-calorie diet is under 800 calories a day). Such low intakes risk nutrient deficiencies, muscle loss, gallstones, and metabolic adaptation. The calculator flags this in red.',
       },
       {
         question: 'When should I use the Katch-McArdle formula?',
-        answer: 'Activity level is the biggest variable. Most people underestimate their TDEE by selecting too low an activity level, or overestimate by selecting "very active" when they exercise 3 days a week. Be honest about your actual weekly movement.',
+        answer: 'Use it when you know your body fat percentage from a reasonably reliable source (DEXA, a good set of calipers, or a quality scale). Katch-McArdle works from lean mass, so it suits lean or muscular people whose weight overstates their metabolism. If your body fat estimate is a guess, Mifflin-St Jeor is the safer default, because a wrong body fat figure makes Katch-McArdle wrong too.',
       },
       {
         question: 'How do I know which activity level to choose?',
@@ -417,7 +413,7 @@ const tdeeConfig: CalculatorConfig = {
       },
       {
         question: 'What happens to my TDEE as I lose weight?',
-        answer: 'TDEE decreases as you lose weight because a smaller body requires less energy to maintain. This is called metabolic adaptation. A person who loses 30 lbs may need 150-250 fewer calories per day to maintain their new weight than someone who has always been at that weight. This is why weight loss plateaus are normal — you need to periodically recalculate your TDEE as your weight changes. The calculator makes this easy by giving you updated numbers any time you change your inputs.',
+        answer: 'TDEE decreases as you lose weight because a smaller body requires less energy to maintain. This is called metabolic adaptation. A person who loses 30 lbs needs roughly 150-250 fewer calories per day to maintain their new weight (30 lb = 13.6 kg, and Mifflin-St Jeor drops 10 kcal of BMR per kg, so about 136 kcal of BMR, or about 210 kcal of TDEE at a 1.55 factor). This is why weight loss plateaus are normal — you need to periodically recalculate your TDEE as your weight changes. The calculator makes this easy by giving you updated numbers any time you change your inputs.',
       },
       {
         question: 'How much does NEAT vary between individuals?',
@@ -425,7 +421,7 @@ const tdeeConfig: CalculatorConfig = {
       },
       {
         question: 'Which BMR formula is most accurate for TDEE?',
-        answer: 'Mifflin-St Jeor is the most validated BMR formula for the general population and is used by default in this calculator. Harris-Benedict (revised 1984) tends to overestimate BMR by ~5% on average. Katch-McArdle is more accurate for lean athletes who know their body fat percentage because it uses lean body mass instead of total weight. The BMR Formula Comparison panel below the results shows all three formulas side-by-side so you can see the difference for your stats. The gap between Mifflin and Harris-Benedict is typically 50-150 calories, while Katch-McArdle can differ by 200+ calories depending on your body composition.',
+        answer: 'Mifflin-St Jeor is the most validated BMR formula for the general population and is used by default in this calculator. Harris-Benedict (revised 1984) tends to read higher than Mifflin-St Jeor and to overestimate resting energy expenditure in most comparisons. Katch-McArdle is more accurate for lean athletes who know their body fat percentage because it uses lean body mass instead of total weight. The BMR Formula Comparison panel below the results shows all three formulas side-by-side so you can see the difference for your stats. The gap between Mifflin and Harris-Benedict is often 50-150 calories, while Katch-McArdle can differ by 200+ calories depending on your body composition.',
       },
     ],
     quickReference: [
@@ -434,7 +430,7 @@ const tdeeConfig: CalculatorConfig = {
       { label: 'Moderate Exercise (3-5 days/wk)', value: 'TDEE × 1.55' },
       { label: 'Heavy Exercise (6-7 days/wk)', value: 'TDEE × 1.725' },
       { label: 'Athlete (2x/day)', value: 'TDEE × 1.9' },
-      { label: 'BMR as % of TDEE', value: '60-75% of total daily burn' },
+      { label: 'BMR as % of TDEE', value: '1 ÷ activity factor: about 83% (sedentary) down to 53% (athlete)' },
       { label: 'Protein Recommendation', value: '~1 g per lb of body weight' },
       { label: 'Safe Minimum (Women)', value: '1,200 kcal/day' },
       { label: 'Safe Minimum (Men)', value: '1,500 kcal/day' },

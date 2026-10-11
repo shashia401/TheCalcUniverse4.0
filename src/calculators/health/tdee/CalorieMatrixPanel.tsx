@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
 
 interface Props {
   values: Record<string, string>;
@@ -23,6 +23,7 @@ export default function CalorieMatrixPanel({ results }: Props) {
   const extremeLossResult = results.find(r => r.id === '_extremeLoss');
   const leanGainResult = results.find(r => r.id === '_leanGain');
   const aggressiveGainResult = results.find(r => r.id === '_aggressiveGain');
+  const safeMinResult = results.find(r => r.id === 'safeMinWarning');
 
   if (!tdeeResult || !bmrResult) return null;
 
@@ -31,45 +32,29 @@ export default function CalorieMatrixPanel({ results }: Props) {
   const tef = parseKcal(tefResult?.value ?? '0');
   const eat = parseKcal(eatResult?.value ?? '0');
   const neat = parseKcal(neatResult?.value ?? '0');
+  const safeMin = safeMinResult ? parseKcal(safeMinResult.value) : 1200;
 
-  const [hoverInfo, setHoverInfo] = useState<{ type: 'segment'; label: string; detail: string; subdetail: string } | { type: 'row'; goal: string; calories: string; note: string } | null>(null);
-
-  const maxValForBar = tdee + 500;
-
-  // Bar segment for TDEE breakdown
+  // Stacked bar: each segment's width is its share of the four components, so the bar always fills
   const totalComponents = bmr + tef + eat + neat;
-  const pctOfTotal = (v: number) => totalComponents > 0 ? (v / totalComponents) * 100 : 0;
-  const barPct = (v: number) => Math.min((v / (tdee * 1.1)) * 100, 100);
+  const pctOfTotal = (v: number) => (totalComponents > 0 ? (v / totalComponents) * 100 : 0);
 
-  const row = (goal: string, calories: string | undefined, color: string, calVal: number, note?: string) => {
-    const cal = calories ?? '—';
-    const pct = Math.min(calVal / (maxValForBar * 1.1) * 100, 100);
+  const parts = [
+    { key: 'BMR', value: bmr, bar: 'bg-violet-700', card: 'bg-violet-50 border-violet-100 text-violet-800', sub: 'Basal metabolism' },
+    { key: 'TEF', value: tef, bar: 'bg-blue-700', card: 'bg-blue-50 border-blue-100 text-blue-800', sub: 'Digesting food' },
+    { key: 'EAT', value: eat, bar: 'bg-emerald-700', card: 'bg-emerald-50 border-emerald-100 text-emerald-800', sub: 'Exercise' },
+    { key: 'NEAT', value: neat, bar: 'bg-amber-700', card: 'bg-amber-50 border-amber-100 text-amber-800', sub: 'Non-exercise movement' },
+  ];
 
-    let barBg = 'bg-slate-200';
-    if (color === 'green') barBg = 'bg-emerald-500';
-    else if (color === 'amber') barBg = 'bg-amber-500';
-    else if (color === 'red') barBg = 'bg-red-400';
-    else if (color === 'blue') barBg = 'bg-blue-500';
-
-    return (
-      <tr key={goal} className="border-b border-slate-100 last:border-0"
-        onMouseEnter={() => setHoverInfo({ type: 'row', goal, calories: cal, note: note ?? '' })}
-        onMouseLeave={() => setHoverInfo(null)}
-      >
-        <td className="px-4 py-3 text-xs font-semibold text-slate-700">{goal}</td>
-        <td className="px-4 py-3 text-right text-xs font-bold text-slate-900 whitespace-nowrap">{cal}</td>
-        <td className="px-4 py-3 w-1/2">
-          <div className="h-4 bg-slate-100 rounded-sm overflow-hidden">
-            <div className={`h-full rounded-sm ${barBg} transition-all`} style={{ width: `${pct}%` }} />
-          </div>
-        </td>
-        <td className="px-3 py-3 text-[10px] text-slate-500">{note ?? ''}</td>
-      </tr>
-    );
-  };
-
-  const sex = results.find(r => r.id === 'safeMinWarning')?.label === 'Safe Minimum (Women)' ? 'female' : 'male';
-  const safeMin = sex === 'female' ? 1200 : 1500;
+  // Goal rows (bars use -700 backgrounds so the white value labels keep >= 4.5:1)
+  const maxValForBar = (tdee + 500) * 1.1;
+  const rows: { goal: string; result: CalculatorResult | undefined; color: string; calVal: number; note: string }[] = [
+    { goal: 'Extreme Weight Loss (2 lb/wk)', result: extremeLossResult, color: 'bg-red-700', calVal: tdee - 1000, note: extremeLossResult?.value?.startsWith('Not recommended') ? '⚠ Below safe minimum' : '' },
+    { goal: 'Weight Loss (1 lb/wk)', result: moderateLossResult, color: 'bg-amber-700', calVal: tdee - 500, note: '−500 kcal deficit' },
+    { goal: 'Mild Weight Loss (0.5 lb/wk)', result: mildLossResult, color: 'bg-emerald-700', calVal: tdee - 250, note: '−250 kcal deficit' },
+    { goal: 'Maintain Weight', result: maintainResult, color: 'bg-blue-700', calVal: tdee, note: 'TDEE target' },
+    { goal: 'Lean Muscle Gain', result: leanGainResult, color: 'bg-emerald-700', calVal: tdee + 250, note: '+250 kcal surplus' },
+    { goal: 'Aggressive Gain', result: aggressiveGainResult, color: 'bg-emerald-700', calVal: tdee + 500, note: '+500 kcal surplus' },
+  ];
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -85,102 +70,43 @@ export default function CalorieMatrixPanel({ results }: Props) {
         <div className="p-5">
           <div className="space-y-3">
             {/* Stacked bar visualization */}
-            <div className="h-7 bg-slate-100 rounded-xl overflow-hidden flex">
-              {bmr > 0 && (
+            <div
+              role="img"
+              aria-label={`Energy expenditure: BMR ${bmr}, TEF ${tef}, EAT ${eat}, NEAT ${neat} kcal per day`}
+              className="h-7 bg-slate-100 rounded-xl overflow-hidden flex"
+            >
+              {parts.filter(p => p.value > 0).map(p => (
                 <div
-                  className="bg-violet-600 h-full flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ width: `${barPct(bmr)}%` }}
-                  title={`BMR: ${bmr} kcal`}
-                  onMouseEnter={() => setHoverInfo({ type: 'segment', label: 'BMR', detail: `${bmr} kcal`, subdetail: `${Math.round(pctOfTotal(bmr))}% of TDEE` })}
-                  onMouseLeave={() => setHoverInfo(null)}
+                  key={p.key}
+                  className={`${p.bar} h-full flex items-center justify-center text-[10px] font-bold text-white`}
+                  style={{ width: `${pctOfTotal(p.value)}%` }}
+                  title={`${p.key}: ${p.value} kcal (${Math.round(pctOfTotal(p.value))}% of TDEE)`}
                 >
-                  {barPct(bmr) > 12 ? `BMR ${bmr}` : ''}
+                  {pctOfTotal(p.value) > 12 ? `${p.key} ${p.value}` : ''}
                 </div>
-              )}
-              {tef > 0 && (
-                <div
-                  className="bg-blue-600 h-full flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ width: `${barPct(tef)}%` }}
-                  title={`TEF: ${tef} kcal`}
-                  onMouseEnter={() => setHoverInfo({ type: 'segment', label: 'TEF', detail: `${tef} kcal`, subdetail: `${Math.round(pctOfTotal(tef))}% of TDEE` })}
-                  onMouseLeave={() => setHoverInfo(null)}
-                >
-                  {barPct(tef) > 12 ? `TEF ${tef}` : ''}
-                </div>
-              )}
-              {eat > 0 && (
-                <div
-                  className="bg-emerald-700 h-full flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ width: `${barPct(eat)}%` }}
-                  title={`EAT: ${eat} kcal`}
-                  onMouseEnter={() => setHoverInfo({ type: 'segment', label: 'EAT', detail: `${eat} kcal`, subdetail: `${Math.round(pctOfTotal(eat))}% of TDEE` })}
-                  onMouseLeave={() => setHoverInfo(null)}
-                >
-                  {barPct(eat) > 12 ? `EAT ${eat}` : ''}
-                </div>
-              )}
-              {neat > 0 && (
-                <div
-                  className="bg-amber-700 h-full flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ width: `${barPct(neat)}%` }}
-                  title={`NEAT: ${neat} kcal`}
-                  onMouseEnter={() => setHoverInfo({ type: 'segment', label: 'NEAT', detail: `${neat} kcal`, subdetail: `${Math.round(pctOfTotal(neat))}% of TDEE` })}
-                  onMouseLeave={() => setHoverInfo(null)}
-                >
-                  {barPct(neat) > 12 ? `NEAT ${neat}` : ''}
-                </div>
-              )}
+              ))}
             </div>
 
             {/* Legend */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="flex items-center gap-2 text-[10px] text-slate-600">
-                <div className="w-3 h-3 rounded bg-violet-600 flex-shrink-0" />
-                <span>BMR ({Math.round(pctOfTotal(bmr))}%)</span>
-              </div>
-              <div className="flex items-center gap-2 text-[10px] text-slate-600">
-                <div className="w-3 h-3 rounded bg-blue-600 flex-shrink-0" />
-                <span>TEF ({Math.round(pctOfTotal(tef))}%)</span>
-              </div>
-              <div className="flex items-center gap-2 text-[10px] text-slate-600">
-                <div className="w-3 h-3 rounded bg-emerald-700 flex-shrink-0" />
-                <span>EAT ({Math.round(pctOfTotal(eat))}%)</span>
-              </div>
-              <div className="flex items-center gap-2 text-[10px] text-slate-600">
-                <div className="w-3 h-3 rounded bg-amber-700 flex-shrink-0" />
-                <span>NEAT ({Math.round(pctOfTotal(neat))}%)</span>
-              </div>
+              {parts.map(p => (
+                <div key={p.key} className="flex items-center gap-2 text-[10px] text-slate-600">
+                  <div className={`w-3 h-3 rounded ${p.bar} flex-shrink-0`} />
+                  <span>{p.key} ({Math.round(pctOfTotal(p.value))}%)</span>
+                </div>
+              ))}
             </div>
 
             {/* Component details */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
-              <div className="rounded-lg bg-violet-50 border border-violet-100 p-3 text-center">
-                <p className="text-[18px] font-bold text-violet-700">{bmr}</p>
-                <p className="text-[10px] text-violet-700 font-semibold">BMR kcal</p>
-                <p className="text-[9px] text-violet-700">Basal metabolism</p>
-              </div>
-              <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-center">
-                <p className="text-[18px] font-bold text-blue-700">{tef}</p>
-                <p className="text-[10px] text-blue-700 font-semibold">TEF kcal</p>
-                <p className="text-[9px] text-blue-700">Digesting food</p>
-              </div>
-              <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-3 text-center">
-                <p className="text-[18px] font-bold text-emerald-700">{eat}</p>
-                <p className="text-[10px] text-emerald-700 font-semibold">EAT kcal</p>
-                <p className="text-[9px] text-emerald-700">Exercise</p>
-              </div>
-              <div className="rounded-lg bg-amber-50 border border-amber-100 p-3 text-center">
-                <p className="text-[18px] font-bold text-amber-700">{neat}</p>
-                <p className="text-[10px] text-amber-700 font-semibold">NEAT kcal</p>
-                <p className="text-[9px] text-amber-700">Non-exercise movement</p>
-              </div>
+              {parts.map(p => (
+                <div key={p.key} className={`rounded-lg border p-3 text-center ${p.card}`}>
+                  <p className="text-[18px] font-bold">{p.value}</p>
+                  <p className="text-[10px] font-semibold">{p.key} kcal</p>
+                  <p className="text-[10px]">{p.sub}</p>
+                </div>
+              ))}
             </div>
-            {hoverInfo?.type === 'segment' && (
-              <div className="text-xs text-center text-slate-600 bg-slate-100 rounded-lg px-3 py-2">
-                <span className="font-semibold">{hoverInfo.label}</span>: <span className="font-bold text-slate-800">{hoverInfo.detail}</span>
-                <span className="text-slate-500 ml-1">· {hoverInfo.subdetail}</span>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -194,43 +120,33 @@ export default function CalorieMatrixPanel({ results }: Props) {
       </div>
 
       <div className="p-5">
-        <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Calorie goal matrix table">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Goal</th>
-                <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Calories</th>
-                <th scope="col" className="px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]"></th>
-                <th scope="col" className="px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Note</th>
-              </tr>
-            </thead>
-            <tbody>
-              {row('Extreme Weight Loss (2 lb/wk)', extremeLossResult?.value, 'red', tdee - 1000, extremeLossResult?.value?.startsWith('Not recommended') ? '⚠ Below safe minimum' : '')}
-              {row('Weight Loss (1 lb/wk)', moderateLossResult?.value, 'amber', tdee - 500, '−500 kcal deficit')}
-              {row('Mild Weight Loss (0.5 lb/wk)', mildLossResult?.value, 'green', tdee - 250, '−250 kcal deficit')}
-              {row('Maintain Weight', maintainResult?.value, 'blue', tdee, 'TDEE target')}
-              {row('Lean Muscle Gain', leanGainResult?.value, 'green', tdee + 250, '+250 kcal surplus')}
-              {row('Aggressive Gain', aggressiveGainResult?.value, 'green', tdee + 500, '+500 kcal surplus')}
-            </tbody>
-          </table>
-        </div>
-
-        {hoverInfo?.type === 'row' && (
-          <div className="text-xs text-center text-slate-600 bg-slate-100 rounded-lg px-3 py-2 mt-4">
-            <span className="font-semibold">{hoverInfo.goal}</span>: <span className="font-bold text-slate-800">{hoverInfo.calories} kcal</span>
-            {hoverInfo.note && <><span className="text-slate-500 ml-1">· {hoverInfo.note}</span></>}
-          </div>
-        )}
+        <ul aria-label="Calorie targets by goal" className="divide-y divide-slate-100 rounded-xl border border-slate-200 px-4 py-1">
+          {rows.map(r => (
+            <li key={r.goal} className="flex flex-col sm:flex-row sm:items-center gap-x-3">
+              <div className="flex-1">
+                <HBarRow
+                  label={r.goal}
+                  labelWidth="w-44"
+                  value={r.calVal}
+                  max={maxValForBar}
+                  color={r.color}
+                  display={r.result?.value ?? '—'}
+                />
+              </div>
+              <span className="text-[10px] text-slate-600 sm:w-36 pb-1.5 sm:pb-0">{r.note}</span>
+            </li>
+          ))}
+        </ul>
 
         {/* Safety Warning */}
         <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
           <div className="flex items-start gap-3">
-            <svg aria-hidden="true" className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="w-5 h-5 text-red-700 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
             <div>
-              <p className="text-xs font-bold text-red-700 mb-1">Caloric Safety Warning</p>
-              <p className="text-xs text-red-600 leading-relaxed">
+              <p className="text-xs font-bold text-red-800 mb-1">Caloric Safety Warning</p>
+              <p className="text-xs text-red-800 leading-relaxed">
                 <strong>Never eat below {safeMin.toLocaleString()} calories per day</strong> without medical supervision.
                 Extremely low calorie diets (VLCD) can cause nutrient deficiencies, gallstones, cardiac arrhythmias,
                 and metabolic adaptation. The "Extreme Weight Loss" target should only be considered for short periods

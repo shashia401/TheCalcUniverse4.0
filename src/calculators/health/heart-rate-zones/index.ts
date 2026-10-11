@@ -87,27 +87,32 @@ const heartRateZonesConfig: CalculatorConfig = {
   calculate: (values) => {
     const age = parseFloat(values.age);
     const rhrInput = parseFloat(values.restingHR);
-    const method = values.method || 'karvonen';
-
     if (isNaN(age) || age <= 0) return [];
 
     const maxHR = 220 - age;
     const hasRHR = !isNaN(rhrInput) && rhrInput > 0 && values.restingHR !== '';
-    const rhr = hasRHR ? rhrInput : 60;
+    // Resting HR at or above the estimated max is physiologically impossible (HRR <= 0) -> treat as invalid input.
+    if (hasRHR && rhrInput >= maxHR) return [];
+    const method = values.method || 'karvonen';
+    // Karvonen needs a resting HR; when none is entered we assume 60 bpm and say so in the results.
+    const ASSUMED_RHR = 60;
+    const rhr = hasRHR ? rhrInput : ASSUMED_RHR;
     const hrr = maxHR - rhr;
 
     const fmt = (n: number) => Math.round(n);
+    const base = method === 'karvonen' ? hrr : maxHR; // intensity applies to HRR (Karvonen) or max HR
+    const offset = method === 'karvonen' ? rhr : 0;
 
     const zoneResults = ZONES.map((zone) => {
       let low: number;
       let high: number;
 
       if (method === 'karvonen') {
-        low = Math.min(fmt(zone.low * hrr + rhr), maxHR);
-        high = Math.min(fmt(zone.high * hrr + rhr), maxHR);
+        low = fmt(zone.low * hrr + rhr);
+        high = fmt(zone.high * hrr + rhr);
       } else {
-        low = Math.min(fmt(zone.low * maxHR), maxHR);
-        high = Math.min(fmt(zone.high * maxHR), maxHR);
+        low = fmt(zone.low * maxHR);
+        high = fmt(zone.high * maxHR);
       }
 
       return {
@@ -125,7 +130,7 @@ const heartRateZonesConfig: CalculatorConfig = {
         value: `${maxHR} bpm`,
         highlight: true,
         color: 'neutral' as const,
-        interpretation: `The 220 − age rule is a population average — your true max can run 10-15 bpm either way, so treat the zones below as guides, not hard limits. ${hasRHR ? 'Since you entered a resting rate, the zones use the Karvonen (heart-rate-reserve) method, which personalizes them to your fitness.' : 'Add your resting heart rate for zones tailored to your fitness via the Karvonen method.'}`,
+        interpretation: `The 220 − age rule (Fox formula) is a population average — your true max can run 10-15 bpm either way, so treat the zones below as guides, not hard limits. ${method !== 'karvonen' ? 'You chose the simple % of max heart rate method, so resting heart rate is not used in the zones.' : hasRHR ? 'Since you entered a resting rate, the zones use the Karvonen (heart-rate-reserve) method, which personalizes them to your fitness.' : 'No resting rate entered, so the Karvonen zones assume a resting rate of 60 bpm. Enter your own for zones tailored to your fitness.'}`,
       },
     ];
 
@@ -139,7 +144,7 @@ const heartRateZonesConfig: CalculatorConfig = {
       results.push({
         id: 'hrr',
         label: 'Heart Rate Reserve (HRR = Max − Resting)',
-        value: `${hrr} bpm`,
+        value: `${Math.round(hrr * 10) / 10} bpm`,
         color: 'neutral' as const,
       });
     }
@@ -148,7 +153,7 @@ const heartRateZonesConfig: CalculatorConfig = {
       id: 'methodUsed',
       label: 'Formula',
       value: method === 'karvonen'
-        ? `Karvonen: Target HR = (Max HR − RHR) × Intensity + RHR`
+        ? `Karvonen: Target HR = (Max HR − RHR) × Intensity + RHR${hasRHR ? '' : ' (assumed RHR 60 bpm)'}`
         : `% Max HR: Target HR = Max HR × Intensity`,
       color: 'neutral' as const,
     });
@@ -158,7 +163,7 @@ const heartRateZonesConfig: CalculatorConfig = {
     results.push({
       id: 'eightTwenty',
       label: '80/20 Rule — Recommended Training Distribution',
-      value: `80% in Zone 1–2 (${fmt(ZONES[0].low * (method === 'karvonen' ? hrr : maxHR) + (method === 'karvonen' ? rhr : 0))}–${fmt(ZONES[1].high * (method === 'karvonen' ? hrr : maxHR) + (method === 'karvonen' ? rhr : 0))} bpm) | 20% in Zone 4–5`,
+      value: `80% in Zone 1–2 (${fmt(ZONES[0].low * base + offset)}–${fmt(ZONES[1].high * base + offset)} bpm) | 20% in Zone 4–5`,
       color: 'positive' as const,
     });
 
@@ -169,7 +174,7 @@ const heartRateZonesConfig: CalculatorConfig = {
     return createElement(HRZonesPanel, { values, results });
   },
   educational: {
-    formula: 'Max HR = 220 − Age | Karvonen: Target = (Max − RHR) × Intensity% + RHR',
+    formula: 'Max HR = 220 − Age (Fox) | Karvonen: Target = (Max − RHR) × Intensity% + RHR',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Heart Rate Training Zones</text><rect x="10" y="60" width="84" height="55" rx="4" fill="var(--svg-3b82f6)"><title>Zone 1: 50-60% of max HR — Recovery. Light activity, warm-up, cool-down.</title></rect><text x="52" y="83" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Zone 1</text><text x="52" y="98" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">50-60%</text><rect x="94" y="60" width="84" height="55" rx="4" fill="var(--svg-22c55e)"><title>Zone 2: 60-70% of max HR — Fat Burn. Endurance training, steady state.</title></rect><text x="136" y="83" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Zone 2</text><text x="136" y="98" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">60-70%</text><rect x="178" y="60" width="84" height="55" rx="4" fill="var(--svg-f59e0b)"><title>Zone 3: 70-80% of max HR — Aerobic. Improving cardio efficiency.</title></rect><text x="220" y="83" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Zone 3</text><text x="220" y="98" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">70-80%</text><rect x="262" y="60" width="84" height="55" rx="4" fill="var(--svg-8b5cf6)"><title>Zone 4: 80-90% of max HR — Threshold. High-intensity, lactate buildup.</title></rect><text x="304" y="83" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Zone 4</text><text x="304" y="98" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">80-90%</text><rect x="346" y="60" width="84" height="55" rx="4" fill="var(--svg-ef4444)"><title>Zone 5: 90-100% of max HR — Max Effort. Sprints, max output.</title></rect><text x="388" y="83" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">Zone 5</text><text x="388" y="98" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">90-100%</text><text x="220" y="155" text-anchor="middle" font-size="11" fill="var(--svg-666666)">Zone 1: Recovery &middot; Zone 2: Fat Burn &middot; Zone 3: Aerobic</text><text x="220" y="175" text-anchor="middle" font-size="11" fill="var(--svg-666666)">Zone 4: Threshold &middot; Zone 5: Max Effort</text></svg>',
       alt: 'Five colored heart rate training zones from Zone 1 (50-60%) to Zone 5 (90-100%)',
@@ -190,11 +195,11 @@ const heartRateZonesConfig: CalculatorConfig = {
       'Use the 80/20 rule to structure your weekly training volume across zones.',
     ],
     explanation:
-      'Training in specific heart rate zones triggers different physiological adaptations. Zone 2 (fat burn / aerobic base) is the most underrated — training here builds aerobic capacity and fat-burning efficiency with minimal recovery cost. Zone 4–5 drives speed and VO2 Max improvements but requires more recovery time. Most recreational athletes spend too much time in Zone 3 — the "grey zone" — which is neither easy enough for optimal aerobic adaptation nor hard enough for performance gains. Elite endurance athletes follow the 80/20 rule: 80% of training in Zones 1–2 and only 20% in high-intensity Zones 4–5. This polarised training approach has been validated in studies of Olympic-level rowers, cyclists, and runners. A common practical application: for a runner doing 5 hours of weekly training, 4 hours should be easy (Zone 1–2, conversational pace) and 1 hour should be hard intervals (Zone 4–5). The 220 minus age formula for max heart rate has a standard deviation of ±10–12 bpm, meaning half the population\'s true max HR differs by more than 10 beats. The Karvonen method reduces this error by incorporating your resting heart rate, which adjusts for individual fitness level — a well-trained athlete might have a resting HR of 40 bpm while a sedentary person might have 75 bpm, leading to very different Heart Rate Reserve values and thus different training zones even at the same age.',
+      'Training in specific heart rate zones triggers different physiological adaptations. Zone 2 (fat burn / aerobic base) is the most underrated — training here builds aerobic capacity and fat-burning efficiency with minimal recovery cost. Zone 4–5 drives speed and VO2 Max improvements but requires more recovery time. Most recreational athletes spend too much time in Zone 3 — the "grey zone" — which is neither easy enough for optimal aerobic adaptation nor hard enough for performance gains. Elite endurance athletes follow the 80/20 rule: 80% of training in Zones 1–2 and only 20% in high-intensity Zones 4–5. This polarised training approach has been validated in studies of Olympic-level rowers, cyclists, and runners. A common practical application: for a runner doing 5 hours of weekly training, 4 hours should be easy (Zone 1–2, conversational pace) and 1 hour should be hard intervals (Zone 4–5). The 220 minus age formula for max heart rate has a standard deviation of ±10–12 bpm, meaning about a third of the population\'s true max HR differs by more than 10 beats. The Karvonen method does not remove that error (it still starts from the estimated max), but it incorporates your resting heart rate, which adjusts for individual fitness level — a well-trained athlete might have a resting HR of 40 bpm while a sedentary person might have 75 bpm, leading to very different Heart Rate Reserve values and thus different training zones even at the same age.',
     faqs: [
       {
         question: 'Is the 220-age max HR formula accurate?',
-        answer: 'It is a population average that can vary by ±10–12 bpm for individuals. A graded exercise stress test provides a true measured max HR. The Karvonen method reduces error by accounting for resting HR.',
+        answer: 'It is a population average that can vary by ±10–12 bpm for individuals. A graded exercise stress test provides a true measured max HR. The Karvonen method personalizes the zones with your resting HR, but it still starts from the estimated max HR, so a measured max gives the best accuracy.',
       },
       {
         question: 'What zone burns the most fat?',
@@ -210,11 +215,11 @@ const heartRateZonesConfig: CalculatorConfig = {
       },
       {
         question: 'How long should I train in each heart rate zone?',
-        answer: 'For balanced cardiovascular fitness: 80% of weekly training time should be in Zones 1-2 (easy aerobic), 10% in Zone 3 (tempo/threshold), and 10% in Zones 4-5 (high intensity). This "80/10/10" split, also known as polarized training, is backed by research on elite endurance athletes and is effective for recreational runners too. Beginners benefit most from spending more time in Zone 2 building aerobic base.',
+        answer: 'For balanced cardiovascular fitness: about 80% of weekly training time in Zones 1-2 (easy aerobic) and about 20% in Zones 4-5 (high intensity), with Zone 3 kept to a minimum. This polarized pattern (about 80% easy, little time in Zone 3, about 20% hard) comes from research on elite endurance athletes and is also used by recreational runners. Beginners benefit most from spending more time in Zone 2 building aerobic base.',
       },
       {
         question: 'Can medications affect my heart rate zones?',
-        answer: 'Yes, significantly. Beta blockers (e.g., metoprolol, atenolol) lower both resting and maximum heart rate by 20-40 bpm, making formula-based zones unreliable. Calcium channel blockers, thyroid medications, and stimulants (ADHD medications, caffeine, decongestants) also alter heart rate. If you take heart-rate-altering medications, do not use formula-derived zones — instead, use perceived exertion (RPE/talk test) or consult your cardiologist for medication-adjusted targets.',
+        answer: 'Yes, significantly. Beta blockers (e.g., metoprolol, atenolol) lower both resting and maximum heart rate, making formula-based zones unreliable. Calcium channel blockers, thyroid medications, and stimulants (ADHD medications, caffeine, decongestants) also alter heart rate. If you take heart-rate-altering medications, do not use formula-derived zones — instead, use perceived exertion (RPE/talk test) or consult your cardiologist for medication-adjusted targets.',
       },
       {
         question: 'Why does my heart rate spike in hot weather even at the same pace?',
@@ -234,7 +239,7 @@ const heartRateZonesConfig: CalculatorConfig = {
         scenario: 'James, 35, is training for his first marathon. His resting HR measured over 5 mornings averages 62 bpm. He wants to use the Karvonen method to determine his Zone 2 training range for building aerobic base on his long runs. His watch currently alerts him at 145 bpm, which feels too hard for easy runs.',
         inputs: { Age: '35', 'Resting HR': '62 bpm', Method: 'Karvonen' },
         result: 'Max HR (220-35): 185 bpm. HRR (185-62): 123 bpm. Zone 2 (Karvonen, 60-70% HRR): 136-148 bpm. His current alert of 145 bpm is at the top of Zone 2 — reasonable for an easy run ceiling, but ideally his easy runs should average 136-142 bpm (the middle of Zone 2).',
-        insight: 'James\'s watch alert at 145 bpm is technically in Zone 2 but at its upper boundary. Most of his long, slow distance runs should fall in the 136-142 bpm range (the lower 2/3 of Zone 2) to maximize aerobic adaptation without accumulating unnecessary fatigue. If he runs at 145 bpm consistently, he drifts into Zone 3 territory, which provides diminishing aerobic returns at higher recovery cost. The practical adjustment: lower his watch alert to 142 bpm and aim to keep his conversational pace (able to speak in full sentences) throughout long runs. Over a 16-week marathon build, spending 80% of training time in Zone 2 (136-148 bpm) and 20% in Zone 4-5 will produce better race results than 50% in Zone 3 with less recovery capacity.',
+        insight: 'James\'s watch alert at 145 bpm is technically in Zone 2 but at its upper boundary. Most of his long, slow distance runs should fall in the 136-142 bpm range (the lower 2/3 of Zone 2) to maximize aerobic adaptation without accumulating unnecessary fatigue. Running right at 145 bpm leaves only 3 bpm of margin before 148, so normal cardiac drift on a long run pushes him into Zone 3, which provides diminishing aerobic returns at higher recovery cost. The practical adjustment: lower his watch alert to 142 bpm and aim to keep his conversational pace (able to speak in full sentences) throughout long runs. Over a 16-week marathon build, spending 80% of training time in Zone 2 (136-148 bpm) and 20% in Zone 4-5 will produce better race results than 50% in Zone 3 with less recovery capacity.',
       },
       {
         scenario: 'Maria, 42, is a fit triathlete with a resting HR of 48 bpm from years of endurance training. She is comparing her zones calculated via % Max HR vs. Karvonen to understand why her coach uses Karvonen zones. Her %MaxHR Zone 2 puts her at 107-125 bpm, but this feels trivially easy given her fitness.',
@@ -246,7 +251,7 @@ const heartRateZonesConfig: CalculatorConfig = {
         scenario: 'Tom, 28, is a recreational runner stuck at a 25-minute 5K for over a year. He runs 4 times per week, always at the same "comfortably hard" pace (HR ~155-160 bpm). Using the calculator, he discovers he has been training almost exclusively in Zone 3 — the grey zone — and missing both Zone 2 aerobic development and Zone 4-5 speed work.',
         inputs: { Age: '28', 'Resting HR': '65 bpm', Method: 'Karvonen' },
         result: 'Max HR: 192 bpm. HRR: 127 bpm. Zone 2 (aerobic base): 141-154 bpm. Zone 3 (grey zone): 154-167 bpm. Zone 4 (threshold): 167-179 bpm. Zone 5 (VO2 Max): 179-192 bpm. Tom\'s typical HR of 155-160 bpm falls squarely in Zone 3.',
-        insight: 'Tom has been training in the "grey zone" — too hard for aerobic base building, not hard enough for meaningful anaerobic or VO2 max adaptation. This explains his 12-month plateau perfectly. The fix: restructure his 4 weekly runs as follows: Run 1 (Zone 2, 141-154 bpm, 60 min easy), Run 2 (Zone 4 intervals, 167-179 bpm, e.g., 5 x 3 min hard with 2 min recovery), Run 3 (Zone 2, 141-154 bpm, 45 min easy), Run 4 (Zone 5, 179-192 bpm, e.g., 6 x 30 sec all-out with 90 sec recovery). This gives him ~65% Zone 2 and ~35% Zone 4-5 — close to the 80/20 ideal. After 8-12 weeks of this polarized approach, he should expect significant improvements in his 5K time as his aerobic base expands AND his top-end speed increases.',
+        insight: 'Tom has been training in the "grey zone" — too hard for aerobic base building, not hard enough for meaningful anaerobic or VO2 max adaptation. This explains his 12-month plateau perfectly. The fix: restructure his 4 weekly runs as follows: Run 1 (Zone 2, 141-154 bpm, 60 min easy), Run 2 (Zone 4 intervals, 167-179 bpm, e.g., 5 x 3 min hard with 2 min recovery), Run 3 (Zone 2, 141-154 bpm, 45 min easy), Run 4 (Zone 5, 179-192 bpm, e.g., 6 x 30 sec all-out with 90 sec recovery). This replaces four identical Zone 3 runs with two easy and two hard sessions; keeping the hard sessions short moves his weekly time distribution toward the 80/20 ideal. After 8-12 weeks of this polarized approach, he should expect significant improvements in his 5K time as his aerobic base expands AND his top-end speed increases.',
       },
     ],
 
@@ -270,10 +275,11 @@ const heartRateZonesConfig: CalculatorConfig = {
     ],
 
     limitations: [
-      'The 220-minus-age formula for max heart rate has a standard deviation of ±10-12 bpm, meaning half the population has a true max HR more than 10 bpm different from the estimate. For individuals over 40, the formula becomes increasingly inaccurate. A graded exercise stress test provides the only truly accurate max HR measurement.',
+      'The 220-minus-age formula for max heart rate has a standard deviation of ±10-12 bpm, meaning about a third of the population has a true max HR more than 10 bpm different from the estimate. For individuals over 40, the formula becomes increasingly inaccurate. A graded exercise stress test provides the only truly accurate max HR measurement.',
       'Heart rate zones based on max HR alone ignore individual fitness level. Two 30-year-olds with the same estimated max HR of 190 bpm can have resting HRs of 45 bpm (highly fit) and 80 bpm (deconditioned), resulting in very different Heart Rate Reserve values and training zones. Always use the Karvonen method with your measured resting HR for personalized accuracy.',
       'This calculator provides educational estimates and is not a substitute for clinical exercise testing or medical advice. If you have a heart condition, are on heart-rate-altering medications (beta blockers, calcium channel blockers), or have been sedentary for an extended period, consult a physician before starting an exercise program based on heart rate zones. Beta blockers, in particular, lower both resting and max HR, rendering formula-based zones unreliable.',
       'Cardiac drift, dehydration, caffeine, stress, sleep deprivation, altitude, and ambient temperature all affect heart rate independently of exercise intensity. Do not treat zone boundaries as rigid walls — a 2-4 bpm deviation is normal and expected. Use heart rate zones as training guides, not as rigid prescriptions.',
+      'This calculator uses the Fox formula (220 − age). The Tanaka formula (208 − 0.7 × age) was fitted to a larger meta-analysis and tends to be more accurate for adults over about 40: at age 60 Fox gives 160 bpm and Tanaka gives 166 bpm.',
       'Heart rate zones do not directly measure lactate threshold or VO2 max, which are superior metrics for performance prescription. Zones 2-3 based solely on HR can overlap with different metabolic states depending on the individual. For serious athletes, lactate threshold testing (via blood lactate sampling) or VO2 max testing (via metabolic cart) provides more precise training zones than HR formulas.',
     ],
 citations: [

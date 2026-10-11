@@ -1,9 +1,50 @@
-import { useState } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
+}
+
+type Tone = 'positive' | 'neutral' | 'negative';
+
+// Colour classes per tone. Text is -700/-800 on a -50/-100 tint so every label keeps >= 4.5:1.
+const TONE = {
+  positive: { card: 'border-emerald-200 bg-emerald-50', big: 'text-emerald-700', sub: 'text-emerald-800', chip: 'bg-emerald-200 text-emerald-900', bar: 'bg-emerald-700', note: 'text-emerald-800' },
+  neutral: { card: 'border-amber-200 bg-amber-50', big: 'text-amber-700', sub: 'text-amber-800', chip: 'bg-amber-200 text-amber-900', bar: 'bg-amber-700', note: 'text-amber-800' },
+  negative: { card: 'border-red-200 bg-red-50', big: 'text-red-700', sub: 'text-red-800', chip: 'bg-red-200 text-red-900', bar: 'bg-red-700', note: 'text-red-800' },
+} as const;
+
+const BMI_DETAIL: Record<string, string> = {
+  Underweight: 'A BMI below 18.5 is classed as underweight. It is associated with nutritional deficiency, bone loss and weaker immunity; a healthcare provider can help find the cause.',
+  Normal: 'A BMI in the normal range (18.5–24.9) is associated with the lowest risk of chronic disease. Maintain your current weight through balanced nutrition and regular physical activity.',
+  Overweight: 'A BMI in the overweight range (25–29.9) indicates excess body weight. Even modest weight loss of 5–10% can significantly improve health markers like blood pressure and insulin sensitivity.',
+  Obese: 'A BMI in the obese range (30+) substantially increases risk for type 2 diabetes, cardiovascular disease, hypertension, and certain cancers. Consultation with a healthcare provider is recommended.',
+};
+
+const WHTR_DETAIL: Record<string, string> = {
+  'Underweight range': 'A WHtR below 0.4 means your waist is less than 40% of your height. That can accompany being underweight or under-muscled.',
+  'Healthy range': 'A WHtR below 0.5 means your waist circumference is less than half your height — the usual target for metabolic health. This suggests low levels of harmful visceral fat.',
+  'Increased risk': 'A WHtR from 0.5 up to 0.6 indicates increased cardiometabolic risk. Visceral fat accumulation around organs begins to impact metabolic function.',
+  'High risk': 'A WHtR of 0.6 or more indicates high risk. Excess visceral fat significantly raises the risk of metabolic syndrome, type 2 diabetes, and cardiovascular events.',
+};
+
+function MetricCard({ title, big, subtitle, chip, tone, barPct, footnote, detail }: {
+  title: string; big: string; subtitle: string; chip: string; tone: Tone; barPct: number; footnote: string; detail: string;
+}) {
+  const t = TONE[tone];
+  return (
+    <div className={`rounded-xl border-2 p-5 text-center ${t.card}`}>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">{title}</p>
+      <p className={`text-3xl font-bold ${t.big}`}>{big}</p>
+      <p className={`text-xs font-semibold mt-1 ${t.sub}`}>{subtitle}</p>
+      <span className={`inline-block mt-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${t.chip}`}>{chip}</span>
+      <div role="img" aria-label={`${title} ${big}, ${chip}`} className="mt-3 h-2 bg-slate-200 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${t.bar}`} style={{ width: `${Math.min(Math.max(barPct, 0), 100)}%` }} />
+      </div>
+      <p className="text-[10px] text-slate-600 mt-2">{footnote}</p>
+      <p className={`text-[11px] leading-relaxed mt-3 pt-3 border-t border-slate-200/80 text-left ${t.note}`}>{detail}</p>
+    </div>
+  );
 }
 
 export default function OverweightPanel({ results }: Props) {
@@ -13,29 +54,20 @@ export default function OverweightPanel({ results }: Props) {
 
   if (!bmiResult || !whtrResult || !riskResult) return null;
 
-  const bmi = parseFloat(bmiResult.value) || 0;
-  const whtr = parseFloat(whtrResult.value) || 0;
-
-  // Color by metric
-  const bmiColor = bmi < 25 ? 'emerald' : bmi < 30 ? 'amber' : 'red';
-  const whtrColor = whtr < 0.5 ? 'emerald' : whtr < 0.6 ? 'amber' : 'red';
-
-  const [hoverCard, setHoverCard] = useState<string | null>(null);
-
-  const bmiCategory = bmiColor === 'emerald' ? 'Normal Range' : bmiColor === 'amber' ? 'Overweight' : 'Obese';
-  const whtrCategory = whtrColor === 'emerald' ? 'Healthy' : whtrColor === 'amber' ? 'Increased Risk' : 'High Risk';
-
-  const bmiDetail = {
-    emerald: 'A BMI in the normal range (18.5–24.9) is associated with the lowest risk of chronic disease. Maintain your current weight through balanced nutrition and regular physical activity.',
-    amber: 'A BMI in the overweight range (25–29.9) indicates excess body weight. Even modest weight loss of 5–10% can significantly improve health markers like blood pressure and insulin sensitivity.',
-    red: 'A BMI in the obese range (30+) substantially increases risk for type 2 diabetes, cardiovascular disease, hypertension, and certain cancers. Consultation with a healthcare provider is recommended.',
+  // Value, label and colour all come from index.ts ("27.0 — Overweight"), so the panel can never
+  // disagree with the calculator (it used to re-classify and showed BMI 17 as "Normal Range").
+  // Split on the FIRST separator only: the BMI label itself can contain one ("Obese (Class III — Severe)").
+  const splitOnce = (v: string): [string, string] => {
+    const i = v.indexOf(' — ');
+    return i < 0 ? [v, ''] : [v.slice(0, i), v.slice(i + 3)];
   };
+  const [bmiNum, bmiLabel] = splitOnce(bmiResult.value);
+  const [whtrNum, whtrLabel] = splitOnce(whtrResult.value);
+  const bmi = parseFloat(bmiNum) || 0;
+  const whtr = parseFloat(whtrNum) || 0;
+  const bmiKey = bmiLabel.startsWith('Obese') ? 'Obese' : bmiLabel.startsWith('Normal') ? 'Normal' : bmiLabel;
 
-  const whtrDetail = {
-    emerald: 'A WHtR below 0.5 means your waist circumference is less than half your height — the optimal target for metabolic health. This indicates low levels of harmful visceral fat.',
-    amber: 'A WHtR between 0.5 and 0.6 indicates increased cardiometabolic risk. Visceral fat accumulation around organs begins to impact metabolic function.',
-    red: 'A WHtR above 0.6 indicates high risk. Excess visceral fat significantly raises the risk of metabolic syndrome, type 2 diabetes, and cardiovascular events.',
-  };
+  const riskTone = (riskResult.color ?? 'neutral') as Tone;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -49,140 +81,48 @@ export default function OverweightPanel({ results }: Props) {
       <div className="p-5 space-y-5">
         {/* Side-by-side BMI + WHtR */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* BMI Card */}
-          <div
-            onMouseEnter={() => setHoverCard('bmi')}
-            onMouseLeave={() => setHoverCard(null)}
-            className={`rounded-xl border-2 p-5 text-center cursor-pointer transition-all ${
-              bmiColor === 'emerald' ? 'border-emerald-200 bg-emerald-50' :
-              bmiColor === 'amber' ? 'border-amber-200 bg-amber-50' : 'border-red-200 bg-red-50'
-            } ${hoverCard === 'bmi' ? 'ring-2 ring-indigo-300' : ''}`}
-          >
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">BMI</p>
-            <p className={`text-3xl font-bold ${
-              bmiColor === 'emerald' ? 'text-emerald-700' :
-              bmiColor === 'amber' ? 'text-amber-700' : 'text-red-700'
-            }`}>{bmi.toFixed(1)}</p>
-            <p className={`text-xs font-semibold mt-1 ${
-              bmiColor === 'emerald' ? 'text-emerald-600' :
-              bmiColor === 'amber' ? 'text-amber-600' : 'text-red-600'
-            }`}>Body Mass Index</p>
-            <span className={`inline-block mt-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-              bmiColor === 'emerald' ? 'bg-emerald-200 text-emerald-800' :
-              bmiColor === 'amber' ? 'bg-amber-200 text-amber-800' : 'bg-red-200 text-red-800'
-            }`}>{bmiCategory}</span>
-            <div className="mt-3 h-2 bg-slate-200 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full ${
-                bmiColor === 'emerald' ? 'bg-emerald-400' :
-                bmiColor === 'amber' ? 'bg-amber-400' : 'bg-red-400'
-              }`} style={{ width: `${Math.min((bmi / 40) * 100, 100)}%` }} />
-            </div>
-            <p className="text-[10px] text-slate-500 mt-2">
-              BMI categories: Underweight &lt;18.5 · Normal 18.5–24.9 · Overweight 25–29.9 · Obese 30+
-            </p>
-
-            {/* Hover tooltip */}
-            {hoverCard === 'bmi' && (
-              <div className="mt-3 pt-3 border-t border-slate-200/80 text-left">
-                <div className="flex items-start gap-1.5">
-                  <svg className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${
-                    bmiColor === 'emerald' ? 'text-emerald-500' :
-                    bmiColor === 'amber' ? 'text-amber-500' : 'text-red-500'
-                  }`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className={`text-[10px] leading-relaxed ${
-                    bmiColor === 'emerald' ? 'text-emerald-700' :
-                    bmiColor === 'amber' ? 'text-amber-700' : 'text-red-700'
-                  }`}>{bmiDetail[bmiColor]}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* WHtR Card */}
-          <div
-            onMouseEnter={() => setHoverCard('whtr')}
-            onMouseLeave={() => setHoverCard(null)}
-            className={`rounded-xl border-2 p-5 text-center cursor-pointer transition-all ${
-              whtrColor === 'emerald' ? 'border-emerald-200 bg-emerald-50' :
-              whtrColor === 'amber' ? 'border-amber-200 bg-amber-50' : 'border-red-200 bg-red-50'
-            } ${hoverCard === 'whtr' ? 'ring-2 ring-indigo-300' : ''}`}
-          >
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">WHtR</p>
-            <p className={`text-3xl font-bold ${
-              whtrColor === 'emerald' ? 'text-emerald-700' :
-              whtrColor === 'amber' ? 'text-amber-700' : 'text-red-700'
-            }`}>{whtr.toFixed(3)}</p>
-            <p className={`text-xs font-semibold mt-1 ${
-              whtrColor === 'emerald' ? 'text-emerald-600' :
-              whtrColor === 'amber' ? 'text-amber-600' : 'text-red-600'
-            }`}>Waist-to-Height Ratio</p>
-            <span className={`inline-block mt-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-              whtrColor === 'emerald' ? 'bg-emerald-200 text-emerald-800' :
-              whtrColor === 'amber' ? 'bg-amber-200 text-amber-800' : 'bg-red-200 text-red-800'
-            }`}>{whtrCategory}</span>
-            <div className="mt-3 h-2 bg-slate-200 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full ${
-                whtrColor === 'emerald' ? 'bg-emerald-400' :
-                whtrColor === 'amber' ? 'bg-amber-400' : 'bg-red-400'
-              }`} style={{ width: `${Math.min((whtr / 0.7) * 100, 100)}%` }} />
-            </div>
-            <p className="text-[10px] text-slate-500 mt-2">
-              WHtR target: keep your waist less than half your height (&lt;0.5)
-            </p>
-
-            {/* Hover tooltip */}
-            {hoverCard === 'whtr' && (
-              <div className="mt-3 pt-3 border-t border-slate-200/80 text-left">
-                <div className="flex items-start gap-1.5">
-                  <svg className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${
-                    whtrColor === 'emerald' ? 'text-emerald-500' :
-                    whtrColor === 'amber' ? 'text-amber-500' : 'text-red-500'
-                  }`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className={`text-[10px] leading-relaxed ${
-                    whtrColor === 'emerald' ? 'text-emerald-700' :
-                    whtrColor === 'amber' ? 'text-amber-700' : 'text-red-700'
-                  }`}>{whtrDetail[whtrColor]}</p>
-                </div>
-              </div>
-            )}
-          </div>
+          <MetricCard
+            title="BMI"
+            big={bmi.toFixed(1)}
+            subtitle="Body Mass Index"
+            chip={bmiLabel}
+            tone={(bmiResult.color ?? 'neutral') as Tone}
+            barPct={(bmi / 40) * 100}
+            footnote="BMI categories: Underweight <18.5 · Normal 18.5–24.9 · Overweight 25–29.9 · Obese 30+"
+            detail={BMI_DETAIL[bmiKey] ?? ''}
+          />
+          <MetricCard
+            title="WHtR"
+            big={whtr.toFixed(2)}
+            subtitle="Waist-to-Height Ratio"
+            chip={whtrLabel}
+            tone={(whtrResult.color ?? 'neutral') as Tone}
+            barPct={(whtr / 0.7) * 100}
+            footnote="WHtR target: keep your waist less than half your height (<0.5)"
+            detail={WHTR_DETAIL[whtrLabel] ?? ''}
+          />
         </div>
 
         {/* Risk Narrative */}
-        {riskResult && (
-          <div className={`rounded-xl border px-5 py-4 ${
-            riskResult.color === 'positive' ? 'border-emerald-200 bg-emerald-50' :
-            riskResult.color === 'negative' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'
-          }`}>
-            <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${
-              riskResult.color === 'positive' ? 'text-emerald-600' :
-              riskResult.color === 'negative' ? 'text-red-600' : 'text-amber-600'
-            }`}>Combined Risk Assessment</p>
-            <p className={`text-xs leading-relaxed ${
-              riskResult.color === 'positive' ? 'text-emerald-800' :
-              riskResult.color === 'negative' ? 'text-red-800' : 'text-amber-800'
-            }`}>{riskResult.value}</p>
-          </div>
-        )}
+        <div className={`rounded-xl border px-5 py-4 ${TONE[riskTone].card}`}>
+          <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${TONE[riskTone].big}`}>Combined Risk Assessment</p>
+          <p className={`text-xs leading-relaxed ${TONE[riskTone].note}`}>{riskResult.value}</p>
+        </div>
 
         {/* Visceral Fat Explanation */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Why Fat Distribution Matters</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">Why Fat Distribution Matters</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <p className="text-xs font-bold text-slate-700 mb-1">Subcutaneous Fat</p>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+              <p className="text-[11px] text-slate-600 leading-relaxed">
                 Stored under the skin (pinchable). Produces beneficial hormones like leptin and adiponectin.
                 Less metabolically harmful — primarily an energy reserve.
               </p>
             </div>
             <div>
               <p className="text-xs font-bold text-red-700 mb-1">Visceral Fat</p>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+              <p className="text-[11px] text-slate-600 leading-relaxed">
                 Stored around internal organs (liver, pancreas). Secretes inflammatory cytokines,
                 free fatty acids, and hormones that promote insulin resistance, inflammation,
                 and cardiovascular disease. WHtR captures this risk.
@@ -193,13 +133,13 @@ export default function OverweightPanel({ results }: Props) {
 
         {/* Actionable Steps */}
         <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-2">Steps to Reduce Cardiovascular Risk</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-2">Steps to Reduce Cardiovascular Risk</p>
           <ol className="text-xs text-blue-800 space-y-2 list-decimal list-inside leading-relaxed">
-            <li><strong>Reduce waist circumference</strong> — even 2–4 cm reduction significantly lowers visceral fat and metabolic risk</li>
-            <li><strong>Aim for 150+ min/week of moderate aerobic activity</strong> — brisk walking, cycling, swimming specifically target visceral fat</li>
+            <li><strong>Reduce waist circumference</strong> — even a modest reduction is linked to lower visceral fat and metabolic risk</li>
+            <li><strong>Aim for 150+ min/week of moderate aerobic activity</strong> — brisk walking, cycling and swimming all help reduce visceral fat</li>
             <li><strong>Prioritize protein and fibre</strong> — increases satiety, preserves lean mass during weight loss, and improves metabolic health</li>
-            <li><strong>Limit added sugar and refined carbs</strong> — these specifically promote visceral fat storage via insulin-driven lipogenesis</li>
-            <li><strong>Get 7–9 hours of quality sleep</strong> — insufficient sleep elevates cortisol, which drives visceral fat accumulation</li>
+            <li><strong>Limit added sugar and refined carbs</strong> — high intakes are associated with more visceral fat</li>
+            <li><strong>Get 7–9 hours of quality sleep</strong> — short sleep is associated with higher cortisol and more visceral fat</li>
           </ol>
         </div>
       </div>

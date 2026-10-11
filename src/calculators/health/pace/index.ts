@@ -3,6 +3,31 @@ import { CalculatorConfig } from '../../../types/calculator';
 import PacePanel from './PacePanel';
 import { fixed2 as fmt } from '../../../lib/format';
 
+const KM_PER_MI = 1.609344;
+
+// Preset race distances in KILOMETRES. The option values are race names, not numbers in the
+// selected unit: "5K" must stay 5 km when the unit is miles (it used to be read as 5 miles).
+const PRESET_KM: Record<string, number> = {
+  '0.4': 0.4,
+  '0.8': 0.8,
+  '1': 1,
+  '5': 5,
+  '10': 10,
+  '10_mi': 10 * KM_PER_MI,
+  half: 21.0975,
+  marathon: 42.195,
+  '50k': 50,
+};
+
+// m:ss or h:mm:ss. Round to whole seconds FIRST, then split, so 59.6 s can never print as ":60".
+const fmtClock = (totalSeconds: number): string => {
+  const t = Math.round(totalSeconds);
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const s = t % 60;
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+};
+
 const paceConfig: CalculatorConfig = {
   inputs: [
     {
@@ -23,8 +48,8 @@ const paceConfig: CalculatorConfig = {
       required: true,
       helpText: 'Select a preset race distance or choose "Custom" to enter your own',
       options: [
-        { label: '400 m', value: '0.25' },
-        { label: '800 m', value: '0.5' },
+        { label: '400 m', value: '0.4' },
+        { label: '800 m', value: '0.8' },
         { label: '1K', value: '1' },
         { label: '5K', value: '5' },
         { label: '10K', value: '10' },
@@ -41,6 +66,7 @@ const paceConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '10',
       min: 0,
+      max: 5000,
       step: 0.01,
       helpText: 'Enter your custom distance in the selected unit (miles or km).',
     },
@@ -128,17 +154,10 @@ const paceConfig: CalculatorConfig = {
     const isMiles = distanceUnit === 'miles';
 
     if (distanceKey === 'custom') {
-      distInUnit = customDist;
-    } else if (distanceKey === 'half') {
-      distInUnit = isMiles ? 13.109375 : 21.0975;
-    } else if (distanceKey === 'marathon') {
-      distInUnit = isMiles ? 26.21875 : 42.195;
-    } else if (distanceKey === '10_mi') {
-      distInUnit = 10;
-    } else if (distanceKey === '50k') {
-      distInUnit = isMiles ? 31.07 : 50;
+      distInUnit = customDist; // already in the selected unit
     } else {
-      distInUnit = parseFloat(distanceKey);
+      const km = PRESET_KM[distanceKey] ?? parseFloat(distanceKey);
+      distInUnit = isMiles ? km / KM_PER_MI : km;
     }
 
     const totalTimeSec = hours * 3600 + minutes * 60 + seconds;
@@ -169,16 +188,8 @@ const paceConfig: CalculatorConfig = {
       resultPaceSec = totalPaceSec;
     }
 
-    const paceMinDisplay = Math.floor(resultPaceSec / 60);
-    const paceSecDisplay = Math.round(resultPaceSec % 60);
-    const paceStr = `${paceMinDisplay}:${String(paceSecDisplay).padStart(2, '0')} /${isMiles ? 'mi' : 'km'}`;
-
-    const totalH = Math.floor(totalTimeSeconds / 3600);
-    const totalM = Math.floor((totalTimeSeconds % 3600) / 60);
-    const totalS = Math.round(totalTimeSeconds % 60);
-    const timeStr = totalH > 0
-      ? `${totalH}:${String(totalM).padStart(2, '0')}:${String(totalS).padStart(2, '0')}`
-      : `${totalM}:${String(totalS).padStart(2, '0')}`;
+    const paceStr = `${fmtClock(resultPaceSec)} /${isMiles ? 'mi' : 'km'}`;
+    const timeStr = fmtClock(totalTimeSeconds);
 
     const distStr = resultDist >= 1
       ? `${resultDist.toFixed(2)} ${isMiles ? 'mi' : 'km'}`
@@ -193,20 +204,12 @@ const paceConfig: CalculatorConfig = {
       : resultDist / (totalTimeSeconds / 3600) * 0.621371;
 
     // Generate splits
-    const splits: { dist: string; time: string }[] = [];
+    // Splits never run past the finish (floor), and are the single source for the panel (_splits).
+    const splits: { d: number; dist: string; time: string }[] = [];
     if (resultDist >= 1 && resultDist <= 50) {
-      const increment = resultDist <= 5 ? 1 : resultDist <= 10 ? 1 : resultDist <= 21.1 ? 2 : 5;
+      const increment = resultDist <= 10 ? 1 : resultDist <= 21.1 ? 2 : 5;
       for (let d = increment; d <= Math.floor(resultDist); d += increment) {
-        const t = d * resultPaceSec;
-        const h = Math.floor(t / 3600);
-        const m = Math.floor((t % 3600) / 60);
-        const s = Math.round(t % 60);
-        splits.push({
-          dist: `${d} ${isMiles ? 'mi' : 'km'}`,
-          time: h > 0
-            ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-            : `${m}:${String(s).padStart(2, '0')}`,
-        });
+        splits.push({ d, dist: `${d} ${isMiles ? 'mi' : 'km'}`, time: fmtClock(d * resultPaceSec) });
       }
     }
 
@@ -247,6 +250,7 @@ const paceConfig: CalculatorConfig = {
         value: `${splits.length} split points · ${distStr} total`,
         color: 'neutral',
       });
+      results.push({ id: '_splits', label: '_splits', value: JSON.stringify(splits), color: 'neutral' });
     }
 
     return results;
@@ -278,19 +282,19 @@ const paceConfig: CalculatorConfig = {
       'The wristband view is designed to be screenshot and carried on race day for reference.',
     ],
     explanation:
-      'Running pace math is straightforward but critical for race strategy. The most common mistake runners make is starting too fast — going out at a pace 10–15 seconds per mile faster than goal pace and then fading dramatically in the second half. This "positive splitting" can cost 5–10 minutes or more over a marathon distance. Even pacing (maintaining the same pace throughout) or slightly negative splitting (running the second half faster than the first) produces the fastest overall times for most runners. The split table helps you plan: for a marathon, check your time at 10K, half marathon, and 20 miles to ensure you are on track. For beginners, add 30–60 seconds per mile to your 5K pace to estimate a realistic marathon pace. For experienced runners, the "VDOT" system developed by Jack Daniels uses your recent race performance to predict equivalent performances at other distances. For example, a 22:00 5K predicts roughly a 1:42 half marathon and a 3:33 marathon, assuming equivalent training and conditions.',
+      'Running pace math is straightforward but critical for race strategy. The most common mistake runners make is starting too fast — going out at a pace 10–15 seconds per mile faster than goal pace and then fading dramatically in the second half. This "positive splitting" can cost several minutes over a marathon distance. Even pacing (maintaining the same pace throughout) or slightly negative splitting (running the second half faster than the first) produces the fastest overall times for most runners. The split table helps you plan: for a marathon, check your time at 10K, half marathon, and 20 miles to ensure you are on track. For beginners, add 30–60 seconds per mile to your 5K pace to estimate a realistic marathon pace. For experienced runners, the "VDOT" system developed by Jack Daniels uses your recent race performance to predict equivalent performances at other distances. For example, the Riegel formula (time × distance ratio^1.06) turns a 22:00 5K into roughly a 1:41 half marathon and a 3:31 marathon, assuming equivalent training and conditions.',
     faqs: [
       {
         question: 'What is a good running pace?',
-        answer: 'A "good" pace is personal — it depends on your fitness level, age, distance, and goals. A 10-minute mile is achievable for most recreational runners. Elite marathoners run under 5 minutes per mile (sub-2:20 marathon). Use the pace calculator to find your current pace and target improvements of 5-10% per training cycle. A useful benchmark: if you can run a 5K at 9:00/mi, a sustainable marathon pace would be roughly 10:00–10:30/mi.',
+        answer: 'A "good" pace is personal — it depends on your fitness level, age, distance, and goals. A 10-minute mile is achievable for most recreational runners. Elite men run marathons at roughly 4:40–5:00 per mile (about 2:02–2:11 finishing times). Use the pace calculator to find your current pace and target improvements of 5-10% per training cycle. A useful benchmark: if you can run a 5K at 9:00/mi, a sustainable marathon pace would be roughly 10:00–10:30/mi.',
       },
       {
         question: 'Should I run at an even pace or negative split?',
-        answer: 'Research strongly favors even or slightly negative splits (running the second half faster than the first). Even pacing minimizes energy waste and produces the best overall time for most runners. Going out too fast (positive split) leads to significant slowdown in the final miles. Elite marathoners often run negative splits by banking energy in the first half. For your first race, focus on holding back in the first half — you will pass many people who started too fast.',
+        answer: 'Pacing analyses of record-setting performances show very even pacing, often with a slightly faster finish. Even pacing minimizes energy waste and tends to produce the best overall time for most runners. Going out too fast (positive split) leads to significant slowdown in the final miles. For your first race, focus on holding back in the first half — you will pass many people who started too fast.',
       },
       {
         question: 'How do I convert min/mile to min/km?',
-        answer: 'Multiply minutes-per-mile by 0.6214. For example, 8:00/mi ≈ 4:58/km. Conversely, multiply min/km by 1.609 to get min/mile. 5:00/km ≈ 8:03/mi. A practical tip: if your GPS watch is set to kilometers but you think in miles, subtract roughly 40% from your per-km time to estimate per-mile pace.',
+        answer: 'Multiply minutes-per-mile by 0.6214. For example, 8:00/mi ≈ 4:58/km. Conversely, multiply min/km by 1.609 to get min/mile. 5:00/km ≈ 8:03/mi. A practical tip: if your GPS watch is set to kilometers but you think in miles, add roughly 60% to your per-km time to estimate per-mile pace.',
       },
       {
         question: 'What pace should I aim for in my first marathon?',
@@ -298,13 +302,13 @@ const paceConfig: CalculatorConfig = {
       },
       {
         question: 'How do elevation and terrain affect running pace?',
-        answer: 'Elevation gain significantly impacts pace — a general rule is that 100 feet of climbing adds roughly 20–30 seconds per mile to your pace. Running on trails vs. roads also adds 30–90 seconds per mile depending on technical difficulty. The pace calculator assumes flat road conditions — adjust your expectations accordingly for hilly courses or trail races. Many runners use a "grade-adjusted pace" to compare effort across different terrains.',
+        answer: 'Climbing slows pace noticeably, and technical trail surfaces slow it further. The pace calculator assumes flat road conditions — adjust your expectations accordingly for hilly courses or trail races. Many runners use a "grade-adjusted pace" to compare effort across different terrains.',
       },
     ],
     commonUses: [
       'Race day planning — calculate target pace for any distance from 400m to marathon and generate split times for even pacing strategy on race day',
       'Training pace zones — determine easy run, tempo run, and interval paces from a recent race result using the pace-time-distance relationship',
-      'Goal setting and comparison — see equivalent performances across distances: a 22:00 5K predicts roughly a 1:42 half marathon and a 3:33 marathon',
+      'Goal setting and comparison — see equivalent performances across distances: the Riegel formula (time × distance ratio^1.06) turns a 22:00 5K into roughly a 1:41 half marathon and a 3:31 marathon',
       'Route and workout design — calculate total time for a known distance at a given pace, or determine how far you can go in a set time for planning training routes'
     ],
   

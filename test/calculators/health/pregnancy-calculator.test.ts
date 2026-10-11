@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import config from '../../../src/calculators/health/pregnancy-calculator/index';
-import { getValue } from '../../helpers';
+import { getValue, getResult } from '../../helpers';
 
 /** Format a Date to YYYY-MM-DD using local timezone (matches how date inputs work) */
 const toLocalDateStr = (d: Date): string => {
@@ -72,7 +72,7 @@ describe('Pregnancy Calculator (General Hub)', () => {
 
     const r = config.calculate({ lmpDate: lmpStr, cycleLength: '28' });
     const trimester = getValue(r, 'currentTrimester');
-    expect(trimester).toBe('2nd Trimester (Weeks 14-26)');
+    expect(trimester).toBe('2nd Trimester (Weeks 14-27)');
   });
 
   it('detects 3rd trimester correctly (LMP ~30 weeks ago)', () => {
@@ -82,7 +82,7 @@ describe('Pregnancy Calculator (General Hub)', () => {
 
     const r = config.calculate({ lmpDate: lmpStr, cycleLength: '28' });
     const trimester = getValue(r, 'currentTrimester');
-    expect(trimester).toBe('3rd Trimester (Weeks 27-40)');
+    expect(trimester).toBe('3rd Trimester (Weeks 28-40)');
   });
 
   // ── Edge cases: trimester boundaries ──────────────────────────
@@ -101,16 +101,16 @@ describe('Pregnancy Calculator (General Hub)', () => {
     const lmpStr = toLocalDateStr(boundary);
 
     const r = config.calculate({ lmpDate: lmpStr, cycleLength: '28' });
-    expect(getValue(r, 'currentTrimester')).toBe('2nd Trimester (Weeks 14-26)');
+    expect(getValue(r, 'currentTrimester')).toBe('2nd Trimester (Weeks 14-27)');
   });
 
-  it('correctly classifies exactly at 27 weeks (3rd tri start)', () => {
+  it('correctly classifies exactly at 28 weeks (3rd tri start, ACOG 28w0d)', () => {
     const boundary = new Date();
-    boundary.setDate(boundary.getDate() - 189);
+    boundary.setDate(boundary.getDate() - 196);
     const lmpStr = toLocalDateStr(boundary);
 
     const r = config.calculate({ lmpDate: lmpStr, cycleLength: '28' });
-    expect(getValue(r, 'currentTrimester')).toBe('3rd Trimester (Weeks 27-40)');
+    expect(getValue(r, 'currentTrimester')).toBe('3rd Trimester (Weeks 28-40)');
   });
 
   // ── Invalid / empty dates ─────────────────────────────────────
@@ -186,5 +186,86 @@ describe('Pregnancy Calculator (General Hub)', () => {
 
     expect(edu.limitations).toBeDefined();
     expect(edu.limitations!.length).toBeGreaterThanOrEqual(5);
+  });
+  // ── Audit regressions (hand-counted dates; clock frozen) ──
+  describe('Audit regressions', () => {
+    const at = (iso: string, fn: () => void) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(`${iso}T12:00:00`));
+      try { fn(); } finally { vi.useRealTimers(); }
+    };
+    const calc = (lmpDate: string, cycleLength = '28') => config.calculate({ lmpDate, cycleLength });
+
+    it('worked examples: LMP 1 Mar 2026 -> Sun 6 Dec 2026; LMP 15 Jan, 35-day cycle -> Thu 29 Oct (22 Oct + 7); LMP 1 Jun -> Mon 8 Mar 2027', () => {
+      at('2026-05-24', () => {
+        expect(getValue(calc('2026-03-01'), 'dueDate')).toBe('Sunday, December 6, 2026');
+        expect(getValue(calc('2026-01-15', '35'), 'dueDate')).toBe('Thursday, October 29, 2026');
+        expect(getValue(calc('2026-01-15', '28'), 'dueDate')).toBe('Thursday, October 22, 2026');
+        expect(getValue(calc('2026-06-01'), 'dueDate')).toBe('Monday, March 8, 2027');
+        // Sarah on 24 May 2026 = 84 days = exactly 12 weeks
+        expect(getValue(calc('2026-03-01'), 'gestationalAge')).toBe('12 weeks pregnant');
+      });
+    });
+
+    it('Jessica: LMP 1 Jun 2026 seen on 15 Sep = 106 days = 15 w 1 d, 2nd trimester', () => {
+      at('2026-09-15', () => {
+        const r = calc('2026-06-01');
+        expect(getValue(r, 'gestationalAge')).toBe('15 weeks and 1 day pregnant');
+        expect(getValue(r, 'currentTrimester')).toBe('2nd Trimester (Weeks 14-27)');
+      });
+    });
+
+    it('trimester boundaries follow ACOG: 13w6d is 1st, 14w0d is 2nd, 27w6d is 2nd, 28w0d is 3rd', () => {
+      const tri = (daysAgo: number) => {
+        let v = '';
+        at('2026-09-15', () => {
+          const d = new Date(2026, 8, 15); d.setDate(d.getDate() - daysAgo);
+          v = getValue(calc(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`), 'currentTrimester');
+        });
+        return v;
+      };
+      expect(tri(97)).toMatch(/^1st/); // 13w6d
+      expect(tri(98)).toMatch(/^2nd/); // 14w0d
+      expect(tri(195)).toMatch(/^2nd/); // 27w6d
+      expect(tri(196)).toMatch(/^3rd/); // 28w0d
+    });
+
+    it('cycle length shifts everything consistently: 35-day cycle moves due date, gestational age and milestones by 7 days', () => {
+      at('2026-05-24', () => {
+        const r35 = calc('2026-03-01', '35');
+        // adjusted LMP = 8 Mar -> 77 days = exactly 11 weeks (not 12)
+        expect(getValue(r35, 'gestationalAge')).toBe('11 weeks pregnant');
+        expect(getValue(r35, 'conceptionDate')).toBe('March 22, 2026'); // 8 Mar + 14
+        expect(getValue(r35, 'endFirstTrimester')).toBe('June 7, 2026'); // 8 Mar + 91 d
+      });
+    });
+
+    it('due today / past due labels use the (adjusted) due date, never a negative or reversed count', () => {
+      at('2026-12-06', () => {
+        expect(getValue(calc('2026-03-01'), 'gestationalAge')).toBe('40 weeks pregnant — due today');
+        expect(getValue(calc('2026-03-01'), 'progressSummary')).toBe('Due today!');
+      });
+      at('2026-12-10', () => {
+        expect(getValue(calc('2026-03-01'), 'gestationalAge')).toBe('4 days past due date');
+        // 35-day cycle: due 13 Dec, so on 10 Dec she is NOT past due (used to say "past due")
+        expect(getValue(calc('2026-03-01', '35'), 'progressSummary')).toBe('3 days to go');
+      });
+    });
+
+    it('37 weeks is labelled early term (full term starts at 39)', () => {
+      at('2026-05-24', () => {
+        const r = calc('2026-03-01');
+        expect(getResult(r, 'fullTermDate').label).toBe('Early Term Begins (37 weeks)');
+        expect(getValue(r, 'fullTermDate')).toContain('full term starts at 39 weeks');
+        expect(getValue(r, 'fullTermDate')).toContain('November 15, 2026'); // 1 Mar + 259 d
+      });
+    });
+
+    it('rejects calendar-invalid LMPs and LMPs far past the due date', () => {
+      at('2026-05-24', () => {
+        expect(calc('2026-02-31')).toEqual([]);
+        expect(calc('2024-01-01')).toEqual([]); // ~2.4 years ago
+      });
+    });
   });
 });

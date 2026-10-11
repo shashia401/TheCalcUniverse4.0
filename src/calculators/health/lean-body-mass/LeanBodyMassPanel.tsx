@@ -10,7 +10,8 @@ function parseVal(s: string): number {
   return parseFloat(s.replace(/[^0-9.]/g, '')) || 0;
 }
 
-const FORMULA_COLORS = ['#3b82f6', '#22c55e', '#f59e0b'];
+// -700 shades keep the coloured formula names at >= 4.5:1 on their tinted cards.
+const FORMULA_COLORS = ['#1d4ed8', '#15803d', '#b45309'];
 
 export default function LeanBodyMassPanel({ values, results }: Props) {
   const avgRes = results.find((r) => r.id === 'avgLBM');
@@ -27,8 +28,8 @@ export default function LeanBodyMassPanel({ values, results }: Props) {
   const totalWeightKg = parseVal(totalRes.value);
   const avgLbmKg = parseVal(avgRes.value);
   const fatMassKg = totalWeightKg - avgLbmKg;
-  const lbmPct = (avgLbmKg / totalWeightKg) * 100;
-  const fatPct = (fatMassKg / totalWeightKg) * 100;
+  const lbmPct = Math.min(100, Math.max(0, (avgLbmKg / totalWeightKg) * 100));
+  const fatPct = 100 - lbmPct;
 
   const formulas = [
     { name: 'Boer', value: boerRes?.value || '', color: FORMULA_COLORS[0] },
@@ -48,25 +49,25 @@ export default function LeanBodyMassPanel({ values, results }: Props) {
       </div>
 
       <div className="p-6 space-y-5">
-        <div className="h-16 bg-slate-100 rounded-xl overflow-hidden flex">
-          <div className="bg-emerald-500 flex items-center justify-center text-white text-xs font-bold" style={{ width: `${lbmPct}%` }}>
+        <div role="img" aria-label={`Body composition: ${lbmPct.toFixed(0)}% lean mass, ${fatPct.toFixed(0)}% fat mass`} className="h-16 bg-slate-100 rounded-xl overflow-hidden flex">
+          <div className="bg-emerald-700 flex items-center justify-center text-white text-xs font-bold" style={{ width: `${lbmPct}%` }}>
             {lbmPct > 15 ? `Lean ${lbmPct.toFixed(0)}%` : ''}
           </div>
-          <div className="bg-amber-400 flex items-center justify-center text-white text-xs font-bold" style={{ width: `${fatPct}%` }}>
+          <div className="bg-amber-700 flex items-center justify-center text-white text-xs font-bold" style={{ width: `${fatPct}%` }}>
             {fatPct > 10 ? `Fat ${fatPct.toFixed(0)}%` : ''}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">Lean Mass</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-1">Lean Mass</p>
             <p className="text-lg font-black text-emerald-700">{avgRes.value}</p>
-            <p className="text-xs text-emerald-500">{lbmPct.toFixed(1)}% of body weight</p>
+            <p className="text-xs text-emerald-700">{lbmPct.toFixed(1)}% of body weight</p>
           </div>
           <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Fat Mass</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-1">Fat Mass</p>
             <p className="text-lg font-black text-amber-700">{fatRes.value}</p>
-            <p className="text-xs text-amber-500">{fatPct.toFixed(1)}% body fat</p>
+            <p className="text-xs text-amber-700">{fatPct.toFixed(1)}% body fat</p>
           </div>
         </div>
 
@@ -80,8 +81,8 @@ export default function LeanBodyMassPanel({ values, results }: Props) {
         </div>
 
         <div className="rounded-xl bg-slate-50 border border-slate-200 px-5 py-3">
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Average LBM across 3 formulas. Boer (1984) is generally considered most accurate.
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Average LBM across 3 formulas (Boer 1984, James 1976, Hume 1966).
             For clinical precision, DEXA or hydrostatic weighing is superior.
           </p>
         </div>

@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ConceptionPanel from './ConceptionPanel';
+import { parseIsoDate, toIsoDate } from '../../../utils/dates';
 
 const conceptionConfig: CalculatorConfig = {
   inputs: [
@@ -13,7 +14,7 @@ const conceptionConfig: CalculatorConfig = {
       options: [
         { label: 'Based on Last Period (LMP)', value: 'lmp' },
         { label: 'Based on Next Expected Period', value: 'nextPeriod' },
-        { label: 'Based on Cycle Length (Average)', value: 'cycle' },
+        { label: 'Based on Cycle Length (if your period starts today)', value: 'cycle' },
         { label: 'IVF Transfer Date (assisted reproduction)', value: 'ivf' },
         { label: 'Based on Target Due Date', value: 'dueDate' },
       ],
@@ -44,21 +45,8 @@ const conceptionConfig: CalculatorConfig = {
       max: 45,
       step: 1,
       inputMode: 'decimal',
-      helpText: 'For cycle length method. Default 28 days.',
-      showWhen: (v) => v.method === 'lmp' || v.method === 'nextPeriod' || v.method === 'cycle',
-    },
-    {
-      id: 'periodLength',
-      label: 'Average Period Length',
-      type: 'number',
-      placeholder: '5',
-      unit: 'days',
-      min: 2,
-      max: 10,
-      step: 1,
-      inputMode: 'decimal',
-      helpText: 'For cycle-based method — when your period typically ends.',
-      showWhen: (v) => v.method === 'lmp' || v.method === 'nextPeriod' || v.method === 'cycle',
+      helpText: 'For the LMP and cycle length methods. Default 28 days. The cycle length method assumes today is day 1 of your cycle.',
+      showWhen: (v) => v.method === 'lmp' || v.method === 'cycle',
     },
     {
       id: 'ivfDate',
@@ -91,6 +79,7 @@ const conceptionConfig: CalculatorConfig = {
   calculate: (values) => {
     const method = values.method || 'lmp';
     const cycleLength = parseFloat(values.cycleLength) || 28;
+    if (cycleLength < 20 || cycleLength > 45) return [];
 
     const addDays = (d: Date, n: number): Date => {
       const r = new Date(d);
@@ -106,10 +95,9 @@ const conceptionConfig: CalculatorConfig = {
 
     // ── IVF Method ──────────────────────────────────────────────
     if (method === 'ivf') {
-      const ivfDateStr = values.ivfDate?.trim();
-      if (!ivfDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(ivfDateStr)) return [];
-      const transferDate = new Date(ivfDateStr + 'T00:00:00');
-      if (isNaN(transferDate.getTime())) return [];
+      // Calendar-invalid dates (2026-02-31) are rejected rather than rolled over to March.
+      const transferDate = parseIsoDate(values.ivfDate);
+      if (!transferDate) return [];
 
       const embryoDays = values.embryoType === 'day3' ? 3 : 5;
       // Due date: Day 5 transfer → +261 days, Day 3 transfer → +263 days
@@ -123,7 +111,16 @@ const conceptionConfig: CalculatorConfig = {
       const retrievalDate = addDays(transferDate, -embryoDays); // e.g., day 5 → retrieval 5 days before transfer
       const retrievalLabel = embryoDays === 5 ? 'Blastocyst (Day 5)' : 'Cleavage Stage (Day 3)';
 
-      const weeksPregnant = Math.floor((today.getTime() - transferDate.getTime()) / (1000 * 60 * 60 * 24 * 7)) + (embryoDays === 5 ? 2 : 2);
+      // Gestational age counts the 14 days before fertilization plus the embryo's age at transfer:
+      // GA(days) = days since transfer + 14 + embryo age (Day 5 transfer = 2w5d, Day 3 = 2w3d on transfer day).
+      const gaDays = Math.round((today.getTime() - transferDate.getTime()) / (1000 * 60 * 60 * 24)) + 14 + embryoDays;
+      const weeksPregnant = Math.floor(gaDays / 7);
+      const stageText =
+        gaDays < 14 + embryoDays
+          ? 'Prior to transfer'
+          : gaDays > 294
+          ? 'Past the estimated due date'
+          : `${weeksPregnant} weeks ${gaDays % 7} day${gaDays % 7 === 1 ? '' : 's'} (gestational age)`;
 
       // Pregnancy test date: ~9-14 days post transfer
       const testDate = addDays(transferDate, 9);
@@ -163,7 +160,7 @@ const conceptionConfig: CalculatorConfig = {
         {
           id: 'ivfWeeksProgress',
           label: 'Current Pregnancy Stage',
-          value: weeksPregnant > 0 ? `~${weeksPregnant} weeks since LMP equivalent` : 'Prior to transfer',
+          value: stageText,
           color: 'neutral',
         },
         {
@@ -177,10 +174,8 @@ const conceptionConfig: CalculatorConfig = {
 
     // ── Target Due Date Method ──────────────────────────────────
     if (method === 'dueDate') {
-      const ddStr = values.targetDueDate?.trim();
-      if (!ddStr || !/^\d{4}-\d{2}-\d{2}$/.test(ddStr)) return [];
-      const targetDue = new Date(ddStr + 'T00:00:00');
-      if (isNaN(targetDue.getTime())) return [];
+      const targetDue = parseIsoDate(values.targetDueDate);
+      if (!targetDue) return [];
 
       // Conception ≈ due date - 266 days
       const conceptionDate = addDays(targetDue, -266);
@@ -195,6 +190,7 @@ const conceptionConfig: CalculatorConfig = {
       const daysFromLmp = Math.round((today.getTime() - lmpDate.getTime()) / (1000 * 60 * 60 * 24));
       const weeksPregnant = Math.floor(daysFromLmp / 7);
       const daysRemaining = Math.round((targetDue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntilWindow = Math.round((fertileStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
       return [
         {
@@ -230,10 +226,12 @@ const conceptionConfig: CalculatorConfig = {
         },
         {
           id: 'weeksPregnant',
-          label: daysFromLmp >= 0 ? 'Current Pregnancy Progress' : 'Weeks until pregnancy',
-          value: daysFromLmp >= 0
+          label: daysRemaining >= 0 && daysFromLmp < 0 ? 'Time until the conception window' : 'Current Pregnancy Progress',
+          value: daysRemaining < 0
+            ? 'The target due date has already passed'
+            : daysFromLmp >= 0
             ? `~${weeksPregnant} weeks pregnant · ${daysRemaining} days remaining`
-            : `Conception window opens in ${Math.abs(daysFromLmp)} days`,
+            : `Conception window opens in ${daysUntilWindow} days`,
           color: 'neutral',
         },
       ];
@@ -243,17 +241,15 @@ const conceptionConfig: CalculatorConfig = {
     let referenceDate: Date;
 
     if (method === 'nextPeriod') {
-      const nd = values.nextPeriodDate?.trim();
-      if (!nd || !/^\d{4}-\d{2}-\d{2}$/.test(nd)) return [];
-      referenceDate = new Date(nd + 'T00:00:00');
-      if (isNaN(referenceDate.getTime())) return [];
+      const nd = parseIsoDate(values.nextPeriodDate);
+      if (!nd) return [];
+      referenceDate = nd;
     } else if (method === 'cycle') {
-      referenceDate = new Date();
+      referenceDate = new Date(today); // assumes today is day 1 of the cycle
     } else {
-      const ld = values.lmpDate?.trim();
-      if (!ld || !/^\d{4}-\d{2}-\d{2}$/.test(ld)) return [];
-      referenceDate = new Date(ld + 'T00:00:00');
-      if (isNaN(referenceDate.getTime())) return [];
+      const ld = parseIsoDate(values.lmpDate);
+      if (!ld) return [];
+      referenceDate = ld;
     }
 
     let ovulationDate: Date;
@@ -261,8 +257,9 @@ const conceptionConfig: CalculatorConfig = {
     if (method === 'nextPeriod') {
       ovulationDate = addDays(referenceDate, -14);
     } else if (method === 'cycle') {
-      const estimatedLmp = addDays(today, -cycleLength);
-      ovulationDate = addDays(estimatedLmp, cycleLength - 14);
+      // No dates are entered, so the cycle is anchored on today as cycle day 1 (the old code anchored it
+      // one full cycle ago, which always reported ovulation as exactly 14 days in the past).
+      ovulationDate = addDays(today, cycleLength - 14);
     } else {
       ovulationDate = addDays(referenceDate, cycleLength - 14);
     }
@@ -323,7 +320,7 @@ const conceptionConfig: CalculatorConfig = {
         id: 'fertileDays',
         label: 'Fertile Days (in order of fertility)',
         value: isCurrentlyFertile
-          ? 'You are in your fertile window — chances are highest today and the next 2 days.'
+          ? `You are in your fertile window — chances are highest in the 2 days before ovulation and on ovulation day (${fmt(ovulationDate)}).`
           : daysUntilOvulation > 0
           ? `Your fertile window opens in ${Math.max(0, Math.round((fertileStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)))} days (${fmt(fertileStart)})`
           : 'Your fertile window has passed for this cycle.',
@@ -339,6 +336,13 @@ const conceptionConfig: CalculatorConfig = {
           : `${Math.abs(daysUntilOvulation)} days ago`,
         color: daysUntilOvulation >= 0 && daysUntilOvulation <= 1 ? 'positive' : 'neutral',
       },
+      {
+        // Panel data (same dates as above) so the calendar never parses display strings.
+        id: '_window',
+        label: '_window',
+        value: JSON.stringify({ start: toIsoDate(fertileStart), end: toIsoDate(fertileEnd), ovulation: toIsoDate(ovulationDate) }),
+        color: 'neutral',
+      },
     ];
   },
   extraPanel: (values, results) => {
@@ -348,7 +352,7 @@ const conceptionConfig: CalculatorConfig = {
   educational: {
     formula: 'Ovulation = Cycle Length − 14 days | Fertile Window = Ovulation − 5 days to Ovulation | IVF Due Date = Transfer Date + 261–263 days',
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Conception Window (28-Day Cycle)</text><rect x="30" y="55" width="380" height="40" rx="4" fill="var(--svg-eeeeee)"/><rect x="30" y="55" width="68" height="40" rx="4" fill="var(--svg-ef4444)" opacity=".4"/><text x="64" y="79" text-anchor="middle" font-size="10" fill="var(--svg-ef4444)" font-weight="bold">Period</text><rect x="98" y="55" width="41" height="40" fill="var(--svg-3b82f6)" opacity=".3"/><text x="118" y="79" text-anchor="middle" font-size="10" fill="var(--svg-3b82f6)">Pre</text><rect x="139" y="55" width="81" height="40" fill="var(--svg-22c55e)" opacity=".5"/><text x="179" y="79" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-22c55e)">Fertile Window</text><rect x="220" y="55" width="190" height="40" rx="4" fill="var(--svg-8b5cf6)" opacity=".3"/><text x="315" y="79" text-anchor="middle" font-size="10" fill="var(--svg-8b5cf6)">Luteal Phase</text><text x="64" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Days 1-5</text><text x="118" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Day 6-8</text><text x="179" y="115" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)" font-weight="bold">Day 9-14</text><text x="315" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Day 15-28</text><text x="220" y="160" text-anchor="middle" font-size="11" fill="var(--svg-8b5cf6)" font-weight="bold">Fertile window: 6 days ending on ovulation</text></svg>',
+      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Conception Window (28-Day Cycle)</text><rect x="30" y="55" width="380" height="40" rx="4" fill="var(--svg-eeeeee)"/><rect x="30" y="55" width="68" height="40" rx="4" fill="var(--svg-ef4444)" opacity=".4"/><text x="64" y="79" text-anchor="middle" font-size="10" fill="var(--svg-ef4444)" font-weight="bold">Period</text><rect x="98" y="55" width="41" height="40" fill="var(--svg-3b82f6)" opacity=".3"/><text x="118" y="79" text-anchor="middle" font-size="10" fill="var(--svg-3b82f6)">Pre</text><rect x="139" y="55" width="81" height="40" fill="var(--svg-22c55e)" opacity=".5"/><text x="179" y="79" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-22c55e)">Fertile Window</text><rect x="220" y="55" width="190" height="40" rx="4" fill="var(--svg-8b5cf6)" opacity=".3"/><text x="315" y="79" text-anchor="middle" font-size="10" fill="var(--svg-8b5cf6)">Luteal Phase</text><text x="64" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Days 1-5</text><text x="118" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Day 6-9</text><text x="179" y="115" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)" font-weight="bold">Day 10-15</text><text x="315" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Day 16-28</text><text x="220" y="160" text-anchor="middle" font-size="11" fill="var(--svg-8b5cf6)" font-weight="bold">Fertile window: 6 days ending on ovulation</text></svg>',
       alt: 'Timeline showing the 6-day fertile window ending on ovulation day within a 28-day cycle',
       caption: 'The fertile window spans 5 days before ovulation through ovulation day; sperm survive up to 5 days',
     },
@@ -369,7 +373,7 @@ const conceptionConfig: CalculatorConfig = {
       'Use the fertile window calendar to plan intercourse timing for best conception chances.',
     ],
     explanation:
-      'Understanding your fertile window is key to conception planning. A pregnancy is most likely when intercourse occurs in the 3 days ending on ovulation day. The fertile window (6 days) accounts for sperm survival (up to 5 days in fertile-quality cervical mucus) and egg viability (12–24 hours after ovulation). Ovulation typically occurs 14 days before your next period starts, but this varies between women and cycles. Tracking with ovulation predictor kits (which detect the LH surge 24–36 hours before ovulation), basal body temperature (which rises 0.5–1°F after ovulation), or cervical mucus observation (which becomes egg-white consistency at peak fertility) can confirm ovulation timing more precisely than calendar methods alone. The implantation window (6–12 days after ovulation) is when a fertilized egg travels down the fallopian tube and embeds in the uterine lining — this is when very early pregnancy tests may show positive results. An important practical note: having intercourse every 1-2 days during the fertile window maximizes conception chances. Waiting to "save up" sperm is counterproductive — regular ejaculation maintains healthier sperm quality than prolonged abstinence. The peak fertility window (the 2 days before ovulation) accounts for approximately 44% of all conceptions in natural cycles, based on the landmark Wilcox et al. (1995) study of fertility timing. For couples trying to conceive, focusing on this 3-day peak window (ovulation day minus 2 through ovulation day) gives the highest probability of success while minimizing the pressure of rigid daily scheduling.',
+      'Understanding your fertile window is key to conception planning. A pregnancy is most likely when intercourse occurs in the 3 days ending on ovulation day. The fertile window (6 days) accounts for sperm survival (up to 5 days in fertile-quality cervical mucus) and egg viability (12–24 hours after ovulation). Ovulation typically occurs 14 days before your next period starts, but this varies between women and cycles. Tracking with ovulation predictor kits (which detect the LH surge 24–36 hours before ovulation), basal body temperature (which rises 0.5–1°F after ovulation), or cervical mucus observation (which becomes egg-white consistency at peak fertility) can confirm ovulation timing more precisely than calendar methods alone. The implantation window (6–12 days after ovulation) is when a fertilized egg travels down the fallopian tube and embeds in the uterine lining — this is when very early pregnancy tests may show positive results. An important practical note: having intercourse every 1-2 days during the fertile window maximizes conception chances. Waiting to "save up" sperm is counterproductive — regular ejaculation maintains healthier sperm quality than prolonged abstinence. In the landmark Wilcox et al. (1995) study, conception was only possible from intercourse in the 6 days ending on ovulation day, and the chance per day rose from about 10% five days before ovulation to about 33% on ovulation day itself. For couples trying to conceive, focusing on the 3-day peak window (ovulation day minus 2 through ovulation day) gives the highest probability of success while minimizing the pressure of rigid daily scheduling.',
     faqs: [
       {
         question: 'How do I calculate my conception date from my due date?',
@@ -381,11 +385,11 @@ const conceptionConfig: CalculatorConfig = {
       },
       {
         question: 'What are the best days to get pregnant?',
-        answer: 'The two days immediately before ovulation, per Wilcox et al. (1995): conception probability is ~20% two days before ovulation and ~24% one day before — the highest single-day odds of the cycle. Ovulation day itself is lower (~12%) because the egg has less time to be fertilized before it stops being viable. Use the "Based on Last Period" or "Based on Cycle Length" method above to get your personal estimated dates rather than relying on a generic average, since ovulation timing varies by several days between individuals even with regular cycles.',
+        answer: 'The last three days of the fertile window: the 2 days before ovulation and ovulation day itself. In Wilcox et al. (1995) the chance of conception from intercourse on a given day rose from about 10% five days before ovulation to about 33% on ovulation day, and there were no conceptions from intercourse after ovulation. Use the "Based on Last Period" or "Based on Cycle Length" method above to get your personal estimated dates rather than relying on a generic average, since ovulation timing varies by several days between individuals even with regular cycles.',
       },
       {
         question: 'How likely is pregnancy from intercourse on each fertile day?',
-        answer: 'Based on Wilcox et al. (1995), the probability of conception by day relative to ovulation: Day −5: ~4%, Day −4: ~11%, Day −3: ~16%, Day −2: ~20%, Day −1: ~24%, Day 0 (ovulation): ~12%, Day +1: ~0%. Peak fertility is the 2 days before ovulation.',
+        answer: 'Based on Wilcox et al. (1995), the probability of conception from intercourse on a single day ranged from about 10% five days before ovulation to about 33% on the day of ovulation itself, rising across the days in between, and was essentially zero after ovulation. Peak fertility is the 2 days before ovulation plus ovulation day.',
       },
       {
         question: 'Can I get pregnant from intercourse outside the fertile window?',
@@ -401,7 +405,7 @@ const conceptionConfig: CalculatorConfig = {
       },
       {
         question: 'How does age affect fertility and conception chances?',
-        answer: 'Fertility peaks in the early-to-mid 20s and gradually declines after age 30, with a more pronounced drop after 35. By age 40, the chance of conceiving naturally in a given cycle is roughly 5% compared to ~25% at age 25. This is primarily due to declining egg quantity and quality. Male fertility also declines with age, though more gradually, with increased risks of genetic abnormalities after age 40.',
+        answer: 'Fertility peaks in the early-to-mid 20s and gradually declines after age 30, with a more pronounced drop after 35. By age 40, the chance of conceiving naturally in a given cycle is roughly 5% or less, compared to roughly 20–25% in the 20s. This is primarily due to declining egg quantity and quality. Male fertility also declines with age, though more gradually, with increased risks of genetic abnormalities after age 40.',
       },
     ],
     commonUses: [
@@ -415,7 +419,7 @@ const conceptionConfig: CalculatorConfig = {
         scenario: 'A woman with a regular 28-day cycle had her last period start on January 1, 2026. She is trying to conceive and wants to identify her fertile window, peak fertility days, ovulation date, and implantation window for this cycle.',
         inputs: { method: 'lmp', lmpDate: '2026-01-01', cycleLength: '28', periodLength: '5' },
         result: 'Ovulation: ~January 15. Fertile Window: ~January 10–15. Peak Fertility: ~January 13–15. Implantation Window: ~January 21–27. Estimated Due Date if conception occurs: ~October 8, 2026.',
-        insight: 'With a textbook 28-day cycle and LMP of January 1, ovulation is estimated on January 15 (cycle day 14). The fertile window spans the 6 days ending on ovulation day — January 10 through 15. The peak fertility window (January 13–15, the 2 days before ovulation through ovulation day) accounts for the highest conception probability. Based on Wilcox et al. data, intercourse on January 13 (~20% probability) through January 15 (~12% probability) gives the best single-day chances. For maximum probability, the couple should have intercourse every 1–2 days from January 10 through January 16. The implantation window (January 21–27) is when the fertilized egg travels and embeds — a home pregnancy test taken on January 28 or later has a reasonable chance of detecting hCG.',
+        insight: 'With a textbook 28-day cycle and LMP of January 1, ovulation is estimated on January 15 (14 days before the next period, cycle day 15). The fertile window spans the 6 days ending on ovulation day — January 10 through 15. The peak fertility window (January 13–15, the 2 days before ovulation through ovulation day) accounts for the highest conception probability. In the Wilcox et al. data the single-day chance climbs to about 33% on the day of ovulation, so January 13 through January 15 gives the best single-day chances. For maximum probability, the couple should have intercourse every 1–2 days from January 10 through January 16. The implantation window (January 21–27) is when the fertilized egg travels and embeds — a home pregnancy test taken on January 28 or later has a reasonable chance of detecting hCG.',
       },
       {
         scenario: 'A couple is planning a pregnancy and wants the baby to be born around September 1, 2026 (to align with school cutoff dates and work leave schedules). They want to know the optimal conception window and when to start trying.',
@@ -439,11 +443,11 @@ const conceptionConfig: CalculatorConfig = {
       'For IVF patients: the "two-week wait" between transfer and pregnancy test is uniquely challenging. Avoid home pregnancy tests before day 9 post-transfer (they can show false negatives due to low hCG or false positives from trigger shot remnants). Plan pleasurable distractions during this window — the stress of constant symptom-spotting does not affect implantation but significantly impacts mental health.',
     ],
     limitations: [
-      'This calculator uses calendar-based estimation methods that assume a regular ovulatory cycle with a 14-day luteal phase. Ovulation does not always occur exactly 14 days before the next period — the luteal phase can range from 12–16 days. Cycle lengths can vary cycle to cycle due to stress, illness, travel, or no identifiable cause. Calendar methods alone predict ovulation correctly only ~30% of the time, even in women with "regular" cycles.',
+      'This calculator uses calendar-based estimation methods that assume a regular ovulatory cycle with a 14-day luteal phase. Ovulation does not always occur exactly 14 days before the next period — the luteal phase can range from 12–16 days. Cycle lengths can vary cycle to cycle due to stress, illness, travel, or no identifiable cause. Calendar methods alone often miss the true ovulation day, even in women with "regular" cycles.',
       'This calculator is a planning and educational tool, not a diagnostic instrument. It cannot confirm ovulation, detect pregnancy, or diagnose fertility problems. For couples actively trying to conceive for 12+ months without success (6+ months if over age 35), consultation with a reproductive endocrinologist is recommended regardless of what the calculator predicts.',
-      'The per-cycle conception probabilities mentioned are population averages from the Wilcox et al. (1995) study. Individual fertility varies dramatically with age (steep decline after 35), ovarian reserve, tubal patency, male factor fertility, lifestyle factors, and underlying medical conditions. The probability of conception in a given cycle ranges from ~25% (age 25, no fertility issues) to <5% (age 40+).',
+      'The per-cycle conception probabilities mentioned are population averages from the Wilcox et al. (1995) study. Individual fertility varies dramatically with age (steep decline after 35), ovarian reserve, tubal patency, male factor fertility, lifestyle factors, and underlying medical conditions. The probability of conception in a given cycle ranges from roughly 20–25% (20s, no fertility issues) to about 5% or less (age 40+).',
       'IVF due date calculations assume a standard embryo development timeline. Frozen embryo transfers (FET) in programmed/hormone-replacement cycles use different dating formulas than fresh transfers, and natural-cycle FETs are dated by ovulation trigger or LH surge timing. This calculator covers fresh Day 3 and Day 5 transfers only.',
-      'Due-date-based reverse conception planning provides estimates, not guarantees. The natural variation in gestation length (37–42 weeks is considered full term) means a target due date may result in birth 2–3 weeks before or after the target. Conception is probabilistic — even perfectly timed intercourse yields only a 20–30% chance of pregnancy per cycle in optimal conditions.',
+      'Due-date-based reverse conception planning provides estimates, not guarantees. The natural variation in gestation length (births from 37 to 42 weeks are all within the normal range) means a target due date may result in birth 2–3 weeks before or after the target. Conception is probabilistic — even perfectly timed intercourse yields only a 20–30% chance of pregnancy per cycle in optimal conditions.',
     ],
     quickReference: [
       { label: 'Ovulation Timing', value: '~14 days before next period starts' },

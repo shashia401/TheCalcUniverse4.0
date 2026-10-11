@@ -31,7 +31,8 @@ const leanBodyMassConfig: CalculatorConfig = {
       label: 'Weight',
       type: 'number',
       placeholder: '170',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.1,
       required: true,
       helpText: 'Pounds (lbs) for Imperial · Kilograms (kg) for Metric',
@@ -42,10 +43,11 @@ const leanBodyMassConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       unit: 'ft',
-      min: 0,
-      max: 9,
+      min: 3,
+      max: 8,
       step: 1,
       helpText: 'Imperial only',
+      showWhen: (v) => v.unit === 'imperial',
     },
     {
       id: 'heightIn',
@@ -57,6 +59,7 @@ const leanBodyMassConfig: CalculatorConfig = {
       max: 11,
       step: 1,
       helpText: 'Imperial only — remaining inches (0–11)',
+      showWhen: (v) => v.unit === 'imperial',
     },
     {
       id: 'heightCm',
@@ -64,9 +67,11 @@ const leanBodyMassConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '178',
       unit: 'cm',
-      min: 0,
+      min: 90,
+      max: 275,
       step: 0.1,
       helpText: 'Metric only',
+      showWhen: (v) => v.unit === 'metric',
     },
   ],
   calculate: (values) => {
@@ -93,7 +98,8 @@ const leanBodyMassConfig: CalculatorConfig = {
       ? 0.407 * weightKg + 0.267 * heightCm - 19.2
       : 0.252 * weightKg + 0.473 * heightCm - 48.3;
 
-    // James Formula (1976)
+    // James Formula (1976). The quadratic term makes it peak and then FALL as weight rises,
+    // so at very high BMI it can go negative; clamp every formula to [0, body weight].
     const jamesKg = sex === 'male'
       ? 1.1 * weightKg - 128 * (weightKg / heightCm) ** 2
       : 1.07 * weightKg - 148 * (weightKg / heightCm) ** 2;
@@ -103,7 +109,8 @@ const leanBodyMassConfig: CalculatorConfig = {
       ? 0.32810 * weightKg + 0.33929 * heightCm - 29.5336
       : 0.29569 * weightKg + 0.41813 * heightCm - 43.2933;
 
-    const allLbm = [boerKg, jamesKg, humeKg];
+    const clampLbm = (n: number) => Math.min(Math.max(n, 0), weightKg);
+    const allLbm = [boerKg, jamesKg, humeKg].map(clampLbm);
     const avgLbm = allLbm.reduce((a, b) => a + b, 0) / allLbm.length;
 
     // Fat mass = weight - LBM
@@ -121,24 +128,24 @@ const leanBodyMassConfig: CalculatorConfig = {
         value: display(avgLbm),
         highlight: true,
         color: 'positive',
-        interpretation: `This is the weight of everything that isn't fat — muscle, bone, organs, water — averaged across three formulas, which puts your body fat near ${bodyFatPct.toFixed(0)}%. LBM is what you want to preserve while losing weight; a deficit paired with protein and resistance training keeps the loss coming from fat, not muscle.`,
+        interpretation: `This is the weight of everything that isn't fat — muscle, bone, organs, water — averaged across three formulas, which puts your body fat near ${bodyFatPct.toFixed(0)}%. LBM is what you want to preserve while losing weight; a deficit paired with protein and resistance training keeps the loss coming from fat, not muscle.${weightKg / (heightCm / 100) ** 2 >= 35 ? ' At a BMI this high the James formula is unreliable (its squared term makes it fall as weight rises), so lean on Boer and Hume.' : ''}`,
       },
       {
         id: 'boer',
         label: 'Boer Formula (1984)',
-        value: display(boerKg),
+        value: display(allLbm[0]),
         color: 'neutral',
       },
       {
         id: 'james',
         label: 'James Formula (1976)',
-        value: display(jamesKg),
+        value: display(allLbm[1]),
         color: 'neutral',
       },
       {
         id: 'hume',
         label: 'Hume Formula (1966)',
-        value: display(humeKg),
+        value: display(allLbm[2]),
         color: 'neutral',
       },
       {
@@ -173,11 +180,11 @@ const leanBodyMassConfig: CalculatorConfig = {
       caption: 'Lean body mass comprises muscle, bone, organs and water; formulas estimate LBM from height and weight',
     },
     formulaDescription:
-      'Lean Body Mass (LBM) is total body weight minus fat mass. Fat-Free Mass (FFM) is slightly different — it includes essential lipids in cell membranes, bone marrow, and organs. LBM and FFM are often used interchangeably but FFM is technically ~2–3% lower. These formulas estimate LBM from height and weight without requiring body fat measurements.',
+      'Lean Body Mass (LBM) is total body weight minus fat mass. Fat-Free Mass (FFM) is slightly different — LBM includes the essential lipids in cell membranes, bone marrow, and organs, while FFM excludes all lipid. LBM and FFM are often used interchangeably, but FFM is technically lower by the amount of essential fat (roughly 3% of body weight in men, more in women). These formulas estimate LBM from height and weight without requiring body fat measurements.',
     variables: [
-      { symbol: 'Boer', name: 'Boer Formula (1984)', description: 'Developed on a Dutch population. Widely used in clinical settings for drug dosing and basal metabolic rate estimation.' },
-      { symbol: 'James', name: 'James Formula (1976)', description: 'Part of the Schofield equations for BMR. Uses a squared weight-to-height ratio term.' },
-      { symbol: 'Hume', name: 'Hume Formula (1966)', description: 'The oldest formula, developed on a US population. Tends to give slightly lower estimates for muscular individuals.' },
+      { symbol: 'Boer', name: 'Boer Formula (1984)', description: 'Published in 1984 (Boer, Amsterdam). Widely used in clinical settings for drug dosing and for normalizing body-fluid volumes.' },
+      { symbol: 'James', name: 'James Formula (1976)', description: 'Uses a squared weight-to-height ratio term, so it peaks and then falls as weight rises; unreliable at very high BMI.' },
+      { symbol: 'Hume', name: 'Hume Formula (1966)', description: 'The oldest of the three (1966); linear in weight and height like Boer.' },
     ],
     howToUse: [
       'Select your unit system and biological sex.',
@@ -187,19 +194,19 @@ const leanBodyMassConfig: CalculatorConfig = {
       'Compare the formula results — the spread between Boer, James, and Hume shows you the range of possible estimates for your body type.',
     ],
     explanation:
-      'Lean Body Mass (LBM) is everything in your body that is not fat — muscle, bone, organs, connective tissue, and water. It is metabolically active tissue: the more LBM you carry, the higher your resting metabolic rate. These three formulas (Boer, James, Hume) estimate LBM from just height and weight, making them useful when body fat measurements are not available. They are generally accurate to within ±3–4% for the general population but can be inaccurate for very muscular individuals or the elderly. The average of all three is more reliable than any single formula. For clinical precision, DEXA, Bod Pod, or hydrostatic weighing are superior. LBM is distinct from Fat-Free Mass (FFM), which excludes all lipids, including essential fats in cell membranes and the nervous system — FFM is typically 2–3% lower than LBM. A practical example: a 180 lb male at 15% body fat has 27 lbs of fat mass and 153 lbs of lean body mass. If he gains 10 lbs of muscle (becoming 190 lbs at ~13% body fat), his BMR increases by roughly 60–70 calories per day — demonstrating how increasing LBM creates a subtle but real metabolic advantage over time. Conversely, a sedentary person losing 10 lbs of muscle during a crash diet effectively lowers their BMR, making it harder to maintain weight loss (a phenomenon called metabolic adaptation). LBM also plays a critical role in longevity: higher muscle mass is associated with better glucose metabolism, higher bone density, and reduced fall risk in older adults.',
+      'Lean Body Mass (LBM) is everything in your body that is not fat — muscle, bone, organs, connective tissue, and water. It is metabolically active tissue: the more LBM you carry, the higher your resting metabolic rate. These three formulas (Boer, James, Hume) estimate LBM from just height and weight, making them useful when body fat measurements are not available. They are estimates: individual error can be several kilograms, and they can be inaccurate for very muscular individuals or the elderly. The average of all three is more reliable than any single formula. For clinical precision, DEXA, Bod Pod, or hydrostatic weighing are superior. LBM is distinct from Fat-Free Mass (FFM), which excludes all lipids, including essential fats in cell membranes and the nervous system — so FFM is lower than LBM by that essential fat. A practical example: a 180 lb male at 15% body fat has 27 lbs of fat mass and 153 lbs of lean body mass. If he gains 10 lbs of muscle (becoming 190 lbs at ~14% body fat, since the same 27 lbs of fat is now 14.2% of 190), his BMR increases by roughly 60 calories per day (4.5 kg × ~13 kcal/kg) — demonstrating how increasing LBM creates a subtle but real metabolic advantage over time. Conversely, a sedentary person losing 10 lbs of muscle during a crash diet effectively lowers their BMR, making it harder to maintain weight loss (a phenomenon called metabolic adaptation). LBM also plays a critical role in longevity: higher muscle mass is associated with better glucose metabolism, higher bone density, and reduced fall risk in older adults.',
     faqs: [
       {
         question: 'What is the difference between LBM and FFM?',
-        answer: 'Lean Body Mass includes everything except stored fat. Fat-Free Mass also excludes essential lipids (in cell membranes, bone marrow, nervous system). FFM is typically 2–3% lower than LBM. The terms are often used interchangeably but are technically different.',
+        answer: 'Lean Body Mass includes everything except stored fat. Fat-Free Mass also excludes essential lipids (in cell membranes, bone marrow, nervous system), so FFM is slightly lower than LBM. The terms are often used interchangeably but are technically different.',
       },
       {
         question: 'Which LBM formula is most accurate?',
-        answer: 'Boer (1984) is generally considered the most accurate for the general population and is widely used in clinical research. James is preferred for metabolic rate calculations. Hume tends to give lower values for muscular individuals. The average of all three is recommended for general use.',
+        answer: 'No single formula is best for everyone. Boer and Hume are linear in weight and height; James has a squared term and becomes unreliable at high BMI. Averaging the three smooths out the quirks of any one equation, which is why this calculator reports the average.',
       },
       {
         question: 'Can I gain LBM while losing fat?',
-        answer: 'LBM is the primary determinant of BMR. Muscle tissue burns ~13 kcal/kg/day at rest, while fat tissue burns only ~4.5 kcal/kg/day. Each pound of muscle gained increases daily resting energy expenditure by approximately 6–7 calories. This is why building muscle supports long-term weight management.',
+        answer: 'LBM is the primary determinant of BMR. Muscle tissue burns ~13 kcal/kg/day at rest, while fat tissue burns only ~4.5 kcal/kg/day. Each pound of muscle gained increases daily resting energy expenditure by approximately 6 calories (13 kcal/kg ÷ 2.2). This is why building muscle supports long-term weight management.',
       },
     ],
     commonUses: [

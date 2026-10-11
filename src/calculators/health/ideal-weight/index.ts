@@ -32,8 +32,8 @@ const idealWeightConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       unit: 'ft',
-      min: 0,
-      max: 9,
+      min: 3,
+      max: 8,
       step: 1,
       required: true,
       helpText: 'Imperial only — feet portion of your height',
@@ -58,7 +58,8 @@ const idealWeightConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '178',
       unit: 'cm',
-      min: 0,
+      min: 90,
+      max: 275,
       step: 0.1,
       helpText: 'Metric only — total height in centimeters',
       showWhen: (v) => v.unit === 'metric',
@@ -68,7 +69,8 @@ const idealWeightConfig: CalculatorConfig = {
       label: 'Current Weight (Optional)',
       type: 'number',
       placeholder: '170',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.1,
       helpText: 'For comparison with ideal weight targets. Not required.',
     },
@@ -139,7 +141,7 @@ const idealWeightConfig: CalculatorConfig = {
         value: displayKg(avgIdeal),
         highlight: true,
         color: 'positive',
-        interpretation: `This averages four classic formulas (Devine, Robinson, Miller, Hamwi), which is why the range below spans several pounds rather than one exact number. They use height and sex only — not muscle or frame — so a lean, muscular person can sit above "ideal" and still be healthy. Treat it as a rough anchor.`,
+        interpretation: `This averages four classic formulas (Devine, Robinson, Miller, Hamwi), which is why the range below spans several pounds rather than one exact number. They use height and sex only — not muscle or frame — so a lean, muscular person can sit above "ideal" and still be healthy. Treat it as a rough anchor.${totalInches < 60 ? ' The four formulas are defined for heights of 5 ft and above; below that they are held at their 5 ft value, so rely on the healthy BMI range instead.' : ''}`,
       },
       {
         id: 'rangeIdeal',
@@ -188,11 +190,7 @@ const idealWeightConfig: CalculatorConfig = {
 
       results.push({
         id: 'weightDiff',
-        label: diff > 0.5
-          ? 'Your Weight vs Average Ideal'
-          : diff < -0.5
-          ? 'Your Weight vs Average Ideal'
-          : 'Your Weight vs Average Ideal',
+        label: 'Your Weight vs Average Ideal',
         value: Math.abs(diff) < 0.5
           ? 'At average ideal weight'
           : `${diff > 0 ? '+' : '-'}${diffDisplay}`,
@@ -216,7 +214,7 @@ const idealWeightConfig: CalculatorConfig = {
     formulaDescription:
       'Ideal body weight formulas were originally developed for clinical drug dosing, not personal weight targets. Each formula uses a different base weight and adjustment factor for height over 5 feet. The average across all four provides a more reliable reference than any single formula.',
     variables: [
-      { symbol: 'Devine', name: 'Devine Formula', description: 'Developed for gentamicin dosing. 50 kg (♂) / 45.5 kg (♀) + 2.3 kg per inch over 5 ft. Tends to be higher for tall people.' },
+      { symbol: 'Devine', name: 'Devine Formula', description: 'Developed for gentamicin dosing. 50 kg (♂) / 45.5 kg (♀) + 2.3 kg per inch over 5 ft. Steeper than Robinson and Miller, so higher for tall people.' },
       { symbol: 'Robinson', name: 'Robinson Formula', description: '52 kg (♂) / 49 kg (♀) + 1.9 kg (♂) / 1.7 kg (♀) per inch over 5 ft.' },
       { symbol: 'Miller', name: 'Miller Formula', description: '56.2 kg (♂) / 53.1 kg (♀) + 1.41 kg (♂) / 1.36 kg (♀) per inch over 5 ft. Most conservative for tall individuals.' },
       { symbol: 'Hamwi', name: 'Hamwi Formula', description: '106 lbs (♂) / 100 lbs (♀) for first 5 ft + 6 lbs (♂) / 5 lbs (♀) per additional inch. The only formula originally in pounds.' },
@@ -230,11 +228,11 @@ const idealWeightConfig: CalculatorConfig = {
       'Review all four formulas plus the average — use the range, not a single number.',
     ],
     explanation:
-      'Ideal body weight is a clinical concept originally designed for medical dosing, not a strict health target. The four formulas (Devine, Robinson, Miller, Hamwi) give different results because they were developed on different populations at different times. For example, the Devine formula tends to give higher values for tall people, while Miller is more conservative. The "ideal" is better understood as a range (the spread between the lowest and highest formula results) rather than a single number. Factors like frame size, muscle mass, age, and ethnicity all affect what weight is healthy for you. The healthy BMI range provides an additional reference independent of formula selection. A practical example: a 5\'10" male might get ideal weights ranging from 155 lbs (Miller) to 161 lbs (Devine) depending on which formula is used. Neither is "right" or "wrong" — they simply use different assumptions. The average of all four (~160 lbs) is a reasonable reference, but an athlete with high muscle mass might be perfectly healthy at 185 lbs, while someone with a small frame might be healthier at 155 lbs. Rather than fixating on a single "ideal" number, use the BMI healthy weight range (18.5–24.9 for your height) as a science-backed target, and assess your body composition, energy levels, and metabolic health markers as more meaningful indicators of health than the number on the scale.',
+      'Ideal body weight is a clinical concept originally designed for medical dosing, not a strict health target. The four formulas (Devine, Robinson, Miller, Hamwi) give different results because they were developed on different populations at different times. For example, the Hamwi and Devine formulas tend to give higher values for tall people, while Miller is more conservative. The "ideal" is better understood as a range (the spread between the lowest and highest formula results) rather than a single number. Factors like frame size, muscle mass, age, and ethnicity all affect what weight is healthy for you. The healthy BMI range provides an additional reference independent of formula selection. A practical example: a 5\'10" male might get ideal weights ranging from 155 lbs (Miller) to 166 lbs (Hamwi) depending on which formula is used. Neither is "right" or "wrong" — they simply use different assumptions. The average of all four (~160 lbs) is a reasonable reference, but an athlete with high muscle mass might be perfectly healthy at 185 lbs, while someone with a small frame might be healthier at 155 lbs. Rather than fixating on a single "ideal" number, use the BMI healthy weight range (18.5–24.9 for your height) as a science-backed target, and assess your body composition, energy levels, and metabolic health markers as more meaningful indicators of health than the number on the scale.',
     faqs: [
       {
         question: 'Why do the four formulas give different results?',
-        answer: 'Each formula was developed on a different population sample. Devine uses the steepest adjustment (2.3 kg per inch), so it gives higher weights for tall people. Miller uses the most conservative adjustment, giving lower weights for tall individuals.',
+        answer: 'Each formula was developed on a different population sample. Hamwi adds the most per inch over 5 ft for men (6 lb, about 2.7 kg), Devine adds 2.3 kg, Robinson 1.9 kg (men) or 1.7 kg (women), and Miller only about 1.4 kg. So the formulas spread further apart the taller you are, with Hamwi and Devine highest and Miller lowest.',
       },
       {
         question: 'Should I use ideal weight as my weight loss goal?',

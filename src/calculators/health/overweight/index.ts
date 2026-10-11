@@ -20,7 +20,7 @@ const overweightConfig: CalculatorConfig = {
       label: 'Sex',
       type: 'select',
       required: true,
-      helpText: 'Used for waist circumference thresholds (88 cm female, 102 cm male)',
+      helpText: 'Used for waist circumference thresholds (NCEP ATP III: 88 cm / 35 in female, 102 cm / 40 in male)',
       options: [
         { label: 'Male', value: 'male' },
         { label: 'Female', value: 'female' },
@@ -43,7 +43,8 @@ const overweightConfig: CalculatorConfig = {
       label: 'Weight',
       type: 'number',
       placeholder: '200',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.1,
       required: true,
       helpText: 'Pounds (lbs) for Imperial · Kilograms (kg) for Metric',
@@ -54,8 +55,8 @@ const overweightConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       unit: 'ft',
-      min: 0,
-      max: 9,
+      min: 3,
+      max: 8,
       step: 1,
       helpText: 'Imperial only — feet portion',
       showWhen: (v) => v.unit === 'imperial',
@@ -78,7 +79,8 @@ const overweightConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '178',
       unit: 'cm',
-      min: 0,
+      min: 90,
+      max: 275,
       step: 0.1,
       helpText: 'Metric only',
       showWhen: (v) => v.unit === 'metric',
@@ -88,7 +90,8 @@ const overweightConfig: CalculatorConfig = {
       label: 'Waist Circumference',
       type: 'number',
       placeholder: '38',
-      min: 0,
+      min: 10,
+      max: 250,
       step: 0.25,
       required: true,
       helpText: 'Measure at belly button level. Inches for Imperial, cm for Metric.',
@@ -120,8 +123,9 @@ const overweightConfig: CalculatorConfig = {
     if ([weightKg, heightCm, waistCm, age].some(isNaN) || weightKg <= 0 || heightCm <= 0 || waistCm <= 0) return [];
 
     // BMI
+    // Classify on the DISPLAYED (1-decimal) BMI so 24.96 -> "25.0" -> Overweight, never "25.0 — Normal Weight".
     const heightM = heightCm / 100;
-    const bmi = weightKg / (heightM * heightM);
+    const bmi = Math.round((weightKg / (heightM * heightM)) * 10) / 10;
 
     const getBmiCategory = (b: number): { label: string; color: 'positive' | 'neutral' | 'negative' } => {
       if (b < 18.5) return { label: 'Underweight', color: 'negative' };
@@ -134,8 +138,8 @@ const overweightConfig: CalculatorConfig = {
 
     const bmiCategory = getBmiCategory(bmi);
 
-    // WHtR
-    const whtr = waistCm / heightCm;
+    // WHtR, to the 2 decimals it is published with (Ashwell/NICE bands), classified on the displayed value
+    const whtr = Math.round((waistCm / heightCm) * 100) / 100;
 
     const getWhtrRisk = (w: number): { label: string; color: 'positive' | 'neutral' | 'negative'; desc: string } => {
       if (w < 0.4) return { label: 'Underweight range', color: 'negative', desc: 'Waist less than 40% of height — may indicate underweight' };
@@ -153,7 +157,10 @@ const overweightConfig: CalculatorConfig = {
     let riskNarrative: string;
     let riskColor: 'positive' | 'neutral' | 'negative';
 
-    if (!isHighBmi && !isHighWhtr) {
+    if (bmi < 18.5) {
+      riskNarrative = 'Underweight — a BMI below 18.5 carries its own health risks (nutritional deficiency, bone loss, weakened immunity). Waist-to-height ratio does not apply the same way at low weight, so discuss your weight with a healthcare provider.';
+      riskColor = 'neutral';
+    } else if (!isHighBmi && !isHighWhtr) {
       riskNarrative = 'Low risk — both BMI and WHtR are in the healthy range. Maintain current lifestyle.';
       riskColor = 'positive';
     } else if (isHighWhtr && !isHighBmi) {
@@ -167,9 +174,13 @@ const overweightConfig: CalculatorConfig = {
       riskColor = 'negative';
     }
 
-    // "Metabolic age" at waist threshold
-    const waistThreshold = sex === 'male' ? 102 : 88; // cm — IDF criteria
-    const waistExcess = waistCm - waistThreshold;
+    // NCEP ATP III abdominal-obesity thresholds: > 102 cm (40 in) men, > 88 cm (35 in) women.
+    // Compared in the unit the user entered so 40.2 in and 102.1 cm both read "above".
+    const isImperial = unit === 'imperial';
+    const waistNative = isImperial ? waistCm / 2.54 : waistCm;
+    const waistThreshold = isImperial ? (sex === 'male' ? 40 : 35) : (sex === 'male' ? 102 : 88);
+    const waistUnit = isImperial ? 'in' : 'cm';
+    const waistExcess = waistNative - waistThreshold;
 
     return [
       {
@@ -182,7 +193,7 @@ const overweightConfig: CalculatorConfig = {
       {
         id: 'whtr',
         label: 'Waist-to-Height Ratio (WHtR)',
-        value: `${whtr.toFixed(3)} — ${whtrRisk.label}`,
+        value: `${whtr.toFixed(2)} — ${whtrRisk.label}`,
         highlight: true,
         color: whtrRisk.color,
       },
@@ -196,8 +207,8 @@ const overweightConfig: CalculatorConfig = {
         id: 'waistStatus',
         label: 'Waist Circumference Status',
         value: waistExcess > 0
-          ? waistCm.toFixed(1) + ' cm — ' + Math.round(waistExcess) + ' cm above the ' + (sex === 'male' ? '102 cm' : '88 cm') + ' threshold for metabolic syndrome risk'
-          : waistCm.toFixed(1) + ' cm — Below the ' + (sex === 'male' ? '102 cm' : '88 cm') + ' metabolic syndrome threshold',
+          ? `${waistNative.toFixed(1)} ${waistUnit} — ${waistExcess.toFixed(1)} ${waistUnit} above the ${waistThreshold} ${waistUnit} threshold for metabolic syndrome risk`
+          : `${waistNative.toFixed(1)} ${waistUnit} — At or below the ${waistThreshold} ${waistUnit} metabolic syndrome threshold`,
         color: waistExcess > 0 ? 'negative' : 'positive',
       },
       {
@@ -221,7 +232,7 @@ const overweightConfig: CalculatorConfig = {
     return createElement(OverweightPanel, { values, results });
   },
   educational: {
-    formula: 'BMI = Weight(kg) ÷ Height²(m) | WHtR = Waist(cm) ÷ Height(cm) | Visceral fat threshold: Waist > 88cm (F) / 102cm (M)',
+    formula: 'BMI = Weight(kg) ÷ Height²(m) | WHtR = Waist(cm) ÷ Height(cm) | Abdominal obesity (NCEP ATP III): Waist > 88cm / 35in (F), 102cm / 40in (M)',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">BMI Categories with Overweight Highlighted</text><rect x="30" y="70" width="380" height="50" rx="4" fill="var(--svg-eeeeee)"/><rect x="30" y="70" width="130" height="50" rx="4" fill="var(--svg-22c55e)" opacity=".3"/><text x="95" y="100" text-anchor="middle" font-size="11" fill="var(--svg-22c55e)" font-weight="bold">Normal &lt; 25</text><rect x="160" y="70" width="80" height="50" fill="var(--svg-f59e0b)" opacity=".6"/><text x="200" y="100" text-anchor="middle" font-size="11" fill="var(--svg-f59e0b)" font-weight="bold">Overweight</text><rect x="240" y="70" width="170" height="50" rx="4" fill="var(--svg-ef4444)" opacity=".3"/><text x="325" y="100" text-anchor="middle" font-size="11" fill="var(--svg-ef4444)" font-weight="bold">Obese &ge; 30</text><text x="220" y="160" text-anchor="middle" font-size="12" fill="var(--svg-8b5cf6)">Overweight is BMI 25-29.9</text><text x="220" y="185" text-anchor="middle" font-size="11" fill="var(--svg-666666)">WHtR gives a more complete risk picture</text></svg>',
       alt: 'BMI scale with the overweight range (25-29.9) highlighted in amber',

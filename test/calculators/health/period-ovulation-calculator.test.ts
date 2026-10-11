@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import config from '../../../src/calculators/health/period-ovulation/index';
 import { getValue } from '../../helpers';
 
@@ -173,5 +173,74 @@ describe('Period & Ovulation Calculator', () => {
       (edu.explanation ?? '');
     expect(combined.toLowerCase()).toContain('opk');
     expect(combined.toLowerCase()).toContain('bbt');
+  });
+  // ── Audit regressions (dates counted by hand; clock frozen so "today" is deterministic) ──
+  describe('Audit regressions', () => {
+    const at = (iso: string, fn: () => void) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(`${iso}T12:00:00`));
+      try { fn(); } finally { vi.useRealTimers(); }
+    };
+    const calc = (lmpDate: string, cycleLength = '28', periodLength = '5', lutealPhase = '14') =>
+      config.calculate({ lmpDate, cycleLength, periodLength, lutealPhase });
+
+    it('Sarah: LMP 1 Mar, 28/5/14 -> ovulation Sun 15 Mar, fertile Tue 10 -> Sun 15 Mar, next period Sun 29 Mar', () => {
+      at('2026-03-20', () => {
+        const r = calc('2026-03-01');
+        expect(getValue(r, 'cycleDay')).toBe('Day 20 of 28');
+        expect(getValue(r, 'ovulationDate')).toBe('Sunday, March 15, 2026 (5 days ago)');
+        expect(getValue(r, 'fertileWindow')).toBe('Tuesday, March 10, 2026 → Sunday, March 15, 2026');
+        expect(getValue(r, 'predictedPeriod')).toBe('Sunday, March 29, 2026 (in 9 days)');
+        expect(getValue(r, 'currentPhase')).toMatch(/^Luteal/);
+      });
+    });
+
+    it('Maria: LMP 5 Apr, 33/6/14 -> ovulation Fri 24 Apr (19 days after LMP), fertile 19-24 Apr, next period 8 May', () => {
+      at('2026-04-10', () => {
+        const r = calc('2026-04-05', '33', '6');
+        expect(getValue(r, 'ovulationDate')).toBe('Friday, April 24, 2026 (in 14 days)');
+        expect(getValue(r, 'fertileWindow')).toBe('Sunday, April 19, 2026 → Friday, April 24, 2026');
+        expect(getValue(r, 'predictedPeriod')).toContain('Friday, May 8, 2026');
+        expect(getValue(r, 'periodFrequency')).toBe('Every 33 days · ~11 periods per year');
+      });
+    });
+
+    it('Priya: LMP 2 May, 30/5/14 -> ovulation Mon 18 May, fertile 13-18 May, next period Mon 1 Jun', () => {
+      at('2026-05-10', () => {
+        const r = calc('2026-05-02', '30');
+        expect(getValue(r, 'ovulationDate')).toContain('Monday, May 18, 2026');
+        expect(getValue(r, 'fertileWindow')).toBe('Wednesday, May 13, 2026 → Monday, May 18, 2026');
+        expect(getValue(r, 'predictedPeriod')).toContain('Monday, June 1, 2026');
+        expect(getValue(r, 'periodFrequency')).toContain('~12 periods per year');
+      });
+    });
+
+    it('phase follows the dates: LMP+2 menstruation, +8 follicular, +10 fertile (window opens 5 days before ovulation), +16 luteal', () => {
+      const phase = (today: string) => { let p = ''; at(today, () => { p = getValue(calc('2026-03-01'), 'currentPhase'); }); return p; };
+      expect(phase('2026-03-03')).toMatch(/^Menstruation \(Day 3/);
+      expect(phase('2026-03-09')).toMatch(/^Follicular/);
+      expect(phase('2026-03-11')).toMatch(/^Fertile/);
+      expect(phase('2026-03-17')).toMatch(/^Luteal/);
+    });
+
+    it('anchors to the cycle that contains today: LMP 1 Jan seen on 20 Mar is cycle day 23 of a cycle starting 26 Feb', () => {
+      at('2026-03-20', () => {
+        const r = calc('2026-01-01');
+        expect(getValue(r, 'cycleDay')).toBe('Day 23 of 28'); // 78 days since LMP = 2 full cycles + 22
+        const cycles = JSON.parse(getValue(r, '_cycles'));
+        expect(cycles[0].periodStart).toBe('2026-02-26');
+        expect(cycles[0].ovulation).toBe('2026-03-12');
+        expect(cycles).toHaveLength(3);
+      });
+    });
+
+    it('rejects calendar-invalid dates instead of rolling 31 Feb over to March, and future LMPs', () => {
+      at('2026-03-20', () => {
+        expect(calc('2025-02-31')).toEqual([]);
+        expect(calc('2026-04-31')).toEqual([]);
+        expect(calc('2026-03-25')).toEqual([]); // last period cannot start in the future
+        expect(calc('2026-03-20').length).toBeGreaterThan(0); // today itself is fine (cycle day 1)
+      });
+    });
   });
 });

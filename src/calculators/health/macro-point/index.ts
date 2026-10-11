@@ -1,5 +1,5 @@
 ﻿import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import MacroPointPanel from './MacroPointPanel';
 
 /*
@@ -43,6 +43,7 @@ const macroPointConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '350',
       min: 0,
+      max: 5000,
       step: 1,
       required: true,
       inputMode: 'decimal',
@@ -54,6 +55,7 @@ const macroPointConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       min: 0,
+      max: 300,
       step: 0.5,
       required: true,
       unit: 'g',
@@ -66,6 +68,7 @@ const macroPointConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '12',
       min: 0,
+      max: 500,
       step: 0.5,
       required: true,
       unit: 'g',
@@ -78,6 +81,7 @@ const macroPointConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '25',
       min: 0,
+      max: 500,
       step: 0.5,
       required: true,
       unit: 'g',
@@ -90,11 +94,12 @@ const macroPointConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       min: 0,
+      max: 200,
       step: 0.5,
       required: false,
       unit: 'g',
       inputMode: 'decimal',
-      helpText: 'Some point systems give a credit for fibre — included for reference',
+      helpText: 'Shown for reference only — fibre is not part of this score',
     },
   ],
   calculate: (values) => {
@@ -103,6 +108,7 @@ const macroPointConfig: CalculatorConfig = {
     const satFat = parseFloat(values.satFat);
     const sugar = parseFloat(values.sugar);
     const protein = parseFloat(values.protein);
+    const fibre = parseFloat(values.fibre);
 
     if ([calories, satFat, sugar, protein].some(isNaN) || calories < 0 || satFat < 0 || sugar < 0 || protein < 0) {
       return [];
@@ -117,7 +123,7 @@ const macroPointConfig: CalculatorConfig = {
     const sugarPoints = sugar * 0.12;
     const proteinCredit = protein * 0.098;
 
-    return [
+    const results: CalculatorResult[] = [
       {
         id: 'macroPoints',
         label: foodName ? `Macro Points — "${foodName}"` : 'Macro Points Score',
@@ -165,10 +171,21 @@ const macroPointConfig: CalculatorConfig = {
       {
         id: 'dailyAllowance',
         label: 'Daily Points Allowance Guide',
-        value: `A typical daily budget ranges from 23–40 points. This item uses ${Math.round(points / 30 * 100)}% of a ~30-point daily budget.`,
+        value: `For illustration only: this item would use ${Math.round(points / 30 * 100)}% of a 30-point day. This calculator does not define an official daily budget.`,
         color: 'neutral',
       },
     ];
+
+    if (!isNaN(fibre) && fibre > 0) {
+      results.push({
+        id: 'fibreNote',
+        label: 'Fibre (reference only)',
+        value: `${fibre.toFixed(1)} g — not included in the score`,
+        color: 'neutral',
+      });
+    }
+
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -188,7 +205,7 @@ const macroPointConfig: CalculatorConfig = {
       { symbol: 'Saturated Fat', name: 'Saturated Fat Penalty', description: 'Saturated fat is weighted heavily (×0.275) to discourage foods high in less healthy fats, per AHA guidelines.' },
       { symbol: 'Sugar', name: 'Sugar Penalty', description: 'Added and total sugar are weighted (×0.12) to discourage high-sugar, low-nutrient foods.' },
       { symbol: 'Protein', name: 'Protein Credit', description: 'Protein reduces points (×0.098) because it is satiating and supports body composition goals.' },
-      { symbol: 'Points Category', name: 'Points Range Classification', description: 'Zero-Point (≤0), Low (0.1–3), Moderate (3.1–6), Higher (6.1–10), or High (>10). Helps you quickly assess whether a food is a frequent, moderate, or occasional choice.' },
+      { symbol: 'Points Category', name: 'Points Range Classification', description: 'Zero-Point (≤0, rare: only when the protein credit outweighs everything else), Low (0.1–3), Moderate (3.1–6), Higher (6.1–10), or High (>10). Helps you quickly assess whether a food is a frequent, moderate, or occasional choice.' },
     ],
     howToUse: [
       'Optionally enter a food name for reference.',
@@ -198,7 +215,7 @@ const macroPointConfig: CalculatorConfig = {
       'Use the score to compare different food choices — lower points generally mean more nutrient-dense options.',
     ],
     explanation:
-      "This Macro Point Calculator provides a nutrition scoring system aligned with popular point-based diet approaches. The formula assigns higher scores to foods high in calories, saturated fat, and sugar, while giving a credit for protein — incentivizing lean proteins, vegetables, and whole foods over processed options. This is not an official Weight Watchers or SmartPoints calculator but uses a similar macronutrient-weighted approach. Keep in mind that all point-based systems are simplifications — a food's healthfulness also depends on micronutrient density, fibre content, food matrix effects, and individual health needs. Use points as one of several decision-making tools, not the sole arbiter of food quality. For instance, comparing a 200-calorie apple (0g saturated fat, 19g sugar, 1g protein) with a 200-calorie serving of cheese crackers (3g saturated fat, 2g sugar, 4g protein): the apple scores fewer points due to zero saturated fat, while the crackers get a larger penalty from saturated fat that outweighs any protein credit. This illustrates how the formula nudges toward whole foods. However, the apple's fibre, vitamin C, and polyphenols are not captured by the point formula — another reminder that points are a useful tool but not a complete picture of nutritional quality.",
+      "This Macro Point Calculator provides a nutrition scoring system aligned with popular point-based diet approaches. The formula assigns higher scores to foods high in calories, saturated fat, and sugar, while giving a credit for protein — incentivizing lean proteins, vegetables, and whole foods over processed options. This is not an official Weight Watchers or SmartPoints calculator but uses a similar macronutrient-weighted approach. Keep in mind that all point-based systems are simplifications — a food's healthfulness also depends on micronutrient density, fibre content, food matrix effects, and individual health needs. Use points as one of several decision-making tools, not the sole arbiter of food quality. For instance, a 95-calorie apple (0g saturated fat, 19g sugar, 0.5g protein) scores 5.1 points (2.9 from calories and 2.3 from sugar, less a 0.05 protein credit), while a 200-calorie serving of cheese crackers (3g saturated fat, 2g sugar, 4g protein) scores 6.8 points (6.1 from calories, 0.8 from saturated fat and 0.2 from sugar, less a 0.4 protein credit). The formula counts every food's calories and sugar, so even an apple is not a zero-point food here. The apple's fibre, vitamin C, and polyphenols are not captured by the point formula — a reminder that points are a useful tool but not a complete picture of nutritional quality.",
     faqs: [
       {
         question: 'Is this the official Weight Watchers SmartPoints formula?',
@@ -206,11 +223,11 @@ const macroPointConfig: CalculatorConfig = {
       },
       {
         question: 'What is a good daily point budget?',
-        answer: 'Daily point budgets typically range from 23–40 points depending on body weight, activity level, and goals. A common starting point is: Women ~23–30 points/day, Men ~30–40 points/day. For weight loss, aim for the lower end of your range. For maintenance, use the middle. For active individuals or those trying to gain weight, use the higher end. This calculator shows a single food\'s score — track your total across all meals to stay within your daily budget.',
+        answer: 'This formula has no official daily budget, and the places in this calculator that mention a 30-point day are only an illustration of scale. Because the score tracks calories, a sensible budget would scale with your own calorie target (see the TDEE calculator). This calculator shows a single food\'s score — add up your foods across the day if you want to compare the total with a budget of your own.',
       },
       {
         question: 'What are zero-point foods and how do they work?',
-        answer: 'Zero-point foods are those whose macronutrient profile yields a score of 0 or below — typically lean proteins like chicken breast (165 cal, 3.6g fat, 0g sugar, 31g protein yields negative points), plain nonfat Greek yogurt, fish, eggs, and tofu. The protein credit (×0.098) offsets the calorie contribution, potentially bringing the score to zero or below. These foods are considered core to a healthy diet and are encouraged without restriction in most point-based systems because they are satiating and nutrient-dense.',
+        answer: 'A food reaches zero or below only when its protein credit (×0.098 per gram) outweighs its calorie, saturated-fat, and sugar terms. With no saturated fat or sugar, that needs more than about 0.31 g of protein per calorie, which almost no whole food reaches. For example, 100 g of cod (82 kcal, 0.1 g saturated fat, 18 g protein) scores about 0.8 points, 100 g of cooked skinless chicken breast (165 kcal, 1 g saturated fat, 31 g protein) about 2.3 points, and one egg white about 0.2 points. So this calculator has no list of free foods; very lean proteins simply score low.',
       },
       {
         question: 'How does this compare to actual nutrition labels and daily values?',
@@ -218,7 +235,7 @@ const macroPointConfig: CalculatorConfig = {
       },
       {
         question: 'Can I use this point system for weight loss?',
-        answer: 'Yes, point-based food scoring can support weight loss by creating awareness of calorie density, saturated fat, and sugar content while encouraging higher protein intake for satiety. To lose weight, set a daily point budget about 20–25% below your maintenance level. Combine point tracking with attention to hunger cues, food quality, and physical activity. However, this is not a clinical weight loss program — for medical weight management, consult a registered dietitian or healthcare provider.',
+        answer: 'Yes, point-based food scoring can support weight loss by creating awareness of calorie density, saturated fat, and sugar content while encouraging higher protein intake for satiety. To lose weight, set a daily point budget below your maintenance level (see the TDEE calculator for a calorie target). Combine point tracking with attention to hunger cues, food quality, and physical activity. However, this is not a clinical weight loss program — for medical weight management, consult a registered dietitian or healthcare provider.',
       },
       {
         question: 'Why does saturated fat add so many points compared to calories?',
@@ -226,7 +243,7 @@ const macroPointConfig: CalculatorConfig = {
       },
       {
         question: 'What foods typically score the lowest and highest points?',
-        answer: 'Lowest: skinless chicken breast, egg whites, cod, shrimp, nonfat plain Greek yogurt, most non-starchy vegetables (entered with their minimal macros). Highest: cheeseburgers, pepperoni pizza, milkshakes, fried chicken, pastries, and processed snacks — these combine high calories, saturated fat, and sugar with minimal protein credit. As a rule of thumb, whole unprocessed foods score lower than their processed equivalents: a homemade grilled chicken breast (~2 pts) vs. breaded frozen chicken tenders (~7–9 pts).',
+        answer: 'Lowest: egg whites, cod, shrimp, skinless chicken breast, nonfat plain Greek yogurt (all roughly 0–3 points per typical serving), then most non-starchy vegetables (about 1 point per 100 g). Highest: cheeseburgers, pepperoni pizza, milkshakes, fried chicken, pastries, and processed snacks — these combine high calories, saturated fat, and sugar with minimal protein credit. As a rule of thumb, whole unprocessed foods score lower than their processed equivalents: a homemade grilled chicken breast (~2–3 pts per 4 oz) vs. breaded frozen chicken tenders (~6–9 pts per serving).',
       },
     ],
     commonUses: [
@@ -266,17 +283,16 @@ const macroPointConfig: CalculatorConfig = {
       'This calculator is not affiliated with Weight Watchers, WW International, Inc., or any branded point-based diet program. The formula is a publicly available macronutrient-weighted scoring method. Do not use this to claim SmartPoints values for official WW programs.',
       'The point formula only considers 4 macronutrients: calories, saturated fat, sugar, and protein. It ignores dietary fiber (which most point systems credit), sodium, trans fat, cholesterol, micronutrient density (vitamins, minerals, phytonutrients), food processing level, glycemic load, and ingredient quality. A diet soda may score 0 points while being nutritionally empty, and almonds may score moderate points while being nutrient-dense.',
       'Individual nutritional needs vary based on age, sex, activity level, metabolic health, food sensitivities, and medical history. The point system provides a generic heuristic that may not align with your specific needs — especially for individuals with diabetes (who need to consider glycemic impact beyond sugar grams), kidney disease (who need to limit protein), or eating disorders (where point tracking can be counterproductive).',
-      'Daily point budgets are rough estimates. The 23–40 point range is a starting point, not a prescription. Your actual maintenance points depend on total daily energy expenditure, which can vary by 500+ calories/day based on activity level, lean body mass, and non-exercise activity thermogenesis (NEAT).',
+      'There is no official daily budget for this formula. Any budget you set should scale with your own energy needs, which can vary by 500+ calories/day based on activity level, lean body mass, and non-exercise activity thermogenesis (NEAT).',
       'Point-based systems can create an unhealthy fixation on numbers. If you find yourself obsessing over fractions of points, avoiding nutrient-dense foods because they "cost too much," or feeling guilty about occasional high-point meals, step back. Points should simplify food decisions, not dominate them. Consult a registered dietitian for a sustainable, individualized approach.',
     ],
     quickReference: [
-      { label: 'Zero-Point', value: '≤ 0 points — Lean proteins, non-starchy vegetables' },
+      { label: 'Zero-Point', value: '≤ 0 points — rare; only when the protein credit outweighs everything else' },
       { label: 'Low Points', value: '0.1–3 points — Generally healthy choices' },
       { label: 'Moderate', value: '3.1–6 points — Watch portion size' },
       { label: 'Higher Points', value: '6.1–10 points — Consume in moderation' },
       { label: 'High Points', value: '>10 points — Occasional indulgence' },
-      { label: 'Daily Budget (Women)', value: '~23–30 points depending on weight/activity' },
-      { label: 'Daily Budget (Men)', value: '~30–40 points depending on weight/activity' },
+      { label: 'Daily Budget', value: 'Not defined here — 30 points is used only as an illustration' },
       { label: 'Formula', value: 'Cal×0.0305 + SatFat×0.275 + Sugar×0.12 − Protein×0.098' },
     ],
     citations: [

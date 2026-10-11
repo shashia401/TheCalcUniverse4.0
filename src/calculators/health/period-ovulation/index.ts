@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PeriodOvulationPanel from './PeriodOvulationPanel';
+import { parseIsoDate, toIsoDate } from '../../../utils/dates';
 
 const periodOvulationConfig: CalculatorConfig = {
   inputs: [
@@ -59,9 +60,9 @@ const periodOvulationConfig: CalculatorConfig = {
     const periodLength = parseInt(values.periodLength) || 5;
     const lutealPhase = parseInt(values.lutealPhase) || 14;
 
-    if (!lmpStr || !/^\d{4}-\d{2}-\d{2}$/.test(lmpStr)) return [];
-    const lmp = new Date(lmpStr + 'T00:00:00');
-    if (isNaN(lmp.getTime()) || cycleLength < 20 || cycleLength > 45) return [];
+    // Calendar-invalid dates (2025-02-31) are rejected rather than rolled over to March.
+    const lmp = parseIsoDate(lmpStr);
+    if (!lmp || cycleLength < 20 || cycleLength > 45) return [];
 
     const addDays = (d: Date, n: number): Date => {
       const r = new Date(d);
@@ -80,6 +81,7 @@ const periodOvulationConfig: CalculatorConfig = {
     // generating a fixed 3-cycle window starting at LMP would then show a
     // "next period" that already happened and a cycle day in the hundreds.
     const dayMs = 1000 * 60 * 60 * 24;
+    if (lmp.getTime() > today.getTime()) return []; // the last period cannot start in the future
     const daysSinceLmpRaw = Math.floor((today.getTime() - lmp.getTime()) / dayMs);
     const cyclesElapsed = Math.max(0, Math.floor(daysSinceLmpRaw / cycleLength));
 
@@ -106,7 +108,7 @@ const periodOvulationConfig: CalculatorConfig = {
       statusText = `Menstruation (Day ${cycleDay} of period)`;
     } else if (today >= currentCycle.fertileStart && today <= currentCycle.fertileEnd) {
       statusText = 'Fertile Window — highest chance of conception';
-    } else if (cycleDay > cycleLength - lutealPhase) {
+    } else if (today > currentCycle.ovulation) {
       statusText = 'Luteal Phase — PMS symptoms may occur';
     } else {
       statusText = 'Follicular Phase — post-period, pre-ovulation';
@@ -166,6 +168,21 @@ const periodOvulationConfig: CalculatorConfig = {
         value: `Every ${cycleLength} days · ~${Math.round(365 / cycleLength)} periods per year`,
         color: 'neutral',
       },
+      {
+        // Panel data: the same three cycles used above, so the calendar can never disagree with the results.
+        id: '_cycles',
+        label: '_cycles',
+        value: JSON.stringify(
+          predictions.map((p) => ({
+            periodStart: toIsoDate(p.periodStart),
+            periodEnd: toIsoDate(p.periodEnd),
+            ovulation: toIsoDate(p.ovulation),
+            fertileStart: toIsoDate(p.fertileStart),
+            fertileEnd: toIsoDate(p.fertileEnd),
+          })),
+        ),
+        color: 'neutral',
+      },
     ];
   },
   extraPanel: (values, results) => {
@@ -175,7 +192,7 @@ const periodOvulationConfig: CalculatorConfig = {
   educational: {
     formula: 'Ovulation = Cycle Length − Luteal Phase | Next Period = LMP + Cycle Length | Fertile Window = Ovulation − 5 to Ovulation',
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Menstrual Cycle (28-Day Example)</text><rect x="30" y="55" width="380" height="40" rx="4" fill="var(--svg-eeeeee)"/><rect x="30" y="55" width="68" height="40" rx="4" fill="var(--svg-ef4444)" opacity=".5"/><text x="64" y="79" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ef4444)">Period</text><rect x="98" y="55" width="109" height="40" fill="var(--svg-3b82f6)" opacity=".3"/><text x="152" y="79" text-anchor="middle" font-size="10" fill="var(--svg-3b82f6)" font-weight="bold">Follicular</text><rect x="207" y="55" width="27" height="40" fill="var(--svg-22c55e)" opacity=".6"/><text x="220" y="79" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)" font-weight="bold">Ovu</text><rect x="234" y="55" width="176" height="40" rx="4" fill="var(--svg-8b5cf6)" opacity=".3"/><text x="322" y="79" text-anchor="middle" font-size="10" fill="var(--svg-8b5cf6)" font-weight="bold">Luteal Phase</text><text x="64" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Days 1-5</text><text x="152" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Days 6-13</text><text x="220" y="115" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)" font-weight="bold">Ovulation</text><text x="322" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Days 15-28</text></svg>',
+      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Menstrual Cycle (28-Day Example)</text><rect x="30" y="55" width="380" height="40" rx="4" fill="var(--svg-eeeeee)"/><rect x="30" y="55" width="68" height="40" rx="4" fill="var(--svg-ef4444)" opacity=".5"/><text x="64" y="79" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ef4444)">Period</text><rect x="98" y="55" width="109" height="40" fill="var(--svg-3b82f6)" opacity=".3"/><text x="152" y="79" text-anchor="middle" font-size="10" fill="var(--svg-3b82f6)" font-weight="bold">Follicular</text><rect x="207" y="55" width="27" height="40" fill="var(--svg-22c55e)" opacity=".6"/><text x="220" y="79" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)" font-weight="bold">Ovu</text><rect x="234" y="55" width="176" height="40" rx="4" fill="var(--svg-8b5cf6)" opacity=".3"/><text x="322" y="79" text-anchor="middle" font-size="10" fill="var(--svg-8b5cf6)" font-weight="bold">Luteal Phase</text><text x="64" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Days 1-5</text><text x="152" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Days 6-14</text><text x="220" y="115" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)" font-weight="bold">Ovulation (day 15)</text><text x="322" y="115" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Days 16-28</text></svg>',
       alt: 'Timeline of menstrual cycle phases: period, follicular, ovulation, and luteal phase',
       caption: 'Ovulation occurs ~14 days before the next period; the fertile window spans the 6 days ending on ovulation',
     },
@@ -194,7 +211,7 @@ const periodOvulationConfig: CalculatorConfig = {
       'Use the privacy notice: all data is processed locally — nothing is stored on servers.',
     ],
     explanation:
-      'The menstrual cycle consists of four phases: menstruation (Days 1–5) where the uterine lining sheds, the follicular phase (Days 1–13) where estrogen rises and an egg matures in the ovary, ovulation (~Day 14 in a 28-day cycle) when the mature egg is released, and the luteal phase (Days 15–28) where progesterone prepares the uterus for potential implantation. Ovulation — the release of a mature egg — occurs ~14 days before your next period, not 14 days after your last period. This is a common misconception. The egg survives 12–24 hours, while sperm can survive up to 5 days in fertile cervical mucus, creating a 6-day fertile window. The luteal phase is hormonally driven by progesterone and is relatively constant at 12–16 days across cycles for each individual, making it the most reliable predictor of ovulation timing. For example, if your cycle is 33 days and your luteal phase is consistently 14 days, ovulation occurs around day 19 (33 − 14 = 19), not day 14. Calendar-based tracking is most accurate for people with regular cycles (±2–3 days). For those with irregular cycles (varying by 7+ days), combining calendar methods with ovulation predictor kits (which detect the LH surge 24–36 hours before ovulation) or basal body temperature tracking (which rises 0.5–1°F after ovulation) improves accuracy. Common cycle variations can indicate health issues: cycles shorter than 21 days or longer than 35 days may warrant investigation for conditions like PCOS, thyroid disorders, or perimenopause.',
+      'The menstrual cycle consists of four phases: menstruation (Days 1–5) where the uterine lining sheds, the follicular phase (Days 1–14) where estrogen rises and an egg matures in the ovary, ovulation when the mature egg is released, and the luteal phase (the days after ovulation) where progesterone prepares the uterus for potential implantation. This calculator counts the first day of your period as cycle day 1 and places ovulation exactly 14 days (your luteal phase length) before the next period starts, so in a 28-day cycle ovulation falls on cycle day 15 (14 days after the period began). Ovulation occurs about 14 days before your next period, not 14 days after your last period — the two only coincide in a 28-day cycle, and assuming otherwise is a common misconception. The egg survives 12–24 hours, while sperm can survive up to 5 days in fertile cervical mucus, creating a 6-day fertile window. The luteal phase is hormonally driven by progesterone and is relatively constant at 12–16 days across cycles for each individual, making it the most reliable predictor of ovulation timing. For example, if your cycle is 33 days and your luteal phase is consistently 14 days, ovulation occurs 19 days after your period starts (33 − 14 = 19), which is cycle day 20, not around day 14. Calendar-based tracking is most accurate for people with regular cycles (±2–3 days). For those with irregular cycles (varying by 7+ days), combining calendar methods with ovulation predictor kits (which detect the LH surge 24–36 hours before ovulation) or basal body temperature tracking (which rises 0.5–1°F after ovulation) improves accuracy. Common cycle variations can indicate health issues: cycles shorter than 21 days or longer than 35 days may warrant investigation for conditions like PCOS, thyroid disorders, or perimenopause.',
     faqs: [
       {
         question: 'How accurate is calendar-based period prediction?',
@@ -206,7 +223,7 @@ const periodOvulationConfig: CalculatorConfig = {
       },
       {
         question: 'What if my cycles are irregular?',
-        answer: 'For irregular cycles, enter your average cycle length but understand that predictions are less precise. Track for 3–6 months to find your average. Consider using ovulation predictor kits (OPKs) for more accurate fertile window detection — they detect the LH surge 24–36 hours before ovulation with 99% accuracy. Basal body temperature (BBT) charting can confirm ovulation after it happens by showing the characteristic temperature shift — take your temperature every morning before getting out of bed with a basal thermometer (accurate to 0.01°F). If cycles are consistently irregular (varying by 7+ days), consult a healthcare provider to investigate potential causes like PCOS (affecting 8–13% of women), thyroid disorders, high prolactin levels, premature ovarian insufficiency, or perimenopause (typically starting after age 40).',
+        answer: 'For irregular cycles, enter your average cycle length but understand that predictions are less precise. Track for 3–6 months to find your average. Consider using ovulation predictor kits (OPKs) for more accurate fertile window detection — they detect the LH surge 24–36 hours before ovulation. Basal body temperature (BBT) charting can confirm ovulation after it happens by showing the characteristic temperature shift — take your temperature every morning before getting out of bed with a basal thermometer (accurate to 0.01°F). If cycles are consistently irregular (varying by 7+ days), consult a healthcare provider to investigate potential causes like PCOS (affecting 8–13% of women), thyroid disorders, high prolactin levels, premature ovarian insufficiency, or perimenopause (typically starting after age 40).',
       },
       {
         question: 'How do I determine my personal luteal phase length?',
@@ -214,11 +231,11 @@ const periodOvulationConfig: CalculatorConfig = {
       },
       {
         question: 'Can I get pregnant during my period?',
-        answer: 'While uncommon, it is possible — especially for people with shorter cycles (21–24 days) or longer periods (7+ days). If you have a 21-day cycle and ovulate on day 7, sperm from intercourse on day 5 of your period (when bleeding is tapering off) can survive and fertilize the egg on day 7. Additionally, what appears to be a period can sometimes be ovulation spotting or breakthrough bleeding. For pregnancy prevention, always use contraception regardless of where you are in your cycle — calendar-based methods (fertility awareness method / FAM) have a typical-use failure rate of 24% per year compared to 0.3% for IUDs or implants.',
+        answer: 'While uncommon, it is possible — especially for people with shorter cycles (21–24 days) or longer periods (7+ days). If you have a 21-day cycle and ovulate on day 7, sperm from intercourse on day 5 of your period (when bleeding is tapering off) can survive and fertilize the egg on day 7. Additionally, what appears to be a period can sometimes be ovulation spotting or breakthrough bleeding. For pregnancy prevention, always use contraception regardless of where you are in your cycle — calendar-based methods (fertility awareness method / FAM) have a typical-use failure rate of about 24% per year compared to under 1% for IUDs or implants.',
       },
       {
         question: 'What is the difference between ovulation day and peak fertility day?',
-        answer: 'Ovulation day is the specific day the egg is released from the ovary and survives for 12–24 hours. Peak fertility days are the 2–3 days *before* ovulation when conception is most likely — studies show the probability of conception is highest with intercourse 1–2 days before ovulation (25–30% chance per cycle), lower on ovulation day itself (10–12%), and near zero after ovulation. This is because sperm need time to undergo capacitation (a biochemical maturation process) in the female reproductive tract before they can fertilize the egg. Having sperm already present when the egg is released gives the highest chance. This calculator shows the full 6-day fertile window ending on ovulation day — the 2 days before ovulation are your peak fertility days.',
+        answer: 'Ovulation day is the specific day the egg is released from the ovary and survives for 12–24 hours. Peak fertility days are the 2–3 days *before* ovulation when conception is most likely — the landmark Wilcox, Weinberg and Baird study (New England Journal of Medicine, 1995) found conception only from intercourse in the 6 days ending on ovulation day, with the chance per day rising from about 10% five days before ovulation to about 33% on ovulation day itself, and no conceptions from intercourse after ovulation. Having sperm already present when the egg is released gives the highest chance. This calculator shows the full 6-day fertile window ending on ovulation day — the 2 days before ovulation and ovulation day itself are the peak fertility days.',
       },
       {
         question: 'What are the most reliable signs that ovulation is approaching?',
@@ -229,20 +246,20 @@ const periodOvulationConfig: CalculatorConfig = {
       {
         scenario: 'Sarah has a regular 28-day cycle. Her last period started on March 1, 2026. She wants to know when her next period will arrive, when she ovulates, and what her fertile window is for conception planning.',
         inputs: { lmpDate: '2026-03-01', cycleLength: '28', periodLength: '5', lutealPhase: '14' },
-        result: 'Current cycle day depends on today\'s date. Next period predicted around March 29. Ovulation estimated March 15 (Day 14). Fertile window: March 10–15. Period frequency: every 28 days, ~13 periods per year.',
-        insight: 'With a textbook 28-day cycle, Sarah\'s predictions are the most straightforward. Her fertile window opens 5 days before ovulation (March 10) and closes on ovulation day. The highest-conception-probability days are March 13–14 (the 2 days before ovulation). If trying to conceive, intercourse every 1–2 days during the fertile window maximizes cumulative probability (~85% pregnancy rate over 6 months for couples under 35). If avoiding pregnancy, this calendar method alone has a 24% typical-use failure rate — consider combining with barrier methods during the fertile window.',
+        result: 'Current cycle day depends on today\'s date. Next period predicted around March 29. Ovulation estimated March 15 (cycle day 15, 14 days before the next period). Fertile window: March 10–15. Period frequency: every 28 days, ~13 periods per year.',
+        insight: 'With a textbook 28-day cycle, Sarah\'s predictions are the most straightforward. Her fertile window opens 5 days before ovulation (March 10) and closes on ovulation day. The highest-conception-probability days are March 13–15 (the 2 days before ovulation and ovulation day itself). If trying to conceive, intercourse every 1–2 days during the fertile window maximizes cumulative probability (~85% pregnancy rate over 6 months for couples under 35). If avoiding pregnancy, this calendar method alone has roughly a 24% typical-use failure rate — consider combining with barrier methods during the fertile window.',
       },
       {
         scenario: 'Maria has a longer 33-day cycle with a 14-day luteal phase. Her last period started on April 5, 2026. She previously assumed she ovulates on Day 14 like everyone, but her doctor explained ovulation happens 14 days before the next period, not 14 days after the last one.',
         inputs: { lmpDate: '2026-04-05', cycleLength: '33', periodLength: '6', lutealPhase: '14' },
-        result: 'Ovulation estimated around Day 19 (April 24). Fertile window: April 19–24. Next period predicted May 8. Period frequency: every 33 days, ~11 periods per year.',
-        insight: 'Maria\'s situation illustrates the most common misconception about ovulation timing. With a 33-day cycle, ovulation occurs around Day 19 (33 − 14 = 19), NOT Day 14. If Maria had used the common "Day 14" assumption for conception timing, she would have missed her fertile window entirely (which ends on Day 19 in this cycle — well after Day 14). This is why calendar-based methods must account for individual cycle length. For people with longer cycles, the follicular phase is longer — the egg takes more time to mature — but the luteal phase stays consistent. Maria should confirm ovulation with OPKs starting around Day 14–15 to catch her later-than-average ovulation.',
+        result: 'Ovulation estimated April 24 (19 days after her period started, cycle day 20). Fertile window: April 19–24. Next period predicted May 8. Period frequency: every 33 days, ~11 periods per year.',
+        insight: 'Maria\'s situation illustrates the most common misconception about ovulation timing. With a 33-day cycle, ovulation occurs 19 days after her period starts (33 − 14 = 19, cycle day 20), NOT around Day 14. If Maria had used the common "Day 14" assumption for conception timing, she would have missed her fertile window almost entirely (it runs from cycle day 15 to cycle day 20 in this cycle). This is why calendar-based methods must account for individual cycle length. For people with longer cycles, the follicular phase is longer — the egg takes more time to mature — but the luteal phase stays consistent. Maria should confirm ovulation with OPKs starting around Day 14–15 to catch her later-than-average ovulation.',
       },
       {
         scenario: 'Priya has irregular cycles ranging from 26–35 days. Her last period started on May 2, 2026. She tracks her cycle for health monitoring and wants to understand how to get the most useful predictions from a calculator despite irregularity.',
         inputs: { lmpDate: '2026-05-02', cycleLength: '30', periodLength: '5', lutealPhase: '14' },
-        result: 'Using a 30-day average, ovulation estimated around Day 16 (May 18). Fertile window: May 13–18. Next period predicted June 1. However — predictions could be off by 4–5 days in either direction. Period frequency: ~12 periods per year.',
-        insight: 'Priya\'s 9-day cycle variation (26–35) means calendar predictions have a wide margin of error. With a 30-day average entered, her actual ovulation could occur anywhere from Day 12 to Day 21. For conception, Priya should supplement with daily OPK testing from Day 10 onward until she detects the LH surge or her period arrives. For period preparedness, she should keep supplies ready from Day 24 onward (earliest possible period start: Day 26). Tracking basal body temperature for 3+ months would reveal whether her luteal phase is consistent — if it is, ovulation can be back-calculated from each period. If cycles are irregular AND she has symptoms like acne, excess hair growth, or difficulty losing weight, PCOS screening (blood work + ultrasound) is recommended. Cycle irregularity affecting more than 25% of cycles warrants medical evaluation.',
+        result: 'Using a 30-day average, ovulation estimated May 18 (16 days after her period started). Fertile window: May 13–18. Next period predicted June 1. However — predictions could be off by 4–5 days in either direction. Period frequency: ~12 periods per year.',
+        insight: 'Priya\'s 9-day cycle variation (26–35) means calendar predictions have a wide margin of error. With a 30-day average entered, her actual ovulation (with a 14-day luteal phase) could land anywhere from 12 to 21 days after her period starts, i.e. cycle day 13 to 22. For conception, Priya should supplement with daily OPK testing from Day 10 onward until she detects the LH surge or her period arrives. For period preparedness, she should keep supplies ready from 24 days after her last period began (the earliest her next period can start is 26 days after). Tracking basal body temperature for 3+ months would reveal whether her luteal phase is consistent — if it is, ovulation can be back-calculated from each period. If cycles are irregular AND she has symptoms like acne, excess hair growth, or difficulty losing weight, PCOS screening (blood work + ultrasound) is recommended. Cycle irregularity affecting more than 25% of cycles warrants medical evaluation.',
       },
     ],
     proTips: [
@@ -257,11 +274,11 @@ const periodOvulationConfig: CalculatorConfig = {
       { label: 'Typical cycle length', value: '28 days (normal range 21–35 days)' },
       { label: 'Typical period length', value: '5 days (normal range 3–7 days)' },
       { label: 'Typical luteal phase', value: '14 days (normal range 12–16 days)' },
-      { label: 'Ovulation timing (28-day cycle)', value: 'Day 14 (not 14 days after period starts — 14 days before next period)' },
+      { label: 'Ovulation timing (28-day cycle)', value: '14 days before the next period starts (cycle day 15; always cycle length minus luteal phase)' },
       { label: 'Fertile window', value: '6 days ending on ovulation day (5 days sperm + 1 day egg viability)' },
       { label: 'Egg lifespan', value: '12–24 hours after ovulation' },
       { label: 'Sperm lifespan in fertile mucus', value: 'Up to 5 days (average 3 days in fertile cervical mucus)' },
-      { label: 'Peak fertility days', value: '2 days before ovulation and ovulation day itself' },
+      { label: 'Peak fertility days', value: '2 days before ovulation and ovulation day itself (about 33% on ovulation day in the 1995 Wilcox study)' },
       { label: 'Cycles per year (28-day cycle)', value: '~13 periods per year' },
       { label: 'When to use OPKs', value: '2–4 days before expected ovulation for 7–10 days per cycle' },
       { label: 'BBT rise after ovulation', value: '0.5–1°F (0.3–0.6°C) sustained rise for at least 3 days' },
@@ -274,10 +291,10 @@ const periodOvulationConfig: CalculatorConfig = {
       'Lifestyle planning — plan around predicted menstrual phases for travel, events, athletic training, and symptom management including PMS and cramps'
     ],
     limitations: [
-      'Calendar-based estimates only — predictions use population averages (14-day luteal phase default). Actual ovulation may occur days earlier or later than predicted, even with regular cycles. Anovulatory cycles occur in 1–2 of every 12 cycles even in healthy individuals.',
+      'Calendar-based estimates only — predictions use population averages (14-day luteal phase default). Actual ovulation may occur days earlier or later than predicted, even with regular cycles. Occasional anovulatory cycles occur even in healthy individuals.',
       'Life factors not accounted for — stress, illness, weight changes (>10% body weight), intense training, travel, sleep disruption, breastfeeding, and perimenopause all affect cycle timing. Recent hormonal contraception can cause irregularity for 3–6 months after discontinuation.',
       'Sperm survival is variable — while 5 days is the documented maximum, most sperm survive only 2–3 days even in fertile cervical mucus. Individual variation is not accounted for in predictions.',
-      'This calculator is NOT a contraceptive device (calendar methods have 24% typical-use failure rate annually). It is NOT a diagnostic tool for any medical condition. For family planning, confirm ovulation with OPK or BBT. For medical concerns, consult a qualified healthcare provider.',
+      'This calculator is NOT a contraceptive device (calendar methods have roughly a 24% typical-use failure rate annually). It is NOT a diagnostic tool for any medical condition. For family planning, confirm ovulation with OPK or BBT. For medical concerns, consult a qualified healthcare provider.',
     ],
     citations: [
       { source: 'ACOG - Menstrual Cycle', url: 'https://www.acog.org/womens-health/faqs/the-menstrual-cycle-menstruation' },

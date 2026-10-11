@@ -4,7 +4,7 @@ import ProteinPanel from './ProteinPanel';
 import { plainLocale as fmt } from '../../../lib/format';
 
 const GOAL_RANGES: Record<string, { label: string; minG: number; maxG: number }> = {
-  maintain: { label: 'Maintain (1.2–1.6 g/kg)', minG: 1.2, maxG: 1.6 },
+  maintain: { label: 'Maintain (0.8–1.2 g/kg)', minG: 0.8, maxG: 1.2 },
   cut: { label: 'Fat Loss / Cut (1.6–2.2 g/kg)', minG: 1.6, maxG: 2.2 },
   bulk: { label: 'Muscle Gain / Bulk (1.6–2.2 g/kg)', minG: 1.6, maxG: 2.2 },
   athlete: { label: 'Endurance Athlete (1.4–1.8 g/kg)', minG: 1.4, maxG: 1.8 },
@@ -28,57 +28,11 @@ const proteinConfig: CalculatorConfig = {
       label: 'Body Weight',
       type: 'number',
       placeholder: '170',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.5,
       required: true,
       helpText: 'Used to calculate daily protein target in grams per kilogram',
-    },
-    {
-      id: 'age',
-      label: 'Age',
-      type: 'number',
-      placeholder: '30',
-      unit: 'years',
-      min: 15,
-      max: 100,
-      step: 1,
-      required: true,
-      helpText: 'Used for BMI calculation and general health context',
-    },
-    {
-      id: 'heightFt',
-      label: 'Height — Feet',
-      type: 'number',
-      placeholder: '5',
-      unit: 'ft',
-      min: 0,
-      max: 9,
-      step: 1,
-      helpText: 'Imperial only',
-      showWhen: (v) => v.unit === 'imperial',
-    },
-    {
-      id: 'heightIn',
-      label: 'Height — Inches',
-      type: 'number',
-      placeholder: '10',
-      unit: 'in',
-      min: 0,
-      max: 11,
-      step: 1,
-      helpText: 'Imperial only — remaining inches (0–11)',
-      showWhen: (v) => v.unit === 'imperial',
-    },
-    {
-      id: 'heightCm',
-      label: 'Height — Centimeters',
-      type: 'number',
-      placeholder: '178',
-      unit: 'cm',
-      min: 0,
-      step: 0.1,
-      helpText: 'Metric only',
-      showWhen: (v) => v.unit === 'metric',
     },
     {
       id: 'goal',
@@ -87,7 +41,7 @@ const proteinConfig: CalculatorConfig = {
       required: true,
       helpText: 'Your fitness goal determines the protein range — higher for muscle gain or fat loss',
       options: [
-        { label: 'Maintain (sedentary to light activity) — 1.2–1.6 g/kg', value: 'maintain' },
+        { label: 'Maintain (sedentary to light activity) — 0.8–1.2 g/kg', value: 'maintain' },
         { label: 'Fat Loss / Cut (calorie deficit, resistance training) — 1.6–2.2 g/kg', value: 'cut' },
         { label: 'Muscle Gain / Bulk (calorie surplus, resistance training) — 1.6–2.2 g/kg', value: 'bulk' },
         { label: 'Endurance Athlete (run/cycle/swim 6+ hrs/week) — 1.4–1.8 g/kg', value: 'athlete' },
@@ -147,7 +101,7 @@ const proteinConfig: CalculatorConfig = {
     const chickenBreastCount = dailyTarget / 26; // 3 oz = ~26g protein
     const eggsCount = dailyTarget / 6; // 1 large egg = ~6g
     const wheyScoops = dailyTarget / 25; // 1 scoop = ~25g
-    const greekYogurtCups = dailyTarget / 17; // 3/4 cup = ~17g
+    const greekYogurtServings = dailyTarget / 17; // one 3/4-cup serving = ~17g
     const salmonServings = dailyTarget / 22; // 3 oz = ~22g
 
     // Max per meal for optimal MPS (muscle protein synthesis)
@@ -184,13 +138,25 @@ const proteinConfig: CalculatorConfig = {
       {
         id: 'foodEquivalents',
         label: 'Daily Food Equivalents',
-        value: `~${chickenBreastCount.toFixed(0)} chicken breasts (3 oz) · ${eggsCount.toFixed(0)} eggs · ${wheyScoops.toFixed(0)} whey scoops · ${greekYogurtCups.toFixed(0)} cups Greek yogurt · ${salmonServings.toFixed(0)} servings salmon (3 oz)`,
+        value: `~${chickenBreastCount.toFixed(0)} chicken breasts (3 oz) · ${eggsCount.toFixed(0)} eggs · ${wheyScoops.toFixed(0)} whey scoops · ${greekYogurtServings.toFixed(0)} servings Greek yogurt (3/4 cup) · ${salmonServings.toFixed(0)} servings salmon (3 oz)`,
         color: 'neutral',
       },
       {
         id: 'weightPct',
         label: 'Protein as % of Daily Calories (at 2,000 kcal baseline)',
         value: `${Math.round(calFromProtein / 2000 * 100)}% of 2,000 kcal diet (adjust for your actual calorie intake)`,
+        color: 'neutral',
+      },
+      {
+        // Panel data, so the panel never has to scrape numbers out of display strings.
+        id: '_protein',
+        label: '_protein',
+        value: JSON.stringify({
+          min: dailyMin,
+          max: dailyMax,
+          target: dailyTarget,
+          meals: [5, 4, 3].map((n) => ({ n, g: Math.round(dailyTarget / n) })),
+        }),
         color: 'neutral',
       },
     ];
@@ -207,7 +173,7 @@ const proteinConfig: CalculatorConfig = {
       caption: 'Protein needs are 1.6-2.2 g/kg per day for active individuals; spread across 3-5 meals',
     },
     formulaDescription:
-      'The evidence-based range of 1.6–2.2 g/kg per day comes from the ISSN, ACSM, and international sports nutrition consensus statements. Higher intakes within the range support muscle gain and preservation during calorie deficits. The body has a per-meal ceiling for muscle protein synthesis (MPS) of approximately 0.4 g/kg.',
+      'For active people the evidence-based range of 1.6–2.2 g/kg per day comes from the ISSN, ACSM, and international sports nutrition consensus statements; for people who are mostly sedentary the recommended dietary allowance is 0.8 g/kg, which is the floor of the Maintain range here. Higher intakes within the range support muscle gain and preservation during calorie deficits. The body has a per-meal ceiling for muscle protein synthesis (MPS) of approximately 0.4 g/kg.',
     variables: [
       { symbol: 'MPS', name: 'Muscle Protein Synthesis', description: 'The biological process of building new muscle tissue. Stimulated by resistance training and dietary protein. Has a per-meal ceiling of ~0.4 g/kg.' },
       { symbol: 'Leucine', name: 'Leucine Threshold', description: 'The amino acid trigger for MPS. A meal needs ~2–3g of leucine (found in ~25–30g of quality protein) to maximally stimulate MPS.' },
@@ -221,11 +187,11 @@ const proteinConfig: CalculatorConfig = {
       'Use the per-meal breakdown to plan your protein distribution across 3–5 meals for optimal muscle protein synthesis.',
     ],
     explanation:
-      'The "1 gram per pound of body weight" rule that dominates gym culture is a simplification that overestimates need for most people. The actual evidence-based range is 1.6–2.2 g per kg of body weight (0.73–1.0 g per lb) for most active individuals. Higher intake (up to 2.2 g/kg) is beneficial during calorie restriction (cutting) where protein\'s thermic effect and satiety are advantageous. The key to muscle growth is not just total daily protein but also its distribution: 3–5 meals with ~0.4 g/kg each maximally stimulate muscle protein synthesis throughout the day. Consuming more than ~0.4 g/kg in a single meal provides no additional MPS benefit — the excess is oxidized for energy. Leucine, a branched-chain amino acid, is the primary trigger for MPS. A meal needs ~2–3g of leucine (found in ~25–30g of quality protein) to maximally stimulate synthesis. A post-workout meal with 30–40g of protein is the most important feeding window.',
+      'The "1 gram per pound of body weight" rule that dominates gym culture is a simplification that overestimates need for most people. The actual evidence-based range is 1.6–2.2 g per kg of body weight (0.73–1.0 g per lb) for most active individuals. Higher intake (up to 2.2 g/kg) is beneficial during calorie restriction (cutting) where protein\'s thermic effect and satiety are advantageous. The key to muscle growth is not just total daily protein but also its distribution: 3–5 meals with ~0.4 g/kg each maximally stimulate muscle protein synthesis throughout the day. Consuming more than ~0.4 g/kg in a single meal has not been shown to add further MPS (the extra still counts toward your daily total). Leucine, a branched-chain amino acid, is the primary trigger for MPS. A meal needs ~2–3g of leucine (found in ~25–30g of quality protein) to maximally stimulate synthesis. A post-workout meal with 30–40g of protein is the most important feeding window.',
     faqs: [
       {
         question: 'Can I eat too much protein?',
-        answer: 'For healthy individuals, high protein intake (up to 3.3 g/kg) is safe and does not damage kidneys or liver. However, intakes above 2.2 g/kg provide no additional muscle-building benefit and may displace other nutrients. Individuals with pre-existing kidney disease should consult their doctor.',
+        answer: 'For healthy individuals, high protein intake (studied up to 3.3 g/kg) has not been shown to damage the kidneys or liver. However, intakes above 2.2 g/kg provide no additional muscle-building benefit and may displace other nutrients. Individuals with pre-existing kidney disease should consult their doctor.',
       },
       {
         question: 'When should I have protein post-workout?',

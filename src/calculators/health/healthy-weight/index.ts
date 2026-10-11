@@ -43,7 +43,8 @@ const healthyWeightConfig: CalculatorConfig = {
       label: 'Current Weight',
       type: 'number',
       placeholder: '170',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.1,
       required: true,
       helpText: 'For calculating Waist-to-Height Ratio and BMI.',
@@ -54,7 +55,8 @@ const healthyWeightConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '34',
       unit: 'in / cm',
-      min: 0,
+      min: 10,
+      max: 250,
       step: 0.1,
       required: true,
       helpText: 'Measured at navel level (men) or narrowest point (women). Used for WHtR.',
@@ -65,8 +67,8 @@ const healthyWeightConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       unit: 'ft',
-      min: 0,
-      max: 9,
+      min: 3,
+      max: 8,
       step: 1,
       required: true,
       helpText: 'Imperial only',
@@ -90,7 +92,8 @@ const healthyWeightConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '178',
       unit: 'cm',
-      min: 0,
+      min: 90,
+      max: 275,
       step: 0.1,
       helpText: 'Metric only',
       showWhen: (v) => v.unit === 'metric',
@@ -137,7 +140,8 @@ const healthyWeightConfig: CalculatorConfig = {
     if ([weightKg, heightCm, waistCm, age].some(isNaN) || weightKg <= 0 || heightCm <= 0 || waistCm <= 0) return [];
 
     const heightM = heightCm / 100;
-    const bmi = weightKg / (heightM * heightM);
+    // Classify on the DISPLAYED (1-decimal) BMI so 24.96 -> "25.0" -> Overweight, never "25.0 - Normal".
+    const bmi = Math.round((weightKg / (heightM * heightM)) * 10) / 10;
 
     // Healthy BMI range
     const bmiHealthyLow = 18.5;
@@ -151,16 +155,17 @@ const healthyWeightConfig: CalculatorConfig = {
     const adjustedTargetKg = healthyWeightLowKg + (healthyWeightHighKg - healthyWeightLowKg) * frameMid;
 
     // Waist-to-Height Ratio (WHtR)
-    const whtr = waistCm / heightCm;
-    const whtrCategory = whtr <= 0.4
-      ? 'Underweight (may indicate nutritional deficiency)'
-      : whtr <= 0.5
+    // Ashwell/NICE bands on the displayed 2-decimal ratio: <0.4 low, 0.4-0.49 healthy, 0.5-0.59 increased, >=0.6 high.
+    const whtr = Math.round((waistCm / heightCm) * 100) / 100;
+    const whtrCategory = whtr < 0.4
+      ? 'Low (may indicate underweight or nutritional deficiency)'
+      : whtr < 0.5
       ? 'Healthy — low health risk'
-      : whtr <= 0.6
+      : whtr < 0.6
       ? 'Increased health risk — consider weight management'
       : 'High health risk — action recommended';
 
-    const whtrColor: 'positive' | 'negative' | 'neutral' = whtr <= 0.5 ? 'positive' : whtr <= 0.6 ? 'neutral' : 'negative';
+    const whtrColor: 'positive' | 'negative' | 'neutral' = whtr < 0.5 ? 'positive' : whtr < 0.6 ? 'neutral' : 'negative';
 
     // BMI category
     const bmiCategory = bmi < 18.5
@@ -209,14 +214,14 @@ const healthyWeightConfig: CalculatorConfig = {
       {
         id: 'whtr',
         label: `Waist-to-Height Ratio (WHtR)`,
-        value: `${fmt1(whtr)} — ${whtrCategory}`,
+        value: `${whtr.toFixed(2)} — ${whtrCategory}`,
         color: whtrColor,
       },
       {
         id: 'whtrThreshold',
         label: 'WHtR Health Threshold',
         value: `Healthy: < 0.5 · Waist should be less than half your height`,
-        color: whtr <= 0.5 ? 'positive' : 'negative',
+        color: whtr < 0.5 ? 'positive' : 'negative',
       },
     ];
   },
@@ -246,7 +251,7 @@ const healthyWeightConfig: CalculatorConfig = {
       'The WHtR metric ("waist less than half your height") is a simple health benchmark independent of your weight.',
     ],
     explanation:
-      '"Healthy weight" is a range derived from population data where morbidity and mortality are lowest. It is not a cosmetic ideal or a one-size-fits-all prescription. BMI 18.5–24.9 corresponds to the weight range where all-cause mortality is lowest at the population level. Waist-to-Height Ratio (WHtR) is a superior metric because it captures abdominal fat distribution — the type of fat most strongly linked to metabolic disease. The "waist less than half your height" rule (WHtR < 0.5) is simple, cross-culturally valid, and independent of weight. Frame size adjusts for the fact that people with larger skeletons can carry more weight healthfully within the normal BMI range. A person with a large frame might be healthy at BMI 24, while someone with a small frame might be healthier at BMI 20. These three metrics together provide a much more complete picture than BMI alone. For instance, a 5\'8" (173 cm) person weighing 165 lbs has a BMI of 25.1, technically "overweight." But if their waist is 31 inches (WHtR 0.45), they have low cardiovascular risk and their BMI classification is misleading. The converse is also true: a person with a "normal" BMI of 22 but a waist of 36 inches (WHtR 0.53) has elevated health risk despite their healthy scale weight — a condition called normal weight obesity.',
+      '"Healthy weight" is a range derived from population data where morbidity and mortality are lowest. It is not a cosmetic ideal or a one-size-fits-all prescription. BMI 18.5–24.9 corresponds to the weight range where all-cause mortality is lowest at the population level. Waist-to-Height Ratio (WHtR) is a superior metric because it captures abdominal fat distribution — the type of fat most strongly linked to metabolic disease. The "waist less than half your height" rule (WHtR < 0.5) is simple, cross-culturally valid, and independent of weight. Frame size adjusts for the fact that people with larger skeletons can carry more weight healthfully within the normal BMI range. A person with a large frame might be healthy at BMI 24, while someone with a small frame might be healthier at BMI 20. These three metrics together provide a much more complete picture than BMI alone. For instance, a 5\'8" (173 cm) person weighing 165 lbs has a BMI of 25.1, technically "overweight." But if their waist is 31 inches (WHtR 0.46), they have low cardiovascular risk and their BMI classification is misleading. The converse is also true: a person with a "normal" BMI of 22 but a waist of 36 inches (WHtR 0.53) has elevated health risk despite their healthy scale weight — a condition called normal weight obesity.',
     faqs: [
       {
         question: 'Is BMI outdated?',

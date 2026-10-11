@@ -7,12 +7,12 @@ interface Props {
   results: CalculatorResult[];
 }
 
-const FORMULA_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6'];
+// -700 shades so the coloured formula names keep >= 4.5:1 contrast on white.
+const FORMULA_COLORS = ['#1d4ed8', '#15803d', '#b45309', '#6d28d9'];
 
 export default function IdealWeightPanel({ values, results }: Props) {
   const avgRes = results.find((r) => r.id === 'avgIdeal');
-  const rangeRes = results.find((r) => r.id === 'rangeIdeal') || results.find((r) => r.id === 'rangeIdeal');
-  const devineRes = results.find((r) => r.id === 'devine');
+    const devineRes = results.find((r) => r.id === 'devine');
   const robinsonRes = results.find((r) => r.id === 'robinson');
   const millerRes = results.find((r) => r.id === 'miller');
   const hamwiRes = results.find((r) => r.id === 'hamwi');
@@ -40,8 +40,6 @@ export default function IdealWeightPanel({ values, results }: Props) {
 
   const toX = (v: number) => ((v - minVal + range * 0.1) / (range * 1.2)) * 100;
 
-  const fmt = (s: string) => s;
-
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
       <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
@@ -53,7 +51,7 @@ export default function IdealWeightPanel({ values, results }: Props) {
 
       <div className="p-6 space-y-5">
         <div className="rounded-xl bg-blue-50 border-2 border-blue-200 px-5 py-4 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1">Average Ideal Weight (4 Formulas)</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-1">Average Ideal Weight (4 Formulas)</p>
           <p className="text-2xl font-black text-blue-700">{avgRes.value}</p>
         </div>
 
@@ -64,7 +62,7 @@ export default function IdealWeightPanel({ values, results }: Props) {
                 <span className="font-semibold" style={{ color: f.color }}>{f.name}</span>
                 <span className="font-semibold text-slate-700">{f.value}</span>
               </div>
-              <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+              <div role="img" aria-label={`${f.name}: ${f.value}`} className="h-4 bg-slate-100 rounded-full overflow-hidden">
                 <div className="h-full rounded-full transition-all" style={{ width: `${toX(values_kg[i])}%`, backgroundColor: f.color, opacity: 0.7 }} />
               </div>
             </div>
@@ -73,7 +71,7 @@ export default function IdealWeightPanel({ values, results }: Props) {
 
         {bmiRangeRes && (
           <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-3 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">Healthy BMI Range</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-1">Healthy BMI Range</p>
             <p className="text-sm font-black text-emerald-700">{bmiRangeRes.value}</p>
           </div>
         )}
@@ -81,7 +79,7 @@ export default function IdealWeightPanel({ values, results }: Props) {
         {diffRes && (
           <div className={`rounded-xl px-5 py-3 text-center border ${diffRes.color === 'positive' ? 'bg-emerald-50 border-emerald-200' : diffRes.color === 'negative' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
             <p className="text-xs font-bold text-slate-600 mb-1">Your Weight vs. Average Ideal</p>
-            <p className="text-lg font-black" style={{ color: diffRes.color === 'positive' ? '#16a34a' : diffRes.color === 'negative' ? '#dc2626' : '#d97706' }}>
+            <p className="text-lg font-black" style={{ color: diffRes.color === 'positive' ? '#15803d' : diffRes.color === 'negative' ? '#b91c1c' : '#b45309' }}>
               {diffRes.value}
             </p>
           </div>
