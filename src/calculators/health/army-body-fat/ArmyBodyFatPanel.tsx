@@ -6,13 +6,10 @@ interface Props {
 }
 
 const AGE_BRACKETS = [
-  { label: '17–21', maxAge: 21, male: '20%', female: '30%' },
-  { label: '22–27', maxAge: 27, male: '22%', female: '32%' },
-  { label: '28–33', maxAge: 33, male: '24%', female: '34%' },
-  { label: '34–39', maxAge: 39, male: '26%', female: '36%' },
-  { label: '40–45', maxAge: 45, male: '28%', female: '38%' },
-  { label: '46–55', maxAge: 55, male: '30%', female: '40%' },
-  { label: '56–65', maxAge: 65, male: '32%', female: '42%' },
+  { label: '17–20', male: '20%', female: '30%' },
+  { label: '21–27', male: '22%', female: '32%' },
+  { label: '28–39', male: '24%', female: '34%' },
+  { label: '40 and older', male: '26%', female: '36%' },
 ];
 
 export default function ArmyBodyFatPanel({ values, results }: Props) {
@@ -69,11 +66,9 @@ export default function ArmyBodyFatPanel({ values, results }: Props) {
             </thead>
             <tbody>
               {AGE_BRACKETS.map((b, i) => {
-                // Better: just check if this row's max matches the result
-                const rowMaxMale = parseInt(b.male);
-                const rowMaxFemale = parseInt(b.female);
+                const rowMax = parseInt(isMale ? b.male : b.female);
                 const resultMax = maxBfResult ? parseInt(maxBfResult.value) : 0;
-                const matches = resultMax === rowMaxMale || (isMale === false && resultMax === rowMaxFemale);
+                const matches = resultMax === rowMax;
 
                 return (
                   <tr key={b.label} className={`border-b border-slate-100 last:border-0 ${matches ? 'bg-blue-50' : i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
@@ -96,7 +91,7 @@ export default function ArmyBodyFatPanel({ values, results }: Props) {
             weight will have their body fat assessed via circumference measurement. Soldiers exceeding the maximum
             allowable body fat for their age and gender will be enrolled in the Army Body Composition Program.
           </blockquote>
-          <p className="text-[10px] text-slate-500 mt-2">Source: Army Regulation 600-9 (2023)</p>
+          <p className="text-[10px] text-slate-500 mt-2">Source: Army Regulation 600-9 (28 June 2013), Appendix B, Tables B-1 and B-2</p>
         </div>
 
         {/* Measurement Guide */}
@@ -112,28 +107,28 @@ export default function ArmyBodyFatPanel({ values, results }: Props) {
               <div className="w-1 h-full min-h-[20px] bg-slate-200 rounded-full mt-1.5" />
               <div>
                 <p className="text-xs font-bold text-slate-700">Neck</p>
-                <p className="text-[11px] text-slate-500">Tape is placed just below the larynx perpendicular to the neck axis. The tape should be snug but not tight, and measurements are rounded up to the nearest 0.5 inch.</p>
+                <p className="text-[11px] text-slate-500">Tape is placed just below the larynx perpendicular to the neck axis. The tape should be snug but not tight, and the measurement is rounded UP to the nearest 0.5 inch.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-1 h-full min-h-[20px] bg-slate-200 rounded-full mt-1.5" />
               <div>
                 <p className="text-xs font-bold text-slate-700">Waist (Men)</p>
-                <p className="text-[11px] text-slate-500">Measured at the level of the navel (umbilicus). The Soldier stands erect with arms at sides, relaxed. Tape is placed parallel to the floor and measurements are taken after a normal exhale.</p>
+                <p className="text-[11px] text-slate-500">Measured at the level of the navel (umbilicus). The Soldier stands erect with arms at sides, relaxed. Tape is placed parallel to the floor and the measurement is taken at the end of a normal, relaxed exhalation, then rounded DOWN to the nearest 0.5 inch.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-1 h-full min-h-[20px] bg-slate-200 rounded-full mt-1.5" />
               <div>
                 <p className="text-xs font-bold text-slate-700">Waist (Women)</p>
-                <p className="text-[11px] text-slate-500">Measured at the narrowest point between the ribs and the iliac crest (natural waist). If the natural waist is not clearly defined, measure at the midpoint between the bottom rib and the iliac crest.</p>
+                <p className="text-[11px] text-slate-500">Measured at the narrowest point of the abdomen (natural waist), usually about halfway between the navel and the lower end of the breastbone. If the site is not easily seen, take several measurements at probable sites and use the smallest. Rounded DOWN to the nearest 0.5 inch.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-1 h-full min-h-[20px] bg-slate-200 rounded-full mt-1.5" />
               <div>
                 <p className="text-xs font-bold text-slate-700">Hips (Women)</p>
-                <p className="text-[11px] text-slate-500">Measured at the widest point of the hips/buttocks, typically at the level of the pubic symphysis. Tape is parallel to the floor.</p>
+                <p className="text-[11px] text-slate-500">Measured over the greatest protrusion of the gluteal muscles (buttocks) as viewed from the side, with the tape parallel to the floor. Rounded DOWN to the nearest 0.5 inch.</p>
               </div>
             </div>
           </div>

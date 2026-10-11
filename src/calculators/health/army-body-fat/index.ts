@@ -2,6 +2,47 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import ArmyBodyFatPanel from './ArmyBodyFatPanel';
 
+// AR 600-9 (28 June 2013), Appendix B, Table B-2: maximum allowable % body fat by age group.
+const MAX_BF_TABLE: { ageMax: number; label: string; male: number; female: number }[] = [
+  { ageMax: 20, label: '17–20', male: 20, female: 30 },
+  { ageMax: 27, label: '21–27', male: 22, female: 32 },
+  { ageMax: 39, label: '28–39', male: 24, female: 34 },
+  { ageMax: Infinity, label: '40+', male: 26, female: 36 },
+];
+
+// AR 600-9 (28 June 2013), Table B-1 screening table weight (lb).
+// Row = [height in, minimum weight, male max 17–20 / 21–27 / 28–39 / 40+, female max 17–20 / 21–27 / 28–39 / 40+].
+// Male maxima are not listed below 60 in (0 here). Above 80 in: +6 lb/in (male), +5 lb/in (female).
+const SCREENING_TABLE: number[][] = [
+  [58, 91, 0, 0, 0, 0, 119, 121, 122, 124],
+  [59, 94, 0, 0, 0, 0, 124, 125, 126, 128],
+  [60, 97, 132, 136, 139, 141, 128, 129, 131, 133],
+  [61, 100, 136, 140, 144, 146, 132, 134, 135, 137],
+  [62, 104, 141, 144, 148, 150, 136, 138, 140, 142],
+  [63, 107, 145, 149, 153, 155, 141, 143, 144, 146],
+  [64, 110, 150, 154, 158, 160, 145, 147, 149, 151],
+  [65, 114, 155, 159, 163, 165, 150, 152, 154, 156],
+  [66, 117, 160, 163, 168, 170, 155, 156, 158, 161],
+  [67, 121, 165, 169, 174, 176, 159, 161, 163, 166],
+  [68, 125, 170, 174, 179, 181, 164, 166, 168, 171],
+  [69, 128, 175, 179, 184, 186, 169, 171, 173, 176],
+  [70, 132, 180, 185, 189, 192, 174, 176, 178, 181],
+  [71, 136, 185, 189, 194, 197, 179, 181, 183, 186],
+  [72, 140, 190, 195, 200, 203, 184, 186, 188, 191],
+  [73, 144, 195, 200, 205, 208, 189, 191, 194, 197],
+  [74, 148, 201, 206, 211, 214, 194, 197, 199, 202],
+  [75, 152, 206, 212, 217, 220, 200, 202, 204, 208],
+  [76, 156, 212, 217, 223, 226, 205, 207, 210, 213],
+  [77, 160, 218, 223, 229, 232, 210, 213, 215, 219],
+  [78, 164, 223, 229, 235, 238, 216, 218, 221, 225],
+  [79, 168, 229, 235, 241, 244, 221, 224, 227, 230],
+  [80, 173, 234, 240, 247, 250, 227, 230, 233, 236],
+];
+
+// AR 600-9 Appendix B rounding rules: neck rounds UP, abdomen/waist/hip round DOWN, to the nearest 1/2 in.
+const roundUpHalf = (x: number): number => Math.ceil(x * 2) / 2;
+const roundDownHalf = (x: number): number => Math.floor(x * 2) / 2;
+
 const armyBodyFatConfig: CalculatorConfig = {
   inputs: [
     {
@@ -34,12 +75,12 @@ const armyBodyFatConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '70',
       unit: 'in',
-      min: 55,
+      min: 58,
       max: 84,
       step: 0.5,
       required: true,
       inputMode: 'decimal',
-      helpText: 'Total height in inches (e.g., 5\'10" = 70 in). Army standard only uses inches.',
+      helpText: 'Total height in inches (e.g., 5\'10" = 70 in). The AR 600-9 tables start at 58 in. Rounded to the nearest 0.5 in for the body fat equation.',
     },
     {
       id: 'weight',
@@ -65,7 +106,7 @@ const armyBodyFatConfig: CalculatorConfig = {
       step: 0.125,
       required: true,
       inputMode: 'decimal',
-      helpText: 'Measure just below the larynx. Tape parallel to the floor. Round up to nearest 0.5 in.',
+      helpText: 'Measure just below the larynx. Enter the raw tape reading — AR 600-9 rounding (neck UP to the nearest 0.5 in) is applied for you.',
     },
     {
       id: 'waist',
@@ -77,7 +118,7 @@ const armyBodyFatConfig: CalculatorConfig = {
       max: 60,
       step: 0.125,
       inputMode: 'decimal',
-      helpText: 'Men only — measure at navel level. Women — measure at narrowest point (natural waist).',
+      helpText: 'Men: abdomen at navel level. Women: natural waist at the narrowest point. Enter the raw tape reading — AR 600-9 rounding (DOWN to the nearest 0.5 in) is applied for you.',
     },
     {
       id: 'hip',
@@ -89,7 +130,7 @@ const armyBodyFatConfig: CalculatorConfig = {
       max: 60,
       step: 0.125,
       inputMode: 'decimal',
-      helpText: 'Women only — measure at the widest point of the hips/buttocks.',
+      helpText: 'Women only — measure at the widest point of the hips/buttocks. AR 600-9 rounding (DOWN to the nearest 0.5 in) is applied for you.',
       showWhen: (v) => v.sex === 'female',
     },
   ],
@@ -108,48 +149,51 @@ const armyBodyFatConfig: CalculatorConfig = {
     if (isMale && (isNaN(waistIn) || waistIn <= 0)) return [];
     if (!isMale && (isNaN(waistIn) || waistIn <= 0 || isNaN(hipIn) || hipIn <= 0)) return [];
 
-    // AR 600-9 DoD body fat formula (uses circumference in inches)
-    let bodyFatPct: number;
+    // AR 600-9 Appendix B rounding: neck UP, abdomen/waist/hip DOWN to the nearest 1/2 in;
+    // height to the nearest 1/2 in for the body fat equation (whole inch for the screening table).
+    const neck = roundUpHalf(neckIn);
+    const waist = roundDownHalf(waistIn);
+    const hip = roundDownHalf(hipIn);
+    const height = Math.round(heightIn * 2) / 2;
 
+    // AR 600-9 / DoD (Hodgdon & Beckett) body fat equations, all measurements in inches
+    let rawPct: number;
     if (isMale) {
-      // Men: %BF = 86.010 × log10(waist - neck) - 70.041 × log10(height) + 36.76
-      // Uses the same equation as U.S. Navy method but with stricter measurement protocol
-      if (waistIn - neckIn <= 0) return []; // log10 domain error guard
-      bodyFatPct = 86.010 * Math.log10(waistIn - neckIn) - 70.041 * Math.log10(heightIn) + 36.76;
+      // Men: %BF = 86.010 × log10(abdomen − neck) − 70.041 × log10(height) + 36.76
+      if (waist - neck <= 0) return []; // log10 domain error guard
+      rawPct = 86.010 * Math.log10(waist - neck) - 70.041 * Math.log10(height) + 36.76;
     } else {
-      // Women: %BF = 163.205 × log10(waist + hip - neck) - 97.684 × log10(height) - 78.387
-      if (waistIn + hipIn - neckIn <= 0) return []; // log10 domain error guard
-      bodyFatPct = 163.205 * Math.log10(waistIn + hipIn - neckIn) - 97.684 * Math.log10(heightIn) - 78.387;
+      // Women: %BF = 163.205 × log10(waist + hip − neck) − 97.684 × log10(height) − 78.387
+      if (waist + hip - neck <= 0) return []; // log10 domain error guard
+      rawPct = 163.205 * Math.log10(waist + hip - neck) - 97.684 * Math.log10(height) - 78.387;
     }
 
     // Clamp to reasonable range
-    bodyFatPct = Math.max(2, Math.min(bodyFatPct, 70));
+    const bodyFatPct = Math.max(2, Math.min(rawPct, 70));
+    // Table B-5: the official percent body fat is rounded to the nearest whole % and is what is
+    // compared with the Table B-2 maximum.
+    const officialPct = Math.round(bodyFatPct);
 
-    // AR 600-9 maximum allowable body fat by age and gender
-    const maxBfTable: { ageMax: number; male: number; female: number }[] = [
-      { ageMax: 21, male: 20, female: 30 },
-      { ageMax: 27, male: 22, female: 32 },
-      { ageMax: 33, male: 24, female: 34 },
-      { ageMax: 39, male: 26, female: 36 },
-      { ageMax: 45, male: 28, female: 38 },
-      { ageMax: 55, male: 30, female: 40 },
-      { ageMax: 65, male: 32, female: 42 },
-    ];
+    const ageBracket = MAX_BF_TABLE.find((row) => Math.floor(age) <= row.ageMax) ?? MAX_BF_TABLE[MAX_BF_TABLE.length - 1];
+    const maxBf = isMale ? ageBracket.male : ageBracket.female;
+    const passes = officialPct <= maxBf;
 
-    const findMaxBf = (age: number, isMale: boolean): number => {
-      for (const row of maxBfTable) {
-        if (age <= row.ageMax) return isMale ? row.male : row.female;
-      }
-      return isMale ? 32 : 42;
-    };
-
-    const maxBf = findMaxBf(age, isMale);
-    const passes = bodyFatPct <= maxBf;
-
-    // Screening weight from AR 600-9 tables (simplified)
-    const screeningWeight = isMale
-      ? Math.round(106 + (heightIn - 60) * 6)
-      : Math.round(100 + (heightIn - 60) * 5);
+    // Screening table weight (Table B-1): height rounded to the nearest whole inch.
+    const screenHeight = Math.round(heightIn);
+    const ageCol = MAX_BF_TABLE.indexOf(ageBracket);
+    let screeningText: string;
+    let screeningMax = 0;
+    if (screenHeight <= 80) {
+      const row = SCREENING_TABLE.find((r) => r[0] === Math.max(58, screenHeight))!;
+      screeningMax = row[(isMale ? 2 : 6) + ageCol];
+      screeningText = screeningMax > 0
+        ? `${screeningMax} lbs max · ${row[1]} lbs min (height ${screenHeight} in, age ${ageBracket.label})`
+        : 'No male screening weight is listed below 60 in in AR 600-9';
+    } else {
+      const last = SCREENING_TABLE[SCREENING_TABLE.length - 1];
+      screeningMax = last[(isMale ? 2 : 6) + ageCol] + (screenHeight - 80) * (isMale ? 6 : 5);
+      screeningText = `${screeningMax} lbs max (height ${screenHeight} in, age ${ageBracket.label}; +${isMale ? 6 : 5} lb per inch over 80 in)`;
+    }
 
     return [
       {
@@ -158,6 +202,12 @@ const armyBodyFatConfig: CalculatorConfig = {
         value: `${bodyFatPct.toFixed(1)}%`,
         highlight: true,
         color: passes ? 'positive' : 'negative',
+      },
+      {
+        id: 'officialBodyFat',
+        label: 'Official Value (whole %, used for pass/fail)',
+        value: `${officialPct}%`,
+        color: 'neutral',
       },
       {
         id: 'maxAllowedBf',
@@ -173,9 +223,9 @@ const armyBodyFatConfig: CalculatorConfig = {
       },
       {
         id: 'screeningWeight',
-        label: 'Army Screening Weight (approximate)',
-        value: `${screeningWeight} lbs (for height ${heightIn.toFixed(0)} in)`,
-        color: weight <= screeningWeight + 10 ? 'positive' : 'neutral',
+        label: 'Army Screening Weight (AR 600-9 Table B-1)',
+        value: screeningText,
+        color: screeningMax > 0 && weight <= screeningMax ? 'positive' : 'neutral',
       },
       {
         id: 'regulationRef',
@@ -191,66 +241,61 @@ const armyBodyFatConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'Men: 86.010 × log₁₀(Waist − Neck) − 70.041 × log₁₀(Height) + 36.76 | Women: 163.205 × log₁₀(Waist + Hip − Neck) − 97.684 × log₁₀(Height) − 78.387',
+    formulaSource: 'AR 600-9, The Army Body Composition Program (28 June 2013), Appendix B — Table B-1 (screening table weight), Table B-2 (maximum allowable percent body fat) and Table B-5 (the body fat equations and worked samples). The equations originate from Hodgdon & Beckett (Naval Health Research Center, 1984).',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Army Tape Test Measurement Sites</text><circle cx="220" cy="48" r="14" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><path d="M206,62 L200,80 L192,105 L188,150 L192,200 L200,240 L210,270 L230,270 L240,240 L248,200 L252,150 L248,105 L240,80 L234,62" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><line x1="140" y1="75" x2="198" y2="75" stroke="var(--svg-ef4444)" stroke-width="2" stroke-dasharray="4,2"/><text x="130" y="79" text-anchor="end" font-size="12" fill="var(--svg-ef4444)" font-weight="bold">Neck</text><line x1="140" y1="145" x2="185" y2="145" stroke="var(--svg-f59e0b)" stroke-width="2" stroke-dasharray="4,2"/><text x="130" y="149" text-anchor="end" font-size="12" fill="var(--svg-f59e0b)" font-weight="bold">Waist</text><text x="220" y="320" text-anchor="middle" font-size="11" fill="var(--svg-666666)">AR 600-9 &middot; The Army Body Composition Program</text></svg>',
       alt: 'Body silhouette with measurement lines at neck and waist for the Army tape test',
       caption: 'AR 600-9 measures neck and waist circumference (and hips for women) to estimate body fat percentage',
     },
     formulaDescription:
-      'The Department of Defense body fat formula (AR 600-9) uses circumference measurements in inches. The same mathematical formula as the U.S. Navy method, but with stricter measurement protocols and specific pass/fail thresholds by age and gender.',
+      'The Department of Defense body fat formula (AR 600-9) uses circumference measurements in inches. It is the same mathematical formula as the U.S. Navy method, with stricter measurement protocols and specific pass/fail thresholds by age group and gender. Per AR 600-9 Appendix B (28 June 2013) the neck is rounded UP and the abdomen, waist and hip DOWN to the nearest 0.5 inch, height is taken to the nearest 0.5 inch, and the resulting percent body fat is rounded to the nearest whole percent before it is compared with the maximum allowable.',
     variables: [
       { symbol: 'Height', name: 'Height (inches)', description: 'Measured without shoes to the nearest 0.5 inch.' },
-      { symbol: 'Circumference Measurements', name: 'Neck, Waist & Hip', description: 'Neck: measured just below the larynx. Waist: at navel level for men, narrowest point for women. Hip (women): at the widest point of the buttocks. All rounded up to nearest 0.5 inch per AR 600-9.' },
-      { symbol: 'Max BF%', name: 'Maximum Allowable Body Fat', description: 'Age- and gender-adjusted threshold from AR 600-9. Ranges from 20% (male, 21 and under) to 42% (female, 55+).' },
+      { symbol: 'Circumference Measurements', name: 'Neck, Waist & Hip', description: 'Neck: measured just below the larynx. Abdomen/waist: at navel level for men, narrowest point of the natural waist for women. Hip (women): at the widest point of the buttocks. Per AR 600-9 Appendix B the neck is rounded UP and the abdomen/waist/hip are rounded DOWN to the nearest 0.5 inch.' },
+      { symbol: 'Max BF%', name: 'Maximum Allowable Body Fat', description: 'Age- and gender-adjusted threshold from AR 600-9 Table B-2 (four age groups: 17–20, 21–27, 28–39, 40 and older). Ranges from 20% (male, 17–20) to 36% (female, 40 and older).' },
     ],
     quickReference: [
-      { label: 'AR 600-9 Male BF% max (age 17–21)', value: '20%' },
-      { label: 'AR 600-9 Male BF% max (age 22–27)', value: '22%' },
-      { label: 'AR 600-9 Male BF% max (age 28–33)', value: '24%' },
-      { label: 'AR 600-9 Male BF% max (age 34–39)', value: '26%' },
-      { label: 'AR 600-9 Male BF% max (age 40–45)', value: '28%' },
-      { label: 'AR 600-9 Male BF% max (age 46–55)', value: '30%' },
-      { label: 'AR 600-9 Male BF% max (age 56–65)', value: '32%' },
-      { label: 'AR 600-9 Female BF% max (age 17–21)', value: '30%' },
-      { label: 'AR 600-9 Female BF% max (age 22–27)', value: '32%' },
-      { label: 'AR 600-9 Female BF% max (age 28–33)', value: '34%' },
-      { label: 'AR 600-9 Female BF% max (age 34–39)', value: '36%' },
-      { label: 'AR 600-9 Female BF% max (age 40–45)', value: '38%' },
-      { label: 'AR 600-9 Female BF% max (age 46–55)', value: '40%' },
-      { label: 'AR 600-9 Female BF% max (age 56–65)', value: '42%' },
+      { label: 'AR 600-9 Male BF% max (age 17–20)', value: '20%' },
+      { label: 'AR 600-9 Male BF% max (age 21–27)', value: '22%' },
+      { label: 'AR 600-9 Male BF% max (age 28–39)', value: '24%' },
+      { label: 'AR 600-9 Male BF% max (age 40 and older)', value: '26%' },
+      { label: 'AR 600-9 Female BF% max (age 17–20)', value: '30%' },
+      { label: 'AR 600-9 Female BF% max (age 21–27)', value: '32%' },
+      { label: 'AR 600-9 Female BF% max (age 28–39)', value: '34%' },
+      { label: 'AR 600-9 Female BF% max (age 40 and older)', value: '36%' },
       { label: 'Male measurement formula', value: '86.010 × log₁₀(Waist − Neck) − 70.041 × log₁₀(Height) + 36.76' },
       { label: 'Female measurement formula', value: '163.205 × log₁₀(Waist + Hip − Neck) − 97.684 × log₁₀(Height) − 78.387' },
-      { label: 'Measurement precision', value: 'All measurements rounded up to nearest 0.5 inch per AR 600-9 protocol' },
-      { label: 'ABCP reassessment interval', value: 'Every 30 days minimum for flagged Soldiers' },
-      { label: 'Flag removal timeline', value: 'Must show satisfactory progress at 3 months and meet standard within 6 months' },
+      { label: 'Measurement rounding', value: 'Neck rounded UP, abdomen/waist/hip rounded DOWN to the nearest 0.5 inch (AR 600-9 App. B); percent body fat rounded to the nearest whole %' },
+      { label: 'ABCP reassessment interval', value: 'Monthly (about every 30 days) for Soldiers enrolled in the ABCP' },
+      { label: 'Satisfactory progress', value: 'Monthly loss of 3–8 lbs or 1% body fat (AR 600-9 para 3-9b); two consecutive months of less than satisfactory progress = program failure (para 3-12)' },
       { label: 'Measurement training requirement', value: 'AR 600-9 requires measurements by trained unit personnel only' },
-      { label: 'Screening weight formula (approx.)', value: 'Male: 106 + 6 × (height_in − 60); Female: 100 + 5 × (height_in − 60)' },
+      { label: 'Screening weight', value: 'Table B-1 lookup by height and age group, e.g. male 69 in aged 21–27: 179 lbs; female 65 in aged 28–39: 154 lbs. Above 80 in add 6 lbs/in (male) or 5 lbs/in (female)' },
     ],
     howToUse: [
       'Enter your gender, age, height (inches), and weight (lbs).',
       'Measure and enter neck circumference just below the larynx.',
       'Men: measure waist at navel level. Women: measure waist at narrowest point and hip at widest point.',
-      'Measurements are rounded up to the nearest 0.5 inch per AR 600-9 protocol.',
+      'Enter raw tape readings — the calculator applies the AR 600-9 rounding rules for you (neck up, abdomen/waist/hip down, to the nearest 0.5 inch).',
       'Results show your estimated body fat %, the maximum allowable for your age/gender, and pass/fail status.',
     ],
     explanation:
-      'AR 600-9 (The Army Body Composition Program) establishes the Department of Defense body fat standards for active duty Soldiers, National Guard, and Army Reserve. The body fat formula is identical to the U.S. Navy circumference method, but measurement protocols differ: AR 600-9 requires measurements to be taken in a specific sequence by trained personnel, with measurements rounded up to the nearest 0.5 inch. The maximum allowable body fat percentage increases with age: at age 21, the limit is 20% (male) and 30% (female), while at age 55, it rises to 30% (male) and 40% (female). This recognizes that body composition naturally changes with age. Soldiers who exceed the maximum allowable body fat percentage for their age and gender are flagged and enrolled in the ABCP (Army Body Composition Program), which includes counseling, exercise guidance, and regular re-assessment at 30-day intervals. Failure to meet standards after 6+ months in the program can lead to administrative separation from service. The screening weight table provides an initial flag — Soldiers exceeding screening weight are taped for body fat assessment, but passing the tape test means they meet the standard regardless of scale weight. A Soldier might exceed their screening weight by 20 lbs but still pass the tape test if they carry significant muscle mass. Conversely, a Soldier below screening weight could still fail the tape test if they have low muscle mass and high body fat percentage. This is why the Army uses the tape test as the definitive measure rather than the scale.',
+      'AR 600-9 (The Army Body Composition Program) establishes the Department of Defense body fat standards for active duty Soldiers, National Guard, and Army Reserve. The body fat formula is identical to the U.S. Navy circumference method, but measurement protocols differ: AR 600-9 requires measurements to be taken three times in sequence by trained personnel, averaged, and rounded (neck up, abdomen/waist/hip down) to the nearest 0.5 inch. The maximum allowable body fat percentage depends on four age groups: for men 20% (17–20), 22% (21–27), 24% (28–39) and 26% (40 and older); for women 30%, 32%, 34% and 36%. Soldiers who exceed the maximum allowable body fat for their age and gender are flagged and enrolled in the Army Body Composition Program (ABCP), which includes counseling, nutrition guidance, and monthly assessments. Satisfactory progress is a monthly loss of 3–8 lbs or 1% body fat; a Soldier who shows less than satisfactory progress on two consecutive monthly assessments (or on three or more assessments after 6 months in the program while still above the standard) has failed the program, and the commander will request a medical evaluation and, absent a qualifying medical condition, initiate separation action. The screening table weight (Table B-1) gives an initial flag — Soldiers exceeding the screening weight for their height and age group are taped for body fat assessment, but passing the tape test means they meet the standard regardless of scale weight. A Soldier might exceed their screening weight by 20 lbs but still pass the tape test if they carry significant muscle mass. Conversely, a Soldier below screening weight could still be taped if their commander judges that their appearance suggests excessive body fat. This is why the Army uses the tape test as the definitive measure rather than the scale.',
     faqs: [
       {
         question: 'How does AR 600-9 differ from the U.S. Navy body fat method?',
-        answer: 'The mathematical formula is identical. The difference is in measurement protocol: AR 600-9 uses inches, requires measurements to be taken by trained personnel following strict procedures, and measurements are rounded up to the nearest 0.5 inch (not to the nearest 0.1 or 0.01). The Navy method rounds to the nearest 0.5 inch as well but uses different measurement sites for the waist: Navy measures at the narrowest point of the waist for both men and women, while Army AR 600-9 measures the male waist at the navel (belly button) level. The pass/fail thresholds also differ between the services — each branch sets its own age- and gender-adjusted maximums. The key difference is that AR 600-9 is tied to administrative consequences (ABCP enrollment, potential separation), while the Navy method is primarily a fitness assessment component.',
+        answer: 'The mathematical formula is identical. The difference is the measurement protocol and the consequences: AR 600-9 uses inches, requires three sets of measurements by trained personnel, rounds the neck UP and the abdomen/waist/hip DOWN to the nearest 0.5 inch, and uses the percentage rounded to the nearest whole percent. Both services measure men at the navel and women at the natural waist. The pass/fail thresholds also differ between the services — each branch sets its own age- and gender-adjusted maximums. AR 600-9 is tied to administrative consequences (ABCP enrollment, potential separation), while the Navy method is primarily a fitness assessment component.',
       },
       {
         question: 'What happens if I exceed the maximum allowable body fat percentage?',
-        answer: 'Soldiers who exceed the standard are enrolled in the Army Body Composition Program (ABCP). They receive counseling, a tailored exercise and nutrition plan, and periodic re-assessment. Continued non-compliance after 6+ months in the program can result in administrative separation. The ABCP process: (1) Initial counseling within 2 working days of flagging, where the Soldier receives a written plan with specific weight loss goals (targeting 3–8 lbs per month, or 1% body fat reduction per month). (2) Monthly reassessments — the Soldier must show satisfactory progress, defined as a monthly weight loss of 3–8 lbs or 1% body fat reduction. (3) At month 6, if the Soldier still does not meet the standard, a separation board is convened. The board reviews the Soldier\'s entire record including performance, disciplinary history, and demonstrated effort. Separation is not automatic — it is a command decision based on the totality of circumstances. Soldiers who make consistent progress but haven\'t yet reached the standard may receive extensions. Soldiers who show no effort typically face separation. AR 600-9 is a retention standard, not merely a fitness evaluation.',
+        answer: 'Soldiers who exceed the standard are flagged and enrolled in the Army Body Composition Program (ABCP). Under AR 600-9 (28 June 2013): (1) the commander provides notification counseling within 2 working days, and the Soldier acknowledges enrollment within 2 working days; (2) the Soldier must meet with a dietitian or health care provider within 30 days of enrollment; (3) progress is assessed monthly — a monthly loss of 3–8 lbs or 1% body fat counts as satisfactory progress; (4) a Soldier fails the program if progress is less than satisfactory on two consecutive monthly assessments, or if after 6 months in the program he or she still exceeds the standard and has had less than satisfactory progress on three or more (nonconsecutive) assessments. After program failure the commander requests a medical evaluation and, if no qualifying medical condition is found, initiates separation action, a bar to reenlistment, or involuntary transfer to the IRR (Reserve Soldiers). Separation is a command and administrative process, not an automatic outcome.',
       },
       {
         question: 'Is the screening weight the same as the weight limit?',
-        answer: 'No. The screening weight is used to determine who needs to be "taped" (body fat assessed). Soldiers exceeding screening weight but within body fat standards pass. Soldiers below screening weight are exempt from the tape test unless they have a visibly disproportionate body composition. This two-tier system exists because muscle weighs more than fat by volume. A 5\'10" Soldier weighing 210 lbs with 12% body fat (very lean, very muscular) would exceed the screening weight of ~166 lbs by 44 lbs — but would easily pass the tape test. Conversely, a 5\'10" Soldier weighing 165 lbs could be below screening weight but still have 28% body fat (low muscle mass, high body fat percentage) — this condition is sometimes called "normal-weight obesity" or "skinny fat." If a Soldier below screening weight appears to have excess body fat, the commander can still order a tape test. The screening weight is a filter to reduce unnecessary taping, not a regulatory standard by itself.',
+        answer: 'No. The screening table weight (AR 600-9 Table B-1) is used to determine who needs a body fat assessment on DA Form 5500/5501. Soldiers exceeding the screening weight but within body fat standards pass. Soldiers below the table minimum are referred for medical evaluation. The two-tier system exists because muscle weighs more than fat by volume. A 5\'10" (70 in) male Soldier aged 21–27 has a screening weight of 185 lbs; if he weighs 210 lbs at 12% body fat he exceeds it by 25 lbs but easily passes the tape test. Conversely, a Soldier below the screening weight could still carry excess body fat (sometimes called "normal-weight obesity"); the regulation lets the commander order a body fat assessment when the Soldier\'s appearance suggests excessive body fat. The screening weight is a filter to reduce unnecessary taping, not a regulatory standard by itself.',
       },
       {
         question: 'How accurate is the Army tape test compared to DEXA or hydrostatic weighing?',
-        answer: 'The Army tape test (circumference method) has a standard error of approximately ±3–4% body fat compared to laboratory gold standards like DEXA (dual-energy X-ray absorptiometry), Bod Pod (air displacement plethysmography), or hydrostatic (underwater) weighing. The tape test tends to underestimate body fat in people with very high body fat (>35%) and overestimate in very lean individuals (<10% male, <15% female). For the population near the pass/fail threshold (typically 18–26% for males), the accuracy is reasonable — within ±3% for most individuals. The tape test was validated in large military populations specifically because it balances accuracy, cost ($0 for a measuring tape vs. $100–300 for a DEXA scan), portability (can be done in a motor pool or field environment), and speed (a trained NCO can tape 15–20 Soldiers per hour). The Army is aware of the limitations and periodically evaluates alternatives including waist-to-height ratio and direct body fat measurement technologies, but the circumference method remains the DoD standard as of 2025.',
+        answer: 'The Army tape test (circumference method) has a standard error of approximately ±3–4% body fat compared to laboratory gold standards like DEXA (dual-energy X-ray absorptiometry), Bod Pod (air displacement plethysmography), or hydrostatic (underwater) weighing. The tape test tends to underestimate body fat in people with very high body fat and overestimate it in very lean individuals. The tape test was adopted because it balances accuracy, cost ($0 for a measuring tape vs. $100–300 for a DEXA scan), portability (it can be done in a motor pool or field environment), and speed. The circumference method is the one prescribed in AR 600-9; check the current regulation and any Army directives for changes to the method or standards.',
       },
       {
         question: 'What is the relationship between the Army tape test and the ACFT (Army Combat Fitness Test)?',
@@ -269,33 +314,33 @@ const armyBodyFatConfig: CalculatorConfig = {
       {
         scenario: 'A 25-year-old male Soldier, 5\'9" (69 inches), weighs 195 lbs. His neck measures 16 inches, waist at navel measures 35 inches. He needs to know if he passes AR 600-9 for his age group.',
         inputs: { sex: 'male', age: '25', heightInches: '69', weight: '195', neck: '16', waist: '35' },
-        result: 'Body fat: approximately 18.0%. Maximum allowable for age 25 (22–27 bracket): 22%. Result: PASS. Screening weight approximately 160 lbs (he exceeds this by 35 lbs but passes tape test due to muscular build).',
-        insight: 'This Soldier exceeds his screening weight by 35 lbs yet passes the tape test with a comfortable margin (18.0% vs. 22% max). This is the classic "muscular Soldier" scenario. His waist-to-neck difference of 19 inches (35 − 16) drives a low body fat calculation because the log of this difference is the largest positive term in the formula. If he were to gain 2 inches on his waist (to 37 inches) while keeping neck the same, his body fat would jump to approximately 21.7% — still passing but much closer to the limit. This illustrates why neck circumference matters: a Soldier can pass the tape test by either losing abdominal fat (reducing waist) OR building neck/shoulder muscle (increasing neck) — though the Army strongly prefers the former approach for actual health outcomes.',
+        result: 'Body fat: approximately 18.0% (official whole-percent value 18%). Maximum allowable for age 25 (21–27 group): 22%. Result: PASS. Screening table weight for 69 in, age 21–27: 179 lbs (he exceeds this by 16 lbs but passes the tape test due to muscular build).',
+        insight: 'This Soldier exceeds his 179-lb screening weight by 16 lbs yet passes the tape test with a comfortable margin (18.0% vs. 22% max). This is the classic "muscular Soldier" scenario. His waist-to-neck difference of 19 inches (35 − 16) drives a low body fat calculation because the log of this difference is the largest positive term in the formula. If he were to gain 2 inches on his waist (to 37 inches) while keeping neck the same, his body fat would jump to approximately 21.7% — still passing but much closer to the limit. This illustrates why neck circumference matters: a Soldier can pass the tape test by either losing abdominal fat (reducing waist) OR building neck/shoulder muscle (increasing neck) — though the Army strongly prefers the former approach for actual health outcomes.',
       },
       {
-        scenario: 'A 32-year-old female Soldier, 5\'5" (65 inches), weighs 155 lbs. Neck: 13 inches, waist: 30 inches, hips: 38 inches. She is approaching the age bracket where the standard relaxes and wants to understand her current standing.',
+        scenario: 'A 32-year-old female Soldier, 5\'5" (65 inches), weighs 155 lbs. Neck: 13 inches, waist: 30 inches, hips: 38 inches. She is in the 28–39 age group (the standard relaxes again at 40) and wants to understand her current standing.',
         inputs: { sex: 'female', age: '32', heightInches: '65', weight: '155', neck: '13', waist: '30', hip: '38' },
-        result: 'Body fat: approximately 28.6%. Maximum allowable for age 32 (28–33 bracket): 34%. Result: PASS with a comfortable margin. Screening weight approximately 125 lbs (exceeded by 30 lbs).',
-        insight: 'This Soldier passes with 28.6% against a 34% maximum — a comfortable margin of 5.4 percentage points. She should be aware that in 2 years (age 34), her maximum increases to 36%, giving her even more room. However, she should not rely on the aging threshold — the goal is always to maintain fitness regardless of age adjustments. The female formula uses a sum of waist + hip − neck, making it sensitive to all three measurements. If her waist increased by 1 inch (31 inches), her body fat would rise to approximately 29.8% — still a comfortable PASS. If she reduced her waist by 1 inch (29 inches), body fat would drop to approximately 27.3% — an even wider margin. This illustrates how a few inches of waist circumference shift the calculated percentage without threatening her standing at this age. She should focus on reducing abdominal circumference through a combination of nutrition and total-body exercise. The good news: her neck measurement (13 inches) and hip measurement (38 inches) contribute favorably to the formula — a relatively larger neck and smaller hips both reduce the calculated body fat percentage.',
+        result: 'Body fat: approximately 28.6% (official whole-percent value 29%). Maximum allowable for age 32 (28–39 group): 34%. Result: PASS with a comfortable margin. Screening table weight for 65 in, age 28–39: 154 lbs (she is 1 lb over, so a tape test is required, which she passes).',
+        insight: 'This Soldier passes with 28.6% against a 34% maximum — a comfortable margin of 5.4 percentage points. Her maximum stays at 34% until age 40, when it rises to 36%, but she should not rely on the aging threshold — the goal is always to maintain fitness regardless of age adjustments. The female formula uses a sum of waist + hip − neck, making it sensitive to all three measurements. If her waist increased by 1 inch (31 inches), her body fat would rise to approximately 29.8% — still a comfortable PASS. If she reduced her waist by 1 inch (29 inches), body fat would drop to approximately 27.3% — an even wider margin. This illustrates how a few inches of waist circumference shift the calculated percentage without threatening her standing at this age. She should focus on reducing abdominal circumference through a combination of nutrition and total-body exercise. Her neck measurement (13 inches) lowers the calculated percentage; her hip measurement (38 inches) raises it.',
       },
       {
         scenario: 'A 45-year-old male National Guard Soldier, 6\'0" (72 inches), 235 lbs, preparing for annual body composition screening. Neck: 17 inches, waist: 40 inches. He failed last year at 29.5% body fat (age 44) and has been in ABCP for 8 months. He wants to know if his progress is sufficient.',
         inputs: { sex: 'male', age: '45', heightInches: '72', weight: '235', neck: '17', waist: '40' },
-        result: 'Body fat: approximately 23.8%. Maximum allowable for age 45 (40–45 bracket): 28%. Result: PASS with a solid margin. Compared to last year (29.5% at 40-inch waist with likely smaller neck), he has improved by adding 0.5 inch to neck (through strength training) and reducing waist by an estimated 1–2 inches.',
-        insight: 'At 23.8% against a 28% maximum, this Soldier passes with a solid 4.2-percentage-point margin. This marks a clear improvement over last year\'s 29.5% failing score. After 8 months in ABCP, this margin gives his commander confidence to remove the flag while counseling him to maintain his progress. Practical next steps: (1) maintain neck circumference through continued resistance training — losing neck muscle would worsen his body fat calculation; (2) continue reducing waist circumference toward 38 inches, which would bring him to approximately 20.4% — an even wider margin; (3) track trends rather than single-point measurements — a consistent downward trend in calculated body fat is the best indicator of sustainable progress. This case illustrates why the ABCP emphasizes long-term lifestyle changes over crash dieting before weigh-ins.',
+        result: 'Body fat: approximately 23.8% (official whole-percent value 24%). Maximum allowable for age 45 (40 and older group): 26%. Result: PASS with a narrow margin. Screening table weight for 72 in, age 40+: 203 lbs (he exceeds this by 32 lbs). Compared to last year (29.5% at 40-inch waist with likely smaller neck), he has improved by adding 0.5 inch to neck (through strength training) and reducing waist by an estimated 1–2 inches.',
+        insight: 'At 23.8% against a 26% maximum, this Soldier passes with a 2.2-percentage-point margin. This marks a clear improvement over last year\'s 29.5% failing score (which exceeded the same 26% maximum for his age group). After 8 months in ABCP, this margin gives his commander confidence to remove the flag while counseling him to maintain his progress. Practical next steps: (1) maintain neck circumference through continued resistance training — losing neck muscle would worsen his body fat calculation; (2) continue reducing waist circumference toward 38 inches, which would bring him to approximately 20.4% — a much wider margin; (3) track trends rather than single-point measurements — a consistent downward trend in calculated body fat is the best indicator of sustainable progress. This case illustrates why the ABCP emphasizes long-term lifestyle changes over crash dieting before weigh-ins.',
       },
     ],
     proTips: [
-      'Neck circumference is the most overlooked variable in the Army tape test — and building neck muscle can legitimately improve your calculated body fat percentage. The formula subtracts neck from waist (men) or from waist+hip (women), so a larger neck directly reduces the calculated body fat. Incorporate neck-specific exercises: neck flexion/extension with a harness or plate, shrugs for trapezius development, and direct neck work 2x/week. A 0.5-inch increase in neck circumference (achievable with 3–4 months of consistent training) can reduce calculated body fat by 1–2 percentage points — sometimes the difference between pass and fail. This is NOT "gaming the system" — it\'s building upper-body muscle mass, which AR 600-9 explicitly accounts for.',
+      'Neck circumference is the most overlooked variable in the Army tape test — and building neck muscle can legitimately improve your calculated body fat percentage. The formula subtracts neck from waist (men) or from waist+hip (women), so a larger neck directly reduces the calculated body fat. Incorporate neck-specific exercises: neck flexion/extension with a harness or plate, shrugs for trapezius development, and direct neck work 2x/week. A 0.5-inch increase in neck circumference (achievable with 3–4 months of consistent training) lowers calculated body fat by roughly 1 percentage point (a little more when the waist–neck difference is small) — sometimes the difference between pass and fail. This is NOT "gaming the system" — it\'s building upper-body muscle mass, which AR 600-9 explicitly accounts for.',
       'Measure at the same time of day and under the same conditions every time. Waist circumference varies by 0.5–1.5 inches over the course of a day due to food, water, bloating, and posture. Official Army tape tests are typically conducted in the morning (before PT formation) for consistency. For an accurate self-check, measure first thing in the morning after using the bathroom and before eating or drinking. Do NOT measure after meals, after drinking water, or in the evening — your waist measurement can be 1–2 inches larger, producing a falsely high body fat estimate. If a Soldier\'s official tape test is scheduled for 0600, their 9 PM self-measurement the night before is NOT predictive of their morning measurement.',
-      'The waist measurement site is DIFFERENT for men (at navel/belly button) vs. women (narrowest point of natural waist). This is the most common measurement error in self-administered tests. For men: find your navel (belly button). Place the tape directly across it, parallel to the floor. Do NOT suck in your stomach — according to AR 600-9 protocol, the Soldier is measured at the end of a normal exhalation. For women: find the narrowest part of your torso — typically 1–2 inches above the navel, roughly at the bottom of the ribcage. This is NOT at navel level for most women. Using the wrong site can change your measurement by 1–3 inches. When in doubt, ask a trained NCO to demonstrate the correct anatomical landmarks.',
+      'The waist measurement site is DIFFERENT for men (at navel/belly button) vs. women (narrowest point of natural waist). This is the most common measurement error in self-administered tests. For men: find your navel (belly button). Place the tape directly across it, parallel to the floor. Do NOT suck in your stomach — according to AR 600-9 protocol, the Soldier is measured at the end of a normal, relaxed exhalation. For women: find the narrowest part of your abdomen — AR 600-9 describes it as usually about halfway between the navel and the lower end of the breastbone (sternum). This is NOT at navel level for most women. Using the wrong site can change your measurement by 1–3 inches. When in doubt, ask a trained NCO to demonstrate the correct anatomical landmarks.',
       'The Army Body Composition Program (ABCP) requires "satisfactory progress" defined as 3–8 lbs per month or 1% body fat reduction per month. A common pitfall: Soldiers lose weight too aggressively (crash dieting, excessive cardio, sauna suits) to pass a monthly weigh-in, only to regain the weight immediately. This roller-coaster pattern is visible to commanders who review the trend rather than a single data point. A Soldier who loses 10 lbs then regains 8 lbs in the next month has effectively made only 2 lbs of progress over 60 days — far below the required rate. Sustainable progress = consistent 0.5–1% body fat reduction per month achieved through moderate caloric deficit, resistance training, and adequate sleep. Commanders are trained to distinguish between "working the program" (steady trend) and "gaming the weigh-in" (yo-yo pattern).',
-      'If you are close to the threshold (±2% of max), be aware that measurement rounding (up to nearest 0.5 inch) can swing your calculated body fat by 1–3%. AR 600-9 explicitly requires rounding UP, never down — a measurement of 35.1 inches is recorded as 35.5 inches. This rounding rule is NOT in your favor. To be safe, aim to be at least 2–3% under your maximum allowable body fat, not just "barely under." A Soldier who is exactly at their max minus 0.1% is one rounding decision away from failing — and the rounding always goes against you. The rule is applied consistently: 35.0 exactly stays 35.0, but 35.1 becomes 35.5.',
-      'The Army tape test formula is mathematically identical to the Navy method but the administrative context is different. In the Navy, body fat is one component of the Physical Fitness Assessment (PFA) — failing body fat means failing the PFA, which affects advancement and can lead to separation. In the Army, failing AR 600-9 triggers ABCP enrollment, which is a separate administrative action from the ACFT. Both services use the same math but different stakes. If you are transferring between services, be aware that each branch has its own maximum allowable body fat tables, measurement protocols, and consequences for exceeding standards. A body fat percentage that passes in the Army (28% for a 44-year-old male) may fail in the Marine Corps (which generally has stricter standards).',
+      'If you are close to the threshold (±2% of max), know the rounding rules. AR 600-9 rounds the neck UP and the abdomen, waist and hip DOWN to the nearest 0.5 inch (a 34 3/4-inch abdomen is recorded as 34.5 inches; a 16 1/4-inch neck as 16.5 inches), and both rules slightly lower the calculated percentage. The final percent body fat is also rounded to the nearest whole percent, so a calculated 22.4% in the 22% group is recorded as 22% and passes. Measurements are the average of three sets, so careful, repeatable tape placement matters more than any single reading. To be safe, aim to be at least 2–3% under your maximum allowable body fat, not just "barely under."',
+      'The Army tape test formula is mathematically identical to the Navy method but the administrative context is different. In the Navy, body fat is one component of the Physical Fitness Assessment (PFA) — failing body fat means failing the PFA, which affects advancement and can lead to separation. In the Army, failing AR 600-9 triggers ABCP enrollment, which is a separate administrative action from the fitness test. Both services use the same math but different stakes. If you are transferring between services, be aware that each branch has its own maximum allowable body fat tables, measurement protocols, and consequences for exceeding standards. A body fat percentage that passes under one service\'s table may fail under another\'s.',
     ],
     limitations: [
       'Self-measurement inaccuracy — it is physically difficult to measure your own neck and waist while maintaining the required posture (feet together, arms at sides, looking straight ahead). The calculator cannot replicate an official tape test conducted by trained personnel per AR 600-9 protocol.',
-      'Measurement rounding per AR 600-9 — official measurements are rounded UP to the nearest 0.5 inch, which always works against the Soldier. This calculator does not apply that rounding, so results may differ from an official test.',
+      'Measurement protocol — official measurements are the average of three sets of readings taken by trained personnel, each rounded to the nearest 0.5 inch (neck up, abdomen/waist/hip down). This calculator applies the same rounding rules to the single reading you enter, but it cannot reproduce the three-measurement averaging.',
       'Body proportion assumptions — the formula assumes average body proportions and may be less accurate for individuals with very short/long torsos relative to height, very narrow/wide shoulders, or significant muscular asymmetry.',
       'This calculator is NOT for official Army use, NOT for ABCP enrollment or administrative decisions. It is an educational tool for Soldiers to understand the formula and estimate their standing. Official tape tests must be conducted by trained unit personnel per the current AR 600-9.',
     ],
@@ -307,7 +352,7 @@ const armyBodyFatConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Body Fat Percentage', url: 'https://en.wikipedia.org/wiki/Body_fat_percentage' },
-      { source: 'U.S. Army - AR 600-9, The Army Body Composition Program', url: 'https://www.army.mil/e2/downloads/rv7/r2/policydocs/r600_9.pdf' },
+      { source: 'U.S. Army - AR 600-9, The Army Body Composition Program (28 June 2013) — Appendix B: Tables B-1, B-2, B-5 and measurement rules', url: 'https://www.army.mil/e2/downloads/rv7/r2/policydocs/r600_9.pdf' },
     ],
   },
 };

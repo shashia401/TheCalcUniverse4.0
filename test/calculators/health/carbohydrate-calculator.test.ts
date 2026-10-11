@@ -186,4 +186,30 @@ describe('Carbohydrate calculator', () => {
     const min = parseInt(range.replace(/,/g, '').match(/(\d+)/)![0]);
     expect(min).toBeGreaterThanOrEqual(1400);
   });
+
+  // ── Audit regressions (independent hand calculations) ──
+  it('doc example: 154 lb (69.85 kg) endurance runner -> 7-12 g/kg = 489-838 g (calc rounds each end)', () => {
+    // 154 lb x 0.45359237 = 69.853 kg ; x7 = 488.97 ; x12 = 838.2
+    const r = config.calculate({ unit: 'imperial', weight: '154', bodyFatPct: '', goal: 'endurance', eventDate: '' });
+    expect(getValue(r, 'dailyCarbRange')).toContain('489–838 g/day');
+    expect(getValue(r, 'dailyCarbRange')).toContain('1,956–3,352 kcal'); // 489*4 = 1956 ; 838*4 = 3352
+  });
+
+  it('glycogen loading is 8 g/kg/day for 3 days: 80 kg -> 640 g/day, starting 3 days before the event', () => {
+    const r = config.calculate({ unit: 'metric', weight: '80', bodyFatPct: '', goal: 'endurance', eventDate: '2026-09-15' });
+    const v = getValue(r, 'glycogenLoading');
+    expect(v).toContain('640 g/day');
+    expect(v).toContain('September 12'); // 2026-09-15 minus 3 days
+  });
+
+  it('rejects calendar-invalid event dates instead of silently rolling over (2026-02-31 -> Mar 3)', () => {
+    const r = config.calculate({ unit: 'metric', weight: '80', bodyFatPct: '', goal: 'endurance', eventDate: '2026-02-31' });
+    expect(r.find((x) => x.id === 'glycogenLoading')).toBeUndefined();
+  });
+
+  it('weight range is bounded', () => {
+    const w = config.inputs.find((i) => i.id === 'weight')!;
+    expect(w.min).toBeGreaterThan(0);
+    expect(w.max).toBeDefined();
+  });
 });

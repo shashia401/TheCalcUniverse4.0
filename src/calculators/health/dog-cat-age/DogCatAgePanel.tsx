@@ -18,8 +18,8 @@ export default function DogCatAgePanel({ values, results }: Props) {
   let epigeneticHuman: number | null = null;
 
   if (species === 'dog') {
-    // Traditional method (linear within years 1-2: age 1 -> 15, age 2 -> 24)
-    traditionalHuman = petAge < 1 ? petAge * 15 : petAge < 2 ? 15 + (petAge - 1) * 9 : 24 + (petAge - 2) * 4;
+    // Traditional method (AVMA: 15, +9, then +5 per year; linear within years 1-2: age 1 -> 15, age 2 -> 24)
+    traditionalHuman = petAge < 1 ? petAge * 15 : petAge < 2 ? 15 + (petAge - 1) * 9 : 24 + (petAge - 2) * 5;
     // Epigenetic method (age >= 1)
     if (petAge >= 1) {
       epigeneticHuman = 16 * Math.log(petAge) + 31;
@@ -86,7 +86,7 @@ export default function DogCatAgePanel({ values, results }: Props) {
             {/* Epigenetic method bar (dogs only, age >= 1) */}
             {epigeneticHuman !== null && (
               <>
-                <text x={10} y={98} fill="#64748b" fontSize={11} fontWeight="bold">Epigenetic (NIH 2020)</text>
+                <text x={10} y={98} fill="#64748b" fontSize={11} fontWeight="bold">Epigenetic (2020 clock)</text>
                 <rect x={10} y={108} width={barWidth(epigeneticHuman) * 2.5} height={30} rx={6} fill="#8b5cf6" opacity={0.8} />
                 <text x={10 + barWidth(epigeneticHuman) * 2.5 + 8} y={128} fill="#1e293b" fontSize={13} fontWeight="bold">
                   {epigeneticHuman.toFixed(1)} yrs
@@ -152,7 +152,7 @@ export default function DogCatAgePanel({ values, results }: Props) {
             in early years. A {species === 'dog' ? '1-year-old dog (~31 human years)' : '1-year-old cat (~15 human years)'} is
             reproductively mature — equivalent to a young adult human, not a 7-year-old child.
             {species === 'dog' && (
-              <span> The NIH 2020 epigenetic study revealed that dog aging follows a logarithmic curve:
+              <span> The 2020 epigenetic (DNA-methylation) study revealed that dog aging follows a logarithmic curve:
               rapid early development that decelerates with age.</span>
             )}
           </p>

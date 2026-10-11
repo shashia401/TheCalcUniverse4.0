@@ -108,4 +108,29 @@ describe('Fat Intake calculator', () => {
     // Should be ~73g (2200 * 0.3 / 9 ≈ 73)
     expect(target).toContain('g/day');
   });
+
+  // ── Audit regressions (hand calculations, 9 kcal/g, 2,200 kcal) ──
+  it('2,200 kcal maintenance: total fat 25-35% = 550-770 kcal = 61-86 g; saturated <= 6% = 132 kcal = 15 g', () => {
+    const r = config.calculate({ unit: 'metric', weight: '70', goal: 'maintain', calories: '2200' });
+    expect(getValue(r, 'totalFatRange')).toContain('61 – 86 g/day');
+    expect(getValue(r, 'saturatedFat')).toBe('≤ 15 g/day');
+    expect(getValue(r, 'monounsaturatedFat')).toBe('24 – 37 g/day'); // 10-15%: 220-330 kcal
+    expect(getValue(r, 'polyunsaturatedFat')).toBe('12 – 24 g/day'); // 5-10%: 110-220 kcal
+    expect(getValue(r, 'omega3')).toBe('1 – 3 g/day'); // IOM AMDR 0.6-1.2% of 2,200 kcal = 13.2-26.4 kcal
+  });
+
+  it('keto goal explains that the general-population fat-type guidance cannot account for 65-80% fat', () => {
+    const keto = config.calculate({ unit: 'metric', weight: '70', goal: 'keto', calories: '2200' });
+    expect(keto.find((x) => x.id === 'totalFatRange')!.interpretation).toContain('ketogenic');
+    const maintain = config.calculate({ unit: 'metric', weight: '70', goal: 'maintain', calories: '2200' });
+    expect(maintain.find((x) => x.id === 'totalFatRange')!.interpretation).toBeUndefined();
+  });
+
+  it('declared input ranges are bounded', () => {
+    for (const id of ['weight', 'calories']) {
+      const f = config.inputs.find((i) => i.id === id)!;
+      expect(f.min).toBeGreaterThan(0);
+      expect(f.max).toBeDefined();
+    }
+  });
 });

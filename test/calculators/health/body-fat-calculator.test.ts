@@ -217,4 +217,34 @@ describe('Body Fat calculator (U.S. Navy method)', () => {
     expect(getResult(r, 'essentialFat')).toBeDefined();
     expect(getResult(r, 'athleticRange')).toBeDefined();
   });
+
+  // ── Audit regressions (independent derivations) ──
+  it('female Navy equation: 65 in, neck 12.5, waist 27, hip 36 -> 163.205*log10(50.5) - 97.684*log10(65) - 78.387 = 22.5%', () => {
+    const r = config.calculate({
+      unit: 'imperial', sex: 'female', age: '28', weight: '140',
+      heightFt: '5', heightIn: '5', heightCm: '', neck: '12.5', abdomen: '', waist: '27', hip: '36',
+    });
+    expect(getValue(r, 'bodyFatPct')).toBe('22.5%');
+    expect(getValue(r, 'category')).toBe('Fitness'); // ACE women: fitness 21-24%
+    expect(getValue(r, 'fatMass')).toBe('31.5 lbs'); // 140 x 0.2251
+  });
+
+  it('metric female input gives the same answer as the inch equation (cm converted before applying the log coefficients)', () => {
+    const r = config.calculate({
+      unit: 'metric', sex: 'female', age: '28', weight: '63.5',
+      heightFt: '', heightIn: '', heightCm: '165.1', neck: '31.75', abdomen: '', waist: '68.58', hip: '91.44',
+    });
+    expect(getValue(r, 'bodyFatPct')).toBe('22.5%');
+  });
+
+  it('declared tape-measure ranges are bounded so cm and inch entries both pass but absurd values do not', () => {
+    for (const id of ['weight', 'heightFt', 'heightCm', 'neck', 'abdomen', 'waist', 'hip']) {
+      const f = config.inputs.find((i) => i.id === id)!;
+      expect(f.min).toBeGreaterThan(0);
+      expect(f.max).toBeDefined();
+    }
+    const neck = config.inputs.find((i) => i.id === 'neck')!;
+    expect(neck.min!).toBeLessThanOrEqual(12); // smallest realistic neck in inches
+    expect(neck.max!).toBeGreaterThanOrEqual(55); // largest realistic neck in cm
+  });
 });

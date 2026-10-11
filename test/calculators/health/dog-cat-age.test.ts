@@ -33,8 +33,8 @@ describe('Dog/Cat Age in Human Years calculator', () => {
       petAgeYears: '5',
     });
     const traditional = getValue(r, 'traditionalAge');
-    // 15 + 9 + 3*4 = 36
-    expect(traditional).toContain('36');
+    // AVMA rule: 15 + 9 + 3*5 = 39
+    expect(traditional).toContain('39');
   });
 
   it('returns correct cat age for a 10-year-old cat (15+9+8×4=56)', () => {

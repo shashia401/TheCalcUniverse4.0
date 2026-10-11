@@ -34,8 +34,8 @@ describe('Calories Burned calculator', () => {
       duration: '60',
     });
     const cals = parseNumber(getValue(r, 'caloriesBurned'));
-    // 3.3 MET × 70 kg × 1 hr = 231 kcal
-    near(cals, 231, 10);
+    // 2011 Compendium 17190 (walking 2.8-3.2 mph, level, moderate pace) = 3.5 MET: 3.5 × 70 kg × 1 hr = 245 kcal
+    expect(cals).toBe(245);
   });
 
   it('calculates calories for cycling 12-14 mph (imperial, 155 lbs, 45 min)', () => {
@@ -255,5 +255,35 @@ describe('Calories Burned calculator', () => {
   it('has variables defined', () => {
     expect(config.educational.variables).toBeDefined();
     expect(config.educational.variables.length).toBeGreaterThanOrEqual(3);
+  });
+
+  // ── Audit regressions: MET values checked against the 2011 Compendium of Physical Activities ──
+  // [activity id, Compendium MET, code]. Expected kcal = MET × 70 kg × 1 h.
+  it.each([
+    ['walk_slow', 2.8, '17152'], ['walk_mod', 3.5, '17190'], ['walk_35', 4.3, '17200'], ['walk_fast', 5.0, '17220'],
+    ['run_5mph', 8.3, '12030'], ['run_6mph', 9.8, '12050'], ['run_7mph', 11.0, '12070'], ['run_8mph', 11.8, '12090'],
+    ['run_10mph', 14.5, '12120'], ['jogging', 7.0, '12020'],
+    ['cycle_leisure', 4.0, '01010'], ['cycle_mod', 6.8, '01020'], ['cycle_fast', 8.0, '01030'], ['cycle_race', 10.0, '01040'],
+    ['swim_leisure', 6.0, '18310'], ['swim_mod', 5.8, '18240'], ['swim_vig', 9.8, '18230'], ['surfing', 3.0, '18220'],
+    ['basketball', 8.0, '15040'], ['soccer', 10.0, '15605'], ['tennis_singles', 8.0, '15690'], ['tennis_doubles', 6.0, '15680'],
+    ['golf_cart', 3.5, '15290'], ['boxing_spar', 7.8, '15120'], ['yoga_hatha', 2.5, '02150'], ['stairmaster', 9.0, '02065'],
+    ['shoveling', 5.3, '08195'], ['gardening', 3.8, '08245'], ['cleaning_heavy', 3.5, '05020'],
+  ])('%s uses the Compendium MET %f (code %s)', (activity, met) => {
+    const r = config.calculate({ unit: 'metric', weight: '70', activity, duration: '60' });
+    expect(parseNumber(getValue(r, 'caloriesBurned'))).toBe(Math.round(met * 70));
+  });
+
+  it('worked example (Mike): 200 lb walking 3 mph 45 min = 238 kcal; vigorous swimming 20 min = 296 kcal', () => {
+    // 200 lb = 90.718 kg ; 3.5 × 90.718 × 0.75 = 238.1 ; 9.8 × 90.718 × (1/3) = 296.3
+    const walk = config.calculate({ unit: 'imperial', weight: '200', activity: 'walk_mod', duration: '45' });
+    const swim = config.calculate({ unit: 'imperial', weight: '200', activity: 'swim_vig', duration: '20' });
+    expect(getValue(walk, 'caloriesBurned')).toBe('238 kcal');
+    expect(getValue(swim, 'caloriesBurned')).toBe('296 kcal');
+  });
+
+  it('weight range is bounded', () => {
+    const w = config.inputs.find((i) => i.id === 'weight')!;
+    expect(w.min).toBeGreaterThan(0);
+    expect(w.max).toBeDefined();
   });
 });

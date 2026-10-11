@@ -21,7 +21,8 @@ const fatIntakeConfig: CalculatorConfig = {
       label: 'Body Weight',
       type: 'number',
       placeholder: '170',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.1,
       required: true,
       helpText: 'Pounds (lbs) for Imperial — Kilograms (kg) for Metric',
@@ -44,7 +45,8 @@ const fatIntakeConfig: CalculatorConfig = {
       label: 'Daily Calorie Target',
       type: 'number',
       placeholder: '2200',
-      min: 0,
+      min: 500,
+      max: 10000,
       step: 10,
       required: true,
       helpText: 'Your TDEE or target daily calorie intake',
@@ -73,11 +75,11 @@ const fatIntakeConfig: CalculatorConfig = {
     const totalHighG = Math.round((calories * range.high) / 9);
     const midG = Math.round((calories * midPct) / 9);
 
-    // AHA: saturated fat ≤ 5-6% of daily calories
+    // AHA (Sacks 2017): saturated fat ≤ 5–6% of daily calories
     const satPctAHA = 0.06; // upper limit per AHA
     const satG = Math.round((calories * satPctAHA) / 9);
 
-    // Monounsaturated: 10-15% of calories (AHA guidance)
+    // Monounsaturated: typical 10–15% of calories (no formal AMDR — the remainder after saturated and polyunsaturated fat)
     const monoLowG = Math.round((calories * 0.10) / 9);
     const monoHighG = Math.round((calories * 0.15) / 9);
 
@@ -85,7 +87,7 @@ const fatIntakeConfig: CalculatorConfig = {
     const polyLowG = Math.round((calories * 0.05) / 9);
     const polyHighG = Math.round((calories * 0.10) / 9);
 
-    // Omega-3 specific: 0.6-1.2% of calories
+    // Omega-3 (total n-3, mostly ALA): IOM AMDR 0.6–1.2% of calories
     const omega3LowG = Math.round((calories * 0.006) / 9);
     const omega3HighG = Math.round((calories * 0.012) / 9);
 
@@ -96,6 +98,7 @@ const fatIntakeConfig: CalculatorConfig = {
         value: `${fmt(totalLowG)} – ${fmt(totalHighG)} g/day (${Math.round(range.low * 100)}–${Math.round(range.high * 100)}% of calories)`,
         highlight: true,
         color: 'neutral',
+        ...(goal === 'keto' ? { interpretation: 'A ketogenic intake puts 65–80% of calories into fat, so the saturated/monounsaturated/polyunsaturated guidance below (general-population limits) covers only part of it — favour unsaturated sources and review lipids with a clinician, especially with diabetes or high cholesterol.' } : {}),
       },
       {
         id: 'totalFatTarget',
@@ -141,19 +144,20 @@ const fatIntakeConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'Total Fat (g) = (Calories × Fat%) ÷ 9 | Saturated ≤ 6% of calories | 1 g fat = 9 kcal',
+    formulaSource: 'Fat = 9 kcal/g (Atwater). Total fat 20–35% of calories, linoleic (n-6) 5–10% and total n-3 0.6–1.2%: Institute of Medicine Dietary Reference Intakes (Macronutrients, 2005) acceptable macronutrient distribution ranges. Saturated fat 5–6%: Sacks FM et al., "Dietary Fats and Cardiovascular Disease: A Presidential Advisory From the American Heart Association", Circulation 2017;136:e1–e23. The goal-specific total-fat percentages (weight loss, heart health, ketogenic) are conventional ranges, not published recommendations.',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Dietary Fat Types Breakdown</text><rect x="80" y="60" width="50" height="30" rx="4" fill="var(--svg-ef4444)" opacity=".6"/><rect x="140" y="60" width="170" height="30" rx="4" fill="var(--svg-22c55e)" opacity=".6"/><rect x="320" y="60" width="100" height="30" rx="4" fill="var(--svg-3b82f6)" opacity=".6"/><text x="105" y="79" text-anchor="middle" font-size="10" fill="var(--svg-ef4444)" font-weight="bold">Sat</text><text x="225" y="79" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)" font-weight="bold">Mono</text><text x="370" y="79" text-anchor="middle" font-size="10" fill="var(--svg-3b82f6)" font-weight="bold">Poly</text><text x="220" y="110" text-anchor="middle" font-size="10" fill="var(--svg-666666)">&le; 6% &middot; 10-15% &middot; 5-10%</text><text x="220" y="140" text-anchor="middle" font-size="11" fill="var(--svg-333333)">Saturated &mdash; limit (animal fats)</text><text x="220" y="160" text-anchor="middle" font-size="11" fill="var(--svg-333333)">Unsaturated &mdash; prioritize (plant oils, fish)</text><text x="220" y="200" text-anchor="middle" font-size="12" fill="var(--svg-8b5cf6)">Total fat: 20-35% of daily calories</text></svg>',
       alt: 'Stacked bar chart showing saturated, monounsaturated, and polyunsaturated fat recommended proportions',
       caption: 'Saturated fat limited to 6% of calories; unsaturated fats (MUFA 10-15%, PUFA 5-10%) prioritized',
     },
     formulaDescription:
-      'Dietary fat provides 9 calories per gram. The American Heart Association recommends total fat intake of 20–35% of daily calories, with saturated fat limited to 5–6% of calories. Replacing saturated fat with unsaturated fats supports cardiovascular health.',
+      'Dietary fat provides 9 calories per gram. The Institute of Medicine acceptable range (also used by the Dietary Guidelines for Americans) is 20–35% of daily calories from total fat, and the American Heart Association recommends limiting saturated fat to 5–6% of calories. Replacing saturated fat with unsaturated fats supports cardiovascular health.',
     variables: [
       { symbol: 'Total Fat', name: 'Total Daily Fat', description: 'Sum of all dietary fat types. Provides essential fatty acids and enables absorption of fat-soluble vitamins A, D, E, K.' },
       { symbol: 'Saturated Fat', name: 'Saturated Fat Limit', description: 'Found in animal products, coconut oil, palm oil. AHA recommends ≤ 5–6% of daily calories for heart health.' },
-      { symbol: 'Monounsaturated Fat', name: 'Monounsaturated Fat (MUFA)', description: 'Found in olive oil, avocados, nuts. Linked to reduced cardiovascular risk. 10–15% of daily calories.' },
+      { symbol: 'Monounsaturated Fat', name: 'Monounsaturated Fat (MUFA)', description: 'Found in olive oil, avocados, nuts. Linked to reduced cardiovascular risk when it replaces saturated fat. Typically about 10–15% of daily calories (there is no formal recommended range; it is the remainder after saturated and polyunsaturated fat).' },
       { symbol: 'Polyunsaturated Fat', name: 'Polyunsaturated Fat (PUFA)', description: 'Includes omega-3 and omega-6 essential fatty acids. Found in fish, flaxseed, walnuts. 5–10% of daily calories.' },
-      { symbol: 'Omega-3', name: 'Omega-3 Fatty Acids', description: 'Essential fats with anti-inflammatory properties. EPA and DHA from fish are most beneficial. ALA from plant sources requires conversion. Target 0.6–1.2% of daily calories.' },
+      { symbol: 'Omega-3', name: 'Omega-3 Fatty Acids', description: 'Essential fats with anti-inflammatory properties. EPA and DHA from fish are the most beneficial; ALA from plant sources requires conversion. The IOM acceptable range for total omega-3 (mostly ALA) is 0.6–1.2% of daily calories; up to about 10% of that can come preformed as EPA and DHA.' },
     ],
     howToUse: [
       'Enter your body weight and daily calorie target (use a TDEE calculator to find maintenance calories).',
@@ -182,7 +186,7 @@ const fatIntakeConfig: CalculatorConfig = {
       'Heart-healthy meal planning — use the AHA-recommended saturated fat limit (≤6% of calories) to design meals that support cardiovascular health',
       'Ketogenic diet formulation — calculate the high fat intake (65-80% of calories) needed to achieve and maintain nutritional ketosis',
       'Weight loss fat budgeting — plan fat intake within 20-25% of calories to create a sustainable calorie deficit while maintaining essential fatty acid intake',
-      'Omega-3 optimization — track EPA/DHA intake targets (0.6-1.2% of calories) to support anti-inflammatory and brain health goals through fatty fish or supplementation'
+      'Omega-3 optimization — track total omega-3 intake against the 0.6-1.2% of calories acceptable range, using fatty fish (EPA/DHA) and plant sources such as flaxseed and walnuts (ALA)'
     ],
   
     citations: [

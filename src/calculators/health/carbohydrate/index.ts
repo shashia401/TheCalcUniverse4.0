@@ -29,7 +29,8 @@ const carbohydrateConfig: CalculatorConfig = {
       label: 'Body Weight',
       type: 'number',
       placeholder: '170',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.5,
       required: true,
       helpText: 'Used to calculate carb target in grams per kilogram of body weight',
@@ -43,7 +44,7 @@ const carbohydrateConfig: CalculatorConfig = {
       min: 3,
       max: 70,
       step: 0.5,
-      helpText: 'If entered, calculates from lean mass for more precision.',
+      helpText: 'Optional. If entered, the g/kg range is applied to lean mass instead of total weight, which gives a lower target. Published sports-nutrition ranges are per kg of total body weight, so leave blank to follow them directly.',
     },
     {
       id: 'goal',
@@ -102,8 +103,9 @@ const carbohydrateConfig: CalculatorConfig = {
     // Glycogen loading timeline (if event date provided)
     const glycogenLoadDate = eventDateStr && /^\d{4}-\d{2}-\d{2}$/.test(eventDateStr)
       ? (() => {
-          const eventDate = new Date(eventDateStr + 'T00:00:00');
-          if (isNaN(eventDate.getTime())) return null;
+          const [yy, mm, dd] = eventDateStr.split('-').map(Number);
+          const eventDate = new Date(yy, mm - 1, dd);
+          if (eventDate.getFullYear() !== yy || eventDate.getMonth() !== mm - 1 || eventDate.getDate() !== dd) return null;
           const loadStart = new Date(eventDate);
           loadStart.setDate(loadStart.getDate() - 3);
           return { loadStart, eventDate, loadDays: '3 days before event' };
@@ -133,8 +135,8 @@ const carbohydrateConfig: CalculatorConfig = {
     ];
 
     if (glycogenLoadDate) {
-      const loadCalsKg = 8; // conservative loading target
-      const loadG = Math.round(weightKg * loadCalsKg);
+      const loadGPerKg = 8; // moderate loading target (sports-nutrition guidance spans 8–12 g/kg/day)
+      const loadG = Math.round(weightKg * loadGPerKg);
       results.push({
         id: 'glycogenLoading',
         label: 'Glycogen Loading Protocol',
@@ -165,6 +167,7 @@ const carbohydrateConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'Carb target = Body Weight (kg) × g/kg range | 1 g carb = 4 kcal',
+    formulaSource: 'g/kg ranges follow the sports-nutrition guidance in Thomas DT, Erdman KA, Burke LM, "Position of the Academy of Nutrition and Dietetics, Dietitians of Canada, and the American College of Sports Medicine: Nutrition and Athletic Performance", Med Sci Sports Exerc 2016;48:543–568 (adjusted by goal; the fat-loss and ketogenic ranges are conventional, not from that statement). 4 kcal per gram of carbohydrate is the standard Atwater factor.',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Carb Types: Simple vs Complex</text><text x="50" y="70" font-size="13" fill="var(--svg-f59e0b)" font-weight="bold">Simple Carbs</text><rect x="50" y="85" width="160" height="30" rx="4" fill="var(--svg-f59e0b)" opacity=".3"/><text x="130" y="104" text-anchor="middle" font-size="11" fill="var(--svg-f59e0b)">Sugar, honey, fruit, sports drinks</text><text x="50" y="140" font-size="11" fill="var(--svg-666666)">Rapid absorption &mdash; quick energy source</text><text x="50" y="180" font-size="13" fill="var(--svg-22c55e)" font-weight="bold">Complex Carbs</text><rect x="50" y="195" width="320" height="30" rx="4" fill="var(--svg-22c55e)" opacity=".3"/><text x="210" y="214" text-anchor="middle" font-size="11" fill="var(--svg-22c55e)">Whole grains, legumes, vegetables, oats</text><text x="50" y="250" font-size="11" fill="var(--svg-666666)">Slow absorption &mdash; sustained energy + fiber</text><text x="220" y="295" text-anchor="middle" font-size="12" fill="var(--svg-8b5cf6)" font-weight="bold">Endurance: 7-12 g/kg &middot; Keto: 0.5-1 g/kg</text></svg>',
       alt: 'Two sections showing simple carbs (sugar, fruit, sports drinks) and complex carbs (whole grains, legumes, vegetables)',
@@ -175,7 +178,7 @@ const carbohydrateConfig: CalculatorConfig = {
     variables: [
       { symbol: 'g/kg', name: 'Grams Per Kilogram', description: 'The density of carbohydrate intake per unit of body mass. Ranges from 0.5 g/kg (keto) to 12 g/kg (endurance).' },
       { symbol: 'Glycogen', name: 'Muscle Glycogen', description: 'The storage form of carbohydrates in muscle and liver. Depleted by exercise, replenished by dietary carbs.' },
-      { symbol: 'Loading', name: 'Glycogen Loading', description: 'A protocol of increased carb intake (8–10 g/kg) for 3 days before an endurance event to maximize muscle glycogen stores.' },
+      { symbol: 'Loading', name: 'Glycogen Loading', description: 'A protocol of increased carb intake before an endurance event (longer than about 90 minutes) to maximize muscle glycogen stores. This calculator uses 8 g/kg per day for the 3 days before the event; sports-nutrition guidelines cite 8–12 g/kg per day, with the higher end used for 1–2 day loads.' },
     ],
     howToUse: [
       'Enter your body weight (and optionally body fat % for lean mass calculation).',
@@ -192,8 +195,8 @@ const carbohydrateConfig: CalculatorConfig = {
         answer: 'For low-to-moderate intensity training, a fat-adapted athlete can perform well on low carb. For high-intensity work (intervals, racing, sprints), carbohydrates are the preferred fuel source and low carb will likely impair performance. Elite endurance athletes typically train and race with high carb availability.',
       },
       {
-        question: 'When should I carb load before a race?',
-        answer: 'Yes. On days with 2+ hours of intense training, aim for the upper end of your range. On rest days, drop to the lower end. This is called "fueling for the work required" and is the modern evidence-based approach to periodized carbohydrate intake.',
+        question: 'Should I eat the same carbs every day?',
+        answer: 'No. On days with 2+ hours of intense training, aim for the upper end of your range. On rest days, drop to the lower end. This is called "fueling for the work required" and is the modern evidence-based approach to periodized carbohydrate intake. Carb loading itself (higher intake in the final 1–3 days) only makes sense before events lasting longer than about 90 minutes.',
       },
       {
         question: 'How do I time carbs around workouts?',

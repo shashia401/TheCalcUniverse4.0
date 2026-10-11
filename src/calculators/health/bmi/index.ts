@@ -39,7 +39,7 @@ const bmiConfig: CalculatorConfig = {
       max: 120,
       step: 1,
       required: false,
-      helpText: 'Optional — adult BMI applies to ages 18+',
+      helpText: 'Optional — adult BMI categories apply to ages 20+; for ages 2–19 use BMI-for-age percentiles',
     },
     {
       id: 'weight',
@@ -47,7 +47,8 @@ const bmiConfig: CalculatorConfig = {
       type: 'number',
       defaultValue: '170',
       placeholder: '170',
-      min: 0,
+      min: 5,
+      max: 1500,
       step: 0.1,
       required: true,
       helpText: 'Pounds (lbs) for Imperial · Kilograms (kg) for Metric',
@@ -59,8 +60,8 @@ const bmiConfig: CalculatorConfig = {
       defaultValue: '5',
       placeholder: '5',
       unit: 'ft',
-      min: 0,
-      max: 9,
+      min: 4,
+      max: 8,
       step: 1,
       helpText: 'Imperial only — feet portion of your height',
       showWhen: (v) => v.unit === 'imperial',
@@ -85,7 +86,8 @@ const bmiConfig: CalculatorConfig = {
       placeholder: '178',
       unit: 'cm',
       inputMode: 'decimal',
-      min: 0,
+      min: 120,
+      max: 275,
       step: 0.1,
       helpText: 'Metric only — total height in centimeters',
       showWhen: (v) => v.unit === 'metric',
@@ -129,10 +131,12 @@ const bmiConfig: CalculatorConfig = {
 
     const heightSq = heightM * heightM;
     const bmi = weightKg / heightSq;
+    // Classify on the one-decimal BMI that is displayed (e.g. 24.96 shows as 25.0 -> Overweight)
+    const shown = Number(bmi.toFixed(1));
     const category =
-      bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal weight' : bmi < 30 ? 'Overweight' : 'Obese';
+      shown < 18.5 ? 'Underweight' : shown < 25 ? 'Normal weight' : shown < 30 ? 'Overweight' : 'Obese';
     const band =
-      bmi < 18.5 ? 'below 18.5' : bmi < 25 ? '18.5–24.9' : bmi < 30 ? '25.0–29.9' : '30 and above';
+      shown < 18.5 ? 'below 18.5' : shown < 25 ? '18.5–24.9' : shown < 30 ? '25.0–29.9' : '30 and above';
 
     steps.push({
       label: 'Square your height',
@@ -170,7 +174,8 @@ const bmiConfig: CalculatorConfig = {
     if (isNaN(weight) || weightKg <= 0) return null;
 
     const bmi = weightKg / (heightM * heightM);
-    const category = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese';
+    const shown = Number(bmi.toFixed(1));
+    const category = shown < 18.5 ? 'Underweight' : shown < 25 ? 'Normal' : shown < 30 ? 'Overweight' : 'Obese';
     return {
       value: bmi,
       min: 15,
@@ -216,7 +221,9 @@ const bmiConfig: CalculatorConfig = {
     // recommends lower cutoffs (overweight ≥ 23, obese ≥ 27.5) because metabolic
     // complications appear at lower BMI in those populations. This calculator does NOT
     // auto-adjust for ethnicity — the educational section explains the difference.
+    // Classified on the one-decimal BMI shown to the user, so the label always agrees with the number.
     const getCategory = (b: number): { label: string; color: 'positive' | 'negative' | 'neutral' } => {
+      b = Number(b.toFixed(1));
       if (b < 18.5) return { label: 'Underweight', color: 'negative' };
       if (b < 25) return { label: 'Normal weight', color: 'positive' };
       if (b < 30) return { label: 'Overweight', color: 'neutral' };
@@ -257,9 +264,13 @@ const bmiConfig: CalculatorConfig = {
     const interpretation =
       category.label === 'Normal weight'
         ? `You're in the healthy weight range for your height (${healthyLowDisp.toFixed(0)}–${healthyHighDisp.toFixed(0)} ${diffUnit}). Maintaining is the goal.`
-        : bmi < 18.5
+        : category.label === 'Underweight'
         ? `You're below the healthy range. Reaching about ${healthyLowDisp.toFixed(0)} ${diffUnit} (BMI 18.5) would bring you into it.`
-        : `You're above the healthy range. About ${healthyHighDisp.toFixed(0)} ${diffUnit} (BMI 25.0) is the top of the healthy band for your height.`;
+        : `You're above the healthy range. About ${healthyHighDisp.toFixed(0)} ${diffUnit} (BMI 24.9) is the top of the healthy band for your height.`;
+    const ageNum = parseFloat(values.age);
+    const youthNote = !isNaN(ageNum) && ageNum < 20
+      ? ' Note: these adult categories do not apply under age 20 — children and teens are assessed with BMI-for-age percentiles (CDC).'
+      : '';
 
     return [
       { id: 'bmiPrime', label: 'BMI Prime', value: bmiPrime, color: 'neutral' },
@@ -269,7 +280,7 @@ const bmiConfig: CalculatorConfig = {
         value: bmi.toFixed(1),
         highlight: true,
         color: category.color,
-        interpretation,
+        interpretation: interpretation + youthNote,
       },
       {
         id: 'normalRange',
@@ -331,6 +342,7 @@ const bmiConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'BMI = Weight (kg) ÷ Height² (m²)',
+    formulaSource: 'BMI categories (18.5 / 25 / 30) from the WHO Technical Report Series 894, "Obesity: preventing and managing the global epidemic" (2000) and the CDC adult BMI categories; BMI = kg/m² (Quetelet). Devine ideal body weight: Devine BJ, Drug Intelligence & Clinical Pharmacy 1974;8:650–655 (50 kg men / 45.5 kg women + 2.3 kg per inch over 5 ft).',
     formulaDescription:
       "BMI is a screening index computed from weight and height to categorize adults into Underweight, Normal, Overweight, or Obese. It does not measure body fat directly.",
     diagram: {
@@ -385,7 +397,7 @@ const bmiConfig: CalculatorConfig = {
       },
       {
         question: 'How accurate is BMI for children and teenagers?',
-        answer: 'For children and teens aged 2–19, BMI is interpreted using percentile charts relative to age and sex, not fixed cutoffs. A BMI at the 85th percentile is considered overweight, and at or above the 95th percentile is obese. Pediatric BMI is always assessed in context of growth patterns, family history, and physical development. The calculator uses adult BMI formulas (ages 18+) and is not calibrated for children.',
+        answer: 'For children and teens aged 2–19, BMI is interpreted using percentile charts relative to age and sex, not fixed cutoffs. A BMI at the 85th percentile is considered overweight, and at or above the 95th percentile is obese. Pediatric BMI is always assessed in context of growth patterns, family history, and physical development. The calculator uses the adult BMI categories (ages 20+) and is not calibrated for children.',
       },
       {
         question: 'What are the limitations of using BMI alone?',
@@ -418,8 +430,8 @@ const bmiConfig: CalculatorConfig = {
           Height: '65 in (5\'5")',
           Weight: '150 lbs',
         },
-        result: 'BMI = 703 × 150 ÷ 65² = 703 × 150 ÷ 4,225 = 24.96 — just inside the Normal range (18.5–24.9).',
-        insight: 'Maria sits right at the top edge of the Normal band. A 3 lb gain would push her to ~25.5 (Overweight), so for screening purposes she is best treated as borderline — a good prompt to track the trend rather than the single reading.',
+        result: 'BMI = 703 × 150 ÷ 65² = 703 × 150 ÷ 4,225 = 24.96, which is reported as 25.0 — Overweight (25.0–29.9).',
+        insight: 'Maria sits right on the Normal/Overweight boundary: 24.96 is shown as 25.0, so she is classed as Overweight, while 1 lb lighter (149 lb → 24.8) she would be Normal. For screening purposes she is best treated as borderline — a good prompt to track the trend rather than the single reading.',
       },
       {
         scenario: 'David is a competitive rower: 6\'1" (185 cm), 210 lbs (95 kg), with roughly 12% body fat. He is surprised his BMI flags him as Overweight.',

@@ -45,7 +45,8 @@ const calorieConfig: CalculatorConfig = {
       type: 'number',
       defaultValue: '70',
       placeholder: '70',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.1,
       required: true,
       helpText: 'Kilograms (kg) for Metric · Pounds (lbs) for Imperial',
@@ -57,7 +58,8 @@ const calorieConfig: CalculatorConfig = {
       defaultValue: '175',
       placeholder: '175',
       unit: 'cm',
-      min: 0,
+      min: 120,
+      max: 275,
       step: 0.1,
       helpText: 'Metric only',
       showWhen: (v) => v.unit === 'metric',
@@ -68,8 +70,8 @@ const calorieConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       unit: 'ft',
-      min: 0,
-      max: 9,
+      min: 4,
+      max: 8,
       step: 1,
       helpText: 'Imperial only',
       showWhen: (v) => v.unit === 'imperial',
@@ -107,6 +109,7 @@ const calorieConfig: CalculatorConfig = {
       placeholder: '2000',
       unit: 'kcal',
       min: 0,
+      max: 20000,
       step: 1,
       required: false,
       helpText: 'Enter to see deficit/surplus vs. your TDEE',
@@ -290,6 +293,8 @@ const calorieConfig: CalculatorConfig = {
   educational: {
     formula:
       "Mifflin-St Jeor: BMR = 10W + 6.25H − 5A + 5 (Male) | BMR = 10W + 6.25H − 5A − 161 (Female) | TDEE = BMR × Activity Factor",
+    formulaSource:
+      'Mifflin MD, St Jeor ST, et al., Am J Clin Nutr 1990;51:241–247 (BMR equation). Activity factors 1.2 / 1.375 / 1.55 / 1.725 / 1.9 are the conventional Harris-Benedict/Katch-McArdle multipliers. 1 kg of body fat ≈ 7,700 kcal is the usual rule-of-thumb approximation (≈ 3,500 kcal per lb). Accuracy: Frankenfield D et al., J Am Diet Assoc 2005;105:775–789.',
     formulaDescription:
       'TDEE is the total number of calories your body burns in a day, calculated by multiplying your BMR (calories at complete rest) by an activity factor. Comparing your actual intake to your TDEE reveals your calorie deficit or surplus, which directly determines whether you lose, maintain, or gain weight.',
     diagram: {
@@ -345,7 +350,7 @@ const calorieConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'How accurate is the Mifflin-St Jeor equation for BMR?',
-        answer: 'The Mifflin-St Jeor equation is the most validated formula for the general population, with an accuracy of about ±100 kcal/day for 70% of people. It was developed in 1990 and has been consistently shown to estimate BMR within 10% of measured values in healthy adults. Athletes and very lean individuals may find Katch-McArdle more accurate, while older adults may be slightly overestimated.',
+        answer: 'The Mifflin-St Jeor equation is the best-validated formula for the general population. A systematic review (Frankenfield et al., 2005) found it predicted resting metabolic rate within 10% of the measured value more often than the other common equations — for roughly 8 in 10 non-obese adults and about 7 in 10 obese adults. Individual results still vary: some people are off by more than 10%, in either direction. Athletes and very lean individuals may find Katch-McArdle more accurate, while older adults may be slightly overestimated.',
       },
       {
         question: 'What is a safe and sustainable calorie deficit for weight loss?',
@@ -416,7 +421,7 @@ const calorieConfig: CalculatorConfig = {
       'Prioritize protein during a calorie deficit. Eating 1.6-2.2 g of protein per kg of body weight helps preserve lean muscle mass when dieting. More muscle means a higher BMR, creating a positive feedback loop for long-term weight management.',
     ],
     limitations: [
-      'This calculator uses the Mifflin-St Jeor equation, which estimates BMR within ±10% for about 70% of the population. Individual BMR can differ by 200-300 kcal/day due to genetics, body composition, hormonal status, and thyroid function. A lab-measured RMR (indirect calorimetry) is the gold standard if you need precise values for medical or athletic purposes.',
+      'This calculator uses the Mifflin-St Jeor equation, which in validation studies predicts resting metabolic rate within 10% of the measured value for roughly 70–80% of adults. Individual BMR can differ by 200-300 kcal/day due to genetics, body composition, hormonal status, and thyroid function. A lab-measured RMR (indirect calorimetry) is the gold standard if you need precise values for medical or athletic purposes.',
       'The activity factors (1.2-1.9) are broad population averages and do not capture individual variation. Two people who both "exercise 3-5 days/week" can have TDEEs that differ by 300-500 kcal due to exercise intensity, non-exercise activity thermogenesis (NEAT), occupation, and genetic differences in movement efficiency.',
       'This calculator does not account for metabolic adaptation (adaptive thermogenesis). When you maintain a calorie deficit for extended periods, your body reduces BMR by 5-15% beyond what weight loss alone would predict — an evolutionary survival response. Diet breaks, reverse dieting, and cycling between deficit and maintenance phases can help mitigate this effect.',
       'The 7,700 kcal per kg of body fat rule (3,500 kcal per pound) is a useful approximation that becomes less accurate as weight loss progresses. In reality, the energy content of body fat changes with body composition, and the body catabolizes some lean mass alongside fat. Expect slightly slower progress than the formula predicts, especially as you get leaner.',

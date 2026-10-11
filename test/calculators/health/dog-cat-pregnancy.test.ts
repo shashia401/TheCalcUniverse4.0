@@ -277,4 +277,27 @@ describe('Dog/Cat Pregnancy Whelping Calculator', () => {
     expect(explanation!.toLowerCase()).toContain('dog');
     expect(explanation!.toLowerCase()).toContain('cat');
   });
+
+  // ── Audit regressions: date arithmetic checked with python datetime.date (independent calendar) ──
+  it('dog bred 2026-03-01 (crosses the US DST change) -> due May 3, 2026; range Apr 28 - May 8', () => {
+    const r = config.calculate({ species: 'dog', breedingDate: '2026-03-01' });
+    expect(getValue(r, 'dueDate')).toBe('May 3, 2026');
+    expect(getValue(r, 'dueDateRange')).toBe('April 28, 2026 – May 8, 2026');
+  });
+
+  it('dog bred 2028-02-15 (leap year) -> due April 18, 2028 (63 days)', () => {
+    expect(getValue(config.calculate({ species: 'dog', breedingDate: '2028-02-15' }), 'dueDate')).toBe('April 18, 2028');
+  });
+
+  it('cat bred 2026-01-15 -> due March 21, 2026 (65 days); window March 19 - 23', () => {
+    const r = config.calculate({ species: 'cat', breedingDate: '2026-01-15' });
+    expect(getValue(r, 'dueDate')).toBe('March 21, 2026');
+    expect(getValue(r, 'dueDateRange')).toBe('March 19, 2026 – March 23, 2026');
+  });
+
+  it('dog bred 2025-10-20 -> due Dec 22, 2025; window Dec 17 - Dec 27', () => {
+    const r = config.calculate({ species: 'dog', breedingDate: '2025-10-20' });
+    expect(getValue(r, 'dueDate')).toBe('December 22, 2025');
+    expect(getValue(r, 'dueDateRange')).toBe('December 17, 2025 – December 27, 2025');
+  });
 });

@@ -58,7 +58,8 @@ const bmrConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '170',
       inputMode: 'decimal',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.1,
       required: true,
       helpText: 'Pounds (lbs) for Imperial · Kilograms (kg) for Metric',
@@ -70,8 +71,8 @@ const bmrConfig: CalculatorConfig = {
       placeholder: '5',
       unit: 'ft',
       inputMode: 'decimal',
-      min: 0,
-      max: 9,
+      min: 4,
+      max: 8,
       step: 1,
       helpText: 'Imperial only',
       showWhen: (v) => v.unit === 'imperial',
@@ -96,7 +97,8 @@ const bmrConfig: CalculatorConfig = {
       placeholder: '175',
       unit: 'cm',
       inputMode: 'decimal',
-      min: 0,
+      min: 120,
+      max: 275,
       step: 0.1,
       helpText: 'Metric only',
       showWhen: (v) => v.unit === 'metric',
@@ -153,6 +155,9 @@ const bmrConfig: CalculatorConfig = {
       katch = 370 + 21.6 * leanMass;
     }
 
+    // Katch-McArdle needs body fat %; without it the result would be a Mifflin number under a Katch label.
+    if (formula === 'katch' && katch === null) return [];
+
     const primaryBMR = formula === 'katch' && katch !== null
       ? katch
       : formula === 'harris'
@@ -172,7 +177,7 @@ const bmrConfig: CalculatorConfig = {
         value: `${fmt(primaryBMR)} kcal/day`,
         highlight: true,
         color: 'neutral' as const,
-        interpretation: `Your body burns ${fmt(primaryBMR)} kcal/day (${(primaryBMR / 24).toFixed(0)}/hour) at complete rest — before any movement or digestion. The ${formulaLabel} equation${formula === 'mifflin' ? ` (the ${sex === 'female' ? '−161' : '+5'} term is the ${sex}-specific constant)` : ''} estimates within ±10% for most people; ${Math.abs(mifflin - harris) > primaryBMR * 0.05 ? `note your Mifflin-St Jeor (${fmt(mifflin)}) and Harris-Benedict (${fmt(harris)}) estimates differ by ${fmt(Math.abs(mifflin - harris))} kcal — Mifflin-St Jeor is the more accurate modern standard` : 'your two formula estimates agree closely, which increases confidence in the number'}. Remember BMR is not a calorie target — multiply by your activity factor (TDEE) before planning a diet.`,
+        interpretation: `Your body burns ${fmt(primaryBMR)} kcal/day (${(primaryBMR / 24).toFixed(0)}/hour) at complete rest — before any movement or digestion. The ${formulaLabel} equation${formula === 'mifflin' ? ` (the ${sex === 'female' ? '−161' : '+5'} term is the ${sex}-specific constant)` : ''} is an estimate (in validation studies the best-performing equation, Mifflin-St Jeor, was within 10% of measured resting metabolic rate for roughly 8 in 10 non-obese adults); ${Math.abs(mifflin - harris) > primaryBMR * 0.05 ? `note your Mifflin-St Jeor (${fmt(mifflin)}) and Harris-Benedict (${fmt(harris)}) estimates differ by ${fmt(Math.abs(mifflin - harris))} kcal — Mifflin-St Jeor is the more accurate modern standard` : 'your two formula estimates agree closely, which increases confidence in the number'}. Remember BMR is not a calorie target — multiply by your activity factor (TDEE) before planning a diet.`,
       },
       {
         id: 'hourlyBurn',
@@ -219,8 +224,8 @@ const bmrConfig: CalculatorConfig = {
 
     results.push({
       id: 'safeMinimum',
-      label: 'Safe Minimum Calorie Intake (BMR)',
-      value: `Never eat below ${fmt(primaryBMR)} kcal/day`,
+      label: 'Reference Floor (BMR)',
+      value: `Eating below ${fmt(primaryBMR)} kcal/day for long stretches is not advised without medical supervision`,
       color: 'negative' as const,
     });
 
@@ -232,8 +237,9 @@ const bmrConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'Mifflin-St Jeor: BMR = 10W + 6.25H − 5A + S | Katch-McArdle: BMR = 370 + 21.6 × LBM',
+    formulaSource: 'Mifflin MD, St Jeor ST, et al. "A new predictive equation for resting energy expenditure in healthy individuals", Am J Clin Nutr 1990;51:241–247 (10W + 6.25H − 5A + 5 men / −161 women). Revised Harris-Benedict: Roza AM, Shizgal HM, Am J Clin Nutr 1984;40:168–182. Katch-McArdle: 370 + 21.6 × lean body mass (kg). Accuracy review: Frankenfield D et al., J Am Diet Assoc 2005;105:775–789.',
     formulaDescription:
-      'BMR is the number of calories your body burns at complete rest to sustain basic physiological functions. It is the floor of your caloric needs — you should never eat below this number.',
+      'BMR is the number of calories your body burns at complete rest to sustain basic physiological functions. It is a useful floor to keep in mind for your caloric needs — long stretches of eating well below it, without medical supervision, are not advised.',
     diagram: {
       svg: '<svg viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto">' +
         '<text x="210" y="24" font-family="system-ui,sans-serif" font-size="14" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">What Burns Your Daily Calories?</text>' +
@@ -266,7 +272,7 @@ const bmrConfig: CalculatorConfig = {
       'The formula line shows the exact math so you can verify the calculation.',
     ],
     explanation:
-      'BMR is your body\'s idle fuel consumption — the calories burned for breathing, circulation, cell repair, and temperature regulation while completely at rest. It represents the minimum caloric intake necessary to survive. The safe minimum calorie intake shown is your BMR: eating below this number causes your body to break down muscle and organ tissue for fuel. To calculate how many calories you actually need including activity, multiply BMR by an activity factor to get TDEE. Mifflin-St Jeor (1990) is the most validated for the general population, developed using a sample of 498 healthy adults. Harris-Benedict (1919, revised 1984) tends to overestimate BMR by 5% or more on average. Katch-McArdle is most accurate for lean athletes with known body fat % because it uses lean body mass rather than total weight — this eliminates the error from estimating BMR for overweight individuals where fat mass inflates the weight-based formulas. BMR naturally declines with age by approximately 2% per decade after age 20, primarily due to sarcopenia (age-related muscle loss). However, this decline can be significantly slowed with consistent resistance training. Body composition changes explain most of the age-related BMR decrease, not aging itself. Women typically have a 5–10% lower BMR than men of the same age and weight because they carry proportionally more body fat and less muscle mass. The thermic effect of food adds roughly 10% on top of BMR, and physical activity accounts for the rest of total daily energy expenditure.',
+      'BMR is your body\'s idle fuel consumption — the calories burned for breathing, circulation, cell repair, and temperature regulation while completely at rest. The figure shown as a reference floor is your BMR: eating far below it for long periods risks muscle loss and metabolic adaptation. To calculate how many calories you actually need including activity, multiply BMR by an activity factor to get TDEE. Mifflin-St Jeor (1990) is the most validated for the general population, developed using a sample of 498 healthy adults. Harris-Benedict (1919, revised 1984) tends to overestimate BMR by 5% or more on average. Katch-McArdle is most accurate for lean athletes with known body fat % because it uses lean body mass rather than total weight — this eliminates the error from estimating BMR for overweight individuals where fat mass inflates the weight-based formulas. BMR naturally declines with age by approximately 2% per decade after age 20, primarily due to sarcopenia (age-related muscle loss). However, this decline can be significantly slowed with consistent resistance training. Body composition changes explain most of the age-related BMR decrease, not aging itself. Women typically have a 5–10% lower BMR than men of the same age and weight because they carry proportionally more body fat and less muscle mass. The thermic effect of food adds roughly 10% on top of BMR, and physical activity accounts for the rest of total daily energy expenditure.',
     faqs: [
       {
         question: 'What is the most accurate BMR formula?',
@@ -274,7 +280,7 @@ const bmrConfig: CalculatorConfig = {
       },
       {
         question: 'Can I eat at my BMR to lose weight?',
-        answer: 'Technically yes, but it is not recommended. Eating at BMR is considered a very low calorie diet (VLCD) and may cause muscle loss, nutrient deficiencies, and metabolic adaptation. A safer deficit is TDEE minus 250–500 calories.',
+        answer: 'It is possible but usually not advisable. Eating at or near BMR is a very large deficit for most people (TDEE is typically 20–90% higher than BMR) and may cause muscle loss, nutrient shortfalls and rebound weight gain. Very-low-calorie diets (roughly under 800 kcal/day) require medical supervision. A safer deficit is TDEE minus 250–500 calories.',
       },
       {
         question: 'Does BMR decrease with age?',
@@ -327,7 +333,7 @@ const bmrConfig: CalculatorConfig = {
     proTips: [
       'BMR is calories burned at complete rest. Multiply it by an activity factor (1.2 sedentary up to 1.9 athlete) to get your TDEE — the number you actually plan meals around.',
       'Mifflin-St Jeor is the most accurate equation for the general population. Harris-Benedict tends to read about 5% high; only use Katch-McArdle if you know your body-fat percentage.',
-      'Don\'t eat below your BMR for extended periods — it drives muscle loss and metabolic slowdown rather than sustainable fat loss.',
+      'Don\'t eat far below your BMR for extended periods — it drives muscle loss and metabolic slowdown rather than sustainable fat loss.',
       'Recalculate after every ~10 lb (4–5 kg) of weight change; your BMR falls as you get lighter.',
     ],
 

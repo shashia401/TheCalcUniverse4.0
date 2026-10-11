@@ -139,7 +139,7 @@ describe('Chocolate Toxicity Calculator', () => {
       amountEaten: '30',
       amountUnit: 'g',
     });
-    const weightKg = 22 / 2.205;
+    const weightKg = 22 / 2.20462; // NIST: 1 kg = 2.20462 lb
     near(parseNumber(getValue(r, 'vomitingThreshold')), 20 * weightKg, 0.1);
     near(parseNumber(getValue(r, 'seizureThreshold')), 60 * weightKg, 0.1);
   });
@@ -174,9 +174,38 @@ describe('Chocolate Toxicity Calculator', () => {
       amountEaten: '25',
       amountUnit: 'g',
     });
-    // theobromine: 25 * 8.5 = 212.5mg
-    // caffeine: 25 * 0.3 = 7.5mg
-    near(parseNumber(getValue(r, 'theobromineMg')), 212.5, 0.1);
-    near(parseNumber(getValue(r, 'caffeineMg')), 7.5, 0.1);
+    // Merck Veterinary Manual: cocoa powder = 28.5 mg/g methylxanthines (807 mg/oz).
+    // Split used here: theobromine 26 mg/g + caffeine 2.5 mg/g -> 25 g = 650 + 62.5 = 712.5 mg
+    // (the old 8.5 + 0.3 mg/g constants under-reported cocoa powder by a factor of 3.2).
+    near(parseNumber(getValue(r, 'theobromineMg')), 650, 0.1);
+    near(parseNumber(getValue(r, 'caffeineMg')), 62.5, 0.1);
+    near(parseNumber(getValue(r, 'totalMethylxanthines')), 712.5, 0.1);
+  });
+
+  // ── Audit regressions: Merck Veterinary Manual methylxanthine content (mg/g) and dose bands ──
+  it.each([
+    ['White', 0.04], ['Milk', 2.3], ['Dark', 5.5], ['Baking Chocolate', 15.5], ['Cocoa Powder', 28.5],
+  ])('%s chocolate total methylxanthines per gram is within 15%% of the Merck value (%f mg/g)', (chocolateType, mgPerG) => {
+    const r = config.calculate({ dogWeight: '50', weightUnit: 'kg', chocolateType, amountEaten: '100', amountUnit: 'g' });
+    const perG = parseNumber(getValue(r, 'totalMethylxanthines')) / 100;
+    expect(perG).toBeGreaterThanOrEqual(mgPerG * 0.95);
+    expect(perG).toBeLessThanOrEqual(chocolateType === 'White' ? 0.06 : mgPerG * 1.15);
+  });
+
+  it('a 10 lb dog eating 1 oz of cocoa powder (807 mg) is 177.9 mg/kg -> emergency (previously reported as ~55 mg/kg)', () => {
+    // 10 lb = 4.5359 kg ; 1 oz = 28.3495 g x 28.5 mg/g = 808 mg ; 808 / 4.5359 = 178 mg/kg
+    const r = config.calculate({ dogWeight: '10', weightUnit: 'lbs', chocolateType: 'Cocoa Powder', amountEaten: '1', amountUnit: 'oz' });
+    expect(parseNumber(getValue(r, 'mgPerKg'))).toBeGreaterThan(170);
+    expect(getValue(r, 'severity')).toContain('EMERGENCY');
+  });
+
+  it('dose bands: 19.9 mg/kg low, 20 mild, 40 serious, 60 emergency', () => {
+    // 10 kg dog on baking chocolate (15.5 mg/g): grams = target mg/kg x 10 kg / 15.5
+    const sev = (mgPerKg: number) =>
+      getValue(config.calculate({ dogWeight: '10', weightUnit: 'kg', chocolateType: 'Baking Chocolate', amountEaten: String((mgPerKg * 10) / 15.5), amountUnit: 'g' }), 'severity');
+    expect(sev(19.9)).toContain('LOW RISK');
+    expect(sev(20.01)).toContain('MILD');
+    expect(sev(40.01)).toContain('SERIOUS');
+    expect(sev(60.01)).toContain('EMERGENCY');
   });
 });

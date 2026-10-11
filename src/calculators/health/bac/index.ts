@@ -52,6 +52,19 @@ const bacConfig: CalculatorConfig = {
       helpText: 'Beer ~5%, Wine ~12%, Liquor ~40%. Leave blank for standard drink equivalents (14g each).',
     },
     {
+      id: 'servingOz',
+      label: 'Serving Size per Drink (fl oz) — optional',
+      type: 'number',
+      placeholder: '12',
+      unit: 'fl oz',
+      min: 0.5,
+      max: 64,
+      step: 0.5,
+      required: false,
+      inputMode: 'decimal',
+      helpText: 'Only used with an ABV. If blank, a typical serving is assumed from the ABV: under 8.5% = 12 oz (beer), 8.5–20% = 5 oz (wine), above 20% = 1.5 oz (spirits). Enter your actual pour for strong beers or large wine glasses.',
+    },
+    {
       id: 'hours',
       label: 'Hours Since First Drink',
       type: 'number',
@@ -86,11 +99,15 @@ const bacConfig: CalculatorConfig = {
     const showCustomABV = !isNaN(alcoholPctParsed) && alcoholPctParsed > 0 && alcoholPctParsed <= 100;
 
     if (showCustomABV) {
-      // Determine serving size based on ABV range
+      // Serving size: the user's own pour if given, otherwise a typical serving inferred from ABV
+      // (wine at ~12% must NOT fall in the beer band, or each "drink" would be a 12 oz pour of wine).
+      const servingOzParsed = parseFloat(values.servingOz);
       let servingMl: number;
-      if (alcoholPctParsed <= 15) {
+      if (!isNaN(servingOzParsed) && servingOzParsed > 0) {
+        servingMl = servingOzParsed * 29.5735;
+      } else if (alcoholPctParsed <= 8.5) {
         servingMl = 355; // beer: 12 oz
-      } else if (alcoholPctParsed <= 25) {
+      } else if (alcoholPctParsed <= 20) {
         servingMl = 148; // wine: 5 oz
       } else {
         servingMl = 44; // liquor: 1.5 oz
@@ -204,6 +221,7 @@ const bacConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'BAC = (A ÷ (W × ρ)) × 100 − (β × t) | A = 14g × drinks | ρ = 0.68 male, 0.55 female | β = 0.015/hr',
+    formulaSource: 'Widmark EMP (1932), the Widmark formula with his mean distribution factors ρ = 0.68 (men) and 0.55 (women); elimination β ≈ 0.015 g/dL per hour is the usual average (individual range about 0.010–0.025). A US standard drink contains 14 g of pure alcohol (NIAAA). Variability of ρ: Seidl U, Jensen U, Alt A, Int J Legal Med 2000;114:71–77. The formula treats all alcohol as absorbed at once, so it reports the peak concentration before elimination and cannot capture absorption timing, food, or medications.',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">BAC Level Meter</text><rect x="30" y="65" width="380" height="40" rx="4" fill="var(--svg-eeeeee)"/><rect x="30" y="65" width="140" height="40" rx="4" fill="var(--svg-22c55e)" opacity=".4"/><text x="100" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-22c55e)">Safe 0.00-0.04</text><rect x="170" y="65" width="80" height="40" fill="var(--svg-f59e0b)" opacity=".4"/><text x="210" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-f59e0b)">Caution</text><rect x="250" y="65" width="80" height="40" fill="var(--svg-ef4444)" opacity=".4"/><text x="290" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ef4444)">Illegal</text><rect x="330" y="65" width="80" height="40" rx="4" fill="var(--svg-8b5cf6)" opacity=".4"/><text x="370" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-8b5cf6)">Severe</text><line x1="170" y1="55" x2="170" y2="65" stroke="var(--svg-333333)" stroke-width="1.5"/><text x="170" y="52" text-anchor="middle" font-size="9" fill="var(--svg-333333)">0.04</text><line x1="250" y1="55" x2="250" y2="65" stroke="var(--svg-333333)" stroke-width="1.5"/><text x="250" y="52" text-anchor="middle" font-size="9" fill="var(--svg-333333)">0.08</text><line x1="330" y1="55" x2="330" y2="65" stroke="var(--svg-333333)" stroke-width="1.5"/><text x="330" y="52" text-anchor="middle" font-size="9" fill="var(--svg-333333)">0.15</text><text x="220" y="140" text-anchor="middle" font-size="11" fill="var(--svg-8b5cf6)">Widmark: BAC from drinks, weight, sex and time</text></svg>',
       alt: 'Four-segment BAC meter showing Safe 0.00-0.04, Caution 0.04-0.08, Illegal 0.08-0.15, and Severe 0.15+ zones with threshold markers',
@@ -224,8 +242,8 @@ const bacConfig: CalculatorConfig = {
       { label: 'Utah legal limit', value: '0.05% BAC — strictest in the US (since 2018)' },
       { label: 'Commercial drivers (CDL)', value: '0.04% BAC — federal limit for commercial vehicle operators' },
       { label: 'Zero tolerance (under 21)', value: '0.00–0.02% BAC — all US states have zero-tolerance laws for underage drivers' },
-      { label: 'Widmark rho (male)', value: '0.68 — average alcohol distribution factor; range 0.60–0.75 depending on body composition' },
-      { label: 'Widmark rho (female)', value: '0.55 — average alcohol distribution factor; range 0.45–0.65 depending on body composition' },
+      { label: 'Widmark rho (male)', value: '0.68 — Widmark\'s commonly used mean distribution factor; individual values span roughly 0.51–0.85 (±2 SD)' },
+      { label: 'Widmark rho (female)', value: '0.55 — Widmark\'s commonly used mean distribution factor; individual values span roughly 0.44–0.66 (±2 SD)' },
       { label: 'Elimination rate (β)', value: '0.015 g/dL per hour — average; range 0.010–0.025 depending on genetics and liver health' },
       { label: 'Time to metabolize 1 drink', value: '~1 hour for average adult — but can be 45 min to 2+ hours depending on individual' },
       { label: 'Peak BAC timing (empty stomach)', value: '30–60 minutes after last drink' },
@@ -245,7 +263,7 @@ const bacConfig: CalculatorConfig = {
       'Review the estimated BAC and the bold safety disclaimer. Never drive based on this estimate.',
     ],
     explanation:
-      'Blood Alcohol Concentration (BAC) measures the amount of alcohol in your bloodstream. The Widmark formula has been used since 1932 and remains the standard for forensic BAC estimation. Alcohol is absorbed through the stomach and small intestine into the bloodstream, then metabolized primarily by the liver at a rate of approximately 0.015 g/dL per hour (about 1 standard drink per hour). Factors affecting actual BAC include: food intake (slows absorption), body composition (muscle holds more water than fat), liver health, genetics, medications, and tolerance. The same number of drinks produces different BACs at different times due to these factors. For example, a 200 lb man and a 130 lb woman who both consume 3 standard drinks over 2 hours will have very different estimated BACs — the man at approximately 0.055% and the woman at approximately 0.079%, which is just under the legal limit for him but over for her. This illustrates why body weight and sex are critical variables, not mere formality. Food in the stomach can reduce peak BAC by 50–60% compared to drinking on an empty stomach — a full meal before drinking significantly changes the outcome. However, once alcohol is absorbed, nothing speeds up elimination except time: coffee, cold showers, exercise, and vomiting do not lower BAC. This tool provides an estimate and is not legally or medically definitive. Never drive after consuming any alcohol.',
+      'Blood Alcohol Concentration (BAC) measures the amount of alcohol in your bloodstream. The Widmark formula has been used since 1932 and remains the standard for forensic BAC estimation. Alcohol is absorbed through the stomach and small intestine into the bloodstream, then metabolized primarily by the liver at a rate of approximately 0.015 g/dL per hour (about 1 standard drink per hour). Factors affecting actual BAC include: food intake (slows absorption), body composition (muscle holds more water than fat), liver health, genetics, medications, and tolerance. The same number of drinks produces different BACs at different times due to these factors. For example, a 200 lb man and a 130 lb woman who both consume 3 standard drinks over 2 hours will have very different estimated BACs — the man at approximately 0.038% and the woman at approximately 0.100%, which is well under the legal limit for him and over it for her. This illustrates why body weight and sex are critical variables, not mere formality. Food in the stomach slows absorption and can substantially lower and delay the peak BAC compared with drinking on an empty stomach — a full meal before drinking changes the outcome. However, once alcohol is absorbed, nothing speeds up elimination except time: coffee, cold showers, exercise, and vomiting do not lower BAC. This tool provides an estimate and is not legally or medically definitive. Never drive after consuming any alcohol.',
     faqs: [
       {
         question: 'Can I use this to determine if it is safe to drive?',
@@ -257,7 +275,7 @@ const bacConfig: CalculatorConfig = {
       },
       {
         question: 'Does eating food affect BAC?',
-        answer: 'Yes. Food in the stomach slows alcohol absorption by delaying gastric emptying, resulting in a lower peak BAC and slower onset. A full meal before drinking can reduce peak BAC by 50–60% compared to drinking on an empty stomach. However, food does not speed up metabolism — once absorbed, alcohol is eliminated at the same rate. The pyloric sphincter (valve between stomach and small intestine) closes after eating, keeping alcohol in the stomach longer where absorption is slower. Fatty and protein-rich meals are most effective; carbohydrate-only meals have less effect.',
+        answer: 'Yes. Food in the stomach slows alcohol absorption by delaying gastric emptying, resulting in a lower peak BAC and slower onset. A full meal before drinking can substantially lower and delay the peak BAC compared to drinking on an empty stomach. However, food does not speed up metabolism — once absorbed, alcohol is eliminated at the same rate. The pyloric sphincter (valve between stomach and small intestine) closes after eating, keeping alcohol in the stomach longer where absorption is slower. Fatty and protein-rich meals are most effective; carbohydrate-only meals have less effect.',
       },
       {
         question: 'Can I speed up alcohol elimination?',
@@ -265,7 +283,7 @@ const bacConfig: CalculatorConfig = {
       },
       {
         question: 'What factors most affect how quickly I get drunk?',
-        answer: 'The biggest factors are: (1) how fast you drink — your liver processes only about 1 drink per hour, so drinking faster than that accumulates alcohol; (2) food in your stomach — a full meal can reduce peak BAC by 50–60%; (3) your body weight and composition — lower weight and higher body fat percentage both lead to higher BAC for the same number of drinks; and (4) your biological sex — women typically reach higher BAC than men after the same number of drinks due to lower body water volume and lower alcohol dehydrogenase activity. Additional important factors: carbonated mixers (champagne, soda mixers) speed absorption; medications including acetaminophen (Tylenol) compete for liver enzymes and slow alcohol metabolism; and tolerance — chronic heavy drinkers may feel less impaired at a given BAC but have the same actual motor and cognitive deficits.',
+        answer: 'The biggest factors are: (1) how fast you drink — your liver processes only about 1 drink per hour, so drinking faster than that accumulates alcohol; (2) food in your stomach — a full meal can substantially lower and delay the peak; (3) your body weight and composition — lower weight and higher body fat percentage both lead to higher BAC for the same number of drinks; and (4) your biological sex — women typically reach higher BAC than men after the same number of drinks due to lower body water volume and lower alcohol dehydrogenase activity. Additional important factors: carbonated mixers (champagne, soda mixers) speed absorption; medications including acetaminophen (Tylenol) compete for liver enzymes and slow alcohol metabolism; and tolerance — chronic heavy drinkers may feel less impaired at a given BAC but have the same actual motor and cognitive deficits.',
       },
       {
         question: 'Why is the legal limit 0.08% BAC?',
@@ -284,20 +302,20 @@ const bacConfig: CalculatorConfig = {
       {
         scenario: 'A 180 lb man drinks 4 standard beers (5% ABV, 12 oz each) over 3 hours at a barbecue. He ate a full meal beforehand. He wants to know his approximate BAC and whether he should wait before driving home.',
         inputs: { sex: 'male', weight: '180', drinks: '4', hours: '3' },
-        result: 'Estimated BAC: approximately 0.043%. Peak BAC (before metabolism): 0.088%. Time until sober (0.00%): ~3 hours. Currently at or under 0.08% but still impaired. Impairment level: Mild impairment — reduced coordination, altered mood.',
-        insight: 'Even though this man is technically under 0.08% at the 3-hour mark (0.043%), he is still measurably impaired — his reaction time, divided attention, and coordination are degraded. The food he ate helped keep his peak BAC lower than it would have been on an empty stomach (likely ~0.10% vs ~0.14%). However, at 0.043% his crash risk is still elevated approximately 1.5–2x compared to 0.00%. He should wait at least 3 more hours to reach 0.00%, or use a rideshare/designated driver. Note: his peak BAC (0.088%) occurred about 60 minutes after his last drink — that was when he was most impaired, not when he was actively drinking. This common misperception is why people often drive at their most impaired state thinking they\'ve "sobered up."',
+        result: 'Estimated BAC: approximately 0.056%. Peak BAC (before metabolism): 0.101%. Time until sober (0.00%): ~4 hours. Currently at or under 0.08% but still impaired. Impairment level: Moderate impairment — slowed reaction time, reduced judgment.',
+        insight: 'Even though this man is technically under 0.08% at the 3-hour mark (0.056%), he is still measurably impaired — his reaction time, divided attention, and coordination are degraded. The 0.101% "peak" is the concentration if all 56 g of alcohol were absorbed with no elimination; because he ate a full meal, absorption was slower and his true peak was probably lower, but he is still roughly 4 hours from 0.00%. He should use a rideshare/designated driver or wait. Note: BAC typically peaks 30–90 minutes after the last drink, so the most impaired moment is often just after drinking stops — a common misperception is that you are safest to drive as soon as you stop drinking.',
       },
       {
         scenario: 'A 130 lb woman drinks 3 glasses of wine (12% ABV, 5 oz each) over 2 hours at dinner. She did not eat much. She wants to understand why 3 drinks for her is different from 3 drinks for her 200 lb male friend.',
         inputs: { sex: 'female', weight: '130', drinks: '3', hours: '2' },
-        result: 'Estimated BAC: approximately 0.100%. Peak BAC (before metabolism): 0.130%. Over the legal driving limit (0.08%). Time until sober (0.00%): ~6.6 hours. Impairment level: Significant impairment — blurred vision, poor coordination, slurred speech.',
+        result: 'Estimated BAC: approximately 0.100%. Peak BAC (before metabolism): 0.130%. Over the legal driving limit (0.08%) — about 2 more hours to get under it. Time until sober (0.00%): ~7 hours. Impairment level: Significant impairment — blurred vision, poor coordination, slurred speech.',
         insight: 'At 0.100% BAC, this woman is already over the legal driving limit (0.08%) and should not drive. Compare with her 200 lb male friend who had the same 3 drinks over 2 hours: his estimated BAC would be approximately 0.038% — well under the limit and less than half her BAC. This stark difference is driven by two factors: (1) the Widmark distribution factor (0.55 vs 0.68) accounts for women\'s lower body water percentage, and (2) her lower body weight (130 vs 200 lbs) means less tissue volume to distribute the alcohol. Additionally, women have lower levels of alcohol dehydrogenase (ADH) — the stomach enzyme that begins metabolizing alcohol before it enters the bloodstream — meaning a higher percentage of ingested alcohol reaches the blood. The combination of these factors means that "drink for drink" comparisons between men and women are not valid. A woman drinking the same number of drinks as her male companion will almost always have a significantly higher BAC.',
       },
       {
         scenario: 'A 200 lb man attending a party drinks 6 craft IPAs (7.5% ABV, 12 oz each) over 4 hours. He\'s been drinking steadily and hasn\'t eaten since lunch. He enters the custom ABV to see how these stronger beers differ from standard 5% beer.',
         inputs: { sex: 'male', weight: '200', drinks: '6', hours: '4', alcoholPct: '7.5' },
-        result: 'Estimated BAC: approximately 0.091%. Peak BAC: 0.151%. Legal limit threshold reached at approximately hour 4.7. Time until sober (0.00%): ~6 hours. Time until under 0.08%: ~0.7 hours. Impairment level: Significant impairment — blurred vision, poor coordination.',
-        insight: 'This is a dangerous situation for several reasons. First, craft IPAs at 7.5% ABV contain significantly more alcohol than standard 5% beer: each 12 oz IPA contains approximately 21g of pure alcohol vs. 14g for standard beer — about 50% more per drink. Six 7.5% ABV beers are equivalent to about 9 standard drinks. Second, without food, absorption is faster and peak BAC is higher. Third, at 0.091%, he is over the legal limit and significantly impaired — this is NOT subtle impairment. He should not drive for at least another hour to reach 0.08%, but even then he should not drive. At 0.091% BAC, his crash risk is approximately 5–10x baseline. The best choice is a rideshare or a sober ride. A common scenario leading to DUIs: the person feels "mostly fine" at hour 4 because most of the alcohol was consumed earlier, but the long tail of metabolism (still several hours from 0.00%) means they are still legally intoxicated. This case illustrates why "I stopped drinking an hour ago so I\'m fine" is dangerous reasoning.',
+        result: 'Estimated BAC: approximately 0.144%. Peak BAC: 0.204%. Time until sober (0.00%): ~10 hours. Time until under 0.08%: ~5 hours. Impairment level: Significant impairment — blurred vision, poor coordination, slurred speech.',
+        insight: 'This is a dangerous situation for several reasons. First, craft IPAs at 7.5% ABV contain significantly more alcohol than standard 5% beer: each 12 oz IPA contains approximately 21 g of pure alcohol vs. 14 g for standard beer — about 50% more per drink. Six 7.5% ABV beers are equivalent to about 9 standard drinks (126 g of alcohol). Second, without food, absorption is faster and the peak is higher. Third, at 0.144% he is far over the legal limit and significantly impaired — this is NOT subtle impairment, and he is still about 4–5 hours from dropping below 0.08% and roughly 10 hours from 0.00%. The best choice is a rideshare or a sober ride. A common scenario leading to DUIs: the person feels "mostly fine" at hour 4 because most of the alcohol was consumed earlier, but the long tail of metabolism means they are still legally intoxicated. This case illustrates why "I stopped drinking an hour ago so I\'m fine" is dangerous reasoning.',
       },
     ],
     proTips: [
@@ -305,11 +323,11 @@ const bacConfig: CalculatorConfig = {
       'Track "standard drinks," not "number of beverages." One craft IPA at 7.5% ABV is roughly 1.5 standard drinks. One 9 oz pour of 14% wine at a restaurant (many places pour more than 5 oz) is about 2 standard drinks. A "double" cocktail made with 3 oz of 40% liquor is 2 standard drinks. Misunderstanding serving sizes is the single biggest cause of BAC estimate errors. Pour 5 oz of wine into a measuring cup once — you may be surprised at how small a "standard drink" actually looks.',
       'Carbonated alcoholic beverages (champagne, prosecco, beer, soda-mixed cocktails) are absorbed faster than non-carbonated ones. The carbonation increases pressure in the stomach, forcing the pyloric sphincter open and accelerating gastric emptying into the small intestine where alcohol is absorbed most rapidly. Studies show peak BAC from champagne can be 20–30% higher than from the same amount of alcohol in a non-carbonated drink consumed at the same rate. If you\'re drinking sparkling wine or beer, your BAC will rise faster and peak higher than this calculator\'s Widmark estimate would suggest.',
       'Medications dramatically affect alcohol metabolism and impairment. Acetaminophen (Tylenol/paracetamol) competes for the same liver enzyme pathway (CYP2E1) and slows alcohol clearance while also increasing the risk of liver damage — the combination is hepatotoxic. Antihistamines, benzodiazepines, opioids, and sleep medications have synergistic sedative effects with alcohol — 0.05% BAC with these medications can produce impairment equivalent to 0.10%+ BAC alone. Read medication labels and consult your pharmacist. If your medication says "do not drink alcohol," it means your BAC estimate from this calculator is an underestimate of your actual impairment.',
-      'The Widmark formula assumes alcohol is consumed evenly over the time period. If you consumed all your drinks in the first hour and then nothing for 3 hours, your actual BAC curve looks very different from someone who sipped slowly over 4 hours — even though the "drinks" and "hours" numbers are the same. Binge drinking (rapid consumption) produces a much higher peak BAC followed by a steeper decline. The formula averages this out and will underestimate your peak BAC in binge scenarios. For rapid consumption, add 20–30% to the peak BAC estimate.',
+      'The Widmark formula assumes alcohol is consumed evenly over the time period. If you consumed all your drinks in the first hour and then nothing for 3 hours, your actual BAC curve looks very different from someone who sipped slowly over 4 hours — even though the "drinks" and "hours" numbers are the same. Binge drinking (rapid consumption) produces a much higher peak BAC followed by a steeper decline. The formula ignores the timing of individual drinks, so it cannot show how high your BAC peaked while you were drinking — it only estimates where you are now.',
       'Mobile breathalyzers (personal BAC testers) are available for $30–100 but have significant accuracy limitations. Consumer-grade devices use semiconductor sensors that drift with temperature, humidity, and repeated use — they can be off by ±0.02% or more compared to police-grade fuel-cell devices. They require calibration every 6–12 months (which most users never do) and a 15–20 minute wait after your last drink to avoid mouth alcohol contamination giving falsely high readings. If you use one, treat it as confirmatory only when it reads BELOW 0.02% — never as a "barely under 0.08%" permission slip to drive.',
     ],
     limitations: [
-      'Individual biological variation — the Widmark distribution factor (rho) varies from 0.60–0.75 for men and 0.45–0.65 for women depending on body fat, age, and health. Alcohol elimination rate (beta) ranges from 0.010–0.025 g/dL/hr, with chronic drinkers eliminating faster and those with liver disease slower.',
+      'Individual biological variation — the Widmark distribution factor (rho) varies widely (roughly 0.51–0.85 for men and 0.44–0.66 for women, ±2 SD) depending on body fat, age, and health. Alcohol elimination rate (beta) ranges from 0.010–0.025 g/dL/hr, with chronic drinkers eliminating faster and those with liver disease slower.',
       'Consumption pattern effects — drinking faster produces a higher peak BAC than the same drinks consumed slowly. Food, carbonated beverages, and medication interactions all affect absorption and are not modeled quantitatively.',
       'Genetic and health factors — ALDH2 deficiency (affecting ~36% of East Asians) dramatically slows metabolism. Liver disease, kidney disease, and diabetes all alter alcohol processing. Arterial BAC can be 50%+ higher than venous BAC in the first 30–60 minutes after drinking.',
       'This tool is NOT a sobriety test and MUST NOT be used to decide whether to drive. The only safe BAC for driving is 0.00%. If you have consumed any alcohol, do not drive. For emergencies, call 911. For alcohol concerns, contact SAMHSA at 1-800-662-HELP (4357).',
@@ -321,7 +339,7 @@ const bacConfig: CalculatorConfig = {
       'Social event planning — estimate the effects of different drinking patterns to plan safer consumption and understand why the same number of drinks affects people differently'
     ],
     citations: [
-      { source: 'NIH - NIAAA BAC', url: 'https://www.niaaa.nih.gov/publications/brochures-and-fact-sheets/understanding-blood-alcohol-concentration' },
+      { source: 'NIAAA Rethinking Drinking — What is a Standard Drink (14 g of pure alcohol)', url: 'https://rethinkingdrinking.niaaa.nih.gov/how-much-too-much/whats-standard-drink' },
       { source: 'CDC - Alcohol and Public Health', url: 'https://www.cdc.gov/alcohol/' },
       { source: 'SAMHSA National Helpline', url: 'https://www.samhsa.gov/find-help/national-helpline' },
     ],

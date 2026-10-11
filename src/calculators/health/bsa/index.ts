@@ -21,7 +21,8 @@ const bsaConfig: CalculatorConfig = {
       label: 'Weight',
       type: 'number',
       placeholder: '170',
-      min: 0,
+      min: 2,
+      max: 1500,
       step: 0.1,
       required: true,
       inputMode: 'decimal',
@@ -33,8 +34,8 @@ const bsaConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       unit: 'ft',
-      min: 0,
-      max: 9,
+      min: 1,
+      max: 8,
       step: 1,
       inputMode: 'numeric',
       helpText: 'Imperial only — feet portion',
@@ -57,7 +58,8 @@ const bsaConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '178',
       unit: 'cm',
-      min: 0,
+      min: 40,
+      max: 275,
       step: 0.1,
       inputMode: 'decimal',
       helpText: 'Metric only',
@@ -133,6 +135,7 @@ const bsaConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'Mosteller: BSA = √(Height(cm) × Weight(kg) ÷ 3600) | Du Bois: BSA = 0.007184 × W^0.425 × H^0.725',
+    formulaSource: 'Mosteller RD, "Simplified calculation of body-surface area", N Engl J Med 1987;317:1098. Du Bois D & Du Bois EF, Arch Intern Med 1916;17:863–871 (0.007184 × W^0.425 × H^0.725). Haycock GB, Schwartz GJ, Wisotsky DH, J Pediatr 1978;93:62–66 (0.024265 × W^0.5378 × H^0.3964). Weight in kg, height in cm.',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Body Surface Area (BSA)</text><circle cx="220" cy="50" r="16" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><path d="M204,66 L198,85 L190,110 L186,155 L190,200 L198,240 L208,270 L232,270 L242,240 L250,200 L254,155 L250,110 L242,85 L236,66" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><line x1="160" y1="50" x2="160" y2="270" stroke="var(--svg-ef4444)" stroke-width="1.5" stroke-dasharray="3,2"/><line x1="155" y1="50" x2="165" y2="50" stroke="var(--svg-ef4444)" stroke-width="1.5"/><line x1="155" y1="270" x2="165" y2="270" stroke="var(--svg-ef4444)" stroke-width="1.5"/><text x="155" y="165" text-anchor="end" font-size="11" fill="var(--svg-ef4444)" transform="rotate(-90,155,165)">Height</text><line x1="150" y1="110" x2="290" y2="110" stroke="var(--svg-22c55e)" stroke-width="1.5"/><line x1="150" y1="105" x2="150" y2="115" stroke="var(--svg-22c55e)" stroke-width="1.5"/><line x1="290" y1="105" x2="290" y2="115" stroke="var(--svg-22c55e)" stroke-width="1.5"/><text x="220" y="105" text-anchor="middle" font-size="11" fill="var(--svg-22c55e)">Body Width</text><text x="220" y="320" text-anchor="middle" font-size="12" fill="var(--svg-8b5cf6)" font-weight="bold">BSA = &radic;(H &times; W &divide; 3600) m&sup2;</text></svg>',
       alt: 'Person outline with height and width measurement annotations for body surface area calculation',
@@ -142,7 +145,7 @@ const bsaConfig: CalculatorConfig = {
       'Body Surface Area estimates the total external surface area of the human body. The Mosteller formula is the most widely used clinically because of its simplicity. BSA is used for chemotherapy dosing, burn severity assessment (rule of nines), and certain medication calculations where weight-based dosing is insufficient. The average adult BSA is 1.7 m².',
     variables: [
       { symbol: 'BSA', name: 'Body Surface Area', description: 'Total surface area of the body in square meters. Used clinically for medication dosing and burn assessment.' },
-      { symbol: 'Mosteller', name: 'Mosteller Formula', description: 'BSA = √(Height × Weight ÷ 3600). The most commonly used formula — simple, accurate, and recommended by the FDA for oncology dosing.' },
+      { symbol: 'Mosteller', name: 'Mosteller Formula', description: 'BSA = √(Height × Weight ÷ 3600). The most commonly used formula — simple, accurate, and widely used in clinical practice.' },
       { symbol: 'Du Bois', name: 'Du Bois Formula', description: 'BSA = 0.007184 × W^0.425 × H^0.725. The original BSA formula developed in 1916 from direct measurement of 9 subjects.' },
     ],
     quickReference: [
@@ -152,12 +155,12 @@ const bsaConfig: CalculatorConfig = {
       { label: 'Newborn BSA', value: '~0.25 m²' },
       { label: 'Child (5 years) BSA', value: '~0.7–0.8 m²' },
       { label: 'Child (10 years) BSA', value: '~1.0–1.2 m²' },
-      { label: 'Mosteller formula', value: 'BSA = √(Height(cm) × Weight(kg) ÷ 3600) — FDA recommended, clinical standard' },
+      { label: 'Mosteller formula', value: 'BSA = √(Height(cm) × Weight(kg) ÷ 3600) — widely used in clinical practice' },
       { label: 'Du Bois formula', value: 'BSA = 0.007184 × W^0.425 × H^0.725 — original 1916 formula from 9 subjects' },
       { label: 'Haycock formula', value: 'BSA = 0.024265 × W^0.5378 × H^0.3964 — preferred for infants/children' },
       { label: 'eGFR normalization', value: 'Standardized to 1.73 m² — the "textbook" reference BSA for renal function' },
       { label: 'Cardiac index formula', value: 'CI = Cardiac Output (L/min) ÷ BSA (m²). Normal: 2.5–4.0 L/min/m²' },
-      { label: 'Chemotherapy carboplatin dosing', value: 'Calvert formula uses BSA + renal function. NEVER self-calculate — requires oncologist.' },
+      { label: 'Carboplatin dosing', value: 'Calvert formula: dose (mg) = target AUC × (GFR + 25) — based on kidney function, not BSA. NEVER self-calculate — requires an oncologist.' },
     ],
     howToUse: [
       'Select your unit system (Imperial or Metric).',
@@ -171,7 +174,7 @@ const bsaConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'Why is BSA used for chemotherapy dosing?',
-        answer: 'Chemotherapy drugs have a narrow therapeutic index — too little is ineffective, too much is toxic. BSA correlates better with drug distribution than body weight because many chemo drugs distribute throughout total body water and extracellular space, which scales with surface area. The FDA and most oncology protocols (including the National Comprehensive Cancer Network guidelines) require BSA-based dosing for drugs like doxorubicin, cyclophosphamide, and carboplatin. The Calvert formula for carboplatin specifically uses BSA combined with renal function (GFR) to calculate the precise dose in milligrams. BSA-based dosing reduces the risk of both under-dosing (treatment failure) and over-dosing (life-threatening toxicity).',
+        answer: 'Chemotherapy drugs have a narrow therapeutic index — too little is ineffective, too much is toxic. BSA has traditionally been used because it correlates better with metabolic rate and drug distribution than body weight alone, and many cytotoxic drugs (for example doxorubicin and cyclophosphamide) are labeled and prescribed in mg/m² doses. Carboplatin is different: the Calvert formula (dose in mg = target AUC × (GFR + 25)) is based on kidney function rather than BSA. Note that BSA-based dosing is a convention rather than a precise science — the ASCO guideline (2012, updated 2021) recommends full weight-based dosing using actual body weight for obese adults rather than capping BSA. Accurate measurement matters in both directions: under-dosing risks treatment failure and over-dosing risks life-threatening toxicity.',
       },
       {
         question: 'What is a normal BSA?',
@@ -179,7 +182,7 @@ const bsaConfig: CalculatorConfig = {
       },
       {
         question: 'Which BSA formula should I use?',
-        answer: 'Mosteller is the current clinical standard recommended by the FDA and most oncology protocols. It gives nearly identical results to Du Bois (within 3%) but is much simpler to calculate — it requires only multiplication, division, and a square root. Haycock is more accurate for infants and children because it was validated on a population that included pediatric subjects. Du Bois, despite being the oldest formula (1916) and based on only 9 subjects, has proven remarkably accurate across diverse populations over the past century. For practical purposes, any of the three formulas is acceptable — they differ by less than 3% for typical adult measurements.',
+        answer: 'Mosteller is the most widely used formula in clinical practice. It gives nearly identical results to Du Bois (within about 3% for typical adults) but is much simpler to calculate — it requires only multiplication, division, and a square root. Haycock is more accurate for infants and children because it was validated on a population that included pediatric subjects. Du Bois, despite being the oldest formula (1916) and based on only 9 subjects, has proven remarkably accurate across diverse populations over the past century. For practical purposes, any of the three formulas is acceptable — they differ by less than 3% for typical adult measurements.',
       },
       {
         question: 'Why does BSA matter for burn assessment?',
@@ -200,15 +203,15 @@ const bsaConfig: CalculatorConfig = {
     ],
     workedExamples: [
       {
-        scenario: 'An oncologist needs to calculate the BSA for a 70 kg, 175 cm patient starting a new chemotherapy regimen. The Mosteller formula is the clinic standard per FDA guidance.',
+        scenario: 'An oncologist needs to calculate the BSA for a 70 kg, 175 cm patient starting a new chemotherapy regimen. The clinic uses the Mosteller formula.',
         inputs: { unit: 'metric', weight: '70', heightCm: '175' },
-        result: 'Mosteller: 1.84 m². Du Bois: 1.85 m². Haycock: 1.84 m². Average: 1.84 m².',
+        result: 'Mosteller: 1.84 m². Du Bois: 1.85 m². Haycock: 1.85 m². Average: 1.85 m².',
         insight: 'All three formulas agree within 0.01 m² for this patient — this is typical for average-sized adults. The oncologist would use 1.84 m² to calculate the chemotherapy dose. For example, if the protocol calls for doxorubicin 60 mg/m², the dose would be 60 × 1.84 = 110.4 mg (rounded to 110 mg). This patient\'s BSA is slightly above the 1.73 m² reference, meaning they will receive a slightly higher absolute dose than the "textbook" patient — but this is appropriate because their larger body volume distributes the drug more widely. Using weight-only dosing would be incorrect here; BSA-based dosing accounts for both height and weight.',
       },
       {
         scenario: 'A pediatrician needs BSA for a 15 kg, 100 cm child to calculate a medication dose. Haycock is preferred for pediatric patients.',
         inputs: { unit: 'metric', weight: '15', heightCm: '100' },
-        result: 'Mosteller: 0.65 m². Du Bois: 0.64 m². Haycock: 0.66 m². Average: 0.65 m².',
+        result: 'Mosteller: 0.65 m². Du Bois: 0.64 m². Haycock: 0.65 m². Average: 0.64 m².',
         insight: 'The child\'s BSA is about 0.65 m² — significantly lower than the adult average of 1.7 m² because BSA does not scale linearly with size. This is why pediatric medication dosing must be BSA-based: a 15 kg child is roughly 21% of a 70 kg adult\'s weight, but their BSA is about 38% of an adult\'s BSA. Weight-based dosing would give this child only one-fifth of the adult dose, which could be subtherapeutic. BSA-based dosing would give approximately 38% of the adult dose — a significantly higher and more appropriate amount. This discrepancy between weight and BSA scaling is largest in infants and narrows as children grow toward adult size. The Haycock formula was specifically validated on children and is the preferred choice here, though Mosteller\'s result (0.65 m²) is close enough for clinical use.',
       },
       {
@@ -219,11 +222,11 @@ const bsaConfig: CalculatorConfig = {
       },
     ],
     proTips: [
-      'For clinical calculations (chemotherapy dosing, burn assessment, cardiac index), always use Mosteller — it is the FDA-recommended standard and is simplest. Save the formula in your phone: sqrt(height_cm × weight_kg / 3600). You can calculate it with any basic calculator that has a square root button. The other formulas provide cross-validation — if Mosteller and Du Bois differ by more than 5%, double-check your height and weight inputs, as this usually indicates a measurement error rather than a real divergence between the formulas.',
+      'For clinical calculations (chemotherapy dosing, burn assessment, cardiac index), Mosteller is the usual choice — it is the most widely used and simplest. Save the formula in your phone: sqrt(height_cm × weight_kg / 3600). You can calculate it with any basic calculator that has a square root button. The other formulas provide cross-validation — if Mosteller and Du Bois differ by more than 5%, double-check your height and weight inputs, as this usually indicates a measurement error rather than a real divergence between the formulas.',
       'BSA is not a health metric like BMI or body fat percentage. A larger BSA does not mean you are unhealthy, and a smaller BSA does not mean you are healthier. BSA is simply a physical measurement used to scale clinical calculations. Do not track your BSA over time as a health goal — it will change if your weight changes, which is already tracked more meaningfully through BMI, waist circumference, or body fat percentage. BSA is a tool for clinicians, not a personal health target.',
-      'When using BSA for medication dosing, understand that BSA-based dosing can overestimate the dose for obese patients. This is known as the "obesity dosing paradox" — BSA scales with weight, but chemotherapy drug distribution in obese patients may not scale proportionally with BSA due to lower blood flow to adipose tissue. Many oncology protocols cap BSA at 2.0 m² or use adjusted body weight for patients with BMI > 30. If you are calculating BSA for personal education about a medication you are receiving, always follow your doctor\'s prescribed dose — never adjust your own medication based on BSA calculations.',
+      'In obese patients the question of how to dose chemotherapy is settled differently from the old habit of capping BSA: the ASCO guideline (2012, updated 2021) recommends full weight-based dosing of cytotoxic chemotherapy using actual body weight, because capping BSA (for example at 2.0 m²) or using ideal weight has been associated with under-treatment without a toxicity benefit. If you are calculating BSA for personal education about a medication you are receiving, always follow your doctor\'s prescribed dose — never adjust your own medication based on BSA calculations.',
       'BSA formulas assume a typical body shape and proportion. For people with amputations, severe scoliosis, dwarfism, or other conditions that significantly alter body proportions, BSA formulas may be inaccurate. In burn care, the Rule of Nines is adjusted for children (the head represents a larger percentage in infants: 18% vs. 9% in adults) and for obesity. For these special populations, direct measurement methods (3D body scanning) or condition-specific adjustment factors are used in clinical settings.',
-      'If you are using BSA for fitness or sports physiology purposes (e.g., calculating heat dissipation capacity or VO2max normalization), note that BSA-to-mass ratio matters more than absolute BSA. A smaller athlete (e.g., a marathon runner at 55 kg, 170 cm) has a higher BSA-to-mass ratio than a larger athlete (e.g., a rugby player at 110 kg, 185 cm). Higher BSA-to-mass ratio = more surface area per unit of body mass = better heat dissipation capacity. This is one reason smaller athletes tend to perform better in hot-weather endurance events. The calculation: BSA (m²) / weight (kg). A typical marathoner might have 1.65 m² / 55 kg = 0.030 m²/kg, while a rugby player might have 2.30 m² / 110 kg = 0.021 m²/kg — the marathoner has ~43% more surface area per kilogram for cooling.',
+      'If you are using BSA for fitness or sports physiology purposes (e.g., calculating heat dissipation capacity or VO2max normalization), note that BSA-to-mass ratio matters more than absolute BSA. A smaller athlete (e.g., a marathon runner at 55 kg, 170 cm) has a higher BSA-to-mass ratio than a larger athlete (e.g., a rugby player at 110 kg, 185 cm). Higher BSA-to-mass ratio = more surface area per unit of body mass = better heat dissipation capacity. This is one reason smaller athletes tend to perform better in hot-weather endurance events. The calculation: BSA (m²) / weight (kg). By the Mosteller formula, the marathoner has 1.61 m² / 55 kg = 0.029 m²/kg, while the rugby player has 2.38 m² / 110 kg = 0.022 m²/kg — the marathoner has roughly 35% more surface area per kilogram for cooling.',
     ],
     commonUses: [
       'Chemotherapy dosing — oncologists use BSA to calculate chemotherapy drug doses, as drug distribution correlates better with surface area than body weight',
@@ -233,7 +236,7 @@ const bsaConfig: CalculatorConfig = {
     ],
     limitations: [
       'Body composition and proportion assumptions — BSA formulas assume average body proportions. Individuals with significantly different muscle mass, body fat, or conditions like amputations, severe scoliosis, kyphosis, dwarfism, or gigantism may have actual BSA that differs from formula estimates.',
-      'Clinical factors not modeled — edema or ascites (fluid retention) can add kilograms to weight without increasing surface area. The obesity dosing paradox means BSA-based chemotherapy may overestimate doses for patients with BMI > 30.',
+      'Clinical factors not modeled — edema or ascites (fluid retention) can add kilograms to weight without increasing surface area. In obese patients, current ASCO guidance is to use full weight-based chemotherapy doses rather than capped BSA, so a formula-derived BSA is not the only input to a dosing decision.',
       'Formula derivation limitations — these formulas were derived primarily from Caucasian populations with small sample sizes (Du Bois: 9 subjects; Mosteller: derived mathematically; Haycock: 81 subjects). Ethnic body proportion differences may introduce systematic biases.',
       'For clinical medication dosing, carboplatin and chemotherapeutic agents should ONLY be dosed by a licensed physician — never self-calculate or self-adjust doses. The Rule of Nines is taught for concept understanding only; actual burn assessment must be performed by trained medical personnel.',
     ],

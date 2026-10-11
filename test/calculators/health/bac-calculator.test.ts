@@ -305,4 +305,41 @@ describe('BAC calculator', () => {
     expect(edu.citations).toBeDefined();
     expect(edu.citations!.length).toBeGreaterThanOrEqual(2);
   });
+
+  // ─── Audit regressions (independent derivations) ────────────────────
+  // Widmark (1932) with Seidl et al. (2000) r = 0.68 men: BAC% = A(g) / (W(g) * r) * 100.
+  // 180 lb male = 81,646.6 g; W*r = 55,519.7 g.
+  it('12% ABV wine counts as a 5 oz pour (14.0 g), not a 12 oz beer-size pour (33.6 g)', () => {
+    // 148 mL * 0.12 * 0.789 = 14.01 g -> 14.01 / 55,519.7 * 100 = 0.0252 %
+    const r = config.calculate({ sex: 'male', weight: '180', drinks: '1', hours: '0', alcoholPct: '12' });
+    expect(getValue(r, 'rawBac')).toContain('0.025');
+    expect(getValue(r, 'standardDrinks')).toContain('~14 g');
+  });
+
+  it('5% ABV beer is a 12 oz pour (14.0 g) and 40% spirits a 1.5 oz pour (13.9 g)', () => {
+    const beer = config.calculate({ sex: 'male', weight: '180', drinks: '1', hours: '0', alcoholPct: '5' });
+    const spirits = config.calculate({ sex: 'male', weight: '180', drinks: '1', hours: '0', alcoholPct: '40' });
+    expect(getValue(beer, 'rawBac')).toContain('0.025');
+    expect(getValue(spirits, 'rawBac')).toContain('0.025');
+  });
+
+  it('honours an explicit serving size: a 12 oz glass of 12% wine = 33.6 g -> 0.061%', () => {
+    // 12 oz * 29.5735 mL * 0.12 * 0.789 = 33.60 g; 33.60 / 55,519.7 * 100 = 0.0605
+    const r = config.calculate({ sex: 'male', weight: '180', drinks: '1', hours: '0', alcoholPct: '12', servingOz: '12' });
+    expect(getValue(r, 'rawBac')).toContain('0.061');
+  });
+
+  it('worked example 1 (180 lb man, 4 standard drinks, 3 h) is 0.056% now / 0.101% peak, not 0.043% / 0.088%', () => {
+    // 56 g / 55,519.7 g * 100 = 0.1009 ; minus 0.015 * 3 = 0.0559
+    const r = config.calculate({ sex: 'male', weight: '180', drinks: '4', hours: '3' });
+    expect(getValue(r, 'bac')).toContain('0.056');
+    expect(getValue(r, 'rawBac')).toContain('0.101');
+  });
+
+  it('worked example 3 (200 lb man, 6 x 12 oz 7.5% beers, 4 h) is 0.144% now / 0.204% peak', () => {
+    // 355 mL * 0.075 * 0.789 = 21.0 g each -> 126.0 g; 126.0 / (90,718.4 * 0.68) * 100 = 0.2043 ; minus 0.06 = 0.1443
+    const r = config.calculate({ sex: 'male', weight: '200', drinks: '6', hours: '4', alcoholPct: '7.5' });
+    expect(getValue(r, 'bac')).toContain('0.144');
+    expect(getValue(r, 'rawBac')).toContain('0.204');
+  });
 });

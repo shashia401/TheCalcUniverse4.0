@@ -104,4 +104,35 @@ describe('Blood Type Calculator (Punnett Square)', () => {
     expect(ab).toBeUndefined();
     expect(o).toBeUndefined();
   });
+
+  // ── Audit regressions: Punnett probabilities recomputed by hand ──
+  // A parent: P(passes A)=0.75, P(passes O)=0.25 (AA or AO equally likely); same for B. Rh+ parent: P(passes r)=0.25.
+  it('A+ x B+: AB 56.3%, A 18.8%, B 18.8%, O 6.3%; Rh+ 93.8% / Rh- 6.3%; AB+ 52.7%, O- 0.4%', () => {
+    const r = config.calculate({ parent1Blood: 'A', parent1Rh: '+', parent2Blood: 'B', parent2Rh: '+' });
+    expect(getValue(r, 'aboAB')).toBe('56.3%'); // 0.75 x 0.75 = 0.5625
+    expect(getValue(r, 'aboA')).toBe('18.8%');  // 0.75 x 0.25 = 0.1875
+    expect(getValue(r, 'aboB')).toBe('18.8%');
+    expect(getValue(r, 'aboO')).toBe('6.3%');   // 0.25 x 0.25 = 0.0625
+    expect(getValue(r, 'rhPositive')).toBe('93.8%'); // 1 - 0.25 x 0.25
+    expect(getValue(r, 'rhNegative')).toBe('6.3%');
+    const combined = getValue(r, 'combinedHeader');
+    expect(combined).toContain('Type AB+: 52.7%'); // 0.5625 x 0.9375
+    expect(combined).toContain('Type O-: 0.4%');   // 0.0625 x 0.0625 = 0.0039
+  });
+
+  it('O- x AB+: A 50%, B 50%, no AB or O; Rh+ 75% / Rh- 25%', () => {
+    const r = config.calculate({ parent1Blood: 'O', parent1Rh: '-', parent2Blood: 'AB', parent2Rh: '+' });
+    expect(getValue(r, 'aboA')).toBe('50.0%');
+    expect(getValue(r, 'aboB')).toBe('50.0%');
+    expect(r.find((x) => x.id === 'aboAB')).toBeUndefined();
+    expect(r.find((x) => x.id === 'aboO')).toBeUndefined();
+    expect(getValue(r, 'rhPositive')).toBe('75.0%');
+    expect(getValue(r, 'rhNegative')).toBe('25.0%');
+  });
+
+  it('A x A: type O only possible via AO x AO (25% under the uniform-genotype prior: 0.25 x 0.25 = 6.25%)', () => {
+    const r = config.calculate({ parent1Blood: 'A', parent1Rh: '+', parent2Blood: 'A', parent2Rh: '+' });
+    expect(getValue(r, 'aboO')).toBe('6.3%');
+    expect(getValue(r, 'aboA')).toBe('93.8%');
+  });
 });

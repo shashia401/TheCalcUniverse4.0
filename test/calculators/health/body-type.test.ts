@@ -189,4 +189,36 @@ describe('Body Type calculator', () => {
     expect(r.length).toBeGreaterThan(0);
     expect(getValue(r, 'bodyShape')).toBeTruthy();
   });
+
+  // ── Audit regressions: WHO (2008) WHR thresholds are >= 0.85 (women) and >= 0.90 (men) ──
+  // The old code had an unreachable male branch (whr > 0.90 is always caught by whr > 0.85) so a
+  // WHR of 0.95 was reported as a female-only risk.
+  it('WHR 0.95 (38/40) is flagged above BOTH the female (0.85) and male (0.90) WHO thresholds', () => {
+    const r = config.calculate({ unit: 'imperial', bust: '42', waist: '38', hip: '40' });
+    expect(getValue(r, 'waistHipRatio')).toBe('0.95');
+    expect(getValue(r, 'whrHealthRisk')).toContain('both women (0.85) and men (0.90)');
+  });
+
+  it('WHR 0.875 (35/40) is elevated for women only', () => {
+    const r = config.calculate({ unit: 'imperial', bust: '40', waist: '35', hip: '40' });
+    expect(getValue(r, 'whrHealthRisk')).toContain('if female');
+    expect(getValue(r, 'whrHealthRisk')).toContain('below the male threshold');
+  });
+
+  it('WHR exactly 0.85 (34/40) meets the WHO >= 0.85 threshold; 0.84 does not', () => {
+    expect(getValue(config.calculate({ unit: 'imperial', bust: '40', waist: '34', hip: '40' }), 'whrHealthRisk')).toContain('if female');
+    expect(getValue(config.calculate({ unit: 'imperial', bust: '40', waist: '33.6', hip: '40' }), 'whrHealthRisk')).toContain('Standard');
+  });
+
+  it('WHR exactly 0.90 (36/40) is flagged for men as well', () => {
+    expect(getValue(config.calculate({ unit: 'imperial', bust: '40', waist: '36', hip: '40' }), 'whrHealthRisk')).toContain('both women');
+  });
+
+  it('declared circumference ranges are bounded', () => {
+    for (const id of ['bust', 'waist', 'hip']) {
+      const f = config.inputs.find((i) => i.id === id)!;
+      expect(f.min).toBeGreaterThan(0);
+      expect(f.max).toBeDefined();
+    }
+  });
 });

@@ -22,7 +22,8 @@ const caloriesBurnedConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '170',
       inputMode: 'decimal',
-      min: 0,
+      min: 20,
+      max: 1500,
       step: 0.5,
       required: true,
       helpText: 'Heavier individuals burn more calories for the same activity',
@@ -32,7 +33,7 @@ const caloriesBurnedConfig: CalculatorConfig = {
       label: 'Activity',
       type: 'select',
       required: true,
-      helpText: 'Choose your activity — MET values come from the Compendium of Physical Activities',
+      helpText: 'Choose your activity — MET values come from the 2011 Compendium of Physical Activities',
       options: ACTIVITIES.flatMap(cat => cat.items.map(item => ({
         label: `${item.label} (${cat.category})`,
         value: item.id,
@@ -114,8 +115,9 @@ const caloriesBurnedConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'Calories = MET × Weight (kg) × Duration (hours)',
+    formulaSource: 'Ainsworth BE, Haskell WL, Herrmann SD, et al. "2011 Compendium of Physical Activities: a second update of codes and MET values", Med Sci Sports Exerc 2011;43(8):1575–1581 (MET values; the activity code is noted beside each value in activities.ts). 1 MET ≈ 1 kcal/kg/h (3.5 mL O₂/kg/min).',
     formulaDescription:
-      'The Metabolic Equivalent of Task (MET) system provides standardized energy cost values for hundreds of physical activities. One MET = 1 kcal/kg/hour (the energy cost of sitting quietly). This formula derives from the 2011 Compendium of Physical Activities.',
+      'The Metabolic Equivalent of Task (MET) system provides standardized energy cost values for hundreds of physical activities. One MET is about 1 kcal/kg/hour (the energy cost of sitting quietly). The MET values used here are taken from the 2011 Compendium of Physical Activities (Ainsworth et al.); calories = MET × body weight in kg × hours gives the gross (total) energy cost of the activity, including the resting component.',
     diagram: {
       svg: '<svg viewBox="0 0 420 230" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto">' +
         '<text x="210" y="20" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Calories Burned by Activity (per hour)</text>' +
@@ -136,13 +138,13 @@ const caloriesBurnedConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Select your weight unit and enter your body weight.',
-      'Choose an activity from the categorized list (100+ activities from the Compendium of Physical Activities).',
+      'Choose an activity from the categorized list (60+ activities from the Compendium of Physical Activities).',
       'Enter the duration of your activity in minutes.',
       'Review your estimated calorie burn, MET value, and per-minute rate.',
       'Compare different activities at the same duration to see which burns more calories for your body weight.',
     ],
     explanation:
-      'The Compendium of Physical Activities is the gold-standard reference for MET values, maintained by researchers at Arizona State University and the National Cancer Institute. It provides standardized energy cost estimates for 800+ activities. The formula Calories = MET × weight(kg) × time(hours) estimates the total energy expenditure of an activity above and beyond resting metabolism (the MET value already excludes the 1 MET baseline). Actual calorie burn varies by individual due to fitness level, body composition, exercise efficiency, and environmental conditions. Fitter individuals may burn slightly fewer calories doing the same activity because their bodies are more efficient. For example, a 155 lb person running at 6 mph for 30 minutes burns approximately 355 calories, while a 185 lb person doing the same run burns about 425 calories — the 30 lb weight difference accounts for roughly 70 additional calories burned. Similarly, running on a treadmill (no wind resistance, flat surface) burns about 5% fewer calories than outdoor running on a flat route. The MET values assume "steady state" effort — stop-and-go activities like basketball or tennis have variable intensity that the average MET smooths out. The values here are estimates, not precise measurements. Using a heart rate monitor provides more individualized calorie burn data because it accounts for your actual physiological response rather than population averages.',
+      'The Compendium of Physical Activities (Ainsworth et al., developed at Arizona State University) is the standard reference for MET values. It provides standardized energy cost estimates for 800+ activities. The formula Calories = MET × weight(kg) × time(hours) estimates the gross energy expenditure of an activity — it includes the resting metabolism you would burn anyway (1 MET), so the extra calories above sitting still are roughly (MET − 1) × weight(kg) × hours. Actual calorie burn varies by individual due to fitness level, body composition, exercise efficiency, and environmental conditions. Fitter individuals may burn slightly fewer calories doing the same activity because their bodies are more efficient. For example, a 155 lb person running at 6 mph for 30 minutes burns approximately 345 calories, while a 185 lb person doing the same run burns about 411 calories — the 30 lb weight difference accounts for roughly 66 additional calories burned. Similarly, running on a treadmill (no wind resistance, flat surface) burns somewhat fewer calories than outdoor running on a flat route; a 1% incline on the treadmill is the usual way to compensate. The MET values assume "steady state" effort — stop-and-go activities like basketball or tennis have variable intensity that the average MET smooths out. The values here are estimates, not precise measurements. Using a heart rate monitor provides more individualized calorie burn data because it accounts for your actual physiological response rather than population averages.',
     faqs: [
       {
         question: 'How accurate are MET-based calorie estimates?',
@@ -163,10 +165,10 @@ const caloriesBurnedConfig: CalculatorConfig = {
     
       {
         question: 'How accurate is this calculator for real-world use?',
-        answer: 'This calculator uses standard mathematical formulas and provides estimates based on the inputs you enter. For financial decisions, always verify results with a qualified professional and check against official statements or lender-provided figures which may include additional factors not modeled here.',
+        answer: 'It is an estimate. Calories = MET × weight (kg) × hours uses population-average MET values from the 2011 Compendium of Physical Activities, so individual burn can differ by roughly ±15–20% depending on fitness, efficiency, terrain, temperature and intensity. Use it for planning and comparing activities, and adjust against your actual weight trend over a few weeks rather than treating one session\'s number as exact.',
       },],
     commonUses: [
-      'Exercise program design — estimate calorie burn for 100+ activities to plan workouts that match your energy expenditure goals',
+      'Exercise program design — estimate calorie burn for 60+ activities to plan workouts that match your energy expenditure goals',
       'Weight management — track exercise calories to manage your daily energy balance alongside dietary intake',
       'Activity comparison — compare different exercises and intensities to find activities that match your fitness preferences and calorie burn goals',
       'Training logging — estimate per-session and per-minute calorie expenditure for training logs and fitness tracking apps'
@@ -177,14 +179,14 @@ const caloriesBurnedConfig: CalculatorConfig = {
       {
         scenario: 'Sarah, 32, weighs 155 lbs (70 kg) and runs at 6 mph (10 min/mile pace) on a treadmill for 30 minutes, 3 times per week. She wants to know how many calories each session burns and how this contributes to her weight management goals.',
         inputs: { Weight: '155 lbs', Activity: 'Running 6 mph (9.8 METs)', 'Duration': '30 minutes' },
-        result: 'Each 30-minute run at 6 mph burns approximately 345 kcal for a 155 lb person. Over 3 weekly sessions, the total is about 1,035 kcal — roughly equivalent to 0.13 kg (0.29 lb) of body fat per week, or 6.8 kg (15 lbs) over a year if diet remains constant.',
+        result: 'Each 30-minute run at 6 mph burns approximately 345 kcal for a 155 lb person. Over 3 weekly sessions, the total is about 1,035 kcal — roughly equivalent to 0.13 kg (0.29 lb) of body fat per week, or about 7.0 kg (15 lbs) over a year if diet remains constant.',
         insight: 'Sarah\'s running habit is a substantial contributor to her energy balance. The 1,035 kcal/week from running means she can eat ~148 kcal more per day and still maintain her weight compared to if she were completely sedentary. This is why regular exercisers can eat more while staying lean — their TDEE is simply higher. However, she should be aware that the "afterburn effect" (EPOC) from moderate steady-state running is minimal — only about 5-10% of the exercise calories, or ~17-34 extra kcal per session. High-intensity interval training (HIIT) produces a larger EPOC (10-15%), but steady-state cardio\'s primary calorie burn happens during the activity itself. To lose 0.5 kg/week, Sarah would need to create a total 3,850 kcal weekly deficit through a combination of diet and exercise — her running provides about 27% of that target.',
       },
       {
         scenario: 'Mike, 28, weighs 200 lbs (90.7 kg) and is comparing two options for his lunch break: a 45-minute walk at 3 mph, or a 20-minute vigorous swim. He has a knee injury and wants to maximize calorie burn within his fitness constraints.',
-        inputs: { Weight: '200 lbs', 'Activity (Option A)': 'Walking 3 mph (3.3 METs)', 'Duration A': '45 min', 'Activity (Option B)': 'Swimming vigorous (10.0 METs)', 'Duration B': '20 min' },
-        result: 'Option A (walking 45 min): ~225 kcal. Option B (vigorous swimming 20 min): ~302 kcal. Swimming burns 34% more calories in less than half the time, and is joint-friendly for Mike\'s knee.',
-        insight: 'MET values reveal a critical training principle: intensity drives efficiency. Swimming at 10 METs packs 10 kcal per kg per hour of energy expenditure, while walking at 3.3 METs delivers only 3.3 kcal per kg per hour. For Mike\'s 90.7 kg body, swimming delivers roughly 908 kcal/hour vs. 300 kcal/hour for walking — a 3:1 advantage. The trade-off is recovery cost: a 20-minute vigorous swim imposes significantly more central nervous system and muscular fatigue than a 45-minute leisurely walk. For daily activity (active recovery), the walk is sustainable. For a targeted calorie-burning session 2-3 times per week, swimming is superior. Given his knee injury, swimming also provides zero-impact exercise that walking (even at a slow pace) may aggravate. The optimal approach: walk most days for general activity and recovery, with 2-3 vigorous swim sessions per week for targeted calorie burning.',
+        inputs: { Weight: '200 lbs', 'Activity (Option A)': 'Walking 3 mph (3.5 METs)', 'Duration A': '45 min', 'Activity (Option B)': 'Swimming laps, vigorous (9.8 METs)', 'Duration B': '20 min' },
+        result: 'Option A (walking 45 min): ~238 kcal. Option B (vigorous swimming 20 min): ~296 kcal. Swimming burns about 24% more calories in less than half the time, and is joint-friendly for Mike\'s knee.',
+        insight: 'MET values reveal a critical training principle: intensity drives efficiency. Swimming laps at 9.8 METs packs 9.8 kcal per kg per hour of energy expenditure, while walking at 3.5 METs delivers only 3.5 kcal per kg per hour. For Mike\'s 90.7 kg body, swimming delivers roughly 889 kcal/hour vs. 318 kcal/hour for walking — about a 2.8:1 advantage. The trade-off is recovery cost: a 20-minute vigorous swim imposes significantly more central nervous system and muscular fatigue than a 45-minute leisurely walk. For daily activity (active recovery), the walk is sustainable. For a targeted calorie-burning session 2-3 times per week, swimming is superior. Given his knee injury, swimming also provides low-impact exercise that walking may aggravate. The optimal approach: walk most days for general activity and recovery, with 2-3 vigorous swim sessions per week for targeted calorie burning.',
       },
       {
         scenario: 'Emma, 40, weighs 130 lbs (59 kg) and cycles at a moderate pace (12-14 mph, 8.0 METs) for her 60-minute weekend ride. She wants to know how many calories she actually burns, and whether the post-ride café stop (latte and muffin: ~550 kcal) offsets her entire workout.',
@@ -196,7 +198,7 @@ const caloriesBurnedConfig: CalculatorConfig = {
 
     proTips: [
       'Compare activities by "calories per minute" rather than total session burn. A 10-minute HIIT session might only burn 120 kcal total (12 kcal/min), while a 60-minute walk burns 240 kcal (4 kcal/min). The walk burns more total calories, but the HIIT session is more than twice as time-efficient per minute — and produces a larger EPOC "afterburn" effect lasting hours after the workout.',
-      'Heavier individuals burn more calories doing the same activity — use this as motivation during weight loss. A 200 lb person running at 6 mph burns ~465 kcal in 30 minutes, while a 150 lb person burns ~350 kcal. As you lose weight, your calorie burn per session decreases (because you are moving less mass), which is one reason weight loss slows over time. Adding intensity or duration compensates for this natural decline.',
+      'Heavier individuals burn more calories doing the same activity — use this as motivation during weight loss. A 200 lb person running at 6 mph burns ~445 kcal in 30 minutes, while a 150 lb person burns ~333 kcal. As you lose weight, your calorie burn per session decreases (because you are moving less mass), which is one reason weight loss slows over time. Adding intensity or duration compensates for this natural decline.',
       'Do not trust the calorie readout on cardio machines. Studies show treadmills overestimate by 10-20%, ellipticals by 20-40%, and stationary bikes by 7-15%. This calculator\'s MET-based estimates (±15-20%) are generally more accurate than machine readouts. For the most accurate individual measurement, use a chest-strap heart rate monitor paired with a fitness watch that accounts for your VO2max estimate.',
       'Use the "calories per minute" result to rank activities by efficiency. If you only have 20 minutes, choose a high-MET activity (running, swimming, jump rope, rowing) to maximize calorie burn in limited time. If you have unlimited time and want sustainability, lower-MET activities (walking, leisurely cycling, yoga) produce less fatigue and can be done daily without burnout or injury risk.',
       'Factor in environmental conditions. Running outdoors in 90°F heat or 0°F cold burns 2-5% more calories than running in 70°F conditions because your body expends extra energy on thermoregulation. Running on sand or trails adds 10-20% more calorie burn compared to pavement at the same speed. Swimming in cold water (below 78°F) increases calorie burn by 5-10% as your body works to maintain core temperature.',
@@ -204,10 +206,10 @@ const caloriesBurnedConfig: CalculatorConfig = {
 
     quickReference: [
       { label: 'MET Definition', value: '1 MET = 3.5 mL O₂/kg/min = 1 kcal/kg/hr (resting metabolic rate)' },
-      { label: 'Walking (3.5 mph)', value: '4.3 METs — ~300 kcal/hr for a 155 lb person' },
+      { label: 'Walking (3.5 mph)', value: '4.3 METs — ~302 kcal/hr for a 155 lb person' },
       { label: 'Running (6 mph)', value: '9.8 METs — ~690 kcal/hr for a 155 lb person' },
       { label: 'Cycling (12-14 mph)', value: '8.0 METs — ~563 kcal/hr for a 155 lb person' },
-      { label: 'Swimming (moderate)', value: '7.0 METs — ~493 kcal/hr for a 155 lb person' },
+      { label: 'Swimming laps (slow to moderate)', value: '5.8 METs — ~408 kcal/hr for a 155 lb person' },
       { label: 'HIIT / Circuit Training', value: '8.0 METs — high EPOC "afterburn" effect for hours post-exercise' },
       { label: 'Formula', value: 'Calories = MET × weight(kg) × duration(hours)' },
       { label: 'Accuracy Range', value: '±15–20% for MET estimates; individual metabolism varies' },

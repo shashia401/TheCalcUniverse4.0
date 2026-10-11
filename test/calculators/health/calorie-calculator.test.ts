@@ -398,4 +398,43 @@ describe('Calorie Calculator', () => {
     const tdee = parseNumber(getValue(r, 'tdee'));
     expect(tdee).toBeGreaterThan(3000);
   });
+
+  // ── Audit regressions (independent hand calculations) ──
+  it('worked example 1: woman 30y 65 kg 165 cm, x1.55, eating 2,000 -> BMR 1,370, TDEE 2,124, deficit 124 (-0.11 kg/wk)', () => {
+    // BMR = 650 + 1031.25 - 150 - 161 = 1370.25 ; TDEE = 1370.25 * 1.55 = 2123.89 ; (2000-2123.89)*7/7700 = -0.1126
+    const r = config.calculate({
+      unit: 'metric', gender: 'female', age: '30', weight: '65', heightCm: '165', heightFt: '', heightIn: '',
+      activityLevel: '1.55', dailyIntake: '2000',
+    });
+    expect(getValue(r, 'bmr')).toBe('1,370 kcal/day');
+    expect(getValue(r, 'tdee')).toBe('2,124 kcal/day');
+    expect(getValue(r, 'calorieDifference')).toBe('124 kcal/day');
+    expect(getValue(r, 'weeklyWeightChange')).toBe('-0.11 kg/week');
+  });
+
+  it('worked example 2: man 22y 75 kg 180 cm, x1.9 -> BMR 1,770, TDEE 3,363', () => {
+    // 750 + 1125 - 110 + 5 = 1770 ; 1770 * 1.9 = 3363
+    const r = config.calculate({
+      unit: 'metric', gender: 'male', age: '22', weight: '75', heightCm: '180', heightFt: '', heightIn: '',
+      activityLevel: '1.9', dailyIntake: '',
+    });
+    expect(getValue(r, 'bmr')).toBe('1,770 kcal/day');
+    expect(getValue(r, 'tdee')).toBe('3,363 kcal/day');
+  });
+
+  it('imperial input converts lb -> kg and ft/in -> cm: 154.32 lb, 5 ft 9 in, man 30y = 69.998 kg / 175.26 cm', () => {
+    // 10*69.998 + 6.25*175.26 - 150 + 5 = 699.98 + 1095.375 - 145 = 1650.4
+    const r = config.calculate({
+      unit: 'imperial', gender: 'male', age: '30', weight: '154.32', heightFt: '5', heightIn: '9', heightCm: '',
+      activityLevel: '1.2', dailyIntake: '',
+    });
+    expect(getValue(r, 'bmr')).toBe('1,650 kcal/day');
+  });
+
+  it('declared input ranges are bounded', () => {
+    for (const id of ['weight', 'heightCm', 'heightFt', 'dailyIntake']) {
+      const f = config.inputs.find((i) => i.id === id)!;
+      expect(f.max).toBeDefined();
+    }
+  });
 });

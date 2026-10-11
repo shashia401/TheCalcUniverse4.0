@@ -26,6 +26,7 @@ const dueDateConfig: CalculatorConfig = {
         { label: 'Last Menstrual Period (LMP) — Most Common', value: 'lmp' },
         { label: 'Conception / Ovulation Date', value: 'conception' },
         { label: 'IVF Transfer Date (Day-5 Blastocyst)', value: 'ivf' },
+        { label: 'IVF Transfer Date (Day-3 Embryo)', value: 'ivf3' },
       ],
     },
     {
@@ -56,8 +57,10 @@ const dueDateConfig: CalculatorConfig = {
 
     if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return [];
 
-    const inputDate = new Date(dateStr + 'T00:00:00');
-    if (isNaN(inputDate.getTime())) return [];
+    // Reject calendar-invalid dates: new Date('2025-02-31T00:00:00') silently rolls over to Mar 3.
+    const [yy, mm, dd] = dateStr.split('-').map(Number);
+    const inputDate = new Date(yy, mm - 1, dd);
+    if (inputDate.getFullYear() !== yy || inputDate.getMonth() !== mm - 1 || inputDate.getDate() !== dd) return [];
 
     let lmpDate: Date;
 
@@ -65,7 +68,11 @@ const dueDateConfig: CalculatorConfig = {
       lmpDate = inputDate;
     } else if (method === 'conception') {
       lmpDate = addDays(inputDate, -14);
+    } else if (method === 'ivf3') {
+      // Day-3 embryo transfer: embryo age 3 days + 14 days = LMP-equivalent 17 days before transfer (EDD = transfer + 263)
+      lmpDate = addDays(inputDate, -17);
     } else {
+      // Day-5 blastocyst transfer: embryo age 5 days + 14 days = LMP-equivalent 19 days before transfer (EDD = transfer + 261)
       lmpDate = addDays(inputDate, -19);
     }
 
@@ -177,6 +184,7 @@ const dueDateConfig: CalculatorConfig = {
   },
   educational: {
     formula: "EDD = LMP + 280 days (Naegele's Rule)",
+    formulaSource: "Naegele's rule (EDD = LMP + 280 days, with +/- days if the cycle is not 28 days) as described in ACOG Committee Opinion No. 700, \"Methods for Estimating the Due Date\" (2017). Conception date + 266 days; IVF: embryo age + 14 days is subtracted from the transfer date (Day-5 blastocyst: transfer + 261 days; Day-3 embryo: transfer + 263 days), per the same ACOG opinion.",
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Pregnancy Timeline (40 Weeks)</text><rect x="30" y="60" width="380" height="40" rx="4" fill="var(--svg-eeeeee)"/><rect x="30" y="60" width="125" height="40" rx="4" fill="var(--svg-3b82f6)" opacity=".3"/><text x="92" y="84" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-3b82f6)">1st Tri</text><rect x="155" y="60" width="130" height="40" fill="var(--svg-22c55e)" opacity=".3"/><text x="220" y="84" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-22c55e)">2nd Tri</text><rect x="285" y="60" width="125" height="40" rx="4" fill="var(--svg-f59e0b)" opacity=".3"/><text x="347" y="84" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-f59e0b)">3rd Tri</text><text x="92" y="120" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Weeks 1-13</text><text x="220" y="120" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Weeks 14-27</text><text x="347" y="120" text-anchor="middle" font-size="10" fill="var(--svg-666666)">Weeks 28-40</text><line x1="347" y1="125" x2="347" y2="140" stroke="var(--svg-ef4444)" stroke-width="2"/><text x="347" y="155" text-anchor="middle" font-size="11" fill="var(--svg-ef4444)" font-weight="bold">Due Date</text><text x="220" y="195" text-anchor="middle" font-size="11" fill="var(--svg-8b5cf6)">EDD = LMP + 280 days (Naegele&apos;s Rule)</text></svg>',
       alt: 'Pregnancy timeline bar showing 1st, 2nd, and 3rd trimesters across 40 weeks with due date marker',
@@ -195,7 +203,7 @@ const dueDateConfig: CalculatorConfig = {
       'Select your calculation method — LMP (last period) is the most common clinical standard.',
       'Enter the relevant date in YYYY-MM-DD format.',
       'If using LMP and your cycle is not 28 days, enter your average cycle length for accuracy.',
-      'If using IVF, select the appropriate method and enter your transfer date.',
+      'If using IVF, select the Day-5 blastocyst or Day-3 embryo option and enter your transfer date.',
       'Review your due date, current gestational age, trimester start dates, and key milestones.',
       'Share the results with your healthcare provider for clinical confirmation at your first ultrasound.',
     ],
@@ -240,7 +248,7 @@ const dueDateConfig: CalculatorConfig = {
           'Cycle Length': '28',
         },
         result: 'EDD: March 8, 2026. Conception: ~June 15, 2025. 1st Trimester: June 1 – September 6, 2025. 2nd Trimester: September 7 – December 13, 2025. 3rd Trimester: December 14, 2025 – March 8, 2026. Total gestation: 40 weeks.',
-        insight: 'Fatima\'s due date is calculated as LMP + 280 days = June 1 + 280 = March 8. With a standard 28-day cycle, ovulation is presumed at day 14 (June 15). The three trimesters divide the 40-week pregnancy into roughly equal 13-week blocks. Fatima should schedule her first-trimester ultrasound between 8–13 weeks (July 27 – August 31) for the most accurate crown-rump length dating, which may refine the due date by ±5–7 days. Only about 5% of babies arrive on the exact due date — delivery anytime from 37 weeks (February 15, 2026) to 42 weeks (March 22, 2026) is considered full term.',
+        insight: 'Fatima\'s due date is calculated as LMP + 280 days = June 1 + 280 = March 8. With a standard 28-day cycle, ovulation is presumed at day 14 (June 15). The three trimesters divide the 40-week pregnancy into roughly equal 13-week blocks. Fatima should schedule her first-trimester ultrasound between 8–13 weeks (July 27 – August 31) for the most accurate crown-rump length dating, which may refine the due date by ±5–7 days. Only about 5% of babies arrive on the exact due date — delivery from 37 weeks (February 15, 2026) to 42 weeks (March 22, 2026) is considered term; ACOG calls 39 weeks 0 days to 40 weeks 6 days "full term".',
       },
       {
         scenario: 'Aiko underwent IVF with a Day-5 blastocyst transfer on April 20, 2025. Her clinic advised her to use the IVF calculation method rather than LMP because her menstrual cycle was suppressed during the treatment protocol.',
@@ -250,7 +258,7 @@ const dueDateConfig: CalculatorConfig = {
           'Cycle Length': '28',
         },
         result: 'EDD: January 6, 2026. Conception: ~April 15, 2025. 1st Trimester: April 1 – July 7, 2025. 2nd Trimester: July 8 – October 13, 2025. 3rd Trimester: October 14, 2025 – January 6, 2026.',
-        insight: 'For IVF, the calculator works backward from the transfer date to an equivalent LMP: Day-5 blastocyst transfer = LMP equivalent of transfer date minus 19 days (April 20 – 19 = April 1). From there, the standard 280-day Naegele\'s rule applies: April 1 + 280 = January 6, 2026. IVF dating is generally more precise than natural-conception LMP dating because the exact embryo age and transfer date are known. However, the same full-term window (37–42 weeks) applies — Aiko\'s baby would be considered full term from December 16, 2025 to January 20, 2026. The first-trimester ultrasound dating may still refine the date slightly, but IVF-derived dates are usually kept as the primary reference since the conception timing is precisely known.',
+        insight: 'For IVF, the calculator works backward from the transfer date to an equivalent LMP: Day-5 blastocyst transfer = LMP equivalent of transfer date minus 19 days (April 20 – 19 = April 1). From there, the standard 280-day Naegele\'s rule applies: April 1 + 280 = January 6, 2026. IVF dating is generally more precise than natural-conception LMP dating because the exact embryo age and transfer date are known. However, the same term window (37–42 weeks) applies — Aiko\'s baby would be considered term from December 16, 2025 to January 20, 2026. The first-trimester ultrasound dating may still refine the date slightly, but IVF-derived dates are usually kept as the primary reference since the conception timing is precisely known.',
       },
     ],
 
@@ -258,7 +266,7 @@ const dueDateConfig: CalculatorConfig = {
       'First-trimester ultrasound (crown-rump length at 8–13 weeks) is the gold standard for dating. If the ultrasound date differs from your LMP-based EDD by 7+ days, your provider will likely use the ultrasound date — it is more accurate than cycle-based estimates, especially for irregular cycles.',
       'Only about 5% of babies arrive on their exact due date. Think of it as a "due month" rather than a "due day." Normal delivery spans from 37 weeks (early term) to 42 weeks (post-term). Mark your calendar for 37 weeks as the "any day now" point.',
       'When using the conception/ovulation method, the calculator subtracts 14 days from your conception date to establish an equivalent LMP. This means the conception date you enter should be the actual date you believe conception occurred (ovulation + fertilization), not the start of your fertile window.',
-      'For IVF pregnancies with Day-3 embryo transfers (rather than Day-5 blastocysts), use the conception date method with your transfer date + 5 days as the conception date (Day-3 embryos are 3 days old at transfer, and conception is defined as fertilization day).',
+      'For IVF pregnancies with Day-3 embryo transfers (rather than Day-5 blastocysts), choose the Day-3 option. The embryo is 3 days old at transfer, so conception (fertilization) was 3 days before the transfer date and the due date is the transfer date + 263 days. (Do not enter transfer date + 5 days as a conception date — that would push the due date about 8 days too late.)',
     ],
 
     quickReference: [

@@ -166,4 +166,41 @@ describe('BSA calculator', () => {
     expect(combined.toLowerCase()).toContain('cardiac index');
     expect(combined.toLowerCase()).toContain('egfr');
   });
+
+  // ── Audit regressions: independent values from the published formulas ──
+  // Mosteller sqrt(H*W/3600); Du Bois 0.007184 W^0.425 H^0.725; Haycock 0.024265 W^0.5378 H^0.3964
+  it('70 kg / 175 cm: Mosteller 1.8447, Du Bois 1.8481, Haycock 1.8468, mean 1.8465 m²', () => {
+    const r = config.calculate({ unit: 'metric', weight: '70', heightCm: '175' });
+    expect(getValue(r, 'bsaMosteller')).toBe('1.84 m²');
+    expect(getValue(r, 'bsaDubois')).toBe('1.85 m²');
+    expect(getValue(r, 'bsaHaycock')).toBe('1.85 m²');
+    expect(getValue(r, 'avgBsa')).toBe('1.85 m²');
+  });
+
+  it('15 kg / 100 cm child: Mosteller 0.6455, Du Bois 0.6400, Haycock 0.6461, mean 0.6439 m²', () => {
+    const r = config.calculate({ unit: 'metric', weight: '15', heightCm: '100' });
+    expect(getValue(r, 'bsaMosteller')).toBe('0.65 m²');
+    expect(getValue(r, 'bsaDubois')).toBe('0.64 m²');
+    expect(getValue(r, 'bsaHaycock')).toBe('0.65 m²');
+    expect(getValue(r, 'avgBsa')).toBe('0.64 m²');
+  });
+
+  it('imperial input converts lb -> kg (0.45359237) and in -> cm (2.54): 154.3 lb, 5 ft 9 in -> Mosteller 1.8459', () => {
+    const r = config.calculate({ unit: 'imperial', weight: '154.3', heightFt: '5', heightIn: '9' });
+    expect(getValue(r, 'bsaMosteller')).toBe('1.85 m²');
+    expect(getValue(r, 'bsaDubois')).toBe('1.85 m²');
+  });
+
+  it('90 kg / 183 cm burn patient: Mosteller sqrt(183*90/3600) = 2.1389 m²', () => {
+    const r = config.calculate({ unit: 'metric', weight: '90', heightCm: '183' });
+    expect(getValue(r, 'bsaMosteller')).toBe('2.14 m²');
+  });
+
+  it('declared input ranges are bounded', () => {
+    for (const id of ['weight', 'heightFt', 'heightCm']) {
+      const f = config.inputs.find((i) => i.id === id)!;
+      expect(f.min).toBeGreaterThan(0);
+      expect(f.max).toBeDefined();
+    }
+  });
 });

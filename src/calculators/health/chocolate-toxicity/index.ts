@@ -8,16 +8,19 @@ interface ChocolateTypeInfo {
   caffeinePerGram: number; // mg/g
 }
 
+// Totals checked against the Merck Veterinary Manual methylxanthine table (mg/g): white 0.04, milk 2.3,
+// semisweet/dark 5.3–5.6, baking 15.5, cocoa powder 28.5. Milk and dark below are ~11–15% above those totals
+// (conservative); cocoa powder was previously 8.5 + 0.3 = 8.8 mg/g, i.e. 3x too low.
 const CHOCOLATE_TYPES: Record<string, ChocolateTypeInfo> = {
-  White: { label: 'White Chocolate', theobrominePerGram: 0.01, caffeinePerGram: 0 },
+  White: { label: 'White Chocolate', theobrominePerGram: 0.01, caffeinePerGram: 0.03 },
   Milk: { label: 'Milk Chocolate', theobrominePerGram: 2.4, caffeinePerGram: 0.2 },
   Dark: { label: 'Dark Chocolate', theobrominePerGram: 5.5, caffeinePerGram: 0.7 },
-  'Cocoa Powder': { label: 'Cocoa Powder', theobrominePerGram: 8.5, caffeinePerGram: 0.3 },
+  'Cocoa Powder': { label: 'Cocoa Powder', theobrominePerGram: 26, caffeinePerGram: 2.5 },
   'Baking Chocolate': { label: 'Baking Chocolate', theobrominePerGram: 14, caffeinePerGram: 1.5 },
 };
 
 // Weight conversions
-const LB_TO_KG = 2.205;
+const LB_TO_KG = 2.20462;
 const OZ_TO_G = 28.3495;
 
 const chocolateConfig: CalculatorConfig = {
@@ -64,6 +67,7 @@ const chocolateConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '50',
       min: 0,
+      max: 10000,
       step: 0.1,
       required: true,
       helpText: 'How much chocolate did the dog eat?',
@@ -147,6 +151,7 @@ const chocolateConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'Methylxanthines = (Theobromine × Amount) + (Caffeine × Amount)  |  mg/kg = Total ÷ Dog Weight (kg)',
+    formulaSource: 'Merck Veterinary Manual, "Chocolate Toxicosis in Animals": methylxanthine content (mg/g) white 0.04, milk 2.3, semisweet/dark 5.3–5.6, baking 15.5, cocoa powder 28.5; dogs — mild signs from about 20 mg/kg, cardiotoxic effects 40–50 mg/kg, seizures at 60 mg/kg and above. The total mg/kg thresholds here match those bands.',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Chocolate Toxicity (mg/kg)</text><rect x="30" y="65" width="380" height="40" rx="4" fill="var(--svg-eeeeee)"/><rect x="30" y="65" width="95" height="40" rx="4" fill="var(--svg-22c55e)" opacity=".4"/><text x="77" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-22c55e)">Low &lt; 20</text><rect x="125" y="65" width="95" height="40" fill="var(--svg-f59e0b)" opacity=".4"/><text x="172" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-f59e0b)">Mild 20-39</text><rect x="220" y="65" width="95" height="40" fill="var(--svg-ef4444)" opacity=".4"/><text x="267" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ef4444)">Serious 40-59</text><rect x="315" y="65" width="95" height="40" rx="4" fill="var(--svg-8b5cf6)" opacity=".4"/><text x="362" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-8b5cf6)">Emergency 60+</text><text x="220" y="145" text-anchor="middle" font-size="11" fill="var(--svg-8b5cf6)">Dark &amp; baking chocolate most dangerous</text></svg>',
       alt: 'Four-segment toxicity scale for chocolate in dogs: Low under 20, Mild 20-39, Serious 40-59, Emergency 60+ mg/kg',
@@ -170,7 +175,7 @@ const chocolateConfig: CalculatorConfig = {
       'Call your veterinarian or ASPCA Poison Control immediately if the result shows Yellow or Red.',
     ],
     explanation:
-      'Chocolate is toxic to dogs because it contains methylxanthines (theobromine and caffeine), compounds that dogs cannot metabolize efficiently. The severity of poisoning depends on the type of chocolate, the amount consumed, and the dog\'s weight. Baking chocolate and dark chocolate are the most dangerous because they contain the highest concentrations of theobromine at 14 mg/g and 5.5 mg/g, respectively. White chocolate has very low levels (0.01 mg/g) and rarely causes toxicity, though the fat and sugar can still cause gastrointestinal upset. The half-life of theobromine in dogs is 17.5 hours — much longer than in humans (6-10 hours) — meaning the toxic compounds stay in the dog\'s system much longer and accumulate to dangerous levels more easily. Symptoms of chocolate poisoning include vomiting, diarrhea, restlessness, increased heart rate, muscle tremors, seizures, and in severe cases, death. Symptoms typically appear within 6-12 hours of ingestion and can last up to 72 hours. Dogs with pre-existing heart conditions, epilepsy, or kidney disease are at higher risk even at lower doses. Small breeds are disproportionately affected because a tiny amount of dark chocolate can exceed the toxicity threshold — a 10 lb dog eating just 1 oz of dark chocolate (roughly two squares of a dark chocolate bar) reaches about 39 mg/kg, right at the edge of the serious-toxicity threshold, not merely mild. If your dog has eaten chocolate, contact your veterinarian or the ASPCA Animal Poison Control Center immediately at (888) 426-4435. Do not induce vomiting unless specifically instructed by a veterinary professional, as this can cause additional complications.',
+      'Chocolate is toxic to dogs because it contains methylxanthines (theobromine and caffeine), compounds that dogs cannot metabolize efficiently. The severity of poisoning depends on the type of chocolate, the amount consumed, and the dog\'s weight. Cocoa powder and baking chocolate are the most dangerous because they contain the highest concentrations of methylxanthines — about 28.5 mg/g and 15.5 mg/g in total, versus roughly 5.5 mg/g for dark/semisweet and 2.3 mg/g for milk chocolate (Merck Veterinary Manual). White chocolate has very low levels (about 0.04 mg/g) and rarely causes toxicity, though the fat and sugar can still cause gastrointestinal upset. The half-life of theobromine in dogs is 17.5 hours — much longer than in humans (6-10 hours) — meaning the toxic compounds stay in the dog\'s system much longer and accumulate to dangerous levels more easily. Symptoms of chocolate poisoning include vomiting, diarrhea, restlessness, increased heart rate, muscle tremors, seizures, and in severe cases, death. Symptoms typically appear within 6-12 hours of ingestion and can last up to 72 hours. Dogs with pre-existing heart conditions, epilepsy, or kidney disease are at higher risk even at lower doses. Small breeds are disproportionately affected because a tiny amount of dark chocolate can exceed the toxicity threshold — a 10 lb dog eating just 1 oz of dark chocolate (roughly two squares of a dark chocolate bar) reaches about 39 mg/kg, just under the 40 mg/kg serious-toxicity threshold and already well into the mild-toxicity range. If your dog has eaten chocolate, contact your veterinarian or the ASPCA Animal Poison Control Center immediately at (888) 426-4435. Do not induce vomiting unless specifically instructed by a veterinary professional, as this can cause additional complications.',
     faqs: [
       {
         question: 'How much chocolate can kill a dog?',
@@ -190,7 +195,7 @@ const chocolateConfig: CalculatorConfig = {
       },
       {
         question: 'Is white chocolate dangerous for dogs?',
-        answer: 'White chocolate contains very little theobromine (0.01 mg/g) and no caffeine, making it unlikely to cause methylxanthine toxicity. However, the high fat and sugar content can still cause gastrointestinal upset (vomiting, diarrhea, pancreatitis). It is not recommended but rarely life-threatening.',
+        answer: 'White chocolate contains very little theobromine and caffeine (about 0.04 mg/g in total), making it unlikely to cause methylxanthine toxicity. However, the high fat and sugar content can still cause gastrointestinal upset (vomiting, diarrhea, pancreatitis). It is not recommended but rarely life-threatening.',
       },
       {
         question: 'Can dogs eat carob as a chocolate substitute?',
@@ -205,6 +210,7 @@ const chocolateConfig: CalculatorConfig = {
     ],
   
     citations: [
+      { source: 'Merck Veterinary Manual — Chocolate Toxicosis in Animals', url: 'https://www.merckvetmanual.com/toxicology/food-hazards/chocolate-toxicosis-in-animals' },
       { source: 'ASPCA - Chocolate Toxicity', url: 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/chocolate' },
       { source: 'Wikipedia', title: 'Theobromine Poisoning', url: 'https://en.wikipedia.org/wiki/Theobromine_poisoning' },
     ],

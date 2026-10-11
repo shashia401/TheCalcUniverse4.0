@@ -2,9 +2,10 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import DogCatAgePanel from './DogCatAgePanel';
 
-// 1st year = 15, 2nd year = 9, each later year = 4 (linear within years 1-2 so age 1 -> 15, age 2 -> 24)
-const traditionalHumanYears = (age: number): number =>
-  age < 1 ? age * 15 : age < 2 ? 15 + (age - 1) * 9 : 24 + (age - 2) * 4;
+// 1st year = 15, 2nd year = 9, each later year = perYear (linear within years 1-2 so age 1 -> 15, age 2 -> 24).
+// AVMA (as quoted by the AKC): dogs +5 per year after year 2; cats +4 per year after year 2.
+const traditionalHumanYears = (age: number, perYear: number): number =>
+  age < 1 ? age * 15 : age < 2 ? 15 + (age - 1) * 9 : 24 + (age - 2) * perYear;
 
 const dogCatAgeConfig: CalculatorConfig = {
   inputs: [
@@ -58,10 +59,10 @@ const dogCatAgeConfig: CalculatorConfig = {
 
     if (species === 'dog') {
       // ── Traditional method ──
-      // 1st year = 15, 2nd year = 9 more, each later year = 4 (interpolated within years 1-2)
-      const traditionalHumanAge = traditionalHumanYears(age);
+      // 1st year = 15, 2nd year = 9 more, each later year = 5 (AVMA dog rule; interpolated within years 1-2)
+      const traditionalHumanAge = traditionalHumanYears(age, 5);
 
-      // ── Epigenetic method (NIH 2020) — only for age ≥ 1 ──
+      // ── Epigenetic method (Wang et al., Cell Systems 2020) — only for age ≥ 1 ──
       let epigeneticHumanAge: number | null = null;
       if (age >= 1) {
         epigeneticHumanAge = 16 * Math.log(age) + 31;
@@ -84,7 +85,7 @@ const dogCatAgeConfig: CalculatorConfig = {
 
       results.push({
         id: 'traditionalAge',
-        label: 'Traditional (×7 Method)',
+        label: 'Traditional (15 / 9 / 5 Method)',
         value: `${Math.round(traditionalHumanAge)} human years`,
         color: 'neutral',
       });
@@ -92,7 +93,7 @@ const dogCatAgeConfig: CalculatorConfig = {
       if (epigeneticHumanAge !== null) {
         results.push({
           id: 'epigeneticAge',
-          label: 'Epigenetic (NIH 2020 Study)',
+          label: 'Epigenetic (2020 DNA-methylation clock)',
           value: `${epigeneticHumanAge.toFixed(1)} human years`,
           highlight: true,
           color: 'positive',
@@ -114,7 +115,7 @@ const dogCatAgeConfig: CalculatorConfig = {
       });
     } else {
       // ── Cat ──
-      const catHumanAge = traditionalHumanYears(age);
+      const catHumanAge = traditionalHumanYears(age, 4);
 
       // Life stage
       const getCatLifeStage = (a: number): string => {
@@ -160,7 +161,7 @@ const dogCatAgeConfig: CalculatorConfig = {
     return createElement(DogCatAgePanel, { values, results });
   },
   educational: {
-    formula: 'Dog (epigenetic): Human Age = 16 × ln(Pet Age) + 31  |  Dog/Cat (traditional): 1st year = 15, 2nd year = 9, each additional = 4',
+    formula: 'Dog (epigenetic): Human Age = 16 × ln(Pet Age) + 31  |  Dog (traditional): 1st year = 15, 2nd year = 9, each additional = 5  |  Cat: 1st year = 15, 2nd year = 9, each additional = 4',
     formulaDescription:
       'For dogs aged 1+, the epigenetic formula (based on DNA methylation patterns) provides a scientifically updated age equivalent. The traditional method applies a fixed stepwise progression. Cats follow the traditional stepwise method.',
     diagram: {
@@ -185,26 +186,26 @@ const dogCatAgeConfig: CalculatorConfig = {
     },
     variables: [
       { symbol: 'ln', name: 'Natural Logarithm', description: 'The natural logarithm (base e). In the epigenetic formula, ln(pet age) reflects the non-linear relationship between chronological age and DNA methylation changes.' },
-      { symbol: 'Epigenetic Age', name: 'DNA Methylation-Based Age', description: 'A molecular clock that measures changes in DNA methylation patterns. The NIH 2020 study on Labrador retrievers found that dog-human age scaling is not linear — it is rapid in early years and decelerates with age.' },
+      { symbol: 'Epigenetic Age', name: 'DNA Methylation-Based Age', description: 'A molecular clock that measures changes in DNA methylation patterns. The 2020 study of Labrador retrievers (Wang et al., Cell Systems, University of California San Diego) found that dog-human age scaling is not linear — it is rapid in early years and decelerates with age.' },
       { symbol: 'Traditional ×7', name: 'Simple Multiplier Rule', description: 'The old rule of multiplying pet years by 7 is inaccurate. It fails to account for the rapid maturation in the first two years and the varying aging rates across species and breeds.' },
     ],
     howToUse: [
       'Select whether the pet is a Dog or Cat.',
       'If Dog, select the size category (Small, Medium, or Large) — size influences life stage transitions.',
       'Enter your pet\'s age in years (you can use decimals, e.g., 1.5 for 18 months).',
-      'View the traditional method result and, for dogs aged 1+, the epigenetic (NIH 2020 study) result.',
+      'View the traditional method result and, for dogs aged 1+, the epigenetic (2020 DNA-methylation study) result.',
       'Check your pet\'s life stage classification and see how the two methods compare.',
     ],
     explanation:
       'For decades, the "multiply by 7" rule was the standard way to estimate a dog\'s age in human years. However, this rule oversimplifies the complex biology of aging across species. In 2020, a landmark study published in Cell Systems by researchers at the University of California, San Diego examined DNA methylation patterns — a type of epigenetic clock — in Labrador retrievers and compared them with human methylation profiles. The study found that the relationship between dog and human age is not a simple linear multiplier. Instead, it follows a logarithmic curve: dogs age extremely rapidly in their first few years (the equivalent of a 1-year-old dog is approximately a 31-year-old human in epigenetic terms) and then the aging rate slows relative to humans. This pattern mirrors the human experience where developmental changes are fastest in childhood and slow in adulthood. The study\'s formula, Human Age = 16 × ln(Dog Age) + 31, applies to dogs aged 1 year and older. For younger dogs, the traditional stepwise method (first year = 15, second year = 9) is more appropriate. This calculator adjusts life stage classifications based on dog size, since larger breeds tend to have shorter lifespans and enter senior status earlier than smaller breeds. For cats, the traditional stepwise formula remains the best available method, as large-scale epigenetic studies on feline aging are not yet available. Cats age similarly to dogs in the first two years but the overall trajectory is slightly more gradual.',
     faqs: [
       {
-        question: 'What is the epigenetic (NIH 2020) dog age formula?',
+        question: 'What is the epigenetic (2020) dog age formula?',
         answer: 'The formula is: Human Age = 16 × ln(Dog Age in years) + 31. It was derived from studying DNA methylation patterns (an epigenetic clock) in Labrador retrievers and comparing them to human methylation profiles across the lifespan. The "ln" is the natural logarithm function. For example, ln(1) = 0, so a 1-year-old dog equals about 31 human years epigenetically. ln(5) ≈ 1.609, so a 5-year-old dog equals 16×1.609+31 ≈ 56.75 human years.',
       },
       {
         question: 'Why is the ×7 rule inaccurate?',
-        answer: 'The ×7 rule assumes a constant linear relationship, but dogs age much faster than humans in their first two years (a 1-year-old dog is roughly equivalent to a 15-year-old human, not a 7-year-old) and the aging rate slows as they get older. For example, a 10-year-old dog by ×7 would be 70 human years, but the epigenetic formula gives approximately 67.8 years, and the traditional stepwise method gives 56 years. The ×7 rule significantly underestimates early-life aging and moderately overestimates late-life aging.',
+        answer: 'The ×7 rule assumes a constant linear relationship, but dogs age much faster than humans in their first two years (a 1-year-old dog is roughly equivalent to a 15-year-old human, not a 7-year-old) and the aging rate slows as they get older. For example, a 10-year-old dog by ×7 would be 70 human years, but the epigenetic formula gives approximately 67.8 years, and the traditional stepwise method (15 + 9 + 8×5) gives 64 years. The ×7 rule significantly underestimates early-life aging and moderately overestimates late-life aging.',
       },
       {
         question: 'Do different dog breeds age differently?',
@@ -212,7 +213,7 @@ const dogCatAgeConfig: CalculatorConfig = {
       },
       {
         question: 'How accurate is the cat age formula?',
-        answer: 'The cat formula (first year = 15 human years, second year = 9, each additional = 4) is the widely accepted veterinary standard endorsed by the American Animal Hospital Association (AAHA) and the American Association of Feline Practitioners (AAFP). Unlike dogs, large-scale epigenetic studies for cats are not yet available, so this formula is based on observed developmental and physiological milestones rather than molecular clocks. A 2021 study in the Journal of Feline Medicine and Surgery confirmed the general validity of this stepwise approach.',
+        answer: 'The cat formula (first year = 15 human years, second year = 9, each additional = 4) is a widely used veterinary rule of thumb; the first two years (15 and 24 human years) match the AVMA figures for cats. Unlike dogs, no large-scale epigenetic clock for cats has been published to the same standard, so this formula is based on observed developmental and physiological milestones rather than molecular clocks.',
       },
       {
         question: 'Why do large dog breeds age faster and have shorter lifespans?',
@@ -228,26 +229,26 @@ const dogCatAgeConfig: CalculatorConfig = {
       },
       {
         question: 'How do I interpret the difference between the traditional and epigenetic age results?',
-        answer: 'The traditional method (15 + 9 + 4 per year after 2) is stepwise and intuitively matches physical milestones — a 1-year-old dog can reproduce, which maps to human adolescence. The epigenetic method (16×ln(age)+31) reflects molecular aging from DNA methylation patterns. For young dogs (1–2 years), the epigenetic method gives higher estimates (~31–42 human years) while the traditional method gives lower estimates (~15–24 human years). For older dogs (10+ years), the two methods converge closer together. Use the epigenetic result as the preferred scientific estimate for dogs aged 1+; use the traditional method for puppies under 1 year and for cats of all ages.',
+        answer: 'The traditional method (15 + 9 + 5 per year after 2, for dogs) is stepwise and intuitively matches physical milestones — a 1-year-old dog can reproduce, which maps to human adolescence. The epigenetic method (16×ln(age)+31) reflects molecular aging from DNA methylation patterns. For young dogs (1–2 years), the epigenetic method gives higher estimates (~31–42 human years) while the traditional method gives lower estimates (~15–24 human years). For older dogs (around 10+ years), the two methods converge closer together. Use the epigenetic result as the preferred scientific estimate for dogs aged 1+; use the traditional method for puppies under 1 year and for cats of all ages.',
       },
     ],
     commonUses: [
       'Pet adoption and care planning — understand the life stage of a rescue or adopted pet to provide age-appropriate nutrition, exercise, and veterinary care',
       'Senior pet health monitoring — identify when a pet enters senior or geriatric life stages to adjust health screening schedules and care routines',
-      'Comparative biology education — explore how the NIH 2020 epigenetic clock for dogs reveals non-linear aging patterns compared to the traditional x7 rule',
+      'Comparative biology education — explore how the 2020 epigenetic clock for dogs reveals non-linear aging patterns compared to the traditional x7 rule',
       'Veterinary visit preparation — provide accurate age equivalents when discussing health concerns, screening schedules, and age-related condition risks with your veterinarian'
     ],
     workedExamples: [
       {
         scenario: 'A family adopted a medium-sized mixed-breed dog from a shelter. The shelter estimates the dog is 3 years old. The family wants to understand how old their dog is in human years using both the traditional and epigenetic methods, and what life stage the dog is in.',
         inputs: { species: 'dog', dogSize: 'medium', petAgeYears: '3' },
-        result: 'Traditional Method: 28 human years (15 + 9 + 4). Epigenetic (NIH 2020): ~48.6 human years (16×ln(3)+31 = 16×1.099+31). Life Stage: Adult.',
-        insight: 'The two methods give quite different results for this 3-year-old dog — 28 vs. ~49 human years. The epigenetic method suggests the dog is closer to middle-aged in molecular terms, which aligns with when veterinarians begin recommending baseline senior bloodwork panels. At this life stage (Adult), the dog needs regular exercise, a high-quality adult maintenance diet, annual veterinary checkups with dental evaluation, and continued socialization. The shelter adoption is at an ideal age — past puppy challenges but with many healthy adult years ahead.',
+        result: 'Traditional Method: 29 human years (15 + 9 + 5). Epigenetic (2020 clock): ~48.6 human years (16×ln(3)+31 = 16×1.099+31). Life Stage: Adult.',
+        insight: 'The two methods give quite different results for this 3-year-old dog — 29 vs. ~49 human years. The epigenetic method suggests the dog is closer to middle-aged in molecular terms, which aligns with when veterinarians begin recommending baseline senior bloodwork panels. At this life stage (Adult), the dog needs regular exercise, a high-quality adult maintenance diet, annual veterinary checkups with dental evaluation, and continued socialization. The shelter adoption is at an ideal age — past puppy challenges but with many healthy adult years ahead.',
       },
       {
         scenario: 'An owner has a 12-year-old Chihuahua (small breed) and wants to know the human age equivalent and what life stage health screenings to expect.',
         inputs: { species: 'dog', dogSize: 'small', petAgeYears: '12' },
-        result: 'Traditional Method: 64 human years (15 + 9 + 10×4). Epigenetic Method: ~70.8 human years (16×ln(12)+31 = 16×2.485+31). Life Stage: Senior.',
+        result: 'Traditional Method: 74 human years (15 + 9 + 10×5). Epigenetic Method: ~70.8 human years (16×ln(12)+31 = 16×2.485+31). Life Stage: Senior.',
         insight: 'At 12 years old, this Chihuahua is classified as a Senior — but for a small breed, this is not necessarily advanced old age as Chihuahuas routinely live to 14–16 years. Compare this to a 12-year-old large-breed dog (like a Labrador), which would be classified as Geriatric with a life expectancy of only 1–2 more years. This stark difference illustrates why size-adjusted life staging is critical. Senior Chihuahuas should have biannual bloodwork (CBC, chemistry, thyroid panel), annual dental cleanings under anesthesia with pre-anesthetic workup, and screening for mitral valve disease (very common in small breeds). The owner should watch for signs of tracheal collapse, luxating patella, and dental disease — all common in aging small breeds.',
       },
       {
@@ -268,7 +269,7 @@ const dogCatAgeConfig: CalculatorConfig = {
     limitations: [
       'The epigenetic formula (16×ln(age)+31) was derived from a study of primarily Labrador retrievers. While the methylation clock shows cross-mammal consistency, breed-specific validation is still in progress. The Dog Aging Project and other longitudinal studies are collecting data on diverse breeds. Very short-lived giant breeds and very long-lived toy breeds may deviate from this formula.',
       'Cat age estimates use the traditional stepwise method, not an epigenetic clock. Large-scale feline DNA methylation studies have not yet been conducted to the same standard as the canine study. The cat formula is based on developmental and physiological milestones (sexual maturity, dental eruption, organ development) mapped to human equivalents, which is less precise than molecular methods.',
-      'Life stage classification thresholds are consensus guidelines from AAHA/AAFP, not rigid biological boundaries. Individual pets age at different rates based on genetics, nutrition, exercise history, body condition, and preventive healthcare. A well-cared-for pet may appear and function younger than its chronological age.',
+      'Life stage classification thresholds are common rules of thumb (the feline bands follow the AAFP/AAHA kitten, junior, adult, mature, senior and geriatric stages; the size-based dog bands are conventional), not rigid biological boundaries. Individual pets age at different rates based on genetics, nutrition, exercise history, body condition, and preventive healthcare. A well-cared-for pet may appear and function younger than its chronological age.',
       'This calculator is for educational purposes. Life stage classification should inform — not replace — veterinary clinical judgment. Individual health assessments, physical exams, and diagnostic testing determine a pet\'s true health status more accurately than age-based formulas.',
       'The calculator does not account for mixed-breed aging patterns, which can be intermediate between the parent breeds. A Labrador-Poodle mix, for instance, may age differently than either purebred. For mixed breeds, the size category provides the best approximation.',
     ],
@@ -277,15 +278,15 @@ const dogCatAgeConfig: CalculatorConfig = {
       { label: 'Dog Year 2 (Epigenetic)', value: '~42 human years (16×ln(2)+31)' },
       { label: 'Dog Year 5 (Epigenetic)', value: '~56.8 human years (16×ln(5)+31)' },
       { label: 'Dog Year 10 (Epigenetic)', value: '~67.8 human years (16×ln(10)+31)' },
-      { label: 'Traditional Dog Method', value: '15 (yr1) + 9 (yr2) + 4×(age-2)' },
+      { label: 'Traditional Dog Method', value: '15 (yr1) + 9 (yr2) + 5×(age-2) — AVMA, medium-size dog' },
       { label: 'Cat Formula', value: '15 (yr1) + 9 (yr2) + 4×(age-2)' },
       { label: '×7 Rule (for comparison)', value: 'Pet Age × 7 (inaccurate, shown for reference)' },
       { label: 'Large Dog Senior', value: 'Age 7: Senior (vs. Age 11: Small Dog Senior)' },
     ],
     citations: [
-      { source: 'NIH 2020 — Epigenetic Clock for Dogs (Cell Systems)', url: 'https://doi.org/10.1016/j.cels.2020.06.006' },
+      { source: 'Wang T et al. 2020 — Quantitative translation of dog-to-human aging by conserved remodeling of the DNA methylome (Cell Systems 11:176–185)', url: 'https://doi.org/10.1016/j.cels.2020.06.006' },
       { source: 'Dog Aging Project — University of Washington / Texas A&M', url: 'https://dogagingproject.org/' },
-      { source: 'AAHA/AAFP Life Stage Guidelines', url: 'https://www.aaha.org/aaha-guidelines/life-stage-canine-2022/life-stage-feline-2023/' },
+      { source: 'AKC — Dog years to human years (quotes the AVMA 15 / 9 / 5 rule)', url: 'https://www.akc.org/expert-advice/health/how-to-calculate-dog-years-to-human-years/' },
       { source: 'American Veterinary Medical Association', url: 'https://www.avma.org/' },
     ],
   },

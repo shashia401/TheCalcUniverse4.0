@@ -33,10 +33,10 @@ const gfrConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '1.0',
       min: 0.1,
-      max: 20,
+      max: 1800,
       step: 0.01,
       required: true,
-      helpText: 'In mg/dL — check your lab results for SCr value',
+      helpText: 'Serum creatinine from your lab results, in the unit chosen below. Valid range: 0.1–20 mg/dL, or about 9–1,768 μmol/L.',
     },
     {
       id: 'creatinineUnit',
@@ -58,10 +58,12 @@ const gfrConfig: CalculatorConfig = {
     let scr = parseFloat(values.creatinine);
     if (isNaN(scr) || scr <= 0 || isNaN(age) || age < 18) return [];
 
-    // Convert μmol/L to mg/dL if needed (1 mg/dL = 88.42 μmol/L)
+    // Convert μmol/L to mg/dL if needed (creatinine MW 113.12 g/mol -> 1 mg/dL = 88.4 μmol/L)
     if (creatinineUnit === 'umol') {
-      scr = scr / 88.42;
+      scr = scr / 88.4;
     }
+    // Physiologic bounds in mg/dL (the form's single min/max has to be wide enough for μmol/L entry)
+    if (scr < 0.1 || scr > 20) return [];
 
     // 2021 CKD-EPI equation (race-free)
     const kappa = sex === 'female' ? 0.7 : 0.9;
@@ -149,7 +151,7 @@ const gfrConfig: CalculatorConfig = {
       { label: 'eGFR 30–44', value: 'Stage 3b — moderate to severe' },
       { label: 'eGFR 15–29', value: 'Stage 4 — severely decreased' },
       { label: 'eGFR < 15', value: 'Stage 5 — kidney failure' },
-      { label: 'CKD diagnosis', value: 'eGFR < 60 for 3+ months' },
+      { label: 'CKD diagnosis', value: 'eGFR < 60 for 3+ months, or kidney damage markers (e.g. albuminuria) for 3+ months at any eGFR' },
     ],
     workedExamples: [
       {
@@ -200,7 +202,7 @@ const gfrConfig: CalculatorConfig = {
       'Discuss results with your healthcare provider — this is a screening estimate, not a diagnosis.',
     ],
     explanation:
-      'The Glomerular Filtration Rate (GFR) is the best overall measure of kidney function. The 2021 CKD-EPI equation is the current clinical standard recommended by the National Kidney Foundation and the American Society of Nephrology. It replaced older equations that included race coefficients, which were found to overestimate GFR in Black individuals and contribute to disparities in kidney disease diagnosis and treatment. eGFR below 60 mL/min/1.73m² for 3+ months indicates chronic kidney disease. An eGFR of 15 or lower indicates kidney failure, requiring dialysis or transplant consideration. eGFR is affected by age (declines naturally after ~40), hydration status, muscle mass, certain medications, and acute illness — a single abnormal result should be confirmed with repeat testing. For example, a 65-year-old with an eGFR of 68 might be experiencing normal age-related decline rather than kidney disease, while a 30-year-old with the same eGFR would likely need further investigation. Serum creatinine, the lab value used in the equation, is itself affected by muscle mass: a bodybuilder may have elevated creatinine (and thus appear to have lower eGFR) simply because they have more muscle mass producing more creatinine as a metabolic waste product. This is why cystatin C-based GFR estimates are sometimes used as a confirmatory test in people with very high or very low muscle mass. Other factors that can temporarily lower eGFR include dehydration, high-protein meals before blood draws, recent strenuous exercise, and certain medications like NSAIDs (ibuprofen, naproxen) and ACE inhibitors.',
+      'The Glomerular Filtration Rate (GFR) is the best overall measure of kidney function. The 2021 CKD-EPI equation is the current clinical standard recommended by the National Kidney Foundation and the American Society of Nephrology. It replaced older equations that included race coefficients, which were found to overestimate GFR in Black individuals and contribute to disparities in kidney disease diagnosis and treatment. eGFR below 60 mL/min/1.73m² for 3+ months indicates chronic kidney disease. An eGFR below 15 indicates kidney failure (stage 5), where dialysis or transplant is considered. eGFR is affected by age (declines naturally after ~40), hydration status, muscle mass, certain medications, and acute illness — a single abnormal result should be confirmed with repeat testing. For example, a 65-year-old with an eGFR of 68 might be experiencing normal age-related decline rather than kidney disease, while a 30-year-old with the same eGFR would likely need further investigation. Serum creatinine, the lab value used in the equation, is itself affected by muscle mass: a bodybuilder may have elevated creatinine (and thus appear to have lower eGFR) simply because they have more muscle mass producing more creatinine as a metabolic waste product. This is why cystatin C-based GFR estimates are sometimes used as a confirmatory test in people with very high or very low muscle mass. Other factors that can temporarily lower eGFR include dehydration, high-protein meals before blood draws, recent strenuous exercise, and certain medications like NSAIDs (ibuprofen, naproxen) and ACE inhibitors.',
     faqs: [
       {
         question: 'Why was the race coefficient removed from GFR equations?',

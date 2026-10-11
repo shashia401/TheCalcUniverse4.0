@@ -234,6 +234,7 @@ const bloodTypeConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'ABO System: I^A and I^B are codominant to i (recessive). Rh System: Rh+ (R) dominant over Rh- (r).',
+    formulaSource: 'Mendelian inheritance of the ABO (I^A, I^B, i) and RhD loci — see NCBI Bookshelf, "Blood Groups and Red Cell Antigens" (Daniels & Bromilow, NBK2261). A type-A or type-B parent is treated as AA/AO (BB/BO) with equal probability, and an Rh+ parent as RR/Rr with equal probability (a uniform prior, not Hardy-Weinberg population frequencies); the ABO and Rh results are multiplied because the loci are on different chromosomes.',
     formulaDescription:
       'Blood type inheritance follows Mendelian genetics. The ABO system uses three alleles: I^A, I^B, and i. A and B are codominant with each other and both dominant over O. The Rh factor has two alleles: R (dominant, Rh+) and r (recessive, Rh-).',
     diagram: {

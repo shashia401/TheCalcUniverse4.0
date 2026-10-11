@@ -55,8 +55,8 @@ describe('Dog & Cat Age Calculator', () => {
       dogSize: 'medium',
       petAgeYears: '3',
     });
-    // Traditional: 15 + 9 + (3-2)*4 = 28
-    expect(getValue(r, 'traditionalAge')).toContain('28');
+    // AVMA rule (as quoted by AKC): 15 + 9 + (3-2)*5 = 29
+    expect(getValue(r, 'traditionalAge')).toContain('29');
   });
 
   it('calculates traditional dog age for a 10-year-old dog', () => {
@@ -65,8 +65,8 @@ describe('Dog & Cat Age Calculator', () => {
       dogSize: 'large',
       petAgeYears: '10',
     });
-    // Traditional: 15 + 9 + (10-2)*4 = 56
-    expect(getValue(r, 'traditionalAge')).toContain('56');
+    // AVMA rule: 15 + 9 + (10-2)*5 = 64
+    expect(getValue(r, 'traditionalAge')).toContain('64');
   });
 
   it('provides epigenetic age for dog aged >= 1', () => {
@@ -348,5 +348,28 @@ describe('Dog & Cat Age: contiguous life stages and cat table', () => {
     const faq = config.educational.faqs.map((f) => f.answer).join(' ');
     expect(faq).toContain('104 Labrador retrievers');
     expect(faq).not.toContain('from 320 dogs');
+  });
+
+  // ── Audit regressions (independent derivations) ──
+  it('traditional dog row is labelled as the 15/9/5 method, not the ×7 method it does not compute', () => {
+    const r = config.calculate({ species: 'dog', dogSize: 'medium', petAgeYears: '3' });
+    expect(r.find((x) => x.id === 'traditionalAge')!.label).toContain('15 / 9 / 5');
+  });
+
+  it('12-year-old dog: traditional 15+9+10*5 = 74; epigenetic 16*ln(12)+31 = 70.76', () => {
+    const r = config.calculate({ species: 'dog', dogSize: 'small', petAgeYears: '12' });
+    expect(getValue(r, 'traditionalAge')).toBe('74 human years');
+    expect(getValue(r, 'epigeneticAge')).toBe('70.8 human years');
+  });
+
+  it('cats keep the 4-per-year rule: 7-year-old cat = 15+9+5*4 = 44, x7 comparison = 49', () => {
+    const r = config.calculate({ species: 'cat', petAgeYears: '7' });
+    expect(getValue(r, 'catHumanAge')).toBe('44 human years');
+    expect(getValue(r, 'traditionalSeven')).toBe('49 human years');
+  });
+
+  it('half-year dog interpolates linearly inside year 1 (0.5 y = 7.5 -> 8) and between year 1 and 2 (1.5 y = 19.5 -> 20)', () => {
+    expect(getValue(config.calculate({ species: 'dog', dogSize: 'medium', petAgeYears: '0.5' }), 'traditionalAge')).toBe('8 human years');
+    expect(getValue(config.calculate({ species: 'dog', dogSize: 'medium', petAgeYears: '1.5' }), 'traditionalAge')).toBe('20 human years');
   });
 });

@@ -102,4 +102,38 @@ describe('BMR calculator', () => {
     });
     expect(getValue(r, 'hourlyBurn')).toContain('kcal/hour');
   });
+
+  // ── Audit regressions (independent hand calculations) ──
+  const male = { unit: 'metric', sex: 'male', age: '30', weight: '80', heightFt: '', heightIn: '', heightCm: '180' };
+  it('Mifflin-St Jeor male 30y 80 kg 180 cm = 10*80 + 6.25*180 - 5*30 + 5 = 1,780', () => {
+    const r = config.calculate({ ...male, formula: 'mifflin', bodyFatPct: '' });
+    expect(getValue(r, 'primaryBMR')).toBe('1,780 kcal/day');
+  });
+
+  it('revised Harris-Benedict (Roza & Shizgal 1984) male = 88.362 + 13.397*80 + 4.799*180 - 5.677*30 = 1,853.6', () => {
+    const r = config.calculate({ ...male, formula: 'harris', bodyFatPct: '' });
+    expect(getValue(r, 'primaryBMR')).toBe('1,854 kcal/day');
+  });
+
+  it('revised Harris-Benedict female 30y 65 kg 165 cm = 447.593 + 9.247*65 + 3.098*165 - 4.330*30 = 1,429.9', () => {
+    const r = config.calculate({ unit: 'metric', formula: 'harris', sex: 'female', age: '30', weight: '65', heightCm: '165', bodyFatPct: '' });
+    expect(getValue(r, 'primaryBMR')).toBe('1,430 kcal/day');
+  });
+
+  it('Katch-McArdle 80 kg at 20% body fat = 370 + 21.6 * 64 kg lean = 1,752.4', () => {
+    const r = config.calculate({ ...male, formula: 'katch', bodyFatPct: '20' });
+    expect(getValue(r, 'primaryBMR')).toBe('1,752 kcal/day');
+  });
+
+  it('Katch-McArdle without body fat returns no result instead of a Mifflin number under a Katch label', () => {
+    expect(config.calculate({ ...male, formula: 'katch', bodyFatPct: '' })).toEqual([]);
+  });
+
+  it('declared input ranges are bounded', () => {
+    for (const id of ['weight', 'heightFt', 'heightCm']) {
+      const f = config.inputs.find((i) => i.id === id)!;
+      expect(f.min).toBeGreaterThan(0);
+      expect(f.max).toBeDefined();
+    }
+  });
 });
