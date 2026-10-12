@@ -2,6 +2,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import MPGPanel from './MPGPanel';
 import { fixed2 as fmt } from '../../../lib/format';
+import { mpgCalc } from './mpgMath';
 
 const mpgCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -76,60 +77,35 @@ const mpgCalculatorConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const mode = values.mode || 'mpg';
-    const milesDriven = parseFloat(values.milesDriven);
-    const gallonsUsed = parseFloat(values.gallonsUsed);
-    const mpg = parseFloat(values.mpg);
-    const fuelPrice = parseFloat(values.fuelPrice);
-    const tankSize = parseFloat(values.tankSize);
+    const c = mpgCalc(values);
+    if (!c) return [];
+    if (c.error) return [{ id: 'error', label: 'Error', value: c.error, color: 'negative' as const }];
 
-    if (mode === 'mpg') {
-      if (isNaN(milesDriven) || isNaN(gallonsUsed) || gallonsUsed <= 0) return [];
-      if (milesDriven <= 0) return [{ id: 'error', label: 'Error', value: 'Miles driven must be greater than 0', color: 'negative' as const }];
-      const calcMpg = milesDriven / gallonsUsed;
-      const l100km = 235.215 / calcMpg;
+    if (c.mode === 'mpg') {
       return [
-        { id: 'mpg', label: 'Fuel Economy', value: `${fmt(calcMpg)} MPG`, highlight: true, color: 'positive' },
-        { id: 'l100km', label: 'In Liters per 100 km', value: `${fmt(l100km)} L/100km`, color: 'neutral' },
-        { id: 'kpl', label: 'Kilometers per Liter', value: `${fmt(calcMpg * 1.60934 / 3.78541)} km/L`, color: 'neutral' },
+        { id: 'mpg', label: 'Fuel Economy', value: `${fmt(c.mpg!)} MPG`, highlight: true, color: 'positive' },
+        { id: 'l100km', label: 'In Liters per 100 km', value: `${fmt(c.l100km!)} L/100km`, color: 'neutral' },
+        { id: 'kpl', label: 'Kilometers per Liter', value: `${fmt(c.kpl!)} km/L`, color: 'neutral' },
       ];
     }
-
-    if (mode === 'tripcost') {
-      if (isNaN(milesDriven) || isNaN(mpg) || isNaN(fuelPrice) || mpg <= 0) return [];
-      if (milesDriven <= 0) return [{ id: 'error', label: 'Error', value: 'Miles driven must be greater than 0', color: 'negative' as const }];
-      const gallonsNeeded = milesDriven / mpg;
-      const tripCost = gallonsNeeded * fuelPrice;
-      const costPerMile = tripCost / milesDriven;
+    if (c.mode === 'tripcost') {
       return [
-        { id: 'tripCost', label: 'Trip Fuel Cost', value: `$${fmt(tripCost)}`, highlight: true, color: 'neutral' },
-        { id: 'gallons', label: 'Gallons Needed', value: `${fmt(gallonsNeeded)} gallons`, color: 'neutral' },
-        { id: 'costPerMile', label: 'Fuel Cost per Mile', value: `$${fmt(costPerMile)}/mile`, color: 'neutral' },
+        { id: 'tripCost', label: 'Trip Fuel Cost', value: `$${fmt(c.tripCost!)}`, highlight: true, color: 'neutral' },
+        { id: 'gallons', label: 'Gallons Needed', value: `${fmt(c.gallons!)} gallons`, color: 'neutral' },
+        { id: 'costPerMile', label: 'Fuel Cost per Mile', value: `$${fmt(c.costPerMile!)}/mile`, color: 'neutral' },
       ];
     }
-
-    if (mode === 'range') {
-      if (isNaN(tankSize) || isNaN(mpg) || mpg <= 0) return [];
-      const range = tankSize * mpg;
-      const usableRange = (tankSize * 0.9) * mpg;
+    if (c.mode === 'range') {
       return [
-        { id: 'range', label: 'Full Tank Range', value: `${fmt(range)} miles`, highlight: true, color: 'positive' },
-        { id: 'usable', label: 'Practical Range (90% tank)', value: `${fmt(usableRange)} miles`, color: 'neutral' },
+        { id: 'range', label: 'Full Tank Range', value: `${fmt(c.range!)} miles`, highlight: true, color: 'positive' },
+        { id: 'usable', label: 'Practical Range (90% tank)', value: `${fmt(c.usable!)} miles`, color: 'neutral' },
       ];
     }
-
-    if (mode === 'convert') {
-      if (isNaN(mpg) || mpg <= 0) return [];
-      const l100km = 235.215 / mpg;
-      const kpl = mpg * 1.60934 / 3.78541;
-      return [
-        { id: 'l100km', label: 'Liters per 100 km', value: `${fmt(l100km)} L/100km`, highlight: true, color: 'positive' },
-        { id: 'kpl', label: 'Kilometers per Liter', value: `${fmt(kpl)} km/L`, color: 'neutral' },
-        { id: 'mpg', label: 'Miles per Gallon', value: `${fmt(mpg)} MPG`, color: 'neutral' },
-      ];
-    }
-
-    return [];
+    return [
+      { id: 'l100km', label: 'Liters per 100 km', value: `${fmt(c.l100km!)} L/100km`, highlight: true, color: 'positive' },
+      { id: 'kpl', label: 'Kilometers per Liter', value: `${fmt(c.kpl!)} km/L`, color: 'neutral' },
+      { id: 'mpg', label: 'Miles per Gallon', value: `${fmt(c.mpg!)} MPG`, color: 'neutral' },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -147,7 +123,7 @@ const mpgCalculatorConfig: CalculatorConfig = {
     variables: [
       { symbol: 'MPG', name: 'Miles Per Gallon', description: 'Number of miles a vehicle can travel on one gallon of fuel. Higher MPG = better fuel economy. The US standard measure of fuel efficiency.' },
       { symbol: 'L/100km', name: 'Liters per 100 Kilometers', description: 'Metric standard measure of fuel consumption. Lower values are better. A car that gets 30 MPG consumes about 7.8 L/100km.' },
-      { symbol: 'KPL', name: 'Kilometers per Liter', description: 'Metric measure of fuel economy. 1 MPG ≈ 0.425 KPL. Used in countries like Canada, the UK, and Japan.' },
+      { symbol: 'KPL', name: 'Kilometers per Liter', description: 'Metric measure of fuel economy. 1 MPG ≈ 0.425 km/L. Used in Japan and several other countries.' },
     ],
     howToUse: [
       'Select the calculation type from the dropdown: MPG, trip cost, range, or unit conversion.',
@@ -156,7 +132,7 @@ const mpgCalculatorConfig: CalculatorConfig = {
       'Use the range mode to estimate how far you can drive on a full tank (with a 10% reserve).',
     ],
     explanation:
-      'Fuel economy is measured in MPG in the United States and most of the Western hemisphere. Europe and most of the world use L/100km (lower is better). To convert: L/100km = 235.215 ÷ MPG. The EPA tests vehicles under standardized conditions — real-world MPG is typically 10-20% lower. Factors affecting real-world MPG include driving speed (every 5 mph over 50 mph is like paying $0.18-$0.30 more per gallon), air conditioning use (can reduce MPG by up to 25% in extreme conditions), tire pressure (under-inflated tires can lower MPG by 0.3% per 1 PSI drop), cargo weight (every 100 pounds reduces MPG by about 1-2%), and road grade (hilly terrain significantly increases fuel consumption). For hybrid and electric vehicles, driving style has an even larger impact — aggressive acceleration can reduce efficiency by 30-40% compared to smooth driving. The trip cost mode helps you budget for road trips: a 1,000 mile trip in a car getting 30 MPG at $3.50 per gallon costs about $117 in fuel. The range mode answers the common question "how far can I go on a tank?" — a 15-gallon tank at 30 MPG gives 450 miles of range, or about 405 miles of practical range leaving a 10% reserve.',
+      'Fuel economy is measured in MPG in the United States and most of the Western hemisphere. Europe and most of the world use L/100km (lower is better). To convert: L/100km = 235.215 ÷ MPG. The EPA tests vehicles under standardized conditions, so your real-world MPG often differs from the label. Factors affecting real-world MPG include driving speed (fuel economy falls off quickly above about 50 mph, per fueleconomy.gov), air conditioning use (a noticeable penalty in hot weather), cold weather (roughly 15% lower in city driving at 20°F than at 77°F, and up to 24% on short trips, per fueleconomy.gov), tire pressure (under-inflated tires can lower MPG by about 0.2% for every 1 PSI drop in average pressure, per fueleconomy.gov), cargo weight (an extra 100 pounds can reduce MPG by about 1%, per fueleconomy.gov), and road grade (hilly terrain increases fuel consumption). For hybrid and electric vehicles, driving style has an even larger impact — aggressive acceleration reduces efficiency compared to smooth driving. The trip cost mode helps you budget for road trips: a 1,000 mile trip in a car getting 30 MPG at $3.50 per gallon costs about $117 in fuel. The range mode answers the common question "how far can I go on a tank?" — a 15-gallon tank at 30 MPG gives 450 miles of range, or about 405 miles of practical range leaving a 10% reserve.',
     commonUses: [
       'Measuring your vehicle actual fuel economy by tracking miles driven and gallons used between fill-ups',
       'Estimating fuel cost for an upcoming road trip using your car real MPG and current gas prices',
@@ -179,13 +155,13 @@ const mpgCalculatorConfig: CalculatorConfig = {
     ],
     proTips: [
       'Track your MPG over multiple fill-ups, not just one. A single tank can vary by 10-15% due to pump shut-off differences, temperature, and driving conditions. Average 5+ tanks for your real baseline. Apps like Fuelly or a simple notes app make this easy.',
-      'Speed is the biggest controllable factor in fuel economy. Every 5 mph above 55 mph reduces fuel economy by roughly 7-8%. Driving at 65 mph instead of 75 mph on a 300-mile trip saves about $5-7 in fuel and only adds about 22 minutes of travel time.',
-      'Under-inflated tires cost you money silently. For every 1 PSI drop in pressure across all four tires, fuel economy decreases by approximately 0.2%. Most cars on the road have at least one under-inflated tire. Check pressure monthly — it takes 2 minutes and costs nothing at most gas stations.',
+      'Speed is a big controllable factor in fuel economy: it usually drops quickly above about 50 mph (fueleconomy.gov), so cruising a little slower on a long highway trip saves fuel for a modest time cost.',
+      'Under-inflated tires cost you money silently. Under-inflated tires can lower gas mileage by about 0.2% for every 1 psi drop in the average pressure of all tires (fueleconomy.gov). Most cars on the road have at least one under-inflated tire. Check pressure monthly — it takes 2 minutes and costs nothing at most gas stations.',
       'Use the trip cost mode before road trips to budget accurately. Fuel is often the single largest trip expense after lodging. Knowing the exact cost removes guesswork and lets you split costs fairly if traveling with friends.',
       'When comparing fuel efficiency between US and international vehicles, always use L/100km for an apples-to-apples comparison. The MPG scale is non-linear: improving from 10 to 20 MPG saves 5 gallons per 100 miles. Improving from 30 to 40 MPG saves only 0.83 gallons per 100 miles. The L/100km scale is linear and avoids this "MPG illusion."',
     ],
     limitations: [
-      'This calculator provides theoretical fuel economy and cost estimates based on the values entered. Actual MPG varies with driving conditions (city vs. highway mix), weather (cold engines use more fuel, winter-blend gasoline has 2-4% less energy), road grade, vehicle load, and driving style.',
+      'This calculator provides theoretical fuel economy and cost estimates based on the values entered. Actual MPG varies with driving conditions (city vs. highway mix), weather (cold engines use more fuel, and winter-blend gasoline has slightly less energy per gallon), road grade, vehicle load, and driving style.',
       'The MPG-to-L/100km conversion uses the constant 235.215, which is accurate for US gallons. For Imperial (UK) gallons, the conversion constant is 282.481 instead.',
       'The trip cost mode assumes constant fuel prices along the route; real prices vary by state and station. The range mode uses a simplified 90% practical tank; actual low-fuel warning light behavior varies by manufacturer.',
       'For hybrid and plug-in hybrid vehicles, real-world MPG depends heavily on trip length, battery state of charge, and ambient temperature beyond what this calculator models.',
@@ -193,17 +169,16 @@ const mpgCalculatorConfig: CalculatorConfig = {
     quickReference: [
       { label: 'MPG to L/100km', value: '235.215 / MPG' },
       { label: 'L/100km to MPG', value: '235.215 / (L/100km)' },
-      { label: 'EPA Compact Car (avg)', value: '28-34 MPG combined' },
-      { label: 'EPA Midsize Sedan (avg)', value: '25-32 MPG combined' },
-      { label: 'EPA Full-Size Truck (avg)', value: '17-22 MPG combined' },
-      { label: 'Speed Penalty', value: '-7% MPG per 5 mph over 55' },
-      { label: 'A/C Penalty', value: '-5 to -25% MPG (extreme heat)' },
-      { label: 'Cold Engine Penalty', value: '-15 to -30% MPG (first 5 min)' },
+      { label: '1 US gallon', value: '3.785 liters' },
+      { label: '1 mile', value: '1.609 km' },
+      { label: 'Extra 100 lb of cargo', value: '≈ -1% MPG (fueleconomy.gov)' },
+      { label: 'Tire pressure', value: '≈ -0.2% MPG per 1 psi low (fueleconomy.gov)' },
+      { label: 'Cold weather (20°F, city)', value: '≈ -15% MPG (fueleconomy.gov)' },
     ],
     faqs: [
       {
         question: 'Why is my real-world MPG lower than the EPA estimate?',
-        answer: 'EPA estimates are from standardized lab conditions. Highway driving at 75+ mph, frequent acceleration, using A/C, cold weather (winter blend fuel reduces MPG by 3-5%), and carrying extra weight all reduce MPG vs. the EPA estimate. Expect 10-20% lower real-world MPG in normal mixed driving.',
+        answer: 'EPA estimates are from standardized test conditions. Highway driving at high speed, frequent acceleration, using A/C, cold weather, and carrying extra weight all reduce MPG compared with the EPA estimate, so your own measured MPG can come out lower (or sometimes higher).',
       },
       {
         question: 'How do I measure my actual MPG?',
@@ -219,11 +194,11 @@ const mpgCalculatorConfig: CalculatorConfig = {
       },
       {
         question: 'Does using premium gas improve MPG?',
-        answer: 'Only if your vehicle requires or recommends it. For cars designed for regular (87 octane), premium fuel provides zero benefit to fuel economy or performance. The higher octane rating only prevents engine knock (pre-ignition) in high-compression engines. If your owner\'s manual says "premium recommended" (not "required"), you can use regular without damage — modern engines have knock sensors that adjust timing, though you may lose 3-5% power and see a small MPG drop. If the manual says "premium required," use premium to avoid engine damage. The cost difference (typically $0.60-$1.00/gallon) almost never justifies using premium in a car designed for regular.',
+        answer: 'Only if your vehicle requires or recommends it. For cars designed for regular (87 octane), premium fuel provides zero benefit to fuel economy or performance. The higher octane rating only prevents engine knock (pre-ignition) in high-compression engines. If your owner\'s manual says "premium recommended" (not "required"), you can use regular without damage — modern engines have knock sensors that adjust timing, though you may lose a little power and see a small MPG drop. If the manual says "premium required," use premium to avoid engine damage. The price difference per gallon almost never justifies using premium in a car designed for regular.',
       },
       {
         question: 'How accurate is my car\'s MPG display?',
-        answer: 'Most modern cars with trip computer MPG displays are reasonably accurate but tend to be optimistic by 3-5% compared to manual calculation (miles driven / gallons pumped). This is because the car\'s computer calculates fuel consumption from injector pulse width and fuel pressure rather than physically measuring fuel flow. The discrepancy can be larger in the first few thousand miles as the system calibrates. To verify your car\'s display: reset the trip computer, drive a full tank, then compare the displayed MPG to your manual calculation. If the gap is consistently more than 5%, mention it at your next service appointment — it may indicate a sensor calibration issue.',
+        answer: 'Most modern cars with trip computer MPG displays are reasonably accurate but can differ from a manual calculation (miles driven / gallons pumped) by a few percent, because the car computes fuel use from injector data rather than measuring it at the pump. To verify your car\'s display: reset the trip computer, drive a full tank, then compare the displayed MPG to your manual calculation. If the gap is consistently large, mention it at your next service appointment — it may indicate a sensor calibration issue.',
       },
     ],
     citations: [

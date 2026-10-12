@@ -91,8 +91,9 @@ describe('Concrete Calculator', () => {
         numSteps: '10',
         wastage: '0',
       });
-      // 10 × 3 × (7/12) × 10 × 0.5 = 87.5 cu ft
-      near(parseNumber(getValue(r, 'cubicFeet')), 87.5, 0.01);
+      // Solid stair: tread k sits on k risers, so volume = run x width x riser x (1+2+...+n)/n
+      // = 10 x 3 x (7/12) x (10+1)/2 = 96.25 cu ft (the old wedge model gave 87.5, under-counting the steps).
+      near(parseNumber(getValue(r, 'cubicFeet')), 96.25, 0.01);
     });
   });
 

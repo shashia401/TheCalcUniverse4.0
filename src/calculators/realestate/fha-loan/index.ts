@@ -2,9 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import FHAMIPPanel from './FHAMIPPanel';
 
-// ML 2023-05 sets the base-loan threshold to the national conforming loan limit ($726,200 for 2023);
-// the 2026 baseline limit is $832,750 (FHFA, Nov 2025). Update each January.
-const MIP_BASE_LOAN_THRESHOLD = 832750;
+import { parseFha, FHA_LIMIT_FLOOR_2026, FHA_LIMIT_CEILING_2026 } from './fhaMath';
 
 const fhaLoanConfig: CalculatorConfig = {
   inputs: [
@@ -55,60 +53,32 @@ const fhaLoanConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const homePrice = parseFloat(values.homePrice);
-    const downPct = parseFloat(values.downPaymentPct || '3.5') / 100;
-    const annualRate = parseFloat(values.interestRate) / 100;
-    const years = parseFloat(values.loanTerm || '30');
-
-    if (isNaN(homePrice) || isNaN(downPct) || isNaN(annualRate) || homePrice <= 0) return [];
-
-    const downPayment = homePrice * downPct;
-    const baseLoan = homePrice - downPayment;
-
-    const upfrontMIP = baseLoan * 0.0175;
-    const totalLoan = baseLoan + upfrontMIP;
-
-    const monthlyRate = annualRate / 12;
-    const numPayments = years * 12;
-
-    let monthlyPI: number;
-    if (monthlyRate === 0) {
-      monthlyPI = totalLoan / numPayments;
-    } else {
-      monthlyPI =
-        (totalLoan * (monthlyRate * Math.pow(1 + monthlyRate, numPayments))) /
-        (Math.pow(1 + monthlyRate, numPayments) - 1);
-    }
-
-    // Annual MIP schedule: HUD Mortgagee Letter 2023-05 (effective 3/20/2023). Rate depends on
-    // term (<= 15 yrs vs > 15 yrs), base loan amount vs the national conforming limit, and LTV.
-    // The duration cutoff (11 years vs mortgage term) is a separate rule: LTV <= 90% -> 11 years.
-    const ltv = Math.round((1 - downPct) * 1e6) / 1e6;
-    const overLimit = baseLoan > MIP_BASE_LOAN_THRESHOLD;
-    let annualMIPRate: number;
-    if (years > 15) {
-      annualMIPRate = overLimit ? (ltv > 0.95 ? 0.0075 : 0.007) : ltv > 0.95 ? 0.0055 : 0.005;
-    } else if (!overLimit) {
-      annualMIPRate = ltv > 0.9 ? 0.004 : 0.0015;
-    } else {
-      annualMIPRate = ltv > 0.9 ? 0.0065 : ltv > 0.78 ? 0.004 : 0.0015;
-    }
-    const monthlyMIP = (baseLoan * annualMIPRate) / 12;
-    const totalMonthly = monthlyPI + monthlyMIP;
-
-    const mipDuration = downPct < 0.1 ? 'Life of loan' : '11 years';
+    const m = parseFha(values);
+    if (!m) return [];
+    const { monthlyPI, monthlyMIP, upfrontMIP, downPayment, baseLoan, lifeOfLoan } = m;
+    const mipDuration = lifeOfLoan ? 'Life of loan' : '11 years';
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt0 = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+    // FHA limits apply to the base loan (UFMIP excluded). The county limit lies between the floor and the ceiling.
+    const warning =
+      baseLoan > FHA_LIMIT_CEILING_2026
+        ? `A base loan of $${fmt0(baseLoan)} is above the 2026 FHA ceiling of $${fmt0(FHA_LIMIT_CEILING_2026)} (the limit in the highest-cost counties), so this loan is not FHA-eligible anywhere.`
+        : baseLoan > FHA_LIMIT_FLOOR_2026
+          ? `A base loan of $${fmt0(baseLoan)} is above the 2026 FHA floor of $${fmt0(FHA_LIMIT_FLOOR_2026)}. It is only eligible if your county limit is high enough (ceiling $${fmt0(FHA_LIMIT_CEILING_2026)}) — check HUD's lookup for your county.`
+          : undefined;
 
     return [
       {
         id: 'totalMonthly',
         label: 'Total Monthly Payment',
-        value: `$${fmt(totalMonthly)}`,
+        value: `$${fmt(m.totalMonthly)}`,
         highlight: true,
-        interpretation: `This includes $${fmt(monthlyMIP)}/mo in mortgage insurance premium, which every FHA loan requires regardless of down payment. It runs for ${mipDuration.toLowerCase()} at your ${(downPct * 100).toFixed(0)}% down payment — putting down at least 10% caps it at 11 years instead of the life of the loan.`,
+        interpretation: `This includes $${fmt(monthlyMIP)}/mo in mortgage insurance premium (${(m.annualMipRate * 100).toFixed(2)}% a year, year-one figure), which every FHA loan requires regardless of down payment. It runs for ${mipDuration.toLowerCase()} at your ${parseFloat(m.downPct.toFixed(1))}% down payment — putting down at least 10% caps it at 11 years instead of the life of the loan.`,
         color: 'neutral',
+        ...(warning ? { warning } : {}),
       },
       {
         id: 'monthlyPI',
@@ -138,7 +108,7 @@ const fhaLoanConfig: CalculatorConfig = {
         id: 'mipDuration',
         label: 'MIP Duration',
         value: mipDuration,
-        color: downPct < 0.1 ? 'negative' : 'neutral',
+        color: lifeOfLoan ? 'negative' : 'neutral',
       },
     ];
   },
@@ -156,7 +126,7 @@ const fhaLoanConfig: CalculatorConfig = {
     formulaDescription:
       'FHA loans require two types of mortgage insurance premiums: an upfront MIP equal to 1.75% of the loan amount (typically financed into the loan itself), and an annual MIP paid in monthly installments at a rate of 0.50% to 0.55% of the loan balance depending on your down payment and loan term (15-year loans pay 0.15%–0.40%). Understanding both components is essential for comparing an FHA loan against a conventional mortgage.',
     variables: [
-      { symbol: 'Upfront & Annual MIP', name: 'Mortgage Insurance Premiums', description: 'Upfront MIP = 1.75% of loan amount (rolled into the loan). Annual MIP = 0.50%-0.55% of loan balance per year on 30-year loans (0.15%-0.40% on 15-year loans, higher on base loans above the conforming limit), paid monthly. Upfront MIP is financed; annual MIP lasts 11 years or life of loan depending on down payment.' },
+      { symbol: 'Upfront & Annual MIP', name: 'Mortgage Insurance Premiums', description: 'Upfront MIP = 1.75% of loan amount (rolled into the loan). Annual MIP = 0.50%-0.55% of loan balance per year on 30-year loans (0.15%-0.40% on 15-year loans, higher on base loans above the conforming limit), paid monthly. Upfront MIP is usually financed (as modeled here); annual MIP lasts 11 years or life of loan depending on down payment. HUD recalculates the annual premium each year on the scheduled balance, so it shrinks over time; the monthly figure shown is year one.' },
       { symbol: 'P&I', name: 'Principal & Interest', description: 'The standard amortization payment calculated on the total loan amount including the financed upfront MIP, using the standard fixed-rate mortgage formula.' },
       { symbol: 'Base Loan', name: 'Base Loan Amount', description: 'The home purchase price minus your down payment. This is the starting point before the upfront MIP is added.' },
     ],
@@ -188,8 +158,8 @@ const fhaLoanConfig: CalculatorConfig = {
         answer: 'Conventional PMI can be canceled once your loan-to-value ratio reaches 80%, either automatically at 78% or by request. FHA MIP with less than 10% down lasts the entire loan term. Conventional PMI rates also vary based on credit score and down payment, whereas FHA MIP rates are fixed by the government.',
       },
       {
-        question: 'What are the FHA loan limits for 2025?',
-        answer: 'FHA loan limits vary by county. For 2025, the floor for most low-cost areas is approximately $524,225, while high-cost areas can go up to $1,209,750. You can check the HUD website for your specific county\'s limit before applying.',
+        question: 'What are the FHA loan limits for 2026?',
+        answer: 'FHA loan limits vary by county. For 2026 (HUD Mortgagee Letter 2025-23), the one-unit floor for low-cost areas is $541,287 and the ceiling in the highest-cost areas is $1,249,125. The limit applies to the base loan, before the financed upfront MIP is added. You can check the HUD website for your specific county\'s limit before applying.',
       },
     ],
     citations: [

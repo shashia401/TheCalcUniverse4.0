@@ -45,8 +45,8 @@ describe('Tile Calculator', () => {
     it('treats an exactly-2-sq-ft tile (12x24) as large format at 5/box — regression fix', () => {
       // Bug: `tileArea > 2 ? 5 : 10` excluded the common 12x24" tile (exactly 2 sq ft)
       // from the large-format bucket, giving 10/box instead of the documented 5/box.
-      // The Nashville bathroom worked example (12x10 room, 12x24 tile, diagonal, 15% waste)
-      // expects 69 tiles at 5/box = 14 boxes, not 7 boxes at 10/box.
+      // Boxes now follow real carton coverage (~15.5 sq ft per box, e.g. Daltile 15.6, MSI 16): a 12x24 box holds
+      // round(15.5 / 2.0) = 8 tiles. 12x10 room, diagonal 15% waste -> 69 tiles -> ceil(69 / 8) = 9 boxes.
       const results = tileConfig.calculate({
         areaLength: '12',
         areaWidth: '10',
@@ -55,7 +55,7 @@ describe('Tile Calculator', () => {
         layout: 'diagonal',
       });
       near(parseNumber(getValue(results, 'baseTiles')), 60);
-      near(parseNumber(getValue(results, 'boxesNeeded')), 14);
+      near(parseNumber(getValue(results, 'boxesNeeded')), 9);
     });
   });
 

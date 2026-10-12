@@ -130,13 +130,15 @@ const capRateConfig: CalculatorConfig = {
     const effectiveGrossIncome = grossRent * (1 - vacancyPct);
     const vacancyLoss = grossRent * vacancyPct;
     const noi = effectiveGrossIncome - totalExpenses;
-    const capRate = (noi / propertyValue) * 100;
+    // Classify and display on the same rounded value (and never show "-0.00%").
+    const capRate = Math.round((noi / propertyValue) * 1e4) / 1e2 || 0;
     const grossRentMultiplier = propertyValue / grossRent;
     // Undefined (÷0) at 100% vacancy: Infinity here is only used for the color; the value shows N/A
     const expenseRatio = totalExpenses > 0 ? (effectiveGrossIncome > 0 ? (totalExpenses / effectiveGrossIncome) * 100 : Infinity) : 0;
 
     const fmt = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      Math.round(n).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    const money = (n: number) => `${n < 0 && Math.round(n) !== 0 ? '-' : ''}$${fmt(Math.abs(n))}`;
     const fmt2 = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -160,19 +162,19 @@ const capRateConfig: CalculatorConfig = {
         label: `Cap Rate — ${getCapLabel(capRate)}`,
         value: `${capRate.toFixed(2)}%`,
         highlight: true,
-        interpretation: `Cap rate is the property's return ignoring financing — it's what a cash buyer would earn, so it's the standard way to compare deals regardless of how each is financed. Higher usually means higher risk or a rougher market, not necessarily a better deal; a great neighborhood commanding a low cap rate can still outperform on appreciation.`,
+        interpretation: `Cap rate is the property's return ignoring financing — it's what a cash buyer would earn, so it's the standard way to compare deals regardless of how each is financed. Higher usually means higher risk or a rougher market, not necessarily a better deal; a great neighborhood commanding a low cap rate can still outperform on appreciation. The Strong/Good/Below-average labels are rough rules of thumb — what counts as a good cap rate depends on the market and property class.`,
         color: getCapColor(capRate),
       },
       {
         id: 'noi',
         label: 'Net Operating Income (NOI)',
-        value: `$${fmt(noi)}/year`,
+        value: `${money(noi)}/year`,
         color: noi > 0 ? ('positive' as const) : ('negative' as const),
       },
       {
         id: 'formula',
         label: 'Formula: NOI ÷ Property Value',
-        value: `$${fmt(noi)} ÷ $${fmt(propertyValue)} = ${capRate.toFixed(2)}%`,
+        value: `${money(noi)} ÷ $${fmt(propertyValue)} = ${capRate.toFixed(2)}%`,
         color: 'neutral' as const,
       },
       {
@@ -183,7 +185,7 @@ const capRateConfig: CalculatorConfig = {
       },
       {
         id: 'vacancyLoss',
-        label: `Vacancy Loss (${(vacancyPct * 100).toFixed(0)}%)`,
+        label: `Vacancy Loss (${parseFloat((vacancyPct * 100).toFixed(1))}%)`,
         value: `-$${fmt(vacancyLoss)}/year`,
         color: 'negative' as const,
       },
@@ -239,16 +241,16 @@ const capRateConfig: CalculatorConfig = {
       'Enter the property purchase price or current market value and the gross annual rental income at full occupancy.',
       'Enter your estimated vacancy rate; 5-10% is typical for residential properties while commercial properties may see 10-15% vacancy.',
       'Enter each expense category individually for the most accurate Net Operating Income. Missing key expenses like maintenance or property management will inflate the cap rate.',
-      'Review the calculated cap rate and its label — 6% or higher is generally considered good in most residential markets, while 3-5% is typical for luxury urban properties.',
+      'Review the calculated cap rate and its label — the labels use rough rules of thumb (6% or higher reads as good, under 4% as low), but what is good depends heavily on the market.',
       'Check the Expense Ratio and Gross Rent Multiplier outputs for additional insight into the property\'s efficiency and relative value.',
       'Use the break-even occupancy output to understand the minimum occupancy needed to cover all operating expenses before any debt service.',
     ],
     explanation:
-      'Cap rate is the most widely used metric for evaluating and comparing real estate investment opportunities across different markets and property types. The formula is straightforward: Net Operating Income divided by Property Value, expressed as a percentage. NOI is calculated by taking the gross annual rent, subtracting vacancy losses (typically 5-10% of gross rent), and then subtracting all recurring operating expenses including property taxes, insurance, maintenance, property management fees, HOA dues, and any landlord-paid utilities. A key rule of cap rate analysis is that mortgage payments are never included in the calculation, because cap rate is designed to measure the property\'s inherent income-generating potential independent of how an individual buyer chooses to finance it. This allows apples-to-apples comparisons between cash buyers and leveraged buyers. Cap rates vary widely by market and property class. In prime urban coastal markets like New York, San Francisco, or Los Angeles, cap rates typically range from 3% to 5% because property values are elevated relative to rents. In secondary and tertiary markets, cap rates of 6% to 10% are common, reflecting lower property values and sometimes higher perceived risk. It is critical to compare cap rates only within the same market and asset class, as comparing a 4% cap rate in Manhattan to an 8% cap rate in rural Ohio is not meaningful without accounting for risk, appreciation potential, and property condition. The Gross Rent Multiplier (GRM) provides a useful secondary screen: GRM is the property price divided by gross annual rent, and lower values generally indicate better value. The Expense Ratio (operating expenses divided by effective gross income) helps assess how efficiently a property is managed, with ratios under 50% considered healthy.',
+      'Cap rate is the most widely used metric for evaluating and comparing real estate investment opportunities across different markets and property types. The formula is straightforward: Net Operating Income divided by Property Value, expressed as a percentage. NOI is calculated by taking the gross annual rent, subtracting vacancy losses (typically 5-10% of gross rent), and then subtracting all recurring operating expenses including property taxes, insurance, maintenance, property management fees, HOA dues, and any landlord-paid utilities. A key rule of cap rate analysis is that mortgage payments are never included in the calculation, because cap rate is designed to measure the property\'s inherent income-generating potential independent of how an individual buyer chooses to finance it. This allows apples-to-apples comparisons between cash buyers and leveraged buyers. Cap rates vary widely by market and property class. In prime, high-priced coastal markets cap rates tend to be lower because property values are elevated relative to rents; in secondary and tertiary markets they tend to be higher, reflecting lower prices and sometimes higher perceived risk. It is critical to compare cap rates only within the same market and asset class, as comparing a low cap rate in a prime coastal market to a high one in a rural market is not meaningful without accounting for risk, appreciation potential, and property condition. The Gross Rent Multiplier (GRM) provides a useful secondary screen: GRM is the property price divided by gross annual rent, and lower values generally indicate better value. The Expense Ratio (operating expenses divided by effective gross income) helps assess how efficiently a property is managed, with a ratio under about 50% a common rule of thumb.',
     faqs: [
       {
         question: 'What is a good cap rate for rental property?',
-        answer: 'It depends entirely on the market and property class. Class A urban properties in major coastal cities typically trade at 3-5% cap rates. Suburban residential properties in growing metro areas generally range from 5-7%. Secondary and rural markets may offer 7-10% or higher. The key is to compare cap rates within the same market and asset class for a meaningful evaluation.',
+        answer: 'It depends entirely on the market and property class. Prime properties in expensive coastal metros have commonly traded at lower cap rates than comparable properties in cheaper secondary and rural markets, where cap rates are usually higher to compensate for risk and weaker growth. There is no single right number: compare cap rates for similar properties in the same market (broker surveys such as the CBRE U.S. Cap Rate Survey publish current figures) and judge them against the risk.',
       },
       {
         question: 'Why are mortgage payments excluded from cap rate?',

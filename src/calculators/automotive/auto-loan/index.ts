@@ -1,4 +1,5 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { autoLoan } from './autoLoanMath';
 import { createElement } from 'react';
 import AutoLoanPanel from './AutoLoanPanel';
 
@@ -86,7 +87,18 @@ const autoLoanConfig: CalculatorConfig = {
       max: 20,
       step: 0.1,
       inputMode: 'decimal',
-      helpText: 'In most states, sales tax applies to (Vehicle Price − Trade-In Value). This calculator uses that formula.',
+      helpText: 'In most states, sales tax applies to (Vehicle Price − Trade-In Value) — see the next field for states that do not.',
+    },
+    {
+      id: 'tradeInTaxCredit',
+      label: 'Does Your State Tax Credit the Trade-In?',
+      type: 'select',
+      defaultValue: 'yes',
+      helpText: 'Most states tax only the price after the trade-in value. A few (California and Virginia among them) tax the full price — check your state.',
+      options: [
+        { label: 'Yes — tax on price minus trade-in (most states)', value: 'yes' },
+        { label: 'No — tax on the full price', value: 'no' },
+      ],
     },
     {
       id: 'titleRegFees',
@@ -101,49 +113,18 @@ const autoLoanConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const price = parseFloat(values.vehiclePrice);
-    const down = parseFloat(values.downPayment) || 0;
-    const tradeInValue = parseFloat(values.tradeInValue) || 0;
-    const tradeInOwed = parseFloat(values.tradeInOwed) || 0;
-    const apr = parseFloat(values.interestRate) / 100;
-    const months = parseFloat(values.loanTerm || '60');
-    const taxPct = parseFloat(values.salesTaxPct) || 0;
-    const fees = parseFloat(values.titleRegFees) || 0;
-
-    if ([price, apr].some(v => isNaN(v)) || price <= 0) return [];
-
-    const netTradeIn = tradeInValue - tradeInOwed;
-    const negativeEquity = netTradeIn < 0 ? Math.abs(netTradeIn) : 0;
-    const positiveTradeIn = netTradeIn > 0 ? netTradeIn : 0;
-
-    const taxableAmount = Math.max(0, price - positiveTradeIn);
-    const salesTax = taxableAmount * (taxPct / 100);
-
-    const outTheDoorPrice = price + salesTax + fees;
-
-    const loanAmount = price + salesTax + fees + negativeEquity - down - positiveTradeIn;
+    const m = autoLoan(values);
+    if (!m) return [];
+    const { salesTax, fees, taxPct, taxableAmount, negativeEquity, tradeInOwed, tradeInValue, loanAmount, monthlyPayment, totalInterest } = m;
 
     if (loanAmount <= 0) return [
       { id: 'paid', label: 'Vehicle is fully covered', value: 'No loan needed', highlight: true, color: 'positive' },
     ];
 
-    const monthlyRate = apr / 12;
-    let monthlyPayment: number;
-    if (monthlyRate === 0) {
-      monthlyPayment = loanAmount / months;
-    } else {
-      monthlyPayment =
-        (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months))) /
-        (Math.pow(1 + monthlyRate, months) - 1);
-    }
-
-    const totalPaid = monthlyPayment * months;
-    const totalInterest = totalPaid - loanAmount;
-
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    const results = [
+    const results: CalculatorResult[] = [
       {
         id: 'monthlyPayment',
         label: 'Estimated Monthly Payment',
@@ -155,7 +136,7 @@ const autoLoanConfig: CalculatorConfig = {
       {
         id: 'outTheDoor',
         label: 'Out-the-Door Price (Before Financing)',
-        value: `$${fmt(outTheDoorPrice)}`,
+        value: `$${fmt(m.outTheDoor)}`,
         color: 'neutral' as const,
       },
       {
@@ -173,12 +154,12 @@ const autoLoanConfig: CalculatorConfig = {
       {
         id: 'totalCost',
         label: 'Total Cost of Vehicle (All-In)',
-        value: `$${fmt(totalPaid + down + positiveTradeIn)}`,
+        value: `$${fmt(m.totalCost)}`,
         color: 'neutral' as const,
       },
       {
         id: 'salesTaxLine',
-        label: `Sales Tax (${taxPct}% on $${fmt(taxableAmount)} — price minus trade-in)`,
+        label: `Sales Tax (${taxPct}% on $${fmt(taxableAmount)}${values.tradeInTaxCredit === 'no' ? ' — full price, no trade-in credit' : ' — price minus trade-in value'})`,
         value: taxPct > 0 ? `$${fmt(salesTax)}` : 'Not entered',
         color: 'neutral' as const,
       },
@@ -208,12 +189,12 @@ const autoLoanConfig: CalculatorConfig = {
   educational: {
     formula: 'M = P × [r(1+r)^n] / [(1+r)^n − 1] | Taxable = Price − Trade-In Value',
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="80" y="40" width="280" height="60" fill="var(--svg-3b82f6)" rx="8"/><text x="220" y="70" text-anchor="middle" font-size="14" fill="var(--svg-ffffff)">Vehicle Price: $35,000</text><rect x="80" y="120" width="280" height="40" fill="var(--svg-22c55e)" rx="8"/><text x="220" y="145" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">Down Payment: $5,000</text><rect x="80" y="175" width="280" height="40" fill="var(--svg-ef4444)" rx="8"/><text x="220" y="200" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">Loan Amount: $30,000</text><rect x="80" y="230" width="280" height="40" fill="var(--svg-8b5cf6)" rx="8"/><text x="220" y="255" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">Monthly: $541 @ 5% APR</text><line x1="80" y1="280" x2="360" y2="280" stroke="var(--svg-666666)" stroke-width="1"/><text x="220" y="305" text-anchor="middle" font-size="14" fill="var(--svg-333333)">Total Interest: $2,456</text></svg>',
+      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="80" y="40" width="280" height="60" fill="var(--svg-3b82f6)" rx="8"/><text x="220" y="70" text-anchor="middle" font-size="14" fill="var(--svg-ffffff)">Vehicle Price: $35,000</text><rect x="80" y="120" width="280" height="40" fill="var(--svg-22c55e)" rx="8"/><text x="220" y="145" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">Down Payment: $5,000</text><rect x="80" y="175" width="280" height="40" fill="var(--svg-ef4444)" rx="8"/><text x="220" y="200" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">Loan Amount: $30,000</text><rect x="80" y="230" width="280" height="40" fill="var(--svg-8b5cf6)" rx="8"/><text x="220" y="255" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">Monthly: $566 @ 5% APR</text><line x1="80" y1="280" x2="360" y2="280" stroke="var(--svg-666666)" stroke-width="1"/><text x="220" y="305" text-anchor="middle" font-size="14" fill="var(--svg-333333)">Total Interest: $3,968</text></svg>',
       alt: 'Vehicle price broken into down payment, loan amount, and monthly payment',
       caption: 'Auto loan breakdown — vehicle price minus down payment equals financed amount',
     },
     formulaDescription:
-      'The monthly payment uses the standard loan amortization formula where M equals the monthly payment, P is the amount financed, r is the monthly interest rate (APR divided by 12), and n is the loan term in months. The formula M = P x [r(1+r)^n] / [(1+r)^n - 1] calculates a fixed payment that fully repays the loan over the term. The amount financed is calculated as: Vehicle Price plus Sales Tax plus Title and Registration Fees, minus Down Payment, minus Trade-In Value, plus any Negative Equity (when the trade-in loan balance exceeds the trade-in value). Sales tax is applied to the taxable amount which is the vehicle price minus any positive trade-in equity, following the most common US state tax rule. The total cost of the loan includes all interest paid over the full term, which increases significantly with longer loan terms.',
+      'The monthly payment uses the standard loan amortization formula where M equals the monthly payment, P is the amount financed, r is the monthly interest rate (APR divided by 12), and n is the loan term in months. The formula M = P x [r(1+r)^n] / [(1+r)^n - 1] calculates a fixed payment that fully repays the loan over the term. The amount financed is calculated as: Vehicle Price plus Sales Tax plus Title and Registration Fees, minus Down Payment, minus Trade-In Value, plus any Negative Equity (when the trade-in loan balance exceeds the trade-in value). Sales tax is applied to the vehicle price minus the trade-in value (the allowance, even when the trade-in is not paid off), following the most common US state tax rule; you can switch this off for states that tax the full price. The total cost of the loan includes all interest paid over the full term, which increases significantly with longer loan terms.',
     variables: [
       { symbol: 'P, r & n', name: 'Loan Terms (Principal, Rate, Months)', description: 'Principal = Price + Tax + Fees + Negative Equity − Down − Trade-In. Monthly rate r = APR ÷ 12. Term n in months (typical: 36-84). These three values determine your monthly payment through the standard amortization formula.' },
       { symbol: 'Negative Equity', name: 'Underwater Trade-In', description: 'When you owe more on your trade-in than it\'s worth, the difference is added to your new loan principal.' },
@@ -226,19 +207,19 @@ const autoLoanConfig: CalculatorConfig = {
       'The calculator applies sales tax only to (price − trade-in value), as most states require.',
     ],
     explanation:
-      'An auto loan is one of the largest financial commitments most people make outside of a mortgage, yet few buyers understand how the numbers actually work at the dealership. The concept of auto financing dates back to 1919, when General Motors founded GMAC (General Motors Acceptance Corporation) to help customers afford cars — this innovation helped quadruple GM sales within four years. Today, the auto loan industry is enormous: Americans owe over $1.6 trillion in auto loan debt, with the average new car loan exceeding $40,000 and average monthly payments approaching $750. Most online auto loan calculators miss the details that actually matter at the dealership. This one correctly handles negative equity (when your trade-in is underwater — you owe more than it is worth), applies sales tax only to the taxable amount as most states require, and includes the title, registration, and doc fees that push your actual loan higher. Longer loan terms of 72 to 84 months dramatically increase total interest and create a high risk of negative equity on your next trade-in. Understanding the full picture — out-the-door price, amount financed, and total loan cost — is the best defense against dealer add-ons and unfavorable financing. Always negotiate the out-the-door price, not the monthly payment, and secure financing pre-approval from a credit union or bank before visiting the dealership.',
+      'An auto loan is one of the largest financial commitments most people make outside of a mortgage, yet few buyers understand how the numbers actually work at the dealership. Auto financing at scale dates back to 1919, when General Motors founded GMAC (General Motors Acceptance Corporation) to help customers afford cars. Today the auto loan market is enormous: U.S. households owe well over $1 trillion in auto loan debt (Federal Reserve Bank of New York), and recent Experian data put the average new-vehicle loan above $40,000. Most online auto loan calculators miss the details that actually matter at the dealership. This one correctly handles negative equity (when your trade-in is underwater — you owe more than it is worth), applies sales tax only to the taxable amount as most states require, and includes the title, registration, and doc fees that push your actual loan higher. Longer loan terms of 72 to 84 months dramatically increase total interest and create a high risk of negative equity on your next trade-in. Understanding the full picture — out-the-door price, amount financed, and total loan cost — is the best defense against dealer add-ons and unfavorable financing. Always negotiate the out-the-door price, not the monthly payment, and secure financing pre-approval from a credit union or bank before visiting the dealership.',
     workedExamples: [
       {
         scenario: 'Marcus is buying a used Honda CR-V priced at $28,000. He has $5,000 cash down, a trade-in worth $8,000 with no remaining loan, lives in a state with 7% sales tax, and expects $400 in title and doc fees. The dealer offers 6.9% APR for 60 months. What is his real monthly payment?',
         inputs: { vehiclePrice: '28000', loanTerm: '60', interestRate: '6.9', downPayment: '5000', tradeInValue: '8000', tradeInOwed: '0', salesTaxPct: '7', titleRegFees: '400' },
         result: '$331.87/month — $3,112.08 total interest over 60 months',
-        insight: 'With $8,000 positive trade-in equity: taxable amount is $28,000 - $8,000 = $20,000 at 7% tax = $1,400. Out-the-door price = $28,000 + $1,400 + $400 = $29,800. Amount financed = $29,800 - $5,000 - $8,000 = $16,800. Monthly payment at 6.9% over 60 months: approximately $331.87. Total interest paid: about $3,112. Marcus saves significantly by having a paid-off trade-in with equity.',
+        insight: 'With $8,000 positive trade-in equity: taxable amount is $28,000 - $8,000 = $20,000 at 7% tax = $1,400. Out-the-door price = $28,000 + $1,400 + $400 = $29,800. Amount financed = $29,800 - $5,000 - $8,000 = $16,800. Monthly payment at 6.9% over 60 months: approximately $331.87. Total interest paid: about $3,112. Marcus saves significantly by having a paid-off trade-in: the $8,000 trade-in both reduces the amount financed and reduces the taxable amount.',
       },
       {
         scenario: 'Jasmine wants a new SUV priced at $42,000. She has only $2,000 down, her trade-in is worth $15,000 but she still owes $18,000 on it, and her state charges 6% sales tax with $600 in fees. The dealer offers 8.5% APR for 72 months. What will her payments look like?',
         inputs: { vehiclePrice: '42000', loanTerm: '72', interestRate: '8.5', downPayment: '2000', tradeInValue: '15000', tradeInOwed: '18000', salesTaxPct: '6', titleRegFees: '600' },
-        result: '$819.94/month — $12,915.62 total interest over 72 months',
-        insight: 'Negative equity: $15,000 owed value − $18,000 owed = -$3,000 rolled into the new loan. Because the trade-in is underwater, it earns Jasmine zero trade-in tax credit (the $15,000 trade-in value only goes toward paying off the $18,000 payoff, not toward the new car) — taxable amount stays the full $42,000 price at 6% = $2,520. Out-the-door = $42,000 + $2,520 + $600 = $45,120. Amount financed = $45,120 + $3,000 (negative equity) - $2,000 (down) = $46,120. Monthly payment at 8.5% over 72 months: approximately $819.94. Total interest: about $12,916 — the underwater trade-in, zero tax credit, and long loan term make this a very expensive deal.',
+        result: '$803.94/month — $12,663.58 total interest over 72 months',
+        insight: 'Negative equity: the $15,000 trade-in value is $3,000 less than the $18,000 payoff, so that $3,000 is rolled into the new loan. The trade-in value still counts as a tax credit in most states, so the taxable amount is $42,000 - $15,000 = $27,000 at 6% = $1,620. Out-the-door = $42,000 + $1,620 + $600 = $44,220. Amount financed = $44,220 + $3,000 (negative equity) - $2,000 (down) = $45,220. Monthly payment at 8.5% over 72 months: approximately $803.94. Total interest: about $12,664 — the underwater trade-in and long loan term make this a very expensive deal.',
       },
     ],
     proTips: [
@@ -253,16 +234,15 @@ const autoLoanConfig: CalculatorConfig = {
       'This calculator uses the standard amortization formula with a fixed APR, but dealer financing may involve simple interest loans that calculate interest daily rather than monthly.',
       'It does not account for manufacturer incentives, rebates, or special financing offers (0% APR) that may be available on new cars. Lease buyout calculations are not supported.',
       'Credit score impact on APR is not modeled — actual rates vary significantly by credit tier. Insurance costs, GAP insurance, and extended warranties are not included but can add $50-$200+ to monthly ownership costs.',
-      'The sales tax calculation follows the most common US method (tax on price minus trade-in); a few states including California, Hawaii, Kentucky, Maryland, and Virginia tax the full purchase price without trade-in credit.',
+      'The sales tax calculation follows the most common US method (tax on price minus trade-in); a few states, including California and Virginia, give no trade-in credit and tax the full purchase price (set the trade-in tax credit field to No), and some states cap the credit. Check your state rules.',
     ],
     quickReference: [
       { label: 'Down Payment Target', value: '20% of vehicle price' },
       { label: 'Max Recommended Term', value: '48-60 months' },
-      { label: 'Excellent Credit APR (New)', value: '5% - 7%' },
-      { label: 'Good Credit APR (New)', value: '7% - 10%' },
-      { label: 'Used Car APR Premium', value: '+2-4% above new car rates' },
+      { label: 'Avg New-Car APR (Experian, Q1 2025)', value: '≈ 6.7%' },
+      { label: 'Avg Used-Car APR (Experian, Q1 2025)', value: '≈ 11.9%' },
       { label: 'Sales Tax Basis', value: 'Price minus Trade-In (most states)' },
-      { label: 'Avg Doc Fee Range', value: '$100 - $500' },
+      { label: 'Doc Fee', value: 'Varies by state and dealer — ask for it in writing' },
       { label: 'Key Metric', value: 'Total cost, not monthly payment' },
     ],
     commonUses: [
@@ -278,15 +258,15 @@ const autoLoanConfig: CalculatorConfig = {
       },
       {
         question: 'How do sales tax and title/registration fees affect my loan?',
-        answer: 'In most US states, sales tax applies only to price minus trade-in value. Title/registration fees typically run $50-$300, and dealer doc fees range $100-$500. These all get added to your loan amount. A few states (like California) don\'t offer the trade-in tax credit — check your DMV.',
+        answer: 'In most US states, sales tax applies only to price minus trade-in value. Title and registration fees and dealer doc fees vary widely by state and dealer, and they all get added to your loan amount. A few states (like California and Virginia) do not offer the trade-in tax credit — use the trade-in tax credit field and check your state revenue department.',
       },
       {
         question: 'What is a good APR for a car loan?',
-        answer: 'New car rates as of 2026: Excellent credit (score 750+) typically qualifies for 6% to 8% APR. Good credit (700 to 749) qualifies for 8% to 11%. Fair credit typically sees 13% to 17%. Used car rates run 2% to 4% higher across all credit tiers. Credit unions and online lenders often beat dealership financing by 1% to 2%. Always check rates from at least 3 lenders before signing — the difference can save thousands over the life of the loan.',
+        answer: 'It depends mostly on your credit score and whether the car is new or used. For reference, Experian reported average APRs of about 6.7% for new and 11.9% for used vehicles in Q1 2025, with borrowers at the top of the credit range paying far less than average and subprime borrowers paying far more. Credit unions and online lenders can beat dealership financing, so check rates from at least 3 lenders before signing — the difference can save thousands over the life of the loan.',
       },
       {
         question: 'Is a 72-month or 84-month car loan a bad idea?',
-        answer: 'Long-term loans of 72 or 84 months have three major risks. First, you pay dramatically more in total interest — a $35,000 loan at 8% over 84 months costs about $11,000 in interest vs. $7,500 over 60 months. Second, you will be underwater (owing more than the car is worth) for most of the loan term because cars depreciate faster than long-term loans amortize. Third, you are more likely to need GAP insurance, which adds cost. If you need a 72 or 84-month loan to afford the monthly payment, the car is probably too expensive for your budget. Stick to 48 to 60 months whenever possible.',
+        answer: 'Long-term loans of 72 or 84 months have three major risks. First, you pay dramatically more in total interest — a $35,000 loan at 8% over 84 months costs about $10,800 in interest vs. about $7,600 over 60 months. Second, you will be underwater (owing more than the car is worth) for most of the loan term because cars depreciate faster than long-term loans amortize. Third, you are more likely to need GAP insurance, which adds cost. If you need a 72 or 84-month loan to afford the monthly payment, the car is probably too expensive for your budget. Stick to 48 to 60 months whenever possible.',
       },
       {
         question: 'Should I get pre-approved before visiting the dealership?',
@@ -294,7 +274,7 @@ const autoLoanConfig: CalculatorConfig = {
       },
       {
         question: 'What is GAP insurance and do I need it?',
-        answer: 'GAP (Guaranteed Asset Protection) insurance covers the difference between your loan balance and the car\'s actual cash value if it\'s totaled or stolen. You should strongly consider GAP if you put less than 20% down, finance for 72+ months, or roll negative equity into the loan — because you\'ll be underwater for most of the loan term. However, buy GAP through your auto insurer (typically $20-$40/year added to your policy) rather than from the dealer finance office where it can cost $500-$900 as a one-time fee. Some insurers and credit unions include GAP-like coverage as a standard policy feature.',
+        answer: 'GAP (Guaranteed Asset Protection) insurance covers the difference between your loan balance and the car\'s actual cash value if it\'s totaled or stolen. You should strongly consider GAP if you put less than 20% down, finance for 72+ months, or roll negative equity into the loan — because you\'ll be underwater for most of the loan term. However, compare GAP quotes from your auto insurer (often added to your policy for a small annual cost) against the dealer finance office, where it is usually a much larger one-time fee. Some insurers and credit unions include GAP-like coverage as a standard policy feature.',
       },
     ],
     citations: [

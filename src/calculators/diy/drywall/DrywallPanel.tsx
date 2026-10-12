@@ -1,42 +1,18 @@
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
+import { drywall } from './drywallMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
+const sq = (n: number) => `${n.toFixed(0)} sq ft`;
 
-export default function DrywallPanel({ results }: Props) {
-  const sheets = results.find(r => r.id === 'sheets');
-  const netArea = results.find(r => r.id === 'netArea');
-  const wallArea = results.find(r => r.id === 'wallArea');
-  const ceilingArea = results.find(r => r.id === 'ceilingArea');
-
-  if (!sheets) return null;
-
-  const sheetVal = parseInt(sheets.value);
-  const netVal = netArea ? parseNum(netArea.value) : 0;
-  const wallVal = wallArea ? parseNum(wallArea.value) : 0;
-  const ceilVal = ceilingArea && ceilingArea.value !== 'Not included' ? parseNum(ceilingArea.value) : 0;
-  const maxArea = Math.max(netVal, wallVal, ceilVal);
-
-  const bar = (label: string, val: number, color: string) => {
-    const pct = maxArea > 0 ? (val / maxArea) * 100 : 0;
-    return (
-      <div className="flex items-center gap-3 py-1.5">
-        <span className="text-xs font-semibold text-slate-600 w-28 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-5 bg-slate-100 rounded overflow-hidden">
-          <div className={`h-full rounded ${color} transition-all flex items-center justify-end pr-1.5 ${pct < 10 ? 'min-w-[40px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[9px] font-bold text-white">{val.toFixed(0)} sq ft</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+export default function DrywallPanel({ values, results }: Props) {
+  const d = drywall(values);
+  if (!d || !results.length) return null;
+  const max = Math.max(d.wallArea, d.ceilingArea, d.withWaste);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -48,12 +24,12 @@ export default function DrywallPanel({ results }: Props) {
       </div>
       <div className="p-5 space-y-2">
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Sheets Needed</p>
-          <p className="text-3xl font-bold text-blue-700">{sheets.value}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-blue-800">Sheets Needed</p>
+          <p className="text-3xl font-bold text-blue-800">{d.sheets} sheets</p>
         </div>
-        {wallVal > 0 && bar('Wall Area', wallVal, 'bg-blue-500')}
-        {ceilVal > 0 && bar('Ceiling Area', ceilVal, 'bg-purple-500')}
-        {netVal > 0 && bar('Net Area (w/waste)', netVal, 'bg-emerald-500')}
+        <HBarRow label="Wall Area" value={d.wallArea} max={max} display={sq(d.wallArea)} color="bg-blue-700" labelWidth="w-32" height="h-5" className="py-1" />
+        {d.ceilingArea > 0 && <HBarRow label="Ceiling Area" value={d.ceilingArea} max={max} display={sq(d.ceilingArea)} color="bg-purple-700" labelWidth="w-32" height="h-5" className="py-1" />}
+        <HBarRow label="Net Area (w/waste)" value={d.withWaste} max={max} display={sq(d.withWaste)} color="bg-emerald-700" labelWidth="w-32" height="h-5" className="py-1" />
       </div>
     </div>
   );

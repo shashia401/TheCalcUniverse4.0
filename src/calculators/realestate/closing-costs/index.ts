@@ -1,5 +1,6 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { closingCosts, parseClosing } from './closingMath';
 import ClosingCostsPanel from './ClosingCostsPanel';
 
 const closingCostsConfig: CalculatorConfig = {
@@ -63,50 +64,16 @@ const closingCostsConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const homePrice = parseFloat(values.homePrice);
-    const downPct = (parseFloat(values.downPaymentPct) || 20) / 100;
-    const annualRate = parseFloat(values.interestRate) / 100;
-    const party = values.party || 'buyer';
+    const parsed = parseClosing(values);
+    if (!parsed) return [];
+    const { homePrice, downPct, annualRate, party } = parsed;
 
-    if (isNaN(homePrice) || homePrice <= 0) return [];
-    if (isNaN(annualRate) && party !== 'seller') return []; // rate drives buyer prepaid interest
-
-    const loanAmount = homePrice * (1 - downPct);
-    if (loanAmount <= 0 && party !== 'seller') return [];
+    const { buyerGroups, totalBuyer, sellerLines, totalSeller } = closingCosts(homePrice, downPct, annualRate);
 
     const fmt = (n: number) =>
       `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
-    const originationFee = loanAmount * 0.01;
-    const appraisalFee = 550;
-    const creditReport = 35;
-    const underwritingFee = 995;
-    const loanFeesTotal = originationFee + appraisalFee + creditReport + underwritingFee;
-
-    const titleSearch = 350;
-    const titleInsuranceLender = loanAmount * 0.005;
-    const titleInsuranceOwner = homePrice * 0.004;
-    const settlementFee = 450;
-    const recordingFee = 150;
-    const titleFeesTotal = titleSearch + titleInsuranceLender + titleInsuranceOwner + settlementFee + recordingFee;
-
-    const daysInMonth = 15;
-    const prepaidInterest = (loanAmount * (annualRate / 365)) * daysInMonth;
-    const prepaidHomeInsurance = homePrice * 0.005;
-    const propertyTaxEscrow = (homePrice * 0.012) / 12 * 3;
-    const escrowSetupFee = 350;
-    const prepaidTotal = prepaidInterest + prepaidHomeInsurance + propertyTaxEscrow + escrowSetupFee;
-
-    const totalBuyer = loanFeesTotal + titleFeesTotal + prepaidTotal;
-
-    const agentCommissionBuyer = homePrice * 0.025;
-    const agentCommissionSeller = homePrice * 0.025;
-    const sellerTitleInsurance = homePrice * 0.004;
-    const transferTax = homePrice * 0.002;
-    const homeWarranty = 500;
-    const totalSeller = agentCommissionBuyer + agentCommissionSeller + sellerTitleInsurance + transferTax + homeWarranty;
-
-    const results = [];
+    const results: CalculatorResult[] = [];
 
     if (party === 'buyer' || party === 'both') {
       results.push({
@@ -114,43 +81,13 @@ const closingCostsConfig: CalculatorConfig = {
         label: `Total Buyer Closing Costs`,
         value: `${fmt(totalBuyer)} (${((totalBuyer / homePrice) * 100).toFixed(1)}% of price)`,
         highlight: party === 'buyer',
-        interpretation: `Closing costs are cash due at signing, on top of your down payment — most buyers underestimate this and get surprised near the finish line. Some categories (like origination fees) are negotiable or lender-dependent; ask for a Loan Estimate early so this figure isn't a last-minute shock.`,
-        color: 'neutral' as const,
+        interpretation: `Closing costs are cash due at signing, on top of your down payment — most buyers underestimate this and get surprised near the finish line. These are national-average assumptions, and some categories (like origination fees) are negotiable or lender-dependent; ask for a Loan Estimate early so this figure isn't a last-minute shock.`,
+        color: 'neutral',
       });
-
-      results.push({
-        id: 'loanFeesHeader',
-        label: 'LOAN / LENDER FEES',
-        value: fmt(loanFeesTotal),
-        color: 'neutral' as const,
-      });
-      results.push({ id: 'origination', label: '  Loan Origination Fee (1%)', value: fmt(originationFee), color: 'neutral' as const });
-      results.push({ id: 'appraisal', label: '  Appraisal Fee', value: fmt(appraisalFee), color: 'neutral' as const });
-      results.push({ id: 'creditReport', label: '  Credit Report Fee', value: fmt(creditReport), color: 'neutral' as const });
-      results.push({ id: 'underwriting', label: '  Underwriting Fee', value: fmt(underwritingFee), color: 'neutral' as const });
-
-      results.push({
-        id: 'titleFeesHeader',
-        label: 'TITLE & THIRD-PARTY FEES',
-        value: fmt(titleFeesTotal),
-        color: 'neutral' as const,
-      });
-      results.push({ id: 'titleSearch', label: '  Title Search', value: fmt(titleSearch), color: 'neutral' as const });
-      results.push({ id: 'titleInsLender', label: "  Lender's Title Insurance", value: fmt(titleInsuranceLender), color: 'neutral' as const });
-      results.push({ id: 'titleInsOwner', label: "  Owner's Title Insurance", value: fmt(titleInsuranceOwner), color: 'neutral' as const });
-      results.push({ id: 'settlementFee', label: '  Settlement / Escrow Fee', value: fmt(settlementFee), color: 'neutral' as const });
-      results.push({ id: 'recording', label: '  Recording Fee', value: fmt(recordingFee), color: 'neutral' as const });
-
-      results.push({
-        id: 'prepaidHeader',
-        label: 'PREPAIDS & ESCROW SETUP',
-        value: fmt(prepaidTotal),
-        color: 'neutral' as const,
-      });
-      results.push({ id: 'prepaidInterest', label: '  Prepaid Interest (~15 days)', value: fmt(prepaidInterest), color: 'neutral' as const });
-      results.push({ id: 'prepaidIns', label: '  Prepaid Homeowners Insurance', value: fmt(prepaidHomeInsurance), color: 'neutral' as const });
-      results.push({ id: 'taxEscrow', label: '  Property Tax Escrow (3 mo.)', value: fmt(propertyTaxEscrow), color: 'neutral' as const });
-      results.push({ id: 'escrowSetup', label: '  Escrow Setup / Cushion', value: fmt(escrowSetupFee), color: 'neutral' as const });
+      for (const g of buyerGroups) {
+        results.push({ id: `${g.id}Header`, label: g.label, value: fmt(g.total), color: 'neutral' });
+        for (const l of g.lines) results.push({ id: l.id, label: l.label, value: fmt(l.amount), color: 'neutral' });
+      }
     }
 
     if (party === 'seller' || party === 'both') {
@@ -159,13 +96,11 @@ const closingCostsConfig: CalculatorConfig = {
         label: 'Total Seller Closing Costs',
         value: `${fmt(totalSeller)} (${((totalSeller / homePrice) * 100).toFixed(1)}% of price)`,
         highlight: party === 'seller',
-        color: 'neutral' as const,
+        color: 'neutral',
       });
-      results.push({ id: 'commissionBuyer', label: "  Buyer's Agent Commission (2.5%)", value: fmt(agentCommissionBuyer), color: 'negative' as const });
-      results.push({ id: 'commissionSeller', label: "  Seller's Agent Commission (2.5%)", value: fmt(agentCommissionSeller), color: 'negative' as const });
-      results.push({ id: 'sellerTitle', label: "  Owner's Title Insurance (Seller)", value: fmt(sellerTitleInsurance), color: 'neutral' as const });
-      results.push({ id: 'transferTax', label: '  Transfer / Excise Tax', value: fmt(transferTax), color: 'neutral' as const });
-      results.push({ id: 'homeWarranty', label: '  Home Warranty (optional)', value: fmt(homeWarranty), color: 'neutral' as const });
+      for (const l of sellerLines) {
+        results.push({ id: l.id, label: l.label, value: fmt(l.amount), color: l.id.startsWith('commission') ? 'negative' : 'neutral' });
+      }
     }
 
     return results;

@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MulchPanel from './MulchPanel';
+import { mulchVolume } from '../../diy/shared/mulchMath';
 import { roundStr2 as fmt } from '../../../lib/format';
 
 const mulchConfig: CalculatorConfig = {
@@ -82,12 +83,13 @@ const mulchConfig: CalculatorConfig = {
       area = length * width;
     }
 
-    const cubicYards = (area * depthIn) / 324;
-    const cubicFeet = cubicYards * 27;
-
-    const bags2ft = Math.ceil(cubicFeet / 2);
-    const bags3ft = Math.ceil(cubicFeet / 3);
-    const bulkScoops = Math.ceil(cubicYards);
+    // Shared with diy/mulch-topsoil: exact volume plus a suggested order with a 10% buffer.
+    const vol = mulchVolume(area, depthIn);
+    const cubicYards = vol.rawCuYd;
+    const cubicFeet = vol.rawCuFt;
+    const bags2ft = vol.bags2;
+    const bags3ft = vol.bags3;
+    const bulkScoops = vol.bulkYards;
 
     const fmtSqft = (n: number) => parseFloat(n.toFixed(1)).toString();
 
@@ -106,21 +108,27 @@ const mulchConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       {
+        id: 'orderCuYd',
+        label: 'Suggested Order (+10% buffer)',
+        value: `${fmt(vol.orderCuYd)} cu yd`,
+        color: 'neutral' as const,
+      },
+      {
         id: 'bags2ft',
-        label: '2 cu ft Bags Needed',
+        label: '2 cu ft Bags Needed (incl. 10% buffer)',
         value: `${bags2ft} bags`,
         color: 'neutral' as const,
       },
       {
         id: 'bags3ft',
-        label: '3 cu ft Bags Needed',
+        label: '3 cu ft Bags Needed (incl. 10% buffer)',
         value: `${bags3ft} bags`,
         color: 'neutral' as const,
       },
       {
         id: 'bulkScoops',
-        label: 'Bulk Scoops (1 yd each)',
-        value: `${bulkScoops} scoop${bulkScoops !== 1 ? 's' : ''}`,
+        label: 'Bulk Yards to Order (incl. buffer, nearest 1/2 yd up)',
+        value: `${bulkScoops} cu yd`,
         color: 'neutral' as const,
       },
       {

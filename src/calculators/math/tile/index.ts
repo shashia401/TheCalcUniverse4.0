@@ -1,14 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import TilePanel from './TilePanel';
+import { tileEstimate, LAYOUT_WASTE, DEFAULT_GROUT_IN } from '../../diy/shared/tileMath';
 import { fixed1 as fmt } from '../../../lib/format';
 
-const LAYOUT_WASTE: Record<string, number> = {
-  grid: 10,
-  brick: 10,
-  diagonal: 15,
-  herringbone: 20,
-};
 
 const LAYOUT_NOTES: Record<string, string> = {
   grid: 'Standard grid is the most efficient layout',
@@ -107,22 +102,29 @@ const tileConfig: CalculatorConfig = {
 
     if ([roomL, roomW, tileL, tileW].some(isNaN) || roomL <= 0 || roomW <= 0 || tileL <= 0 || tileW <= 0) return [];
 
-    const effectiveTileL = tileL / 12;
-    const effectiveTileW = tileW / 12;
-
-    const roomArea = roomL * roomW;
-    const tileAreaSqFt = effectiveTileL * effectiveTileW;
-
-    const baseTiles = Math.ceil(roomArea / tileAreaSqFt);
-
     const wastePct = !isNaN(wasteOverride) && wasteOverride >= 0
       ? wasteOverride
       : LAYOUT_WASTE[layout] ?? 10;
+    const groutParsed = parseFloat(values.groutWidth);
+    const sqFtPerBox = parseFloat(values.sqFtPerBox);
 
-    const wasteDecimal = wastePct / 100;
-    const wasteTiles = Math.ceil(baseTiles * wasteDecimal);
-    const totalTiles = Math.ceil(baseTiles * (1 + wasteDecimal));
-    const boxesNeeded = Math.ceil(totalTiles / 10);
+    // Shared with diy/tile-flooring and math/tile: grout joints are part of the tile pitch, boxes use carton coverage.
+    const est = tileEstimate({
+      roomLengthFt: roomL,
+      roomWidthFt: roomW,
+      tileLengthIn: tileL,
+      tileWidthIn: tileW,
+      groutIn: Number.isFinite(groutParsed) ? groutParsed : DEFAULT_GROUT_IN,
+      wastePct,
+      sqFtPerBox: Number.isFinite(sqFtPerBox) ? sqFtPerBox : undefined,
+    });
+    const roomArea = est.roomSqFt;
+    const tileAreaSqFt = est.tileSqFt;
+    const baseTiles = est.baseTiles;
+    const wasteTiles = est.wasteTiles;
+    const totalTiles = est.totalTiles;
+    const tilesPerBox = est.tilesPerBox;
+    const boxesNeeded = est.boxes;
 
     const results = [
       {
@@ -140,7 +142,7 @@ const tileConfig: CalculatorConfig = {
       },
       {
         id: 'boxesNeeded',
-        label: 'Boxes (10/box)',
+        label: `Boxes (${tilesPerBox} tiles/box)`,
         value: `${boxesNeeded} boxes`,
         color: 'neutral' as const,
       },

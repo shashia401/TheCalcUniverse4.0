@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MulchPanel from './MulchPanel';
+import { mulchVolume } from '../shared/mulchMath';
 import { roundStr2 as fmt } from '../../../lib/format';
 
 const mulchConfig: CalculatorConfig = {
@@ -90,12 +91,13 @@ const mulchConfig: CalculatorConfig = {
       area = length * width;
     }
 
-    const cubicYards = (area * depthIn) / 324;
-    const cubicFeet = cubicYards * 27;
-
-    const bags2ft = Math.ceil(cubicFeet / 2);
-    const bags3ft = Math.ceil(cubicFeet / 3);
-    const bulkScoops = Math.ceil(cubicYards);
+    // Shared with diy/mulch-topsoil: exact volume plus a suggested order with a 10% buffer.
+    const vol = mulchVolume(area, depthIn);
+    const cubicYards = vol.rawCuYd;
+    const cubicFeet = vol.rawCuFt;
+    const bags2ft = vol.bags2;
+    const bags3ft = vol.bags3;
+    const bulkScoops = vol.bulkYards;
 
     const fmtSqft = (n: number) => parseFloat(n.toFixed(1)).toString();
 
@@ -128,21 +130,27 @@ const mulchConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       {
+        id: 'orderCuYd',
+        label: 'Suggested Order (+10% buffer)',
+        value: `${fmt(vol.orderCuYd)} cu yd`,
+        color: 'neutral' as const,
+      },
+      {
         id: 'bags2ft',
-        label: '2 cu ft Bags Needed',
+        label: '2 cu ft Bags Needed (incl. 10% buffer)',
         value: `${bags2ft} bags`,
         color: 'neutral' as const,
       },
       {
         id: 'bags3ft',
-        label: '3 cu ft Bags Needed',
+        label: '3 cu ft Bags Needed (incl. 10% buffer)',
         value: `${bags3ft} bags`,
         color: 'neutral' as const,
       },
       {
         id: 'bulkScoops',
-        label: 'Bulk Scoops (1 yd each)',
-        value: `${bulkScoops} scoop${bulkScoops !== 1 ? 's' : ''}`,
+        label: 'Bulk Yards to Order (incl. buffer, nearest 1/2 yd up)',
+        value: `${bulkScoops} cu yd`,
         color: 'neutral' as const,
       },
       {
@@ -194,7 +202,7 @@ const mulchConfig: CalculatorConfig = {
       'Review the results: total cubic yards, bag counts, bulk scoops, and cost comparison.',
     ],
     explanation:
-      'Mulch is a protective layer of material applied to the surface of soil. Its primary functions are to conserve soil moisture, improve soil fertility and health, reduce weed growth, and enhance the visual appeal of garden beds. The word "mulch" comes from the Middle English word "molsh," meaning soft or moist — a fitting origin for a material that keeps soil soft and moist beneath its surface.\n\nMulch is typically applied at a depth of 2-3 inches for effective weed suppression and moisture retention. One cubic yard of mulch covers approximately 162 sq ft at 2 inches deep, or 108 sq ft at 3 inches deep. For larger areas (over 2 cubic yards), bulk delivery from a landscape supply company is significantly cheaper per cubic yard than bagged mulch from a home improvement store. A standard full-size pickup truck can hold about 1-2 cubic yards of mulch safely.\n\nPractical example: a rectangular garden bed measuring 20 feet by 10 feet (200 sq ft) at 3 inches deep requires (200 x 3) / 324 = 1.85 cubic yards of mulch. You would need approximately 25 bags of 2-cubic-foot mulch or order 2 cubic yards in bulk. Bulk delivery at $35 per yard costs $70, while bagged mulch at $4.50 per bag costs $112.50 — a savings of $42.50 with bulk delivery for this medium-sized bed.\n\nEdge cases: for circular beds around trees, measure the diameter at the widest point but subtract the area occupied by the tree trunk. For sloped beds, use a depth on the higher end (3-4 inches) to prevent erosion runoff. For irregularly shaped beds, divide the bed into simple geometric shapes, calculate each area separately, and sum them. Avoid "volcano mulching" — piling mulch against tree trunks — as this traps moisture against the bark, causing rot, fungal disease, and insect infestation. Rubber mulch and gravel require different depth calculations: rubber mulch is often applied at just 1-2 inches since it does not decompose, while gravel for driveways needs 4-6 inches for load-bearing capacity.',
+      'Mulch is a protective layer of material applied to the surface of soil. Its primary functions are to conserve soil moisture, improve soil fertility and health, reduce weed growth, and enhance the visual appeal of garden beds. The word "mulch" comes from the Middle English word "molsh," meaning soft or moist — a fitting origin for a material that keeps soil soft and moist beneath its surface.\n\nMulch is typically applied at a depth of 2-3 inches for effective weed suppression and moisture retention. One cubic yard of mulch covers approximately 162 sq ft at 2 inches deep, or 108 sq ft at 3 inches deep. For larger areas (over 2 cubic yards), bulk delivery from a landscape supply company is significantly cheaper per cubic yard than bagged mulch from a home improvement store. A standard full-size pickup truck can hold about 1-2 cubic yards of mulch safely.\n\nPractical example: a rectangular garden bed measuring 20 feet by 10 feet (200 sq ft) at 3 inches deep requires (200 x 3) / 324 = 1.85 cubic yards of mulch. With the suggested 10% buffer that is 2.04 cubic yards, or 28 bags of 2-cubic-foot mulch, or 2.5 cubic yards in bulk. Bulk delivery at $35 per yard costs $87.50, while bagged mulch at $4.50 per bag costs $126.00 -- a savings of $38.50 with bulk delivery for this medium-sized bed (prices are examples; use local quotes).\n\nEdge cases: for circular beds around trees, measure the diameter at the widest point but subtract the area occupied by the tree trunk. For sloped beds, use a depth on the higher end (3-4 inches) to prevent erosion runoff. For irregularly shaped beds, divide the bed into simple geometric shapes, calculate each area separately, and sum them. Avoid "volcano mulching" — piling mulch against tree trunks — as this traps moisture against the bark, causing rot, fungal disease, and insect infestation. Rubber mulch and gravel require different depth calculations: rubber mulch is often applied at just 1-2 inches since it does not decompose, while gravel for driveways needs 4-6 inches for load-bearing capacity.',
     diagram: {
       svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><defs><marker id="ab" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--svg-3b82f6)"/></marker></defs><rect x="40" y="130" width="240" height="50" fill="var(--svg-92400e)" rx="3"/><rect x="40" y="100" width="240" height="30" fill="var(--svg-78350f)" stroke="var(--svg-3b82f6)" stroke-width="2" rx="3"/><text x="160" y="120" text-anchor="middle" fill="var(--svg-ffffff)" font-size="12" font-weight="bold">Mulch Layer (2&ndash;3 in)</text><text x="160" y="157" text-anchor="middle" fill="var(--svg-fef3c7)" font-size="11">Soil</text><line x1="40" y1="90" x2="280" y2="90" stroke="var(--svg-3b82f6)" stroke-width="1.5" marker-start="url(#ab)" marker-end="url(#ab)"/><text x="160" y="84" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="13" font-weight="bold">Garden Bed Width</text><line x1="290" y1="100" x2="290" y2="130" stroke="var(--svg-ef4444)" stroke-width="2"/><text x="300" y="118" text-anchor="start" fill="var(--svg-ef4444)" font-size="11" font-weight="bold">D</text><rect x="30" y="165" width="260" height="20" fill="var(--svg-d1d5db)" rx="3"/><text x="160" y="178" text-anchor="middle" fill="var(--svg-1e40af)" font-size="10">Cubic Yards = (L &amp;times; W &amp;times; Depth_in) &amp;divide; 324</text></svg>',
       alt: 'Cross-section of garden bed showing mulch layer on top of soil with width and depth dimensions labeled',
@@ -240,14 +248,14 @@ const mulchConfig: CalculatorConfig = {
       {
         scenario: 'Maria in Portland has a 25 ft x 8 ft flower bed along her fence line and wants to apply 3 inches of cedar mulch. She found bagged cedar mulch at $5.97 per 2 cu ft bag and a bulk supplier at $42 per cubic yard. Which is cheaper for her project?',
         inputs: { length: '25', width: '8', depth: '3', shape: 'rect', pricePerBag2: '5.97', pricePerBulkYard: '42' },
-        result: '1.85 cubic yards needed. Bagged: 25 bags at $5.97 = $149.25. Bulk: 2 yards at $42 = $84.00. Bulk delivery saves $65.25.',
-        insight: 'Maria saves 44% by ordering bulk delivery despite needing only 1.85 yards. Many suppliers have a 1-2 yard minimum and charge a delivery fee ($30-50), so she should call to confirm the total delivered price. Even with a $40 delivery fee, bulk ($124) still beats bagged ($149).',
+        result: '1.85 cubic yards of mulch; 2.04 cubic yards with the 10% buffer. Bagged: 28 bags at $5.97 = $167.16. Bulk: 2.5 yards at $42 = $105.00. Bulk delivery saves $62.16.',
+        insight: 'Maria saves about 37% by ordering bulk delivery, even after rounding up to 2.5 yards. Many suppliers have a minimum order and charge a delivery fee, so she should call to confirm the total delivered price; a $40 delivery fee would still leave bulk ($145) cheaper than bagged ($167).',
       },
       {
         scenario: 'James in Austin needs to mulch around a 15 ft diameter circular tree ring at 2 inches deep. He only has a sedan and cannot transport bulk. How many bags should he buy?',
         inputs: { length: '15', width: '15', depth: '2', shape: 'circle' },
-        result: 'Area = 176.7 sq ft. Mulch needed = 1.09 cubic yards (29.5 cubic feet). Bags needed: 15 bags (2 cu ft) or 10 bags (3 cu ft).',
-        insight: 'James needs 15 bags of 2-cu-ft mulch. He should buy 16-17 bags to account for settling and uneven ground. Since he has a sedan, two trips or having it delivered might be necessary. A 15-ft tree ring is a substantial mulching project — landscape fabric underneath would reduce future maintenance.',
+        result: 'Area = 176.7 sq ft. Mulch needed = 1.09 cubic yards (29.5 cubic feet); 1.20 cubic yards (32.4 cubic feet) with the 10% buffer. Bags needed: 17 bags (2 cu ft) or 11 bags (3 cu ft).',
+        insight: 'James needs 17 bags of 2-cu-ft mulch, which already includes a 10% buffer for settling and uneven ground. Since he has a sedan, two trips or having it delivered might be necessary. A 15-ft tree ring is a substantial mulching project; landscape fabric underneath would reduce future maintenance.',
       },
     ],
     proTips: [

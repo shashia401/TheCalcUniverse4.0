@@ -17,17 +17,17 @@ describe('auto-loan', () => {
     expect(r).toHaveLength(7);
 
     // Net trade-in = 8000 - 5000 = +3000 (positive equity)
-    // Taxable amount = 35000 - 3000 = 32000
-    // Sales tax = 32000 * 0.08 = 2560
-    // Out-the-door = 35000 + 2560 + 500 = 38060
-    // Loan amount = 38060 - 5000 - 3000 = 30060
-    // Monthly payment on $30060 @ 6.9% / 60mo ≈ 593.78
-    near(parseNumber(getValue(r, 'outTheDoor')), 38060);
-    near(parseNumber(getValue(r, 'totalFinanced')), 30060);
-    near(parseNumber(getValue(r, 'monthlyPayment')), 593.78, 1);
-    near(parseNumber(getValue(r, 'totalInterest')), 5566.80, 100);
-    near(parseNumber(getValue(r, 'totalCost')), 43626.80, 100);
-    expect(getValue(r, 'salesTaxLine')).toContain('2,560.00');
+    // Sales-tax credit is for the trade-in VALUE (allowance), not just the equity: taxable = 35000 - 8000 = 27000
+    // Sales tax = 27000 * 0.08 = 2160
+    // Out-the-door = 35000 + 2160 + 500 = 37660
+    // Loan amount = 37660 - 5000 - 3000 = 29660
+    // Monthly payment on $29660 @ 6.9% / 60mo = 585.91 (closed-form PMT)
+    near(parseNumber(getValue(r, 'outTheDoor')), 37660);
+    near(parseNumber(getValue(r, 'totalFinanced')), 29660);
+    near(parseNumber(getValue(r, 'monthlyPayment')), 585.91, 0.01);
+    near(parseNumber(getValue(r, 'totalInterest')), 5494.31, 0.05);
+    near(parseNumber(getValue(r, 'totalCost')), 43154.31, 0.05);
+    expect(getValue(r, 'salesTaxLine')).toContain('2,160.00');
     expect(getValue(r, 'feesLine')).toContain('500');
   });
 

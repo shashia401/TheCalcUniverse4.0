@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import ConcreteSlabPanel from './ConcreteSlabPanel';
+import { concreteOrder, slabCuFt } from '../shared/concreteMath';
 import { fixed2 as fmt } from '../../../lib/format';
 
 const concreteSlabConfig: CalculatorConfig = {
@@ -64,12 +65,12 @@ const concreteSlabConfig: CalculatorConfig = {
 
     if ([length, width, depthIn].some(isNaN) || length <= 0 || width <= 0) return [];
 
-    const depthFt = depthIn / 12;
-    const cubicFeet = length * width * depthFt;
-    const cubicYards = cubicFeet / 27;
-    const withWaste = cubicYards * (1 + wastePct);
-    const bags60lb = Math.ceil(withWaste * 27 / 0.45);
-    const bags80lb = Math.ceil(withWaste * 27 / 0.6);
+    // Shared with diy/concrete so both calculators agree on identical inputs.
+    const cubicFeet = slabCuFt(length, width, depthIn);
+    const order = concreteOrder(cubicFeet, wastePct * 100);
+    const withWaste = order.totalCuYd;
+    const bags60lb = order.bags60;
+    const bags80lb = order.bags80;
 
     return [
       {
@@ -82,7 +83,7 @@ const concreteSlabConfig: CalculatorConfig = {
       {
         id: 'cubicFeet',
         label: 'Cubic Feet',
-        value: `${fmt(cubicFeet * (1 + wastePct))} cu ft`,
+        value: `${fmt(order.totalCuFt)} cu ft`,
         color: 'neutral',
       },
       {
@@ -117,7 +118,7 @@ const concreteSlabConfig: CalculatorConfig = {
     ],
     quickReference: [
       { label: '1 cubic yard', value: '27 cubic feet (3×3×3 ft cube)' },
-      { label: '10×10 ft slab at 4 in thick', value: '1.23 cu yd (~2 cu yd with waste)' },
+      { label: '10×10 ft slab at 4 in thick', value: '1.23 cu yd (1.36 cu yd with 10% waste)' },
       { label: '20×20 ft two-car driveway, 4 in', value: '4.94 cu yd (~5.5 cu yd with waste)' },
       { label: '1 cu yd from 80-lb bags', value: '45 bags (each yields ~0.6 cu ft)' },
       { label: '1 cu yd from 60-lb bags', value: '60 bags (each yields ~0.45 cu ft)' },
@@ -171,27 +172,27 @@ const concreteSlabConfig: CalculatorConfig = {
         scenario: 'Tom is pouring a 20×15 ft driveway extension for his second car. Standard 4-inch thickness with 10% waste for the slightly uneven subgrade.',
         inputs: { length: '20', width: '15', depth: '4', wastePct: '10' },
         result: 'Volume = 3.70 cu yd without waste, 4.07 cu yd with 10% waste. Equivalent: 245 sixty-lb bags or 184 eighty-lb bags.',
-        insight: 'At just over 4 cubic yards, Tom is well above the bagged-concrete threshold. He should order a ready-mix truck (4.5 yards, the supplier minimum is usually 4 yards). Cost: ~$125–150/yard × 4.5 = $560–675 plus a short-load fee if the minimum isn\'t met. Bagged would cost ~$800+ and take a full day of heavy labor mixing. Ready-mix saves both money and time at this volume. Tom needs to prepare a gravel base, build wood forms, and arrange for a wheelbarrow and helpers since the truck has limited pour time.',
+        insight: 'At just over 4 cubic yards, Tom is well above the bagged-concrete threshold. He should order a ready-mix truck (4.5 yards, the supplier minimum is usually 4 yards). Get a delivered ready-mix quote and compare it with the cost of 184 eighty-lb bags, which would also take a full day of heavy mixing. Ready-mix saves both money and time at this volume. Tom needs to prepare a gravel base, build wood forms, and arrange for a wheelbarrow and helpers since the truck has limited pour time.',
       },
       {
-        scenario: 'Priya needs to set 8 fence posts, each requiring a 12-inch diameter hole 30 inches deep. She\'s buying 80-lb bags from the hardware store.',
-        inputs: { length: '0', width: '0', depth: '4', wastePct: '10' },
-        result: 'Each post hole volume: pi × (0.5 ft)² × 2.5 ft = 1.96 cu ft × 8 posts = 15.7 cu ft total. At 0.6 cu ft per 80-lb bag = ~27 bags with 10% waste (but run the posts through a cylinder volume formula separately).',
-        insight: 'This calculator is designed for slab pours. For cylindrical post holes, use a separate formula: volume = pi × radius² × depth. Each 12-inch × 30-inch hole = ~2 cu ft. With 8 posts and 10% waste: ~18 cu ft total. At 0.6 cu ft per 80-lb bag, that\'s 30 bags. Priya should buy 32 bags for safety. For post-setting, use a fast-setting concrete mix specifically made for fence posts rather than standard slab mix — it sets in 20–40 minutes so you don\'t need to brace posts overnight.',
+        scenario: 'A homeowner is pouring a 10×10 ft shed pad at 4 inches thick and wants the standard 10% waste allowance.',
+        inputs: { length: '10', width: '10', depth: '4', wastePct: '10' },
+        result: 'Volume = 1.23 cu yd without waste, 1.36 cu yd with 10% waste. Equivalent: 82 sixty-lb bags or 62 eighty-lb bags.',
+        insight: 'Volume = 10 × 10 × (4/12) = 33.33 cubic feet = 1.23 cubic yards; with 10% waste 36.67 cubic feet = 1.36 cubic yards. That is 62 eighty-lb bags (0.6 cu ft each) or 82 sixty-lb bags (0.45 cu ft each). At this size both bagged and ready-mix are workable; get a ready-mix quote and compare it with the bag cost. For round post holes or footings use the Concrete Calculator instead, which has a cylinder option.',
       },
       {
         scenario: 'A landscape contractor is pouring a 30×25 ft patio at 4 inches thick for a restaurant outdoor dining area. The site is flat and well-prepared, so 5% waste is sufficient.',
         inputs: { length: '30', width: '25', depth: '4', wastePct: '5' },
         result: 'Volume = 9.26 cu yd without waste, 9.72 cu yd with 5% waste. Equivalent: 584 sixty-lb bags or 438 eighty-lb bags.',
-        insight: 'At nearly 10 cubic yards, this is a full ready-mix truck (typical capacity is 8–10 yards). The contractor should order 10 yards, which is the safe round-up. At ~$125/yard, that\'s $1,250 for concrete. The 5% waste is acceptable because the site is flat and the crew is experienced, but the contractor might still round up to 10.5 yards if the subbase has any undulation. For a restaurant dining area, the contractor should use a broom finish for slip resistance and consider integral color or stamped concrete for aesthetics. He should plan for a crew of 3–4 people for the pour and finishing.',
+        insight: 'At nearly 10 cubic yards, this is a full ready-mix truck (typical capacity is 8–10 yards). The contractor should order 10 yards, which is the safe round-up. The 5% waste is acceptable because the site is flat and the crew is experienced, but the contractor might still round up to 10.5 yards if the subbase has any undulation. For a restaurant dining area, the contractor should use a broom finish for slip resistance and consider integral color or stamped concrete for aesthetics. He should plan for a crew of 3–4 people for the pour and finishing.',
       },
     ],
     proTips: [
-      'Never pour concrete on dry, uncompacted, or frozen ground. Excavate to the required depth, compact the soil with a plate compactor (rent for ~$50/day), add 4–6 inches of compacted gravel base for drainage, and dampen the gravel before pouring to prevent the dry base from sucking water out of the concrete too quickly, which weakens the slab.',
+      'Never pour concrete on dry, uncompacted, or frozen ground. Excavate to the required depth, compact the soil with a plate compactor, add 4–6 inches of compacted gravel base for drainage, and dampen the gravel before pouring to prevent the dry base from sucking water out of the concrete too quickly, which weakens the slab.',
       'Order slightly more concrete than calculated — coming up short mid-pour creates a "cold joint" (a weak seam between old and new concrete) that will crack and looks terrible. Most suppliers allow you to return unused concrete (check their policy), so the cost of over-ordering 0.25–0.5 yards is far less than the cost of a short load or structural failure.',
       'Cut control joints within 6–18 hours of finishing — while the concrete is still green but has hardened enough to hold an edge. Joints should be 1/4 the slab thickness deep and spaced at 2–3 times the slab thickness in feet (e.g., for 4-inch slab, cut joints every 8–12 ft). Control joints don\'t prevent cracking; they direct cracks to a straight, hidden line where they are less visible.',
       'Curing is not the same as drying — concrete cures through a chemical reaction with water (hydration), not by drying out. Keep the slab continuously moist for at least 7 days after pouring. Use a soaker hose, wet burlap, plastic sheeting, or spray-on curing compound. Concrete that dries out too quickly can lose up to 40% of its design strength.',
-      'Use reinforcement: welded wire mesh (WWF) or rebar is cheap insurance. For a 4-inch residential slab, 6×6 W1.4/W1.4 wire mesh placed at mid-depth (use chairs or pull it up during the pour — never lay it on the ground and pour over it) adds about $0.25/sq ft and dramatically reduces random cracking. For structural slabs, use #4 rebar spaced 12–18 inches.',
+      'Use reinforcement: welded wire mesh (WWF) or rebar is cheap insurance. For a 4-inch residential slab, 6×6 W1.4/W1.4 wire mesh placed at mid-depth (use chairs or pull it up during the pour — never lay it on the ground and pour over it) is inexpensive and dramatically reduces random cracking. For structural slabs, use #4 rebar spaced 12–18 inches.',
       'When mixing from bags, rent a concrete mixer (about $40–60/day) instead of mixing in a wheelbarrow. A mixer produces more consistent concrete, saves hours of labor, and reduces the risk of weak spots from improperly mixed bags. One person operating a mixer can produce about 1 cubic yard per hour — enough for a small patio. For anything over 1.5 yards, ready-mix is more economical.',
     ],
     limitations: [

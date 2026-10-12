@@ -14,144 +14,135 @@ describe('BTU Calculator', () => {
     purpose: 'cooling',
   };
 
+  // Model (see btuMath.ts): cooling = area x BTU/sq ft(zone: 30/25/20/15, 20 = ENERGY STAR/ASHRAE rule of thumb)
+  // x ceiling x sun x insulation x room + 600 per occupant beyond two + 4,000 for a kitchen.
+  // Heating = area x BTU/sq ft(zone: 20/30/40/50) x ceiling x insulation. All values below derived by hand.
   describe('Standard Room', () => {
     it('calculates BTU for standard room in hot climate', () => {
-      // 400 × 30 × 1.0 × 1.0 × 1.0 × 1.0 + (1 × 600) = 12,600 BTU/h
-      const r = config.calculate(baseValues);
-      near(parseNumber(getValue(r, 'btuRequired')), 12600);
+      // 400 x 30 = 12,000; one occupant adds nothing (first two are in the base load)
+      near(parseNumber(getValue(config.calculate(baseValues), 'btuRequired')), 12000);
     });
 
     it('computes AC tonnage correctly', () => {
-      // 12,600 / 12,000 = 1.05 tons, formatted to "1.1 ton" (1 decimal)
-      const r = config.calculate(baseValues);
-      near(parseNumber(getValue(r, 'tonsRequired')), 1.1);
+      near(parseNumber(getValue(config.calculate(baseValues), 'tonsRequired')), 1.0);
     });
 
     it('recommends rounded-up AC size', () => {
-      // ceil(1.05 × 2) / 2 = 1.5 tons
-      const r = config.calculate(baseValues);
-      const recVal = getValue(r, 'recommendedAC');
-      expect(recVal).toContain('1.5 ton');
+      // exactly 1.0 ton needs no round-up; 12,001 BTU/h would need 1.5
+      expect(getValue(config.calculate(baseValues), 'recommendedAC')).toContain('1.0 ton');
+      expect(getValue(config.calculate({ ...baseValues, area: '401' }), 'recommendedAC')).toContain('1.5 ton');
     });
 
     it('calculates BTU per sq ft', () => {
-      // 12,600 / 400 = 31.5, rounded to 32 BTU/sq ft
-      const r = config.calculate(baseValues);
-      near(parseNumber(getValue(r, 'btuPerSqFt')), 32, 1);
+      near(parseNumber(getValue(config.calculate(baseValues), 'btuPerSqFt')), 30, 0.5);
     });
   });
 
   describe('worked example: Phoenix master bedroom', () => {
-    it('recommends 1.0 ton, not 1.5 ton — regression for narrative drift fix', () => {
-      // Educational workedExamples text previously claimed 0.98 tons and a 1.5 ton (18,000
-      // BTU/h) recommendation for this scenario. The real calculate() output is 350*30 + 2*600
-      // = 11,700 BTU/h = 0.975 tons, which rounds up to 1.0 ton (12,000 BTU/h), not 1.5 ton.
+    it('10,500 BTU/h, 0.9 tons, recommends 1.0 ton', () => {
       const r = config.calculate({
         area: '350', climateZone: '1', sunExposure: 'moderate', insulation: 'average',
         ceilingHeight: '8', roomType: 'standard', people: '2', purpose: 'cooling',
       });
-      near(parseNumber(getValue(r, 'btuRequired')), 11700);
-      near(parseNumber(getValue(r, 'tonsRequired')), 1.0, 0.05);
+      near(parseNumber(getValue(r, 'btuRequired')), 10500); // 350 x 30, two occupants are in the base
+      near(parseNumber(getValue(r, 'tonsRequired')), 0.9, 0.05);
       expect(getValue(r, 'recommendedAC')).toContain('1.0 ton');
       expect(getValue(r, 'recommendedAC')).toContain('12,000');
     });
   });
 
+  describe('worked example: Minneapolis heating', () => {
+    it('600 x 50 x 1.2 x 0.9 = 32,400 BTU/h; occupants and sun are ignored for heating', () => {
+      const r = config.calculate({
+        area: '600', climateZone: '4', sunExposure: 'minimal', insulation: 'good',
+        ceilingHeight: '9', roomType: 'standard', people: '4', purpose: 'heating',
+      });
+      near(parseNumber(getValue(r, 'btuRequired')), 32400);
+      expect(getValue(r, 'recommendedAC')).toContain('3.0 ton');
+    });
+  });
+
   describe('Room Types', () => {
-    it('calculates higher BTU for kitchen', () => {
-      // Kitchen factor = 1.15 → 400 × 30 × 1.15 + 600 = 14,400
-      const r = config.calculate({ ...baseValues, roomType: 'kitchen' });
-      near(parseNumber(getValue(r, 'btuRequired')), 14400);
+    it('kitchen adds 4,000 BTU/h of cooling', () => {
+      near(parseNumber(getValue(config.calculate({ ...baseValues, roomType: 'kitchen' }), 'btuRequired')), 16000);
     });
 
     it('calculates lower BTU for basement', () => {
-      // Basement factor = 0.85 → 400 × 30 × 0.85 + 600 = 10,800
-      const r = config.calculate({ ...baseValues, roomType: 'basement' });
-      near(parseNumber(getValue(r, 'btuRequired')), 10800);
+      // 12,000 x 0.85
+      near(parseNumber(getValue(config.calculate({ ...baseValues, roomType: 'basement' }), 'btuRequired')), 10200);
     });
 
     it('includes room details string', () => {
-      const r = config.calculate(baseValues);
-      const details = getValue(r, 'roomDetails');
+      const details = getValue(config.calculate(baseValues), 'roomDetails');
       expect(details).toContain('Zone 1');
       expect(details).toContain('standard');
     });
   });
 
   describe('Climate Zones', () => {
-    it('Zone 2 (Mixed) produces less BTU requirement than Zone 1', () => {
-      const r1 = config.calculate(baseValues);
-      const r2 = config.calculate({ ...baseValues, climateZone: '2' });
-      const btu1 = parseNumber(getValue(r1, 'btuRequired'));
-      const btu2 = parseNumber(getValue(r2, 'btuRequired'));
+    it('Zone 2 (Mixed) produces less cooling requirement than Zone 1', () => {
+      const btu1 = parseNumber(getValue(config.calculate(baseValues), 'btuRequired'));
+      const btu2 = parseNumber(getValue(config.calculate({ ...baseValues, climateZone: '2' }), 'btuRequired'));
       expect(btu2).toBeLessThan(btu1);
     });
 
-    it('Zone 4 (Cold) produces lowest BTU requirement', () => {
-      const r = config.calculate({ ...baseValues, climateZone: '4' });
-      // 400 × 15 × 1.0 × 1.0 × 1.0 × 1.0 + 600 = 6,600
-      near(parseNumber(getValue(r, 'btuRequired')), 6600);
+    it('Zone 4 (Cold) has the lowest cooling requirement', () => {
+      near(parseNumber(getValue(config.calculate({ ...baseValues, climateZone: '4' }), 'btuRequired')), 6000); // 400 x 15
+    });
+
+    it('heating runs the other way: colder zones need MORE capacity (was inverted)', () => {
+      const h = (zone: string) => parseNumber(getValue(config.calculate({ ...baseValues, climateZone: zone, purpose: 'heating' }), 'btuRequired'));
+      expect(h('1')).toBe(8000); // 400 x 20
+      expect(h('2')).toBe(12000); // 400 x 30
+      expect(h('3')).toBe(16000); // 400 x 40
+      expect(h('4')).toBe(20000); // 400 x 50
     });
   });
 
   describe('Sun Exposure', () => {
-    it('high sun exposure increases BTU', () => {
-      const r = config.calculate({ ...baseValues, sunExposure: 'high' });
-      // 400 × 30 × 1.0 × 1.15 × 1.0 × 1.0 + 600 = 14,400
-      near(parseNumber(getValue(r, 'btuRequired')), 14400);
+    it('high sun exposure increases BTU by 10%', () => {
+      near(parseNumber(getValue(config.calculate({ ...baseValues, sunExposure: 'high' }), 'btuRequired')), 13200);
     });
 
-    it('minimal sun exposure decreases BTU', () => {
-      const r = config.calculate({ ...baseValues, sunExposure: 'minimal' });
-      // 400 × 30 × 1.0 × 0.9 × 1.0 × 1.0 + 600 = 11,400
-      near(parseNumber(getValue(r, 'btuRequired')), 11400);
+    it('minimal sun exposure decreases BTU by 10%', () => {
+      near(parseNumber(getValue(config.calculate({ ...baseValues, sunExposure: 'minimal' }), 'btuRequired')), 10800);
     });
   });
 
   describe('Insulation', () => {
     it('poor insulation increases BTU requirement', () => {
-      const r = config.calculate({ ...baseValues, insulation: 'poor' });
-      // 400 × 30 × 1.0 × 1.0 × 1.2 × 1.0 + 600 = 15,000
-      near(parseNumber(getValue(r, 'btuRequired')), 15000);
+      near(parseNumber(getValue(config.calculate({ ...baseValues, insulation: 'poor' }), 'btuRequired')), 14400);
     });
 
     it('good insulation decreases BTU requirement', () => {
-      const r = config.calculate({ ...baseValues, insulation: 'good' });
-      // 400 × 30 × 1.0 × 1.0 × 0.9 × 1.0 + 600 = 11,400
-      near(parseNumber(getValue(r, 'btuRequired')), 11400);
+      near(parseNumber(getValue(config.calculate({ ...baseValues, insulation: 'good' }), 'btuRequired')), 10800);
     });
   });
 
   describe('Ceiling Height', () => {
-    it('tall ceiling increases BTU', () => {
-      const r = config.calculate({ ...baseValues, ceilingHeight: '9' });
-      near(parseNumber(getValue(r, 'btuRequired')), 13800); // 400×30×1.1 + 600
+    it('tall ceiling scales with volume (9-10 ft = 1.2)', () => {
+      near(parseNumber(getValue(config.calculate({ ...baseValues, ceilingHeight: '9' }), 'btuRequired')), 14400);
     });
 
-    it('high ceiling further increases BTU', () => {
-      const r = config.calculate({ ...baseValues, ceilingHeight: '12' });
-      near(parseNumber(getValue(r, 'btuRequired')), 15600); // 400×30×1.25 + 600
+    it('high ceiling (12 ft = 1.5, volume 12/8)', () => {
+      near(parseNumber(getValue(config.calculate({ ...baseValues, ceilingHeight: '12' }), 'btuRequired')), 18000);
     });
   });
 
   describe('Heating vs Cooling', () => {
-    it('heating applies 0.85 multiplier', () => {
-      const r = config.calculate({ ...baseValues, purpose: 'heating' });
-      // (12000 + 600) × 0.85 = 10,710
-      near(parseNumber(getValue(r, 'btuRequired')), 10710);
+    it('heating has no 0.85 derate and uses its own table', () => {
+      near(parseNumber(getValue(config.calculate({ ...baseValues, purpose: 'heating' }), 'btuRequired')), 8000);
     });
 
-    it('cooling uses 1.0 multiplier', () => {
-      const r = config.calculate({ ...baseValues, purpose: 'cooling' });
-      near(parseNumber(getValue(r, 'btuRequired')), 12600);
+    it('cooling uses the cooling table', () => {
+      near(parseNumber(getValue(config.calculate({ ...baseValues, purpose: 'cooling' }), 'btuRequired')), 12000);
     });
   });
 
   describe('People Count', () => {
-    it('additional people add 600 BTU/h each', () => {
-      const r = config.calculate({ ...baseValues, people: '4' });
-      // 12000 + (4 × 600) = 14,400
-      near(parseNumber(getValue(r, 'btuRequired')), 14400);
+    it('occupants beyond two add 600 BTU/h each (cooling)', () => {
+      near(parseNumber(getValue(config.calculate({ ...baseValues, people: '4' }), 'btuRequired')), 13200); // 12,000 + 2 x 600
+      near(parseNumber(getValue(config.calculate({ ...baseValues, people: '2' }), 'btuRequired')), 12000);
     });
   });
 

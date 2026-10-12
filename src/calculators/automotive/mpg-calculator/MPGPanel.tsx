@@ -1,35 +1,28 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { mpgCalc } from './mpgMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
+const n2 = (n: number) => n.toFixed(2);
+const MAX_MPG = 60;
+
+// Rule-of-thumb bands for a typical passenger vehicle (not a standard): -700 fills keep white text >= 4.5:1.
+function band(mpg: number) {
+  if (mpg >= 45) return { fill: 'bg-emerald-700', pill: 'bg-emerald-100 text-emerald-800', label: 'Excellent' };
+  if (mpg >= 30) return { fill: 'bg-green-700', pill: 'bg-green-100 text-green-800', label: 'Good' };
+  if (mpg >= 20) return { fill: 'bg-amber-700', pill: 'bg-amber-100 text-amber-800', label: 'Fair' };
+  return { fill: 'bg-red-700', pill: 'bg-red-100 text-red-800', label: 'Poor' };
 }
 
-export default function MPGPanel({ results }: Props) {
-  const mode = results.length > 0 ? (results[0].id === 'mpg' ? 'mpg' : results[0].id === 'tripCost' ? 'tripcost' : results[0].id === 'range' ? 'range' : 'convert') : 'mpg';
-  const mpg = results.find(r => r.id === 'mpg');
-  const l100km = results.find(r => r.id === 'l100km');
-  const tripCost = results.find(r => r.id === 'tripCost');
-  const costPerMile = results.find(r => r.id === 'costPerMile');
-  const range = results.find(r => r.id === 'range');
-  const usable = results.find(r => r.id === 'usable');
+export default function MPGPanel({ values, results }: Props) {
+  const c = mpgCalc(values);
+  if (!results.length || !c || c.error) return null;
 
-  if (!results.length) return null;
-
-  const mpgVal = mpg ? parseNum(mpg.value) : 0;
-  const maxMPG = 60;
-  const pct = mpgVal > 0 ? Math.min((mpgVal / maxMPG) * 100, 100) : 0;
-
-  const getColor = (v: number) =>
-    v >= 45 ? 'bg-emerald-500' : v >= 30 ? 'bg-green-500' : v >= 20 ? 'bg-amber-500' : 'bg-red-500';
-
-  const getLabel = (v: number) =>
-    v >= 45 ? 'Excellent' : v >= 30 ? 'Good' : v >= 20 ? 'Fair' : 'Poor';
+  const pct = c.mpg ? Math.min((c.mpg / MAX_MPG) * 100, 100) : 0;
+  const b = c.mpg ? band(c.mpg) : null;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -40,56 +33,54 @@ export default function MPGPanel({ results }: Props) {
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Fuel Economy</span>
       </div>
       <div className="p-5 space-y-3">
-        {mpg && (
+        {c.mpg !== undefined && b && (
           <div>
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs font-semibold text-slate-600">MPG</span>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getColor(mpgVal).replace('bg-', 'bg-').replace('500', '100')} ${getColor(mpgVal).replace('bg-', 'text-').replace('500', '700')}`}>
-                {getLabel(mpgVal)}
-              </span>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${b.pill}`}>{b.label}</span>
             </div>
             <div className="h-4 bg-slate-100 rounded overflow-hidden">
-              <div className={`h-full rounded ${getColor(mpgVal)} transition-all flex items-center justify-end pr-1`} style={{ width: `${Math.max(pct, 3)}%` }}>
-                <span className="text-[9px] font-bold text-white">{mpg.value}</span>
+              <div className={`h-full rounded ${b.fill} transition-all flex items-center justify-end pr-1`} style={{ width: `${Math.max(pct, 3)}%` }}>
+                <span className="text-[9px] font-bold text-white">{n2(c.mpg)} MPG</span>
               </div>
             </div>
-            <div className="flex justify-between text-[9px] text-slate-400 mt-0.5">
+            <div className="flex justify-between text-[9px] text-slate-600 mt-0.5">
               <span>0</span>
               <span>30</span>
-              <span>60</span>
+              <span>60+</span>
             </div>
           </div>
         )}
-        {l100km && (
+        {c.l100km !== undefined && (
           <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
             <span className="text-xs text-slate-600">L/100km</span>
-            <span className="text-sm font-bold text-slate-700">{l100km.value}</span>
+            <span className="text-sm font-bold text-slate-700">{n2(c.l100km)} L/100km</span>
           </div>
         )}
-        {tripCost && (
+        {c.tripCost !== undefined && (
           <div className="rounded-xl bg-amber-50 border border-amber-200 p-4">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-amber-800 font-semibold">Trip Cost</span>
-              <span className="text-lg font-bold text-amber-900">{tripCost.value}</span>
+              <span className="text-xs text-amber-900 font-semibold">Trip Cost</span>
+              <span className="text-lg font-bold text-amber-900">${n2(c.tripCost)}</span>
             </div>
-            {costPerMile && (
+            {c.costPerMile !== undefined && (
               <div className="flex justify-between items-center mt-2 pt-2 border-t border-amber-200">
-                <span className="text-xs text-amber-700">Per Mile</span>
-                <span className="text-sm font-bold text-amber-800">{costPerMile.value}</span>
+                <span className="text-xs text-amber-900">Per Mile</span>
+                <span className="text-sm font-bold text-amber-900">${n2(c.costPerMile)}/mile</span>
               </div>
             )}
           </div>
         )}
-        {range && (
+        {c.range !== undefined && (
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-              <p className="text-[10px] font-bold text-emerald-700 uppercase">Full Tank</p>
-              <p className="text-base font-bold text-emerald-800">{range.value}</p>
+              <p className="text-[10px] font-bold text-emerald-800 uppercase">Full Tank</p>
+              <p className="text-base font-bold text-emerald-900">{n2(c.range)} miles</p>
             </div>
-            {usable && (
+            {c.usable !== undefined && (
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <p className="text-[10px] font-bold text-slate-600 uppercase">Practical</p>
-                <p className="text-base font-bold text-slate-700">{usable.value}</p>
+                <p className="text-[10px] font-bold text-slate-600 uppercase">Practical (90% tank)</p>
+                <p className="text-base font-bold text-slate-700">{n2(c.usable)} miles</p>
               </div>
             )}
           </div>

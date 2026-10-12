@@ -37,11 +37,11 @@ describe('Tile Calculator', () => {
     expect(tiles).toBeGreaterThanOrEqual(100);
   });
 
-  it('boxes needed is ceiled (10 tiles per box)', () => {
+  it('boxes needed is ceiled using carton coverage (12x12 -> 16 tiles per 15.5 sq ft box)', () => {
     const r = config.calculate({ areaLength: '10', areaWidth: '10', tileLength: '12', tileWidth: '12', groutWidth: '0.125', layout: 'grid' });
     const boxes = parseInt(getValue(r, 'boxesNeeded'));
     const tiles = parseInt(getValue(r, 'tilesNeeded'));
-    expect(boxes).toBeGreaterThanOrEqual(Math.ceil(tiles / 10));
+    expect(boxes).toBe(Math.ceil(tiles / 16));
   });
 
   it('cost calculation when price per tile given', () => {

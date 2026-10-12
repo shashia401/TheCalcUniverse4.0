@@ -5,11 +5,6 @@ interface Props {
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/[$,]/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
-
 export default function CapRatePanel({ results }: Props) {
   const capRate = results.find(r => r.id === 'capRate');
   const noi = results.find(r => r.id === 'noi');
@@ -22,23 +17,6 @@ export default function CapRatePanel({ results }: Props) {
 
   if (!capRate) return null;
 
-  const noiVal = noi ? parseNum(noi.value) : 0;
-  const expenseVal = totalExpenses ? parseNum(totalExpenses.value) : 0;
-  const maxForBar = Math.max(noiVal, expenseVal, 1);
-
-  const bar = (label: string, val: number, max: number, color: string) => {
-    const pct = max > 0 ? (val / max) * 100 : 0;
-    return (
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-semibold text-slate-500 w-28 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${Math.max(pct, 3)}%` }} />
-        </div>
-        <span className="text-[10px] font-bold text-slate-700 w-24 text-right flex-shrink-0">{noi?.value || ''}</span>
-      </div>
-    );
-  };
-
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
       <div className="flex items-center gap-2 px-6 py-3 border-b border-slate-100 bg-slate-50">
@@ -50,7 +28,7 @@ export default function CapRatePanel({ results }: Props) {
       <div className="p-5 space-y-4">
         {/* Cap Rate prominently */}
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 text-center">
-          <p className="text-[9px] font-bold text-blue-500 uppercase tracking-wider">{capRate.label}</p>
+          <p className="text-[9px] font-bold text-blue-700 uppercase tracking-wider">{capRate.label}</p>
           <p className="text-3xl font-bold text-blue-700">{capRate.value}</p>
         </div>
 
@@ -58,14 +36,14 @@ export default function CapRatePanel({ results }: Props) {
         <div className="space-y-2">
           {noi && (
             <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-              <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Net Operating Income</p>
+              <p className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider">Net Operating Income</p>
               <p className="text-lg font-bold text-emerald-700">{noi.value}</p>
             </div>
           )}
           {totalExpenses && (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-              <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Operating Expenses</p>
-              <p className="text-lg font-bold text-red-600">{totalExpenses.value}</p>
+              <p className="text-[9px] font-bold text-red-700 uppercase tracking-wider">Operating Expenses</p>
+              <p className="text-lg font-bold text-red-700">{totalExpenses.value}</p>
             </div>
           )}
         </div>

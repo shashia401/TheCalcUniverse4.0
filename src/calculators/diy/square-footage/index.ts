@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SquareFootagePanel from './SquareFootagePanel';
+import { area } from './areaMath';
 
 const SHAPE_OPTIONS = [
   { label: 'Rectangle', value: 'rectangle' },
@@ -123,90 +124,41 @@ const squareFootageConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const shape = values.shape || 'rectangle';
-    const unit = values.unit || 'ft';
-    const wastageStr = values.wastage || '0';
-    const priceStr = values.pricePerSqFt || '';
-    const wastagePct = parseInt(wastageStr) || 0;
-    const price = priceStr ? parseFloat(priceStr) : NaN;
-
-    // Validate shape-specific inputs
-    let area: number;
-    let dimensionsDesc: string;
-
-    if (shape === 'rectangle') {
-      const length = parseFloat(values.length);
-      const width = parseFloat(values.width);
-      if (isNaN(length) || isNaN(width) || length <= 0 || width <= 0) return [];
-      area = length * width;
-      dimensionsDesc = `${fmt(length)} × ${fmt(width)} ${unit}`;
-    } else if (shape === 'circle') {
-      const radius = parseFloat(values.radius);
-      if (isNaN(radius) || radius <= 0) return [];
-      area = Math.PI * radius * radius;
-      dimensionsDesc = `Radius = ${fmt(radius)} ${unit}`;
-    } else if (shape === 'lshape') {
-      const length = parseFloat(values.length);
-      const width = parseFloat(values.width);
-      const lLength2 = parseFloat(values.lLength2);
-      const lWidth2 = parseFloat(values.lWidth2);
-      if (
-        isNaN(length) || isNaN(width) || length <= 0 || width <= 0 ||
-        isNaN(lLength2) || isNaN(lWidth2) || lLength2 <= 0 || lWidth2 <= 0
-      ) return [];
-      area = length * width + lLength2 * lWidth2;
-      dimensionsDesc = `(${fmt(length)} × ${fmt(width)}) + (${fmt(lLength2)} × ${fmt(lWidth2)}) ${unit}`;
-    } else {
-      return [];
-    }
-
-    if (!isFinite(area) || area <= 0) return [];
-
-    // Convert area to sq ft and sq m
-    let sqft: number;
-    let sqm: number;
-
-    if (unit === 'm') {
-      sqm = area;
-      sqft = area * 10.7639;
-    } else {
-      sqft = area;
-      sqm = area / 10.7639;
-    }
-
-    // Apply wastage
-    const wasteMultiplier = 1 + wastagePct / 100;
-    const withWaste = sqft * wasteMultiplier;
-
-    const fmtSqft = fmt(sqft);
-    const fmtSqm = fmt(sqm);
-    const fmtWithWaste = fmt(withWaste);
-    const shapeLabel = SHAPE_LABELS[shape] || shape;
+    const r = area(values);
+    if (!r) return [];
+    const unit = r.unit;
+    const d = r.dimensions;
+    const dimensionsDesc =
+      r.shape === 'rectangle'
+        ? `${fmt(d.length!)} × ${fmt(d.width!)} ${unit}`
+        : r.shape === 'circle'
+          ? `Radius = ${fmt(d.radius!)} ${unit}`
+          : `(${fmt(d.length!)} × ${fmt(d.width!)}) + (${fmt(d.length2!)} × ${fmt(d.width2!)}) ${unit}`;
 
     const results: CalculatorResult[] = [
       {
         id: 'sqft',
         label: 'Square Footage',
-        value: `${fmtSqft} ft²`,
+        value: `${fmt(r.sqft)} ft²`,
         highlight: true,
         color: 'positive',
       },
       {
         id: 'sqm',
         label: 'Square Meters',
-        value: `${fmtSqm} m²`,
+        value: `${fmt(r.sqm)} m²`,
         color: 'neutral',
       },
       {
         id: 'withWaste',
-        label: `With ${wastagePct}% Waste`,
-        value: `${fmtWithWaste} ft²`,
+        label: `With ${r.wastagePct}% Waste`,
+        value: `${fmt(r.withWaste)} ft²`,
         color: 'neutral',
       },
       {
         id: 'shape',
         label: 'Shape',
-        value: shapeLabel,
+        value: SHAPE_LABELS[r.shape] || r.shape,
         color: 'neutral',
       },
       {
@@ -217,13 +169,11 @@ const squareFootageConfig: CalculatorConfig = {
       },
     ];
 
-    // Optional cost estimate
-    if (!isNaN(price) && price > 0) {
-      const cost = price * withWaste;
+    if (r.cost !== null) {
       results.push({
         id: 'totalCost',
         label: 'Estimated Cost',
-        value: `$${cost.toFixed(2)}`,
+        value: `$${r.cost.toFixed(2)}`,
         color: 'neutral',
       });
     }

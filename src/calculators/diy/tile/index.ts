@@ -1,14 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import TilePanel from './TilePanel';
+import { tileEstimate, LAYOUT_WASTE, DEFAULT_GROUT_IN } from '../shared/tileMath';
 import { fixed1 as fmt } from '../../../lib/format';
 
-const LAYOUT_WASTE: Record<string, number> = {
-  grid: 10,
-  brick: 10,
-  diagonal: 15,
-  herringbone: 20,
-};
 
 const LAYOUT_NOTES: Record<string, string> = {
   grid: 'Standard grid is the most efficient layout with minimal waste',
@@ -98,6 +93,17 @@ const tileConfig: CalculatorConfig = {
       helpText: 'Optional: enter the individual tile price to estimate total material cost.',
     },
     {
+      id: 'sqFtPerBox',
+      label: 'Sq Ft per Box (optional)',
+      type: 'number',
+      placeholder: '15.5',
+      min: 1,
+      max: 100,
+      step: 0.1,
+      inputMode: 'decimal',
+      helpText: 'Coverage printed on the carton. Blank uses 15.5 sq ft, typical of retail porcelain cartons (about 15.5-16 sq ft); it varies by product.',
+    },
+    {
       id: 'wasteOverride',
       label: 'Custom Waste % (optional)',
       type: 'number',
@@ -120,24 +126,29 @@ const tileConfig: CalculatorConfig = {
 
     if ([roomL, roomW, tileL, tileW].some(isNaN) || roomL <= 0 || roomW <= 0 || tileL <= 0 || tileW <= 0) return [];
 
-    const effectiveTileL = tileL / 12;
-    const effectiveTileW = tileW / 12;
-
-    const roomArea = roomL * roomW;
-    const tileAreaSqFt = effectiveTileL * effectiveTileW;
-
-    const baseTiles = Math.ceil(roomArea / tileAreaSqFt);
-
     const wastePct = !isNaN(wasteOverride) && wasteOverride >= 0
       ? wasteOverride
       : LAYOUT_WASTE[layout] ?? 10;
+    const groutParsed = parseFloat(values.groutWidth);
+    const sqFtPerBox = parseFloat(values.sqFtPerBox);
 
-    const wasteDecimal = wastePct / 100;
-    const wasteTiles = Math.ceil(baseTiles * wasteDecimal);
-    const totalTiles = Math.ceil(baseTiles * (1 + wasteDecimal));
-    // Standard box has 10 tiles; adjust for larger format
-    const tilesPerBox = effectiveTileL * effectiveTileW >= 2 ? 5 : 10;
-    const boxesNeeded = Math.ceil(totalTiles / tilesPerBox);
+    // Shared with diy/tile-flooring and math/tile: grout joints are part of the tile pitch, boxes use carton coverage.
+    const est = tileEstimate({
+      roomLengthFt: roomL,
+      roomWidthFt: roomW,
+      tileLengthIn: tileL,
+      tileWidthIn: tileW,
+      groutIn: Number.isFinite(groutParsed) ? groutParsed : DEFAULT_GROUT_IN,
+      wastePct,
+      sqFtPerBox: Number.isFinite(sqFtPerBox) ? sqFtPerBox : undefined,
+    });
+    const roomArea = est.roomSqFt;
+    const tileAreaSqFt = est.tileSqFt;
+    const baseTiles = est.baseTiles;
+    const wasteTiles = est.wasteTiles;
+    const totalTiles = est.totalTiles;
+    const tilesPerBox = est.tilesPerBox;
+    const boxesNeeded = est.boxes;
 
     const results = [
       {
@@ -179,7 +190,7 @@ const tileConfig: CalculatorConfig = {
       },
       {
         id: 'boxesNeeded',
-        label: `Boxes Needed (${tilesPerBox}/box)`,
+        label: `Boxes Needed (${tilesPerBox} tiles/box)`,
         value: `${boxesNeeded} boxes`,
         color: 'neutral' as const,
       },
@@ -268,8 +279,8 @@ const tileConfig: CalculatorConfig = {
       {
         scenario: 'Emily in Nashville is tiling her 12 ft x 10 ft bathroom floor with 12x24 inch porcelain tiles in a diagonal layout. The tiles cost $4.25 each. How many tiles, boxes, and what is the total cost?',
         inputs: { areaLength: '12', areaWidth: '10', tileLength: '12', tileWidth: '24', layout: 'diagonal', pricePerTile: '4.25' },
-        result: 'Room = 120 sq ft. Each tile = 2 sq ft. Base = 60 tiles. With 15% waste = 69 tiles. Large-format boxes (5/box) = 14 boxes (70 tiles). Total cost = $297.50.',
-        insight: 'Emily should buy 14 boxes (70 tiles) for $297.50. She should keep the one extra tile for future repairs. Since this is a bathroom, she also needs a waterproofing membrane and cement backer board underneath, plus mortar and grout. She should verify all boxes have the same dye lot number before the installer begins work.',
+        result: 'Room = 120 sq ft. Each tile = 2 sq ft (2.03 sq ft with 1/8 inch grout joints). Base = 60 tiles. With 15% waste = 69 tiles. At 8 tiles per box (15.5 sq ft cartons) = 9 boxes (72 tiles). Total cost = 69 x $4.25 = $293.25.',
+        insight: 'Emily should buy 9 boxes (72 tiles); the 3 tiles beyond the 69 she needs are spares for future repairs. Check the coverage printed on the carton of the tile she picks, since it varies by product. Since this is a bathroom, she also needs a waterproofing membrane and cement backer board underneath, plus mortar and grout. She should verify all boxes have the same dye lot number before the installer begins work.',
       },
     ],
     proTips: [

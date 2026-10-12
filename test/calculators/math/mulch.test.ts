@@ -59,8 +59,9 @@ describe('Mulch Calculator', () => {
   it('bulk scoops are ceiled cubic yards', () => {
     const r = config.calculate({ length: '20', width: '10', depth: '2', shape: 'rect' });
     const cy = parseNumber(getValue(r, 'cubicYards'));
-    const scoops = parseInt(getValue(r, 'bulkScoops'));
-    expect(scoops).toBe(Math.ceil(cy));
+    // Bulk order = raw volume + 10% buffer, rounded up to the next half yard: 1.23 * 1.1 = 1.36 -> 1.5 cu yd.
+    const scoops = parseFloat(getValue(r, 'bulkScoops'));
+    expect(scoops).toBe(Math.ceil(cy * 1.1 * 2) / 2);
   });
 
   it('cost comparison: shows dollar amounts when prices entered', () => {

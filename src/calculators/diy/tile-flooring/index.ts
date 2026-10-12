@@ -1,6 +1,16 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import TileFlooringPanel from './TileFlooringPanel';
+import { tileEstimate, DEFAULT_GROUT_IN } from '../shared/tileMath';
+
+const TILE_DIMS: Record<string, [number, number]> = {
+  '0.25': [6, 6],
+  '1': [12, 12],
+  '2': [12, 24],
+  '2.25': [18, 18],
+  '4': [24, 24],
+  '9': [36, 36],
+};
 import { fixed1 as fmt } from '../../../lib/format';
 
 const tileFlooringConfig: CalculatorConfig = {
@@ -56,6 +66,30 @@ const tileFlooringConfig: CalculatorConfig = {
       ],
     },
     {
+      id: 'groutWidth',
+      label: 'Grout Line Width',
+      type: 'select',
+      defaultValue: '0.125',
+      helpText: 'Joint width between tiles. 1/8 inch is typical for rectified porcelain; wider joints need fewer tiles.',
+      options: [
+        { label: '1/16 inch', value: '0.0625' },
+        { label: '1/8 inch (standard)', value: '0.125' },
+        { label: '3/16 inch', value: '0.1875' },
+        { label: '1/4 inch', value: '0.25' },
+      ],
+    },
+    {
+      id: 'sqFtPerBox',
+      label: 'Sq Ft per Box (optional)',
+      type: 'number',
+      placeholder: '15.5',
+      min: 1,
+      max: 100,
+      step: 0.1,
+      inputMode: 'decimal',
+      helpText: 'Coverage printed on the carton. Blank uses 15.5 sq ft, typical of retail porcelain cartons.',
+    },
+    {
       id: 'pricePerSqFt',
       label: 'Tile Cost per Sq Ft (optional)',
       type: 'number',
@@ -71,27 +105,38 @@ const tileFlooringConfig: CalculatorConfig = {
     const length = parseFloat(values.roomLength);
     const width = parseFloat(values.roomWidth);
     const tileSqFt = parseFloat(values.tileSize || '1');
-    const wastePct = parseFloat(values.wastePercent || '10') / 100;
+    const wastePct = parseFloat(values.wastePercent || '10');
     const price = parseFloat(values.pricePerSqFt);
+    const groutParsed = parseFloat(values.groutWidth);
+    const sqFtPerBox = parseFloat(values.sqFtPerBox);
 
-    if ([length, width, tileSqFt].some(isNaN) || length <= 0 || width <= 0) return [];
+    if ([length, width, tileSqFt].some(isNaN) || length <= 0 || width <= 0 || tileSqFt <= 0) return [];
 
-    const roomSqFt = length * width;
-    const totalSqFtNeeded = roomSqFt * (1 + wastePct);
-    const tilesNeeded = Math.ceil(totalSqFtNeeded / tileSqFt);
-    const sqFtPerBox = 20;
-    const boxesNeeded = Math.ceil(totalSqFtNeeded / sqFtPerBox);
+    // Tile sizes are square-foot values; the tiles are 6x6, 12x12, 12x24, 18x18, 24x24 or 36x36.
+    const dims = TILE_DIMS[values.tileSize || '1'] ?? [Math.sqrt(tileSqFt * 144), Math.sqrt(tileSqFt * 144)];
+    // Shared with diy/tile and math/tile so identical inputs give identical tile and box counts.
+    const est = tileEstimate({
+      roomLengthFt: length,
+      roomWidthFt: width,
+      tileLengthIn: dims[0],
+      tileWidthIn: dims[1],
+      groutIn: Number.isFinite(groutParsed) ? groutParsed : DEFAULT_GROUT_IN,
+      wastePct,
+      sqFtPerBox: Number.isFinite(sqFtPerBox) ? sqFtPerBox : undefined,
+    });
+    const roomSqFt = est.roomSqFt;
+    const totalSqFtNeeded = roomSqFt * (1 + wastePct / 100);
 
     const results = [
       {
         id: 'sqFt',
-        label: `Total Sq Ft (with ${(wastePct * 100).toFixed(0)}% waste)`,
+        label: `Total Sq Ft (with ${wastePct.toFixed(0)}% waste)`,
         value: `${fmt(totalSqFtNeeded)} sq ft`,
         highlight: true,
         color: 'positive' as const,
       },
-      { id: 'tiles', label: 'Individual Tiles Needed', value: `${tilesNeeded.toLocaleString(undefined)} tiles`, color: 'neutral' as const },
-      { id: 'boxes', label: 'Approx. Boxes (20 sq ft/box)', value: `${boxesNeeded} boxes`, color: 'neutral' as const },
+      { id: 'tiles', label: 'Individual Tiles Needed (incl. grout joints)', value: `${est.totalTiles.toLocaleString(undefined)} tiles`, color: 'neutral' as const },
+      { id: 'boxes', label: `Boxes (${est.tilesPerBox} tiles/box)`, value: `${est.boxes} boxes`, color: 'neutral' as const },
       { id: 'roomArea', label: 'Room Area', value: `${fmt(roomSqFt)} sq ft`, color: 'neutral' as const },
     ];
 
@@ -172,19 +217,19 @@ const tileFlooringConfig: CalculatorConfig = {
       {
         scenario: 'Maria is renovating her 12×10 ft bathroom floor with 12×24 inch porcelain tiles in a straight-lay pattern. The tiles cost $4.50 per sq ft from the local flooring store.',
         inputs: { roomLength: '12', roomWidth: '10', tileSize: '2', wastePercent: '10', pricePerSqFt: '4.50' },
-        result: 'Room = 120 sq ft. With 10% waste = 132 sq ft needed. Each tile is 2 sq ft, so 66 tiles. Boxes: 7 (at 20 sq ft/box). Estimated cost: $594.00.',
-        insight: 'Maria should buy 7 boxes (140 sq ft coverage) which gives her about 20 sq ft extra — perfect for future repairs. At $4.50/sq ft, the tile cost is $594. She should also budget for thinset mortar (~$30–50), grout (~$20–30), and tools if she doesn\'t own them. The 12×24 large-format tiles require a very flat subfloor — if the floor has any dips over 1/8 inch in 10 ft, she will need self-leveling compound before tiling, adding $30–50 and an extra day of prep.',
+        result: 'Room = 120 sq ft. With 10% waste = 132 sq ft needed. Each tile is 2 sq ft, so 60 tiles plus 10% = 66 tiles (1/8 inch grout joints included). Boxes: 9 (8 tiles per 15.5 sq ft box). Estimated cost: $594.00.',
+        insight: 'Maria should buy 9 boxes (72 tiles, about 144 sq ft of coverage), which leaves 6 spare tiles for future repairs. At $4.50/sq ft on the 132 sq ft needed, the tile cost is $594. She should also budget for thinset mortar (~$30–50), grout (~$20–30), and tools if she doesn\'t own them. The 12×24 large-format tiles require a very flat subfloor — if the floor has any dips over 1/8 inch in 10 ft, she will need self-leveling compound before tiling, adding $30–50 and an extra day of prep.',
       },
       {
         scenario: 'David is tiling his kitchen backsplash with 6×6 inch ceramic tiles in a diagonal pattern. The backsplash area is 15 linear feet by 18 inches high behind the counter.',
         inputs: { roomLength: '15', roomWidth: '1.5', tileSize: '0.25', wastePercent: '15', pricePerSqFt: '2.00' },
-        result: 'Area = 22.5 sq ft. With 15% waste = 25.9 sq ft. Each tile is 0.25 sq ft, so 104 tiles. Boxes: 2. Cost: $51.75.',
+        result: 'Area = 22.5 sq ft. With 15% waste = 25.9 sq ft. Each tile is 0.25 sq ft, so 87 tiles plus 15% = 101 tiles (1/8 inch grout joints included). Boxes: 2. Cost: $51.75.',
         insight: 'David needs only 2 boxes for the backsplash — a small project well within DIY range. The diagonal pattern creates a diamond visual that makes small kitchens feel larger, but the 15% waste is important because diagonal cuts produce more waste triangles that cannot be reused. For a backsplash, David should also buy matching bullnose trim tiles for the exposed edges, which may cost $3–5 per linear foot additionally.',
       },
       {
         scenario: 'A flooring contractor is bidding a 25×20 ft open-plan living area with 24×24 inch large-format tiles in a herringbone pattern. The tiles are premium Italian porcelain at $12/sq ft.',
         inputs: { roomLength: '25', roomWidth: '20', tileSize: '4', wastePercent: '20', pricePerSqFt: '12.00' },
-        result: 'Area = 500 sq ft. With 20% waste = 600 sq ft. Each tile is 4 sq ft, so 150 tiles. Boxes: 30. Estimated cost: $7,200.00.',
+        result: 'Area = 500 sq ft. With 20% waste = 600 sq ft. Each tile is 4 sq ft, so 124 tiles plus 20% = 149 tiles (1/8 inch grout joints included). Boxes: 38 (4 tiles per box). Estimated cost: $7,200.00.',
         insight: 'At 600 sq ft including waste, this is a large professional installation. The 20% herringbone waste is non-negotiable — every border tile requires a precise 45-degree cut. The contractor should verify the subfloor flatness with a 10 ft straightedge: for 24×24 tiles, the floor must be flat to within 1/16 inch over 10 ft, which is stricter than standard. Large-format tiles also require a special large-format thinset mortar that costs more but prevents lippage. The contractor should factor in 3–4 days of labor for this size project at professional rates.',
       },
     ],

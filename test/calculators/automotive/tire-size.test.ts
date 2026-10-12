@@ -13,7 +13,7 @@ describe('tire-size', () => {
       newAspect: '45',
       newRim: '18',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // origSidewall = 225 * 0.50 = 112.5
     // newSidewall = 235 * 0.45 = 105.75
     // origDiamMm = 17 * 25.4 + 2 * 112.5 = 431.8 + 225 = 656.8
@@ -37,7 +37,7 @@ describe('tire-size', () => {
       newAspect: '50',
       newRim: '17',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     near(parseNumber(getValue(r, 'diamDiff')), 0);
     near(parseNumber(getValue(r, 'speedError')), 0);
   });
@@ -52,7 +52,7 @@ describe('tire-size', () => {
       newAspect: '45',
       newRim: '19',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // origSidewall = 205 * 0.55 = 112.75
     // newSidewall = 245 * 0.45 = 110.25
     // origDiamMm = 16 * 25.4 + 2 * 112.75 = 406.4 + 225.5 = 631.9

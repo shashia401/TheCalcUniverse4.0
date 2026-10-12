@@ -138,19 +138,19 @@ describe('drywall', () => {
       ceiling: 'no',
     });
     const tape = getValue(r, 'tape');
-    expect(tape).toContain('rolls');
+    expect(tape).toContain('roll');
   });
 
   it('worked example: 24x16 basement — regression for narrative drift fix', () => {
-    // Educational workedExamples text previously claimed "6.0 gal joint compound" and
-    // "6 rolls joint tape" for this scenario. The real calculate() output is 6.5 gal
-    // (ceil(33/30*5)+0.5) and 4 rolls (ceil(2*(24+16)/50)*2).
+    // Net area = 640 + 384 - 20 - 45 = 959 sq ft. USG estimating guidance: ~10 gal joint compound and
+    // ~370 ft of tape per 1,000 sq ft -> 9.59 gal and 354.8 ft (2 rolls of 250 ft).
     const r = config.calculate({
       length: '24', width: '16', height: '8', sheetSize: '32', ceiling: 'yes', doors: '1', windows: '3',
     });
     near(parseNumber(getValue(r, 'sheets')), 33);
-    near(parseNumber(getValue(r, 'jointCompound')), 6.5, 0.05);
-    near(parseNumber(getValue(r, 'tape')), 4, 0.01);
+    near(parseNumber(getValue(r, 'jointCompound')), 9.6, 0.05);
+    near(parseNumber(getValue(r, 'tape')), 2, 0.01);
+    near(parseNumber(getValue(r, 'screws')), 1056, 0.5); // 33 sheets x 32 (1 per sq ft of board)
   });
 
   describe('Educational content', () => {

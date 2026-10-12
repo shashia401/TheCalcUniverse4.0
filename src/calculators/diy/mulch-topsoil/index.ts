@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import MulchTopsoilPanel from './MulchTopsoilPanel';
+import { mulchVolume } from '../shared/mulchMath';
 
 const mulchTopsoilConfig: CalculatorConfig = {
   inputs: [
@@ -64,13 +65,8 @@ const mulchTopsoilConfig: CalculatorConfig = {
 
     if ([length, width, depthIn].some(isNaN) || length <= 0 || width <= 0 || depthIn <= 0) return [];
 
-    const depthFt = depthIn / 12;
-    const cubicFeet = length * width * depthFt;
-    const cubicYards = cubicFeet / 27;
-    const withWaste = cubicYards * 1.1;
-
-    const bagSizeCuFt = 2;
-    const bagsNeeded = Math.ceil(cubicFeet * 1.1 / bagSizeCuFt);
+    // Same shared math as diy/mulch and math/mulch: exact volume, plus a suggested order with a 10% buffer.
+    const vol = mulchVolume(length * width, depthIn);
 
     const materialNames: Record<string, string> = {
       mulch: 'Mulch',
@@ -84,20 +80,26 @@ const mulchTopsoilConfig: CalculatorConfig = {
       {
         id: 'cubicYards',
         label: `${materialNames[material] ?? 'Unknown material'} — Cubic Yards`,
-        value: `${withWaste.toFixed(2)} cu yd`,
+        value: `${vol.rawCuYd.toFixed(2)} cu yd`,
         highlight: true,
         color: 'positive',
       },
       {
         id: 'cubicFeet',
         label: 'Cubic Feet',
-        value: `${(cubicFeet * 1.1).toFixed(1)} cu ft`,
+        value: `${vol.rawCuFt.toFixed(1)} cu ft`,
+        color: 'neutral',
+      },
+      {
+        id: 'orderCuYd',
+        label: 'Suggested Order (+10% buffer)',
+        value: `${vol.orderCuYd.toFixed(2)} cu yd`,
         color: 'neutral',
       },
       {
         id: 'bags',
-        label: '2 Cu Ft Bags (if bagged)',
-        value: `${bagsNeeded} bags`,
+        label: '2 Cu Ft Bags (if bagged, incl. 10% buffer)',
+        value: `${vol.bags2} bags`,
         color: 'neutral',
       },
       {
@@ -181,14 +183,14 @@ const mulchTopsoilConfig: CalculatorConfig = {
       {
         scenario: 'Emily is mulching her 30×10 ft perennial flower bed with 3 inches of shredded hardwood mulch to suppress weeds for the growing season.',
         inputs: { material: 'mulch', length: '30', width: '10', depth: '3' },
-        result: 'Area = 300 sq ft, volume = 2.78 cu yd without waste, 3.06 cu yd with 10% buffer. Equivalent to 42 two-cu-ft bags.',
-        insight: 'At just over 3 cubic yards, Emily is at the sweet spot where bulk delivery is economical. Bulk mulch costs $25–40/yard delivered (with a 3–5 yard minimum) vs. $3–5 per 2 cu ft bag retail. At 3 yards bulk: ~$75–120 vs. 42 bags retail: ~$126–210. Even with a delivery fee, bulk is cheaper and means no hauling and no plastic waste. If Emily has her own pickup, she can self-haul up to ~2 yards per trip. She should apply mulch after the soil has warmed in late spring and pull it 2–3 inches away from plant stems to prevent rot.',
+        result: 'Area = 300 sq ft, volume = 2.78 cu yd without waste, 3.06 cu yd with 10% buffer. Equivalent to 46 two-cu-ft bags (with the buffer).',
+        insight: 'At just over 3 cubic yards, Emily is at the sweet spot where bulk delivery is economical. Bulk delivery is usually much cheaper per cubic yard than 2 cu ft retail bags (compare local prices), and it means no hauling and no plastic waste. If Emily has her own pickup, she can self-haul up to ~2 yards per trip. She should apply mulch after the soil has warmed in late spring and pull it 2–3 inches away from plant stems to prevent rot.',
       },
       {
         scenario: 'Raj is building a new 20×5 ft raised vegetable bed and needs to fill it with 6 inches of topsoil mixed with compost for optimal growing conditions.',
         inputs: { material: 'topsoil', length: '20', width: '5', depth: '6' },
-        result: 'Area = 100 sq ft, volume = 1.85 cu yd without waste, 2.04 cu yd with 10% buffer. Equivalent to 28 two-cu-ft bags.',
-        insight: 'Raj needs about 2 cubic yards of topsoil. Since vegetable beds benefit from compost mixed in, a good strategy is 1.5 yards of screened topsoil + 0.5 yards of compost mixed together. At 2 yards total, this might be below some bulk suppliers\' minimum delivery (often 3–5 yards), so Raj should either order from a landscape supply with a 2-yard minimum or plan to pick up with a truck. If bagged, 28 bags × $3–4 = $84–112. Raj should also consider installing a weed barrier or layer of cardboard at the bottom of the raised bed to prevent grass and weeds from growing up through the new soil.',
+        result: 'Area = 100 sq ft, volume = 1.85 cu yd without waste, 2.04 cu yd with 10% buffer. Equivalent to 28 two-cu-ft bags (with the buffer).',
+        insight: 'Raj needs about 2 cubic yards of topsoil. Since vegetable beds benefit from compost mixed in, a good strategy is 1.5 yards of screened topsoil + 0.5 yards of compost mixed together. At 2 yards total, this might be below some bulk suppliers\' minimum delivery (often 3–5 yards), so Raj should either order from a landscape supply with a 2-yard minimum or plan to pick up with a truck. If bagged, he needs 28 two-cu-ft bags including the buffer. He should also consider installing a weed barrier or a layer of cardboard at the bottom of the raised bed to prevent grass and weeds from growing up through the new soil.',
       },
       {
         scenario: 'A city parks department is refreshing the mulch on 10 tree rings, each 6 ft in diameter. They need 3 inches of fresh mulch on each ring.',

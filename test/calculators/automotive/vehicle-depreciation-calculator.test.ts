@@ -79,7 +79,7 @@ describe('vehicle depreciation calculator', () => {
       yearsOwned: '5',
       vehicleType: 'average',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // Starting value after 3 years at average rates:
     // 30000 * 0.80 * 0.85 * 0.88 = 17952
     // Then 5 more years: rates [0.10, 0.09, 0.08, 0.07, 0.06]
@@ -95,7 +95,7 @@ describe('vehicle depreciation calculator', () => {
       yearsOwned: '3',
       vehicleType: 'average',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // After 5 years at average rates [0.20, 0.15, 0.12, 0.10, 0.09]:
     // 25000 * 0.80 * 0.85 * 0.88 * 0.90 * 0.91 = 12257
     // Then 3 more years at rates [0.08, 0.07, 0.06]:
@@ -127,7 +127,7 @@ describe('vehicle depreciation calculator', () => {
       yearsOwned: '3',
       vehicleType: 'truck',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     const futureValue = parseNumber(getValue(r, 'futureValue'));
     // 10 years of rates + 5 years at 5% tail = 10 rate years + 5 tail years
     // Then 3 more years from 15 to 18 = 3 tail years at 5%

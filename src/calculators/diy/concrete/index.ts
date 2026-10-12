@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ConcretePanel from './ConcretePanel';
+import { concreteOrder, DEFAULT_CONCRETE_WASTE_PCT, slabCuFt, cylinderCuFt } from '../shared/concreteMath';
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
 
@@ -15,7 +16,7 @@ const SHAPE_FORMULAS: Record<string, string> = {
   slab: 'Volume = Length × Width × (Depth / 12)',
   hole: 'Volume = π × (Diameter/2)² × (Depth / 12)',
   column: 'Volume = π × (Diameter/2)² × (Depth / 12)',
-  stairs: 'Volume ≈ Length × Width × (Riser / 12) × Steps × 0.5',
+  stairs: 'Volume = Run × Width × (Riser / 12) × (Steps + 1) / 2',
 };
 
 // ─── Calculation helpers ─────────────────────────────────────────────────────────
@@ -40,13 +41,12 @@ function isValidPositive(n: number): boolean {
  * Wastage is expressed as a whole number percentage (0, 5, 10, 15).
  */
 function buildResults(rawCubicFeet: number, wastage: number, shape: string): CalculatorResult[] {
-  const cubicYards = rawCubicFeet / 27;
-  const multiplier = 1 + wastage / 100;
-  const totalCubicFeet = rawCubicFeet * multiplier;
-  const totalCubicYards = cubicYards * multiplier;
-
-  const bags60 = Math.ceil(totalCubicFeet / 0.45);
-  const bags80 = Math.ceil(totalCubicFeet / 0.60);
+  // Shared with diy/concrete-slab so both calculators agree on identical inputs.
+  const order = concreteOrder(rawCubicFeet, wastage);
+  const totalCubicFeet = order.totalCuFt;
+  const totalCubicYards = order.totalCuYd;
+  const bags60 = order.bags60;
+  const bags80 = order.bags80;
 
   return [
     {
@@ -98,7 +98,9 @@ function buildResults(rawCubicFeet: number, wastage: number, shape: string): Cal
 
 function calculate(values: Record<string, string>): CalculatorResult[] {
   const shape = values.shape || 'slab';
-  const wastage = parseInt(values.wastage || '0', 10) || 0;
+  // A blank waste field means the standard 10% (same default as diy/concrete-slab); an explicit 0 is honored.
+  const wasteParsed = parseInt(values.wastage ?? '', 10);
+  const wastage = Number.isFinite(wasteParsed) ? wasteParsed : DEFAULT_CONCRETE_WASTE_PCT;
   const depth = parseDim(values.depth);
 
   if (shape === 'slab') {
@@ -107,7 +109,7 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
     if (!isValidPositive(length) || !isValidPositive(width) || !isValidPositive(depth)) {
       return [];
     }
-    const cubicFeet = length * width * (depth / 12);
+    const cubicFeet = slabCuFt(length, width, depth);
     return buildResults(cubicFeet, wastage, shape);
   }
 
@@ -116,8 +118,7 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
     if (!isValidPositive(diameter) || !isValidPositive(depth)) {
       return [];
     }
-    const radius = diameter / 2;
-    const cubicFeet = Math.PI * radius * radius * (depth / 12);
+    const cubicFeet = cylinderCuFt(diameter, depth);
     return buildResults(cubicFeet, wastage, shape);
   }
 
@@ -134,8 +135,9 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
     ) {
       return [];
     }
-    // Each step is approximately half a rectangular block
-    const cubicFeet = stairsLength * stairsWidth * (riserHeight / 12) * numSteps * 0.5;
+    // Solid stair: tread k sits on a block k risers high, so the total is run x width x riser x (1+2+...+n)/n
+    // = L x W x R x (n+1)/2 (a plain wedge would be n/2 and underestimates).
+    const cubicFeet = stairsLength * stairsWidth * (riserHeight / 12) * ((numSteps + 1) / 2);
     return buildResults(cubicFeet, wastage, shape);
   }
 
@@ -255,7 +257,8 @@ const concreteConfig: CalculatorConfig = {
         { label: '10% (standard)', value: '10' },
         { label: '15% (complex pour)', value: '15' },
       ],
-      helpText: 'Select the waste allowance percentage for the concrete',
+      defaultValue: '10',
+      helpText: 'Select the waste allowance percentage for the concrete (10% is the standard recommendation)',
     },
   ],
 
@@ -321,36 +324,36 @@ const concreteConfig: CalculatorConfig = {
       },
       {
         question: 'How do I calculate concrete for staircases?',
-        answer: 'Stairs are approximated as triangular prisms. The formula multiplies stair length by width, then by riser height (in feet), then by the number of steps, and divides by 2 because each step is approximately a triangle in cross-section. For example, a set of 10 stairs that are 3 feet wide, with 7-inch risers and a total run of 10 feet: Volume = 10 ft × 3 ft × (7/12 ft) × 10 steps × 0.5 = 8.75 cubic feet = 0.32 cubic yards. The 0.5 factor accounts for the triangular shape. For more precise estimates on complex staircases with landings, treat the landing as a separate slab calculation and add it to the stair volume.',
+        answer: 'Stairs are modeled as a solid stepped block: each tread sits on a block as many risers high as its step number, so the volume is total run x width x riser height (in feet) x (steps + 1) / 2. For example, 10 steps that are 3 feet wide, with 7-inch risers and a total run of 10 feet: Volume = 10 ft x 3 ft x (7/12 ft) x (10 + 1) / 2 = 96.25 cubic feet = 3.56 cubic yards (before waste). Treat a landing as a separate slab and add it to the stair volume.',
       },
       {
         question: 'How do I calculate concrete for round footings or columns?',
-        answer: 'Round footings and columns use the cylinder volume formula: V = π × r² × h, where r is the radius (half the diameter) in feet and h is the depth in feet. For example, a 24-inch diameter footing (r = 1 ft) that is 4 feet deep: V = 3.14159 × 1² × 4 = 12.57 cubic feet = 0.47 cubic yards. With 10% waste: 0.51 cubic yards. That is about 23 80-lb bags or 31 60-lb bags. For sonotube (cardboard form) columns, the diameter is the inside diameter of the tube. Common sonotube sizes are 8, 10, 12, 18, and 24 inches. Always flare the bottom of the footing wider than the column for stability — building codes typically require the footing to be twice the column diameter and at least 6 inches thick at the base.',
+        answer: 'Round footings and columns use the cylinder volume formula: V = π × r² × h, where r is the radius (half the diameter) in feet and h is the depth in feet. For example, a 24-inch diameter footing (r = 1 ft) that is 4 feet deep: V = 3.14159 × 1² × 4 = 12.57 cubic feet = 0.47 cubic yards. With 10% waste: 0.51 cubic yards. That is about 24 80-lb bags or 31 60-lb bags. For sonotube (cardboard form) columns, the diameter is the inside diameter of the tube. Common sonotube sizes are 8, 10, 12, 18, and 24 inches. Always flare the bottom of the footing wider than the column for stability — building codes typically require the footing to be twice the column diameter and at least 6 inches thick at the base.',
       },
       {
         question: 'When is ready-mix concrete delivery worth it versus mixing from bags?',
-        answer: 'Ready-mix is cost-effective for pours over 1 cubic yard (roughly 45 80-lb bags). Below 1 cubic yard, bagged concrete is practical for a DIY project. At 1-2 cubic yards, both options are viable — ready-mix costs about $130-$180 per yard plus a $150-$200 delivery fee, while bags cost $225-$315 per cubic yard equivalent but have no delivery minimum. For 2+ cubic yards, ready-mix is the clear winner on both cost and labor. A full truck carries 8-10 cubic yards. If your pour is less than 4-5 yards, you will likely pay a short-load fee of $50-$100 on top of the per-yard price. Always call at least three local ready-mix suppliers for quotes.',
+        answer: 'Ready-mix is cost-effective for pours over 1 cubic yard (roughly 45 80-lb bags). Below 1 cubic yard, bagged concrete is practical for a DIY project. At 1-2 cubic yards, both options are viable: ready-mix has a per-yard price plus delivery and often a short-load fee for small orders, while bags cost more per cubic yard equivalent but have no delivery minimum. For 2+ cubic yards, ready-mix is usually the winner on both cost and labor. A full truck carries about 8-10 cubic yards. Always call at least three local ready-mix suppliers for delivered quotes.',
       },
     ],
     workedExamples: [
       {
         scenario: 'Backyard Patio Slab in Austin, TX',
         inputs: { shape: 'slab', length: '12', width: '10', depth: '4', wastage: '10' },
-        result: '1.63 cubic yards. Approximately 74 80-lb bags or 98 60-lb bags. Ready-mix would cost roughly $210-$290 delivered.',
-        insight: 'A standard 12x10 ft patio at 4 inches thick. Volume = 12 × 10 × (4/12) = 40 cubic feet. In cubic yards: 40 / 27 = 1.48 cubic yards. With 10% waste: 1.63 cubic yards. Equivalent to approximately 74 80-lb bags or 98 60-lb bags. At $5.50 per 80-lb bag, the material cost is about $407 for bagged concrete. Ready-mix would cost roughly $210-$290 delivered in the Austin area. At 1.63 cubic yards with waste, this project is right at the threshold where ready-mix starts to make sense. If you have a truck and can pick up the bags yourself, bagged concrete gives you flexibility to work at your own pace over a weekend. If convenience matters more, order 1.75 yards of ready-mix and have it done in a morning. In Austin heat, pour early in the morning (before 8 AM) to avoid rapid setting — concrete poured above 85°F can lose workability in under 30 minutes.',
+        result: '1.63 cubic yards. Approximately 74 80-lb bags or 98 60-lb bags. Compare delivered ready-mix quotes against bagged cost.',
+        insight: 'A standard 12x10 ft patio at 4 inches thick. Volume = 12 × 10 × (4/12) = 40 cubic feet. In cubic yards: 40 / 27 = 1.48 cubic yards. With 10% waste: 1.63 cubic yards. Equivalent to approximately 74 80-lb bags or 98 60-lb bags. Compare 74 bags at your local price against a delivered ready-mix quote. At 1.63 cubic yards with waste, this project is right at the threshold where ready-mix starts to make sense. If you have a truck and can pick up the bags yourself, bagged concrete gives you flexibility to work at your own pace over a weekend. If convenience matters more, order 1.75 yards of ready-mix and have it done in a morning. In Austin heat, pour early in the morning (before 8 AM) to avoid rapid setting — concrete poured above 85°F can lose workability in under 30 minutes.',
       },
       {
         scenario: 'Deck Footings for a 12x16 Deck in Chicago, IL',
-        inputs: { shape: 'hole', diameter: '1', depth: '4', wastage: '10' },
-        result: '0.77 cubic yards with waste. Approximately 35 80-lb bags or 47 60-lb bags total for 6 footings.',
-        insight: 'A typical deck requires 6 footing holes, each 12 inches in diameter and 48 inches deep (below the 42-inch frost line in Chicago). Per footing: radius = 0.5 ft, Volume = π × 0.5² × 4 = 3.14 cubic feet. Total for 6 footings: 18.85 cubic feet = 0.70 cubic yards. With 10% waste: 0.77 cubic yards. In Chicago, footings must extend below the 42-inch frost line by code. Always verify your local frost depth before digging. Use a post-hole digger or auger for holes, and consider renting a powered auger ($60-$80/day) for more than 4 holes. Place a few inches of gravel at the bottom of each hole for drainage before pouring. Use Quikrete Fast-Setting Concrete Mix for fence and deck posts — it sets in 20-40 minutes and does not require mixing, just pour it dry into the hole and add water. For structural deck footings, however, use standard concrete mix and allow 24-48 hours of curing before attaching post anchors.',
+        inputs: { shape: 'hole', diameter: '1', depth: '48', wastage: '10' },
+        result: 'One footing: 0.13 cubic yards with waste (6 80-lb bags). Six footings: 0.77 cubic yards, approximately 35 80-lb bags or 47 60-lb bags.',
+        insight: 'A typical deck requires 6 footing holes, each 12 inches in diameter and 48 inches deep (below the 42-inch frost line in Chicago). Per footing: radius = 0.5 ft, Volume = π × 0.5² × 4 = 3.14 cubic feet (enter the depth as 48 inches). Total for 6 footings: 18.85 cubic feet = 0.70 cubic yards. With 10% waste: 0.77 cubic yards. In Chicago, footings must extend below the 42-inch frost line by code. Always verify your local frost depth before digging. Use a post-hole digger or auger for holes, and consider renting a powered auger for more than 4 holes. Place a few inches of gravel at the bottom of each hole for drainage before pouring. Use Quikrete Fast-Setting Concrete Mix for fence and deck posts — it sets in 20-40 minutes and does not require mixing, just pour it dry into the hole and add water. For structural deck footings, however, use standard concrete mix and allow 24-48 hours of curing before attaching post anchors.',
       },
     ],
     proTips: [
       'Order concrete for a morning delivery — cooler temperatures give you more working time. Concrete delivered on a hot afternoon can lose 30-60 minutes of workability. In temperatures above 85°F, use a set-retarding admixture or plan to finish the concrete within 30 minutes of placement.',
       'Build sturdy formwork with 2x4 lumber secured with stakes every 2-3 feet. Check that forms are level with a 4-foot level before pouring. Apply a release agent (diesel fuel or commercial form oil) to the inside of forms so they strip cleanly after the concrete sets. Use duplex nails so forms can be disassembled easily.',
       'Have all tools ready before the truck arrives: wheelbarrow (or concrete buggy for large pours), shovel, rake, screed board (a straight 2x4), bull float, magnesium hand float, edging tool, and groover/jointer tool. The concrete will not wait while you search for a missing trowel — you typically have 60-90 minutes from truck arrival to finish.',
-      'For bagged concrete, rent a portable drum mixer ($35-$50/day) for projects requiring more than 20 bags. Hand-mixing in a wheelbarrow with a hoe is exhausting beyond about 10-12 bags and produces inconsistent results. A mixer ensures uniform water distribution and strength throughout the pour.',
+      'For bagged concrete, rent a portable drum mixer for projects requiring more than 20 bags. Hand-mixing in a wheelbarrow with a hoe is exhausting beyond about 10-12 bags and produces inconsistent results. A mixer ensures uniform water distribution and strength throughout the pour.',
       'Cure concrete properly: keep the surface moist for at least 7 days. Cover with wet burlap, plastic sheeting, or apply a curing compound. Do not let freshly poured concrete dry out in the first 24-48 hours — rapid drying causes surface cracking and reduces strength. In hot weather, mist the surface with water 2-3 times per day.',
       'Cut control joints within 24 hours of pouring, while the concrete is still green. For a 4-inch slab, cut joints every 8-12 feet and to a depth of at least 1 inch (25% of slab thickness). Joints direct cracking to predetermined locations. For sidewalks, place joints at intervals equal to the width of the walkway.',
     ],
@@ -368,7 +371,6 @@ const concreteConfig: CalculatorConfig = {
       { label: 'Bags per cu yd (60 lb)', value: '60 bags' },
       { label: 'Std slab thickness', value: '4 inches' },
       { label: 'Driveway thickness', value: '4-6 inches' },
-      { label: 'Ready-mix cost/yard', value: '$130-$180' },
     ],
     citations: [
       { source: 'Wikipedia', title: 'Concrete', url: 'https://en.wikipedia.org/wiki/Concrete' },

@@ -94,10 +94,11 @@ describe('FHA annual MIP schedule (HUD ML 2023-05)', () => {
     expect(mip(300000, 3.5, '30')).toBeCloseTo(expected(300000, 3.5, 55), 1);
   });
 
-  it('base loan above the conforming limit uses the higher rows', () => {
-    // 1,000,000 home, 20% down -> base 800,000 (< 832,750): still the low tier
-    expect(mip(1000000, 20, '30')).toBeCloseTo(expected(1000000, 20, 50), 1);
-    // 1,200,000 home -> base loans above 832,750
+  it('base loan above the ML 2023-05 threshold ($726,200) uses the higher rows', () => {
+    // 900,000 home, 20% down -> base 720,000 (<= 726,200): still the low tier
+    expect(mip(900000, 20, '30')).toBeCloseTo(expected(900000, 20, 50), 1);
+    // 1,000,000 home, 20% down -> base 800,000 (> 726,200): 70 bps
+    expect(mip(1000000, 20, '30')).toBeCloseTo(expected(1000000, 20, 70), 1);
     expect(mip(1200000, 10, '30')).toBeCloseTo(expected(1200000, 10, 70), 1);
     expect(mip(1200000, 5, '30')).toBeCloseTo(expected(1200000, 5, 70), 1);
     expect(mip(1200000, 3.5, '30')).toBeCloseTo(expected(1200000, 3.5, 75), 1);

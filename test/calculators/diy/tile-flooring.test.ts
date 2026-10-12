@@ -12,11 +12,11 @@ describe('tile-flooring', () => {
     });
     expect(r).toHaveLength(4);
     // roomSqFt = 120; totalSqFtNeeded = 120 * 1.1 = 132
-    // tilesNeeded = ceil(132 / 1) = 132
-    // boxesNeeded = ceil(132 / 20) = 7
+    // 1/8" grout joints: cell = 12.125^2 / 144 = 1.02094 sq ft -> ceil(120 / 1.02094) = 118 tiles; +10% = ceil(129.8) = 130
+    // carton = 15.5 sq ft = round(15.5 / 1) = 16 tiles -> ceil(130 / 16) = 9 boxes
     near(parseNumber(getValue(r, 'sqFt')), 132);
-    near(parseNumber(getValue(r, 'tiles')), 132);
-    near(parseNumber(getValue(r, 'boxes')), 7);
+    near(parseNumber(getValue(r, 'tiles')), 130);
+    near(parseNumber(getValue(r, 'boxes')), 9);
     near(parseNumber(getValue(r, 'roomArea')), 120);
   });
 
@@ -30,10 +30,11 @@ describe('tile-flooring', () => {
     });
     expect(r).toHaveLength(5);
     // roomSqFt = 100; totalSqFtNeeded = 100 * 1.15 = 115
-    // tilesNeeded = ceil(115 / 2.25) = ceil(51.11) = 52
+    // cell = 18.125^2 / 144 = 2.2815 -> ceil(100 / 2.2815) = 44; +15% = ceil(50.6) = 51 tiles
+    // carton = round(15.5 / 2.25) = 7 tiles -> ceil(51 / 7) = 8 boxes
     near(parseNumber(getValue(r, 'sqFt')), 115);
-    near(parseNumber(getValue(r, 'tiles')), 52);
-    near(parseNumber(getValue(r, 'boxes')), 6);
+    near(parseNumber(getValue(r, 'tiles')), 51);
+    near(parseNumber(getValue(r, 'boxes')), 8);
     near(parseMoney(getValue(r, 'cost')), 517.50);
   });
 
@@ -78,10 +79,11 @@ describe('tile-flooring', () => {
     });
     expect(r).toHaveLength(4);
     // roomSqFt = 180; totalSqFtNeeded = 180 * 1.2 = 216
-    // tilesNeeded = ceil(216 / 0.25) = ceil(864) = 864
+    // cell = 6.125^2 / 144 = 0.26052 -> ceil(180 / 0.26052) = 691; +20% = ceil(829.2) = 830 tiles
+    // carton = round(15.5 / 0.25) = 62 tiles -> ceil(830 / 62) = 14 boxes
     near(parseNumber(getValue(r, 'sqFt')), 216);
-    near(parseNumber(getValue(r, 'tiles')), 864);
-    near(parseNumber(getValue(r, 'boxes')), 11);
+    near(parseNumber(getValue(r, 'tiles')), 830);
+    near(parseNumber(getValue(r, 'boxes')), 14);
   });
 
   it('does not include cost result when price is omitted', () => {
@@ -104,11 +106,11 @@ describe('tile-flooring', () => {
     });
     expect(r).toHaveLength(5);
     // roomSqFt = 500; totalSqFtNeeded = 500 * 1.15 = 575
-    // tilesNeeded = ceil(575 / 4) = ceil(143.75) = 144
-    // boxesNeeded = ceil(575 / 20) = ceil(28.75) = 29
+    // cell = 24.125^2 / 144 = 4.0418 -> ceil(500 / 4.0418) = 124; +15% = ceil(142.6) = 143 tiles
+    // carton = round(15.5 / 4) = 4 tiles -> ceil(143 / 4) = 36 boxes
     near(parseNumber(getValue(r, 'sqFt')), 575);
-    near(parseNumber(getValue(r, 'tiles')), 144);
-    near(parseNumber(getValue(r, 'boxes')), 29);
+    near(parseNumber(getValue(r, 'tiles')), 143);
+    near(parseNumber(getValue(r, 'boxes')), 36);
     near(parseMoney(getValue(r, 'cost')), 6900.00);
   });
 
@@ -121,9 +123,9 @@ describe('tile-flooring', () => {
     });
     expect(r).toHaveLength(4);
     // roomSqFt = 22.5; totalSqFtNeeded = 22.5 * 1.15 = 25.875
-    // tilesNeeded = ceil(25.875 / 0.25) = ceil(103.5) = 104
+    // cell = 0.26052 -> ceil(22.5 / 0.26052) = 87; +15% = ceil(100.05) = 101 tiles (62 per carton -> 2 boxes)
     near(parseNumber(getValue(r, 'sqFt')), 25.9);
-    near(parseNumber(getValue(r, 'tiles')), 104);
+    near(parseNumber(getValue(r, 'tiles')), 101);
     near(parseNumber(getValue(r, 'boxes')), 2);
   });
 

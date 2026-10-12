@@ -97,7 +97,7 @@ export default function MulchPanel({ values, results }: Props) {
       <div className="p-6 space-y-6">
         <div className="rounded-xl bg-blue-50 border border-blue-200 px-5 py-4 text-center">
           <p className="text-4xl font-black text-blue-700">{cyRes?.value || '0'}</p>
-          <p className="text-xs font-bold uppercase tracking-widest text-blue-500 mt-1">Total Mulch Needed</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-700 mt-1">Total Mulch Needed</p>
         </div>
 
         <GardenBedSVG shape={shape} />

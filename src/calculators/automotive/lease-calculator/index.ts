@@ -1,4 +1,5 @@
 import { CalculatorConfig } from '../../../types/calculator';
+import { lease } from './leaseMath';
 import { createElement } from 'react';
 import LeasePanel from './LeasePanel';
 
@@ -10,6 +11,7 @@ const leaseCalculatorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '45,000',
       prefix: '$',
+      min: 0,
       inputMode: 'decimal',
       required: true,
       helpText: 'Manufacturer suggested retail price of the vehicle',
@@ -20,6 +22,7 @@ const leaseCalculatorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '42,500',
       prefix: '$',
+      min: 0,
       inputMode: 'decimal',
       required: true,
       helpText: 'The actual selling price you negotiate — lower is better.',
@@ -36,12 +39,12 @@ const leaseCalculatorConfig: CalculatorConfig = {
     },
     {
       id: 'tradeInValue',
-      label: 'Trade-In Value',
+      label: 'Trade-In Equity',
       type: 'number',
       placeholder: '0',
       prefix: '$',
       inputMode: 'decimal',
-      helpText: 'Value of your trade-in vehicle applied as additional cap cost reduction.',
+      helpText: 'Trade-in value minus any loan payoff, applied as additional cap cost reduction.',
     },
     {
       id: 'leaseTerm',
@@ -85,6 +88,8 @@ const leaseCalculatorConfig: CalculatorConfig = {
       label: 'Money Factor',
       type: 'number',
       placeholder: '0.00125',
+      min: 0,
+      max: 0.01,
       step: 0.00001,
       inputMode: 'decimal',
       helpText:
@@ -97,6 +102,8 @@ const leaseCalculatorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '3.0',
       unit: '%',
+      min: 0,
+      max: 24,
       step: 0.01,
       inputMode: 'decimal',
       helpText: 'Will be converted to Money Factor (APR ÷ 2400) for the lease calculation.',
@@ -108,6 +115,8 @@ const leaseCalculatorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '8.25',
       unit: '%',
+      min: 0,
+      max: 20,
       step: 0.01,
       inputMode: 'decimal',
       helpText: 'Sales tax is applied monthly to the base lease payment in most states',
@@ -125,88 +134,16 @@ const leaseCalculatorConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const msrp = parseFloat(values.msrp);
-    const negotiatedPrice = parseFloat(values.negotiatedPrice);
-    const downPayment = parseFloat(values.downPayment) || 0;
-    const tradeInValue = parseFloat(values.tradeInValue) || 0;
-    const leaseTerm = parseInt(values.leaseTerm, 10) || 36;
-    const residualValuePct = parseFloat(values.residualValuePct);
-    const rateInputType = values.rateInputType || 'mf';
-    const moneyFactorInput = parseFloat(values.moneyFactor) || 0;
-    const aprRateInput = parseFloat(values.aprRate) || 0;
-    const salesTaxRate = parseFloat(values.salesTax) / 100 || 0;
-    const acquisitionFee = parseFloat(values.acquisitionFee) || 0;
-
-    if (
-      isNaN(msrp) ||
-      isNaN(negotiatedPrice) ||
-      isNaN(residualValuePct) ||
-      msrp <= 0 ||
-      negotiatedPrice <= 0 ||
-      residualValuePct <= 0
-    ) {
-      return [];
-    }
-
-    // Adjusted cap cost
-    const adjustedCapCost = negotiatedPrice - downPayment - tradeInValue + acquisitionFee;
-
-    // Residual value (dollar amount)
-    const residualValue = msrp * (residualValuePct / 100);
-
-    // Money factor
-    let moneyFactorUsed: number;
-    if (rateInputType === 'apr') {
-      moneyFactorUsed = aprRateInput / 2400;
-    } else {
-      moneyFactorUsed = moneyFactorInput;
-    }
-
-    // APR display
-    const aprDisplay = moneyFactorUsed * 2400;
-
-    // Monthly depreciation
-    const monthlyDepreciation = (adjustedCapCost - residualValue) / leaseTerm;
-
-    // Monthly finance charge
-    const monthlyFinanceCharge = (adjustedCapCost + residualValue) * moneyFactorUsed;
-
-    // Base monthly payment
-    const baseMonthlyPayment = monthlyDepreciation + monthlyFinanceCharge;
-
-    // Monthly tax
-    const monthlyTax = baseMonthlyPayment * salesTaxRate;
-
-    // Total monthly payment
-    const totalMonthlyPayment = baseMonthlyPayment + monthlyTax;
-
-    // Total lease cost (all-in)
-    const totalLeaseCost = totalMonthlyPayment * leaseTerm + downPayment + tradeInValue;
-
-    const effectiveAPR = moneyFactorUsed * 2400;
+    const l = lease(values);
+    if (!l) return [];
+    const { residualValue, monthlyDepreciation, monthlyFinanceCharge, baseMonthlyPayment, totalMonthlyPayment, totalLeaseCost } = l;
+    const effectiveAPR = l.apr;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     const fmtMF = (mf: number) => mf.toFixed(5);
-
-    // Build _leaseBreakdown for the panel
-    const leaseBreakdown = {
-      adjustedCapCost,
-      residualValue,
-      moneyFactorUsed,
-      aprDisplay,
-      monthlyDepreciation,
-      monthlyFinanceCharge,
-      baseMonthlyPayment,
-      monthlyTax,
-      totalMonthlyPayment,
-      totalLeaseCost,
-      msrp,
-      negotiatedPrice,
-      leaseTerm,
-      residualValuePct,
-    };
+    const moneyFactorUsed = l.moneyFactor;
 
     return [
       {
@@ -257,11 +194,6 @@ const leaseCalculatorConfig: CalculatorConfig = {
         label: 'Total Lease Cost (All-In)',
         value: `$${fmt(totalLeaseCost)}`,
         color: 'negative' as const,
-      },
-      {
-        id: '_leaseBreakdown',
-        label: '_leaseBreakdown',
-        value: JSON.stringify(leaseBreakdown),
       },
     ];
   },
@@ -321,27 +253,27 @@ const leaseCalculatorConfig: CalculatorConfig = {
       {
         scenario: 'David negotiates a $42,500 price on an SUV with a $45,000 MSRP. The 36-month lease has a 55% residual, 0.00125 money factor, $2,000 down, $895 acquisition fee, and 8.25% sales tax. What is his true monthly payment?',
         inputs: { msrp: '45000', negotiatedPrice: '42500', downPayment: '2000', leaseTerm: '36', residualValuePct: '55', rateInputType: 'mf', moneyFactor: '0.00125', salesTax: '8.25', acquisitionFee: '895' },
-        result: '$590.01/month after tax — $23,240.36 total lease cost over 36 months',
+        result: '$590.01/month after tax — $23,240.30 total lease cost over 36 months',
         insight: 'Adjusted cap cost = $42,500 - $2,000 + $895 = $41,395. Residual value = $45,000 x 55% = $24,750. Monthly depreciation = ($41,395 - $24,750) / 36 = $462.36. Monthly finance charge = ($41,395 + $24,750) x 0.00125 = $82.68. Base payment = $462.36 + $82.68 = $545.04. Tax at 8.25% = $44.97. Total monthly = $590.01. Effective APR = 0.00125 x 2400 = 3.0%. Total 36-month cost including down payment = $590.01 x 36 + $2,000 = $23,240.',
       },
       {
         scenario: 'Priya is cross-shopping two leases on a $38,000 MSRP sedan. Dealer A offers 60% residual and 0.00150 money factor. Dealer B offers 55% residual and 0.00080 money factor. Both are 36 months with $0 down and $795 acquisition fee, negotiated to $36,000. Which is the better deal?',
         inputs: { msrp: '38000', negotiatedPrice: '36000', downPayment: '0', leaseTerm: '36', residualValuePct: '60', rateInputType: 'mf', moneyFactor: '0.00150', salesTax: '0', acquisitionFee: '795' },
-        result: 'Dealer A: $478.14/month vs Dealer B: $487.69/month — Dealer A wins by $9.55/month despite higher money factor',
-        insight: 'Dealer A: Residual = $22,800 (60%). Cap cost = $36,795. Depreciation = ($36,795 - $22,800) / 36 = $388.75. Finance charge = ($36,795 + $22,800) x 0.00150 = $89.39. Total = $478.14/month. Dealer B: Residual = $20,900 (55%). Cap cost = $36,795. Depreciation = ($36,795 - $20,900) / 36 = $441.53. Finance charge = ($36,795 + $20,900) x 0.00080 = $46.16. Total = $487.69/month. Despite the higher residual, Dealer A\'s higher money factor makes it only $9.55/month cheaper. The residual isn\'t everything — always convert the money factor to APR and compare the total.',
+        result: 'Dealer A: $478.14/month vs Dealer B: $487.68/month — Dealer A wins by $9.54/month despite higher money factor',
+        insight: 'Dealer A: Residual = $22,800 (60%). Cap cost = $36,795. Depreciation = ($36,795 - $22,800) / 36 = $388.75. Finance charge = ($36,795 + $22,800) x 0.00150 = $89.39. Total = $478.14/month. Dealer B: Residual = $20,900 (55%). Cap cost = $36,795. Depreciation = ($36,795 - $20,900) / 36 = $441.53. Finance charge = ($36,795 + $20,900) x 0.00080 = $46.16. Total = $487.68/month. Despite the higher residual, Dealer A\'s higher money factor makes it only $9.54/month cheaper. The residual isn\'t everything — always convert the money factor to APR and compare the total.',
       },
     ],
     proTips: [
       'Never negotiate a lease based on monthly payment. Instead, negotiate the capitalized cost (selling price) just like a purchase — then apply the residual and money factor. A lower cap cost directly reduces both the depreciation and finance charge components.',
       'Ask for the "buy rate" money factor. Dealers can mark up the manufacturer\'s base money factor and pocket the difference. The buy rate is what you qualify for based on your credit score. Check Edmunds forums to find the current buy rate for your make and model before visiting the dealer.',
       'Avoid putting money down on a lease. Unlike a purchase, a down payment on a lease is lost if the vehicle is totaled or stolen — the insurance payout goes to the leasing company, not you. Instead, consider Multiple Security Deposits (MSDs) if offered by the manufacturer, which reduce the money factor and are refundable at lease end.',
-      'Target vehicles with high residual values. The residual is the single biggest driver of your monthly payment. Brands like Toyota, Honda, Subaru, and some luxury marques (Lexus, Porsche) set aggressive residuals to keep payments low. Avoid vehicles with residuals below 50% after 36 months unless the cap cost discount is substantial.',
+      'Target vehicles with high residual values. The residual is the single biggest driver of your monthly payment. Models that hold their value well tend to get higher residuals and cheaper leases. Be wary of vehicles with residuals below about 50% after 36 months unless the cap cost discount is substantial.',
       'Check for lease-specific incentives. Manufacturers frequently offer lease cash, loyalty rebates, and conquest incentives that apply only to leases — not purchases. These reduce the cap cost and can make leasing dramatically cheaper than buying, especially on slow-selling models.',
       'Review the lease contract for these specific numbers: gross capitalized cost, capitalized cost reduction, adjusted capitalized cost, residual value, rent charge (total finance charge over the term), and the total of payments. If any number doesn\'t match what you calculated, ask why — don\'t sign until you understand every line item.',
     ],
     limitations: [
       'This calculator models a closed-end lease with fixed monthly payments but does not account for mileage overage fees (typically $0.15-$0.30/mile), excess wear-and-tear charges, disposition fees at lease end ($300-$500), or early termination penalties.',
-      'Lease tax treatment varies by state: some tax the full vehicle price upfront, some tax each monthly payment, and others tax the sum of payments. Illinois and Texas, for example, tax the full selling price even on a lease, which significantly increases the effective monthly cost.',
+      'Lease tax treatment varies by state: some tax the full vehicle price upfront, some tax each monthly payment, and others tax the sum of payments. Some states tax the full vehicle price upfront, some tax each monthly payment, and others tax the sum of payments, so the effective monthly cost can differ noticeably from state to state — check your state rules.',
       'The calculator assumes sales tax is applied monthly, which is the most common method. Manufacturer lease specials often include subsidized residuals and money factors not reflected here.',
       'Always confirm the residual value, money factor, and all fees directly with the dealer before signing.',
     ],
@@ -359,12 +291,12 @@ const leaseCalculatorConfig: CalculatorConfig = {
       {
         question: 'What is a money factor and how do I convert it to APR?',
         answer:
-          'The money factor (also called lease factor or lease rate) is the interest rate on a lease expressed as a tiny decimal, typically between 0.0005 and 0.003. Multiply by 2400 to convert to the equivalent APR: a money factor of 0.00125 equals 3.0% APR (0.00125 × 2400 = 3.0). Always ask your dealer for the money factor explicitly — they are not required to disclose it in most states — and verify it by calculating the monthly finance charge independently.',
+          'The money factor (also called lease factor or lease rate) is the interest rate on a lease expressed as a tiny decimal, typically between 0.0005 and 0.003. Multiply by 2400 to convert to the equivalent APR: a money factor of 0.00125 equals 3.0% APR (0.00125 × 2400 = 3.0). Always ask your dealer for the money factor explicitly — dealers do not always volunteer it — and verify it by calculating the monthly finance charge independently.',
       },
       {
         question: 'Why does the residual value affect my monthly payment so much?',
         answer:
-          'The lease payment covers only the portion of the car you use — the depreciation from today\'s price to the residual value at lease end. A $45,000 car with a 60% residual leaves $18,000 of value to amortize over the lease. The same car with a 50% residual leaves $22,500 to amortize — a 25% increase in the depreciation component, which typically drives 70–80% of the payment. This is why leasing vehicles with high residual values (many luxury brands, popular SUVs) is dramatically more economical than leasing vehicles with poor residuals.',
+          'The lease payment covers only the portion of the car you use — the depreciation from today\'s price to the residual value at lease end. A $45,000 car with a 60% residual leaves $18,000 of value to amortize over the lease. The same car with a 50% residual leaves $22,500 to amortize — a 25% increase in the depreciation component, which is usually most of the payment (about 85% in the worked example above). This is why leasing vehicles with high residual values (many luxury brands, popular SUVs) is dramatically more economical than leasing vehicles with poor residuals.',
       },
       {
         question: 'Can I negotiate the money factor on a lease?',
@@ -373,11 +305,11 @@ const leaseCalculatorConfig: CalculatorConfig = {
       },
       {
         question: 'Is it smart to put money down on a lease?',
-        answer: 'Generally, no. Unlike a purchase where a down payment builds equity, lease down payments (called cap cost reduction) only lower your monthly payment — and that money is gone if the car is totaled or stolen because the insurance payout goes to the leasing company. If you have $3,000 to put down on a 36-month lease at 3% APR equivalent, that $3,000 saves you about $88/month but you lose every penny of it in a total loss. Instead, keep the cash in a savings account and use it to supplement the higher monthly payment. Some manufacturers offer Multiple Security Deposits (MSDs) as an alternative — these are refundable at lease end and reduce the money factor without the risk of a traditional down payment.',
+        answer: 'Generally, no. Unlike a purchase where a down payment builds equity, lease down payments (called cap cost reduction) only lower your monthly payment — and that money is gone if the car is totaled or stolen because the insurance payout goes to the leasing company. If you have $3,000 to put down on a 36-month lease at 3% APR equivalent, that $3,000 saves you about $87/month but you lose every penny of it in a total loss. Instead, keep the cash in a savings account and use it to supplement the higher monthly payment. Some manufacturers offer Multiple Security Deposits (MSDs) as an alternative — these are refundable at lease end and reduce the money factor without the risk of a traditional down payment.',
       },
       {
         question: 'What happens at the end of my lease?',
-        answer: 'At lease end, you have three options: (1) Return the vehicle and walk away (possibly paying a disposition fee of $300-$500 plus any excess mileage or wear-and-tear charges), (2) Purchase the vehicle at the predetermined residual value stated in your contract (this can be a good deal if the market value exceeds the residual), or (3) Trade the vehicle toward a new lease or purchase (the dealer pays the residual and any positive equity goes toward your next deal). Some lessees can sell their leased vehicle to a third-party dealer like CarMax or Carvana for more than the residual and pocket the difference — check if your leasing company allows third-party buyouts, as some (like Honda/Acura and Nissan/Infiniti) recently restricted this.',
+        answer: 'At lease end, you have three options: (1) Return the vehicle and walk away (possibly paying a disposition fee of $300-$500 plus any excess mileage or wear-and-tear charges), (2) Purchase the vehicle at the predetermined residual value stated in your contract (this can be a good deal if the market value exceeds the residual), or (3) Trade the vehicle toward a new lease or purchase (the dealer pays the residual and any positive equity goes toward your next deal). Some lessees can sell their leased vehicle to a third-party dealer like CarMax or Carvana for more than the residual and pocket the difference — check whether your leasing company allows third-party buyouts, as some lessors restrict them.',
       },
       {
         question: 'What are excess mileage and wear-and-tear charges?',

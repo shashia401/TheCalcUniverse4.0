@@ -47,11 +47,11 @@ export default function TileFlooringPanel({ results }: Props) {
       </div>
       <div className="p-5 space-y-2">
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Total Sq Ft Needed</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-blue-700">Total Sq Ft Needed</p>
           <p className="text-3xl font-bold text-blue-700">{sqFt.value}</p>
         </div>
-        {roomVal > 0 && bar('Room Area', roomVal, 'bg-slate-400')}
-        {bar('Total with Waste', sqftVal, 'bg-blue-500')}
+        {roomVal > 0 && bar('Room Area', roomVal, 'bg-slate-700')}
+        {bar('Total with Waste', sqftVal, 'bg-blue-700')}
         <div className="grid grid-cols-2 gap-3 mt-2">
           {tiles && (
             <div className="rounded-xl border border-slate-200 p-3">

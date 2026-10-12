@@ -1,41 +1,18 @@
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
+import { depreciation } from './depreciationMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
+const usd = (n: number) => `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
-export default function DepreciationPanel({ results }: Props) {
-  const totalDep = results.find(r => r.id === 'totalDepreciation');
-  const futureValue = results.find(r => r.id === 'futureValue');
-  const annualDep = results.find(r => r.id === 'annualDepreciation');
-  const monthlyDep = results.find(r => r.id === 'monthlyDepreciation');
-
-  if (!totalDep || !futureValue) return null;
-
-  const totalVal = parseNum(totalDep.value);
-  const futureVal = parseNum(futureValue.value);
-  const annualVal = annualDep ? parseNum(annualDep.value) : 0;
-  const maxVal = Math.max(totalVal, futureVal, annualVal);
-
-  const bar = (label: string, val: number, color: string) => {
-    const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
-    return (
-      <div className="flex items-center gap-3 py-1.5">
-        <span className="text-xs font-semibold text-slate-600 w-36 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-6 bg-slate-100 rounded overflow-hidden">
-          <div className={`h-full rounded ${color} transition-all flex items-center justify-end pr-1.5 ${pct < 12 ? 'min-w-[50px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[10px] font-bold text-white drop-shadow-sm">${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+export default function DepreciationPanel({ values, results }: Props) {
+  const d = depreciation(values);
+  if (!d || !results.length) return null;
+  const max = Math.max(d.valueNow, d.totalDepreciation, d.futureValue, d.annual);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -46,15 +23,14 @@ export default function DepreciationPanel({ results }: Props) {
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Depreciation Summary</span>
       </div>
       <div className="p-5 space-y-2">
-        {bar('Future Value', futureVal, 'bg-emerald-700')}
-        {bar('Total Depreciation', totalVal, 'bg-red-700')}
-        {annualVal > 0 && bar('Annual Depreciation', annualVal, 'bg-amber-700')}
-        {monthlyDep && (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-xs text-slate-500">{monthlyDep.label}</p>
-            <p className="text-lg font-bold text-slate-700">{monthlyDep.value}</p>
-          </div>
-        )}
+        {d.age > 0 && <HBarRow label="Value Today" value={d.valueNow} max={max} display={usd(d.valueNow)} color="bg-blue-700" labelWidth="w-36" />}
+        <HBarRow label="Future Value" value={d.futureValue} max={max} display={usd(d.futureValue)} color="bg-emerald-700" labelWidth="w-36" />
+        <HBarRow label="Total Depreciation" value={d.totalDepreciation} max={max} display={usd(d.totalDepreciation)} color="bg-red-700" labelWidth="w-36" />
+        {d.annual > 0 && <HBarRow label="Annual Depreciation" value={d.annual} max={max} display={usd(d.annual)} color="bg-amber-700" labelWidth="w-36" />}
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="text-xs text-slate-600">Monthly Depreciation Cost</p>
+          <p className="text-lg font-bold text-slate-700">{usd(d.monthly)}/month</p>
+        </div>
       </div>
     </div>
   );

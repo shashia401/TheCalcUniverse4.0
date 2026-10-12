@@ -1,47 +1,19 @@
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
+import { autoLoan } from './autoLoanMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
+const usd = (n: number) => `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
-export default function AutoLoanPanel({ results }: Props) {
-  const monthly = results.find(r => r.id === 'monthlyPayment');
-  const financed = results.find(r => r.id === 'totalFinanced');
-  const interest = results.find(r => r.id === 'totalInterest');
-  const totalCost = results.find(r => r.id === 'totalCost');
-  const otd = results.find(r => r.id === 'outTheDoor');
+export default function AutoLoanPanel({ values, results }: Props) {
+  const m = autoLoan(values);
+  if (!m || m.loanAmount <= 0 || !results.some((r) => r.id === 'monthlyPayment')) return null;
 
-  if (!monthly || !financed) return null;
-
-  const financedVal = parseNum(financed.value);
-  const interestVal = interest ? parseNum(interest.value) : 0;
-  const totalVal = interestVal > 0 ? financedVal + interestVal : financedVal;
-  const maxVal = Math.max(financedVal, interestVal, totalVal);
-
-  const bar = (label: string, val: number, color: string, highlight?: boolean) => {
-    const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
-    const barColor =
-      color === 'green' ? 'bg-emerald-700' :
-      color === 'red' ? 'bg-red-700' :
-      color === 'blue' ? 'bg-blue-700' :
-      'bg-slate-600';
-    return (
-      <div className={`flex items-center gap-3 py-1.5 ${highlight ? 'bg-blue-50/50 -mx-4 px-4 rounded-lg' : ''}`}>
-        <span className="text-xs font-semibold text-slate-600 w-36 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-6 bg-slate-100 rounded overflow-hidden">
-          <div className={`h-full rounded ${barColor} transition-all flex items-center justify-end pr-1.5 ${pct < 12 ? 'min-w-[50px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[10px] font-bold text-white drop-shadow-sm">${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const max = Math.max(m.outTheDoor, m.loanAmount, m.totalInterest, m.totalCost);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -52,16 +24,14 @@ export default function AutoLoanPanel({ results }: Props) {
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Loan Breakdown</span>
       </div>
       <div className="p-5 space-y-2">
-        {otd && bar('Out-the-Door Price', parseNum(otd.value), 'blue')}
-        {bar('Amount Financed', financedVal, 'green', true)}
-        {interestVal > 0 && bar('Total Interest', interestVal, 'red')}
-        {totalCost && bar('Total Cost', parseNum(totalCost.value), 'slate')}
-        {monthly && (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-xs text-slate-500">Monthly Payment</p>
-            <p className="text-lg font-bold text-slate-700">{monthly.value}</p>
-          </div>
-        )}
+        <HBarRow label="Out-the-Door Price" value={m.outTheDoor} max={max} display={usd(m.outTheDoor)} color="bg-blue-700" labelWidth="w-36" />
+        <HBarRow label="Amount Financed" value={m.loanAmount} max={max} display={usd(m.loanAmount)} color="bg-emerald-700" labelWidth="w-36" />
+        {m.totalInterest > 0 && <HBarRow label="Total Interest" value={m.totalInterest} max={max} display={usd(m.totalInterest)} color="bg-red-700" labelWidth="w-36" />}
+        <HBarRow label="Total Cost" value={m.totalCost} max={max} display={usd(m.totalCost)} color="bg-slate-700" labelWidth="w-36" />
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="text-xs text-slate-600">Monthly Payment</p>
+          <p className="text-lg font-bold text-slate-700">${m.monthlyPayment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+        </div>
       </div>
     </div>
   );

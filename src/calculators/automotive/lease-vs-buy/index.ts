@@ -1,4 +1,5 @@
 import { CalculatorConfig } from '../../../types/calculator';
+import { leaseVsBuy } from './leaseVsBuyMath';
 import { createElement } from 'react';
 import LeaseVsBuyPanel from './LeaseVsBuyPanel';
 
@@ -26,7 +27,7 @@ const leaseBuyConfig: CalculatorConfig = {
       step: 10,
       inputMode: 'decimal',
       required: true,
-      helpText: 'The quoted monthly lease payment before tax',
+      helpText: 'The quoted monthly lease payment before tax (add the tax rate below to include it)',
     },
     {
       id: 'leaseDownPayment',
@@ -72,7 +73,34 @@ const leaseBuyConfig: CalculatorConfig = {
       max: 30,
       step: 0.01,
       inputMode: 'decimal',
+      required: true,
       helpText: 'Interest rate for the purchase loan',
+    },
+    {
+      id: 'buyLoanTerm',
+      label: 'Loan Term (Buy)',
+      type: 'select',
+      defaultValue: '60',
+      helpText: 'Months to repay the purchase loan. Any balance left when the lease would end is counted against buying.',
+      options: [
+        { label: '36 months', value: '36' },
+        { label: '48 months', value: '48' },
+        { label: '60 months', value: '60' },
+        { label: '72 months', value: '72' },
+        { label: '84 months', value: '84' },
+      ],
+    },
+    {
+      id: 'salesTax',
+      label: 'Sales Tax Rate',
+      type: 'number',
+      placeholder: '7',
+      unit: '%',
+      min: 0,
+      max: 20,
+      step: 0.1,
+      inputMode: 'decimal',
+      helpText: 'Optional. Applied to each lease payment and to the purchase price (financed). Leave blank to compare pre-tax.',
     },
     {
       id: 'depreciationRate',
@@ -84,48 +112,26 @@ const leaseBuyConfig: CalculatorConfig = {
       max: 50,
       step: 1,
       inputMode: 'decimal',
-      helpText: 'New cars depreciate 15-25% per year; used cars less',
+      helpText: 'Leave blank for 15%. New cars often lose 15-25% in year one; the rate slows later.',
     },
   ],
   calculate: (values) => {
-    const price = parseFloat(values.vehiclePrice);
-    const leasePayment = parseFloat(values.leasePayment);
-    const leaseDown = parseFloat(values.leaseDownPayment) || 0;
-    const leaseTerm = parseFloat(values.leaseTerm || '36');
-    const buyDown = parseFloat(values.buyDownPayment) || 0;
-    const buyAPR = parseFloat(values.buyAPR) / 100;
-    const deprPct = parseFloat(values.depreciationRate) / 100 || 0.15;
-
-    if ([price, leasePayment].some(isNaN) || price <= 0) return [];
-
-    const totalLeaseCost = leaseDown + leasePayment * leaseTerm;
-
-    const loanPrincipal = price - buyDown;
-    const monthlyRate = buyAPR / 12;
-    let monthlyBuyPayment: number;
-    if (monthlyRate === 0 || isNaN(buyAPR)) {
-      monthlyBuyPayment = loanPrincipal / 60;
-    } else {
-      monthlyBuyPayment = (loanPrincipal * (monthlyRate * Math.pow(1 + monthlyRate, 60))) / (Math.pow(1 + monthlyRate, 60) - 1);
-    }
-
-    const residualValue = price * Math.pow(1 - deprPct, leaseTerm / 12);
-    const totalBuyCost = buyDown + monthlyBuyPayment * leaseTerm - residualValue;
+    const c = leaseVsBuy(values);
+    if (!c) return [];
+    const { leaseTerm, totalLeaseCost, netBuyCost, residualValue, leaseWins, tie, savings } = c;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-    const leaseWins = totalLeaseCost < totalBuyCost;
-
     return [
       {
         id: 'recommendation',
-        label: `Over ${leaseTerm} months, ${leaseWins ? 'leasing' : 'buying'} costs less`,
-        value: `Save $${fmt(Math.abs(totalBuyCost - totalLeaseCost))}`,
+        label: tie ? `Over ${leaseTerm} months, leasing and buying cost the same` : `Over ${leaseTerm} months, ${leaseWins ? 'leasing' : 'buying'} costs less`,
+        value: tie ? 'No difference' : `Save $${fmt(savings)}`,
         highlight: true,
         color: 'positive',
         interpretation: leaseWins
-          ? `Leasing wins on pure cost here, but you own nothing at the end — this comparison is about cash flow, not wealth building. Buying builds equity you can sell or trade later, which this number doesn't capture.`
+          ? `Leasing wins on pure cost here, but you own nothing at the end — this comparison is about cash flow, not wealth building. Buying builds equity you can sell or trade later, and every extra year you keep a purchased car improves its case.`
           : `Buying wins here largely because you keep the car's value at the end instead of returning it. Leasing can still make sense if you value driving a newer car every few years or want lower monthly payments and warranty coverage.`,
       },
       {
@@ -136,8 +142,8 @@ const leaseBuyConfig: CalculatorConfig = {
       },
       {
         id: 'totalBuy',
-        label: `Net Buy Cost (${leaseTerm} mo, incl. equity)`,
-        value: `$${fmt(totalBuyCost)}`,
+        label: `Net Buy Cost (${leaseTerm} mo, after car value and loan payoff)`,
+        value: `$${fmt(netBuyCost)}`,
         color: 'neutral',
       },
       {
@@ -146,6 +152,12 @@ const leaseBuyConfig: CalculatorConfig = {
         value: `$${fmt(residualValue)}`,
         color: 'positive',
       },
+      {
+        id: 'loanBalance',
+        label: 'Loan Balance Still Owed After Term',
+        value: `$${fmt(c.loanBalance)}`,
+        color: c.loanBalance > 0 ? 'negative' : 'neutral',
+      },
     ];
   },
   extraPanel: (values, results) => {
@@ -153,14 +165,14 @@ const leaseBuyConfig: CalculatorConfig = {
     return createElement(LeaseVsBuyPanel, { values, results });
   },
   educational: {
-    formula: 'Net Buy Cost = Down Payment + Payments over term − Remaining Vehicle Value',
+    formula: 'Net Buy Cost = Down Payment + Payments made + Loan Balance Still Owed − Vehicle Value at End of Term',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="40" y="80" width="170" height="200" fill="var(--svg-e0e7ff)" stroke="var(--svg-3b82f6)" stroke-width="1" rx="8"/><text x="125" y="115" text-anchor="middle" font-size="16" fill="var(--svg-3b82f6)" font-weight="bold">Lease</text><text x="125" y="150" text-anchor="middle" font-size="13" fill="var(--svg-333333)">$399/mo</text><text x="125" y="175" text-anchor="middle" font-size="11" fill="var(--svg-666666)">No equity</text><text x="125" y="220" text-anchor="middle" font-size="13" fill="var(--svg-333333)">Total: $14K</text><rect x="230" y="80" width="170" height="200" fill="var(--svg-ede9fe)" stroke="var(--svg-8b5cf6)" stroke-width="1" rx="8"/><text x="315" y="115" text-anchor="middle" font-size="16" fill="var(--svg-8b5cf6)" font-weight="bold">Buy</text><text x="315" y="150" text-anchor="middle" font-size="13" fill="var(--svg-333333)">$550/mo</text><text x="315" y="175" text-anchor="middle" font-size="11" fill="var(--svg-666666)">Build equity</text><text x="315" y="220" text-anchor="middle" font-size="13" fill="var(--svg-333333)">Total: $33K</text></svg>',
       alt: 'Lease vs buy comparison showing monthly payment and equity difference',
       caption: 'Leasing offers lower payments; buying builds ownership equity over time',
     },
     formulaDescription:
-      'The lease vs. buy comparison compares total lease payments to the net cost of buying after accounting for the vehicle\'s residual value at the end of the comparison period. The comparison is only valid over the same time horizon.',
+      'The lease vs. buy comparison compares total lease payments to the net cost of buying after accounting for the vehicle\'s residual value at the end of the comparison period. The loan still owed at the end of the window is counted against buying, because it must be paid off to sell the car (or carried if you keep it). The comparison is only valid over the same time horizon.',
     variables: [
       { symbol: 'Residual Value', name: 'Vehicle Residual Value', description: 'The estimated market value of the vehicle at the end of the lease/comparison term. This is the key advantage of buying — you retain this asset value.' },
       { symbol: 'Depreciation', name: 'Annual Depreciation Rate', description: 'The rate at which the vehicle loses value each year. New cars average 15-25% in year one; luxury vehicles can lose 30%+ in the first year.' },
@@ -169,11 +181,11 @@ const leaseBuyConfig: CalculatorConfig = {
       'Enter the vehicle price, lease payment, and lease term.',
       'Enter the buy scenario down payment and loan APR.',
       'Enter an estimated annual depreciation rate (15% is typical for new vehicles).',
-      'The calculator compares total cost over the same time period.',
-      'The comparison accounts for the vehicle equity you retain if you buy, making it a true apples-to-apples comparison.',
+      'The calculator compares total cost over the lease term, counting any loan balance still owed on the purchase.',
+      'The comparison credits you with the vehicle value you keep if you buy and charges you for the loan still outstanding, making it an apples-to-apples comparison.',
     ],
     explanation:
-      'Leasing vs. buying is fundamentally a question of what you pay for what you get. Leasing means paying for only the depreciation during the lease term — you return the car at the end. Buying means paying for the full vehicle but retaining the asset. Leasing is often cheaper in the short term but more expensive over the long run if you always lease vs. driving a purchased vehicle for many years. Leasing makes financial sense when: you value always having a new car, you drive less than the mileage limit, and your lease payment is significantly below a purchase payment. Real-world example: a $40,000 car with a $450 per month lease at 36 months totals $16,200 plus $2,000 down equals $18,200. Buying the same car with $5,000 down at 6.9% APR over 60 months costs about $690 per month. Over 36 months, the buyer pays $29,840 but the car is worth about $22,000 residual, making the net cost only $7,840 — much less than the lease. However, the lease has lower monthly payments and the buyer is responsible for repairs after the warranty expires. The lease decision also depends on driving habits: if you drive 18,000 miles per year and the lease allows only 12,000, you face roughly $900 to $1,800 in excess mileage fees at the end. For business owners, lease payments can often be deducted as a business expense, which may tip the scales toward leasing.',
+      'Leasing vs. buying is fundamentally a question of what you pay for what you get. Leasing means paying for only the depreciation during the lease term — you return the car at the end. Buying means paying for the full vehicle but retaining the asset. Leasing is often cheaper in the short term but more expensive over the long run if you always lease vs. driving a purchased vehicle for many years. Leasing makes financial sense when: you value always having a new car, you drive less than the mileage limit, and your lease payment is significantly below a purchase payment. Real-world example: a $40,000 car with a $450 per month lease at 36 months totals $16,200 plus $2,000 down, or $18,200. Buying the same car with $5,000 down at 6.9% APR over 60 months costs about $691 per month. Over 36 months the buyer pays about $29,890 in cash, still owes about $15,458 on the loan, and owns a car worth about $24,565 (15% a year depreciation), so the net cost is $29,890 + $15,458 - $24,565 = $20,783, about $2,583 more than the lease. Leaving out the remaining loan balance would make buying look about $15,500 cheaper than it really is. The lease decision also depends on driving habits: if you drive 18,000 miles per year and the lease allows only 12,000, you face roughly $5,400 in excess mileage fees at $0.30 per mile (or $2,700 at $0.15) at the end. For business owners, lease payments can often be deducted as a business expense, which may tip the scales toward leasing.',
     commonUses: [
       'Deciding whether to lease or finance a new vehicle by comparing total costs over the same time period',
       'Evaluating the financial trade-off between lower monthly lease payments and building equity through ownership',
@@ -183,25 +195,25 @@ const leaseBuyConfig: CalculatorConfig = {
       {
         scenario: 'Alex is considering a $40,000 SUV. Lease: $2,000 down, $450/month, 36 months. Buy: $5,000 down, 6.9% APR for 60 months, 15% annual depreciation. Over 36 months, which costs less?',
         inputs: { vehiclePrice: '40000', leasePayment: '450', leaseDownPayment: '2000', leaseTerm: '36', buyDownPayment: '5000', buyAPR: '6.9', depreciationRate: '15' },
-        result: 'Buying saves $12,875 over 36 months — lease costs $18,200 with nothing retained vs. net buy cost of $5,325 after equity',
-        insight: 'Total lease cost = $2,000 + ($450 x 36) = $18,200. Buy scenario: Loan principal = $35,000. Monthly payment at 6.9% for 60 months = $691.39. Over 36 months, buyer pays $5,000 + ($691.39 x 36) = $29,890. But after 3 years at 15% depreciation, the car\'s residual value is $40,000 x (0.85)^3 = $24,565. Net buy cost = $29,890 - $24,565 = $5,325. Buying saves $12,875 over 36 months because the car retains significant equity. If Alex can afford the higher payment, buying is the clear winner here — but the lease offers lower monthly cash outlay.',
+        result: 'Leasing saves $2,583 over 36 months — lease costs $18,200 vs. net buy cost of $20,783 after car value and loan payoff',
+        insight: 'Total lease cost = $2,000 + ($450 x 36) = $18,200. Buy scenario: Loan principal = $35,000. Monthly payment at 6.9% for 60 months = $691.39. Over 36 months, the buyer pays $5,000 + ($691.39 x 36) = $29,890 and still owes $15,458 on the loan. After 3 years at 15% depreciation, the car is worth $40,000 x (0.85)^3 = $24,565. Net buy cost = $29,890 + $15,458 - $24,565 = $20,783, so leasing is cheaper by $2,583 over this 36-month window. Keeping the purchased car longer changes the picture: each extra year of ownership spreads the depreciation over more months.',
       },
       {
         scenario: 'Taylor drives 8,000 miles per year and wants a new car every 3 years with the latest tech. The $35,000 sedan leases at $380/month with $1,500 down (36 months). Buying at 7.5% APR with $3,500 down and 18% annual depreciation. Is leasing the better fit?',
         inputs: { vehiclePrice: '35000', leasePayment: '380', leaseDownPayment: '1500', leaseTerm: '36', buyDownPayment: '3500', buyAPR: '7.5', depreciationRate: '18' },
-        result: 'Buying saves $8,253 over 36 months — lease: $15,180 vs. net buy cost: $6,927 after equity',
-        insight: 'Total lease cost = $1,500 + ($380 x 36) = $15,180. Buy: Loan = $31,500 at 7.5% / 60 months = $631.14/month. Over 36 months: $3,500 + ($631.14 x 36) = $26,221. Residual after 3 years at 18% depreciation: $35,000 x (0.82)^3 = $19,294. Net buy cost = $26,221 - $19,294 = $6,927. Buying still costs less on paper, but for Taylor\'s lifestyle — low mileage, always wanting the latest car, no interest in ownership — the convenience of leasing may be worth the $8,253 premium over 3 years. The analysis changes if Taylor keeps the purchased car beyond 3 years: each additional year of ownership dramatically tilts the math toward buying.',
+        result: 'Leasing saves $5,772 over 36 months — lease: $15,180 vs. net buy cost: $20,952 after car value and loan payoff',
+        insight: 'Total lease cost = $1,500 + ($380 x 36) = $15,180. Buy: Loan = $31,500 at 7.5% / 60 months = $631.20/month. Over 36 months: $3,500 + ($631.20 x 36) = $26,223, with $14,027 still owed on the loan. Car value after 3 years at 18% depreciation: $35,000 x (0.82)^3 = $19,298. Net buy cost = $26,223 + $14,027 - $19,298 = $20,952. Leasing is $5,772 cheaper over the 3 years, which fits Taylor with low mileage and a taste for new cars. The analysis changes if Taylor keeps the purchased car much longer than 3 years: depreciation slows, the loan gets paid off, and buying catches up.',
       },
     ],
     proTips: [
-      'Run the comparison net of equity, not just monthly payments. A $400 lease payment looks cheaper than a $650 loan payment, but the loan builds equity. Over 36 months, the lease costs $14,400 with nothing to show for it. The loan costs $23,400 but leaves you with a car worth $18,000-$25,000 — making the net cost potentially lower than leasing.',
+      'Run the comparison net of equity and net of the loan you still owe, not just monthly payments. A $400 lease payment looks cheaper than a $650 loan payment, but the loan buys an asset. Over 36 months the lease costs $14,400 with nothing to show for it; the loan costs $23,400 in payments, and you still owe a large balance, but you own a car that is worth something. Only after subtracting both do you see which is really cheaper.',
       'Your annual mileage is the single biggest lifestyle factor. If you drive under 12,000 miles per year, leasing is viable. If you drive 15,000+, buying almost always wins because excess mileage fees on a lease ($0.15-$0.30/mile) add up fast. A 5,000-mile annual overage costs $750-$1,500 per year.',
-      'Consider the ownership horizon, not just the first 3 years. Leasing every 3 years for 9 years (three consecutive leases) usually costs 50-100% more than buying one car and keeping it for 9 years. The savings from long-term ownership are enormous — often $15,000-$30,000 over a decade.',
+      'Consider the ownership horizon, not just the first 3 years. Leasing every 3 years for 9 years (three consecutive leases) usually costs more than buying one car and keeping it for 9 years, because you keep paying for the steepest part of depreciation each time. Run the numbers for your own quotes.',
       'For business owners, lease payments may be tax-deductible as a business expense (consult your CPA). The IRS allows deducting either actual expenses or the standard mileage rate. Leasing simplifies record-keeping since the monthly payment is a clean expense, whereas a purchased vehicle requires depreciation schedules.',
-      'Factor in maintenance and repairs. Leased vehicles are always under factory warranty, so major repair costs are covered. A purchased vehicle kept beyond the warranty period (typically 3-5 years) will incur out-of-pocket repair costs. Budget $500-$1,000 per year for repairs on a 5-8 year old vehicle.',
+      'Factor in maintenance and repairs. Leased vehicles are always under factory warranty, so major repair costs are covered. A purchased vehicle kept beyond the warranty period (typically 3-5 years) will incur out-of-pocket repair costs. Budget for repairs on a vehicle that is out of warranty.',
     ],
     limitations: [
-      'This calculator uses a simplified 60-month loan for the buy scenario and a constant annual depreciation rate, which is an approximation — real depreciation follows a declining curve (faster in early years).',
+      'This calculator uses a constant annual depreciation rate and compares only over the lease term, which is an approximation — real depreciation follows a declining curve (faster in early years).',
       'It does not account for sales tax differences between leasing and buying (some states tax the full vehicle price on a lease, others only monthly payments), insurance cost differences (leasing typically requires higher coverage limits), manufacturer incentives (lease cash, subsidized residuals), or the time value of money.',
       'The comparison assumes you sell or trade the purchased vehicle at the end of the comparison period. If you keep the purchased vehicle longer, the financial advantage of buying increases substantially.',
       'GAP insurance costs are not included but are often required on leases.',
@@ -209,17 +221,17 @@ const leaseBuyConfig: CalculatorConfig = {
     quickReference: [
       { label: 'Lease Best For', value: 'Low mileage, want new car every 2-3 yrs' },
       { label: 'Buy Best For', value: 'High mileage, keep car 5+ years' },
-      { label: 'Typical Lease Payment vs Buy', value: '30-50% lower monthly' },
+      { label: 'Lease vs Loan Payment', value: 'Lease monthly is usually lower' },
       { label: 'New Car Year-1 Depreciation', value: '15-25% of MSRP' },
       { label: 'Excess Mileage Fee', value: '$0.15 - $0.30 per mile' },
-      { label: 'Break-Even (Lease vs Buy)', value: 'Usually 3-5 years ownership' },
+      { label: 'Break-Even (Lease vs Buy)', value: 'Depends on your numbers — buying improves the longer you keep the car' },
       { label: 'Lease Mileage Limits', value: '10K / 12K / 15K miles per year' },
       { label: 'Key Metric', value: 'Net cost after equity, not monthly pmt' },
     ],
     faqs: [
       {
         question: 'What are the main advantages of leasing?',
-        answer: 'Lower monthly payments (usually 30-50% less than buying), always driving a new vehicle under warranty, no trade-in hassle at the end, potential tax advantages for business use, and the ability to upgrade every 2-3 years. Disadvantages include mileage limits (typically 10,000-15,000 miles per year), no ownership or equity, and potential fees for excess wear or mileage at lease end.',
+        answer: 'Lower monthly payments (usually less than a loan payment on the same car), always driving a new vehicle under warranty, no trade-in hassle at the end, potential tax advantages for business use, and the ability to upgrade every 2-3 years. Disadvantages include mileage limits (typically 10,000-15,000 miles per year), no ownership or equity, and potential fees for excess wear or mileage at lease end.',
       },
       {
         question: 'What happens at the end of a lease?',
@@ -231,7 +243,7 @@ const leaseBuyConfig: CalculatorConfig = {
       },
       {
         question: 'How does mileage affect the lease vs. buy decision?',
-        answer: 'Mileage is one of the most important factors. Standard leases cap you at 10,000, 12,000, or 15,000 miles per year. Every mile over the limit costs $0.15-$0.30 at lease-end. If you drive 20,000 miles per year, a 12,000-mile lease leaves you 24,000 miles over after 3 years — that\'s $3,600-$7,200 in fees. Buying eliminates this risk entirely. If your driving is unpredictable (new job, moving, lifestyle changes), buying gives you flexibility that a lease contract does not. You can purchase additional miles upfront at a discount (typically $0.10-$0.15/mile), but this still adds to the lease cost.',
+        answer: 'Mileage is one of the most important factors. Standard leases cap you at 10,000, 12,000, or 15,000 miles per year. Every mile over the limit costs $0.15-$0.30 at lease-end. If you drive 20,000 miles per year, a 12,000-mile lease leaves you 24,000 miles over after 3 years — that\'s $3,600-$7,200 in fees. Buying eliminates this risk entirely. If your driving is unpredictable (new job, moving, lifestyle changes), buying gives you flexibility that a lease contract does not. You can purchase additional miles upfront at a discount at a lower per-mile rate, but this still adds to the lease cost.',
       },
       {
         question: 'Can I get out of a lease early?',

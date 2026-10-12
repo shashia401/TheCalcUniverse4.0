@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import LumberPanel from './LumberPanel';
+import { lumber } from './lumberMath';
 
 const lumberConfig: CalculatorConfig = {
   inputs: [
@@ -61,46 +62,33 @@ const lumberConfig: CalculatorConfig = {
       min: 0,
       step: 0.01,
       inputMode: 'decimal',
-      helpText: 'Optional: enter the price per board foot to calculate total lumber cost. Construction-grade softwood is typically $0.50-2.00/bf, hardwood $3-15/bf.',
+      helpText: 'Optional: enter the price per board foot to calculate total lumber cost. Prices vary widely by species, grade, and region.',
     },
   ],
   calculate: (values) => {
-    const thickness = parseFloat(values.thickness);
-    const width = parseFloat(values.width);
-    const length = parseFloat(values.length);
-    const quantity = parseFloat(values.quantity);
+    const l = lumber(values);
+    if (!l) return [];
     const pricePerBdFt = parseFloat(values.pricePerBdFt);
-
-    if ([thickness, width, length, quantity].some(isNaN) || length <= 0 || quantity <= 0) return [];
-
-    const boardFeetPerBoard = (thickness * width * length) / 12;
-    const totalBoardFeet = boardFeetPerBoard * quantity;
-    const totalLinearFeet = length * quantity;
-    // Approximate actual dimensions (subtract 0.5-inch from nominal for surfaced lumber)
-    const actualThickness = thickness >= 2 ? thickness - 0.5 : thickness - 0.25;
-    const actualWidth = width >= 8 ? width - 0.75 : width >= 2 ? width - 0.5 : width - 0.25;
-    const actualBoardFeetPerBoard = (actualThickness * actualWidth * length) / 12;
-    const actualTotalBoardFeet = actualBoardFeetPerBoard * quantity;
 
     const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'neutral' }> = [
       {
         id: 'totalBdFt',
         label: 'Total Board Feet (Nominal)',
-        value: `${totalBoardFeet.toFixed(2)} bd ft`,
+        value: `${l.totalBdFt.toFixed(2)} bd ft`,
         highlight: true,
         color: 'positive' as const,
       },
-      { id: 'perBoard', label: 'Board Feet per Board (Nominal)', value: `${boardFeetPerBoard.toFixed(2)} bd ft`, color: 'neutral' as const },
-      { id: 'linearFt', label: 'Total Linear Feet', value: `${totalLinearFeet.toFixed(0)} ft`, color: 'neutral' as const },
-      { id: 'actualBdFt', label: 'Total Board Feet (Actual)', value: `${actualTotalBoardFeet.toFixed(2)} bd ft`, color: 'neutral' as const },
-      { id: 'actualDimensions', label: 'Actual Dimensions (approx)', value: `${actualThickness.toFixed(1)}" x ${actualWidth.toFixed(1)}"`, color: 'neutral' as const },
+      { id: 'perBoard', label: 'Board Feet per Board (Nominal)', value: `${l.perBoard.toFixed(2)} bd ft`, color: 'neutral' as const },
+      { id: 'linearFt', label: 'Total Linear Feet', value: `${l.linearFt.toFixed(0)} ft`, color: 'neutral' as const },
+      { id: 'actualBdFt', label: 'Total Board Feet (Actual)', value: `${l.actualBdFt.toFixed(2)} bd ft`, color: 'neutral' as const },
+      { id: 'actualDimensions', label: 'Actual Dimensions (approx)', value: `${l.actualT.toFixed(1)}" x ${l.actualW.toFixed(1)}"`, color: 'neutral' as const },
     ];
 
     if (!isNaN(pricePerBdFt) && pricePerBdFt > 0) {
       results.push({
         id: 'totalCost',
         label: 'Estimated Lumber Cost (Nominal)',
-        value: `$${(totalBoardFeet * pricePerBdFt).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: `$${(l.totalBdFt * pricePerBdFt).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         color: 'neutral' as const,
       });
     }
@@ -177,7 +165,7 @@ const lumberConfig: CalculatorConfig = {
       {
         scenario: 'Framing a 12x16 ft Deck in Portland, OR',
         inputs: { thickness: '2', width: '8', length: '16', quantity: '8', pricePerBdFt: '1.85' },
-        result: 'Total 170.67 bd ft. At $1.85/bf: $315.74 for joists. Full framing ~400 bd ft (~$740).',
+        result: 'Total 170.67 bd ft. At $1.85/bf: $315.73 for joists. Full framing ~400 bd ft (~$740).',
         insight: 'A deck frame using 2x8 pressure-treated Southern Yellow Pine joists spanning 16 ft. Eight joists at 16 ft each. Board feet per joist: (2 x 8 x 16) / 12 = 21.33 bd ft. Total board feet: 21.33 x 8 = 170.67 bd ft. Total linear feet: 16 x 8 = 128 ft. At $1.85/bf for pressure-treated SYP 2x8 (typical 2025 pricing in Portland): 170.67 x $1.85 = $315.74 for the joists. Adding the ledger board, rim joists, and blocking brings total framing lumber needs to approximately 400 board feet or roughly $740. In Portland, deck lumber must be pressure-treated for ground contact (UC4A or UC4B) for any wood within 6 inches of soil. The rainy climate means all deck fasteners should be hot-dipped galvanized or stainless steel -- standard electroplated screws will rust within 2-3 years. For the deck boards themselves, budget additional material: a 12x16 deck with 5/4 x 6 inch deck boards needs approximately 28 boards at 16 ft each = about 280 board feet for the decking alone. Total project lumber: framing (400 bf) + decking (280 bf) + railing posts and balusters (~150 bf) = approximately 830 board feet.',
       },
       {
@@ -222,8 +210,6 @@ const lumberConfig: CalculatorConfig = {
       { label: '2x6x8 board feet', value: '8.00 bd ft' },
       { label: '2x8x8 board feet', value: '10.67 bd ft' },
       { label: 'Pre-cut stud length', value: '92-5/8 inches' },
-      { label: 'Softwood framing price', value: '$0.50-2.00/bf' },
-      { label: 'Hardwood price range', value: '$3-18/bf' },
       { label: 'Waste allowance (framing)', value: '10%' },
       { label: 'Waste allowance (hardwood)', value: '20-30%' },
     ],

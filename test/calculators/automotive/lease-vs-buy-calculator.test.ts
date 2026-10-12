@@ -14,7 +14,7 @@ describe('lease-vs-buy', () => {
       buyAPR: '6.9',
       depreciationRate: '15',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // totalLeaseCost = 2000 + 450 * 36 = 18200
     near(parseNumber(getValue(r, 'totalLease')), 18200, 100);
     // recommendation should exist
@@ -24,9 +24,10 @@ describe('lease-vs-buy', () => {
   });
 
   it('worked example: Alex $40k SUV — regression for narrative drift fix', () => {
-    // Educational workedExamples "result" text previously claimed $12,535 savings and a
-    // $5,665 net buy cost, disagreeing with its own insight text ($12,870 / $5,330) and
-    // with the real calculate() output. Pin the correct values: $12,875 savings, $5,325 net buy cost.
+    // End-to-end audit: the old model ignored the loan still owed after 36 of 60 payments, so buying looked
+    // $12,875 cheaper. Independent derivation: payment = 35,000 at 0.575%/month over 60 = 691.39; after 36
+    // payments the balance is 15,457.95; the car is worth 40,000 x 0.85^3 = 24,565. Net buy cost =
+    // 5,000 + 24,890.11 + 15,457.95 - 24,565.00 = 20,783.06 versus 18,200 to lease (lease saves 2,583).
     const r = config.calculate({
       vehiclePrice: '40000',
       leasePayment: '450',
@@ -36,9 +37,10 @@ describe('lease-vs-buy', () => {
       buyAPR: '6.9',
       depreciationRate: '15',
     });
-    near(parseNumber(getValue(r, 'totalBuy')), 5325, 5);
-    const savings = 18200 - parseNumber(getValue(r, 'totalBuy'));
-    near(savings, 12875, 5);
+    near(parseNumber(getValue(r, 'totalBuy')), 20783, 1);
+    near(parseNumber(getValue(r, 'loanBalance')), 15458, 1);
+    expect(getValue(r, 'recommendation')).toContain('Save $2,583');
+    expect(r.find((x) => x.id === 'recommendation')!.label).toContain('leasing costs less');
   });
 
   it('higher lease payment makes buying the recommendation', () => {
@@ -51,7 +53,7 @@ describe('lease-vs-buy', () => {
       buyAPR: '6.9',
       depreciationRate: '15',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // totalLeaseCost = 3000 + 700 * 36 = 28200
     near(parseNumber(getValue(r, 'totalLease')), 28200, 100);
     // buying should be recommended since lease is expensive (check label)
@@ -68,7 +70,7 @@ describe('lease-vs-buy', () => {
       buyAPR: '0',
       depreciationRate: '15',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // totalLeaseCost = 0 + 350 * 36 = 12600
     near(parseNumber(getValue(r, 'totalLease')), 12600, 100);
     // Residual value: 24000 * (1-0.15)^3 = 24000 * 0.614125 = 14739
@@ -98,7 +100,7 @@ describe('lease-vs-buy', () => {
       buyAPR: '5.9',
       depreciationRate: '15',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // totalLeaseCost = 1500 + 400 * 48 = 20700
     near(parseNumber(getValue(r, 'totalLease')), 20700, 100);
     // Residual: 35000 * (1-0.15)^4 = 35000 * 0.5220 = 18270

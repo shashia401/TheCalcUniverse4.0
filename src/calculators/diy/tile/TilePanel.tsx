@@ -126,7 +126,7 @@ export default function TilePanel({ values, results }: Props) {
       <div className="p-6 space-y-6">
         <div className="rounded-xl bg-blue-50 border border-blue-200 px-5 py-4 text-center">
           <p className="text-4xl font-black text-blue-700">{tileCount}</p>
-          <p className="text-xs font-bold uppercase tracking-widest text-blue-500 mt-1">Tiles Required</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-700 mt-1">Tiles Required</p>
         </div>
 
         <TileGridSVG layout={layout} />
@@ -156,13 +156,13 @@ export default function TilePanel({ values, results }: Props) {
           <div className="space-y-3">
             {hasCost && (
               <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-emerald-600">Total Cost</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Total Cost</p>
                 <p className="text-xl font-black text-emerald-800">{costRes?.value}</p>
               </div>
             )}
             {noteRes && (
               <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-amber-600">Layout Note</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-amber-800">Layout Note</p>
                 <p className="text-sm text-amber-800">{noteRes.value}</p>
               </div>
             )}

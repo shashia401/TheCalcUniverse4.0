@@ -1,6 +1,10 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import AmortizationPanel from '../../../components/calculator/AmortizationPanel';
+import { parseMortgage } from './mortgageMath';
+
+const fmt2 = (n: number) =>
+  n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -64,7 +68,7 @@ const mortgageAmortizationConfig: CalculatorConfig = {
       max: 30,
       step: 0.01,
       required: true,
-      helpText: 'Current national average ~6.8%',
+      helpText: 'The rate on your lender quote (fixed-rate loan)',
     },
     {
       id: 'propertyTax',
@@ -73,9 +77,10 @@ const mortgageAmortizationConfig: CalculatorConfig = {
       placeholder: '1.2',
       unit: '%',
       min: 0,
+      max: 10,
       step: 0.01,
       required: false,
-      helpText: 'Annual property tax as % of home value — national avg ~1.2%',
+      helpText: 'Annual property tax as % of home value — varies a lot by state and county',
     },
     {
       id: 'homeInsurance',
@@ -119,43 +124,10 @@ const mortgageAmortizationConfig: CalculatorConfig = {
     },
   ],
   explainSteps: (values) => {
-    const homePrice = parseFloat(values.homePrice);
-    const annualRate = parseFloat(values.interestRate) / 100;
-    const years = parseFloat(values.loanTerm || '30');
-
-    if (isNaN(homePrice) || isNaN(annualRate) || homePrice <= 0) return [];
-
-    const pctOverride = parseFloat(values.downPaymentPct);
-    const downPayment = !isNaN(pctOverride) && values.downPaymentPct !== ''
-      ? homePrice * (pctOverride / 100)
-      : parseFloat(values.downPayment) || 0;
-    const principal = homePrice - downPayment;
-    if (principal <= 0) return [];
-
-    const downPct = (downPayment / homePrice) * 100;
-    const monthlyRate = annualRate / 12;
-    const numPayments = years * 12;
-
-    let monthlyPI: number;
-    if (monthlyRate === 0) {
-      monthlyPI = principal / numPayments;
-    } else {
-      monthlyPI =
-        (principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments))) /
-        (Math.pow(1 + monthlyRate, numPayments) - 1);
-    }
-
-    const propertyTaxPct = parseFloat(values.propertyTax) / 100 || 0;
-    const homeInsuranceAnnual = parseFloat(values.homeInsurance) || 0;
-    const hoaMonthly = parseFloat(values.hoaFee) || 0;
-    const pmiAnnual = downPct < 20 ? principal * 0.008 : 0;
-    const monthlyPropertyTax = (homePrice * propertyTaxPct) / 12;
-    const monthlyInsurance = homeInsuranceAnnual / 12;
-    const monthlyPMI = pmiAnnual / 12;
-    const totalMonthly = monthlyPI + monthlyPropertyTax + monthlyInsurance + monthlyPMI + hoaMonthly;
-
-    const fmt = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const m = parseMortgage(values);
+    if (!m) return [];
+    const { homePrice, downPayment, principal, downPct, annualRate, monthlyRate, years, numPayments, monthlyPI } = m;
+    const fmt = fmt2;
 
     const steps: { label: string; expr: string; note?: string }[] = [
       {
@@ -183,14 +155,14 @@ const mortgageAmortizationConfig: CalculatorConfig = {
     }
 
     const escrowParts: string[] = [];
-    if (monthlyPropertyTax > 0) escrowParts.push(`tax $${fmt(monthlyPropertyTax)}`);
-    if (monthlyInsurance > 0) escrowParts.push(`insurance $${fmt(monthlyInsurance)}`);
-    if (monthlyPMI > 0) escrowParts.push(`PMI $${fmt(monthlyPMI)}`);
-    if (hoaMonthly > 0) escrowParts.push(`HOA $${fmt(hoaMonthly)}`);
+    if (m.monthlyPropertyTax > 0) escrowParts.push(`tax $${fmt(m.monthlyPropertyTax)}`);
+    if (m.monthlyInsurance > 0) escrowParts.push(`insurance $${fmt(m.monthlyInsurance)}`);
+    if (m.monthlyPMI > 0) escrowParts.push(`PMI $${fmt(m.monthlyPMI)}`);
+    if (m.hoaMonthly > 0) escrowParts.push(`HOA $${fmt(m.hoaMonthly)}`);
 
     steps.push({
       label: 'Add taxes, insurance and fees for the full PITI payment',
-      expr: `$${fmt(monthlyPI)}${escrowParts.length ? ' + ' + escrowParts.join(' + ') : ''} = $${fmt(totalMonthly)}/mo`,
+      expr: `$${fmt(monthlyPI)}${escrowParts.length ? ' + ' + escrowParts.join(' + ') : ''} = $${fmt(m.totalMonthly)}/mo`,
       note: escrowParts.length
         ? 'PITI = Principal, Interest, Taxes & Insurance.'
         : 'No escrow items entered, so PITI equals principal & interest.',
@@ -199,47 +171,9 @@ const mortgageAmortizationConfig: CalculatorConfig = {
     return steps;
   },
   calculate: (values) => {
-    const homePrice = parseFloat(values.homePrice);
-    const annualRate = parseFloat(values.interestRate) / 100;
-    const years = parseFloat(values.loanTerm || '30');
-
-    if (isNaN(homePrice) || isNaN(annualRate) || homePrice <= 0) return [];
-
-    const pctOverride = parseFloat(values.downPaymentPct);
-    const downPayment = !isNaN(pctOverride) && values.downPaymentPct !== ''
-      ? homePrice * (pctOverride / 100)
-      : parseFloat(values.downPayment) || 0;
-
-    const principal = homePrice - downPayment;
-    if (principal <= 0) return [];
-
-    const downPct = (downPayment / homePrice) * 100;
-    const monthlyRate = annualRate / 12;
-    const numPayments = years * 12;
-
-    let monthlyPI: number;
-    if (monthlyRate === 0) {
-      monthlyPI = principal / numPayments;
-    } else {
-      monthlyPI =
-        (principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments))) /
-        (Math.pow(1 + monthlyRate, numPayments) - 1);
-    }
-
-    const propertyTaxPct = parseFloat(values.propertyTax) / 100 || 0;
-    const homeInsuranceAnnual = parseFloat(values.homeInsurance) || 0;
-    const hoaMonthly = parseFloat(values.hoaFee) || 0;
-
-    const pmiAnnual = downPct < 20 ? principal * 0.008 : 0;
-
-    const monthlyPropertyTax = (homePrice * propertyTaxPct) / 12;
-    const monthlyInsurance = homeInsuranceAnnual / 12;
-    const monthlyPMI = pmiAnnual / 12;
-    const totalMonthly = monthlyPI + monthlyPropertyTax + monthlyInsurance + monthlyPMI + hoaMonthly;
-
-    const totalMortgage = monthlyPI * numPayments;
-    const totalInterest = totalMortgage - principal;
-    const totalOutOfPocket = totalMonthly * numPayments;
+    const m = parseMortgage(values);
+    if (!m) return [];
+    const { principal, downPayment, downPct, monthlyPI, monthlyPMI, hoaMonthly, numPayments } = m;
 
     const sm = parseInt(values.startMonth) || new Date().getMonth() + 1;
     const sy = parseInt(values.startYear) || new Date().getFullYear();
@@ -250,16 +184,16 @@ const mortgageAmortizationConfig: CalculatorConfig = {
     const payoffYear = sy + Math.floor(monthsFromStart / 12);
     const payoffDate = `${MONTHS[payoffMonthIndex]} ${payoffYear}`;
 
-    const fmt = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt = fmt2;
+    const pmiYears = (m.pmiMonths / 12).toFixed(1);
 
     const results: CalculatorResult[] = [
       {
         id: 'totalMonthly',
         label: 'Total Monthly Payment (PITI)',
-        value: `$${fmt(totalMonthly)}`,
+        value: `$${fmt(m.totalMonthly)}`,
         highlight: true,
-        interpretation: `PITI bundles Principal, Interest, Taxes, and Insurance — the full housing payment lenders qualify you on, not just the loan payment. ${downPct < 20 ? `At ${downPct.toFixed(0)}% down you're also paying $${fmt(pmiAnnual / 12)}/mo in PMI, which drops off once you reach 20% equity.` : `At ${downPct.toFixed(0)}% down you've cleared the 20% threshold, so no PMI applies.`}`,
+        interpretation: `PITI bundles Principal, Interest, Taxes, and Insurance — the full housing payment lenders qualify you on, not just the loan payment. ${downPct < 20 ? `At ${downPct.toFixed(0)}% down you're also paying an estimated $${fmt(monthlyPMI)}/mo in PMI (0.8% of the loan per year, a typical-case assumption), which falls away automatically once the balance reaches 78% of the original price — about ${pmiYears} years in.` : `At ${downPct.toFixed(0)}% down you've reached the 20% threshold, so no PMI applies.`}`,
         color: 'neutral' as const,
       },
       {
@@ -271,13 +205,13 @@ const mortgageAmortizationConfig: CalculatorConfig = {
       {
         id: 'monthlyTax',
         label: 'Property Tax (est.)',
-        value: monthlyPropertyTax > 0 ? `$${fmt(monthlyPropertyTax)}` : 'Not entered',
+        value: m.monthlyPropertyTax > 0 ? `$${fmt(m.monthlyPropertyTax)}` : 'Not entered',
         color: 'neutral' as const,
       },
       {
         id: 'monthlyIns',
         label: 'Homeowners Insurance',
-        value: monthlyInsurance > 0 ? `$${fmt(monthlyInsurance)}` : 'Not entered',
+        value: m.monthlyInsurance > 0 ? `$${fmt(m.monthlyInsurance)}` : 'Not entered',
         color: 'neutral' as const,
       },
     ];
@@ -316,13 +250,13 @@ const mortgageAmortizationConfig: CalculatorConfig = {
       {
         id: 'totalInterest',
         label: 'Total Interest Paid',
-        value: `$${fmt(totalInterest)}`,
+        value: `$${fmt(m.totalInterest)}`,
         color: 'negative' as const,
       },
       {
         id: 'totalOutOfPocket',
-        label: 'Total Out-of-Pocket',
-        value: `$${fmt(totalOutOfPocket)}`,
+        label: 'Total Paid Over the Loan (excl. down payment)',
+        value: `$${fmt(m.totalPaid)}`,
         color: 'neutral' as const,
       },
       {
@@ -336,65 +270,30 @@ const mortgageAmortizationConfig: CalculatorConfig = {
     return results;
   },
   extraPanel: (values, results) => {
-    const homePrice = parseFloat(values.homePrice);
-    const annualRate = parseFloat(values.interestRate) / 100;
-    const years = parseFloat(values.loanTerm || '30');
-
-    if (!results.length || isNaN(homePrice) || isNaN(annualRate)) return null;
-
-    const pctOverride = parseFloat(values.downPaymentPct);
-    const downPayment = !isNaN(pctOverride) && values.downPaymentPct !== ''
-      ? homePrice * (pctOverride / 100)
-      : parseFloat(values.downPayment) || 0;
-
-    const principal = homePrice - downPayment;
-    if (principal <= 0) return null;
-
-    const downPct = (downPayment / homePrice) * 100;
-    const monthlyRate = annualRate / 12;
-    const numPayments = years * 12;
-
-    let monthlyPayment: number;
-    if (monthlyRate === 0) {
-      monthlyPayment = principal / numPayments;
-    } else {
-      monthlyPayment =
-        (principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments))) /
-        (Math.pow(1 + monthlyRate, numPayments) - 1);
-    }
-
-    const totalInterest = monthlyPayment * numPayments - principal;
-    const propertyTaxPct = parseFloat(values.propertyTax) / 100 || 0;
-    const homeInsuranceAnnual = parseFloat(values.homeInsurance) || 0;
-    const hoaMonthly = parseFloat(values.hoaFee) || 0;
-    const pmiAnnual = downPct < 20 ? principal * 0.008 : 0;
-
-    const monthlyPropertyTax = (homePrice * propertyTaxPct) / 12;
-    const monthlyInsurance = homeInsuranceAnnual / 12;
-    const monthlyPMI = pmiAnnual / 12;
-    const totalMonthly = monthlyPayment + monthlyPropertyTax + monthlyInsurance + monthlyPMI + hoaMonthly;
+    const m = parseMortgage(values);
+    if (!results.length || !m) return null;
 
     return createElement(AmortizationPanel, {
-      loanAmount: principal,
-      annualRate,
-      years,
-      monthlyPayment,
-      totalInterest,
+      loanAmount: m.principal,
+      annualRate: m.annualRate,
+      years: m.years,
+      monthlyPayment: m.monthlyPI,
+      totalInterest: m.totalInterest,
       monthlyBreakdown: {
-        principalAndInterest: monthlyPayment,
-        propertyTax: monthlyPropertyTax,
-        homeInsurance: monthlyInsurance,
-        pmi: monthlyPMI,
-        hoa: hoaMonthly,
+        principalAndInterest: m.monthlyPI,
+        propertyTax: m.monthlyPropertyTax,
+        homeInsurance: m.monthlyInsurance,
+        pmi: m.monthlyPMI,
+        hoa: m.hoaMonthly,
         other: 0,
-        total: totalMonthly,
+        total: m.totalMonthly,
       },
     });
   },
   educational: {
     formula: 'M = P × [r(1+r)^n] / [(1+r)^n − 1]',
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="60" y="40" width="320" height="60" fill="var(--svg-f8fafc)" stroke="var(--svg-e2e8f0)" rx="8"/><rect x="80" y="50" width="280" height="40" fill="var(--svg-3b82f6)" rx="4"/><text x="220" y="75" text-anchor="middle" font-size="14" fill="var(--svg-ffffff)">House Price: $400,000</text><rect x="60" y="120" width="150" height="60" fill="var(--svg-22c55e)" rx="8"/><text x="135" y="148" text-anchor="middle" font-size="12" fill="var(--svg-ffffff)">Down Payment</text><text x="135" y="165" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">$80,000 (20%)</text><rect x="230" y="120" width="150" height="60" fill="var(--svg-ef4444)" rx="8"/><text x="305" y="148" text-anchor="middle" font-size="12" fill="var(--svg-ffffff)">Loan Amount</text><text x="305" y="165" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">$320,000</text><rect x="60" y="210" width="320" height="50" fill="var(--svg-8b5cf6)" rx="8"/><text x="220" y="230" text-anchor="middle" font-size="12" fill="var(--svg-ffffff)">Monthly Payment</text><text x="220" y="248" text-anchor="middle" font-size="14" fill="var(--svg-ffffff)">$2,082 @ 6.5% / 30yr</text><line x1="60" y1="270" x2="380" y2="270" stroke="var(--svg-e2e8f0)" stroke-width="1"/><text x="220" y="295" text-anchor="middle" font-size="12" fill="var(--svg-666666)">Total Interest: $429,528</text></svg>',
+      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="60" y="40" width="320" height="60" fill="var(--svg-f8fafc)" stroke="var(--svg-e2e8f0)" rx="8"/><rect x="80" y="50" width="280" height="40" fill="var(--svg-3b82f6)" rx="4"/><text x="220" y="75" text-anchor="middle" font-size="14" fill="var(--svg-ffffff)">House Price: $400,000</text><rect x="60" y="120" width="150" height="60" fill="var(--svg-22c55e)" rx="8"/><text x="135" y="148" text-anchor="middle" font-size="12" fill="var(--svg-ffffff)">Down Payment</text><text x="135" y="165" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">$80,000 (20%)</text><rect x="230" y="120" width="150" height="60" fill="var(--svg-ef4444)" rx="8"/><text x="305" y="148" text-anchor="middle" font-size="12" fill="var(--svg-ffffff)">Loan Amount</text><text x="305" y="165" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)">$320,000</text><rect x="60" y="210" width="320" height="50" fill="var(--svg-8b5cf6)" rx="8"/><text x="220" y="230" text-anchor="middle" font-size="12" fill="var(--svg-ffffff)">Monthly Payment</text><text x="220" y="248" text-anchor="middle" font-size="14" fill="var(--svg-ffffff)">$2,023 @ 6.5% / 30yr</text><line x1="60" y1="270" x2="380" y2="270" stroke="var(--svg-e2e8f0)" stroke-width="1"/><text x="220" y="295" text-anchor="middle" font-size="12" fill="var(--svg-666666)">Total Interest: $408,142</text></svg>',
       alt: 'House price breakdown into down payment, loan amount, and monthly payment',
       caption: 'Mortgage amortization — monthly payment calculated from principal, rate, and term',
     },
@@ -405,7 +304,7 @@ const mortgageAmortizationConfig: CalculatorConfig = {
       { symbol: 'P', name: 'Principal', description: 'The loan amount equal to the home purchase price minus your down payment. This is the actual amount you are borrowing from the lender.' },
       { symbol: 'r', name: 'Monthly Rate', description: 'Your annual interest rate divided by 12. For example, a 6.8% annual rate becomes a 0.567% monthly rate used in the payment formula.' },
       { symbol: 'n', name: 'Number of Payments', description: 'The total number of monthly payments over the loan term. For a 30-year loan, this is 360 payments. For a 15-year loan, this is 180 payments.' },
-      { symbol: 'PMI', name: 'Private Mortgage Insurance', description: 'Auto-calculated at approximately 0.8% of the loan amount per year when your down payment is under 20%. PMI protects the lender, not you, and is typically cancellable once you reach 20% equity.' },
+      { symbol: 'PMI', name: 'Private Mortgage Insurance', description: 'Estimated at a flat 0.8% of the loan amount per year when your down payment is under 20% (a typical-case assumption; real rates depend on credit score and down payment). PMI protects the lender, not you. It can be cancelled on request at 80% loan-to-value and ends automatically at 78% of the original value; this calculator charges it only until that 78% point.' },
     ],
     howToUse: [
       'Enter the home purchase price to set the starting point for the calculation.',
@@ -416,7 +315,7 @@ const mortgageAmortizationConfig: CalculatorConfig = {
       'Scroll down to view the complete amortization schedule showing the principal and interest split for every monthly payment across the full loan term.',
     ],
     explanation:
-      'A PITI mortgage payment covers four distinct components. Principal is the portion that actually reduces your loan balance — in the early years this is a small fraction of each payment. Interest is the cost of borrowing money from the lender; in the early years of a 30-year loan, roughly two-thirds of each payment goes toward interest alone. Taxes are annual property taxes that the lender collects monthly and holds in an escrow account to pay on your behalf. Insurance is homeowners insurance, also typically escrowed. If your down payment is under 20%, Private Mortgage Insurance (PMI) is automatically included to protect the lender against default. PMI typically costs 0.3% to 1.5% of the loan amount per year depending on your credit score and down payment size. The amortization schedule is the key tool for understanding your mortgage: early payments are heavily weighted toward interest, but over time the ratio shifts. By the halfway point of a 30-year loan, each payment applies more to principal than to interest. Making extra principal payments early in the loan term has an outsized effect on total interest savings because it reduces the balance on which future interest is calculated. A single extra payment per year can shorten a 30-year mortgage by several years and save tens of thousands in interest.',
+      'A PITI mortgage payment covers four distinct components. Principal is the portion that actually reduces your loan balance — in the early years this is a small fraction of each payment. Interest is the cost of borrowing money from the lender; in the early years of a 30-year loan most of each payment is interest — at a 6.8% rate about 87% of the first payment. Taxes are annual property taxes that the lender collects monthly and holds in an escrow account to pay on your behalf. Insurance is homeowners insurance, also typically escrowed. If your down payment is under 20%, Private Mortgage Insurance (PMI) is typically required to protect the lender against default; this calculator estimates it automatically. PMI typically costs 0.3% to 1.5% of the loan amount per year depending on your credit score and down payment size. The amortization schedule is the key tool for understanding your mortgage: early payments are heavily weighted toward interest, but over time the ratio shifts. At a 6.8% rate each payment starts applying more to principal than to interest around payment 238 (year 20) of a 30-year loan; at lower rates the crossover comes sooner. Making extra principal payments early in the loan term has an outsized effect on total interest savings because it reduces the balance on which future interest is calculated. One extra payment per year would shorten a 6.8%, 30-year mortgage by about 6 years and save roughly $98,000 in interest on a $320,000 loan.',
     faqs: [
       {
         question: 'What is PITI?',
@@ -424,7 +323,7 @@ const mortgageAmortizationConfig: CalculatorConfig = {
       },
       {
         question: 'What is PMI and when can I remove it?',
-        answer: 'Private Mortgage Insurance protects the lender in case you default on the loan when your down payment is under 20%. It is automatically calculated at roughly 0.8% of the loan per year. You can request removal once your loan-to-value ratio drops below 80%, and it must be automatically terminated at 78% LTV under the Homeowners Protection Act.',
+        answer: 'Private Mortgage Insurance protects the lender in case you default on the loan when your down payment is under 20%. It is estimated here at roughly 0.8% of the loan per year (actual rates vary with credit score and down payment). You can request removal once your loan-to-value ratio reaches 80% of the original value, and it must be terminated automatically when the scheduled balance reaches 78% under the Homeowners Protection Act; the calculator stops charging PMI at that 78% point.',
       },
       {
         question: 'Should I choose a 15-year or 30-year mortgage?',
@@ -436,7 +335,7 @@ const mortgageAmortizationConfig: CalculatorConfig = {
       },
       {
         question: 'What happens if I make extra principal payments?',
-        answer: 'Extra principal payments reduce the loan balance faster, which means less future interest accrues. Even one extra payment per year can shorten a 30-year mortgage by 4-5 years and save tens of thousands in interest. The amortization schedule updates to reflect this if you recalculate with a higher down payment.',
+        answer: 'Extra principal payments reduce the loan balance faster, which means less future interest accrues. For example, one extra payment per year on a $320,000, 6.8%, 30-year loan shortens it by about 6 years and saves roughly $98,000 in interest. Use the extra-payment controls under the amortization schedule to model this.',
       },
     ],
     citations: [

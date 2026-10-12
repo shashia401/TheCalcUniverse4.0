@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import DrywallPanel from './DrywallPanel';
+import { drywall } from './drywallMath';
 
 const drywallConfig: CalculatorConfig = {
   inputs: [
@@ -83,70 +84,51 @@ const drywallConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const length = parseFloat(values.length);
-    const width = parseFloat(values.width);
-    const height = parseFloat(values.height);
-    const sheetSqFt = parseFloat(values.sheetSize || '32');
-    const includeCeiling = values.ceiling !== 'no';
-    const doors = parseFloat(values.doors) || 0;
-    const windows = parseFloat(values.windows) || 0;
-
-    if ([length, width, height].some(isNaN) || length <= 0 || width <= 0 || height <= 0) return [];
-
-    const wallArea = 2 * (length + width) * height;
-    const ceilingArea = includeCeiling ? length * width : 0;
-    const totalArea = wallArea + ceilingArea;
-    const doorArea = doors * 20;
-    const windowArea = windows * 15;
-    const netArea = totalArea - doorArea - windowArea;
-    const withWaste = netArea * 1.1;
-    const sheetsNeeded = Math.ceil(withWaste / sheetSqFt);
-    const perimeterLinearFt = 2 * (length + width);
-    const estimatedScrews = Math.ceil(sheetsNeeded * 32); // ~32 screws per 4x8 sheet
-    const jointCompoundGals = Math.ceil((sheetsNeeded / 30) * 5) + 0.5; // ~5 gal per 30 sheets, keep as number
+    const d = drywall(values);
+    if (!d) return [];
 
     return [
       {
         id: 'sheets',
         label: 'Drywall Sheets Needed',
-        value: `${sheetsNeeded} sheets`,
+        value: `${d.sheets} sheets`,
         highlight: true,
         color: 'positive',
       },
       {
         id: 'netArea',
         label: 'Net Area (with 10% waste)',
-        value: `${withWaste.toFixed(0)} sq ft`,
+        value: `${d.withWaste.toFixed(0)} sq ft`,
         color: 'neutral',
       },
       {
         id: 'wallArea',
         label: 'Wall Area',
-        value: `${wallArea.toFixed(0)} sq ft`,
+        value: `${d.wallArea.toFixed(0)} sq ft`,
         color: 'neutral',
       },
       {
         id: 'ceilingArea',
         label: 'Ceiling Area',
-        value: includeCeiling ? `${ceilingArea.toFixed(0)} sq ft` : 'Not included',
+        value: d.ceilingArea > 0 ? `${d.ceilingArea.toFixed(0)} sq ft` : 'Not included',
         color: 'neutral',
       },
       {
         id: 'screws',
-        label: 'Drywall Screws (approx)',
-        value: `${estimatedScrews} screws`,
+        label: 'Drywall Screws (approx, ~1 per sq ft of board)',
+        value: `${d.screws} screws`,
         color: 'neutral',
       },
       {
         id: 'jointCompound',
-        label: 'Joint Compound',
-        value: `${jointCompoundGals.toFixed(1)} gallons`,
+        label: 'Joint Compound (~10 gal per 1,000 sq ft)',
+        value: `${d.compoundGal.toFixed(1)} gallons`,
         color: 'neutral',
       },
       {
         id: 'tape',
-        label: 'Joint Tape',
-        value: `${Math.ceil(perimeterLinearFt / 50) * 2} rolls (250 ft each)`,
+        label: 'Joint Tape (~370 ft per 1,000 sq ft)',
+        value: `${d.tapeRolls} roll${d.tapeRolls === 1 ? '' : 's'} (250 ft each)`,
         color: 'neutral',
       },
     ];
@@ -221,20 +203,20 @@ const drywallConfig: CalculatorConfig = {
       {
         scenario: 'Finishing a Basement Recreation Room in Denver, CO',
         inputs: { length: '24', width: '16', height: '8', sheetSize: '32', ceiling: 'yes', doors: '1', windows: '3' },
-        result: '33 sheets, 1,056 screws, 6.5 gal joint compound, 4 rolls joint tape. Materials ~$579 plus tax.',
-        insight: 'A 24x16 ft basement with standard 8 ft ceilings, one door to the stairwell, and three small egress windows. Wall area = 2 x (24+16) x 8 = 640 sq ft. Ceiling area = 24 x 16 = 384 sq ft. Total before openings = 640 + 384 = 1,024 sq ft. Deduct 1 door (20 sq ft) and 3 windows (45 sq ft): net = 959 sq ft. With 10% waste: 1,054.9 sq ft. Using 4x8 ft sheets (32 sq ft each): ceil(1054.9 / 32) = 33 sheets. Material cost at Denver Home Depot prices (2025): 33 sheets of 1/2-inch lightweight drywall at ~$15/sheet = $495, screws ($8/box of 1 lb, need 3 boxes) = $24, joint compound (~6.5 gal, one 4.5-gal bucket + one 2-gal bucket) = $40, tape (4 rolls) = $20, total materials ~$579 plus tax. Add $45/day drywall lift rental for ceiling work. Basement drywall has important moisture considerations. In Denver, basements experience significant humidity swings due to the semi-arid climate and clay soils that expand and contract. Always use a 6-mil polyethylene vapor barrier behind the drywall on basement foundation walls to prevent ground moisture from wicking through. Leave a 1/2-inch gap between the bottom edge of drywall and the basement floor -- this gap gets covered by baseboard and prevents wicking if the floor ever gets damp. For basement ceilings, consider using 5/8-inch type X drywall for the added fire protection between floors, and install access panels at plumbing cleanouts and HVAC dampers before drywalling the ceiling.',
+        result: '33 sheets, 1,056 screws, 9.6 gal joint compound, 2 rolls joint tape.',
+        insight: 'A 24x16 ft basement with standard 8 ft ceilings, one door to the stairwell, and three small egress windows. Wall area = 2 x (24+16) x 8 = 640 sq ft. Ceiling area = 24 x 16 = 384 sq ft. Total before openings = 640 + 384 = 1,024 sq ft. Deduct 1 door (20 sq ft) and 3 windows (45 sq ft): net = 959 sq ft. With 10% waste: 1,054.9 sq ft. Using 4x8 ft sheets (32 sq ft each): ceil(1054.9 / 32) = 33 sheets. Finishing materials: about 959 x 0.01 = 9.6 gallons of joint compound (USG estimating guidance of roughly 10 gallons per 1,000 sq ft, about two 4.5-gallon pails) and about 959 x 0.37 = 355 ft of joint tape (2 rolls of 250 ft). Screws at roughly 1 per sq ft of board: 33 x 32 = 1,056. Consider renting a drywall lift for the ceiling. Basement drywall has important moisture considerations. In Denver, basements experience significant humidity swings due to the semi-arid climate and clay soils that expand and contract. Always use a 6-mil polyethylene vapor barrier behind the drywall on basement foundation walls to prevent ground moisture from wicking through. Leave a 1/2-inch gap between the bottom edge of drywall and the basement floor -- this gap gets covered by baseboard and prevents wicking if the floor ever gets damp. For basement ceilings, consider using 5/8-inch type X drywall for the added fire protection between floors, and install access panels at plumbing cleanouts and HVAC dampers before drywalling the ceiling.',
       },
       {
         scenario: 'Garage Conversion to Home Office in Austin, TX',
         inputs: { length: '20', width: '20', height: '10', sheetSize: '48', ceiling: 'yes', doors: '1', windows: '2' },
-        result: '27 sheets of 4x12 ft drywall, 864 screws, ~5.0 gal joint compound.',
-        insight: 'A 20x20 ft two-car garage being converted to a home office, with 10 ft ceilings. Wall area = 2 x (20+20) x 10 = 800 sq ft. Ceiling area = 20 x 20 = 400 sq ft. Total = 1,200 sq ft before openings. Deduct 1 door (20 sq ft) and 2 windows (30 sq ft): net = 1,150 sq ft. With 10% waste: 1,265 sq ft. Using 4x12 ft sheets (48 sq ft each) for the 10 ft walls: ceil(1265 / 48) = 27 sheets. Using 4x12 sheets on 10 ft walls is ideal -- the 12 ft length covers the wall height with one horizontal seam instead of needing to stack 8 ft sheets with a 2 ft filler strip. Garage conversions in Austin have unique code requirements. Texas building codes require 5/8-inch type X fire-rated drywall on the ceiling if there is living space above. The garage slab likely slopes (1/4 inch per foot minimum by code for drainage), so you may need to fur out the bottom plate or use a leveling compound before framing walls. Austin is in IECC climate zone 2, so the garage walls must be insulated to R-13 before drywalling for a conditioned space permit.',
+        result: '27 sheets of 4x12 ft drywall, 1,296 screws, ~11.5 gal joint compound, 2 rolls joint tape.',
+        insight: 'A 20x20 ft two-car garage being converted to a home office, with 10 ft ceilings. Wall area = 2 x (20+20) x 10 = 800 sq ft. Ceiling area = 20 x 20 = 400 sq ft. Total = 1,200 sq ft before openings. Deduct 1 door (20 sq ft) and 2 windows (30 sq ft): net = 1,150 sq ft. With 10% waste: 1,265 sq ft. Using 4x12 ft sheets (48 sq ft each) for the 10 ft walls: ceil(1265 / 48) = 27 sheets. Using 4x12 sheets on 10 ft walls is ideal -- the 12 ft length covers the wall height with one horizontal seam instead of needing to stack 8 ft sheets with a 2 ft filler strip. Garage conversions carry code requirements (fire separation, insulation, slab slope), so check with your local building department before hanging board. Materials: 27 sheets x 48 sq ft = 1,296 screws at about 1 per sq ft, about 11.5 gallons of joint compound and about 425 ft of tape (2 rolls).',
       },
       {
         scenario: 'Small Bathroom Remodel with Moisture Concerns in Portland, OR',
         inputs: { length: '8', width: '5', height: '9', sheetSize: '32', ceiling: 'yes', doors: '1', windows: '1' },
-        result: '5 sheets purple moisture-resistant drywall + 8 sheets 1/2-inch cement board for tub surround.',
-        insight: 'A compact 8x5 ft bathroom with 9 ft ceilings. Wall area = 2 x (8+5) x 9 = 234 sq ft. Ceiling = 8 x 5 = 40 sq ft. Total = 274 sq ft. Deduct 1 door (20 sq ft) and 1 window (15 sq ft): net = 239 sq ft. With 10% waste: 262.9 sq ft. The tub/shower surround walls need cement board, not drywall. Assume a standard 5 ft tub on the 5 ft wall: the surround covers 3 walls, 5 ft wide x 7 ft high = 35 sq ft + 2 side walls each 3 ft wide x 7 ft high = 42 sq ft each. Total cement board area = 119 sq ft (8 sheets of 3x5 ft). Remaining drywall area: ~143.9 sq ft, about 5 sheets of 4x8 drywall. Portland\'s rainy climate means bathroom moisture management is critical. Always install an exhaust fan vented to the outside rated at minimum 50 CFM. Use cement board with a liquid-applied waterproofing membrane (like RedGard or Hydro Ban) on all shower surround walls. The extra $100-$200 in moisture-proofing materials prevents $5,000-$15,000 in mold remediation down the road.',
+        result: 'About 6 sheets of moisture-resistant drywall + 6 sheets of 3x5 ft cement board for the tub surround.',
+        insight: 'A compact 8x5 ft bathroom with 9 ft ceilings. Wall area = 2 x (8+5) x 9 = 234 sq ft. Ceiling = 8 x 5 = 40 sq ft. Total = 274 sq ft. Deduct 1 door (20 sq ft) and 1 window (15 sq ft): net = 239 sq ft. With 10% waste: 262.9 sq ft. The tub/shower surround walls need cement board, not drywall. Assume a standard 5 ft tub on the 5 ft wall: the surround covers the 5 ft back wall (5 x 7 = 35 sq ft) plus 2 side walls each 3 ft wide x 7 ft high (21 sq ft each). Total cement board area = 35 + 21 + 21 = 77 sq ft, about 6 sheets of 3x5 ft (15 sq ft each). Remaining drywall area: 262.9 - 77 = about 186 sq ft, about 6 sheets of 4x8 drywall. Portland\'s rainy climate means bathroom moisture management is critical. Always install an exhaust fan vented to the outside rated at minimum 50 CFM. Use cement board with a liquid-applied waterproofing membrane (like RedGard or Hydro Ban) on all shower surround walls. Spending a little more on moisture-proofing in a bathroom is cheap insurance against mold.',
       },
     ],
     proTips: [
@@ -261,7 +243,8 @@ const drywallConfig: CalculatorConfig = {
       { label: 'Screws per 4x8 sheet', value: '~32 screws' },
       { label: 'Screw spacing (edges)', value: '12 inches' },
       { label: 'Screw spacing (field)', value: '16 inches' },
-      { label: 'Joint compound (approx)', value: '1 gal per 100-150 sq ft' },
+      { label: 'Joint compound (USG estimate)', value: '~10 gal per 1,000 sq ft' },
+      { label: 'Joint tape (USG estimate)', value: '~370 ft per 1,000 sq ft' },
       { label: '1/2-inch std weight', value: '~1.6 lbs per sq ft' },
       { label: '5/8-inch type X weight', value: '~2.3 lbs per sq ft' },
       { label: 'Std door rough opening', value: '~20 sq ft' },

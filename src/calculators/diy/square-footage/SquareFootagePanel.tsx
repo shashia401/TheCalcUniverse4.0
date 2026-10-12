@@ -1,4 +1,5 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { area } from './areaMath';
 
 interface Props {
   values: Record<string, string>;
@@ -55,6 +56,7 @@ function LShapeDiagram() {
 }
 
 export default function SquareFootagePanel({ values, results }: Props) {
+  const a = area(values);
   const sqftRow = results.find(r => r.id === 'sqft');
   const sqmRow = results.find(r => r.id === 'sqm');
   const withWasteRow = results.find(r => r.id === 'withWaste');
@@ -62,16 +64,15 @@ export default function SquareFootagePanel({ values, results }: Props) {
   const dimensionsRow = results.find(r => r.id === 'dimensions');
   const totalCostRow = results.find(r => r.id === 'totalCost');
 
-  if (!sqftRow || !sqmRow || !shapeRow) return null;
+  if (!a || !sqftRow || !sqmRow || !shapeRow) return null;
 
-  const shape = values.shape || 'rectangle';
-  const wastage = parseInt(values.wastage || '0');
+  const shape = a.shape;
+  const wastage = a.wastagePct;
 
   const shapeDiagram = shape === 'circle' ? <CircleDiagram /> : shape === 'lshape' ? <LShapeDiagram /> : <RectangleDiagram />;
 
-  // Extract numeric values for display
-  const sqftNum = parseFloat(sqftRow.value.replace(/[^0-9.]/g, ''));
-  const sqmNum = parseFloat(sqmRow.value.replace(/[^0-9.]/g, ''));
+  const sqftNum = a.sqft;
+  const sqmNum = a.sqm;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -93,20 +94,20 @@ export default function SquareFootagePanel({ values, results }: Props) {
 
         {/* Big result */}
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 text-center">
-          <p className="text-sm text-slate-500 mb-1">{sqftRow.label}</p>
+          <p className="text-sm text-slate-600 mb-1">{sqftRow.label}</p>
           <p className="text-3xl font-bold text-blue-700 font-mono">{sqftRow.value}</p>
         </div>
 
         {/* Sq ft vs sq m comparison */}
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-center">
-            <p className="text-[10px] font-bold text-blue-500 uppercase">Square Feet</p>
+            <p className="text-[10px] font-bold text-blue-800 uppercase">Square Feet</p>
             <p className="text-lg font-bold text-blue-700 font-mono mt-0.5">
               {sqftNum >= 1000 ? sqftNum.toLocaleString(undefined, { maximumFractionDigits: 2 }) : sqftNum.toFixed(2)}
             </p>
           </div>
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-center">
-            <p className="text-[10px] font-bold text-emerald-500 uppercase">Square Meters</p>
+            <p className="text-[10px] font-bold text-emerald-800 uppercase">Square Meters</p>
             <p className="text-lg font-bold text-emerald-700 font-mono mt-0.5">
               {sqmNum.toFixed(2)}
             </p>
@@ -125,7 +126,7 @@ export default function SquareFootagePanel({ values, results }: Props) {
         {withWasteRow && wastage > 0 && (
           <div className="rounded-xl border border-amber-200 bg-amber-50">
             <div className="px-5 py-4">
-              <p className="text-[10px] font-bold text-amber-600 uppercase mb-2">Wastage Breakdown</p>
+              <p className="text-[10px] font-bold text-amber-800 uppercase mb-2">Wastage Breakdown</p>
               <div className="space-y-1.5 text-xs text-amber-800">
                 <div className="flex justify-between">
                   <span>Exact area</span>
@@ -156,7 +157,7 @@ export default function SquareFootagePanel({ values, results }: Props) {
           <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50">
             <div className="px-5 py-4">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold text-emerald-600 uppercase">{totalCostRow.label}</p>
+                <p className="text-[10px] font-bold text-emerald-800 uppercase">{totalCostRow.label}</p>
                 <p className="text-2xl font-bold text-emerald-700 font-mono">{totalCostRow.value}</p>
               </div>
             </div>

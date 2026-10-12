@@ -1,4 +1,5 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { parseFha, cumulativeMip } from './fhaMath';
 
 interface Props {
   values: Record<string, string>;
@@ -6,42 +7,24 @@ interface Props {
 }
 
 export default function FHAMIPPanel({ values, results }: Props) {
-  if (!results || results.length === 0) return null;
+  const m = parseFha(values);
+  if (!results || results.length === 0 || !m) return null;
 
-  const totalMonthly = results.find(r => r.id === 'totalMonthly');
-  const monthlyPI = results.find(r => r.id === 'monthlyPI');
-  const monthlyMIP = results.find(r => r.id === 'monthlyMIP');
-  const upfrontMIP = results.find(r => r.id === 'upfrontMIP');
-  const mipDuration = results.find(r => r.id === 'mipDuration');
+  const { monthlyMIP, monthlyPI, upfrontMIP, totalMonthly, lifeOfLoan, annualMipRate } = m;
+  const termYears = m.years;
 
-  if (!totalMonthly || !monthlyPI || !monthlyMIP || !upfrontMIP) return null;
+  // Annual MIP is recalculated each year on the scheduled balance, so cumulative totals are below monthlyMIP x months.
+  const mip1yr = cumulativeMip(m, 12);
+  const mip5yr = cumulativeMip(m, 60);
+  const mip10yr = cumulativeMip(m, 120);
+  const mipFullTerm = cumulativeMip(m, m.mipMonths);
 
-  const parseVal = (s: string): number => {
-    const cleaned = s.replace(/[^0-9.]/g, '');
-    return parseFloat(cleaned) || 0;
-  };
-
-  const monthlyMIPVal = parseVal(monthlyMIP.value);
-  const upfrontMIPVal = parseVal(upfrontMIP.value);
-  const totalMonthlyVal = parseVal(totalMonthly.value);
-  const monthlyPIVal = parseVal(monthlyPI.value);
-  const isLifeOfLoan = mipDuration?.value === 'Life of loan';
-
-  // Total MIP over common periods
-  const mip1yr = monthlyMIPVal * 12;
-  const mip5yr = monthlyMIPVal * 60;
-  const mip10yr = monthlyMIPVal * 120;
-  const termYears = parseFloat(values.loanTerm || '30') || 30;
-  const mipFullTerm = isLifeOfLoan
-    ? monthlyMIPVal * termYears * 12
-    : monthlyMIPVal * Math.min(132, termYears * 12); // 11 years or the term, if shorter
-  // Effective annual rate = monthly MIP x 12 / base loan (upfront MIP is 1.75% of base loan)
-  const annualRatePct = upfrontMIPVal > 0 ? ((monthlyMIPVal * 12) / (upfrontMIPVal / 0.0175)) * 100 : 0;
-
+  const fmt2 = (n: number) =>
+    n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmt = (n: number) =>
     n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-  const barMax = Math.max(totalMonthlyVal, 1);
+  const barMax = Math.max(totalMonthly, 1);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -56,12 +39,12 @@ export default function FHAMIPPanel({ values, results }: Props) {
 
         {/* Upfront MIP highlight */}
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Upfront MIP (1.75%)</p>
-          <p className="text-lg font-black text-amber-800">{upfrontMIP.value}</p>
-          <p className="text-xs text-amber-600 mt-1">
-            {isLifeOfLoan
-              ? `Financed into the loan — you pay interest on this amount for the full loan term.`
-              : `Financed into the loan and fully paid by the time MIP drops off (11 years).`}
+          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-800 mb-1">Upfront MIP (1.75%)</p>
+          <p className="text-lg font-black text-amber-800">${fmt2(upfrontMIP)}</p>
+          <p className="text-xs text-amber-800 mt-1">
+            {lifeOfLoan
+              ? `Modeled as financed into the loan — you pay interest on this amount for the full loan term.`
+              : `Modeled as financed into the loan and fully paid by the time MIP drops off (11 years).`}
           </p>
         </div>
 
@@ -70,20 +53,20 @@ export default function FHAMIPPanel({ values, results }: Props) {
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Monthly MIP vs. P&amp;I</p>
           <div className="h-8 rounded-lg overflow-hidden flex border border-slate-200">
             <div
-              className="bg-blue-500 h-full flex items-center justify-start px-3 transition-all"
-              style={{ width: `${(monthlyPIVal / barMax) * 100}%` }}
+              className="bg-blue-700 h-full flex items-center justify-start px-3 transition-all"
+              style={{ width: `${(monthlyPI / barMax) * 100}%` }}
             >
-              <span className="text-[9px] text-white font-bold truncate">P&amp;I {monthlyPI.value}</span>
+              <span className="text-[9px] text-white font-bold truncate">P&amp;I ${fmt2(monthlyPI)}</span>
             </div>
             <div
-              className="bg-red-400 h-full flex items-center justify-start px-3 transition-all"
-              style={{ width: `${(monthlyMIPVal / barMax) * 100}%` }}
+              className="bg-red-700 h-full flex items-center justify-start px-3 transition-all"
+              style={{ width: `${(monthlyMIP / barMax) * 100}%` }}
             >
-              <span className="text-[9px] text-white font-bold truncate">MIP {monthlyMIP.value}</span>
+              <span className="text-[9px] text-white font-bold truncate">MIP ${fmt2(monthlyMIP)}</span>
             </div>
           </div>
           <p className="text-[10px] text-slate-500 mt-1">
-            MIP is {(monthlyMIPVal / Math.max(totalMonthlyVal, 1) * 100).toFixed(1)}% of your total monthly payment
+            MIP is {(monthlyMIP / Math.max(totalMonthly, 1) * 100).toFixed(1)}% of your total monthly payment
           </p>
         </div>
 
@@ -101,15 +84,15 @@ export default function FHAMIPPanel({ values, results }: Props) {
               </thead>
               <tbody>
                 {[
-                  { period: 'Year 1', mip: mip1yr, cum: mip1yr },
-                  { period: 'Year 5', mip: mip5yr, cum: upfrontMIPVal + mip5yr },
-                  { period: 'Year 10', mip: mip10yr, cum: upfrontMIPVal + mip10yr },
-                  { period: isLifeOfLoan ? `Full Term (${termYears}yr)` : 'Full Term', mip: mipFullTerm, cum: upfrontMIPVal + mipFullTerm },
+                  { period: 'Year 1', mip: mip1yr, cum: upfrontMIP + mip1yr },
+                  { period: 'Year 5', mip: mip5yr, cum: upfrontMIP + mip5yr },
+                  { period: 'Year 10', mip: mip10yr, cum: upfrontMIP + mip10yr },
+                  { period: lifeOfLoan ? `Full Term (${termYears}yr)` : 'Years 1–11 (MIP ends)', mip: mipFullTerm, cum: upfrontMIP + mipFullTerm },
                 ].map((row, i) => (
                   <tr key={`item-${i}`} className={`border-b border-slate-100 last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
                     <td className="px-4 py-2.5 font-bold text-slate-700">{row.period}</td>
-                    <td className="px-4 py-2.5 text-right font-bold text-red-500">${fmt(row.mip)}</td>
-                    <td className="px-4 py-2.5 text-right font-bold text-amber-600">${fmt(row.cum)}</td>
+                    <td className="px-4 py-2.5 text-right font-bold text-red-700">${fmt(row.mip)}</td>
+                    <td className="px-4 py-2.5 text-right font-bold text-amber-800">${fmt(row.cum)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -122,19 +105,19 @@ export default function FHAMIPPanel({ values, results }: Props) {
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">MIP Rules</p>
           <ul className="space-y-1.5 text-xs text-slate-600">
             <li className="flex items-start gap-2">
-              <span className="text-red-400 mt-0.5">•</span>
-              <span><strong>Upfront MIP:</strong> 1.75% of loan, always financed into the balance. You pay interest on this.</span>
+              <span className="text-red-700 mt-0.5">•</span>
+              <span><strong>Upfront MIP:</strong> 1.75% of the base loan, usually financed into the balance (as modeled here), so you pay interest on it.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-red-400 mt-0.5">•</span>
-              <span><strong>Annual MIP:</strong> {annualRatePct.toFixed(2)}% of loan balance, paid monthly.</span>
+              <span className="text-red-700 mt-0.5">•</span>
+              <span><strong>Annual MIP:</strong> {(annualMipRate * 100).toFixed(2)}% of the base loan a year at your down payment and term, paid monthly and recalculated each year on the scheduled balance.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-red-400 mt-0.5">•</span>
-              <span><strong>Duration:</strong> {mipDuration?.value ?? 'Life of loan'}. {isLifeOfLoan ? 'MIP lasts the entire loan term if you put less than 10% down.' : 'MIP drops off after 11 years if you put 10% or more down.'}</span>
+              <span className="text-red-700 mt-0.5">•</span>
+              <span><strong>Duration:</strong> {lifeOfLoan ? 'Life of loan' : '11 years'}. {lifeOfLoan ? 'MIP lasts the entire loan term if you put less than 10% down.' : 'MIP drops off after 11 years if you put 10% or more down.'}</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-red-400 mt-0.5">•</span>
+              <span className="text-red-700 mt-0.5">•</span>
               <span><strong>Refinance to remove:</strong> The only way to remove FHA MIP is to refinance into a conventional loan once you have 20% equity.</span>
             </li>
           </ul>

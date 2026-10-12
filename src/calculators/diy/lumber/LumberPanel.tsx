@@ -1,41 +1,17 @@
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
+import { lumber } from './lumberMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
-
-export default function LumberPanel({ results }: Props) {
-  const totalBdFt = results.find(r => r.id === 'totalBdFt');
-  const perBoard = results.find(r => r.id === 'perBoard');
-  const linearFt = results.find(r => r.id === 'linearFt');
-  const totalCost = results.find(r => r.id === 'totalCost');
-
-  if (!totalBdFt) return null;
-
-  const bdftVal = parseNum(totalBdFt.value);
-  const perVal = perBoard ? parseNum(perBoard.value) : 0;
-  const linVal = linearFt ? parseNum(linearFt.value) : 0;
-  const maxVal = Math.max(bdftVal, linVal);
-
-  const bar = (label: string, val: number, max: number, color: string, unit: string) => {
-    const pct = max > 0 ? (val / max) * 100 : 0;
-    return (
-      <div className="flex items-center gap-3 py-1.5">
-        <span className="text-xs font-semibold text-slate-600 w-28 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-5 bg-slate-100 rounded overflow-hidden">
-          <div className={`h-full rounded ${color} transition-all flex items-center justify-end pr-1.5 ${pct < 10 ? 'min-w-[45px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[9px] font-bold text-white">{val.toFixed(1)} {unit}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+export default function LumberPanel({ values, results }: Props) {
+  const l = lumber(values);
+  if (!l || !results.length) return null;
+  const totalCost = results.find((r) => r.id === 'totalCost');
+  const max = Math.max(l.totalBdFt, l.actualBdFt);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -47,11 +23,14 @@ export default function LumberPanel({ results }: Props) {
       </div>
       <div className="p-5 space-y-2">
         <div className="rounded-xl bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 p-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-600">Total Board Feet</p>
-          <p className="text-3xl font-bold text-amber-700">{totalBdFt.value}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-800">Total Board Feet (nominal)</p>
+          <p className="text-3xl font-bold text-amber-800">{l.totalBdFt.toFixed(2)} bd ft</p>
         </div>
-        {perVal > 0 && bar('Per Board', perVal, maxVal, 'bg-blue-500', 'bd ft')}
-        {linVal > 0 && bar('Linear Feet', linVal, maxVal, 'bg-emerald-500', 'ft')}
+        <HBarRow label="Nominal" value={l.totalBdFt} max={max} display={`${l.totalBdFt.toFixed(1)} bd ft`} color="bg-blue-700" labelWidth="w-28" height="h-5" className="py-1" />
+        <HBarRow label="Actual (S4S)" value={l.actualBdFt} max={max} display={`${l.actualBdFt.toFixed(1)} bd ft`} color="bg-emerald-700" labelWidth="w-28" height="h-5" className="py-1" />
+        <p className="text-xs text-slate-600">
+          {l.quantity} board{l.quantity === 1 ? '' : 's'} x {l.length} ft = {l.linearFt.toFixed(0)} linear ft; {l.perBoard.toFixed(2)} bd ft each.
+        </p>
         {totalCost && (
           <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div className="flex justify-between items-center">

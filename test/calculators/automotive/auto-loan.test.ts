@@ -17,17 +17,17 @@ describe('auto-loan', () => {
     expect(r).toHaveLength(7);
 
     // Net trade-in = 8000 - 5000 = +3000 (positive equity)
-    // Taxable amount = 35000 - 3000 = 32000
-    // Sales tax = 32000 * 0.08 = 2560
-    // Out-the-door = 35000 + 2560 + 500 = 38060
-    // Loan amount = 38060 - 5000 - 3000 = 30060
-    // Monthly payment on $30060 @ 6.9% / 60mo ≈ 593.78
-    near(parseNumber(getValue(r, 'outTheDoor')), 38060);
-    near(parseNumber(getValue(r, 'totalFinanced')), 30060);
-    near(parseNumber(getValue(r, 'monthlyPayment')), 593.78, 1);
-    near(parseNumber(getValue(r, 'totalInterest')), 5566.80, 100);
-    near(parseNumber(getValue(r, 'totalCost')), 43626.80, 100);
-    expect(getValue(r, 'salesTaxLine')).toContain('2,560.00');
+    // Sales-tax credit is for the trade-in VALUE (allowance), not just the equity: taxable = 35000 - 8000 = 27000
+    // Sales tax = 27000 * 0.08 = 2160
+    // Out-the-door = 35000 + 2160 + 500 = 37660
+    // Loan amount = 37660 - 5000 - 3000 = 29660
+    // Monthly payment on $29660 @ 6.9% / 60mo = 585.91 (closed-form PMT)
+    near(parseNumber(getValue(r, 'outTheDoor')), 37660);
+    near(parseNumber(getValue(r, 'totalFinanced')), 29660);
+    near(parseNumber(getValue(r, 'monthlyPayment')), 585.91, 0.01);
+    near(parseNumber(getValue(r, 'totalInterest')), 5494.31, 0.05);
+    near(parseNumber(getValue(r, 'totalCost')), 43154.31, 0.05);
+    expect(getValue(r, 'salesTaxLine')).toContain('2,160.00');
     expect(getValue(r, 'feesLine')).toContain('500');
   });
 
@@ -153,16 +153,17 @@ describe('auto-loan', () => {
   it('worked example: Jasmine (underwater trade-in) — regression for narrative drift fix', () => {
     // Educational workedExamples text previously claimed a $30,220 loan amount (incorrectly
     // subtracting the trade-in value on top of adding negative equity) and $538.11/mo.
-    // The real calculate() output rolls in negative equity WITHOUT any trade-in tax/principal
-    // credit (since the trade-in is underwater): loan = $46,120, payment = $819.94/mo.
+    // Corrected again in the end-to-end audit: the trade-in ALLOWANCE ($15,000) is still a sales-tax credit
+    // in states that give one (the shortfall is just financed on top), so tax = (42000-15000)*6% = 1,620,
+    // loan = 42000 + 1620 + 600 + 3000 - 2000 = 45,220, payment = $803.94/mo.
     const r = config.calculate({
       vehiclePrice: '42000', loanTerm: '72', interestRate: '8.5',
       downPayment: '2000', tradeInValue: '15000', tradeInOwed: '18000',
       salesTaxPct: '6', titleRegFees: '600',
     });
-    near(parseNumber(getValue(r, 'totalFinanced')), 46120, 1);
-    near(parseNumber(getValue(r, 'monthlyPayment')), 819.94, 0.05);
-    near(parseNumber(getValue(r, 'totalInterest')), 12915.62, 1);
+    near(parseNumber(getValue(r, 'totalFinanced')), 45220, 1);
+    near(parseNumber(getValue(r, 'monthlyPayment')), 803.94, 0.05);
+    near(parseNumber(getValue(r, 'totalInterest')), 12663.58, 1);
   });
 
   it('handles sales tax correctly with trade-in credit', () => {

@@ -1,41 +1,22 @@
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
+import { concreteOrder, slabCuFt, BAG_60_CU_FT, BAG_80_CU_FT } from '../shared/concreteMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
+export default function ConcreteSlabPanel({ values, results }: Props) {
+  const length = parseFloat(values.length);
+  const width = parseFloat(values.width);
+  const depth = parseFloat(values.depth || '4');
+  const waste = parseFloat(values.wastePct || '10');
+  if (!results.length || !(length > 0) || !(width > 0) || !(depth > 0)) return null;
 
-export default function ConcreteSlabPanel({ results }: Props) {
-  const cubicYards = results.find(r => r.id === 'cubicYards');
-  const cubicFeet = results.find(r => r.id === 'cubicFeet');
-  const bags60 = results.find(r => r.id === 'bags60');
-  const bags80 = results.find(r => r.id === 'bags80');
-
-  if (!cubicYards) return null;
-
-  const ydVal = parseNum(cubicYards.value);
-  const bags60Val = bags60 ? parseInt(bags60.value) : 0;
-  const bags80Val = bags80 ? parseInt(bags80.value) : 0;
-  const maxVal = Math.max(ydVal, bags60Val * 0.03 || 0, bags80Val * 0.04 || 0);
-
-  const bar = (label: string, val: number, max: number, color: string, unit: string) => {
-    const pct = max > 0 ? (val / max) * 100 : 0;
-    return (
-      <div className="flex items-center gap-3 py-1.5">
-        <span className="text-xs font-semibold text-slate-600 w-28 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-6 bg-slate-100 rounded overflow-hidden">
-          <div className={`h-full rounded ${color} transition-all flex items-center justify-end pr-1.5 ${pct < 12 ? 'min-w-[50px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[10px] font-bold text-white drop-shadow-sm">{val.toFixed(2)} {unit}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const o = concreteOrder(slabCuFt(length, width, depth), waste);
+  // Compare everything in cubic feet of concrete: the order, and what the bags would actually yield.
+  const max = Math.max(o.totalCuFt, o.bags60 * BAG_60_CU_FT, o.bags80 * BAG_80_CU_FT);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -47,12 +28,12 @@ export default function ConcreteSlabPanel({ results }: Props) {
       </div>
       <div className="p-5 space-y-2">
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Cubic Yards Needed</p>
-          <p className="text-3xl font-bold text-emerald-700">{cubicYards.value}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">Cubic Yards Needed</p>
+          <p className="text-3xl font-bold text-emerald-800">{o.totalCuYd.toFixed(2)} cu yd</p>
         </div>
-        {cubicFeet && bar('Cubic Feet', parseNum(cubicFeet.value), parseNum(cubicFeet.value), 'bg-blue-700', 'ft')}
-        {bags60 && bar('60-lb Bags', bags60Val * 0.6, maxVal, 'bg-amber-700', 'bags')}
-        {bags80 && bar('80-lb Bags', bags80Val * 0.8, maxVal, 'bg-orange-700', 'bags')}
+        <HBarRow label="Cubic Feet" value={o.totalCuFt} max={max} display={`${o.totalCuFt.toFixed(2)} ft³`} color="bg-blue-700" labelWidth="w-28" />
+        <HBarRow label="60-lb Bags" value={o.bags60 * BAG_60_CU_FT} max={max} display={`${o.bags60} bags`} color="bg-amber-700" labelWidth="w-28" />
+        <HBarRow label="80-lb Bags" value={o.bags80 * BAG_80_CU_FT} max={max} display={`${o.bags80} bags`} color="bg-orange-700" labelWidth="w-28" />
       </div>
     </div>
   );

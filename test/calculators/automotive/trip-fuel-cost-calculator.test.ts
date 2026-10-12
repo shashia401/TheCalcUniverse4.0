@@ -32,12 +32,12 @@ describe('trip-fuel-cost', () => {
       fuelPrice: '4.00',
     });
     expect(r).toHaveLength(4);
-    // distance in miles: 500 * 0.621371 = 310.6855
-    // mpg = 235.215 / 8 = 29.401875
-    // gallonsNeeded = 310.6855 / 29.401875 ≈ 10.567
-    // totalCost = 10.567 * 4.00 ≈ 42.27
+    // With L/100km the price is per LITER (the input help says so): 500 km x 8 L/100km = 40 L; 40 x 4.00 = 160.
+    // (It used to treat the price as per gallon: 10.567 gal x 4.00 = 42.27, understating a per-liter price 3.785x.)
     const cost = parseNumber(getValue(r, 'totalCost'));
-    near(cost, 42.27, 0.1);
+    near(cost, 160, 0.01);
+    expect(getValue(r, 'gallonsNeeded')).toBe('40.00 liters');
+    expect(getValue(r, 'costPer100')).toBe('$32.00'); // 8 L x 4.00 per 100 km
   });
 
   it('high MPG and multiple passengers', () => {
@@ -174,11 +174,8 @@ describe('trip-fuel-cost', () => {
       fuelPrice: '1.50',
     });
     expect(r).toHaveLength(4);
-    // mpg = 235.215 / 3.5 = 67.204
-    // distance miles = 100 * 0.621371 = 62.1371
-    // gallons = 62.1371 / 67.204 = 0.9246
-    // totalCost = 0.9246 * 1.50 ≈ 1.39
-    near(parseNumber(getValue(r, 'totalCost')), 1.39, 0.1);
+    // 100 km x 3.5 L/100km = 3.5 L; price is per liter: 3.5 x 1.50 = 5.25
+    near(parseNumber(getValue(r, 'totalCost')), 5.25, 0.001);
   });
 
   it('default units assumed when not provided', () => {

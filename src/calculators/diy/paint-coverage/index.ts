@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import PaintCoveragePanel from './PaintCoveragePanel';
+import { paint } from './paintMath';
 import { fixed1 as fmt } from '../../../lib/format';
 
 const paintCoverageConfig: CalculatorConfig = {
@@ -74,49 +75,33 @@ const paintCoverageConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const length = parseFloat(values.roomLength);
-    const width = parseFloat(values.roomWidth);
-    const height = parseFloat(values.ceilingHeight);
-    const doors = parseFloat(values.doors) || 0;
-    const windows = parseFloat(values.windows) || 0;
-    const coats = parseFloat(values.coats || '2');
-
-    if ([length, width, height].some(isNaN) || length <= 0 || width <= 0 || height <= 0) return [];
-
-    const wallArea = 2 * (length + width) * height;
-    const doorArea = doors * 21;
-    const windowArea = windows * 15;
-    const paintableArea = Math.max(0, wallArea - doorArea - windowArea);
-    const coveragePerGallon = 350;
-
-    const gallonsNeeded = (paintableArea * coats) / coveragePerGallon;
-    const gallonsWithWaste = gallonsNeeded * 1.1;
-    const gallonContainers = Math.ceil(gallonsWithWaste);
+    const pt = paint(values);
+    if (!pt) return [];
 
     return [
       {
         id: 'gallons',
         label: 'Gallons Needed (with 10% waste)',
-        value: `${fmt(gallonsWithWaste)} gallons`,
+        value: `${fmt(pt.gallonsWithWaste)} gallons`,
         highlight: true,
         color: 'positive',
       },
       {
         id: 'containers',
         label: 'Buy This Many Gallon Containers',
-        value: `${gallonContainers} gallon(s)`,
+        value: `${pt.containers} gallon(s)`,
         color: 'neutral',
       },
       {
         id: 'paintableArea',
         label: 'Net Paintable Area',
-        value: `${fmt(paintableArea)} sq ft`,
+        value: `${fmt(pt.paintableArea)} sq ft`,
         color: 'neutral',
       },
       {
         id: 'totalWallArea',
         label: 'Total Wall Area',
-        value: `${fmt(wallArea)} sq ft`,
+        value: `${fmt(pt.wallArea)} sq ft`,
         color: 'neutral',
       },
     ];
@@ -193,7 +178,7 @@ const paintCoverageConfig: CalculatorConfig = {
         scenario: 'Jessica is repainting her 14×12 ft bedroom with 9 ft ceilings. The room has 2 standard doors and 3 windows. She wants 2 coats of eggshell finish for a fresh, even look.',
         inputs: { roomLength: '14', roomWidth: '12', ceilingHeight: '9', doors: '2', windows: '3', coats: '2' },
         result: 'Wall area = 468 sq ft, minus 42 sq ft (doors) and 45 sq ft (windows) = 381 sq ft paintable. At 350 sq ft/gallon with 2 coats and 10% waste: 2.4 gallons needed. Buy 3 gallons.',
-        insight: 'Jessica needs 3 gallon containers. She should buy all 3 from the same store at the same time to avoid color lot mismatches. With eggshell finish on smooth walls, 350 sq ft/gallon is realistic. She should budget about $90–$150 for quality paint, plus supplies (rollers, brushes, tape, drop cloths). Total project time: about 4–6 hours for a weekend DIY project including prep and cleanup.',
+        insight: 'Jessica needs 3 gallon containers. She should buy all 3 from the same store at the same time to avoid color lot mismatches. With eggshell finish on smooth walls, 350 sq ft/gallon is realistic. She should also budget for supplies (rollers, brushes, tape, drop cloths). Total project time: about 4–6 hours for a weekend DIY project including prep and cleanup.',
       },
       {
         scenario: 'Mark is painting his 20×15 ft open-plan living room with 10 ft ceilings and large windows totaling 80 sq ft of glass. He wants 1 coat of a high-quality paint that promises one-coat coverage over a similar existing color.',

@@ -10,12 +10,14 @@ describe('mulch-topsoil', () => {
       width: '10',
       depth: '3',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // depthFt = 3/12 = 0.25; cubicFeet = 30*10*0.25 = 75
     // cubicYards = 75/27 = 2.7778; withWaste = 2.7778 * 1.1 = 3.0556
     // formatted toFixed(2) → "3.06" → parseNumber gives 3.06
-    near(parseNumber(getValue(r, 'cubicYards')), 3.06);
-    near(parseNumber(getValue(r, 'cubicFeet')), 82.5);
+    // Primary figures are exact (shared with diy/mulch); the 10% buffer is in orderCuYd and the bag count.
+    near(parseNumber(getValue(r, 'cubicYards')), 2.78);
+    near(parseNumber(getValue(r, 'cubicFeet')), 75);
+    near(parseNumber(getValue(r, 'orderCuYd')), 3.06);
     // bagsNeeded = ceil(75 * 1.1 / 2) = ceil(41.25) = 42
     near(parseNumber(getValue(r, 'bags')), 42);
     near(parseNumber(getValue(r, 'area')), 300);
@@ -28,11 +30,12 @@ describe('mulch-topsoil', () => {
       width: '5',
       depth: '6',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // depthFt = 6/12 = 0.5; cubicFeet = 20*5*0.5 = 50
     // cubicYards = 50/27 = 1.8519; withWaste = 1.8519 * 1.1 = 2.0370
     // formatted toFixed(2) → "2.04" → parseNumber gives 2.04
-    near(parseNumber(getValue(r, 'cubicYards')), 2.04);
+    near(parseNumber(getValue(r, 'cubicYards')), 1.85);
+    near(parseNumber(getValue(r, 'orderCuYd')), 2.04);
     near(parseNumber(getValue(r, 'area')), 100);
   });
 
@@ -48,7 +51,8 @@ describe('mulch-topsoil', () => {
       depth: '3',
     });
     near(parseNumber(getValue(r, 'area')), 280);
-    near(parseNumber(getValue(r, 'cubicYards')), 2.85, 0.01);
+    near(parseNumber(getValue(r, 'cubicYards')), 2.59, 0.01);
+    near(parseNumber(getValue(r, 'orderCuYd')), 2.85, 0.01);
     near(parseNumber(getValue(r, 'bags')), 39);
   });
 
@@ -59,11 +63,12 @@ describe('mulch-topsoil', () => {
       width: '3',
       depth: '2',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // depthFt = 2/12 = 0.1667; cubicFeet = 40*3*0.1667 = 20
     // cubicYards = 20/27 = 0.7407; withWaste = 0.7407 * 1.1 = 0.8148
     // formatted toFixed(2) → "0.81" → parseNumber gives 0.81
-    near(parseNumber(getValue(r, 'cubicYards')), 0.81);
+    near(parseNumber(getValue(r, 'cubicYards')), 0.74);
+    near(parseNumber(getValue(r, 'orderCuYd')), 0.81);
     near(parseNumber(getValue(r, 'area')), 120);
   });
 
@@ -73,7 +78,7 @@ describe('mulch-topsoil', () => {
       width: '10',
       depth: '3',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // Default is 'mulch', so label should reference Mulch
     expect(getValue(r, 'cubicYards')).toContain('cu yd');
   });
@@ -109,10 +114,11 @@ describe('mulch-topsoil', () => {
       width: '5',
       depth: '3',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // depthFt = 3/12 = 0.25; cubicFeet = 20*5*0.25 = 25
     // cubicYards = 25/27 = 0.9259; withWaste = 1.0185 → 1.02
-    near(parseNumber(getValue(r, 'cubicYards')), 1.02);
+    near(parseNumber(getValue(r, 'cubicYards')), 0.93);
+    near(parseNumber(getValue(r, 'orderCuYd')), 1.02);
     // bagsNeeded = ceil(25 * 1.1 / 2) = ceil(13.75) = 14
     near(parseNumber(getValue(r, 'bags')), 14);
     near(parseNumber(getValue(r, 'area')), 100);
@@ -125,10 +131,11 @@ describe('mulch-topsoil', () => {
       width: '6',
       depth: '6',
     });
-    expect(r).toHaveLength(4);
+    expect(r).toHaveLength(5);
     // depthFt = 6/12 = 0.5; cubicFeet = 6*6*0.5 = 18
     // cubicYards = 18/27 = 0.6667; withWaste = 0.7333 → 0.73
-    near(parseNumber(getValue(r, 'cubicYards')), 0.73);
+    near(parseNumber(getValue(r, 'cubicYards')), 0.67);
+    near(parseNumber(getValue(r, 'orderCuYd')), 0.73);
     near(parseNumber(getValue(r, 'area')), 36);
   });
 

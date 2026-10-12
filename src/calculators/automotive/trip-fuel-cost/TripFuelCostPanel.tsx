@@ -1,43 +1,16 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { tripFuel } from './tripMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
+const usd = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function TripFuelCostPanel({ values, results }: Props) {
-  const totalCost = results.find(r => r.id === 'totalCost');
-  const perPerson = results.find(r => r.id === 'perPerson');
-  const gallons = results.find(r => r.id === 'gallonsNeeded');
-  const costPer100 = results.find(r => r.id === 'costPer100');
-
-  if (!totalCost) return null;
-
-  const totalVal = parseNum(totalCost.value);
-  const perPersonVal = perPerson ? parseNum(perPerson.value) : 0;
-  const maxVal = Math.max(totalVal, perPersonVal);
-
-  const passengers = parseFloat(values?.passengers || '1') || 1;
-
-  // Workaround for props access
-  const bar = (label: string, val: number, color: string) => {
-    const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
-    return (
-      <div className="flex items-center gap-3 py-1.5">
-        <span className="text-xs font-semibold text-slate-600 w-32 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-6 bg-slate-100 rounded overflow-hidden">
-          <div className={`h-full rounded ${color} transition-all flex items-center justify-end pr-1.5 ${pct < 12 ? 'min-w-[50px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[10px] font-bold text-white drop-shadow-sm">${val.toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const t = tripFuel(values);
+  if (!t || 'error' in t || !results.length) return null;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -50,27 +23,23 @@ export default function TripFuelCostPanel({ values, results }: Props) {
       </div>
       <div className="p-5 space-y-2">
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Total Fuel Cost</p>
-          <p className="text-3xl font-bold text-blue-700">{totalCost.value}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-blue-800">Total Fuel Cost</p>
+          <p className="text-3xl font-bold text-blue-800">{usd(t.totalCost)}</p>
         </div>
-        {perPerson && (
-          <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
-            <span className="text-xs text-slate-600">Cost per Person ({passengers})</span>
-            <span className="text-sm font-bold text-emerald-600">{perPerson.value}</span>
-          </div>
-        )}
-        {gallons && (
-          <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
-            <span className="text-xs text-slate-600">Fuel Needed</span>
-            <span className="text-sm font-bold text-slate-700">{gallons.value}</span>
-          </div>
-        )}
-        {costPer100 && (
-          <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
-            <span className="text-xs text-slate-600">Per 100 Miles</span>
-            <span className="text-sm font-bold text-slate-700">{costPer100.value}</span>
-          </div>
-        )}
+        <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
+          <span className="text-xs text-slate-600">Cost per Person ({t.passengers})</span>
+          <span className="text-sm font-bold text-emerald-700">{usd(t.costPerPerson)}</span>
+        </div>
+        <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
+          <span className="text-xs text-slate-600">Fuel Needed</span>
+          <span className="text-sm font-bold text-slate-700">
+            {t.fuelAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {t.metric ? 'liters' : 'gallons'}
+          </span>
+        </div>
+        <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
+          <span className="text-xs text-slate-600">{t.metric ? 'Per 100 km' : 'Per 100 Miles'}</span>
+          <span className="text-sm font-bold text-slate-700">{usd(t.costPer100)}</span>
+        </div>
       </div>
     </div>
   );

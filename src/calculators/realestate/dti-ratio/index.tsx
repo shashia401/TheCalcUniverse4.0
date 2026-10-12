@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import { DTIGauge } from './DtiPanel';
+import { backEndBand, frontEndBand, shown } from './dtiMath';
 
 /* ── Shared parsing helpers (used by calculate and extraPanel) ── */
 function parseIncome(values: Record<string, string>) {
@@ -136,19 +137,8 @@ const dtiRatioConfig: CalculatorConfig = {
     const frontEndDTI = (housing / totalIncome) * 100;
     const backEndDTI = (totalDebt / totalIncome) * 100;
 
-    const getStatus = (dti: number) => {
-      if (dti <= 28) return 'Green — Excellent';
-      if (dti <= 36) return 'Yellow — Good';
-      if (dti <= 43) return 'Yellow — Acceptable';
-      if (dti <= 49) return 'Red — High';
-      return 'Red — Needs Work';
-    };
-
-    const getColor = (dti: number): 'positive' | 'negative' | 'neutral' => {
-      if (dti <= 36) return 'positive';
-      if (dti <= 43) return 'neutral';
-      return 'negative';
-    };
+    const be = backEndBand(backEndDTI);
+    const fe = frontEndBand(frontEndDTI);
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -160,17 +150,17 @@ const dtiRatioConfig: CalculatorConfig = {
     return [
       {
         id: 'backEndDTI',
-        label: `Back-End DTI — ${getStatus(backEndDTI)}`,
-        value: `${backEndDTI.toFixed(1)}%`,
+        label: `Back-End DTI — ${be.label}`,
+        value: `${shown(backEndDTI).toFixed(1)}%`,
         highlight: true,
-        color: getColor(backEndDTI),
-        interpretation: `This is all your monthly debt — housing plus cards, auto, student loans — as a share of gross income. Most mortgage lenders cap this around 43%, with the best rates reserved for borrowers under 36%; paying down other debt before applying often moves the needle more than shopping for a lower mortgage rate.`,
+        color: be.tone,
+        interpretation: `This is all your monthly debt — housing plus cards, auto, student loans — as a share of gross income. Traditional guidelines treat 36% as comfortable and 43% as the FHA baseline cap (Fannie Mae will go to 45% manually and 50% through automated underwriting with strong credit and reserves); paying down other debt before applying often moves the needle more than shopping for a lower mortgage rate.`,
       },
       {
         id: 'frontEndDTI',
-        label: `Front-End DTI (Housing Only) — ${getStatus(frontEndDTI)}`,
-        value: `${frontEndDTI.toFixed(1)}%`,
-        color: getColor(frontEndDTI),
+        label: `Front-End DTI (Housing Only) — ${fe.label}`,
+        value: `${shown(frontEndDTI).toFixed(1)}%`,
+        color: fe.tone,
       },
       {
         id: 'totalIncome',
@@ -198,13 +188,13 @@ const dtiRatioConfig: CalculatorConfig = {
       },
       {
         id: 'maxDebtFor43',
-        label: 'Max Total Debt for 43% (FHA limit)',
+        label: 'Max Total Debt for 43% (FHA baseline)',
         value: `$${fmt(maxDebtFor43)}/mo`,
         color: 'neutral' as const,
       },
       {
         id: 'debtHeadroom',
-        label: 'Remaining Capacity (vs. 43% limit)',
+        label: 'Remaining Capacity (vs. 43% baseline)',
         value: maxDebtFor43 - totalDebt >= 0
           ? `$${fmt(maxDebtFor43 - totalDebt)}/mo available`
           : `$${fmt(totalDebt - maxDebtFor43)}/mo over limit`,
@@ -228,10 +218,10 @@ const dtiRatioConfig: CalculatorConfig = {
     formulaDescription:
       'DTI ratio compares your monthly debt obligations to your gross monthly income and is the single most important number lenders evaluate during mortgage underwriting. Two versions are used: front-end (housing costs only) and back-end (all debts combined). Each has its own threshold that determines which loan programs you qualify for.',
     variables: [
-      { symbol: 'Front-End DTI', name: 'Housing Ratio', description: 'Your proposed PITI payment divided by gross monthly income. Conventional lenders prefer this below 28%; anything under 31% is typically acceptable for FHA loans.' },
-      { symbol: 'Back-End DTI', name: 'Total Debt Ratio', description: 'All monthly debt payments combined divided by gross income. Conventional loans cap at 36-43%; FHA may allow up to 50% with compensating factors like high credit scores or large cash reserves.' },
+      { symbol: 'Front-End DTI', name: 'Housing Ratio', description: 'Your proposed PITI payment divided by gross monthly income. The traditional conventional guideline is 28% or less; the FHA baseline is 31%.' },
+      { symbol: 'Back-End DTI', name: 'Total Debt Ratio', description: 'All monthly debt payments combined divided by gross income. Fannie Mae manual underwriting uses 36% (up to 45% with qualifying credit score and reserves) and automated underwriting (DU) allows up to 50%. The FHA baseline is 43%, with higher ratios only on documented compensating factors.' },
       { symbol: 'PITI', name: 'Housing Payment', description: 'Principal, Interest, Taxes, and Insurance — the four components of a full mortgage payment. Lenders always use PITI, not just the principal and interest amount, for DTI calculations.' },
-      { symbol: 'Compensating Factors', name: 'Factors That Offset High DTI', description: 'Reserves (cash savings after closing), excellent credit above 740, large down payment above 25%, or significant rental income history can help lenders approve DTIs above standard limits.' },
+      { symbol: 'Compensating Factors', name: 'Factors That Offset High DTI', description: 'Documented cash reserves after closing, a strong credit score, a larger down payment, or a housing payment no higher than your current rent can help lenders approve DTIs above standard limits (the specific factors depend on the loan program).' },
     ],
     howToUse: [
       'Enter all sources of gross monthly income before taxes and deductions, including salary, self-employment earnings, and stable side income.',
@@ -242,11 +232,11 @@ const dtiRatioConfig: CalculatorConfig = {
       'Experiment by adjusting individual debt amounts or adding income to see how much each change affects your DTI percentages.',
     ],
     explanation:
-      'Debt-to-Income ratio is the single most important factor in mortgage underwriting because it measures your capacity to take on additional debt. Lenders evaluate two ratios: the front-end ratio compares only your housing costs to income and should stay below 28% for conventional loans. The back-end ratio includes all debt payments and should stay below 36-43% for conventional financing. FHA loans are more generous, allowing back-end DTI up to 50% if you have compensating factors such as a credit score above 700, significant cash reserves after closing, or a history of stable employment. VA loans have no strict DTI maximum but generally require residual income analysis. The color-coded gauge in this tool maps directly to lender guidelines: green (under 28% front-end or 36% back-end) means you are well-qualified; yellow (28-36% front-end or 36-43% back-end) is acceptable to many lenders but may require a stronger credit profile; red (above 43% back-end) means you may need to pay down debt, increase your income, or consider an FHA or non-qualified mortgage program. An important edge case: if you have significant assets or a large down payment, some lenders may be flexible on DTI limits. Self-employed borrowers should note that lenders use the net income from their tax returns, which is often much lower than gross revenue.',
+      'Debt-to-Income ratio is the single most important factor in mortgage underwriting because it measures your capacity to take on additional debt. Lenders evaluate two ratios: the front-end ratio compares only your housing costs to income and should stay below 28% for conventional loans. The back-end ratio includes all debt payments: 36% is the traditional comfortable level, Fannie Mae allows up to 45% on manually underwritten loans and 50% through its automated underwriting, and the FHA baseline is 43% (higher ratios need documented compensating factors such as cash reserves or a payment no higher than your current housing cost). VA loans use a 41% guideline together with a residual-income test. The color-coded gauge maps to those benchmarks: green (28% or less front-end, 36% or less back-end) is comfortably within the traditional guidelines; orange (up to 31% front-end, up to 43% back-end) is acceptable to many lenders but may need a stronger credit profile; red (above 31% front-end or above 43% back-end) means you may need to pay down debt, increase your income, or find a lender and program that allows higher ratios. An important edge case: if you have significant assets or a large down payment, some lenders may be flexible on DTI limits. Self-employed borrowers should note that lenders use the net income from their tax returns, which is often much lower than gross revenue.',
     faqs: [
       {
         question: 'What DTI is needed to qualify for a conventional mortgage?',
-        answer: 'Most conventional lenders want a front-end DTI below 28% and a back-end DTI below 36-43%. Fannie Mae and Freddie Mac allow back-end DTIs up to 45-50% with strong compensating factors such as large cash reserves, a credit score above 740, or a significant down payment of 25% or more.',
+        answer: 'The traditional guideline is a front-end DTI of 28% or less and a back-end DTI of 36% or less. Under the Fannie Mae Selling Guide, manually underwritten loans can go to 45% with the credit score and reserves required by the Eligibility Matrix, and loans approved through Desktop Underwriter can go up to 50%.',
       },
       {
         question: 'Does DTI use gross or net income?',
@@ -266,7 +256,7 @@ const dtiRatioConfig: CalculatorConfig = {
       },
       {
         question: 'Can I get a mortgage with a DTI over 50%?',
-        answer: 'Conventional and FHA loans generally cap at 50% back-end DTI. However, some non-qualified mortgage (non-QM) lenders offer products for DTIs above 50%, typically requiring higher interest rates, larger down payments, and significant cash reserves. VA loans do not have a specific DTI cap but require residual income analysis.',
+        answer: 'Fannie Mae caps DU-approved loans at 50%, so conventional agency loans generally stop there. Some non-qualified mortgage (non-QM) lenders offer products for DTIs above 50%, typically requiring higher interest rates, larger down payments, and significant cash reserves. VA loans use a 41% guideline with a residual-income test rather than a hard cap.',
       },
     ],
     citations: [

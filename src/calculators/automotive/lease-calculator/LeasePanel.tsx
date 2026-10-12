@@ -1,25 +1,9 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { lease } from './leaseMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-interface LeaseBreakdown {
-  adjustedCapCost: number;
-  residualValue: number;
-  moneyFactorUsed: number;
-  aprDisplay: number;
-  monthlyDepreciation: number;
-  monthlyFinanceCharge: number;
-  baseMonthlyPayment: number;
-  monthlyTax: number;
-  totalMonthlyPayment: number;
-  totalLeaseCost: number;
-  msrp: number;
-  negotiatedPrice: number;
-  leaseTerm: number;
-  residualValuePct: number;
 }
 
 function fmt(n: number): string {
@@ -61,23 +45,14 @@ function PaymentSegment({ color, amount, total, label }: SegmentProps) {
 }
 
 export default function LeasePanel({ values: _values, results }: Props) {
-  if (!results || !results.length) return null;
-
-  const breakdownResult = results.find((r) => r.id === '_leaseBreakdown');
-  if (!breakdownResult) return null;
-
-  let bd: LeaseBreakdown;
-  try {
-    bd = JSON.parse(breakdownResult.value) as LeaseBreakdown;
-  } catch {
-    return null;
-  }
+  const bd = lease(_values);
+  if (!results || !results.length || !bd) return null;
 
   const {
     adjustedCapCost,
     residualValue,
-    moneyFactorUsed,
-    aprDisplay,
+    moneyFactor: moneyFactorUsed,
+    apr: aprDisplay,
     monthlyDepreciation,
     monthlyFinanceCharge,
     baseMonthlyPayment,
@@ -90,20 +65,21 @@ export default function LeasePanel({ values: _values, results }: Props) {
     residualValuePct,
   } = bd;
 
-  // Depreciation portion during lease (dollar value of car consumed)
-  const depreciationDollar = msrp - residualValue;
+  // What you actually pay for over the term: adjusted cap cost minus what the lessor keeps (the residual)
+  const depreciationDollar = Math.max(0, adjustedCapCost - residualValue);
+  const barBase = Math.max(adjustedCapCost, 1);
   const rateInputType = _values.rateInputType || 'mf';
 
   // APR color
-  let aprColorClass = 'text-emerald-600';
+  let aprColorClass = 'text-emerald-700';
   let aprBgClass = 'bg-emerald-50';
   let aprBorderClass = 'border-emerald-200';
   if (aprDisplay >= 7) {
-    aprColorClass = 'text-red-600';
+    aprColorClass = 'text-red-700';
     aprBgClass = 'bg-red-50';
     aprBorderClass = 'border-red-200';
   } else if (aprDisplay >= 4) {
-    aprColorClass = 'text-amber-600';
+    aprColorClass = 'text-amber-700';
     aprBgClass = 'bg-amber-50';
     aprBorderClass = 'border-amber-200';
   }
@@ -285,22 +261,22 @@ export default function LeasePanel({ values: _values, results }: Props) {
 
           <div className="flex items-center justify-between text-xs mb-2">
             <span className="text-slate-600">MSRP: <span className="font-bold text-slate-800">${fmtShort(msrp)}</span></span>
-            <span className="text-slate-600">Residual: <span className="font-bold text-blue-600">${fmtShort(residualValue)} ({residualValuePct.toFixed(1)}%)</span></span>
+            <span className="text-slate-600">Residual: <span className="font-bold text-blue-700">${fmtShort(residualValue)} ({residualValuePct.toFixed(1)}%)</span></span>
           </div>
 
           {/* Depreciation vs Residual bar */}
           <div className="relative h-8 rounded-lg overflow-hidden border border-slate-200 mb-2">
             <div
-              className="absolute left-0 top-0 h-full bg-red-400 flex items-center justify-center"
-              style={{ width: `${(depreciationDollar / msrp) * 100}%` }}
+              className="absolute left-0 top-0 h-full bg-red-700 flex items-center justify-center"
+              style={{ width: `${(depreciationDollar / barBase) * 100}%` }}
             >
               <span className="text-[9px] text-white font-bold px-1 truncate">
                 You pay ${fmtShort(depreciationDollar)}
               </span>
             </div>
             <div
-              className="absolute right-0 top-0 h-full bg-blue-400 flex items-center justify-center"
-              style={{ width: `${(residualValue / msrp) * 100}%` }}
+              className="absolute right-0 top-0 h-full bg-blue-700 flex items-center justify-center"
+              style={{ width: `${(Math.min(residualValue, barBase) / barBase) * 100}%` }}
             >
               <span className="text-[9px] text-white font-bold px-1 truncate">
                 ${fmtShort(residualValue)} remains
@@ -345,12 +321,12 @@ export default function LeasePanel({ values: _values, results }: Props) {
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Total Lease Cost</p>
               <p className="text-base font-black text-red-700">${fmtShort(totalLeaseCost)}</p>
-              <p className="text-[10px] text-red-500 mt-0.5">All-in over {leaseTerm} months</p>
+              <p className="text-[10px] text-red-700 mt-0.5">All-in over {leaseTerm} months</p>
             </div>
             <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Residual Value</p>
               <p className="text-base font-black text-blue-700">${fmtShort(residualValue)}</p>
-              <p className="text-[10px] text-blue-500 mt-0.5">{residualValuePct.toFixed(1)}% of MSRP at lease end</p>
+              <p className="text-[10px] text-blue-700 mt-0.5">{residualValuePct.toFixed(1)}% of MSRP at lease end</p>
             </div>
           </div>
         </div>
@@ -367,7 +343,7 @@ export default function LeasePanel({ values: _values, results }: Props) {
             </div>
             <div className="flex items-center justify-between px-4 py-2.5 text-xs">
               <span className="text-slate-500">Negotiated Price</span>
-              <span className="font-bold text-emerald-600">${fmtShort(negotiatedPrice)}</span>
+              <span className="font-bold text-emerald-700">${fmtShort(negotiatedPrice)}</span>
             </div>
             <div className="flex items-center justify-between px-4 py-2.5 text-xs bg-emerald-50/50">
               <span className="text-emerald-700 font-semibold">Cap Cost Savings</span>
@@ -408,8 +384,8 @@ export default function LeasePanel({ values: _values, results }: Props) {
             ].map((row) => (
               <div key={row.factor} className="grid grid-cols-3 gap-2 px-4 py-2 text-[11px]">
                 <span className="font-bold text-slate-600">{row.factor}</span>
-                <span className="text-blue-600">{row.lease}</span>
-                <span className="text-emerald-600">{row.buy}</span>
+                <span className="text-blue-700">{row.lease}</span>
+                <span className="text-emerald-700">{row.buy}</span>
               </div>
             ))}
           </div>
