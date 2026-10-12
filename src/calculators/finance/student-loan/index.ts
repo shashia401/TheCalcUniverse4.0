@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
-import { pmt } from '../../../utils/financial';
 import StudentLoanPanel from './StudentLoanPanel';
+import { computeStudentLoan } from './studentLoanMath';
 
 const studentLoanConfig: CalculatorConfig = {
   inputs: [
@@ -20,26 +20,27 @@ const studentLoanConfig: CalculatorConfig = {
       id: 'interestRate',
       label: 'Annual Interest Rate',
       type: 'number',
-      placeholder: '6.53',
+      placeholder: '6.52',
       unit: '%',
       inputMode: 'decimal',
       min: 0,
       max: 20,
       step: 0.01,
       required: true,
-      helpText: '2024–25 federal undergraduate direct subsidized/unsubsidized rate: 6.53%. Grad: 8.08%. PLUS: 9.08%.',
+      helpText: 'Federal rates for loans first disbursed July 1, 2026 – June 30, 2027: undergraduate 6.52%, graduate unsubsidized 8.07%, PLUS 9.07% (fixed for the life of the loan).',
     },
     {
       id: 'repaymentTerm',
       label: 'Repayment Term',
       type: 'select',
       required: true,
+      helpText: 'Fixed monthly payments over the chosen term (standard amortization). Income-driven plans such as IBR and the new Repayment Assistance Plan set payments from your income and are not modeled.',
       options: [
         { label: '10 years (Standard Federal Plan)', value: '10' },
         { label: '12 years', value: '12' },
-        { label: '15 years (Extended)', value: '15' },
-        { label: '20 years (Income-Driven Repayment)', value: '20' },
-        { label: '25 years (IDR/PSLF eligible)', value: '25' },
+        { label: '15 years (Extended / mid-balance Standard)', value: '15' },
+        { label: '20 years (fixed payment)', value: '20' },
+        { label: '25 years (fixed payment)', value: '25' },
       ],
     },
     {
@@ -82,41 +83,16 @@ const studentLoanConfig: CalculatorConfig = {
       type: 'select',
       options: [
         { label: '6 months (Federal Standard)', value: '6' },
-        { label: '9 months (Perkins Loans)', value: '9' },
+        { label: '9 months (Perkins Loans, no longer issued)', value: '9' },
         { label: 'No grace period', value: '0' },
       ],
     },
   ],
 
   calculate: (values) => {
-    const principal = parseFloat(values.loanBalance);
-    const annualRate = parseFloat(values.interestRate) / 100;
-    const repaymentYears = parseInt(values.repaymentTerm) || 10;
-    const inSchool = values.inSchool === 'yes';
-    const monthsUntilGrad = parseInt(values.monthsUntilGraduation) || 0;
-    const loanType = values.loanType || 'unsubsidized';
-    const gracePeriodRaw = parseInt(values.gracePeriodMonths);
-    const gracePeriod = isNaN(gracePeriodRaw) ? 6 : gracePeriodRaw;
-
-    if (isNaN(principal) || isNaN(annualRate) || principal <= 0) return [];
-
-    const monthlyRate = annualRate / 12;
-    const inSchoolMonths = inSchool ? monthsUntilGrad : 0;
-    const totalDeferMonths = inSchoolMonths + gracePeriod;
-
-    let capitalizedInterest = 0;
-    let effectivePrincipal = principal;
-
-    if (inSchool && loanType === 'unsubsidized') {
-      capitalizedInterest = principal * monthlyRate * totalDeferMonths;
-      effectivePrincipal = principal + capitalizedInterest;
-    }
-
-    const n = repaymentYears * 12;
-    const monthlyPayment = pmt(effectivePrincipal, monthlyRate, n);
-
-    const totalPaid = monthlyPayment * n;
-    const totalInterestRepayment = totalPaid - effectivePrincipal;
+    const c = computeStudentLoan(values);
+    if (!c) return [];
+    const { principal, repaymentYears, inSchool, loanType, capitalizedInterest, subsidy, effectivePrincipal, monthlyPayment, totalPaid, totalInterestRepayment, totalDeferMonths } = c;
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtD = (n: number) =>
@@ -153,7 +129,7 @@ const studentLoanConfig: CalculatorConfig = {
       results.push({
         id: 'subsidyBenefit',
         label: 'Government Interest Subsidy (In-School + Grace)',
-        value: `${fmtD(principal * monthlyRate * totalDeferMonths)} — You owe $0 extra`,
+        value: `${fmtD(subsidy)} — You owe $0 extra`,
         color: 'positive' as const,
       });
     }
@@ -211,9 +187,9 @@ const studentLoanConfig: CalculatorConfig = {
       'The monthly payment uses standard amortization on the effective principal after capitalization. For unsubsidized loans, interest compounds monthly during school and the grace period, then is added (capitalized) to the principal before repayment begins — permanently increasing the balance you will pay interest on for years.',
     variables: [
       { symbol: 'Subsidized', name: 'Subsidized Loans', description: 'The federal government pays the interest that accrues on Direct Subsidized Loans while you are enrolled at least half-time, during the 6-month grace period after graduation, and during periods of deferment. Your principal stays flat throughout school — you start repayment owing exactly what you borrowed, with no capitalized interest.' },
-      { symbol: 'Unsubsidized', name: 'Unsubsidized Loans', description: 'Interest begins accruing from the day the loan is disbursed — through school, grace period, and any deferment period. You can choose to pay this interest as it accrues or allow it to be capitalized at repayment start. A $35,000 loan at 6.53% accrues approximately $1,905 per year in interest while you are in school.' },
-      { symbol: 'Capitalization', name: 'Interest Capitalization', description: 'The moment your grace period ends, all unpaid accrued interest is added to your principal balance. You then pay interest on this larger number for the entire repayment term. A $35,000 loan with $3,810 in capitalized interest means you start repayment owing $38,810 — permanently increasing every future payment calculation.' },
-      { symbol: 'IDR', name: 'Income-Driven Repayment', description: 'Federal IDR plans (SAVE, IBR, PAYE, ICR) cap monthly payments at 5-20% of discretionary income. After 20-25 years of qualifying payments, remaining balances may be forgiven, though the forgiven amount is typically taxable as income. The 20 and 25-year term options in this calculator reflect these plan timelines.' },
+      { symbol: 'Unsubsidized', name: 'Unsubsidized Loans', description: 'Interest begins accruing from the day the loan is disbursed — through school, grace period, and any deferment period. You can choose to pay this interest as it accrues or allow it to be capitalized at repayment start. A $35,000 loan at 6.53% accrues $2,285.50 per year (35,000 × 6.53%) in interest while you are in school.' },
+      { symbol: 'Capitalization', name: 'Interest Capitalization', description: 'The moment your grace period ends, all unpaid accrued interest is added to your principal balance. You then pay interest on this larger number for the entire repayment term. A $35,000 loan at 6.53% that accrues interest for 18 months builds $3,428 of interest, so you start repayment owing $38,428 — permanently increasing every future payment calculation.' },
+      { symbol: 'IDR', name: 'Income-Driven Repayment', description: 'Income-driven plans set monthly payments from your income instead of the balance. The 2025 budget law (One Big Beautiful Bill Act) creates a Repayment Assistance Plan (RAP) from July 1, 2026 with payments of 1-10% of adjusted gross income over up to 30 years, and phases out SAVE, PAYE and ICR for existing borrowers by July 2028. This calculator does NOT model income-driven plans: the 20 and 25-year options are ordinary fixed-payment amortization over that term. Rules were still being finalized in 2026, so check studentaid.gov.' },
       { symbol: 'Grace Period', name: 'Post-Graduation Grace Period', description: 'Federal student loans provide a 6-month grace period after graduation (or dropping below half-time enrollment) before payments begin. During this period, subsidized loans continue to have interest paid by the government; unsubsidized loans continue accruing interest that will capitalize at repayment start.' },
     ],
     howToUse: [
@@ -227,7 +203,7 @@ const studentLoanConfig: CalculatorConfig = {
       'See how paying interest while still in school prevents capitalization and saves thousands of dollars over the life of the loan.',
     ],
     explanation:
-      'The difference between a subsidized and unsubsidized loan with the same balance and interest rate can be thousands of dollars over the life of the loan. For a $35,000 loan at 6.53% with 3 years of school and a 6-month grace period (42 months total deferment), an unsubsidized loan accumulates approximately $7,985 in capitalized interest before the first payment is due. Your starting balance at repayment is effectively $42,985 instead of $35,000 — and every monthly payment and lifetime interest cost is calculated on that higher number. Paying even small amounts of interest while in school can prevent this capitalization and save thousands.',
+      'The difference between a subsidized and unsubsidized loan with the same balance and interest rate can be thousands of dollars over the life of the loan. For a $35,000 loan at 6.53% with 3 years of school and a 6-month grace period (42 months total deferment), an unsubsidized loan accumulates about $7,999 in simple interest (35,000 × 6.53% ÷ 12 × 42) before the first payment is due. Your starting balance at repayment is effectively $42,999 instead of $35,000 — and every monthly payment and lifetime interest cost is calculated on that higher number. Paying even small amounts of interest while in school can prevent this capitalization and save thousands.',
     faqs: [
       {
         question: 'Should I pay interest on my unsubsidized loan while in school?',
@@ -235,7 +211,7 @@ const studentLoanConfig: CalculatorConfig = {
       },
       {
         question: 'What is the standard federal student loan repayment plan?',
-        answer: 'The Standard Repayment Plan is 10 years (120 fixed monthly payments). It results in the highest monthly payment but the lowest total interest paid of any federal repayment plan. Income-driven repayment plans offer lower monthly payments (capped at 5-20% of discretionary income) but extend repayment to 20-25 years, often resulting in significantly higher total interest costs, though forgiveness may apply at the end of the term.',
+        answer: 'The Standard Repayment Plan for older loans is 10 years (120 fixed monthly payments). It results in the highest monthly payment but the lowest total interest paid of any federal repayment plan. For loans first disbursed on or after July 1, 2026, the new Standard plan sets the term by balance (roughly 10 years under $25,000, 15 years to $50,000, 20 years to $100,000, 25 years above), and income-based payments move to the new Repayment Assistance Plan. Longer terms lower the monthly payment but raise total interest.',
       },
       {
         question: 'How does Public Service Loan Forgiveness (PSLF) work?',
@@ -243,7 +219,7 @@ const studentLoanConfig: CalculatorConfig = {
       },
       {
         question: 'What are the current federal student loan interest rates?',
-        answer: 'Federal student loan rates are set annually by Congress based on the 10-year Treasury note yield plus a fixed margin. For loans disbursed July 1, 2024 through June 30, 2025: Direct Subsidized and Unsubsidized Loans (undergraduate): 6.53%. Direct Unsubsidized (graduate/professional): 8.08%. Direct PLUS Loans (parent and graduate): 9.08%. Rates reset each July 1st, so check current rates at studentaid.gov.',
+        answer: 'Federal student loan rates are set annually by Congress based on the 10-year Treasury note yield plus a fixed margin. For loans first disbursed July 1, 2026 through June 30, 2027 (the May 2026 10-year Treasury auction yield of 4.468% plus 2.05, 3.60 and 4.60 points): Direct Subsidized and Unsubsidized Loans (undergraduate): 6.52%. Direct Unsubsidized (graduate/professional): 8.07%. Direct PLUS Loans (parent and graduate): 9.07%. Rates reset each July 1st, so check current rates at studentaid.gov. Graduate PLUS loans are closed to new borrowers after June 30, 2026.',
       },
       {
         question: 'What happens if I consolidate my student loans?',
@@ -255,7 +231,7 @@ const studentLoanConfig: CalculatorConfig = {
       },
       {
         question: 'How does income-driven repayment (IDR) affect the total cost of my loan?',
-        answer: 'IDR plans reduce your monthly payment to a percentage of your discretionary income (5-20% depending on the specific plan), but the trade-off is that extending repayment to 20 or 25 years dramatically increases total interest paid. For example, a $50,000 loan at 7% paid over 10 years costs about $69,500 total. The same loan under a 20-year IDR plan at a reduced payment could cost over $90,000 total — an extra $20,500 in interest. The benefit is cash flow flexibility today, and any remaining balance after the repayment term may be forgiven (though typically taxable). Use this calculator to compare the 10-year standard plan against the 20 or 25-year options to see the trade-off in real numbers.',
+        answer: 'Income-driven plans (such as IBR or the new Repayment Assistance Plan) set your payment from your income, but stretching repayment over 20 or 25 years dramatically increases total interest paid, and any remaining balance may be forgiven (often taxable). This calculator does not model income-based payments; it shows what a longer fixed term costs. For example, a $50,000 loan at 7% paid over 10 years costs about $69,665 total ($580.54/month); over 20 years the payment is $387.65/month but the total is about $93,036 — an extra $23,400 in interest. Use the 10-, 15-, 20- and 25-year options to see the trade-off in real numbers.',
       },
     ],
 
@@ -263,20 +239,20 @@ const studentLoanConfig: CalculatorConfig = {
       {
         scenario: 'Emily graduates from a public university with $35,000 in unsubsidized federal loans at 6.53%. She had loans disbursed over 4 years and is about to enter her 6-month grace period. She wants to know the true cost of deferring interest.',
         inputs: { loanBalance: '35000', interestRate: '6.53', repaymentTerm: '10', inSchool: 'yes', monthsUntilGraduation: '0', loanType: 'unsubsidized', gracePeriodMonths: '6' },
-        result: 'Capitalized interest: $1,143.02, Effective principal: $36,143.02, Monthly payment: $411.23/mo',
-        insight: 'Emily\'s 6-month grace period will add over $1,143 to her principal. On a 10-year plan, the capitalized interest alone will cost her an additional $416 in interest over the repayment term because she pays interest on the interest. If Emily can pay just $190/month during her grace period to cover the accruing interest, she prevents capitalization entirely and enters repayment owing exactly $35,000 — saving thousands over the loan\'s life.',
+        result: 'Capitalized interest: $1,142.75, Effective principal: $36,142.75, Monthly payment: $410.95/mo',
+        insight: 'Emily\'s 6-month grace period will add about $1,143 to her principal. On a 10-year plan, the capitalized interest alone will cost her an additional $416 in interest over the repayment term because she pays interest on the interest. If Emily can pay just $190/month during her grace period to cover the accruing interest, she prevents capitalization entirely and enters repayment owing exactly $35,000 — saving thousands over the loan\'s life.',
       },
       {
         scenario: 'Marcus borrowed $60,000 for graduate school at 8.08% and is pursuing a career in government. He qualifies for PSLF and is choosing between the standard 10-year plan and a 25-year IDR plan.',
         inputs: { loanBalance: '60000', interestRate: '8.08', repaymentTerm: '10', inSchool: 'no' },
-        result: 'Standard 10-year: $730.12/mo, total cost ~$87,614. With IDR + PSLF: lower payments and remaining balance forgiven tax-free after 120 qualifying payments.',
+        result: 'Standard 10-year: $730.50/mo, total cost ~$87,661. With an income-driven plan + PSLF: lower payments and remaining balance forgiven tax-free after 120 qualifying payments.',
         insight: 'If Marcus is certain he will work in qualifying public service for 10 years, he should enroll in an IDR plan to keep payments low and maximize the amount forgiven through PSLF — which is tax-free unlike standard IDR forgiveness. The standard 10-year plan would pay off the loan entirely before PSLF forgiveness kicks in, meaning Marcus would get no benefit from the program he is eligible for.',
       },
       {
         scenario: 'Jennifer has $27,000 in subsidized federal loans at 5.50%. She is starting a 24-month graduate program and wants to see if subsidized status during deferment saves her money.',
         inputs: { loanBalance: '27000', interestRate: '5.50', repaymentTerm: '10', inSchool: 'yes', monthsUntilGraduation: '24', loanType: 'subsidized', gracePeriodMonths: '6' },
-        result: 'Government subsidy benefit: $3,712.50 — she owes $0 extra. Monthly payment remains $293.03 on the original $27,000 principal.',
-        insight: 'Because Jennifer\'s loans are subsidized, the government pays the $3,712.50 in interest that would have accrued during her 30 months of school plus grace period. If these were unsubsidized loans, her effective principal at repayment would be $30,712.50, raising her monthly payment to $333.30 — roughly $40 more per month, adding nearly $4,800 to her total repayment cost.',
+        result: 'Government subsidy benefit: $3,712.50 — she owes $0 extra. Monthly payment remains $293.02 on the original $27,000 principal.',
+        insight: 'Because Jennifer\'s loans are subsidized, the government pays the $3,712.50 in interest that would have accrued during her 30 months of school plus grace period. If these were unsubsidized loans, her effective principal at repayment would be $30,712.50, raising her monthly payment to $333.31 — roughly $40 more per month, adding about $4,835 to her total repayment cost.',
       },
     ],
 
@@ -288,9 +264,9 @@ const studentLoanConfig: CalculatorConfig = {
     ],
 
     quickReference: [
-      { label: 'Undergrad Rate 2024-25', value: '6.53% (Direct Subsidized/Unsubsidized)' },
-      { label: 'Grad Rate 2024-25', value: '8.08% (Direct Unsubsidized)' },
-      { label: 'PLUS Rate 2024-25', value: '9.08% (Parent/Grad PLUS)' },
+      { label: 'Undergrad Rate 2026-27', value: '6.52% (Direct Subsidized/Unsubsidized)' },
+      { label: 'Grad Rate 2026-27', value: '8.07% (Direct Unsubsidized)' },
+      { label: 'PLUS Rate 2026-27', value: '9.07% (Parent PLUS; Grad PLUS closed to new borrowers)' },
       { label: 'Standard Repayment', value: '10 years (120 payments)' },
       { label: 'Grace Period', value: '6 months (federal standard)' },
       { label: 'PSLF Forgiveness', value: '120 qualifying payments, tax-free' },
@@ -298,7 +274,7 @@ const studentLoanConfig: CalculatorConfig = {
 
     limitations: [
       'This calculator models federal Direct Loans. Private student loans, Parent PLUS loans, Perkins loans, and FFEL program loans may have different interest accrual rules, grace periods, and repayment options not represented here.',
-      'Income-driven repayment calculations are based on discretionary income which depends on your actual income and family size. The 20 and 25-year term options in this calculator use standard amortization — actual IDR payments vary each year as your income changes and may not fully amortize the loan within the term.',
+      'Income-driven repayment calculations are based on discretionary income which depends on your actual income and family size. The 20 and 25-year term options in this calculator use standard fixed-payment amortization — actual income-based payments vary each year as your income changes and may not fully amortize the loan within the term.',
       'The calculator uses simple interest accrual for the in-school and grace periods. In reality, interest accrues daily on unsubsidized loans (daily interest = principal x rate / 365), and capitalization typically occurs at specific trigger events (end of grace period, end of deferment, end of forbearance).',
       'Forgiveness programs like PSLF and IDR forgiveness have specific eligibility requirements, qualifying payment definitions, and tax implications that this calculator cannot model. The forgiven amount under IDR is generally taxable as income in the year of forgiveness, while PSLF forgiveness is tax-free. Always consult studentaid.gov for current program rules.',
     ],

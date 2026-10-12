@@ -3,7 +3,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { pmt } from '../../../utils/financial';
 import VAPanel from './VAPanel';
 
-// VA Funding Fee Table (purchase loans only)
+// VA Funding Fee Table (purchase loans, rates in effect since April 7, 2023 - va.gov/housing-assistance/home-loans/funding-fee-and-closing-costs)
 // < 5% down:   first=2.15%, subsequent=3.30%
 // 5–9.99%:     first=1.50%, subsequent=1.50%
 // >= 10%:      first=1.25%, subsequent=1.25%
@@ -27,7 +27,7 @@ const vaMortgageConfig: CalculatorConfig = {
       prefix: '$',
       placeholder: '400,000',
       required: true,
-      helpText: 'The purchase price of the home. VA loans have no maximum loan amount with full entitlement, but lenders may impose their own limits.',
+      helpText: 'The purchase price of the home. With full entitlement the VA sets no maximum loan amount (no county limit); lenders may impose their own limits. With reduced entitlement the county limit applies (baseline $832,750 in 2026).',
     },
     {
       id: 'downPaymentType',
@@ -143,6 +143,7 @@ const vaMortgageConfig: CalculatorConfig = {
         ? downPaymentRaw
         : homePrice * (downPaymentRaw / 100);
 
+    if (downPaymentDollars < 0 || downPaymentDollars >= homePrice) return [];
     const downPaymentPct = (downPaymentDollars / homePrice) * 100;
     const baseLoanAmount = homePrice - downPaymentDollars;
 
@@ -289,7 +290,7 @@ const vaMortgageConfig: CalculatorConfig = {
       'Determine how a service-connected disability exemption from the VA funding fee affects your total loan cost and monthly payment.',
     ],
     explanation:
-      'VA loans offer exceptional benefits that no other mortgage program matches: no PMI requirement (saving $100–$300/month vs. conventional loans with less than 20% down), no minimum down payment required, and competitive interest rates often 0.25–0.50% below conventional rates. The VA Funding Fee replaces PMI — it is a one-time fee paid at closing or rolled into the loan. For first-time VA loan users putting 0% down, the fee is 2.15% of the loan amount. For those putting 5% or more down, the fee drops to 1.50%. Veterans with a service-connected disability rating of 10% or more are fully exempt from this fee. Purple Heart recipients on active duty are also exempt. The ability to finance 100% of the home price without PMI is the single biggest advantage of VA loans. On a $400,000 home, a conventional loan with 5% down would require about $250/month in PMI and a $20,000 down payment. A VA loan with 0% down requires no PMI and no down payment — just the Funding Fee (which can be rolled into the loan). Over 5 years, the VA loan saves roughly $15,000 in PMI and upfront cash. Additionally, VA loans are assumable by other VA-eligible borrowers, which can be a powerful selling point if rates rise. The VA also offers support for borrowers facing financial hardship, including loan modifications and repayment plans. When comparing VA to other low-down-payment options like FHA (which requires both upfront and annual MIP for the life of the loan) or conventional 97% LTV (which requires PMI until the loan reaches 80% LTV), the VA loan almost always comes out ahead for eligible borrowers. Veterans should factor in the one-time nature of the funding fee versus the ongoing monthly cost of PMI or FHA mortgage insurance. For a typical 30-year loan, PMI can cost $15,000–$30,000 over the years before cancellation. The VA funding fee on a $400,000 purchase with 0% down for a first-time user is $8,600 — a fraction of the long-term PMI cost. For subsequent users, the higher 3.30% fee can be mitigated by putting 5% or more down, which drops the fee to 1.50%. The key is to run the numbers for your specific scenario — including property taxes, insurance, HOA fees, and the funding fee — to see your true monthly payment and total cost over time. Also consider that VA loans have no prepayment penalty, allowing you to refinance to a lower rate without penalty if rates drop.',
+      'VA loans offer exceptional benefits that no other mortgage program matches: no PMI requirement (saving $100–$300/month vs. conventional loans with less than 20% down), no minimum down payment required, and competitive interest rates often 0.25–0.50% below conventional rates. The VA Funding Fee replaces PMI — it is a one-time fee paid at closing or rolled into the loan. For first-time VA loan users putting 0% down, the fee is 2.15% of the loan amount. For those putting 5% or more down, the fee drops to 1.50%. Veterans with a service-connected disability rating of 10% or more are fully exempt from this fee. Purple Heart recipients on active duty are also exempt. The ability to finance 100% of the home price without PMI is the single biggest advantage of VA loans. On a $400,000 home, a conventional loan with 5% down would require about $250/month in PMI and a $20,000 down payment. A VA loan with 0% down requires no PMI and no down payment — just the Funding Fee (which can be rolled into the loan). Over 5 years, the VA loan avoids roughly $15,000 of PMI, on top of the $20,000 down payment. Additionally, VA loans are assumable by other VA-eligible borrowers, which can be a powerful selling point if rates rise. The VA also offers support for borrowers facing financial hardship, including loan modifications and repayment plans. When comparing VA to other low-down-payment options like FHA (which requires both upfront and annual MIP for the life of the loan) or conventional 97% LTV (which requires PMI until the loan reaches 80% LTV), the VA loan almost always comes out ahead for eligible borrowers. Veterans should factor in the one-time nature of the funding fee versus the ongoing monthly cost of PMI or FHA mortgage insurance. For a typical 30-year loan, PMI can cost $15,000–$30,000 over the years before cancellation. The VA funding fee on a $400,000 purchase with 0% down for a first-time user is $8,600 — a fraction of the long-term PMI cost. For subsequent users, the higher 3.30% fee can be mitigated by putting 5% or more down, which drops the fee to 1.50%. The key is to run the numbers for your specific scenario — including property taxes, insurance, HOA fees, and the funding fee — to see your true monthly payment and total cost over time. Also consider that VA loans have no prepayment penalty, allowing you to refinance to a lower rate without penalty if rates drop.',
     faqs: [
       {
         question: 'Who is exempt from the VA Funding Fee?',
@@ -329,9 +330,9 @@ const vaMortgageConfig: CalculatorConfig = {
     workedExamples: [
       {
         scenario: 'Sergeant Michael Rodriguez, a first-time VA loan user in San Antonio, TX, is buying a $350,000 home with 0% down. He has no service-connected disability, so he must pay the 2.15% funding fee. His VA-approved lender quotes 6.25% on a 30-year fixed loan.',
-        inputs: { homePrice: '350000', downPaymentType: 'dollars', downPaymentValue: '0', loanTerm: '30', interestRate: '6.25', vaUseType: 'first', fundingFeeExempt: 'no', fundingFeePaidUpfront: 'rolled', annualPropertyTax: '4200', annualInsurance: '1200', monthlyHOA: '0' },
-        result: 'Monthly payment: approximately $2,646 including P&I, taxes, and insurance. Total loan amount (with rolled-in funding fee): $357,525.',
-        insight: 'With 0% down and the funding fee rolled in, Michael finances everything with no upfront cash required. His total monthly payment of $2,646 includes principal, interest, property taxes ($350/mo), and insurance ($100/mo). The funding fee adds $7,525 to his loan but preserves his cash. Compared to a conventional loan with 5% down ($17,500 cash required) and $200/month PMI, the VA loan saves $17,500 upfront and eliminates $200/month in PMI. Over 5 years, total savings exceed $29,500.',
+        inputs: { homePrice: '350000', downPaymentType: 'dollar', downPaymentValue: '0', loanTerm: '30', interestRate: '6.25', vaUseType: 'first', fundingFeeExempt: 'no', fundingFeePaidUpfront: 'rolled', annualPropertyTax: '4200', annualInsurance: '1200', monthlyHOA: '0' },
+        result: 'Monthly payment: approximately $2,651 including P&I ($2,201.34), taxes, and insurance. Total loan amount (with rolled-in funding fee): $357,525.',
+        insight: 'With 0% down and the funding fee rolled in, Michael finances everything with no upfront cash required. His total monthly payment of $2,651 includes principal, interest, property taxes ($350/mo), and insurance ($100/mo). The funding fee adds $7,525 to his loan but preserves his cash. Compared to a conventional loan with 5% down ($17,500 cash required) and $200/month PMI, the VA loan saves $17,500 upfront and eliminates $200/month in PMI. Over 5 years, the savings come to about $29,500 ($17,500 plus 60 months of $200 PMI).',
       },
       {
         scenario: 'Captain Sarah Chen, a disabled veteran with a 30% service-connected disability rating, is buying a $500,000 home in San Diego, CA. She has saved $50,000 for a down payment (10%) but is considering using 0% down since she is exempt from the funding fee.',
@@ -347,10 +348,10 @@ const vaMortgageConfig: CalculatorConfig = {
       },
     ],
     proTips: [
-      'If you have a service-connected disability rating (even 0%), get your VA disability letter BEFORE closing — the funding fee exemption can save thousands.',
+      'If you receive VA disability compensation (a rating of 10% or more), get your VA disability letter BEFORE closing — the funding fee exemption can save thousands. A 0% rating does not qualify.',
       'The VA funding fee is lower when you put at least 5% down. If you have some savings, running both 0% and 5% scenarios side-by-side often reveals that modest down payments pay for themselves through lower fees and interest.',
       'VA loans are assumable by future buyers who are also VA-eligible. If rates rise, this can make your home more valuable to VA buyers who can "assume" your below-market rate instead of getting a new loan.',
-      'When shopping lenders, compare both the rate AND lender fees. Some lenders charge a 1% origination fee on VA loans, while others do not. The VA does not limit lender origination fees — only the 1% funding fee.',
+      'When shopping lenders, compare both the rate AND lender fees. Some lenders charge the maximum 1% origination fee the VA allows on VA loans, while others charge less. That is separate from the VA funding fee.',
     ],
     quickReference: [
       { label: 'First use, 0% down funding fee', value: '2.15% of loan amount' },
@@ -361,7 +362,7 @@ const vaMortgageConfig: CalculatorConfig = {
       { label: 'Maximum loan (full entitlement)', value: 'No statutory limit' },
     ],
     limitations: [
-      'VA loans are solely for primary residences — this calculator cannot model investment property or second home scenarios.',
+      'VA loans are solely for primary residences — this calculator cannot model investment property or second home scenarios. It also assumes full entitlement; with a reduced (second-use) entitlement the county loan limit (baseline $832,750 in 2026) caps how much the VA guarantees, which can require a down payment.',
       'The actual funding fee rate depends on your specific military service history, disability status, and whether it is your first or subsequent VA loan use. Verify your exact rate with your VA Certificate of Eligibility.',
       'VA loan rates and terms vary by lender. This calculator uses the standard mortgage amortization formula but does not account for lender-specific pricing adjustments, discount points, or closing cost variations.',
     ],

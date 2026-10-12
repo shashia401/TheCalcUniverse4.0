@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SalaryToHourlyPanel from './SalaryToHourlyPanel';
+import { payRates } from '../salary-hourly/salaryHourlyMath';
 
 const salaryToHourlyConfig: CalculatorConfig = {
   inputs: [
@@ -47,13 +48,10 @@ const salaryToHourlyConfig: CalculatorConfig = {
     const hoursPerWeek = parseFloat(values.hoursPerWeek);
     const weeksPerYear = parseFloat(values.weeksPerYear || '52');
 
-    if (isNaN(salary) || isNaN(hoursPerWeek) || isNaN(weeksPerYear) || hoursPerWeek <= 0 || weeksPerYear <= 0) return [];
+    if (isNaN(salary) || salary <= 0 || isNaN(hoursPerWeek) || isNaN(weeksPerYear) || hoursPerWeek <= 0 || weeksPerYear <= 0) return [];
 
-    const totalHours = hoursPerWeek * weeksPerYear;
-    const hourlyRate = salary / totalHours;
-    const dailyRate = hourlyRate * hoursPerWeek / 5;
-    const weeklyRate = salary / weeksPerYear;
-    const monthlyRate = salary / 12;
+    // Same conversion as the Salary to Hourly (salary-hourly) calculator, so the two always agree.
+    const { hourly: hourlyRate, daily: dailyRate, weekly: weeklyRate, monthly: monthlyRate } = payRates(salary, hoursPerWeek, weeksPerYear);
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -68,13 +66,13 @@ const salaryToHourlyConfig: CalculatorConfig = {
       },
       {
         id: 'dailyRate',
-        label: 'Daily Rate (8 hr equivalent)',
+        label: 'Daily Rate (5-day week)',
         value: `$${fmt(dailyRate)}`,
         color: 'neutral',
       },
       {
         id: 'weeklyRate',
-        label: 'Weekly Rate',
+        label: weeksPerYear === 52 ? 'Weekly Rate' : 'Weekly Rate (per week worked)',
         value: `$${fmt(weeklyRate)}`,
         color: 'neutral',
       },
@@ -104,7 +102,7 @@ const salaryToHourlyConfig: CalculatorConfig = {
       { symbol: 'S', name: 'Annual Salary', description: 'Your gross annual compensation before taxes or deductions. This is the starting point for all rate conversions.' },
       { symbol: 'H', name: 'Hours Per Week', description: 'The average number of hours you work each week. Standard full-time is 40 hours. If you regularly work more, your effective hourly rate drops proportionally.' },
       { symbol: 'W', name: 'Weeks Per Year', description: 'The number of weeks you work in a year. Use 52 for a standard full-year schedule with paid vacation. Use fewer only if you take unpaid time off or work seasonally.' },
-      { symbol: 'Freelance Rate', name: 'Equivalent Freelance Rate', description: 'To match a salaried position, freelancers typically need to charge 1.5–2× the equivalent hourly rate to cover self-employment taxes, health insurance, PTO, and non-billable time. A $31.25/hr salaried role requires roughly $50–$62/hr as a freelancer.' },
+      { symbol: 'Freelance Rate', name: 'Equivalent Freelance Rate', description: 'To match a salaried position, freelancers typically need to charge 1.5–2× the equivalent hourly rate to cover self-employment taxes, health insurance, PTO, and non-billable time. A $31.25/hr salaried role requires roughly $47–$63/hr as a freelancer.' },
     ],
     howToUse: [
       'Enter your annual gross salary, average hours per week, and weeks per year.',
@@ -146,7 +144,7 @@ const salaryToHourlyConfig: CalculatorConfig = {
           'Weeks Worked Per Year': '52',
         },
         result: 'Hourly Rate: $31.25. Daily Rate: $250.00. Weekly Rate: $1,250.00. Monthly Rate: $5,416.67.',
-        insight: 'Tom earns $31.25 per hour as a salaried employee. To match this as a freelancer, he would need to charge roughly $47-$63/hour (1.5-2x multiplier) to account for self-employment taxes (15.3% vs the 7.65% he pays as an employee), health insurance, no paid time off, and non-billable hours spent on admin, marketing, and client acquisition. If Tom can bill 1,500 hours/year (accounting for 500+ hours of non-billable time), he would need a rate of about $62/hour to match his current $65K salary with equivalent benefits.',
+        insight: 'Tom earns $31.25 per hour as a salaried employee. To match this as a freelancer, he would need to charge roughly $47-$63/hour (1.5-2x multiplier) to account for self-employment taxes (15.3% vs the 7.65% he pays as an employee), health insurance, no paid time off, and non-billable hours spent on admin, marketing, and client acquisition. If Tom can bill only 1,500 hours a year, $65,000 of revenue already takes $43.33/hour before self-employment tax, insurance and business expenses, which is why 1.5–2× his salaried rate ($46.88–$62.50) is the usual range.',
       },
       {
         scenario: 'Maria is a teacher in Miami earning $52,000 on a 10-month contract. She works 40 hours per week for 40 weeks per year. She wants to understand her hourly rate and explore summer side work.',
@@ -164,7 +162,7 @@ const salaryToHourlyConfig: CalculatorConfig = {
       'When comparing salary to freelance, multiply your salaried hourly rate by 1.5-2x. An employee earning $31.25/hr costs an employer about $42-45/hr including payroll taxes, benefits, and overhead. As a freelancer, you need to cover both sides of that equation.',
       'If your job regularly demands more than 40 hours, use the actual hours in the calculator. A $65K salary at 50 hours/week is only $25.00/hr — $6.25 less per hour than the standard 40-hour assumption. Knowing this number helps evaluate whether the extra hours are worth it.',
       'Use the daily rate for project pricing. If you earn $250/day as a salaried employee, a 5-day freelance project at $500/day ($2,500 total) represents 10 days of employee-equivalent earnings — giving you 5 extra "days" of earning power for the same time invested.',
-      'Don\'t forget to factor in the value of employer benefits when comparing W-2 to 1099. A W-2 job paying $31.25/hr with health insurance ($8K value), 401k match ($3K), and PTO ($5K) is actually worth about $39-41/hr in total compensation — pushing your freelance rate target to $59-82/hr.',
+      'Don\'t forget to factor in the value of employer benefits when comparing W-2 to 1099. A W-2 job paying $31.25/hr with health insurance ($8K value), 401k match ($3K), and PTO ($5K) is actually worth about $39/hr in total compensation ($16,000 of benefits over 2,080 hours adds $7.69/hr) — pushing your freelance rate target to roughly $58–$78/hr.',
     ],
 
     quickReference: [

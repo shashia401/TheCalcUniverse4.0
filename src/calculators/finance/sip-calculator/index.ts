@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SipPanel from './SipPanel';
+import { sipFutureValue, sipYearly } from './sipMath';
 
 function fmt(n: number): string {
   const abs = Math.abs(n);
@@ -47,10 +48,10 @@ const sipConfig: CalculatorConfig = {
       unit: '%',
       inputMode: 'decimal',
       min: 0,
-      max: 100,
+      max: 50,
       step: 0.5,
       required: true,
-      helpText: 'Expected annual return rate',
+      helpText: 'Expected annual return rate (applied as annual rate / 12 each month)',
       slider: { min: 0, max: 30, step: 0.5 },
     },
     {
@@ -61,7 +62,7 @@ const sipConfig: CalculatorConfig = {
       unit: 'years',
       inputMode: 'decimal',
       min: 0,
-      max: 100,
+      max: 60,
       step: 1,
       required: true,
       helpText: 'Number of years you plan to invest',
@@ -69,44 +70,22 @@ const sipConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const lumpsum = parseFloat(values.lumpsum) || 0;
-    const monthly = parseFloat(values.monthlyInvestment) || 0;
+    // Hidden tab fields keep their old text, so honour the active tab (undefined = both, for direct callers).
+    const lumpsum = values.shape === 'sip' ? 0 : parseFloat(values.lumpsum) || 0;
+    const monthly = values.shape === 'lumpsum' ? 0 : parseFloat(values.monthlyInvestment) || 0;
     const r = parseFloat(values.expectedReturn) / 100;
     const t = parseFloat(values.timePeriod);
 
     if ((monthly <= 0 && lumpsum <= 0) || isNaN(r) || isNaN(t) || t <= 0) return [];
 
-    const monthlyRate = r / 12;
     const months = Math.round(t * 12);
+    if (months < 1) return [];
     const totalSipInvested = monthly * months;
     const totalInvested = lumpsum + totalSipInvested;
 
-    let fv: number;
-    if (monthlyRate === 0) {
-      fv = lumpsum + totalSipInvested;
-    } else {
-      // Lump sum: FV = lumpsum × (1 + r)^n
-      const fvLumpsum = lumpsum * Math.pow(1 + monthlyRate, months);
-      // SIP: annuity due (invested at month start)
-      // FV = monthly × [((1 + r)^n - 1) / r] × (1 + r)
-      const fvSip = monthly * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate);
-      fv = fvLumpsum + fvSip;
-    }
-
+    const fv = sipFutureValue(lumpsum, monthly, r, months);
     const totalReturns = fv - totalInvested;
-
-    // Build yearly wealth chart data
-    const chartData = [];
-    for (let year = 1; year <= Math.min(t, 30); year++) {
-      const yMonths = year * 12;
-      if (monthlyRate === 0) {
-        chartData.push({ year, value: lumpsum + monthly * yMonths });
-      } else {
-        const lumpVal = lumpsum * Math.pow(1 + monthlyRate, yMonths);
-        const sipVal = monthly * ((Math.pow(1 + monthlyRate, yMonths) - 1) / monthlyRate) * (1 + monthlyRate);
-        chartData.push({ year, value: Math.round((lumpVal + sipVal) * 100) / 100 });
-      }
-    }
+    const chartData = sipYearly(lumpsum, monthly, r, months);
 
     const label = lumpsum > 0 ? (monthly > 0 ? 'Lumpsum + SIP' : 'Lumpsum Only') : 'SIP Only';
 
@@ -152,11 +131,11 @@ const sipConfig: CalculatorConfig = {
       caption: 'Earlier SIP contributions compound for more months — time in the market matters more than timing the market',
     },
     formulaDescription:
-      'The SIP formula combines two components: the future value of a lump sum (if any) plus the future value of an annuity due for monthly contributions. The annuity due formula uses the (1 + r) multiplier because SIP contributions are invested at the start of each month, giving each installment an extra month of compounding compared to end-of-month investments. This seemingly small detail adds up significantly over long periods — a 15-year SIP with the annuity due formula will show about 0.5-1% higher final value than the ordinary annuity formula. The total wealth grows through the power of compounding, where returns themselves generate further returns, creating an exponential growth curve that accelerates dramatically in the later years.',
+      'The SIP formula combines two components: the future value of a lump sum (if any) plus the future value of an annuity due for monthly contributions. The annuity due formula uses the (1 + r) multiplier because SIP contributions are invested at the start of each month, giving each installment an extra month of compounding compared to end-of-month investments. This seemingly small detail adds up significantly over long periods — a 15-year SIP with the annuity due formula shows a final value higher than the ordinary-annuity formula by exactly the factor (1 + r/12), about 0.5% at 6% and 1% at 12%. The total wealth grows through the power of compounding, where returns themselves generate further returns, creating an exponential growth curve that accelerates dramatically in the later years.',
     variables: [
       { symbol: 'P', name: 'Monthly SIP Amount', description: 'The fixed amount invested every month. Even small amounts like Rs 5,000/month compound into significant wealth over 20+ years.' },
       { symbol: 'LS', name: 'Lump Sum (Optional)', description: 'A one-time initial investment that compounds for the entire period. Bonuses, inheritances, or existing savings can be invested as a lump sum alongside the monthly SIP.' },
-      { symbol: 'r', name: 'Monthly Rate', description: 'The annual expected return rate divided by 12. For Indian equity mutual funds, 10-12% annual return (0.83-1% monthly) is a commonly used estimate based on historical Nifty 50 data.' },
+      { symbol: 'r', name: 'Monthly Rate', description: 'The annual expected return rate divided by 12. For Indian equity mutual funds, 10-12% annual return (0.83-1% monthly) is a commonly used planning assumption; actual returns vary widely by fund and period.' },
       { symbol: 'n', name: 'Total Months', description: 'The total number of months you invest. Longer durations dramatically amplify compounding — 10 extra years can more than double the final corpus.' },
     ],
     howToUse: [
@@ -178,8 +157,8 @@ const sipConfig: CalculatorConfig = {
       {
         scenario: 'Ravi, age 25, starts a monthly SIP of Rs 5,000 in an equity mutual fund expecting 12% annual returns. He plans to invest for 30 years until retirement at 55. How much will his corpus be, and how much of it is pure returns versus his own contributions?',
         inputs: { monthlyInvestment: '5000', expectedReturn: '12', timePeriod: '30' },
-        result: 'Total invested: Rs 18 lakh. Maturity value: approximately Rs 1.76 crore. Total returns: Rs 1.58 crore (about 90% of the final corpus) — nearly 10x the amount actually invested.',
-        insight: 'Total invested = Rs 5,000 x 360 months = Rs 18 lakh. The maturity value comes to approximately Rs 1.76 crore. That means Rs 1.58 crore (about 90% of the final corpus) is pure returns earned through compounding — nearly 10x the amount he actually invested. This demonstrates why starting early is the single most important factor in wealth creation.',
+        result: 'Total invested: Rs 18 lakh. Maturity value: approximately Rs 1.76 crore. Total returns: Rs 1.58 crore (about 90% of the final corpus) — the corpus is nearly 10x the amount actually invested.',
+        insight: 'Total invested = Rs 5,000 x 360 months = Rs 18 lakh. The maturity value comes to approximately Rs 1.76 crore. That means Rs 1.58 crore (about 90% of the final corpus) is pure returns earned through compounding — the corpus is nearly 10x the amount he actually invested. This demonstrates why starting early is the single most important factor in wealth creation.',
       },
       {
         scenario: 'Priya receives a Rs 5 lakh bonus and wants to invest it as a lump sum while also starting a Rs 15,000 monthly SIP for her daughter\'s college education in 12 years. She expects 10% annual returns from a balanced fund.',
@@ -189,8 +168,8 @@ const sipConfig: CalculatorConfig = {
       },
     ],
     proTips: [
-      'Start as early as possible — a Rs 10,000 SIP started at age 25 vs. age 35 means a difference of over Rs 1 crore by retirement, even though only Rs 12 lakh extra is invested.',
-      'Step up your SIP annually by 5-10% to match your income growth. A Rs 10,000 SIP stepped up 10% yearly grows to a corpus nearly 3x larger than a flat SIP over 20 years.',
+      'Start as early as possible — a Rs 10,000 SIP started at age 25 vs. age 35 (retiring at 55, at 10-12% returns) means a difference of over Rs 1.5 crore by retirement, even though only Rs 12 lakh extra is invested.',
+      'Step up your SIP annually by 5-10% to match your income growth. A Rs 10,000 SIP stepped up 10% yearly grows to a corpus about 2x larger than a flat SIP over 20 years (at 12%).',
       'Align your SIP date with your salary credit date (e.g., 1st or 5th of the month) to ensure consistent investing and avoid missed installments due to insufficient balance.',
       'For equity SIPs, ignore short-term market fluctuations — continuing SIPs during market downturns buys you more units at lower prices, which amplifies returns when markets recover.',
       'Use the lumpsum + SIP combination strategically: invest windfalls (bonuses, tax refunds, inheritances) as lump sums while maintaining your regular monthly SIP for disciplined wealth building.',
@@ -219,7 +198,7 @@ const sipConfig: CalculatorConfig = {
       },
       {
         question: 'Is it better to invest lumpsum or through SIP?',
-        answer: 'It depends on market conditions and your risk tolerance. In a bull market, lumpsum typically wins because more money is invested for longer. In volatile or bear markets, SIP wins because each installment buys at different price points, lowering the average cost per unit. Research by SEBI and AMFI shows that over 7+ year periods, the performance difference narrows significantly. For most salaried investors, SIP is more practical because it aligns with regular income and removes the need to time the market.',
+        answer: 'It depends on market conditions and your risk tolerance. In a bull market, lumpsum typically wins because more money is invested for longer. In volatile or bear markets, SIP wins because each installment buys at different price points, lowering the average cost per unit. Over 7+ year periods the performance difference between the two approaches usually narrows. For most salaried investors, SIP is more practical because it aligns with regular income and removes the need to time the market.',
       },
       {
         question: 'What is the minimum amount required to start a SIP?',

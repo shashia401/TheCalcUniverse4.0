@@ -1,43 +1,7 @@
 import { AlertTriangle, Calendar } from 'lucide-react';
 import { CalculatorResult } from '../../../types/calculator';
-
-const UNIFORM_TABLE: Record<number, number> = {
-  72: 27.4, 73: 26.5, 74: 25.5, 75: 24.6, 76: 23.7, 77: 22.9, 78: 22.0, 79: 21.1,
-  80: 20.2, 81: 19.4, 82: 18.5, 83: 17.7, 84: 16.8, 85: 16.0, 86: 15.2, 87: 14.4,
-  88: 13.7, 89: 12.9, 90: 12.2, 91: 11.5, 92: 10.8, 93: 10.1, 94: 9.5, 95: 8.9,
-  96: 8.4, 97: 7.8, 98: 7.3, 99: 6.8, 100: 6.4, 101: 6.0, 102: 5.6, 103: 5.2,
-  104: 4.9, 105: 4.6, 106: 4.3, 107: 4.1, 108: 3.9, 109: 3.7, 110: 3.5, 111: 3.4,
-  112: 3.3, 113: 3.1, 114: 3.0, 115: 2.9, 116: 2.8, 117: 2.7, 118: 2.5, 119: 2.3, 120: 2.0,
-};
-
-const JOINT_TABLE: Record<number, number> = {
-  70: 35.0, 71: 34.1, 72: 33.3, 73: 32.4, 74: 31.5, 75: 30.6, 76: 29.8, 77: 28.9, 78: 28.0,
-  79: 27.2, 80: 26.3, 81: 25.5, 82: 24.6, 83: 23.8, 84: 22.9, 85: 22.1, 86: 21.3, 87: 20.5,
-  88: 19.7, 89: 19.0, 90: 18.2,
-};
-
-function getDistributionPeriod(age: number, useJoint: boolean): number {
-  if (useJoint) {
-    const clampedAge = Math.min(Math.max(age, 70), 90);
-    return JOINT_TABLE[clampedAge] ?? UNIFORM_TABLE[Math.min(Math.max(age, 72), 120)] ?? 2.0;
-  }
-  const clampedAge = Math.min(Math.max(age, 72), 120);
-  return UNIFORM_TABLE[clampedAge] ?? 2.0;
-}
-
-function getRmdStartAge(birthYear: number): number {
-  if (birthYear <= 1950) return 72;
-  if (birthYear <= 1959) return 73;
-  return 75;
-}
-
-interface ProjectionRow {
-  year: number;
-  age: number;
-  balance: number;
-  rmd: number;
-  factor: number;
-}
+import SvgBarChart from '../../../components/charts/SvgBarChart';
+import { rmdStartAge as getRmdStartAge, type ProjectionRow } from './rmdMath';
 
 interface RMDPanelProps {
   values: Record<string, string>;
@@ -55,142 +19,15 @@ function fmtDollarFull(n: number): string {
   return `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-interface BarChartProps {
-  projection: ProjectionRow[];
-}
-
-function RMDBarChart({ projection }: BarChartProps) {
-  const activeRows = projection.filter((r) => r.rmd > 0);
-  if (activeRows.length === 0) return null;
-
-  const maxRmd = Math.max(...activeRows.map((r) => r.rmd));
-
-  const svgWidth = 560;
-  const svgHeight = 260;
-  const padL = 72;
-  const padR = 16;
-  const padT = 16;
-  const padB = 64;
-  const chartW = svgWidth - padL - padR;
-  const chartH = svgHeight - padT - padB;
-
-  const n = activeRows.length;
-  const barGroupW = chartW / n;
-  const barW = Math.min(barGroupW * 0.62, 40);
-
-  const toY = (val: number) => padT + (1 - val / maxRmd) * chartH;
-
-  const gridFractions = [0, 0.25, 0.5, 0.75, 1];
-  const fmtY = (frac: number) => {
-    const v = frac * maxRmd;
-    if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
-    if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}K`;
-    return `$${v.toFixed(0)}`;
-  };
-
+function RMDBarChart({ projection }: { projection: ProjectionRow[] }) {
+  if (projection.length === 0) return null;
   return (
-    <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="10-Year RMD Projection Bar Chart">
-      <svg
-        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-        className="w-full"
-        style={{ minWidth: '320px' }}
-        aria-hidden="true"
-      >
-        {/* Grid lines */}
-        {gridFractions.map((g) => {
-          const y = padT + (1 - g) * chartH;
-          return (
-            <g key={g}>
-              <line
-                x1={padL}
-                y1={y}
-                x2={padL + chartW}
-                y2={y}
-                stroke="#e2e8f0"
-                strokeWidth={g === 0 ? 1 : 0.5}
-              />
-              <text
-                x={padL - 5}
-                y={y}
-                textAnchor="end"
-                dominantBaseline="middle"
-                fontSize={9}
-                fill="#94a3b8"
-              >
-                {fmtY(g)}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Bars */}
-        {activeRows.map((row, i) => {
-          const cx = padL + (i + 0.5) * barGroupW;
-          const barX = cx - barW / 2;
-          const barY = toY(row.rmd);
-          const barH = padT + chartH - barY;
-          const labelY = padT + chartH + 14;
-
-          return (
-            <g key={row.year}>
-              <rect
-                x={barX}
-                y={barY}
-                width={barW}
-                height={barH}
-                rx={3}
-                fill="#3b82f6"
-                fillOpacity={0.8}
-              />
-              {/* RMD value on top of bar (only if bar is tall enough) */}
-              {barH > 22 && (
-                <text
-                  x={cx}
-                  y={barY + 11}
-                  textAnchor="middle"
-                  fontSize={8}
-                  fill="#1e3a5f"
-                  fontWeight="600"
-                >
-                  {fmtDollar(row.rmd)}
-                </text>
-              )}
-              {/* X axis labels */}
-              <text
-                x={cx}
-                y={labelY}
-                textAnchor="middle"
-                fontSize={8}
-                fill="#64748b"
-                fontWeight="600"
-              >
-                Age {row.age}
-              </text>
-              <text
-                x={cx}
-                y={labelY + 12}
-                textAnchor="middle"
-                fontSize={8}
-                fill="#94a3b8"
-              >
-                {row.year}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Chart border */}
-        <rect
-          x={padL}
-          y={padT}
-          width={chartW}
-          height={chartH}
-          fill="none"
-          stroke="#e2e8f0"
-          strokeWidth={0.5}
-        />
-      </svg>
-    </div>
+    <SvgBarChart
+      ariaLabel="Projected required minimum distribution for each of the next years"
+      data={projection.map((r) => ({ label: `Age ${r.age}`, value: r.rmd }))}
+      format={fmtDollar}
+      height={240}
+    />
   );
 }
 
@@ -201,46 +38,21 @@ const SECURE_RULES = [
 ];
 
 export default function RMDPanel({ values, results }: RMDPanelProps) {
-  // Re-derive inputs from values
   const birthYear = parseInt(values.birthYear, 10);
-  const accountBalance = parseFloat(values.accountBalance) || 0;
-  const useJoint = values.spouseToggle === 'yes';
-  const expectedReturn = parseFloat(values.expectedReturn) || 6;
-
-  const currentYear = new Date().getFullYear();
-
-  // Determine if the owner has started RMDs yet
-  const currentAge = isNaN(birthYear) ? null : currentYear - birthYear;
+  const parsedReturn = parseFloat(values.expectedReturn);
+  const expectedReturn = Number.isFinite(parsedReturn) ? parsedReturn : 6;
   const rmdStartAge = isNaN(birthYear) ? null : getRmdStartAge(birthYear);
-  const hasStarted = currentAge !== null && rmdStartAge !== null && currentAge >= rmdStartAge;
 
-  // Compute current RMD for the penalty warning
-  let currentRmd = 0;
-  if (hasStarted && currentAge !== null) {
-    const factor = getDistributionPeriod(currentAge, useJoint);
-    currentRmd = accountBalance / factor;
+  // The projection is computed once, in index.ts; the panel only renders it.
+  let projection: ProjectionRow[] = [];
+  try {
+    projection = JSON.parse(results.find((r) => r.id === '_projectionData')?.value ?? '[]') as ProjectionRow[];
+  } catch {
+    projection = [];
   }
+  const useJoint = /Joint/.test(results.find((r) => r.id === 'distributionPeriod')?.label ?? '');
+  const currentRmd = projection[0]?.rmd ?? 0;
   const penalty25 = currentRmd * 0.25;
-
-  // Build the 10-year projection internally
-  const projection: ProjectionRow[] = [];
-  if (!isNaN(birthYear) && accountBalance > 0 && rmdStartAge !== null && currentAge !== null) {
-    const rate = expectedReturn / 100;
-    let projBalance = accountBalance;
-    for (let i = 0; i < 10; i++) {
-      const projAge = currentAge + i;
-      const projYear = currentYear + i;
-      if (projAge < rmdStartAge) {
-        projBalance = projBalance * (1 + rate);
-        projection.push({ year: projYear, age: projAge, balance: projBalance, rmd: 0, factor: 0 });
-      } else {
-        const factor = getDistributionPeriod(projAge, useJoint);
-        const projRmd = projBalance / factor;
-        projection.push({ year: projYear, age: projAge, balance: projBalance, rmd: projRmd, factor });
-        projBalance = (projBalance - projRmd) * (1 + rate);
-      }
-    }
-  }
 
   const hasResults = results.some((r) => r.id === 'currentRmd');
   if (!hasResults && projection.length === 0) return null;
@@ -253,7 +65,7 @@ export default function RMDPanel({ values, results }: RMDPanelProps) {
       {/* Section 1: IRS Penalty Warning */}
       <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-red-50">
         <AlertTriangle size={16} className="text-red-500 flex-shrink-0" />
-        <span className="text-xs font-bold uppercase tracking-widest text-red-600">IRS Penalty Warning</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-red-700">IRS Penalty Warning</span>
       </div>
 
       <div className="px-6 py-5 border-b border-slate-100">
@@ -268,20 +80,20 @@ export default function RMDPanel({ values, results }: RMDPanelProps) {
           {currentRmd > 0 && (
             <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="rounded-lg bg-red-100 border border-red-300 px-4 py-2.5 inline-block">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-red-700 mb-0.5">
                   25% Penalty on Your RMD
                 </p>
                 <p className="text-lg font-black text-red-700">{fmtDollarFull(penalty25)}</p>
               </div>
               <div className="rounded-lg bg-amber-50 border border-amber-300 px-4 py-2.5 inline-block">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-800 mb-0.5">
                   Reduced 10% (if corrected in 2 yrs)
                 </p>
                 <p className="text-lg font-black text-amber-700">{fmtDollarFull(currentRmd * 0.10)}</p>
               </div>
             </div>
           )}
-          <p className="text-xs text-red-500 mt-3">
+          <p className="text-xs text-red-700 mt-3">
             The first RMD can be delayed to April 1 of the following year, but if you do, you must take two
             RMDs in that year — both will be taxable income.
           </p>
@@ -325,7 +137,7 @@ export default function RMDPanel({ values, results }: RMDPanelProps) {
                     <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">
                       IRS Factor
                     </th>
-                    <th scope="col" className="text-right px-4 py-2.5 font-bold text-blue-500 uppercase tracking-wider text-[10px]">
+                    <th scope="col" className="text-right px-4 py-2.5 font-bold text-blue-700 uppercase tracking-wider text-[10px]">
                       RMD
                     </th>
                   </tr>
@@ -408,7 +220,7 @@ export default function RMDPanel({ values, results }: RMDPanelProps) {
                     <td className={`px-4 py-3 font-semibold ${isApplicable ? 'text-blue-800' : 'text-slate-700'}`}>
                       {rule.range}
                       {isApplicable && (
-                        <span className="ml-2 inline-block rounded-full bg-blue-100 border border-blue-300 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-600">
+                        <span className="ml-2 inline-block rounded-full bg-blue-100 border border-blue-300 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-700">
                           You
                         </span>
                       )}

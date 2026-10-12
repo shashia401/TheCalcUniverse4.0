@@ -1,6 +1,7 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import SalaryHourlyPanel from './SalaryHourlyPanel';
+import { payRates, trueHourly as computeTrueHourly } from './salaryHourlyMath';
 
 const salaryHourlyConfig: CalculatorConfig = {
   inputs: [
@@ -47,6 +48,7 @@ const salaryHourlyConfig: CalculatorConfig = {
       unit: 'hrs',
       inputMode: 'decimal',
       min: 0,
+      max: 8,
       step: 0.25,
       helpText: 'Total daily commute time in hours (to and from work)',
       showWhen: (values) => values.trueHourlyToggle === 'yes',
@@ -59,8 +61,9 @@ const salaryHourlyConfig: CalculatorConfig = {
       prefix: '$',
       inputMode: 'decimal',
       min: 0,
+      max: 500,
       step: 0.5,
-      helpText: 'Daily cost of commuting (gas, tolls, parking, transit fare)',
+      helpText: 'Daily cost of commuting (gas, tolls, parking, transit fare). For driving, the IRS 2026 business rate of 72.5 cents/mile is a good all-in vehicle-cost benchmark.',
       showWhen: (values) => values.trueHourlyToggle === 'yes',
     },
     {
@@ -71,6 +74,7 @@ const salaryHourlyConfig: CalculatorConfig = {
       unit: 'hrs',
       inputMode: 'decimal',
       min: 0,
+      max: 60,
       step: 0.5,
       helpText: 'Extra hours you work each week that you are not paid for',
       showWhen: (values) => values.trueHourlyToggle === 'yes',
@@ -83,6 +87,7 @@ const salaryHourlyConfig: CalculatorConfig = {
       unit: 'days',
       inputMode: 'decimal',
       min: 0,
+      max: 120,
       step: 1,
       helpText: 'Number of paid days off per year (PTO + holidays)',
       showWhen: (values) => values.trueHourlyToggle === 'yes',
@@ -99,10 +104,7 @@ const salaryHourlyConfig: CalculatorConfig = {
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    const standardHourly = salary / (hoursPerWeek * 52);
-    const weeklyPay = salary / 52;
-    const monthlyPay = salary / 12;
-    const biweeklyPay = salary / 26;
+    const { hourly: standardHourly, weekly: weeklyPay, monthly: monthlyPay, biweekly: biweeklyPay } = payRates(salary, hoursPerWeek);
 
     const results: CalculatorResult[] = [
       {
@@ -145,17 +147,16 @@ const salaryHourlyConfig: CalculatorConfig = {
     ];
 
     if (trueHourlyToggle === 'yes') {
-      const commuteHours = parseFloat(values.commuteHoursPerDay || '0');
-      const commuteCost = parseFloat(values.commuteCostPerDay || '0');
-      const overtime = parseFloat(values.unpaidOvertimeHours || '0');
-      const ptoDays = parseFloat(values.paidTimeOff || '0');
-
-      const workDaysPerWeek = 5;
-      const workingWeeks = 52 - ptoDays / workDaysPerWeek;
-      const effectiveHoursPerWeek = hoursPerWeek + commuteHours * workDaysPerWeek + overtime;
-      const effectiveAnnualHours = effectiveHoursPerWeek * workingWeeks;
-      const commuteCostsAnnual = commuteCost * workDaysPerWeek * workingWeeks;
-      const trueHourly = (salary - commuteCostsAnnual) / effectiveAnnualHours;
+      const t = computeTrueHourly({
+        salary,
+        hoursPerWeek,
+        commuteHoursPerDay: parseFloat(values.commuteHoursPerDay || '0') || 0,
+        commuteCostPerDay: parseFloat(values.commuteCostPerDay || '0') || 0,
+        unpaidOvertimeHours: parseFloat(values.unpaidOvertimeHours || '0') || 0,
+        ptoDays: parseFloat(values.paidTimeOff || '0') || 0,
+      });
+      const { effectiveHoursPerWeek, effectiveAnnualHours, commuteCostsAnnual, trueHourly } = t;
+      if (!Number.isFinite(trueHourly)) return results;
 
       results.push({
         id: 'trueHourly',
@@ -200,7 +201,7 @@ const salaryHourlyConfig: CalculatorConfig = {
       caption: 'Standard hourly rate ignores commute time and unpaid overtime — the true hourly rate reveals your actual earnings per hour of life spent on work',
     },
     formulaDescription:
-      'The standard hourly rate divides your salary by total hours worked. The true hourly rate also accounts for commute time, commute costs, and unpaid overtime — revealing your actual earnings per hour of life spent on work. For most salaried workers, the true hourly rate is significantly lower than the standard calculation suggests, often by 20–40%.',
+      'The standard hourly rate divides your salary by total hours worked. The true hourly rate also accounts for commute time, commute costs, and unpaid overtime — revealing your actual earnings per hour of life spent on work. For most salaried workers, the true hourly rate is significantly lower than the standard calculation suggests, typically by 15–25% in the examples below.',
     variables: [
       { symbol: 'Standard', name: 'Standard Hourly Rate', description: 'Salary divided by hours worked per year. Assumes every hour is equally compensated and ignores commute time and unpaid overtime.' },
       { symbol: 'True Hourly', name: 'True Hourly Rate', description: 'Your adjusted hourly wage after accounting for commute time, commute costs, unpaid overtime, and paid time off. This is your actual earnings per hour of life dedicated to work.' },
@@ -219,7 +220,7 @@ const salaryHourlyConfig: CalculatorConfig = {
       'Determine whether a higher-paying job with a longer commute actually pays less per hour when all your time and costs are included.',
     ],
     explanation:
-      'The standard method of calculating hourly rate — dividing salary by 2,080 hours (40 hrs × 52 weeks) — is misleading for most workers. It ignores commute time, which can add 5–15 hours per week of unpaid, unreimbursed time. It ignores unpaid overtime, which is increasingly common in salaried roles where "getting the job done" takes more than 40 hours. And it ignores commute costs, which can easily reach $3,000–$5,000 per year in gas, tolls, parking, and vehicle wear-and-tear. When you account for these factors, a seemingly good salary can translate to a much lower effective hourly wage. For example, an $80,000 salary with a 1-hour daily commute and 5 hours of unpaid overtime per week is effectively earning closer to $22/hour. This insight is crucial when comparing job offers, negotiating salary, or deciding whether a higher-paying job with a longer commute is actually worth it. The true hourly rate gives you a realistic basis for comparing a job to a freelance or contract opportunity.',
+      'The standard method of calculating hourly rate — dividing salary by 2,080 hours (40 hrs × 52 weeks) — is misleading for most workers. It ignores commute time, which can add 5–15 hours per week of unpaid, unreimbursed time. It ignores unpaid overtime, which is increasingly common in salaried roles where "getting the job done" takes more than 40 hours. And it ignores commute costs, which can easily reach $3,000–$5,000 per year in gas, tolls, parking, and vehicle wear-and-tear. When you account for these factors, a seemingly good salary can translate to a much lower effective hourly wage. For example, an $80,000 salary with a 1-hour daily commute and 5 hours of unpaid overtime per week is effectively earning about $31/hour ($80,000 / 2,600 hours a year). This insight is crucial when comparing job offers, negotiating salary, or deciding whether a higher-paying job with a longer commute is actually worth it. The true hourly rate gives you a realistic basis for comparing a job to a freelance or contract opportunity.',
     faqs: [
       {
         question: 'Should I use 52 weeks or fewer for the standard calculation?',
@@ -227,7 +228,7 @@ const salaryHourlyConfig: CalculatorConfig = {
       },
       {
         question: 'How do I compare two job offers using this?',
-        answer: 'Calculate the true hourly rate for each offer, including different commute times and costs. A job paying $90K with a 30-minute commute may be worth more than one paying $100K with a 90-minute commute. For a 5-day work week: 30-min commute = 5 hours/week = ~260 hours/year lost. 90-min commute = 15 hours/week = ~780 hours/year lost. At $100K, that extra 520 hours translates to a difference of nearly $20/hour in effective earnings. Also factor in health insurance, retirement matching, and other benefits.',
+        answer: 'Calculate the true hourly rate for each offer, including different commute times and costs. A job paying $90K with a 30-minute commute each way can beat one paying $100K with a 90-minute commute each way. For a 5-day work week: 1 hour of daily commuting = 5 hours/week = 260 hours/year; 3 hours daily = 15 hours/week = 780 hours/year. Dividing by 52 weeks of 40 working hours plus commute, the $90K job works out to $90,000 / 2,340 = $38.46 per hour of life, the $100K job to $100,000 / 2,860 = $34.97, so the lower salary wins by about $3.50 an hour (before commute costs). Also factor in health insurance, retirement matching, and other benefits.',
       },
       {
         question: 'Does this account for taxes?',
@@ -252,7 +253,7 @@ const salaryHourlyConfig: CalculatorConfig = {
           'Paid Time Off': '15',
         },
         result: 'Standard Hourly: $38.46/hr. True Hourly: $31.65/hr. Effective Hours per Week: 50 hrs (incl. commute & overtime). Effective Annual Hours: 2,450 hrs. Annual Commute Cost: $2,450.',
-        insight: 'Jessica\'s "true" hourly rate is $31.65 — about an 18% reduction from her standard $38.46 rate. This means every hour of her life dedicated to work (including the 1-hour daily commute and 5 hours of unpaid overtime each week) earns her about $31.65. The 5 hours of unpaid overtime alone reduces her effective rate by nearly $4/hour. When comparing this job to a $70K fully remote position, the remote job at $33.65/hr standard would be $33.65/hr true (zero commute) — actually paying slightly more per hour of life invested.',
+        insight: 'Jessica\'s "true" hourly rate is $31.65 — about an 18% reduction from her standard $38.46 rate. This means every hour of her life dedicated to work (including the 1-hour daily commute and 5 hours of unpaid overtime each week) earns her about $31.65. The 5 hours of unpaid overtime alone cost about $3.50 an hour. Compare a $70K fully remote position with the same 40 hours, 15 PTO days and no overtime: it works out to $70,000 / (40 x 49 weeks) = $35.71 per hour, which is more per hour of life invested than Jessica earns at $80K.',
       },
       {
         scenario: 'Marcus earns $120,000 as a senior developer in San Francisco. He works 45 hours/week, has a brutal 2-hour daily round-trip BART commute costing $14/day, typically works 5 hours of unpaid overtime, and gets 20 PTO days. He is considering a $100K fully remote offer.',
@@ -266,14 +267,14 @@ const salaryHourlyConfig: CalculatorConfig = {
           'Paid Time Off': '20',
         },
         result: 'Standard Hourly: $51.28/hr. True Hourly: $40.50/hr. Effective Hours per Week: 60 hrs (incl. commute & overtime). Effective Annual Hours: 2,880 hrs. Annual Commute Cost: $3,360.',
-        insight: 'Marcus\'s true hourly rate of $40.50 is about 21% below his standard $51.28 rate — a significant gap driven by his long commute and long hours. His 60 effective weekly hours mean he is effectively working 1.5 full-time jobs. The $100K remote offer at 45 hours/week with no commute would give a true hourly rate of about $46.30/hr ($100K ÷ (45hrs × 48wks with 20 PTO days)). Despite the $20K nominal pay cut, the remote role actually pays slightly more per hour actually spent on work — and Marcus would reclaim 520+ hours per year (10 hours of commute per week). This is the classic case where the lower-paying job is actually the better deal when you account for total time invested.',
+        insight: 'Marcus\'s true hourly rate of $40.50 is about 21% below his standard $51.28 rate — a significant gap driven by his long commute and long hours. His 60 effective weekly hours mean he is effectively working 1.5 full-time jobs. The $100K remote offer at 45 hours/week with no commute would give a true hourly rate of about $46.30/hr ($100K ÷ (45hrs × 48wks with 20 PTO days)). Despite the $20K nominal pay cut, the remote role actually pays more per hour spent on work — and Marcus would reclaim about 480 hours per year (10 hours of commute per week over 48 working weeks). This is the classic case where the lower-paying job is actually the better deal when you account for total time invested.',
       },
     ],
 
     proTips: [
-      'The true hourly rate is your most honest tool for comparing job offers. A $100K remote job with no commute beats a $120K office job with a 90-minute daily commute every time — the difference can be $10-15/hour in effective pay.',
+      'The true hourly rate is your most honest tool for comparing job offers. Commute time can erase a salary gap. A $100K remote job ($48.08/hr) roughly matches a $120K office job with 1.5 commute hours a day ($120,000 / (47.5 hrs x 52) = $48.58/hr) — and the remote job also saves the commute costs and gives you the time back.',
       'Don\'t forget work-from-home costs in the true hourly calculation. If you work remotely, your commute cost is zero but you may have higher utility bills, internet costs, and home office expenses. Subtract these from your salary for an apples-to-apples comparison.',
-      'Use the true hourly rate to evaluate everyday spending decisions. That $5 daily latte costs you about 9 minutes of work at $31.65/hr true. That $50 dinner is over 1.5 hours of your life. This framing helps prioritize spending on what truly matters.',
+      'Use the true hourly rate to evaluate everyday spending decisions. That $5 daily latte costs you about 9.5 minutes of work at $31.65/hr true. That $50 dinner is over 1.5 hours of your life. This framing helps prioritize spending on what truly matters.',
       'If your true hourly rate is significantly below minimum wage in your area, you are effectively working for poverty wages despite a comfortable salary — a sign to renegotiate hours, find a closer job, or switch roles.',
     ],
 
@@ -282,16 +283,16 @@ const salaryHourlyConfig: CalculatorConfig = {
       { label: 'True Formula', value: '(Salary − Commute Costs) ÷ Effective Annual Hours' },
       { label: '$50K, 40hr/wk', value: '~$24.04/hr standard' },
       { label: '$100K, 40hr/wk', value: '~$48.08/hr standard' },
-      { label: '$80K + 1hr commute', value: '$38.46 → $31.65 true (18% cut)' },
+      { label: '$80K, 1hr commute, 5hr OT, 15 PTO days', value: '$38.46 → $31.65 true (18% cut)' },
       { label: '20 PTO days', value: 'Reduces working weeks from 52 to 48' },
-      { label: 'Commute cost est.', value: 'IRS mileage rate: $0.70/mile (2026)' },
+      { label: 'Commute cost est.', value: 'IRS business mileage rate: $0.725/mile (2026)' },
     ],
 
     limitations: [
       'Both standard and true hourly rates are gross (pre-tax). Your actual take-home pay after federal, state, FICA, and benefit deductions will be 20-35% lower depending on your tax bracket and state.',
       'Does not account for the value of employer benefits: health insurance ($5K-$20K/year), 401(k) match (typically 3-6% of salary), life insurance, disability coverage, and tuition reimbursement. A job with great benefits at a lower salary can be more valuable than a higher-salary job with no benefits.',
       'Paid Time Off is modeled as a reduction in working weeks, but the calculator assumes a consistent 5-day work week. If you work a compressed 4x10 schedule or have irregular hours, the effective hours calculation will be slightly off.',
-      'Commute costs use the simplified daily average. For accurate numbers, use the IRS standard mileage rate ($0.70/mile for 2026) multiplied by your daily round-trip miles, plus actual parking and toll costs. A 30-mile round trip at the IRS rate costs $21/day in vehicle wear alone.',
+      'Commute costs use the simplified daily average. For accurate numbers, use the IRS standard mileage rate ($0.725/mile for 2026, Notice 2026-10) multiplied by your daily round-trip miles, plus actual parking and toll costs. A 30-mile round trip at the IRS rate is about $21.75 per day in vehicle costs alone.',
     ],
 citations: [
     { source: 'US Bureau of Labor Statistics', url: 'https://www.bls.gov' },

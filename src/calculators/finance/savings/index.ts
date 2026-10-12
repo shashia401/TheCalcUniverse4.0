@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SavingsPanel from './SavingsPanel';
+import { finalBalance as fvBalance, monthlyForGoal, monthlyRateFromApy, wholeMonths } from './savingsMath';
 
 const savingsConfig: CalculatorConfig = {
   inputs: [
@@ -84,7 +85,7 @@ const savingsConfig: CalculatorConfig = {
       max: 30,
       step: 0.01,
       required: true,
-      helpText: 'High-yield savings accounts currently offer 4.5–5.5% APY',
+      helpText: 'Top high-yield savings accounts pay up to about 4.5% APY in late 2026; the FDIC national average savings rate is 0.37%.',
     },
   ],
   calculate: (values) => {
@@ -98,8 +99,9 @@ const savingsConfig: CalculatorConfig = {
 
     if (isNaN(timePeriod) || isNaN(apy) || timePeriod <= 0) return [];
 
-    const months = timeUnit === 'years' ? timePeriod * 12 : timePeriod;
-    const monthlyRate = apy / 12;
+    const months = wholeMonths(timePeriod, timeUnit);
+    const monthlyRate = monthlyRateFromApy(apy);
+    const longWarn = months > 1200 ? 'A horizon longer than 100 years is purely theoretical; shorten it for a realistic plan.' : undefined;
 
     const fmtD = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -107,20 +109,18 @@ const savingsConfig: CalculatorConfig = {
       n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
     if (solveFor === 'balance') {
-      const futureP = P * Math.pow(1 + monthlyRate, months);
-      const futurePMT = monthlyRate === 0
-        ? monthlyContrib * months
-        : monthlyContrib * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
-      const finalBalance = futureP + futurePMT;
+      const finalBalance = fvBalance(P, monthlyContrib, apy, months);
+      if (!(finalBalance > 0)) return [];
       const totalPrincipal = P + monthlyContrib * months;
       const totalInterest = finalBalance - totalPrincipal;
       const timeLabel = timeUnit === 'years'
-        ? `${timePeriod} year${timePeriod !== 1 ? 's' : ''}`
+        ? `${months / 12} year${months !== 12 ? 's' : ''}`
         : `${months} month${months !== 1 ? 's' : ''}`;
 
       return [
         {
           id: 'finalBalance',
+          warning: longWarn,
           label: `Final Balance after ${timeLabel}`,
           value: fmtK(finalBalance),
           highlight: true,
@@ -154,7 +154,6 @@ const savingsConfig: CalculatorConfig = {
       const futureP = P * Math.pow(1 + monthlyRate, months);
       const remaining = goal - futureP;
 
-      let requiredMonthly: number;
       if (remaining <= 0) {
         return [
           {
@@ -173,11 +172,7 @@ const savingsConfig: CalculatorConfig = {
         ];
       }
 
-      if (monthlyRate === 0) {
-        requiredMonthly = remaining / months;
-      } else {
-        requiredMonthly = remaining * monthlyRate / (Math.pow(1 + monthlyRate, months) - 1);
-      }
+      const requiredMonthly = monthlyForGoal(P, goal, apy, months);
 
       const totalDeposited = P + requiredMonthly * months;
       const totalInterest = goal - totalDeposited;
@@ -185,6 +180,7 @@ const savingsConfig: CalculatorConfig = {
       return [
         {
           id: 'requiredMonthly',
+          warning: longWarn,
           label: 'Required Monthly Contribution',
           value: `$${fmtD(requiredMonthly)}/mo`,
           highlight: true,
@@ -257,7 +253,7 @@ const savingsConfig: CalculatorConfig = {
     },
     variables: [
       { symbol: 'Contributions', name: 'Your Deposits', description: 'Both your initial deposit (P) and ongoing monthly contributions (PMT) form the total principal you invest. The initial deposit starts the growth, but consistent monthly contributions often matter more over time — a regular savings habit beats a one-time lump sum.' },
-      { symbol: 'r', name: 'Monthly Rate', description: 'APY ÷ 12. The APY (Annual Percentage Yield) already accounts for compounding frequency, so dividing by 12 gives the true monthly rate.' },
+      { symbol: 'r', name: 'Monthly Rate', description: '(1 + APY)^(1/12) − 1. The APY (Annual Percentage Yield) is the effective annual return after compounding, so the monthly rate is its twelfth root, not APY ÷ 12. For example, 5% APY is 0.4074% per month, and $5,000 grows to exactly $5,250 in a year.' },
       { symbol: 'n', name: 'Number of Months', description: 'The total duration in months.' },
     ],
     howToUse: [
@@ -271,15 +267,15 @@ const savingsConfig: CalculatorConfig = {
       'Compare the growth difference between a traditional savings account and a high-yield savings account with current market APY rates.',
     ],
     explanation:
-      'A savings calculator is the foundation of any financial goal. Whether saving for an emergency fund (3–6 months of expenses), a down payment, a vacation, or a car, the math is the same: initial deposit + regular contributions + interest = goal. The power of high-yield savings accounts (currently 4.5–5.5% APY) vs. traditional savings accounts (0.01–0.5% APY) is enormous over even a 2–3 year horizon. The difference between putting $500/month in a 0.01% savings account vs. a 5% HYSA is thousands of dollars over 5 years.',
+      'A savings calculator is the foundation of any financial goal. Whether saving for an emergency fund (3–6 months of expenses), a down payment, a vacation, or a car, the math is the same: initial deposit + regular contributions + interest = goal. The power of high-yield savings accounts (up to about 4.5% APY in late 2026) vs. the FDIC national average savings rate (0.37%) is large even over a 2–3 year horizon. Putting $500/month into a 0.01% account vs. a 4.5% HYSA for 5 years is a difference of roughly $3,500 in interest.',
     faqs: [
       {
         question: 'What is APY vs. interest rate?',
-        answer: 'APY (Annual Percentage Yield) already accounts for compounding — it is the actual annual return you earn, including the effect of how often interest is credited. An interest rate of 4.89% compounded monthly has an APY of approximately 5%. For savings accounts, always compare APY, not the nominal rate.',
+        answer: 'APY (Annual Percentage Yield) already accounts for compounding — it is the actual annual return you earn, including the effect of how often interest is credited. An interest rate of 4.89% compounded monthly has an APY of approximately 5.00%. For savings accounts, always compare APY, not the nominal rate.',
       },
       {
         question: 'What are current high-yield savings account rates?',
-        answer: 'As of 2026, leading online banks and credit unions offer 4.5–5.5% APY on high-yield savings accounts (HYSA). Traditional brick-and-mortar bank savings accounts still offer as little as 0.01–0.1% APY. The difference is enormous: $10,000 at 5% APY for 5 years earns roughly $2,834 in interest (this calculator compounds monthly); at 0.01% it earns only $5.',
+        answer: 'In late 2026 the best online high-yield savings accounts (HYSA) pay up to about 4.5% APY, while the FDIC national average savings rate is only 0.37% and many traditional bank accounts pay as little as 0.01%. Rates move with the Federal Reserve, so check a current rate tracker. The difference is large: $10,000 at 5% APY for 5 years earns $2,763 in interest ($10,000 × (1.05^5 − 1)); at 0.01% it earns only about $5.',
       },
       {
         question: 'How much should I have in an emergency fund?',

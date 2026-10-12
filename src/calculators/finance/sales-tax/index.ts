@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SalesTaxPanel from './SalesTaxPanel';
+import { salesTaxFigures } from './salesTaxMath';
 
 const salesTaxConfig: CalculatorConfig = {
   inputs: [
@@ -40,7 +41,7 @@ const salesTaxConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const mode = values.mode || 'add';
+    const mode = !values.mode || values.mode === 'add' ? 'add' : 'extract';
     const amount = parseFloat(values.amount);
     const taxRate = parseFloat(values.taxRate) / 100;
 
@@ -49,10 +50,8 @@ const salesTaxConfig: CalculatorConfig = {
     const fmtD = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+    const { tax: taxAmount, net: netPrice, gross: grossPrice } = salesTaxFigures(mode, amount, taxRate);
     if (mode === 'add') {
-      const taxAmount = amount * taxRate;
-      const grossPrice = amount + taxAmount;
-
       return [
         {
           id: 'grossPrice',
@@ -81,9 +80,6 @@ const salesTaxConfig: CalculatorConfig = {
         },
       ];
     } else {
-      const netPrice = amount / (1 + taxRate);
-      const taxAmount = amount - netPrice;
-
       return [
         {
           id: 'taxAmount',
@@ -180,7 +176,7 @@ const salesTaxConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What is my local sales tax rate?',
-        answer: 'Sales tax rates vary by state, county, and city. The US average combined rate is approximately 7.12%. To find your precise rate, visit your state\'s Department of Revenue website, or look up your ZIP code on the Sales Tax Institute or Avalara websites. Some cities and counties have their own additional rates on top of the state rate, so checking the exact combined rate for your specific address is essential.',
+        answer: 'Sales tax rates vary by state, county, and city. State rates run from 0% in five states (New Hampshire, Oregon, Montana, Delaware, Alaska) to 7.25% in California, and with local taxes the highest average combined rate is Louisiana at about 10.1% (Tax Foundation, 2026). To find your precise rate, visit your state\'s Department of Revenue website, or look up your ZIP code on the Sales Tax Institute or Avalara websites. Some cities and counties have their own additional rates on top of the state rate, so checking the exact combined rate for your specific address is essential.',
       },
       {
         question: 'Why does "Extract Tax" give a different result than just multiplying by the rate?',
@@ -188,7 +184,7 @@ const salesTaxConfig: CalculatorConfig = {
       },
       {
         question: 'Do I charge sales tax on shipping?',
-        answer: 'It depends on your state. Some states tax shipping charges, others exempt them, and some only tax shipping if it is not separately stated on the invoice. As of 2024, approximately 15 states tax shipping unconditionally, 10 states exempt it, and the rest have nuanced rules based on the shipping method and whether the shipping charge is separately stated. This varies significantly by state — consult a tax advisor or your state\'s revenue department for definitive guidance.',
+        answer: 'It depends on your state. Some states tax shipping charges, others exempt them, and some only tax shipping if it is not separately stated on the invoice. Some states tax shipping unconditionally, some exempt it, and many have nuanced rules based on the shipping method and whether the shipping charge is separately stated. This varies significantly by state — consult a tax advisor or your state\'s revenue department for definitive guidance.',
       },
       {
         question: 'Do I need to collect sales tax for online sales in other states?',
@@ -204,7 +200,7 @@ const salesTaxConfig: CalculatorConfig = {
       },
       {
         question: 'What happens if I do not collect and remit sales tax when I should?',
-        answer: 'Failure to collect and remit sales tax can result in significant penalties including back taxes owed, interest on unpaid amounts (often 1-2% per month), and civil penalties ranging from 5-25% of the uncollected tax. In severe cases of deliberate non-compliance, business owners can face personal liability — meaning the state can pursue your personal assets even through a corporation or LLC. States have become increasingly aggressive about enforcement since the Wayfair ruling, and many participate in information-sharing agreements to identify non-compliant sellers. If you discover you have not been collecting when you should have, most states offer voluntary disclosure programs that reduce or waive penalties if you come forward before being contacted by the tax authority.',
+        answer: 'Failure to collect and remit sales tax can result in significant penalties including back taxes owed, interest on unpaid amounts, and civil penalties that commonly run from about 5% to 25% of the uncollected tax depending on the state. In severe cases of deliberate non-compliance, business owners can face personal liability — meaning the state can pursue your personal assets even through a corporation or LLC. States have become increasingly aggressive about enforcement since the Wayfair ruling, and many participate in information-sharing agreements to identify non-compliant sellers. If you discover you have not been collecting when you should have, most states offer voluntary disclosure programs that reduce or waive penalties if you come forward before being contacted by the tax authority.',
       },
     ],
     workedExamples: [
@@ -218,7 +214,7 @@ const salesTaxConfig: CalculatorConfig = {
         scenario: 'Mark owns a small retail shop in Chicago where the combined sales tax rate is 10.25% (6.25% state + 1.75% county + 1.25% city + 1% RTA). He wants to price a new product at $49.99 pre-tax and needs to know the shelf price.',
         inputs: { mode: 'add', amount: '49.99', taxRate: '10.25' },
         result: 'Total with tax: $55.11, Tax amount: $5.12, Pre-tax: $49.99',
-        insight: 'Mark could set the shelf price as $55.11 or round up to $55.99 for psychological pricing. Chicago has one of the highest combined sales tax rates in the US — only a few cities like Long Beach, CA and certain Louisiana parishes exceed 10.25%. His customers pay $5.12 in tax on a single $49.99 item, which highlights the real impact that local tax rates have on consumers.',
+        insight: 'Mark could set the shelf price as $55.11 or round up to $55.99 for psychological pricing. Chicago has one of the highest combined sales tax rates among large US cities. His customers pay $5.12 in tax on a single $49.99 item, which highlights the real impact that local tax rates have on consumers.',
       },
       {
         scenario: 'Sarah is an e-commerce seller based in Florida shipping to a customer in New York. She sold an item for $89.99 pre-tax. Florida has a 6% state rate and New York state rate is 4% plus the customer\'s county surcharge.',
@@ -234,9 +230,9 @@ const salesTaxConfig: CalculatorConfig = {
       'Keep your resale certificates organized and up to date. If you purchase inventory for resale, you generally do not pay sales tax on those purchases — you collect it from the end customer instead. Without a valid resale certificate on file with your supplier, you will be charged tax twice (once when you buy inventory and once when you sell it).',
     ],
     quickReference: [
-      { label: 'US Average Combined Rate', value: '~7.12%' },
+      { label: 'Highest Average Combined Rate', value: 'Louisiana ~10.1% (Tax Foundation, 2026)' },
       { label: 'Highest State Rate (CA)', value: '7.25%' },
-      { label: 'Highest Combined Rate', value: '~10.25% (Chicago, Long Beach)' },
+      { label: 'Example Combined Rate', value: '10.25% (Chicago)' },
       { label: 'No State Sales Tax', value: 'NH, OR, MT, DE, AK' },
       { label: 'Add Tax Formula', value: 'Gross = Net x (1 + rate)' },
       { label: 'Extract Tax Formula', value: 'Net = Gross / (1 + rate)' },

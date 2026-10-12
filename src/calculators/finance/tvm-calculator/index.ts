@@ -2,63 +2,7 @@ import { createElement } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import TVMPanel from './TVMPanel';
-
-function tvmFV(pv: number, pmt: number, r: number, n: number, due: boolean): number {
-  if (r === 0) return -(pv + pmt * n);
-  const D = new Decimal(1).plus(r).pow(n);
-  const annuityFactor = due
-    ? D.minus(1).div(r).times(new Decimal(1).plus(r))
-    : D.minus(1).div(r);
-  return -(new Decimal(pv).times(D).plus(new Decimal(pmt).times(annuityFactor))).toNumber();
-}
-
-function tvmPV(fv: number, pmt: number, r: number, n: number, due: boolean): number {
-  if (r === 0) return -(fv + pmt * n);
-  const D = new Decimal(1).plus(r).pow(n);
-  const annuityFactor = due
-    ? new Decimal(1).minus(new Decimal(1).div(D)).div(r).times(new Decimal(1).plus(r))
-    : new Decimal(1).minus(new Decimal(1).div(D)).div(r);
-  return -(new Decimal(fv).div(D).plus(new Decimal(pmt).times(annuityFactor))).toNumber();
-}
-
-function tvmPMT(pv: number, fv: number, r: number, n: number, due: boolean): number {
-  if (r === 0) return -(pv + fv) / n;
-  const D = new Decimal(1).plus(r).pow(n);
-  const dueMult = due ? new Decimal(1).div(new Decimal(1).plus(r)) : new Decimal(1);
-  return -(new Decimal(pv).times(D).plus(fv))
-    .div(D.minus(1).div(r))
-    .times(dueMult)
-    .toNumber();
-}
-
-function tvmN(pv: number, fv: number, pmt: number, r: number, due: boolean): number {
-  if (r === 0) {
-    if (pmt === 0) return 0;
-    return -(pv + fv) / pmt;
-  }
-  const dueMult = due ? new Decimal(1).plus(r) : new Decimal(1);
-  const num = new Decimal(-fv).times(r).plus(new Decimal(pmt).times(dueMult));
-  const den = new Decimal(pv).times(r).plus(new Decimal(pmt).times(dueMult));
-  if (den.eq(0) || num.div(den).lte(0)) return NaN;
-  return Decimal.ln(num.div(den)).div(Decimal.ln(new Decimal(1).plus(r))).toNumber();
-}
-
-function tvmRate(pv: number, fv: number, pmt: number, n: number, due: boolean): number {
-  if (n === 0) return 0;
-  let rate = 0.1;
-  for (let i = 0; i < 200; i++) {
-    const fvCalc = tvmFV(pv, pmt, rate, n, due);
-    const delta = 1e-6;
-    const fvDelta = tvmFV(pv, pmt, rate + delta, n, due);
-    const deriv = (fvDelta - fvCalc) / delta;
-    if (Math.abs(deriv) < 1e-15) break;
-    const next = rate - (fvCalc - fv) / deriv;
-    if (Math.abs(next - rate) < 1e-10) { rate = next; break; }
-    rate = next;
-    if (rate < -0.9999) rate = -0.9999;
-  }
-  return rate;
-}
+import { tvmFV, tvmN, tvmPMT, tvmPV, tvmRate } from './tvmMath';
 
 const tvmSvg = `<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect width="440" height="340" fill="var(--svg-f8fafc)" rx="8"/><text x="220" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--svg-1e293b)">The Five Variables of TVM</text><text x="220" y="44" text-anchor="middle" font-size="11" fill="var(--svg-64748b)">Know any four, solve for the fifth</text><g transform="translate(40,65)"><rect x="0" y="0" width="120" height="60" rx="8" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><text x="60" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-1e40af)">PV</text><text x="60" y="44" text-anchor="middle" font-size="10" fill="var(--svg-64748b)">Present Value</text><text x="60" y="56" text-anchor="middle" font-size="8" fill="var(--svg-94a3b8)">Today's $</text><line x1="125" y1="30" x2="195" y2="30" stroke="var(--svg-22c55e)" stroke-width="2.5" stroke-linecap="round"/><polygon points="195,24 208,30 195,36" fill="var(--svg-22c55e)"/><text x="165" y="18" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)" font-weight="bold">x(1+r)^n</text><rect x="215" y="0" width="120" height="60" rx="8" fill="var(--svg-dcfce7)" stroke="var(--svg-22c55e)" stroke-width="2"/><text x="275" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-15803d)">FV</text><text x="275" y="44" text-anchor="middle" font-size="10" fill="var(--svg-64748b)">Future Value</text><text x="275" y="56" text-anchor="middle" font-size="8" fill="var(--svg-94a3b8)">Later $</text><rect x="0" y="85" width="120" height="50" rx="8" fill="var(--svg-fef3c7)" stroke="var(--svg-f59e0b)" stroke-width="1.5"/><text x="60" y="106" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-b45309)">PMT</text><text x="60" y="123" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">Periodic Payment</text><line x1="60" y1="135" x2="60" y2="145" stroke="var(--svg-f59e0b)" stroke-width="1.5"/><line x1="60" y1="145" x2="165" y2="145" stroke="var(--svg-f59e0b)" stroke-width="1.5" stroke-dasharray="4,3"/><line x1="165" y1="145" x2="275" y2="145" stroke="var(--svg-f59e0b)" stroke-width="1.5" stroke-dasharray="4,3"/><polygon points="275,139 285,145 275,151" fill="var(--svg-f59e0b)"/><rect x="140" y="85" width="110" height="50" rx="8" fill="var(--svg-f3e8ff)" stroke="var(--svg-8b5cf6)" stroke-width="1.5"/><text x="195" y="106" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-7c3aed)">N</text><text x="195" y="123" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">Number of Periods</text><rect x="270" y="85" width="110" height="50" rx="8" fill="var(--svg-fce7f3)" stroke="var(--svg-ec4899)" stroke-width="1.5"/><text x="325" y="106" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-db2777)">Rate (I/Y)</text><text x="325" y="123" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">Interest per Period</text><line x1="20" y1="175" x2="360" y2="175" stroke="var(--svg-94a3b8)" stroke-width="2"/><circle cx="20" cy="175" r="6" fill="var(--svg-3b82f6)"/><text x="20" y="192" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)" font-weight="bold">Today</text><circle cx="105" cy="175" r="4" fill="var(--svg-f59e0b)"/><text x="105" y="192" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">PMT</text><circle cx="190" cy="175" r="4" fill="var(--svg-f59e0b)"/><text x="190" y="192" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">PMT</text><circle cx="275" cy="175" r="4" fill="var(--svg-f59e0b)"/><text x="275" y="192" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">PMT</text><circle cx="360" cy="175" r="6" fill="var(--svg-22c55e)"/><text x="360" y="192" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)" font-weight="bold">End</text><g transform="translate(20,210)"><text x="170" y="10" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Use Cases</text><text x="85" y="28" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">Mortgage: Solve PMT</text><text x="170" y="28" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">Savings: Solve FV</text><text x="255" y="28" text-anchor="middle" font-size="9" fill="var(--svg-8b5cf6)">Lease: Solve Rate</text><text x="85" y="44" text-anchor="middle" font-size="9" fill="var(--svg-ef4444)">Payoff: Solve N</text><text x="200" y="44" text-anchor="middle" font-size="9" fill="var(--svg-f59e0b)">Investment: Solve PV</text></g></g></svg>`;
 
@@ -86,6 +30,7 @@ const tvmConfig: CalculatorConfig = {
       unit: 'periods',
       inputMode: 'numeric',
       min: 0,
+      max: 12000,
       step: 1,
       helpText: 'Total number of payment periods (e.g., 360 for 30-yr monthly mortgage)',
     },
@@ -164,13 +109,14 @@ const tvmConfig: CalculatorConfig = {
     let extraResults: Array<{ id: string; label: string; value: string; color?: 'positive' | 'negative' | 'neutral' }> = [];
 
     if (solveFor === 'FV') {
-      if ([nRaw, rateRaw, pvRaw, pmtRaw].some(isNaN)) return [];
+      if ([nRaw, rateRaw, pvRaw].some(isNaN)) return [];
       const pmt = isNaN(pmtRaw) ? 0 : pmtRaw;
       solved = tvmFV(pvRaw, pmt, rateRaw, nRaw, due);
       label = 'Future Value (FV)';
 
-      const totalPmt = (isNaN(pmtRaw) ? 0 : pmtRaw) * nRaw;
-      const interest = solved - (-pvRaw) - totalPmt;
+      // Cash put in = -(PV + PMT x n) (both negative when you invest); interest = FV - cash put in = FV + PV + PMT x n.
+      const totalPmt = pmt * nRaw;
+      const interest = solved + pvRaw + totalPmt;
       extraResults = [
         { id: 'totalPayments', label: 'Total of Payments', value: fmtMoney(totalPmt), color: 'neutral' },
         { id: 'totalInterest', label: 'Total Interest Earned', value: fmtMoney(interest), color: interest >= 0 ? 'positive' : 'negative' },
@@ -230,6 +176,15 @@ const tvmConfig: CalculatorConfig = {
       return [{ id: 'error', label: 'Result', value: 'Cannot solve — check inputs', color: 'negative' }];
     }
 
+    // The solved variable joins the entered ones so the panel can draw the real scenario (it used to plot the blank field as 0).
+    const pmtUsed = isNaN(pmtRaw) ? 0 : pmtRaw;
+    const known = { n: nRaw, rate: rateRaw, pv: pvRaw, pmt: pmtUsed, fv: fvRaw };
+    const scenario = {
+      ...known,
+      ...(solveFor === 'FV' ? { fv: solved } : solveFor === 'PV' ? { pv: solved } : solveFor === 'N' ? { n: solved } : solveFor === 'RATE' ? { rate: solved / 100 } : { pmt: solved }),
+      due,
+    };
+
     const displayValue = solveFor === 'N'
       ? `${solved.toFixed(4)} periods`
       : solveFor === 'RATE'
@@ -252,6 +207,7 @@ const tvmConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       ...extraResults.map(r => ({ ...r, color: r.color as 'positive' | 'negative' | 'neutral' | undefined })),
+      { id: '_tvm', label: '', value: JSON.stringify(scenario) },
     ];
   },
   educational: {
@@ -329,7 +285,7 @@ const tvmConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What is the difference between an ordinary annuity and annuity due?',
-        answer: 'An ordinary annuity (End of Period) assumes payments occur at the end of each period — this is standard for loans and mortgages. An annuity due (Beginning of Period) assumes payments occur at the start — typical for leases and rent payments. Annuity due values are always slightly higher because payments are made sooner, giving them less time to discount (PV) or more time to compound (FV). For example, a $250,000 mortgage at 6% for 30 years: ordinary PMT = -$1,498.88, annuity due PMT = -$1,491.40.',
+        answer: 'An ordinary annuity (End of Period) assumes payments occur at the end of each period — this is standard for loans and mortgages. An annuity due (Beginning of Period) assumes payments occur at the start — typical for leases and rent payments. Annuity due values are always slightly higher because payments are made sooner, giving them less time to discount (PV) or more time to compound (FV). For example, a $250,000 mortgage at 6% for 30 years: ordinary PMT = -$1,498.88, annuity due PMT = -$1,491.42 ($1,498.88 / 1.005).',
       },
       {
         question: 'Why do I enter the loan amount as a positive number for PV?',

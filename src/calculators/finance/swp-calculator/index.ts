@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SwpPanel from './SwpPanel';
+import { simulateSwp } from './swpMath';
 
 function fmt(n: number): string {
   const abs = Math.abs(n);
@@ -30,10 +31,10 @@ const swpConfig: CalculatorConfig = {
       unit: '%',
       inputMode: 'decimal',
       min: 0,
-      max: 100,
+      max: 50,
       step: 0.5,
       required: true,
-      helpText: 'Expected annual return on remaining corpus',
+      helpText: 'Expected annual return on remaining corpus (applied as annual rate / 12 each month)',
     },
     {
       id: 'monthlyWithdrawal',
@@ -54,9 +55,10 @@ const swpConfig: CalculatorConfig = {
       unit: 'years',
       inputMode: 'decimal',
       min: 0,
+      max: 60,
       step: 1,
       required: true,
-      helpText: 'How many years you need the withdrawals to last',
+      helpText: 'How many years you need the withdrawals to last (up to 60)',
     },
   ],
   calculate: (values) => {
@@ -67,47 +69,21 @@ const swpConfig: CalculatorConfig = {
 
     if (corpus <= 0 || monthlyW <= 0 || isNaN(r) || isNaN(t) || t <= 0) return [];
 
-    const monthlyRate = r / 12;
     const targetMonths = Math.round(t * 12);
-
-    // Simulate month-by-month to accurately track depletion
-    let balance = corpus;
-    let monthsLasted = 0;
-    const chartData: { year: number; value: number }[] = [];
-
-    for (let m = 1; m <= 600; m++) { // max 50 years
-      if (balance <= 0) break;
-      // Apply growth first
-      if (monthlyRate > 0) {
-        balance = balance * (1 + monthlyRate);
-      }
-      // Subtract withdrawal
-      balance -= monthlyW;
-      monthsLasted = m;
-
-      // Record yearly snapshots
-      if (m % 12 === 0) {
-        chartData.push({ year: m / 12, value: Math.round(balance * 100) / 100 });
-        if (balance <= 0) break;
-      }
-
-      // Stop at the requested withdrawal period
-      if (m >= targetMonths) break;
-    }
-
-    const totalWithdrawn = monthlyW * Math.min(monthsLasted, targetMonths);
-    const endingValue = balance;
+    if (targetMonths < 1) return [];
+    const sim = simulateSwp(corpus, r, monthlyW, targetMonths);
+    const { monthsPaid: monthsLasted, totalWithdrawn, ending: endingValue, depleted, yearly: chartData } = sim;
 
     const results: CalculatorResult[] = [
       {
         id: 'finalValue',
-        label: `Final Value (${monthsLasted >= targetMonths ? 'Corpus preserved' : 'Depleted'})`,
+        label: `Final Value (${depleted ? 'Depleted' : 'Corpus preserved'})`,
         value: fmt(endingValue),
         highlight: true,
-        color: endingValue > 0 ? 'positive' : 'negative',
-        interpretation: monthsLasted >= targetMonths
-          ? `Your withdrawal rate stayed below the assumed growth rate, so the corpus outlasted the withdrawal period and still has value left. This assumes a steady return every month — real markets don't move in a straight line, so a market downturn early in withdrawals can deplete a fund faster than this model shows.`
-          : `Withdrawals outpaced growth and the fund ran out after ${monthsLasted} of the ${targetMonths} months requested. Lowering the monthly withdrawal or extending the time horizon are the two levers that fix this.`,
+        color: depleted ? 'negative' : 'positive',
+        interpretation: !depleted
+          ? `The corpus outlasted the ${targetMonths}-month withdrawal period and still has ${fmt(endingValue)} left (${endingValue >= corpus ? 'it grew, because the assumed return exceeds your withdrawals' : 'it shrank, but it covers every withdrawal'}). This assumes a steady return every month — real markets don't move in a straight line, so a market downturn early in withdrawals can deplete a fund faster than this model shows.`
+          : `The fund ran out in month ${monthsLasted} of the ${targetMonths} requested (the last payment is only what was left). Lowering the monthly withdrawal or extending the time horizon are the two levers that fix this.`,
       },
       {
         id: 'totalInvested',
@@ -123,7 +99,7 @@ const swpConfig: CalculatorConfig = {
       },
       {
         id: 'monthsLasted',
-        label: 'Withdrawal Period',
+        label: depleted ? 'Fund Lasts' : 'Withdrawal Period',
         value: `${monthsLasted} months (${(monthsLasted / 12).toFixed(1)} yr)`,
         color: 'neutral',
       },
@@ -148,7 +124,7 @@ const swpConfig: CalculatorConfig = {
       caption: 'Each month, the corpus earns returns first, then the withdrawal is deducted from the remaining balance',
     },
     formulaDescription:
-      'The SWP calculation simulates month-by-month depletion: at the start of each month, the remaining balance earns one month of returns (r/12), then the monthly withdrawal is deducted. If the returns exceed the withdrawal, the corpus grows — this is the ideal scenario for perpetual income. If the withdrawal exceeds returns, the corpus gradually depletes. The simulation runs until either the balance reaches zero or the requested withdrawal period ends. The key metric is sustainability: can the corpus survive the full required period? The SWP formula is essentially the reverse of the SIP formula — instead of adding money monthly, you are removing it while the remaining balance continues compounding.',
+      'The SWP calculation simulates month-by-month depletion: each month the remaining balance earns one month of returns (r/12), then the monthly withdrawal is deducted at month end. If the returns exceed the withdrawal, the corpus grows — this is the ideal scenario for perpetual income. If the withdrawal exceeds returns, the corpus gradually depletes. The simulation runs until either the balance reaches zero (the final payment is whatever is left) or the requested withdrawal period ends. When withdrawals exceed monthly growth, the months to depletion are n = −ln(1 − i·C/W) / ln(1 + i), with i = r/12. The key metric is sustainability: can the corpus survive the full required period? The SWP formula is essentially the reverse of the SIP formula — instead of adding money monthly, you are removing it while the remaining balance continues compounding.',
     variables: [
       { symbol: 'P', name: 'Initial Corpus', description: 'The total investable amount at the start of withdrawals. This is typically your retirement corpus or any large investment intended for regular income generation.' },
       { symbol: 'r', name: 'Annual Return Rate', description: 'The expected annual return on the remaining balance. A balanced portfolio (equity + debt) typically expects 7-9% post-retirement. The monthly rate is r/12 applied each month before the withdrawal.' },
@@ -175,13 +151,13 @@ const swpConfig: CalculatorConfig = {
         scenario: 'Mr. Sharma, age 60, has a retirement corpus of Rs 1 crore invested in a balanced fund. He needs Rs 50,000 per month for living expenses. Assuming 8% annual returns, will his corpus last 30 years until age 90?',
         inputs: { corpus: '10000000', expectedReturn: '8', monthlyWithdrawal: '50000', withdrawalPeriod: '30' },
         result: 'With 8% returns and Rs 50,000/month withdrawal (6% annual withdrawal rate), the corpus not only lasts the full 30 years but grows, ending with approximately Rs 3.48 crore still remaining — because the 8% return outpaces the 6% withdrawal rate.',
-        insight: 'With 8% returns and Rs 50,000/month withdrawal (6% annual withdrawal rate), the corpus comfortably survives the full 30-year target and still has roughly Rs 3.48 crore left over, since the return rate exceeds the withdrawal rate. Mr. Sharma actually has room to increase his monthly withdrawal — a corpus this size only depletes if the withdrawal rate creeps above the 8% return rate for an extended period.',
+        insight: 'With 8% returns and Rs 50,000/month withdrawal (6% annual withdrawal rate), the corpus comfortably survives the full 30-year target and still has roughly Rs 3.48 crore left over, since the return rate exceeds the withdrawal rate. Mr. Sharma actually has room to increase his monthly withdrawal — the fund only depletes if withdrawals exceed the return the corpus earns.',
       },
       {
         scenario: 'Ananya, age 45, is planning early retirement (FIRE) with a corpus of Rs 3 crore. She needs Rs 1 lakh per month and expects 9% returns from a diversified portfolio. Can she sustain this for 45 years?',
         inputs: { corpus: '30000000', expectedReturn: '9', monthlyWithdrawal: '100000', withdrawalPeriod: '45' },
-        result: 'At a 4% annual withdrawal rate (Rs 1 lakh/month = Rs 12 lakh/year = 4% of Rs 3 crore), the corpus has a high probability of lasting 45+ years at 9% returns. With returns exceeding the withdrawal rate by 5%, the corpus may actually grow over time.',
-        insight: 'At a 4% annual withdrawal rate (Rs 1 lakh/month = Rs 12 lakh/year = 4% of Rs 3 crore), the corpus has a high probability of lasting 45+ years at 9% returns. In fact, with returns exceeding the withdrawal rate by 5%, the corpus may actually grow over time. Ananya\'s plan is conservative and sustainable — the key risk is sequence-of-returns in the first 5 years of early retirement.',
+        result: 'At a 4% annual withdrawal rate (Rs 1 lakh/month = Rs 12 lakh/year = 4% of Rs 3 crore), the corpus lasts the full 45 years in this fixed-return model and keeps growing, because the 9% return exceeds the withdrawal rate by 5 percentage points.',
+        insight: 'At a 4% annual withdrawal rate (Rs 1 lakh/month = Rs 12 lakh/year = 4% of Rs 3 crore), the corpus lasts the full 45 years at a steady 9% return and keeps growing. Real returns are not steady, so the sequence of returns is the real risk to a plan this long. Ananya\'s plan is conservative and sustainable — the key risk is sequence-of-returns in the first 5 years of early retirement.',
       },
     ],
     proTips: [
@@ -201,7 +177,7 @@ const swpConfig: CalculatorConfig = {
     quickReference: [
       { label: '4% Rule (Trinity Study)', value: '4% of corpus/year, adjusted for inflation' },
       { label: 'Indian Conservative SWR', value: '5-6% for equity-heavy portfolios' },
-      { label: 'Perpetual SWR', value: '3-3.5% to preserve corpus indefinitely' },
+      { label: 'Perpetual SWR', value: 'Rule of thumb: ~3-3.5% for very long horizons' },
       { label: 'SWP vs Annuity', value: 'SWP retains capital; annuity surrenders it' },
       { label: 'Bucket Strategy', value: '2-3yr cash + balance in balanced fund' },
       { label: 'Tax: Equity LTCG', value: '12.5% above Rs 1.25L/year' },
@@ -211,11 +187,11 @@ const swpConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'How long will my corpus last?',
-        answer: 'The calculator simulates month-by-month withdrawals and growth. Your corpus lasts as long as the balance stays above zero after each withdrawal. A sustainable withdrawal rate is typically 4-6% of the initial corpus per year. At 8% returns with 5% withdrawal rate, the corpus can last 30+ years. At 8% returns with 10% withdrawal rate, it may deplete in 12-15 years. The chart shows the projected balance year by year so you can see exactly when depletion occurs.',
+        answer: 'The calculator simulates month-by-month withdrawals and growth. Your corpus lasts as long as the balance stays above zero after each withdrawal. A sustainable withdrawal rate is typically 4-6% of the initial corpus per year. At 8% returns with 5% withdrawal rate, the corpus can last 30+ years. At 8% returns with a 10% withdrawal rate, it depletes in about 20 years (n = −ln(1 − 0.8) / ln(1 + 0.08/12) ≈ 242 months). The chart shows the projected balance year by year so you can see exactly when depletion occurs.',
       },
       {
         question: 'What is a safe withdrawal rate for Indian retirees?',
-        answer: 'The classic "4% rule" from the US Trinity Study suggests withdrawing 4% of initial corpus annually (adjusted for inflation) for a 30-year retirement with 95% success rate. For India, a withdrawal rate of 5-6% is sometimes used due to higher expected equity returns (10-12% vs 7-8% in the US), but this carries higher risk. A conservative Indian SWP withdrawal rate is 4-5% for a balanced portfolio. For early retirement (FIRE) requiring 40-50 years, aim for 3-3.5% withdrawal rate to ensure the corpus outlasts you.',
+        answer: 'The classic "4% rule" from the US Trinity Study suggests withdrawing 4% of initial corpus annually (adjusted for inflation) for a 30-year retirement with 95% success rate. For India, a withdrawal rate of 5-6% is sometimes used because of higher expected nominal returns, but higher inflation offsets much of that and the plan carries more risk. A conservative Indian SWP withdrawal rate is 4-5% for a balanced portfolio. For early retirement (FIRE) requiring 40-50 years, aim for 3-3.5% withdrawal rate to ensure the corpus outlasts you.',
       },
       {
         question: 'Is SWP better than buying an annuity?',
@@ -227,7 +203,7 @@ const swpConfig: CalculatorConfig = {
       },
       {
         question: 'How are SWP withdrawals taxed in India?',
-        answer: 'Each SWP installment is treated as a redemption of mutual fund units on a first-in-first-out (FIFO) basis. For equity funds: LTCG (held > 1 year) taxed at 12.5% above Rs 1.25 lakh per year; STCG (held < 1 year) at 20%. For debt funds: taxed at your income tax slab rate regardless of holding period (as per 2023 Budget changes). For tax-efficient SWP, stagger your initial investment over multiple funds and withdraw from debt fund units held over 3 years first to minimize short-term gains tax.',
+        answer: 'Each SWP installment is treated as a redemption of mutual fund units on a first-in-first-out (FIFO) basis. For equity funds: LTCG (held > 1 year) taxed at 12.5% above Rs 1.25 lakh per year; STCG (held < 1 year) at 20%. For debt funds: taxed at your income tax slab rate regardless of holding period (as per 2023 Budget changes). For tax-efficient SWP, remember that each redemption takes gains from the oldest units first, so the first withdrawals of a new SWP are mostly principal.',
       },
       {
         question: 'What is the bucket strategy for SWP?',

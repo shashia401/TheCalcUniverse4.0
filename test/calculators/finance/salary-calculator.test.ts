@@ -109,13 +109,12 @@ describe('salary-calculator', () => {
     const gross = parseNumber(getValue(r, 'annual'));
     const netAnnual = parseNumber(getValue(r, 'netAnnual'));
     expect(netAnnual).toBeLessThan(gross);
-    // For $75,000 single filer with 2026 rates + 4.5% state estimate
+    // For $75,000 single filer with 2026 rates (federal + FICA only, no state tax)
     // Federal tax on (75000 - 16100) = 58900 taxable:
     //   12400*0.10 + (50400-12400)*0.12 + (58900-50400)*0.22 = 7670
     // FICA: SS = 75000*0.062 = 4650, Medicare = 75000*0.0145 = 1087.5
-    // State: 75000*0.045 = 3375
-    // Net = 75000 - 7670 - 4650 - 1087.5 - 3375 = 58217.5
-    near(netAnnual, 58218, 100);
+    // Net = 75000 - 7670 - 4650 - 1087.5 = 61592.5
+    near(netAnnual, 61592.5, 1);
   });
 
   it('net bi-weekly paycheck equals netAnnual / 26', () => {

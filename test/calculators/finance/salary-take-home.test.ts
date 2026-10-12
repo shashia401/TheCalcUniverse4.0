@@ -57,8 +57,10 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
     const stateTax = parseMoney(getValue(r, 'totalStateTax'));
     expect(stateTax).toBeGreaterThan(0);
 
-    // State tax should be ~$13,950 ($150K × 9.3%)
-    near(stateTax, 13950.00);
+    // CA 2026 MFJ schedule (Tax Foundation), taxable = 150,000 - 11,080 std = 138,920:
+    //   1% to 22,158 = 221.58; 2% to 52,528 = 607.40; 4% to 82,904 = 1,215.04;
+    //   6% to 115,084 = 1,930.80; 8% on the remaining 23,836 = 1,906.88  -> 5,881.70
+    near(stateTax, 5881.70);
 
     // Federal tax on $117,800 taxable (MFJ, $32,200 std deduction, 2026):
     //   10% on $0–$24,800 = $2,480
@@ -164,9 +166,10 @@ describe('salary-take-home (Salary Take-Home Pay Calculator)', () => {
     const fica = parseMoney(getValue(r, 'totalFICA'));
     near(fica, 16239.00);
 
-    // CA state tax: $300K × 9.3% = $27,900
+    // CA MFJ 2026, taxable = 300,000 - 11,080 = 288,920: 221.58 + 607.40 + 1,215.04 + 1,930.80
+    //   + 8% x 30,364 (2,429.12) + 9.3% x 143,472 (13,342.90) = 19,746.84
     const stateTax = parseMoney(getValue(r, 'totalStateTax'));
-    near(stateTax, 27900);
+    near(stateTax, 19746.84);
   });
 
   it('$225K single — additional Medicare surtax on income over $200K', () => {

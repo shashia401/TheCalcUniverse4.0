@@ -49,7 +49,11 @@ describe('SWP Calculator', () => {
       monthlyWithdrawal: '100000',
       withdrawalPeriod: '5',
     });
-    expect(parseInr(getValue(r, 'finalValue'))).toBeLessThan(0);
+    // The balance cannot go below zero: depleted. Lifetime n = -ln(1 - i*C/W)/ln(1+i) = -ln(0.75)/ln(1.005) = 57.7
+    // months, so the 58th (partial) payment empties the fund.
+    expect(parseInr(getValue(r, 'finalValue'))).toBe(0);
+    expect(r.find((x) => x.id === 'finalValue')!.label).toContain('Depleted');
+    expect(getValue(r, 'monthsLasted')).toContain('58 months');
   });
 
   it('zero return: corpus depletes exactly at corpus / monthly', () => {
@@ -79,7 +83,10 @@ describe('SWP Calculator', () => {
       monthlyWithdrawal: '500000',
       withdrawalPeriod: '5',
     });
-    expect(parseInr(getValue(r, 'finalValue'))).toBeLessThan(0);
+    // 100,000 x (1 + 0.08/12) = 100,666.67 < 500,000: the first payment is only what is left
+    expect(parseInr(getValue(r, 'finalValue'))).toBe(0);
+    expect(getValue(r, 'monthsLasted')).toContain('1 months');
+    near(parseInr(getValue(r, 'totalWithdrawn')), 100666.67, 500); // displayed as lakhs (1.01L)
   });
 
   it('very small withdrawal relative to corpus: final value positive', () => {

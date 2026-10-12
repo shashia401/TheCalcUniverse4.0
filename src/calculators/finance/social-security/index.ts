@@ -2,59 +2,10 @@ import { createElement } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import SocialSecurityPanel from './SocialSecurityPanel';
+import { BEND_POINTS, estimatePIA, fraLabel, getFRA, monthlyBenefit } from './ssMath';
+import { FICA } from '../../../utils/taxData';
 
-function estimatePIA(annualIncome: number, birthYear: number): number {
-  const yearsWorked = Math.min(35, new Date().getFullYear() - birthYear - 22);
-  const aime = Math.max(0, new Decimal(annualIncome).div(12).times(new Decimal(yearsWorked).div(35)).toNumber());
-
-  const bend1 = 1174;
-  const bend2 = 7078;
-
-  let pia: number;
-  if (aime <= bend1) {
-    pia = new Decimal(aime).times(0.90).toNumber();
-  } else if (aime <= bend2) {
-    pia = new Decimal(bend1).times(0.90)
-      .plus(new Decimal(aime).minus(bend1).times(0.32))
-      .toNumber();
-  } else {
-    pia = new Decimal(bend1).times(0.90)
-      .plus(new Decimal(bend2).minus(bend1).times(0.32))
-      .plus(new Decimal(aime).minus(bend2).times(0.15))
-      .toNumber();
-  }
-
-  return Math.round(pia);
-}
-
-function getMonthlyBenefit(pia: number, retirementAge: number, fra: number): number {
-  if (retirementAge >= fra) {
-    const monthsDelayed = (retirementAge - fra) * 12;
-    const increase = new Decimal(monthsDelayed).times(0.00667);
-    return Math.round(new Decimal(pia).times(new Decimal(1).plus(increase)).toNumber());
-  } else {
-    const monthsEarly = (fra - retirementAge) * 12;
-    let reduction: number;
-    if (monthsEarly <= 36) {
-      reduction = new Decimal(monthsEarly).times(5 / 9).div(100).toNumber();
-    } else {
-      reduction = new Decimal(36).times(5 / 9).div(100)
-        .plus(new Decimal(monthsEarly - 36).times(5 / 12).div(100))
-        .toNumber();
-    }
-    return Math.round(new Decimal(pia).times(new Decimal(1).minus(reduction)).toNumber());
-  }
-}
-
-function getFRA(birthYear: number): number {
-  if (birthYear <= 1937) return 65;
-  if (birthYear <= 1942) return 65 + (birthYear - 1937) * (2 / 12);
-  if (birthYear <= 1954) return 66;
-  if (birthYear <= 1959) return 66 + (birthYear - 1954) * (2 / 12);
-  return 67;
-}
-
-const ssSvg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="8"/><text x="160" y="20" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-1e293b)">PIA: Progressive Benefit Formula</text><rect x="10" y="35" width="300" height="155" rx="8" fill="var(--svg-f1f5f9)"/><rect x="20" y="50" width="80" height="50" rx="5" fill="var(--svg-22c55e)" opacity="0.85"/><text x="60" y="72" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-ffffff)">90%</text><text x="60" y="88" text-anchor="middle" font-size="8" fill="var(--svg-052e16)">of AIME up to $1,174</text><rect x="110" y="50" width="90" height="50" rx="5" fill="var(--svg-3b82f6)" opacity="0.85"/><text x="155" y="72" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-ffffff)">32%</text><text x="155" y="88" text-anchor="middle" font-size="8" fill="var(--svg-1e3a5f)">of AIME $1,174-$7,078</text><rect x="210" y="50" width="90" height="50" rx="5" fill="var(--svg-ef4444)" opacity="0.85"/><text x="255" y="72" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-ffffff)">15%</text><text x="255" y="88" text-anchor="middle" font-size="8" fill="var(--svg-450a0a)">of AIME above $7,078</text><text x="160" y="115" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">Example: $5,000 AIME</text><text x="160" y="133" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">$1,174 x 90% = $1,057</text><text x="160" y="149" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">$3,826 x 32% = $1,224</text><line x1="50" y1="156" x2="270" y2="156" stroke="var(--svg-cbd5e1)" stroke-width="0.8"/><text x="160" y="172" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">PIA = $1,057 + $1,224 = $2,281/mo</text><text x="160" y="186" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">The formula replaces more of lower incomes — a progressive design</text></svg>`;
+const ssSvg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="8"/><text x="160" y="20" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-1e293b)">PIA: Progressive Benefit Formula</text><rect x="10" y="35" width="300" height="155" rx="8" fill="var(--svg-f1f5f9)"/><rect x="20" y="50" width="80" height="50" rx="5" fill="var(--svg-22c55e)" opacity="0.85"/><text x="60" y="72" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-ffffff)">90%</text><text x="60" y="88" text-anchor="middle" font-size="8" fill="var(--svg-052e16)">of AIME up to $1,286</text><rect x="110" y="50" width="90" height="50" rx="5" fill="var(--svg-3b82f6)" opacity="0.85"/><text x="155" y="72" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-ffffff)">32%</text><text x="155" y="88" text-anchor="middle" font-size="8" fill="var(--svg-1e3a5f)">of AIME $1,286-$7,749</text><rect x="210" y="50" width="90" height="50" rx="5" fill="var(--svg-ef4444)" opacity="0.85"/><text x="255" y="72" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-ffffff)">15%</text><text x="255" y="88" text-anchor="middle" font-size="8" fill="var(--svg-450a0a)">of AIME above $7,749</text><text x="160" y="115" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">Example: $5,000 AIME</text><text x="160" y="133" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">$1,286 x 90% = $1,157.40</text><text x="160" y="149" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">$3,714 x 32% = $1,188.48</text><line x1="50" y1="156" x2="270" y2="156" stroke="var(--svg-cbd5e1)" stroke-width="0.8"/><text x="160" y="172" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">PIA = $2,345.80/mo (rounded down to 10c)</text><text x="160" y="186" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">The formula replaces more of lower incomes — a progressive design</text></svg>`;
 
 const socialSecurityConfig: CalculatorConfig = {
   inputs: [
@@ -129,12 +80,12 @@ const socialSecurityConfig: CalculatorConfig = {
     if (annualIncome < 0) return [];
 
     const fra = getFRA(birthYear);
-    const pia = estimatePIA(annualIncome, birthYear);
+    const pia = estimatePIA(annualIncome);
 
-    const benefitAt62 = getMonthlyBenefit(pia, 62, fra);
-    const benefitAtFRA = getMonthlyBenefit(pia, fra, fra);
-    const benefitAt70 = getMonthlyBenefit(pia, 70, fra);
-    const benefitAtChosen = getMonthlyBenefit(pia, retirementAge, fra);
+    const benefitAt62 = monthlyBenefit(pia, 62, fra, birthYear);
+    const benefitAtFRA = monthlyBenefit(pia, fra, fra, birthYear);
+    const benefitAt70 = monthlyBenefit(pia, 70, fra, birthYear);
+    const benefitAtChosen = monthlyBenefit(pia, retirementAge, fra, birthYear);
 
     // No earnings -> no benefit -> a percent-of-FRA ratio is undefined (0/0)
     const pctOf = (b: number, dp: number) => benefitAtFRA > 0 ? `${new Decimal(b).div(benefitAtFRA).times(100).toFixed(dp)}%` : null;
@@ -155,7 +106,7 @@ const socialSecurityConfig: CalculatorConfig = {
         value: `${fmt(benefitAtChosen)}/mo`,
         highlight: true,
         color: 'positive' as const,
-        interpretation: `Claiming before your full retirement age (${fra}) locks in a permanently reduced benefit for life; waiting past it — up to 70 — permanently increases it by about 8% per year. There's no single right age: it depends on health, other income, and whether you need the cash sooner rather than maximizing the monthly amount.`,
+        interpretation: `Claiming before your full retirement age (${fraLabel(fra)}) locks in a permanently reduced benefit for life; waiting past it — up to 70 — permanently increases it by about 8% per year. There's no single right age: it depends on health, other income, and whether you need the cash sooner rather than maximizing the monthly amount.`,
       },
       {
         id: 'annual',
@@ -166,7 +117,7 @@ const socialSecurityConfig: CalculatorConfig = {
       {
         id: 'fra',
         label: `Your Full Retirement Age (FRA)`,
-        value: `Age ${fra} — ${fmt(benefitAtFRA)}/mo at FRA`,
+        value: `Age ${fraLabel(fra)} — ${fmt(benefitAtFRA)}/mo at FRA`,
         color: 'neutral' as const,
       },
       {
@@ -207,6 +158,19 @@ const socialSecurityConfig: CalculatorConfig = {
       });
     }
 
+    const spouseIncome = parseFloat(values.spouseIncome);
+    if (maritalStatus === 'married' && Number.isFinite(spouseIncome) && spouseIncome > 0) {
+      // Spouse's own PIA vs a spousal benefit of 50% of your PIA (at their FRA): they receive the larger of the two.
+      const spousePia = estimatePIA(spouseIncome);
+      const topUp = Math.max(0, Math.floor(pia * 5) / 10 - spousePia);
+      results.push({
+        id: 'spouseBenefit',
+        label: 'Spouse at Their Full Retirement Age (own vs. spousal benefit)',
+        value: `Own ${fmt(Math.floor(spousePia))}/mo` + (topUp > 0 ? ` + ${fmt(Math.floor(topUp))} spousal top-up = ${fmt(Math.floor(spousePia + topUp))}/mo` : ' (own benefit is larger than the 50% spousal amount)'),
+        color: 'neutral' as const,
+      });
+    }
+
     return results;
   },
   extraPanel: (values, results) => {
@@ -217,11 +181,11 @@ const socialSecurityConfig: CalculatorConfig = {
     if (!results.length || isNaN(birthYear) || isNaN(annualIncome) || isNaN(retirementAge)) return null;
 
     const fra = getFRA(birthYear);
-    const pia = estimatePIA(annualIncome, birthYear);
-    const benefitAt62 = getMonthlyBenefit(pia, 62, fra);
-    const benefitAtFRA = getMonthlyBenefit(pia, fra, fra);
-    const benefitAt70 = getMonthlyBenefit(pia, 70, fra);
-    const benefitAtChosen = getMonthlyBenefit(pia, retirementAge, fra);
+    const pia = estimatePIA(annualIncome);
+    const benefitAt62 = monthlyBenefit(pia, 62, fra, birthYear);
+    const benefitAtFRA = monthlyBenefit(pia, fra, fra, birthYear);
+    const benefitAt70 = monthlyBenefit(pia, 70, fra, birthYear);
+    const benefitAtChosen = monthlyBenefit(pia, retirementAge, fra, birthYear);
 
     return createElement(SocialSecurityPanel, {
       fra, pia, benefitAt62, benefitAtFRA, benefitAt70, benefitAtChosen,
@@ -229,14 +193,14 @@ const socialSecurityConfig: CalculatorConfig = {
     });
   },
   educational: {
-    formula: 'PIA = 90% x AIME(up to $1,174) + 32% x AIME($1,174-$7,078) + 15% x AIME(above $7,078)',
+    formula: 'PIA = 90% x AIME(up to $1,286) + 32% x AIME($1,286-$7,749) + 15% x AIME(above $7,749)',
     formulaDescription:
       'The Primary Insurance Amount (PIA) is calculated from your Average Indexed Monthly Earnings (AIME) using a progressive formula with three bend points. Benefits are then adjusted up or down based on the age you claim relative to your Full Retirement Age (FRA). All calculations use decimal.js for precision with the SSA bend point formula.',
     formulaSource:
-      'Social Security Administration PIA formula (https://www.ssa.gov/oact/cola/piaformula.html). Bend points are for 2025: $1,174 and $7,078. The 90%-32%-15% replacement tiers are set by law. Delayed retirement credits are 8% per year (0.667% per month) for those born 1943+, applied from FRA to age 70.',
+      'Social Security Administration PIA formula (https://www.ssa.gov/oact/cola/piaformula.html). Bend points are for workers turning 62 in 2026: $1,286 and $7,749. The 90%-32%-15% replacement tiers are set by law. Delayed retirement credits are 8% per year (0.667% per month) for those born 1943+, applied from FRA to age 70.',
     diagram: {
       svg: ssSvg,
-      alt: 'Social Security bend point formula showing three progressive replacement tiers: 90% of AIME up to $1,174, 32% from $1,174 to $7,078, and 15% above $7,078, with a $5,000 AIME example',
+      alt: 'Social Security bend point formula showing three progressive replacement tiers: 90% of AIME up to $1,286, 32% from $1,286 to $7,749, and 15% above $7,749, with a $5,000 AIME example',
       caption: 'Social Security replaces a higher percentage of lower earnings — the progressive bend point formula is the key to understanding your benefit',
     },
     variables: [
@@ -244,11 +208,11 @@ const socialSecurityConfig: CalculatorConfig = {
       { symbol: 'AIME', name: 'Average Indexed Monthly Earnings', description: 'The SSA takes your highest 35 years of indexed earnings (wage-adjusted for inflation), sums them, and divides by 420 months. If you worked fewer than 35 years, zero years are included, reducing your AIME.' },
       { symbol: 'FRA', name: 'Full Retirement Age', description: 'For those born 1943-1954: Age 66. For those born 1960+: Age 67. For years in between, FRA increases in 2-month increments per birth year.' },
       { symbol: '+8%/yr', name: 'Delayed Retirement Credits', description: 'For every year you delay claiming past your FRA (up to age 70), your benefit increases 8% per year (0.667% per month). This is risk-free and guaranteed — the highest return available to most retirees.' },
-      { symbol: 'Bend Points', name: 'PIA Bend Points', description: 'Bend points are the dollar thresholds in the PIA formula that determine the weighting of your AIME. For 2025, the first bend point is $1,174 (90% replacement) and the second is $7,078 (32% replacement up to this, 15% above). These are adjusted annually for average wage growth.' },
+      { symbol: 'Bend Points', name: 'PIA Bend Points', description: 'Bend points are the dollar thresholds in the PIA formula that determine the weighting of your AIME. For 2026, the first bend point is $1,286 (90% replacement) and the second is $7,749 (32% replacement up to this, 15% above). These are adjusted annually for average wage growth.' },
     ],
     howToUse: [
       'Enter your birth year — this determines your Full Retirement Age (FRA).',
-      'Enter your current annual earned income. The calculator uses a simplified approximation of the SSA\'s AIME formula.',
+      'Enter your current annual earned income. The calculator uses a simplified AIME: your income (up to the $184,500 taxable maximum) is treated as your earnings in every one of your 35 working years, in today\'s dollars.',
       'Use the retirement age field (62-70) to see how early or late claiming affects your monthly benefit, and review the comparison chart below.',
     ],
     commonUses: [
@@ -260,20 +224,20 @@ const socialSecurityConfig: CalculatorConfig = {
       {
         scenario: 'Maria, born in 1965, earned $85,000/year throughout her career. How much will she receive at FRA vs. age 62 vs. age 70?',
         inputs: { birthYear: '1965', annualIncome: '85000', maritalStatus: 'single', retirementAge: '67' },
-        result: 'At 67 (FRA): ~$2,947/mo. At 62: ~$2,063/mo (70% of FRA). At 70: ~$3,655/mo (124% of FRA).',
-        insight: 'Delaying from 62 to 70 increases Maria\'s benefit by about 77%: $2,063 vs $3,655/month. But she would give up 8 years of payments at the lower rate (8 × 12 × $2,063 ≈ $198,000 total if she had claimed at 62 instead). The break-even age — the point where total lifetime benefits from delaying surpass early claiming — is approximately 79. If Maria expects to live past 79, waiting pays off.',
+        result: 'At 67 (FRA): $3,012/mo. At 62: $2,108/mo (70% of FRA). At 70: $3,735/mo (124% of FRA).',
+        insight: 'Delaying from 62 to 70 increases Maria\'s benefit by about 77%: $2,108 vs $3,735/month. But she would give up 8 years of payments at the lower rate (8 × 12 × $2,108 ≈ $202,000 if she had claimed at 62 instead). The break-even age — the point where total lifetime benefits from delaying surpass early claiming — is about 79 for claiming at 67 instead of 62 and about 80 for claiming at 70. If Maria expects to live past that, waiting pays off. (Her AIME is $85,000 / 12 = $7,083; PIA = 0.9 × $1,286 + 0.32 × ($7,083 − $1,286) = $3,012.50.)',
       },
       {
         scenario: 'James, born in 1970, earns $45,000/year. What strategy maximizes his Social Security?',
         inputs: { birthYear: '1970', annualIncome: '45000', maritalStatus: 'single', retirementAge: '62' },
-        result: 'At 62: ~$1,293/mo. At FRA (67): ~$1,847/mo. At 70: ~$2,291/mo.',
-        insight: 'For James, the 90% replacement tier covers most of his AIME, giving him a proportionally larger benefit relative to his income. At about a 49% replacement rate (PIA ÷ monthly income), Social Security will be a major income source. Low-income workers benefit most from delaying because the 8%/year delayed credits apply to the full PIA.',
+        result: 'At 62: $1,362/mo. At FRA (67): $1,945/mo. At 70: $2,412/mo.',
+        insight: 'For James, the 90% replacement tier covers most of his AIME, giving him a proportionally larger benefit relative to his income. At about a 52% replacement rate (PIA $1,945.80 ÷ monthly income $3,750), Social Security will be a major income source. Low-income workers benefit most from delaying because the 8%/year delayed credits apply to the full PIA.',
       },
       {
         scenario: 'A married couple, both born 1960, has one spouse earning $120,000 and the other $30,000. What claiming strategy maximizes their household income?',
         inputs: { birthYear: '1960', annualIncome: '120000', maritalStatus: 'married', retirementAge: '70', spouseIncome: '30000' },
-        result: 'Higher earner at 70: ~$4,197/mo. Lower earner\'s own (at FRA): ~$1,481/mo. Spousal benefit: up to $1,692/mo.',
-        insight: 'The lower-earning spouse is better off taking the spousal benefit (50% of higher earner\'s PIA = ~$1,692/mo) than their own ($1,481/mo). The common strategy: higher earner delays to 70 to maximize the survivor benefit, while the lower earner claims earlier or uses spousal benefits, depending on health and financial needs.',
+        result: 'Higher earner at 70: $4,418/mo. Lower earner\'s own (at FRA): $1,545/mo. Spousal benefit: up to $1,781/mo.',
+        insight: 'The lower-earning spouse receives their own benefit ($1,545/mo) plus a spousal top-up of about $236 that brings the total to 50% of the higher earner\'s PIA ($3,563.20), about $1,781/mo. The common strategy: higher earner delays to 70 to maximize the survivor benefit, while the lower earner claims earlier or uses spousal benefits, depending on health and financial needs.',
       },
     ],
     proTips: [
@@ -285,9 +249,9 @@ const socialSecurityConfig: CalculatorConfig = {
     ],
     limitations: [
       'This calculator uses a simplified AIME estimate based on current income — it assumes your current salary is representative of your career average. In reality, the SSA indexes your actual 35 highest-earning years for wage inflation, which can produce different results.',
-      'The bend points used ($1,174 and $7,078) are 2025 values. These are adjusted annually based on the national average wage index. For future years, bend points will be higher.',
+      'The bend points used ($1,286 and $7,749) are the 2026 values, which apply to people turning 62 in 2026; they rise every year with the national average wage index, so younger workers will have higher bend points, and the estimate is in today\'s dollars. Estimates are capped at the SSA maximum benefit at full retirement age for 2026 ($4,152/month).',
       'The earnings test (benefit reduction if you work while claiming before FRA) is described in the FAQs but not calculated — the calculator shows what your benefit would be based solely on claiming age.',
-      'Future Social Security legislative changes (benefit cuts, FRA increases, COLA formula changes) are not modeled. The Social Security Trustees project the trust fund will be depleted around 2035, potentially reducing benefits to ~77% of scheduled levels unless Congress acts.',
+      'Future Social Security legislative changes (benefit cuts, FRA increases, COLA formula changes) are not modeled. The 2025 Social Security Trustees Report projects the retirement (OASI) trust fund will be depleted in 2033, after which incoming payroll taxes would cover about 77% of scheduled benefits unless Congress acts.',
     ],
     quickReference: [
       { label: 'FRA for Born 1960+', value: 'Age 67' },
@@ -309,7 +273,7 @@ const socialSecurityConfig: CalculatorConfig = {
       },
       {
         question: 'Can I work while receiving Social Security before FRA?',
-        answer: 'Yes, but benefits are temporarily reduced if you earn above the earnings limit ($22,320 in 2025 if under FRA). For every $2 earned above that limit, $1 of benefits is withheld. Once you reach FRA, there is no earnings limit. The withheld benefits are credited back to you at FRA through a higher monthly payment.',
+        answer: 'Yes, but benefits are temporarily reduced if you earn above the earnings limit ($24,480 in 2026 if under FRA). For every $2 earned above that limit, $1 of benefits is withheld. In the year you reach FRA the limit is $65,160 (2026) and $1 is withheld for every $3 above it, counting only earnings before the month you reach FRA. Once you reach FRA, there is no earnings limit. The withheld benefits are credited back to you at FRA through a higher monthly payment.',
       },
       {
         question: 'What about spousal and survivor benefits?',
@@ -317,7 +281,7 @@ const socialSecurityConfig: CalculatorConfig = {
       },
       {
         question: 'Are Social Security benefits taxable?',
-        answer: 'Yes, up to 85% of Social Security benefits may be subject to federal income tax if your combined income (AGI + nontaxable interest + half of SS benefits) exceeds certain thresholds: $25,000 (single), $32,000 (married filing jointly), or $0 (married filing separately). Up to 50% of benefits are taxable between the first and second threshold; up to 85% above the second threshold. About one-third of beneficiaries pay some tax on their benefits. A handful of states also tax Social Security benefits.',
+        answer: 'Yes, up to 85% of Social Security benefits may be subject to federal income tax if your combined income (AGI + nontaxable interest + half of SS benefits) exceeds certain thresholds: $25,000 (single), $32,000 (married filing jointly), or $0 (married filing separately). Up to 50% of benefits are taxable between the first and second threshold; up to 85% above the second threshold. A handful of states also tax Social Security benefits.',
       },
     ],
     citations: [

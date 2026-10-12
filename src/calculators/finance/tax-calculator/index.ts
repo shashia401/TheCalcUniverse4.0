@@ -1,53 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
-import { FEDERAL_BRACKETS, STANDARD_DEDUCTION } from '../../../utils/taxData';
+import { TAX_YEAR } from '../../../utils/taxData';
 import TaxCalculatorPanel from './TaxCalculatorPanel';
-
-// Derived from the shared, actively-maintained bracket data (utils/taxData.ts) —
-// this file used to hardcode its own copy that had drifted (wrong Head of
-// Household thresholds).
-const STATUS_KEY: Record<string, keyof typeof FEDERAL_BRACKETS> = {
-  Single: 'single',
-  'Married Filing Jointly': 'mfj',
-  'Head of Household': 'hoh',
-  'Married Filing Separately': 'mfs',
-};
-
-const BRACKETS: Record<string, [number, number][]> = Object.fromEntries(
-  Object.entries(STATUS_KEY).map(([label, key]) => [
-    label,
-    FEDERAL_BRACKETS[key].map((b) => [b.to, b.rate] as [number, number]),
-  ])
-);
-
-const STD_DEDUCTION: Record<string, number> = Object.fromEntries(
-  Object.entries(STATUS_KEY).map(([label, key]) => [label, STANDARD_DEDUCTION[key]])
-);
-
-function calcTax(
-  taxableIncome: number,
-  brackets: [number, number][],
-): { totalTax: number; marginalRate: number } {
-  if (taxableIncome <= 0) return { totalTax: 0, marginalRate: 0 };
-
-  let tax = 0;
-  let prevLimit = 0;
-  let marginalRate = 0;
-
-  for (const [limit, rate] of brackets) {
-    if (taxableIncome > limit) {
-      tax += (limit - prevLimit) * rate;
-      prevLimit = limit;
-      marginalRate = rate;
-    } else {
-      tax += (taxableIncome - prevLimit) * rate;
-      marginalRate = rate;
-      return { totalTax: tax, marginalRate };
-    }
-  }
-
-  return { totalTax: tax, marginalRate };
-}
+import { computeFederalTax } from './taxCalcMath';
 
 const fmtMoney = (n: number): string =>
   `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -100,29 +55,13 @@ const taxCalculatorConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const income = parseFloat(values.annualIncome);
-    const status = values.filingStatus || 'Single';
-
-    if (isNaN(income) || income < 0) return [];
-
-    const preTaxStr = values.preTaxDeductions;
-    const preTaxVal = parseFloat(preTaxStr);
-    const preTax = isNaN(preTaxVal) ? 0 : preTaxVal;
-
-    const withholdingStr = values.withholding;
-    const withholdingVal = parseFloat(withholdingStr);
-    const withholding = isNaN(withholdingVal) ? 0 : withholdingVal;
-
-    const stdDed = STD_DEDUCTION[status] ?? STD_DEDUCTION.Single;
-    const taxableIncome = Math.max(0, income - stdDed - preTax);
-
-    const brackets = BRACKETS[status] ?? BRACKETS.Single;
-    const { totalTax, marginalRate } = calcTax(taxableIncome, brackets);
+    const c = computeFederalTax(values);
+    if (!c) return [];
+    const { taxableIncome, totalTax, marginalRate, effectiveRate, withholding } = c;
 
     // Convert marginal rate from decimal (0.22) to percentage (22) for display
     const marginalRatePct = marginalRate * 100;
-    const effectiveRate = income > 0 ? (totalTax / income) * 100 : 0;
-    const netAfterWithholding = totalTax - withholding;
+    const netAfterWithholding = c.balance;
     const isRefund = netAfterWithholding < 0;
 
     return [
@@ -134,7 +73,7 @@ const taxCalculatorConfig: CalculatorConfig = {
       },
       {
         id: 'totalTax',
-        label: 'Total Federal Income Tax',
+        label: `Total Federal Income Tax (${TAX_YEAR})`,
         value: fmtMoney(totalTax),
         highlight: true,
         color: 'negative',
@@ -208,7 +147,7 @@ const taxCalculatorConfig: CalculatorConfig = {
       'Review your results: taxable income, total tax, marginal vs. effective tax rate, and whether you will owe additional tax or receive a refund.',
     ],
     explanation:
-      'The United States federal income tax system is progressive, meaning that higher portions of your income are taxed at higher rates. However, a common misconception is that moving into a higher tax bracket means all of your income is taxed at that rate — this is not how progressive taxation works. Instead, your income is divided into chunks, and each chunk is taxed at its corresponding rate. For example, a single filer with $100,000 of taxable income in 2025 does not pay 22% on all $100,000. The first $11,925 is taxed at 10% ($1,192.50), the next $36,550 (from $11,926 to $48,475) is taxed at 12% ($4,386.00), and the remaining $51,525 (from $48,476 to $100,000) is taxed at 22% ($11,335.50). The total tax bill would be $16,914, which is an effective rate of 16.9% — far below the 22% marginal rate the same filer might worry about. This is why both your marginal tax rate and effective tax rate matter: the marginal rate tells you how much you save from a deduction or pay on extra income, while the effective rate tells you your true average burden. The standard deduction further reduces your taxable income: for 2025, single filers automatically deduct $15,000 — you simply do not pay tax on the first $15,000 you earn. Married couples filing jointly deduct $30,000, and heads of household deduct $22,500. Pre-tax retirement contributions (401k, traditional IRA, HSA) also reduce your taxable income dollar-for-dollar, meaning every dollar contributed saves you tax at your marginal rate. Understanding how progressive brackets work helps you make informed decisions about retirement savings, Roth vs. traditional accounts, and tax-efficient investing strategies.',
+      'The United States federal income tax system is progressive, meaning that higher portions of your income are taxed at higher rates. However, a common misconception is that moving into a higher tax bracket means all of your income is taxed at that rate — this is not how progressive taxation works. Instead, your income is divided into chunks, and each chunk is taxed at its corresponding rate. For example, a single filer with $100,000 of taxable income in 2026 does not pay 22% on all $100,000. The first $12,400 is taxed at 10% ($1,240.00), the next $38,000 (from $12,400 to $50,400) is taxed at 12% ($4,560.00), and the remaining $49,600 (from $50,400 to $100,000) is taxed at 22% ($10,912.00). The total tax bill would be $16,712, which is an effective rate of 16.7% — far below the 22% marginal rate the same filer might worry about. This is why both your marginal tax rate and effective tax rate matter: the marginal rate tells you how much you save from a deduction or pay on extra income, while the effective rate tells you your true average burden. The standard deduction further reduces your taxable income: for 2026, single filers automatically deduct $16,100 — you simply do not pay tax on the first $16,100 you earn. Married couples filing jointly deduct $32,200, and heads of household deduct $24,150. Pre-tax retirement contributions (401k, traditional IRA, HSA) also reduce your taxable income dollar-for-dollar, meaning every dollar contributed saves you tax at your marginal rate. Understanding how progressive brackets work helps you make informed decisions about retirement savings, Roth vs. traditional accounts, and tax-efficient investing strategies.',
     faqs: [
       {
         question:
@@ -289,8 +228,8 @@ citations: [
       },
     ],
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect width="440" height="340" fill="var(--svg-f8fafc)" rx="8"/><text x="220" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-1e293b)">2025 Federal Tax Brackets — Single Filer</text><text x="220" y="44" text-anchor="middle" font-size="10" fill="var(--svg-64748b)">Income is taxed in progressive layers — each bracket only applies to income in that range</text><rect x="20" y="60" width="25" height="240" rx="3" fill="var(--svg-22c55e)" opacity="0.85"/><rect x="46" y="60" width="25" height="240" rx="3" fill="var(--svg-22c55e)" opacity="0.7"/><rect x="72" y="60" width="25" height="240" rx="3" fill="var(--svg-22c55e)" opacity="0.55"/><rect x="20" y="60" width="77" height="240" rx="4" stroke="var(--svg-22c55e)" stroke-width="1.5" fill="none"/><text x="58" y="315" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-16a34a)">10%</text><text x="58" y="326" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">$0-$11,925</text><rect x="100" y="100" width="35" height="200" rx="3" fill="var(--svg-84cc16)" opacity="0.85"/><rect x="136" y="100" width="35" height="200" rx="3" fill="var(--svg-84cc16)" opacity="0.7"/><rect x="172" y="100" width="35" height="200" rx="3" fill="var(--svg-84cc16)" opacity="0.55"/><rect x="100" y="100" width="107" height="200" rx="4" stroke="var(--svg-65a30d)" stroke-width="1.5" fill="none"/><text x="153" y="315" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-4d7c0f)">12%</text><text x="153" y="326" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">$11,926-$48,475</text><rect x="210" y="140" width="35" height="160" rx="3" fill="var(--svg-f59e0b)" opacity="0.85"/><rect x="246" y="140" width="35" height="160" rx="3" fill="var(--svg-f59e0b)" opacity="0.7"/><rect x="282" y="140" width="35" height="160" rx="3" fill="var(--svg-f59e0b)" opacity="0.55"/><rect x="210" y="140" width="107" height="160" rx="4" stroke="var(--svg-d97706)" stroke-width="1.5" fill="none"/><text x="263" y="315" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-b45309)">22%</text><text x="263" y="326" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">$48,476-$103,350</text><rect x="320" y="172" width="35" height="128" rx="3" fill="var(--svg-f97316)" opacity="0.85"/><rect x="356" y="172" width="35" height="128" rx="3" fill="var(--svg-f97316)" opacity="0.7"/><rect x="392" y="172" width="35" height="128" rx="3" fill="var(--svg-f97316)" opacity="0.55"/><rect x="320" y="172" width="107" height="128" rx="4" stroke="var(--svg-ea580c)" stroke-width="1.5" fill="none"/><text x="373" y="315" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-c2410c)">24%+</text><text x="373" y="326" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">$103,351+</text><text x="58" y="55" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$11,925</text><text x="153" y="55" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$48,475</text><text x="263" y="55" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$103,350</text><text x="373" y="55" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$197,300+</text><line x1="20" y1="60" x2="20" y2="300" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="14" y="180" text-anchor="middle" font-size="8" fill="var(--svg-94a3b8)" transform="rotate(-90,14,180)">TAX RATE</text></svg>',
-      alt: 'Stacked bar chart showing progressive federal income tax brackets for single filers in 2025: 10% bracket up to $11,925, 12% bracket from $11,926 to $48,475, 22% bracket from $48,476 to $103,350, and 24%+ bracket starting at $103,351. Each bracket is represented by progressively taller bars showing increasing tax rates.',
+      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect width="440" height="340" fill="var(--svg-f8fafc)" rx="8"/><text x="220" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-1e293b)">2026 Federal Tax Brackets — Single Filer</text><text x="220" y="44" text-anchor="middle" font-size="10" fill="var(--svg-64748b)">Income is taxed in progressive layers — each bracket only applies to income in that range</text><rect x="20" y="60" width="25" height="240" rx="3" fill="var(--svg-22c55e)" opacity="0.85"/><rect x="46" y="60" width="25" height="240" rx="3" fill="var(--svg-22c55e)" opacity="0.7"/><rect x="72" y="60" width="25" height="240" rx="3" fill="var(--svg-22c55e)" opacity="0.55"/><rect x="20" y="60" width="77" height="240" rx="4" stroke="var(--svg-22c55e)" stroke-width="1.5" fill="none"/><text x="58" y="315" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-16a34a)">10%</text><text x="58" y="326" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">$0-$12,400</text><rect x="100" y="100" width="35" height="200" rx="3" fill="var(--svg-84cc16)" opacity="0.85"/><rect x="136" y="100" width="35" height="200" rx="3" fill="var(--svg-84cc16)" opacity="0.7"/><rect x="172" y="100" width="35" height="200" rx="3" fill="var(--svg-84cc16)" opacity="0.55"/><rect x="100" y="100" width="107" height="200" rx="4" stroke="var(--svg-65a30d)" stroke-width="1.5" fill="none"/><text x="153" y="315" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-4d7c0f)">12%</text><text x="153" y="326" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">$12,401-$50,400</text><rect x="210" y="140" width="35" height="160" rx="3" fill="var(--svg-f59e0b)" opacity="0.85"/><rect x="246" y="140" width="35" height="160" rx="3" fill="var(--svg-f59e0b)" opacity="0.7"/><rect x="282" y="140" width="35" height="160" rx="3" fill="var(--svg-f59e0b)" opacity="0.55"/><rect x="210" y="140" width="107" height="160" rx="4" stroke="var(--svg-d97706)" stroke-width="1.5" fill="none"/><text x="263" y="315" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-b45309)">22%</text><text x="263" y="326" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">$50,401-$105,700</text><rect x="320" y="172" width="35" height="128" rx="3" fill="var(--svg-f97316)" opacity="0.85"/><rect x="356" y="172" width="35" height="128" rx="3" fill="var(--svg-f97316)" opacity="0.7"/><rect x="392" y="172" width="35" height="128" rx="3" fill="var(--svg-f97316)" opacity="0.55"/><rect x="320" y="172" width="107" height="128" rx="4" stroke="var(--svg-ea580c)" stroke-width="1.5" fill="none"/><text x="373" y="315" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-c2410c)">24%+</text><text x="373" y="326" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">$105,701+</text><text x="58" y="55" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$12,400</text><text x="153" y="55" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$50,400</text><text x="263" y="55" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$105,700</text><text x="373" y="55" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$201,775+</text><line x1="20" y1="60" x2="20" y2="300" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="14" y="180" text-anchor="middle" font-size="8" fill="var(--svg-94a3b8)" transform="rotate(-90,14,180)">TAX RATE</text></svg>',
+      alt: 'Stacked bar chart showing progressive federal income tax brackets for single filers in 2026: 10% bracket up to $12,400, 12% bracket from $12,401 to $50,400, 22% bracket from $50,401 to $105,700, and 24%+ bracket starting at $105,701. Each bracket is represented by progressively taller bars showing increasing tax rates.',
       caption:
         'Federal income tax is progressive: each bracket applies only to income within that range. Moving to a higher bracket does not affect income taxed in lower brackets.',
     },

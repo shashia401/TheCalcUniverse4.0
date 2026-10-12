@@ -1,13 +1,13 @@
 import { CalculatorResult } from '../../../types/calculator';
 import { ExternalLink } from 'lucide-react';
-import { VAT_COUNTRY_LIST } from '../../../utils/taxData';
+import { VAT_COUNTRY_LIST, TAX_YEAR } from '../../../utils/taxData';
 
 export default function VATPanel({}: { results: CalculatorResult[] }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
       <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
         <ExternalLink size={16} className="text-slate-500" />
-        <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Worldwide VAT Rates (2026)</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Worldwide VAT Rates ({TAX_YEAR})</span>
       </div>
 
       <div className="p-6">
@@ -42,7 +42,7 @@ export default function VATPanel({}: { results: CalculatorResult[] }) {
         </div>
 
         <p className="text-[11px] text-slate-500 leading-relaxed">
-          Rates shown are standard VAT/GST rates as of {new Date().getFullYear()}. Reduced rates may apply to specific goods and services.
+          Rates shown are standard VAT/GST rates as of {TAX_YEAR}. Reduced rates may apply to specific goods and services.
           Always verify current rates with local tax authorities. For official VAT rates, visit the relevant country's tax authority website.
         </p>
       </div>

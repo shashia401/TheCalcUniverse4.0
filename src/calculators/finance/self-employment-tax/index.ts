@@ -1,11 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SelfEmploymentTaxPanel from './SelfEmploymentTaxPanel';
+import { computeSeTax, parseSeInput, SE_MIN_EARNINGS } from './seTaxMath';
 
-const SS_RATE = 0.124; // 12.4%
-const MEDICARE_RATE = 0.029; // 2.9%
-const SS_WAGE_BASE_2026 = 184500;
-const SE_MULTIPLIER = 0.9235; // 92.35% of net earnings subject to SE tax
 
 const selfEmploymentTaxConfig: CalculatorConfig = {
   inputs: [
@@ -33,6 +30,18 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
       helpText: 'If you have W-2 wages, SS taxes already paid through your employer reduce the SS wage base remaining for SE income.',
     },
     {
+      id: 'filingStatus',
+      label: 'Filing Status',
+      type: 'select',
+      options: [
+        { label: 'Single', value: 'single' },
+        { label: 'Married Filing Jointly', value: 'mfj' },
+        { label: 'Head of Household', value: 'hoh' },
+        { label: 'Married Filing Separately', value: 'mfs' },
+      ],
+      helpText: 'Only sets the threshold for the 0.9% Additional Medicare Tax ($200,000 single/head of household, $250,000 joint, $125,000 separate).',
+    },
+    {
       id: 'qbiDeduction',
       label: 'Qualified Business Income (QBI) Deduction (Section 199A)',
       type: 'select',
@@ -46,32 +55,13 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const netProfit = parseFloat(values.netProfit);
-    const w2Income = parseFloat(values.w2Income) || 0;
-    const qbiEnabled = values.qbiDeduction === 'yes';
+    const input = parseSeInput(values);
+    const { netProfit, w2Income, qbi: qbiEnabled } = input;
 
     if (isNaN(netProfit) || netProfit <= 0) return [];
 
-    const seEarnings = netProfit * SE_MULTIPLIER;
-
-    // SS wage base: if W-2 wages already consumed some of the SS base
-    const remainingSSBase = Math.max(0, SS_WAGE_BASE_2026 - w2Income);
-    const ssEarnings = Math.min(seEarnings, remainingSSBase);
-    const socialSecurityPortion = Math.max(0, ssEarnings * SS_RATE);
-
-    const medicarePortion = seEarnings * MEDICARE_RATE;
-
-    const secaTax = socialSecurityPortion + medicarePortion;
-
-    // Deductible half of SE tax (above-the-line deduction on Form 1040)
-    const deductiblePortion = secaTax / 2;
-
-    // QBI savings estimate (simplified: 20% of net profit at an assumed 22% marginal rate)
-    const qbiSavings = qbiEnabled ? netProfit * 0.2 * 0.22 : 0;
-
-    const effectiveRate = (secaTax / netProfit) * 100;
-
-    const totalIncome = netProfit + w2Income;
+    const c = computeSeTax(input);
+    const { secaTax, socialSecurityPortion, medicarePortion, deductiblePortion, qbiSavings, additionalMedicare } = c;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -83,6 +73,7 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
         value: `$${fmt(secaTax)}`,
         highlight: true,
         color: 'negative' as const,
+        warning: c.owes ? undefined : `Net earnings from self-employment under $${SE_MIN_EARNINGS} (after the 92.35% factor) owe no self-employment tax.`,
         interpretation: `This covers both halves of Social Security and Medicare that a W-2 employer would normally split with you — as a self-employed filer, you owe all of it. Half of this amount is deductible on your income tax return, which softens the real cost; set this aside quarterly rather than facing it as one bill in April.`,
       },
       {
@@ -98,9 +89,15 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       {
+        id: 'additionalMedicare',
+        label: 'Additional Medicare Tax (0.9%, not part of SECA)',
+        value: additionalMedicare > 0 ? `$${fmt(additionalMedicare)}` : `$0.00 (under the $${c.threshold.toLocaleString()} threshold)`,
+        color: additionalMedicare > 0 ? 'negative' as const : 'neutral' as const,
+      },
+      {
         id: 'effectiveRate',
         label: 'Effective SE Tax Rate',
-        value: `${effectiveRate.toFixed(2)}%`,
+        value: `${c.effectiveRate.toFixed(2)}%`,
         color: 'neutral' as const,
       },
       {
@@ -111,14 +108,14 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
       },
       {
         id: 'qbiSavings',
-        label: 'Estimated QBI Deduction Savings (income tax)',
+        label: 'Estimated QBI Deduction Savings (20% of QBI at an assumed 22% bracket)',
         value: qbiEnabled ? `$${fmt(qbiSavings)}` : '$0.00 (QBI not applied)',
         color: qbiEnabled ? 'positive' as const : 'neutral' as const,
       },
       {
         id: 'totalIncome',
         label: 'Total Combined Income (1099 + W-2)',
-        value: `$${fmt(totalIncome)}`,
+        value: `$${fmt(c.totalIncome)}`,
         color: 'neutral' as const,
       },
     ];
@@ -137,7 +134,7 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
       caption: 'Self-employed individuals pay the full 15.3% SECA tax (both employee and employer shares of FICA), but can deduct half as an above-the-line adjustment',
     },
     formulaDescription:
-      'Self-employment tax is 15.3% of 92.35% of your net self-employment income. The 15.3% breaks into 12.4% for Social Security (up to the annual wage base of $184,500 in 2026) and 2.9% for Medicare (no cap). You can deduct half of your SE tax as an above-the-line adjustment on Form 1040. The QBI deduction (Section 199A) allows eligible self-employed individuals to deduct up to 20% of qualified business income from income tax.',
+      'Self-employment tax is 15.3% of 92.35% of your net self-employment income. The 15.3% breaks into 12.4% for Social Security (up to the annual wage base of $184,500 in 2026) and 2.9% for Medicare (no cap). You can deduct half of your SE tax as an above-the-line adjustment on Form 1040. The QBI deduction (Section 199A) allows eligible self-employed individuals to deduct up to 20% of qualified business income (net profit less the deductible half of SE tax) from income tax. SE tax applies only when net SE earnings are at least $400.',
     variables: [
       {
         symbol: '92.35%',
@@ -147,7 +144,7 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
       {
         symbol: 'SECA Components',
         name: 'Social Security & Medicare Rates',
-        description: 'SE tax has two parts: 12.4% for Social Security (capped at $184,500 for 2026) and 2.9% for Medicare (no cap). Together they form the 15.3% total SECA rate. An additional 0.9% Medicare surtax applies above $200K/$250K.',
+        description: 'SE tax has two parts: 12.4% for Social Security (capped at $184,500 for 2026) and 2.9% for Medicare (no cap). Together they form the 15.3% total SECA rate. The separate 0.9% Additional Medicare Tax applies to combined wages and self-employment earnings above $200K (single/head of household), $250K (joint) or $125K (separate), and is shown on its own line.',
       },
       {
         symbol: 'QBI',
@@ -157,7 +154,7 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Enter your net profit from Schedule C and optionally any W-2 wages.',
-      'Toggle the QBI deduction on/off to see estimated income tax savings.',
+      'Choose your filing status (used for the 0.9% Additional Medicare Tax threshold) and toggle the QBI deduction on/off to see estimated income tax savings.',
       'Review the breakdown: total SECA tax, SS/Medicare portions, deductible half, and QBI savings.',
     ],
     commonUses: [
@@ -197,8 +194,8 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
           'W-2 Wages (if applicable)': '0',
           'Qualified Business Income (QBI) Deduction': 'Yes — Apply QBI deduction (simplified 20%)',
         },
-        result: 'Total SECA Tax: $14,129.55. Social Security Portion: $11,451.40 (12.4% of $92,350). Medicare Portion: $2,678.15 (2.9% of $92,350). Effective SE Tax Rate: 14.13%. Deductible Half: $7,064.78. Estimated QBI Savings: $4,400. Total Combined Income: $100,000.',
-        insight: 'Elena owes $14,130 in self-employment tax — the equivalent of both the employee (7.65%) and employer (7.65%) halves of FICA. Her effective SE tax rate is 14.13% rather than 15.3% because of the 92.35% multiplier. She can deduct $7,065 (half) on her Form 1040 as an above-the-line adjustment, which reduces her income tax but not the SE tax itself. The QBI deduction saves her an estimated $4,400 in income tax (20% of $100K at an assumed 22% marginal rate). Combined, Elena should set aside roughly 25-30% of her net profit for federal taxes (SE tax + income tax) and make quarterly estimated payments to avoid underpayment penalties.',
+        result: 'Total SECA Tax: $14,129.55. Social Security Portion: $11,451.40 (12.4% of $92,350). Medicare Portion: $2,678.15 (2.9% of $92,350). Effective SE Tax Rate: 14.13%. Deductible Half: $7,064.78. Additional Medicare Tax: $0.00. Estimated QBI Savings: $4,089.15. Total Combined Income: $100,000.',
+        insight: 'Elena owes $14,130 in self-employment tax — the equivalent of both the employee (7.65%) and employer (7.65%) halves of FICA. Her effective SE tax rate is 14.13% rather than 15.3% because of the 92.35% multiplier. She can deduct $7,065 (half) on her Form 1040 as an above-the-line adjustment, which reduces her income tax but not the SE tax itself. The QBI deduction (20% of $92,935 of qualified income after the deductible half of SE tax, or $18,587) saves her an estimated $4,089 in income tax at an assumed 22% marginal rate. Combined, Elena should set aside roughly 25-30% of her net profit for federal taxes (SE tax + income tax) and make quarterly estimated payments to avoid underpayment penalties.',
       },
       {
         scenario: 'Raj is a software consultant in Seattle with $180,000 in 1099 income and $45,000 in W-2 wages from a part-time teaching position. He wants to understand how his W-2 wages affect his SE tax on the 1099 income.',
@@ -207,8 +204,8 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
           'W-2 Wages (if applicable)': '45,000',
           'Qualified Business Income (QBI) Deduction': 'Yes — Apply QBI deduction (simplified 20%)',
         },
-        result: 'Total SECA Tax: $22,118.67. Social Security Portion: $17,298.00 (12.4% of $139,500). Medicare Portion: $4,820.67 (2.9% of $166,230). Effective SE Tax Rate: 12.29%. Deductible Half: $11,059.34. Estimated QBI Savings: $7,920. Total Combined Income: $225,000.',
-        insight: 'Raj\'s W-2 wages of $45,000 have already used $45K of the Social Security wage base ($184,500 for 2026). Only $139,500 of the wage base remains available for his SE income. His SE earnings base is $166,230 ($180K × 92.35%), but only $139,500 of it is subject to the 12.4% Social Security portion — the rest escapes Social Security tax entirely. His effective SE tax rate drops to 12.29% (down from the full 14.13% Elena pays with no W-2 offset). The Medicare portion of 2.9% applies to the full SE earnings base with no cap. His total combined income of $225K puts him above the $200K threshold where the additional 0.9% Medicare surtax may apply on earned income — though this simplified calculator does not model that surtax.',
+        result: 'Total SECA Tax: $22,118.67. Social Security Portion: $17,298.00 (12.4% of $139,500). Medicare Portion: $4,820.67 (2.9% of $166,230). Effective SE Tax Rate: 12.29%. Deductible Half: $11,059.34. Additional Medicare Tax (single): $101.07. Estimated QBI Savings: $7,433.39. Total Combined Income: $225,000.',
+        insight: 'Raj\'s W-2 wages of $45,000 have already used $45K of the Social Security wage base ($184,500 for 2026). Only $139,500 of the wage base remains available for his SE income. His SE earnings base is $166,230 ($180K × 92.35%), but only $139,500 of it is subject to the 12.4% Social Security portion — the rest escapes Social Security tax entirely. His effective SE tax rate drops to 12.29% (down from the full 14.13% Elena pays with no W-2 offset). The Medicare portion of 2.9% applies to the full SE earnings base with no cap. His combined wages and SE earnings ($45,000 + $166,230) exceed the $200,000 single-filer threshold by $11,230, so the 0.9% Additional Medicare Tax adds $101.07; it is separate from SECA tax and not deductible.',
       },
     ],
 
@@ -226,12 +223,13 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
       { label: 'Medicare Cap', value: 'No cap — 2.9% on all SE earnings' },
       { label: 'Deductible Half', value: 'Above-the-line, Form 1040 adjustment' },
       { label: '$100K net profit', value: '~$14,130 SE tax (effective ~14.1%)' },
-      { label: 'Additional Medicare', value: '0.9% above $200K/$250K (not modeled)' },
+      { label: 'Additional Medicare', value: '0.9% above $200K single / $250K joint (shown separately)' },
+      { label: 'Minimum SE earnings', value: '$400 (after the 92.35% factor)' },
     ],
 
     limitations: [
-      'The QBI deduction estimate uses a simplified 20% at 22% marginal rate. In reality, the QBI deduction is the lesser of 20% of QBI or 20% of taxable income, and phases out for high earners in specified service trades (SSTBs like doctors, lawyers, consultants above certain income thresholds). The actual savings depend on your specific tax situation.',
-      'Does not model the 0.9% Additional Medicare Tax on earned income above $200,000 (single) or $250,000 (MFJ). For high-earning self-employed individuals, this surtax adds meaningfully to the total SE tax burden on income above those thresholds.',
+      'The QBI deduction estimate uses a simplified 20% of (net profit less half of SE tax) at an assumed 22% marginal rate. In reality, the QBI deduction is the lesser of 20% of QBI or 20% of taxable income, and phases out for high earners in specified service trades (SSTBs like doctors, lawyers, consultants above certain income thresholds). The actual savings depend on your specific tax situation.',
+      'The 0.9% Additional Medicare Tax uses only the wages and self-employment earnings you enter here; it ignores other Medicare wages on a spouse\'s return and any unreimbursed-expense or loss adjustments on Form 8959.',
       'The interaction between W-2 wages and the SE Social Security wage base is simplified. It assumes W-2 wages consume the wage base first, which is correct for the employee portion but the employer portion of FICA on W-2 wages does not count toward the SE wage base.',
       'Does not account for self-employed health insurance deduction, SEP IRA or Solo 401(k) contributions, home office deduction, or business use of vehicle — all of which reduce both your net profit (and thus SE tax) and your income tax liability.',
     ],

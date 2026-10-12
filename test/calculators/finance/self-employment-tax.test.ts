@@ -48,8 +48,9 @@ describe('self-employment-tax', () => {
       qbiDeduction: 'yes',
     });
 
-    // QBI savings = 100000 * 0.20 * 0.22 = 4,400
-    near(parseMoney(getValue(r, 'qbiSavings')), 4400, 0.01);
+    // QBI = net profit less the deductible half of SE tax = 100,000 - 7,064.775 = 92,935.225
+    // savings = 20% x QBI x assumed 22% bracket = 92,935.225 x 0.044 = 4,089.15
+    near(parseMoney(getValue(r, 'qbiSavings')), 4089.15, 0.01);
   });
 
   it('returns zero QBI savings when disabled', () => {

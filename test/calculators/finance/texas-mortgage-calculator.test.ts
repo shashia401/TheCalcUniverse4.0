@@ -94,7 +94,7 @@ describe('Texas Mortgage Calculator', () => {
 
   it('shows no state income tax benefit', () => {
     const r = config.calculate(defaultInputs);
-    expect(getValue(r, 'incomeTaxNote')).toContain('TX saves');
+    expect(getValue(r, 'incomeTaxNote')).toContain('does not tax wages');
   });
 
   it('educational content has required sections', () => {

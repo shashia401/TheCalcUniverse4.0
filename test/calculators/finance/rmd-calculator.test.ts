@@ -41,15 +41,17 @@ describe('RMD Calculator', () => {
     expect(getValue(r, 'yearsUntil')).toContain('years');
   });
 
-  it('uses joint life table when spouse is more than 10 years younger', () => {
+  it('uses joint life table (IRS Table II) when spouse is more than 10 years younger', () => {
+    // Born 1950 -> age 76 in 2026; IRS Pub 590-B Table II at owner 76 / spouse 60 = 28.2
     const r = config.calculate({
       birthYear: '1950',
       accountBalance: '500000',
       spouseToggle: 'yes',
+      spouseAge: '60',
       expectedReturn: '6',
     });
-    near(parseMoney(getValue(r, 'currentRmd')), 500000 / 29.8, 1);
-    expect(getValue(r, 'distributionPeriod')).toContain('29.8');
+    expect(getValue(r, 'distributionPeriod')).toBe('28.2');
+    near(parseMoney(getValue(r, 'currentRmd')), 500000 / 28.2, 0.01);
   });
 
   it('returns empty array when birth year is missing', () => {

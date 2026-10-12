@@ -247,7 +247,9 @@ describe('tvm-calculator', () => {
     const baseInputs = { n: '60', rate: '0.5', pv: '-250000', pmt: '-1498.88', fv: '0', timing: 'end' as const };
 
     for (const mode of ['FV', 'PV', 'PMT', 'N', 'RATE'] as const) {
-      const inputs = { ...baseInputs, solveFor: mode };
+      // The rate solver needs a consistent scenario (a 250,000 loan repaid over 360 months); with both PV and PMT
+      // negative no rate exists, and the solver now says so instead of returning a made-up number.
+      const inputs = mode === 'RATE' ? { ...baseInputs, n: '360', pv: '250000', solveFor: mode } : { ...baseInputs, solveFor: mode };
       const r = config.calculate(inputs);
       expect(r.length).toBeGreaterThan(0);
       expect(r[0].id).not.toBe('error');

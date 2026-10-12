@@ -1,10 +1,14 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RothIRAPanel from './RothIRAPanel';
+import { IRA_LIMITS, ROTH_IRA_INCOME_LIMITS, TAX_YEAR } from '../../../utils/taxData';
+import { parseRothInputs, rothProjection } from './rothMath';
 
-const ROTH_LIMIT_2026 = 7500;
-const ROTH_CATCHUP_2026 = 1100;
-const TAX_YEAR = 2026;
+const ROTH_LIMIT_2026 = IRA_LIMITS.base;
+const ROTH_CATCHUP_2026 = IRA_LIMITS.catchup;
+const $ = (n: number) => `$${n.toLocaleString()}`;
+const SINGLE = ROTH_IRA_INCOME_LIMITS.single;
+const MFJ = ROTH_IRA_INCOME_LIMITS.mfj;
 
 const rothIRAConfig: CalculatorConfig = {
   inputs: [
@@ -95,37 +99,29 @@ const rothIRAConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const currentAge = parseInt(values.currentAge);
-    const retirementAge = parseInt(values.retirementAge);
-    const currentBalance = parseFloat(values.currentBalance) || 0;
-    const annualContribution = parseFloat(values.annualContribution) || 0;
-    const annualReturn = parseFloat(values.annualReturn) / 100;
-    const retirementTaxRate = parseFloat(values.expectedRetirementTaxRate) / 100 || 0.12;
+    const inp = parseRothInputs(values);
+    const { currentAge, retirementAge, currentBalance, annualContribution, annualReturn, retirementRate: retirementTaxRate } = inp;
 
     if (isNaN(currentAge) || isNaN(retirementAge) || isNaN(annualReturn) || retirementAge <= currentAge) return [];
 
-    const years = retirementAge - currentAge;
     const isCatchup = currentAge >= 50;
-    const maxContrib = isCatchup ? ROTH_LIMIT_2026 + ROTH_CATCHUP_2026 : ROTH_LIMIT_2026;
-
-    const contribution = Math.min(annualContribution, maxContrib);
-    const overLimit = annualContribution > maxContrib;
-
-    let balance = currentBalance;
-    let totalContributions = 0;
-
-    for (let y = 0; y < years; y++) {
-      balance = balance * (1 + annualReturn) + contribution;
-      totalContributions += contribution;
-    }
-
-    const totalEarnings = balance - currentBalance - totalContributions;
-    const taxFreeTotal = balance;
-
-    const taxSavingsVsTraditional = totalEarnings * retirementTaxRate;
+    const p = rothProjection(inp);
+    const { years, maxContrib, contribution, overLimit, balance: taxFreeTotal, contributed, earnings: totalEarnings } = p;
+    const taxSavingsVsTraditional = p.taxOnGrowthAvoided;
+    const totalContributions = contributed - currentBalance;
 
     const fmt = (n: number) =>
       n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+    const hasCompare = Number.isFinite(p.traditionalAfterTax);
+    const advantage = taxFreeTotal - p.traditionalAfterTax;
+    const compareText = hasCompare
+      ? advantage > 0.5
+        ? ` Against a Traditional IRA funded with the same after-tax dollars (deducted at ${(inp.marginalRate * 100).toFixed(0)}% now, taxed at ${(retirementTaxRate * 100).toFixed(0)}% later) the Roth comes out ${fmt(advantage)} ahead.`
+        : advantage < -0.5
+          ? ` Against a Traditional IRA funded with the same after-tax dollars (deducted at ${(inp.marginalRate * 100).toFixed(0)}% now, taxed at ${(retirementTaxRate * 100).toFixed(0)}% later) the Traditional comes out ${fmt(-advantage)} ahead, because your retirement rate is lower than today's.`
+          : ` At equal current and retirement rates, Roth and Traditional end up with the same after-tax money.`
+      : '';
 
     const results: CalculatorResult[] = [
       {
@@ -134,7 +130,7 @@ const rothIRAConfig: CalculatorConfig = {
         value: fmt(taxFreeTotal),
         highlight: true,
         color: 'positive' as const,
-        interpretation: `Every dollar of this — including ${fmt(totalEarnings)} in growth — comes out with zero tax owed, since you already paid tax on contributions going in. That's worth an estimated ${fmt(taxSavingsVsTraditional)} versus a Traditional account taxed at your assumed ${(retirementTaxRate * 100).toFixed(0)}% retirement rate. Roth wins most clearly when you expect to be in a similar or higher bracket later.`,
+        interpretation: `Every dollar of this — including ${fmt(totalEarnings)} in growth — comes out with zero tax owed, since you already paid tax on contributions going in. Growth of that size would owe an estimated ${fmt(taxSavingsVsTraditional)} at your assumed ${(retirementTaxRate * 100).toFixed(0)}% rate in a taxable account.${compareText} Roth wins when your retirement tax rate is higher than your rate today.`,
       },
     ];
 
@@ -142,7 +138,7 @@ const rothIRAConfig: CalculatorConfig = {
       results.push({
         id: 'limitWarning',
         label: `${TAX_YEAR} IRS Contribution Limit Warning`,
-        value: `Your $${annualContribution.toLocaleString()} exceeds the ${isCatchup ? 'age 50+' : ''} limit of $${maxContrib.toLocaleString()}. Calculation uses $${maxContrib.toLocaleString()}.`,
+        value: `Your ${$(annualContribution)} exceeds the ${isCatchup ? 'age 50+ ' : ''}limit of ${$(maxContrib)}. Calculation uses ${$(maxContrib)}.`,
         color: 'negative' as const,
       });
     }
@@ -150,7 +146,7 @@ const rothIRAConfig: CalculatorConfig = {
     results.push({
       id: 'totalContributions',
       label: 'Your Total Contributions',
-      value: fmt(currentBalance + totalContributions),
+      value: fmt(contributed),
       color: 'neutral' as const,
     });
     results.push({
@@ -167,14 +163,22 @@ const rothIRAConfig: CalculatorConfig = {
     });
     results.push({
       id: 'taxSavingsVsTraditional',
-      label: `Tax Saved vs. Traditional IRA (${(retirementTaxRate * 100).toFixed(0)}% withdrawal tax)`,
+      label: `Tax on Growth Avoided (${(retirementTaxRate * 100).toFixed(0)}% rate)`,
       value: fmt(taxSavingsVsTraditional),
       color: 'positive' as const,
     });
+    if (hasCompare) {
+      results.push({
+        id: 'rothVsTraditional',
+        label: advantage >= 0 ? 'Roth Advantage vs. Equal-Cost Traditional IRA' : 'Traditional IRA Advantage vs. Roth',
+        value: fmt(Math.abs(advantage)),
+        color: advantage >= 0 ? 'positive' : 'negative',
+      });
+    }
     results.push({
       id: 'annualContribResult',
-      label: `Annual Contribution (${TAX_YEAR} IRS Max: $${maxContrib.toLocaleString()})`,
-      value: `$${contribution.toLocaleString()}/yr for ${years} years`,
+      label: `Annual Contribution (${TAX_YEAR} IRS Max: ${$(maxContrib)})`,
+      value: `${$(contribution)}/yr for ${years} years`,
       color: 'neutral' as const,
     });
     results.push({
@@ -189,11 +193,7 @@ const rothIRAConfig: CalculatorConfig = {
 
   extraPanel: (values, results) => {
     if (!results.length) return null;
-    return createElement(RothIRAPanel, {
-      values,
-      results,
-      limits: { base: ROTH_LIMIT_2026, catchup: ROTH_CATCHUP_2026, taxYear: TAX_YEAR },
-    });
+    return createElement(RothIRAPanel, { values, results });
   },
 
   educational: {
@@ -207,7 +207,7 @@ const rothIRAConfig: CalculatorConfig = {
     variables: [
       { symbol: 'Contribution Limits', name: `${TAX_YEAR} Roth IRA Max Contributions`, description: `Under 50: $${ROTH_LIMIT_2026.toLocaleString()}/year. Age 50+: $${(ROTH_LIMIT_2026 + ROTH_CATCHUP_2026).toLocaleString()}/year (includes $${ROTH_CATCHUP_2026.toLocaleString()} catch-up). Limits apply to combined contributions across all IRA accounts (Roth + Traditional).` },
       { symbol: 'Tax-Free', name: 'The Core Advantage', description: 'Roth IRA contributions are made with after-tax dollars. All growth and withdrawals in retirement are completely tax-free (assuming age 59½+ and 5-year rule met). On a $1M Roth balance, a 22% withdrawal tax rate would cost $220,000 in a traditional IRA. With a Roth: $0.' },
-      { symbol: 'Income Limit', name: 'Phase-Out Range', description: `For ${TAX_YEAR}: Single filers earning $153,000–$168,000 face a reduced contribution limit. Above $168,000, direct Roth IRA contributions are not allowed. Married filing jointly: $242,000–$252,000 phase-out. Alternative: the "Backdoor Roth IRA" strategy (contribute to traditional IRA, then convert).` },
+      { symbol: 'Income Limit', name: 'Phase-Out Range', description: `For ${TAX_YEAR} (IRS Notice 2025-67): Single filers with MAGI of ${$(SINGLE.start)}–${$(SINGLE.end)} face a reduced contribution limit. At ${$(SINGLE.end)} or more, direct Roth IRA contributions are not allowed. Married filing jointly: ${$(MFJ.start)}–${$(MFJ.end)} phase-out. Alternative: the "Backdoor Roth IRA" strategy (contribute to traditional IRA, then convert).` },
     ],
     howToUse: [
       'Enter your current and target retirement age to set the investment window.',
@@ -230,7 +230,7 @@ const rothIRAConfig: CalculatorConfig = {
       },
       {
         question: 'What are the income limits for Roth IRA contributions?',
-        answer: `For ${TAX_YEAR}: Single filers with MAGI above $168,000 cannot contribute directly to a Roth IRA. The phase-out begins at $153,000. For married filing jointly, the phase-out is $242,000–$252,000. If you exceed these limits, consider the "Backdoor Roth IRA" strategy: contribute to a non-deductible traditional IRA, then convert it to Roth.`,
+        answer: `For ${TAX_YEAR}: Single filers with MAGI of ${$(SINGLE.end)} or more cannot contribute directly to a Roth IRA. The phase-out begins at ${$(SINGLE.start)}. For married filing jointly, the phase-out is ${$(MFJ.start)}–${$(MFJ.end)}. If you exceed these limits, consider the "Backdoor Roth IRA" strategy: contribute to a non-deductible traditional IRA, then convert it to Roth.`,
       },
       {
         question: 'Roth IRA vs. Traditional IRA: which is better?',

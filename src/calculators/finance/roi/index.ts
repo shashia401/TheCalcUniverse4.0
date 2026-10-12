@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ROIPanel from './ROIPanel';
+import { computeRoi } from './roiMath';
 
 const roiConfig: CalculatorConfig = {
   inputs: [
@@ -47,19 +48,11 @@ const roiConfig: CalculatorConfig = {
     const returned = parseFloat(values.amountReturned);
     const years = parseFloat(values.years) || 0;
 
-    if (isNaN(invested) || isNaN(returned) || invested <= 0) {
+    if (isNaN(invested) || isNaN(returned) || invested <= 0 || returned < 0) {
       return [];
     }
 
-    const netProfit = returned - invested;
-    const totalRoi = (netProfit / invested) * 100;
-    const multiplier = returned / invested;
-
-    // Annualized ROI: (1 + totalROI)^(1/years) - 1 → CAGR formula
-    const totalRoiDecimal = returned / invested;
-    const annualizedRoi = years > 0
-      ? (Math.pow(totalRoiDecimal, 1 / years) - 1) * 100
-      : 0;
+    const { netProfit, totalRoiPct: totalRoi, multiplier, annualizedPct: annualizedRoi } = computeRoi(invested, returned, years);
 
     const fmt = (n: number) =>
       Math.abs(n).toLocaleString(undefined, {
@@ -209,8 +202,8 @@ const roiConfig: CalculatorConfig = {
       {
         scenario: 'David bought 100 shares of a tech stock at $150/share ($15,000 total). After 3 years, he sold all shares at $225/share ($22,500 total), receiving $200 in dividends along the way.',
         inputs: { amountInvested: '15000', amountReturned: '22700', years: '3' },
-        result: 'ROI: +51.33%, Annualized ROI: +14.82%, Multiplier: 1.51x, Net Profit: +$7,700.00',
-        insight: 'David\'s $200 in dividends boosted his total return from $22,500 to $22,700 — adding about 1.33% to his absolute ROI. The annualized return of 14.82% exceeds the S&P 500 historical average of ~10%, classifying this as an excellent investment. However, David should consider whether this outperformance compensated for the substantial single-stock risk he took versus a diversified index fund.',
+        result: 'ROI: +51.33%, Annualized ROI: +14.81%, Multiplier: 1.51x, Net Profit: +$7,700.00',
+        insight: 'David\'s $200 in dividends boosted his total return from $22,500 to $22,700 — adding about 1.33% to his absolute ROI. The annualized return of 14.81% exceeds the S&P 500 historical average of ~10%, classifying this as an excellent investment. However, David should consider whether this outperformance compensated for the substantial single-stock risk he took versus a diversified index fund.',
       },
       {
         scenario: 'Priya invested $5,000 in a small business venture. After 2 years, the business failed and she recovered only $2,500 from liquidating inventory.',
@@ -219,10 +212,10 @@ const roiConfig: CalculatorConfig = {
         insight: 'A -50% total ROI means Priya lost half her investment. The annualized loss of -29.29% per year quantifies the severity. An important mathematical truth: a 50% loss requires a 100% gain just to break even. If Priya had diversified across 10 similar small-business investments instead of concentrating all her capital in one, the odds of total loss would be dramatically lower.',
       },
       {
-        scenario: 'Marcus invested $200,000 as a 20% down payment on a rental property, plus $15,000 in closing costs and renovations ($215,000 total invested). After 5 years he sold for $310,000, netting $275,000 after agent fees and mortgage payoff.',
-        inputs: { amountInvested: '215000', amountReturned: '275000', years: '5' },
-        result: 'ROI: +27.91%, Annualized ROI: +5.05%, Net Profit: +$60,000.00, Multiplier: 1.28x',
-        insight: 'While the 27.91% total ROI seems modest compared to stock market returns, the annualized 5.05% does not tell the full story. Marcus also benefited from rental income during the 5 years (not included in this calculation), mortgage principal paydown by tenants, and significant tax advantages like depreciation deductions. Real estate ROI calculations should always include rental cash flow alongside the sale proceeds.',
+        scenario: 'Marcus put $50,000 down on a $250,000 rental property (20% down) and spent another $15,000 on closing costs and renovations ($65,000 total invested). After 5 years he sold, and after agent fees and the mortgage payoff he netted $100,000.',
+        inputs: { amountInvested: '65000', amountReturned: '100000', years: '5' },
+        result: 'ROI: +53.85%, Annualized ROI: +9.00%, Net Profit: +$35,000.00, Multiplier: 1.54x',
+        insight: 'Because Marcus used a mortgage, his ROI is measured on his own cash ($65,000), not the $250,000 property price, so leverage amplifies the return. The calculation still leaves out the rental income he collected for 5 years, the mortgage interest and property taxes he paid, and tax effects such as depreciation, so include those cash flows in Amount Returned (or Amount Invested) for a complete picture.',
       },
     ],
     proTips: [

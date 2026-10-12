@@ -2,36 +2,15 @@ import { createElement } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import RMDPanel from './RMDPanel';
+import { TAX_YEAR } from '../../../utils/taxData';
+import {
+  JOINT_SPOUSE_MIN_AGE,
+  distributionPeriod as getDistributionPeriod,
+  jointTableApplies,
+  projectRmds,
+  rmdStartAge as getRmdStartAge,
+} from './rmdMath';
 
-const UNIFORM_TABLE: Record<number, number> = {
-  72: 27.4, 73: 26.5, 74: 25.5, 75: 24.6, 76: 23.7, 77: 22.9, 78: 22.0, 79: 21.1,
-  80: 20.2, 81: 19.4, 82: 18.5, 83: 17.7, 84: 16.8, 85: 16.0, 86: 15.2, 87: 14.4,
-  88: 13.7, 89: 12.9, 90: 12.2, 91: 11.5, 92: 10.8, 93: 10.1, 94: 9.5, 95: 8.9,
-  96: 8.4, 97: 7.8, 98: 7.3, 99: 6.8, 100: 6.4, 101: 6.0, 102: 5.6, 103: 5.2,
-  104: 4.9, 105: 4.6, 106: 4.3, 107: 4.1, 108: 3.9, 109: 3.7, 110: 3.5, 111: 3.4,
-  112: 3.3, 113: 3.1, 114: 3.0, 115: 2.9, 116: 2.8, 117: 2.7, 118: 2.5, 119: 2.3, 120: 2.0,
-};
-
-const JOINT_TABLE: Record<number, number> = {
-  70: 35.0, 71: 34.1, 72: 33.3, 73: 32.4, 74: 31.5, 75: 30.6, 76: 29.8, 77: 28.9, 78: 28.0,
-  79: 27.2, 80: 26.3, 81: 25.5, 82: 24.6, 83: 23.8, 84: 22.9, 85: 22.1, 86: 21.3, 87: 20.5,
-  88: 19.7, 89: 19.0, 90: 18.2,
-};
-
-function getDistributionPeriod(age: number, useJoint: boolean): number {
-  if (useJoint) {
-    const clampedAge = Math.min(Math.max(age, 70), 90);
-    return JOINT_TABLE[clampedAge] ?? UNIFORM_TABLE[Math.min(Math.max(age, 72), 120)] ?? 2.0;
-  }
-  const clampedAge = Math.min(Math.max(age, 72), 120);
-  return UNIFORM_TABLE[clampedAge] ?? 2.0;
-}
-
-function getRmdStartAge(birthYear: number): number {
-  if (birthYear <= 1950) return 72;
-  if (birthYear <= 1959) return 73;
-  return 75;
-}
 
 const rmdConfig: CalculatorConfig = {
   inputs: [
@@ -64,7 +43,21 @@ const rmdConfig: CalculatorConfig = {
         { label: 'No — Use Uniform Lifetime Table', value: 'no' },
         { label: 'Yes — Use Joint Life Expectancy Table', value: 'yes' },
       ],
-      helpText: 'Select "Yes" if your sole beneficiary is a spouse more than 10 years younger.',
+      helpText: 'Select "Yes" only if your spouse is your sole beneficiary and is more than 10 years younger than you.',
+    },
+    {
+      id: 'spouseAge',
+      label: `Spouse's Age (birthday in ${TAX_YEAR})`,
+      type: 'number',
+      placeholder: '62',
+      min: JOINT_SPOUSE_MIN_AGE,
+      max: 94,
+      step: 1,
+      unit: 'years',
+      inputMode: 'numeric',
+      showWhen: (v) => v.spouseToggle === 'yes',
+      helpText:
+        'IRS Table II needs both ages. If your spouse is not more than 10 years younger, the Uniform Lifetime Table is used instead.',
     },
     {
       id: 'expectedReturn',
@@ -82,13 +75,16 @@ const rmdConfig: CalculatorConfig = {
 
   calculate: (values) => {
     const birthYear = parseInt(values.birthYear, 10);
-    const accountBalance = new Decimal(String(values.accountBalance || '0').replace(/,/g, ''));
+    const accountBalance = new Decimal(String(values.accountBalance || '0').replace(/,/g, '') || '0');
     const useJoint = values.spouseToggle === 'yes';
-    const expectedReturn = parseFloat(values.expectedReturn) || 6;
+    const spouseAgeNow = parseInt(values.spouseAge, 10);
+    const parsedReturn = parseFloat(values.expectedReturn);
+    const expectedReturn = Number.isFinite(parsedReturn) ? parsedReturn : 6;
 
-    if (isNaN(birthYear) || accountBalance.lte(0)) return [];
+    if (isNaN(birthYear) || accountBalance.isNaN() || accountBalance.lte(0)) return [];
+    if (useJoint && !Number.isFinite(spouseAgeNow)) return [];
 
-    const currentYear = 2026;
+    const currentYear = TAX_YEAR;
     const currentAge = currentYear - birthYear;
     const rmdStartAge = getRmdStartAge(birthYear);
 
@@ -111,7 +107,10 @@ const rmdConfig: CalculatorConfig = {
       ];
     }
 
-    const distributionPeriod = getDistributionPeriod(currentAge, useJoint);
+    const spouseAge = useJoint ? spouseAgeNow : null;
+    // Table II applies only if the spouse is more than 10 years younger (and inside the table's range).
+    const jointApplies = useJoint && jointTableApplies(currentAge, spouseAgeNow);
+    const distributionPeriod = getDistributionPeriod(currentAge, spouseAge);
     const rmd = accountBalance.div(distributionPeriod);
     const rmdPct = rmd.div(accountBalance).mul(100);
     const penalty25 = rmd.mul(0.25);
@@ -119,25 +118,19 @@ const rmdConfig: CalculatorConfig = {
     const fmtDollar = (d: Decimal): string =>
       `$${d.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 
-    // Build 10-year projection data using decimal.js for precision
-    const rate = expectedReturn / 100;
-    const projection: Array<{ year: number; age: number; balance: number; rmd: number; factor: number }> = [];
-    let projBalance = accountBalance;
-    for (let i = 0; i < 10; i++) {
-      const projAge = currentAge + i;
-      const projYear = currentYear + i;
-      if (projAge < rmdStartAge) {
-        projBalance = projBalance.mul(1 + rate);
-        projection.push({ year: projYear, age: projAge, balance: projBalance.toNumber(), rmd: 0, factor: 0 });
-      } else {
-        const factor = getDistributionPeriod(projAge, useJoint);
-        const projRmd = projBalance.div(factor);
-        projection.push({ year: projYear, age: projAge, balance: projBalance.toNumber(), rmd: projRmd.toNumber(), factor });
-        projBalance = projBalance.minus(projRmd).mul(1 + rate);
-      }
-    }
+    const projection = projectRmds(
+      accountBalance.toNumber(),
+      currentAge,
+      spouseAge,
+      currentYear,
+      expectedReturn / 100,
+    );
 
-    const tableLabel = useJoint ? 'Joint Life Expectancy Table' : 'Uniform Lifetime Table';
+    const tableLabel = jointApplies ? 'Joint Life Expectancy Table' : 'Uniform Lifetime Table';
+    const tableWarning =
+      useJoint && !jointApplies
+        ? `Your spouse must be more than 10 years younger than you (and at least ${JOINT_SPOUSE_MIN_AGE}) for the Joint Life Expectancy Table; the Uniform Lifetime Table was used instead.`
+        : undefined;
 
     return [
       {
@@ -146,6 +139,7 @@ const rmdConfig: CalculatorConfig = {
         value: fmtDollar(rmd),
         highlight: true,
         color: 'positive',
+        warning: tableWarning,
         interpretation: `This is a mandatory withdrawal, not optional income — the IRS taxes it as ordinary income whether you need the cash or not, and missing it triggers a 25% penalty (${fmtDollar(penalty25)} here) on the shortfall. It's ${rmdPct.toFixed(1)}% of your balance this year; the percentage rises each year as the distribution period shortens.`,
       },
       {
@@ -188,6 +182,7 @@ const rmdConfig: CalculatorConfig = {
 
   educational: {
     formula: 'RMD = Account Balance / IRS Life Expectancy Factor',
+    formulaSource: 'IRS Publication 590-B (2025), Appendix B: Table III (Uniform Lifetime) and Table II (Joint Life and Last Survivor Expectancy); start ages from SECURE 2.0 Act section 107 and the IRS final regulations of July 2024.',
     formulaDescription:
       'The account balance used is the December 31 value from the prior year. The IRS Life Expectancy Factor comes from either the Uniform Lifetime Table (most account owners) or the Joint Life Expectancy Table (when the sole beneficiary is a spouse more than 10 years younger). All calculations use decimal.js for precise financial math.',
     diagram: {
@@ -206,7 +201,7 @@ const rmdConfig: CalculatorConfig = {
         symbol: 'Life Expectancy Factor',
         name: 'IRS Distribution Period',
         description:
-          'A divisor published by the IRS in Publication 590-B. It decreases each year as you age, which increases the percentage you must withdraw. Under SECURE 2.0 the tables were updated in 2022 to reflect longer life expectancies, slightly reducing RMD amounts. The Uniform Lifetime Table is used by most account owners. The Joint Life Expectancy Table applies only when your sole beneficiary is a spouse more than 10 years younger.',
+          'A divisor published by the IRS in Publication 590-B. It decreases each year as you age, which increases the percentage you must withdraw. The IRS updated the tables effective 2022 to reflect longer life expectancies, which lowered RMD amounts. The Uniform Lifetime Table is used by most account owners. The Joint Life Expectancy Table (IRS Table II) applies only when your sole beneficiary is a spouse more than 10 years younger, and its divisor depends on both your age and your spouse\'s age.',
       },
       {
         symbol: 'RMD Start Age',
@@ -224,7 +219,7 @@ const rmdConfig: CalculatorConfig = {
     howToUse: [
       'Enter your birth year so the calculator can determine your RMD start age under SECURE 2.0.',
       'Enter your total retirement account balance as of December 31 of the prior year. Include all Traditional IRAs and qualified employer plans (401k, 403b, 457b). Do NOT include Roth IRAs.',
-      'Select whether your sole beneficiary is a spouse who is more than 10 years younger. If yes, the Joint Life Expectancy Table applies and gives a longer distribution period (lower RMD).',
+      'Select whether your sole beneficiary is a spouse who is more than 10 years younger. If yes, enter your spouse\'s age; the Joint Life Expectancy Table (IRS Table II) then gives a longer distribution period (lower RMD).',
       'Enter your expected annual return to see how your RMDs are projected to change over the next 10 years as your balance grows between distributions.',
       'Review the penalty warning — failing to take your full RMD results in a 25% excise tax on the shortfall (reduced to 10% if corrected within a 2-year window under SECURE 2.0).',
     ],
@@ -244,23 +239,23 @@ const rmdConfig: CalculatorConfig = {
       },
       {
         scenario: 'Bob, born in 1948 (age 78 in 2026), has a $750,000 401(k) balance and his wife Susan is 15 years younger (age 63). He has named her as his sole beneficiary.',
-        inputs: { birthYear: '1948', accountBalance: '750000', spouseToggle: 'yes', expectedReturn: '5' },
-        result: 'Bob\'s RMD using the Joint Life Expectancy Table is $750,000 / 28.0 = $26,786 — nearly $7,300 less than the Uniform Table amount of $34,091. Over his remaining lifetime, the Joint Table could save Bob tens of thousands in reduced RMDs.',
-        insight: 'Using the Joint Life Expectancy Table (spouse 10+ years younger), Bob\'s distribution factor at age 78 is 28.0 instead of the Uniform Table factor of 22.0. His RMD is $750,000 / 28.0 = $26,786 — nearly $7,300 less than under the Uniform Table ($34,091). Over his remaining lifetime, the Joint Table could save Bob tens of thousands in reduced RMDs, keeping more money tax-deferred.',
+        inputs: { birthYear: '1948', accountBalance: '750000', spouseToggle: 'yes', spouseAge: '63', expectedReturn: '5' },
+        result: 'Bob\'s RMD using the Joint Life Expectancy Table (IRS Table II, ages 78 and 63) is $750,000 / 25.6 = $29,297 — about $4,800 less than the Uniform Table amount of $34,091 ($750,000 / 22.0).',
+        insight: 'Using the Joint Life Expectancy Table (spouse more than 10 years younger), Bob\'s distribution factor for ages 78 and 63 is 25.6 instead of the Uniform Table factor of 22.0. His RMD is $750,000 / 25.6 = $29,297 — about $4,800 less than under the Uniform Table ($34,091), keeping more money tax-deferred. The gap narrows as both ages rise.',
       },
     ],
     proTips: [
       'Consider taking your first RMD in the calendar year you turn 72/73/75 rather than delaying to April 1 of the next year. Delaying means taking two RMDs in one tax year, which could push you into a higher tax bracket and increase your Medicare IRMAA premiums.',
-      'Use your RMD to fund a Qualified Charitable Distribution (QCD) if you are 70.5 or older. You can direct up to $105,000 (2026 limit) of your RMD directly to a qualified charity, satisfying the RMD requirement without the distribution counting as taxable income.',
+      'Use your RMD to fund a Qualified Charitable Distribution (QCD) if you are 70.5 or older. You can direct up to $111,000 (2026 limit, IRS Notice 2025-67) of your RMD directly to a qualified charity, satisfying the RMD requirement without the distribution counting as taxable income.',
       'If you have multiple IRA accounts, you can calculate the RMD for each IRA separately but withdraw the total from just one account. This flexibility lets you manage which investments to sell and minimize transaction costs. 401(k) RMDs, however, must be taken separately from each plan.',
       'Plan Roth conversions before RMD age to reduce future RMDs. Converting portions of your traditional IRA to a Roth IRA when you are in a lower tax bracket (e.g., between retirement and RMD age) reduces the balance subject to RMDs and generates tax-free growth.',
       'Monitor the "RMD tax torpedo" — RMDs increase your taxable income, which can trigger higher Medicare Part B and Part D premiums (IRMAA surcharges) and make more of your Social Security benefits taxable. Strategic planning before age 72/73/75 can mitigate this effect.',
     ],
     limitations: [
-      'This calculator uses the 2022 IRS life expectancy tables (effective from 2022 per SECURE Act regulations). The Uniform Lifetime Table assumes the account owner\'s beneficiary is exactly 10 years younger — if there is no designated beneficiary or the beneficiary is less than 10 years younger, the Uniform Table applies.',
-      'The Joint Life Expectancy Table is only valid when the spouse is the SOLE primary beneficiary and is more than 10 years younger.',
+      'This calculator uses the IRS life expectancy tables in effect since 2022 (Pub. 590-B). The Uniform Lifetime Table assumes the account owner\'s beneficiary is exactly 10 years younger; it applies whenever the sole beneficiary is not a spouse more than 10 years younger. Born in 1959? SECURE 2.0 is ambiguous; the IRS\'s proposed regulations treat age 73 as the start age.',
+      'The Joint Life Expectancy Table is only valid when the spouse is the SOLE beneficiary for the whole year and is more than 10 years younger. This calculator holds the age gap constant in the projection and covers spouse ages 30 to 94.',
       'Inherited IRA RMD rules (under the SECURE Act\'s 10-year rule for non-spouse beneficiaries) are not covered by this calculator.',
-      'The 10-year projection assumes constant returns, which does not reflect real market volatility. State income tax on RMDs varies by state and is not included.',
+      'The 10-year projection assumes constant returns (the RMD is taken at the start of each year and the rest grows), which does not reflect real market volatility. State income tax on RMDs varies by state and is not included.',
     ],
     quickReference: [
       { label: 'RMD Start — Born <=1950', value: 'Age 72' },
@@ -270,13 +265,13 @@ const rmdConfig: CalculatorConfig = {
       { label: 'Subsequent RMDs', value: 'December 31 each year' },
       { label: 'Missed RMD Penalty', value: '25% (10% if corrected within 2 yrs)' },
       { label: 'Roth IRAs', value: 'No RMDs during owner\'s lifetime' },
-      { label: 'QCD Limit (2026)', value: '$105,000 per year (age 70.5+)' },
+      { label: 'QCD Limit (2026)', value: '$111,000 per year (age 70.5+)' },
     ],
     faqs: [
       {
         question: 'What accounts are subject to RMDs?',
         answer:
-          'Traditional IRAs, SEP IRAs, SIMPLE IRAs, 401(k), 403(b), and governmental 457(b) plans are all subject to RMDs. Roth IRAs are NOT subject to RMDs during the original owner\'s lifetime — you never have to withdraw from a Roth IRA while you\'re alive. However, inherited Roth IRAs are now subject to RMDs under the SECURE Act rules. Designated Roth accounts in 401(k) and 403(b) plans ARE subject to RMDs (unlike Roth IRAs), though many people roll these over to a Roth IRA before RMD age to avoid this requirement.',
+          'Traditional IRAs, SEP IRAs, SIMPLE IRAs, 401(k), 403(b), and governmental 457(b) plans are all subject to RMDs. Roth IRAs are NOT subject to RMDs during the original owner\'s lifetime — you never have to withdraw from a Roth IRA while you\'re alive. However, most non-spouse beneficiaries of an inherited Roth IRA must empty it within 10 years under the SECURE Act. Designated Roth accounts in 401(k) and 403(b) plans were subject to lifetime RMDs until 2023, but SECURE 2.0 removed that requirement starting in 2024, so they now match Roth IRAs.',
       },
       {
         question: 'What happens if I take more than the RMD?',
@@ -286,12 +281,12 @@ const rmdConfig: CalculatorConfig = {
       {
         question: 'Can I avoid RMDs by converting to a Roth IRA?',
         answer:
-          'Yes. Converting a Traditional IRA to a Roth IRA eliminates future RMDs on those funds, since Roth IRAs have no RMD requirement during the owner\'s lifetime. However, the converted amount is fully taxable in the year of conversion. Many retirees do partial Roth conversions in lower-income years (e.g., between retirement and RMD age, before Social Security begins) to reduce future RMD amounts and smooth out their tax burden over retirement.',
+          'Yes. Converting a Traditional IRA to a Roth IRA eliminates future RMDs on those funds, since Roth IRAs have no RMD requirement during the owner\'s lifetime. However, the converted amount is fully taxable in the year of conversion. The year\'s RMD itself cannot be converted, so take it first. Many retirees do partial Roth conversions in lower-income years (e.g., between retirement and RMD age, before Social Security begins) to reduce future RMD amounts and smooth out their tax burden over retirement.',
       },
       {
         question: 'Do I have to take RMDs from each account separately?',
         answer:
-          'For IRAs (Traditional, SEP, SIMPLE), you can calculate the RMD for each account separately but withdraw the total aggregate amount from any one IRA or combination of IRAs. For employer plans (401k, 403b, 457b), RMDs must be calculated and taken separately from each plan — you cannot aggregate across employer plans or between employer plans and IRAs. Inherited IRAs must also be handled separately from your own IRAs.',
+          'For IRAs (Traditional, SEP, SIMPLE), you can calculate the RMD for each account separately but withdraw the total aggregate amount from any one IRA or combination of IRAs. For employer plans (401k, 457b), RMDs must be calculated and taken separately from each plan; 403(b) RMDs can be aggregated only with other 403(b) accounts. You cannot aggregate between employer plans and IRAs. Inherited IRAs must also be handled separately from your own IRAs.',
       },
       {
         question: 'Can I delay my first RMD to April 1 of the following year?',

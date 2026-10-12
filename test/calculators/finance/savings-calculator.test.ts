@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import config from '../../../src/calculators/finance/savings';
-import { getValue, parseMoney, near, fvLump, fvMonthlyContrib } from '../../helpers';
+import { getValue, parseMoney, near } from '../../helpers';
 
 describe('savings (balance mode)', () => {
   it('lump only: $5,000 @ 4.5% for 10 years monthly compounding', () => {
@@ -13,8 +13,8 @@ describe('savings (balance mode)', () => {
       timeUnit: 'years',
       apy: '4.5',
     });
-    const expected = fvLump(5000, 0.045, 10, 12);
-    near(parseMoney(getValue(r, 'finalBalance')), expected, 1);
+    // APY is the effective annual yield: 5,000 x 1.045^10 = 7,764.85
+    near(parseMoney(getValue(r, 'finalBalance')), 5000 * Math.pow(1.045, 10), 1);
     near(parseMoney(getValue(r, 'totalPrincipal')), 5000);
   });
 
@@ -28,8 +28,8 @@ describe('savings (balance mode)', () => {
       timeUnit: 'years',
       apy: '5',
     });
-    const expected = fvLump(1000, 0.05, 5, 12) + fvMonthlyContrib(200, 0.05, 5);
-    near(parseMoney(getValue(r, 'finalBalance')), expected, 1);
+    // monthly rate = 1.05^(1/12) - 1 = 0.40741%; 1000 x 1.05^5 + 200 x (1.05^5 - 1)/0.0040741 = 14,839.03
+    near(parseMoney(getValue(r, 'finalBalance')), 14839.03, 1);
     near(parseMoney(getValue(r, 'totalPrincipal')), 1000 + 200 * 60);
   });
 
@@ -148,8 +148,8 @@ describe('savings (goal mode)', () => {
       apy: '6',
     });
     const required = parseMoney(getValue(r, 'requiredMonthly').replace('/mo', ''));
-    // FV of that monthly contribution over 10 years at 6% should be ≈ 100,000
-    const fv = fvMonthlyContrib(required, 0.06, 10);
+    // FV of that monthly contribution over 10 years at 6% APY (monthly rate 1.06^(1/12) - 1) should be 100,000
+    const fv = required * ((Math.pow(1.06, 10) - 1) / (Math.pow(1.06, 1 / 12) - 1));
     near(fv, 100000, 1);
   });
 
