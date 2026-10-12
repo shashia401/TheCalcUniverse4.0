@@ -96,7 +96,7 @@ export default function HELOCPanel({ results }: Props) {
         {/* Risk callout */}
         <div className="rounded-xl bg-red-50 border border-red-200 px-5 py-4">
           <p className="text-xs font-bold text-red-700 mb-1">Important Risk Disclosure</p>
-          <p className="text-xs text-red-600 leading-relaxed">
+          <p className="text-xs text-red-700 leading-relaxed">
             A HELOC is secured by your home. Failure to repay puts your home at risk of
             foreclosure. HELOCs use variable rates &mdash; if the Prime Rate rises, your payment rises
             too. Borrow only what you can service even if rates increase by 2&ndash;3%.

@@ -12,10 +12,10 @@ export function PresentValueTable({ presentValues, npv }: { presentValues: Prese
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
-            <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Year</th>
-            <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Cash Flow</th>
-            <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Discount Factor</th>
-            <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Present Value</th>
+            <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Year</th>
+            <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Cash Flow</th>
+            <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Discount Factor</th>
+            <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Present Value</th>
           </tr>
         </thead>
         <tbody>
@@ -25,11 +25,11 @@ export function PresentValueTable({ presentValues, npv }: { presentValues: Prese
               className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}
             >
               <td className="px-3 py-2 font-bold text-slate-700">Year {row.year}</td>
-              <td className={`px-3 py-2 text-right font-semibold ${row.cashFlow < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+              <td className={`px-3 py-2 text-right font-semibold ${row.cashFlow < 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                 {fmtD(row.cashFlow)}
               </td>
-              <td className="px-3 py-2 text-right text-slate-500">{row.discountFactor.toFixed(4)}</td>
-              <td className={`px-3 py-2 text-right font-semibold ${row.presentValue < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+              <td className="px-3 py-2 text-right text-slate-600">{row.discountFactor.toFixed(4)}</td>
+              <td className={`px-3 py-2 text-right font-semibold ${row.presentValue < 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                 {fmtD(row.presentValue)}
               </td>
             </tr>

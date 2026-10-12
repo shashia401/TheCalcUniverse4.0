@@ -1,77 +1,48 @@
 import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { fvWithContributions } from '../../../utils/financial';
 import { IRA_LIMITS } from '../../../utils/taxData';
 import { TrendingUp, Scale } from 'lucide-react';
+import SvgLineChart from '../../../components/charts/SvgLineChart';
+import { iraProjection, rateOr } from './iraMath';
 
-const TAX_YEAR = 2026;
+const fmt = (n: number) =>
+  n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const axis = (n: number) =>
+  n >= 1_000_000 ? `$${+(n / 1_000_000).toFixed(1)}M` : `$${+(n / 1_000).toFixed(0)}K`;
 
 export default function IraPanel({ values }: { values: Record<string, string>; results: CalculatorResult[] }) {
   const currentAge = parseInt(values.currentAge) || 30;
   const retirementAge = parseInt(values.retirementAge) || 65;
-  const currentBalance = parseFloat(values.currentBalance) || 0;
-  const annualContribution = parseFloat(values.annualContribution) || 0;
-  const annualReturn = parseFloat(values.expectedReturn) / 100 || 0.07;
-  const marginalRate = parseFloat(values.marginalTaxRate) / 100 || 0.22;
-  const retireRate = parseFloat(values.retirementTaxRate) / 100 || 0.12;
+  const currentBalance = Math.max(0, parseFloat(values.currentBalance) || 0);
+  const annualContribution = Math.max(0, parseFloat(values.annualContribution) || 0);
+  const parsedReturn = parseFloat(values.expectedReturn);
+  const annualReturn = isNaN(parsedReturn) ? 0.07 : parsedReturn / 100;
+  const marginalRate = rateOr(values.marginalTaxRate, 0.22);
+  const retireRate = rateOr(values.retirementTaxRate, 0.12);
   const years = retirementAge - currentAge;
-  if (years <= 0) return null;
 
   const maxContrib = currentAge >= 50 ? IRA_LIMITS.totalAge50Plus : IRA_LIMITS.base;
   const contrib = Math.min(annualContribution, maxContrib);
 
-  const chartData = useMemo(() => {
-    const data: Array<{ year: number; age: number; traditional: number; roth: number }> = [];
+  // Same pure function as index.ts: the Traditional line includes the invested deduction, so the
+  // winner shown here can never disagree with the result rows.
+  const { chartData, final } = useMemo(() => {
+    const input = { years, currentBalance, contribution: contrib, annualReturn, marginalRate, retireRate };
+    const data = [];
     for (let y = 1; y <= years; y++) {
-      const months = y * 12;
-      const monthlyRate = annualReturn / 12;
-      const bal = fvWithContributions(currentBalance, contrib / 12, monthlyRate, months);
-      const tradAfterTax = bal * (1 - retireRate);
-      const rothAfterTax = bal; // Roth withdrawals are tax-free
-      data.push({ year: y, age: currentAge + y, traditional: tradAfterTax, roth: rothAfterTax });
+      const p = iraProjection(input, y);
+      data.push({ year: y, age: currentAge + y, traditional: p.tradTotal, roth: p.rothBalance });
     }
-    return data;
-  }, [currentBalance, contrib, annualReturn, years, retireRate, currentAge]);
+    return { chartData: data, final: years > 0 ? iraProjection(input) : null };
+  }, [years, currentBalance, contrib, annualReturn, marginalRate, retireRate, currentAge]);
 
-  const last = chartData[chartData.length - 1];
-  if (!last) return null;
+  if (years <= 0 || !final) return null;
 
-  const finalRoth = last.roth;
-  const finalTrad = last.traditional;
+  const finalRoth = final.rothBalance;
+  const finalTrad = final.tradTotal;
+  const tie = Math.abs(finalRoth - finalTrad) < 0.5;
   const tradBetter = finalTrad > finalRoth;
   const betterAmount = Math.abs(finalRoth - finalTrad);
-
-  const breakevenRate = (() => {
-    if (finalRoth <= 0) return 0;
-    let lo = 0, hi = 0.5;
-    for (let i = 0; i < 50; i++) {
-      const mid = (lo + hi) / 2;
-      const tradAtMid = finalRoth * (1 - mid);
-      if (tradAtMid > finalTrad) lo = mid;
-      else hi = mid;
-    }
-    return lo;
-  })();
-
-  const fmt = (n: number) =>
-    n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-
-  // Chart dimensions
-  const maxVal = Math.max(last.traditional, last.roth);
-  const width = 520;
-  const height = 200;
-  const padL = 55;
-  const padR = 20;
-  const padT = 20;
-  const padB = 36;
-  const chartW = width - padL - padR;
-  const chartH = height - padT - padB;
-
-  const toX = (i: number) => padL + (i / (chartData.length - 1)) * chartW;
-  const toY = (v: number) => padT + (1 - v / maxVal) * chartH;
-
-  const pathRoth = chartData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${toX(i).toFixed(1)} ${toY(d.roth).toFixed(1)}`).join(' ');
-  const pathTrad = chartData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${toX(i).toFixed(1)} ${toY(d.traditional).toFixed(1)}`).join(' ');
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -84,62 +55,48 @@ export default function IraPanel({ values }: { values: Record<string, string>; r
         {/* Summary cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1">Roth IRA (After-Tax)</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-1">Roth IRA (After-Tax)</p>
             <p className="text-lg font-black text-blue-700">{fmt(finalRoth)}</p>
-            <p className="text-[10px] text-blue-500 mt-0.5">100% tax-free withdrawal</p>
+            <p className="text-[10px] text-blue-700 mt-0.5">100% tax-free withdrawal</p>
           </div>
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Traditional IRA (After-Tax)</p>
-            <p className="text-lg font-black text-amber-700">{fmt(finalTrad)}</p>
-            <p className="text-[10px] text-amber-500 mt-0.5">After {(retireRate * 100).toFixed(0)}% withdrawal tax</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-800 mb-1">Traditional (After-Tax + Invested Deduction)</p>
+            <p className="text-lg font-black text-amber-800">{fmt(finalTrad)}</p>
+            <p className="text-[10px] text-amber-800 mt-0.5">After {(retireRate * 100).toFixed(0)}% withdrawal tax</p>
           </div>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 col-span-2 sm:col-span-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">{tradBetter ? 'Traditional Wins By' : 'Roth Wins By'}</p>
-            <p className="text-lg font-black text-emerald-700">{fmt(betterAmount)}</p>
-            <p className="text-[10px] text-emerald-500 mt-0.5">{tradBetter ? 'Lower retirement tax rate advantage' : 'Tax-free growth advantage'}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-1">{tie ? 'Result' : tradBetter ? 'Traditional Wins By' : 'Roth Wins By'}</p>
+            <p className="text-lg font-black text-emerald-700">{tie ? 'Tie' : fmt(betterAmount)}</p>
+            <p className="text-[10px] text-emerald-700 mt-0.5">{tie ? 'Same rate now and in retirement' : tradBetter ? 'Lower retirement tax rate advantage' : 'Tax-free growth advantage'}</p>
           </div>
           <div className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-3 col-span-2 sm:col-span-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600 mb-1">Breakeven Retirement Tax Rate</p>
-            <p className="text-lg font-black text-purple-700">{(breakevenRate * 100).toFixed(1)}%</p>
-            <p className="text-[10px] text-purple-500 mt-0.5">If your retirement rate is below this &rarr; Traditional wins</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-1">Breakeven Retirement Tax Rate</p>
+            <p className="text-lg font-black text-purple-700">{(final.breakevenRate * 100).toFixed(1)}%</p>
+            <p className="text-[10px] text-purple-700 mt-0.5">If your retirement rate is below this &rarr; Traditional wins</p>
           </div>
         </div>
 
         {/* Growth chart */}
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Balance Growth Over Time</p>
-          <div className="w-full overflow-x-auto" tabIndex={0} role="img" aria-label="IRA balance growth comparison chart">
-            <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} aria-hidden="true">
-              {[0, 0.25, 0.5, 0.75, 1].map((g) => {
-                const y = padT + (1 - g) * chartH;
-                return (
-                  <g key={g}>
-                    <line x1={padL} y1={y} x2={padL + chartW} y2={y} stroke="#e2e8f0" strokeWidth={0.5} />
-                    <text x={padL - 4} y={y} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="#94a3b8">
-                      {maxVal * g >= 1_000_000 ? `$${(maxVal * g / 1_000_000).toFixed(1)}M` : `$${(maxVal * g / 1_000).toFixed(0)}K`}
-                    </text>
-                  </g>
-                );
-              })}
-              {/* Year labels */}
-              {chartData.filter((_, i) => i % Math.max(1, Math.floor(chartData.length / 5)) === 0 || i === chartData.length - 1).map((d) => (
-                <text key={d.year} x={toX(chartData.indexOf(d))} y={height - 6} textAnchor="middle" fontSize={8} fill="#94a3b8">
-                  {d.age ? `Age ${d.age}` : `Yr ${d.year}`}
-                </text>
-              ))}
-              <path d={pathRoth} fill="none" stroke="#3b82f6" strokeWidth={2.5} strokeLinejoin="round" />
-              <path d={pathTrad} fill="none" stroke="#f59e0b" strokeWidth={2.5} strokeLinejoin="round" strokeDasharray="4 3" />
-              <rect x={padL} y={padT} width={chartW} height={chartH} fill="none" stroke="#e2e8f0" strokeWidth={0.5} />
-            </svg>
-          </div>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">Balance Growth Over Time</p>
+          <SvgLineChart
+            series={[
+              { name: 'Roth IRA (tax-free)', color: '#1d4ed8', points: chartData.map((d) => ({ x: d.age, y: d.roth })) },
+              { name: 'Traditional (after tax, with invested deduction)', color: '#b45309', dashed: true, points: chartData.map((d) => ({ x: d.age, y: d.traditional })) },
+            ]}
+            height={200}
+            xFormat={(n) => `Age ${n}`}
+            yFormat={axis}
+            ariaLabel={`Projected balances to age ${retirementAge}: Roth ${fmt(finalRoth)}, Traditional after tax ${fmt(finalTrad)}`}
+          />
           <div className="flex flex-wrap gap-4 justify-center mt-2">
             <div className="flex items-center gap-1.5">
-              <div className="w-4 h-0.5 bg-blue-500" />
-              <span className="text-[10px] text-slate-500">Roth IRA (Tax-Free)</span>
+              <div className="w-4 h-0.5 bg-blue-700" aria-hidden="true" />
+              <span className="text-[10px] text-slate-600">Roth IRA (Tax-Free)</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-4 h-0.5 bg-amber-500" />
-              <span className="text-[10px] text-slate-500">Traditional IRA (After {(retireRate * 100).toFixed(0)}% Tax)</span>
+              <div className="w-4" style={{ borderTop: '2px dashed #b45309' }} aria-hidden="true" />
+              <span className="text-[10px] text-slate-600">Traditional (After {(retireRate * 100).toFixed(0)}% Tax, deduction invested)</span>
             </div>
           </div>
         </div>
@@ -166,8 +123,8 @@ export default function IraPanel({ values }: { values: Record<string, string>; r
               Roth provides more <strong className="text-blue-700">tax-free flexibility</strong> in retirement.</>
             )}
           </p>
-          <p className="text-xs text-slate-500 mt-2">
-            If your effective retirement tax rate is below <strong>{(breakevenRate * 100).toFixed(1)}%</strong>, Traditional
+          <p className="text-xs text-slate-600 mt-2">
+            If your effective retirement tax rate is below <strong>{(final.breakevenRate * 100).toFixed(1)}%</strong>, Traditional
             wins. Above that, Roth wins. Estimate your retirement rate based on how much you plan to withdraw annually.
           </p>
         </div>

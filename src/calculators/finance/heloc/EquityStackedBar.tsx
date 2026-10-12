@@ -14,24 +14,24 @@ export function EquityStackedBar({ data }: { data: HELOCData }) {
       label: 'Current Mortgage',
       pct: mortgagePct,
       value: mortgageBalance,
-      color: '#ef4444',
+      color: '#b91c1c',
       textColor: 'text-red-700',
-      bg: 'bg-red-400',
+      bg: 'bg-red-700',
     },
     {
       label: 'Available HELOC Line',
       pct: helocPct,
       value: maxBorrowable,
-      color: '#10b981',
+      color: '#047857',
       textColor: 'text-emerald-700',
-      bg: 'bg-emerald-500',
+      bg: 'bg-emerald-700',
     },
     {
       label: 'Required Equity Cushion',
       pct: cushionPct,
       value: requiredCushion,
       color: '#e2e8f0',
-      textColor: 'text-slate-500',
+      textColor: 'text-slate-600',
       bg: 'bg-slate-200',
     },
   ];
@@ -45,7 +45,7 @@ export function EquityStackedBar({ data }: { data: HELOCData }) {
             .map((seg) => (
               <div
                 key={seg.label}
-                className={`${seg.bg} flex items-center justify-center transition-all`}
+                className={`${seg.bg} flex items-center justify-center`}
                 style={{ width: `${Math.max(seg.pct, 0)}%` }}
               >
                 {seg.pct > 8 && (
@@ -71,7 +71,7 @@ export function EquityStackedBar({ data }: { data: HELOCData }) {
 
       <div className="flex justify-between text-[10px] text-slate-500">
         <span>0%</span>
-        <span className="text-amber-600 font-bold">{maxLTV}% CLTV limit</span>
+        <span className="text-amber-800 font-bold">{maxLTV}% CLTV limit</span>
         <span>100%</span>
       </div>
 

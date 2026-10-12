@@ -4,6 +4,8 @@ import InterestRatePanel from './InterestRatePanel';
 
 const interestRateSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="16" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Compound Interest Rate Solver</text><rect x="15" y="28" width="290" height="50" rx="6" fill="var(--svg-eff6ff)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="160" y="44" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-1e40af)">Solving for the Rate</text><text x="160" y="60" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-3b82f6)">A = P(1 + r/n)^(nt)</text><text x="160" y="73" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">r = n[(A/P)^(1/nt) - 1]</text><g transform="translate(15,88)"><rect x="10" y="0" width="100" height="28" rx="4" fill="var(--svg-3b82f6)"/><text x="60" y="19" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">P = $10,000</text><text x="60" y="36" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Principal</text><text x="125" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-64748b)">+</text><rect x="145" y="0" width="80" height="28" rx="4" fill="var(--svg-22c55e)"/><text x="185" y="19" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">$4,500</text><text x="185" y="36" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Interest</text><text x="235" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-64748b)">=</text><rect x="255" y="0" width="45" height="28" rx="4" fill="var(--svg-8b5cf6)"/><text x="277" y="19" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-ffffff)">A</text><text x="277" y="36" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">$14.5K</text></g><rect x="15" y="132" width="290" height="30" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="146" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">Compounding Frequency (n)</text><text x="55" y="158" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Monthly (12/yr)</text><text x="125" y="158" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Daily (365/yr)</text><text x="195" y="158" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Quarterly (4/yr)</text><text x="265" y="158" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Annual (1/yr)</text><rect x="15" y="170" width="290" height="24" rx="6" fill="var(--svg-fef3c7)" stroke="var(--svg-f59e0b)" stroke-width="0.5"/><text x="160" y="186" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-b45309)">EAR = (1 + r/n)^n - 1  = true annual rate after compounding</text></svg>';
 
+const FREQ_LABEL: Record<number, string> = { 1: 'annually', 2: 'semi-annually', 4: 'quarterly', 12: 'monthly', 365: 'daily' };
+
 const interestRateConfig: CalculatorConfig = {
   inputs: [
     {
@@ -108,7 +110,7 @@ const interestRateConfig: CalculatorConfig = {
     return [
       {
         id: 'nominalRate',
-        label: n === 0 ? 'Simple Interest Rate (Annual)' : `Nominal Annual Rate (${n > 0 ? `compounded ${['', '', 'semi-annually', 'quarterly', '', '', '', '', '', '', '', '', 'monthly'][n] || `${n}x/yr`}` : ''})`,
+        label: n === 0 ? 'Simple Interest Rate (Annual)' : `Nominal Annual Rate (compounded ${FREQ_LABEL[n] || `${n}x/yr`})`,
         value: pct(rate),
         highlight: true,
         color: 'positive' as const,
@@ -124,7 +126,7 @@ const interestRateConfig: CalculatorConfig = {
       },
       {
         id: 'periodicRate',
-        label: n > 0 ? `Rate per Period (${1 / n} year)` : 'Annual Rate',
+        label: n > 0 ? `Rate per Period (${FREQ_LABEL[n] || `1/${n} year`})` : 'Annual Rate',
         value: pct(rate / (n > 0 ? n : 1)),
         color: 'neutral' as const,
       },
@@ -218,7 +220,7 @@ const interestRateConfig: CalculatorConfig = {
         scenario: 'Tom in San Diego, CA took out a personal loan of $5,000 and after making all payments over 3 years (36 months), he calculated he paid back a total of $6,920. The lender advertised "competitive rates" but Tom wants to know the actual effective annual rate he was charged, with monthly compounding.',
         inputs: { principal: '5000', finalAmount: '6920', timePeriod: '3', timeUnit: 'years', compoundFrequency: '12' },
         result: 'Nominal annual rate (monthly compounded): 10.8816%. Effective Annual Rate (EAR): 11.4411%. Periodic rate (monthly): 0.9068%. Total interest paid: $1,920. Total cost as % of principal: +38.4000%.',
-        insight: 'Tom paid a 10.88% nominal rate — the APR the lender disclosed — but the effective annual rate of 11.44% is the true cost. This 0.56 percentage point gap is the "compounding penalty" that borrowers pay when interest compounds monthly rather than annually. Over the 3-year term on a $5,000 loan, the difference between 10.88% simple and 10.88% monthly compounding is about $105 in extra interest. However, compared to a credit card at 22% APR (EAR ~24%), Tom\'s 11.44% EAR personal loan is still dramatically cheaper. This example highlights why understanding effective rates matters: when comparing loan offers, always compare EAR to EAR, not nominal rates — especially when comparing products with different compounding frequencies.',
+        insight: 'Tom paid a 10.88% nominal rate — the APR the lender disclosed — but the effective annual rate of 11.44% is the true cost. This 0.56 percentage point gap is the "compounding penalty" that borrowers pay when interest compounds monthly rather than annually. Over the 3-year term on a $5,000 loan, the difference between 10.88% simple interest ($1,632) and 10.88% compounded monthly ($1,920) is about $288 in extra interest. However, compared to a credit card at 22% APR (EAR ~24%), Tom\'s 11.44% EAR personal loan is still dramatically cheaper. This example highlights why understanding effective rates matters: when comparing loan offers, always compare EAR to EAR, not nominal rates — especially when comparing products with different compounding frequencies.',
       },
     ],
 
@@ -226,7 +228,7 @@ const interestRateConfig: CalculatorConfig = {
       'When comparing savings accounts, CDs, or loans, always use the EAR (Effective Annual Rate), not the nominal rate. A bank offering 4.90% compounded daily has an EAR of 5.02%, while another offering 5.00% compounded annually has an EAR of exactly 5.00%. The "lower" nominal rate actually beats the "higher" one — this is why APY (Annual Percentage Yield) was mandated for savings products.',
       'For loans, the lender\'s APR is the nominal rate. Use this calculator with the total you will actually pay back (including all fees) as the Final Amount to find your true effective borrowing rate. What looks like a 7% loan can become a 9%+ effective rate once origination fees and closing costs are included.',
       'The difference between nominal and effective rates grows with both the nominal rate and the compounding frequency. At 3%, the EAR gap is tiny. At 25% (credit card territory), daily compounding produces an EAR of 28.39% — a 3.39-point penalty for borrowers. This is why credit card debt is so destructive: high nominal rates compounded daily.',
-      'For quick mental math: the EAR is approximately equal to the nominal rate plus (nominal rate² / 2n) where n is compounding periods per year. At 12% nominal compounded monthly, EAR ≈ 12% + (0.0144/24) ≈ 12.60% — close to the actual 12.68%. This shortcut helps you spot-check whether a quoted rate passes the smell test.',
+      'For quick mental math: the EAR is approximately the nominal rate plus r²(n−1)/(2n), where n is compounding periods per year. At 12% nominal compounded monthly, EAR ≈ 12% + 0.0144×11/24 ≈ 12.66% — close to the actual 12.68%. This shortcut helps you spot-check whether a quoted rate passes the smell test.',
     ],
 
     quickReference: [

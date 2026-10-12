@@ -1,4 +1,8 @@
-// Source: U.S. Bureau of Labor Statistics (BLS) CPI-U data
+// Source: U.S. Bureau of Labor Statistics (BLS) CPI-U, U.S. city average, all items, 1982-84=100, NOT seasonally
+// adjusted, annual averages. 1913-2016 checked against BLS Table 24 (mean of the 12 monthly indexes); 2017-2024 are
+// the BLS annual averages (2024 = 313.689). 2025 = mean of the 11 published months (October 2025 was not collected),
+// and 2026 = mean of the months published so far (January-August 2026, 331.66) because the year is not complete.
+// The partial year is NOT a forecast. Update both when BLS publishes a full-year average.
 export const CPI_DATA: Record<number, number> = {
   1913: 9.9,
   1914: 10.0,
@@ -108,14 +112,16 @@ export const CPI_DATA: Record<number, number> = {
   2018: 251.1,
   2019: 255.7,
   2020: 258.8,
-  2021: 270.9,
+  2021: 271.0,
   2022: 292.7,
   2023: 304.7,
-  2024: 313.5,
-  2025: 319.0,
-  // 2026 projection: extrapolated from 2023-2025 trend (~1.6% YoY increase)
-  2026: 324.0,
+  2024: 313.7,
+  2025: 321.9,
+  2026: 331.7, // Jan-Aug 2026 average (partial year)
 };
+
+/** Years whose value is a partial-year average rather than a full-year BLS annual average. */
+export const PARTIAL_YEARS: Record<number, string> = { 2026: 'Jan–Aug average' };
 
 export const CPI_YEARS = Object.keys(CPI_DATA).map(Number).sort((a, b) => a - b);
 export const MIN_YEAR = CPI_YEARS[0];

@@ -3,6 +3,7 @@ import { HELOCData, fmt } from './helocTypes';
 export function RateContextCard({ data }: { data: HELOCData }) {
   const { helocRate, actualDraw } = data;
 
+  // Illustrative comparison rates (not market data): a typical-looking credit card APR and personal loan APR.
   const creditCardRate = 24;
   const personalLoanRate = 12;
 
@@ -16,15 +17,15 @@ export function RateContextCard({ data }: { data: HELOCData }) {
 
   const comparisons = [
     {
-      label: 'Credit Card Average',
+      label: 'Credit Card (example APR)',
       rate: creditCardRate,
       savings: ccSavings,
-      color: 'text-red-600',
+      color: 'text-red-700',
       bg: 'bg-red-50',
       border: 'border-red-200',
     },
     {
-      label: 'Personal Loan Average',
+      label: 'Personal Loan (example APR)',
       rate: personalLoanRate,
       savings: plSavings,
       color: 'text-amber-700',
@@ -36,11 +37,11 @@ export function RateContextCard({ data }: { data: HELOCData }) {
   return (
     <div className="space-y-3">
       <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-1">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-1">
           Your HELOC Rate
         </p>
         <p className="text-3xl font-black text-blue-700">{helocRate.toFixed(2)}%</p>
-        <p className="text-xs text-blue-500 mt-1">Variable rate tied to Prime Rate</p>
+        <p className="text-xs text-blue-700 mt-1">Variable rate tied to Prime Rate</p>
       </div>
 
       <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -56,11 +57,11 @@ export function RateContextCard({ data }: { data: HELOCData }) {
           <p className="text-xs text-slate-600">
             You save{' '}
             <strong className="text-emerald-700">${fmt(c.savings)}/month</strong> per $10,000 vs.{' '}
-            {c.label.toLowerCase()}.
+            a {c.rate}% {c.label.toLowerCase().replace(' (example apr)', '')}.
             {actualDraw > 0 && (
               <span className="block mt-0.5 text-slate-500">
                 On your ${fmt(actualDraw)} draw: save{' '}
-                <strong className="text-emerald-600">
+                <strong className="text-emerald-700">
                   ${fmt((c.savings * actualDraw) / base)}/month
                 </strong>{' '}
                 vs. this alternative.

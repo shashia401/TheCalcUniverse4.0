@@ -5,8 +5,7 @@ import {
   FilingStatus,
   STANDARD_DEDUCTIONS_2025,
   STATE_RATES_2025,
-  calcFederalTax,
-  calcFICA,
+  computeIncomeTax,
   RETIREMENT_LIMITS_2025,
 } from './taxData';
 
@@ -17,7 +16,7 @@ const STATE_OPTIONS = Object.entries(STATE_RATES_2025)
     value: code,
   }));
 
-const incomeTaxSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="14" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Paycheck Breakdown</text><rect x="15" y="24" width="290" height="20" rx="4" fill="var(--svg-e2e8f0)"/><text x="160" y="38" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-475569)">Gross Income: $75,000</text><rect x="15" y="50" width="30" height="18" rx="3" fill="var(--svg-3b82f6)"/><text x="30" y="62" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">401k</text><rect x="48" y="50" width="70" height="18" rx="3" fill="var(--svg-ef4444)"/><text x="83" y="62" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Federal $8,350</text><rect x="122" y="50" width="45" height="18" rx="3" fill="var(--svg-f59e0b)"/><text x="144" y="62" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">FICA</text><rect x="171" y="50" width="30" height="18" rx="3" fill="var(--svg-8b5cf6)"/><text x="186" y="62" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">State</text><rect x="205" y="50" width="100" height="18" rx="3" fill="var(--svg-22c55e)"/><text x="255" y="62" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Take-Home</text><rect x="15" y="78" width="290" height="55" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="93" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">Progressive Tax Brackets (2025 Single)</text><rect x="25" y="98" width="50" height="14" rx="3" fill="var(--svg-22c55e)"/><text x="50" y="108" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">10%</text><text x="80" y="108" font-size="6" fill="var(--svg-64748b)">$0-$11,925</text><rect x="145" y="98" width="50" height="14" rx="3" fill="var(--svg-3b82f6)"/><text x="170" y="108" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">12%</text><text x="200" y="108" font-size="6" fill="var(--svg-64748b)">$11,926-$48,475</text><rect x="25" y="114" width="50" height="14" rx="3" fill="var(--svg-f59e0b)"/><text x="50" y="124" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">22%</text><text x="80" y="124" font-size="6" fill="var(--svg-64748b)">$48,476-$103,350</text><rect x="15" y="140" width="290" height="28" rx="6" fill="var(--svg-f1f5f9)"/><text x="85" y="152" font-size="7" fill="var(--svg-f59e0b)">Marginal: 22%</text><text x="160" y="152" text-anchor="middle" font-size="6" fill="var(--svg-94a3b8)">|</text><text x="235" y="152" font-size="7" fill="var(--svg-22c55e)">Effective: ~11%</text><text x="160" y="163" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">You only pay each bracket rate on income within that bracket</text><rect x="15" y="174" width="290" height="20" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="188" text-anchor="middle" font-size="7" fill="var(--svg-475569)">Net Pay = Gross - Federal - FICA - State - Pre-Tax Deductions</text></svg>';
+const incomeTaxSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="14" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Paycheck Breakdown</text><rect x="15" y="24" width="290" height="20" rx="4" fill="var(--svg-e2e8f0)"/><text x="160" y="38" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-475569)">Gross Income: $75,000</text><rect x="15" y="50" width="30" height="18" rx="3" fill="var(--svg-3b82f6)"/><text x="30" y="62" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">401k</text><rect x="48" y="50" width="70" height="18" rx="3" fill="var(--svg-ef4444)"/><text x="83" y="62" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Federal $8,350</text><rect x="122" y="50" width="45" height="18" rx="3" fill="var(--svg-f59e0b)"/><text x="144" y="62" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">FICA</text><rect x="171" y="50" width="30" height="18" rx="3" fill="var(--svg-8b5cf6)"/><text x="186" y="62" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">State</text><rect x="205" y="50" width="100" height="18" rx="3" fill="var(--svg-22c55e)"/><text x="255" y="62" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Take-Home</text><rect x="15" y="78" width="290" height="55" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="93" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">Progressive Tax Brackets (2025 Single)</text><rect x="25" y="98" width="50" height="14" rx="3" fill="var(--svg-22c55e)"/><text x="50" y="108" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">10%</text><text x="80" y="108" font-size="6" fill="var(--svg-64748b)">$0-$11,925</text><rect x="145" y="98" width="50" height="14" rx="3" fill="var(--svg-3b82f6)"/><text x="170" y="108" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">12%</text><text x="200" y="108" font-size="6" fill="var(--svg-64748b)">$11,926-$48,475</text><rect x="25" y="114" width="50" height="14" rx="3" fill="var(--svg-f59e0b)"/><text x="50" y="124" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">22%</text><text x="80" y="124" font-size="6" fill="var(--svg-64748b)">$48,476-$103,350</text><rect x="15" y="140" width="290" height="28" rx="6" fill="var(--svg-f1f5f9)"/><text x="85" y="152" font-size="7" fill="var(--svg-f59e0b)">Marginal: 22%</text><text x="160" y="152" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">|</text><text x="235" y="152" font-size="7" fill="var(--svg-22c55e)">Effective: ~11%</text><text x="160" y="163" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">You only pay each bracket rate on income within that bracket</text><rect x="15" y="174" width="290" height="20" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="188" text-anchor="middle" font-size="7" fill="var(--svg-475569)">Net Pay = Gross - Federal - FICA - State - Pre-Tax Deductions</text></svg>';
 
 const incomeTaxConfig: CalculatorConfig = {
   inputs: [
@@ -57,9 +56,9 @@ const incomeTaxConfig: CalculatorConfig = {
       placeholder: '6,000',
       prefix: '$',
       min: 0,
-      max: RETIREMENT_LIMITS_2025.traditional401k,
+      max: RETIREMENT_LIMITS_2025.traditional401k + RETIREMENT_LIMITS_2025.superCatchUp401k,
       step: 500,
-      helpText: `2025 limit: $${RETIREMENT_LIMITS_2025.traditional401k.toLocaleString()} ($${(RETIREMENT_LIMITS_2025.traditional401k + RETIREMENT_LIMITS_2025.catchUp401k).toLocaleString()} if age 50+)`,
+      helpText: `2026 limit: $${RETIREMENT_LIMITS_2025.traditional401k.toLocaleString()}; $${(RETIREMENT_LIMITS_2025.traditional401k + RETIREMENT_LIMITS_2025.catchUp401k).toLocaleString()} if age 50+; $${(RETIREMENT_LIMITS_2025.traditional401k + RETIREMENT_LIMITS_2025.superCatchUp401k).toLocaleString()} if age 60-63. Reduces income tax but not Social Security/Medicare tax.`,
     },
     {
       id: 'healthInsurance',
@@ -80,7 +79,7 @@ const incomeTaxConfig: CalculatorConfig = {
       inputMode: 'decimal',
       min: 0,
       step: 100,
-      helpText: 'HSA contributions, FSA, dependent care FSA, traditional IRA (if deductible)',
+      helpText: 'Payroll-deducted HSA contributions, health FSA and dependent care FSA. These reduce both income tax and FICA. (A deductible IRA contribution only reduces income tax and is not included here.)',
     },
   ],
   calculate: (values) => {
@@ -93,27 +92,8 @@ const incomeTaxConfig: CalculatorConfig = {
 
     if (isNaN(gross) || gross <= 0) return [];
 
-    const ficaWages = Math.max(0, gross - health - otherPreTax);
-    const federalAGI = Math.max(0, gross - retirement401k - health - otherPreTax);
-    const standardDeduction = STANDARD_DEDUCTIONS_2025[status];
-    const taxableIncome = Math.max(0, federalAGI - standardDeduction);
-
-    const { tax: federalTax, marginalRate } = calcFederalTax(taxableIncome, status);
-    const { ss, medicare, additionalMedicare } = calcFICA(ficaWages, status);
-    const ficaTotal = ss + medicare + additionalMedicare;
-
-    const stateInfo = STATE_RATES_2025[stateCode];
-    const stateRate = stateInfo?.noIncomeTax
-      ? 0
-      : typeof stateInfo?.rate === 'number' && stateInfo.rate > 0
-      ? stateInfo.rate
-      : stateInfo?.effectiveRate || 0;
-    const stateTax = federalAGI * stateRate;
-
-    const totalTax = federalTax + ficaTotal + stateTax;
-    const netPay = gross - totalTax - retirement401k - health - otherPreTax;
-    const effectiveRate = (federalTax / Math.max(gross, 1)) * 100;
-    const totalEffectiveRate = (totalTax / Math.max(gross, 1)) * 100;
+    const t = computeIncomeTax({ gross, status, stateCode, retirement401k, health, otherPreTax });
+    const { standardDeduction, taxableIncome, federalTax, marginalRate, ficaTotal, stateInfo, stateRate, stateTax, totalTax, netPay, effectiveRate, totalEffectiveRate } = t;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -207,7 +187,7 @@ const incomeTaxConfig: CalculatorConfig = {
       caption: 'Federal income tax uses progressive marginal brackets where only the income within each bracket is taxed at that rate, making the effective rate lower than the marginal rate',
     },
     formulaDescription:
-      'Federal income tax is calculated using progressive marginal brackets on taxable income (after the standard deduction). FICA is calculated on earned wages. State tax uses each state\'s effective rate for estimation.',
+      'Federal income tax is calculated using progressive marginal brackets on taxable income (after the standard deduction). FICA is calculated on earned wages. State tax applies each state\'s flat rate (or a rough effective rate for graduated-rate states) to federal AGI, as an estimate.',
     variables: [
       { symbol: 'AGI', name: 'Adjusted Gross Income', description: 'Gross income minus above-the-line deductions (401k, health insurance, HSA). This is the starting point for calculating taxable income.' },
       { symbol: 'Taxable Income', name: 'Taxable Income', description: 'AGI minus the standard deduction. Federal income tax brackets are applied to this number.' },
@@ -224,7 +204,7 @@ const incomeTaxConfig: CalculatorConfig = {
       'Plan pre-tax retirement contributions by seeing how much 401k and HSA contributions lower your taxable income and tax bill.',
     ],
     explanation:
-      'The US federal income tax system is progressive — higher income is taxed at higher rates, but only for the income within each bracket. If you\'re in the 22% bracket, you don\'t pay 22% on all your income — you pay 10% on the first portion, 12% on the next, and only 22% on the income that falls in that bracket. This is why the "effective rate" is always lower than the "marginal rate." Pre-tax contributions to 401(k) and health insurance reduce both your taxable income AND your FICA wages, making them extremely valuable.',
+      'The US federal income tax system is progressive — higher income is taxed at higher rates, but only for the income within each bracket. If you\'re in the 22% bracket, you don\'t pay 22% on all your income — you pay 10% on the first portion, 12% on the next, and only 22% on the income that falls in that bracket. This is why the "effective rate" is always lower than the "marginal rate." Pre-tax 401(k) contributions reduce your taxable income (but not your Social Security and Medicare wages), while employer health premiums and payroll HSA/FSA contributions reduce both, making all of them valuable.',
     faqs: [
       {
         question: 'What is the difference between marginal and effective tax rate?',
@@ -232,7 +212,7 @@ const incomeTaxConfig: CalculatorConfig = {
       },
       {
         question: 'Does my 401(k) contribution really reduce my taxes?',
-        answer: 'Yes. A traditional 401(k) contribution reduces your federal AGI dollar-for-dollar. At a 22% marginal rate, a $10,000 contribution saves $2,200 in federal taxes. It also reduces Social Security and Medicare taxes on the portion that reduces FICA wages.',
+        answer: 'Yes. A traditional 401(k) contribution reduces your federal AGI dollar-for-dollar. At a 22% marginal rate, a $10,000 contribution saves $2,200 in federal taxes. It does not reduce Social Security or Medicare taxes, because 401(k) deferrals are still FICA wages.',
       },
       {
         question: 'What is FICA?',
@@ -265,9 +245,9 @@ const incomeTaxConfig: CalculatorConfig = {
     ],
 
     proTips: [
-      'Pre-tax 401(k) contributions reduce your taxable income dollar-for-dollar and also lower your FICA wages (reducing Social Security and Medicare taxes). At a 22% marginal rate, a $10,000 contribution saves $2,200 in federal taxes plus ~$765 in FICA — an immediate 29.7% return before any investment gains.',
-      'Your "all-in" effective rate (federal + FICA + state) is the number that matters for budgeting, not your marginal bracket. A single filer earning $100,000 in the 24% bracket typically pays only ~19-20% all-in, not 24% + 7.65% FICA. Understanding this difference prevents overestimating your tax burden.',
-      'If you live in a no-income-tax state (TX, FL, NV, WA, TN, SD, WY, AK, NH), you save 5-13% of your income compared to high-tax states. This calculator lets you model "what if I moved" scenarios — the difference can be thousands per year, which is why state tax rates influence relocation decisions for remote workers.',
+      'Pre-tax 401(k) contributions reduce your taxable income dollar-for-dollar (they do not reduce FICA wages). At a 22% marginal rate, a $10,000 contribution saves $2,200 in federal tax, plus your state tax rate on the same amount, before any investment gains. Pre-tax health premiums do save FICA too: $1,000 of premiums saves $76.50 in payroll tax on top of the income tax.',
+      'Your "all-in" effective rate (federal + FICA + state) is the number that matters for budgeting, not your marginal bracket. A single filer earning $100,000 is in the 22% bracket but pays only about 21% in federal income tax plus FICA combined (before any state tax), not 22% + 7.65%. Understanding this difference prevents overestimating your tax burden.',
+      'If you live in a no-income-tax state (TX, FL, NV, WA, TN, SD, WY, AK, NH), you can save several percent of your income (up to roughly 10% in the highest-tax states) compared to high-tax states. This calculator lets you model "what if I moved" scenarios — the difference can be thousands per year, which is why state tax rates influence relocation decisions for remote workers.',
       'Health insurance premiums deducted from your paycheck are pre-tax for both federal income tax AND FICA. This dual tax benefit makes employer-sponsored health insurance one of the most tax-efficient ways to pay for healthcare — even more tax-advantaged than many people realize.',
     ],
 
@@ -277,13 +257,13 @@ const incomeTaxConfig: CalculatorConfig = {
       { label: '2026 Standard Deduction (HoH)', value: '$24,150 — head of household' },
       { label: 'Social Security Tax (2026)', value: '6.2% on wages up to $184,500 (wage base limit)' },
       { label: 'Medicare Tax', value: '1.45% on all wages + 0.9% additional on wages above $200K (single) / $250K (MFJ)' },
-      { label: '2025 401(k) Limit (Under 50)', value: '$23,500 — pre-tax or Roth contributions' },
-      { label: '2025 401(k) Limit (50+)', value: '$31,000 — includes $7,500 catch-up contribution' },
+      { label: '2026 401(k) Limit (Under 50)', value: '$24,500 — pre-tax or Roth contributions' },
+      { label: '2026 401(k) Limit (50+)', value: '$32,500 — includes $8,000 catch-up ($35,750 for ages 60-63)' },
       { label: 'Marginal vs Effective Rate', value: 'Marginal = rate on last dollar. Effective = total tax ÷ gross income (always lower due to progressive brackets)' },
     ],
 
     limitations: [
-      'State income tax uses simplified effective rates (flat percentage applied to AGI). Many states have graduated brackets with multiple rates, standard deductions, and personal exemptions. The calculator\'s state estimate is approximate — for precise state tax planning, use your state\'s official tax calculator or consult a tax preparer.',
+      'State income tax is a simplified estimate: one rate applied to federal AGI (flat-rate states use their 2026 rate; graduated states use a rough effective rate for a typical income), with no state deductions or exemptions. Many states have graduated brackets with multiple rates, standard deductions, and personal exemptions. The calculator\'s state estimate is approximate — for precise state tax planning, use your state\'s official tax calculator or consult a tax preparer.',
       'It does not model tax credits (Child Tax Credit, Earned Income Tax Credit, education credits, saver\'s credit), itemized deductions (mortgage interest, charitable contributions, SALT capped at $10,000), or above-the-line deductions beyond the pre-tax categories provided. Real tax liability may be significantly lower if you qualify for credits.',
       'FICA calculation applies the Social Security wage base cap ($184,500 in 2026) but does not account for multiple jobs (where each employer withholds separately, potentially causing over-withholding that is refunded at tax time). Additional Medicare tax applies above $200K (single) / $250K (MFJ).',
       'This calculator assumes all income is W-2 wage income. Self-employment income, investment income (capital gains, dividends, interest), rental income, and retirement distributions are taxed differently and are not modeled. Self-employed individuals must pay both the employee and employer portions of FICA (15.3% total on the first $184,500).',

@@ -1,6 +1,7 @@
 import { CalculatorResult } from '../../../types/calculator';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { GitCompare } from 'lucide-react';
+import SvgLineChart from '../../../components/charts/SvgLineChart';
+import { parseDebts } from './debtMath';
 
 interface Props {
   values: Record<string, string>;
@@ -38,8 +39,8 @@ function PlanCard({
 }) {
   const borderColor = color === 'orange' ? 'border-orange-200' : 'border-emerald-200';
   const bgColor = color === 'orange' ? 'bg-orange-50' : 'bg-emerald-50';
-  const textColor = color === 'orange' ? 'text-orange-600' : 'text-emerald-600';
-  const labelColor = color === 'orange' ? 'text-orange-500' : 'text-emerald-500';
+  const textColor = color === 'orange' ? 'text-orange-700' : 'text-emerald-700';
+  const labelColor = color === 'orange' ? 'text-orange-700' : 'text-emerald-700';
 
   return (
     <div className={`rounded-xl border ${borderColor} ${bgColor} p-4 flex-1 min-w-0`}>
@@ -70,42 +71,20 @@ function PlanCard({
 }
 
 export default function DebtConsolidationPanel({ values, results }: Props) {
-  const debts: Array<{ name: string; balance: number; rate: number; payment: number }> = (() => {
-    try {
-      const raw = JSON.parse(values.debts || '[]');
-      if (Array.isArray(raw)) {
-        return raw
-          .map((d: { name?: string; balance?: string; rate?: string; payment?: string }) => ({
-            name: d.name || 'Debt',
-            balance: parseFloat(d.balance as string) || 0,
-            rate: parseFloat(d.rate as string) || 0,
-            payment: parseFloat(d.payment as string) || 0,
-          }))
-          .filter((d) => d.balance > 0 && d.rate > 0 && d.payment > 0);
-      }
-    } catch { /* fall through */ }
-    return [];
-  })();
+  const debts = parseDebts(values.debts);
 
   const totalBalance = debts.reduce((s, d) => s + d.balance, 0);
 
   // Parse payoff progression data for the line chart
-  const payoffData: { month: number; current: number | null; consolidation: number | null }[] = (() => {
+  const series = (() => {
     try {
       const raw = JSON.parse(getVal(results, '_payoffData'));
-      if (!raw || !raw.current || !raw.consolidation) return [];
-      const maxLen = Math.max(raw.current.length, raw.consolidation.length);
-      const data: { month: number; current: number | null; consolidation: number | null }[] = [];
-      for (let i = 0; i < maxLen; i++) {
-        // Only sample every few months for large datasets to keep chart readable
-        if (maxLen > 120 && i % 3 !== 0 && i !== maxLen - 1) continue;
-        data.push({
-          month: i,
-          current: i < raw.current.length ? raw.current[i] : null,
-          consolidation: i < raw.consolidation.length ? raw.consolidation[i] : null,
-        });
-      }
-      return data;
+      if (!raw || !Array.isArray(raw.current) || !Array.isArray(raw.consolidation)) return [];
+      const toPoints = (a: number[]) => a.map((y, x) => ({ x, y }));
+      return [
+        { name: 'Current Plan', color: '#c2410c', points: toPoints(raw.current) },
+        { name: 'Consolidation', color: '#15803d', points: toPoints(raw.consolidation) },
+      ];
     } catch { return []; }
   })();
 
@@ -159,41 +138,37 @@ export default function DebtConsolidationPanel({ values, results }: Props) {
         </div>
 
         {/* Payoff Comparison Line Chart */}
-        {payoffData.length > 0 && (
+        {series.length > 0 && (
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Balance Over Time</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">Balance Over Time</p>
             <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={payoffData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} label={{ value: 'Months', position: 'insideBottomRight', offset: -4, fontSize: 10, fill: '#94a3b8' }} />
-                  <YAxis tickFormatter={fmtCurrency} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={50} />
-                  <Tooltip
-                    contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                    formatter={(value: unknown) => [fmtCurrency(value as number), '']}
-                    labelFormatter={(l) => `Month ${l}`}
-                  />
-                  <Legend
-                    wrapperStyle={{ fontSize: '11px', paddingTop: '4px' }}
-                  />
-                  <Line type="monotone" dataKey="current" stroke="#f97316" strokeWidth={2.5} dot={false} name="Current Plan" />
-                  <Line type="monotone" dataKey="consolidation" stroke="#22c55e" strokeWidth={2.5} dot={false} name="Consolidation" />
-                </LineChart>
-              </ResponsiveContainer>
+              <SvgLineChart
+                series={series}
+                height={250}
+                ariaLabel="Total remaining debt balance by month: current plan versus consolidation loan"
+                xFormat={(n) => `${n}`}
+                yFormat={fmtCurrency}
+              />
+              <div className="flex flex-wrap gap-4 mt-2 text-[11px] font-semibold text-slate-600">
+                <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-orange-700" aria-hidden="true" />Current Plan</span>
+                <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-green-700" aria-hidden="true" />Consolidation</span>
+                <span className="text-slate-500">x-axis: months</span>
+              </div>
             </div>
           </div>
         )}
 
         {/* Rate Analysis */}
         <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 space-y-3">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Rate Analysis</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-600">Rate Analysis</p>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white rounded-lg border border-slate-200 p-3">
               <p className="text-[10px] text-slate-500 mb-1">Weighted Avg. Current Rate</p>
-              <p className="text-xl font-black text-orange-500">{weightedAvgRate.toFixed(2)}%</p>
+              <p className="text-xl font-black text-orange-700">{weightedAvgRate.toFixed(2)}%</p>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-3">
               <p className="text-[10px] text-slate-500 mb-1">New Consolidation Rate</p>
-              <p className={`text-xl font-black ${newRate < weightedAvgRate ? 'text-emerald-600' : 'text-red-500'}`}>
+              <p className={`text-xl font-black ${newRate < weightedAvgRate ? 'text-emerald-700' : 'text-red-700'}`}>
                 {newRate.toFixed(2)}%
               </p>
             </div>
@@ -208,21 +183,21 @@ export default function DebtConsolidationPanel({ values, results }: Props) {
 
         {/* Origination Fee */}
         <div className="rounded-xl bg-amber-50 border border-amber-200 p-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-1">Origination Fee</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-800 mb-1">Origination Fee</p>
           <p className="text-sm font-black text-amber-700">{getVal(results, 'originationFeeAmt')}</p>
         </div>
 
         {/* Existing Debts table */}
         {debts.length > 0 && (
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Your Existing Debts</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">Your Existing Debts</p>
             <div className="overflow-x-auto rounded-xl border border-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default,#2563eb)]" tabIndex={0} role="region" aria-label="Existing debts table">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
                     <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Debt</th>
                     <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Balance</th>
-                    <th scope="col" className="text-right px-3 py-2.5 font-bold text-red-400 uppercase tracking-wider text-[10px]">Rate</th>
+                    <th scope="col" className="text-right px-3 py-2.5 font-bold text-red-700 uppercase tracking-wider text-[10px]">Rate</th>
                     <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Payment</th>
                   </tr>
                 </thead>
@@ -231,14 +206,14 @@ export default function DebtConsolidationPanel({ values, results }: Props) {
                     <tr key={`item-${i}`} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                       <td className="px-4 py-2.5 font-bold text-slate-700">{d.name}</td>
                       <td className="px-3 py-2.5 text-right text-slate-600">{fmt(d.balance)}</td>
-                      <td className="px-3 py-2.5 text-right text-red-500 font-semibold">{d.rate.toFixed(2)}%</td>
+                      <td className="px-3 py-2.5 text-right text-red-700 font-semibold">{d.rate.toFixed(2)}%</td>
                       <td className="px-3 py-2.5 text-right text-slate-600">{fmt(d.payment)}/mo</td>
                     </tr>
                   ))}
                   <tr className="bg-slate-50 border-t border-slate-200">
                     <td className="px-4 py-2.5 font-black text-slate-700">Total</td>
                     <td className="px-3 py-2.5 text-right font-black text-slate-800">{fmt(totalBalance)}</td>
-                    <td className="px-3 py-2.5 text-right text-orange-500 font-black">{weightedAvgRate.toFixed(2)}% avg</td>
+                    <td className="px-3 py-2.5 text-right text-orange-700 font-black">{weightedAvgRate.toFixed(2)}% avg</td>
                     <td className="px-3 py-2.5 text-right font-black text-slate-800">{fmt(debts.reduce((s, d) => s + d.payment, 0))}/mo</td>
                   </tr>
                 </tbody>

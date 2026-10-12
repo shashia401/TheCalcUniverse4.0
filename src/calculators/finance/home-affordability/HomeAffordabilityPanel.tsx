@@ -41,9 +41,9 @@ export default function HomeAffordabilityPanel({ values, results }: Props) {
 
       <div className="p-6 space-y-5">
         <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-4 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">Maximum Home Price</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-1">Maximum Home Price</p>
           <p className="text-2xl font-black text-emerald-700">{fmt(maxPrice)}</p>
-          <p className="text-xs text-emerald-500 mt-1">With {fmt(downPayment)} down ({downPct.toFixed(1)}%)</p>
+          <p className="text-xs text-emerald-700 mt-1">With {fmt(downPayment)} down ({downPct.toFixed(1)}%)</p>
         </div>
 
         <div className="space-y-3">

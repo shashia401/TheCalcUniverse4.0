@@ -10,6 +10,12 @@ interface CartItem {
   discount2: number;
 }
 
+/** Sequential (stacked) discounts, then sales tax on the discounted price. Rates are fractions. */
+export function applyDiscounts(price: number, d1: number, d2: number, tax: number) {
+  const afterDiscount = price * (1 - d1) * (1 - d2);
+  return { afterDiscount, afterTax: afterDiscount * (1 + tax), savings: price - afterDiscount };
+}
+
 function DiscountPanel({}: { results: CalculatorResult[] }) {
   const [items, setItems] = useState<CartItem[]>([
     { id: 1, label: 'Item 1', price: 49.99, discount1: 20, discount2: 0 },
@@ -26,12 +32,11 @@ function DiscountPanel({}: { results: CalculatorResult[] }) {
       const price = item.price;
       const d1 = item.discount1 / 100;
       const d2 = item.discount2 / 100;
-      const afterDiscount = price * (1 - d1) * (1 - d2);
-      const afterTax = afterDiscount * (1 + taxRate);
+      const { afterDiscount, afterTax, savings } = applyDiscounts(price, d1, d2, taxRate);
       totalOriginal += price;
       totalAfterDiscount += afterDiscount;
       totalAfterTax += afterTax;
-      return { ...item, afterDiscount, afterTax, savings: price - afterDiscount };
+      return { ...item, afterDiscount, afterTax, savings };
     });
 
     const totalSavings = totalOriginal - totalAfterDiscount;
@@ -74,6 +79,7 @@ function DiscountPanel({}: { results: CalculatorResult[] }) {
                 type="text"
                 inputMode="decimal"
                 value={salesTax}
+                aria-label="Sales tax rate in percent"
                 onChange={(e) => setSalesTax(e.target.value.replace(/[^0-9.]/g, ''))}
                 className="w-full pl-3 pr-6 py-1.5 rounded-lg border border-slate-200 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400"
               />
@@ -82,6 +88,7 @@ function DiscountPanel({}: { results: CalculatorResult[] }) {
           </div>
           <button
             onClick={addItem}
+            type="button"
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold hover:bg-blue-100 transition-colors"
           >
             <Plus size={12} /> Add Item
@@ -92,12 +99,12 @@ function DiscountPanel({}: { results: CalculatorResult[] }) {
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Item</th>
-                <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Price</th>
-                <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Disc. 1</th>
-                <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Disc. 2</th>
-                <th scope="col" className="text-right px-3 py-2.5 font-bold text-emerald-600 uppercase tracking-wider text-[10px]">Final</th>
-                <th scope="col" className="text-right px-3 py-2.5 font-bold text-emerald-600 uppercase tracking-wider text-[10px] hidden sm:table-cell">Saved</th>
+                <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Item</th>
+                <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Price</th>
+                <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Disc. 1</th>
+                <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Disc. 2</th>
+                <th scope="col" className="text-right px-3 py-2.5 font-bold text-emerald-700 uppercase tracking-wider text-[10px]">Final</th>
+                <th scope="col" className="text-right px-3 py-2.5 font-bold text-emerald-700 uppercase tracking-wider text-[10px] hidden sm:table-cell">Saved</th>
                 <th scope="col" className="w-8 px-2 py-2.5"></th>
               </tr>
             </thead>
@@ -108,6 +115,7 @@ function DiscountPanel({}: { results: CalculatorResult[] }) {
                     <input
                       type="text"
                       value={item.label}
+                      aria-label={`Item name for ${item.label}`}
                       onChange={(e) => updateItem(item.id, 'label', e.target.value)}
                       className="w-20 sm:w-28 px-2 py-1 rounded border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400/40"
                     />
@@ -119,6 +127,7 @@ function DiscountPanel({}: { results: CalculatorResult[] }) {
                         type="text"
                         inputMode="decimal"
                         value={item.price ?? ''}
+                        aria-label={`Price of ${item.label} in dollars`}
                         onChange={(e) => updateItem(item.id, 'price', e.target.value)}
                         className="w-16 sm:w-20 pl-4 pr-2 py-1 rounded border border-slate-200 text-xs font-bold text-slate-800 text-right focus:outline-none focus:ring-2 focus:ring-blue-400/40"
                       />
@@ -129,6 +138,7 @@ function DiscountPanel({}: { results: CalculatorResult[] }) {
                       type="text"
                       inputMode="decimal"
                       value={item.discount1 || ''}
+                      aria-label={`First discount percent for ${item.label}`}
                       onChange={(e) => updateItem(item.id, 'discount1', e.target.value)}
                       className="w-14 px-2 py-1 rounded border border-slate-200 text-xs font-bold text-slate-800 text-right focus:outline-none focus:ring-2 focus:ring-blue-400/40"
                     />
@@ -138,16 +148,18 @@ function DiscountPanel({}: { results: CalculatorResult[] }) {
                       type="text"
                       inputMode="decimal"
                       value={item.discount2 || ''}
+                      aria-label={`Second discount percent for ${item.label}`}
                       onChange={(e) => updateItem(item.id, 'discount2', e.target.value)}
                       className="w-14 px-2 py-1 rounded border border-slate-200 text-xs font-bold text-slate-800 text-right focus:outline-none focus:ring-2 focus:ring-blue-400/40"
                     />
                   </td>
-                  <td className="px-3 py-2 text-right font-bold text-emerald-600">${fmt(item.afterTax)}</td>
-                  <td className="px-3 py-2 text-right font-semibold text-red-500 hidden sm:table-cell">${fmt(item.savings)}</td>
+                  <td className="px-3 py-2 text-right font-bold text-emerald-700">${fmt(item.afterTax)}</td>
+                  <td className="px-3 py-2 text-right font-semibold text-red-700 hidden sm:table-cell">${fmt(item.savings)}</td>
                   <td className="px-2 py-2 text-right">
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="p-1 text-slate-300 hover:text-red-400 transition-colors"
+                      aria-label={`Remove ${item.label}`}
+                      className="p-1 text-slate-500 hover:text-red-700 transition-colors"
                     >
                       <Trash2 size={12} />
                     </button>
@@ -160,20 +172,20 @@ function DiscountPanel({}: { results: CalculatorResult[] }) {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Total Original</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">Total Original</p>
             <p className="text-lg font-black text-slate-800">${fmt(cartTotals.totalOriginal)}</p>
           </div>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">After Discount</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-1">After Discount</p>
             <p className="text-lg font-black text-emerald-700">${fmt(cartTotals.totalAfterDiscount)}</p>
           </div>
           <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1">Total You Pay</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-1">Total You Pay</p>
             <p className="text-lg font-black text-blue-700">${fmt(cartTotals.totalAfterTax)}</p>
           </div>
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1">Total Saved</p>
-            <p className="text-lg font-black text-red-600">${fmt(cartTotals.totalSavings)}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-red-700 mb-1">Total Saved</p>
+            <p className="text-lg font-black text-red-700">${fmt(cartTotals.totalSavings)}</p>
           </div>
         </div>
       </div>
@@ -238,12 +250,8 @@ const discountConfig: CalculatorConfig = {
 
     if (isNaN(price) || isNaN(d1) || price <= 0) return [];
 
-    const afterD1 = price * (1 - d1);
-    const afterD2 = afterD1 * (1 - d2);
-    const totalSavings = price - afterD2;
+    const { afterDiscount: afterD2, afterTax: finalPrice, savings: totalSavings } = applyDiscounts(price, d1, d2, tax);
     const savingsPct = (totalSavings / price) * 100;
-    const taxAmount = afterD2 * tax;
-    const finalPrice = afterD2 + taxAmount;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -263,15 +271,15 @@ const discountConfig: CalculatorConfig = {
   educational: {
     formula: 'Final = Price × (1 − d₁) × (1 − d₂) × (1 + tax)',
     formulaDescription:
-      'Stacked discounts are applied sequentially, not added. A 20% + 10% stack is NOT 30% off — the 10% applies to the already-reduced price, making the effective discount 28%, not 30%. This is one of the most common pricing misconceptions in retail, and stores rely on it to make discounts appear larger than they actually are. Sales tax is always applied after all discounts, on the final discounted subtotal.',
+      'Stacked discounts are applied sequentially, not added. A 20% + 10% stack is NOT 30% off — the 10% applies to the already-reduced price, making the effective discount 28%, not 30%. This is one of the most common pricing misconceptions in retail, and stores rely on it to make discounts appear larger than they actually are. Sales tax is normally charged on the final discounted subtotal (store discounts and coupons reduce the taxable price; in some states a manufacturer coupon does not, so check your local rule).',
     diagram: {
-      svg: '<svg viewBox="0 0 440 300" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="60" y="20" width="320" height="260" fill="#f8fafc" stroke="#e2e8f0" rx="10"/><rect x="80" y="45" width="280" height="36" rx="6" fill="#f1f5f9"/><text x="100" y="69" font-family="system-ui,sans-serif" font-size="13" fill="#64748b">Original Price</text><text x="340" y="69" font-family="system-ui,sans-serif" font-size="16" fill="#1e293b" text-anchor="end" font-weight="bold">$100.00</text><text x="220" y="105" font-family="system-ui,sans-serif" font-size="14" fill="#ef4444" text-anchor="middle" font-weight="bold">20% OFF</text><rect x="80" y="120" width="280" height="36" rx="6" fill="#fee2e2"/><text x="100" y="144" font-family="system-ui,sans-serif" font-size="13" fill="#dc2626">After 20% Off</text><text x="340" y="144" font-family="system-ui,sans-serif" font-size="16" fill="#dc2626" text-anchor="end" font-weight="bold">$80.00</text><text x="220" y="178" font-family="system-ui,sans-serif" font-size="14" fill="#f59e0b" text-anchor="middle" font-weight="bold">Extra 10% OFF</text><rect x="80" y="195" width="280" height="36" rx="6" fill="#fef3c7"/><text x="100" y="219" font-family="system-ui,sans-serif" font-size="13" fill="#d97706">Final (28% total off)</text><text x="340" y="219" font-family="system-ui,sans-serif" font-size="16" fill="#d97706" text-anchor="end" font-weight="bold">$72.00</text><text x="220" y="260" font-family="system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="middle">NOT 30% off — math: 100 x 0.80 x 0.90 = 72</text></svg>',
+      svg: '<svg viewBox="0 0 440 300" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="60" y="20" width="320" height="260" fill="#f8fafc" stroke="#e2e8f0" rx="10"/><rect x="80" y="45" width="280" height="36" rx="6" fill="#f1f5f9"/><text x="100" y="69" font-family="system-ui,sans-serif" font-size="13" fill="#64748b">Original Price</text><text x="340" y="69" font-family="system-ui,sans-serif" font-size="16" fill="#1e293b" text-anchor="end" font-weight="bold">$100.00</text><text x="220" y="105" font-family="system-ui,sans-serif" font-size="14" fill="#b91c1c" text-anchor="middle" font-weight="bold">20% OFF</text><rect x="80" y="120" width="280" height="36" rx="6" fill="#fee2e2"/><text x="100" y="144" font-family="system-ui,sans-serif" font-size="13" fill="#dc2626">After 20% Off</text><text x="340" y="144" font-family="system-ui,sans-serif" font-size="16" fill="#dc2626" text-anchor="end" font-weight="bold">$80.00</text><text x="220" y="178" font-family="system-ui,sans-serif" font-size="14" fill="#b45309" text-anchor="middle" font-weight="bold">Extra 10% OFF</text><rect x="80" y="195" width="280" height="36" rx="6" fill="#fef3c7"/><text x="100" y="219" font-family="system-ui,sans-serif" font-size="13" fill="#b45309">Final (28% total off)</text><text x="340" y="219" font-family="system-ui,sans-serif" font-size="16" fill="#b45309" text-anchor="end" font-weight="bold">$72.00</text><text x="220" y="260" font-family="system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="middle">NOT 30% off — math: 100 x 0.80 x 0.90 = 72</text></svg>',
       alt: 'Stacked discount breakdown showing $100 original price, 20% off to $80, then extra 10% off to $72 final, demonstrating that 20% + 10% = 28% not 30%',
       caption: 'Stacked discounts are multiplied, not added — 20% off + extra 10% off = 28% total savings, not 30%',
     },
     variables: [
       { symbol: 'Stacked Discount', name: 'Sequential Application', description: 'Each discount percentage is applied to the balance after the previous discount. 20% off + 10% off = 100 × 0.80 × 0.90 = 72, meaning 28% total off. The order of multiplication does not matter — the same result occurs regardless of which discount is applied first.' },
-      { symbol: 'Sales Tax', name: 'Applied After Discounts', description: 'Sales tax is calculated on the final discounted price — one reason to stack discounts before tax. You effectively save a small amount on tax when you get a larger discount.' },
+      { symbol: 'Sales Tax', name: 'Applied After Discounts', description: 'Sales tax is normally calculated on the final discounted price. You effectively save a small amount on tax when you get a larger discount.' },
     ],
     howToUse: [
       'Enter the original price of the item.',
@@ -311,7 +319,7 @@ const discountConfig: CalculatorConfig = {
       },
       {
         question: 'How do I use the bulk cart feature?',
-        answer: 'The interactive panel below the main calculator lets you add multiple items, each with its own price and up to two stacked discounts. You can set a sales tax rate that applies to the entire cart. The cart shows line-item detail including each item\'s final price, itemized savings, and running totals for the whole order. Use the pencil icon to edit item names and the trash icon to remove items. This is especially useful for clearance shopping where different items have different discount levels.',
+        answer: 'The interactive panel below the main calculator lets you add multiple items, each with its own price and up to two stacked discounts. You can set a sales tax rate that applies to the entire cart. The cart shows line-item detail including each item\'s final price, itemized savings, and running totals for the whole order. Type directly in the Item column to rename an item and use the trash icon to remove one. This is especially useful for clearance shopping where different items have different discount levels.',
       },
       {
         question: 'Does the order of discounts matter?',
@@ -319,7 +327,7 @@ const discountConfig: CalculatorConfig = {
       },
       {
         question: 'How does sales tax interact with discounts?',
-        answer: 'Sales tax is always calculated on the final discounted price, not the original price. This means you effectively save a small amount on tax when you get a discount. For example, an $100 item at 20% off costs $80, and 8% tax on $80 = $6.40, totaling $86.40. Without the discount, it would be $100 + $8 = $108. Your total savings including the tax benefit: $108 - $86.40 = $21.60, which is 20% off the pre-tax price plus an extra $1.60 saved on tax. The interactive bulk cart panel automatically includes this effect.',
+        answer: 'Sales tax is normally calculated on the final discounted price, not the original price (a manufacturer coupon can be an exception in some states). This means you effectively save a small amount on tax when you get a discount. For example, an $100 item at 20% off costs $80, and 8% tax on $80 = $6.40, totaling $86.40. Without the discount, it would be $100 + $8 = $108. Your total savings including the tax benefit: $108 - $86.40 = $21.60, which is 20% off the pre-tax price plus an extra $1.60 saved on tax. The interactive bulk cart panel automatically includes this effect.',
       },
     ],
   },

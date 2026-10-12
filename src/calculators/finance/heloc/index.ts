@@ -49,7 +49,7 @@ const helocCalculatorConfig: CalculatorConfig = {
       step: 0.01,
       required: true,
       helpText:
-        'HELOCs use variable rates tied to Prime Rate. Current Prime is approximately 8.50%. Enter the rate quoted by your lender.',
+        'HELOCs use variable rates tied to the Prime Rate plus a margin. Enter the APR quoted by your lender (the current Prime Rate is published daily, e.g. in the Wall Street Journal).',
     },
     {
       id: 'drawAmount',
@@ -106,6 +106,9 @@ const helocCalculatorConfig: CalculatorConfig = {
         label: interestLabel,
         value: `$${fmt(monthlyInterestOnDraw)}`,
         color: 'neutral',
+        interpretation: drawAmount > maxBorrowable
+          ? `Your planned draw of $${fmt(drawAmount)} is more than the $${fmt(maxBorrowable)} available, so this payment is for the available line only.`
+          : undefined,
       },
       {
         id: 'totalEquityResult',
@@ -176,7 +179,7 @@ const helocCalculatorConfig: CalculatorConfig = {
       'Compare HELOC borrowing against other financing options by understanding how variable rates affect long-term repayment costs.',
     ],
     explanation:
-      'A HELOC (Home Equity Line of Credit) works like a credit card secured by your home equity. During the draw period (typically 10 years), you borrow and repay as needed, paying interest-only on what you have drawn. After the draw period, the balance converts to a fully-amortizing loan typically over 20 years. HELOCs use variable rates tied to the Prime Rate, so payments change as rates move. For example, if the Prime Rate is 8.50% and your lender offers Prime + 1.00%, your rate is 9.50%. When the Federal Reserve raises or lowers rates, your HELOC rate follows. HELOCs are commonly used for home improvements, debt consolidation, major purchases, or as an emergency fund. The interest paid on a HELOC may be tax-deductible if the funds are used to buy, build, or substantially improve your home — consult a tax advisor for your specific situation. The draw period structure makes HELOCs particularly suitable for ongoing projects where you need flexibility to borrow as work progresses rather than taking a lump sum all at once.',
+      'A HELOC (Home Equity Line of Credit) works like a credit card secured by your home equity. During the draw period (typically 10 years), you borrow and repay as needed, paying interest-only on what you have drawn. After the draw period, the balance converts to a fully-amortizing loan typically over 20 years. HELOCs use variable rates tied to the Prime Rate, so payments change as rates move. For example, if the Prime Rate were 7.00% and your lender offered Prime + 1.00%, your rate would be 8.00%. When the Federal Reserve raises or lowers rates, your HELOC rate follows. HELOCs are commonly used for home improvements, debt consolidation, major purchases, or as an emergency fund. The interest paid on a HELOC may be tax-deductible if the funds are used to buy, build, or substantially improve your home — consult a tax advisor for your specific situation. The draw period structure makes HELOCs particularly suitable for ongoing projects where you need flexibility to borrow as work progresses rather than taking a lump sum all at once.',
     howToUse: [
       'Enter your estimated home value based on appraisal or market estimate (Zillow, Redfin, or professional appraisal).',
       'Input your current mortgage balance from your latest statement.',
@@ -213,10 +216,10 @@ const helocCalculatorConfig: CalculatorConfig = {
     
     workedExamples: [
       {
-        scenario: 'Jennifer in Charlotte, NC bought her home for $380,000 five years ago and it is now worth $550,000 based on recent comparable sales. She still owes $320,000 on her mortgage and wants to know how much she can borrow through a HELOC at a standard 80% CLTV limit. The lender quoted a rate of 8.75% (Prime + 0.25%). She plans to draw $50,000 for a kitchen renovation.',
+        scenario: 'Jennifer in Charlotte, NC bought her home for $380,000 five years ago and it is now worth $550,000 based on recent comparable sales. She still owes $320,000 on her mortgage and wants to know how much she can borrow through a HELOC at a standard 80% CLTV limit. The lender quoted a rate of 8.75% APR. She plans to draw $50,000 for a kitchen renovation.',
         inputs: { homeValue: '550000', mortgageBalance: '320000', maxLTV: '80', helocRate: '8.75', drawAmount: '50000' },
         result: 'Maximum available credit line: $120,000. Monthly interest-only payment on her $50,000 draw: $365/month. Total home equity: $230,000. Tapable equity: $120,000. Required equity cushion: $110,000. Current LTV: 58.2%.',
-        insight: 'Jennifer has built $230,000 in equity — 42% of her home\'s value — through both principal paydown and appreciation. However, the 80% CLTV limit means she can only access $120,000 of that equity (the "tapable" portion). The remaining $110,000 must stay in the home as a lender cushion. At the quoted 8.75% rate, her $50,000 draw for the kitchen renovation costs $365/month in interest-only payments during the 10-year draw period — significantly less than the ~$1,042/month she would pay on a 20% APR credit card for the same balance. This is why HELOCs are popular for home improvements: the rate spread between HELOCs and credit cards is typically 10+ percentage points.',
+        insight: 'Jennifer has built $230,000 in equity — 42% of her home\'s value — through both principal paydown and appreciation. However, the 80% CLTV limit means she can only access $120,000 of that equity (the "tapable" portion). The remaining $110,000 must stay in the home as a lender cushion. At the quoted 8.75% rate, her $50,000 draw for the kitchen renovation costs $365/month in interest-only payments during the 10-year draw period — significantly less than the ~$833/month she would pay at a 20% APR on a credit card for the same balance. This is why HELOCs are popular for home improvements: the rate spread between HELOCs and credit cards is typically 10+ percentage points.',
       },
       {
         scenario: 'David and Lisa in Denver, CO own a home worth $720,000 with a $395,000 mortgage balance. They are exploring a HELOC with a credit union that offers 90% CLTV at a rate of 9.25%. They want to know their maximum credit line before deciding how much to draw.',
@@ -228,7 +231,7 @@ const helocCalculatorConfig: CalculatorConfig = {
 
     proTips: [
       'HELOC rates are variable and tied to the Prime Rate. When the Federal Reserve raises rates, your monthly payment increases. Budget for rates 2-3 percentage points higher than today\'s quote — if you cannot afford the payment at that level, you are overborrowing.',
-      'The draw period (typically 10 years) is interest-only — you pay only the interest on what you have drawn. When the repayment period begins, your payment jumps significantly because you now pay principal AND interest. A $100,000 draw at 8.75% costs $729/month (interest-only) during the draw period but roughly $1,050/month during the 20-year repayment period.',
+      'The draw period (typically 10 years) is interest-only — you pay only the interest on what you have drawn. When the repayment period begins, your payment jumps significantly because you now pay principal AND interest. A $100,000 draw at 8.75% costs $729/month (interest-only) during the draw period but about $884/month during a 20-year repayment period.',
       'HELOC interest may be tax-deductible if used to buy, build, or substantially improve your home (IRS Publication 936). Interest on funds used for debt consolidation, vacations, or college tuition is generally NOT deductible. Track your draws by purpose to maximize your tax deduction.',
       'Many lenders charge annual fees ($50-$100), draw fees, early closure fees (if you close the line within 3 years), and inactivity fees. The effective cost of a HELOC is higher than the stated interest rate alone — ask for a full fee schedule before committing.',
     ],
@@ -236,7 +239,7 @@ const helocCalculatorConfig: CalculatorConfig = {
     quickReference: [
       { label: 'Max HELOC Formula', value: '(Home Value × CLTV%) − Mortgage Balance' },
       { label: 'Standard CLTV Limit', value: '80% — most conventional lenders cap total secured debt at 80% of home value' },
-      { label: 'Current Prime Rate (June 2026)', value: '~8.50% — HELOC rates typically Prime + 0% to 2% margin' },
+      { label: 'HELOC Rate Basis', value: 'Prime Rate plus a lender margin (often 0% to 2%) — check the current Prime Rate' },
       { label: 'Draw Period Duration', value: 'Typically 10 years — interest-only payments on drawn balance' },
       { label: 'Repayment Period Duration', value: 'Typically 20 years — fully amortizing, no further draws allowed' },
       { label: 'HELOC Interest Tax Deduction', value: 'Deductible only if funds used to buy, build, or substantially improve the home (IRS Pub 936)' },

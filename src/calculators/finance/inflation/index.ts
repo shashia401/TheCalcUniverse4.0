@@ -1,15 +1,18 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import InflationPanel from './InflationPanel';
-import { CPI_DATA, MIN_YEAR, MAX_YEAR } from './cpiData';
+import { CPI_DATA, MIN_YEAR, MAX_YEAR, PARTIAL_YEARS } from './cpiData';
+
+/** "2026 (Jan–Aug average)" for a partial year, otherwise just the year. */
+const yearText = (y: number) => (PARTIAL_YEARS[y] ? `${y} (${PARTIAL_YEARS[y]})` : String(y));
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: MAX_YEAR - MIN_YEAR + 1 }, (_, i) => {
   const y = MIN_YEAR + i;
-  return { label: String(y), value: String(y) };
+  return { label: yearText(y), value: String(y) };
 });
 
-const inflationSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="14" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Inflation: The Silent Thief</text><text x="160" y="28" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">At 3% inflation, $100 loses purchasing power over time</text><g transform="translate(15,35)"><line x1="30" y1="5" x2="30" y2="115" stroke="var(--svg-cbd5e1)" stroke-width="1"/><line x1="30" y1="115" x2="290" y2="115" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="25" y="9" text-anchor="end" font-size="7" fill="var(--svg-94a3b8)">$100</text><text x="25" y="34" text-anchor="end" font-size="7" fill="var(--svg-94a3b8)">$75</text><text x="25" y="59" text-anchor="end" font-size="7" fill="var(--svg-94a3b8)">$50</text><text x="25" y="84" text-anchor="end" font-size="7" fill="var(--svg-94a3b8)">$25</text><text x="25" y="119" text-anchor="end" font-size="7" fill="var(--svg-94a3b8)">$0</text><line x1="30" y1="5" x2="290" y2="5" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="30" y1="30" x2="290" y2="30" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="30" y1="55" x2="290" y2="55" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="30" y1="80" x2="290" y2="80" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><path d="M 40,7 Q 90,10 140,25 Q 175,40 210,60 Q 235,78 260,100 Q 275,110 290,115" fill="none" stroke="var(--svg-ef4444)" stroke-width="2.5" stroke-linecap="round"/><path d="M 40,7 Q 90,10 140,25 Q 175,40 210,60 Q 235,78 260,100 Q 275,110 290,115 L 290,115 L 40,115 Z" fill="var(--svg-ef4444)" opacity="0.08"/><circle cx="40" cy="7" r="3" fill="var(--svg-ef4444)"/><text x="40" y="1" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-weight="bold">$100</text><circle cx="140" cy="25" r="3" fill="var(--svg-ef4444)"/><text x="140" y="19" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-weight="bold">$74</text><circle cx="210" cy="60" r="3" fill="var(--svg-ef4444)"/><text x="210" y="54" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-weight="bold">$55</text><circle cx="260" cy="100" r="3" fill="var(--svg-ef4444)"/><text x="260" y="94" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-weight="bold">$41</text></g><rect x="15" y="160" width="290" height="20" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="174" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ef4444)">Adjusted Value = Original x CPI2 / CPI1</text><text x="160" y="194" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">$100 loses half its purchasing power every ~24 years at 3%</text></svg>';
+const inflationSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="14" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Inflation: The Silent Thief</text><text x="160" y="28" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">At 3% inflation, $100 loses purchasing power over time</text><g transform="translate(15,35)"><line x1="30" y1="5" x2="30" y2="115" stroke="var(--svg-cbd5e1)" stroke-width="1"/><line x1="30" y1="115" x2="290" y2="115" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="25" y="9" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$100</text><text x="25" y="34" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$75</text><text x="25" y="59" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$50</text><text x="25" y="84" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$25</text><text x="25" y="119" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$0</text><line x1="30" y1="5" x2="290" y2="5" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="30" y1="30" x2="290" y2="30" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="30" y1="55" x2="290" y2="55" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="30" y1="80" x2="290" y2="80" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><path d="M 40,7 Q 90,10 140,25 Q 175,40 210,60 Q 235,78 260,100 Q 275,110 290,115" fill="none" stroke="var(--svg-ef4444)" stroke-width="2.5" stroke-linecap="round"/><path d="M 40,7 Q 90,10 140,25 Q 175,40 210,60 Q 235,78 260,100 Q 275,110 290,115 L 290,115 L 40,115 Z" fill="var(--svg-ef4444)" opacity="0.08"/><circle cx="40" cy="7" r="3" fill="var(--svg-ef4444)"/><text x="40" y="1" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-weight="bold">$100</text><circle cx="140" cy="25" r="3" fill="var(--svg-ef4444)"/><text x="140" y="19" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-weight="bold">$74</text><circle cx="210" cy="60" r="3" fill="var(--svg-ef4444)"/><text x="210" y="54" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-weight="bold">$55</text><circle cx="260" cy="100" r="3" fill="var(--svg-ef4444)"/><text x="260" y="94" text-anchor="middle" font-size="7" fill="var(--svg-ef4444)" font-weight="bold">$41</text></g><rect x="15" y="160" width="290" height="20" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="174" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ef4444)">Adjusted Value = Original x CPI2 / CPI1</text><text x="160" y="194" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">$100 loses half its purchasing power every ~24 years at 3%</text></svg>';
 
 const inflationConfig: CalculatorConfig = {
   inputs: [
@@ -31,7 +34,7 @@ const inflationConfig: CalculatorConfig = {
       type: 'select',
       required: true,
       options: years,
-      helpText: `CPI data from ${MIN_YEAR} to ${MAX_YEAR} (Bureau of Labor Statistics)`,
+      helpText: `CPI-U annual averages from ${MIN_YEAR} to ${MAX_YEAR} (Bureau of Labor Statistics). ${MAX_YEAR} is the average of the months published so far, not a forecast.`,
     },
     {
       id: 'endYear',
@@ -55,10 +58,13 @@ const inflationConfig: CalculatorConfig = {
     const adjustedAmount = (amount / cpiStart) * cpiEnd;
     const cumulativeRate = ((cpiEnd - cpiStart) / cpiStart) * 100;
     const years = Math.abs(endYear - startYear);
-    const avgAnnualRate = years > 0
-      ? (Math.pow(cpiEnd / cpiStart, 1 / years) - 1) * 100
-      : 0;
+    // Average inflation is always the rate between the earlier and the later year, whichever way you convert.
+    const loCpi = startYear <= endYear ? cpiStart : cpiEnd;
+    const hiCpi = startYear <= endYear ? cpiEnd : cpiStart;
+    const avgAnnualRate = years > 0 ? (Math.pow(hiCpi / loCpi, 1 / years) - 1) * 100 : 0;
     const direction = endYear > startYear ? 'future' : 'past';
+    const partialYear = [startYear, endYear].find((y) => PARTIAL_YEARS[y]);
+    const partialNote = partialYear ? ` Note: ${partialYear} is the ${PARTIAL_YEARS[partialYear]} so far, not a full year.` : '';
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -73,7 +79,9 @@ const inflationConfig: CalculatorConfig = {
         highlight: true,
         color: endYear > startYear ? ('neutral' as const) : ('positive' as const),
         interpretation: years > 0
-          ? `Prices ${cumulativeRate >= 0 ? 'rose' : 'fell'} ${Math.abs(cumulativeRate).toFixed(0)}% over these ${years} years (${avgAnnualRate.toFixed(1)}%/yr average, per official CPI data). ${avgAnnualRate > 3.5 ? 'That is above the Fed\'s 2% target — cash sitting idle lost real value quickly in this period.' : avgAnnualRate >= 0 ? `At this pace, money loses roughly half its purchasing power every ${Math.max(1, Math.round(72 / Math.max(avgAnnualRate, 0.1)))} years — which is why long-term savings need to earn more than ${avgAnnualRate.toFixed(1)}% just to break even.` : 'This was a rare deflationary period — cash actually gained purchasing power.'}`
+          ? direction === 'past'
+            ? `Prices in ${endYear} were ${Math.abs(cumulativeRate).toFixed(0)}% lower than in ${startYear} — equivalently, prices rose ${((cpiStart / cpiEnd - 1) * 100).toFixed(0)}% from ${endYear} to ${startYear} (${avgAnnualRate.toFixed(1)}%/yr average, per official CPI data).${partialNote}`
+            : `Prices rose ${cumulativeRate.toFixed(0)}% over these ${years} years (${avgAnnualRate.toFixed(1)}%/yr average, per official CPI data). ${avgAnnualRate > 3.5 ? 'That is above the Fed\'s 2% target — cash sitting idle lost real value quickly in this period.' : avgAnnualRate >= 0 ? `At this pace, money loses roughly half its purchasing power every ${Math.max(1, Math.round(72 / Math.max(avgAnnualRate, 0.1)))} years — which is why long-term savings need to earn more than ${avgAnnualRate.toFixed(1)}% just to break even.` : 'This was a rare deflationary period — cash actually gained purchasing power.'}${partialNote}`
           : undefined,
       },
       {
@@ -91,22 +99,22 @@ const inflationConfig: CalculatorConfig = {
       {
         id: 'purchasingPower',
         label: direction === 'future'
-          ? `Purchasing Power Loss — $${amount.toFixed(0)} buys less in ${endYear}`
-          : `Purchasing Power — $${amount.toFixed(0)} in ${startYear} had more buying power`,
+          ? `Purchasing Power Loss — $${amount.toFixed(0)} buys less in ${endYear} than in ${startYear}`
+          : `Purchasing Power — a dollar in ${endYear} bought more than a dollar in ${startYear}`,
         value: direction === 'future'
-          ? `${(((amount - adjustedAmount) / adjustedAmount) * 100).toFixed(1)}% less today`
-          : `${(((adjustedAmount - amount) / amount) * 100).toFixed(1)}% more then`,
+          ? `${(((adjustedAmount - amount) / adjustedAmount) * 100).toFixed(1)}% less buying power`
+          : `${((cpiStart / cpiEnd - 1) * 100).toFixed(1)}% more buying power`,
         color: direction === 'future' ? ('negative' as const) : ('positive' as const),
       },
       {
         id: 'cpiStart',
-        label: `CPI in ${startYear} (Bureau of Labor Statistics)`,
+        label: `CPI in ${yearText(startYear)} (Bureau of Labor Statistics)`,
         value: cpiStart.toFixed(1),
         color: 'neutral' as const,
       },
       {
         id: 'cpiEnd',
-        label: `CPI in ${endYear} (Bureau of Labor Statistics)`,
+        label: `CPI in ${yearText(endYear)} (Bureau of Labor Statistics)`,
         value: cpiEnd.toFixed(1),
         color: 'neutral' as const,
       },
@@ -160,7 +168,7 @@ const inflationConfig: CalculatorConfig = {
       },
       {
         question: 'Is this the official BLS inflation calculator?',
-        answer: 'This calculator uses the same official CPI data from the Bureau of Labor Statistics (BLS). The math is identical to the official BLS inflation calculator at bls.gov. Annual average CPI values are used for each year. For precise month-to-month calculations, the BLS provides monthly CPI data that allows you to calculate inflation within a specific year.',
+        answer: 'This calculator uses the same official CPI data from the Bureau of Labor Statistics (BLS). The BLS inflation calculator at bls.gov uses monthly values, while this tool uses each year\'s annual average, so results for the same two years can differ slightly. For month-to-month calculations, use the BLS calculator or its monthly CPI data.',
       },
       {
         question: 'What causes inflation?',
@@ -179,18 +187,18 @@ const inflationConfig: CalculatorConfig = {
       {
         scenario: 'Maria inherited $10,000 in 1990 and wants to know how much that is worth in today\'s dollars to fairly compare it to current savings.',
         inputs: { amount: '10000', startYear: '1990', endYear: '2024' },
-        result: 'The adjusted value is approximately $24,000 in 2024 dollars.',
+        result: 'The adjusted value is approximately $24,000 in 2024 dollars ($24,002).',
         insight: 'A dollar in 1990 had more than double the purchasing power of a dollar today. This demonstrates why salary comparisons across decades can be misleading without adjusting for inflation — a $50,000 salary in 1990 had the same real value as roughly $120,000 today.',
       },
       {
         scenario: 'James retired in 2000 with $500,000 in savings and wants to know what that amount would need to be worth today (2026) just to have kept pace with inflation.',
         inputs: { amount: '500000', startYear: '2000', endYear: '2026' },
-        result: 'The adjusted value is approximately $940,800 in 2026 dollars — James\'s original $500,000 would need to nearly double just to match inflation over 26 years.',
-        insight: 'Prices roughly doubled (cumulative inflation of about 88%, or 2.5%/year average) between 2000 and 2026. If James had left his $500,000 sitting in cash earning no return, its real purchasing power today would be worth only about half of what it was in 2000. This is why retirement portfolios need to outpace inflation, not just preserve nominal value — a multi-decade retirement horizon is common, and cash alone rarely keeps up. Note: this calculator looks up actual historical CPI data, so it can only compare years it has data for (this app\'s data currently runs through 2026) — it does not project future inflation.',
+        result: 'The adjusted value is approximately $963,100 in 2026 dollars (using the January–August 2026 average CPI) — James\'s original $500,000 would need to nearly double just to match inflation over 26 years.',
+        insight: 'Prices rose about 93% (2.55%/year on average) between 2000 and 2026. If James had left his $500,000 sitting in cash earning no return, its real purchasing power today would be worth only about half of what it was in 2000. This is why retirement portfolios need to outpace inflation, not just preserve nominal value — a multi-decade retirement horizon is common, and cash alone rarely keeps up. Note: this calculator looks up actual historical CPI data, so it can only compare years it has data for (this app\'s data runs through the January–August 2026 average) — it does not project future inflation.',
       },
     ],
     proTips: [
-      'When comparing historical prices to today, always adjust for inflation first. A $3,000 car in 1970 sounds cheap, but that is equivalent to nearly $24,000 today — roughly the price of a modern economy car.',
+      'When comparing historical prices to today, always adjust for inflation first. A $3,000 car in 1970 sounds cheap, but that is equivalent to roughly $24,000-$25,000 in recent dollars (24,255 in 2024 dollars) — roughly the price of a modern economy car.',
       'For retirement planning, assume a 3% long-term inflation rate as your baseline, then stress-test at 4% and 5% to see the impact of higher-than-expected inflation on your nest egg.',
       'Use the average annual rate as a "rule of 24" shortcut: at 3% inflation, the purchasing power rule is that money halves roughly every 24 years (72 ÷ inflation rate). This is the inflation version of the "Rule of 72" used for investment doubling.',
       'Social Security benefits receive annual Cost of Living Adjustments (COLAs) based on CPI-W, which helps protect retirees. However, Medicare premiums are deducted from Social Security, and healthcare costs often rise faster than general inflation, partially offsetting the COLA benefit.',
@@ -199,7 +207,7 @@ const inflationConfig: CalculatorConfig = {
       'CPI data reflects national averages and may not perfectly match your personal inflation experience, which depends on your specific spending mix — for example, a renter experiences different inflation than a commuter who drives.',
       'This calculator uses annual average CPI, which smooths out month-to-month price changes. For precise calculations involving specific months, consult the BLS monthly CPI tables.',
       'CPI does not directly account for quality improvements in goods over time. A car built today costs more but includes safety features, fuel efficiency, and technology that a 1990 car did not have — these hedonic adjustments are partially addressed by BLS methodology but remain imperfect.',
-      'Future inflation is projected using historical data patterns, but actual future inflation may differ significantly due to monetary policy changes, geopolitical events, or economic shocks that are impossible to predict.',
+      'This calculator never forecasts inflation: it only compares years that have published CPI data. The latest year (2026) is the average of the months published so far, not a full-year figure, and the 2025 annual average excludes October 2025, which BLS did not collect.',
     ],
   citations: [
     { source: 'US Bureau of Labor Statistics', url: 'https://www.bls.gov/cpi' },

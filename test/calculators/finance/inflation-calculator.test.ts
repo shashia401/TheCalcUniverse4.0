@@ -204,6 +204,7 @@ describe('inflation-calculator', () => {
 
     const r = config.calculate({ amount: '500000', startYear: '2000', endYear: '2026' });
     expect(r.length).toBeGreaterThan(0);
-    near(parseMoney(getValue(r, 'adjustedAmount')), 940800, 500);
+    // 500,000 x 331.7 (Jan-Aug 2026 average CPI) / 172.2 (2000 annual average) = 963,124
+    near(parseMoney(getValue(r, 'adjustedAmount')), 963124, 50);
   });
 });

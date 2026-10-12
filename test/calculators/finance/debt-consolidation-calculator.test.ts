@@ -107,16 +107,16 @@ describe('debt-consolidation-calculator', () => {
     expect(r).toHaveLength(0);
   });
 
-  it('returns empty when newRate is zero or negative', () => {
-    const r = config.calculate({
+  it('returns empty when newRate is negative; 0% (balance-transfer style) is accepted', () => {
+    const base = {
       debt1name: 'Card',
       debt1balance: '1000',
       debt1rate: '20',
       debt1payment: '50',
-      newRate: '0',
       newTermMonths: '36',
-    });
-    expect(r).toHaveLength(0);
+    };
+    expect(config.calculate({ ...base, newRate: '-1' })).toHaveLength(0);
+    expect(config.calculate({ ...base, newRate: '0' }).length).toBeGreaterThan(0);
   });
 
   it('returns empty when origination fee exceeds 10%', () => {

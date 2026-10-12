@@ -1,8 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import HouseAffordabilityPanel from './HouseAffordabilityPanel';
+import { solveAffordability, parseDtiLimit, DEFAULT_PROPERTY_TAX_PCT, DEFAULT_INSURANCE_ANNUAL } from '../../../utils/affordability';
 
-const houseAffordabilitySvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="14" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">House Affordability: DTI Approach</text><g transform="translate(15,22)"><rect x="10" y="5" width="280" height="24" rx="4" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><text x="150" y="21" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-1e40af)">Monthly Income: $8,333</text><line x1="150" y1="29" x2="150" y2="36" stroke="var(--svg-64748b)" stroke-width="1.2"/><rect x="10" y="36" width="100" height="22" rx="4" fill="var(--svg-22c55e)"/><text x="60" y="51" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Max Housing: $2,333</text><text x="60" y="64" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">28% Front-End DTI</text><rect x="120" y="36" width="70" height="22" rx="4" fill="var(--svg-f59e0b)"/><text x="155" y="51" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">- Debts $500</text><text x="200" y="51" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-64748b)">=</text><rect x="215" y="36" width="75" height="22" rx="4" fill="var(--svg-8b5cf6)"/><text x="252" y="51" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Available: $1,833</text><rect x="10" y="75" width="280" height="40" rx="6" fill="var(--svg-f1f5f9)"/><text x="150" y="90" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">PITI = P&amp;I + Taxes + Insurance</text><rect x="25" y="96" width="72" height="14" rx="3" fill="var(--svg-3b82f6)"/><text x="61" y="106" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">P&amp;I ~$1,466</text><rect x="105" y="96" width="55" height="14" rx="3" fill="var(--svg-f59e0b)"/><text x="132" y="106" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">Tax ~$233</text><rect x="168" y="96" width="55" height="14" rx="3" fill="var(--svg-ef4444)"/><text x="195" y="106" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">Ins ~$134</text><text x="248" y="106" font-size="8" font-weight="bold" fill="var(--svg-22c55e)">Max: $273K</text><rect x="10" y="122" width="280" height="34" rx="6" fill="var(--svg-fef3c7)" stroke="var(--svg-f59e0b)" stroke-width="0.5"/><text x="150" y="138" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-b45309)">The 28/36 Rule</text><text x="80" y="152" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Housing cost &le; 28% of income</text><text x="235" y="152" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">All debts &le; 36% of income</text><rect x="10" y="164" width="280" height="26" rx="6" fill="var(--svg-f1f5f9)"/><text x="150" y="178" text-anchor="middle" font-size="7" fill="var(--svg-475569)">Income x DTI% - Existing Debts = Max Housing Payment</text><text x="150" y="189" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Reverse-amortize to get max loan amount + down payment</text></svg>';
+const houseAffordabilitySvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="14" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">House Affordability: DTI Approach</text><g transform="translate(15,22)"><rect x="10" y="5" width="280" height="24" rx="4" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><text x="150" y="21" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-1e40af)">Monthly Income: $8,333</text><line x1="150" y1="29" x2="150" y2="36" stroke="var(--svg-64748b)" stroke-width="1.2"/><rect x="10" y="36" width="100" height="22" rx="4" fill="var(--svg-22c55e)"/><text x="60" y="51" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Front cap: $2,333</text><text x="60" y="64" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">28% Front-End DTI</text><rect x="120" y="36" width="70" height="22" rx="4" fill="var(--svg-f59e0b)"/><text x="155" y="51" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Back cap: $2,500</text><text x="155" y="64" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">36% less $500 debts</text><text x="200" y="51" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-64748b)">&rarr;</text><rect x="215" y="36" width="75" height="22" rx="4" fill="var(--svg-8b5cf6)"/><text x="252" y="51" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Housing: $2,333</text><rect x="10" y="75" width="280" height="40" rx="6" fill="var(--svg-f1f5f9)"/><text x="150" y="90" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">PITI = P&amp;I + Taxes + Insurance</text><rect x="25" y="96" width="72" height="14" rx="3" fill="var(--svg-3b82f6)"/><text x="61" y="106" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">P&amp;I ~$1,887</text><rect x="105" y="96" width="55" height="14" rx="3" fill="var(--svg-f59e0b)"/><text x="132" y="106" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">Tax ~$322</text><rect x="168" y="96" width="55" height="14" rx="3" fill="var(--svg-ef4444)"/><text x="195" y="106" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">Ins ~$125</text><text x="248" y="106" font-size="8" font-weight="bold" fill="var(--svg-22c55e)">Max: $351K</text><rect x="10" y="122" width="280" height="34" rx="6" fill="var(--svg-fef3c7)" stroke="var(--svg-f59e0b)" stroke-width="0.5"/><text x="150" y="138" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-b45309)">The 28/36 Rule</text><text x="80" y="152" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Housing cost &le; 28% of income</text><text x="235" y="152" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">All debts &le; 36% of income</text><rect x="10" y="164" width="280" height="26" rx="6" fill="var(--svg-f1f5f9)"/><text x="150" y="178" text-anchor="middle" font-size="7" fill="var(--svg-475569)">Housing = lower of (Income x 28%) and (Income x 36% - Debts)</text><text x="150" y="189" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Solve for price: loan + down payment, tax grows with price</text></svg>';
 
 const houseAffordabilityConfig: CalculatorConfig = {
   inputs: [
@@ -44,12 +45,12 @@ const houseAffordabilityConfig: CalculatorConfig = {
       type: 'select',
       required: true,
       options: [
-        { label: 'Conservative — 28% (Safe, easy approval)', value: '28' },
-        { label: 'Moderate — 36% (Common lender guideline)', value: '36' },
-        { label: 'Aggressive — 43% (FHA/Fannie Max)', value: '43' },
+        { label: 'Conservative — 28% back-end (Safe, easy approval)', value: '28' },
+        { label: 'Moderate — 36% back-end (28/36 rule)', value: '36' },
+        { label: 'Aggressive — 43% back-end (FHA standard, 31/43)', value: '43' },
         { label: 'Custom', value: 'custom' },
       ],
-      helpText: 'Maximum debt-to-income ratio — lower is safer for approval.',
+      helpText: 'Maximum total debt-to-income ratio (housing + other debts). The housing-only (front-end) cap is paired automatically: 28% up to 36%, 31% up to 43%, 36% above.',
     },
     {
       id: 'customDti',
@@ -87,44 +88,67 @@ const houseAffordabilityConfig: CalculatorConfig = {
       ],
       helpText: 'Length of the mortgage — shorter terms have higher payments but less interest.',
     },
+    {
+      id: 'propertyTax',
+      label: 'Property Tax Rate (optional)',
+      type: 'number',
+      placeholder: '1.1',
+      unit: '%',
+      min: 0,
+      max: 5,
+      step: 0.01,
+      helpText: 'Annual property tax as a % of home value. Blank = 1.1% (US average).',
+    },
+    {
+      id: 'homeInsurance',
+      label: 'Annual Home Insurance (optional)',
+      type: 'number',
+      placeholder: '1,500',
+      prefix: '$',
+      min: 0,
+      step: 100,
+      helpText: 'Annual homeowners insurance premium. Blank = $1,500.',
+    },
+    {
+      id: 'pmiRate',
+      label: 'PMI Rate (optional)',
+      type: 'number',
+      placeholder: '0.8',
+      unit: '%',
+      min: 0,
+      max: 3,
+      step: 0.05,
+      helpText: 'Annual PMI as a % of the loan, charged only when the down payment is under 20% (typically 0.3–1.5%). Blank = PMI not modelled.',
+    },
   ],
   calculate: (values) => {
     const annualIncome = parseFloat(values.annualIncome);
-    const monthlyDebts = parseFloat(values.monthlyDebts) || 0;
-    const downPayment = parseFloat(values.downPayment) || 0;
-    const dtiLimit = values.dtiLimit === 'custom'
-      ? parseFloat(values.customDti) / 100
-      : parseFloat(values.dtiLimit || '36') / 100;
     const interestRate = parseFloat(values.interestRate) / 100;
     const loanTermYears = parseFloat(values.loanTerm || '30');
+    const limitRaw = values.dtiLimit === 'custom' ? values.customDti : values.dtiLimit || '36';
+    const { front, back } = parseDtiLimit(limitRaw);
 
-    if ([annualIncome, interestRate, loanTermYears].some(isNaN) || annualIncome <= 0 || isNaN(dtiLimit) || dtiLimit <= 0) return [];
+    if ([annualIncome, interestRate, loanTermYears].some(isNaN) || annualIncome <= 0 || (values.dtiLimit === 'custom' && !(parseFloat(values.customDti) > 0))) return [];
 
-    const monthlyIncome = annualIncome / 12;
-    const monthlyRate = interestRate / 12;
-    const n = loanTermYears * 12;
+    const taxPct = parseFloat(values.propertyTax);
+    const insurance = parseFloat(values.homeInsurance);
+    const monthlyDebts = parseFloat(values.monthlyDebts) || 0;
+    const sol = solveAffordability({
+      annualIncome,
+      monthlyDebts,
+      downPayment: parseFloat(values.downPayment) || 0,
+      annualRate: interestRate,
+      years: loanTermYears,
+      propertyTaxRate: (isNaN(taxPct) ? DEFAULT_PROPERTY_TAX_PCT : taxPct) / 100,
+      insuranceAnnual: isNaN(insurance) ? DEFAULT_INSURANCE_ANNUAL : insurance,
+      frontPct: front / 100,
+      backPct: back / 100,
+      pmiRate: (parseFloat(values.pmiRate) || 0) / 100,
+    });
 
-    const maxTotalDebt = monthlyIncome * dtiLimit;
-    const maxHousingPayment = maxTotalDebt - monthlyDebts;
-
-    if (maxHousingPayment <= 0) {
-      return [{ id: 'error', label: 'Notice', value: 'Your existing debts exceed the DTI limit. Reduce debts or increase income.', color: 'negative' as const }];
+    if (!sol) {
+      return [{ id: 'error', label: 'Notice', value: 'At this DTI limit your existing debts and insurance leave no room for a mortgage payment. Reduce debts, raise income, or choose a higher DTI limit.', color: 'negative' as const }];
     }
-
-    const estimatedTaxesInsurance = maxHousingPayment * 0.2;
-    const maxPI = maxHousingPayment - estimatedTaxesInsurance;
-
-    let maxLoanAmount: number;
-    if (monthlyRate === 0) {
-      maxLoanAmount = maxPI * n;
-    } else {
-      maxLoanAmount = maxPI * (1 - Math.pow(1 + monthlyRate, -n)) / monthlyRate;
-    }
-
-    const maxHomePrice = maxLoanAmount + downPayment;
-    const downPaymentPct = maxHomePrice > 0 ? (downPayment / maxHomePrice) * 100 : 0;
-    const frontEndDTI = (maxHousingPayment / monthlyIncome) * 100;
-    const backEndDTI = ((maxHousingPayment + monthlyDebts) / monthlyIncome) * 100;
 
     const fmtD = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -135,90 +159,90 @@ const houseAffordabilityConfig: CalculatorConfig = {
       {
         id: 'maxHomePrice',
         label: 'Maximum Home Price You Can Afford',
-        value: fmtK(maxHomePrice),
+        value: fmtK(sol.maxHomePrice),
         highlight: true,
         color: 'positive' as const,
-        interpretation: `This puts your back-end DTI (all debt including housing) at ${backEndDTI.toFixed(0)}% of gross income — lenders typically cap around 43-45%. It's the lender's ceiling, not a comfort level; buying meaningfully below this leaves breathing room for maintenance, rate changes, and life's surprises.`,
+        interpretation: `This puts your housing at ${sol.frontEndRatio.toFixed(0)}% of gross income and your back-end DTI (all debt including housing) at ${sol.backEndRatio.toFixed(0)}% — lenders typically cap around 43-45%. It's the lender's ceiling, not a comfort level; buying meaningfully below this leaves breathing room for maintenance, rate changes, and life's surprises.`,
       },
       {
         id: 'maxLoan',
         label: 'Maximum Loan Amount',
-        value: fmtK(maxLoanAmount),
+        value: fmtK(sol.loan),
         color: 'neutral' as const,
       },
       {
         id: 'maxHousingPayment',
-        label: 'Max Total Monthly Housing Payment (PITI)',
-        value: `$${fmtD(maxHousingPayment)}/mo`,
+        label: 'Total Monthly Housing Payment (PITI)',
+        value: `$${fmtD(sol.totalMonthly)}/mo`,
         color: 'neutral' as const,
       },
       {
         id: 'maxPI',
         label: 'Est. Principal & Interest (P&I)',
-        value: `$${fmtD(maxPI)}/mo`,
+        value: `$${fmtD(sol.pi)}/mo`,
         color: 'neutral' as const,
       },
       {
         id: 'taxesInsurance',
-        label: 'Tax & Insurance Buffer (~20% of PITI)',
-        value: `$${fmtD(estimatedTaxesInsurance)}/mo`,
+        label: sol.pmi > 0 ? 'Property Tax, Insurance & PMI' : 'Property Tax & Insurance',
+        value: `$${fmtD(sol.tax + sol.insurance + sol.pmi)}/mo`,
         color: 'neutral' as const,
       },
       {
         id: 'downPaymentPct',
         label: 'Down Payment as % of Home Price',
-        value: `${downPaymentPct.toFixed(1)}%${downPaymentPct < 20 ? ' — PMI likely required' : ' — No PMI!'}`,
-        color: downPaymentPct >= 20 ? 'positive' as const : 'neutral' as const,
+        value: `${sol.downPaymentPct.toFixed(1)}%${sol.downPaymentPct < 20 ? ' — PMI likely required' : ' — No PMI!'}`,
+        color: sol.downPaymentPct >= 20 ? 'positive' as const : 'neutral' as const,
       },
       {
         id: 'frontEndDTI',
         label: 'Front-End DTI (Housing Only)',
-        value: `${frontEndDTI.toFixed(1)}%`,
-        color: frontEndDTI <= 28 ? 'positive' as const : 'neutral' as const,
+        value: `${sol.frontEndRatio.toFixed(1)}%`,
+        color: sol.frontEndRatio <= 28.05 ? 'positive' as const : 'neutral' as const,
       },
       {
         id: 'backEndDTI',
         label: 'Back-End DTI (All Debts)',
-        value: `${backEndDTI.toFixed(1)}%`,
-        color: backEndDTI <= 36 ? 'positive' as const : 'neutral' as const,
+        value: `${sol.backEndRatio.toFixed(1)}%`,
+        color: sol.backEndRatio <= 36.05 ? 'positive' as const : 'neutral' as const,
       },
     ];
   },
   extraPanel: (values, results) => {
     const annualIncome = parseFloat(values.annualIncome);
-    const monthlyDebts = parseFloat(values.monthlyDebts) || 0;
-    const downPayment = parseFloat(values.downPayment) || 0;
-    const dtiLimit = values.dtiLimit === 'custom'
-      ? parseFloat(values.customDti) / 100
-      : parseFloat(values.dtiLimit || '36') / 100;
-    const interestRate = parseFloat(values.interestRate) / 100;
-    const loanTermYears = parseFloat(values.loanTerm || '30');
-
     if (!results.length || results[0].id === 'error' || isNaN(annualIncome)) return null;
 
     return createElement(HouseAffordabilityPanel, {
-      annualIncome, monthlyDebts, downPayment, dtiLimit, interestRate, loanTermYears,
+      annualIncome,
+      monthlyDebts: parseFloat(values.monthlyDebts) || 0,
+      downPayment: parseFloat(values.downPayment) || 0,
+      dtiLimit: values.dtiLimit === 'custom' ? values.customDti : values.dtiLimit || '36',
+      interestRate: parseFloat(values.interestRate) / 100,
+      loanTermYears: parseFloat(values.loanTerm || '30'),
+      propertyTaxPct: parseFloat(values.propertyTax),
+      insuranceAnnual: parseFloat(values.homeInsurance),
+      pmiPct: parseFloat(values.pmiRate) || 0,
     });
   },
   educational: {
-    formula: 'Max Loan = MaxPI × [1 − (1 + r/12)^−n] ÷ (r/12)',
+    formula: 'Housing = min(Income × Front %, Income × Back % − Debts)  →  Price = (Housing − Insurance + Down × k) ÷ (k + Tax Rate ÷ 12)',
     diagram: {
       svg: houseAffordabilitySvg,
       alt: 'House affordability flow diagram showing monthly income flowing through the 28% DTI limit, subtracting existing debts, yielding available PITI split into P&I, taxes, and insurance',
       caption: 'Lenders use the 28/36 rule where housing costs should not exceed 28% of income and total debts should not exceed 36% of income to determine borrowing capacity',
     },
     formulaDescription:
-      'Working backward from your DTI limit: Monthly Income × DTI Percent − Existing Debts = Max Housing Payment. Subtract estimated taxes and insurance (~20% buffer) to get Max P&I. Then reverse the standard mortgage payment formula to determine the maximum loan amount and home price you can afford.',
+      'Working backward from your DTI limit: the housing payment is capped by the lower of the front-end limit (Monthly Income × Front %) and the back-end limit (Monthly Income × Back % − Existing Debts). Property tax and insurance come out of that payment first, and what remains pays principal and interest on the loan. Because property tax is a percentage of the price, the maximum price is solved directly from k, the monthly payment per $1 borrowed. This calculator uses the same engine as the Home Affordability Calculator.',
     variables: [
-      { symbol: 'DTI Ratios', name: 'Front-End & Back-End DTI', description: 'Back-end DTI = (all debts including housing) / gross monthly income. Front-end DTI = housing only / income. The 28/36 rule is standard: housing ≤ 28%, all debts ≤ 36%. Most lenders cap DTI at 43% (FHA/Fannie Mae maximum).' },
-      { symbol: 'PITI', name: 'Total Housing Payment', description: 'Principal, Interest, Taxes, and Insurance — the four components of the true monthly cost of homeownership. This calculator reserves approximately 20% of the maximum housing payment for taxes and insurance as a reasonable estimate.' },
-      { symbol: 'PMI', name: 'Private Mortgage Insurance', description: 'Required by lenders when your down payment is less than 20% of the purchase price. It protects the lender (not you) against default and typically costs 0.5-1.5% of the loan amount per year, adding $50-$200 or more to your monthly payment.' },
+      { symbol: 'DTI Ratios', name: 'Front-End & Back-End DTI', description: 'Back-end DTI = (all debts including housing) / gross monthly income. Front-end DTI = housing only / income. The 28/36 rule is standard: housing ≤ 28%, all debts ≤ 36%. 43% is the FHA standard back-end limit; some programs approve higher with compensating factors.' },
+      { symbol: 'PITI', name: 'Total Housing Payment', description: 'Principal, Interest, Taxes, and Insurance — the four components of the true monthly cost of homeownership. Property tax (default 1.1% of the price per year) and insurance (default $1,500 per year) are estimated separately and come out of the housing payment first.' },
+      { symbol: 'PMI', name: 'Private Mortgage Insurance', description: 'Required by lenders when your down payment is less than 20% of the purchase price. It protects the lender (not you) against default and typically costs 0.5-1.5% of the loan amount per year (about $125-$375/month on a $300,000 loan). Enter a PMI rate above to include it in the payment.' },
     ],
     howToUse: [
       'Enter your combined annual household gross income (before taxes and deductions).',
       'Enter all your current monthly debt payments — auto loans, student loans, minimum credit card payments, personal loans.',
       'Enter how much you have available for a down payment — larger down payments reduce or eliminate PMI.',
-      'Select your comfort level with debt. Conservative 28% is safest; Moderate 36% is common; Aggressive 43% is the FHA/Fannie Mae maximum.',
+      'Select your comfort level with debt. Conservative 28% is safest; Moderate 36% is common; Aggressive 43% is the FHA standard limit.',
       'Enter the current mortgage interest rate and desired loan term to see your maximum affordable home price.',
     ],
     commonUses: [
@@ -227,7 +251,7 @@ const houseAffordabilityConfig: CalculatorConfig = {
       'Plan your home search by understanding how interest rates and loan terms translate into a maximum affordable purchase price.',
     ],
     explanation:
-      'This calculator works backward from your income — the same approach lenders use when evaluating mortgage applications. The key number is the back-end DTI, which measures all your monthly debts (including the proposed mortgage payment) as a percentage of gross monthly income. A 36% DTI on a $100,000 annual income means you can have $3,000/month in total debt payments. If you already pay $500 in existing debts, you have $2,500 available for housing. Subtracting estimated taxes and insurance ($400-$600 on a typical home, depending on location) leaves your maximum principal and interest payment. That payment is then reversed through the mortgage formula to determine the maximum loan amount and, when combined with your down payment, the maximum home price you can afford.',
+      'This calculator works backward from your income — the same approach lenders use when evaluating mortgage applications. The key number is the back-end DTI, which measures all your monthly debts (including the proposed mortgage payment) as a percentage of gross monthly income. A 36% back-end DTI on a $100,000 annual income means you can have $3,000/month in total debt payments. If you already pay $500 in existing debts, the back-end limit leaves $2,500 for housing, but the 28% front-end limit caps housing at $2,333, so $2,333 is the budget. Property tax and insurance are taken out of that (about $322 and $125 per month at the defaults on a $351,000 home), leaving about $1,887 for principal and interest. That payment is then reversed through the mortgage formula to give the maximum loan and, with your down payment, the maximum home price (about $351,000 with $60,000 down at 6.75% over 30 years).',
     faqs: [
       {
         question: 'What is the 28/36 rule?',
@@ -235,11 +259,11 @@ const houseAffordabilityConfig: CalculatorConfig = {
       },
       {
         question: 'Does this include property taxes and insurance?',
-        answer: 'Yes, this calculator reserves approximately 20% of the maximum housing budget for property taxes and homeowners insurance. However, actual property tax rates vary significantly by location — from under 0.5% of home value annually in some areas to over 2.5% in others. For a more precise estimate, look up your local county property tax rate and get insurance quotes for the specific property.',
+        answer: 'Yes. It uses the property tax rate and annual insurance premium you enter (defaults: 1.1% of the home price and $1,500 per year) and subtracts them from your housing budget before sizing the loan. Actual property tax rates vary significantly by location — from under 0.5% of home value annually in some areas to over 2.5% in others — so look up your county rate and get an insurance quote for the specific property.',
       },
       {
         question: 'What is PMI and when can I avoid it?',
-        answer: 'Private Mortgage Insurance protects the lender (not you) when your down payment is less than 20% of the purchase price. It typically costs 0.5-1.5% of the loan amount per year, adding $50-$200 or more to your monthly payment. You can avoid PMI by saving a 20% down payment, using a conventional loan with a "piggyback" second mortgage (80/10/10 structure), or using certain loan programs like VA loans which do not require PMI.',
+        answer: 'Private Mortgage Insurance protects the lender (not you) when your down payment is less than 20% of the purchase price. It typically costs 0.5-1.5% of the loan amount per year (about $125-$375/month on a $300,000 loan). You can avoid PMI by saving a 20% down payment, using a conventional loan with a "piggyback" second mortgage (80/10/10 structure), or using certain loan programs like VA loans which do not require PMI.',
       },
       {
         question: 'Should I max out what the calculator allows?',

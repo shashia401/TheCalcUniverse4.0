@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
+import { futureValue } from './fvMath';
 
 interface Props {
   values: Record<string, string>;
@@ -19,27 +20,23 @@ export default function FutureValuePanel({ values, results }: Props) {
   const compounding = parseInt(values.compounding || '12');
   const monthlyContribution = parseFloat(values.monthlyContribution) || 0;
 
-  const pv = values.presentValue;
-  const ar = values.annualRate;
-  const yr = values.years;
-  if ((pv === undefined || pv === null || pv === '') &&
-      (ar === undefined || ar === null || ar === '') &&
-      (yr === undefined || yr === null || yr === '')) return null;
-
+  // Same pure function as index.tsx, so the last row always equals the headline Future Value.
   const yearlyData = useMemo(() => {
     const data: Array<{ year: number; balance: number; totalContrib: number }> = [];
-    const ratePerPeriod = annualRate / compounding;
-    const contribPerPeriod = monthlyContribution * (12 / compounding);
-    let bal = presentValue;
-    for (let y = 1; y <= Math.min(years, 40); y++) {
-      for (let p = 1; p <= compounding; p++) {
-        bal = bal * (1 + ratePerPeriod) + contribPerPeriod;
-      }
-      const contribSoFar = presentValue + monthlyContribution * 12 * y;
-      data.push({ year: y, balance: bal, totalContrib: contribSoFar });
+    const marks: number[] = [];
+    for (let y = 1; y <= Math.floor(years); y++) marks.push(y);
+    if (years > 0 && !Number.isInteger(years)) marks.push(years);
+    for (const y of marks) {
+      data.push({
+        year: y,
+        balance: futureValue(presentValue, annualRate, compounding, monthlyContribution, y),
+        totalContrib: presentValue + monthlyContribution * 12 * y,
+      });
     }
     return data;
   }, [presentValue, annualRate, years, monthlyContribution, compounding]);
+
+  if (!presentValue && !annualRate && !years) return null;
 
   const fvValue = results.find(r => r.id === 'futureValue')?.value ?? '';
   const earValue = results.find(r => r.id === 'effectiveAnnualRate')?.value ?? '';
@@ -59,19 +56,19 @@ export default function FutureValuePanel({ values, results }: Props) {
       <div className="p-6 space-y-6">
         {/* Rendered Formula */}
         <div className="rounded-xl bg-slate-800 p-5 overflow-x-auto" tabIndex={0}>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">FV Formula — With Your Numbers</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300 mb-3">FV Formula — With Your Numbers</p>
           <div className="text-sm font-mono text-emerald-300 leading-relaxed space-y-1 whitespace-nowrap">
-            <p className="text-slate-500">FV = PV × (1 + r/m)^(n×m) + PMT × [((1 + r/m)^(n×m) − 1) / (r/m)]</p>
+            <p className="text-slate-300">FV = PV × (1 + r/m)^(n×m) + PMT × [((1 + i)^(12n) − 1) / i],  i = (1 + r/m)^(m/12) − 1</p>
             <p className="mt-3 text-white">
               FV = {fmtMoney(presentValue)} × (1 + {(annualRate * 100).toFixed(1)}%/{compounding})^({years}×{compounding})
             </p>
             {monthlyContribution > 0 && (
               <p className="text-white">
-                &nbsp;&nbsp;&nbsp;&nbsp;+ {fmtMoney(monthlyContribution * 12 / compounding)} × [((1 + {(annualRate * 100).toFixed(1)}%/{compounding})^({years}×{compounding}) − 1) / ({(annualRate * 100).toFixed(1)}%/{compounding})]
+                &nbsp;&nbsp;&nbsp;&nbsp;+ {fmtMoney(monthlyContribution)} × [((1 + i)^({years}×12) − 1) / i],  i = (1 + {(annualRate * 100).toFixed(1)}%/{compounding})^({'12' === String(compounding) ? '1' : `${compounding}/12`}) − 1
               </p>
             )}
             <p className="mt-3 text-white font-bold">
-              = <span className="text-emerald-400">{fvValue}</span>
+              = <span className="text-emerald-300">{fvValue}</span>
             </p>
           </div>
         </div>
@@ -79,34 +76,34 @@ export default function FutureValuePanel({ values, results }: Props) {
         {/* Step-by-step calculation */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Rate per Period</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">Rate per Period</p>
             <p className="text-lg font-black text-slate-800">{(ratePerPeriod * 100).toFixed(4)}%</p>
-            <p className="text-[10px] text-slate-500">{annualRate * 100}% ÷ {compounding}</p>
+            <p className="text-[10px] text-slate-600">{+(annualRate * 100).toFixed(4)}% ÷ {compounding}</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Total Periods</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">Total Periods</p>
             <p className="text-lg font-black text-slate-800">{totalPeriods}</p>
-            <p className="text-[10px] text-slate-500">{years} yrs × {compounding}/yr</p>
+            <p className="text-[10px] text-slate-600">{years} yrs × {compounding}/yr</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Effective Annual Rate</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">Effective Annual Rate</p>
             <p className="text-lg font-black text-slate-800">{earValue}</p>
-            <p className="text-[10px] text-slate-500">(1 + r/m)^m − 1</p>
+            <p className="text-[10px] text-slate-600">(1 + r/m)^m − 1</p>
           </div>
         </div>
 
-        {/* Growth Chart */}
+        {/* Growth table */}
         {yearlyData.length > 1 && (
           <>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Year-by-Year Growth</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">Year-by-Year Growth</p>
             <div className="overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label="Year-by-year growth table">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
-                    <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Year</th>
-                    <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Balance</th>
-                    <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Contributions</th>
-                    <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Growth</th>
+                    <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Year</th>
+                    <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Balance</th>
+                    <th scope="col" className="text-right px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Contributions</th>
+                    <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Growth</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -115,9 +112,9 @@ export default function FutureValuePanel({ values, results }: Props) {
                     return (
                       <tr key={row.year} className={`border-b border-slate-100 last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
                         <td className="px-4 py-2.5 font-bold text-slate-700">Year {row.year}</td>
-                        <td className="px-3 py-2.5 text-right font-bold text-emerald-600">{fmtMoney(row.balance)}</td>
-                        <td className="px-3 py-2.5 text-right font-bold text-blue-600">{fmtMoney(row.totalContrib)}</td>
-                        <td className="px-4 py-2.5 text-right font-bold text-orange-500">{fmtMoney(Math.max(0, growth))}</td>
+                        <td className="px-3 py-2.5 text-right font-bold text-emerald-700">{fmtMoney(row.balance)}</td>
+                        <td className="px-3 py-2.5 text-right font-bold text-blue-700">{fmtMoney(row.totalContrib)}</td>
+                        <td className="px-4 py-2.5 text-right font-bold text-orange-700">{fmtMoney(Math.max(0, growth))}</td>
                       </tr>
                     );
                   })}

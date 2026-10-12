@@ -19,6 +19,40 @@ function pmtDecimal(principal: number, monthlyRate: number, periods: number): nu
   return p.times(r).times(pow).div(pow.minus(1)).toNumber();
 }
 
+/**
+ * Shared by calculate() and chart(): the CLTV cap, the approved amount and the financed amount.
+ * Closing costs are used exactly as entered (rolled into the balance); null for incomplete input.
+ */
+function computeLoan(values: Record<string, string>) {
+  const homeValue = parseFloat(values.homeValue);
+  const currentMortgage = values.currentMortgage === '' ? 0 : parseFloat(values.currentMortgage) || 0;
+  const desiredLoan = values.desiredLoan === '' ? 0 : parseFloat(values.desiredLoan) || 0;
+  const annualRate = parseFloat(values.interestRate);
+  const loanTermRaw = parseFloat(values.loanTerm);
+  const loanTermMonths = isNaN(loanTermRaw) || loanTermRaw <= 0 ? NaN : loanTermRaw;
+  const closingCosts = values.closingCosts === '' || values.closingCosts === undefined ? 0 : Math.max(0, parseFloat(values.closingCosts) || 0);
+  if (
+    isNaN(homeValue) || homeValue <= 0 ||
+    isNaN(annualRate) || annualRate < 0 ||
+    desiredLoan < 0 || currentMortgage < 0 ||
+    isNaN(loanTermMonths)
+  ) {
+    return null;
+  }
+  const profile = MAX_LTV_BY_CREDIT[values.creditProfile || 'good'] || MAX_LTV_BY_CREDIT.good;
+  const totalEquity = homeValue - currentMortgage;
+  const maxHeloc = Math.max(0, homeValue * profile.maxLtv - currentMortgage);
+  const isUnderLimit = desiredLoan <= maxHeloc;
+  const actualLoan = isUnderLimit ? desiredLoan : maxHeloc;
+  const actualClosingCosts = actualLoan > 0 ? closingCosts : 0;
+  return {
+    homeValue, currentMortgage, closingCosts, annualRate, loanTermMonths,
+    maxLtvPct: profile.maxLtv, totalEquity, maxHeloc, isUnderLimit, actualLoan,
+    actualClosingCosts, financedAmount: actualLoan + actualClosingCosts,
+    monthlyRate: annualRate / 100 / 12,
+  };
+}
+
 const homeEquityLoanConfig: CalculatorConfig = {
   inputs: [
     {
@@ -53,7 +87,7 @@ const homeEquityLoanConfig: CalculatorConfig = {
       label: 'Your Credit Profile',
       type: 'select',
       required: true,
-      helpText: 'Lenders set maximum combined loan-to-value (CLTV) based on your credit score. Higher scores unlock more equity access and better interest rates.',
+      helpText: 'Lenders set maximum combined loan-to-value (CLTV) based on your credit score. The caps used here (85% / 80% / 75% / 65%) are illustrative assumptions of this calculator, not a lender standard; check your lender for its actual limit.',
       options: [
         { label: 'Excellent (740+)', value: 'excellent' },
         { label: 'Good (700–739)', value: 'good' },
@@ -120,24 +154,10 @@ const homeEquityLoanConfig: CalculatorConfig = {
   // Living Answer chart — cumulative principal vs interest over the term.
   // Mirrors calculate()'s financed-amount and CLTV-cap logic exactly.
   chart: (values) => {
-    const homeValue = parseFloat(values.homeValue);
-    const currentMortgage = values.currentMortgage === '' ? 0 : (parseFloat(values.currentMortgage) || 0);
-    const desiredLoan = values.desiredLoan === '' ? 0 : (parseFloat(values.desiredLoan) || 0);
-    const annualRate = parseFloat(values.interestRate);
-    const loanTermMonths = parseFloat(values.loanTerm);
-    const closingCosts = values.closingCosts === '' || values.closingCosts === undefined ? 0 : (parseFloat(values.closingCosts) || 0);
-    const creditProfile = values.creditProfile || 'good';
-    if (isNaN(homeValue) || homeValue <= 0 || isNaN(annualRate) || annualRate < 0 ||
-        isNaN(desiredLoan) || desiredLoan < 0 || isNaN(loanTermMonths) || loanTermMonths <= 0) return null;
-
-    const profile = MAX_LTV_BY_CREDIT[creditProfile] || MAX_LTV_BY_CREDIT.good;
-    const maxHeloc = Math.max(0, homeValue * profile.maxLtv - currentMortgage);
-    const actualLoan = Math.min(desiredLoan, maxHeloc);
-    if (actualLoan <= 0) return null;
-    const financed = actualLoan + Math.min(closingCosts, actualLoan * 0.05);
-    const monthlyRate = annualRate / 100 / 12;
+    const loan = computeLoan(values);
+    if (!loan || loan.actualLoan <= 0) return null;
+    const { financedAmount: financed, monthlyRate, loanTermMonths } = loan;
     const payment = pmtDecimal(financed, monthlyRate, loanTermMonths);
-
     const byMonth = loanTermMonths <= 36;
     const points: { x: number; values: number[] }[] = [{ x: 0, values: [0, 0] }];
     let balance = financed;
@@ -163,41 +183,16 @@ const homeEquityLoanConfig: CalculatorConfig = {
     };
   },
   calculate: (values) => {
-    const homeValue = parseFloat(values.homeValue);
-    const currentMortgage = values.currentMortgage === '' ? 0 : (parseFloat(values.currentMortgage) || 0);
-    const desiredLoan = values.desiredLoan === '' ? 0 : (parseFloat(values.desiredLoan) || 0);
-    const annualRate = parseFloat(values.interestRate);
-    const loanTermRaw = parseFloat(values.loanTerm);
-    const loanTermMonths = isNaN(loanTermRaw) || loanTermRaw <= 0 ? NaN : loanTermRaw;
-    const closingCosts = values.closingCosts === '' || values.closingCosts === undefined ? 0 : (parseFloat(values.closingCosts) || 0);
-    const creditProfile = values.creditProfile || 'good';
+    const loan = computeLoan(values);
+    if (!loan) return [];
+    const {
+      homeValue, currentMortgage, closingCosts, annualRate, loanTermMonths, maxLtvPct,
+      totalEquity, maxHeloc, isUnderLimit, actualLoan, actualClosingCosts, financedAmount, monthlyRate,
+    } = loan;
 
-    // Comprehensive NaN/edge case guards
-    if (
-      isNaN(homeValue) || homeValue <= 0 ||
-      isNaN(annualRate) || annualRate < 0 ||
-      isNaN(desiredLoan) || desiredLoan < 0 ||
-      isNaN(currentMortgage) || currentMortgage < 0 ||
-      isNaN(loanTermMonths) || loanTermMonths <= 0
-    ) {
-      return [];
-    }
-
-    const profile = MAX_LTV_BY_CREDIT[creditProfile] || MAX_LTV_BY_CREDIT.good;
-    const maxLtvPct = profile.maxLtv;
-
-    const totalEquity = homeValue - currentMortgage;
-    const maxTotalLoan = homeValue * maxLtvPct;
-    const maxHeloc = Math.max(0, maxTotalLoan - currentMortgage);
-
-    const isUnderLimit = desiredLoan <= maxHeloc;
-    const actualLoan = isUnderLimit ? desiredLoan : maxHeloc;
-
-    const monthlyRate = annualRate / 100 / 12;
     const monthlyPayment = pmtDecimal(actualLoan, monthlyRate, loanTermMonths);
-    const actualClosingCosts = Math.min(closingCosts, actualLoan * 0.05);
-    const financedAmount = actualLoan + actualClosingCosts;
     const actualMonthlyPayment = pmtDecimal(financedAmount, monthlyRate, loanTermMonths);
+    void annualRate;
 
     // Use Decimal for precise total calculations
     const totalPayment = new Decimal(actualMonthlyPayment).times(loanTermMonths).toNumber();
@@ -290,13 +285,14 @@ const homeEquityLoanConfig: CalculatorConfig = {
       'Pay attention to the APR, not just the interest rate. The APR includes closing costs and fees, giving you the true cost of borrowing for comparison shopping.',
       'If your CLTV is borderline, consider making extra mortgage payments for 6-12 months to build more equity before applying — even a 5% equity increase can unlock significantly better terms.',
       'Home equity loan interest may be tax-deductible if you use the funds to "buy, build, or substantially improve" your home. Keep receipts and consult a tax professional.',
-      'A 15-year term instead of 20 years typically saves you 30-40% in total interest while only increasing your monthly payment by about 20%. Run both scenarios in this calculator to see the difference.',
+      'A 15-year term instead of 20 years saves roughly 30% of the total interest (28.7% at 8.5%) while raising your monthly payment by only about 14%. Run both scenarios in this calculator to see the difference.',
     ],
     limitations: [
       'This calculator estimates borrowing power based on CLTV limits but does not account for debt-to-income (DTI) ratio requirements, which most lenders cap at 43%. Your actual approved amount may be lower if your DTI is high.',
       'The interest rate shown is for estimation only. Actual rates depend on your credit score, loan amount, loan term, location, and the specific lender\'s underwriting criteria.',
       'Home equity loans put your home at risk of foreclosure if you cannot make payments. This calculator does not assess your ability to repay — always borrow conservatively.',
-      'Closing cost estimates (2-5%) are industry averages. Your actual costs may differ based on your state\'s recording fees, appraisal requirements, and the lender\'s fee structure.',
+      'Closing costs are used exactly as you enter them and rolled into the loan balance (typical costs are 2-5% of the loan amount; yours depend on your state and lender). Enter 0 if your lender charges none or you pay them upfront.',
+      'The maximum CLTV for each credit profile (85% / 80% / 75% / 65%) is an illustrative assumption of this calculator, not a published lender standard. Lenders set their own limits, commonly 80-85% and up to 90% at some credit unions.',
     ],
     workedExamples: [
       {
@@ -313,7 +309,7 @@ const homeEquityLoanConfig: CalculatorConfig = {
       },
     ],
     explanation:
-      `A home equity loan is a second mortgage that lets you borrow against the equity you have built in your home. Unlike a HELOC (Home Equity Line of Credit), which is a revolving line of credit with a variable rate, a home equity loan provides a lump sum with a fixed interest rate and fixed monthly payments over a set term. Lenders evaluate your Combined Loan-to-Value (CLTV) ratio, the sum of your first mortgage balance and the new home equity loan divided by your home's current market value. Most lenders cap CLTV at 80-85% for borrowers with excellent credit, though some will go to 90% at higher rates. The equity stack chart in this calculator shows how your home value is partitioned: the first mortgage occupies the bottom portion, the home equity loan sits on top of that, and your remaining untapped equity is at the top. This visual makes it clear exactly how much of your home's value you control free and clear. The concept of using home equity as collateral was developed in the 19th century by building and loan associations that helped working families access capital through their property, and the modern home equity lending industry has grown into a multi-billion dollar market serving millions of American homeowners.`,
+      `A home equity loan is a second mortgage that lets you borrow against the equity you have built in your home. Unlike a HELOC (Home Equity Line of Credit), which is a revolving line of credit with a variable rate, a home equity loan provides a lump sum with a fixed interest rate and fixed monthly payments over a set term. Lenders evaluate your Combined Loan-to-Value (CLTV) ratio, the sum of your first mortgage balance and the new home equity loan divided by your home's current market value. Most lenders cap CLTV at 80-85% for borrowers with excellent credit, though some will go to 90% at higher rates. The equity stack chart in this calculator shows how your home value is partitioned: the first mortgage occupies the bottom portion, the home equity loan sits on top of that, and your remaining untapped equity is at the top. This visual makes it clear exactly how much of your home's value you control free and clear.`,
     citations: [
 
       { source: 'Federal Reserve', title: 'Mortgage Debt Outstanding by Type of Property and Holder', url: 'https://www.federalreserve.gov/data/mortoutstand/current.htm' },

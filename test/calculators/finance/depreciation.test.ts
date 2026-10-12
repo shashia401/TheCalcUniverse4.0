@@ -73,7 +73,8 @@ describe('depreciation', () => {
       // rate = 2/5 = 0.4
       // Year 1: 50000 * 0.4 * 0.5 = 10000
       near(parseNumber(getValue(r, 'annualDepreciation')), 10000, 0.01);
-      near(parseMoney(getValue(r, 'totalDepreciation')), 45000, 0.01); // cost - salvage
+      // MACRS ignores salvage (IRS Pub. 946): the full 50,000 cost is recovered
+      near(parseMoney(getValue(r, 'totalDepreciation')), 50000, 0.01);
 
       const schedule = parseSchedule(r);
       // Should have 6 years (n+1 due to half-year convention at start)
@@ -83,13 +84,13 @@ describe('depreciation', () => {
       expect(schedule[0].depreciationExpense).toBe(10000);
       expect(schedule[0].year).toBe(1);
 
-      // Total all depreciation expenses should equal 45000
+      // Total of all depreciation expenses equals the full cost
       const total = schedule.reduce((s, row) => s + row.depreciationExpense, 0);
-      near(total, 45000, 0.01);
+      near(total, 50000, 0.01);
 
-      // Final book value should equal salvage
+      // Final book value is zero (salvage is ignored under MACRS)
       const finalBV = schedule[schedule.length - 1].bookValue;
-      near(finalBV, 5000, 0.01);
+      near(finalBV, 0, 0.01);
     });
 
     it('handles 3-year asset with MACRS', () => {

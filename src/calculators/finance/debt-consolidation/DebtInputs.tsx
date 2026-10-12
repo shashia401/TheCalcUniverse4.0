@@ -59,7 +59,7 @@ export default function DebtInputs({ id, value, onChange, errors }: Props) {
   }, []);
 
   const baseInput =
-    'w-full rounded-lg border text-slate-900 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 bg-white focus-visible:ring-brand-500/40';
+    'w-full rounded-lg border text-slate-900 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 bg-white focus-visible:ring-brand-500/40';
   const baseBorder = 'border-slate-200 hover:border-slate-300 focus:border-brand-400 focus:ring-brand-100';
 
   return (
@@ -80,6 +80,7 @@ export default function DebtInputs({ id, value, onChange, errors }: Props) {
               <input
                 type="text"
                 placeholder="Debt name"
+                aria-label={`Debt ${i + 1} name`}
                 value={row.name}
                 onChange={(e) => updateRow(i, 'name', e.target.value)}
                 className={`${baseInput} ${baseBorder} px-2.5 py-2 text-xs`}
@@ -95,6 +96,7 @@ export default function DebtInputs({ id, value, onChange, errors }: Props) {
                   type="text"
                   inputMode="decimal"
                   placeholder="Balance"
+                  aria-label={`Debt ${i + 1} balance in dollars`}
                   value={row.balance}
                   onChange={(e) => updateRow(i, 'balance', e.target.value)}
                   className={`${baseInput} ${baseBorder} pl-5 py-2 text-xs w-full`}
@@ -110,6 +112,7 @@ export default function DebtInputs({ id, value, onChange, errors }: Props) {
                   type="text"
                   inputMode="decimal"
                   placeholder="Rate"
+                  aria-label={`Debt ${i + 1} interest rate (APR) in percent`}
                   value={row.rate}
                   onChange={(e) => updateRow(i, 'rate', e.target.value)}
                   className={`${baseInput} ${baseBorder} px-2 py-2 text-xs pr-6 w-full`}
@@ -127,6 +130,7 @@ export default function DebtInputs({ id, value, onChange, errors }: Props) {
                   type="text"
                   inputMode="decimal"
                   placeholder="Min. payment/mo"
+                  aria-label={`Debt ${i + 1} monthly payment in dollars`}
                   value={row.payment}
                   onChange={(e) => updateRow(i, 'payment', e.target.value)}
                   className={`${baseInput} ${baseBorder} pl-5 py-2 text-xs`}
@@ -140,8 +144,8 @@ export default function DebtInputs({ id, value, onChange, errors }: Props) {
               type="button"
               onClick={() => removeRow(i)}
               disabled={debts.length <= 1}
-              className="flex-shrink-0 self-center sm:self-start p-2 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              aria-label="Remove debt"
+              className="flex-shrink-0 self-center sm:self-start p-2 rounded-md text-slate-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              aria-label={`Remove debt ${i + 1}`}
               title="Remove debt"
             >
               <Trash2 size={14} />
@@ -153,14 +157,14 @@ export default function DebtInputs({ id, value, onChange, errors }: Props) {
       <button
         type="button"
         onClick={addRow}
-        className="flex items-center justify-center gap-1.5 w-full mt-1 py-2 rounded-lg border border-dashed border-slate-300 bg-white text-sm font-semibold text-brand-600 hover:text-white hover:bg-brand-500 hover:border-brand-500 transition-all duration-200"
+        className="flex items-center justify-center gap-1.5 w-full mt-1 py-2 rounded-lg border border-dashed border-slate-300 bg-white text-sm font-semibold text-brand-600 hover:text-white hover:bg-brand-500 hover:border-brand-500 transition-colors duration-200"
       >
         <Plus size={15} strokeWidth={2.5} />
         Add Debt
       </button>
 
       {errors?.[id] && (
-        <p id={`${id}-error`} className="text-xs text-red-500" role="alert">{errors[id]}</p>
+        <p id={`${id}-error`} className="text-xs text-red-700" role="alert">{errors[id]}</p>
       )}
       {!errors?.[id] && <div className="min-h-[1.25rem]" />}
     </fieldset>

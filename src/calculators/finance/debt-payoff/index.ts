@@ -2,8 +2,9 @@ import { createElement } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import DebtPayoffPanel from './DebtPayoffPanel';
+import { parseCards, simulatePayoff } from './payoffSim';
 
-const debtPayoffSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="16" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Debt Payoff Strategies</text><text x="160" y="30" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">Same extra payment, different ordering methods</text><g transform="translate(15,38)"><line x1="25" y1="10" x2="25" y2="120" stroke="var(--svg-cbd5e1)" stroke-width="1"/><line x1="25" y1="120" x2="285" y2="120" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="20" y="14" text-anchor="end" font-size="7" fill="var(--svg-94a3b8)">$7.5K</text><text x="20" y="45" text-anchor="end" font-size="7" fill="var(--svg-94a3b8)">$5K</text><text x="20" y="78" text-anchor="end" font-size="7" fill="var(--svg-94a3b8)">$2.5K</text><text x="20" y="123" text-anchor="end" font-size="7" fill="var(--svg-94a3b8)">$0</text><line x1="25" y1="10" x2="285" y2="10" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="25" y1="45" x2="285" y2="45" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="25" y1="78" x2="285" y2="78" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><path d="M 40,12 Q 100,18 165,42 Q 210,60 250,85 Q 270,100 285,120" fill="none" stroke="var(--svg-8b5cf6)" stroke-width="2.5" stroke-linecap="round"/><path d="M 40,12 Q 80,16 130,34 Q 180,58 220,85 Q 250,103 285,120" fill="none" stroke="var(--svg-3b82f6)" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/><text x="250" y="72" font-size="8" fill="var(--svg-8b5cf6)" font-weight="bold">Avalanche</text><text x="250" y="92" font-size="8" fill="var(--svg-3b82f6)" font-weight="bold">Snowball</text></g><rect x="15" y="158" width="140" height="22" rx="4" fill="var(--svg-eff6ff)"/><text x="85" y="173" text-anchor="middle" font-size="7" fill="var(--svg-2563eb)">Snowball: wins on motivation</text><rect x="165" y="158" width="140" height="22" rx="4" fill="var(--svg-faf5ff)"/><text x="235" y="173" text-anchor="middle" font-size="7" fill="var(--svg-7c3aed)">Avalanche: wins on math</text><text x="160" y="194" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Same dollars, different order — choose what you will stick with</text></svg>';
+const debtPayoffSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="16" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Debt Payoff Strategies</text><text x="160" y="30" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">Same extra payment, different ordering methods</text><g transform="translate(15,38)"><line x1="25" y1="10" x2="25" y2="120" stroke="var(--svg-cbd5e1)" stroke-width="1"/><line x1="25" y1="120" x2="285" y2="120" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="20" y="14" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$7.5K</text><text x="20" y="45" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$5K</text><text x="20" y="78" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$2.5K</text><text x="20" y="123" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$0</text><line x1="25" y1="10" x2="285" y2="10" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="25" y1="45" x2="285" y2="45" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="25" y1="78" x2="285" y2="78" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><path d="M 40,12 Q 100,18 165,42 Q 210,60 250,85 Q 270,100 285,120" fill="none" stroke="var(--svg-8b5cf6)" stroke-width="2.5" stroke-linecap="round"/><path d="M 40,12 Q 80,16 130,34 Q 180,58 220,85 Q 250,103 285,120" fill="none" stroke="var(--svg-3b82f6)" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/><text x="250" y="72" font-size="8" fill="var(--svg-8b5cf6)" font-weight="bold">Avalanche</text><text x="250" y="92" font-size="8" fill="var(--svg-3b82f6)" font-weight="bold">Snowball</text></g><rect x="15" y="158" width="140" height="22" rx="4" fill="var(--svg-eff6ff)"/><text x="85" y="173" text-anchor="middle" font-size="7" fill="var(--svg-2563eb)">Snowball: wins on motivation</text><rect x="165" y="158" width="140" height="22" rx="4" fill="var(--svg-faf5ff)"/><text x="235" y="173" text-anchor="middle" font-size="7" fill="var(--svg-7c3aed)">Avalanche: wins on math</text><text x="160" y="194" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Same dollars, different order — choose what you will stick with</text></svg>';
 
 const debtPayoffConfig: CalculatorConfig = {
   inputs: [
@@ -152,63 +153,16 @@ const debtPayoffConfig: CalculatorConfig = {
   calculate: (values) => {
     const extraPayment = parseFloat(values.extraPayment) || 0;
 
-    const cards = [1, 2, 3].map((n) => ({
-      name: values[`card${n}name`] || `Card ${n}`,
-      balance: parseFloat(values[`card${n}balance`]) || 0,
-      rate: parseFloat(values[`card${n}rate`]) || 0,
-      min: parseFloat(values[`card${n}min`]) || 0,
-    })).filter((c) => c.balance > 0 && c.rate > 0);
+    const cards = parseCards(values);
 
     if (cards.length === 0) return [];
 
-    const simulate = (order: typeof cards) => {
-      const balances = order.map((c) => c.balance);
-      let month = 0;
-      let totalInterest = new Decimal(0);
-      const maxMonths = 600;
-
-      while (balances.some((b) => b > 0) && month < maxMonths) {
-        month++;
-        if (balances.some((b) => !Number.isFinite(b))) break;
-        // Extra pool = user's extra payment + minimums freed up by cards already paid off ("rollover")
-        let extra = extraPayment;
-        const paid: number[] = balances.map((b, i) => {
-          let minPaid = 0;
-          if (b > 0) {
-            const interest = new Decimal(b).mul(order[i].rate).div(100).div(12).toNumber();
-            totalInterest = totalInterest.plus(interest);
-            balances[i] = b + interest;
-            minPaid = Math.min(order[i].min, balances[i]);
-          }
-          extra += order[i].min - minPaid; // unused minimum (card already cleared) rolls into the pool
-          return minPaid;
-        });
-
-        // Apply the pool to cards in priority order; any leftover after a card is cleared flows to the next
-        for (let i = 0; i < balances.length && extra > 0; i++) {
-          if (balances[i] <= 0) continue;
-          const pay = Math.min(extra, balances[i] - paid[i]);
-          extra -= pay;
-          paid[i] += pay;
-        }
-
-        for (let i = 0; i < balances.length; i++) {
-          balances[i] = Math.max(0, balances[i] - paid[i]);
-        }
-      }
-
-      // Not cleared in 50 years (payments don't outrun interest) -> results would be meaningless
-      const paidOff = !balances.some((b) => b > 0);
-      return { months: month, totalInterest: totalInterest.toNumber(), paidOff };
-    };
-
-    const snowballOrder = [...cards].sort((a, b) => a.balance - b.balance);
-    const avalancheOrder = [...cards].sort((a, b) => b.rate - a.rate);
-
-    const snowball = simulate(snowballOrder);
-    const avalanche = simulate(avalancheOrder);
+    const snowball = simulatePayoff(cards, extraPayment, 'snowball');
+    const avalanche = simulatePayoff(cards, extraPayment, 'avalanche');
 
     const allPaid = snowball.paidOff && avalanche.paidOff;
+    const interestGap = snowball.totalInterest - avalanche.totalInterest; // > 0: Avalanche cheaper
+    const sameCost = Math.abs(interestGap) < 0.5; // under 50 cents: indistinguishable
     const totalDebt = cards.reduce((s, c) => s + c.balance, 0);
     const totalMin = cards.reduce((s, c) => s + c.min, 0);
 
@@ -243,8 +197,8 @@ const debtPayoffConfig: CalculatorConfig = {
         color: 'positive' as const,
         interpretation: !allPaid
           ? 'At these payments, interest outpaces what you pay, so at least one card is not cleared within 50 years. Raise the extra payment or the minimums.'
-          : snowball.totalInterest > avalanche.totalInterest
-          ? `For your ${cards.length} card${cards.length === 1 ? '' : 's'} totaling ${fmtDollar(totalDebt)}, Avalanche (highest rate first) beats Snowball by ${fmtDollar(snowball.totalInterest - avalanche.totalInterest)} in interest${avalanche.months < snowball.months ? ` and gets you debt-free ${snowball.months - avalanche.months} month${snowball.months - avalanche.months === 1 ? '' : 's'} sooner` : ''}. Snowball's smallest-first wins are better only if you need the early motivation boost.`
+          : interestGap >= 0.5
+          ? `For your ${cards.length} card${cards.length === 1 ? '' : 's'} totaling ${fmtDollar(totalDebt)}, Avalanche (highest rate first) beats Snowball by ${fmtDollar(interestGap)} in interest${avalanche.months < snowball.months ? ` and gets you debt-free ${snowball.months - avalanche.months} month${snowball.months - avalanche.months === 1 ? '' : 's'} sooner` : ''}. Snowball's smallest-first wins are better only if you need the early motivation boost.`
           : `For your balances, both strategies cost about the same — pick Snowball (smallest balance first) for the motivational quick wins.`,
       },
       {
@@ -271,11 +225,11 @@ const debtPayoffConfig: CalculatorConfig = {
         label: 'Interest Saved (Avalanche vs. Snowball)',
         value: !allPaid
           ? 'N/A (not paid off within 50 years)'
-          : snowball.totalInterest > avalanche.totalInterest
-          ? `${fmtDollar(snowball.totalInterest - avalanche.totalInterest)} saved with Avalanche`
-          : snowball.totalInterest < avalanche.totalInterest
-            ? `${fmtDollar(avalanche.totalInterest - snowball.totalInterest)} saved with Snowball`
-            : 'Both strategies cost the same',
+          : sameCost
+          ? 'Both strategies cost the same'
+          : interestGap > 0
+            ? `${fmtDollar(interestGap)} saved with Avalanche`
+            : `${fmtDollar(-interestGap)} saved with Snowball`,
         color: 'positive' as const,
       },
     ];
@@ -310,7 +264,7 @@ const debtPayoffConfig: CalculatorConfig = {
       'Visualize how the rolling minimum payment effect accelerates debt elimination as each credit card balance is paid off.',
     ],
     explanation:
-      'Studies show the Avalanche method always saves more money mathematically, but the Snowball method has a significantly higher completion rate in practice because the psychological reward of eliminating an entire card balance keeps people motivated over the long term. The "best" strategy is ultimately the one you will actually stick to. Use this calculator to quantify the trade-off: if the Avalanche saves you $200 over the Snowball but the Snowball keeps you on track for the full payoff journey, the Snowball is likely the better choice for you. The rolling minimum payment effect is the real engine of both strategies — as each card is eliminated, the freed-up minimum payment gets added to the next card, creating accelerating momentum.',
+      'Mathematically the Avalanche method always costs the least interest, but the Snowball method can be easier to stick with: research on consumer debt (see the Harvard Business Review article cited below) found that people who focus on closing out whole accounts tend to make faster progress, because the reward of eliminating a card keeps them motivated. The "best" strategy is ultimately the one you will actually stick to. Use this calculator to quantify the trade-off: if the Avalanche saves you $200 over the Snowball but the Snowball keeps you on track for the full payoff journey, the Snowball is likely the better choice for you. The rolling minimum payment effect is the real engine of both strategies — as each card is eliminated, the freed-up minimum payment gets added to the next card, creating accelerating momentum.',
     workedExamples: [
       {
         scenario: 'Sarah has three credit cards: Chase Sapphire ($4,500 balance, 22.99% APR, $85/mo min), Citi Double Cash ($2,100 balance, 19.99% APR, $45/mo min), and Capital One Quicksilver ($850 balance, 28.99% APR, $25/mo min). She can afford $200 extra per month above minimums.',
@@ -321,7 +275,7 @@ const debtPayoffConfig: CalculatorConfig = {
       {
         scenario: 'Mike only has two credit cards: $8,000 at 24% with $200 minimum, and $3,000 at 18% with $75 minimum. He can spare $150 extra each month.',
         inputs: { extraPayment: '150', card1name: 'Card A', card1balance: '8000', card1rate: '24', card1min: '200', card2name: 'Card B', card2balance: '3000', card2rate: '18', card2min: '75' },
-        result: 'Snowball pays off Card B ($3,000) first in about 15 months, freeing $75/month to attack Card A. Avalanche targets Card A first at 24% APR, saving more in interest but requiring patience before seeing a card fully eliminated.',
+        result: 'Snowball pays off Card B ($3,000) first in 15 months, freeing $75/month to attack Card A, and is debt-free in 37 months with $4,417 of interest. Avalanche targets Card A first at 24% APR, clears it in month 31 and is debt-free in 36 months with $4,022 of interest, saving about $395.',
         insight: 'Snowball pays off Card B ($3,000) first in about 15 months — giving Mike a quick win and freeing up $75/month to attack the larger $8,000 card. Avalanche targets the 24% Card A first, saving more money but requiring patience before seeing a card eliminated.',
       },
     ],
@@ -333,8 +287,8 @@ const debtPayoffConfig: CalculatorConfig = {
       'If you have a card with a very small balance (under $500), consider paying it off in full immediately, regardless of strategy. Eliminating an entire minimum payment frees cash flow instantly and provides an immediate psychological win.',
     ],
     limitations: [
-      'This calculator assumes fixed APRs, consistent minimum payment formulas, and no additional purchases on the cards being paid off. Real-world minimum payments may vary as balances change (many issuers calculate minimums as 1-2% of balance plus interest).',
-      'Cards with promotional 0% APRs are not modeled — treat those separately.',
+      'This calculator assumes fixed APRs, consistent minimum payment formulas, and no additional purchases on the cards being paid off. Real-world minimum payments may vary as balances change (many issuers calculate minimums as roughly 1% of the balance plus interest, with a fixed floor).',
+      'A 0% APR is treated as a flat 0% for the whole payoff; promotional rates that expire (and the higher rate that follows) are not modeled.',
       'The simulation caps at 600 months (50 years) and does not account for balance transfer offers, debt consolidation loans, or debt settlement negotiations.',
       'Late fees, over-limit fees, and annual card fees are not included in the calculation.',
     ],
@@ -343,8 +297,8 @@ const debtPayoffConfig: CalculatorConfig = {
       { label: 'Avalanche Priority', value: 'Highest APR first' },
       { label: 'Rollover Effect', value: 'Freed minimums attack next card' },
       { label: 'Mathematically Optimal', value: 'Avalanche always' },
-      { label: 'Psychologically Effective', value: 'Snowball (higher completion rate)' },
-      { label: 'Minimum Payment Rule', value: '1-2% of balance + interest' },
+      { label: 'Psychologically Effective', value: 'Snowball (quick wins from closing accounts)' },
+      { label: 'Minimum Payment Rule', value: 'Often ~1% of balance + interest, with a fixed floor (varies by issuer)' },
       { label: 'Credit Utilization Impact', value: 'Improves as balances drop' },
     ],
     faqs: [

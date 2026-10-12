@@ -8,6 +8,8 @@ export interface PresentValueRow {
 export interface IRRData {
   cashFlows: number[];
   irr: number | null;
+  allIrrs?: number[];
+  signChanges?: number;
   npv: number | null;
   discountRate: number | null;
   presentValues: PresentValueRow[];
@@ -17,10 +19,11 @@ export interface IRRData {
 }
 
 export const BENCHMARKS = [
-  { label: 'High-Yield Savings (~5%)', threshold: 0.05 },
-  { label: 'S&P 500 Average (~10%)', threshold: 0.10 },
-  { label: 'Typical Real Estate (8–12%)', threshold: 0.10 },
-  { label: 'Venture Capital Target (20%+)', threshold: 0.20 },
+  // Illustrative reference points, not live market data.
+  { label: 'Savings-account style return (~4%)', threshold: 0.04 },
+  { label: 'Long-run US stock market (~10% nominal)', threshold: 0.10 },
+  { label: 'Typical real-estate target (8–12%)', threshold: 0.10 },
+  { label: 'Venture capital target (20%+)', threshold: 0.20 },
 ];
 
 export function fmtCurrency(n: number, compact = false): string {

@@ -109,6 +109,7 @@ describe('estate-tax', () => {
     });
     expect(getValue(r, 'notice')).toContain('$30.00M');
     expect(getValue(r, 'federalTaxableEstate')).toContain('Below exemption');
-    near(parseMoney(getValue(r, 'stateTax')), 257400, 100);
+    // Connecticut 2026 exemption = federal $15M: (17.9M - 15M) x 12% top rate x 0.5 convention = 174,000
+    near(parseMoney(getValue(r, 'stateTax')), 174000, 100);
   });
 });

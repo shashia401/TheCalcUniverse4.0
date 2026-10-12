@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import InterestCalcPanel from './InterestCalcPanel';
+import { computeInterest } from './interestMath';
 
 const interestCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -45,9 +46,10 @@ const interestCalculatorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       min: 0,
+      max: 36500, // 100 years expressed in days
       step: 1,
       required: true,
-      helpText: 'Length of time your money will be borrowed or invested.',
+      helpText: 'Length of time your money will be borrowed or invested (months are divided by 12 and days by 365).',
     },
     {
       id: 'interestType',
@@ -84,28 +86,15 @@ const interestCalculatorConfig: CalculatorConfig = {
 
     if ([P, annualRate, timePeriod].some(isNaN) || P <= 0 || timePeriod <= 0) return [];
 
-    let t: number;
-    if (timeUnit === 'years') {
-      t = timePeriod;
-    } else if (timeUnit === 'months') {
-      t = timePeriod / 12;
-    } else {
-      t = timePeriod / 365;
+    const calc = computeInterest({ principal: P, annualRate, timeUnit, timePeriod, interestType, n });
+    if (!calc.finite) {
+      return [{ id: 'error', label: 'Notice', value: 'The result is too large to display. Shorten the time period or lower the rate.', color: 'negative' as const }];
     }
-
-    let totalAmount: number;
-    let totalInterest: number;
-    let formulaDisplay: string;
-
-    if (interestType === 'simple') {
-      totalInterest = P * annualRate * t;
-      totalAmount = P + totalInterest;
-      formulaDisplay = `A = ${P.toLocaleString(undefined)} × (1 + ${(annualRate * 100).toFixed(2)}% × ${t.toFixed(4)}) = $${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    } else {
-      totalAmount = P * Math.pow(1 + annualRate / n, n * t);
-      totalInterest = totalAmount - P;
-      formulaDisplay = `A = ${P.toLocaleString(undefined)} × (1 + ${(annualRate / n * 100).toFixed(4)}%)^${(n * t).toFixed(1)} = $${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
+    const { t, totalAmount, totalInterest } = calc;
+    const money = (x: number) => x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formulaDisplay = interestType === 'simple'
+      ? `A = ${P.toLocaleString(undefined)} × (1 + ${(annualRate * 100).toFixed(2)}% × ${t.toFixed(4)}) = $${money(totalAmount)}`
+      : `A = ${P.toLocaleString(undefined)} × (1 + ${(annualRate / n * 100).toFixed(4)}%)^${(n * t).toFixed(1)} = $${money(totalAmount)}`;
 
     const growthMultiple = totalAmount / P;
     const fmt = (n: number) =>
@@ -146,8 +135,7 @@ const interestCalculatorConfig: CalculatorConfig = {
     ];
 
     if (interestType === 'compound') {
-      const simpleInterest = P * annualRate * t;
-      const compoundBonus = totalInterest - simpleInterest;
+      const compoundBonus = totalInterest - calc.simpleInterest;
       if (compoundBonus > 0.01) {
         results.push({
           id: 'compoundBonus',
@@ -158,9 +146,7 @@ const interestCalculatorConfig: CalculatorConfig = {
       }
     }
 
-    const effectiveAnnualRate = interestType === 'simple'
-      ? annualRate * 100
-      : (Math.pow(1 + annualRate / n, n) - 1) * 100;
+    const effectiveAnnualRate = calc.effectiveAnnualRate;
 
     results.push({
       id: 'effectiveRate',
@@ -178,7 +164,7 @@ const interestCalculatorConfig: CalculatorConfig = {
   educational: {
     formula: 'Simple: A = P(1 + rt) | Compound: A = P(1 + r/n)^(nt)',
     diagram: {
-      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="6"/><text x="160" y="18" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-1e293b)">Simple vs. Compound Interest</text><text x="160" y="34" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$10,000 invested at 7% over 30 years</text><g transform="translate(30,36)"><line x1="0" y1="100" x2="260" y2="100" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="0" y1="70" x2="260" y2="70" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="0" y1="40" x2="260" y2="40" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="0" y1="10" x2="260" y2="10" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="0" y1="100" x2="0" y2="0" stroke="var(--svg-cbd5e1)" stroke-width="0.5"/><line x1="0" y1="100" x2="260" y2="30" stroke="var(--svg-ef4444)" stroke-width="2.5" stroke-linecap="round"/><text x="265" y="28" font-size="8" fill="var(--svg-ef4444)" font-weight="bold">Simple</text><path d="M 0,100 Q 30,95 60,80 Q 100,60 140,35 Q 180,18 220,8 Q 245,3 260,2" fill="none" stroke="var(--svg-3b82f6)" stroke-width="2.5" stroke-linecap="round"/><text x="265" y="4" font-size="8" fill="var(--svg-3b82f6)" font-weight="bold">Compound</text><text x="0" y="114" text-anchor="middle" font-size="7" fill="var(--svg-94a3b8)">0</text><text x="87" y="114" text-anchor="middle" font-size="7" fill="var(--svg-94a3b8)">10yr</text><text x="173" y="114" text-anchor="middle" font-size="7" fill="var(--svg-94a3b8)">20yr</text><text x="260" y="114" text-anchor="middle" font-size="7" fill="var(--svg-94a3b8)">30yr</text></g><rect x="30" y="160" width="260" height="30" rx="6" fill="var(--svg-f1f5f9)"/><text x="85" y="179" text-anchor="middle" font-size="9" fill="var(--svg-ef4444)">Simple: $31,000</text><text x="200" y="179" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">Compound: $76,123</text><text x="160" y="196" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">2.5× more with compounding — the eighth wonder of the world</text></svg>',
+      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="6"/><text x="160" y="18" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-1e293b)">Simple vs. Compound Interest</text><text x="160" y="34" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">$10,000 invested at 7% over 30 years</text><g transform="translate(30,36)"><line x1="0" y1="100" x2="260" y2="100" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="0" y1="70" x2="260" y2="70" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="0" y1="40" x2="260" y2="40" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="0" y1="10" x2="260" y2="10" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="0" y1="100" x2="0" y2="0" stroke="var(--svg-cbd5e1)" stroke-width="0.5"/><line x1="0" y1="100" x2="260" y2="30" stroke="var(--svg-ef4444)" stroke-width="2.5" stroke-linecap="round"/><text x="265" y="28" font-size="8" fill="var(--svg-ef4444)" font-weight="bold">Simple</text><path d="M 0,100 Q 30,95 60,80 Q 100,60 140,35 Q 180,18 220,8 Q 245,3 260,2" fill="none" stroke="var(--svg-3b82f6)" stroke-width="2.5" stroke-linecap="round"/><text x="265" y="4" font-size="8" fill="var(--svg-3b82f6)" font-weight="bold">Compound</text><text x="0" y="114" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">0</text><text x="87" y="114" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">10yr</text><text x="173" y="114" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">20yr</text><text x="260" y="114" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">30yr</text></g><rect x="30" y="160" width="260" height="30" rx="6" fill="var(--svg-f1f5f9)"/><text x="85" y="179" text-anchor="middle" font-size="9" fill="var(--svg-ef4444)">Simple: $31,000</text><text x="200" y="179" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">Compound: $76,123</text><text x="160" y="196" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">2.5× more with compounding</text></svg>',
       alt: 'Line chart comparing simple interest (red, linear) versus compound interest (blue, exponential) growth of $10,000 at 7% over 30 years',
       caption: 'Simple interest grows linearly on the principal only; compound interest earns interest on interest, creating exponential growth that accelerates over time',
     },
@@ -205,7 +191,7 @@ const interestCalculatorConfig: CalculatorConfig = {
       'Determine the effective annual rate to compare financial products with different compounding frequencies on an apples-to-apples basis.',
     ],
     explanation:
-      'Simple interest is straightforward: you pay or earn interest only on the original principal. Car loans and some personal loans use simple interest. The total cost is predictable and linear. Compound interest is far more powerful: you earn interest on previously earned interest, causing exponential growth. Savings accounts, investments, mortgages, and credit cards all use compound interest. The more frequently interest compounds, the larger the effective annual rate — daily compounding yields more than annual compounding at the same stated rate. The compound advantage (shown as "Interest Earned on Interest" in the results) quantifies exactly how much extra you earn from compounding versus simple interest. This difference is small in year one but grows dramatically over time, reflecting Albert Einstein\'s famous characterization of compound interest as the "eighth wonder of the world."',
+      'Simple interest is straightforward: you pay or earn interest only on the original principal. Car loans and some personal loans use simple interest. The total cost is predictable and linear. Compound interest is far more powerful: you earn interest on previously earned interest, causing exponential growth. Savings accounts, investments, mortgages, and credit cards all use compound interest. The more frequently interest compounds, the larger the effective annual rate — daily compounding yields more than annual compounding at the same stated rate. The compound advantage (shown as "Interest Earned on Interest" in the results) quantifies exactly how much extra you earn from compounding versus simple interest. This difference is small in year one but grows dramatically over time.',
     faqs: [
       {
         question: 'Which is better — simple or compound interest?',

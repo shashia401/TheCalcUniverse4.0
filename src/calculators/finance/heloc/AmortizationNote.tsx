@@ -22,18 +22,18 @@ export function AmortizationNote({ data }: { data: HELOCData }) {
       <div className="p-4 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg bg-blue-50 border border-blue-200 px-3 py-3 text-center">
-            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wide mb-1">
+            <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wide mb-1">
               Draw Period (Yrs 1&ndash;10)
             </p>
             <p className="text-lg font-black text-blue-700">${fmt(interestOnlyPayment)}/mo</p>
-            <p className="text-[10px] text-blue-400 mt-0.5">Interest-only</p>
+            <p className="text-[10px] text-blue-700 mt-0.5">Interest-only</p>
           </div>
           <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-3 text-center">
-            <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wide mb-1">
+            <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wide mb-1">
               Repayment Phase (Yrs 11&ndash;30)
             </p>
             <p className="text-lg font-black text-amber-700">${fmt(repayPayment)}/mo</p>
-            <p className="text-[10px] text-amber-500 mt-0.5">20-yr fully amortizing</p>
+            <p className="text-[10px] text-amber-800 mt-0.5">20-yr fully amortizing</p>
           </div>
         </div>
 

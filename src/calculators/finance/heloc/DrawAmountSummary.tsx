@@ -30,7 +30,7 @@ export function DrawAmountSummary({ data }: { data: HELOCData }) {
             <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide mb-1">
               Your Draw
             </p>
-            <p className="text-xl font-black text-blue-600">${fmt(actualDraw)}</p>
+            <p className="text-xl font-black text-blue-700">${fmt(actualDraw)}</p>
           </div>
           <div className="px-4 py-4 text-center">
             <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide mb-1">
@@ -48,7 +48,7 @@ export function DrawAmountSummary({ data }: { data: HELOCData }) {
         </div>
         <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 rounded-full transition-all"
+            className="h-full bg-blue-500 rounded-full"
             style={{ width: `${Math.min(drawPct, 100)}%` }}
           />
         </div>
@@ -57,11 +57,11 @@ export function DrawAmountSummary({ data }: { data: HELOCData }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3 text-center">
           <p className="text-[10px] text-slate-500 font-semibold mb-1">Monthly Interest</p>
-          <p className="text-base font-black text-amber-600">${fmt(monthlyInterestOnDraw)}</p>
+          <p className="text-base font-black text-amber-800">${fmt(monthlyInterestOnDraw)}</p>
         </div>
         <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3 text-center">
           <p className="text-[10px] text-slate-500 font-semibold mb-1">Annual Interest</p>
-          <p className="text-base font-black text-red-500">${fmt(annualCost)}</p>
+          <p className="text-base font-black text-red-700">${fmt(annualCost)}</p>
         </div>
         <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3 text-center">
           <p className="text-[10px] text-slate-500 font-semibold mb-1">HELOC Rate</p>

@@ -8,11 +8,14 @@ export type FilingStatus = 'single' | 'mfj' | 'mfs' | 'hoh';
 export const FEDERAL_BRACKETS_2025 = FEDERAL_BRACKETS;
 export const STANDARD_DEDUCTIONS_2025 = STANDARD_DEDUCTION;
 
+// Named *_2025 for import stability; the values are the 2026 limits (IRS Notice 2025-67).
 export const RETIREMENT_LIMITS_2025 = {
-  traditional401k: 23500,
-  traditionalIRA: 7000,
-  catchUp401k: 7500,
-  catchUpIRA: 1000,
+  traditional401k: 24500,
+  traditionalIRA: 7500,
+  catchUp401k: 8000,
+  /** Ages 60-63 (SECURE 2.0 super catch-up) replaces the regular catch-up */
+  superCatchUp401k: 11250,
+  catchUpIRA: 1100,
 };
 
 // Social Security wage base, rates, and the single/mfj additional-Medicare
@@ -37,6 +40,8 @@ export interface StateRate {
   noIncomeTax?: boolean;
 }
 
+// Flat rates are the 2026 rates (Tax Foundation, as of Jan 1 2026). States marked 'graduated' use a rough
+// effective rate for a typical middle income, which is only an approximation of the real brackets.
 export const STATE_RATES_2025: Record<string, StateRate> = {
   AL: { name: 'Alabama', rate: 'graduated', effectiveRate: 0.04 },
   AK: { name: 'Alaska', rate: 0, noIncomeTax: true },
@@ -47,21 +52,21 @@ export const STATE_RATES_2025: Record<string, StateRate> = {
   CT: { name: 'Connecticut', rate: 'graduated', effectiveRate: 0.05 },
   DE: { name: 'Delaware', rate: 'graduated', effectiveRate: 0.052 },
   FL: { name: 'Florida', rate: 0, noIncomeTax: true },
-  GA: { name: 'Georgia', rate: 0.0549 },
+  GA: { name: 'Georgia', rate: 0.0519 },
   HI: { name: 'Hawaii', rate: 'graduated', effectiveRate: 0.072 },
-  ID: { name: 'Idaho', rate: 0.058 },
+  ID: { name: 'Idaho', rate: 0.053 },
   IL: { name: 'Illinois', rate: 0.0495 },
-  IN: { name: 'Indiana', rate: 0.0305 },
+  IN: { name: 'Indiana', rate: 0.0295 },
   IA: { name: 'Iowa', rate: 0.038 },
   KS: { name: 'Kansas', rate: 'graduated', effectiveRate: 0.049 },
-  KY: { name: 'Kentucky', rate: 0.04 },
-  LA: { name: 'Louisiana', rate: 'graduated', effectiveRate: 0.035 },
+  KY: { name: 'Kentucky', rate: 0.035 },
+  LA: { name: 'Louisiana', rate: 0.03 },
   ME: { name: 'Maine', rate: 'graduated', effectiveRate: 0.055 },
   MD: { name: 'Maryland', rate: 'graduated', effectiveRate: 0.049 },
   MA: { name: 'Massachusetts', rate: 0.05 },
   MI: { name: 'Michigan', rate: 0.0425 },
   MN: { name: 'Minnesota', rate: 'graduated', effectiveRate: 0.063 },
-  MS: { name: 'Mississippi', rate: 0.047 },
+  MS: { name: 'Mississippi', rate: 0.04 },
   MO: { name: 'Missouri', rate: 'graduated', effectiveRate: 0.047 },
   MT: { name: 'Montana', rate: 'graduated', effectiveRate: 0.054 },
   NE: { name: 'Nebraska', rate: 'graduated', effectiveRate: 0.053 },
@@ -70,9 +75,9 @@ export const STATE_RATES_2025: Record<string, StateRate> = {
   NJ: { name: 'New Jersey', rate: 'graduated', effectiveRate: 0.057 },
   NM: { name: 'New Mexico', rate: 'graduated', effectiveRate: 0.049 },
   NY: { name: 'New York', rate: 'graduated', effectiveRate: 0.062 },
-  NC: { name: 'North Carolina', rate: 0.0425 },
+  NC: { name: 'North Carolina', rate: 0.0399 },
   ND: { name: 'North Dakota', rate: 'graduated', effectiveRate: 0.018 },
-  OH: { name: 'Ohio', rate: 'graduated', effectiveRate: 0.035 },
+  OH: { name: 'Ohio', rate: 0.0275 },
   OK: { name: 'Oklahoma', rate: 'graduated', effectiveRate: 0.044 },
   OR: { name: 'Oregon', rate: 'graduated', effectiveRate: 0.077 },
   PA: { name: 'Pennsylvania', rate: 0.0307 },
@@ -81,7 +86,7 @@ export const STATE_RATES_2025: Record<string, StateRate> = {
   SD: { name: 'South Dakota', rate: 0, noIncomeTax: true },
   TN: { name: 'Tennessee', rate: 0, noIncomeTax: true },
   TX: { name: 'Texas', rate: 0, noIncomeTax: true },
-  UT: { name: 'Utah', rate: 0.0465 },
+  UT: { name: 'Utah', rate: 0.045 },
   VT: { name: 'Vermont', rate: 'graduated', effectiveRate: 0.054 },
   VA: { name: 'Virginia', rate: 'graduated', effectiveRate: 0.049 },
   WA: { name: 'Washington', rate: 0, noIncomeTax: true },
@@ -102,6 +107,48 @@ export function calcFederalTax(taxableIncome: number, status: FilingStatus): { t
     if (taxableIncome > bracket.min) marginalRate = bracket.rate;
   }
   return { tax, marginalRate };
+}
+
+export interface IncomeTaxInput {
+  gross: number;
+  status: FilingStatus;
+  stateCode: string;
+  retirement401k: number;
+  health: number;
+  otherPreTax: number;
+}
+
+/** All figures behind the income-tax result rows and panel (single source of truth). */
+export function computeIncomeTax(i: IncomeTaxInput) {
+  const { gross, status, stateCode, retirement401k, health, otherPreTax } = i;
+  // 401(k) deferrals reduce income tax but NOT FICA wages; Section 125 health premiums and payroll HSA/FSA reduce both.
+  const ficaWages = Math.max(0, gross - health - otherPreTax);
+  const federalAGI = Math.max(0, gross - retirement401k - health - otherPreTax);
+  const standardDeduction = STANDARD_DEDUCTIONS_2025[status];
+  const taxableIncome = Math.max(0, federalAGI - standardDeduction);
+
+  const { tax: federalTax, marginalRate } = calcFederalTax(taxableIncome, status);
+  const { ss, medicare, additionalMedicare } = calcFICA(ficaWages, status);
+  const ficaTotal = ss + medicare + additionalMedicare;
+
+  const stateInfo = STATE_RATES_2025[stateCode];
+  const stateRate = stateInfo?.noIncomeTax
+    ? 0
+    : typeof stateInfo?.rate === 'number' && stateInfo.rate > 0
+    ? stateInfo.rate
+    : stateInfo?.effectiveRate || 0;
+  const stateTax = federalAGI * stateRate;
+
+  const preTaxTotal = retirement401k + health + otherPreTax;
+  const totalTax = federalTax + ficaTotal + stateTax;
+  const netPay = gross - totalTax - preTaxTotal;
+  return {
+    ficaWages, federalAGI, standardDeduction, taxableIncome, federalTax, marginalRate,
+    ss, medicare, additionalMedicare, ficaTotal, stateInfo, stateRate, stateTax,
+    preTaxTotal, totalTax, netPay,
+    effectiveRate: (federalTax / Math.max(gross, 1)) * 100,
+    totalEffectiveRate: (totalTax / Math.max(gross, 1)) * 100,
+  };
 }
 
 export function calcFICA(wages: number, status: FilingStatus): { ss: number; medicare: number; additionalMedicare: number } {
