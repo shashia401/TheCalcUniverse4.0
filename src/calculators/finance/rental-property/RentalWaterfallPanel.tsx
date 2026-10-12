@@ -45,8 +45,8 @@ function WaterfallRow({ label, amount, maxAmount, type, isPositive }: WaterfallR
     valueColor = 'text-emerald-700 font-bold';
   } else if (type === 'reduction') {
     barColor = 'bg-red-400';
-    labelColor = 'text-red-600';
-    valueColor = 'text-red-600 font-bold';
+    labelColor = 'text-red-700';
+    valueColor = 'text-red-700 font-bold';
   } else if (type === 'intermediate') {
     barColor = 'bg-slate-400';
     labelColor = 'text-slate-600 font-medium';
@@ -351,7 +351,7 @@ export default function RentalWaterfallPanel({ values, results }: Props) {
               </div>
               <div className="flex justify-between text-[9px] text-slate-500 mt-1">
                 <span>0%</span>
-                <span className={onePercentPasses ? 'text-emerald-500 font-bold' : 'text-red-400 font-bold'}>
+                <span className={onePercentPasses ? 'text-emerald-700 font-bold' : 'text-red-700 font-bold'}>
                   1% threshold
                 </span>
                 <span>2%+</span>
@@ -376,11 +376,11 @@ export default function RentalWaterfallPanel({ values, results }: Props) {
               <tbody>
                 {[
                   { label: 'Gross Monthly Rent', value: grossRent, class: 'text-emerald-600' },
-                  { label: '− Vacancy Loss', value: -vacancyLossValue, class: 'text-red-500' },
+                  { label: '− Vacancy Loss', value: -vacancyLossValue, class: 'text-red-700' },
                   { label: '= Effective Gross Rent', value: effectiveGrossRent, class: 'text-slate-700', bold: true },
-                  { label: '− Operating Expenses', value: -operatingExpenses, class: 'text-red-500' },
+                  { label: '− Operating Expenses', value: -operatingExpenses, class: 'text-red-700' },
                   { label: '= Net Operating Income (NOI)', value: noi, class: 'text-blue-600', bold: true },
-                  { label: '− Mortgage / Debt Service', value: -mortgagePayment, class: 'text-red-500' },
+                  { label: '− Mortgage / Debt Service', value: -mortgagePayment, class: 'text-red-700' },
                   { label: '= Net Cash Flow', value: netCashFlow, class: netCashFlow >= 0 ? 'text-emerald-600' : 'text-red-600', bold: true },
                 ].map((row, i) => (
                   <tr key={`item-${i}`} className={`border-b border-slate-100 last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} ${row.bold ? 'border-t-2 border-slate-200' : ''}`}>

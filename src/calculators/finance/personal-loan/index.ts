@@ -3,6 +3,23 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { pmt } from '../../../utils/financial';
 import AmortizationPanel from '../../../components/calculator/AmortizationPanel';
 
+/**
+ * Annual rate (APR-style, nominal /12) at which `n` payments of `payment` are worth exactly `cashReceived`
+ * today. This is the borrower's true cost of credit once an origination fee shrinks the cash received.
+ */
+function effectiveAnnualRate(payment: number, n: number, cashReceived: number): number {
+  const pv = (r: number) => (r === 0 ? payment * n : (payment * (1 - Math.pow(1 + r, -n))) / r);
+  if (pv(0) <= cashReceived) return 0;
+  let lo = 0;
+  let hi = 1; // 100% per month is far above any real loan
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    if (pv(mid) > cashReceived) lo = mid;
+    else hi = mid;
+  }
+  return lo * 12;
+}
+
 const personalLoanConfig: CalculatorConfig = {
   inputs: [
     {
@@ -62,6 +79,7 @@ const personalLoanConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '3',
       helpText: 'Enter the percentage (e.g., 3 for 3%) or flat dollar amount.',
+      min: 0,
       step: 0.1,
     },
     {
@@ -188,8 +206,14 @@ const personalLoanConfig: CalculatorConfig = {
     const totalPaid = monthlyPayment * n;
     const totalInterest = totalPaid - actualLoanBalance;
 
-    // Total cost including fee when fee was deducted (not rolled in)
-    const totalCostIncFee = totalPaid + (feeHandling === 'deducted' ? originationFeeAmount : 0);
+    // A fee larger than the loan leaves no cash to borrow.
+    if (actualCashReceived <= 0) return [];
+
+    // All payments over the term. A deducted fee is already inside this (you repay the full amount but
+    // receive less), so it is NOT added again. Cost of borrowing = what you repay minus the cash you got.
+    const totalCostIncFee = totalPaid;
+    const costOfBorrowing = totalPaid - actualCashReceived;
+    const effectiveApr = effectiveAnnualRate(monthlyPayment, n, actualCashReceived) * 100;
 
     const fmt = (num: number) =>
       num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -251,9 +275,21 @@ const personalLoanConfig: CalculatorConfig = {
       },
       {
         id: 'totalCostIncFee',
-        label: 'Total Cost of Loan (Payments + Fee)',
+        label: 'Total Repaid (All Payments, Fee Included)',
         value: `$${fmt(totalCostIncFee)}`,
         color: 'negative' as const,
+      },
+      {
+        id: 'costOfBorrowing',
+        label: 'Cost of Borrowing (Interest + Fee)',
+        value: `$${fmt(costOfBorrowing)}`,
+        color: 'negative' as const,
+      },
+      {
+        id: 'effectiveApr',
+        label: 'Effective APR (including fee)',
+        value: `${effectiveApr.toFixed(2)}%`,
+        color: effectiveApr > interestRate + 0.005 ? 'negative' as const : 'neutral' as const,
       },
       {
         id: 'loanTermResult',
@@ -356,7 +392,7 @@ const personalLoanConfig: CalculatorConfig = {
       {
         question: 'How does an origination fee affect my effective APR?',
         answer:
-          'When an origination fee is deducted from your loan proceeds, you receive less money than you borrowed but still must repay the full loan amount plus interest. This effectively raises your true cost of borrowing. For example, a $20,000 loan at 11.5% APR with a 3% origination fee deducted means you receive only $19,400 but must repay the full $20,000 plus interest — raising your effective APR to approximately 13.5%. This calculator accounts for this and shows you the real cost.',
+          'When an origination fee is deducted from your loan proceeds, you receive less money than you borrowed but still must repay the full loan amount plus interest. This effectively raises your true cost of borrowing. For example, a $20,000 loan at 11.5% APR with a 3% origination fee deducted means you receive only $19,400 but must repay the full $20,000 plus interest — raising your effective APR to about 13.6% over a 36-month term (about 12.8% over 60 months). The calculator shows this as the Effective APR line.',
       },
       {
         question: 'Does my credit score affect my personal loan rate?',

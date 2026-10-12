@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RentalWaterfallPanel from './RentalWaterfallPanel';
 import { STATE_TAX_RATES } from './utils';
+import { pmt } from '../../../utils/financial';
+import { numOr } from '../rent-vs-buy/model';
 
 const rentalPropertyConfig: CalculatorConfig = {
   inputs: [
@@ -85,7 +87,7 @@ const rentalPropertyConfig: CalculatorConfig = {
       max: 100,
       step: 1,
       required: false,
-      helpText: 'Expected percentage of time the property sits vacant (national average ~5–8%)',
+      helpText: 'Expected percentage of time the property sits vacant. Blank uses 5%; enter 0 for none.',
     },
     {
       id: 'propertyTaxState',
@@ -93,59 +95,10 @@ const rentalPropertyConfig: CalculatorConfig = {
       type: 'select',
       required: false,
       helpText: 'Select a state to auto-fill the average effective property tax rate. Select "Custom" to enter manually below.',
-      options: [
-        { label: '— Custom (enter below)', value: 'custom' },
-        { label: 'Alabama (0.41%)', value: 'al' },
-        { label: 'Alaska (0.96%)', value: 'ak' },
-        { label: 'Arizona (0.66%)', value: 'az' },
-        { label: 'Arkansas (0.62%)', value: 'ar' },
-        { label: 'California (0.76%)', value: 'ca' },
-        { label: 'Colorado (0.55%)', value: 'co' },
-        { label: 'Connecticut (1.79%)', value: 'ct' },
-        { label: 'Delaware (0.58%)', value: 'de' },
-        { label: 'Florida (0.81%)', value: 'fl' },
-        { label: 'Georgia (0.81%)', value: 'ga' },
-        { label: 'Hawaii (0.31%)', value: 'hi' },
-        { label: 'Idaho (0.69%)', value: 'id' },
-        { label: 'Illinois (1.95%)', value: 'il' },
-        { label: 'Indiana (0.76%)', value: 'in' },
-        { label: 'Iowa (1.32%)', value: 'ia' },
-        { label: 'Kansas (1.32%)', value: 'ks' },
-        { label: 'Kentucky (0.84%)', value: 'ky' },
-        { label: 'Louisiana (0.53%)', value: 'la' },
-        { label: 'Maine (1.28%)', value: 'me' },
-        { label: 'Maryland (1.02%)', value: 'md' },
-        { label: 'Massachusetts (1.12%)', value: 'ma' },
-        { label: 'Michigan (1.43%)', value: 'mi' },
-        { label: 'Minnesota (1.11%)', value: 'mn' },
-        { label: 'Mississippi (0.65%)', value: 'ms' },
-        { label: 'Missouri (0.93%)', value: 'mo' },
-        { label: 'Montana (0.78%)', value: 'mt' },
-        { label: 'Nebraska (1.49%)', value: 'ne' },
-        { label: 'Nevada (0.54%)', value: 'nv' },
-        { label: 'New Hampshire (1.53%)', value: 'nh' },
-        { label: 'New Jersey (2.13%)', value: 'nj' },
-        { label: 'New Mexico (0.66%)', value: 'nm' },
-        { label: 'New York (1.40%)', value: 'ny' },
-        { label: 'North Carolina (0.72%)', value: 'nc' },
-        { label: 'North Dakota (0.95%)', value: 'nd' },
-        { label: 'Ohio (1.40%)', value: 'oh' },
-        { label: 'Oklahoma (0.81%)', value: 'ok' },
-        { label: 'Oregon (0.93%)', value: 'or' },
-        { label: 'Pennsylvania (1.31%)', value: 'pa' },
-        { label: 'Rhode Island (1.33%)', value: 'ri' },
-        { label: 'South Carolina (0.55%)', value: 'sc' },
-        { label: 'South Dakota (1.24%)', value: 'sd' },
-        { label: 'Tennessee (0.65%)', value: 'tn' },
-        { label: 'Texas (1.63%)', value: 'tx' },
-        { label: 'Utah (0.60%)', value: 'ut' },
-        { label: 'Vermont (1.70%)', value: 'vt' },
-        { label: 'Virginia (0.78%)', value: 'va' },
-        { label: 'Washington (0.91%)', value: 'wa' },
-        { label: 'West Virginia (0.60%)', value: 'wv' },
-        { label: 'Wisconsin (1.55%)', value: 'wi' },
-        { label: 'Wyoming (0.57%)', value: 'wy' },
-      ],
+      options: Object.entries(STATE_TAX_RATES).map(([value, st]) => ({
+        value,
+        label: value === 'custom' ? '— Custom (enter below)' : `${st.label} (${(st.rate * 100).toFixed(2)}%)`,
+      })),
     },
     {
       id: 'propertyTax',
@@ -216,7 +169,7 @@ const rentalPropertyConfig: CalculatorConfig = {
     const annualRate = parseFloat(values.interestRate) / 100;
     const years = parseFloat(values.loanTerm || '30');
     const monthlyRent = parseFloat(values.monthlyRent);
-    const vacancyRate = parseFloat(values.vacancyRate) / 100 || 0.05;
+    const vacancyRate = numOr(values.vacancyRate, 5) / 100; // blank -> 5%, an explicit 0 stays 0
 
     // State-based property tax: if state is selected (not custom), auto-calculate
     const stateKey = values.propertyTaxState || 'custom';
@@ -234,26 +187,18 @@ const rentalPropertyConfig: CalculatorConfig = {
     const annualInsurance = parseFloat(values.insurance) || 0;
     const monthlyHOA = parseFloat(values.hoaFees) || 0;
     const annualHOA = monthlyHOA * 12;
-    const maintenancePct = parseFloat(values.maintenancePct) / 100 || 0.10;
+    const maintenancePct = numOr(values.maintenancePct, 10) / 100; // blank -> 10%, an explicit 0 stays 0
     const mgmtPct = parseFloat(values.propertyMgmtPct) / 100 || 0;
 
     if (isNaN(purchasePrice) || isNaN(monthlyRent) || isNaN(annualRate) || purchasePrice <= 0 || monthlyRent <= 0) return [];
+    if (downPayment > purchasePrice) return []; // cannot put down more than the price
 
     const loanAmount = purchasePrice - downPayment;
     const totalCashInvested = downPayment + closingCosts;
     const monthlyRate = annualRate / 12;
     const numPayments = years * 12;
 
-    let monthlyMortgage = 0;
-    if (loanAmount > 0) {
-      if (monthlyRate === 0) {
-        monthlyMortgage = loanAmount / numPayments;
-      } else {
-        monthlyMortgage =
-          (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments))) /
-          (Math.pow(1 + monthlyRate, numPayments) - 1);
-      }
-    }
+    const monthlyMortgage = loanAmount > 0 ? pmt(loanAmount, monthlyRate, numPayments) : 0;
 
     const annualGrossRent = monthlyRent * 12;
     const annualVacancyLoss = annualGrossRent * vacancyRate;
@@ -391,7 +336,7 @@ const rentalPropertyConfig: CalculatorConfig = {
       'Determine the minimum rent needed to cover all ownership costs and generate your target monthly profit margin.',
     ],
     explanation:
-      'A profitable rental property should generate positive monthly cash flow after all expenses and mortgage payments. Property taxes vary enormously by market — Austin TX averages ~2.2% while Michigan averages ~1.4% of assessed value. HOA fees are especially important for condos and can range from $100 to $1,000+/month. The cash flow waterfall shows exactly where each dollar of rent goes, from gross income down through vacancy, operating expenses, and debt service to your net cash flow.',
+      'A profitable rental property should generate positive monthly cash flow after all expenses and mortgage payments. Property taxes vary enormously by market — the state averages in the dropdown run from about 0.3% of value in Hawaii to roughly 2% in New Jersey and Illinois. HOA fees are especially important for condos and can range from $100 to $1,000+/month. The cash flow waterfall shows exactly where each dollar of rent goes, from gross income down through vacancy, operating expenses, and debt service to your net cash flow.',
     faqs: [
       {
         question: 'What is a good cap rate for a rental property?',
@@ -458,7 +403,7 @@ const rentalPropertyConfig: CalculatorConfig = {
 
     proTips: [
       'The 1% rule is a quick filter: monthly rent should be at least 1% of the purchase price. A $350K property should rent for $3,500+/month. Most properties fail this in expensive markets, so use it as a screening tool, not a hard rule.',
-      'HOA fees are the silent cash-flow killer. A $400/month HOA requires roughly $50,000 more in rent (at an 8% cap rate equivalent) to generate the same return. Always check HOA financials and reserve studies before buying a condo.',
+      'HOA fees are the silent cash-flow killer. A $400/month HOA costs $4,800 a year, which at an 8% cap rate is the same drag on value as about $60,000 of purchase price. Always check HOA financials and reserve studies before buying a condo.',
       'Self-managing boosts your cash-on-cash return by 1–3 percentage points — but factor in the value of your time. At 8% management on $2,500 rent, you are paying $200/month to avoid midnight repair calls. Many investors start self-managing and switch to professional management after 2-3 properties.',
       'Run this calculator with multiple vacancy and maintenance scenarios. A 5% vacancy rate assumes roughly 2.5 weeks of vacancy per year — realistic in strong markets but optimistic in weaker ones. Stress-test with 8-10% vacancy and 15% maintenance to see if the deal still works.',
     ],
@@ -470,7 +415,7 @@ const rentalPropertyConfig: CalculatorConfig = {
       { label: 'Lender DSCR Minimum', value: '1.20–1.25x' },
       { label: 'Good GRM', value: 'Under 12x (lower is better)' },
       { label: 'Typical Down Payment', value: '20–25% for investment property' },
-      { label: 'Prop Tax Range', value: '0.3% (HI) to 2.5% (NJ)' },
+      { label: 'Prop Tax Range (state averages)', value: '0.3% (HI) to 2.1% (NJ)' },
     ],
 
     limitations: [

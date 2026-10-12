@@ -1,6 +1,13 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PaymentCalcPanel from './PaymentCalcPanel';
+import { pmt } from '../../../utils/financial';
+
+/** Longest payoff the calculator will describe: 50 years of monthly payments. */
+const MAX_TERM_MONTHS = 600;
+/** Present value of a level monthly payment: how much a payment of M supports over n months. */
+const pvOfPayments = (M: number, monthlyRate: number, n: number) =>
+  monthlyRate === 0 ? M * n : (M * (1 - Math.pow(1 + monthlyRate, -n))) / monthlyRate;
 
 const paymentCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -86,12 +93,8 @@ const paymentCalculatorConfig: CalculatorConfig = {
 
       const n = termUnit === 'years' ? Math.round(termRaw * 12) : Math.round(termRaw);
       if (n < 1) return []; // term rounds to zero payments
-      let M: number;
-      if (monthlyRate === 0) {
-        M = P / n;
-      } else {
-        M = (P * (monthlyRate * Math.pow(1 + monthlyRate, n))) / (Math.pow(1 + monthlyRate, n) - 1);
-      }
+      if (n > MAX_TERM_MONTHS) return [];
+      const M = pmt(P, monthlyRate, n);
 
       const totalPaid = M * n;
       const totalInterest = totalPaid - P;
@@ -139,13 +142,8 @@ const paymentCalculatorConfig: CalculatorConfig = {
       if ([M, termRaw].some(isNaN) || M <= 0 || termRaw <= 0) return [];
 
       const n = termUnit === 'years' ? Math.round(termRaw * 12) : Math.round(termRaw);
-      if (n < 1) return []; // term rounds to zero payments
-      let P: number;
-      if (monthlyRate === 0) {
-        P = M * n;
-      } else {
-        P = (M * (Math.pow(1 + monthlyRate, n) - 1)) / (monthlyRate * Math.pow(1 + monthlyRate, n));
-      }
+      if (n < 1 || n > MAX_TERM_MONTHS) return []; // term rounds to zero payments, or is unrealistically long
+      const P = pvOfPayments(M, monthlyRate, n);
 
       const totalPaid = M * n;
       const totalInterest = totalPaid - P;
@@ -180,9 +178,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
           id: 'increaseBy50',
           label: `If You Pay $${fmtInt(M + 50)}/month (+$50) You Can Borrow`,
           value: (() => {
-            const extraP = monthlyRate === 0
-              ? (M + 50) * n
-              : ((M + 50) * (Math.pow(1 + monthlyRate, n) - 1)) / (monthlyRate * Math.pow(1 + monthlyRate, n));
+            const extraP = pvOfPayments(M + 50, monthlyRate, n);
             return `$${fmt(extraP)} — $${fmt(extraP - P)} more`;
           })(),
           color: 'positive' as const,
@@ -195,36 +191,22 @@ const paymentCalculatorConfig: CalculatorConfig = {
       const M = parseFloat(values.monthlyPayment);
       if ([P, M].some(isNaN) || P <= 0 || M <= 0) return [];
 
-      if (monthlyRate === 0) {
-        const n = Math.ceil(P / M);
-        const totalPaid = M * n;
+      const durationLabel = (n: number) => {
         const years = Math.floor(n / 12);
         const months = n % 12;
-        return [
-          {
-            id: 'term',
-            label: 'Time to Pay Off',
-            value: years > 0 ? `${years} yr ${months > 0 ? months + ' mo' : ''}` : `${months} months`,
-            highlight: true,
-            color: 'neutral' as const,
-          },
-          {
-            id: 'totalPaid',
-            label: 'Total Amount Paid',
-            value: `$${fmt(totalPaid)}`,
-            color: 'neutral' as const,
-          },
-          {
-            id: 'totalInterest',
-            label: 'Total Interest Paid (0% rate)',
-            value: '$0.00',
-            color: 'positive' as const,
-          },
-        ];
-      }
+        return years > 0
+          ? `${years} year${years !== 1 ? 's' : ''}${months > 0 ? ` and ${months} month${months !== 1 ? 's' : ''}` : ''}`
+          : `${n} month${n !== 1 ? 's' : ''}`;
+      };
+      const tooLong = {
+        id: 'error',
+        label: 'Payment Too Low',
+        value: `At $${fmt(M)}/month this loan would take more than ${MAX_TERM_MONTHS / 12} years to pay off. Increase the payment.`,
+        color: 'negative' as const,
+      };
 
       const minPayment = P * monthlyRate;
-      if (M <= minPayment) {
+      if (monthlyRate > 0 && M <= minPayment) {
         return [
           {
             id: 'error',
@@ -235,46 +217,56 @@ const paymentCalculatorConfig: CalculatorConfig = {
         ];
       }
 
-      const n = -Math.log(1 - (monthlyRate * P) / M) / Math.log(1 + monthlyRate);
-      const nRounded = Math.ceil(n);
-      const exactTotalInterest = M * nRounded - P;
-      const years = Math.floor(nRounded / 12);
-      const months = nRounded % 12;
+      // Exact (fractional) number of payments, then whole payments with a smaller final payment.
+      const nExact = monthlyRate === 0 ? P / M : -Math.log(1 - (monthlyRate * P) / M) / Math.log(1 + monthlyRate);
+      const nRounded = Math.max(1, Math.ceil(nExact - 1e-9));
+      if (nRounded > MAX_TERM_MONTHS) return [tooLong];
+
+      // Total paid = (n-1) full payments + a final payment equal to the remaining balance plus its interest.
+      let totalPaid: number;
+      if (monthlyRate === 0) {
+        totalPaid = P;
+      } else {
+        const growth = Math.pow(1 + monthlyRate, nRounded - 1);
+        const balanceBeforeLast = P * growth - (M * (growth - 1)) / monthlyRate;
+        totalPaid = M * (nRounded - 1) + Math.min(M, balanceBeforeLast * (1 + monthlyRate));
+      }
+      const totalInterest = totalPaid - P;
 
       return [
         {
           id: 'term',
           label: 'Time to Pay Off',
-          value: years > 0
-            ? `${years} year${years !== 1 ? 's' : ''}${months > 0 ? ` and ${months} month${months !== 1 ? 's' : ''}` : ''}`
-            : `${nRounded} month${nRounded !== 1 ? 's' : ''}`,
+          value: durationLabel(nRounded),
           highlight: true,
           color: 'neutral' as const,
         },
         {
           id: 'totalPayments',
           label: 'Total Number of Payments',
-          value: `${nRounded} payments`,
+          value: `${nRounded} payments (the last one may be smaller)`,
           color: 'neutral' as const,
         },
         {
           id: 'totalInterest',
-          label: 'Total Interest Paid',
-          value: `$${fmt(exactTotalInterest)}`,
-          color: 'negative' as const,
+          label: monthlyRate === 0 ? 'Total Interest Paid (0% rate)' : 'Total Interest Paid',
+          value: `$${fmt(totalInterest)}`,
+          color: monthlyRate === 0 ? 'positive' as const : 'negative' as const,
         },
         {
           id: 'totalCost',
           label: 'Total Amount Paid',
-          value: `$${fmt(M * nRounded)}`,
+          value: `$${fmt(totalPaid)}`,
           color: 'neutral' as const,
         },
-        {
-          id: 'minPayment',
-          label: 'Minimum Payment to Cover Interest Only',
-          value: `$${fmt(minPayment)}/month (never pays off principal)`,
-          color: 'negative' as const,
-        },
+        ...(monthlyRate > 0
+          ? [{
+              id: 'minPayment',
+              label: 'Minimum Payment to Cover Interest Only',
+              value: `$${fmt(minPayment)}/month (never pays off principal)`,
+              color: 'negative' as const,
+            }]
+          : []),
       ];
     }
 
@@ -308,18 +300,18 @@ const paymentCalculatorConfig: CalculatorConfig = {
     ],
     commonUses: [
       'Determine how large a loan you can afford by entering your target monthly payment, interest rate, and desired loan term — see how much house or car you can qualify for before shopping.',
-      'Compare loan scenarios side by side: a $30,000 car loan at 6% for 60 months ($580/month) vs 72 months ($498/month) — lower payment but $1,200 more in interest.',
+      'Compare loan scenarios side by side: a $30,000 car loan at 6% for 60 months ($580/month) vs 72 months ($497/month) — lower payment but about $1,000 more in interest.',
       'Find out how long it will take to pay off a loan at your current monthly payment amount including accrued interest, plus see how adding just $50/month accelerates your payoff.',
       'See the true cost of extending your mortgage term: a $200,000 mortgage at 6.5% costs $1,264/month for 30 years ($255,000 interest) vs $1,742/month for 15 years ($113,600 interest) — save about $141,500 by choosing 15 years if you can afford the payment.',
-      'Use the Calculate Loan Amount mode to reverse-engineer your borrowing power: if you can afford $600/month and qualify for 7% APR over 60 months, you can borrow approximately $30,300 — but at 72 months, ~$35,000.',
+      'Use the Calculate Loan Amount mode to reverse-engineer your borrowing power: if you can afford $600/month and qualify for 7% APR over 60 months, you can borrow approximately $30,300 — but at 72 months, ~$35,200.',
       'Credit card debt analysis: see how long it takes to pay off revolving credit card debt at minimum payments, and compare the impact of increasing your payment to a fixed amount each month.',
     ],
     explanation:
-      'This is the "solve for X" loan calculator. Most people know their budget (monthly payment) and want to know how large a loan they can afford. Others know the loan amount and want to find out how long it will take to pay it off at their current payment. All three calculations use the same amortization equation, just rearranged algebraically. The minimum payment warning shows the point at which your payment only covers interest and the balance never decreases — a critical threshold to understand, especially for credit card debt where minimum payments are often set just above this level. Understanding the relationship between these three variables — loan amount, payment, and term — is the foundation of smart borrowing. A $50 increase in monthly payment on a $25,000 loan at 7% APR shortens the term from 60 months to about 49 months and saves over $1,000 in total interest.',
+      'This is the "solve for X" loan calculator. Most people know their budget (monthly payment) and want to know how large a loan they can afford. Others know the loan amount and want to find out how long it will take to pay it off at their current payment. All three calculations use the same amortization equation, just rearranged algebraically. The minimum payment warning shows the point at which your payment only covers interest and the balance never decreases — a critical threshold to understand, especially for credit card debt where minimum payments are often set just above this level. Understanding the relationship between these three variables — loan amount, payment, and term — is the foundation of smart borrowing. A $50 increase in monthly payment on a $25,000 loan at 7% APR ($495 to $545) shortens the term from 60 months to 54 months and saves about $520 in total interest.',
     faqs: [
       {
         question: 'How much can I afford to borrow at $500/month?',
-        answer: 'Select "Calculate Loan Amount," enter $500 as your monthly payment, your expected APR, and desired term. For example, at 7% APR over 5 years: $500/month = ~$25,200 loan. Over 3 years: ~$16,300. Over 7 years: ~$32,700. A longer term increases borrowing power but costs more in total interest.',
+        answer: 'Select "Calculate Loan Amount," enter $500 as your monthly payment, your expected APR, and desired term. For example, at 7% APR over 5 years: $500/month = ~$25,250 loan. Over 3 years: ~$16,200. Over 7 years: ~$33,100. A longer term increases borrowing power but costs more in total interest.',
       },
       {
         question: 'What happens if my payment only covers the interest?',
@@ -335,7 +327,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
       },
       {
         question: 'Should I choose a shorter or longer loan term?',
-        answer: 'Shorter terms have higher monthly payments but much less total interest. Longer terms have lower payments but cost significantly more over time. For a $25,000 loan at 7%: a 3-year term costs $772/month with $2,781 total interest; a 5-year term costs $495/month with $4,700 total interest. Choose the shortest term you can comfortably afford.',
+        answer: 'Shorter terms have higher monthly payments but much less total interest. Longer terms have lower payments but cost significantly more over time. For a $25,000 loan at 7%: a 3-year term costs $772/month with $2,789 total interest; a 5-year term costs $495/month with $4,700 total interest. Choose the shortest term you can comfortably afford.',
       },
       {
         question: 'What is the best strategy for paying off a car loan vs a mortgage?',
@@ -343,7 +335,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
       },
       {
         question: 'How much more can I borrow if I add $50 to my monthly payment?',
-        answer: 'Adding $50/month increases your borrowing power significantly more than $50 times the loan term because the extra payment reduces the interest burden. For example, at 7% APR over 60 months: $500/month gets you ~$25,200 while $550/month gets you ~$27,700 — that is $2,500 more borrowing power from just $50 extra per month. Over 72 months at the same rate: $500/month → ~$29,200, $550/month → ~$32,100. The calculator shows this as the "+$50/month" line in Loan Amount mode.',
+        answer: 'Adding $50/month increases your borrowing power significantly more than $50 times the loan term because the extra payment reduces the interest burden. For example, at 7% APR over 60 months: $500/month gets you ~$25,250 while $550/month gets you ~$27,800 — that is about $2,500 more borrowing power from just $50 extra per month. Over 72 months at the same rate: $500/month → ~$29,300, $550/month → ~$32,300. The calculator shows this as the "+$50/month" line in Loan Amount mode.',
       },
     ],
   citations: [

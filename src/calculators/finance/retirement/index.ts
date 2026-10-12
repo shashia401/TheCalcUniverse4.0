@@ -211,7 +211,9 @@ const retirementConfig: CalculatorConfig = {
     const currentSavings = parseFloat(values.currentSavings) || 0;
     const monthlyContribution = parseFloat(values.monthlyContribution) || 0;
     const annualReturn = parseFloat(values.annualReturn) / 100;
-    const inflationRate = parseFloat(values.inflationRate) / 100 || 0.03;
+    // Same rule as calculate(): blank -> 3%, but an explicit 0% inflation is respected.
+    const inflationInput = parseFloat(values.inflationRate);
+    const inflationRate = isNaN(inflationInput) ? 0.03 : inflationInput / 100;
 
     if (!results.length || isNaN(currentAge) || isNaN(retirementAge) || retirementAge <= currentAge) return null;
 
@@ -311,7 +313,7 @@ const retirementConfig: CalculatorConfig = {
           'Desired Annual Retirement Income': '60,000',
         },
         result: 'Estimated total at retirement (age 65): approximately $1,476,000. Inflation-adjusted (today\'s dollars): approximately $524,000. Total contributed: $260,000. Total growth: approximately $1,216,000. Money multiplied: 5.7×. With the 4% rule inflation-adjusted targets, the calculator shows a gap relative to the inflation-adjusted goal — Anna\'s $60K desired income inflates to about $169K/year in future dollars, requiring about $4.2M at retirement.',
-        insight: 'Anna\'s contributions of $260,000 grow to about $1,476,000 — a 5.7× multiplier, with over $1.2 million coming from compound growth alone. The key insight from the 4% rule check is that inflation-adjusted targets are ambitious: $60,000 in today\'s dollars becomes roughly $169,000 in 35 years at 3% inflation, requiring a nest egg of about $4.2 million. While her projected $1.48 million portfolio would generate about $59,000/year using the simple 4% rule (close to her current $60K goal), the inflation-adjusted target requires a significantly larger nest egg. If she started just 5 years later at 35, her final balance would drop to roughly $1,016,000 — a difference of about $460,000 that shows why starting early is the single most powerful retirement decision.',
+        insight: 'Anna\'s contributions of $260,000 grow to about $1,476,000 — a 5.7× multiplier, with over $1.2 million coming from compound growth alone. The key insight from the 4% rule check is that inflation-adjusted targets are ambitious: $60,000 in today\'s dollars becomes roughly $169,000 in 35 years at 3% inflation, requiring a nest egg of about $4.2 million. Her projected $1.48 million portfolio would generate about $59,000/year using the simple 4% rule, but those are future dollars worth only about $21,000 in today\'s purchasing power, so the inflation-adjusted target requires a much larger nest egg. If she started just 5 years later at 35, her final balance would drop to roughly $1,016,000 — a difference of about $460,000 that shows why starting early is the single most powerful retirement decision.',
       },
       {
         scenario: 'Robert is 45, has $120,000 saved, contributes $800/month, and wants to retire at 67. He uses a conservative 5% return assumption (closer to a 60/40 bond/stock portfolio) and 3% inflation. He wants $70,000/year in retirement.',
@@ -325,7 +327,7 @@ const retirementConfig: CalculatorConfig = {
           'Desired Annual Retirement Income': '70,000',
         },
         result: 'Estimated total at retirement (age 67): approximately $743,000. Inflation-adjusted (today\'s dollars): approximately $388,000. Total contributed: $331,200. Total growth: approximately $412,000. Money multiplied: 2.2×. The calculator projects a significant gap when inflation-adjusting the 4% rule target: Robert\'s $70K desired income inflates to about $134K/year, requiring roughly $3.4M at retirement — far more than his projected $743K portfolio.',
-        insight: 'Robert faces a serious retirement gap. His projected $743,000 nest egg, when using the inflation-adjusted 4% rule framework, falls well short of the roughly $3.4 million target needed to generate $70,000/year in today\'s purchasing power. Even at a 7% return (instead of his conservative 5%), his projected balance would only reach about $1,057,000. This is the reality check many mid-career savers need — catching up requires significantly increasing contributions, delaying retirement, or adjusting lifestyle expectations. The calculator\'s required-contribution feature computes the exact monthly amount needed to close the gap given his current assumptions.',
+        insight: 'Robert faces a serious retirement gap. His projected $743,000 nest egg, when using the inflation-adjusted 4% rule framework, falls well short of the roughly $3.4 million target needed to generate $70,000/year in today\'s purchasing power. Even at a 7% return (instead of his conservative 5%), his projected balance would only reach about $1,057,000. This is the reality check many mid-career savers need — catching up requires significantly increasing contributions, delaying retirement, or adjusting lifestyle expectations. The calculator\'s required-contribution line shows the exact monthly amount needed to close the gap with his current assumptions (about $6,245 a month).',
       },
     ],
 

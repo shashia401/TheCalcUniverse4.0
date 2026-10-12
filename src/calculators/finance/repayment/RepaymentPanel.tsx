@@ -21,7 +21,6 @@ interface Props {
   extraPayment: number;
 }
 
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function buildSchedule(
   principal: number,
@@ -90,7 +89,7 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
       interest: rows.reduce((s, r) => s + r.interest, 0),
       principal: rows.reduce((s, r) => s + r.principal, 0),
       endBalance: rows[rows.length - 1].balance,
-      dateRange: `${MONTH_NAMES[(((year - 1) * 12) % 12)]} ${new Date().getFullYear() + year - 1} – ${MONTH_NAMES[((year * 12 - 1) % 12)]} ${new Date().getFullYear() + year - 1}`,
+      dateRange: `Payments ${(year - 1) * 12 + 1}–${(year - 1) * 12 + rows.length}`,
     }));
   }, [schedule]);
 
@@ -106,7 +105,7 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden print:shadow-none">
       <div className="flex items-center justify-between gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
         <div className="flex items-center gap-2">
-          <TrendingDown size={16} className="text-slate-500" />
+          <TrendingDown size={16} className="text-slate-600" aria-hidden="true" />
           <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
             {usingExtra ? 'Amortization Schedule (With Extra Payment)' : 'Amortization Schedule'}
           </span>
@@ -151,7 +150,7 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
             <button type="button"
               onClick={() => { setView('annual'); setShowAll(false); }}
               className={`px-4 py-1.5 transition-colors ${
-                view === 'annual' ? 'bg-blue-500 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'
+                view === 'annual' ? 'bg-blue-700 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'
               }`}
             >
               Annual
@@ -159,13 +158,13 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
             <button type="button"
               onClick={() => { setView('monthly'); setShowAll(false); }}
               className={`px-4 py-1.5 transition-colors border-l border-slate-200 ${
-                view === 'monthly' ? 'bg-blue-500 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'
+                view === 'monthly' ? 'bg-blue-700 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'
               }`}
             >
               Monthly
             </button>
           </div>
-          <span className="text-[10px] text-slate-500">
+          <span className="text-[10px] text-slate-600">
             {view === 'annual' ? `${yearly.length} years` : `${schedule.length} payments`}
           </span>
         </div>
@@ -176,11 +175,11 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
-                  <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Year</th>
-                  <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px] hidden sm:table-cell">Period</th>
-                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-orange-500 uppercase tracking-wider text-[10px]">Interest</th>
-                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-blue-500 uppercase tracking-wider text-[10px]">Principal</th>
-                  <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Balance</th>
+                  <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Year</th>
+                  <th scope="col" className="text-left px-3 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px] hidden sm:table-cell">Period</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-orange-700 uppercase tracking-wider text-[10px]">Interest</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-blue-700 uppercase tracking-wider text-[10px]">Principal</th>
+                  <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Balance</th>
                 </tr>
               </thead>
               <tbody>
@@ -192,7 +191,7 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
                     }`}
                   >
                     <td className="px-4 py-2.5 font-bold text-slate-800">{row.year}</td>
-                    <td className="px-3 py-2.5 text-slate-500 hidden sm:table-cell">{row.dateRange}</td>
+                    <td className="px-3 py-2.5 text-slate-600 hidden sm:table-cell">{row.dateRange}</td>
                     <td className="px-3 py-2.5 text-right text-orange-600 font-semibold">${fmt(row.interest)}</td>
                     <td className="px-3 py-2.5 text-right text-blue-600 font-semibold">${fmt(row.principal)}</td>
                     <td className="px-4 py-2.5 text-right font-bold text-slate-700">
@@ -206,11 +205,11 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
-                  <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">#</th>
-                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-orange-500 uppercase tracking-wider text-[10px]">Interest</th>
-                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-blue-500 uppercase tracking-wider text-[10px]">Principal</th>
-                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-emerald-500 uppercase tracking-wider text-[10px]">Payment</th>
-                  <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Balance</th>
+                  <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">#</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-orange-700 uppercase tracking-wider text-[10px]">Interest</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-blue-700 uppercase tracking-wider text-[10px]">Principal</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-bold text-emerald-700 uppercase tracking-wider text-[10px]">Payment</th>
+                  <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Balance</th>
                 </tr>
               </thead>
               <tbody>
@@ -221,7 +220,7 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
                       i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
                     }`}
                   >
-                    <td className="px-4 py-2 font-semibold text-slate-500">{row.month}</td>
+                    <td className="px-4 py-2 font-semibold text-slate-600">{row.month}</td>
                     <td className="px-3 py-2 text-right text-orange-600 font-semibold">${fmt(row.interest)}</td>
                     <td className="px-3 py-2 text-right text-blue-600 font-semibold">${fmt(row.principal)}</td>
                     <td className="px-3 py-2 text-right text-emerald-600 font-semibold">${fmt(row.payment)}</td>
@@ -252,7 +251,7 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
         {/* Payment #1 vs Payment #N comparison */}
         {schedule.length > 1 && (
           <div className="border-t border-slate-100 pt-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">How Each Payment Is Split</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">How Each Payment Is Split</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[0, Math.min(schedule.length - 1, 48)].map((idx, arrIdx) => {
                 const row = schedule[0]; // first payment is always same
@@ -263,7 +262,7 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
                 // stable — two-element array [0, N], arrIdx is always 0 or 1
                 return (
                   <div key={arrIdx} className="rounded-xl border border-slate-200 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">
                       {idx === 0 ? 'Payment #1' : `Payment #${idx + 1}`} — {idx === 0 ? `Month ${row.month}` : `Month ${targetRow.month}`}
                     </p>
                     <div className="flex items-center gap-4">
@@ -281,17 +280,17 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
                         <div className="flex justify-between mt-1.5">
                           <div className="flex items-center gap-1">
                             <div className="w-2 h-2 rounded-sm bg-orange-400" />
-                            <span className="text-[10px] text-slate-500">Interest ${fmt(targetRow.interest)}</span>
+                            <span className="text-[10px] text-slate-600">Interest ${fmt(targetRow.interest)}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <div className="w-2 h-2 rounded-sm bg-blue-500" />
-                            <span className="text-[10px] text-slate-500">Principal ${fmt(targetRow.principal)}</span>
+                            <span className="text-[10px] text-slate-600">Principal ${fmt(targetRow.principal)}</span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
                         <span className="text-xs font-black text-slate-700">${fmt(targetRow.payment)}</span>
-                        <p className="text-[9px] text-slate-500">total</p>
+                        <p className="text-[9px] text-slate-600">total</p>
                       </div>
                     </div>
                   </div>
@@ -304,7 +303,7 @@ export default function RepaymentPanel({ loanAmount, annualRate, years, monthlyP
         {/* Balance chart */}
         {yearly.length > 1 && (
           <div className="border-t border-slate-100 pt-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Balance Over Time</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">Balance Over Time</p>
             <BalanceChart rows={yearly} />
           </div>
         )}
@@ -356,7 +355,7 @@ function BalanceChart({ rows }: { rows: { year: number; startBalance: number; en
           return (
             <g key={g}>
               <line x1={padL} y1={y} x2={padL + chartW} y2={y} stroke="#e2e8f0" strokeWidth={0.5} />
-              <text x={padL - 4} y={y} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="#94a3b8">{fmtY(g)}</text>
+              <text x={padL - 4} y={y} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="#64748b">{fmtY(g)}</text>
             </g>
           );
         })}
@@ -365,7 +364,7 @@ function BalanceChart({ rows }: { rows: { year: number; startBalance: number; en
           return (
             <g key={yr}>
               <line x1={x} y1={padT} x2={x} y2={padT + chartH} stroke="#e2e8f0" strokeWidth={0.5} />
-              <text x={x} y={padT + chartH + 10} textAnchor="middle" fontSize={9} fill="#94a3b8">{yr}</text>
+              <text x={x} y={padT + chartH + 10} textAnchor="middle" fontSize={9} fill="#64748b">{yr}</text>
             </g>
           );
         })}
@@ -378,7 +377,7 @@ function BalanceChart({ rows }: { rows: { year: number; startBalance: number; en
             <stop offset="100%" stopColor="#22c55e" stopOpacity="0.15" />
           </linearGradient>
         </defs>
-        <text x={padL + chartW / 2} y={height - 2} textAnchor="middle" fontSize={9} fill="#94a3b8">Year</text>
+        <text x={padL + chartW / 2} y={height - 2} textAnchor="middle" fontSize={9} fill="#64748b">Year</text>
       </svg>
     </div>
   );

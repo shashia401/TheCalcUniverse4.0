@@ -60,3 +60,25 @@ describe('percent-off', () => {
     expect(r).toEqual([]);
   });
 });
+
+describe('percent-off audit', () => {
+  // Independent: 200 x 0.60 x 0.70 = 84.00; tax 8.25% -> 90.93; saved 116.00; effective 58%; gap 12 points
+  it('Black Friday example: $90.93 final, 58% effective, gap 12', () => {
+    const r = config.calculate({ price: '200', discount1: '40', discount2: '30', tax: '8.25' });
+    expect(getValue(r, 'final')).toBe('$90.93');
+    expect(getValue(r, 'saved')).toBe('$116.00');
+    expect(getValue(r, 'effective')).toBe('58.00%');
+    expect(getValue(r, 'gap')).toContain('12.00 percentage points');
+  });
+  it('clearance FAQ: $200, 50% then 30% -> $70.00, 65%', () => {
+    const r = config.calculate({ price: '200', discount1: '50', discount2: '30' });
+    expect(getValue(r, 'final')).toBe('$70.00');
+    expect(getValue(r, 'effective')).toBe('65.00%');
+  });
+  it('tax FAQ: $100, 25% off, 8% tax -> $81.00', () => {
+    expect(getValue(config.calculate({ price: '100', discount1: '25', tax: '8' }), 'final')).toBe('$81.00');
+  });
+  it('out-of-range percentages return the input-error row', () => {
+    expect(config.calculate({ price: '100', discount1: '120' })[0].id).toBe('err');
+  });
+});

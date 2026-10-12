@@ -1,14 +1,12 @@
 import { CreditCard } from 'lucide-react';
 import { CalculatorResult } from '../../../types/calculator';
+import { parseAmount as parseVal } from '../../../utils/calcResults';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseVal(s: string): number {
-  return parseFloat(s.replace(/[$%,+\s-]/g, '').replace(/,/g, '')) || 0;
-}
 
 export default function PaymentCalcPanel({ values, results }: Props) {
   if (!results.length) return null;
@@ -35,7 +33,7 @@ export default function PaymentCalcPanel({ values, results }: Props) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
-          <CreditCard size={16} className="text-slate-500" />
+          <CreditCard size={16} className="text-slate-500" aria-hidden="true" />
           <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
             Loan Cost Breakdown
           </span>
@@ -44,7 +42,7 @@ export default function PaymentCalcPanel({ values, results }: Props) {
           <div className="space-y-3">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-blue-600">Principal</span>
+                <span className="text-xs font-bold text-blue-700">Principal</span>
                 <span className="text-xs font-bold text-slate-700">
                   ${principal.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
@@ -55,7 +53,7 @@ export default function PaymentCalcPanel({ values, results }: Props) {
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-red-600">Total Interest</span>
+                <span className="text-xs font-bold text-red-700">Total Interest</span>
                 <span className="text-xs font-bold text-slate-700">
                   ${totalInterest.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
@@ -66,7 +64,7 @@ export default function PaymentCalcPanel({ values, results }: Props) {
             </div>
           </div>
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Monthly Payment</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">Monthly Payment</p>
             <p className="text-lg font-black text-slate-700">
               ${monthlyPayment.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
@@ -85,14 +83,14 @@ export default function PaymentCalcPanel({ values, results }: Props) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
-          <CreditCard size={16} className="text-slate-500" />
+          <CreditCard size={16} className="text-slate-500" aria-hidden="true" />
           <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
             Borrowing Power
           </span>
         </div>
         <div className="p-6 space-y-5">
           <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1">You Can Borrow</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-1">You Can Borrow</p>
             <p className="text-xl font-black text-blue-700">
               ${loanAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </p>
@@ -113,19 +111,19 @@ export default function PaymentCalcPanel({ values, results }: Props) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
-          <CreditCard size={16} className="text-slate-500" />
+          <CreditCard size={16} className="text-slate-500" aria-hidden="true" />
           <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
             Payoff Timeline
           </span>
         </div>
         <div className="p-6 space-y-5">
           <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1">Time to Pay Off</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-1">Time to Pay Off</p>
             <p className="text-xl font-black text-blue-700">{termRes.value}</p>
           </div>
           {totalInterest > 0 && (
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Total Interest</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">Total Interest</p>
               <p className="text-lg font-black text-slate-700">
                 ${totalInterest.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>

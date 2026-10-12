@@ -1,6 +1,10 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import AmortizationPanel from '../../../components/calculator/AmortizationPanel';
+import { pmt } from '../../../utils/financial';
+
+/** Longest term the calculator will model: 50 years of monthly payments. */
+const MAX_MONTHS = 600;
 
 const loanCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -82,7 +86,7 @@ const loanCalculatorConfig: CalculatorConfig = {
     }
 
     const growth = Math.pow(1 + monthlyRate, months);
-    const payment = (principal * (monthlyRate * growth)) / (growth - 1);
+    const payment = pmt(principal, monthlyRate, months);
     const totalPaid = payment * months;
 
     return [
@@ -120,11 +124,7 @@ const loanCalculatorConfig: CalculatorConfig = {
 
     const months = termUnit === 'years' ? Math.ceil(termRaw * 12) : Math.ceil(termRaw);
     const monthlyRate = annualRate / 12;
-    const payment =
-      monthlyRate === 0
-        ? principal / months
-        : (principal * (monthlyRate * Math.pow(1 + monthlyRate, months))) /
-          (Math.pow(1 + monthlyRate, months) - 1);
+    const payment = pmt(principal, monthlyRate, months);
 
     // Walk the amortization schedule, accumulating principal repaid vs interest paid.
     // Sample by year for long loans, by month for short ones, so the curve reads well.
@@ -167,11 +167,7 @@ const loanCalculatorConfig: CalculatorConfig = {
 
     const months = termUnit === 'years' ? Math.ceil(termRaw * 12) : Math.ceil(termRaw);
     const monthlyRate = annualRate / 12;
-    const payment =
-      monthlyRate === 0
-        ? principal / months
-        : (principal * (monthlyRate * Math.pow(1 + monthlyRate, months))) /
-          (Math.pow(1 + monthlyRate, months) - 1);
+    const payment = pmt(principal, monthlyRate, months);
     const totalInterest = payment * months - principal;
 
     return {
@@ -193,17 +189,16 @@ const loanCalculatorConfig: CalculatorConfig = {
     if ([principal, annualRate, termRaw].some(isNaN) || principal <= 0 || termRaw <= 0) return null;
     const months = termUnit === 'years' ? Math.ceil(termRaw * 12) : Math.ceil(termRaw);
     const monthlyRate = annualRate / 12;
-    const payment = monthlyRate === 0
-      ? principal / months
-      : (principal * (monthlyRate * Math.pow(1 + monthlyRate, months))) / (Math.pow(1 + monthlyRate, months) - 1);
+    const payment = pmt(principal, monthlyRate, months);
     const totalPaid = payment * months;
-    const ratio = totalPaid > 0 ? ((totalPaid - principal) / totalPaid) * 100 : 0;
+    // Classify on the DISPLAYED (rounded) percentage so the label never contradicts the number.
+    const ratio = totalPaid > 0 ? Math.round(((totalPaid - principal) / totalPaid) * 100) : 0;
     const band = ratio < 15 ? 'Low' : ratio < 30 ? 'Moderate' : 'High';
     return {
       value: ratio,
       min: 0,
       max: 60,
-      valueLabel: `Interest is ${ratio.toFixed(0)}% of total cost — ${band}`,
+      valueLabel: `Interest is ${ratio}% of total cost — ${band}`,
       bands: [
         { to: 15, label: 'Low', color: '#22c55e' },
         { to: 30, label: 'Moderate', color: '#f59e0b' },
@@ -223,17 +218,11 @@ const loanCalculatorConfig: CalculatorConfig = {
     // Math.ceil on fractional months -- prevents understating the term for microloans or
     // partial-month inputs (e.g., 1.1 years = 14 months with ceil vs 13 with round).
     const months = termUnit === 'years' ? Math.ceil(termRaw * 12) : Math.ceil(termRaw);
+    if (months > MAX_MONTHS) return [];
     const years = months / 12;
     const monthlyRate = annualRate / 12;
 
-    let monthlyPayment: number;
-    if (monthlyRate === 0) {
-      monthlyPayment = principal / months;
-    } else {
-      monthlyPayment =
-        (principal * (monthlyRate * Math.pow(1 + monthlyRate, months))) /
-        (Math.pow(1 + monthlyRate, months) - 1);
-    }
+    const monthlyPayment = pmt(principal, monthlyRate, months);
 
     const totalPaid = monthlyPayment * months;
     const totalInterest = totalPaid - principal;
@@ -293,14 +282,7 @@ const loanCalculatorConfig: CalculatorConfig = {
     const years = months / 12;
     const monthlyRate = annualRate / 12;
 
-    let monthlyPayment: number;
-    if (monthlyRate === 0) {
-      monthlyPayment = principal / months;
-    } else {
-      monthlyPayment =
-        (principal * (monthlyRate * Math.pow(1 + monthlyRate, months))) /
-        (Math.pow(1 + monthlyRate, months) - 1);
-    }
+    const monthlyPayment = pmt(principal, monthlyRate, months);
 
     const totalInterest = monthlyPayment * months - principal;
 
@@ -318,8 +300,8 @@ const loanCalculatorConfig: CalculatorConfig = {
       'Monthly payment is calculated using the standard loan amortization formula — the same math used for auto loans, personal loans, and mortgages. This formula ensures each payment is exactly the same amount throughout the life of the loan, with the proportion allocated to interest decreasing over time as the principal balance shrinks.',
     diagram: {
       svg: '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif"><path d="M 150,50 A 100,100 0 1,1 91,231 Z" fill="var(--svg-3b82f6)"/><path d="M 91,231 A 100,100 0 0,1 150,50 Z" fill="var(--svg-ef4444)"/><text x="150" y="148" font-size="14" fill="var(--svg-1e293b)" text-anchor="middle" font-weight="600">Total Cost</text><text x="150" y="163" font-size="11" fill="var(--svg-64748b)" text-anchor="middle">of Loan</text><text x="201" y="164" font-size="13" fill="var(--svg-ffffff)" text-anchor="middle" font-weight="600">Principal</text><text x="201" y="179" font-size="12" fill="var(--svg-ffffff)" text-anchor="middle">~60%</text><text x="99" y="132" font-size="13" fill="var(--svg-ffffff)" text-anchor="middle" font-weight="600">Interest</text><text x="99" y="147" font-size="12" fill="var(--svg-ffffff)" text-anchor="middle">~40%</text></svg>',
-      alt: 'Pie chart showing typical loan cost breakdown with approximately 60% principal in blue and 40% interest in red',
-      caption: 'Typical loan total cost breakdown — principal vs. interest over the full term',
+      alt: 'Illustrative pie chart of a long-term loan: roughly 60% principal in blue and 40% interest in red. Short personal loans usually carry a much smaller interest share.',
+      caption: 'Illustration only (a long-term loan): principal vs. interest over the full term. Your own split is shown in the donut above.',
     },
     variables: [
       { symbol: 'M', name: 'Monthly Payment', description: 'The fixed amount paid each month toward both principal and interest. This amount stays constant for the entire loan term, but the split between principal and interest changes with each payment.' },
@@ -349,7 +331,7 @@ const loanCalculatorConfig: CalculatorConfig = {
       },
       {
         question: 'How does an extra payment affect my loan?',
-        answer: 'Extra payments go directly to principal reduction, shortening your loan term and reducing total interest. Even $50 extra per month on a 5-year $20,000 loan at 8% can save over $300 in interest and pay the loan off several months early. Use the Extra Payment feature available in the amortization schedule section below to model different scenarios.',
+        answer: 'Extra payments go directly to principal reduction, shortening your loan term and reducing total interest. Even $50 extra per month on a 5-year $20,000 loan at 8% saves about $590 in interest and pays the loan off about 7 months early (53 payments instead of 60). Use the Extra Payment feature available in the amortization schedule section below to model different scenarios.',
       },
       {
         question: 'What is a typical personal loan interest rate?',
@@ -357,7 +339,7 @@ const loanCalculatorConfig: CalculatorConfig = {
       },
       {
         question: 'What is amortization and why does it matter?',
-        answer: 'Amortization is the process of spreading out a loan into fixed payments over time. Early payments are mostly interest because the outstanding balance is largest. Over time, as principal shrinks, more of each payment goes toward the balance. A 30-year mortgage at 6.5% means the first year\'s payments are about 80% interest and 20% principal. Understanding amortization shows why extra payments early in the loan term save the most money.',
+        answer: 'Amortization is the process of spreading out a loan into fixed payments over time. Early payments are mostly interest because the outstanding balance is largest. Over time, as principal shrinks, more of each payment goes toward the balance. On a 30-year mortgage at 6.5%, about 85% of the first year\'s payments go to interest and about 15% to principal. Understanding amortization shows why extra payments early in the loan term save the most money.',
       },
     ],
   citations: [

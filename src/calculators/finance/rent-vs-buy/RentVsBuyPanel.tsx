@@ -1,38 +1,12 @@
 import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
 import { CrossoverChart } from './CrossoverChart';
-import { CostBreakdown, fmtDollar } from './CostBreakdown';
+import { CostBreakdown, fmtDollar, type RVBData } from './CostBreakdown';
 import { BreakEvenContext } from './BreakEvenContext';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-interface RVBData {
-  breakEvenYear: number;
-  yearRange: number;
-  chartData: { year: number; cumulativeRentCost: number; cumulativeBuyCost: number }[];
-  selectedYear: number;
-  buyingCostAtHorizon: number;
-  rentingCostAtHorizon: number;
-  difference: number;
-  cheaperOption: 'buy' | 'rent';
-  homePrice: number;
-  downPayment: number;
-  closingCosts: number;
-  loanAmount: number;
-  monthlyRent: number;
-  annualRentIncrease: number;
-  rentersInsurance: number;
-  mortgageRate: number;
-  propertyTaxRate: number;
-  maintenancePct: number;
-  pmiRate: number;
-  downPaymentPct: number;
-  sellingCostsPct: number;
-  homeAppreciationRate: number;
-  homeValueAtHorizon: number;
 }
 
 // ─── Main Panel ───────────────────────────────────────────────────────────────
@@ -103,7 +77,7 @@ export default function RentVsBuyPanel({ results }: Props) {
             <div>
               <p
                 className={`text-xs font-bold uppercase tracking-widest mb-1 ${
-                  cheaperOption === 'buy' ? 'text-emerald-600' : 'text-amber-600'
+                  cheaperOption === 'buy' ? 'text-emerald-700' : 'text-amber-700'
                 }`}
               >
                 After {selectedYear} Year{selectedYear !== 1 ? 's' : ''}
@@ -124,7 +98,7 @@ export default function RentVsBuyPanel({ results }: Props) {
                   : 'border-amber-300 bg-white'
               }`}
             >
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
                 Break-Even
               </p>
               <p
@@ -135,7 +109,7 @@ export default function RentVsBuyPanel({ results }: Props) {
                 {breakEvenDisplay}
               </p>
               {isEverBuyingCheaper && breakEvenYear > 1 && (
-                <p className="text-[10px] text-slate-500 mt-0.5">buying becomes cheaper</p>
+                <p className="text-[10px] text-slate-600 mt-0.5">buying becomes cheaper</p>
               )}
             </div>
           </div>
@@ -143,7 +117,7 @@ export default function RentVsBuyPanel({ results }: Props) {
 
         {/* 2. Crossover chart */}
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">
             30-Year Net Cost Comparison
           </p>
           <CrossoverChart
@@ -155,7 +129,7 @@ export default function RentVsBuyPanel({ results }: Props) {
 
         {/* 3. Side-by-side cost breakdown */}
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">
             Cost Breakdown at Year {selectedYear}
           </p>
           <CostBreakdown data={data} />
@@ -163,7 +137,7 @@ export default function RentVsBuyPanel({ results }: Props) {
 
         {/* 4. Break-even context */}
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">
             Understanding the Break-Even Point
           </p>
           <BreakEvenContext breakEvenYear={breakEvenYear} />

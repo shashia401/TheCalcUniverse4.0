@@ -14,6 +14,7 @@ const presentValueConfig: CalculatorConfig = {
       prefix: '$',
       placeholder: '100,000',
       inputMode: 'numeric',
+      min: 0,
       required: true,
       helpText: 'The amount of money you want to have at the end of the investment period.',
     },
@@ -36,6 +37,8 @@ const presentValueConfig: CalculatorConfig = {
       unit: '%',
       placeholder: '7',
       inputMode: 'decimal',
+      min: 0,
+      max: 100,
       step: 0.01,
       required: true,
       helpText:
@@ -233,7 +236,7 @@ const presentValueConfig: CalculatorConfig = {
     proTips: [
       'Use a lower discount rate (3-5%) for critical goals you cannot afford to miss (college, retirement basics) — this forces you to save more, providing a safety margin.',
       'Use a higher discount rate (8-10%) for aspirational goals — it reflects optimistic returns and tells you the minimum you could get away with saving.',
-      'The discount rate should match the risk of the future cash flow: use the 10-year Treasury yield (~4-5%) for guaranteed payments like bonds, and 7-10% for equity-like uncertain returns.',
+      'The discount rate should match the risk of the future cash flow: use the current 10-year Treasury yield for guaranteed payments like bonds, and 7-10% for equity-like uncertain returns.',
       'Always sensitivity-test your PV analysis with at least two discount rates — a 2% change in rate can swing the required investment by 30%+ for long time horizons.',
     ],
     limitations: [
@@ -255,7 +258,7 @@ const presentValueConfig: CalculatorConfig = {
       {
         question: 'What discount rate should I use?',
         answer:
-          'The discount rate depends on your goal. For investments: 7% is the inflation-adjusted S&P 500 long-run return (a common benchmark). 10% is the nominal S&P 500 average. For risk-free planning: use the current 10-year Treasury yield (~4-5%). For a business project: use your WACC (weighted average cost of capital). A higher discount rate means a lower present value — it makes future money worth less today. When in doubt, try multiple rates to see the range.',
+          'The discount rate depends on your goal. For investments: 7% is the inflation-adjusted S&P 500 long-run return (a common benchmark). 10% is the nominal S&P 500 average. For risk-free planning: use the current 10-year Treasury yield. For a business project: use your WACC (weighted average cost of capital). A higher discount rate means a lower present value — it makes future money worth less today. When in doubt, try multiple rates to see the range.',
       },
       {
         question: 'What is the difference between Present Value and Net Present Value (NPV)?',

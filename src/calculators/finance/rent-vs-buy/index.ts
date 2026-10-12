@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RentVsBuyPanel from './RentVsBuyPanel';
-import { monthlyPayment, loanBalanceAtYear } from './utils';
+import { numOr, simulateRentVsBuy, firstBuyingWinsYear, RvbParams } from './model';
 
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
       unit: '%',
       placeholder: '3',
       step: 0.1,
-      helpText: 'Historical average US rent increases: 3–5%/year. Enter 0 if rent is fixed.',
+      helpText: 'Typical US rent growth is a few percent a year. Blank uses 3%; enter 0 if rent is fixed.',
     },
     {
       id: 'rentersInsurance',
@@ -94,7 +94,7 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
       unit: '%',
       placeholder: '1.2',
       step: 0.01,
-      helpText: 'Varies by location. National average ~1.1%. Check your county assessor.',
+      helpText: 'Varies by location; the US effective average is roughly 1%. Check your county assessor.',
     },
     {
       id: 'maintenancePct',
@@ -104,6 +104,17 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
       placeholder: '1.5',
       step: 0.1,
       helpText: 'Rule of thumb: 1–2% of home value per year. Older homes trend higher.',
+    },
+    {
+      id: 'homeInsurancePct',
+      label: "Annual Homeowner's Insurance",
+      type: 'number',
+      unit: '%',
+      placeholder: '0.5',
+      min: 0,
+      max: 5,
+      step: 0.05,
+      helpText: "Homeowner's insurance as % of home value per year. Blank uses 0.5%; enter 0 to exclude it.",
     },
     {
       id: 'homeAppreciationRate',
@@ -158,146 +169,55 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // ── Parse inputs ──────────────────────────────────────────────────────────
+    // Blank -> default; an explicit 0 is respected (0% appreciation, fixed rent, no PMI ...).
     const monthlyRent = parseFloat(values.monthlyRent);
-    const annualRentIncrease = (parseFloat(values.annualRentIncrease) || 3) / 100;
-    const rentersInsurance = parseFloat(values.rentersInsurance) || 180;
-
     const homePrice = parseFloat(values.homePrice);
-    const downPaymentPct = (parseFloat(values.downPaymentPct) || 10) / 100;
     const mortgageRate = parseFloat(values.mortgageRate) / 100;
-    const closingCostsPct = (parseFloat(values.closingCostsPct) || 3) / 100;
-    const propertyTaxRate = (parseFloat(values.propertyTaxRate) || 1.2) / 100;
-    const maintenancePct = (parseFloat(values.maintenancePct) || 1.5) / 100;
-    const homeAppreciationRate = (parseFloat(values.homeAppreciationRate) || 3) / 100;
-    const sellingCostsPct = (parseFloat(values.sellingCostsPct) || 6) / 100;
-    const pmiRate = (parseFloat(values.pmiRate) || 0.7) / 100;
+    if ([monthlyRent, homePrice, mortgageRate].some(isNaN) || homePrice <= 0 || monthlyRent <= 0) return [];
 
-    const yearsToStay = Math.min(30, Math.max(1, Math.round(parseFloat(values.yearsToStay) || 7)));
+    const params: RvbParams = {
+      monthlyRent,
+      rentIncrease: numOr(values.annualRentIncrease, 3) / 100,
+      rentersInsurance: numOr(values.rentersInsurance, 180),
+      homePrice,
+      downPaymentPct: Math.min(1, Math.max(0, numOr(values.downPaymentPct, 10) / 100)),
+      mortgageRate,
+      closingCostsPct: numOr(values.closingCostsPct, 3) / 100,
+      propertyTaxRate: numOr(values.propertyTaxRate, 1.2) / 100,
+      maintenancePct: numOr(values.maintenancePct, 1.5) / 100,
+      homeInsurancePct: numOr(values.homeInsurancePct, 0.5) / 100,
+      appreciation: numOr(values.homeAppreciationRate, 3) / 100,
+      sellingCostsPct: numOr(values.sellingCostsPct, 6) / 100,
+      pmiRate: numOr(values.pmiRate, 0.7) / 100,
+      investReturn: 0.07, // opportunity-cost rate
+    };
+    const yearsToStay = Math.min(30, Math.max(1, Math.round(numOr(values.yearsToStay, 7))));
 
-    if (
-      [monthlyRent, homePrice, mortgageRate].some(isNaN) ||
-      homePrice <= 0 ||
-      monthlyRent <= 0
-    ) {
-      return [];
-    }
-
-    // ── Derived constants ─────────────────────────────────────────────────────
-    const downPayment = homePrice * downPaymentPct;
-    const closingCosts = homePrice * closingCostsPct;
+    const rows = simulateRentVsBuy(params);
+    const downPayment = homePrice * params.downPaymentPct;
+    const closingCosts = homePrice * params.closingCostsPct;
     const loanAmount = homePrice - downPayment;
-    const termMonths = 360; // 30-year fixed
-    const stockReturn = 0.07; // opportunity cost rate
-
-    // Monthly P&I
-    const mp = monthlyPayment(loanAmount, mortgageRate, termMonths);
-    const monthlyTax = (homePrice * propertyTaxRate) / 12;
-
-    // ── Build 30-year arrays ──────────────────────────────────────────────────
-    const cumulativeRentCost: number[] = new Array(31).fill(0);
-    const cumulativeBuyCost: number[] = new Array(31).fill(0);
-
-    // Track cumulative buying costs BEFORE sale proceeds (for comparison)
-    let cumBuyBeforeProceeds = downPayment + closingCosts;
-    let cumRent = 0;
-
-    const chartData: { year: number; cumulativeRentCost: number; cumulativeBuyCost: number }[] = [];
-
-    for (let y = 1; y <= 30; y++) {
-      // ── RENTING PATH ───────────────────────────────────────────────────────
-      // Rent this year (escalates)
-      const rentThisYear = monthlyRent * 12 * Math.pow(1 + annualRentIncrease, y - 1);
-      cumRent += rentThisYear + rentersInsurance;
-
-      // Opportunity cost: down payment + closing costs invested at 7%
-      const investedValue = (downPayment + closingCosts) * Math.pow(1 + stockReturn, y);
-      const investmentGain = investedValue - (downPayment + closingCosts);
-
-      // Net renting cost = all rent paid MINUS investment gains (renting lets you keep that cash)
-      const netRentCost = cumRent - investmentGain;
-      cumulativeRentCost[y] = netRentCost;
-
-      // ── BUYING PATH ────────────────────────────────────────────────────────
-      // P&I paid in year y
-      const piThisYear = Math.min(mp * 12, Math.max(0, mp * Math.min(y * 12, termMonths) - mp * Math.min((y - 1) * 12, termMonths)));
-
-      // Property tax
-      const taxThisYear = monthlyTax * 12;
-
-      // Maintenance (use current home value)
-      const homeValueAtY = homePrice * Math.pow(1 + homeAppreciationRate, y);
-      const homeValueAtYMinus1 = homePrice * Math.pow(1 + homeAppreciationRate, y - 1);
-      const maintenanceThisYear = homeValueAtYMinus1 * maintenancePct;
-
-      // PMI: applies if downPaymentPct < 0.20 AND loanBalance at start of year / homePrice > 0.80
-      const balAtStartOfYear = loanBalanceAtYear(loanAmount, mortgageRate, termMonths, y - 1);
-      let pmiThisYear = 0;
-      if (downPaymentPct < 0.20 && balAtStartOfYear / homePrice > 0.80) {
-        // PMI drops when LTV ≤ 80%; use avg of start/end balance for the year's PMI
-        const balAtEndOfYear = loanBalanceAtYear(loanAmount, mortgageRate, termMonths, y);
-        // Only charge PMI for the months in this year where LTV > 80%
-        const r = mortgageRate / 12;
-        let pmiMonths = 0;
-        let runningBal = balAtStartOfYear;
-        for (let m = 0; m < 12; m++) {
-          if (runningBal / homePrice > 0.80) {
-            pmiMonths++;
-          }
-          const interest = runningBal * r;
-          const principalPaid = mp - interest;
-          runningBal = Math.max(0, runningBal - principalPaid);
-        }
-        void balAtEndOfYear; // suppress unused warning
-        pmiThisYear = (loanAmount * pmiRate * pmiMonths) / 12;
-      }
-
-      cumBuyBeforeProceeds += piThisYear + taxThisYear + maintenanceThisYear + pmiThisYear;
-
-      // Sale proceeds at year y
-      const loanBal = loanBalanceAtYear(loanAmount, mortgageRate, termMonths, y);
-      const saleProceeds = homeValueAtY * (1 - sellingCostsPct) - loanBal;
-
-      // Net buying cost = all costs paid in minus net proceeds from sale
-      const netBuyCost = cumBuyBeforeProceeds - saleProceeds;
-      cumulativeBuyCost[y] = netBuyCost;
-
-      chartData.push({
-        year: y,
-        cumulativeRentCost: Math.round(netRentCost),
-        cumulativeBuyCost: Math.round(netBuyCost),
-      });
-    }
-
-    // ── Break-even ────────────────────────────────────────────────────────────
-    let breakEvenYear = 0; // 0 = buying always cheaper; -1 = never cheaper within 30 yrs
-    // Check if buying is cheaper from year 1
-    if (cumulativeBuyCost[1] < cumulativeRentCost[1]) {
-      breakEvenYear = 1;
-    } else {
-      let found = false;
-      for (let y = 2; y <= 30; y++) {
-        if (cumulativeBuyCost[y] < cumulativeRentCost[y]) {
-          breakEvenYear = y;
-          found = true;
-          break;
-        }
-      }
-      if (!found) breakEvenYear = -1; // never within 30 years
-    }
+    const chartData = rows.map((r) => ({
+      year: r.year,
+      cumulativeRentCost: Math.round(r.netRentCost),
+      cumulativeBuyCost: Math.round(r.netBuyCost),
+    }));
+    // 1 = buying already cheaper after year one; -1 = never within 30 years
+    const breakEvenYear = firstBuyingWinsYear(rows);
 
     // ── Horizon results ───────────────────────────────────────────────────────
-    const buyingCostAtHorizon = cumulativeBuyCost[yearsToStay];
-    const rentingCostAtHorizon = cumulativeRentCost[yearsToStay];
+    const at = rows[yearsToStay - 1];
+    const buyingCostAtHorizon = at.netBuyCost;
+    const rentingCostAtHorizon = at.netRentCost;
     const cheaperOption = buyingCostAtHorizon < rentingCostAtHorizon ? 'buy' : 'rent';
     const difference = Math.abs(buyingCostAtHorizon - rentingCostAtHorizon);
-    const homeValueAtHorizon = homePrice * Math.pow(1 + homeAppreciationRate, yearsToStay);
+    const homeValueAtHorizon = at.homeValue;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
     const breakEvenDisplay =
-      breakEvenYear === 0 || breakEvenYear === 1
+      breakEvenYear === 1
         ? 'Buying always cheaper'
         : breakEvenYear === -1
         ? 'No break-even within 30 years'
@@ -365,16 +285,29 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
           loanAmount,
           // For side-by-side breakdown
           monthlyRent,
-          annualRentIncrease: annualRentIncrease * 100,
-          rentersInsurance,
+          annualRentIncrease: params.rentIncrease * 100,
+          rentersInsurance: params.rentersInsurance,
           mortgageRate: mortgageRate * 100,
-          propertyTaxRate: propertyTaxRate * 100,
-          maintenancePct: maintenancePct * 100,
-          pmiRate: pmiRate * 100,
-          downPaymentPct: downPaymentPct * 100,
-          sellingCostsPct: sellingCostsPct * 100,
-          homeAppreciationRate: homeAppreciationRate * 100,
+          propertyTaxRate: params.propertyTaxRate * 100,
+          maintenancePct: params.maintenancePct * 100,
+          pmiRate: params.pmiRate * 100,
+          downPaymentPct: params.downPaymentPct * 100,
+          sellingCostsPct: params.sellingCostsPct * 100,
+          homeAppreciationRate: params.appreciation * 100,
           homeValueAtHorizon,
+          // Cumulative components at the chosen horizon, straight from the model (the panel never re-derives them)
+          breakdown: {
+            rentOnly: at.rentOnly,
+            rentersInsurance: at.rentersInsurancePaid,
+            investmentGain: at.investmentGain,
+            mortgagePaid: at.mortgagePaid,
+            tax: at.taxPaid,
+            insurance: at.insurancePaid,
+            maintenance: at.maintenancePaid,
+            pmi: at.pmiPaid,
+            saleProceeds: at.saleProceeds,
+            upfront: downPayment + closingCosts,
+          },
         }),
       },
     ];
@@ -393,7 +326,7 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
       caption: 'Buying has higher upfront costs from closing and down payment but builds equity, so the cumulative cost grows more slowly than renting over time',
     },
     formulaDescription:
-      'This calculator compares the true total cost of renting versus buying over your chosen time horizon. The buying path tracks principal and interest, property taxes, maintenance, PMI, and closing costs, then subtracts the net proceeds from selling the home. The renting path tracks all rent payments (adjusted for annual increases) and renters insurance, then subtracts the investment gains your down payment and closing costs would have earned if invested in the stock market at 7%. The break-even year is when cumulative buying costs first become lower than cumulative renting costs.',
+      'This calculator compares the true total cost of renting versus buying over your chosen time horizon. The buying path tracks principal and interest, property taxes, homeowner\'s insurance, maintenance, PMI, and closing costs, then subtracts the net proceeds from selling the home. The renting path tracks all rent payments (adjusted for annual increases) and renters insurance, then subtracts the investment gains your down payment and closing costs would have earned if invested in the stock market at 7%. The break-even year is when cumulative buying costs first become lower than cumulative renting costs.',
     variables: [
       {
         symbol: 'Break-Even',
@@ -429,7 +362,7 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
       'Model how changing home prices, mortgage rates, and rent increases affect whether renting or buying is the better financial decision.',
     ],
     explanation:
-      'The rent vs. buy decision is one of the most significant financial choices most people make. This calculator models the true total cost of each path, accounting for: opportunity cost of the down payment (invested in stocks instead), rent increases over time, building home equity through principal paydown and appreciation, PMI elimination when LTV hits 80%, and net sale proceeds after selling costs at your chosen time horizon. The break-even point is the year when buying becomes cheaper than renting on a cumulative net-cost basis. Historically, the national break-even is around 3-5 years in most markets, but it varies dramatically based on home prices, rents, and mortgage rates. In high-cost markets like San Francisco or NYC, the break-even can be 7-10+ years. The key insight: transaction costs (closing costs at purchase, ~6% selling costs at sale) are the biggest barrier to short-term buying. If you might move within 3 years, renting almost always wins financially. If you will stay 7+ years, buying typically builds more wealth.',
+      'The rent vs. buy decision is one of the most significant financial choices most people make. This calculator models the true total cost of each path, accounting for: opportunity cost of the down payment (invested in stocks instead), rent increases over time, building home equity through principal paydown and appreciation, PMI elimination when LTV hits 80%, and net sale proceeds after selling costs at your chosen time horizon. The break-even point is the year when buying becomes cheaper than renting on a cumulative net-cost basis. A commonly cited rule of thumb is that buying needs roughly 5-7 years to beat renting, but it varies dramatically with home prices, rents, and mortgage rates, and in high-cost markets it can take longer. The key insight: transaction costs (closing costs at purchase, ~6% selling costs at sale) are the biggest barrier to short-term buying. If you might move within 3 years, renting almost always wins financially. If you will stay 7+ years, buying typically builds more wealth.',
     faqs: [
       {
         question: 'How is the break-even year calculated?',
@@ -439,7 +372,7 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
       {
         question: 'Should I factor in tax deductions for mortgage interest?',
         answer:
-          'The calculator does not include mortgage interest deductions because the standard deduction ($27,700 for married couples in 2024) means only about 13% of filers itemize. If you do itemize, your true buying cost will be lower than calculated here. Consult a tax advisor for personalized analysis. The mortgage interest deduction is most valuable in the first years of the loan when interest payments are highest, and for higher-priced homes with larger mortgages.',
+          'The calculator does not include mortgage interest deductions because the 2026 standard deduction ($32,200 for married couples filing jointly, $16,100 single) means most filers do not itemize. If you do itemize, your true buying cost will be lower than calculated here. Consult a tax advisor for personalized analysis. The mortgage interest deduction is most valuable in the first years of the loan when interest payments are highest, and for higher-priced homes with larger mortgages.',
       },
       {
         question: 'What if I am unsure how long I will stay?',

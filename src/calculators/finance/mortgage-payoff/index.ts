@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import MortgagePayoffPanel from './MortgagePayoffPanel';
+import { simulatePayoff, payoffDateLabel, MAX_PAYOFF_MONTHS } from './payoffSim';
 
 const mortgagePayoffConfig: CalculatorConfig = {
   inputs: [
@@ -12,7 +13,7 @@ const mortgagePayoffConfig: CalculatorConfig = {
       prefix: '$',
       min: 0,
       step: 1000,
-      required: true,
+      helpText: 'Optional. Only used to show how much of the original loan you have already repaid.',
     },
     {
       id: 'currentBalance',
@@ -93,41 +94,19 @@ const mortgagePayoffConfig: CalculatorConfig = {
 
     const monthlyRate = annualRate / 12;
 
-    const simulate = (
-      startBalance: number,
-      payment: number,
-      extraMo: number,
-      yearlyLS: number
-    ): { months: number; totalInterest: number } => {
-      let bal = startBalance;
-      let months = 0;
-      let totalInterest = 0;
-      while (bal > 0.005 && months < 12000) {
-        const interest = bal * monthlyRate;
-        totalInterest += interest;
-        const extra = extraMo + (months > 0 && months % 12 === 0 ? yearlyLS : 0);
-        const principal = Math.min(bal, payment - interest + extra);
-        if (principal <= 0) { months = 99999; break; }
-        bal -= principal;
-        months++;
-      }
-      return { months, totalInterest };
-    };
+    const std = simulatePayoff(balance, monthlyRate, basePayment);
 
-    const stdStart = singleLumpSum > 0 ? Math.max(0, balance - singleLumpSum) : balance;
-    const std = simulate(balance, basePayment, 0, 0);
-
-    if (std.months >= 99999) {
+    if (std.neverPaysOff) {
       return [{
         id: 'negativeAmortization',
-        label: 'Warning: Negative Amortization',
-        value: 'Your monthly payment is too low to cover the monthly interest. The loan balance will increase over time.',
+        label: 'Warning: Payment Too Low',
+        value: `Your monthly payment is too low to pay this loan off within ${MAX_PAYOFF_MONTHS / 12} years (it barely covers, or does not cover, the monthly interest). Increase the payment or check the balance and rate.`,
         highlight: true,
         color: 'negative' as const,
       }];
     }
 
-    const newSim = simulate(stdStart, basePayment, extraMonthly, yearlyLumpSum);
+    const newSim = simulatePayoff(balance, monthlyRate, basePayment, extraMonthly, yearlyLumpSum, singleLumpSum);
 
     const monthsSaved = std.months - newSim.months;
     const interestSaved = std.totalInterest - newSim.totalInterest;
@@ -140,12 +119,6 @@ const mortgagePayoffConfig: CalculatorConfig = {
       return [y > 0 ? `${y} yr${y !== 1 ? 's' : ''}` : '', m > 0 ? `${m} mo` : ''].filter(Boolean).join(' ');
     };
 
-    const payoffDate = (months: number) => {
-      const d = new Date();
-      d.setMonth(d.getMonth() + months);
-      return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    };
-
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -153,7 +126,7 @@ const mortgagePayoffConfig: CalculatorConfig = {
       {
         id: 'standardPayoffDate',
         label: 'Standard Payoff Date',
-        value: payoffDate(std.months),
+        value: payoffDateLabel(std.months),
         highlight: !hasExtra,
         color: 'neutral' as const,
       },
@@ -171,7 +144,7 @@ const mortgagePayoffConfig: CalculatorConfig = {
         {
           id: 'newPayoffDate',
           label: 'New Payoff Date — Debt Free!',
-          value: payoffDate(newSim.months),
+          value: payoffDateLabel(newSim.months),
           highlight: true,
           color: 'positive' as const,
           interpretation: interestSaved > 0
@@ -199,6 +172,17 @@ const mortgagePayoffConfig: CalculatorConfig = {
       );
     }
 
+
+    const original = parseFloat(values.originalAmount);
+    if (Number.isFinite(original) && original >= balance && original > 0) {
+      results.push({
+        id: 'paidSoFar',
+        label: 'Already Repaid',
+        value: `${(((original - balance) / original) * 100).toFixed(1)}% of the original $${fmt(original)}`,
+        color: 'neutral' as const,
+      });
+    }
+
     return results;
   },
   extraPanel: (values, results) => {
@@ -223,7 +207,7 @@ const mortgagePayoffConfig: CalculatorConfig = {
   educational: {
     formula: 'Interest Saved = Standard Total Interest − Accelerated Total Interest',
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect width="440" height="340" fill="var(--svg-f8fafc)" rx="8"/><text x="220" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--svg-1e293b)">Mortgage Payoff: Principal vs. Interest</text><text x="220" y="44" text-anchor="middle" font-size="11" fill="var(--svg-64748b)">Extra payments today save years of interest tomorrow</text><g transform="translate(30,60)"><!-- House icon (simplified) --><polygon points="190,10 290,50 290,110 90,110 90,50" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2" stroke-linejoin="round"/><rect x="140" y="60" width="110" height="50" rx="4" fill="var(--svg-f1f5f9)" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="195" y="82" text-anchor="middle" font-size="9" fill="var(--svg-475569)">Mortgage Balance</text><text x="195" y="98" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e40af)">$280K</text></g><!-- Early years pie / bar breakdown --><g transform="translate(40,190)"><text x="100" y="10" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">Early Years (High Interest)</text><rect x="20" y="20" width="160" height="40" rx="5" fill="var(--svg-ef4444)"/><text x="100" y="44" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">~80% Interest</text><rect x="20" y="62" width="40" height="20" rx="4" fill="var(--svg-3b82f6)"/><text x="40" y="76" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">20% Principal</text><text x="220" y="10" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">Later Years (High Principal)</text><rect x="200" y="38" width="160" height="40" rx="5" fill="var(--svg-22c55e)"/><text x="280" y="62" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">~80% Principal</text><rect x="200" y="80" width="120" height="20" rx="4" fill="var(--svg-ef4444)"/><text x="260" y="94" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">20% Interest</text></g><!-- Comparison arrows --><g transform="translate(40,290)"><rect x="10" y="0" width="180" height="36" rx="8" fill="var(--svg-f1f5f9)"/><text x="100" y="14" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ef4444)">Standard: 30yr, $360K interest</text><text x="100" y="28" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">vs.</text><rect x="230" y="0" width="180" height="36" rx="8" fill="var(--svg-f0fdf4)"/><text x="320" y="14" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-16a34a)">Extra $300/mo: 21yr, $260K interest</text><text x="320" y="28" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">Save 9 years &amp; $100K+</text></g></svg>',
+      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect width="440" height="340" fill="var(--svg-f8fafc)" rx="8"/><text x="220" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--svg-1e293b)">Mortgage Payoff: Principal vs. Interest</text><text x="220" y="44" text-anchor="middle" font-size="11" fill="var(--svg-64748b)">Extra payments today save years of interest tomorrow</text><g transform="translate(30,60)"><!-- House icon (simplified) --><polygon points="190,10 290,50 290,110 90,110 90,50" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2" stroke-linejoin="round"/><rect x="140" y="60" width="110" height="50" rx="4" fill="var(--svg-f1f5f9)" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="195" y="82" text-anchor="middle" font-size="9" fill="var(--svg-475569)">Mortgage Balance</text><text x="195" y="98" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e40af)">$280K</text></g><!-- Early years pie / bar breakdown --><g transform="translate(40,190)"><text x="100" y="10" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">Early Years (High Interest)</text><rect x="20" y="20" width="160" height="40" rx="5" fill="var(--svg-ef4444)"/><text x="100" y="44" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">~80% Interest</text><rect x="20" y="62" width="40" height="20" rx="4" fill="var(--svg-3b82f6)"/><text x="40" y="76" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">20% Principal</text><text x="220" y="10" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">Later Years (High Principal)</text><rect x="200" y="38" width="160" height="40" rx="5" fill="var(--svg-22c55e)"/><text x="280" y="62" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ffffff)">~80% Principal</text><rect x="200" y="80" width="120" height="20" rx="4" fill="var(--svg-ef4444)"/><text x="260" y="94" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">20% Interest</text></g><!-- Comparison arrows --><g transform="translate(40,290)"><rect x="10" y="0" width="180" height="36" rx="8" fill="var(--svg-f1f5f9)"/><text x="100" y="14" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-ef4444)">Standard: 30yr, $467K interest</text><text x="100" y="28" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">vs.</text><rect x="230" y="0" width="180" height="36" rx="8" fill="var(--svg-f0fdf4)"/><text x="320" y="14" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-16a34a)">Extra $300/mo: 21.6yr, $316K interest</text><text x="320" y="28" text-anchor="middle" font-size="9" fill="var(--svg-64748b)">Save 8.4 years &amp; $151K</text></g></svg>',
       alt: 'Mortgage payoff visual showing a house with mortgage balance, early years interest vs principal breakdown, and comparison of standard vs accelerated payoff timelines',
       caption: 'In the early years of a mortgage, most of your payment goes to interest — extra principal payments reduce total interest by years and thousands of dollars',
     },
@@ -246,7 +230,7 @@ const mortgagePayoffConfig: CalculatorConfig = {
       'Determine the exact month and year you will become mortgage-free under different accelerated payment strategies.',
     ],
     explanation:
-      'The early years of a mortgage are heavily front-loaded with interest — in year 1 of a 30-year mortgage at 6.75%, over 80% of each payment may go to interest and less than 20% to principal. This is because the interest is calculated on the full outstanding balance, which is largest at the beginning. Extra principal payments are uniquely powerful because they permanently eliminate future interest charges on that principal for the entire remaining term. A $300/month extra payment on a $350,000 mortgage at 6.75% can save you over $100,000 in interest and cut nearly 9 years off your loan. The calculator simulates this month by month: every extra dollar you pay today potentially saves multiple dollars in future interest.',
+      'The early years of a mortgage are heavily front-loaded with interest — in year 1 of a 30-year mortgage at 6.75%, over 80% of each payment may go to interest and less than 20% to principal. This is because the interest is calculated on the full outstanding balance, which is largest at the beginning. Extra principal payments are uniquely powerful because they permanently eliminate future interest charges on that principal for the entire remaining term. On a new $350,000 30-year mortgage at 6.75%, a $300/month extra payment saves about $151,700 in interest and cuts about 8.4 years (101 payments) off the loan. The calculator simulates this month by month: every extra dollar you pay today potentially saves multiple dollars in future interest.',
     faqs: [
       {
         question: 'Should I make extra monthly payments or a large annual lump sum?',

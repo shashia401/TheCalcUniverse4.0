@@ -87,3 +87,29 @@ describe('net-worth', () => {
     near(parseNumber(getValue(r, 'debtToAsset')), 50);
   });
 });
+
+import { getValue as gvNw } from '../../helpers';
+import { parseAmount } from '../../../src/utils/calcResults';
+
+describe('net worth audit', () => {
+  // Michael: assets 15+50+80+300+10 = 455,000; liabilities 220+12+3 = 235,000; NW 220,000; 235/455 = 51.648% -> 51.6%
+  const michael = { cash: '15000', investments: '50000', retirement: '80000', realEstate: '300000', otherAssets: '10000', mortgage: '220000', carLoans: '12000', creditCardDebt: '3000' };
+  it('worked example 1 (Michael)', () => {
+    const r = config.calculate(michael);
+    expect(gvNw(r, 'totalAssets')).toBe('$455,000.00');
+    expect(gvNw(r, 'totalLiabilities')).toBe('$235,000.00');
+    expect(gvNw(r, 'netWorth')).toBe('$220,000.00');
+    expect(gvNw(r, 'debtToAsset')).toBe('51.6%');
+  });
+  // Aisha: assets 8+15+18 = 41,000; liabilities 8+22+2 = 32,000; NW 9,000; 32/41 = 78.05% -> 78.0%
+  it('worked example 2 (Aisha)', () => {
+    const r = config.calculate({ cash: '8000', retirement: '15000', otherAssets: '18000', carLoans: '8000', studentLoans: '22000', creditCardDebt: '2000' });
+    expect(gvNw(r, 'netWorth')).toBe('$9,000.00');
+    expect(gvNw(r, 'debtToAsset')).toBe('78.0%');
+  });
+  it('negative net worth keeps its sign when re-parsed (panel used to strip the minus and show it as positive)', () => {
+    const r = config.calculate({ cash: '1000', studentLoans: '6000' });
+    expect(gvNw(r, 'netWorth')).toBe('-$5,000.00');
+    expect(parseAmount(gvNw(r, 'netWorth'))).toBe(-5000);
+  });
+});

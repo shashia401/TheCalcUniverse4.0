@@ -2,6 +2,41 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RentAffordabilityPanel from './RentAffordabilityPanel';
 
+/** Shared by calculate() and the panel. Returns null for incomplete input. */
+function rentCalc(values: Record<string, string>) {
+  const grossIncome = parseFloat(values.grossIncome);
+  const incomeFrequency = values.incomeFrequency || 'annual';
+  const monthlyDebts = parseFloat(values.monthlyDebts) || 0;
+  const rentRule = values.rentRule || '30';
+  const customPct = parseFloat(values.customPct) / 100;
+  if (!(grossIncome > 0)) return null;
+
+  let monthlyIncome: number;
+  switch (incomeFrequency) {
+    case 'monthly': monthlyIncome = grossIncome; break;
+    case 'hourly': monthlyIncome = (grossIncome * 40 * 52) / 12; break;
+    default: monthlyIncome = grossIncome / 12;
+  }
+
+  let maxRent: number;
+  let ruleName: string;
+  if (rentRule === '40x') {
+    maxRent = (monthlyIncome * 12) / 40;
+    ruleName = '40x Rule';
+  } else if (rentRule === 'custom') {
+    const pct = isNaN(customPct) ? 0.30 : customPct;
+    maxRent = monthlyIncome * pct;
+    ruleName = `${(pct * 100).toFixed(0)}% Custom Rule`;
+  } else if (rentRule === '25') {
+    maxRent = monthlyIncome * 0.25;
+    ruleName = '25% Conservative Rule';
+  } else {
+    maxRent = monthlyIncome * 0.30; // '30' and any unknown value
+    ruleName = '30% Rule';
+  }
+  return { monthlyIncome, maxRent, ruleName, monthlyDebts };
+}
+
 const rentAffordabilityConfig: CalculatorConfig = {
   inputs: [
     {
@@ -11,6 +46,7 @@ const rentAffordabilityConfig: CalculatorConfig = {
       placeholder: '75,000',
       prefix: '$',
       min: 0,
+      max: 100000000,
       step: 100,
       required: true,
       helpText: 'Your income before taxes — enter annual, monthly, or hourly based on the frequency selected.',
@@ -63,38 +99,11 @@ const rentAffordabilityConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const grossIncome = parseFloat(values.grossIncome);
-    const incomeFrequency = values.incomeFrequency || 'annual';
-    const monthlyDebts = parseFloat(values.monthlyDebts) || 0;
-    const rentRule = values.rentRule || '30';
-    const customPct = parseFloat(values.customPct) / 100;
-
-    if (isNaN(grossIncome) || grossIncome <= 0) return [];
-
-    let monthlyIncome: number;
-    switch (incomeFrequency) {
-      case 'monthly': monthlyIncome = grossIncome; break;
-      case 'hourly': monthlyIncome = grossIncome * 40 * 52 / 12; break;
-      default: monthlyIncome = grossIncome / 12;
-    }
-
-    let maxRent: number;
-    let ruleName: string;
-    let rulePct: number;
-
-    if (rentRule === '40x') {
-      maxRent = (monthlyIncome * 12) / 40;
-      ruleName = '40x Rule';
-      rulePct = maxRent / monthlyIncome;
-    } else if (rentRule === 'custom') {
-      rulePct = isNaN(customPct) ? 0.30 : customPct;
-      maxRent = monthlyIncome * rulePct;
-      ruleName = `${(rulePct * 100).toFixed(0)}% Custom Rule`;
-    } else {
-      rulePct = parseFloat(rentRule) / 100;
-      maxRent = monthlyIncome * rulePct;
-      ruleName = rentRule === '25' ? '25% Conservative Rule' : '30% Rule';
-    }
+    const c = rentCalc(values);
+    if (!c) return [];
+    const { monthlyIncome, maxRent, ruleName, monthlyDebts } = c;
+    // 40x test with a tolerance: 12*(income/12) vs 40*(0.30*income/12) differ by float noise at exactly 30%.
+    const meets40x = monthlyIncome * 12 >= maxRent * 40 - 1e-6;
 
     const remainingAfterRentAndDebt = monthlyIncome - maxRent - monthlyDebts;
     const fmtD = (n: number) =>
@@ -135,37 +144,15 @@ const rentAffordabilityConfig: CalculatorConfig = {
       {
         id: 'landlordRule',
         label: 'Meets 40x Landlord Requirement?',
-        value: (monthlyIncome * 12) >= maxRent * 40 ? 'Yes — income qualifies' : `No — landlords require ~$${fmtD(maxRent * 40 / 12)}/mo income`,
-        color: (monthlyIncome * 12) >= maxRent * 40 ? 'positive' as const : 'negative' as const,
+        value: meets40x ? 'Yes — income qualifies' : `No — landlords require ~$${fmtD(maxRent * 40 / 12)}/mo income`,
+        color: meets40x ? 'positive' as const : 'negative' as const,
       },
     ];
   },
   extraPanel: (values, results) => {
-    const grossIncome = parseFloat(values.grossIncome);
-    const incomeFrequency = values.incomeFrequency || 'annual';
-    const monthlyDebts = parseFloat(values.monthlyDebts) || 0;
-    const rentRule = values.rentRule || '30';
-    const customPct = parseFloat(values.customPct) / 100;
-
-    if (!results.length || isNaN(grossIncome)) return null;
-
-    let monthlyIncome: number;
-    switch (incomeFrequency) {
-      case 'monthly': monthlyIncome = grossIncome; break;
-      case 'hourly': monthlyIncome = grossIncome * 40 * 52 / 12; break;
-      default: monthlyIncome = grossIncome / 12;
-    }
-
-    let maxRent: number;
-    if (rentRule === '40x') {
-      maxRent = (monthlyIncome * 12) / 40;
-    } else if (rentRule === 'custom') {
-      maxRent = monthlyIncome * (isNaN(customPct) ? 0.30 : customPct);
-    } else {
-      maxRent = monthlyIncome * parseFloat(rentRule) / 100;
-    }
-
-    return createElement(RentAffordabilityPanel, { monthlyIncome, maxRent, monthlyDebts });
+    const c = rentCalc(values);
+    if (!results.length || !c) return null;
+    return createElement(RentAffordabilityPanel, { monthlyIncome: c.monthlyIncome, maxRent: c.maxRent, monthlyDebts: c.monthlyDebts });
   },
   educational: {
     formula: '30% Rule: Max Rent = Monthly Income × 0.30   ·   40x Rule: Max Rent = Annual Income ÷ 40',
@@ -175,9 +162,9 @@ const rentAffordabilityConfig: CalculatorConfig = {
       caption: 'The 30% rule (and equivalent 40x landlord rule) ensures you have enough income for other essentials and savings after paying rent',
     },
     formulaDescription:
-      'The 30% rule calculates rent as a share of gross monthly income — a benchmark established by US housing policy in the 1960s. The 40x rule (popular in NYC and other major metros) requires annual income to be at least 40 times the monthly rent. Both rules arrive at roughly the same conclusion: housing costs should not consume more than about 30% of your income.',
+      'The 30% rule calculates rent as a share of gross monthly income — a benchmark with roots in US public-housing policy (a 25% rent cap enacted in 1969, raised to 30% in 1981). The 40x rule (popular in NYC and other major metros) requires annual income to be at least 40 times the monthly rent. Both rules arrive at roughly the same conclusion: housing costs should not consume more than about 30% of your income.',
     variables: [
-      { symbol: '30% Rule', name: 'The Standard Rule', description: 'The most widely cited housing affordability benchmark. If you earn $5,000/month gross, you should spend no more than $1,500 on rent. It originated from US public housing policies in the 1960s, which capped rent at 25% for subsidized tenants, and later evolved into the 30% general personal finance guideline used by landlords and financial advisors alike.' },
+      { symbol: '30% Rule', name: 'The Standard Rule', description: 'The most widely cited housing affordability benchmark. If you earn $5,000/month gross, you should spend no more than $1,500 on rent. It grew out of US public-housing policy: a 25% cap on subsidized rents in 1969 that was raised to 30% in 1981, and it became the general personal-finance guideline used by landlords and financial advisors alike.' },
       { symbol: '40x Rule', name: 'The NYC/Metro Rule', description: 'Landlords in competitive rental markets often require annual income to be at least 40 times the monthly rent. For a $2,500/month apartment, you need $100,000/year in income. This is mathematically equivalent to approximately 30% of gross income but is framed differently to simplify landlord screening. It is the standard in cities like New York, San Francisco, and Boston.' },
       { symbol: '25% Rule', name: 'Conservative Guideline', description: 'A stricter 25% rule used by financial planners who advocate for more savings and financial flexibility. This is especially valuable if you have high existing debt payments (student loans, car payments), irregular income, or are trying to save aggressively for a down payment on a home.' },
     ],

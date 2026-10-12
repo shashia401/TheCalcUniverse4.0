@@ -1,107 +1,7 @@
-import { createElement, useMemo } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
-import { pmt, fmtCurrency } from '../../../utils/financial';
-import { TrendingUp } from 'lucide-react';
-
-function RefinancePanel({ values }: { values: Record<string, string>; results: CalculatorResult[] }) {
-  const currentBalance = parseFloat(values.currentBalance) || 0;
-  const currentRate = parseFloat(values.currentRate) / 100 || 0;
-  const currentTerm = parseFloat(values.currentTerm) || 0;
-  const newRate = parseFloat(values.newRate) / 100 || 0;
-  const newTerm = parseFloat(values.newTerm) || 0;
-  const closingCosts = parseFloat(values.closingCosts) || 0;
-  const plannedStay = parseFloat(values.plannedStay) || 0;
-
-  const isMissing = (v: string | undefined) => v === undefined || v === null || v === '';
-  if (isMissing(values.currentBalance) || isMissing(values.currentRate) || isMissing(values.newRate) || isMissing(values.currentTerm) || isMissing(values.newTerm)) return null;
-
-  const oldMonthlyRate = currentRate / 12;
-  const oldPayment = pmt(currentBalance, oldMonthlyRate, currentTerm);
-  const newMonthlyRate = newRate / 12;
-  const newPayment = pmt(currentBalance, newMonthlyRate, newTerm);
-  const monthlySavings = oldPayment - newPayment;
-  const breakEvenMonths = monthlySavings > 0 ? Math.ceil(closingCosts / monthlySavings) : Infinity;
-
-  // Build amortization schedules for chart
-  const chartData = useMemo(() => {
-    const data: Array<{ year: number; oldBalance: number; newBalance: number }> = [];
-    const maxMonths = Math.max(currentTerm, newTerm);
-    let oldBal = currentBalance;
-    let newBal = currentBalance;
-
-    for (let m = 1; m <= maxMonths; m++) {
-      if (oldBal > 0) {
-        const oi = oldBal * oldMonthlyRate;
-        const op = oldPayment - oi;
-        oldBal = Math.max(0, oldBal - op);
-      }
-      if (newBal > 0) {
-        const ni = newBal * newMonthlyRate;
-        const np = newPayment - ni;
-        newBal = Math.max(0, newBal - np);
-      }
-      if (m % 12 === 0) {
-        data.push({ year: m / 12, oldBalance: oldBal, newBalance: newBal });
-      }
-    }
-    return data;
-  }, [currentBalance, oldMonthlyRate, oldPayment, newMonthlyRate, newPayment, currentTerm, newTerm]);
-
-  if (!chartData.length) return null;
-
-  const maxVal = Math.max(...chartData.map((d) => Math.max(d.oldBalance, d.newBalance)));
-  const width = 520, height = 180, padL = 55, padR = 20, padT = 16, padB = 36;
-  const chartW = width - padL - padR, chartH = height - padT - padB;
-  const toX = (i: number) => padL + (i / (chartData.length - 1)) * chartW;
-  const toY = (v: number) => padT + (1 - v / maxVal) * chartH;
-
-  const oldPath = chartData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${toX(i).toFixed(1)} ${toY(d.oldBalance).toFixed(1)}`).join(' ');
-  const newPath = chartData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${toX(i).toFixed(1)} ${toY(d.newBalance).toFixed(1)}`).join(' ');
-
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
-      <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
-        <TrendingUp size={16} className="text-slate-500" />
-        <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Refinance Analysis — Balance Comparison</span>
-      </div>
-      <div className="p-6 space-y-4">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ minWidth: '280px' }} role="img" aria-label="Refinance comparison chart">
-          {[0, 0.25, 0.5, 0.75, 1].map((g) => {
-            const y = padT + (1 - g) * chartH;
-            return (
-              <g key={g}>
-                <line x1={padL} y1={y} x2={padL + chartW} y2={y} stroke="#e2e8f0" strokeWidth={0.5} />
-                <text x={padL - 4} y={y} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="#94a3b8">
-                  {maxVal * g >= 1_000_000 ? `$${(maxVal * g / 1_000_000).toFixed(1)}M` : `$${(maxVal * g / 1_000).toFixed(0)}K`}
-                </text>
-              </g>
-            );
-          })}
-          {chartData.filter((_, i) => i % Math.max(1, Math.floor(chartData.length / 5)) === 0 || i === chartData.length - 1).map((d) => (
-            <text key={d.year} x={toX(chartData.indexOf(d))} y={height - 6} textAnchor="middle" fontSize={8} fill="#94a3b8">Yr {d.year}</text>
-          ))}
-          <path d={oldPath} fill="none" stroke="#ef4444" strokeWidth={2.5} strokeLinejoin="round" />
-          <path d={newPath} fill="none" stroke="#22c55e" strokeWidth={2.5} strokeLinejoin="round" />
-          <rect x={padL} y={padT} width={chartW} height={chartH} fill="none" stroke="#e2e8f0" strokeWidth={0.5} />
-        </svg>
-        <div className="flex flex-wrap gap-4 justify-center">
-          <div className="flex items-center gap-1.5"><div className="w-4 h-0.5 bg-red-500" /><span className="text-[10px] text-slate-500">Current Loan Balance</span></div>
-          <div className="flex items-center gap-1.5"><div className="w-4 h-0.5 bg-emerald-500" /><span className="text-[10px] text-slate-500">Refinanced Balance</span></div>
-        </div>
-        {monthlySavings > 0 && (
-          <div className="rounded-xl bg-blue-50 border border-blue-200 p-3">
-            <p className="text-[11px] text-blue-800 leading-relaxed">
-              After <strong>{breakEvenMonths} months</strong> (break-even point), you save <strong>{fmtCurrency(monthlySavings)}/mo</strong>.
-              {plannedStay > breakEvenMonths
-                ? ` Over your planned ${plannedStay}mo stay, you'd save ~${fmtCurrency(monthlySavings * (plannedStay - breakEvenMonths))}.`
-                : ` But you plan to stay only ${plannedStay}mo — you won't recoup the closing costs.`}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+import { createElement } from 'react';
+import { CalculatorConfig } from '../../../types/calculator';
+import RefinancePanel from './RefinancePanel';
+import { computeRefi } from './refinanceMath';
 
 const refinanceConfig: CalculatorConfig = {
   inputs: [
@@ -193,42 +93,31 @@ const refinanceConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const currentBalance = parseFloat(values.currentBalance);
-    const currentRate = parseFloat(values.currentRate) / 100;
-    const currentTerm = parseFloat(values.currentTerm);
-    const newRate = parseFloat(values.newRate) / 100;
-    const newTerm = parseFloat(values.newTerm);
-    const closingCosts = parseFloat(values.closingCosts) || 0;
-    const plannedStay = parseFloat(values.plannedStay) || 60;
-
-    if (isNaN(currentBalance) || isNaN(currentRate) || isNaN(currentTerm) || isNaN(newRate) || isNaN(newTerm) || currentBalance <= 0) return [];
-
-    const oldMonthlyRate = currentRate / 12;
-    const oldPayment = pmt(currentBalance, oldMonthlyRate, currentTerm);
-    const newMonthlyRate = newRate / 12;
-    const newPayment = pmt(currentBalance, newMonthlyRate, newTerm);
-
-    const monthlySavings = oldPayment - newPayment;
-    const breakEvenMonths = monthlySavings > 0 ? Math.ceil(closingCosts / monthlySavings) : Infinity;
+    const c = computeRefi(values);
+    if (!c) return [];
+    const { monthlySavings, breakEvenMonths, plannedStay, closingCosts, interestSaved } = c;
+    const rateLower = c.newRate < c.currentRate;
     const paysOffBeforeBreakEven = plannedStay < breakEvenMonths;
+    const netInterestSaved = interestSaved - closingCosts;
 
-    // Total interest remaining on current vs new
-    const oldTotalPayment = oldPayment * currentTerm;
-    const oldTotalInterest = oldTotalPayment - currentBalance;
-    const newTotalPayment = newPayment * Math.min(newTerm, 360);
-    const newTotalInterest = newTotalPayment - currentBalance;
-    const totalInterestSaved = Math.max(0, oldTotalInterest - newTotalInterest);
+    const fmt = (n: number) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
     // Recommendation
     let recommendation: string;
     let recColor: 'positive' | 'negative' | 'neutral';
     if (monthlySavings <= 0) {
-      recommendation = 'Wait — your new rate is not lower';
-      recColor = 'negative';
-    } else if (plannedStay >= breakEvenMonths && newRate < currentRate) {
+      if (rateLower && netInterestSaved > 0) {
+        // Shorter term: the payment rises but lifetime interest falls by more than the closing costs.
+        recommendation = `Yes — shorter term saves ${fmt(netInterestSaved)} in interest after closing costs (payment rises ${fmt(-monthlySavings)}/mo)`;
+        recColor = 'positive';
+      } else {
+        recommendation = rateLower ? 'Wait — interest savings do not cover the closing costs' : 'Wait — your new rate is not lower';
+        recColor = 'negative';
+      }
+    } else if (plannedStay >= breakEvenMonths && rateLower) {
       recommendation = 'Yes — Refinance now';
       recColor = 'positive';
-    } else if (plannedStay < breakEvenMonths && breakEvenMonths < Infinity) {
+    } else if (paysOffBeforeBreakEven) {
       recommendation = `Wait — break-even (${breakEvenMonths}mo) exceeds your stay (${plannedStay}mo)`;
       recColor = 'negative';
     } else {
@@ -236,16 +125,14 @@ const refinanceConfig: CalculatorConfig = {
       recColor = 'neutral';
     }
 
-    const fmt = (n: number) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-
-    const results = [
+    return [
       {
         id: 'recommendation',
         label: 'Recommendation',
         value: recommendation,
         highlight: true,
         color: recColor,
-        interpretation: `Refinancing carries upfront closing costs, so it only pays off if you keep the loan past the break-even point (${breakEvenMonths < Infinity ? `about ${breakEvenMonths} months here` : 'never, at these numbers'}). ${monthlySavings > 0 ? `The lower payment helps, but resetting to a fresh 30-year term can still raise total interest even at a lower rate.` : `Your new rate isn't lower, so there's nothing to recover.`}`,
+        interpretation: `Refinancing carries upfront closing costs, so it only pays off if you keep the loan past the break-even point (${breakEvenMonths < Infinity ? `about ${breakEvenMonths} months here` : 'a lower payment never pays them back at these numbers'}). ${monthlySavings > 0 ? `The lower payment helps, but resetting to a fresh 30-year term can still raise total interest even at a lower rate.` : rateLower ? `Your payment goes up because the term is shorter; the benefit comes from interest saved, not cash flow.` : `Your new rate isn't lower, so there's nothing to recover.`}`,
       },
       {
         id: 'monthlySavings',
@@ -262,37 +149,35 @@ const refinanceConfig: CalculatorConfig = {
       {
         id: 'oldPayment',
         label: 'Current Monthly Payment',
-        value: fmt(oldPayment),
+        value: fmt(c.oldPayment),
         color: 'neutral' as const,
       },
       {
         id: 'newPayment',
         label: 'New Monthly Payment',
-        value: fmt(newPayment),
-        color: newPayment < oldPayment ? 'positive' as const : 'negative' as const,
+        value: fmt(c.newPayment),
+        color: c.newPayment < c.oldPayment ? 'positive' as const : 'negative' as const,
       },
       {
         id: 'totalInterestSaved',
-        label: 'Total Interest Saved (Full Term)',
-        value: totalInterestSaved > 0 ? fmt(totalInterestSaved) : 'No savings',
-        color: totalInterestSaved > 0 ? 'positive' as const : 'negative' as const,
+        label: 'Total Interest Saved (Full Term, before closing costs)',
+        value: interestSaved > 0 ? fmt(interestSaved) : 'No savings',
+        color: interestSaved > 0 ? 'positive' as const : 'negative' as const,
       },
       {
         id: 'netBenefit',
-        label: 'Net Benefit Over Planned Stay',
-        value: monthlySavings > 0 && plannedStay > breakEvenMonths
-          ? fmt(monthlySavings * (plannedStay - breakEvenMonths))
+        label: 'Net Benefit Over Planned Stay (payment savings - closing costs)',
+        value: monthlySavings > 0 && plannedStay >= breakEvenMonths
+          ? fmt(c.netOverStay)
           : monthlySavings > 0 ? `Not yet break-even` : '—',
-        color: monthlySavings > 0 && plannedStay > breakEvenMonths ? 'positive' as const : 'neutral' as const,
+        color: monthlySavings > 0 && plannedStay >= breakEvenMonths ? 'positive' as const : 'neutral' as const,
       },
     ];
-
-    return results;
   },
 
   extraPanel: (values, results) => {
     if (!results.length) return null;
-    return createElement(RefinancePanel, { values, results });
+    return createElement(RefinancePanel, { values });
   },
 
   educational: {
@@ -307,7 +192,7 @@ const refinanceConfig: CalculatorConfig = {
     variables: [
       { symbol: 'Break-Even', name: 'Months to Recoup Costs', description: 'Closing costs divided by monthly savings. This is the single most critical number in any refinance decision — it tells you how long it takes for the savings to cover the upfront costs.' },
       { symbol: 'Monthly Savings', name: 'Reduction in Payment', description: 'Old monthly payment minus new monthly payment. Can be negative if extending the loan term cancels out the benefit of a lower rate. Not all lower payments are actually savings.' },
-      { symbol: 'Rate Drop', name: 'Interest Rate Reduction', description: 'The difference between old and new APR. A 1% drop on a $200,000 loan typically saves about $150/month. However, the actual savings depends on how much time is left on the current loan.' },
+      { symbol: 'Rate Drop', name: 'Interest Rate Reduction', description: 'The difference between old and new APR. A 1% drop on a $200,000 30-year loan saves roughly $130 to $135/month. However, the actual savings depends on how much time is left on the current loan.' },
       { symbol: 'Planned Stay', name: 'Your Time Horizon', description: 'How many months you plan to stay in the home after refinancing. If this is less than the break-even period, do not refinance — you will not recoup the closing costs.' },
       { symbol: 'Total Interest Savings', name: 'Lifetime Cost Comparison', description: 'The net savings in total interest paid over the full life of the new loan compared to the remaining term of the old loan. A lower monthly payment does not always mean lower total interest — resetting the loan term can increase lifetime cost even at a lower rate.' },
     ],
@@ -348,7 +233,7 @@ proTips: [
       'Get a Loan Estimate from at least 3 lenders — closing costs can vary by thousands of dollars for the same rate. Use the break-even with each lender\'s actual fees, not estimates.',
       'A "no-cost refinance" rolls closing costs into the rate (you pay a slightly higher rate in exchange for zero upfront costs). If you might move within 2-3 years, a no-cost refi eliminates break-even risk entirely — but you pay more if you stay long-term.',
       'When refinancing from a 30-year with 25 years left into a new 30-year, calculate the total interest over the SAME 25-year horizon (by adding extra principal to the new loan schedule) for a fair comparison. The calculator shows lifetime totals which include the extra 5 years.',
-      'If your credit score has improved significantly since your original mortgage, you may qualify for a much better rate than the average. Check your credit before shopping — a 100-point improvement can mean 0.5–1% lower rate.',
+      'If your credit score has improved significantly since your original mortgage, you may qualify for a much better rate than the average. Check your credit before shopping — a large improvement can mean a meaningfully lower rate.',
     ],
 workedExamples: [
       {
@@ -362,8 +247,8 @@ workedExamples: [
           'Refinance Closing Costs': '$6,000',
           'How Long Will You Stay?': '60',
         },
-        result: 'Recommendation: Yes — Refinance now. Old payment: $1,848/month. New payment: $1,499/month. Monthly savings: $349. Break-even: 18 months (1.5 years). Net benefit over 5-year stay: approximately $14,600. Total interest remaining on the current loan: approximately $304,000 compared to about $290,000 on the new loan — saving roughly $14,600 in interest over the remaining 25 years. However, extending the term to 30 years means making payments for 5 extra years, so the monthly savings come at the cost of a longer repayment timeline.',
-        insight: 'Sarah saves $349/month immediately, and her break-even is just 18 months — well under her planned 60-month stay. Over 5 years, after recouping closing costs, she nets about $14,600 in savings. The refinance reduces total interest on the remaining balance, but because the loan term resets from 25 remaining years to 30 years, she trades lower monthly payments for 5 extra years of mortgage payments. If she refinanced into a 25-year term instead, her monthly savings would be smaller but overall interest savings significantly larger.',
+        result: 'Recommendation: Yes — Refinance now. Old payment: $1,848/month. New payment: $1,499/month. Monthly savings: $349. Break-even: 18 months (1.5 years). Net benefit over 5-year stay (payment savings minus closing costs): approximately $14,900. Total interest remaining on the current loan: approximately $304,000 compared to about $290,000 on the new loan — saving roughly $14,600 in interest over the remaining 25 years. However, extending the term to 30 years means making payments for 5 extra years, so the monthly savings come at the cost of a longer repayment timeline.',
+        insight: 'Sarah saves $349/month immediately, and her break-even is just 18 months — well under her planned 60-month stay. Over 5 years, after recouping closing costs, she nets about $14,900 in savings. The refinance reduces total interest on the remaining balance, but because the loan term resets from 25 remaining years to 30 years, she trades lower monthly payments for 5 extra years of mortgage payments. If she refinanced into a 25-year term instead, her monthly savings would be smaller but overall interest savings significantly larger.',
       },
       {
         scenario: 'Mike has a $300,000 mortgage at 6.5% with 20 years (240 months) remaining. He is considering refinancing to 5.75% on a new 15-year term with $5,500 in closing costs. He wants to pay off the home faster and plans to stay at least 10 years in his Denver home.',
@@ -376,14 +261,14 @@ workedExamples: [
           'Refinance Closing Costs': '$5,500',
           'How Long Will You Stay?': '120',
         },
-        result: 'Recommendation: Yes — Refinance now. Old payment: $2,237/month. New payment: $2,491/month. Monthly savings: -$254 (higher payment). Break-even: never (payment increased). Total interest on the remaining current loan: approximately $237,000. Total interest on the new 15-year loan: approximately $148,000. Interest saved by refinancing: approximately $88,400.',
-        insight: 'Mike\'s monthly payment goes up by $254 because he is shortening the term from 20 remaining years to 15 years. However, he saves about $88,400 in total interest by both lowering his rate (0.75% drop) and shortening the term. There is no break-even in the traditional sense because the payment increased — instead, the savings come from the roughly $88K in avoided interest. This is a "rate-and-term" refinance where the primary goal is long-term savings, not monthly cash flow relief. Mike should confirm the higher payment fits his budget before proceeding.',
+        result: 'Recommendation: Yes — shorter term saves about $82,900 in interest after closing costs (payment rises $255/mo). Old payment: $2,237/month. New payment: $2,491/month. Payment change: +$255/month. Break-even on payment savings: never (payment increased). Total interest on the remaining current loan: approximately $236,800. Total interest on the new 15-year loan: approximately $148,400. Interest saved by refinancing: approximately $88,400 before the $5,500 closing costs.',
+        insight: 'Mike\'s monthly payment goes up by $255 because he is shortening the term from 20 remaining years to 15 years. However, he saves about $88,400 in total interest by both lowering his rate (0.75% drop) and shortening the term. There is no break-even in the traditional sense because the payment increased — instead, the savings come from the roughly $88K in avoided interest. This is a "rate-and-term" refinance where the primary goal is long-term savings, not monthly cash flow relief. Mike should confirm the higher payment fits his budget before proceeding.',
       },
     ],
 faqs: [
       {
         question: 'What is a good break-even period for refinancing?',
-        answer: 'A break-even under 24 months is considered excellent, 24-36 months is standard and acceptable, and over 48 months is questionable unless you plan to stay in the home long-term. The national average break-even for a rate-reduction refinance is approximately 30 months. The current rate environment and your specific closing costs will determine your actual break-even.',
+        answer: 'A break-even under 24 months is considered excellent, 24-36 months is standard and acceptable, and over 48 months is questionable unless you plan to stay in the home long-term. Your specific closing costs and rate drop determine your actual break-even.',
       },
       {
         question: 'Should I refinance if I plan to move in 2 years?',

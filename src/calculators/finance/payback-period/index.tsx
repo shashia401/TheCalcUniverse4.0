@@ -78,30 +78,29 @@ const paybackPeriodConfig: CalculatorConfig = {
     const simplePaybackYears = initialInvestment / annualCashFlow;
     const simplePaybackExceedsLife = projectLife > 0 && simplePaybackYears > projectLife;
 
-    // Discounted payback
+    // Cash received in year y (end-of-year convention). A fractional project life (e.g. 2.5 years)
+    // gets a pro-rated final year, so payback, NPV and "total return" all describe the same cash flows.
+    const cashInYear = (y: number) =>
+      projectLife > 0 ? annualCashFlow * Math.max(0, Math.min(1, projectLife - (y - 1))) : annualCashFlow;
+
+    // Discounted payback (linear interpolation inside the recovery year)
     let discountedPaybackYears = Infinity;
     let cumulativeDcf = 0;
     for (let y = 1; y <= maxYears; y++) {
-      const dcf = annualCashFlow / Math.pow(1 + discountRate, y);
+      const annualDcf = annualCashFlow / Math.pow(1 + discountRate, y);
+      const dcf = cashInYear(y) / Math.pow(1 + discountRate, y);
       cumulativeDcf += dcf;
       if (cumulativeDcf >= initialInvestment) {
-        // Interpolate: fraction of year
         const prevCum = cumulativeDcf - dcf;
-        const fraction = (initialInvestment - prevCum) / dcf;
-        discountedPaybackYears = y - 1 + fraction;
+        discountedPaybackYears = y - 1 + (initialInvestment - prevCum) / annualDcf;
         break;
       }
     }
 
     // NPV at end of project life
     let npv = -initialInvestment;
-    let totalUndiscounted = 0;
     for (let y = 1; y <= maxYears; y++) {
-      const cf = y <= (projectLife || maxYears) ? annualCashFlow : 0;
-      if (useDiscounted) {
-        npv += cf / Math.pow(1 + discountRate, y);
-      }
-      totalUndiscounted += cf;
+      if (useDiscounted) npv += cashInYear(y) / Math.pow(1 + discountRate, y);
     }
 
     // Total return ratio
@@ -112,6 +111,8 @@ const paybackPeriodConfig: CalculatorConfig = {
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    // Colour bands are judged on the DISPLAYED (1 dp) period so "3.0 years" is never classed as over 3.
+    const shown = (n: number) => Math.round(n * 10) / 10;
 
     const results: CalculatorResult[] = [
       {
@@ -121,7 +122,7 @@ const paybackPeriodConfig: CalculatorConfig = {
           ? `> ${fmt(projectLife)} years (exceeds project life)`
           : `${fmt(simplePaybackYears)} years`,
         highlight: true,
-        color: simplePaybackYears <= 3 ? 'positive' : simplePaybackYears <= 5 ? 'neutral' : 'negative',
+        color: shown(simplePaybackYears) <= 3 ? 'positive' : shown(simplePaybackYears) <= 5 ? 'neutral' : 'negative',
         interpretation: `Simple payback ignores the time value of money — it treats a dollar earned in year 5 the same as one earned today. It's a quick screening tool for comparing projects, but for a real investment decision pair it with IRR or NPV, which do account for discounting.`,
       },
       {
@@ -140,7 +141,7 @@ const paybackPeriodConfig: CalculatorConfig = {
       },
       {
         id: 'profitIndex',
-        label: projectLife > 0 ? 'Profitability Index' : 'Return Multiple (Annual)',
+        label: projectLife > 0 ? 'Profitability Index' : 'Annual Cash Yield (cash flow ÷ investment)',
         value: projectLife > 0 ? `${profitIndex.toFixed(2)}x` : `${(annualCashFlow / initialInvestment * 100).toFixed(1)}%`,
         color: profitIndex >= 1 ? 'positive' : 'negative',
       },
@@ -151,9 +152,11 @@ const paybackPeriodConfig: CalculatorConfig = {
         id: 'discountedPayback',
         label: 'Discounted Payback Period',
         value: discountedPaybackYears === Infinity
-          ? 'Never (TVM-adjusted cash flows do not recoup investment)'
+          ? (projectLife > 0
+              ? 'Never within the project life (TVM-adjusted cash flows do not recoup the investment)'
+              : 'Never (TVM-adjusted cash flows do not recoup investment)')
           : `${fmt(discountedPaybackYears)} years`,
-        color: discountedPaybackYears <= 5 ? 'positive' : discountedPaybackYears <= 8 ? 'neutral' : discountedPaybackYears === Infinity ? 'negative' : 'neutral',
+        color: discountedPaybackYears === Infinity ? 'negative' : shown(discountedPaybackYears) <= 5 ? 'positive' : 'neutral',
       });
 
       if (projectLife > 0) {
@@ -206,7 +209,7 @@ const paybackPeriodConfig: CalculatorConfig = {
       'Payback period ignores all cash flows after the payback date. A project with a 2-year payback that produces zero value afterward is worse than one with a 4-year payback that generates decades of profits. Always pair payback analysis with NPV or IRR.',
       'Simple payback ignores the time value of money entirely — a dollar in year 5 is treated the same as a dollar today. For anything beyond a 2-3 year horizon, always use discounted payback with an appropriate cost of capital.',
       'It assumes constant annual cash flows. Most real-world investments have variable year-to-year cash flows. Solar panels degrade; rental income rises with inflation. For uneven cash flows, you need a year-by-year discounted cash flow model.',
-      'Tax effects (depreciation shields, ITC credits for solar, Section 179 expensing) can dramatically change payback periods and are not modeled here. A 30% federal solar tax credit, for example, reduces the initial investment by 30% for tax purposes, shortening the effective payback considerably.',
+      'Tax effects (depreciation shields, investment tax credits, Section 179 expensing) can dramatically change payback periods and are not modeled here. An investment tax credit, for example, reduces your net upfront cost and shortens the effective payback considerably — check current eligibility, because federal solar credits were changed by 2025 legislation.',
     ],
 quickReference: [
       { label: 'Simple Payback', value: 'Investment ÷ Annual Cash Flow' },
@@ -214,7 +217,7 @@ quickReference: [
       { label: 'Excellent Payback', value: 'Under 2–3 years' },
       { label: 'Typical Equipment', value: '3–5 years' },
       { label: 'Typical Solar', value: '6–10 years (before incentives)' },
-      { label: '10% discount, 10yr life', value: '$50K at $12K/yr = 5.3yr simple, 6.6yr disc.' },
+      { label: '10% discount, 10yr life', value: '$50K at $12K/yr = 4.2yr simple, 5.7yr disc.' },
     ],
 proTips: [
       'Use discounted payback with a rate equal to your weighted average cost of capital (WACC) or your required rate of return — typically 8–15% for most businesses. Simple payback is just a quick screening filter.',

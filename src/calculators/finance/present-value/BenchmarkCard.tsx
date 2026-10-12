@@ -1,9 +1,9 @@
 import { PVData, fmtDollar, fmtDollarCompact, computePV } from './presentValueTypes';
 
 const BENCHMARKS = [
-  { label: 'S&P 500 avg — inflation-adjusted (7%)', rate: 7 },
-  { label: '10-year Treasury (~4.5%)', rate: 4.5 },
-  { label: 'High-yield savings (~5%)', rate: 5 },
+  { label: 'S&P 500 long-run avg — inflation-adjusted (7%)', rate: 7 },
+  { label: '10-year Treasury (illustrative 4.5%)', rate: 4.5 },
+  { label: 'High-yield savings (illustrative 5%)', rate: 5 },
 ];
 
 export function BenchmarkCard({ data }: { data: PVData }) {

@@ -116,9 +116,9 @@ describe('pension calculator', () => {
   });
 
   it('matches the educational explanation scenario (age 35->65, $50K, $500/mo, 7%)', () => {
-    // Regression test: the calculator's own "explanation" text cites this exact
-    // scenario (~$947K balance, $230K contributions, $717K growth) — verify
-    // calculate() actually produces those figures.
+    // The explanation text cites this scenario. Monthly compounding at 7%/12 with end-of-month
+    // contributions (same convention as the retirement calculator), derived independently:
+    // 50,000 x 1.005833^360 + 500 x (1.005833^360 - 1)/0.005833 = 405,826 + 609,985 = 1,015,810.
     const r = config.calculate({
       currentAge: '35',
       retirementAge: '65',
@@ -127,9 +127,9 @@ describe('pension calculator', () => {
       growthRate: '7',
       inflationAdjust: 'nominal',
     });
-    expect(parseMoney(getValue(r, 'projectedBalance'))).toBeCloseTo(947377, -2);
+    expect(parseMoney(getValue(r, 'projectedBalance'))).toBeCloseTo(1015810, -1);
     expect(parseMoney(getValue(r, 'totalContributions'))).toBe(230000);
-    expect(parseMoney(getValue(r, 'totalGrowth'))).toBeCloseTo(717377, -2);
+    expect(parseMoney(getValue(r, 'totalGrowth'))).toBeCloseTo(785810, -1);
   });
 
   it('matches manual year-by-year calculation', () => {
@@ -141,9 +141,26 @@ describe('pension calculator', () => {
       growthRate: '10',
       inflationAdjust: 'nominal',
     });
-    // Year 1: 10000 * 1.10 + 6000 = 17000
-    // Year 2: 17000 * 1.10 + 6000 = 24700
-    expect(parseMoney(getValue(r, 'projectedBalance'))).toBeCloseTo(24700, 0);
+    // i = 0.10/12; (1+i)^24 = 1.220391; FV = 10,000 x 1.220391 + 500 x 0.220391/0.0083333 = 12,203.91 + 13,223.46
+    expect(parseMoney(getValue(r, 'projectedBalance'))).toBeCloseTo(25427.37, 0);
     expect(parseMoney(getValue(r, 'totalContributions'))).toBe(10000 + 500 * 12 * 2);
+  });
+
+  it('starting 5 years later (age 40) leaves 691,307: about 32% less', () => {
+    // 50,000 x 1.005833^300 + 500 x (1.005833^300 - 1)/0.005833 = 691,307 (node closed form)
+    const r = config.calculate({ currentAge: '40', retirementAge: '65', currentBalance: '50000', monthlyContribution: '500', growthRate: '7', inflationAdjust: 'nominal' });
+    expect(parseMoney(getValue(r, 'projectedBalance'))).toBeCloseTo(691307, -1);
+  });
+
+  it('4% rule monthly payout on 1,015,810 is 3,386.03; inflation-adjusted 418,500 -> 1,395.00', () => {
+    const r = config.calculate({ currentAge: '35', retirementAge: '65', currentBalance: '50000', monthlyContribution: '500', growthRate: '7', inflationAdjust: 'adjusted' });
+    expect(getValue(r, 'monthlyPayout4pct')).toBe('$3,386.03/mo');
+    expect(parseMoney(getValue(r, 'inflationAdjusted'))).toBeCloseTo(418500, -1);
+    expect(getValue(r, 'monthlyPayoutAdj')).toBe('$1,395.00/mo');
+  });
+
+  it('a half-year horizon is not dropped (35 to 35.5 = 6 months)', () => {
+    const r = config.calculate({ currentAge: '35', retirementAge: '35.5', currentBalance: '1000', monthlyContribution: '100', growthRate: '0', inflationAdjust: 'nominal' });
+    expect(parseMoney(getValue(r, 'projectedBalance'))).toBe(1600);
   });
 });

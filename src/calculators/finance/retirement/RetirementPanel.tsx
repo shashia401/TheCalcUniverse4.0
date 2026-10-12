@@ -156,15 +156,15 @@ function StackedAreaChart({ data, annualReturn }: { data: DataPoint[]; annualRet
       <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2 px-1">
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-0.5 bg-emerald-500 flex-shrink-0" />
-          <span className="text-[10px] text-slate-500">Portfolio Value ({(annualReturn * 100).toFixed(1)}% return)</span>
+          <span className="text-[10px] text-slate-600">Portfolio Value ({(annualReturn * 100).toFixed(1)}% return)</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-0.5 bg-blue-500 flex-shrink-0" style={{ borderTop: '2px dashed #3b82f6', background: 'none' }} />
-          <span className="text-[10px] text-slate-500">Total Contributed</span>
+          <span className="text-[10px] text-slate-600">Total Contributed</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-4 flex-shrink-0" style={{ borderTop: '1.5px dashed #f97316' }} />
-          <span className="text-[10px] text-slate-500">Inflation-Adjusted Value</span>
+          <span className="text-[10px] text-slate-600">Inflation-Adjusted Value</span>
         </div>
       </div>
     </div>
@@ -184,9 +184,9 @@ function MilestoneTable({ data }: { data: DataPoint[] }) {
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
-            <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-500 uppercase tracking-wider text-[10px]">Age</th>
-            <th scope="col" className="text-right px-3 py-2.5 font-bold text-blue-500 uppercase tracking-wider text-[10px]">Contributed</th>
-            <th scope="col" className="text-right px-3 py-2.5 font-bold text-emerald-500 uppercase tracking-wider text-[10px]">Growth</th>
+            <th scope="col" className="text-left px-4 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Age</th>
+            <th scope="col" className="text-right px-3 py-2.5 font-bold text-blue-700 uppercase tracking-wider text-[10px]">Contributed</th>
+            <th scope="col" className="text-right px-3 py-2.5 font-bold text-emerald-700 uppercase tracking-wider text-[10px]">Growth</th>
             <th scope="col" className="text-right px-4 py-2.5 font-bold text-slate-600 uppercase tracking-wider text-[10px]">Total</th>
           </tr>
         </thead>
@@ -242,40 +242,40 @@ export default function RetirementPanel({
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
       <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
-        <TrendingUp size={16} className="text-slate-500" />
+        <TrendingUp size={16} className="text-slate-600" aria-hidden="true" />
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Retirement Projection</span>
       </div>
 
       <div className="p-6 space-y-6">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Portfolio Growth Over Time</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">Portfolio Growth Over Time</p>
           <StackedAreaChart data={data} annualReturn={annualReturn} />
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Return Scenarios at Age {retirementAge}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">Return Scenarios at Age {retirementAge}</p>
           <div className="grid grid-cols-3 gap-3">
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1">Pessimistic</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-red-700 mb-1">Pessimistic</p>
               <p className="text-sm font-black text-red-700">{fmt(pessimisticFinal.total)}</p>
-              <p className="text-[10px] text-red-400 mt-0.5">{((annualReturn - 0.02) * 100).toFixed(1)}% return</p>
+              <p className="text-[10px] text-red-700 mt-0.5">{((annualReturn - 0.02) * 100).toFixed(1)}% return</p>
             </div>
             <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 ring-2 ring-blue-300">
               <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1">Expected</p>
               <p className="text-sm font-black text-blue-700">{fmt(finalData.total)}</p>
-              <p className="text-[10px] text-blue-400 mt-0.5">{(annualReturn * 100).toFixed(1)}% return</p>
+              <p className="text-[10px] text-blue-700 mt-0.5">{(annualReturn * 100).toFixed(1)}% return</p>
             </div>
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">Optimistic</p>
               <p className="text-sm font-black text-emerald-700">{fmt(optimisticFinal.total)}</p>
-              <p className="text-[10px] text-emerald-400 mt-0.5">{((annualReturn + 0.02) * 100).toFixed(1)}% return</p>
+              <p className="text-[10px] text-emerald-700 mt-0.5">{((annualReturn + 0.02) * 100).toFixed(1)}% return</p>
             </div>
           </div>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Year-by-Year Milestones</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-600">Year-by-Year Milestones</p>
             <DownloadCsvButton
               filename="retirement-projection.csv"
               headers={['Age', 'Contributed', 'Growth', 'Total', 'Inflation-Adjusted Total']}

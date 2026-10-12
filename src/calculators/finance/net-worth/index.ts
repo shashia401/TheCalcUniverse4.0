@@ -129,12 +129,14 @@ const netWorthConfig: CalculatorConfig = {
 
     const fmt = (n: number) =>
       Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // Sign from the ROUNDED amount, so a sub-cent negative never prints as "-$0.00".
+    const netWorthCents = Math.round(netWorth * 100);
 
     return [
       {
         id: 'netWorth',
         label: 'Net Worth',
-        value: `${netWorth >= 0 ? '' : '-'}$${fmt(netWorth)}`,
+        value: `${netWorthCents >= 0 ? '' : '-'}$${fmt(netWorth)}`,
         highlight: true,
         color: netWorth >= 0 ? 'positive' : 'negative',
         interpretation: netWorth >= 0
@@ -271,7 +273,7 @@ const netWorthConfig: CalculatorConfig = {
     limitations: [
       'Net worth is a point-in-time snapshot. It does not capture income trajectory, earning potential, or future inheritance — all of which dramatically affect long-term financial health. A medical resident with negative net worth and $200K in student loans has far better financial prospects than a 55-year-old with zero net worth and stagnant income.',
       'Asset values are self-reported and unaudited. Real estate values in particular can be volatile and hard to estimate without a professional appraisal or comparative market analysis. Over- or under-estimating your home value by even 10% can swing your net worth by tens of thousands.',
-      'Does not account for tax liabilities embedded in assets. A $500K 401(k) balance is pre-tax money — withdrawing it may trigger 22-37% federal tax plus state tax. Similarly, selling a home above the $250K/$500K capital gains exclusion triggers taxes.',
+      'Does not account for tax liabilities embedded in assets. A $500K 401(k) balance is pre-tax money — withdrawals are taxed as ordinary income (federal marginal rates run 10-37%) plus any state tax. Similarly, selling a home above the $250K/$500K capital gains exclusion triggers taxes.',
       'Private company equity, stock options, restricted stock units, pensions with cash value, and illiquid investments are hard to value and not explicitly modeled. If these represent a significant portion of your wealth, consult a financial advisor for a comprehensive net worth statement.',
     ],
 citations: [

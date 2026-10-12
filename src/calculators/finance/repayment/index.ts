@@ -1,6 +1,10 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RepaymentPanel from './RepaymentPanel';
+import { pmt } from '../../../utils/financial';
+
+/** Longest term modelled: 50 years of monthly payments. */
+const MAX_MONTHS = 600;
 
 const repaymentConfig: CalculatorConfig = {
   inputs: [
@@ -72,14 +76,8 @@ const repaymentConfig: CalculatorConfig = {
     const months = termUnit === 'years' ? Math.round(termRaw * 12) : Math.round(termRaw);
     const monthlyRate = annualRate / 12;
 
-    let monthlyPayment: number;
-    if (monthlyRate === 0) {
-      monthlyPayment = principal / months;
-    } else {
-      monthlyPayment =
-        (principal * (monthlyRate * Math.pow(1 + monthlyRate, months))) /
-        (Math.pow(1 + monthlyRate, months) - 1);
-    }
+    if (months < 1 || months > MAX_MONTHS) return [];
+    const monthlyPayment = pmt(principal, monthlyRate, months);
 
     const totalPaid = monthlyPayment * months;
     const totalInterest = totalPaid - principal;
@@ -95,20 +93,20 @@ const repaymentConfig: CalculatorConfig = {
     const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral'; interpretation?: string }> = [];
 
     // Compute extra payment scenario
-    if (extraPayment > 0 && monthlyRate > 0) {
+    if (extraPayment > 0) {
       let extraBalance = principal;
       let extraMonths = 0;
+      let extraTotalPaid = 0; // actual cash paid; the final payment is smaller than the full amount
       const totalExtraPmt = monthlyPayment + extraPayment;
 
       while (extraBalance > 0.005 && extraMonths < months + 600) {
         const interest = extraBalance * monthlyRate;
-        const principalPaid = Math.min(totalExtraPmt - interest, extraBalance + interest);
-        extraBalance = Math.max(0, extraBalance + interest - totalExtraPmt);
+        const payment = Math.min(totalExtraPmt, extraBalance + interest);
+        extraBalance = extraBalance + interest - payment;
+        extraTotalPaid += payment;
         extraMonths++;
-        if (principalPaid <= 0) break;
       }
 
-      const extraTotalPaid = totalExtraPmt * extraMonths;
       const extraTotalInterest = extraTotalPaid - principal;
       const interestSaved = totalInterest - extraTotalInterest;
       const timeSaved = months - extraMonths;
@@ -119,20 +117,20 @@ const repaymentConfig: CalculatorConfig = {
       results.push(
         { id: 'monthlyPayment', label: 'Monthly Payment', value: `$${fmt(monthlyPayment)}`, highlight: true, color: 'positive' as const },
         { id: 'monthlyWithExtra', label: 'Monthly Payment with Extra', value: `$${fmt(totalExtraPmt)}`, color: 'positive' as const },
-        { id: 'interestSaved', label: 'Interest Saved', value: `$${fmtLarge(interestSaved)}`, highlight: true, color: 'positive' as const, interpretation: `Extra payments go straight to principal, so this saving compounds — every dollar paid early stops accruing interest for the rest of the loan. Paying extra earliest in the term saves the most; the same extra dollar late in the loan barely moves the needle.` },
+        { id: 'interestSaved', label: 'Interest Saved', value: `${fmtLarge(interestSaved)}`, highlight: true, color: 'positive' as const, interpretation: `Extra payments go straight to principal, so this saving compounds — every dollar paid early stops accruing interest for the rest of the loan. Paying extra earliest in the term saves the most; the same extra dollar late in the loan barely moves the needle.` },
         { id: 'timeSaved', label: 'Time Saved', value: timeSavedStr, highlight: true, color: 'positive' as const },
         { id: 'newPayoffTime', label: 'New Payoff Time', value: `${Math.floor(extraMonths / 12)}yr ${extraMonths % 12}mo (${extraMonths} payments)`, color: 'neutral' as const },
-        { id: 'totalInterest', label: 'Total Interest (Standard)', value: `$${fmtLarge(totalInterest)}`, color: 'negative' as const },
-        { id: 'totalInterestWithExtra', label: 'Total Interest (With Extra)', value: `$${fmtLarge(extraTotalInterest)}`, color: 'positive' as const },
-        { id: 'totalCost', label: 'Total Cost of Loan (Principal + Interest)', value: `$${fmtLarge(totalPaid)}`, color: 'neutral' as const },
+        { id: 'totalInterest', label: 'Total Interest (Standard)', value: `${fmtLarge(totalInterest)}`, color: 'negative' as const },
+        { id: 'totalInterestWithExtra', label: 'Total Interest (With Extra)', value: `${fmtLarge(extraTotalInterest)}`, color: 'positive' as const },
+        { id: 'totalCost', label: 'Total Cost of Loan (Principal + Interest)', value: `${fmtLarge(totalPaid)}`, color: 'neutral' as const },
         { id: 'interestRatio', label: 'Interest as % of Total Cost', value: `${interestRatio.toFixed(1)}%`, color: interestRatio > 30 ? 'negative' as const : 'neutral' as const },
         { id: 'termMonths', label: 'Loan Term', value: termUnit === 'years' ? `${termRaw} year${termRaw !== 1 ? 's' : ''} (${months} payments)` : `${months} months`, color: 'neutral' as const },
       );
     } else {
       results.push(
         { id: 'monthlyPayment', label: 'Monthly Payment', value: `$${fmt(monthlyPayment)}`, highlight: true, color: 'positive' as const },
-        { id: 'totalInterest', label: 'Total Interest Paid', value: `$${fmtLarge(totalInterest)}`, color: 'negative' as const },
-        { id: 'totalCost', label: 'Total Cost of Loan (Principal + Interest)', value: `$${fmtLarge(totalPaid)}`, color: 'neutral' as const },
+        { id: 'totalInterest', label: 'Total Interest Paid', value: `${fmtLarge(totalInterest)}`, color: 'negative' as const },
+        { id: 'totalCost', label: 'Total Cost of Loan (Principal + Interest)', value: `${fmtLarge(totalPaid)}`, color: 'neutral' as const },
         { id: 'interestRatio', label: 'Interest as % of Total Cost', value: `${interestRatio.toFixed(1)}%`, color: interestRatio > 30 ? 'negative' as const : 'neutral' as const },
         { id: 'termMonths', label: 'Loan Term', value: termUnit === 'years' ? `${termRaw} year${termRaw !== 1 ? 's' : ''} (${months} payments)` : `${months} months`, color: 'neutral' as const },
       );
@@ -153,14 +151,7 @@ const repaymentConfig: CalculatorConfig = {
     const months = termUnit === 'years' ? Math.round(termRaw * 12) : Math.round(termRaw);
     const monthlyRate = annualRate / 12;
 
-    let monthlyPayment: number;
-    if (monthlyRate === 0) {
-      monthlyPayment = principal / months;
-    } else {
-      monthlyPayment =
-        (principal * (monthlyRate * Math.pow(1 + monthlyRate, months))) /
-        (Math.pow(1 + monthlyRate, months) - 1);
-    }
+    const monthlyPayment = pmt(principal, monthlyRate, months);
 
     const totalInterest = monthlyPayment * months - principal;
 
@@ -199,19 +190,19 @@ const repaymentConfig: CalculatorConfig = {
       'Understand the true cost of borrowing by viewing how much of each payment goes toward interest versus principal over time.',
     ],
     explanation:
-      'Every loan payment is split between interest charged on the remaining balance and principal repayment. Early payments are mostly interest — later payments are mostly principal. This is called amortization. For example, on a $25,000 loan at 7% over 5 years, your first payment is about $145 interest and $350 principal. By the final payment, it is about $3 interest and $492 principal. Even small extra payments go directly to principal reduction, which means less interest accrues on future balances. The schedule below shows exactly how each payment is applied month by month, and the downloadable CSV lets you import the data into your own spreadsheet or financial planner. The "extra payment" feature shows you the impact of even modest additional amounts: $25 extra per month on that same loan saves about $60 in interest and shortens the term by 3 months — and the effect grows much larger on bigger, longer-term loans like mortgages.',
+      'Every loan payment is split between interest charged on the remaining balance and principal repayment. Early payments are mostly interest — later payments are mostly principal. This is called amortization. For example, on a $25,000 loan at 7% over 5 years, your first payment is about $146 interest and $349 principal. By the final payment, it is about $3 interest and $492 principal. Even small extra payments go directly to principal reduction, which means less interest accrues on future balances. The schedule below shows exactly how each payment is applied month by month, and the downloadable CSV lets you import the data into your own spreadsheet or financial planner. The "extra payment" feature shows you the impact of even modest additional amounts: $25 extra per month on that same loan saves about $277 in interest and shortens the term by 3 months — and the effect grows much larger on bigger, longer-term loans like mortgages.',
     faqs: [
       {
         question: 'How does an extra payment save me money?',
-        answer: 'Extra payments go directly to reducing the principal balance. Since interest is calculated on the remaining balance, a lower principal means less interest accrues each month. On a $25,000 loan at 7% over 5 years, $25 extra per month saves about $60 in interest and shaves 3 months off the term; on a larger, longer-term loan like a mortgage, the same size extra payment can save thousands. The earlier you start making extra payments, the greater the impact because you reduce the principal before more interest has a chance to accrue on it.',
+        answer: 'Extra payments go directly to reducing the principal balance. Since interest is calculated on the remaining balance, a lower principal means less interest accrues each month. On a $25,000 loan at 7% over 5 years, $25 extra per month saves about $277 in interest and shaves 3 months off the term; on a larger, longer-term loan like a mortgage, the same size extra payment can save thousands. The earlier you start making extra payments, the greater the impact because you reduce the principal before more interest has a chance to accrue on it.',
       },
       {
         question: 'Should I make extra payments or invest instead?',
-        answer: 'If your loan APR exceeds your expected investment returns (which it almost certainly does for most consumer debt), paying down the loan is the better financial move. A guaranteed 7% return by avoiding interest beats the stock market\'s historical average of ~10% when accounting for taxes and volatility. The one exception is if you don\'t have an emergency fund — prioritize 3-6 months of expenses first before making extra loan payments. Another exception: if your loan has a very low rate (e.g., 3% mortgage), investing may yield higher returns.',
+        answer: 'If your loan APR exceeds your expected investment returns (which it almost certainly does for most consumer debt), paying down the loan is the better financial move. A guaranteed 7% return by avoiding interest is a risk-free return that is hard to match once taxes and market volatility are considered, even though the stock market\'s long-run nominal average is around 10%. The one exception is if you don\'t have an emergency fund — prioritize 3-6 months of expenses first before making extra loan payments. Another exception: if your loan has a very low rate (e.g., 3% mortgage), investing may yield higher returns.',
       },
       {
         question: 'Are there prepayment penalties on personal loans?',
-        answer: 'Most personal loans do not have prepayment penalties, unlike some mortgages. However, always check your loan agreement. Federal law prohibits prepayment penalties on most consumer loans under $75,000, but private lenders may structure fees differently. When in doubt, ask your lender specifically: "Is there any penalty for paying off this loan early?" If there is a penalty, calculate whether the interest savings still exceed the penalty amount.',
+        answer: 'Most personal loans do not have prepayment penalties, unlike some mortgages. However, always check your loan agreement. Some states restrict them and federal rules limit them on most residential mortgages, but terms differ by lender and loan type. When in doubt, ask your lender specifically: "Is there any penalty for paying off this loan early?" If there is a penalty, calculate whether the interest savings still exceed the penalty amount.',
       },
     ],
   citations: [

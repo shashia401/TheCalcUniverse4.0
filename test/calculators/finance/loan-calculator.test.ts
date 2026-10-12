@@ -124,3 +124,33 @@ describe('loan-calculator', () => {
     near(parseMoney(getValue(r, 'totalCost')), 10789.52, 1);
   });
 });
+
+describe('loan-calculator audit', () => {
+  const base = { loanAmount: '20000', interestRate: '8', termUnit: 'years', loanTerm: '3' };
+  // Independent: r=0.08/12, n=36 -> PMT = 626.727309; interest = 626.727309*36 - 20000 = 2,562.18 (FAQ says ~$2,560)
+  it('FAQ example $20k @ 8% 3y: payment $626.73, interest $2,562.18', () => {
+    const r = config.calculate(base);
+    expect(getValue(r, 'monthlyPayment')).toBe('$626.73');
+    expect(getValue(r, 'totalInterest')).toBe('$2,562.18');
+  });
+  // 5y: PMT=405.527886, interest 4,331.67 (FAQ says ~$4,300)
+  it('FAQ example $20k @ 8% 5y: interest $4,331.67', () => {
+    expect(getValue(config.calculate({ ...base, loanTerm: '5' }), 'totalInterest')).toBe('$4,331.67');
+  });
+  it('months unit and fractional months round up (1.1 y = 14 payments)', () => {
+    const r = config.calculate({ ...base, loanTerm: '1.1' });
+    expect(getValue(r, 'termMonths')).toContain('14 payments');
+    expect(getValue(config.calculate({ ...base, termUnit: 'months', loanTerm: '36' }), 'monthlyPayment')).toBe('$626.73');
+  });
+  it('0% APR divides evenly', () => {
+    expect(getValue(config.calculate({ ...base, interestRate: '0' }), 'monthlyPayment')).toBe('$555.56');
+  });
+  it('terms beyond 50 years return no result instead of a 600-year schedule', () => {
+    expect(config.calculate({ ...base, loanTerm: '600' })).toEqual([]);
+  });
+  it('gauge label matches its rounded percentage', () => {
+    const g = config.gauge!({ ...base })!;
+    // interest share = 2562.18 / 22562.18 = 11.36% -> "11%" Low
+    expect(g.valueLabel).toBe('Interest is 11% of total cost — Low');
+  });
+});

@@ -96,20 +96,20 @@ export default function MortgageComparePanel({ results }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">Total Savings</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-1">Total Savings</p>
             <p className="text-lg font-black text-emerald-700">{fmtD(savings)}</p>
-            <p className="text-[10px] text-emerald-500">{savingsPct.toFixed(0)}% less interest</p>
+            <p className="text-[10px] text-emerald-700">{savingsPct.toFixed(0)}% less interest</p>
           </div>
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Extra Monthly (15yr)</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-1">Extra Monthly (15yr)</p>
             <p className="text-lg font-black text-amber-700">{fmtD(extraMonthly)}</p>
           </div>
         </div>
 
         <div className="rounded-xl bg-slate-50 border border-slate-200 px-5 py-3">
           <p className="text-xs font-bold text-slate-600 mb-1">Key Insight</p>
-          <p className="text-[11px] text-slate-500 leading-relaxed">
-            15-year: ${fmtD(monthly15)}/month — ${fmtD(interest15)} interest. 30-year: ${fmtD(monthly30)}/month — ${fmtD(interest30)} interest.
+          <p className="text-[11px] text-slate-600 leading-relaxed">
+            15-year: {fmtD(monthly15)}/month — {fmtD(interest15)} interest. 30-year: {fmtD(monthly30)}/month — {fmtD(interest30)} interest.
             {savings > 0 && ` You save ${fmtD(savings)} with the 15-year term.`}
           </p>
         </div>

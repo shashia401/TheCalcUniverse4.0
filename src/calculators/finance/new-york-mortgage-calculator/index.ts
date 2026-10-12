@@ -3,6 +3,38 @@ import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import NYMortgagePanel from './NYMortgagePanel';
 
+/**
+ * NY mortgage recording tax (MRT), % of mortgage amount. Source: NYS Dept. of Taxation and Finance,
+ * Form MT-15 (rev. 1/25), rate tables: basic $.50 + special additional $.25 + additional ($.30 in the
+ * MCTD, $.25 elsewhere) + local tax, per $100. The special additional tax ($.25) is owed by the LENDER
+ * on mortgages of 1-6 family property (Tax Law 253(1-a); TSB-M-92(4)R), so the borrower's share is
+ * the total minus 0.25%.
+ */
+export const MRT_LENDER_SHARE = 0.0025;
+export const MRT_REGIONS: Record<string, { label: string; total: (loan: number) => number }> = {
+  // Table 4: all mortgages < $500K 2.05%; 1-3 family / individual condo >= $500K 2.175%
+  nyc: { label: 'New York City (5 boroughs)', total: (loan) => (loan >= 500000 ? 0.02175 : 0.0205) },
+  // Table 1 (MCTD counties imposing basic + special additional + additional tax only): 1.05%
+  mctd: { label: 'Nassau, Suffolk, Orange, Putnam or Dutchess County', total: () => 0.0105 },
+  // Table 5: Westchester County (outside Yonkers) and Rockland County 1.30%
+  westchester: { label: 'Westchester (outside Yonkers) or Rockland County', total: () => 0.013 },
+  // Table 2: upstate counties imposing basic + special additional + additional tax (Erie, Monroe, Onondaga, ...) 1.00%
+  upstate: { label: 'Upstate — most counties (Erie, Monroe, Onondaga, Niagara, Oneida, ...)', total: () => 0.01 },
+};
+
+/** Mortgage amount is rounded to the nearest $100 on the MT-15 return. */
+export function mortgageRecordingTax(loan: number, region: string) {
+  const r = MRT_REGIONS[region] ?? MRT_REGIONS.nyc;
+  const base = Math.round(loan / 100) * 100;
+  const total = base * r.total(loan);
+  const lender = base * MRT_LENDER_SHARE;
+  return { total, lender, borrower: total - lender };
+}
+
+/** NY State mansion tax (Tax Law 1402-a): 1% of the consideration, paid by the buyer, on residential sales of $1,000,000 or more. */
+export const MANSION_TAX_THRESHOLD = 1_000_000;
+export const MANSION_TAX_RATE = 0.01;
+
 const nyMortgageConfig: CalculatorConfig = {
   inputs: [
     {
@@ -39,7 +71,7 @@ const nyMortgageConfig: CalculatorConfig = {
       step: 0.125,
       inputMode: 'decimal',
       required: true,
-      helpText: 'Current NY average: ~6.7% for 30-year fixed (2026)',
+      helpText: 'Use the rate on your Loan Estimate or lender quote.',
     },
     {
       id: 'loanTerm',
@@ -57,12 +89,12 @@ const nyMortgageConfig: CalculatorConfig = {
       id: 'propertyTaxRate',
       label: 'Property Tax Rate',
       type: 'percentage',
-      placeholder: '1.6',
+      placeholder: '1.3',
       min: 0,
       max: 4,
       step: 0.1,
       inputMode: 'decimal',
-      helpText: 'NY average is ~1.6% — varies widely by county (higher upstate, lower in NYC)',
+      helpText: 'NY statewide average is about 1.3% of home value (Tax Foundation, 2024 ACS) — NYC counties are well under 1%, some upstate counties exceed 2.4%.',
     },
     {
       id: 'starEligible',
@@ -70,10 +102,17 @@ const nyMortgageConfig: CalculatorConfig = {
       type: 'select',
       options: [
         { value: 'none', label: 'No — Do not qualify for STAR' },
-        { value: 'basic', label: 'Basic STAR (income < $500K, primary residence)' },
-        { value: 'enhanced', label: 'Enhanced STAR (age 65+, income < $98.7K)' },
+        { value: 'basic', label: 'Basic STAR (income ≤ $500K credit / $250K exemption, primary residence)' },
+        { value: 'enhanced', label: 'Enhanced STAR (age 65+, income ≤ $110,750 for 2026-27)' },
       ],
-      helpText: 'STAR reduces school property taxes. Basic STAR exempts up to $30K from assessed value; Enhanced STAR exempts up to $70K.',
+      helpText: 'STAR reduces school property taxes. Basic STAR covers the first $30,000 of full value; Enhanced STAR the first $88,500 (2026-27). Savings here are an estimate.',
+    },
+    {
+      id: 'mrtRegion',
+      label: 'Where is the property? (mortgage recording tax)',
+      type: 'select',
+      options: Object.entries(MRT_REGIONS).map(([value, r]) => ({ value, label: r.label })),
+      helpText: 'Recording tax varies by county. Other counties differ (0.75%-1.25% total outside the downstate region); see Form MT-15.',
     },
   ],
   calculate: (values) => {
@@ -105,13 +144,14 @@ const nyMortgageConfig: CalculatorConfig = {
     }
 
     const monthlyTax = homePrice.mul(taxRate).div(12);
-    const hasPmi = parseFloat(downPct) < 20;
+    // Exact comparison: a 19.96% down payment displays as "20.0%" but is still under 20%.
+    const hasPmi = downPayment.div(homePrice).lt(0.2);
     const monthlyPmi = hasPmi ? loanAmount.mul(0.005).div(12) : new Decimal(0);
     const totalMonthly = basePayment.plus(monthlyTax).plus(monthlyPmi);
     const totalInterest = basePayment.mul(months).minus(loanAmount);
     const totalCost = loanAmount.plus(totalInterest);
 
-    // STAR savings (school tax is typically ~60% of total property tax)
+    // STAR savings (assumes school tax is ~60% of total property tax; exempt full value per tax.ny.gov, 2026-27)
     const annualSchoolTax = monthlyTax.mul(12).mul(0.6);
     let starSavings = new Decimal(0);
     if (star === 'basic') {
@@ -121,14 +161,13 @@ const nyMortgageConfig: CalculatorConfig = {
       starSavings = new Decimal(30000).mul(schoolTaxRate);
     } else if (star === 'enhanced') {
       const schoolTaxRate = annualSchoolTax.div(homePrice);
-      starSavings = new Decimal(70000).mul(schoolTaxRate);
+      starSavings = new Decimal(88500).mul(schoolTaxRate);
     }
 
-    // Mortgage Recording Tax (paid at closing, not monthly)
-    // NYC: 0.5% for loans under $500K, 0.625% for loans $500K+
-    let mrtRate = new Decimal(0.005);
-    if (loanAmount.gte(500000)) mrtRate = new Decimal(0.00625);
-    const recordingTax = loanAmount.mul(mrtRate);
+    // Mortgage Recording Tax (paid at closing, not monthly): borrower's share, see mortgageRecordingTax().
+    const mrt = mortgageRecordingTax(loanAmount.toNumber(), values.mrtRegion || 'nyc');
+    const recordingTax = new Decimal(mrt.borrower);
+    const mansionTax = homePrice.gte(MANSION_TAX_THRESHOLD) ? homePrice.mul(MANSION_TAX_RATE) : new Decimal(0);
 
     const fmtDollar = (d: Decimal, decimals = 2): string =>
       `$${d.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
@@ -144,8 +183,23 @@ const nyMortgageConfig: CalculatorConfig = {
       { id: 'totalCost', label: 'Total Cost of Loan', value: fmtInt(totalCost), color: 'neutral' },
       { id: 'propertyTaxNote', label: 'Annual Property Taxes', value: `${fmtInt(monthlyTax.mul(12))}/yr`, color: 'neutral' },
       { id: 'starSavings', label: 'Estimated STAR Annual Savings', value: starSavings.gt(0) ? `${fmtInt(starSavings)}/yr` : 'Not eligible', color: 'positive' },
-      { id: 'recordingTax', label: 'Mortgage Recording Tax (at closing)', value: fmtDollar(recordingTax), color: 'negative' },
-      { id: '_nyData', label: '', value: JSON.stringify({ loanAmount: loanAmount.toNumber(), downPct, hasPmi, monthlyTax: monthlyTax.toNumber(), term }) },
+      {
+        id: 'recordingTax',
+        label: 'Mortgage Recording Tax — Your Share (at closing)',
+        value: fmtDollar(recordingTax),
+        color: 'negative',
+        interpretation: `Total tax on this mortgage is ${fmtDollar(new Decimal(mrt.total))}; the lender pays ${fmtDollar(new Decimal(mrt.lender))} of it (the 0.25% special additional tax). Based on the NYS Form MT-15 rate tables for ${(MRT_REGIONS[values.mrtRegion || 'nyc'] ?? MRT_REGIONS.nyc).label}; the $10,000 one-/two-family exclusion on the additional tax (about $30) is not applied.`,
+      },
+      {
+        id: 'mansionTax',
+        label: 'NY State Mansion Tax (buyer, at closing)',
+        value: mansionTax.gt(0) ? fmtDollar(mansionTax) : 'Not applicable (price under $1,000,000)',
+        color: mansionTax.gt(0) ? 'negative' : 'neutral',
+        interpretation: mansionTax.gt(0)
+          ? 'Statewide 1% tax on residential purchases of $1,000,000 or more, paid by the buyer. New York City adds a supplemental tax on purchases of $2,000,000 or more that this calculator does not include.'
+          : undefined,
+      },
+      { id: '_nyData', label: '', value: JSON.stringify({ loanAmount: loanAmount.toNumber(), downPct, hasPmi, monthlyTax: monthlyTax.toNumber(), monthlyPmi: monthlyPmi.toNumber(), term }) },
     ];
   },
   extraPanel: (values, results) => {
@@ -154,17 +208,17 @@ const nyMortgageConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'M = P * [r(1+r)^n] / [(1+r)^n - 1]',
-    formulaDescription: 'Standard monthly mortgage payment formula. New York has moderate-to-high property taxes (averaging ~1.6%), a state income tax (4-10.9% brackets), the STAR program that offers school tax relief for homeowners, and a unique mortgage recording tax paid at closing. All calculations use decimal.js for precise financial math.',
+    formulaDescription: 'Standard monthly mortgage payment formula. New York has moderate-to-high property taxes (about 1.3% of home value on average, from well under 1% in NYC to over 2.4% in some upstate counties), a state income tax (4-10.9% brackets), the STAR program that offers school tax relief for homeowners, and a unique mortgage recording tax paid at closing. All calculations use decimal.js for precise financial math.',
     diagram: {
-      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-333333)">NY Housing Cost Components</text><rect x="20" y="35" width="280" height="24" rx="4" fill="var(--svg-3b82f6)" opacity="0.8"/><text x="160" y="51" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">Principal + Interest (monthly mortgage)</text><rect x="20" y="65" width="200" height="24" rx="4" fill="var(--svg-ef4444)" opacity="0.7"/><text x="120" y="81" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">Property Tax (~1.6% average)</text><rect x="20" y="95" width="150" height="24" rx="4" fill="var(--svg-ef4444)" opacity="0.5"/><text x="95" y="111" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">State Income Tax (4-10.9%)</text><rect x="20" y="125" width="120" height="24" rx="4" fill="var(--svg-3b82f6)" opacity="0.5"/><text x="80" y="141" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">Mortgage Recording Tax</text><line x1="20" y1="158" x2="300" y2="158" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="160" y="175" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-555555)">NY has BOTH property + income tax</text><text x="160" y="191" text-anchor="middle" font-size="9" fill="var(--svg-555555)">STAR program: up to $70K off assessed value</text></svg>',
+      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-333333)">NY Housing Cost Components</text><rect x="20" y="35" width="280" height="24" rx="4" fill="var(--svg-3b82f6)" opacity="0.8"/><text x="160" y="51" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">Principal + Interest (monthly mortgage)</text><rect x="20" y="65" width="200" height="24" rx="4" fill="var(--svg-ef4444)" opacity="0.7"/><text x="120" y="81" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">Property Tax (~1.3% average)</text><rect x="20" y="95" width="150" height="24" rx="4" fill="var(--svg-ef4444)" opacity="0.5"/><text x="95" y="111" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">State Income Tax (4-10.9%)</text><rect x="20" y="125" width="120" height="24" rx="4" fill="var(--svg-3b82f6)" opacity="0.5"/><text x="80" y="141" text-anchor="middle" font-size="10" fill="var(--svg-ffffff)">Mortgage Recording Tax</text><line x1="20" y1="158" x2="300" y2="158" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="160" y="175" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-555555)">NY has BOTH property + income tax</text><text x="160" y="191" text-anchor="middle" font-size="9" fill="var(--svg-555555)">STAR program: school-tax relief (Enhanced: first $88.5K)</text></svg>',
       alt: 'Breakdown of New York housing cost components including mortgage, property tax, income tax, and recording tax',
-      caption: 'New York homeowners pay both property tax (~1.6%) and state income tax (4-10.9%), plus a unique mortgage recording tax at closing.',
+      caption: 'New York homeowners pay both property tax (about 1.3% on average) and state income tax (4-10.9%), plus a mortgage recording tax at closing.',
     },
     variables: [
-      { symbol: 'M', name: 'Monthly Payment', description: 'Your monthly principal and interest. New York also has a mortgage recording tax (not included in monthly payment) that adds 0.5-2.25% of the loan amount at closing.' },
-      { symbol: 'STAR', name: 'STAR Property Tax Exemption', description: 'New York\'s School Tax Relief program provides a partial exemption from school property taxes. Basic STAR: up to $30,000 off assessed value for homeowners earning under $500K. Enhanced STAR: up to $70,000 off for seniors 65+ earning under $98,700 (2025 income limit).' },
-      { symbol: 'NY MRT', name: 'Mortgage Recording Tax', description: 'New York is one of the few states with a mortgage recording tax (0.5-2.25% of the mortgage amount, varies by county). NYC: 0.5% for loans under $500K, 0.625% for $500K+. Paid at closing, not monthly.' },
-      { symbol: 'SONYMA', name: 'State of New York Mortgage Agency', description: 'Offers low-interest mortgages and down payment assistance (up to 3% of purchase price or $15,000) for first-time homebuyers. Additional grants available for specific counties and professions (teachers, first responders).' },
+      { symbol: 'M', name: 'Monthly Payment', description: 'Your monthly principal and interest. New York also has a mortgage recording tax (not included in monthly payment) that adds roughly 0.75%-1.925% of the loan amount for the borrower at closing, depending on the region.' },
+      { symbol: 'STAR', name: 'STAR Property Tax Exemption', description: 'New York\'s School Tax Relief program provides a partial exemption from school property taxes. Basic STAR covers the first $30,000 of full value (income up to $500,000 for the STAR credit, $250,000 for the exemption). Enhanced STAR covers the first $88,500 of full value for owners 65+ with income up to $110,750 (2026-27 school year). New homeowners register for the STAR credit rather than the exemption.' },
+      { symbol: 'NY MRT', name: 'Mortgage Recording Tax', description: 'New York is one of the few states with a mortgage recording tax (NYS Form MT-15: 1.00%-2.80% in total depending on county). In NYC the total is 2.05% for loans under $500K and 2.175% for 1-3 family homes and condos at $500K+; the lender pays 0.25% of that, so the borrower pays 1.80% / 1.925%. Paid at closing, not monthly.' },
+      { symbol: 'SONYMA', name: 'State of New York Mortgage Agency', description: 'Offers below-market-rate mortgages and down payment assistance (generally up to 3% of the purchase price, capped at $15,000) for qualifying first-time homebuyers. Additional grants available for specific counties and professions (teachers, first responders).' },
     ],
     howToUse: [
       'Enter the New York home price — use $500,000 as a starting point for statewide median.',
@@ -179,48 +233,48 @@ const nyMortgageConfig: CalculatorConfig = {
       'Compare housing costs across New York City, suburban, and upstate markets with location-specific property tax rate assumptions.',
       'Plan your home purchase by evaluating SONYMA down payment assistance and the STAR school tax relief program benefits.',
     ],
-    explanation: 'New York\'s housing market is defined by extreme regional variation. New York City and its suburbs have among the highest home prices in the nation, while upstate cities like Buffalo, Rochester, and Syracuse remain relatively affordable. Property taxes in New York average about 1.6% of home value annually, but this varies dramatically by county — NYC has relatively low property tax rates (0.8-1.0%) while upstate counties like Monroe (Rochester) and Erie (Buffalo) can exceed 2.5%. New York is also one of the few states with a mortgage recording tax (0.5-2.25% of the loan amount, paid at closing). The STAR (School Tax Relief) program provides exemptions for homeowners: Basic STAR exempts $30K of assessed value (income < $500K), Enhanced STAR exempts $70K (age 65+, income < $98.7K). Unlike Texas, New York has both property tax AND state income tax (ranging from 4% to 10.9%), so the total tax burden is significantly higher.',
+    explanation: 'New York\'s housing market is defined by extreme regional variation. New York City and its suburbs have among the highest home prices in the nation, while upstate cities like Buffalo, Rochester, and Syracuse remain relatively affordable. Property taxes in New York average about 1.3% of home value annually (Tax Foundation, 2024 ACS), but this varies dramatically by county — the five NYC counties are lowest (Brooklyn about 0.56%) while upstate counties like Monroe (Rochester, about 2.4%) are among the highest. New York is also one of the few states with a mortgage recording tax (1.00%-2.80% of the loan amount depending on county, paid at closing) and charges a 1% mansion tax on residential purchases of $1,000,000 or more. The STAR (School Tax Relief) program covers the first $30,000 (Basic) or $88,500 (Enhanced, age 65+, income up to $110,750) of full value. Unlike Texas, New York has both property tax AND state income tax (ranging from 4% to 10.9%), so the total tax burden is significantly higher.',
     workedExamples: [
       {
         scenario: 'Maria is buying a $400,000 condo in Queens, NYC with 20% down ($80,000), a 30-year fixed mortgage at 6.7%, and NYC property tax rate of 0.9%. She qualifies for Basic STAR.',
-        inputs: { homePrice: '400000', downPayment: '80000', interestRate: '6.7', loanTerm: '30', propertyTaxRate: '0.9', starEligible: 'basic' },
-        result: 'Monthly P&I is approximately $2,064, plus $300/month property tax — total $2,364/month. STAR saves roughly $162/year on school taxes. Mortgage recording tax at closing: approximately $1,600.',
-        insight: 'Maria\'s monthly P&I is about $2,064, plus $300/month in property tax — total ~$2,364/month before STAR savings. The mortgage recording tax adds roughly $1,600 at closing. STAR saves her roughly $162/year on school taxes. State income tax on top means her true housing burden is higher than the mortgage alone suggests.',
+        inputs: { homePrice: '400000', downPayment: '80000', interestRate: '6.7', loanTerm: '30', propertyTaxRate: '0.9', starEligible: 'basic', mrtRegion: 'nyc' },
+        result: 'Monthly P&I is approximately $2,065, plus $300/month property tax — total $2,365/month. STAR saves roughly $162/year on school taxes. Mortgage recording tax at closing: $5,760 (1.80% of the $320,000 loan; the 2.05% total of $6,560 includes $800 paid by the lender).',
+        insight: 'Maria\'s monthly P&I is about $2,065, plus $300/month in property tax — total ~$2,365/month before STAR savings. Her share of the mortgage recording tax adds $5,760 at closing. STAR saves her roughly $162/year on school taxes. State income tax on top means her true housing burden is higher than the mortgage alone suggests.',
       },
       {
-        scenario: 'The Johnsons are buying a $250,000 home in Rochester (Monroe County) with 10% down ($25,000), a 30-year fixed at 6.7%, and Monroe County property tax rate of 2.5%. They are first-time buyers using SONYMA.',
-        inputs: { homePrice: '250000', downPayment: '25000', interestRate: '6.7', loanTerm: '30', propertyTaxRate: '2.5', starEligible: 'basic' },
-        result: 'Monthly P&I is approximately $1,451, plus $521/month property tax and $94/month PMI — total $2,066/month. Upstate NY property taxes at 2.5% add more to the monthly payment than PMI, making property tax the single largest cost after P&I.',
-        insight: 'With only 10% down, the Johnsons pay PMI (~$94/month) on top of $1,451 P&I and $521/month in property tax — total ~$2,066/month. Upstate NY property taxes at 2.5% add more to the monthly payment than PMI. The high property tax is the single largest cost after principal and interest.',
+        scenario: 'The Johnsons are buying a $250,000 home in Rochester (Monroe County) with 10% down ($25,000), a 30-year fixed at 6.7%, and a Monroe County property tax rate of 2.4%. They are first-time buyers using SONYMA.',
+        inputs: { homePrice: '250000', downPayment: '25000', interestRate: '6.7', loanTerm: '30', propertyTaxRate: '2.4', starEligible: 'basic', mrtRegion: 'upstate' },
+        result: 'Monthly P&I is approximately $1,452, plus $500/month property tax and $94/month PMI — total $2,046/month. Mortgage recording tax at closing: $1,688 (0.75% of the $225,000 loan; the lender pays the other 0.25%). Upstate NY property taxes at 2.4% add more to the monthly payment than PMI, making property tax the single largest cost after P&I.',
+        insight: 'With only 10% down, the Johnsons pay PMI (~$94/month) on top of $1,452 P&I and $500/month in property tax — total ~$2,046/month. Upstate NY property taxes at 2.4% add more to the monthly payment than PMI. The high property tax is the single largest cost after principal and interest.',
       },
     ],
     proTips: [
       'Apply for STAR through the NYS Tax Department immediately after closing — the exemption is not automatic. You need to register online at tax.ny.gov/star or call 518-457-2036.',
-      'Check SONYMA\'s "Achieving the Dream" program for lower interest rates if your income is below 80% of the area median — rates are often 0.5-1% below market.',
+      'Check SONYMA\'s "Achieving the Dream" program for a below-market interest rate if you meet its income limits.',
       'NYC buyers: co-ops have lower closing costs than condos because you are buying shares, not real property. The mortgage recording tax does not apply to co-op loans in NYC.',
-      'Factor the mortgage recording tax into your closing cost budget — on a $500K mortgage in NYC, it is $3,125. This is paid at closing and cannot be rolled into the loan.',
+      'Factor the mortgage recording tax into your closing cost budget — on a $500K 1-3 family or condo mortgage in NYC, your share is $9,625 (1.925%; the total is 2.175% or $10,875, and the lender pays 0.25%). It is paid at closing. Also budget the 1% mansion tax on purchases of $1,000,000 or more.',
       'Upstate buyers: negotiate property tax assessments with your town assessor. Many upstate NY assessments are outdated, and a successful grievance can reduce your tax bill permanently.',
     ],
     limitations: [
-      'This calculator estimates the mortgage recording tax at NYC rates (0.5% for loans under $500K, 0.625% for $500K+) — your county may have different rates.',
+      'Mortgage recording tax uses the NYS Form MT-15 totals for four regions (NYC, Nassau/Suffolk/Orange/Putnam/Dutchess, Westchester/Rockland, and most upstate counties); some upstate counties charge 0.75% or 1.25% in total, Yonkers 1.80%. Co-op loans and the $10,000 one-/two-family exclusion are not modelled, and the mansion tax is the statewide 1% (NYC supplemental rates above $2 million are not included).',
       'STAR savings are estimated based on school taxes being ~60% of total property taxes; actual savings depend on your specific school district and assessment.',
       'Co-op and condo common charges are not included. Mello-Roos and special district taxes common in some NY developments are not modeled.',
       'SONYMA program eligibility requirements (income limits, purchase price caps) vary by county. State income tax impact on your overall budget is mentioned but not calculated here.',
     ],
     quickReference: [
-      { label: 'NY Property Tax Avg', value: '~1.6% (0.8% NYC to 2.5% upstate)' },
+      { label: 'NY Property Tax Avg', value: '~1.3% statewide (NYC under 1%, some upstate counties over 2.4%)' },
       { label: 'NY Income Tax Range', value: '4% - 10.9%' },
-      { label: 'Basic STAR Exemption', value: 'Up to $30,000 off assessed value' },
-      { label: 'Enhanced STAR Exemption', value: 'Up to $70,000 off (age 65+)' },
-      { label: 'NYC MRT Rate', value: '0.5% (<$500K) / 0.625% ($500K+)' },
-      { label: 'SONYMA Down Payment Help', value: 'Up to 3% of purchase price' },
-      { label: 'NY Median Home Price', value: '~$500,000 (2026)' },
-    ],
+      { label: 'Basic STAR', value: 'First $30,000 of full value (credit income limit $500K)' },
+      { label: 'Enhanced STAR (2026-27)', value: 'First $88,500 of full value (age 65+, income ≤ $110,750)' },
+      { label: 'NYC mortgage recording tax', value: '2.05% (<$500K) / 2.175% ($500K+, 1-3 family or condo); lender pays 0.25%' },
+      { label: 'NY mansion tax', value: '1% of price, buyer pays, residential $1M+' },
+      { label: 'SONYMA Down Payment Help', value: 'Generally up to 3% of price, max $15,000' },
+          ],
     faqs: [
-      { question: 'How do NY property taxes compare to other states?', answer: 'New York has some of the highest combined tax burdens in the US. Property taxes average ~1.6% of home value, plus state income tax of 4-10.9%. Unlike Texas which has no income tax, New York homeowners pay both property and income taxes — factor this into your affordability calculation.' },
-      { question: 'What is the STAR program?', answer: 'The School Tax Relief (STAR) program offers a partial exemption from school property taxes. Basic STAR provides up to $30,000 off your home\'s assessed value for homeowners earning under $500,000. Enhanced STAR (for seniors 65+) provides up to $70,000 off for those earning under $98,700 (2025 income limit). You must apply through the NYS Tax Department at tax.ny.gov/star.' },
-      { question: 'What is SONYMA?', answer: 'The State of New York Mortgage Agency (SONYMA) offers low-interest mortgages and down payment assistance (up to 3% of purchase price) for first-time homebuyers with qualifying income limits. Additional programs exist for specific professions: teachers, nurses, police officers, firefighters, and veterans. SONYMA also offers a "RemodelNY" program that finances both the home purchase and renovations in a single mortgage.' },
-      { question: 'What is the mortgage recording tax?', answer: 'New York is one of the few states that charges a mortgage recording tax: 0.5% in NYC for loans under $500K, 0.625% for loans $500K+, 0.75-1.05% in the NYC suburbs (Nassau, Suffolk, Westchester, Rockland), and varying rates upstate. On a $400,000 mortgage in NYC, that is an additional $2,000-$2,500 at closing. This tax is paid at closing and is NOT tax-deductible.' },
+      { question: 'How do NY property taxes compare to other states?', answer: 'New York has some of the highest combined tax burdens in the US. Property taxes average about 1.3% of home value (Tax Foundation), plus state income tax of 4-10.9%. Unlike Texas which has no income tax, New York homeowners pay both property and income taxes — factor this into your affordability calculation.' },
+      { question: 'What is the STAR program?', answer: 'The School Tax Relief (STAR) program offers a partial exemption from school property taxes. Basic STAR covers the first $30,000 of your home\'s full value (household income up to $500,000 for the STAR credit, or $250,000 for the exemption). Enhanced STAR (for owners 65+) covers the first $88,500 for household income up to $110,750 (2026-27 school year). New homeowners register for the STAR credit through the NYS Tax Department at tax.ny.gov/star.' },
+      { question: 'What is SONYMA?', answer: 'The State of New York Mortgage Agency (SONYMA) offers below-market-rate mortgages and down payment assistance (generally up to 3% of the purchase price, capped at $15,000) for first-time homebuyers with qualifying income limits. Additional programs exist for specific professions: teachers, nurses, police officers, firefighters, and veterans. SONYMA also offers a "RemodelNY" program that finances both the home purchase and renovations in a single mortgage.' },
+      { question: 'What is the mortgage recording tax?', answer: 'New York is one of the few states that charges a mortgage recording tax. Per NYS Form MT-15 the total is 2.05% in NYC for loans under $500K and 2.175% for 1-3 family homes and condos at $500K+, 1.05% in Nassau, Suffolk, Orange, Putnam and Dutchess, 1.30% in Westchester and Rockland, and 0.75%-1.25% in upstate counties. The lender pays 0.25% of it, so on a $400,000 mortgage in NYC the borrower pays about $7,200 (1.80%) at closing, with the lender paying $1,000 more. It is paid at closing and is generally not deductible as mortgage interest.' },
       { question: 'Are co-ops cheaper to buy than condos in NYC?', answer: 'Co-ops typically have lower purchase prices than comparable condos and significantly lower closing costs because the mortgage recording tax does not apply to co-op loans (you are buying shares in a corporation, not real property). However, co-ops require board approval, have stricter financial requirements (often 20-25% down minimum, 2+ years of post-closing liquidity), and may have restrictions on subletting, renovations, and pied-a-terre use. Condos offer more flexibility but higher costs.' },
     ],
     citations: [

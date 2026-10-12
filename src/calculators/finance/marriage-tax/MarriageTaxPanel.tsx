@@ -72,7 +72,7 @@ export default function MarriageTaxPanel({ results }: Props) {
                 ? `Marriage Bonus: Save ${fmtD(Math.abs(diff))} per year`
                 : 'Tax Neutral — No Difference'}
           </p>
-          <p className={`text-xs mt-1 ${isPenalty ? 'text-red-600' : isBonus ? 'text-emerald-600' : 'text-slate-500'}`}>
+          <p className={`text-xs mt-1 ${isPenalty ? 'text-red-700' : isBonus ? 'text-emerald-700' : 'text-slate-600'}`}>
             {jointIncome > 0 && `Combined income: ${fmtD(jointIncome)}`}
             {isPenalty
               ? ` — Filing jointly costs more. This typically happens when both partners earn similar high incomes.`

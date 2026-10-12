@@ -10,6 +10,7 @@ const percentOffConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '120',
       prefix: '$',
+      min: 0,
       required: true,
       helpText: 'The original price of the item before any discounts are applied.',
     },
@@ -19,6 +20,8 @@ const percentOffConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '20',
       unit: '%',
+      min: 0,
+      max: 100,
       step: 0.5,
       required: true,
       helpText: 'First percentage discount applied to the original price.',
@@ -29,6 +32,8 @@ const percentOffConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '15',
       unit: '%',
+      min: 0,
+      max: 100,
       step: 0.5,
       helpText: 'Applied AFTER the primary discount, not added to it. Leave blank if not stacking.',
     },
@@ -38,6 +43,8 @@ const percentOffConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '8.25',
       unit: '%',
+      min: 0,
+      max: 100,
       step: 0.01,
       helpText: 'Applied to the post-discount price. Leave blank for no tax.',
     },
@@ -159,7 +166,7 @@ const percentOffConfig: CalculatorConfig = {
       {
         question: 'Is sales tax applied before or after a discount?',
         answer:
-          'Always after the discount, in every US state. Sales tax is a percentage of the price actually paid, not the sticker price. So if a $100 item is 25% off in a state with 8% tax, you pay $75 + (8% × $75) = $81 total. This is also why higher-discount items effectively give you a small tax break compared to the original full-price version. The calculator accounts for this automatically.',
+          'In general, after the store\'s own discount: sales tax is a percentage of the price actually paid, not the sticker price. So if a $100 item is 25% off in a state with 8% tax, you pay $75 + (8% × $75) = $81 total. This is also why higher-discount items effectively give you a small tax break compared to the original full-price version. Some states treat manufacturer coupons differently and tax the price before the coupon, so check your state\'s rules for coupon-based discounts. The calculator applies tax to the fully discounted price.',
       },
       {
         question: 'What is the "stacking gap" shown in the results?',

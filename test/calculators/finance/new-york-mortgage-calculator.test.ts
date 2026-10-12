@@ -58,9 +58,8 @@ describe('New York Mortgage Calculator', () => {
 
   it('computes mortgage recording tax at closing', () => {
     const r = config.calculate(defaultInputs);
-    const recordingTax = parseMoney(getValue(r, 'recordingTax'));
-    expect(recordingTax).toBeGreaterThan(1500);
-    expect(recordingTax).toBeLessThan(3500);
+    // $400,000 loan in NYC: Form MT-15 total 2.05% = $8,200; lender pays 0.25% ($1,000); borrower pays 1.80% = $7,200.
+    expect(parseMoney(getValue(r, 'recordingTax'))).toBe(7200);
   });
 
   it('shows STAR savings when basic STAR eligible', () => {
@@ -120,5 +119,45 @@ describe('New York Mortgage Calculator', () => {
     if (edu.quickReference) {
       expect(edu.quickReference.length).toBeGreaterThanOrEqual(5);
     }
+  });
+});
+
+describe('NY taxes audit (NYS Form MT-15 rev. 1/25, STAR 2026-27)', () => {
+  const base = { homePrice: '400000', downPayment: '80000', interestRate: '6.7', loanTerm: '30', propertyTaxRate: '0.9', starEligible: 'basic' };
+  // Independent: P&I = 320000 * (r(1+r)^360)/((1+r)^360-1), r = 0.067/12 -> 2064.89; tax 400000*0.9%/12 = 300
+  it("Maria's worked example: P&I $2,064.89, total $2,364.89, STAR $162, recording tax $5,760", () => {
+    const r = config.calculate({ ...base, mrtRegion: 'nyc' });
+    expect(getValue(r, 'monthlyPayment')).toBe('$2,064.89');
+    expect(getValue(r, 'totalMonthly')).toBe('$2,364.89');
+    expect(getValue(r, 'starSavings')).toBe('$162/yr');
+    expect(getValue(r, 'recordingTax')).toBe('$5,760.00');
+  });
+  it("Johnsons' example: 10% down adds PMI $93.75; upstate recording tax 0.75% of $225,000 = $1,687.50", () => {
+    const r = config.calculate({ homePrice: '250000', downPayment: '25000', interestRate: '6.7', loanTerm: '30', propertyTaxRate: '2.4', starEligible: 'basic', mrtRegion: 'upstate' });
+    expect(getValue(r, 'totalMonthly')).toBe('$2,045.63'); // 1451.88 + 500 + 93.75
+    expect(getValue(r, 'recordingTax')).toBe('$1,687.50');
+  });
+  it('NYC loans of $500K+ use 2.175% total (borrower 1.925%): $500K -> $9,625', () => {
+    const r = config.calculate({ homePrice: '625000', downPayment: '125000', interestRate: '6.7', loanTerm: '30', propertyTaxRate: '1', mrtRegion: 'nyc' });
+    expect(getValue(r, 'recordingTax')).toBe('$9,625.00');
+  });
+  it('other regions: Nassau/Suffolk 1.05% total -> 0.80% borrower; Westchester 1.30% -> 1.05% (on $400K)', () => {
+    expect(getValue(config.calculate({ ...base, mrtRegion: 'mctd' }), 'recordingTax')).toBe('$2,560.00');
+    expect(getValue(config.calculate({ ...base, mrtRegion: 'westchester' }), 'recordingTax')).toBe('$3,360.00');
+  });
+  it('Enhanced STAR covers the first $88,500: 88,500 x (0.9% x 60% school share) = $477.90', () => {
+    expect(getValue(config.calculate({ ...base, starEligible: 'enhanced' }), 'starSavings')).toBe('$478/yr');
+  });
+  it('mansion tax is 1% from $1,000,000 and absent below it', () => {
+    const below = config.calculate({ ...base, homePrice: '999999', downPayment: '200000' });
+    expect(getValue(below, 'mansionTax')).toContain('Not applicable');
+    const at = config.calculate({ ...base, homePrice: '1000000', downPayment: '200000' });
+    expect(getValue(at, 'mansionTax')).toBe('$10,000.00');
+  });
+  it('a 19.96% down payment (displays as 20.0%) still pays PMI', () => {
+    // 19.96% of 500,000 = 99,800; PMI = 400,200 * 0.5% / 12 = 166.75
+    const r = config.calculate({ homePrice: '500000', downPayment: '99800', interestRate: '6.7', loanTerm: '30', propertyTaxRate: '0' });
+    const pi = parseMoney(getValue(r, 'monthlyPayment'));
+    expect(parseMoney(getValue(r, 'totalMonthly')) - pi).toBeCloseTo(166.75, 1);
   });
 });

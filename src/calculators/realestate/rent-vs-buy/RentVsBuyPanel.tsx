@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
+import { simulateRentVsBuy, firstBuyingWinsYear } from '../../finance/rent-vs-buy/model';
+import { rvbParamsFromValues } from './params';
 
 interface Props {
   values: Record<string, string>;
@@ -24,12 +26,6 @@ function fmtCompact(n: number): string {
 function getResultValue(results: CalculatorResult[], id: string): string {
   const r = results.find((x) => x.id === id);
   return r ? r.value : '';
-}
-
-function parseNum(s: string): number {
-  if (!s) return 0;
-  const m = s.replace(/[$,]/g, '').match(/^([\d.]+)/);
-  return m ? parseFloat(m[1]) : 0;
 }
 
 // ─── SVG Line Chart: Equity Growth vs Sunk Rent Costs ─────────────────────────
@@ -197,20 +193,20 @@ function EquityChart({
       <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2 px-1">
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-0.5 bg-blue-500 flex-shrink-0" />
-          <span className="text-[10px] text-slate-500">Home Value</span>
+          <span className="text-[10px] text-slate-600">Home Value</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-0.5 bg-emerald-500 flex-shrink-0" />
-          <span className="text-[10px] text-slate-500">Equity (Buying benefit)</span>
+          <span className="text-[10px] text-slate-600">Equity (Buying benefit)</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-4 flex-shrink-0" style={{ borderTop: '2px dashed #ef4444' }} />
-          <span className="text-[10px] text-slate-500">Sunk Rent Costs</span>
+          <span className="text-[10px] text-slate-600">Sunk Rent Costs</span>
         </div>
         {showBev && (
           <div className="flex items-center gap-1.5">
             <div className="w-4 flex-shrink-0" style={{ borderTop: '1.5px dashed #f59e0b' }} />
-            <span className="text-[10px] text-slate-500">Tipping Point</span>
+            <span className="text-[10px] text-slate-600">Tipping Point</span>
           </div>
         )}
       </div>
@@ -222,98 +218,32 @@ function EquityChart({
 
 export default function RentVsBuyPanel({ values, results }: Props) {
   const { chartData, breakEvenYear, selectedYears, buyCost, rentCost, buyWins, homeEquityVal, futureHomeValueVal } = useMemo(() => {
-    const homePrice = parseNum(values.homePrice);
-    const downPct = parseNum(values.downPaymentPct) / 100;
-    const annualRate = parseNum(values.interestRate) / 100;
-    const propertyTaxPct = (parseNum(values.propertyTaxPct) || 1.2) / 100;
-    const maintenancePct = (parseNum(values.maintenancePct) || 1.5) / 100;
-    const appreciation = parseNum(values.homeAppreciation) / 100;
-    const monthlyRent = parseNum(values.monthlyRent);
-    const rentIncrease = (parseNum(values.rentIncrease) || 3) / 100;
-    const rentersInsuranceAnnual = parseNum(values.rentersInsurance) || 200;
-    const years = parseNum(values.years) || 7;
-    const closingCostsPct = (parseNum(values.closingCostsPct) || 3) / 100;
+    const empty = { chartData: [] as ChartPoint[], breakEvenYear: null as number | null, selectedYears: 0, buyCost: 0, rentCost: 0, buyWins: false, homeEquityVal: 0, futureHomeValueVal: 0 };
+    const parsed = rvbParamsFromValues(values);
+    if (!parsed) return empty;
 
-    if ([homePrice, downPct, annualRate, monthlyRent, years, appreciation].some(isNaN)) {
-      return { chartData: [] as ChartPoint[], breakEvenYear: null, selectedYears: 0, buyCost: 0, rentCost: 0, buyWins: false, homeEquityVal: 0, futureHomeValueVal: 0 };
-    }
-    if (homePrice <= 0 || years <= 0) {
-      return { chartData: [] as ChartPoint[], breakEvenYear: null, selectedYears: 0, buyCost: 0, rentCost: 0, buyWins: false, homeEquityVal: 0, futureHomeValueVal: 0 };
-    }
-
-    const downPayment = homePrice * downPct;
-    const principal = homePrice - downPayment;
-    const closingCosts = homePrice * closingCostsPct;
-    const monthlyRate = annualRate / 12;
-    const numPayments30 = 30 * 12;
-
-    let monthlyMortgage: number;
-    if (monthlyRate === 0) {
-      monthlyMortgage = principal / numPayments30;
-    } else {
-      monthlyMortgage =
-        (principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments30))) /
-        (Math.pow(1 + monthlyRate, numPayments30) - 1);
-    }
-
-    const propertyTaxMonthly = (homePrice * propertyTaxPct) / 12;
-    const maintenanceMonthly = (homePrice * maintenancePct) / 12;
-    const homeInsuranceMonthly = (homePrice * 0.005) / 12;
-
-    // Generate 30-year chart data
-    const data: ChartPoint[] = [];
-    let runningBuyCost = downPayment + closingCosts;
-    let remainingBalance = principal;
-    let runningRentCost = 0;
-    let currentRent = monthlyRent;
-    let foundBreakEven: number | null = null;
-
-    for (let yr = 1; yr <= 30; yr++) {
-      for (let m = 0; m < 12; m++) {
-        const interest = remainingBalance * monthlyRate;
-        const principalPaid = monthlyMortgage - interest;
-        remainingBalance = Math.max(remainingBalance - principalPaid, 0);
-        runningBuyCost += monthlyMortgage + propertyTaxMonthly + maintenanceMonthly + homeInsuranceMonthly;
-      }
-      runningRentCost += currentRent * 12 + rentersInsuranceAnnual;
-      currentRent *= (1 + rentIncrease);
-
-      const fv = homePrice * Math.pow(1 + appreciation, yr);
-      const equity = fv - remainingBalance;
-      const netBuy = runningBuyCost - equity;
-
-      data.push({
-        year: yr,
-        homeValue: fv,
-        equity: Math.max(0, equity),
-        sunkRentCost: runningRentCost,
-        netBuyCost: netBuy,
-      });
-
-      if (foundBreakEven === null && netBuy <= runningRentCost) {
-        foundBreakEven = yr;
-      }
-    }
-
-    // Get values for selected year
-    const selectedPt = data.find((d) => d.year === years);
-    const futureHomeValueVal = selectedPt ? selectedPt.homeValue : 0;
-    const homeEquityVal = selectedPt ? selectedPt.equity : 0;
-    const buyCost = selectedPt ? selectedPt.netBuyCost : 0;
-    const rentCost = selectedPt ? selectedPt.sunkRentCost : 0;
-    const buyWins = buyCost < rentCost;
-
+    // Same model the calculation uses, so the chart and the result rows can never disagree.
+    const rows = simulateRentVsBuy(parsed.params);
+    const data: ChartPoint[] = rows.map((r) => ({
+      year: r.year,
+      homeValue: r.homeValue,
+      equity: Math.max(0, r.equity),
+      sunkRentCost: r.rentPaid,
+      netBuyCost: r.netBuyCost,
+    }));
+    const be = firstBuyingWinsYear(rows);
+    const sel = rows[parsed.years - 1];
     return {
       chartData: data,
-      breakEvenYear: foundBreakEven,
-      selectedYears: years,
-      buyCost,
-      rentCost,
-      buyWins,
-      homeEquityVal,
-      futureHomeValueVal,
+      breakEvenYear: be === -1 ? null : be,
+      selectedYears: parsed.years,
+      buyCost: sel.netBuyCost,
+      rentCost: sel.netRentCost,
+      buyWins: sel.netBuyCost < sel.netRentCost,
+      homeEquityVal: Math.max(0, sel.equity),
+      futureHomeValueVal: sel.homeValue,
     };
-  }, [values.homePrice, values.downPaymentPct, values.interestRate, values.propertyTaxPct, values.maintenancePct, values.homeAppreciation, values.monthlyRent, values.rentIncrease, values.rentersInsurance, values.years, values.closingCostsPct]);
+  }, [values]);
 
   if (!chartData.length) return null;
 
@@ -349,7 +279,7 @@ export default function RentVsBuyPanel({ values, results }: Props) {
               </p>
             </div>
             <div className="rounded-lg border bg-white px-4 py-2.5 text-center shrink-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Home Equity</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Home Equity</p>
               <p className="text-lg font-black text-emerald-700 mt-0.5">{fmtCompact(homeEquityVal)}</p>
             </div>
           </div>
@@ -357,7 +287,7 @@ export default function RentVsBuyPanel({ values, results }: Props) {
 
         {/* 2. SVG Line Chart */}
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">
             Home Value, Equity &amp; Sunk Rent Costs Over 30 Years
           </p>
           <EquityChart
@@ -375,15 +305,15 @@ export default function RentVsBuyPanel({ values, results }: Props) {
             </p>
             <div className="space-y-1.5">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Net cost to buy</span>
+                <span className="text-slate-600">Net cost to buy</span>
                 <span className="font-bold text-emerald-700">{fmtCompact(buyCost)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Home equity</span>
+                <span className="text-slate-600">Home equity</span>
                 <span className="font-bold text-emerald-700">+{fmtCompact(homeEquityVal)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Future home value</span>
+                <span className="text-slate-600">Future home value</span>
                 <span className="font-bold text-blue-600">{fmtCompact(futureHomeValueVal)}</span>
               </div>
             </div>
@@ -394,17 +324,17 @@ export default function RentVsBuyPanel({ values, results }: Props) {
             </p>
             <div className="space-y-1.5">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Net cost to rent</span>
+                <span className="text-slate-600">Net cost to rent</span>
                 <span className="font-bold text-blue-700">{fmtCompact(rentCost)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Difference</span>
+                <span className="text-slate-600">Difference</span>
                 <span className={`font-bold ${buyWins ? 'text-emerald-700' : 'text-amber-700'}`}>
                   {fmtCompact(difference)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Result</span>
+                <span className="text-slate-600">Result</span>
                 <span className={`font-bold ${buyWins ? 'text-emerald-700' : 'text-amber-700'}`}>
                   {buyWins ? 'Buying wins' : 'Renting wins'}
                 </span>
@@ -415,28 +345,28 @@ export default function RentVsBuyPanel({ values, results }: Props) {
 
         {/* 4. Month-by-month breakdown summary */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">
             Monthly Cost Breakdown
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-white rounded-lg border border-slate-200 px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Monthly Buy</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Total Monthly Buy</p>
               <p className="text-lg font-black text-emerald-700">{totalMonthlyBuyStr || 'N/A'}</p>
-              <p className="text-[10px] text-slate-500">P&amp;I + taxes + insurance + maintenance</p>
+              <p className="text-[10px] text-slate-600">P&amp;I + taxes + insurance + maintenance</p>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Upfront Closing Costs</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Upfront Closing Costs</p>
               <p className="text-lg font-black text-blue-700">{closingCostsLineStr || 'N/A'}</p>
-              <p className="text-[10px] text-slate-500">One-time cost at purchase</p>
+              <p className="text-[10px] text-slate-600">One-time cost at purchase</p>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">TIP</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">TIP</p>
               <p className="text-lg font-black text-amber-700">
                 {breakEvenYear !== null && breakEvenYear >= 1 && breakEvenYear <= 30
                   ? `Stay > ${breakEvenYear} yr${breakEvenYear !== 1 ? 's' : ''}`
                   : 'No break-even'}
               </p>
-              <p className="text-[10px] text-slate-500">
+              <p className="text-[10px] text-slate-600">
                 {breakEvenYear !== null && breakEvenYear >= 1 && breakEvenYear <= 30
                   ? 'After this point buying is cheaper'
                   : 'Renting stays cheaper long-term'}

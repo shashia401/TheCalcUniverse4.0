@@ -36,6 +36,7 @@ const marriageTaxConfig: CalculatorConfig = {
       placeholder: '85,000',
       prefix: '$',
       required: true,
+      min: 0,
       helpText: 'Gross annual income for the first partner before taxes.',
     },
     {
@@ -45,6 +46,7 @@ const marriageTaxConfig: CalculatorConfig = {
       placeholder: '65,000',
       prefix: '$',
       required: true,
+      min: 0,
       helpText: 'Gross annual income for the second partner before taxes.',
     },
     {
@@ -56,7 +58,7 @@ const marriageTaxConfig: CalculatorConfig = {
         { label: 'Standard Deduction (most common)', value: 'standard' },
         { label: 'Itemized — enter combined itemized amount', value: 'itemized' },
       ],
-      helpText: 'Choose standard deduction or itemize if your deductions exceed the standard amount.',
+      helpText: 'Choose standard deduction or itemize if your deductions exceed the standard amount. If an itemized figure is lower than the standard deduction, the standard deduction is used instead.',
     },
     {
       id: 'itemized1',
@@ -107,9 +109,11 @@ const marriageTaxConfig: CalculatorConfig = {
           { id: 'err', label: 'Itemized Deduction Inputs Required', value: 'Enter all three itemized deduction amounts (Partner 1 single, Partner 2 single, and combined joint), or switch to Standard Deduction.', color: 'negative' as const, highlight: true },
         ];
       }
-      ded1 = it1;
-      ded2 = it2;
-      dedJoint = itJ;
+      // A taxpayer takes the LARGER of itemized and standard, so a low itemized figure
+      // never raises the tax above the standard-deduction result.
+      ded1 = Math.max(it1, STD_DEDUCTION_SINGLE_2026);
+      ded2 = Math.max(it2, STD_DEDUCTION_SINGLE_2026);
+      dedJoint = Math.max(itJ, STD_DEDUCTION_MFJ_2026);
     } else {
       ded1 = STD_DEDUCTION_SINGLE_2026;
       ded2 = STD_DEDUCTION_SINGLE_2026;
@@ -125,6 +129,8 @@ const marriageTaxConfig: CalculatorConfig = {
     const taxableJoint = Math.max(0, i1 + i2 - dedJoint);
     const taxJoint = calcTax(taxableJoint, MFJ_BRACKETS_2026);
 
+    const totalIncome = i1 + i2;
+    const pct = (t: number) => (totalIncome > 0 ? ((t / totalIncome) * 100).toFixed(2) : '0.00');
     const diff = taxJoint - totalSingleTax;
     const isPenalty = diff > 0;
     const isBonus = diff < 0;
@@ -153,8 +159,8 @@ const marriageTaxConfig: CalculatorConfig = {
       { id: 'p2Tax', label: `   • Partner 2 (income $${fmt(i2)}, deduction $${fmt(ded2)})`, value: `$${fmt(tax2)}`, color: 'neutral' as const },
       { id: 'marriedTotal', label: `If MARRIED — Joint Federal Tax (MFJ, deduction $${fmt(dedJoint)})`, value: marriedFmt, color: 'neutral' as const },
       { id: 'jointIncome', label: 'Combined Household Income', value: `$${fmt(i1 + i2)}`, color: 'neutral' as const },
-      { id: 'effSingle', label: 'Effective Tax Rate — Filing as 2 Singles', value: `${(((totalSingleTax) / (i1 + i2)) * 100).toFixed(2)}%`, color: 'neutral' as const },
-      { id: 'effMarried', label: 'Effective Tax Rate — Filing Jointly', value: `${((taxJoint / (i1 + i2)) * 100).toFixed(2)}%`, color: 'neutral' as const },
+      { id: 'effSingle', label: 'Effective Tax Rate — Filing as 2 Singles', value: `${pct(totalSingleTax)}%`, color: 'neutral' as const },
+      { id: 'effMarried', label: 'Effective Tax Rate — Filing Jointly', value: `${pct(taxJoint)}%`, color: 'neutral' as const },
       { id: 'year', label: 'Tax Year Used', value: '2026 IRS brackets and standard deductions', color: 'neutral' as const },
     ];
   },
@@ -196,7 +202,7 @@ const marriageTaxConfig: CalculatorConfig = {
       {
         question: 'When do couples typically experience a marriage penalty?',
         answer:
-          'When both partners individually earn very high, similar incomes — specifically once each partner is already deep into the 35% single bracket (roughly $380K+ each). Two singles each making $450,000 pay tax at a marginal rate of 35%. Combined as MFJ, their $900,000 joint income crosses into the 37% bracket sooner than it would on two separate returns, creating a penalty of a few thousand dollars per year. Below this income level, the brackets are exactly neutral between filing separately and jointly, so no penalty exists for moderate earners.',
+          'When both partners individually earn very high, similar incomes — specifically once each partner is already deep into the 35% single bracket (roughly $400K+ of income each, i.e. about $384K of taxable income each after the standard deduction). Two singles each making $450,000 pay tax at a marginal rate of 35%. Combined as MFJ, their $900,000 joint income crosses into the 37% bracket sooner than it would on two separate returns, creating a penalty of about $1,982 per year (2026 brackets, standard deduction). With the standard deduction, below this income level the brackets are exactly neutral between filing separately and jointly, so no penalty exists for moderate earners.',
       },
       {
         question: 'When do couples get a marriage bonus?',
@@ -239,7 +245,7 @@ const marriageTaxConfig: CalculatorConfig = {
 
     proTips: [
       'Run this calculator both ways (standard deduction and itemized) — if one partner has large mortgage interest or charitable deductions, itemizing might flip a penalty into a bonus or vice versa.',
-      'The marriage penalty only appears once joint income pushes into the 37% MFJ bracket while each partner individually is still in the 35% single bracket — the 10% through 32% brackets are all exactly double for singles vs. MFJ, so they are neutral. If both partners individually earn above roughly $380K each, you will likely face a penalty.',
+      'The marriage penalty only appears once joint income pushes into the 37% MFJ bracket while each partner individually is still in the 35% single bracket — the 10% through 32% brackets are all exactly double for singles vs. MFJ, so they are neutral. If both partners individually earn above roughly $400K each, you will likely face a penalty.',
       'Don\'t forget about non-tax factors: married couples may qualify for better health insurance rates, spousal IRA contributions, and Social Security survivor benefits that can outweigh a tax penalty.',
       'This is federal income tax only. If you live in a community property state (CA, TX, WA, etc.), your state tax picture can be entirely different from the federal result.',
     ],
@@ -256,7 +262,7 @@ const marriageTaxConfig: CalculatorConfig = {
     limitations: [
       'Federal income tax only. State income tax brackets often differ significantly from federal brackets and can add their own marriage penalties or bonuses — California, for example, has a separate marriage penalty in its top brackets.',
       'It does not model the Earned Income Tax Credit, which has its own marriage penalty for low-income couples. It also does not model ACA premium tax credits, Social Security benefit taxation thresholds for married vs. single filers, or FICA taxes which are neutral with respect to marriage.',
-      'Assumes both partners use the same deduction type (both standard or both itemized). In reality, if one partner itemizes, the other must also itemize even if their individual deductions are below the standard threshold.',
+      'Uses the same deduction choice for both partners (standard or itemized, with itemized amounts floored at the standard deduction). Two unmarried filers can each choose independently; a mixed choice is not modelled. Itemized limits such as the SALT cap are not applied to the amounts you enter.',
       'It does not account for the "marriage bonus" from IRA contribution eligibility — married couples filing jointly have higher income phase-out ranges for Roth IRA contributions and deductible traditional IRA contributions.',
     ],
 citations: [

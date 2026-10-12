@@ -24,6 +24,19 @@ export interface RVBData {
   sellingCostsPct: number;
   homeAppreciationRate: number;
   homeValueAtHorizon: number;
+  /** Cumulative components at the selected year, computed by the shared model (never re-derived here). */
+  breakdown: {
+    rentOnly: number;
+    rentersInsurance: number;
+    investmentGain: number;
+    mortgagePaid: number;
+    tax: number;
+    insurance: number;
+    maintenance: number;
+    pmi: number;
+    saleProceeds: number;
+    upfront: number;
+  };
 }
 
 export function fmtDollar(n: number, compact = false): string {
@@ -42,73 +55,15 @@ export function fmtDollarFull(n: number): string {
 }
 
 export function CostBreakdown({ data }: { data: RVBData }) {
-  const {
-    selectedYear: y,
-    monthlyRent,
-    annualRentIncrease,
-    rentersInsurance,
-    homePrice,
-    downPayment,
-    closingCosts,
-    loanAmount,
-    mortgageRate,
-    propertyTaxRate,
-    maintenancePct,
-    pmiRate,
-    downPaymentPct,
-    homeAppreciationRate,
-    sellingCostsPct,
-    homeValueAtHorizon,
-    buyingCostAtHorizon,
-    rentingCostAtHorizon,
-    cheaperOption,
-  } = data;
-
-  // Reconstruct renting breakdown
-  let totalRentPaid = 0;
-  for (let i = 0; i < y; i++) {
-    totalRentPaid += monthlyRent * 12 * Math.pow(1 + annualRentIncrease / 100, i);
-  }
-  const totalRentersInsurance = rentersInsurance * y;
-
-  // Reconstruct buying breakdown
-  const r = mortgageRate / 100 / 12;
-  const termMonths = 360;
-  const mp =
-    r === 0
-      ? loanAmount / termMonths
-      : (loanAmount * (r * Math.pow(1 + r, termMonths))) / (Math.pow(1 + r, termMonths) - 1);
-
-  const totalMortgagePaid = mp * Math.min(y * 12, termMonths);
-
-  const totalTax = homePrice * (propertyTaxRate / 100) * y;
-
-  let totalMaintenance = 0;
-  for (let i = 0; i < y; i++) {
-    totalMaintenance += homePrice * Math.pow(1 + homeAppreciationRate / 100, i) * (maintenancePct / 100);
-  }
-
-  // PMI (simplified: months where LTV > 80%)
-  let totalPmi = 0;
-  if (downPaymentPct < 20) {
-    let bal = loanAmount;
-    for (let m = 0; m < y * 12 && m < termMonths; m++) {
-      if (bal / homePrice > 0.80) {
-        totalPmi += (loanAmount * (pmiRate / 100)) / 12;
-      }
-      const interest = bal * r;
-      bal = Math.max(0, bal - (mp - interest));
-    }
-  }
-
-  // Loan balance at year y
-  let loanBal = loanAmount;
-  for (let m = 0; m < Math.min(y * 12, termMonths); m++) {
-    const interest = loanBal * r;
-    loanBal = Math.max(0, loanBal - (mp - interest));
-  }
-  const saleProceeds = homeValueAtHorizon * (1 - sellingCostsPct / 100) - loanBal;
-  const upfrontCosts = downPayment + closingCosts;
+  const { selectedYear: y, buyingCostAtHorizon, rentingCostAtHorizon, cheaperOption, breakdown: b } = data;
+  const totalRentPaid = b.rentOnly;
+  const totalRentersInsurance = b.rentersInsurance;
+  const totalMortgagePaid = b.mortgagePaid;
+  const totalTax = b.tax;
+  const totalMaintenance = b.maintenance;
+  const totalPmi = b.pmi;
+  const saleProceeds = b.saleProceeds;
+  const upfrontCosts = b.upfront;
 
   const total = buyingCostAtHorizon;
   const maxVal = Math.max(Math.abs(buyingCostAtHorizon), Math.abs(rentingCostAtHorizon), 1);
@@ -116,9 +71,9 @@ export function CostBreakdown({ data }: { data: RVBData }) {
   const rentPct = Math.min(100, (Math.abs(rentingCostAtHorizon) / maxVal) * 100);
 
   const rowCls = 'flex justify-between items-center py-1.5 border-b border-slate-100 last:border-0 text-sm';
-  const labelCls = 'text-slate-500';
+  const labelCls = 'text-slate-600';
   const valCls = 'font-semibold text-slate-700';
-  const negValCls = 'font-semibold text-emerald-600';
+  const negValCls = 'font-semibold text-emerald-700';
 
   return (
     <div className="space-y-4">
@@ -137,8 +92,12 @@ export function CostBreakdown({ data }: { data: RVBData }) {
               <span className={labelCls}>Renter's insurance</span>
               <span className={valCls}>{fmtDollarFull(totalRentersInsurance)}</span>
             </div>
+            <div className={rowCls}>
+              <span className={labelCls}>Growth on down payment + closing costs if invested at 7%</span>
+              <span className={negValCls}>&minus;{fmtDollarFull(b.investmentGain)}</span>
+            </div>
             <div className="flex justify-between items-center py-2 mt-1 border-t-2 border-blue-300">
-              <span className="font-bold text-slate-700 text-sm">Net cost (after opportunity gain)</span>
+              <span className="font-bold text-slate-700 text-sm">Net cost (rent minus invested growth)</span>
               <span className="font-black text-blue-700 text-sm">{fmtDollarFull(rentingCostAtHorizon)}</span>
             </div>
           </div>
@@ -161,6 +120,10 @@ export function CostBreakdown({ data }: { data: RVBData }) {
             <div className={rowCls}>
               <span className={labelCls}>Property taxes</span>
               <span className={valCls}>{fmtDollarFull(totalTax)}</span>
+            </div>
+            <div className={rowCls}>
+              <span className={labelCls}>Homeowner&apos;s insurance</span>
+              <span className={valCls}>{fmtDollarFull(b.insurance)}</span>
             </div>
             <div className={rowCls}>
               <span className={labelCls}>Maintenance &amp; upkeep</span>
@@ -188,10 +151,10 @@ export function CostBreakdown({ data }: { data: RVBData }) {
 
       {/* Progress bars */}
       <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Cost Comparison</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Cost Comparison</p>
         <div className="space-y-1.5">
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500 w-14 shrink-0">Renting</span>
+            <span className="text-xs text-slate-600 w-14 shrink-0">Renting</span>
             <div className="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${cheaperOption === 'rent' ? 'bg-blue-400' : 'bg-blue-300'}`}
@@ -203,7 +166,7 @@ export function CostBreakdown({ data }: { data: RVBData }) {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500 w-14 shrink-0">Buying</span>
+            <span className="text-xs text-slate-600 w-14 shrink-0">Buying</span>
             <div className="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${cheaperOption === 'buy' ? 'bg-emerald-400' : 'bg-emerald-300'}`}
@@ -215,7 +178,7 @@ export function CostBreakdown({ data }: { data: RVBData }) {
             </span>
           </div>
         </div>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-slate-600 mt-1">
           {cheaperOption === 'buy'
             ? `Buying saves you ${fmtDollar(Math.abs(buyingCostAtHorizon - rentingCostAtHorizon), true)} over ${y} years.`
             : `Renting saves you ${fmtDollar(Math.abs(buyingCostAtHorizon - rentingCostAtHorizon), true)} over ${y} years.`}
