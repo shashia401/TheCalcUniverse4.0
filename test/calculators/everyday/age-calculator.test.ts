@@ -107,7 +107,7 @@ describe('Age Calculator', () => {
       toDate: '2025-01-01',
     });
     const chineseZodiac = getValue(r, 'chineseZodiac');
-    // 2000 = Dragon
+    // 2000 = Dragon by calendar year (1 Jan is before Lunar New Year, so the panel also warns about Rabbit)
     expect(chineseZodiac).toBe('Dragon');
   });
 
@@ -138,8 +138,8 @@ describe('Age Calculator', () => {
       toDate: '2025-01-01',
     });
     const nextDecade = getValue(r, 'nextDecade');
-    expect(nextDecade).toBeTruthy();
-    expect(nextDecade).toContain('year');
+    // 30th birthday is 2025-03-15: 2 months 14 days after 2025-01-01 (old "~N years" used year-number subtraction)
+    expect(nextDecade).toBe('In 2 months');
   });
 
   it('handles birthday on month boundary correctly', () => {

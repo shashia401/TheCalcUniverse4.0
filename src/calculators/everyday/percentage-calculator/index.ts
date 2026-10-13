@@ -24,6 +24,8 @@ const percentageCalculatorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '15',
       step: 0.01,
+      min: -1000000000000,
+      max: 1000000000000,
       required: true,
       helpText: 'First value for the percentage calculation',
     },
@@ -33,6 +35,8 @@ const percentageCalculatorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '200',
       step: 0.01,
+      min: -1000000000000,
+      max: 1000000000000,
       required: true,
       helpText: 'Second value for the percentage calculation',
     },
@@ -45,8 +49,8 @@ const percentageCalculatorConfig: CalculatorConfig = {
     if (isNaN(x) || isNaN(y)) return [];
 
     const fmt = (n: number) => {
-      if (Math.abs(n) >= 1000) return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
-      return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+      if (Math.abs(n) >= 1000) return n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+      return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
     };
 
     if (mode === 'of') {
@@ -108,8 +112,8 @@ const percentageCalculatorConfig: CalculatorConfig = {
     if (isNaN(x) || isNaN(y)) return [];
 
     const fmt = (n: number) => {
-      if (Math.abs(n) >= 1000) return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
-      return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+      if (Math.abs(n) >= 1000) return n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+      return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
     };
 
     if (mode === 'of') {
@@ -199,7 +203,7 @@ const percentageCalculatorConfig: CalculatorConfig = {
       'When comparing percentage changes, always note the base value. A 50% increase on $10 is only $5, while a 10% increase on $1,000 is $100. The absolute change matters more than the percentage for large-base comparisons.',
       'For stacked discounts (e.g., "50% off, plus an extra 20% off"), the discounts multiply, they do not add. 50% off then 20% off equals 60% off total, not 70% off. Use our Percent Off Calculator for precise stacked discount calculations.',
       'In finance, always check whether a change is reported in "percentage points" or "percent." An interest rate moving from 4% to 5% is a 1 percentage point increase but a 25% relative increase in the rate itself.',
-      'Sales tax rates vary significantly by location in the US: from 0% (Alaska, Delaware, Montana, New Hampshire, Oregon) to over 9% (Louisiana, Tennessee, Arkansas). Always check your local combined state and city tax rate.',
+      'Sales tax varies a lot by location in the US: five states (Alaska, Delaware, Montana, New Hampshire, Oregon) have no statewide sales tax, while the highest average combined state and local rates are around 9.5% (for example Louisiana and Tennessee, per the Tax Foundation). Always check your local combined rate.',
     ],
     limitations: [
       'Pure percentage calculations assume linear relationships, but real-world applications often involve compounding (like compound interest), tiered tax brackets, or progressive discount structures.',

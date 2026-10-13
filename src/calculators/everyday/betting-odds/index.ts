@@ -1,34 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BettingOddsPanel from './BettingOddsPanel';
-
-function gcd(a: number, b: number): number {
-  return b === 0 ? a : gcd(b, a % b);
-}
-
-function decimalToFraction(value: number): string {
-  if (value <= 0) return '0/1';
-  const tolerance = 1.0e-6;
-  let numerator = 1;
-  let denominator = 1;
-  let bestNum = 1;
-  let bestDen = 1;
-  let bestErr = Math.abs(value - numerator / denominator);
-
-  for (denominator = 1; denominator <= 1000; denominator++) {
-    numerator = Math.round(value * denominator);
-    const err = Math.abs(value - numerator / denominator);
-    if (err < bestErr) {
-      bestErr = err;
-      bestNum = numerator;
-      bestDen = denominator;
-      if (err < tolerance) break;
-    }
-  }
-
-  const g = gcd(bestNum, bestDen);
-  return `${bestNum / g}/${bestDen / g}`;
-}
+import { decimalToAmerican, decimalToFraction, oddsInfo } from './oddsMath';
 
 const bettingOddsConfig: CalculatorConfig = {
   inputs: [
@@ -48,7 +21,7 @@ const bettingOddsConfig: CalculatorConfig = {
       label: 'American Odds',
       type: 'number',
       placeholder: '+200',
-      helpText: 'Enter positive (underdog) or negative (favorite) odds',
+      helpText: 'Enter +100 or higher (underdog) or -100 or lower (favorite). American odds between -100 and +100 do not exist.',
       showWhen: (values) => values.oddsFormat === 'American',
     },
     {
@@ -70,65 +43,30 @@ const bettingOddsConfig: CalculatorConfig = {
       showWhen: (values) => values.oddsFormat === 'Fractional',
     },
     {
+      id: 'otherOdds',
+      label: 'Opposite Outcome Odds (optional)',
+      type: 'text',
+      placeholder: '-110',
+      helpText: 'Odds of the other side of a two-way market, in the same format as above. Enter it to see the bookmaker overround and the margin-free probability.',
+    },
+    {
       id: 'stake',
       label: 'Stake ($)',
       type: 'number',
       placeholder: '100',
       min: 0,
+      max: 10000000,
       helpText: 'Amount you plan to wager',
     },
   ],
   calculate: (values) => {
-    const oddsFormat = values.oddsFormat || 'American';
-    const stake = values.stake !== undefined && values.stake !== ''
-      ? parseFloat(values.stake)
-      : 100;
-
-    if (isNaN(stake) || stake <= 0) return [];
-
-    let decimalOdds: number;
-
-    if (oddsFormat === 'American') {
-      const american = parseFloat(values.americanOdds);
-      if (isNaN(american) || american === 0) return [];
-      decimalOdds = american >= 0
-        ? american / 100 + 1
-        : 100 / Math.abs(american) + 1;
-    } else if (oddsFormat === 'Decimal') {
-      decimalOdds = parseFloat(values.decimalOdds);
-      if (isNaN(decimalOdds) || decimalOdds < 1) return [];
-    } else if (oddsFormat === 'Fractional') {
-      const frac = values.fractionalOdds || '';
-      const parts = frac.split('/').map((s) => s.trim());
-      if (parts.length !== 2) return [];
-      const num = parseFloat(parts[0]);
-      const den = parseFloat(parts[1]);
-      if (isNaN(num) || isNaN(den) || den === 0) return [];
-      decimalOdds = num / den + 1;
-    } else {
-      return [];
-    }
-
-    // Convert to American
-    let americanOddsStr: string;
-    if (decimalOdds === 1) {
-      americanOddsStr = '—'; // em dash — no meaningful American odds representation
-    } else if (decimalOdds >= 2) {
-      americanOddsStr = `+${((decimalOdds - 1) * 100).toFixed(0)}`;
-    } else {
-      americanOddsStr = `${Math.round(-100 / (decimalOdds - 1))}`;
-    }
-
-    // Convert to Fractional
-    const fractionalOddsStr = decimalToFraction(decimalOdds - 1);
-
-    const impliedProbability = (1 / decimalOdds) * 100;
-    const payout = stake * decimalOdds;
-    const profit = payout - stake;
-
+    const o = oddsInfo(values);
+    if (!o) return [];
+    const americanOddsStr = decimalToAmerican(o.decimal);
     const fmtD = (n: number) => n.toFixed(2);
+    const pct = (p: number) => `${(p * 100).toFixed(2)}%`;
 
-    return [
+    const results: CalculatorResult[] = [
       {
         id: 'americanOddsOut',
         label: 'American Odds',
@@ -136,45 +74,32 @@ const bettingOddsConfig: CalculatorConfig = {
         highlight: true,
         color: americanOddsStr === '—' ? 'neutral' : parseFloat(americanOddsStr) >= 0 ? 'positive' : 'negative',
       },
-      {
-        id: 'decimalOddsOut',
-        label: 'Decimal Odds',
-        value: decimalOdds.toFixed(3),
-        highlight: true,
-        color: 'neutral',
-      },
-      {
-        id: 'fractionalOddsOut',
-        label: 'Fractional Odds',
-        value: fractionalOddsStr,
-        highlight: true,
-        color: 'neutral',
-      },
+      { id: 'decimalOddsOut', label: 'Decimal Odds', value: o.decimal.toFixed(3), highlight: true, color: 'neutral' },
+      { id: 'fractionalOddsOut', label: 'Fractional Odds', value: decimalToFraction(o.decimal - 1), highlight: true, color: 'neutral' },
       {
         id: 'impliedProbability',
         label: 'Implied Probability',
-        value: `${impliedProbability.toFixed(2)}%`,
+        value: pct(o.implied),
         color: 'neutral',
+        interpretation: 'Includes the bookmaker margin: 1 ÷ decimal odds. Add the opposite outcome below to see the margin.',
       },
-      {
-        id: 'payout',
-        label: 'Total Payout',
-        value: `$${fmtD(payout)}`,
-        color: 'positive',
-      },
-      {
-        id: 'profit',
-        label: 'Profit',
-        value: `$${fmtD(profit)}`,
-        color: profit >= 0 ? 'positive' : 'negative',
-      },
-      {
-        id: 'stakeReturned',
-        label: 'Stake Returned',
-        value: `$${fmtD(stake)}`,
-        color: 'neutral',
-      },
+      { id: 'payout', label: 'Total Payout', value: `$${fmtD(o.payout)}`, color: 'positive' },
+      { id: 'profit', label: 'Profit', value: `$${fmtD(o.profit)}`, color: o.profit >= 0 ? 'positive' : 'negative' },
+      { id: 'stakeReturned', label: 'Stake Returned', value: `$${fmtD(o.stake)}`, color: 'neutral' },
     ];
+    if (o.overround !== null && o.fairProb !== null && o.otherImplied !== null) {
+      results.push(
+        {
+          id: 'overround',
+          label: 'Overround (Bookmaker Margin)',
+          value: `${(o.overround * 100).toFixed(2)}%`,
+          color: o.overround > 0 ? 'negative' : 'neutral',
+          interpretation: `Implied probabilities ${pct(o.implied)} + ${pct(o.otherImplied)} = ${pct(o.implied + o.otherImplied)}; the excess over 100% is the margin.${o.overround < 0 ? ' A total below 100% would be an arbitrage between these two prices.' : ''}`,
+        },
+        { id: 'fairProbability', label: 'Margin-Free Probability', value: pct(o.fairProb), color: 'neutral', interpretation: 'Implied probability divided by the total, i.e. with the margin removed proportionally (the simplest de-vig method).' },
+      );
+    }
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -228,10 +153,11 @@ const bettingOddsConfig: CalculatorConfig = {
       'Enter the odds in your chosen format. The other two formats will be calculated automatically.',
       'Optionally enter a stake amount to see your potential payout and profit.',
       'Review the implied probability to understand the likelihood the odds represent.',
+      'Optionally enter the opposite outcome\'s odds (same format) to get the bookmaker overround and the margin-free probability of your outcome.',
       'Compare odds across different bookmakers by converting them to a common format.',
     ],
     explanation:
-      'Odds conversion is an essential skill for any sports bettor. Understanding how odds translate between formats allows you to shop for the best lines across different sportsbooks, regardless of the format each book uses. American odds (also called Moneyline odds) are the standard in the United States and show either how much you need to bet to win $100 (negative odds for favorites) or how much you win on a $100 bet (positive odds for underdogs). Decimal odds are the most intuitive format — simply multiply your stake by the decimal to get your total return. They are widely used in Europe, Australia, and Canada. Fractional odds are traditional in the UK and Ireland, showing the ratio of profit to stake. The implied probability is perhaps the most important derived metric: it tells you what percentage chance the odds represent. If you believe an outcome is more likely than the implied probability suggests, you have found a value bet. Professional bettors regularly convert odds to implied probabilities to identify mispriced lines. The overround (also called vig or juice) is the bookmaker\'s commission built into the odds. In a fair market with two equally likely outcomes, both would have implied probabilities of 50% each, summing to 100%. In reality, sportsbooks build in a margin so the probabilities sum to over 100%, typically 102—108%. This vig is how sportsbooks make their profit regardless of the outcome. Understanding these concepts is fundamental to making informed betting decisions and managing your bankroll effectively over the long term.',
+      'Odds conversion is an essential skill for any sports bettor. Understanding how odds translate between formats allows you to shop for the best lines across different sportsbooks, regardless of the format each book uses. American odds (also called Moneyline odds) are the standard in the United States and show either how much you need to bet to win $100 (negative odds for favorites) or how much you win on a $100 bet (positive odds for underdogs). Decimal odds are the most intuitive format — simply multiply your stake by the decimal to get your total return. They are widely used in Europe, Australia, and Canada. Fractional odds are traditional in the UK and Ireland, showing the ratio of profit to stake. The implied probability is perhaps the most important derived metric: it tells you what percentage chance the odds represent. If you believe an outcome is more likely than the implied probability suggests, you have found a value bet. Professional bettors regularly convert odds to implied probabilities to identify mispriced lines. The overround (also called vig or juice) is the bookmaker\'s commission built into the odds. In a fair market with two equally likely outcomes, both would have implied probabilities of 50% each, summing to 100%. In reality, sportsbooks build in a margin so the probabilities sum to over 100% (two -110 prices sum to 104.76%). This vig is how sportsbooks make their profit regardless of the outcome. Understanding these concepts is fundamental to making informed betting decisions and managing your bankroll effectively over the long term.',
     faqs: [
       {
         question: 'What is the difference between +200 and -200 American odds?',
@@ -239,7 +165,7 @@ const bettingOddsConfig: CalculatorConfig = {
       },
       {
         question: 'Why do implied probabilities from a bookmaker add up to more than 100%?',
-        answer: 'That extra percentage is the overround or vig (vigorish), which is the bookmaker\'s built-in profit margin. If a market has two outcomes each priced at -110 (52.4% implied probability each), the total is 104.8%. The extra 4.8% is the bookmaker\'s theoretical commission. This is how sportsbooks make money regardless of which side wins.',
+        answer: 'That extra percentage is the overround or vig (vigorish), which is the bookmaker\'s built-in profit margin. If a market has two outcomes each priced at -110 (52.38% implied probability each), the total is 104.76%. The extra 4.76% is the overround (the bookmaker\'s margin relative to the total stake, about 4.5% of all money bet if both sides are balanced). Enter the opposite outcome\'s odds above to compute it. This is how sportsbooks make money regardless of which side wins.',
       },
       {
         question: 'Can I use this calculator for non-sports betting?',

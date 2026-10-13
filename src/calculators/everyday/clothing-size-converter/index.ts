@@ -1,4 +1,4 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import ClothingSizePanel from './ClothingSizePanel';
 
@@ -21,12 +21,19 @@ interface CategoryTable {
 // ─── Helper to parse size input ───────────────────────────────────────────────
 
 function isNumericValue(val: string): boolean {
-  const n = parseFloat(val);
-  return !isNaN(n) && val.trim() !== '';
+  return val.trim() !== '' && Number.isFinite(Number(val.trim()));
 }
 
 function parseNumeric(val: string): number {
-  return parseFloat(val.trim());
+  return Number(val.trim());
+}
+
+/** Collapse several matching rows into one display value: "4–6" for numbers, "S/M" for letters. */
+function span(vals: string[]): string {
+  const uniq = vals.filter((v, i) => vals.indexOf(v) === i);
+  if (uniq.length === 1) return uniq[0];
+  if (uniq.every((v) => Number.isFinite(Number(v)))) return `${uniq[0]}–${uniq[uniq.length - 1]}`;
+  return uniq.join('/');
 }
 
 /** Find the closest matching row index for a numeric value in a given column */
@@ -152,30 +159,17 @@ const WOMENS_DRESSES: CategoryTable = {
     { us: '4', uk: '8', eu: '36', jp: '9', intl: 'S' },
     { us: '6', uk: '10', eu: '38', jp: '11', intl: 'S' },
     { us: '8', uk: '12', eu: '40', jp: '13', intl: 'M' },
-    { us: '10', uk: '14', eu: '42', jp: '15', intl: 'L' },
+    { us: '10', uk: '14', eu: '42', jp: '15', intl: 'M' },
     { us: '12', uk: '16', eu: '44', jp: '17', intl: 'L' },
-    { us: '14', uk: '18', eu: '46', jp: '19', intl: 'XL' },
+    { us: '14', uk: '18', eu: '46', jp: '19', intl: 'L' },
     { us: '16', uk: '20', eu: '48', jp: '21', intl: 'XL' },
   ],
   numericColumns: ['us', 'uk', 'eu', 'jp'],
   intlColumn: true,
 };
 
-const WOMENS_TOPS: CategoryTable = {
-  rows: [
-    { us: '0', uk: '4', eu: '32', jp: '5', intl: 'XS' },
-    { us: '2', uk: '6', eu: '34', jp: '7', intl: 'XS' },
-    { us: '4', uk: '8', eu: '36', jp: '9', intl: 'S' },
-    { us: '6', uk: '10', eu: '38', jp: '11', intl: 'S' },
-    { us: '8', uk: '12', eu: '40', jp: '13', intl: 'M' },
-    { us: '10', uk: '14', eu: '42', jp: '15', intl: 'L' },
-    { us: '12', uk: '16', eu: '44', jp: '17', intl: 'L' },
-    { us: '14', uk: '18', eu: '46', jp: '19', intl: 'XL' },
-    { us: '16', uk: '20', eu: '48', jp: '21', intl: 'XL' },
-  ],
-  numericColumns: ['us', 'uk', 'eu', 'jp'],
-  intlColumn: true,
-};
+// Same grading as dresses (US + 4 = UK, US + 32 = EU); an alias so the two tables can never drift apart.
+const WOMENS_TOPS: CategoryTable = WOMENS_DRESSES;
 
 const MENS_SUITS_JACKETS: CategoryTable = {
   rows: [
@@ -195,15 +189,15 @@ const MENS_SUITS_JACKETS: CategoryTable = {
 
 const MENS_SHIRTS: CategoryTable = {
   rows: [
-    { us: '14', uk: '14', eu: '36', jp: 'S', intl: 'XS' },
-    { us: '14.5', uk: '14.5', eu: '37', jp: 'S', intl: 'XS' },
-    { us: '15', uk: '15', eu: '38', jp: 'M', intl: 'S' },
-    { us: '15.5', uk: '15.5', eu: '39', jp: 'M', intl: 'S' },
-    { us: '16', uk: '16', eu: '41', jp: 'L', intl: 'M' },
-    { us: '16.5', uk: '16.5', eu: '42', jp: 'L', intl: 'M' },
-    { us: '17', uk: '17', eu: '43', jp: 'XL', intl: 'L' },
-    { us: '17.5', uk: '17.5', eu: '44', jp: 'XL', intl: 'L' },
-    { us: '18', uk: '18', eu: '45', jp: 'XXL', intl: 'XL' },
+    { us: '14', uk: '14', eu: '36', jp: 'S', intl: 'S' },
+    { us: '14.5', uk: '14.5', eu: '37', jp: 'S', intl: 'S' },
+    { us: '15', uk: '15', eu: '38', jp: 'M', intl: 'M' },
+    { us: '15.5', uk: '15.5', eu: '39', jp: 'M', intl: 'M' },
+    { us: '16', uk: '16', eu: '41', jp: 'L', intl: 'L' },
+    { us: '16.5', uk: '16.5', eu: '42', jp: 'L', intl: 'L' },
+    { us: '17', uk: '17', eu: '43', jp: 'XL', intl: 'XL' },
+    { us: '17.5', uk: '17.5', eu: '44', jp: 'XL', intl: 'XL' },
+    { us: '18', uk: '18', eu: '46', jp: 'XXL', intl: 'XXL' },
   ],
   numericColumns: ['us', 'uk', 'eu'],
   intlColumn: true,
@@ -224,7 +218,7 @@ const WOMENS_SHOES: CategoryTable = {
 
 const MENS_SHOES: CategoryTable = {
   rows: [
-    { us: '7', uk: '6.5', eu: '40', jp: '25.5' },
+    { us: '7', uk: '6.5', eu: '40', jp: '25' },
     { us: '8', uk: '7.5', eu: '41', jp: '26' },
     { us: '9', uk: '8.5', eu: '42.5', jp: '27' },
     { us: '10', uk: '9.5', eu: '43', jp: '28' },
@@ -238,37 +232,37 @@ const MENS_SHOES: CategoryTable = {
 
 const CHILDREN: CategoryTable = {
   rows: [
-    { us: '0-3M', uk: '0-3M', eu: '56', jp: '50', intl: 'NB' },
-    { us: '3-6M', uk: '3-6M', eu: '62', jp: '60', intl: '0-3M' },
-    { us: '6-12M', uk: '6-12M', eu: '74', jp: '70', intl: '3-6M' },
-    { us: '12-18M', uk: '12-18M', eu: '80', jp: '80', intl: '6-9M' },
-    { us: '2T', uk: '2T', eu: '86', jp: '90', intl: '12-18M' },
-    { us: '3T', uk: '3T', eu: '92', jp: '95', intl: '2T' },
-    { us: '4T', uk: '4T', eu: '98', jp: '100', intl: '3T' },
-    { us: '5', uk: '5', eu: '104', jp: '110', intl: '4' },
-    { us: '6', uk: '6', eu: '110', jp: '120', intl: '5' },
-    { us: '7', uk: '7', eu: '116', jp: '130', intl: '6' },
-    { us: '8', uk: '8', eu: '122', jp: '140', intl: '7' },
-    { us: '10', uk: '10', eu: '134', jp: '150', intl: '8' },
-    { us: '12', uk: '12', eu: '140', jp: '160', intl: '10' },
-    { us: '14', uk: '14', eu: '152', jp: '170', intl: '12' },
+    { us: '0-3M', uk: '0-3M', eu: '56', jp: '50' },
+    { us: '3-6M', uk: '3-6M', eu: '62', jp: '60' },
+    { us: '6-12M', uk: '6-12M', eu: '74', jp: '70' },
+    { us: '12-18M', uk: '12-18M', eu: '80', jp: '80' },
+    { us: '2T', uk: '2T', eu: '86', jp: '90' },
+    { us: '3T', uk: '3T', eu: '92', jp: '95' },
+    { us: '4T', uk: '4T', eu: '104', jp: '100' },
+    { us: '5', uk: '5', eu: '110', jp: '110' },
+    { us: '6', uk: '6', eu: '116', jp: '120' },
+    { us: '7', uk: '7', eu: '122', jp: '130' },
+    { us: '8', uk: '8', eu: '128', jp: '130' },
+    { us: '10', uk: '10', eu: '140', jp: '140' },
+    { us: '12', uk: '12', eu: '152', jp: '150' },
+    { us: '14', uk: '14', eu: '158', jp: '160' },
   ],
   numericColumns: ['eu', 'jp'],
-  intlColumn: true,
+  intlColumn: false,
 };
 
 const JEANS: CategoryTable = {
   rows: [
-    { us: '28', uk: '28', eu: '42', jp: '70', intl: 'XS' },
-    { us: '29', uk: '29', eu: '44', jp: '73', intl: 'S' },
+    { us: '28', uk: '28', eu: '44', jp: '71', intl: 'XS' },
+    { us: '29', uk: '29', eu: '45', jp: '74', intl: 'S' },
     { us: '30', uk: '30', eu: '46', jp: '76', intl: 'S' },
-    { us: '31', uk: '31', eu: '48', jp: '79', intl: 'M' },
-    { us: '32', uk: '32', eu: '50', jp: '81', intl: 'M' },
-    { us: '33', uk: '33', eu: '52', jp: '84', intl: 'L' },
-    { us: '34', uk: '34', eu: '54', jp: '86', intl: 'L' },
-    { us: '36', uk: '36', eu: '56', jp: '91', intl: 'XL' },
-    { us: '38', uk: '38', eu: '58', jp: '97', intl: 'XXL' },
-    { us: '40', uk: '40', eu: '60', jp: '102', intl: 'XXL' },
+    { us: '31', uk: '31', eu: '47', jp: '79', intl: 'M' },
+    { us: '32', uk: '32', eu: '48', jp: '81', intl: 'M' },
+    { us: '33', uk: '33', eu: '49', jp: '84', intl: 'L' },
+    { us: '34', uk: '34', eu: '50', jp: '86', intl: 'L' },
+    { us: '36', uk: '36', eu: '52', jp: '91', intl: 'XL' },
+    { us: '38', uk: '38', eu: '54', jp: '97', intl: 'XXL' },
+    { us: '40', uk: '40', eu: '56', jp: '102', intl: 'XXL' },
   ],
   numericColumns: ['us', 'uk', 'eu', 'jp'],
   intlColumn: true,
@@ -304,46 +298,33 @@ interface LookupResult {
   intl: string;
 }
 
+const OUT_OF_RANGE = 'out-of-range' as const;
+
 function lookupInTable(
   table: CategoryTable,
   region: string,
   sizeInput: string,
-): LookupResult | null {
+): LookupResult | typeof OUT_OF_RANGE | null {
   const trimmed = sizeInput.trim();
   if (!trimmed) return null;
 
   const rows = table.rows;
   const col = REGION_COLUMN[region];
 
-  // Handle International region specially
+  // International letter: several rows can share a letter (S = US 4-6), so report the whole span.
   if (region === 'International (S/M/L/XL)') {
-    const row = findExactStringRow(rows, 'intl', trimmed);
-    if (row) {
-      return {
-        us: row.us,
-        uk: row.uk,
-        eu: row.eu,
-        jp: row.jp,
-        intl: row.intl || trimmed,
-      };
-    }
-    // For children's sizes, try to match a US value directly
-    if (table === CHILDREN) {
-      const childRow = rows.find(
-        (r) => r.us.toUpperCase() === trimmed.toUpperCase(),
-      );
-      if (childRow) {
-        return {
-          us: childRow.us,
-          uk: childRow.uk,
-          eu: childRow.eu,
-          jp: childRow.jp,
-          intl: childRow.intl || '',
-        };
-      }
-    }
-    return null;
+    const t = trimmed.toUpperCase();
+    const matches = rows.filter((r) => (r.intl || '').toUpperCase() === t);
+    if (matches.length === 0) return null;
+    return {
+      us: span(matches.map((r) => r.us)),
+      uk: span(matches.map((r) => r.uk)),
+      eu: span(matches.map((r) => r.eu)),
+      jp: span(matches.map((r) => r.jp)),
+      intl: matches[0].intl || trimmed,
+    };
   }
+  if (!col) return null;
 
   // For non-numeric columns (Children by age is text-based), try exact match first
   if (table === CHILDREN) {
@@ -363,8 +344,18 @@ function lookupInTable(
     return null;
   }
 
-  // Numeric lookup
-  if (!isNumericValue(trimmed)) return null;
+  // Letter sizes typed into a column that holds letters (e.g. JP "L" for men's shirts)
+  if (!isNumericValue(trimmed)) {
+    const matches = rows.filter((r) => r[col].toUpperCase() === trimmed.toUpperCase());
+    if (matches.length === 0) return null;
+    return {
+      us: span(matches.map((r) => r.us)),
+      uk: span(matches.map((r) => r.uk)),
+      eu: span(matches.map((r) => r.eu)),
+      jp: span(matches.map((r) => r.jp)),
+      intl: matches[0].intl || '',
+    };
+  }
   const target = parseNumeric(trimmed);
 
   // Try exact match first
@@ -379,18 +370,25 @@ function lookupInTable(
     };
   }
 
+  // The chart has no data outside its first/last row - say so instead of snapping to the nearest end.
+  const colVals = rows.map((r) => parseFloat(r[col])).filter((v) => !isNaN(v));
+  if (colVals.length === 0) return null;
+  if (target < Math.min(...colVals) || target > Math.max(...colVals)) return OUT_OF_RANGE;
+
   // Try interpolation
   const range = findRange(rows, col, target);
   if (range && range.low !== range.high) {
-    const usVal = interpolateValue(rows, col, 'us', range.low, range.high, target);
-    const ukVal = interpolateValue(rows, col, 'uk', range.low, range.high, target);
-    const euVal = interpolateValue(rows, col, 'eu', range.low, range.high, target);
-    const jpVal = interpolateValue(rows, col, 'jp', range.low, range.high, target);
-    // Use closest row's intl value
+    // Use the closest row for letter columns (JP S/M/L) and for the intl letter
     const closestIdx = Math.abs(parseFloat(rows[range.low][col]) - target) <=
       Math.abs(parseFloat(rows[range.high][col]) - target)
       ? range.low
       : range.high;
+    const interp = (c: 'us' | 'uk' | 'eu' | 'jp') =>
+      interpolateValue(rows, col, c, range.low, range.high, target) || rows[closestIdx][c];
+    const usVal = interp('us');
+    const ukVal = interp('uk');
+    const euVal = interp('eu');
+    const jpVal = interp('jp');
     const intlVal = rows[closestIdx].intl || '';
 
     return {
@@ -472,9 +470,21 @@ const clothingSizeConfig: CalculatorConfig = {
 
     const result = lookupInTable(table, region, sizeInput);
     if (!result) return [];
+    if (result === OUT_OF_RANGE) {
+      return [
+        {
+          id: 'outOfRange',
+          label: 'Size not in chart',
+          value: '—',
+          color: 'neutral',
+          warning: `${sizeInput} is outside the ${category} chart, which has no data beyond its smallest and largest size. Check the brand's own size chart.`,
+        },
+      ];
+    }
 
-    const results = [
-      { id: 'us', label: 'US Size', value: result.us },
+    const approx = 'Typical retail equivalents. Sizing is not standardised and varies by brand - check the brand\'s own size chart.';
+    const results: CalculatorResult[] = [
+      { id: 'us', label: 'US Size', value: result.us, interpretation: approx },
       { id: 'uk', label: 'UK Size', value: result.uk },
       { id: 'eu', label: 'EU Size', value: result.eu },
       { id: 'jp', label: 'JP Size', value: result.jp },
@@ -494,7 +504,7 @@ const clothingSizeConfig: CalculatorConfig = {
     formula:
       'Convert between US, UK, EU, JP, and International sizing using standardised conversion tables with matching and linear interpolation for partial sizes.',
     formulaDescription:
-      'Clothing sizing systems developed independently across different regions, each using different measurement units, reference points, and grading increments. US women\'s clothing uses even numbers (0-20+) where each increment corresponds to approximately 1 inch of circumference change. UK women\'s sizing follows a similar scale offset by about 4 sizes. EU sizing uses a centimetre-based system (30-60+) that directly corresponds to body measurements. Japanese sizing provides an alternative numeric or letter-based system. International letter sizing (XS-XXL) offers a rough cross-reference but varies significantly between brands and garment types. This converter uses standardised conversion tables derived from industry references to map sizes across all five systems, with linear interpolation applied for in-between sizes.',
+      'Clothing sizing systems developed independently across different regions, each using different measurement units, reference points, and grading increments. US women\'s clothing uses even numbers (0-20+) where each step of two sizes (for example 8 to 10) corresponds to roughly 1 inch of bust, waist and hip. UK women\'s sizing follows a similar scale offset by about 4 sizes. EU sizing uses a centimetre-based system (30-60+) that directly corresponds to body measurements. Japanese sizing provides an alternative numeric or letter-based system. International letter sizing (XS-XXL) offers a rough cross-reference but varies significantly between brands and garment types. This converter uses typical retail conversion tables to map sizes across the five systems, with linear interpolation for in-between sizes. These are approximations, not a standard: brands differ, so always check the brand\'s own chart.',
     variables: [
       {
         symbol: 'US',
@@ -542,11 +552,11 @@ const clothingSizeConfig: CalculatorConfig = {
       'Helping parents find the right size for children using age-based sizing charts from different countries.',
     ],
     explanation:
-      'Clothing size conversion is complicated because different countries and regions developed their sizing systems independently, using different measurement units, reference points, and grading increments. US women\'s clothing sizing traces its origins to a 1930s government study by the Bureau of Home Economics, where 10,000 women were measured to create a standardised system. That original system used even numbers (8-42), but over decades, manufacturers shifted the scale (a phenomenon known as vanity sizing) so that today a size 8 fits a body approximately two sizes larger than the 1930s equivalent. UK women\'s sizing follows a similar scale to US but is offset by approximately 4 sizes: a US size 8 equals a UK size 12. The offset originated because the UK based its system on imperial measurements while the US system drifted independently. EU sizing is fundamentally different: it uses a centimetre-based system where each size typically corresponds to a 2 cm change in circumference (4 cm for full chest circumference in tops). EU sizes for women (30-60) and men (44-72) are based on actual body measurements, making them more systematic and less prone to vanity sizing drift. Japanese sizing for women (5-21) uses yet another scale that tends to run smaller than Western equivalents, reflecting the average difference in body measurements across populations. International letter sizing (XS through XXL and beyond) was intended as a universal cross-reference but remains unstandardised: a size M from one brand may fit differently than a size M from another, even within the same country. The most reliable approach is to use body measurements (chest, waist, hips, inseam) in centimetres or inches, which this converter uses as its underlying reference data. For shoes, each system uses a different zero point and grading increment: US sizes start at approximately 0 (women) or 6 (men) and increase by 1/3 inch per size. UK sizes are similar but offset by about 1-2 sizes. EU shoe sizes are based on the Paris point (2/3 cm per size), making them strictly linear. Japanese shoe sizes are simply the foot length in centimetres.',
+      'Clothing size conversion is complicated because different countries and regions developed their sizing systems independently, using different measurement units, reference points, and grading increments. US women\'s clothing sizing traces its origins to a US Department of Agriculture Bureau of Home Economics survey of nearly 15,000 women in 1939-1940. The voluntary commercial standard built on it was later withdrawn, and over the decades manufacturers drifted the scale (vanity sizing), so today labels are set by each brand; ASTM D5585 publishes reference body-measurement tables for women (misses) sizes. UK women\'s sizing follows a similar scale to US but is offset by approximately 4 sizes: a US size 8 equals a UK size 12. EU sizing is fundamentally different: its numbers relate to body measurements in centimetres (for women each step of two, such as 38 to 40, is about 4 cm of bust). That makes EU sizes more systematic, although brands still vary. Japanese sizing for women (5-21) uses yet another scale that tends to run smaller than Western equivalents, reflecting the average difference in body measurements across populations. International letter sizing (XS through XXL and beyond) was intended as a universal cross-reference but remains unstandardised: a size M from one brand may fit differently than a size M from another, even within the same country. The most reliable approach is to compare your body measurements (chest, waist, hips, inseam) with the brand\'s own chart. For shoes, each system uses a different zero point and grading increment: US sizes increase by 1/3 inch per full size and men\'s and women\'s scales are offset (a women\'s 8 is about a men\'s 6.5). UK sizes are offset from US by about 2 (women) or 0.5-1 (men). EU shoe sizes are based on the Paris point (2/3 cm per size), making them strictly linear. Japanese shoe sizes are simply the foot length in centimetres.',
     faqs: [
       {
         question: 'Why are clothing sizes different between the US, UK, and EU?',
-        answer: 'Each region developed its sizing system independently based on local measurement units and historical standards. US women\'s sizing originated from a 1930s government study and uses even numbers based on inches. UK women\'s sizing is similar but shifted by approximately +4 sizes. EU sizing uses a metric-based system directly tied to body measurements in centimetres. These historical differences persist because there is no single mandatory international standard — manufacturers choose which system to use based on their target market.',
+        answer: 'Each region developed its sizing system independently based on local measurement units and historical standards. US women\'s sizing originated from a 1939-1940 government survey and now uses brand-defined even numbers. UK women\'s sizing is similar but shifted by approximately +4 sizes. EU sizing uses a metric-based system directly tied to body measurements in centimetres. These historical differences persist because there is no single mandatory international standard — manufacturers choose which system to use based on their target market.',
       },
       {
         question: 'Why do my sizes vary so much between different brands?',
@@ -562,13 +572,13 @@ const clothingSizeConfig: CalculatorConfig = {
       },
     ],
     diagram: {
-      svg: '<svg viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="210" y="16" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Clothing Size Conversion Chart</text><g transform="translate(10, 28)"><text x="200" y="12" font-family="system-ui,sans-serif" font-size="12" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">Women’s Dresses / Tops</text><rect x="0" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="34" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">US</text><rect x="70" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="104" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">UK</text><rect x="140" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="174" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">EU</text><rect x="210" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="244" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">JP</text><rect x="280" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="314" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">Intl</text><text x="34" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">4</text><text x="104" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">8</text><text x="174" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">36</text><text x="244" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">9</text><text x="314" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">S</text><text x="34" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">8</text><text x="104" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">12</text><text x="174" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">40</text><text x="244" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">13</text><text x="314" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">M</text><text x="34" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">14</text><text x="104" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">18</text><text x="174" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">46</text><text x="244" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">19</text><text x="314" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">XL</text></g><g transform="translate(10, 130)"><text x="200" y="12" font-family="system-ui,sans-serif" font-size="12" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">Men’s Shirts (Collar)</text><rect x="0" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="34" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">US</text><rect x="70" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="104" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">EU</text><rect x="140" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="174" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">Intl</text><text x="34" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">14.5</text><text x="104" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">37</text><text x="174" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">XS</text><text x="34" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">15.5</text><text x="104" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">39</text><text x="174" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">S</text><text x="34" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">16.5</text><text x="104" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">42</text><text x="174" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">M</text><text x="34" y="114" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">17.5</text><text x="104" y="114" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">44</text><text x="174" y="114" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">L</text></g></svg>',
+      svg: '<svg viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="210" y="16" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Clothing Size Conversion Chart</text><g transform="translate(10, 28)"><text x="200" y="12" font-family="system-ui,sans-serif" font-size="12" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">Women’s Dresses / Tops</text><rect x="0" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="34" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">US</text><rect x="70" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="104" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">UK</text><rect x="140" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="174" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">EU</text><rect x="210" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="244" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">JP</text><rect x="280" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="314" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">Intl</text><text x="34" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">4</text><text x="104" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">8</text><text x="174" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">36</text><text x="244" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">9</text><text x="314" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">S</text><text x="34" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">8</text><text x="104" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">12</text><text x="174" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">40</text><text x="244" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">13</text><text x="314" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">M</text><text x="34" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">16</text><text x="104" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">20</text><text x="174" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">48</text><text x="244" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">21</text><text x="314" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">XL</text></g><g transform="translate(10, 130)"><text x="200" y="12" font-family="system-ui,sans-serif" font-size="12" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">Men’s Shirts (Collar)</text><rect x="0" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="34" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">US</text><rect x="70" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="104" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">EU</text><rect x="140" y="22" width="68" height="20" rx="3" fill="var(--svg-dbeafe)"/><text x="174" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-2563eb)" font-weight="600">Intl</text><text x="34" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">14.5</text><text x="104" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">37</text><text x="174" y="60" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">S</text><text x="34" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">15.5</text><text x="104" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">39</text><text x="174" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">M</text><text x="34" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">16.5</text><text x="104" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">42</text><text x="174" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">L</text><text x="34" y="114" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">17.5</text><text x="104" y="114" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">44</text><text x="174" y="114" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="500">XL</text></g></svg>',
       alt: 'Size conversion table showing US, UK, EU, JP, and International equivalent sizes for women\'s dresses/tops and men\'s shirts across multiple rows.',
       caption: 'Equivalence chart for women\'s dresses/tops and men\'s shirts across US, UK, EU, JP, and International sizing systems.',
     },
     citations: [
       { title: 'Wikipedia — Clothing Sizes', url: 'https://en.wikipedia.org/wiki/Clothing_sizes' },
-      { title: 'ASTM D6240 — Standard Tables of Body Measurements for Men Sizes', url: 'https://www.astm.org/d6240-18.html' },
+      { title: 'ASTM D6240 — Standard Tables of Body Measurements for Men', url: 'https://www.astm.org/d6240-18.html' },
     ],
   },
 };

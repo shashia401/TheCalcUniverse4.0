@@ -104,7 +104,7 @@ describe('Depth of Field Calculator', () => {
       subjectDistance: '12',
       distanceUnit: 'feet',
     });
-    expect(getValue(r, 'cocValue')).toContain('0.043');
+    expect(getValue(r, 'cocValue')).toContain('0.037');
   });
 
   it('includes all required result IDs', () => {

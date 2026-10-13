@@ -76,11 +76,9 @@ describe('yarn-yardage', () => {
       stitchesPer4in: '20',
       rowsPer4in: '24',
     });
-    // Area = 60*80 = 4800 sq in
-    // Stitches per sq in = (20/4) * (24/4) = 5 * 6 = 30
-    // Yardage = 4800 / 30 * 1.2 = 192 yards
+    // 3.5 x 60 x 80 x (24/4) / 36 = 2800 yd, x 1.2 waste = 3360 yd (the old formula divided by the gauge and gave 192)
     const yardage = parseNumber(getValue(r, 'yardageNeeded'));
-    near(yardage, 192, 1);
+    near(yardage, 3360, 1);
   });
 
   it('returns empty for custom project with missing dimensions', () => {
@@ -103,8 +101,9 @@ describe('yarn-yardage', () => {
       precutType: 'Jelly Roll',
       precutCount: '2',
     });
-    expect(getValue(r, 'precutYardage')).toContain('6');
-    expect(getValue(r, 'remainingYardage')).toBeTruthy();
+    // 2 x 2.65 yd = 5.3 yd of fabric -> "5 yards"
+    expect(getValue(r, 'precutYardage')).toContain('5 yards');
+    expect(r.find((x) => x.id === 'remainingYardage')).toBeUndefined();
   });
 
   it('shows different yardage for different project sizes', () => {

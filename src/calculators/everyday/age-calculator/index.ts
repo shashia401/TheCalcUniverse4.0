@@ -1,40 +1,10 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import AgeCalculatorPanel from './AgeCalculatorPanel';
+import { computeAge, chineseAnimal, zodiacSign } from './ageMath';
+import { toIsoDate } from '../../../utils/dates';
 
-const daysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate();
-const utcDay = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
-
-// Calendar-borrow age breakdown. When the birth day is later than the length of
-// the previous month (e.g. 31 Jan -> 1 Mar) the borrowed days still leave a
-// negative day count; in that case anchor on the birthday clamped to month-end
-// (31 Jan -> 29 Feb) and count the real days from there. Total days use UTC
-// day numbers so a DST change can't drop a day.
-function ageBreakdown(birth: Date, to: Date) {
-  let years = to.getFullYear() - birth.getFullYear();
-  let months = to.getMonth() - birth.getMonth();
-  let days = to.getDate() - birth.getDate();
-  const rawYears = years;
-  const borrowDays = days < 0;
-  if (days < 0) {
-    months -= 1;
-    days += new Date(to.getFullYear(), to.getMonth(), 0).getDate();
-  }
-  const borrowMonths = months < 0;
-  if (months < 0) {
-    years -= 1;
-    months += 12;
-  }
-  if (days < 0) {
-    const anchorIdx = birth.getFullYear() * 12 + birth.getMonth() + years * 12 + months;
-    const ay = Math.floor(anchorIdx / 12);
-    const am = anchorIdx % 12;
-    const anchor = new Date(ay, am, Math.min(birth.getDate(), daysInMonth(ay, am)));
-    days = Math.round((utcDay(to) - utcDay(anchor)) / 86400000);
-  }
-  const totalDays = Math.round((utcDay(to) - utcDay(birth)) / 86400000);
-  return { years, months, days, rawYears, borrowDays, borrowMonths, totalDays };
-}
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const ageCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -57,21 +27,10 @@ const ageCalculatorConfig: CalculatorConfig = {
     },
   ],
   explainSteps: (values) => {
-    const birthStr = values.birthDate;
-    const toStr = values.toDate;
-
-    if (!birthStr || !/^\d{4}-\d{2}-\d{2}$/.test(birthStr)) return [];
-
-    const birth = new Date(birthStr + 'T00:00:00');
-    if (isNaN(birth.getTime())) return [];
-
-    const hasToDate = !!(toStr && /^\d{4}-\d{2}-\d{2}$/.test(toStr));
-    const to = hasToDate ? new Date(toStr + 'T00:00:00') : new Date();
-
-    if (birth > to) return [];
-
-    const { years, months, days, rawYears, borrowDays, borrowMonths, totalDays } = ageBreakdown(birth, to);
-    const toLabel = hasToDate ? toStr : 'today';
+    const a = computeAge(values);
+    if (!a) return [];
+    const birthStr = toIsoDate(a.birth);
+    const toLabel = a.hasToDate ? toIsoDate(a.to) : 'today';
 
     const steps: { label: string; expr: string; note?: string }[] = [
       {
@@ -80,113 +39,54 @@ const ageCalculatorConfig: CalculatorConfig = {
       },
       {
         label: 'Subtract years, months and days separately',
-        expr: `years ${to.getFullYear()} − ${birth.getFullYear()} = ${rawYears} · months ${to.getMonth() + 1} − ${birth.getMonth() + 1} · days ${to.getDate()} − ${birth.getDate()}`,
+        expr: `years ${a.to.getFullYear()} − ${a.birth.getFullYear()} = ${a.rawYears} · months ${a.to.getMonth() + 1} − ${a.birth.getMonth() + 1} · days ${a.to.getDate()} − ${a.birth.getDate()}`,
       },
     ];
 
-    if (borrowDays || borrowMonths) {
+    if (a.borrowDays || a.borrowMonths) {
       const adj: string[] = [];
-      if (borrowDays) adj.push('days were negative, so borrow a month worth of days');
-      if (borrowMonths) adj.push('months were negative, so borrow 1 year (+12 months)');
+      if (a.borrowDays) adj.push('days were negative, so borrow a month worth of days');
+      if (a.borrowMonths) adj.push('months were negative, so borrow 1 year (+12 months)');
       steps.push({
         label: 'Fix any negative parts by borrowing',
-        expr: `${years} years, ${months} months, ${days} days`,
+        expr: `${a.years} years, ${a.months} months, ${a.days} days`,
         note: adj.join('; '),
       });
     }
 
     steps.push({
       label: 'Your exact age',
-      expr: `${years} years, ${months} months, ${days} days`,
+      expr: `${a.years} years, ${a.months} months, ${a.days} days`,
     });
     steps.push({
       label: 'Total days lived',
-      expr: `⌊(${toLabel} − ${birthStr}) ÷ 1 day⌋ = ${totalDays.toLocaleString(undefined)} days`,
+      expr: `(${toLabel} − ${birthStr}) in whole calendar days = ${a.totalDays.toLocaleString('en-US')} days`,
     });
 
     return steps;
   },
   calculate: (values) => {
-    const birthStr = values.birthDate;
-    const toStr = values.toDate;
-
-    if (!birthStr || !/^\d{4}-\d{2}-\d{2}$/.test(birthStr)) return [];
-
-    const birth = new Date(birthStr + 'T00:00:00');
-    if (isNaN(birth.getTime())) return [];
-
-    const to = toStr && /^\d{4}-\d{2}-\d{2}$/.test(toStr)
-      ? new Date(toStr + 'T00:00:00')
-      : new Date();
-
-    if (birth > to) return [];
-
-    const { years, months, days, totalDays } = ageBreakdown(birth, to);
+    const a = computeAge(values);
+    if (!a) return [];
+    const { birth, years, months, days, totalDays } = a;
     const totalWeeks = Math.floor(totalDays / 7);
     const totalMonths = years * 12 + months;
     const totalHours = totalDays * 24;
 
-    const birthMonth = birth.getMonth();
-    const birthDay = birth.getDate();
-    const isLeapBirthday = birthMonth === 1 && birthDay === 29;
-    const targetYear = to.getFullYear();
-    const isLeapYear = (targetYear % 4 === 0 && targetYear % 100 !== 0) || (targetYear % 400 === 0);
-    const nextBirthdayMonth = isLeapBirthday && !isLeapYear ? 2 : birthMonth;
-    const nextBirthdayDay = isLeapBirthday && !isLeapYear ? 1 : birthDay;
-    const nextBirthday = new Date(targetYear, nextBirthdayMonth, nextBirthdayDay);
-    if (nextBirthday <= to) nextBirthday.setFullYear(to.getFullYear() + 1);
-    const daysUntilBirthday = Math.round((nextBirthday.getTime() - to.getTime()) / (1000 * 60 * 60 * 24));
+    const zodiac = zodiacSign(birth.getMonth(), birth.getDate());
+    const chineseZodiac = chineseAnimal(birth.getFullYear());
+    const birthWeekday = WEEKDAYS[birth.getDay()];
 
-    // Zodiac sign calculation
-    const zodiacSigns = [
-      { name: 'Capricorn', endMonth: 0, endDay: 19 },
-      { name: 'Aquarius', endMonth: 1, endDay: 18 },
-      { name: 'Pisces', endMonth: 2, endDay: 20 },
-      { name: 'Aries', endMonth: 3, endDay: 19 },
-      { name: 'Taurus', endMonth: 4, endDay: 20 },
-      { name: 'Gemini', endMonth: 5, endDay: 20 },
-      { name: 'Cancer', endMonth: 6, endDay: 22 },
-      { name: 'Leo', endMonth: 7, endDay: 22 },
-      { name: 'Virgo', endMonth: 8, endDay: 22 },
-      { name: 'Libra', endMonth: 9, endDay: 22 },
-      { name: 'Scorpio', endMonth: 10, endDay: 21 },
-      { name: 'Sagittarius', endMonth: 11, endDay: 21 },
-      { name: 'Capricorn', endMonth: 12, endDay: 19 },
-    ];
-    let zodiac = 'Capricorn';
-    for (const z of zodiacSigns) {
-      if (birthMonth < z.endMonth || (birthMonth === z.endMonth && birthDay <= z.endDay)) {
-        zodiac = z.name;
-        break;
-      }
-    }
+    const d10 = toIsoDate(a.day10k);
+    const dec = a.decadeIn;
+    const decadeParts = [
+      dec.years > 0 ? `${dec.years} year${dec.years !== 1 ? 's' : ''}` : '',
+      dec.months > 0 ? `${dec.months} month${dec.months !== 1 ? 's' : ''}` : '',
+      dec.years === 0 && dec.months === 0 ? `${dec.days} day${dec.days !== 1 ? 's' : ''}` : '',
+    ].filter(Boolean);
 
-    // Chinese zodiac
-    const chineseZodiacAnimals = ['Rat', 'Ox', 'Tiger', 'Rabbit', 'Dragon', 'Snake', 'Horse', 'Goat', 'Monkey', 'Rooster', 'Dog', 'Pig'];
-    const chineseZodiacIdx = ((birth.getFullYear() - 4) % 12 + 12) % 12;
-    const chineseZodiac = chineseZodiacAnimals[chineseZodiacIdx];
-
-    // Day of week born
-    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const birthWeekday = weekdays[birth.getDay()];
-
-    // Life milestones
-    const day10k = new Date(birth.getTime() + 10000 * 24 * 60 * 60 * 1000);
-    const day20k = new Date(birth.getTime() + 20000 * 24 * 60 * 60 * 1000);
-    const day30k = new Date(birth.getTime() + 30000 * 24 * 60 * 60 * 1000);
-    const fmtMilestone = (d: Date) => d.toISOString().slice(0, 10);
-    const daysTo10k = Math.max(0, Math.round((day10k.getTime() - to.getTime()) / (1000 * 60 * 60 * 24)));
-    const daysTo20k = Math.max(0, Math.round((day20k.getTime() - to.getTime()) / (1000 * 60 * 60 * 24)));
-
-    // Next major birthday (decade milestone)
-    let nextDecadeBirthday = Math.ceil((years + 1) / 10) * 10;
-    if (nextDecadeBirthday === years) nextDecadeBirthday = years + 10;
-    const decadeBday = new Date(birth.getFullYear() + nextDecadeBirthday, birthMonth, birthDay);
-    if (isLeapBirthday && !((birth.getFullYear() + nextDecadeBirthday) % 4 === 0 && ((birth.getFullYear() + nextDecadeBirthday) % 100 !== 0 || (birth.getFullYear() + nextDecadeBirthday) % 400 === 0))) {
-      decadeBday.setMonth(2);
-      decadeBday.setDate(1);
-    }
-    const yearsToDecade = decadeBday.getFullYear() - to.getFullYear();
+    // Lunar New Year falls between 21 Jan and 20 Feb, so a Jan 1 - Feb 20 birth may belong to the previous animal.
+    const earlyYear = birth.getMonth() === 0 || (birth.getMonth() === 1 && birth.getDate() <= 20);
 
     return [
       {
@@ -199,44 +99,50 @@ const ageCalculatorConfig: CalculatorConfig = {
       {
         id: 'totalDays',
         label: 'Total Days Lived',
-        value: totalDays.toLocaleString(undefined),
+        value: totalDays.toLocaleString('en-US'),
         color: 'neutral',
       },
       {
         id: 'totalWeeks',
         label: 'Total Weeks Lived',
-        value: totalWeeks.toLocaleString(undefined),
+        value: totalWeeks.toLocaleString('en-US'),
         color: 'neutral',
       },
       {
         id: 'totalMonths',
         label: 'Total Months Lived',
-        value: totalMonths.toLocaleString(undefined),
+        value: totalMonths.toLocaleString('en-US'),
         color: 'neutral',
       },
       {
         id: 'totalHours',
         label: 'Approximate Hours Lived',
-        value: totalHours.toLocaleString(undefined),
+        value: totalHours.toLocaleString('en-US'),
         color: 'neutral',
       },
       {
         id: 'nextBirthday',
         label: 'Next Birthday In',
-        value: `${daysUntilBirthday} days`,
+        value: `${a.daysUntilBirthday} days`,
         color: 'positive',
+        interpretation: a.isBirthdayToday
+          ? 'Today is your birthday - the next one is a year away.'
+          : `Your next birthday is ${toIsoDate(a.nextBirthday)}, when you turn ${years + 1}.`,
       },
       {
         id: 'zodiacSign',
-        label: 'Zodiac Sign',
+        label: 'Zodiac Sign (Western, for fun)',
         value: zodiac,
         color: 'neutral',
       },
       {
         id: 'chineseZodiac',
-        label: 'Chinese Zodiac',
+        label: 'Chinese Zodiac (by calendar year)',
         value: chineseZodiac,
         color: 'neutral',
+        interpretation: earlyYear
+          ? `Born in January/February: the Chinese year starts at Lunar New Year (21 Jan - 20 Feb). If you were born before it, your animal is the previous one (${chineseAnimal(birth.getFullYear() - 1)}).`
+          : 'Based on the calendar year of birth; entertainment only.',
       },
       {
         id: 'birthWeekday',
@@ -247,14 +153,15 @@ const ageCalculatorConfig: CalculatorConfig = {
       {
         id: 'day10k',
         label: '10,000-Day Milestone',
-        value: daysTo10k === 0 ? `${fmtMilestone(day10k)} (reached!)` : `${fmtMilestone(day10k)} (in ${daysTo10k.toLocaleString()} days)`,
+        value: a.daysTo10k === 0 ? `${d10} (reached!)` : `${d10} (in ${a.daysTo10k.toLocaleString('en-US')} days)`,
         color: 'neutral',
       },
       {
         id: 'nextDecade',
-        label: `Next Decade Birthday (${nextDecadeBirthday})`,
-        value: `In ~${yearsToDecade} year${yearsToDecade !== 1 ? 's' : ''}`,
+        label: `Next Decade Birthday (${a.nextDecadeAge})`,
+        value: `In ${decadeParts.join(', ')}`,
         color: 'positive',
+        interpretation: `Your ${a.nextDecadeAge}th birthday is ${toIsoDate(a.decadeDate)}.`,
       },
     ];
   },
@@ -265,7 +172,7 @@ const ageCalculatorConfig: CalculatorConfig = {
   educational: {
     formula: 'Age = Reference Date − Birth Date (accounting for leap years and month lengths)',
     formulaDescription:
-      'Exact chronological age calculation subtracts the birth date from the reference date, handling the varying number of days in each month (28-31) and leap years (February 29 occurs in years divisible by 4 but not by 100, unless also divisible by 400). The years-months-days breakdown uses component-wise comparison with borrowing: if the target day is smaller than the birth day, one month is borrowed from the months component and converted to the number of days in the previous month. Similarly, if the target month is smaller, one year is borrowed and converted to 12 months. Total days derive from the millisecond difference between midnight UTC on both dates, avoiding timezone complications entirely.',
+      'Exact chronological age calculation subtracts the birth date from the reference date, handling the varying number of days in each month (28-31) and leap years (February 29 occurs in years divisible by 4 but not by 100, unless also divisible by 400). The years-months-days breakdown uses component-wise comparison with borrowing: if the target day is smaller than the birth day, one month is borrowed from the months component and converted to the number of days in the previous month. Similarly, if the target month is smaller, one year is borrowed and converted to 12 months. Total days are the difference of the two calendar dates counted as whole days, so daylight-saving changes and your time zone cannot add or remove a day. A 29 February birthday is treated as 1 March in non-leap years.',
     diagram: {
       svg: '<svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto">' +
         '<text x="210" y="20" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Your Age in Different Units</text>' +
@@ -298,53 +205,54 @@ const ageCalculatorConfig: CalculatorConfig = {
       'Use the countdown to your next birthday and next decade milestone for planning celebrations, checking age-based eligibility, or tracking retirement dates.',
     ],
     explanation:
-      'An age calculator determines your exact chronological age — the time elapsed between your birth date and a reference date — expressed in years, months, and days. Chronological age is distinct from biological age (how old your body actually is based on cellular markers) and psychological age (how old you feel). The concept of tracking chronological age dates to ancient Rome, where birth registrations were maintained for taxation and military service eligibility under Emperor Augustus. Today, exact age calculation matters for: legal age of majority (18 in most countries), Social Security retirement eligibility (62-70 in the US), Medicare enrollment at 65, school enrollment cutoffs (usually September 1 in the US), age-based driver licensing tiers, alcohol purchase age verification, and prescription drug dosing that varies by age. This calculator implements precise date arithmetic accounting for the Gregorian calendar\'s irregular month lengths (28-31 days) and leap year rules (divisible by 4, except century years not divisible by 400). The calculator also provides interesting perspective metrics: a 30-year-old has lived about 11,000 days, a 50-year-old has experienced roughly 18,250 sunrises, and a centenarian has witnessed approximately 36,500 days of human history. The 10,000-day milestone (reached around age 27 years and 4 months) is celebrated in some cultures as a coming-of-age marker. Knowing your total weeks lived (roughly 52 per year) provides a different temporal perspective — a typical 80-year lifespan contains only about 4,000 weeks.',
+      'An age calculator determines your exact chronological age — the time elapsed between your birth date and a reference date — expressed in years, months, and days. Chronological age is distinct from biological age (how old your body actually is based on cellular markers) and psychological age (how old you feel). Exact age calculation matters for: legal age of majority (18 in most countries), Social Security retirement eligibility (62-70 in the US), Medicare enrollment at 65, school enrollment cutoffs (usually September 1 in the US), age-based driver licensing tiers, alcohol purchase age verification, and prescription drug dosing that varies by age. This calculator implements precise date arithmetic accounting for the Gregorian calendar\'s irregular month lengths (28-31 days) and leap year rules (divisible by 4, except century years not divisible by 400). The calculator also provides interesting perspective metrics: a 30-year-old has lived about 11,000 days, a 50-year-old has experienced roughly 18,250 sunrises, and a centenarian has witnessed approximately 36,500 days of human history. The 10,000-day milestone arrives at about age 27 years and 4 months and makes a fun alternative "birthday". Knowing your total weeks lived (roughly 52 per year) provides a different temporal perspective — a typical 80-year lifespan contains only about 4,000 weeks.',
     workedExamples: [
       {
         scenario: 'Maria from Barcelona was born on March 15, 1990 and needs to confirm her exact age for a US visa application. The consular form asks for "age in years, months, and days" as of the application date, June 10, 2026.',
         inputs: { birthDate: '1990-03-15', toDate: '2026-06-10' },
-        result: '36 years, 2 months, 26 days (13,235 total days).',
-        insight: 'Maria is 36 years, 2 months, and 26 days old on her visa application date. For US immigration forms, age must be exact — even one day can affect eligibility categories. The visa officer will cross-check this against her passport birth date. Her total lived days are 13,235, meaning she has already passed her 10,000-day milestone (which occurred around July 31, 2017, when she was 27). Her next decade milestone is her 40th birthday on March 15, 2030 — roughly 3 years and 9 months away. She was born on a Thursday.',
+        result: '36 years, 2 months, 26 days (13,236 total days).',
+        insight: 'Maria is 36 years, 2 months, and 26 days old on her application date. Forms that ask for age to the day are checked against the passport birth date, so use the exact date. Her total lived days are 13,236, meaning she has already passed her 10,000-day milestone (31 July 2017, when she was 27). Her 40th birthday is on March 15, 2030 — 3 years and 9 months after the application date. She was born on a Thursday.',
       },
       {
-        scenario: 'James, a steelworker from Pittsburgh born August 1, 1963, needs to confirm his exact age on August 1, 2028 — when he turns 65 and becomes eligible for full Social Security retirement benefits.',
+        scenario: 'James, a steelworker from Pittsburgh born August 1, 1963, wants to confirm his exact age on August 1, 2028 — the day he turns 65 and becomes Medicare-eligible.',
         inputs: { birthDate: '1963-08-01', toDate: '2028-08-01' },
         result: 'Exactly 65 years, 0 months, 0 days (23,742 total days).',
-        insight: 'James turns exactly 65 on August 1, 2028 — his full retirement age (FRA) for Social Security purposes. If born in 1963, his FRA is 67 for full benefits, but he can claim reduced benefits starting at 62. At exactly 65, James becomes Medicare-eligible. The Social Security Administration uses the "day before birthday" rule for some purposes — meaning his first retirement check arrives the month after he turns 65. James has lived 23,742 days as of his 65th birthday. His total hours lived is approximately 569,808. He was born on a Thursday (August 1, 1963). His Chinese zodiac is the Rabbit. James should also check his private pension and 401(k) required minimum distribution dates; under current SECURE 2.0 rules, RMDs begin at age 73 — his RMD start date would be April 1 following the year he turns 73.',
+        insight: 'James turns exactly 65 on August 1, 2028, which is when he becomes eligible for Medicare. For anyone born in 1960 or later the Social Security full retirement age is 67, not 65, though reduced benefits can start at 62. James has lived 23,742 days (about 569,808 hours) by his 65th birthday. He was born on a Thursday, and his Chinese zodiac animal by calendar year is the Rabbit.',
       },
       {
         scenario: 'Leah, born on February 29, 2000 (a leap year baby in Sydney, Australia), wants to know how many actual February 29 birthdays she has celebrated by May 17, 2026. She is also curious when her 10,000-day milestone falls.',
         inputs: { birthDate: '2000-02-29', toDate: '2026-05-17' },
-        result: '26 years, 2 months, 18 days (9,573 total days). 7 true Feb 29 birthdays celebrated.',
-        insight: 'Leah has celebrated only 7 "true" birthdays on February 29 in her 26 years of life. In non-leap years, most leaplings celebrate on February 28 or March 1. Her total lived days: 9,573 — she will reach her 10,000-day milestone on July 17, 2027, at age 27. Her next decade birthday (30th) will occur in 2030, which is not a leap year, so she will celebrate on March 1. Her Chinese zodiac is the Dragon (2000 is a Dragon year) and she was born on a Tuesday. Leap year birthdays occur for only about 0.07% of the world\'s population — approximately 5 million people globally, sometimes called "leaplings" or "leap day babies." In most jurisdictions, a leapling legally turns 18 on March 1 in non-leap years for purposes of voting, drinking age, and contract signing. For astrological purposes, February 29 falls under Pisces regardless.',
+        result: '26 years, 2 months, 18 days (9,574 total days). 6 true Feb 29 birthdays celebrated (2004-2024).',
+        insight: 'Leah has had only 6 "true" birthdays on February 29 (2004, 2008, 2012, 2016, 2020, 2024) in her 26 years of life. In non-leap years this calculator treats March 1 as her birthday; some places use February 28 instead. Her total lived days: 9,574 — she reaches her 10,000-day milestone on July 17, 2027, at age 27. Her 30th birthday falls in 2030, which is not a leap year, so it is counted as March 1. Her Chinese zodiac animal by calendar year is the Dragon and she was born on a Tuesday. About 1 person in 1,461 is born on February 29 (roughly 5 million people), sometimes called "leaplings". Which day counts as a leapling\'s legal birthday varies by jurisdiction. For Western astrology, February 29 falls under Pisces.',
       },
     ],
     proTips: [
       'For quick mental age math: subtract birth year from current year, then subtract 1 if your birthday hasn\'t occurred yet this year. This gives years only — months and days require the full calculation.',
-      'Milestone ages in days provide fascinating perspective: 10,000 days arrives around age 27 years + 4 months, 20,000 days at ~54.8 years, and 30,000 days at ~82.1 years. Track these "day milestones" as alternative birthday markers — 10,000-day celebrations are a tradition in some East Asian cultures.',
+      'Milestone ages in days provide fascinating perspective: 10,000 days arrives around age 27 years + 4 months, 20,000 days at ~54.8 years, and 30,000 days at ~82.1 years. Track these "day milestones" as fun alternative birthdays.',
       'When filling out official forms, check whether they require "age at last birthday" (common for census data and surveys) or "age at nearest birthday" (less common but used for some insurance rate calculations). The difference can affect eligibility cutoffs for Medicare, driver licensing tiers, and school enrollment.',
-      'Age in weeks is the standard measurement for infant development tracking during the first 6-12 months of life, as pediatric developmental milestones (rolling over, sitting, crawling, walking) follow week-based timelines rather than month-based ones. The CDC milestone checklist uses age in weeks up to 12 months.',
-      'For legal age determination in US courts, the common-law "birthday rule" holds that you reach age N at 12:00:01 AM on your Nth birthday regardless of the time of day you were born. This means someone born at 11:59 PM on January 15 legally turns 21 at the first moment of January 15, 21 years later — not 11:59 PM.',
-      'Life expectancy context: as of 2025, the average US lifespan is about 77.5 years (~28,300 days). A 40-year-old has lived roughly 14,600 days (~52% of average lifespan). A newborn today has about a 1-in-3 chance of living to 100, meaning ~36,500 days. Use these benchmarks to give perspective on life stage planning.',
+      'Age in weeks is handy for tracking the first months of a baby\'s life, although the CDC developmental milestone checklists are organised by age in months (2, 4, 6, 9, 12, 15, 18, 24, 30 months).',
+      'Legal systems differ on exactly when you "reach" an age: some treat you as reaching age N at the start of your Nth birthday, others on the day before it. For anything with a legal cut-off, check the rule that applies to you.',
+      'Life expectancy context: US life expectancy at birth was 79.0 years in 2024 (NCHS Data Brief 548), about 28,900 days. A 40-year-old has lived roughly 14,600 days (about half of that). Use these benchmarks only as rough perspective, not as a prediction for any individual.',
     ],
     limitations: [
       'When not to use: For precise legal age determination where the time of birth matters (e.g., some countries define legal age at the exact time of birth, not just the date). For forensic age estimation of unknown individuals (teeth/bone age), use forensic odontology or radiographic bone age assessment instead — chronological age from birthday does not equal biological maturity which varies by individual.',
       'Age calculation depends on the Gregorian calendar system and does not account for historical calendar transitions (e.g., the switch from the Julian calendar in 1582, which varied by country — Great Britain adopted the Gregorian calendar in September 1752, skipping 11 days). For dates before 1582, calendar discrepancies can produce inaccuracies of 10-13 days.',
       'Time zone differences are not considered — the calculator uses the local date only, not the exact time of birth. For someone born in Tokyo at 3:00 AM JST on January 15, the date in New York is still January 14. In rare edge cases where the exact hour matters for legal purposes (citizenship by birth, inheritance cutoff dates), consult a legal professional.',
       'The calculator assumes midnight-to-midnight day boundaries. For preterm infants, the corrected gestational age (weeks since conception, not birth) is used for developmental milestone tracking until age 2. This calculator gives chronological age from birth date, which may differ from corrected age by several weeks for premature babies.',
-      'Different legal systems define "one year" differently for specific purposes. For example, the US Supreme Court ruled in 1993 that for statute-of-limitations purposes, a "year" runs from the anniversary date to the day before the next anniversary (not to the anniversary itself). Always check the specific legal definition for your jurisdiction.',
+      'The 10,000-day date counts whole calendar days from the birth date; it does not depend on the time of birth. Different legal systems define "one year" and "reaching an age" differently for specific purposes, so check the definition in your jurisdiction.',
+      'The Chinese zodiac animal is looked up from the calendar year of birth. The Chinese year starts at Lunar New Year (between 21 January and 20 February), so people born in January or February before that date belong to the previous animal; the result row warns you in that case. Zodiac signs and animals are cultural entertainment, not science.',
     ],
     quickReference: [
       { label: '1 year (non-leap)', value: '365 days' },
       { label: '1 year (leap year)', value: '366 days' },
       { label: '1 year in weeks', value: '52.14 weeks (52 weeks + 1 day)' },
       { label: '1 year in hours', value: '8,760 hours (8,784 in leap)' },
-      { label: '10,000 days milestone', value: '~27 years, 4 months, 15 days' },
+      { label: '10,000 days milestone', value: '~27 years, 4 months' },
       { label: '20,000 days milestone', value: '~54 years, 9 months' },
-      { label: 'Average US lifespan', value: '~28,300 days (~77.5 years)' },
-      { label: 'Age 18 (legal majority)', value: '6,570 days (minimum)' },
-      { label: 'Age 65 (Medicare)', value: '23,741 days (minimum)' },
-      { label: 'Centenarian (100 years)', value: '36,524 days (25 leap days)' },
+      { label: 'US life expectancy at birth (2024)', value: '79.0 years (~28,900 days)' },
+      { label: 'Age 18 (legal majority)', value: '6,574-6,575 days' },
+      { label: 'Age 65 (Medicare)', value: '23,741-23,742 days' },
+      { label: 'Centenarian (100 years)', value: '36,524-36,525 days (24-25 leap days)' },
     ],
     commonUses: [
       'Legal age verification — confirming exact age for driver licensing, voting registration, alcohol purchase eligibility, firearm purchase background checks, and contract signing capability under the law.',
@@ -361,15 +269,15 @@ const ageCalculatorConfig: CalculatorConfig = {
       },
       {
         question: 'What happens if I was born on February 29 in a leap year?',
-        answer: 'Leaplings (people born on February 29) experience their true birthday only in leap years, which occur every 4 years except century years not divisible by 400. In non-leap years, the calculator treats March 1 as the birthday reference. For example, if you were born February 29, 2000, you would be 26 on March 1, 2026. Legally, most US states and international jurisdictions recognize March 1 as the official birthday in non-leap years for age-of-majority purposes. This means a leapling can legally vote, drink (at 21), and sign contracts on March 1 of the appropriate year. Some countries like New Zealand and Taiwan officially recognize February 28 instead. About 5 million people worldwide are leaplings, including celebrities like Tony Robbins (1960) and Ja Rule (1976). The next leap years after 2024 are 2028, 2032, and 2036. The year 2100 will NOT be a leap year (century rule exception), so a leapling born in 2032 who would normally expect a birthday in 2100 will have to wait until 2104.',
+        answer: 'Leaplings (people born on February 29) experience their true birthday only in leap years, which occur every 4 years except century years not divisible by 400. In non-leap years, the calculator treats March 1 as the birthday reference. For example, if you were born February 29, 2000, you turn 26 on March 1, 2026. Which day a leapling legally "turns" a year older in non-leap years differs between jurisdictions (28 February or 1 March), so check the rule for the purpose you need. About 5 million people worldwide are leaplings (roughly 1 in 1,461). The next leap years after 2024 are 2028, 2032, and 2036. The year 2100 will NOT be a leap year (century rule exception), so there is no 29 February between 2096 and 2104.',
       },
       {
         question: 'Why does my age show differently on some websites or calculators?',
-        answer: 'Different age calculators handle month boundaries and leap years with varying levels of precision. The most common discrepancy comes from how they handle day borrowing: some use a simple 30-day month average, while others account for the actual number of days in each month (28/29/30/31). Another source of variation is whether calculators count the birthday itself as adding a year. For example, if today is your birthday, some calculators show your new age while others still show last year\'s age until the exact time matches — this is the "inclusive count" vs. "completed years" distinction. Our calculator uses completed years, months, and days, meaning you must have fully reached each unit boundary. A third difference: some calculators round months to 4.35 weeks (365/12/7), introducing small errors that compound over decades. Our precise date arithmetic accounts for the exact calendar structure for any date range between 1900-2100.',
+        answer: 'Different age calculators handle month boundaries and leap years with varying levels of precision. The most common discrepancy comes from how they handle day borrowing: some use a simple 30-day month average, while others account for the actual number of days in each month (28/29/30/31). Another source of variation is whether calculators count the birthday itself as adding a year. For example, if today is your birthday, some calculators show your new age while others still show last year\'s age until the exact time matches — this is the "inclusive count" vs. "completed years" distinction. Our calculator uses completed years, months, and days, meaning you must have fully reached each unit boundary. A third difference: some calculators round months to 4.35 weeks (365/12/7), introducing small errors that compound over decades. Our date arithmetic uses the exact Gregorian calendar structure (actual month lengths and leap years).',
       },
       {
         question: 'What is the 10,000-day milestone and why does it matter?',
-        answer: 'Your 10,000th day alive occurs at approximately age 27 years and 4 months (27.4 years). In several East Asian cultures, particularly Korea and Japan, the 10,000-day (man-ireum in Korean) celebration marks a significant coming-of-age milestone — 10,000 days represents roughly a third of the traditional ideal lifespan of 30,000 days. The concept is similar to the Western "quarter-life crisis" marker at 25, but with a more mathematically grounded basis. The 20,000-day milestone arrives at ~54.8 years (near typical retirement age) and 30,000 days at ~82.1 years. Notable 10,000-day equivalents: if you were born on September 11, 2001, your 10,000th day was approximately January 30, 2029. Someone born on iPhone launch day (June 29, 2007) reaches 10,000 days around November 13, 2034. These milestones are increasingly used in personal development and life planning as concrete, measurable markers of life stages.',
+        answer: 'Your 10,000th day alive occurs at approximately age 27 years and 4 months (27.4 years). Counting from day 0 (your birth date), the 10,000th day is the date 10,000 calendar days later. It is a popular "alternative birthday" to celebrate. The 20,000-day milestone arrives at ~54.8 years and 30,000 days at ~82.1 years. Examples: someone born on September 11, 2001 reaches 10,000 days on January 27, 2029, and someone born on June 29, 2007 reaches it on November 14, 2034.',
       },
       {
         question: 'How does age affect Social Security and Medicare eligibility?',
@@ -381,13 +289,14 @@ const ageCalculatorConfig: CalculatorConfig = {
       },
       {
         question: 'How do different countries and legal systems define when someone reaches a specific age?',
-        answer: 'Age calculation rules vary significantly by jurisdiction. In the United States, under common law, a person reaches an age at 12:00:01 AM on their birthday regardless of birth time — the "birthday rule." In South Korea, the traditional system counted you as age 1 at birth and added a year on January 1st regardless of your actual birthday, meaning a baby born December 31 was age 2 the next day. Korea switched to international age counting in June 2023. In Japan, the age of majority was lowered from 20 to 18 in April 2022, but drinking and smoking remain at age 20. In Iran and Saudi Arabia, the lunar Hijri calendar is used for some legal purposes, with Hijri years being ~354 days (about 11 days shorter than Gregorian years), meaning age milestones are reached roughly 3% earlier. Some European countries (Germany, Austria) calculate age based on the exact time of birth for certain legal purposes like criminal responsibility and witness competency. For international legal matters, always consult an attorney familiar with the specific jurisdiction.',
+        answer: 'Age calculation rules vary significantly by jurisdiction. In the United States, under common law, a person reaches an age at 12:00:01 AM on their birthday regardless of birth time — the "birthday rule." In South Korea, the traditional system counted you as age 1 at birth and added a year on January 1st regardless of your actual birthday, meaning a baby born December 31 was age 2 the next day. Korea switched to international age counting in June 2023. In Japan, the age of majority was lowered from 20 to 18 in April 2022, but drinking and smoking remain at age 20. In Iran and Saudi Arabia, the lunar Hijri calendar is used for some legal purposes, with Hijri years being ~354 days (about 11 days shorter than Gregorian years), meaning age milestones are reached roughly 3% earlier. For international legal matters, always consult an attorney familiar with the specific jurisdiction.',
       },
     ],
     citations: [
       { source: 'NIST - Time and Calendar', url: 'https://www.nist.gov/pml/time-and-frequency-division' },
       { source: 'Social Security Administration - Retirement Age', url: 'https://www.ssa.gov/benefits/retirement/planner/agereduction.html' },
       { source: 'CDC - Developmental Milestones', url: 'https://www.cdc.gov/ncbddd/actearly/milestones/index.html' },
+      { source: 'NCHS Data Brief 548 - Mortality in the United States, 2024', url: 'https://www.cdc.gov/nchs/products/databriefs/db548.htm' },
       { source: 'timeanddate.com - Age Calculator', url: 'https://www.timeanddate.com/date/age-calculator.html' },
     ],
   },

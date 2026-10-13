@@ -1,27 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import YarnYardagePanel from './YarnYardagePanel';
-
-// XL = L + (L − M), extending each project's own S→M→L increment — the
-// size selector below offers XL for every project type, so every entry
-// needs one (a missing key silently returned zero results for that combo).
-const PROJECT_BASE_YARDAGE: Record<string, Record<string, number>> = {
-  Scarf: { S: 300, M: 400, L: 500, XL: 600 },
-  Blanket: { S: 1200, M: 1800, L: 2400, XL: 3000 },
-  Sweater: { S: 800, M: 1000, L: 1200, XL: 1400 },
-  Hat: { S: 200, M: 250, L: 300, XL: 350 },
-  Socks: { S: 250, M: 300, L: 350, XL: 400 },
-  Shawl: { S: 500, M: 700, L: 900, XL: 1100 },
-  Dishcloth: { S: 100, M: 150, L: 200, XL: 250 },
-};
-
-const PRECUT_CONVERTER: Record<string, number> = {
-  'Jelly Roll': 2.75,
-  'Layer Cake': 0.5,
-  'Charm Pack': 0.75,
-  'Fat Quarter': 0.5,
-  'Fat Eighth': 0.25,
-};
+import { K_STITCH, WASTE, yarnPlan } from './yarnMath';
 
 const YARN_WEIGHT_DESCRIPTIONS: Record<string, string> = {
   'Lace/Fingering': 'Lightest weight, used for delicate shawls and socks',
@@ -69,6 +49,7 @@ const yarnYardageConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '60',
       min: 1,
+      max: 1000,
       inputMode: 'numeric',
       helpText: 'Width of your custom project in inches. Use imperial measurements for best results with this calculator.',
       showWhen: (values) => values.projectType === 'Custom',
@@ -79,6 +60,7 @@ const yarnYardageConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '80',
       min: 1,
+      max: 1000,
       inputMode: 'numeric',
       helpText: 'Length of your custom project in inches. For metric conversions, 1 inch = 2.54 cm.',
       showWhen: (values) => values.projectType === 'Custom',
@@ -87,7 +69,7 @@ const yarnYardageConfig: CalculatorConfig = {
       id: 'yarnWeight',
       label: 'Yarn Weight',
       type: 'select',
-      helpText: 'Thickness of your yarn affects yardage needed. Thicker yarn covers more area per yard.',
+      helpText: 'Used to check that your stitch gauge is plausible for this yarn (Craft Yarn Council ranges). Preset yardages are for worsted weight.',
       options: [
         { label: 'Lace/Fingering', value: 'Lace/Fingering' },
         { label: 'Sport', value: 'Sport' },
@@ -103,6 +85,7 @@ const yarnYardageConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '20',
       min: 1,
+      max: 100,
       required: true,
       inputMode: 'numeric',
       helpText: 'Your stitch gauge from a 4-inch swatch — count stitches across 4 inches horizontally. Always block your swatch before measuring.',
@@ -113,6 +96,7 @@ const yarnYardageConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '24',
       min: 1,
+      max: 150,
       required: true,
       inputMode: 'numeric',
       helpText: 'Your row gauge from a 4-inch swatch — count rows across 4 inches vertically. Gauge changes significantly after blocking with natural fibers.',
@@ -121,7 +105,7 @@ const yarnYardageConfig: CalculatorConfig = {
       id: 'precutType',
       label: 'Precut Fabric Type (optional)',
       type: 'select',
-      helpText: 'Optional precut bundle type for quilting projects. Select None to skip precut calculations.',
+      helpText: 'Optional quilting precut bundle. Shows its size in yards of 44-inch fabric; this is fabric, so it is not subtracted from the yarn you need.',
       options: [
         { label: 'None', value: '' },
         { label: 'Jelly Roll (2.5" strips)', value: 'Jelly Roll' },
@@ -137,120 +121,56 @@ const yarnYardageConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '1',
       min: 1,
+      max: 1000,
       inputMode: 'numeric',
       helpText: 'How many precut bundles you plan to use. Each precut type provides a specific yardage equivalent.',
       showWhen: (values) => (values.precutType || '') !== '',
     },
   ],
   calculate: (values) => {
-    const projectType = values.projectType || 'Scarf';
-    const size = values.size || 'M';
-    const stitchesPer4in = parseInt(values.stitchesPer4in, 10);
-    const rowsPer4in = parseInt(values.rowsPer4in, 10);
-
-    if (isNaN(stitchesPer4in) || isNaN(rowsPer4in) || stitchesPer4in < 1 || rowsPer4in < 1) {
-      return [];
-    }
-
-    let baseYardage = 0;
-
-    if (projectType === 'Custom') {
-      const customWidth = parseFloat(values.customWidth);
-      const customLength = parseFloat(values.customLength);
-      if (isNaN(customWidth) || isNaN(customLength) || customWidth <= 0 || customLength <= 0) {
-        return [];
-      }
-      const stitchesPerInch = stitchesPer4in / 4;
-      const rowsPerInch = rowsPer4in / 4;
-      baseYardage = ((customWidth * customLength) / (stitchesPerInch * rowsPerInch)) * 1.2;
-    } else {
-      const projectSizes = PROJECT_BASE_YARDAGE[projectType];
-      if (!projectSizes) return [];
-      baseYardage = projectSizes[size];
-      if (!baseYardage) return [];
-    }
-
-    // The Custom-mode area formula above already divides by the user's own
-    // stitchesPerInch/rowsPerInch, so their actual gauge is already baked into
-    // baseYardage. Re-applying the 20/24-baseline gaugeFactor on top of that
-    // (as previously done for every project type) double-counts gauge and can
-    // shrink or inflate the estimate by several times — e.g. a 10 st / 12 row
-    // custom gauge previously quartered the true yardage. Only the preset
-    // project sizes (fixed yardages measured at the 20/24 baseline) need this
-    // adjustment to scale to the user's real gauge.
-    const gaugeFactor = (stitchesPer4in / 20) * (rowsPer4in / 24);
-    const gaugeAdjustedYardage = projectType === 'Custom' ? baseYardage : baseYardage * gaugeFactor;
-
-    const precutType = values.precutType || '';
-    const precutCount = parseInt(values.precutCount, 10) || 0;
-    let precutYardage = 0;
-    if (precutType && precutCount > 0 && PRECUT_CONVERTER[precutType]) {
-      precutYardage = PRECUT_CONVERTER[precutType] * precutCount;
-    }
-
-    const yardageNeeded = gaugeAdjustedYardage;
-    const metersNeeded = yardageNeeded * 0.9144;
-
-    const fmtYards = (n: number) => `${Math.round(n).toLocaleString(undefined)} yards`;
-    const fmtMeters = (n: number) => `${Math.round(n).toLocaleString(undefined)} meters`;
+    const p = yarnPlan(values);
+    if (!p) return [];
+    const fmtYards = (n: number) => `${Math.round(n).toLocaleString('en-US')} yards`;
+    const fmtMeters = (n: number) => `${Math.round(n).toLocaleString('en-US')} meters`;
+    const custom = p.projectType === 'Custom';
 
     const results: CalculatorResult[] = [
       {
         id: 'yardageNeeded',
         label: 'Estimated Yardage Needed',
-        value: fmtYards(yardageNeeded),
+        value: fmtYards(p.yards),
         highlight: true,
         color: 'positive',
+        interpretation: 'An estimate for stockinette or single crochet. Buy 10-20% extra and all skeins from one dye lot.',
+        warning: p.gaugeWarning ?? undefined,
       },
-      {
-        id: 'metersNeeded',
-        label: 'Estimated Meters Needed',
-        value: fmtMeters(metersNeeded),
-        color: 'neutral',
-      },
+      { id: 'metersNeeded', label: 'Estimated Meters Needed', value: fmtMeters(p.meters), color: 'neutral' },
       {
         id: 'baseYardage',
-        label: projectType === 'Custom' ? 'Calculated Base Yardage' : `Base Yardage for ${projectType} (Size ${size})`,
-        value: `${Math.round(baseYardage).toLocaleString(undefined)} yards`,
+        label: custom ? 'Calculated Base Yardage (before 20% waste)' : `Base Yardage for ${p.projectType} (Size ${p.size})`,
+        value: `${Math.round(p.baseYardage).toLocaleString('en-US')} yards`,
         color: 'neutral',
       },
       {
         id: 'gaugeAdjustment',
-        label: `Gauge Adjustment (${stitchesPer4in} st / ${rowsPer4in} rows per 4")`,
-        value: projectType === 'Custom'
-          ? 'Already included in base yardage (your gauge sets the fabric area above)'
-          : `× ${gaugeFactor.toFixed(2)} factor`,
+        label: `Gauge Adjustment (${p.stitches} st / ${p.rows} rows per 4")`,
+        value: custom ? `${K_STITCH} × width × length × rows per inch ÷ 36, × ${WASTE} waste` : `× ${p.rowFactor.toFixed(2)} (your rows ÷ ${24})`,
         color: 'neutral',
       },
     ];
 
-    if (yardageNeeded > 0) {
-      const weightName = values.yarnWeight || 'Worsted';
-      const weightDesc = YARN_WEIGHT_DESCRIPTIONS[weightName] || '';
-      results.push({
-        id: 'yarnWeightInfo',
-        label: `Yarn Weight: ${weightName}`,
-        value: weightDesc,
-        color: 'neutral',
-      });
-    }
+    const weightName = p.yarnWeight;
+    results.push({ id: 'yarnWeightInfo', label: `Yarn Weight: ${weightName}`, value: YARN_WEIGHT_DESCRIPTIONS[weightName] || '', color: 'neutral' });
 
-    if (precutYardage > 0) {
+    if (p.precutFabricYards > 0) {
       results.push({
         id: 'precutYardage',
-        label: `Yardage from ${precutCount} ${precutType}(s)`,
-        value: fmtYards(precutYardage),
+        label: `Fabric in ${p.precutCount} ${p.precutType}(s)`,
+        value: fmtYards(p.precutFabricYards),
         color: 'neutral',
-      });
-      const remaining = yardageNeeded - precutYardage;
-      results.push({
-        id: 'remainingYardage',
-        label: remaining > 0 ? 'Additional Yardage Needed' : 'Yardage Surplus',
-        value: fmtYards(Math.abs(remaining)),
-        color: remaining > 0 ? 'negative' : 'positive',
+        interpretation: 'Equivalent yards of 44-inch-wide quilting fabric (area basis). This is fabric, not yarn, so it does not reduce the yarn estimate.',
       });
     }
-
     return results;
   },
   extraPanel: (values, results) => {
@@ -258,19 +178,19 @@ const yarnYardageConfig: CalculatorConfig = {
     return createElement(YarnYardagePanel, { values, results });
   },
   educational: {
-    formula: 'Yardage = (Width × Length) ÷ ((St/in) × (Rows/in)) × 1.2  |  Adjusted = Base × (StGauge÷20) × (RowGauge÷24)  |  Meters = Yards × 0.9144',
+    formula: 'Preset: Yards = Base × (Rows per 4" ÷ 24)  |  Custom: Yards = 3.5 × Width × Length × (Rows per inch) ÷ 36 × 1.2  |  Meters = Yards × 0.9144',
     formulaDescription:
-      'Yarn yardage estimation combines project dimensions with your personal gauge to calculate how much yarn you need. The base yardage uses pre-calculated estimates for common project types and sizes at a standard worsted-weight gauge of 20 stitches and 24 rows per 4 inches. The gauge adjustment factor scales these base values proportionally to match your individual knitting or crochet tension. For custom-sized projects, the calculator uses the fabric area method: total square inches divided by the area covered per yard of yarn (determined by your stitch and row gauge), with a 20% waste buffer for seaming, pattern repeats, and swatching. Tighter gauge (more stitches per inch) requires more yarn; looser gauge requires less. The result is also shown in metric meters by multiplying yards by 0.9144 for those using metric yarn labels sold outside the United States.',
+      'Yarn yardage is an estimate. A row of knitting or crochet uses roughly 3.5 times its width in yarn (typically 3 to 4 times for stockinette), and finer stitches are proportionally shorter, so the yarn in a row does not depend on the stitch count; total yarn grows with the number of rows. For custom pieces the calculator multiplies 3.5 × width × length × rows per inch, divides by 36 to get yards and adds 20% for waste. For the preset projects it scales a base yardage (typical worsted-weight values at 24 rows per 4 inches, rounded rules of thumb rather than published data) by your row gauge ÷ 24. The stitch gauge is used to check that your swatch is plausible for the yarn weight you selected, using the Craft Yarn Council standard ranges.',
     diagram: {
-      svg: '<svg viewBox="0 0 460 130" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="230" y="18" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Yardage Estimates by Project (Worsted Weight, Size M)</text><rect x="15" y="40" width="60" height="16" rx="4" fill="var(--svg-3b82f6)" opacity="0.8"/><text x="45" y="52" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-ffffff)" font-weight="600" text-anchor="middle">Hat</text><text x="45" y="35" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-64748b)" text-anchor="middle">200 yd</text><rect x="85" y="32" width="80" height="24" rx="4" fill="var(--svg-22c55e)" opacity="0.8"/><text x="125" y="48" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-ffffff)" font-weight="600" text-anchor="middle">Scarf</text><text x="125" y="28" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-64748b)" text-anchor="middle">350 yd</text><rect x="175" y="38" width="70" height="18" rx="4" fill="var(--svg-f59e0b)" opacity="0.8"/><text x="210" y="50" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-ffffff)" font-weight="600" text-anchor="middle">Shawl</text><text x="210" y="33" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-64748b)" text-anchor="middle">500 yd</text><rect x="255" y="28" width="90" height="28" rx="4" fill="var(--svg-8b5cf6)" opacity="0.8"/><text x="300" y="46" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-ffffff)" font-weight="600" text-anchor="middle">Sweater</text><text x="300" y="23" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-64748b)" text-anchor="middle">1200 yd</text><rect x="355" y="20" width="90" height="36" rx="4" fill="var(--svg-ef4444)" opacity="0.8"/><text x="400" y="42" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-ffffff)" font-weight="600" text-anchor="middle">Blanket</text><text x="400" y="17" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-64748b)" text-anchor="middle">2500 yd</text><text x="230" y="107" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">Gauge adjustment: Actual = Base × (your_st ÷ 20) × (your_rows ÷ 24)</text><text x="230" y="119" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-94a3b8)" text-anchor="middle">Tighter gauge (more st/in) = more yarn | Looser gauge = less yarn</text></svg>',
-      alt: 'Horizontal bar chart comparing yardage estimates for hat (200 yd), scarf (350 yd), shawl (500 yd), sweater (1200 yd), and blanket (2500 yd)',
-      caption: 'Yardage varies significantly by project type and size. Adjust base yardage by your personal gauge ratio for accurate estimates.',
+      svg: '<svg viewBox=\'0 0 460 200\' xmlns=\'http://www.w3.org/2000/svg\' style=\'max-width:100%;height:auto\'><text x=\'230\' y=\'18\' font-family=\'system-ui,sans-serif\' font-size=\'13\' font-weight=\'700\' fill=\'var(--svg-1e293b)\' text-anchor=\'middle\'>Preset yardage, size M (worsted, 24 rows per 4 in)</text><text x=\'78\' y=\'50\' text-anchor=\'end\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>Hat</text><rect x=\'84\' y=\'34\' width=\'42\' height=\'22\' rx=\'4\' fill=\'var(--svg-3b82f6)\'/><text x=\'132\' y=\'50\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>250 yd</text><text x=\'78\' y=\'82\' text-anchor=\'end\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>Scarf</text><rect x=\'84\' y=\'66\' width=\'67\' height=\'22\' rx=\'4\' fill=\'var(--svg-3b82f6)\'/><text x=\'157\' y=\'82\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>400 yd</text><text x=\'78\' y=\'114\' text-anchor=\'end\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>Shawl</text><rect x=\'84\' y=\'98\' width=\'117\' height=\'22\' rx=\'4\' fill=\'var(--svg-3b82f6)\'/><text x=\'207\' y=\'114\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>700 yd</text><text x=\'78\' y=\'146\' text-anchor=\'end\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>Sweater</text><rect x=\'84\' y=\'130\' width=\'167\' height=\'22\' rx=\'4\' fill=\'var(--svg-3b82f6)\'/><text x=\'257\' y=\'146\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>1000 yd</text><text x=\'78\' y=\'178\' text-anchor=\'end\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>Blanket</text><rect x=\'84\' y=\'162\' width=\'300\' height=\'22\' rx=\'4\' fill=\'var(--svg-3b82f6)\'/><text x=\'390\' y=\'178\' font-size=\'11\' fill=\'var(--svg-1e293b)\'>1800 yd</text></svg>',
+      alt: 'Horizontal bar chart of preset size M yardage: hat 250 yd, scarf 400 yd, shawl 700 yd, sweater 1000 yd, blanket 1800 yd',
+      caption: 'Preset yardages are rough anchors for worsted weight; the estimate scales with your row gauge.',
     },
     variables: [
       {
         symbol: 'Base Yardage',
         name: 'Base Yardage by Project',
-        description: 'Pre-calculated yardage estimates for common project types and sizes at standard worsted-weight gauge. These are starting points compiled from averages across thousands of knitting patterns and should be adjusted for your specific gauge.',
+        description: 'Pre-calculated yardage estimates for common project types and sizes at standard worsted-weight gauge. These are rule-of-thumb starting points, not published data, and should be adjusted for your specific gauge and pattern.',
       },
       {
         symbol: 'Gauge',
@@ -279,18 +199,18 @@ const yarnYardageConfig: CalculatorConfig = {
       },
       {
         symbol: 'Gauge Factor',
-        name: 'Gauge Adjustment Multiplier',
-        description: 'A multiplier that scales base yardage proportionally for your specific gauge. Computed as (your stitch gauge ÷ 20) × (your row gauge ÷ 24). Values above 1.0 mean you need more yarn than the baseline estimate.',
+        name: 'Row Gauge Multiplier',
+        description: 'Scales preset yardage by your row gauge: your rows per 4 inches ÷ 24. More rows per inch means more rows to knit and more yarn.',
       },
       {
         symbol: 'Precut',
         name: 'Precut Fabric Yardage',
-        description: 'Standardized fabric bundles used in quilting. Jelly Rolls contain 40 strips of 2.5"×WOF (~2.75 yds). Layer Cakes have 42 squares of 10"×10" (~2.75 yds). Charm Packs have 42 squares of 5"×5" (~0.75 yds). Fat Quarters are 18"×22" (~0.5 yds). Fat Eighths are 9"×22" (~0.25 yds).',
+        description: 'Standardized fabric bundles used in quilting, shown as the equivalent yards of 44-inch-wide fabric by area: a Jelly Roll (40 strips of 2.5" × 42") is about 2.65 yd, a Layer Cake (42 squares of 10") about 2.65 yd, a Charm Pack (42 squares of 5") about 0.66 yd, a Fat Quarter (18" × 22") 0.25 yd and a Fat Eighth (9" × 22") 0.125 yd. Fabric precuts are not yarn.',
       },
       {
         symbol: 'Waste Factor',
         name: '20% Waste Buffer',
-        description: 'The custom project mode automatically adds 20% to account for seam allowances, pattern repeat matching, swatching, weaving in ends, and the inevitable small errors that require ripping back. For complex cable or lace patterns, consider purchasing an additional 5-10%.',
+        description: 'The custom project mode adds 20% as a safety margin for seaming, weaving in ends, swatching and mistakes. This is a rule of thumb; complex cable or lace patterns can need more.',
       },
     ],
     commonUses: [
@@ -302,13 +222,13 @@ const yarnYardageConfig: CalculatorConfig = {
     howToUse: [
       'Select your project type (Scarf, Blanket, Sweater, etc.) or choose Custom to enter your own width and length dimensions in inches.',
       'For standard projects, pick the size (S, M, L, XL). For custom projects, enter the exact width and length of your finished piece.',
-      'Choose your yarn weight category to understand how the fiber thickness affects the yardage estimate.',
+      'Choose your yarn weight so the calculator can check your stitch gauge is plausible for that yarn.',
       'Enter your personal gauge — stitches per 4 inches and rows per 4 inches — measured from a properly blocked gauge swatch.',
-      'Optionally, select a precut fabric type and quantity if you plan to incorporate precut bundles into your quilting or knitting project.',
-      'Review the estimated yardage in both yards and meters, check the gauge adjustment factor, and determine if additional yarn is needed beyond any precuts.',
+      'Optionally, select a quilting precut type and quantity to see how many yards of fabric it equals (this is separate from the yarn estimate).',
+      'Review the estimated yardage in both yards and meters, check the gauge adjustment, and add a safety margin before buying.',
     ],
     explanation:
-      'Yarn yardage estimation is one of the most common challenges knitters and crocheters face. Running out of yarn mid-project is frustrating — dye lots change over time, and finding a matching skein months later is nearly impossible. Buying too much is wasteful and expensive, especially with premium natural fibers. This calculator helps you get it right the first time by combining project-specific base yardages with your personal gauge. The concept of standardized yarn weights emerged in the mid-20th century as the Craft Yarn Council of America developed the yarn weight system in the 1970s, building on centuries of handspinning traditions dating back to medieval European guilds. The base yardages are compiled from averages across thousands of projects for common items like scarves, blankets, sweaters, hats, socks, shawls, and dishcloths. These base values assume a standard worsted-weight yarn at a typical gauge of 20 stitches and 24 rows per 4 inches. The gauge adjustment is critical because everyone knits differently — a loose knitter might use significantly less yarn for the same project than a tight knitter using the same pattern and yarn. The adjustment formula scales the base yardage proportionally: if you knit 18 stitches per 4 inches instead of 20, you need approximately 10% less yarn (18/20 = 0.9). Conversely, if your gauge is 22 stitches per 4 inches, you need about 10% more. For custom-sized projects, the calculator uses the fabric area method: total square inches divided by the area covered per yard of yarn (determined by your gauge), with a 20% waste buffer for seaming, pattern repeats, and swatching. The result is also shown in meters (multiply yards by 0.9144) for those using metric yarn labels commonly sold in Europe, Australia, and Asia. Understanding your personal gauge and how it affects yardage is a valuable skill that will save you money, reduce waste, and prevent the heartbreak of an unfinished project.',
+      'Yarn yardage estimation is one of the most common challenges knitters and crocheters face. Running out of yarn mid-project is frustrating because dye lots change over time and a matching skein can be hard to find later; buying far too much is wasteful. This calculator gives an estimate in two ways. For preset projects (scarf, blanket, sweater, hat, socks, shawl, dishcloth) it starts from rule-of-thumb base yardages for worsted-weight yarn at 24 rows per 4 inches and scales them by your row gauge. For a custom piece it uses a simple physical model: a row of stockinette uses roughly 3.5 times its width in yarn, so yardage = 3.5 × width × length × rows per inch ÷ 36, plus 20% waste. The stitch gauge does not change that estimate (finer stitches use proportionally less yarn each), but the calculator checks it against the Craft Yarn Council standard stitch-gauge range for the yarn weight you selected, which catches mismatched swatches. The preset values are anchors, not measured data; textured stitches, cables, lace, crochet and fiber differences all change real consumption. The result is also shown in meters (multiply yards by 0.9144). Always swatch, block the swatch, and buy a safety margin.',
     faqs: [
       {
         question: 'Should I always buy extra yarn beyond the calculated estimate?',
@@ -320,43 +240,43 @@ const yarnYardageConfig: CalculatorConfig = {
       },
       {
         question: 'What if I am using a different yarn weight than worsted?',
-        answer: 'The calculator handles this through the gauge adjustment automatically. Enter your actual gauge (stitches and rows per 4 inches) regardless of yarn weight. Lace-weight yarn will have a much higher stitch count per 4 inches (typically 28 to 34 stitches), resulting in a larger yardage estimate because finer yarn covers less area per yard. Bulky and super bulky yarns have lower stitch counts (10 to 16 stitches per 4 inches) and need less yardage. The base yardage assumes worsted-weight at standard gauge, but the gauge multiplier corrects for any weight you use.',
+        answer: 'Select your yarn weight and enter your real swatch gauge. The preset yardages are anchored to worsted weight, so for a very different weight (for example lace or super bulky) the custom mode, which works from your dimensions and row gauge, is usually the better starting point. The calculator warns if your stitch gauge is outside the Craft Yarn Council range for the selected weight (for example 16-20 stitches per 4 inches for worsted, 12-15 for bulky, 27-40 for lace and fingering).',
       },
       {
         question: 'Can I use this calculator for crochet projects too?',
-        answer: 'Yes, the calculator works for both knitting and crochet. Simply enter your crochet gauge (stitches and rows per 4 inches in your chosen stitch pattern). Note that crochet typically uses 20 to 30 percent more yarn than knitting for the same project dimensions because crochet stitches are structurally thicker and consume more yarn per stitch. The estimates may be slightly conservative for crochet — adding an extra 10 to 15 percent to the yardage result is a good practice specifically for crochet projects.',
+        answer: 'You can enter a crochet gauge, but the model is built around knitted stockinette. Crochet fabric is typically denser and many crocheters report using noticeably more yarn than for the same size in knitting, so add a larger safety margin (for example 15-25%) and check against a pattern written for your stitch.',
       },
       {
         question: 'How does the gauge adjustment factor work mathematically?',
-        answer: 'The gauge adjustment is a multiplier that scales the base yardage proportionally to your personal gauge. The formula is: multiplier = (your stitches per 4 inches divided by 20) multiplied by (your rows per 4 inches divided by 24). If your gauge is tighter than the baseline (more stitches per inch), the multiplier exceeds 1 and you need more yarn. If your gauge is looser (fewer stitches per inch), the multiplier is less than 1 and you need less yarn. For example, a gauge of 22 stitches and 26 rows gives a multiplier of (22/20) × (26/24) = 1.1 × 1.083 = 1.19 — meaning you need about 19 percent more yarn than the base yardage.',
+        answer: 'For preset projects the base yardage is multiplied by your rows per 4 inches divided by 24. For example 22 rows gives 22/24 = 0.92 (about 8% less yarn) and 26 rows gives 26/24 = 1.08 (about 8% more). The stitch count per row does not change the result because tighter stitches are shorter, so a row of the same width uses about the same length of yarn. For custom pieces the same idea gives yards = 3.5 × width × length × (rows per inch) ÷ 36, times 1.2 for waste.',
       },
       {
-        question: 'What are precut fabrics and how do I account for them in my project?',
-        answer: 'Precut fabrics are standardized fabric bundles used primarily in quilting. A Jelly Roll contains 40 strips of 2.5 inches by width-of-fabric (about 2.75 yards total). A Layer Cake has 42 squares of 10 by 10 inches (about 2.75 yards). A Charm Pack has 42 squares of 5 by 5 inches (about 0.75 yards). A Fat Quarter measures 18 by 22 inches (about 0.5 yards). A Fat Eighth measures 9 by 22 inches (about 0.25 yards). The calculator converts your selected precut type and quantity into equivalent yardage and subtracts it from your total need, showing whether you have enough or need additional fabric.',
+        question: 'What are precut fabrics and why are they in a yarn calculator?',
+        answer: 'Precuts are standardized quilting fabric bundles. The optional precut selector only converts them to yards of 44-inch-wide fabric by area (Jelly Roll of 40 strips 2.5 by 42 inches about 2.65 yd, Layer Cake of 42 ten-inch squares about 2.65 yd, Charm Pack of 42 five-inch squares about 0.66 yd, Fat Quarter 0.25 yd, Fat Eighth 0.125 yd). Fabric cannot replace yarn, so these numbers are shown separately and are not subtracted from the yarn estimate.',
       },
       {
         question: 'Why does the custom project mode add a 20 percent waste factor?',
-        answer: 'The 20 percent waste factor in custom mode accounts for several real-world considerations: pattern repeat matching (especially for stripes, plaids, or directional prints), seaming and seam allowances, swatching (you should always make a gauge swatch before starting), weaving in ends, and the inevitable small errors that require ripping back and re-knitting a section. For complex cable or lace patterns, the effective waste can be even higher at 25 to 30 percent. For simple stockinette projects with no pattern matching, you might reduce it to 10 percent. The factor is built into custom mode as a reasonable default to ensure you do not run out of yarn mid-project.',
+        answer: 'The 20 percent margin covers seaming, weaving in ends, swatching and the occasional mistake that needs ripping back. It is a rule of thumb, not a measured value; complex cables, lace or heavy texture can need more, and simple stockinette without seams may need less.',
       },
     ],
     workedExamples: [
       {
-        scenario: 'Emma is knitting a medium-sized scarf in worsted-weight yarn. Her gauge swatch shows 18 stitches and 22 rows per 4 inches — she knits slightly looser than the baseline gauge of 20 st / 24 rows per 4 inches. She wants to know exactly how much yarn to buy.',
+        scenario: 'Emma is knitting a medium-sized scarf in worsted-weight yarn. Her gauge swatch shows 18 stitches and 22 rows per 4 inches. She wants to know how much yarn to buy.',
         inputs: { projectType: 'Scarf', size: 'M', yarnWeight: 'Worsted', stitchesPer4in: '18', rowsPer4in: '22' },
-        result: 'Estimated 330 yards needed (base 400 adjusted by gauge factor 0.83). Equivalent to ~302 meters.',
-        insight: 'Base yardage for a medium scarf is 400 yards at the standard gauge. Emma\'s looser gauge has a factor of (18/20) × (22/24) = 0.9 × 0.917 = 0.825. So 400 × 0.825 = 330 yards — she needs about 17% less yarn than the standard estimate because her looser tension covers more area per yard. She should still buy a 400-yard skein to account for swatching, pattern modifications, and dye lot matching. If she switches to a tighter gauge pattern, she should re-calculate.',
+        result: 'Estimated 367 yards needed (base 400 × 22/24). Equivalent to ~335 meters.',
+        insight: 'The preset medium scarf is 400 yards at 24 rows per 4 inches. Emma gets fewer rows per inch (22), so the scarf needs 22/24 = 0.917 of the base: 400 × 0.917 = 367 yards. Her 18 stitches per 4 inches is inside the usual 16-20 range for worsted yarn. She should still buy extra (two 220-yard skeins give 440 yards) to allow for swatching and dye-lot matching.',
       },
       {
-        scenario: 'Marcus is quilting a custom throw blanket measuring 50 inches by 60 inches with bulky yarn. He knits at a gauge of 10 stitches and 12 rows per 4 inches. He also plans to use one Jelly Roll. How much additional yarn does he need?',
-        inputs: { projectType: 'Custom', customWidth: '50', customLength: '60', stitchesPer4in: '10', rowsPer4in: '12', precutType: 'Jelly Roll', precutCount: '1' },
-        result: 'Estimated 480 yards needed (400 base + 20% waste). Jelly Roll provides ~3 yards. 477 additional yards needed.',
-        insight: 'Custom area method: stitches per inch = 2.5, rows per inch = 3. Fabric area = (50 × 60) / (2.5 × 3) = 3,000 / 7.5 = 400 yards. With 20% waste: 400 × 1.2 = 480 yards. The Jelly Roll contributes about 2.75 yards of fabric — barely a dent in the total. Marcus needs approximately 477 additional yards. For quilting, precuts are supplemental — the main fabric comes from yardage. Marcus should buy approximately 6 yards of 44-inch wide quilting fabric as his primary material.',
+        scenario: 'Marcus is knitting a custom throw 50 inches by 60 inches with super bulky yarn at 10 stitches and 12 rows per 4 inches.',
+        inputs: { projectType: 'Custom', customWidth: '50', customLength: '60', yarnWeight: 'Super Bulky', stitchesPer4in: '10', rowsPer4in: '12' },
+        result: 'Estimated 1,050 yards needed (875 base + 20% waste). Equivalent to ~960 meters.',
+        insight: 'Rows per inch = 12 ÷ 4 = 3. Yarn = 3.5 × 50 × 60 × 3 ÷ 36 = 875 yards, plus 20% waste = 1,050 yards. His 10 stitches per 4 inches is inside the usual 7-11 range for super bulky yarn. As a sanity check, an average throw in chunky yarn commonly takes on the order of a thousand yards, but his own swatch and stitch pattern decide the real figure.',
       },
       {
-        scenario: 'Lily is crocheting a large lace shawl using lace-weight yarn. She measured her crochet gauge at 30 stitches and 36 rows per 4 inches. The pattern suggests a large shawl needs about 900 yards in lace weight. She wants to verify the estimate.',
+        scenario: 'Lily is crocheting a large lace shawl. She measured 30 stitches and 36 rows per 4 inches in lace-weight yarn; the preset large shawl is 900 yards.',
         inputs: { projectType: 'Shawl', size: 'L', yarnWeight: 'Lace/Fingering', stitchesPer4in: '30', rowsPer4in: '36' },
-        result: 'Estimated 2,025 yards needed (base 900 adjusted by gauge factor 2.25). Equivalent to ~1,852 meters.',
-        insight: 'Base yardage for a large shawl is 900 yards. Gauge factor: (30/20) × (36/24) = 1.5 × 1.5 = 2.25. Adjusted: 900 × 2.25 = 2,025 yards. This seems high, but lace-weight projects use significantly more yardage because the fine yarn covers less area. Realistically, Lily\'s tighter gauge means she needs about 2,025 yards. For crochet, she should add 15% more: 2,025 × 1.15 = 2,329 yards. Large lace shawls commonly need 1,500 to 2,400 yards. Lily should also verify her gauge after blocking, as lace opens up significantly and may change the effective gauge.',
+        result: 'Estimated 1,350 yards needed (900 × 36/24). Equivalent to ~1,234 meters.',
+        insight: 'Her row gauge of 36 per 4 inches is 1.5 times the 24-row baseline, so the shawl needs about 1.5 × 900 = 1,350 yards. Her 30 stitches per 4 inches is inside the usual 27-40 range for lace and fingering weight. Crochet generally uses more yarn than knitting for the same size, so she should add 15-20% and check the gauge again after blocking.',
       },
     ],
     proTips: [
@@ -364,21 +284,21 @@ const yarnYardageConfig: CalculatorConfig = {
       'Block your swatch before measuring gauge. Many fibers (especially wool, alpaca, and cotton) change gauge significantly after washing. A swatch that is perfect unblocked can grow 5 to 15 percent after blocking, which translates to significant yardage differences.',
       'When buying yarn for a project, buy all skeins from the same dye lot number. Dye lots are printed on the label — even the same color name can vary noticeably between lots, creating visible stripes in your finished project that cannot be fixed.',
       'For projects with multiple colors, calculate yardage for each color separately. A striped blanket with 4 colors does not use equal amounts of each — estimate each color\'s proportion of the total surface area and multiply by total yardage.',
-      'The gauge adjustment assumes stockinette stitch (knitting) or single crochet. Cable patterns, lace, bobbles, and heavily textured stitches can use 30 to 50 percent more yarn than stockinette for the same dimensions — factor this in manually.',
+      'The estimate assumes stockinette (knitting) or single crochet. Cables, bobbles, lace and heavily textured stitches can use noticeably more yarn for the same dimensions, so add a larger margin for them.',
       'Yarn is typically sold in skeins of specific yardage (e.g., 220 yards per 100g skein of worsted). Divide the calculator\'s yardage estimate by your skein\'s yardage to determine how many skeins to buy — and always round up, never down.',
     ],
     limitations: [
-      'The base yardage values assume standard worsted-weight projects at 20 stitches and 24 rows per 4 inches. Heavily cabled, lace, or complex stitch patterns can require significantly more yarn — up to 50 percent more for intricate cable work. The gauge adjustment is a linear approximation; in reality, the relationship between gauge and yardage is not perfectly linear at extreme gauge differences. The 20 percent waste factor for custom projects is a general estimate — extensive pattern matching, directional prints, or frequent modifications may require 30 percent or more. This calculator estimates total yardage, not individual color requirements, so you must estimate each color\'s proportion separately when not to rely on this for multi-color projects without additional planning. Precut fabric yardage is approximate — actual usable fabric varies based on cutting and piecing efficiency within your specific design layout. The calculator does not account for yarn substitutions where a different fiber content may change the yardage requirement even at the same gauge due to differences in fiber density and elasticity.',
+      'These are estimates, not measurements. Preset yardages are rule-of-thumb values for worsted-weight projects at 24 rows per 4 inches, and custom mode assumes about 3.5 times the fabric width in yarn per row (stockinette). Cables, lace, texture, crochet stitches, seams and fiber differences change real consumption, and the calculator does not estimate yarn per color for multi-color projects. Always swatch, block the swatch, and buy a safety margin of 10-20% from one dye lot.',
     ],
     quickReference: [
       { label: 'Scarf (S/M/L)', value: '300 / 400 / 500 yds — a standard 6"×60" scarf in worsted weight at baseline gauge.' },
       { label: 'Hat (S/M/L)', value: '200 / 250 / 300 yds — adult beanie or slouch hat. Most patterns need 1 skein of worsted (~220 yds).' },
-      { label: 'Sweater (S/M/L)', value: '800 / 1000 / 1200 yds — adult pullover. Add 200 yds for cables, 300 yds for long sleeves.' },
-      { label: 'Blanket (S/M/L)', value: '1200 / 1800 / 2400 yds — throw to full-size. Bulky yarn needs about 30% less yardage.' },
+      { label: 'Sweater (S/M/L)', value: '800 / 1000 / 1200 yds - adult pullover; cables and long sleeves need more.' },
+      { label: 'Blanket (S/M/L)', value: '1200 / 1800 / 2400 yds - throw to full-size, worsted weight.' },
       { label: 'Shawl (S/M/L)', value: '500 / 700 / 900 yds — triangle or crescent shawl. Lace shawls often need 1000+ yds.' },
-      { label: 'Jelly Roll', value: '~2.75 yds of fabric from 40 strips of 2.5"×WOF. Great for strip quilting and log cabin blocks.' },
-      { label: 'Layer Cake', value: '~2.75 yds from 42 squares of 10"×10". Pre-cut convenience for patchwork quilts.' },
-      { label: 'Fat Quarter', value: '~0.5 yds from 18"×22" cut. Quarter-yard cut with more usable width than a standard quarter yard.' },
+      { label: 'Jelly Roll', value: '~2.65 yds of 44-inch fabric by area (40 strips of 2.5" x 42").' },
+      { label: 'Layer Cake', value: '~2.65 yds by area (42 squares of 10").' },
+      { label: 'Fat Quarter', value: '0.25 yd by area (18" x 22").' },
     ],
     citations: [
       { source: 'Craft Yarn Council - Standard Yarn Weight System', url: 'https://www.craftyarncouncil.com/standards/yarn-weight-system' },

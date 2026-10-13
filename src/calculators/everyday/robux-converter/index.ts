@@ -1,34 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RobuxConverterPanel from './RobuxConverterPanel';
-
-interface Package {
-  amount: number;
-  cost: number;
-}
-
-const ROBUX_PACKAGES: Package[] = [
-  { amount: 400, cost: 4.99 },
-  { amount: 800, cost: 9.99 },
-  { amount: 1700, cost: 19.99 },
-  { amount: 4500, cost: 49.99 },
-  { amount: 10000, cost: 99.99 },
-];
-
-const ROBUX_PREMIUM_PACKAGES: Package[] = [
-  { amount: 440, cost: 4.99 },
-  { amount: 880, cost: 9.99 },
-  { amount: 1870, cost: 19.99 },
-  { amount: 4950, cost: 49.99 },
-  { amount: 11000, cost: 99.99 },
-];
-
-const VBUCK_PACKAGES: Package[] = [
-  { amount: 1000, cost: 8.99 },
-  { amount: 2800, cost: 22.99 },
-  { amount: 5000, cost: 36.99 },
-  { amount: 13500, cost: 79.99 },
-];
+import { PRICES_NOTE, cheapestCover, findBestPackage, packagesFor, singlePackPurchase } from './robuxMath';
 
 const PACKAGE_OPTIONS = [
   { label: '400 units', value: '400' },
@@ -46,23 +19,6 @@ const PACKAGE_OPTIONS = [
   { label: '11000 units (Premium)', value: '11000' },
   { label: '13500 units (V-Bucks)', value: '13500' },
 ];
-
-function getPackageByAmount(packages: Package[], amount: number): Package | undefined {
-  return packages.find(p => p.amount === amount);
-}
-
-function findBestPackage(packages: Package[]): Package {
-  let best = packages[0];
-  let bestRate = best.cost / best.amount;
-  for (const pkg of packages) {
-    const rate = pkg.cost / pkg.amount;
-    if (rate < bestRate) {
-      bestRate = rate;
-      best = pkg;
-    }
-  }
-  return best;
-}
 
 const robuxConfig: CalculatorConfig = {
   inputs: [
@@ -84,10 +40,11 @@ const robuxConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '1000',
       min: 1,
+      max: 1000000,
       step: 100,
       required: true,
       inputMode: 'numeric',
-      helpText: 'How many Robux or V-Bucks do you want to acquire? Enter the total desired amount.',
+      helpText: 'How many Robux or V-Bucks do you want to get (at least)? Without a chosen package the calculator finds the cheapest mix of packs that reaches this amount.',
     },
     {
       id: 'calculationMode',
@@ -112,77 +69,47 @@ const robuxConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const amount = parseInt(values.virtualCurrency);
-    const currencyType = values.currencyType || 'Robux';
-    const packageTypeValue = values.packageType ? parseInt(values.packageType) : 0;
+    const amount = parseInt(values.virtualCurrency, 10);
+    if (!Number.isFinite(amount) || amount <= 0) return [];
+    const { packages, bonusPercent, display: displayCurrency } = packagesFor(values.currencyType || 'Robux');
+    const chosen = values.packageType ? packages.find((p) => p.amount === parseInt(values.packageType, 10)) : undefined;
 
-    if (isNaN(amount) || amount <= 0) return [];
-
-    let packages: Package[];
-    let bonusPercent = 0;
-    let displayCurrency = '';
-
-    if (currencyType === 'Roblox Premium') {
-      packages = ROBUX_PREMIUM_PACKAGES;
-      bonusPercent = 10;
-      displayCurrency = 'Robux (Premium)';
-    } else if (currencyType === 'V-Bucks') {
-      packages = VBUCK_PACKAGES;
-      displayCurrency = 'V-Bucks';
-    } else {
-      packages = ROBUX_PACKAGES;
-      displayCurrency = 'Robux';
-    }
-
-    let selectedPkg = packageTypeValue > 0 ? getPackageByAmount(packages, packageTypeValue) : undefined;
-    if (!selectedPkg) {
-      selectedPkg = findBestPackage(packages);
-    }
-
-    const numPackages = Math.ceil(amount / selectedPkg.amount);
-    const usdValue = numPackages * selectedPkg.cost;
-    const effectiveRate = selectedPkg.cost / selectedPkg.amount;
-
+    const purchase = chosen ? singlePackPurchase(chosen, amount) : cheapestCover(packages, amount);
+    const usdValue = purchase.cents / 100;
+    const effectiveRate = usdValue / purchase.units;
     const bestPkg = findBestPackage(packages);
     const bestRate = bestPkg.cost / bestPkg.amount;
-
     const fmtMoney = (n: number) => n.toFixed(2);
+    const mix = purchase.items.map((i) => `${i.count} × ${i.pkg.amount.toLocaleString('en-US')}`).join(' + ');
+    const surplus = purchase.units - amount;
 
     return [
       {
         id: 'usdValue',
-        label: `Estimated Cost (USD) for ${amount.toLocaleString()} ${displayCurrency}`,
+        label: `Estimated Cost (USD) for ${amount.toLocaleString('en-US')} ${displayCurrency}`,
         value: `$${fmtMoney(usdValue)}`,
         highlight: true,
         color: 'positive',
+        interpretation: chosen
+          ? `${mix} = ${purchase.units.toLocaleString('en-US')} ${displayCurrency}. ${PRICES_NOTE}`
+          : `Cheapest mix of packs that reaches ${amount.toLocaleString('en-US')}: ${mix} = ${purchase.units.toLocaleString('en-US')} ${displayCurrency}. ${PRICES_NOTE}`,
+        warning: 'Illustrative prices - confirm in the official store before buying.',
       },
-      {
-        id: 'effectiveRate',
-        label: 'Effective Rate ($ per unit)',
-        value: `$${effectiveRate.toFixed(6)}`,
-        color: 'neutral',
-      },
+      { id: 'effectiveRate', label: 'Effective Rate ($ per unit received)', value: `$${effectiveRate.toFixed(6)}`, color: 'neutral' },
       {
         id: 'bestPackage',
-        label: 'Best Value Package',
-        value: `${bestPkg.amount.toLocaleString()} for $${fmtMoney(bestPkg.cost)} ($${bestRate.toFixed(6)}/unit)`,
+        label: 'Best Value Package (lowest $ per unit)',
+        value: `${bestPkg.amount.toLocaleString('en-US')} for $${fmtMoney(bestPkg.cost)} ($${bestRate.toFixed(6)}/unit)`,
         color: 'positive',
       },
       {
         id: 'packageType',
-        label: 'Selected Package',
-        value: `${selectedPkg.amount.toLocaleString()} for $${fmtMoney(selectedPkg.cost)}`,
+        label: chosen ? 'Selected Package' : 'Packs Used',
+        value: chosen ? `${chosen.amount.toLocaleString('en-US')} for $${fmtMoney(chosen.cost)}` : mix,
       },
-      {
-        id: 'bonusPercent',
-        label: 'Bonus',
-        value: bonusPercent > 0 ? `${bonusPercent}% Premium Bonus Applied` : 'Standard (no bonus)',
-      },
-      {
-        id: 'currencyType',
-        label: 'Currency',
-        value: displayCurrency,
-      },
+      { id: 'unitsReceived', label: 'Units Received', value: `${purchase.units.toLocaleString('en-US')} (${surplus.toLocaleString('en-US')} more than requested)`, color: 'neutral' },
+      { id: 'bonusPercent', label: 'Bonus', value: bonusPercent > 0 ? `${bonusPercent}% Premium Bonus Applied` : 'Standard (no bonus)' },
+      { id: 'currencyType', label: 'Currency', value: displayCurrency },
     ];
   },
   extraPanel: (values, results) => {
@@ -197,18 +124,18 @@ const robuxConfig: CalculatorConfig = {
       caption: 'Virtual currency is purchased in fixed package tiers. Larger packages offer a lower cost per unit of virtual currency.',
     },
     formulaDescription:
-      'The total USD cost is calculated by determining how many packages are needed to meet or exceed the desired virtual currency amount, then multiplying by the selected package price. Since virtual currency is only sold in fixed package sizes (you cannot buy partial packages), the calculator rounds up the number of packages needed using the ceiling function. The effective rate is the price per single unit of virtual currency, computed by dividing the package price by the number of units it contains. A lower effective rate means better value per unit — larger packages almost always offer superior rates. Roblox Premium subscribers receive approximately a 10 percent bonus on every Robux purchase, improving the effective rate by giving more units for the same dollar amount. This tiered pricing structure is intentional game design that encourages higher-value single purchases.',
+      'The total USD cost is calculated by determining how many packages are needed to meet or exceed the desired virtual currency amount, then multiplying by the selected package price. Since virtual currency is only sold in fixed package sizes (you cannot buy partial packages), the calculator rounds up the number of packages needed using the ceiling function. The effective rate is the price per single unit of virtual currency, computed by dividing the package price by the number of units it contains. A lower effective rate means better value per unit — larger packages almost always offer superior rates. Roblox Premium subscribers have received a 10 percent bonus on Robux purchases (the snapshot used here; check whether it still applies), improving the effective rate by giving more units for the same dollar amount. This tiered pricing structure is intentional game design that encourages higher-value single purchases.',
     variables: [
       { symbol: 'Amount', name: 'Virtual Currency Amount', description: 'The total number of Robux or V-Bucks you want to purchase. Enter the desired quantity and the calculator determines the most cost-effective way to acquire it.' },
       { symbol: 'Package Size', name: 'Package Unit Count', description: 'The number of virtual currency units in a single fixed-price purchase package. Available sizes range from 400 to 13,500 units depending on the currency type.' },
-      { symbol: 'Package Price', name: 'USD Price', description: 'The US dollar cost of the selected package tier. Prices are based on official Roblox and Epic Games store listings for the US market.' },
+      { symbol: 'Package Price', name: 'USD Price', description: 'The US dollar cost of the selected package tier. Prices are an illustrative snapshot of US store listings (2025); they change over time, so confirm in the official store.' },
       { symbol: 'Effective Rate', name: 'Price Per Unit', description: 'The cost per single unit of virtual currency in USD. Computed as Package Price divided by Package Size. The package with the lowest effective rate gives you the most virtual currency per dollar spent.' },
-      { symbol: 'Premium Bonus', name: 'Roblox Premium Bonus', description: 'Roblox Premium subscribers receive approximately 10 percent extra Robux on every purchase at no additional cost. A $99.99 package that normally gives 10,000 Robux gives 11,000 Robux with Premium, reducing the effective rate from $0.010 to $0.009 per Robux.' },
+      { symbol: 'Premium Bonus', name: 'Roblox Premium Bonus', description: 'Roblox Premium subscribers have received about 10 percent extra Robux on purchases (snapshot; check the current terms). A $99.99 package that normally gives 10,000 Robux gives 11,000 with Premium, reducing the effective rate from $0.0100 to $0.0091 per Robux.' },
     ],
     commonUses: [
       'Estimating the exact USD cost of purchasing a specific amount of Robux or V-Bucks for in-game spending, gifts, or allowances',
       'Comparing package pricing tiers side-by-side to find the best value per unit before making a purchase decision',
-      'Deciding whether a Roblox Premium subscription ($4.99/month) is financially worthwhile based on your monthly Robux purchasing habits',
+      'Estimating what a Roblox Premium purchase bonus is worth for your monthly Robux purchasing habits',
       'Budgeting children\'s gaming spending by calculating exactly how many packages are needed to reach a target virtual currency amount',
     ],
     quickReference: [
@@ -218,23 +145,23 @@ const robuxConfig: CalculatorConfig = {
       { label: '4,500 Robux', value: '$49.99 ($0.0111/Robux)' },
       { label: '10,000 Robux', value: '$99.99 ($0.0100/Robux — BEST VALUE)' },
       { label: 'Premium 10% Bonus', value: '~$0.0091/Robux on $99.99 tier' },
-      { label: 'Best V-Bucks Deal', value: '13,500 for $79.99 ($0.0059/V-Buck)' },
-      { label: 'V-Bucks 1,000', value: '$8.99 ($0.0090/V-Buck — worst rate)' },
+      { label: 'Best V-Bucks Deal', value: '13,500 for $89.99 ($0.0067/V-Buck)' },
+      { label: 'V-Bucks 1,000', value: '$8.99 ($0.0090/V-Buck - highest rate)' },
     ],
     howToUse: [
       'Select your currency type: Robux for standard Roblox currency, Robux (Premium) for the 10% subscriber bonus, or V-Bucks for Fortnite.',
       'Enter the total amount of virtual currency you want to acquire — for example, 5000 to purchase a specific game pass or outfit bundle.',
-      'Choose Basic mode to see the essential cost and the best-value package recommendation.',
+      'Choose Basic mode to see the cheapest mix of packs that reaches your amount, its cost, and the lowest-price-per-unit package.',
       'Switch to Advanced mode and select a specific package tier to see the detailed per-package cost breakdown for that tier.',
       'Review the effective rate (cost per unit) to understand which package size gives you the most virtual currency for your money.',
       'Compare the Premium vs. Standard rates to decide whether a Roblox Premium subscription pays for itself based on your buying habits.',
     ],
     explanation:
-      'Virtual currency in online gaming platforms like Roblox (Robux) and Fortnite (V-Bucks) is purchased exclusively in fixed-price tiered packages — you cannot buy custom amounts. The concept of in-game virtual currencies dates back to the early 2000s when Second Life introduced the Linden Dollar in 2003, creating one of the first real-money-traded virtual economies. Habbo Hotel pioneered microtransactions through virtual furniture purchases in 2001, establishing the precedent for digital goods monetization. Roblox launched its Robux currency in 2007 alongside its developer exchange program (DevEx), and Fortnite introduced V-Bucks in 2017 as part of its free-to-play battle royale model. The psychology behind tiered pricing is well-studied: larger packages almost always offer a better per-unit rate, which encourages higher-value single purchases even though the total spend is larger. For example, buying 10,000 Robux in one package costs $99.99 at $0.010 per unit, while buying twenty-five 400-Robux packages to reach the same amount would cost $124.75 at $0.0125 per unit — a 25% premium for buying small. Roblox Premium subscribers receive approximately 10% bonus Robux on each purchase, reducing the effective rate further and often paying for the subscription cost through the bonus alone for regular buyers. Understanding these pricing mechanics helps parents, players, and gift-givers make informed purchasing decisions and avoid the hidden cost of buying small, frequent packages instead of saving for the best-value tier.',
+      'Virtual currency in online gaming platforms like Roblox (Robux) and Fortnite (V-Bucks) is purchased exclusively in fixed-price tiered packages — you cannot buy custom amounts. In-game virtual currencies go back to the early 2000s, for example Second Life\'s Linden Dollar (2003), one of the first real-money-traded virtual economies. Roblox introduced Robux in 2007 (its Developer Exchange for cashing out followed in 2013), and Fortnite introduced V-Bucks in 2017. The psychology behind tiered pricing is well-studied: larger packages almost always offer a better per-unit rate, which encourages higher-value single purchases even though the total spend is larger. For example, buying 10,000 Robux in one package costs $99.99 at $0.010 per unit, while buying twenty-five 400-Robux packages to reach the same amount would cost $124.75 at $0.0125 per unit — a 25% premium for buying small. Roblox Premium subscribers receive approximately 10% bonus Robux on each purchase, reducing the effective rate further and often paying for the subscription cost through the bonus alone for regular buyers. Understanding these pricing mechanics helps parents, players, and gift-givers make informed purchasing decisions and avoid the hidden cost of buying small, frequent packages instead of saving for the best-value tier.',
     faqs: [
       {
         question: 'Is Roblox Premium worth it for buying Robux?',
-        answer: 'Yes, if you buy Robux regularly — at least 1,000 Robux per month. Premium costs $4.99 per month and gives a monthly Robux stipend plus a 10 percent bonus on every Robux purchase. The 10 percent bonus on a $99.99 package effectively gives you $10 worth of extra Robux for free, which is double the monthly subscription cost. For families spending $20 or more per month on Robux, Premium almost always pays for itself through the bonus alone, even without factoring in the monthly stipend and other Premium perks like trading and selling items.',
+        answer: 'It depends on how you value the extras. Premium costs $4.99 per month for the entry tier. At the snapshot terms it gives a monthly Robux stipend (450 Robux, worth about $5.60 at the standard $0.0125 per Robux) plus a 10 percent bonus on purchases. The bonus alone only offsets the $4.99 fee if you spend about $50 a month on Robux, so for most families the stipend and other Premium perks are the real value. Roblox changes these benefits, so check the current terms.',
       },
       {
         question: 'Which Robux package has the best value?',
@@ -242,51 +169,51 @@ const robuxConfig: CalculatorConfig = {
       },
       {
         question: 'Which V-Bucks package has the best value?',
-        answer: 'The 13,500 V-Bucks package at $79.99 offers the best rate at approximately $0.0059 per V-Buck. The 1,000 V-Bucks package at $8.99 has the worst rate at $0.0090 per V-Buck — a 52 percent premium for buying the smallest package. The 2,800 V-Bucks at $22.99 ($0.0082/V-Buck) and 5,000 V-Bucks at $36.99 ($0.0074/V-Buck) offer intermediate value. Unlike Robux, V-Bucks cannot be earned through a subscription service and must be purchased directly or earned through the Battle Pass.',
+        answer: 'In this snapshot the 13,500 V-Bucks package at $89.99 offers the best rate at approximately $0.0067 per V-Buck. The 1,000 V-Bucks package at $8.99 has the highest rate at $0.0090 per V-Buck — about 35 percent more per unit than the largest pack. The 2,800 V-Bucks at $22.99 ($0.0082/V-Buck) and 5,000 V-Bucks at $36.99 ($0.0074/V-Buck) sit in between. Epic reduced the V-Bucks in its packs in March 2026, so current packs differ. V-Bucks can also be earned in-game, for example through the Battle Pass.',
       },
       {
         question: 'Can I buy partial packages or custom amounts?',
-        answer: 'No, virtual currency purchases on Roblox and Fortnite are only available in fixed package sizes — there is no option to buy a custom amount. If you need an amount that falls between two package sizes, you must buy multiple smaller packages or a larger package that exceeds your target. For example, to get 3,000 Robux, you could buy one 1,700 Robux package plus one 800 Robux package plus one 400 Robux package (2,900 total for $34.97), or simply buy one 4,500 Robux package for $49.99 and have 1,500 extra for future use. The calculator shows you the exact cost for any combination.',
+        answer: 'No, virtual currency purchases on Roblox and Fortnite are only available in fixed package sizes — there is no option to buy a custom amount. If you need an amount that falls between two package sizes, you must buy multiple smaller packages or a larger package that exceeds your target. For example, to get at least 3,000 Robux the cheapest mix at these prices is eight 400-Robux packs (3,200 Robux for $39.92); one 1,700 plus one 1,700 pack (3,400 for $39.98) costs a few cents more but needs fewer purchases. Without a chosen package the calculator finds the cheapest mix for you.',
       },
       {
         question: 'How do V-Bucks and Robux pricing compare?',
-        answer: 'Robux costs approximately $0.010 per unit at the best tier, while V-Bucks cost about $0.0059 per unit at the best tier. V-Bucks are roughly 41 percent cheaper per unit than Robux. However, these currencies are used in completely different games (Fortnite vs. Roblox), have different in-game purchasing power, and are not interchangeable — a V-Buck does not buy the same amount of in-game content as a Robux. Direct price-per-unit comparison is informative but should not be the sole basis for choosing between the two platforms.',
+        answer: 'Robux costs approximately $0.010 per unit at the best tier, while V-Bucks cost about $0.0067 per unit at the best tier (snapshot prices), roughly a third less per unit. However, these currencies are used in completely different games (Fortnite vs. Roblox), have different in-game purchasing power, and are not interchangeable — a V-Buck does not buy the same amount of in-game content as a Robux. Direct price-per-unit comparison is informative but should not be the sole basis for choosing between the two platforms.',
       },
       {
         question: 'Are there ways to get free or discounted Robux?',
-        answer: 'Roblox Premium subscribers receive a monthly Robux stipend as part of their subscription: 450 Robux/month for the $4.99 tier, 1,000 Robux/month for $9.99, and 2,200 Robux/month for $19.99. Roblox also offers occasional gift card promotions at retail stores where you get bonus virtual items. However, never use third-party Robux generators, "free Robux" websites, or unauthorized resellers claiming to offer discounts — these are virtually always scams that steal account credentials or payment information. The only legitimate way to acquire Robux at a discount is through the Premium subscription bonus. When not to trust a Robux offer: if it is not from the official Roblox website, the Microsoft Store, or an authorized retailer like Amazon or GameStop, it is likely fraudulent.',
+        answer: 'Roblox Premium subscribers have received a monthly Robux stipend (450 Robux/month for the $4.99 tier, 1,000 for $9.99 and 2,200 for $19.99 at the snapshot terms; check current terms). Roblox also offers occasional gift card promotions at retail stores where you get bonus virtual items. However, never use third-party Robux generators, "free Robux" websites, or unauthorized resellers claiming to offer discounts — these are virtually always scams that steal account credentials or payment information. When not to trust a Robux offer: if it is not from the official Roblox website, the Microsoft Store, or an authorized retailer like Amazon or GameStop, it is likely fraudulent.',
       },
     ],
     workedExamples: [
       {
-        scenario: 'A parent wants to buy 5,000 Robux for their child to purchase game passes and avatar items. They select Robux and enter 5000. Using the best-value package (10,000 Robux at $99.99), they would spend $99.99 and receive 10,000 Robux — double what they asked for. If they instead used the 4,500 Robux package at $49.99, they would need 2 packages ($99.98 total) to get 9,000 Robux. The 10,000 package gives 1,000 more Robux for only $0.01 more.',
+        scenario: 'A parent wants to buy 5,000 Robux for a child to spend on game passes and avatar items. They choose Robux and enter 5000 without picking a package, so the calculator looks for the cheapest mix of packs that reaches at least 5,000.',
         inputs: { virtualCurrency: '5000', currencyType: 'Robux' },
-        result: 'Estimated cost: $99.99 for 10,000 Robux via the best-value package. Effective rate: $0.0100 per unit.',
-        insight: 'Buying one 10,000-Robux package at $99.99 gives double the requested amount at nearly the same cost as buying multiple smaller packages. The extra 5,000 Robux can be saved in the account for future purchases. This is often the better financial decision for families who expect to buy Robux again within a few months.',
+        result: 'Estimated cost: $59.94 for exactly 5,000 Robux (4 × 400 + 2 × 1,700). Effective rate: $0.0120 per unit.',
+        insight: 'Buying one 10,000-Robux pack would cost $99.99, almost $40 more, for double the amount. The cheapest way to reach 5,000 at these prices is four 400-Robux packs plus two 1,700-Robux packs: $19.96 + $39.98 = $59.94. A single 4,500 pack ($49.99) falls 500 short, and 4,500 + 800 gives 5,300 for $59.98. Prices are an illustrative snapshot, so check the store before buying.',
       },
       {
-        scenario: 'A Roblox Premium subscriber wants to know if the 10% bonus actually matters for large purchases. With Premium, the $99.99 package gives 11,000 Robux instead of 10,000 — an extra 1,000 Robux for free. The effective rate drops from $0.0100 to $0.0091 per Robux. Over the course of a year, if they buy the $99.99 package four times, the Premium bonus saves $40 worth of Robux for a $60 annual subscription cost.',
+        scenario: 'A Roblox Premium member (at the snapshot terms, 10% more Robux per purchase) wants 10,000 Robux and enters 10000 with Robux (Premium) selected.',
         inputs: { virtualCurrency: '10000', currencyType: 'Roblox Premium' },
         result: 'Estimated cost: $99.99 for 11,000 Robux (Premium). Effective rate: $0.0091 per unit. 10% bonus applied.',
-        insight: 'Roblox Premium at $4.99/month ($59.88/year) pays for itself if you buy at least 8,000 Robux per year. The 10% bonus on four $99.99 packages gives $40 worth of free Robux, and the monthly stipend (450/month for the basic tier) provides another 5,400 Robux annually — combined value well exceeding the subscription cost for regular buyers.',
+        insight: 'With the Premium amounts the $99.99 pack delivers 11,000 Robux instead of 10,000, an extra 1,000 Robux (about $12.50 at the standard small-pack rate) for the same price, and it is still the cheapest way to reach 10,000. The 10% bonus alone would take roughly $55 of Robux purchases a month to offset a $4.99 monthly fee, so Premium is mainly worth it for its other benefits. Check the current Premium terms, which Roblox changes.',
       },
       {
-        scenario: 'A Fortnite player wants the new Battle Pass (950 V-Bucks) plus a 2,000 V-Buck skin bundle. They need 2,950 V-Bucks total and check the calculator in Basic mode to see the best-value recommendation.',
+        scenario: 'A Fortnite player wants 2,950 V-Bucks (a Battle Pass plus a skin bundle) and enters 2950 with V-Bucks selected.',
         inputs: { virtualCurrency: '2950', currencyType: 'V-Bucks' },
-        result: 'Estimated cost: $79.99 for 13,500 V-Bucks via best-value package. Effective rate: $0.0059 per unit.',
-        insight: 'The calculator always recommends the single package with the lowest per-unit rate — here, the 13,500 V-Buck tier at $0.0059/V-Buck beats every smaller tier, including the 5,000 V-Buck package at $0.0074/V-Buck. That means the "best value" pick (13,500 V-Bucks for $79.99) delivers over 10,000 more V-Bucks than the player actually needs. For a one-time purchase close to the exact amount, switching to Advanced mode and selecting the 5,000 V-Buck package directly ($36.99) avoids the large surplus, at the cost of a worse per-unit rate. For players who buy V-Bucks regularly, banking the leftover balance in the largest package is usually the better long-term financial decision; for a single purchase, the closer-fitting package avoids overspending.',
+        result: 'Estimated cost: $26.97 for 3,000 V-Bucks (3 × 1,000). Effective rate: $0.0090 per unit.',
+        insight: 'The 1,000-V-Bucks pack has the highest price per V-Buck, but three of them reach 2,950 for $26.97, which is cheaper than 2,800 + 1,000 ($31.98) and far cheaper than the best-rate 13,500 pack ($89.99). If you will keep buying V-Bucks anyway, a larger pack lowers the cost per V-Buck. Epic reduced the V-Bucks in each pack in March 2026, so current packs differ from this snapshot.',
       },
     ],
     proTips: [
-      'The 10,000 Robux package at $99.99 consistently offers the best per-unit rate at about $0.010 per Robux. If you plan to buy Robux multiple times per year, save up and buy the largest package once rather than smaller packages more frequently — you will save approximately 25% compared to buying the smallest packages repeatedly.',
-      'Roblox Premium at $4.99 to $19.99 per month gives a monthly Robux stipend plus a 10% bonus on all Robux purchases. For families spending $20 or more per month on Robux, Premium almost always pays for itself through the bonus alone — the monthly stipend and trading/selling perks are essentially free extras.',
-      'V-Bucks packages follow a different pricing structure: 13,500 V-Bucks for $79.99 at $0.0059 per V-Buck is by far the best value. The 1,000 V-Buck package at $8.99 costs 52% more per unit. Unlike Robux, V-Bucks cannot be earned through a subscription — they must be purchased or earned through Battle Pass gameplay.',
-      'Never buy virtual currency from third-party resellers, "discount" websites, or social media sellers offering below-market rates. These are nearly always scams using stolen credit cards, hacked accounts, or fraudulent chargeback schemes. Purchasing from unauthorized sellers can result in permanent account bans, and the platforms offer zero recourse for lost funds in these cases.',
-      'For parents managing children\'s gaming budgets, teach value comparison using this calculator. Show your child that saving allowance for the $99.99 package (10,000 Robux at $0.010 each) is much smarter than impulse-buying five $19.99 packages (8,500 Robux at $0.0118 each) — they get 1,500 more Robux for the same total spend.',
-      'Exchange rates and package pricing vary by country and platform. Purchases made through the Apple App Store or Google Play Store on mobile devices often cost 10-30% more than direct web purchases due to platform fees. For the best rates, buy virtual currency directly through the Roblox or Epic Games website on a desktop browser.',
+      'The 10,000 Robux pack at $99.99 has the lowest price per Robux at these prices (about $0.0100 per Robux). If you will use 10,000 Robux anyway, one large pack costs about 20% less per Robux than the smallest ones; if you only need a smaller amount, the calculator finds the cheapest mix of packs instead of pushing you to the biggest.',
+      'Roblox Premium has offered a monthly Robux stipend plus a 10% bonus on purchases (snapshot terms; check the current ones). The bonus is worth about 9 cents of extra Robux per dollar spent, so the stipend and other perks are the main reason to subscribe.',
+      'V-Bucks packs at the snapshot prices run from $0.0090 per V-Buck (1,000 pack) down to about $0.0067 (13,500 pack). Epic changed the V-Bucks in each pack in March 2026, so check the current lineup.',
+      'Never buy virtual currency from third-party resellers, "discount" websites, or social media sellers offering below-market rates. These are often scams using stolen cards or hacked accounts, and purchases from unauthorized sellers can lead to account bans.',
+      'For parents managing a gaming budget, compare price per unit: two $19.99 packs give 3,400 Robux ($0.0118 each), while the $49.99 pack gives 4,500 ($0.0111 each), so a bigger pack gives more Robux per dollar.',
+      'Prices and amounts vary by country and platform. Roblox has said purchases on its website or with gift cards can give up to about 25% more Robux than purchases through mobile app stores (since November 2024), so check each channel before buying.',
     ],
     limitations: [
-      'Package pricing is based on USD pricing from the official Roblox and Epic Games stores as of the most recent update. Prices may vary by region, platform (iOS and Android app stores often charge more due to their 15-30% platform fees), and over time as the platforms adjust their pricing. This calculator uses published US pricing tiers — prices in other currencies such as EUR, GBP, CAD, and AUD are different and subject to exchange rate fluctuations. The calculator does not account for applicable sales tax, which may apply in some jurisdictions. Roblox gift cards and promotional events may offer bonus Robux that changes the effective rate beyond what is accounted for here. When not to rely on these estimates: for purchases outside the United States, always check the official platform purchase page for region-specific pricing. For exact current pricing, verify against the official Roblox or Fortnite in-app purchase page before making a buying decision.',
+      'Package pricing is an illustrative snapshot of US store prices (2025); Roblox and Epic change pack sizes, bonuses and prices from time to time. Prices may vary by region, platform (iOS and Android app stores often charge more due to their 15-30% platform fees), and over time as the platforms adjust their pricing. This calculator uses published US pricing tiers — prices in other currencies such as EUR, GBP, CAD, and AUD are different and subject to exchange rate fluctuations. The calculator does not account for applicable sales tax, which may apply in some jurisdictions. Roblox gift cards and promotional events may offer bonus Robux that changes the effective rate beyond what is accounted for here. When not to rely on these estimates: for purchases outside the United States, always check the official platform purchase page for region-specific pricing. For exact current pricing, verify against the official Roblox or Fortnite in-app purchase page before making a buying decision.',
     ],
     citations: [
       { source: 'Roblox Developer Hub - Robux Overview', url: 'https://create.roblox.com/docs' },

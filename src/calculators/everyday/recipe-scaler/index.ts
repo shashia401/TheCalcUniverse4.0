@@ -1,56 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RecipeScalerPanel from './RecipeScalerPanel';
-
-function parseQty(value: string): number | null {
-  const trimmed = value.trim();
-
-  // Try simple fraction like "1/2"
-  const simpleMatch = /^(\d+)\/(\d+)$/.exec(trimmed);
-  if (simpleMatch) {
-    const num = parseInt(simpleMatch[1], 10);
-    const den = parseInt(simpleMatch[2], 10);
-    if (den !== 0) return num / den;
-  }
-
-  // Try mixed fraction like "2 1/2"
-  const mixedMatch = /^(\d+)\s+(\d+)\/(\d+)$/.exec(trimmed);
-  if (mixedMatch) {
-    const whole = parseInt(mixedMatch[1], 10);
-    const num = parseInt(mixedMatch[2], 10);
-    const den = parseInt(mixedMatch[3], 10);
-    if (den !== 0) return whole + num / den;
-  }
-
-  // Try plain number
-  const num = parseFloat(trimmed);
-  if (!isNaN(num)) return num;
-
-  return null;
-}
-
-function formatQty(value: number): string {
-  // If very close to a whole number, show integer
-  if (Math.abs(value - Math.round(value)) < 0.001) {
-    return Math.round(value).toString();
-  }
-  // Show up to 2 decimal places, trimming trailing zeros
-  return parseFloat(value.toFixed(2)).toString();
-}
-
-interface IngredientFields {
-  name: string;
-  qty: string;
-  unit: string;
-}
-
-function buildIngredient(prefix: string, values: Record<string, string>): IngredientFields | null {
-  const name = values[`${prefix}Name`]?.trim();
-  const qty = values[`${prefix}Qty`]?.trim();
-  const unit = values[`${prefix}Unit`]?.trim();
-  if (!name && !qty) return null;
-  return { name: name || '', qty: qty || '', unit: unit || '' };
-}
+import { formatQty, scaleRecipe, toKitchenFraction } from './recipeMath';
 
 const unitOptions = [
   { label: 'cups', value: 'cups' },
@@ -81,7 +32,7 @@ function ingredientInputs(prefix: string, labelNum: number, required: boolean, s
       type: 'text' as const,
       placeholder: 'e.g. 2 1/2',
       required,
-      helpText: 'Supports fractions like 1/2 or 2 1/2',
+      helpText: 'Supports fractions like 1/2 or 2 1/2 and decimals like 1.5',
       ...(showWhen ? { showWhen } : {}),
     },
     {
@@ -103,6 +54,7 @@ const recipeScalerConfig: CalculatorConfig = {
       label: 'Original Servings',
       type: 'number',
       min: 1,
+      max: 10000,
       step: 1,
       required: true,
       inputMode: 'numeric',
@@ -113,6 +65,7 @@ const recipeScalerConfig: CalculatorConfig = {
       label: 'Desired Servings',
       type: 'number',
       min: 1,
+      max: 10000,
       step: 1,
       required: true,
       inputMode: 'numeric',
@@ -123,55 +76,35 @@ const recipeScalerConfig: CalculatorConfig = {
     ...ingredientInputs('ingredient3', 3, false, (v) => !!v.ingredient2Name),
   ],
   calculate: (values) => {
-    const originalServings = parseInt(values.originalServings, 10);
-    const desiredServings = parseInt(values.desiredServings, 10);
-
-    if (isNaN(originalServings) || originalServings <= 0) return [];
-    if (isNaN(desiredServings) || desiredServings <= 0) return [];
-
-    const scaleFactor = desiredServings / originalServings;
+    const r = scaleRecipe(values);
+    if (!r) return [];
 
     const results: CalculatorResult[] = [
       {
         id: 'scaleFactor',
         label: 'Scale Factor',
-        value: `${formatQty(scaleFactor)}x`,
+        value: `${formatQty(r.factor)}x`,
         highlight: true,
-        color: scaleFactor >= 1 ? 'positive' : 'neutral',
+        color: r.factor >= 1 ? 'positive' : 'neutral',
+        interpretation: `${r.desired} ÷ ${r.original} servings.${r.factor >= 2 || r.factor <= 0.5 ? ' Salt, spices, leavening, pan size and cooking time do not scale in simple proportion at this factor - adjust by taste and experience.' : ''}`,
       },
     ];
 
-    const prefixes = ['ingredient1', 'ingredient2', 'ingredient3'];
-    prefixes.forEach((prefix) => {
-      const ing = buildIngredient(prefix, values);
-      if (!ing) return;
-      const parsedQty = parseQty(ing.qty);
-      if (parsedQty === null || ing.qty === '') return;
-
-      const scaledQty = parsedQty * scaleFactor;
+    for (const ing of r.ingredients) {
       const unitLabel = ing.unit ? ` ${ing.unit}` : '';
-      const nameLabel = ing.name ? `${ing.name}: ` : '';
-
+      const kitchen = ['cups', 'tbsp', 'tsp'].includes(ing.unit) ? toKitchenFraction(ing.scaled) : null;
       results.push({
-        id: `${prefix}-scaled`,
-        label: nameLabel.trim() || `Ingredient`,
-        value: `${formatQty(scaledQty)}${unitLabel}`,
+        id: ing.id,
+        label: ing.name || 'Ingredient',
+        value: `${formatQty(ing.scaled)}${unitLabel}`,
         color: 'neutral',
+        interpretation: kitchen ? `About ${kitchen}${unitLabel} in measuring-spoon or cup terms.` : undefined,
       });
-    });
-
-    if (results.length <= 1) {
-      // No ingredients were parsed
-      return [
-        {
-          id: 'noIngredients',
-          label: 'No Ingredients',
-          value: 'Add at least one ingredient to see scaled quantities',
-          color: 'neutral',
-        },
-      ];
     }
 
+    if (results.length <= 1) {
+      return [{ id: 'noIngredients', label: 'No Ingredients', value: 'Add at least one ingredient to see scaled quantities', color: 'neutral' }];
+    }
     return results;
   },
   extraPanel: (values, results) => {
@@ -201,11 +134,11 @@ const recipeScalerConfig: CalculatorConfig = {
       { label: '1 lb', value: '16 oz = 454 g' },
     ],
     proTips: [
-      'For baking recipes, scale leavening agents (baking soda, baking powder, yeast) by only 1.5x when doubling the recipe — they do not scale linearly and over-leavening can cause baked goods to rise too quickly and collapse.',
-      'When scaling down (e.g., halving a recipe), pay attention to pan sizes. A halved 9×13 cake batter fits better in an 8×8 or 9-inch round pan, and the baking time will decrease by about 15-25%.',
-      'Strong spices (cayenne, cloves, cardamom) and salt should be scaled conservatively — start with 75% of the scaled amount, then taste and adjust. Doubling cayenne can make a dish inedibly hot.',
-      'Eggs are tricky when scaling: for half an egg, beat a whole egg and measure out 2 tablespoons. For recipes calling for odd numbers of eggs after scaling (e.g., 4.5), round up and slightly reduce other liquids.',
-      'For soups and sauces scaled up, reduce the cooking liquid by 5-10% from the calculated amount — evaporation rates do not scale linearly with volume in large pots.',
+      'Rules of thumb from home-cooking practice, not measured constants: for baking recipes, scale leavening agents (baking soda, baking powder, yeast) by only 1.5x when doubling the recipe — they do not scale linearly and over-leavening can cause baked goods to rise too quickly and collapse.',
+      'When scaling down (e.g., halving a recipe), pay attention to pan sizes. A halved 9×13 cake batter fits better in an 8×8 or 9-inch round pan, and the baking time will usually be shorter, so start checking early.',
+      'Strong spices (cayenne, cloves, cardamom) and salt should be scaled conservatively — start with somewhat less than the scaled amount, then taste and adjust. Doubling cayenne can make a dish inedibly hot.',
+      'Eggs are tricky when scaling: for half an egg, beat a whole egg and measure out about 1.5 tablespoons (a large egg is roughly 3 tablespoons). For recipes calling for odd numbers of eggs after scaling (e.g., 4.5), round up and slightly reduce other liquids.',
+      'For soups and sauces scaled up, hold back a little of the cooking liquid — evaporation rates do not scale linearly with volume in large pots.',
     ],
     limitations: [
       'Recipe scaling works best for ingredients that scale linearly: flour, sugar, butter, milk, and most dry goods. Leavening agents (baking powder, baking soda, yeast), strong spices, salt, and acidic ingredients (lemon juice, vinegar) often do NOT scale linearly and may need adjustment by taste or experience. The calculator handles the arithmetic — it does NOT adjust for non-linear ingredient behavior, cooking time changes (which do not scale proportionally), or pan size adjustments. For baking recipes in particular, always consult a trusted baking reference for leavening and egg adjustments, and expect to test scaled recipes at least once before serving them to guests.',
@@ -228,7 +161,7 @@ const recipeScalerConfig: CalculatorConfig = {
         },
         result: 'Scale factor of 2x. Butter: 2 cups. Sugar: 3 cups. Vanilla Extract: 4 tsp.',
         insight:
-          'With a scale factor of 2x (48 ÷ 24), each ingredient quantity doubles: 1 cup butter becomes 2 cups, 1 1/2 cups sugar becomes 3 cups, and 2 tsp vanilla becomes 4 tsp (or 1 tbsp + 1 tsp). A double batch of cookies may need to be baked in two separate trays rather than one larger tray, and the baking time stays roughly the same since the cookie size does not change. The butter and sugar scale linearly, but vanilla extract is a flavoring agent — consider adding only 3.5 tsp instead of 4 to avoid an overpowering vanilla taste.',
+          'With a scale factor of 2x (48 ÷ 24), each ingredient quantity doubles: 1 cup butter becomes 2 cups, 1 1/2 cups sugar becomes 3 cups, and 2 tsp vanilla becomes 4 tsp (or 1 tbsp + 1 tsp). A double batch of cookies may need to be baked in two separate trays rather than one larger tray, and the baking time stays roughly the same since the cookie size does not change. The butter and sugar scale linearly, but vanilla extract is a flavoring agent — some cooks add slightly less than the full doubled amount of strong flavourings and taste before adding more.',
       },
       {
         scenario: 'Halving a Dinner Recipe for Two People',
@@ -264,7 +197,7 @@ const recipeScalerConfig: CalculatorConfig = {
       'View the scaled quantities instantly for each ingredient.',
     ],
     explanation:
-      'Scaling recipes is a common kitchen challenge whether you are cooking for a crowd, halving a family recipe, or adjusting serving sizes for meal prep. The math is straightforward: divide your desired number of servings by the original number of servings to get a scale factor, then multiply each ingredient quantity by that factor. However, not all ingredients scale linearly in practice. Salt, spices, and leavening agents (baking soda, baking powder, yeast) often need careful adjustment because they affect chemical reactions in baking. Doubling the salt might make a dish inedibly salty, while doubling baking powder could cause a cake to rise too rapidly and collapse. For best results, scale aromatic spices and salt by about 1.5x when doubling a recipe instead of 2x, and adjust to taste. Liquids also require attention because evaporation rates change with larger volumes. When scaling up a soup or sauce, you may need slightly less additional liquid than the math suggests, then thin it out as needed. For scaling down, be mindful of pan sizes: halving a recipe designed for a 9x13 pan may work better in an 8x8 pan, and cooking times will likely decrease. Egg quantities can be tricky when scaling down since you cannot easily use half an egg. Beat the egg and measure out half by volume, or use a small egg as a substitute. This calculator handles the arithmetic so you can focus on cooking adjustments, but always use your judgment for ingredients that behave non-linearly when scaled.',
+      'Scaling recipes is a common kitchen challenge whether you are cooking for a crowd, halving a family recipe, or adjusting serving sizes for meal prep. The math is straightforward: divide your desired number of servings by the original number of servings to get a scale factor, then multiply each ingredient quantity by that factor. However, not all ingredients scale linearly in practice. Salt, spices, and leavening agents (baking soda, baking powder, yeast) often need careful adjustment because they affect chemical reactions in baking. Doubling the salt might make a dish inedibly salty, while doubling baking powder could cause a cake to rise too rapidly and collapse. A common rule of thumb is to scale aromatic spices and salt by about 1.5x when doubling a recipe instead of 2x, then adjust to taste; these adjustments are experience-based, not exact. Liquids also require attention because evaporation rates change with larger volumes. When scaling up a soup or sauce, you may need slightly less additional liquid than the math suggests, then thin it out as needed. For scaling down, be mindful of pan sizes: halving a recipe designed for a 9x13 pan may work better in an 8x8 pan, and cooking times will likely decrease. Egg quantities can be tricky when scaling down since you cannot easily use half an egg. Beat the egg and measure out half by volume (a large egg is roughly 3 tablespoons), or use a small egg as a substitute. This calculator handles the arithmetic so you can focus on cooking adjustments, but always use your judgment for ingredients that behave non-linearly when scaled.',
     faqs: [
       {
         question: 'How do I measure half of 1/3 cup?',
@@ -272,11 +205,11 @@ const recipeScalerConfig: CalculatorConfig = {
       },
       {
         question: 'Can I scale baking recipes reliably?',
-        answer: 'Baking recipes require more care when scaling because ingredient ratios affect chemical reactions. Leavening agents (baking soda, baking powder, yeast) often do not scale linearly. A good rule of thumb is to scale leavening agents by 1.5x when doubling, rather than 2x. Eggs can be scaled by volume (beat an egg and measure the needed fraction). Flour and sugar scale more reliably linearly than leavening agents.',
+        answer: 'Baking recipes require more care when scaling because ingredient ratios affect chemical reactions. Leavening agents (baking soda, baking powder, yeast) often do not scale linearly. A common rule of thumb (not a measured standard) is to scale leavening agents by about 1.5x when doubling, rather than 2x. Eggs can be scaled by volume (beat an egg and measure the needed fraction). Flour and sugar scale more reliably linearly than leavening agents.',
       },
       {
         question: 'What about cooking time when scaling?',
-        answer: 'Cooking time does not scale proportionally with ingredient quantity. A doubled batch of soup may take only 20% longer to reach a boil. A larger casserole will need more oven time because heat penetrates a thicker mass more slowly. Use visual doneness cues (internal temperature, texture, color) rather than simply multiplying the original cooking time. Always start checking doneness at the original recipe time and add time as needed.',
+        answer: 'Cooking time does not scale proportionally with ingredient quantity. A doubled batch of soup takes noticeably less than twice as long to reach a boil. A larger casserole will need more oven time because heat penetrates a thicker mass more slowly. Use visual doneness cues (internal temperature, texture, color) rather than simply multiplying the original cooking time. Always start checking doneness at the original recipe time and add time as needed.',
       },
       {
         question: 'How do I handle irregular ingredient sizes (e.g., onions, chicken breasts)?',

@@ -52,16 +52,16 @@ describe('Clothing Size Converter', () => {
       expect(getValue(r, 'eu')).toBe('38');
     });
 
-    it('converts International M to US 8, UK 12, EU 40, JP 13', () => {
+    it('converts International M to the whole M span US 8-10, UK 12-14, EU 40-42, JP 13-15', () => {
       const r = config.calculate({
         category: "Women's Dresses",
         region: 'International (S/M/L/XL)',
         sizeInput: 'M',
       });
-      expect(getValue(r, 'us')).toBe('8');
-      expect(getValue(r, 'uk')).toBe('12');
-      expect(getValue(r, 'eu')).toBe('40');
-      expect(getValue(r, 'jp')).toBe('13');
+      expect(getValue(r, 'us')).toBe('8–10');
+      expect(getValue(r, 'uk')).toBe('12–14');
+      expect(getValue(r, 'eu')).toBe('40–42');
+      expect(getValue(r, 'jp')).toBe('13–15');
     });
   });
 
@@ -159,7 +159,7 @@ describe('Clothing Size Converter', () => {
       expect(getValue(r, 'jp')).toBe('28');
     });
 
-    it('converts UK 6.5 to US 7, EU 40, JP 25.5', () => {
+    it('converts UK 6.5 to US 7, EU 40, JP 25', () => {
       const r = config.calculate({
         category: "Men's Shoes",
         region: 'UK',
@@ -168,7 +168,7 @@ describe('Clothing Size Converter', () => {
       expect(getValue(r, 'us')).toBe('7');
       expect(getValue(r, 'uk')).toBe('6.5');
       expect(getValue(r, 'eu')).toBe('40');
-      expect(getValue(r, 'jp')).toBe('25.5');
+      expect(getValue(r, 'jp')).toBe('25'); // US men's 7 = 25.0 cm foot length
     });
   });
 
@@ -197,7 +197,7 @@ describe('Clothing Size Converter', () => {
   });
 
   describe('Jeans (W/L)', () => {
-    it('converts US 32 to UK 32, EU 50, JP 81', () => {
+    it('converts US 32 to UK 32, EU 48, JP 81', () => {
       const r = config.calculate({
         category: 'Jeans (W/L)',
         region: 'US',
@@ -205,19 +205,19 @@ describe('Clothing Size Converter', () => {
       });
       expect(getValue(r, 'us')).toBe('32');
       expect(getValue(r, 'uk')).toBe('32');
-      expect(getValue(r, 'eu')).toBe('50');
-      expect(getValue(r, 'jp')).toBe('81');
+      expect(getValue(r, 'eu')).toBe('48'); // EU trouser size = US waist + 16
+      expect(getValue(r, 'jp')).toBe('81'); // 32 in x 2.54 = 81.3 cm
       expect(getValue(r, 'intl')).toBe('M');
     });
 
-    it('converts US 36 to UK 36, EU 56, JP 91', () => {
+    it('converts US 36 to UK 36, EU 52, JP 91', () => {
       const r = config.calculate({
         category: 'Jeans (W/L)',
         region: 'US',
         sizeInput: '36',
       });
       expect(getValue(r, 'us')).toBe('36');
-      expect(getValue(r, 'eu')).toBe('56');
+      expect(getValue(r, 'eu')).toBe('52');
       expect(getValue(r, 'jp')).toBe('91');
       expect(getValue(r, 'intl')).toBe('XL');
     });

@@ -1,6 +1,7 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import PixelsToInchesPanel from './PixelsToInchesPanel';
+import { pixelInfo } from './pixelsMath';
 
 const pixelsToInchesConfig: CalculatorConfig = {
   inputs: [
@@ -10,10 +11,22 @@ const pixelsToInchesConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '1920',
       min: 1,
+      max: 1000000,
       step: 1,
       required: true,
       inputMode: 'numeric',
-      helpText: 'Pixel dimension (width or height) to convert to physical print size. Enter the pixel count for one dimension of your image.',
+      helpText: 'Pixel dimension (width or height) to convert to physical print size.',
+    },
+    {
+      id: 'pixelsB',
+      label: 'Other Dimension (optional)',
+      type: 'number',
+      placeholder: '4000',
+      min: 1,
+      max: 1000000,
+      step: 1,
+      inputMode: 'numeric',
+      helpText: 'Optional: the image\'s other side in pixels. Gives its print size and the exact megapixel count (width x height).',
     },
     {
       id: 'dpi',
@@ -57,65 +70,45 @@ const pixelsToInchesConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const pixels = parseFloat(values.pixels);
-    const dpiVal = values.dpi === 'custom' ? parseFloat(values.customDpi) : parseFloat(values.dpi);
+    const p = pixelInfo(values);
+    if (!p) return [];
 
-    if (isNaN(pixels) || pixels <= 0) return [];
-    if (isNaN(dpiVal) || dpiVal <= 0) return [];
-
-    const inches = pixels / dpiVal;
-    const cm = inches * 2.54;
-    const mm = inches * 25.4;
-    const megapixels = (pixels * pixels) / 1_000_000;
-
-    const fmt = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const fmtInt = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    const fmt = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtInt = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
     const outputUnits = values.outputUnits || 'all';
-
     const results: CalculatorResult[] = [];
 
     if (outputUnits === 'all' || outputUnits === 'imperial') {
+      results.push({ id: 'inches', label: 'Print Size (Inches)', value: `${fmt(p.inches)}"`, highlight: true, color: 'neutral' });
+    }
+    if (outputUnits === 'all' || outputUnits === 'metric') {
+      results.push(
+        { id: 'cm', label: 'Print Size (Centimeters)', value: `${fmt(p.cm)} cm`, color: 'neutral' },
+        { id: 'mm', label: 'Print Size (Millimeters)', value: `${fmt(p.mm)} mm`, color: 'neutral' },
+      );
+    }
+    if (p.inchesB !== null && p.cmB !== null) {
+      const imp = `${fmt(p.inches)}" × ${fmt(p.inchesB)}"`;
+      const met = `${fmt(p.cm)} × ${fmt(p.cmB)} cm`;
       results.push({
-        id: 'inches',
-        label: 'Print Size (Inches)',
-        value: `${fmt(inches)}"`,
-        highlight: true,
+        id: 'printSize',
+        label: 'Full Print Size (width × height)',
+        value: outputUnits === 'metric' ? met : outputUnits === 'imperial' ? imp : `${imp} (${met})`,
         color: 'neutral',
       });
     }
 
-    if (outputUnits === 'all' || outputUnits === 'metric') {
-      results.push(
-        {
-          id: 'cm',
-          label: 'Print Size (Centimeters)',
-          value: `${fmt(cm)} cm`,
-          color: 'neutral',
-        },
-        {
-          id: 'mm',
-          label: 'Print Size (Millimeters)',
-          value: `${fmt(mm)} mm`,
-          color: 'neutral',
-        },
-      );
-    }
-
     results.push(
-      {
-        id: 'dpiUsed',
-        label: 'DPI / PPI Used',
-        value: fmtInt(dpiVal),
-        color: 'neutral',
-      },
+      { id: 'dpiUsed', label: 'DPI / PPI Used', value: fmtInt(p.dpi), color: 'neutral' },
       {
         id: 'megapixels',
-        label: 'Estimated Resolution (Megapixels)',
-        value: `${fmt(megapixels)} MP`,
+        label: p.squareAssumed ? 'Megapixels (if the image is square)' : 'Resolution (Megapixels)',
+        value: `${fmt(p.megapixels)} MP`,
         color: 'neutral',
+        interpretation: p.squareAssumed
+          ? 'Only one side was entered, so this assumes a square image. Enter the other dimension for the real megapixel count.'
+          : `${fmtInt(p.pixels)} × ${fmtInt(p.pixelsB as number)} px ÷ 1,000,000.`,
       },
     );
 
@@ -126,9 +119,9 @@ const pixelsToInchesConfig: CalculatorConfig = {
     return createElement(PixelsToInchesPanel, { values, results });
   },
   educational: {
-    formula: 'Inches = Pixels ÷ DPI | cm = Inches × 2.54 | mm = Inches × 25.4 | MP = (Pixels ÷ DPI)²',
+    formula: 'Inches = Pixels ÷ DPI | cm = Inches × 2.54 | mm = Inches × 25.4 | MP = Width px × Height px ÷ 1,000,000',
     formulaDescription:
-      'Converting digital pixels to physical print dimensions requires knowing the output resolution in DPI (dots per inch) or PPI (pixels per inch). The core formula divides the pixel dimension by the DPI to get the physical size in inches using the imperial measurement system. To convert to metric, multiply inches by 2.54 for centimeters or by 25.4 for millimeters. The megapixel estimate squares the pixel count and divides by one million, providing a rough measure of total image resolution assuming a square image. For rectangular images, the actual megapixel count equals (width in pixels multiplied by height in pixels) divided by one million. Understanding this conversion chain from digital dimensions through imperial inches to metric centimeters enables photographers and designers to prepare images correctly for any output medium.',
+      'Converting digital pixels to physical print dimensions requires knowing the output resolution in DPI (dots per inch) or PPI (pixels per inch). The core formula divides the pixel dimension by the DPI to get the physical size in inches using the imperial measurement system. To convert to metric, multiply inches by 2.54 for centimeters or by 25.4 for millimeters. The megapixel count is width in pixels multiplied by height in pixels, divided by one million; if you enter only one side, the calculator assumes a square image and says so. Understanding this conversion chain from digital dimensions through imperial inches to metric centimeters enables photographers and designers to prepare images correctly for any output medium.',
     diagram: {
       svg: '<svg viewBox="0 0 460 140" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="230" y="18" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Pixel to Print Size at Different DPIs</text><text x="60" y="42" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)" text-anchor="end">3000 px</text><text x="70" y="42" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-94a3b8)">→</text><rect x="80" y="30" width="160" height="24" rx="4" fill="var(--svg-3b82f6)" opacity="0.15" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><text x="160" y="46" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">72 DPI → 41.7"</text><text x="250" y="42" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-64748b)">(screen)</text><text x="60" y="72" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)" text-anchor="end">3000 px</text><text x="70" y="72" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-94a3b8)">→</text><rect x="80" y="60" width="160" height="24" rx="4" fill="var(--svg-22c55e)" opacity="0.15" stroke="var(--svg-22c55e)" stroke-width="1.5"/><text x="160" y="76" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">150 DPI → 20.0"</text><text x="250" y="72" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-64748b)">(large print)</text><text x="60" y="102" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)" text-anchor="end">3000 px</text><text x="70" y="102" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-94a3b8)">→</text><rect x="80" y="90" width="160" height="24" rx="4" fill="var(--svg-f59e0b)" opacity="0.15" stroke="var(--svg-f59e0b)" stroke-width="1.5"/><text x="160" y="106" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">300 DPI → 10.0"</text><text x="250" y="102" font-family="system-ui,sans-serif" font-size="8" fill="var(--svg-64748b)">(print quality)</text><rect x="80" y="120" width="300" height="8" rx="3" fill="var(--svg-f1f5f9)" stroke="var(--svg-cbd5e1)" stroke-width="1"/><rect x="80" y="120" width="50" height="8" rx="3" fill="var(--svg-3b82f6)" opacity="0.4"/><rect x="130" y="120" width="100" height="8" fill="var(--svg-22c55e)" opacity="0.4"/><rect x="230" y="120" width="150" height="8" rx="3" fill="var(--svg-f59e0b)" opacity="0.4"/><text x="105" y="136" font-family="system-ui,sans-serif" font-size="7" fill="var(--svg-64748b)" text-anchor="middle">0-10"</text><text x="180" y="136" font-family="system-ui,sans-serif" font-size="7" fill="var(--svg-64748b)" text-anchor="middle">10-30"</text><text x="305" y="136" font-family="system-ui,sans-serif" font-size="7" fill="var(--svg-64748b)" text-anchor="middle">30-40+"</text></svg>',
       alt: 'Ruler diagram showing 3000 pixels converts to different print sizes at 72 DPI (41.7 inches), 150 DPI (20.0 inches), and 300 DPI (10.0 inches)',
@@ -138,7 +131,7 @@ const pixelsToInchesConfig: CalculatorConfig = {
       { symbol: 'DPI / PPI', name: 'Dots Per Inch / Pixels Per Inch', description: 'The resolution density at which the image will be rendered on the output device. Web and screen displays traditionally use 72 DPI, modern screens use 96 DPI, and standard high-quality printing requires 300 DPI. Large format printing for posters and banners often uses 150 to 200 DPI since viewing distance is greater.' },
       { symbol: 'Pixels', name: 'Pixel Dimension', description: 'The width or height of the digital image in pixels. Enter one dimension at a time — for full print sizing, calculate width and height separately using their respective pixel counts. A 6000 by 4000 pixel image is 24 megapixels total (width × height ÷ 1,000,000).' },
       { symbol: 'Inches', name: 'Print Size in Inches', description: 'The physical dimension in the imperial measurement system at which the image will print given the specified DPI. For example, a 3000 pixel wide image at 300 DPI prints at exactly 10 inches wide. This is the primary measurement used in United States print shops and photo labs.' },
-      { symbol: 'Megapixels', name: 'Estimated Resolution', description: 'A rough estimate of the image resolution computed by squaring the single pixel dimension and dividing by one million, assuming a square image. For rectangular images, actual megapixels = (width × height) ÷ 1,000,000. A 24 MP image can produce excellent 16 by 20 inch prints at 300 DPI.' },
+      { symbol: 'Megapixels', name: 'Estimated Resolution', description: 'Total pixels divided by one million: width × height ÷ 1,000,000. If only one side is entered the calculator assumes a square image. A 24 MP image (6000 × 4000 px) prints 20 × 13.3 inches at 300 DPI.' },
     ],
     commonUses: [
       'Preparing digital images for photo printing at labs or home printers by calculating the maximum print size at a given resolution',
@@ -150,11 +143,11 @@ const pixelsToInchesConfig: CalculatorConfig = {
       { label: 'A4 Print (210×297 mm)', value: '8.27 × 11.69" — needs 2480×3508 px at 300 DPI' },
       { label: 'Letter Size', value: '8.5 × 11" — needs 2550×3300 px at 300 DPI' },
       { label: '4 × 6" Photo', value: 'Needs 1200×1800 px at 300 DPI (2.2 MP)' },
-      { label: '5 × 7" Photo', value: 'Needs 1500×2100 px at 300 DPI (3.2 MP)' },
+      { label: '5 × 7" Photo', value: 'Needs 1500×2100 px at 300 DPI (3.15 MP)' },
       { label: '8 × 10" Photo', value: 'Needs 2400×3000 px at 300 DPI (7.2 MP)' },
       { label: '11 × 14" Poster', value: 'Needs 3300×4200 px at 300 DPI (13.9 MP)' },
       { label: 'Passport Photo', value: '2 × 2" — needs 600×600 px at 300 DPI' },
-      { label: 'Billboard (48×14 ft)', value: 'Needs only 10-30 DPI due to 50+ ft viewing distance' },
+      { label: 'Billboard (48×14 ft)', value: 'Often printed at 30 DPI or less because of the long viewing distance' },
     ],
     howToUse: [
       'Enter the pixel dimension of your image (width or height) into the pixels field — for example, 1920 for a Full HD image width.',
@@ -165,11 +158,11 @@ const pixelsToInchesConfig: CalculatorConfig = {
       'Use the quick reference table to check standard print sizes and their pixel requirements at 300 DPI for common photo and document formats.',
     ],
     explanation:
-      'Understanding the relationship between digital pixels and physical print size is essential for photographers, graphic designers, and anyone preparing images for print. The concept of dots per inch dates back to the 19th century when halftone printing was invented in the 1850s by William Fox Talbot, allowing photographs to be reproduced in newspapers using dots of varying sizes. By the 1980s, laser printers standardized at 300 DPI, establishing the benchmark still used today for high-quality office and photo printing. The key principle is resolution density: DPI (dots per inch) or PPI (pixels per inch) determines how tightly the image data is packed into each inch of physical output. Higher DPI produces smaller physical dimensions but sharper detail — a 3000 pixel image prints at 10 inches wide at 300 DPI but stretches to an impressive 41.7 inches at 72 DPI. For web and screen use, 72 DPI was the traditional standard for CRT monitors, though modern Retina and HiDPI displays effectively use 192 to 300 PPI through device pixel ratios of 2x or 3x. For professional print, 300 DPI is the gold standard for photo lab prints, magazines, and any material viewed from a typical reading distance of 12 to 18 inches. At 300 DPI, the human eye cannot resolve individual dots at normal viewing distance. Large format prints like posters and banners can use 150 DPI since viewing distance is greater — the farther away the viewer, the lower the DPI requirement. A common mistake is confusing pixel count with print quality: a 4000 pixel wide image at 72 DPI produces a 55 inch print (too soft for close viewing), while the same image at 300 DPI prints at a crisp 13.3 inches. Image resolution in megapixels helps quantify total image data: a 3000 by 3000 pixel image contains 9 million pixels (9 megapixels). When preparing images for print, always calculate the minimum pixel dimensions needed by multiplying the desired print size in inches by the required DPI of the output device.',
+      'Understanding the relationship between digital pixels and physical print size is essential for photographers, graphic designers, and anyone preparing images for print. Dots per inch comes from halftone printing, which reproduces photographs with dots of varying size (the idea goes back to William Fox Talbot in the 1850s and became practical in the 1880s). The first desktop laser printers of the mid-1980s printed at 300 DPI, a benchmark still used for high-quality office and photo printing. The key principle is resolution density: DPI (dots per inch) or PPI (pixels per inch) determines how tightly the image data is packed into each inch of physical output. Higher DPI produces smaller physical dimensions but sharper detail — a 3000 pixel image prints at 10 inches wide at 300 DPI but stretches to an impressive 41.7 inches at 72 DPI. For web and screen use, 72 DPI was the traditional standard for CRT monitors, though modern Retina and HiDPI displays run at roughly 220 to 460 PPI through device pixel ratios of 2x or 3x. For professional print, 300 DPI is the gold standard for photo lab prints, magazines, and any material viewed from a typical reading distance of 12 to 18 inches. At 300 DPI, the human eye cannot resolve individual dots at normal viewing distance. Large format prints like posters and banners can use 150 DPI since viewing distance is greater — the farther away the viewer, the lower the DPI requirement. A common mistake is confusing pixel count with print quality: a 4000 pixel wide image at 72 DPI produces a 55 inch print (too soft for close viewing), while the same image at 300 DPI prints at a crisp 13.3 inches. Image resolution in megapixels helps quantify total image data: a 3000 by 3000 pixel image contains 9 million pixels (9 megapixels). When preparing images for print, always calculate the minimum pixel dimensions needed by multiplying the desired print size in inches by the required DPI of the output device.',
     faqs: [
       {
         question: 'What DPI should I use for printing photos?',
-        answer: 'For high-quality photo prints viewed up close, use 300 DPI as the standard. This is the benchmark for photo lab prints, magazines, brochures, and any printed material held at a typical reading distance of 12 to 18 inches. For large format prints like posters and banners viewed from several feet away, 150 DPI is usually sufficient. Canvas prints work well at 200 DPI because the textured surface naturally softens the image. For professional offset printing, some publications require 300 DPI minimum. When not to use 300 DPI: billboards and vehicle wraps viewed from 50+ feet away only need 10 to 30 DPI because the eye cannot resolve fine detail at that distance. Always confirm the required resolution with your specific print service provider before preparing files.',
+        answer: 'For high-quality photo prints viewed up close, use 300 DPI as the standard. This is the benchmark for photo lab prints, magazines, brochures, and any printed material held at a typical reading distance of 12 to 18 inches. For large format prints like posters and banners viewed from several feet away, 150 DPI is usually sufficient. Canvas prints are often supplied at about 150 to 200 DPI. For professional offset printing, some publications require 300 DPI minimum. When not to use 300 DPI: billboards and vehicle wraps viewed from a long way off are often printed at 30 DPI or less because the eye cannot resolve fine detail at that distance. Always confirm the required resolution with your specific print service provider before preparing files.',
       },
       {
         question: 'What is the difference between DPI and PPI?',
@@ -181,19 +174,19 @@ const pixelsToInchesConfig: CalculatorConfig = {
       },
       {
         question: 'Can I increase the DPI of an existing image to make it print larger?',
-        answer: 'Technically yes through a process called upsampling or interpolation, but it will reduce print quality. Increasing DPI without adding new pixel data forces the software to mathematically guess (interpolate) the values of new pixels between existing ones, resulting in a softer, less detailed image. Modern AI upscaling tools like Adobe Super Resolution and Topaz Gigapixel can produce remarkably good results by analyzing image content and intelligently fabricating detail, but they cannot create real detail that was never captured. The best approach is always to capture images at sufficient resolution for your largest intended print size. As a practical rule, traditional upsampling by about 50 percent is generally acceptable for most images without visible quality loss, but beyond that, degradation becomes noticeable.',
+        answer: 'Technically yes through a process called upsampling or interpolation, but it will reduce print quality. Increasing DPI without adding new pixel data forces the software to mathematically guess (interpolate) the values of new pixels between existing ones, resulting in a softer, less detailed image. Modern AI upscaling tools like Adobe Super Resolution and Topaz Gigapixel can produce remarkably good results by analyzing image content and intelligently fabricating detail, but they cannot create real detail that was never captured. The best approach is always to capture images at sufficient resolution for your largest intended print size. Modest upsampling is often acceptable, but the more you enlarge, the more softness becomes visible.',
       },
       {
         question: 'Does DPI matter for images displayed on web screens?',
-        answer: 'No — DPI metadata embedded in image files is completely ignored by web browsers and virtually all screen-based applications. An image that is 1200 pixels wide will display at exactly 1200 screen pixels on a standard display, regardless of whether the DPI metadata says 72, 300, or any other value. What matters for web and screen display is only the actual pixel dimensions. However, setting DPI to 72 in your image export settings is still a good habit because it signals the intended use case and some content management systems use this metadata for automatic preview generation. For Retina and HiDPI displays with 2x or 3x device pixel ratios, export images at 2x or 3x the CSS display size: a 300 pixel wide image container should receive a 600 pixel wide source file for 2x displays to appear sharp.',
+        answer: 'No — DPI metadata embedded in image files is completely ignored by web browsers and virtually all screen-based applications. An image that is 1200 pixels wide will display at exactly 1200 screen pixels on a standard display, regardless of whether the DPI metadata says 72, 300, or any other value. What matters for web and screen display is only the actual pixel dimensions. For Retina and HiDPI displays with 2x or 3x device pixel ratios, export images at 2x or 3x the CSS display size: a 300 pixel wide image container should receive a 600 pixel wide source file for 2x displays to appear sharp.',
       },
     ],
     workedExamples: [
       {
-        scenario: 'A photographer has a 6000 by 4000 pixel image from a 24-megapixel DSLR and wants to know the largest high-quality print possible. At 300 DPI, 6000 divided by 300 equals 20 inches wide, and 4000 divided by 300 equals 13.3 inches tall — roughly a 13 by 19 inch print, a common large format photo size. At 200 DPI (acceptable for canvas or wall art viewed from a few feet away), the same image prints at 30 by 20 inches.',
+        scenario: 'A photographer has a 6000 by 4000 pixel image from a 24-megapixel DSLR and wants to know the largest high-quality print possible. At 300 DPI, 6000 divided by 300 equals 20 inches wide, and 4000 divided by 300 equals 13.3 inches tall, so a 20 by 13.3 inch print. At 200 DPI (acceptable for canvas or wall art viewed from a few feet away), the same image prints at 30 by 20 inches.',
         inputs: { pixels: '6000', dpi: '300' },
         result: 'Print size: 20.00" (50.80 cm / 508.00 mm) at 300 DPI.',
-        insight: 'The DPI needed depends entirely on viewing distance. Close-up viewing at 12-18 inches requires 300 DPI. Wall art viewed from 3-6 feet is fine at 150-200 DPI. A poster across the room at 10+ feet only needs 72-100 DPI. Billboards viewed from 50+ feet can use 10-30 DPI. A 24 MP image can print very large as long as DPI is matched to the expected viewing distance.',
+        insight: 'The DPI needed depends entirely on viewing distance. Close-up viewing at 12-18 inches requires 300 DPI. Wall art viewed from 3-6 feet is fine at 150-200 DPI. A poster across the room at 10+ feet can get by with roughly 72-100 DPI. Billboards are often printed at 30 DPI or less. A 24 MP image can print very large as long as DPI is matched to the expected viewing distance.',
       },
       {
         scenario: 'A parent needs to prepare a 4 by 6 inch photo for printing at a drugstore photo kiosk at 300 DPI. Working backwards: 4 inches multiplied by 300 DPI equals 1200 pixels for the short edge, and 6 inches multiplied by 300 DPI equals 1800 pixels for the long edge. They need at least a 1200 by 1800 pixel image, which is only 2.16 megapixels. Any smartphone camera made in the last decade captures far more than this — most phone photos are 12 megapixels (4032 by 3024 pixels).',
@@ -205,7 +198,7 @@ const pixelsToInchesConfig: CalculatorConfig = {
         scenario: 'A graphic designer is preparing a 24 by 36 inch poster for a trade show booth. The poster will be viewed from 4 to 8 feet away by attendees walking through the exhibit hall. At 300 DPI, the file would need to be 7200 by 10800 pixels (77.8 megapixels) — impractical for most design workflows. At 150 DPI (sufficient for this viewing distance), the file only needs 3600 by 5400 pixels (19.4 megapixels), which is manageable in Adobe Illustrator or Photoshop.',
         inputs: { pixels: '3600', dpi: '150' },
         result: 'Print size: 24.00" (60.96 cm / 609.60 mm) at 150 DPI.',
-        insight: 'For trade show displays and large format posters, 150 DPI is the industry standard because the viewing distance of 4-8 feet means the human eye cannot resolve individual dots finer than about 150 per inch. Pushing to 300 DPI for a large poster creates enormous file sizes with no visible quality improvement at the intended viewing distance. The 19.4 megapixel requirement at 150 DPI is well within the capability of a professional DSLR or mirrorless camera for photographic posters, or trivially handled by vector design software for text and graphic posters.',
+        insight: 'For trade show displays and large format posters, 150 DPI is a common choice because at a viewing distance of 4-8 feet the eye cannot make out finer detail. Pushing to 300 DPI for a large poster creates enormous file sizes with no visible quality improvement at the intended viewing distance. The 19.4 megapixel requirement at 150 DPI is well within the capability of a professional DSLR or mirrorless camera for photographic posters, or trivially handled by vector design software for text and graphic posters.',
       },
     ],
     proTips: [
@@ -217,9 +210,9 @@ const pixelsToInchesConfig: CalculatorConfig = {
       'The relationship between megapixels and print size is quadratic, not linear. Doubling the print dimensions requires quadrupling the megapixels. An 8 by 10 inch print at 300 DPI needs 7.2 MP, but a 16 by 20 inch print at the same DPI needs 28.8 MP — four times the resolution for a print with twice the dimensions.',
     ],
     limitations: [
-      'This calculator converts a single pixel dimension to its physical print size. For complete print sizing, calculate both width and height dimensions separately using their respective pixel counts — the result for each dimension will differ if your image is not square.',
+      'The main result converts one pixel dimension to its print size; enter the optional other dimension to get both sides and the exact megapixel count.',
       'DPI metadata embedded in image files is completely ignored by web browsers, which display images at one image pixel per one screen pixel regardless of the DPI setting in the file.',
-      'The megapixel estimate assumes a square image for simplicity — actual total megapixels for any rectangular image equals (width in pixels multiplied by height in pixels) divided by one million.',
+      'If you leave the other dimension blank, the megapixel figure assumes a square image; enter both sides for the real count.',
       'For images that will be cropped before printing, calculate based on the cropped dimensions, not the original full-file pixel count.',
       'Retina and HiDPI displays use device pixel ratios of 2x or 3x — this calculator does not account for device pixel ratios, which are a display concern not a print concern.',
       'For full image preparation workflows, pair this tool with an aspect ratio calculator to determine both dimensions simultaneously, and always soft-proof your images through your editing software before sending files to print.',

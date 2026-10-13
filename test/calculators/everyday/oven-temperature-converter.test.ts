@@ -55,8 +55,8 @@ describe('Oven Temperature Converter', () => {
     const results = config.calculate({ temperature: '0', fromUnit: '°C' });
     expect(getValue(results, 'fahrenheit')).toBe('32°F');
     expect(getValue(results, 'celsius')).toBe('0°C');
-    // Gas Mark 1/4 is closest at 107°C
-    expect(getValue(results, 'gasMark')).toBe('Gas Mark 1/4');
+    // Freezing point is far below the gas mark scale (1/4 = 110°C): no gas mark is claimed
+    expect(getValue(results, 'gasMark')).toBe('Outside the gas mark range');
   });
 
   it('Gas Mark fraction "1/4" parses correctly', () => {
@@ -65,11 +65,10 @@ describe('Oven Temperature Converter', () => {
     expect(getValue(results, 'gasMark')).toBe('Gas Mark 1/4');
   });
 
-  it('Gas Mark below table min uses closest', () => {
+  it('Gas Mark below the 1/4 minimum is flagged, not clamped (it used to show 225°F)', () => {
     const results = config.calculate({ temperature: '0.1', fromUnit: 'Gas Mark' });
-    expect(getValue(results, 'fahrenheit')).toBe('225°F');
-    expect(getValue(results, 'celsius')).toBe('110°C');
-    expect(getValue(results, 'cookingDescription')).toBe('Very Slow / Cool');
+    expect(results).toHaveLength(1);
+    expect(results[0].warning).toMatch(/outside the scale/);
   });
 
   it('interpolates non-integer gas marks within range', () => {
@@ -81,11 +80,10 @@ describe('Oven Temperature Converter', () => {
     expect(getValue(results, 'celsius')).toBe('145°C');
   });
 
-  it('Gas Mark above table max uses closest', () => {
+  it('Gas Mark above 10 is flagged, not clamped (it used to show "Gas Mark 12" with 500°F)', () => {
     const results = config.calculate({ temperature: '12', fromUnit: 'Gas Mark' });
-    expect(getValue(results, 'fahrenheit')).toBe('500°F');
-    expect(getValue(results, 'celsius')).toBe('260°C');
-    expect(getValue(results, 'cookingDescription')).toBe('Extremely Hot');
+    expect(results).toHaveLength(1);
+    expect(results[0].warning).toMatch(/outside the scale/);
   });
 
   it('non-numeric temperature returns empty array', () => {

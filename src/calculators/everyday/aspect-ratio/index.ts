@@ -1,42 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import AspectRatioPanel from './AspectRatioPanel';
-
-function gcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b > 0) {
-    const t = b;
-    b = a % b;
-    a = t;
-  }
-  return a;
-}
-
-interface AspectPreset {
-  label: string;
-  ratio: number; // w/h
-  display: string;
-}
-
-const PRESETS: AspectPreset[] = [
-  { label: '16:9 — Widescreen HD', ratio: 16 / 9, display: '16:9' },
-  { label: '4:3 — Standard / Classic', ratio: 4 / 3, display: '4:3' },
-  { label: '1:1 — Square', ratio: 1 / 1, display: '1:1' },
-  { label: '3:2 — Classic Photo', ratio: 3 / 2, display: '3:2' },
-  { label: '21:9 — Ultrawide', ratio: 21 / 9, display: '21:9' },
-  { label: '9:16 — Vertical / TikTok / IG Story', ratio: 9 / 16, display: '9:16' },
-];
-
-function findPreset(w: number, h: number): string | null {
-  const r = w / h;
-  for (const preset of PRESETS) {
-    if (Math.abs(r - preset.ratio) < 0.02) {
-      return preset.label;
-    }
-  }
-  return null;
-}
+import { aspectInfo } from './aspectMath';
 
 const aspectRatioConfig: CalculatorConfig = {
   inputs: [
@@ -58,6 +23,7 @@ const aspectRatioConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '1920',
       min: 1,
+      max: 100000,
       step: 1,
       required: true,
       helpText: 'Width of the image or screen in pixels',
@@ -69,6 +35,7 @@ const aspectRatioConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '1080',
       min: 1,
+      max: 100000,
       step: 1,
       required: true,
       helpText: 'Height of the image or screen in pixels',
@@ -81,7 +48,8 @@ const aspectRatioConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '16',
       min: 1,
-      step: 1,
+      max: 1000,
+      step: 0.01,
       required: true,
       helpText: 'First number of the aspect ratio (e.g., 16 in 16:9)',
       showWhen: (values) => values.mode === 'find-missing',
@@ -92,7 +60,8 @@ const aspectRatioConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '9',
       min: 1,
-      step: 1,
+      max: 1000,
+      step: 0.01,
       required: true,
       helpText: 'Second number of the aspect ratio (e.g., 9 in 16:9)',
       showWhen: (values) => values.mode === 'find-missing',
@@ -114,6 +83,7 @@ const aspectRatioConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '1920',
       min: 1,
+      max: 100000,
       step: 1,
       required: true,
       helpText: 'The known dimension in pixels',
@@ -121,138 +91,45 @@ const aspectRatioConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const mode = values.mode || 'calculate-ratio';
-    const fmtInt = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-
+    const a = aspectInfo(values);
+    if (!a) return [];
+    // Pixel sizes can be fractional when solving for a missing side (1000 px wide at 16:9 -> 562.5 px).
+    const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    const ratio = `${a.ratioW}:${a.ratioH}`;
+    const presetNote = a.preset
+      ? a.exactPreset
+        ? undefined
+        : `Within 2% of ${a.preset.display}, but not exactly ${a.preset.display}.`
+      : undefined;
     const results: CalculatorResult[] = [];
 
-    if (mode === 'calculate-ratio') {
-      const width = parseFloat(values.width);
-      const height = parseFloat(values.height);
-
-      if (isNaN(width) || width <= 0 || isNaN(height) || height <= 0) return [];
-
-      const g = gcd(width, height);
-      const ratioW = width / g;
-      const ratioH = height / g;
-      const preset = findPreset(width, height);
-
-      results.push({
-        id: 'simplifiedRatio',
-        label: 'Aspect Ratio',
-        value: `${ratioW}:${ratioH}`,
-        highlight: true,
-        color: 'neutral',
-      });
-
-      results.push({
-        id: 'gcd',
-        label: 'GCD (Greatest Common Divisor)',
-        value: fmtInt(g),
-        color: 'neutral',
-      });
-
-      results.push({
-        id: 'widthResult',
-        label: 'Width',
-        value: `${fmtInt(width)} px`,
-        color: 'neutral',
-      });
-
-      results.push({
-        id: 'heightResult',
-        label: 'Height',
-        value: `${fmtInt(height)} px`,
-        color: 'neutral',
-      });
-
-      if (preset) {
-        results.push({
-          id: 'presetMatch',
-          label: 'Preset Match',
-          value: preset,
-          color: 'positive',
-        });
-      }
-
-      // Orientation
-      let orientation = '';
-      if (width > height) orientation = 'Landscape';
-      else if (height > width) orientation = 'Portrait';
-      else orientation = 'Square';
+    if (a.mode === 'calculate-ratio') {
+      results.push({ id: 'simplifiedRatio', label: 'Aspect Ratio', value: ratio, highlight: true, color: 'neutral', interpretation: presetNote ?? `${fmt(a.width)} ÷ ${fmt(a.g)} = ${a.ratioW} and ${fmt(a.height)} ÷ ${fmt(a.g)} = ${a.ratioH}.` });
+      results.push({ id: 'gcd', label: 'GCD (Greatest Common Divisor)', value: fmt(a.g), color: 'neutral' });
+      results.push({ id: 'widthResult', label: 'Width', value: `${fmt(a.width)} px`, color: 'neutral' });
+      results.push({ id: 'heightResult', label: 'Height', value: `${fmt(a.height)} px`, color: 'neutral' });
+      if (a.preset) results.push({ id: 'presetMatch', label: 'Preset Match', value: a.preset.label, color: 'positive' });
       results.push({
         id: 'orientation',
         label: 'Orientation',
-        value: orientation,
+        value: a.width > a.height ? 'Landscape' : a.height > a.width ? 'Portrait' : 'Square',
         color: 'neutral',
       });
-    }
-
-    if (mode === 'find-missing') {
-      const ratioA = parseFloat(values.ratioA);
-      const ratioB = parseFloat(values.ratioB);
-      const knownDimension = values.knownDimension || 'width';
-      const knownValue = parseFloat(values.knownValue);
-
-      if (isNaN(ratioA) || ratioA <= 0 || isNaN(ratioB) || ratioB <= 0) return [];
-      if (isNaN(knownValue) || knownValue <= 0) return [];
-
-      let missingWidth: number;
-      let missingHeight: number;
-
-      if (knownDimension === 'width') {
-        missingWidth = knownValue;
-        missingHeight = (knownValue / ratioA) * ratioB;
-      } else {
-        missingHeight = knownValue;
-        missingWidth = (knownValue / ratioB) * ratioA;
-      }
-
-      const g = gcd(missingWidth, missingHeight);
-      const ratioW = missingWidth / g;
-      const ratioH = missingHeight / g;
-      const preset = findPreset(missingWidth, missingHeight);
-
+    } else {
+      const wasWidth = a.knownDimension === 'width';
       results.push({
         id: 'missingDimension',
-        label: knownDimension === 'width' ? 'Calculated Height' : 'Calculated Width',
-        value: `${fmtInt(knownDimension === 'width' ? missingHeight : missingWidth)} px`,
+        label: wasWidth ? 'Calculated Height' : 'Calculated Width',
+        value: `${fmt(wasWidth ? a.height : a.width)} px`,
         highlight: true,
         color: 'positive',
+        interpretation: Number.isInteger(wasWidth ? a.height : a.width) ? undefined : 'Not a whole number of pixels at this ratio - round to the nearest pixel (or pick a size that is a multiple of the ratio).',
       });
-
-      results.push({
-        id: 'givenWidth',
-        label: knownDimension === 'width' ? 'Width' : 'Calculated Width',
-        value: `${fmtInt(missingWidth)} px`,
-        color: 'neutral',
-      });
-
-      results.push({
-        id: 'givenHeight',
-        label: knownDimension === 'height' ? 'Height' : 'Calculated Height',
-        value: `${fmtInt(missingHeight)} px`,
-        color: 'neutral',
-      });
-
-      results.push({
-        id: 'ratio',
-        label: 'Aspect Ratio',
-        value: `${ratioW}:${ratioH}`,
-        color: 'neutral',
-      });
-
-      if (preset) {
-        results.push({
-          id: 'presetMatch',
-          label: 'Preset Match',
-          value: preset,
-          color: 'positive',
-        });
-      }
+      results.push({ id: 'givenWidth', label: wasWidth ? 'Width' : 'Calculated Width', value: `${fmt(a.width)} px`, color: 'neutral' });
+      results.push({ id: 'givenHeight', label: wasWidth ? 'Calculated Height' : 'Height', value: `${fmt(a.height)} px`, color: 'neutral' });
+      results.push({ id: 'ratio', label: 'Aspect Ratio', value: ratio, color: 'neutral' });
+      if (a.preset) results.push({ id: 'presetMatch', label: 'Preset Match', value: a.preset.label, color: 'positive' });
     }
-
     return results;
   },
   extraPanel: (values, results) => {
@@ -290,7 +167,7 @@ const aspectRatioConfig: CalculatorConfig = {
     howToUse: [
       'Select "Calculate aspect ratio from dimensions" to find the simplified ratio of a known width and height.',
       'Select "Find missing dimension from ratio" to solve for the unknown dimension when you know the ratio and one measurement.',
-      'Review the simplified ratio, preset match, social media format suggestions, and orientation.',
+      'Review the simplified ratio, the closest common preset (within 2%), and the orientation. Sizes that cannot be expressed in whole pixels at the chosen ratio are shown with decimals - round them to the nearest pixel.',
     ],
     explanation:
       'Aspect ratio is a fundamental concept in visual media that describes the proportional relationship between width and height. It is expressed as two numbers separated by a colon (e.g., 16:9). Understanding aspect ratios is crucial for creating content that displays correctly across different platforms and devices. The most common modern display ratio is 16:9, which is the standard for HDTV, YouTube, and most computer monitors. However, the rise of mobile-first content has made 9:16 (vertical video) increasingly important for platforms like TikTok, Instagram Stories, and Snapchat. When preparing images or videos, using the wrong aspect ratio results in awkward letterboxing, cropping, or distorted content. The GCD method ensures the ratio is expressed in its simplest whole-number form — for example, a 1920×1080 display has a GCD of 120, yielding the simplified ratio 16:9. Social media platforms each have their own recommended aspect ratios: Instagram feed posts work best at 1:1 (square) or 4:5 (portrait), Facebook and YouTube prefer 16:9, and Pinterest images perform well at 2:3. Knowing how to calculate and convert between aspect ratios is an essential skill for photographers, videographers, web designers, and social media managers.',
@@ -305,11 +182,11 @@ const aspectRatioConfig: CalculatorConfig = {
       },
       {
         question: 'What aspect ratio should I use for Instagram?',
-        answer: 'Instagram supports several aspect ratios depending on the format: Feed posts work best at 1:1 (square, 1080×1080), 4:5 (portrait, 1080×1350), or 1.91:1 (landscape, 1080×566). Instagram Stories and Reels use 9:16 (1080×1920). For IGTV and longer videos, 4:5 portrait orientation is recommended. Using the correct ratio ensures your content displays fully without awkward cropping in the feed.',
+        answer: 'Instagram supports several aspect ratios depending on the format: Feed posts work best at 1:1 (square, 1080×1080), 4:5 (portrait, 1080×1350), or 1.91:1 (landscape, 1080×566). Instagram Stories and Reels use 9:16 (1080×1920). Platform specifications change, so check the platform\'s current guidelines. Using the correct ratio ensures your content displays fully without awkward cropping in the feed.',
       },
       {
         question: 'How do I calculate the missing dimension from an aspect ratio?',
-        answer: 'To find the missing dimension: multiply the known dimension by the target ratio, then divide by the known ratio. If you know the width (1920) and want a 16:9 ratio: height = (1920 × 9) / 16 = 1080. If you know the height (1080) and want 16:9: width = (1080 × 16) / 9 = 1920. This works for any ratio, whether you are calculating width or height.',
+        answer: 'To find the missing dimension: multiply the known dimension by the other side of the ratio, then divide by the known side\'s ratio number. If you know the width (1920) and want a 16:9 ratio: height = (1920 × 9) / 16 = 1080. If you know the height (1080) and want 16:9: width = (1080 × 16) / 9 = 1920. This works for any ratio, whether you are calculating width or height.',
       },
     ],
     citations: [

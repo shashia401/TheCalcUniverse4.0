@@ -1,28 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BpmTapperPanel from './BpmTapperPanel';
-
-const noteFactorMap: Record<string, number> = {
-  whole: 4,
-  half: 2,
-  quarter: 1,
-  eighth: 0.5,
-  sixteenth: 0.25,
-  'dotted-quarter': 1.5,
-  'dotted-eighth': 0.75,
-  'quarter-triplet': 2 / 3,
-};
-
-const allNotes: { id: string; label: string; factor: number }[] = [
-  { id: 'whole', label: 'Whole (1/1)', factor: 4 },
-  { id: 'half', label: 'Half (1/2)', factor: 2 },
-  { id: 'quarter', label: 'Quarter (1/4)', factor: 1 },
-  { id: 'eighth', label: 'Eighth (1/8)', factor: 0.5 },
-  { id: 'sixteenth', label: 'Sixteenth (1/16)', factor: 0.25 },
-  { id: 'dotted-quarter', label: 'Dotted 1/4', factor: 1.5 },
-  { id: 'dotted-eighth', label: 'Dotted 1/8', factor: 0.75 },
-  { id: 'quarter-triplet', label: 'Triplet 1/4', factor: 2 / 3 },
-];
+import { NOTES, bpmFromDelay, delayMs, noteFactor } from './bpmMath';
 
 const bpmTapperConfig: CalculatorConfig = {
   inputs: [
@@ -44,7 +23,7 @@ const bpmTapperConfig: CalculatorConfig = {
       min: 20,
       max: 300,
       step: 1,
-      helpText: 'House: 120-130 | Trap: 140-160 | DnB: 170-180 | Lo-fi: 80-90',
+      helpText: 'House: 120-130 | Trap: 130-160 | DnB: 170-180 | Lo-fi: 80-90',
       showWhen: (values) => values.mode !== 'ms-to-bpm',
     },
     {
@@ -68,6 +47,9 @@ const bpmTapperConfig: CalculatorConfig = {
       label: 'Target Delay (ms)',
       type: 'number',
       placeholder: '500',
+      min: 1,
+      max: 60000,
+      step: 0.01,
       helpText: 'Known delay time in milliseconds to convert back to BPM',
       showWhen: (values) => values.mode === 'ms-to-bpm',
     },
@@ -75,20 +57,20 @@ const bpmTapperConfig: CalculatorConfig = {
   calculate: (values) => {
     const mode = values.mode || 'bpm-to-ms';
     const noteValue = values.noteValue || 'quarter';
-    const factor = noteFactorMap[noteValue] || 1;
+    const factor = noteFactor(noteValue);
 
     if (mode === 'bpm-to-ms') {
       const bpm = parseFloat(values.bpm);
       if (isNaN(bpm) || bpm <= 0) return [];
 
-      const delayMs = (60000 / bpm) * factor;
-      const freqHz = 1000 / delayMs;
+      const delay = delayMs(bpm, factor);
+      const freqHz = 1000 / delay;
 
       const results: CalculatorResult[] = [
         {
           id: 'delayMs',
           label: `Delay`,
-          value: `${delayMs.toFixed(2)} ms`,
+          value: `${delay.toFixed(2)} ms`,
           highlight: true,
           color: 'positive',
         },
@@ -100,8 +82,8 @@ const bpmTapperConfig: CalculatorConfig = {
         },
       ];
 
-      allNotes.forEach((nv) => {
-        const ms = (60000 / bpm) * nv.factor;
+      NOTES.forEach((nv) => {
+        const ms = delayMs(bpm, nv.factor);
         results.push({
           id: `note-${nv.id}`,
           label: nv.label,
@@ -117,7 +99,7 @@ const bpmTapperConfig: CalculatorConfig = {
     const targetMs = parseFloat(values.targetMs);
     if (isNaN(targetMs) || targetMs <= 0) return [];
 
-    const bpm = (60000 / targetMs) * factor;
+    const bpm = bpmFromDelay(targetMs, factor);
     const freqHz = 1000 / targetMs;
 
     return [
@@ -127,6 +109,7 @@ const bpmTapperConfig: CalculatorConfig = {
         value: `${bpm.toFixed(2)} BPM`,
         highlight: true,
         color: 'positive',
+        warning: bpm < 20 || bpm > 300 ? 'That tempo is outside the usual 20-300 BPM range - check that the note value matches your delay time.' : undefined,
       },
       {
         id: 'frequencyHz',
@@ -165,10 +148,10 @@ const bpmTapperConfig: CalculatorConfig = {
       'For BPM to ms: enter the tempo, select the note value you want the delay for, and see the result instantly.',
       'For ms to BPM: enter the delay time in milliseconds and select what note value it represents to find your tempo.',
       'Use the full note value table to see delay times for every note division at your tempo.',
-      'Reference the preset BPM ranges for common electronic music genres like house (120-130), trap (140-160), drum & bass (170-180), and lo-fi (80-90).',
+      'Reference the preset BPM ranges for common electronic music genres like house (120-130), trap (130-160), drum & bass (170-180), and lo-fi (80-90).',
     ],
     explanation:
-      'Delay time calculation is a fundamental skill for music producers, audio engineers, and live sound technicians. Setting delay and reverb times to match the tempo of a track keeps the effect musically in time rather than clashing with the beat. The core formula is simple: there are 60,000 milliseconds in one minute, so dividing by the BPM gives the duration of one beat (a quarter note in 4/4 time). From there, multiplying by note value factors gives every other note division. Whole notes (factor 4) last four beats, half notes (factor 2) last two beats, eighth notes (factor 0.5) are half a beat, and sixteenth notes (factor 0.25) are a quarter of a beat. Dotted notes multiply the base duration by 1.5, creating a characteristic "long-short" rhythmic feel used extensively in dub, reggae, and ambient music. Triplets divide a beat into three equal parts, giving a swing or shuffle feel. Understanding these relationships lets you dial in professional-sounding effects without guessing. For example, a 120 BPM track has a quarter note delay of 500 ms. Setting a reverb predelay to 250 ms (an eighth note) ensures the reverb tail starts exactly on the next subdivision. Many hardware delay units and plugins include a tap tempo or sync feature that does this math automatically, but knowing how it works helps you troubleshoot when sync is unavailable or when you want creative, unsynced delay timings. Live sound engineers use delay time calculations to align speaker arrays, timing delays between main speakers and fill speakers for coherent coverage across a venue. The same math applies: a 1 ms delay corresponds to roughly 1 foot of sound travel distance at sea level.',
+      'Delay time calculation is a fundamental skill for music producers, audio engineers, and live sound technicians. Setting delay and reverb times to match the tempo of a track keeps the effect musically in time rather than clashing with the beat. The core formula is simple: there are 60,000 milliseconds in one minute, so dividing by the BPM gives the duration of one beat (a quarter note in 4/4 time). From there, multiplying by note value factors gives every other note division. Whole notes (factor 4) last four beats, half notes (factor 2) last two beats, eighth notes (factor 0.5) are half a beat, and sixteenth notes (factor 0.25) are a quarter of a beat. Dotted notes multiply the base duration by 1.5, creating a "long-short" rhythmic feel (the dotted-eighth delay is a long-standing favourite on guitar and synth parts). Triplets divide a beat into three equal parts, giving a swing or shuffle feel. Understanding these relationships lets you dial in professional-sounding effects without guessing. For example, a 120 BPM track has a quarter note delay of 500 ms. Setting a reverb predelay to 250 ms (an eighth note) ensures the reverb tail starts exactly on the next subdivision. Many hardware delay units and plugins include a tap tempo or sync feature that does this math automatically, but knowing how it works helps you troubleshoot when sync is unavailable or when you want creative, unsynced delay timings. Live sound engineers use delay time calculations to align speaker arrays, timing delays between main speakers and fill speakers for coherent coverage across a venue. (That is a different calculation: sound travels about 343 m/s in air at 20 C, so a 1 ms delay corresponds to roughly 34 cm, or 1.1 ft, of distance.)',
     faqs: [
       {
         question: 'What is the difference between dotted and triplet notes?',
@@ -180,7 +163,7 @@ const bpmTapperConfig: CalculatorConfig = {
       },
       {
         question: 'Can I use these same formulas for reverb settings?',
-        answer: 'Yes. Reverb predelay (the gap between the dry signal and the onset of reverb) is commonly set to an eighth note or sixteenth note delay to preserve clarity while still adding ambience. Reverb decay time can be set to match a quarter note or half note for a natural sounding tail that does not wash out the next beat. Many engineers set reverb decay to roughly 60-70% of a quarter note value for a balanced sound.',
+        answer: 'Yes. Reverb predelay (the gap between the dry signal and the onset of reverb) and decay time can both be set to note values so the effect breathes with the groove: a predelay of a 1/16 or 1/32 keeps the dry hit clear, and a decay of about one beat or one bar keeps the tail from smearing into the next beat. These are production tips rather than rules - trust your ears.',
       },
       {
         question: 'What are typical BPM ranges for different music genres?',

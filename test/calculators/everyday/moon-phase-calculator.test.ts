@@ -14,7 +14,7 @@ describe('Moon Phase Calculator', () => {
   });
 
   it('returns Full Moon near known full moon dates', () => {
-    const r = config.calculate({ dateOfBirth: '2024-06-21' });
+    const r = config.calculate({ dateOfBirth: '2024-06-22' }); // full moon 2024-06-22 01:08 UTC (USNO)
     expect(getValue(r, 'moonPhase')).toBe('Full Moon');
     near(parseNumber(getValue(r, 'illumination')), 100, 1);
   });

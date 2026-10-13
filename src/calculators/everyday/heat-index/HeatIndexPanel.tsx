@@ -1,17 +1,9 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { heatInfo } from './heatMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
-}
-
-interface ChartData {
-  heatIndex: number;
-  temperature: number;
-  humidity: number;
-  dangerTier: string;
-  dangerColor: string;
-  recommendations: string[];
 }
 
 const dangerZones = [
@@ -22,19 +14,18 @@ const dangerZones = [
   { label: 'Extreme Danger', min: 125, max: Infinity, color: '#7c3aed', textColor: '#4c1d95' },
 ];
 
-export default function HeatIndexPanel({ results }: Props) {
+export default function HeatIndexPanel({ values, results }: Props) {
   const hiRow = results.find(r => r.id === 'heatIndex');
   const tempRow = results.find(r => r.id === 'temperature');
   const humRow = results.find(r => r.id === 'humidity');
   const dangerRow = results.find(r => r.id === 'dangerTier');
-  const chartRow = results.find(r => r.id === '_chartData');
+  // Same pure function index.ts uses; the panel never parses result strings or JSON blobs.
+  const info = heatInfo(values);
 
-  if (!hiRow || !chartRow) return null;
+  if (!hiRow || !info) return null;
 
-  let data: ChartData = { heatIndex: 0, temperature: 0, humidity: 0, dangerTier: 'Safe', dangerColor: '#22c55e', recommendations: [] };
-  try { data = JSON.parse(chartRow.value); } catch {}
-
-  const hi = data.heatIndex;
+  const data = { dangerTier: info.tier.label, dangerColor: info.tier.color, recommendations: info.recommendations };
+  const hi = info.hiF;
 
   // SVG Thermometer
   const svgW = 280;
@@ -70,7 +61,7 @@ export default function HeatIndexPanel({ results }: Props) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
       <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
-        <svg aria-hidden="true" className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg aria-hidden="true" className="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 4v1m0 4v1m0 4v1M4 5a9 9 0 0118 0" />
         </svg>
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
@@ -81,9 +72,9 @@ export default function HeatIndexPanel({ results }: Props) {
       <div className="p-5 space-y-5">
         {/* Heat Index card */}
         <div className="rounded-xl border p-5 text-center" style={{ borderColor: data.dangerColor, backgroundColor: `${data.dangerColor}10` }}>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Heat Index (Feels Like)</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Heat Index (Feels Like)</p>
           <p className="text-3xl font-bold font-mono mt-1" style={{ color: data.dangerColor }}>
-            {hi.toFixed(1)}°F
+            {hiRow.value}
           </p>
           <p className="text-xs font-medium mt-1" style={{ color: data.dangerColor }}>
             {data.dangerTier}
@@ -163,7 +154,7 @@ export default function HeatIndexPanel({ results }: Props) {
 
         {/* Danger zone legend */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">NOAA Danger Tiers</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">NOAA Danger Tiers</p>
           <div className="space-y-1.5">
             {dangerZones.map(zone => (
               <div key={zone.label} className="flex items-center gap-2 text-xs text-slate-600">
@@ -185,25 +176,25 @@ export default function HeatIndexPanel({ results }: Props) {
         <div className="grid grid-cols-2 gap-2">
           {tempRow && (
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Temperature</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Temperature</p>
               <p className="text-sm font-bold font-mono text-slate-700">{tempRow.value}</p>
             </div>
           )}
           {humRow && (
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Humidity</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Humidity</p>
               <p className="text-sm font-bold font-mono text-slate-700">{humRow.value}</p>
             </div>
           )}
           {dangerRow && (
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Danger Tier</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Danger Tier</p>
               <p className="text-sm font-bold font-mono text-slate-700">{dangerRow.value}</p>
             </div>
           )}
           {hiRow && (
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Heat Index</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Heat Index</p>
               <p className="text-sm font-bold font-mono text-slate-700">{hiRow.value}</p>
             </div>
           )}
@@ -241,7 +232,7 @@ export default function HeatIndexPanel({ results }: Props) {
 
         {/* Heat safety tips */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">General Heat Safety</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">General Heat Safety</p>
           <ul className="space-y-1 text-xs text-slate-600 list-disc list-inside">
             <li>Drink plenty of water before, during, and after outdoor activity — don't wait until you're thirsty</li>
             <li>Wear lightweight, light-colored, loose-fitting clothing and a wide-brimmed hat</li>

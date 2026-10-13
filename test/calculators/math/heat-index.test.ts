@@ -18,9 +18,10 @@ describe('Heat Index calculator', () => {
     near(parseNumber(getValue(r, 'heatIndex')), 109.3, 0.5);
   });
 
-  it('returns temperature when below 80°F (simplified)', () => {
+  it('uses the NWS Steadman simple formula when the average with T is below 80°F', () => {
+    // 0.5 * (75 + 61 + 1.2 * (75 - 68) + 0.094 * 80) = 75.96 -> 76.0 (hand calculation, NWS WPC "heat index equation")
     const r = config.calculate({ temperature: '75', humidity: '80' });
-    near(parseNumber(getValue(r, 'heatIndex')), 75);
+    near(parseNumber(getValue(r, 'heatIndex')), 76.0);
   });
 
   it('labels danger tier as "Safe" below 80°F', () => {

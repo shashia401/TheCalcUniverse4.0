@@ -37,14 +37,14 @@ describe('Robux / V-Bucks Converter', () => {
 
   it('sets correct effective rate for V-Bucks 13500 package', () => {
     const r = config.calculate({ virtualCurrency: '13500', currencyType: 'V-Bucks', packageType: '13500' });
-    near(parseNumber(getValue(r, 'usdValue')), 79.99);
+    near(parseNumber(getValue(r, 'usdValue')), 89.99);
     const rate = parseNumber(getValue(r, 'effectiveRate'));
-    near(rate, 79.99 / 13500, 0.0001);
+    near(rate, 89.99 / 13500, 0.0001);
   });
 
-  it('matches the worked example: requesting 2,950 V-Bucks in Basic mode recommends the 13,500 package (regression: narrative previously claimed the 5,000 package at $36.99 was picked, but findBestPackage always picks the globally lowest per-unit rate)', () => {
+  it('matches the worked example: 2,950 V-Bucks costs $26.97 (3 x 1,000) - the cheapest mix, not the $89.99 best-rate pack (regression: it used to quote the largest pack for any amount)', () => {
     const r = config.calculate({ virtualCurrency: '2950', currencyType: 'V-Bucks' });
-    near(parseNumber(getValue(r, 'usdValue')), 79.99);
+    near(parseNumber(getValue(r, 'usdValue')), 26.97);
     expect(getValue(r, 'bestPackage')).toContain('13,500');
   });
 

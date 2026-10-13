@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import TipSplitterPanel from './TipSplitterPanel';
+import { splitBill } from './tipMath';
 
 const tipSplitterConfig: CalculatorConfig = {
   inputs: [
@@ -11,9 +12,10 @@ const tipSplitterConfig: CalculatorConfig = {
       placeholder: '85.50',
       prefix: '$',
       min: 0,
+      max: 1000000,
       step: 0.01,
       required: true,
-      helpText: 'Total bill amount shown on the receipt',
+      helpText: 'Total bill amount shown on the receipt (including tax, before the tip)',
     },
     {
       id: 'tipPercent',
@@ -50,54 +52,36 @@ const tipSplitterConfig: CalculatorConfig = {
       placeholder: '7.20',
       prefix: '$',
       min: 0,
+      max: 1000000,
       step: 0.01,
-      helpText: 'Enter the tax shown on the bill if you want tip calculated on pre-tax amount',
+      helpText: 'Enter the tax shown on the bill if you want the tip calculated on the pre-tax amount (must be less than the bill)',
     },
   ],
   calculate: (values) => {
-    const bill = parseFloat(values.billAmount);
-    const tipPct = parseFloat(values.tipPercent || '18') / 100;
-    const people = parseInt(values.numPeople) || 1;
-    const tax = parseFloat(values.taxAmount) || 0;
+    const sp = splitBill(values);
+    if (!sp) return [];
+    const usd = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const even = sp.highCount === 0;
 
-    if (isNaN(bill) || bill <= 0) return [];
-
-    const preTaxBill = bill - tax;
-    const tipAmount = Math.max(0, preTaxBill * tipPct);
-    const totalBill = bill + tipAmount;
-    const perPersonTotal = totalBill / people;
-    const perPersonTip = tipAmount / people;
-
-    const fmt = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    return [
+    const results = [
       {
         id: 'perPersonTotal',
-        label: `Each Person Pays (÷${people})`,
-        value: `$${fmt(perPersonTotal)}`,
+        label: `Each Person Pays (÷${sp.people})`,
+        value: usd(sp.highShare),
         highlight: true,
-        color: 'positive',
+        color: 'positive' as const,
+        interpretation: even
+          ? `${usd(sp.totalCents)} ÷ ${sp.people} divides exactly.`
+          : `${usd(sp.totalCents)} does not divide evenly in cents: ${sp.highCount} ${sp.highCount === 1 ? 'person pays' : 'people pay'} ${usd(sp.highShare)} and ${sp.people - sp.highCount} pay ${usd(sp.lowShare)}, so the shares add up to the total exactly.`,
       },
-      {
-        id: 'tipAmount',
-        label: 'Total Tip',
-        value: `$${fmt(tipAmount)}`,
-        color: 'neutral',
-      },
-      {
-        id: 'perPersonTip',
-        label: 'Tip Per Person',
-        value: `$${fmt(perPersonTip)}`,
-        color: 'neutral',
-      },
-      {
-        id: 'totalBill',
-        label: 'Grand Total (bill + tip)',
-        value: `$${fmt(totalBill)}`,
-        color: 'neutral',
-      },
+      { id: 'tipAmount', label: 'Total Tip', value: usd(sp.tipCents), color: 'neutral' as const, interpretation: `${usd(sp.billCents - sp.taxCents)} ${sp.taxCents > 0 ? '(pre-tax) ' : ''}× ${values.tipPercent || '18'}%, rounded to the cent.` },
+      { id: 'perPersonTip', label: 'Tip Per Person', value: usd(sp.tipShares[0]), color: 'neutral' as const },
+      { id: 'totalBill', label: 'Grand Total (bill + tip)', value: usd(sp.totalCents), color: 'neutral' as const },
     ];
+    if (!even) {
+      results.push({ id: 'shareSplit', label: 'Exact Split', value: `${sp.highCount} × ${usd(sp.highShare)} + ${sp.people - sp.highCount} × ${usd(sp.lowShare)}`, color: 'neutral' as const });
+    }
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -142,29 +126,29 @@ const tipSplitterConfig: CalculatorConfig = {
       'The result shows the per-person amount and itemized breakdown.',
     ],
     explanation:
-      'Tipping etiquette varies by country and service type. In the United States, standard restaurant tips range from 15% (adequate) to 20% (good service) to 25%+ (exceptional). In the UK and Europe, 10-15% is typical, and tipping is less expected. The modern American tipping custom traces back to wealthy Americans who adopted European aristocratic hospitality practices in the late 19th century, bringing the practice home from travels abroad. Counter service, fast casual, and food delivery apps often prompt for tips ranging from 10-25%. The tip is traditionally calculated on the pre-tax subtotal, though many people tip on the total bill amount for simplicity. Knowing when and how much to tip can prevent awkward social situations and ensure service workers are fairly compensated. In the US, many service industry workers earn a tipped minimum wage as low as $2.13 per hour, making tips their primary income source. For group dining, splitting the bill evenly among all diners is the most common approach, but you should also consider whether some people ordered significantly more expensive items. Many restaurants automatically add gratuity of 18% or higher for parties of six or more, so always check your bill before adding an additional tip. During the COVID-19 pandemic, tipping norms shifted significantly, with many consumers tipping more generously (20-25%) to support hospitality workers facing reduced hours and health risks. This elevated tipping trend has partially persisted in the post-pandemic economy.',
+      'Tipping etiquette varies by country and service type. In the United States, standard restaurant tips range from 15% (adequate) to 20% (good service) to 25%+ (exceptional). In the UK and Europe, 10-15% is typical, and tipping is less expected. Tipping became common in the United States in the late 19th century. Counter service, fast casual, and food delivery apps often prompt for tips ranging from 10-25%. The tip is traditionally calculated on the pre-tax subtotal, though many people tip on the total bill amount for simplicity. Knowing when and how much to tip can prevent awkward social situations and ensure service workers are fairly compensated. In the US, many service industry workers earn a tipped minimum wage as low as $2.13 per hour, making tips their primary income source. For group dining, splitting the bill evenly among all diners is the most common approach, but you should also consider whether some people ordered significantly more expensive items. Many restaurants automatically add gratuity of 18% or higher for parties of six or more, so always check your bill before adding an additional tip. During the COVID-19 pandemic, tipping norms shifted significantly, with many consumers tipping more generously (20-25%) to support hospitality workers facing reduced hours and health risks. This elevated tipping trend has partially persisted in the post-pandemic economy.',
     workedExamples: [
       { scenario: 'Four friends dine out and the total bill is $120 with $9.60 tax. They want to leave a 20% tip on the pre-tax amount and split evenly.', inputs: { billAmount: '120', tipPercent: '20', numPeople: '4', taxAmount: '9.60' }, result: '$35.52 per person (total $142.08 / 4). Tip: $22.08 total, $5.52 per person.', insight: 'The pre-tax subtotal is $110.40. At 20%, the tip is $22.08. The grand total is $142.08, split four ways at $35.52 per person. Each person also pays $5.52 as their share of the tip.' },
       { scenario: 'Two colleagues grab lunch. The bill is $48 total including $4 tax. They want to tip 18% on the pre-tax amount.', inputs: { billAmount: '48', tipPercent: '18', numPeople: '2', taxAmount: '4' }, result: '$27.96 per person (total $55.92 / 2). Tip: $7.92 total, $3.96 per person.', insight: 'Pre-tax subtotal is $44. Tip at 18% is $7.92. Total is $55.92, so each person pays $27.96. Without the tax deduction, the tip would have been $8.64 (18% of $48), saving them $0.72 by tipping on the pre-tax amount.' },
-      { scenario: 'A group of 8 celebrates a birthday at a restaurant. The total bill is $320, and the restaurant has already added an 18% auto-gratuity for large parties.', inputs: { billAmount: '320', tipPercent: '18', numPeople: '8' }, result: '$47.20 per person (total $377.60 / 8). Tip: $57.60 total, $7.20 per person.', insight: 'Each of the 8 people pays $47.20 including the 18% auto-gratuity ($40 for their share of the bill plus $7.20 for tip). Since gratuity is already included, the group should not add an additional tip unless service was exceptional.' },
+      { scenario: 'A group of 8 celebrates a birthday at a restaurant. The bill is $320 with no gratuity added yet, and they want to leave 18%.', inputs: { billAmount: '320', tipPercent: '18', numPeople: '8' }, result: '$47.20 per person (total $377.60 / 8). Tip: $57.60 total, $7.20 per person.', insight: 'Each of the 8 people pays $47.20: $40 for their share of the bill plus $7.20 for tip. If the restaurant has already added an automatic gratuity to the bill, enter a tip that matches it (or compare with the receipt) so the group does not tip twice.' },
     ],
     proTips: [
-      'Double the tax to estimate a 15-18% tip quickly: in most US states with ~8% sales tax, doubling the tax amount on your receipt gives a rough 16% tip. In states with ~10% tax (like California or New York), this method overestimates slightly.',
+      'Double the tax to estimate a tip quickly: with an 8% sales tax, doubling the tax amount gives a 16% tip on the pre-tax amount. The shortcut gets bigger or smaller with the local tax rate, so check it against the percentage you actually want.',
       'When splitting a bill among couples or pairs, first divide by the number of sub-groups, then use the calculator for the final per-person split. This avoids confusion when some groups share entrees or drinks.',
-      'For business meals, the IRS generally allows a 50% deduction on meals including tips. Keep your itemized receipt showing the tip amount for tax purposes.',
+      'For business meals, US tax rules generally limit the deduction to 50% of the cost, and the rules change, so keep the itemized receipt and check current IRS guidance.',
       'In countries where tipping is not customary (Japan, South Korea, China), leaving a tip can actually cause confusion or offense. Always research local customs before traveling.',
       'Digital payment apps like Venmo, Zelle, and Splitwise have made bill splitting dramatically easier. One person pays the full bill and others reimburse instantly — this calculator helps determine exactly how much each person owes.',
     ],
     limitations: [
-      'This calculator assumes equal splitting of the total bill among all diners. In reality, individuals may have consumed items of widely different costs, and a truly fair split would require itemizing each person\'s order. The calculator also assumes tip is calculated on the pre-tax amount, which may differ from local customs or restaurant policies. Auto-gratuity policies (typically 18% for parties of 6+) vary by restaurant and are not automatically accounted for. Currency conversion for international travel is not included.',
+      'This calculator assumes equal splitting of the total bill among all diners; amounts are worked out in whole cents, and when the total does not divide evenly a few people pay one cent more so the shares add up exactly. In reality, individuals may have consumed items of widely different costs, and a truly fair split would require itemizing each person\'s order. The calculator also assumes tip is calculated on the pre-tax amount, which may differ from local customs or restaurant policies. Auto-gratuity policies (typically 18% for parties of 6+) vary by restaurant and are not automatically accounted for. Currency conversion for international travel is not included.',
     ],
     quickReference: [
       { label: '15% tip (adequate)', value: 'Multiply bill by 0.15' },
       { label: '18% tip (standard)', value: 'Multiply bill by 0.18' },
       { label: '20% tip (good service)', value: 'Multiply bill by 0.20' },
       { label: '25% tip (exceptional)', value: 'Multiply bill by 0.25' },
-      { label: 'US tipped min. wage', value: '$2.13/hr (federal)' },
-      { label: 'Large party auto-gratuity', value: 'Typically 18% for 6+' },
+      { label: 'US federal tipped minimum cash wage', value: '$2.13/hr (some states require more)' },
+      { label: 'Large party auto-gratuity', value: 'Varies by restaurant (often 15-20% for larger parties)' },
     ],
     faqs: [
       {
@@ -173,7 +157,7 @@ const tipSplitterConfig: CalculatorConfig = {
       },
       {
         question: 'What is an appropriate tip for different services?',
-        answer: 'Sit-down restaurants: 18-22%. Bars: $1-2 per drink or 15%. Hotel housekeeping: $2-5/night. Food delivery: 15-20%. Taxis/rideshares: 10-15%. Salon services: 15-20%. Valet parking: $2-5. Moving services: 15-20% or $20-50 per mover depending on job complexity.',
+        answer: 'These are common US customs, not rules, and vary by region. Sit-down restaurants: 15-20% (more for excellent service). Bars: about $1-2 per drink or 15-20%. Food delivery: 10-20%. Taxis and rideshares: 10-15%. Salon services: 15-20%. Valet: a few dollars. Moving services: customs vary by region and job size, so ask the company.',
       },
       {
         question: 'How should a group split a bill fairly?',
@@ -181,7 +165,7 @@ const tipSplitterConfig: CalculatorConfig = {
       },
       {
         question: 'Is it okay to tip less for bad service?',
-        answer: 'Most tipping etiquette guides suggest that 15% is the minimum for adequate service, even when service is below expectations. For truly poor service, 10% is sometimes acceptable but should be rare. If service is exceptional, 22-25% or more is a generous way to show appreciation.',
+        answer: 'In the US, many etiquette guides treat 15% as the baseline for adequate service. Tipping less is a personal choice and norms differ by country. If service is exceptional, 22-25% or more is a generous way to show appreciation.',
       },
       {
         question: 'Should I tip on takeout and counter service orders?',

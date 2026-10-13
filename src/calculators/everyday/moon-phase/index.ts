@@ -1,78 +1,11 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MoonPhasePanel from './MoonPhasePanel';
+import { SYNODIC_MONTH, moonInfo } from './moonMath';
 
-const LUNAR_CYCLE_DAYS = 29.53058867;
-const KNOWN_NEW_MOON = new Date(2000, 0, 6); // Jan 6, 2000
-
-interface PhaseInfo {
-  name: string;
-  emoji: string;
-}
-
-// Phase ranges: each entry covers [start, end)
-const PHASES: [number, number, PhaseInfo][] = [
-  [0, 0.03, { name: 'New Moon', emoji: '🌑' }],
-  [0.03, 0.24, { name: 'Waxing Crescent', emoji: '🌒' }],
-  [0.24, 0.26, { name: 'First Quarter', emoji: '🌓' }],
-  [0.26, 0.49, { name: 'Waxing Gibbous', emoji: '🌔' }],
-  [0.49, 0.51, { name: 'Full Moon', emoji: '🌕' }],
-  [0.51, 0.74, { name: 'Waning Gibbous', emoji: '🌖' }],
-  [0.74, 0.76, { name: 'Last Quarter', emoji: '🌗' }],
-  [0.76, 0.97, { name: 'Waning Crescent', emoji: '🌘' }],
-  [0.97, 1.0, { name: 'New Moon', emoji: '🌑' }],
-];
-
-function getPhaseInfo(phase: number): PhaseInfo {
-  for (const [start, end, info] of PHASES) {
-    if (phase >= start && phase < end) return info;
-  }
-  // edge case: phase exactly 1.0 or very close
-  return { name: 'New Moon', emoji: '🌑' };
-}
-
-function getIllumination(phase: number): number {
-  // Illumination: 0% at new moon, 100% at full moon
-  // Using the formula: illumination = (1 - cos(2*PI*phase)) / 2 * 100
-  return (1 - Math.cos(2 * Math.PI * phase)) / 2 * 100;
-}
-
-function getNextFullMoon(phase: number, baseDate: Date): Date {
-  // days until next full moon (phase = 0.5)
-  let daysUntil = (0.5 - phase + 1) % 1;
-  if (daysUntil === 0) daysUntil = 1; // if exactly full moon, next full is one cycle later
-  daysUntil *= LUNAR_CYCLE_DAYS;
-  const next = new Date(baseDate);
-  next.setDate(next.getDate() + Math.ceil(daysUntil));
-  return next;
-}
-
-function getZodiacSign(date: Date): string {
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-
-  if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Aries';
-  if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Taurus';
-  if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return 'Gemini';
-  if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return 'Cancer';
-  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return 'Leo';
-  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return 'Virgo';
-  if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return 'Libra';
-  if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return 'Scorpio';
-  if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return 'Sagittarius';
-  if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return 'Capricorn';
-  if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'Aquarius';
-  return 'Pisces';
-}
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
+const fmtDay = (ms: number) =>
+  new Date(ms).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const fmtTime = (ms: number) => new Date(ms).toISOString().slice(11, 16);
 
 const moonPhaseConfig: CalculatorConfig = {
   inputs: [
@@ -85,34 +18,30 @@ const moonPhaseConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const dateStr = values.dateOfBirth;
-    if (!dateStr) return [];
-
-    // Parse date parts in local time to match KNOWN_NEW_MOON construction
-    const parts = dateStr.split('-').map(Number);
-    const date = new Date(parts[0], parts[1] - 1, parts[2]);
-    if (isNaN(date.getTime())) return [];
-
-    // Calculate days since known new moon
-    const diffMs = date.getTime() - KNOWN_NEW_MOON.getTime();
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-    // Calculate phase position in cycle [0, 1) using modulo to handle dates before reference
-    const phase = (((diffDays % LUNAR_CYCLE_DAYS) / LUNAR_CYCLE_DAYS) + 1) % 1;
-
-    const phaseInfo = getPhaseInfo(phase);
-    const illumination = getIllumination(phase);
-    const nextFullMoon = getNextFullMoon(phase, date);
-    const daysUntilNextFull = Math.round((nextFullMoon.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    const zodiacSign = getZodiacSign(date);
+    const m = moonInfo(values);
+    if (!m) return [];
+    const days = m.daysUntilFull;
 
     return [
-      { id: 'moonPhase', label: 'Moon Phase', value: phaseInfo.name, highlight: true, color: 'positive' },
-      { id: 'illumination', label: 'Illumination', value: `${illumination.toFixed(1)}%`, color: 'neutral' },
-      { id: 'phaseEmoji', label: 'Phase Symbol', value: phaseInfo.emoji },
-      { id: 'nextFullMoon', label: 'Next Full Moon', value: formatDate(nextFullMoon), color: 'neutral' },
-      { id: 'daysUntilNextFull', label: 'Days Until Next Full Moon', value: daysUntilNextFull.toString() },
-      { id: 'zodiacSign', label: 'Zodiac Sign', value: zodiacSign, color: 'positive' },
+      {
+        id: 'moonPhase',
+        label: 'Moon Phase',
+        value: m.phase.name,
+        highlight: true,
+        color: 'positive',
+        interpretation: `Evaluated at 12:00 UTC on the chosen date: the Moon is ${m.ageDays.toFixed(1)} days into its ${SYNODIC_MONTH.toFixed(2)}-day cycle (Sun-Moon elongation ${m.elongation.toFixed(1)}°).`,
+      },
+      { id: 'illumination', label: 'Illumination', value: `${m.illumination.toFixed(1)}%`, color: 'neutral' },
+      { id: 'phaseEmoji', label: 'Phase Symbol', value: m.phase.emoji },
+      {
+        id: 'nextFullMoon',
+        label: 'Next Full Moon (UTC date)',
+        value: fmtDay(m.nextFullMs),
+        color: 'neutral',
+        interpretation: `Exact moment ${fmtTime(m.nextFullMs)} UTC; in your time zone the date can differ by one day.`,
+      },
+      { id: 'daysUntilNextFull', label: 'Days Until Next Full Moon', value: days.toString(), interpretation: days === 0 ? 'The full moon falls on the chosen date (UTC).' : undefined },
+      { id: 'zodiacSign', label: 'Zodiac Sign (Western, for fun)', value: m.zodiac, color: 'positive' },
     ];
   },
   extraPanel: (values, results) => {
@@ -120,17 +49,17 @@ const moonPhaseConfig: CalculatorConfig = {
     return createElement(MoonPhasePanel, { values, results });
   },
   educational: {
-    formula: 'Phase = (Days Since Known New Moon) mod 29.53058867 ÷ 29.53058867',
+    formula: 'Elongation = Moon longitude − Sun longitude;  Illumination = (1 − cos elongation) ÷ 2',
     diagram: {
-      svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><circle cx="80" cy="170" r="40" fill="var(--svg-1e293b)"/><circle cx="160" cy="170" r="40" fill="var(--svg-ffffff)"/><rect x="120" y="130" width="40" height="80" fill="var(--svg-1e293b)"/><circle cx="240" cy="170" r="40" fill="var(--svg-ffffff)"/><rect x="200" y="130" width="80" height="80" fill="var(--svg-1e293b)"/><circle cx="320" cy="170" r="40" fill="var(--svg-ffffff)"/><rect x="320" y="130" width="40" height="80" fill="var(--svg-1e293b)"/><text x="80" y="290" text-anchor="middle" font-size="11" fill="var(--svg-333333)">New</text><text x="160" y="290" text-anchor="middle" font-size="11" fill="var(--svg-333333)">1st Qtr</text><text x="240" y="290" text-anchor="middle" font-size="11" fill="var(--svg-333333)">Full</text><text x="320" y="290" text-anchor="middle" font-size="11" fill="var(--svg-333333)">Last Qtr</text></svg>',
+      svg: '<svg viewBox="0 0 460 230" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="230" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-333333)">Moon phases over one 29.53-day cycle</text><circle cx="80" cy="150" r="40" fill="var(--svg-1e293b)"/><text x="80" y="215" text-anchor="middle" font-size="11" fill="var(--svg-333333)">New</text><circle cx="180" cy="150" r="40" fill="var(--svg-1e293b)"/><path d="M 180 110 A 40 40 0 0 1 180 190 Z" fill="var(--svg-fde68a)"/><text x="180" y="215" text-anchor="middle" font-size="11" fill="var(--svg-333333)">First Quarter</text><circle cx="280" cy="150" r="40" fill="var(--svg-fde68a)"/><text x="280" y="215" text-anchor="middle" font-size="11" fill="var(--svg-333333)">Full</text><circle cx="380" cy="150" r="40" fill="var(--svg-1e293b)"/><path d="M 380 110 A 40 40 0 0 0 380 190 Z" fill="var(--svg-fde68a)"/><text x="380" y="215" text-anchor="middle" font-size="11" fill="var(--svg-333333)">Last Quarter</text></svg>',
       alt: 'Four moon phase illustrations showing new, first quarter, full, and last quarter',
       caption: 'Moon phases cycle every 29.53 days from new to full and back',
     },
     formulaDescription:
-      'The moon phase is calculated by determining how many days have passed since a known new moon (January 6, 2000), then finding the remainder when divided by the lunar cycle length (29.53 days). This gives the moon\'s current position in its cycle, which is mapped to named phases.',
+      'The phase is set by the elongation: the angle between the Moon and the Sun as seen from Earth. The calculator computes the Moon\'s ecliptic longitude from Meeus\'s lunar series (mean elements plus the 16 largest periodic terms) and the Sun\'s from its equation of centre; 0° is new moon, 90° first quarter, 180° full moon, 270° last quarter. Illumination is (1 − cos elongation) ÷ 2 and the cycle fraction is elongation ÷ 360°. The next full moon is found by solving elongation = 180°. A plain mean-cycle formula (new moon on 6 January 2000 plus multiples of 29.530589 days) can be off by up to about 14 hours because the Moon\'s speed varies; this method matches published new and full moon times to within a few minutes.',
     variables: [
-      { symbol: 'Lunar Cycle', name: 'Synodic Month', description: 'The time between successive new moons: approximately 29.53 days.' },
-      { symbol: 'Phase Fraction', name: 'Phase Position', description: 'A value from 0 to 1 representing where the moon is in its 29.53-day cycle.' },
+      { symbol: 'Lunar Cycle', name: 'Synodic Month', description: 'The mean time between successive new moons: 29.530589 days (individual months range from about 29.3 to 29.8 days).' },
+      { symbol: 'Phase Fraction', name: 'Phase Position', description: 'Elongation ÷ 360°: a value from 0 to 1 representing where the moon is in its cycle (0 = new, 0.5 = full).' },
       { symbol: 'Illumination', name: 'Illumination Percentage', description: 'The fraction of the moon\'s visible disk that is illuminated by the sun.' },
       { symbol: 'New Moon', name: 'New Moon', description: 'When the moon is between Earth and the sun, making it nearly invisible from Earth.' },
       { symbol: 'Full Moon', name: 'Full Moon', description: 'When Earth is between the sun and the moon, making the entire face visible.' },
@@ -143,17 +72,17 @@ const moonPhaseConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Enter any date to see the moon phase for that day.',
-      'The calculator shows the phase name, illumination percentage, and an SVG rendering.',
-      'The next full moon date is calculated based on the current phase.',
-      'Your birth month\'s zodiac sign is also displayed for reference.',
+      'The calculator shows the phase name (a principal phase covers the day it occurs, ±12 hours around 12:00 UTC), illumination percentage, and an SVG rendering.',
+      'The next full moon on or after your date is found from the Moon\'s position, with its date and time in UTC.',
+      'The Western zodiac sign for the date is also displayed, for fun only.',
       'Use the phase and illumination to plan stargazing (new moon = darkest skies), lunar photography (full moon), or track cultural events tied to the lunar calendar.',
     ],
     explanation:
-      'The moon orbits Earth approximately every 27.3 days (sidereal month), but because Earth is also moving around the sun, it takes about 29.53 days for the moon to return to the same phase (synodic month). This astronomical algorithm uses a known new moon reference point to calculate the phase for any given date. The phase is determined by the angular distance between the moon and the sun as seen from Earth. When the moon is between Earth and the sun, we see the dark side (new moon). When Earth is between the sun and the moon, we see the fully illuminated face (full moon). The in-between phases — crescent, quarter, and gibbous — occur as the moon moves through its orbit. Practical applications include planning stargazing nights around new moons for darker skies, timing lunar photography sessions during full moons, and understanding cultural celebrations like Ramadan and Chinese New Year that follow the lunar calendar.',
+      'The moon orbits Earth approximately every 27.3 days (sidereal month), but because Earth is also moving around the sun, it takes about 29.53 days for the moon to return to the same phase (synodic month). This calculator evaluates the Sun-Moon geometry directly for 12:00 UTC on the chosen date. The phase is determined by the angular distance between the moon and the sun as seen from Earth. When the moon is between Earth and the sun, we see the dark side (new moon). When Earth is between the sun and the moon, we see the fully illuminated face (full moon). The in-between phases — crescent, quarter, and gibbous — occur as the moon moves through its orbit. Practical applications include planning stargazing nights around new moons for darker skies, timing lunar photography sessions during full moons, and understanding cultural celebrations like Ramadan and Chinese New Year that follow the lunar calendar.',
     faqs: [
       {
         question: 'How accurate is this moon phase calculation?',
-        answer: 'This calculator uses the standard astronomical algorithm based on the mean lunar cycle length of 29.53058867 days. It is accurate to within about 1-2 days for dates far in the past or future. For exact phase times (to the minute), more precise ephemeris calculations are needed.',
+        answer: 'It computes the Moon\'s and Sun\'s positions from a truncated Meeus series, which reproduces published new and full moon times to within about 5 minutes for modern dates (e.g. new moon 2000-01-06 18:14 UTC, full moon 2024-01-25 17:54 UTC). The phase is evaluated at 12:00 UTC on the date you enter, so the displayed illumination can differ from the value at your local time of day by a few percent near the full and new moons. Official phase tables (US Naval Observatory) are the reference for exact times.',
       },
       {
         question: 'Why does the moon have phases?',
@@ -161,7 +90,7 @@ const moonPhaseConfig: CalculatorConfig = {
       },
       {
         question: 'What is a "blue moon"?',
-        answer: 'A blue moon is the second full moon occurring within a single calendar month. Since the lunar cycle is about 29.5 days, most months have one full moon, but occasionally a month will have two. This happens roughly every 2.5 years.',
+        answer: 'A blue moon is the second full moon occurring within a single calendar month. Since the lunar cycle is about 29.5 days, most months have one full moon, but occasionally a month will have two. This happens roughly every 2-3 years.',
       },
       {
         question: 'Can the moon phase affect human behavior?',
@@ -169,7 +98,7 @@ const moonPhaseConfig: CalculatorConfig = {
       },
       {
         question: 'What is a lunar eclipse and when does it happen?',
-        answer: 'A lunar eclipse occurs when Earth comes between the sun and the moon, casting its shadow on the moon. This can only happen during a full moon when the sun, Earth, and moon are aligned. Total lunar eclipses happen approximately every 1.5 years and give the moon a distinctive reddish hue — often called a "blood moon." Unlike solar eclipses, lunar eclipses are safe to view with the naked eye.',
+        answer: 'A lunar eclipse occurs when Earth comes between the sun and the moon, casting its shadow on the moon. This can only happen during a full moon when the sun, Earth, and moon are aligned. Total lunar eclipses are visible from any given place roughly every couple of years and give the moon a distinctive reddish hue — often called a "blood moon." Unlike solar eclipses, lunar eclipses are safe to view with the naked eye.',
       },
     ],
   

@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WeddingAlcoholPanel from './WeddingAlcoholPanel';
+import { alcoholPlan } from './weddingMath';
 
 const weddingAlcoholConfig: CalculatorConfig = {
   inputs: [
@@ -10,6 +11,7 @@ const weddingAlcoholConfig: CalculatorConfig = {
       type: 'number',
       required: true,
       min: 1,
+      max: 5000,
       inputMode: 'numeric',
       helpText: 'Total number of guests attending your event',
     },
@@ -70,87 +72,48 @@ const weddingAlcoholConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const guests = parseInt(values.guests, 10);
-    if (isNaN(guests) || guests <= 0) return [];
-
-    const drinkersPct = parseFloat(values.drinkersPct || '80') / 100;
-    const duration = parseFloat(values.duration || '4');
-    const beerPct = parseFloat(values.beerPct || '40') / 100;
-    const winePct = parseFloat(values.winePct || '30') / 100;
-    const liquorPct = parseFloat(values.liquorPct || '30') / 100;
-
-    const drinkingGuests = guests * drinkersPct;
-
-    // Drink consumption estimates
-    const beerTotal = drinkingGuests * beerPct * duration * 1.5;
-    const wineGlasses = drinkingGuests * winePct * duration * 1.0;
-    const liquorDrinks = drinkingGuests * liquorPct * duration * 0.75;
-
-    // Wine: 1 bottle (750ml) = 5 glasses
-    const wineBottles = wineGlasses / 5;
-    // Liquor: 1 bottle (750ml) = 17 shots (1.5 oz each)
-    const liquorBottles = liquorDrinks / 17;
-
-    const fmt = (n: number) => Math.ceil(n).toLocaleString(undefined);
+    const p = alcoholPlan(values);
+    if (!p) return [];
+    const fmt = (n: number) => Math.max(0, Math.ceil(n - 1e-9)).toLocaleString('en-US');
+    const splitOk = Math.abs(p.splitTotal - 100) < 0.5;
 
     return [
       {
         id: 'drinkingGuests',
         label: 'Drinking Guests',
-        value: fmt(drinkingGuests),
+        value: fmt(p.drinkingGuests),
         color: 'neutral',
+        warning: splitOk ? undefined : `The beer, wine and cocktail percentages add up to ${p.splitTotal}%, not 100%. Quantities scale with whatever you entered, so adjust them to total 100% for a sensible plan.`,
       },
       {
         id: 'beerTotal',
         label: 'Beer (cans/bottles)',
-        value: fmt(beerTotal),
+        value: fmt(p.beer),
         highlight: true,
         color: 'positive',
+        interpretation: 'Rule of thumb, not measured data: 1.5 beers per beer drinker per hour of bar service. Rounded up.',
       },
       {
         id: 'wineBottles',
         label: 'Wine (750ml bottles)',
-        value: fmt(wineBottles),
+        value: fmt(p.wineBottles),
         highlight: true,
         color: 'positive',
+        interpretation: 'Assumes 1 glass per wine drinker per hour and 5 glasses per 750 ml bottle. Rounded up.',
       },
-      {
-        id: 'wineGlasses',
-        label: 'Wine Glasses Served',
-        value: fmt(wineGlasses),
-        color: 'neutral',
-      },
+      { id: 'wineGlasses', label: 'Wine Glasses Served', value: fmt(p.wineGlasses), color: 'neutral' },
       {
         id: 'liquorBottles',
         label: 'Liquor (750ml bottles)',
-        value: fmt(liquorBottles),
+        value: fmt(p.liquorBottles),
         highlight: true,
         color: 'positive',
+        interpretation: 'Assumes 0.75 cocktails per cocktail drinker per hour and 1.5 oz of spirit per cocktail (about 17 per 750 ml bottle). Rounded up; mixers, ice and champagne for a toast are not included.',
       },
-      {
-        id: 'liquorDrinks',
-        label: 'Cocktails Served',
-        value: fmt(liquorDrinks),
-        color: 'neutral',
-      },
-      {
-        id: 'beerPctDisplay',
-        label: 'Beer',
-        value: `${(beerPct * 100).toFixed(0)}% of alcohol`,
-        color: 'neutral',
-      },
-      {
-        id: 'winePctDisplay',
-        label: 'Wine',
-        value: `${(winePct * 100).toFixed(0)}% of alcohol`,
-        color: 'neutral',
-      },
-      {
-        id: 'liquorPctDisplay',
-        label: 'Cocktails',
-        value: `${(liquorPct * 100).toFixed(0)}% of alcohol`,
-        color: 'neutral',
-      },
+      { id: 'liquorDrinks', label: 'Cocktails Served', value: fmt(p.liquorDrinks), color: 'neutral' },
+      { id: 'beerPctDisplay', label: 'Beer', value: `${p.beerPct.toFixed(0)}% of alcohol`, color: 'neutral' },
+      { id: 'winePctDisplay', label: 'Wine', value: `${p.winePct.toFixed(0)}% of alcohol`, color: 'neutral' },
+      { id: 'liquorPctDisplay', label: 'Cocktails', value: `${p.liquorPct.toFixed(0)}% of alcohol`, color: 'neutral' },
     ];
   },
   extraPanel: (values, results) => {
@@ -160,7 +123,7 @@ const weddingAlcoholConfig: CalculatorConfig = {
   educational: {
     formula: 'Drinking Guests = Total Guests x (Drinkers % / 100) | Beer = Drinking Guests x (Beer % / 100) x Hours x 1.5/hr | Wine (bottles) = (Drinking Guests x Wine % / 100 x Hours x 1.0/hr) / 5 | Liquor (bottles) = (Drinking Guests x Liquor % / 100 x Hours x 0.75/hr) / 17',
     formulaDescription:
-      'Total alcohol needed is calculated by determining the number of drinking guests, then estimating consumption per hour per category. Beer drinkers consume approximately 1.5 drinks per hour, wine drinkers 1.0 glasses per hour, and cocktail drinkers 0.75 drinks per hour. Wine bottles (750ml) yield 5 glasses each. Liquor bottles (750ml) yield approximately 17 shots (1.5 oz) each.',
+      'Total alcohol needed is calculated by determining the number of drinking guests, then estimating consumption per hour per category. The rates used are rules of thumb: 1.5 beers per hour for beer drinkers, 1.0 glasses per hour for wine drinkers and 0.75 cocktails per hour for cocktail drinkers. Wine bottles (750ml) yield 5 glasses each. Liquor bottles (750ml) yield approximately 17 shots (1.5 oz) each.',
     diagram: {
       svg: '<svg viewBox="0 0 440 130" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="18" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Per-Person Drink Estimate (4-Hour Event)</text><!-- Beer --><rect x="20" y="35" width="120" height="55" rx="6" fill="var(--svg-f59e0b)" opacity="0.12" stroke="var(--svg-f59e0b)" stroke-width="2"/><text x="80" y="55" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Beer</text><text x="80" y="70" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-1e293b)" text-anchor="middle">1.5 / hr</text><text x="80" y="84" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">6 beers / 4 hrs</text><!-- Wine --><rect x="160" y="35" width="120" height="55" rx="6" fill="var(--svg-8b5cf6)" opacity="0.12" stroke="var(--svg-8b5cf6)" stroke-width="2"/><text x="220" y="55" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Wine</text><text x="220" y="70" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-1e293b)" text-anchor="middle">1.0 / hr</text><text x="220" y="84" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">4 glasses / 4 hrs</text><text x="220" y="96" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">~1 bottle</text><!-- Liquor --><rect x="300" y="35" width="120" height="55" rx="6" fill="var(--svg-3b82f6)" opacity="0.12" stroke="var(--svg-3b82f6)" stroke-width="2"/><text x="360" y="55" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Liquor</text><text x="360" y="70" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-1e293b)" text-anchor="middle">0.75 / hr</text><text x="360" y="84" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">3 drinks / 4 hrs</text><text x="360" y="96" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">~⅙ bottle</text><text x="220" y="120" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-64748b)" text-anchor="middle">For 100 guests (80% drinkers): ~60 beers, 50 glasses wine (10 bottles), 60 cocktails (4 bottles liquor)</text></svg>',
       alt: 'Breakdown of per-person alcohol consumption rates for beer, wine, and liquor at a 4-hour event',
@@ -199,7 +162,7 @@ const weddingAlcoholConfig: CalculatorConfig = {
         },
         result: '45 drinking guests. Stock 243 beers (11 cases), 9 bottles of wine, and 3 bottles of liquor (about 51 cocktails).',
         insight:
-          'For a 50-guest summer BBQ with 90% drinkers (45 drinking guests), 6 hours, and a beer-heavy crowd (60% beer), the calculator recommends approximately 243 beers (11 cases of 24), 9 bottles of wine, and 3 bottles of liquor (about 51 cocktails). Hot weather increases beer consumption by 15-25%, so the 1.5 beers/hour rate is appropriate. The longer duration (6 hours) significantly increases totals compared to a 4-hour event. Stock extra ice, water, and non-alcoholic drinks: about 2-3 per guest for the full 6 hours.',
+          'For a 50-guest summer BBQ with 90% drinkers (45 drinking guests), 6 hours, and a beer-heavy crowd (60% beer), the calculator recommends approximately 243 beers (11 cases of 24), 9 bottles of wine, and 3 bottles of liquor (about 51 cocktails). Hot weather tends to increase beer consumption, so the 1.5 beers/hour rate is reasonable here. The longer duration (6 hours) significantly increases totals compared to a 4-hour event. Stock extra ice, water, and non-alcoholic drinks: about 2-3 per guest for the full 6 hours.',
       },
     ],
     quickReference: [
@@ -214,12 +177,12 @@ const weddingAlcoholConfig: CalculatorConfig = {
     proTips: [
       'Buy from a liquor store with a return policy — most will accept unopened cases and bottles. Order ~10% more than the estimate and return what you do not open.',
       'If you are serving a signature cocktail, adjust the liquor percentage UP (to 35-40%) because guests gravitate toward the novelty drink, increasing spirit consumption beyond the standard 0.75 drinks/hour rate.',
-      'For outdoor summer events, increase beer and white wine estimates by 15-25% due to heat. For winter indoor events, increase red wine and whiskey estimates by 10-15%.',
+      'For outdoor summer events, raise beer and white wine somewhat because of the heat; for winter indoor events, raise red wine and whiskey a little.',
       'Do NOT forget the non-alcoholic drinks. Plan 2-3 servings per guest (water, soda, juice). A common mistake is ordering enough alcohol but running out of mixers, ice, and water.',
       'For multi-day events or weddings with a welcome party + reception + farewell brunch, run the calculator separately for each event with the appropriate duration and crowd composition — a rehearsal dinner crowd drinks differently than a reception crowd.',
     ],
     limitations: [
-      'These estimates are based on industry averages for North American wedding receptions with mixed-age crowds. Actual consumption varies significantly with crowd demographics (a 20-something crowd drinks 20-30% more; a family-heavy crowd with children drinks less), weather (hot days increase beer and light cocktail consumption by 15-25%), food service (heavy food reduces alcohol consumption; passed appetizers with limited food increases it), and bar type (open bar increases consumption 20-30% vs. cash bar). The calculator does not account for champagne toasts, welcome drinks, after-party consumption, or vendor meals. It assumes continuous bar service for the full duration — if your bar closes during dinner, reduce the effective duration. Always use these numbers as a starting point and adjust based on your specific crowd and venue policies.',
+      'These are rule-of-thumb estimates, not measured data. Actual consumption varies significantly with crowd demographics (a young crowd may drink more; a family-heavy crowd with children less), weather (hot days tend to increase beer and light cocktail consumption), food service (heavy food tends to reduce consumption) and bar type (an open bar usually increases consumption compared with a cash bar). The calculator does not account for champagne toasts, welcome drinks, after-party consumption, or vendor meals. It assumes continuous bar service for the full duration — if your bar closes during dinner, reduce the effective duration. Always use these numbers as a starting point and adjust based on your specific crowd and venue policies.',
     ],
     commonUses: [
       'Planning how much beer, wine, and liquor to buy for a wedding reception based on guest count',
@@ -235,7 +198,7 @@ const weddingAlcoholConfig: CalculatorConfig = {
       'View the recommended quantities of beer, wine, and liquor to purchase.',
     ],
     explanation:
-      'Planning the right amount of alcohol for a wedding or party is a classic estimation problem: too little and guests go thirsty, too much and you are stuck with hundreds of dollars in unused bottles. The standard industry formula used by event planners accounts for three key factors: the number of drinking guests, the duration of the event, and the consumption rate per hour. Industry experience shows that the average drinking guest consumes about 1.5 drinks per hour during a wedding reception, though this rate varies by beverage type. Beer drinkers tend to drink slightly more (1.5 drinks/hour), wine drinkers average about 1 glass per hour, and cocktail drinkers average about 0.75 drinks per hour since spirits are stronger and consumed more slowly. The distribution between beer, wine, and liquor depends heavily on your crowd. A younger, more casual group may lean 50% beer, 25% wine, 25% liquor. A formal evening wedding often shifts toward 30% beer, 40% wine, 30% liquor. For mixed crowds, equal thirds is a safe starting point. Wine is typically sold in 750 ml bottles, each yielding approximately 5 standard glasses. Liquor is also sold in 750 ml bottles, each yielding about 17 standard 1.5 oz shots. Beer is easiest to estimate since each can or bottle is a single serving. Many hosts also include a champagne toast, which adds roughly one additional glass per guest (one 750ml bottle of champagne serves about 5-6 flutes). Remember that these are estimates, and actual consumption varies based on weather (hot days increase drinking), event energy, and whether food is served throughout. When in doubt, many liquor stores accept returns on unopened cases, so buying slightly more than the estimate gives you a comfortable buffer.',
+      'Planning the right amount of alcohol for a wedding or party is a classic estimation problem: too little and guests go thirsty, too much and you are stuck with hundreds of dollars in unused bottles. The standard industry formula used by event planners accounts for three key factors: the number of drinking guests, the duration of the event, and the consumption rate per hour. This calculator uses simple planning rules of thumb rather than measured data: 1.5 beers, 1 glass of wine or 0.75 cocktails per drinker per hour of bar service. Many planners start from about one drink per drinking guest per hour, so treat these rates as adjustable assumptions. The distribution between beer, wine, and liquor depends heavily on your crowd. A younger, more casual group may lean 50% beer, 25% wine, 25% liquor. A formal evening wedding often shifts toward 30% beer, 40% wine, 30% liquor. For mixed crowds, equal thirds is a safe starting point. Wine is typically sold in 750 ml bottles, each yielding approximately 5 standard glasses. Liquor is also sold in 750 ml bottles, each yielding about 17 standard 1.5 oz shots. Beer is easiest to estimate since each can or bottle is a single serving. Many hosts also include a champagne toast, which adds roughly one additional glass per guest (one 750ml bottle of champagne serves about 5-6 flutes). Remember that these are estimates, and actual consumption varies based on weather (hot days increase drinking), event energy, and whether food is served throughout. When in doubt, many liquor stores accept returns on unopened cases, so buying slightly more than the estimate gives you a comfortable buffer.',
     faqs: [
       {
         question: 'How much champagne do I need for a toast?',
@@ -243,7 +206,7 @@ const weddingAlcoholConfig: CalculatorConfig = {
       },
       {
         question: 'Should I have an open bar or a limited bar?',
-        answer: 'An open bar where guests drink freely typically increases consumption by 20-30% compared to a cash bar or ticket system. Many couples opt for beer and wine only with a signature cocktail to control costs while still offering variety. This approach can reduce your total alcohol needed by 15-25% compared to a full open bar with multiple liquor options.',
+        answer: 'An open bar where guests drink freely usually increases consumption compared with a cash bar or ticket system. Many couples opt for beer and wine only with a signature cocktail to control costs while still offering variety, which also reduces the number of different bottles you need to buy.',
       },
       {
         question: 'How many kegs should I get instead of bottles/cans?',
@@ -255,7 +218,7 @@ const weddingAlcoholConfig: CalculatorConfig = {
       },
       {
         question: 'How do weather and season affect alcohol consumption?',
-        answer: 'Hot weather increases beer and light cocktail consumption by 15-25% while reducing heavy liquor and red wine consumption. Summer weddings often need 10-15% more beer and white wine. Winter weddings see higher demand for red wine, whiskey, and warm cocktails like hot toddies or mulled wine. Outdoor events in warm weather also increase overall hydration needs, so stock extra water and non-alcoholic options.',
+        answer: 'Hot weather tends to increase beer and light cocktail consumption while reducing heavy liquor and red wine. Summer weddings often need somewhat more beer and white wine; adjust the beer and wine percentages to reflect that. Winter weddings see higher demand for red wine, whiskey, and warm cocktails like hot toddies or mulled wine. Outdoor events in warm weather also increase overall hydration needs, so stock extra water and non-alcoholic options.',
       },
     ],
     citations: [

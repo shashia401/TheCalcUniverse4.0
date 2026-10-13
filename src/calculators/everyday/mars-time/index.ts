@@ -1,4 +1,5 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { SOL_SECONDS, hms, lmstHours, marsSolDate, mtcHours, parseUtc } from './marsMath';
 
 const marsTimeConfig: CalculatorConfig = {
   inputs: [
@@ -19,7 +20,7 @@ const marsTimeConfig: CalculatorConfig = {
       label: 'Earth Date & Time (UTC)',
       type: 'text',
       placeholder: '2026-05-20T12:00:00',
-      helpText: 'ISO 8601 format. NASA\'s Mars24 algorithm uses the Julian Date to compute Mars solar time.',
+      helpText: 'ISO 8601, read as UTC unless you add a Z or an offset (+02:00). Mars24 converts it to Terrestrial Time (adds the leap seconds) before computing the Mars Sol Date.',
       showWhen: (v) => v.mode === 'earthToMars',
     },
     {
@@ -33,7 +34,7 @@ const marsTimeConfig: CalculatorConfig = {
       max: 360,
       step: 0.1,
       defaultValue: '137.4',
-      helpText: 'Longitude on Mars. Curiosity rover: 137.4°E (Gale Crater). Supports both metric (SI) and imperial (US customary) Earth time inputs for UTC conversion — results are equivalent for either system. Perseverance: 77.4°E (Jezero Crater). 0° = Airy-0 crater meridian.',
+      helpText: 'Longitude on Mars. Curiosity rover: 137.4°E (Gale Crater). Perseverance: 77.4°E (Jezero Crater). 0° = Airy-0 crater meridian. East longitude is positive.',
       showWhen: (v) => v.mode === 'earthToMars',
     },
     {
@@ -43,6 +44,7 @@ const marsTimeConfig: CalculatorConfig = {
       placeholder: '100',
       inputMode: 'decimal',
       min: 0,
+      max: 1000000,
       step: 1,
       required: true,
       helpText: '1 Mars sol = 24h 39m 35.244s Earth time (88,775.244 seconds). Enter number of sols to convert to Earth days.',
@@ -55,6 +57,7 @@ const marsTimeConfig: CalculatorConfig = {
       placeholder: '3000',
       inputMode: 'decimal',
       min: 0,
+      max: 100000,
       step: 1,
       required: true,
       helpText: 'Sol number since landing. Curiosity landed Sol 0 on Aug 6, 2012. Perseverance landed Sol 0 on Feb 18, 2021.',
@@ -77,68 +80,55 @@ const marsTimeConfig: CalculatorConfig = {
 
   calculate: (values) => {
     const mode = values.mode || 'earthToMars';
-    const results = [];
-
-    const SOL_SECONDS = 88775.244; // 24h 39m 35.244s
-    const SOL_DAYS = SOL_SECONDS / 86400; // ~1.02749 Earth days per sol
+    const results: CalculatorResult[] = [];
 
     if (mode === 'earthToMars') {
-      const dateStr = values.earthDate;
       const lon = parseFloat(values.marsLongitude);
-      if (!dateStr || isNaN(lon)) return [];
+      const earthDate = parseUtc(values.earthDate);
+      if (!earthDate || !Number.isFinite(lon)) return [];
 
-      const earthDate = new Date(dateStr);
-      if (isNaN(earthDate.getTime())) return [];
-
-      // Mars24 algorithm (simplified from NASA/Allison & McEwen 2000)
-      const jd = (earthDate.getTime() / 86400000) + 2440587.5;
-
-      // Mars Sol Date (MSD) — days since 1873-12-29 12:00 UTC
-      const msd = (jd - 2451549.5 + 4.5) / 1.0274912517 + 44796.0 - 0.00096;
-
-      // Local Mean Solar Time (LMST) at specified longitude
-      const lmstHours = (24 * ((msd - Math.floor(msd)) + lon / 360)) % 24;
-      const lmstAdjusted = ((lmstHours % 24) + 24) % 24;
-
-      const hours = Math.floor(lmstAdjusted);
-      const minutes = Math.floor((lmstAdjusted - hours) * 60);
-      const seconds = Math.floor(((lmstAdjusted - hours) * 60 - minutes) * 60);
-
-      const lmst = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
+      const msd = marsSolDate(earthDate);
       results.push(
-        { id: 'lmst', label: 'Local Mean Solar Time', value: lmst, highlight: true, color: 'positive' } as CalculatorResult,
-        { id: 'msd', label: 'Mars Sol Date (MSD)', value: msd.toFixed(4), highlight: false, color: 'neutral' } as CalculatorResult,
-        { id: 'sol', label: 'Sol Number Today', value: Math.floor(msd).toString(), highlight: false, color: 'neutral' } as CalculatorResult,
-        { id: 'earthTime', label: 'Earth UTC', value: earthDate.toISOString(), highlight: false, color: 'neutral' } as CalculatorResult,
+        {
+          id: 'lmst',
+          label: 'Local Mean Solar Time',
+          value: hms(lmstHours(msd, lon)),
+          highlight: true,
+          color: 'positive',
+          interpretation: `Mean solar time at ${lon}°E on Mars. True (sundial) time differs by the Mars equation of time, up to about 50 minutes.`,
+        },
+        { id: 'mtc', label: 'Coordinated Mars Time (MTC)', value: hms(mtcHours(msd)), color: 'neutral', interpretation: 'Mean solar time at the prime meridian (Airy-0), the Mars counterpart of UTC.' },
+        { id: 'msd', label: 'Mars Sol Date (MSD)', value: msd.toFixed(4), color: 'neutral' },
+        { id: 'sol', label: 'Sol Number (MSD, prime meridian)', value: Math.floor(msd).toString(), color: 'neutral' },
+        { id: 'earthTime', label: 'Earth UTC', value: earthDate.toISOString(), color: 'neutral' },
       );
     }
 
     if (mode === 'solToEarth') {
       const sols = parseFloat(values.sols);
-      if (isNaN(sols) || sols < 0) return [];
+      if (!Number.isFinite(sols) || sols < 0) return [];
 
-      const earthSeconds = sols * SOL_SECONDS;
-      const earthDays = earthSeconds / 86400;
+      const earthDays = (sols * SOL_SECONDS) / 86400;
       const earthHours = earthDays * 24;
-      const days = Math.floor(earthDays);
-      const hours = Math.floor((earthDays - days) * 24);
-      const minutes = Math.floor(((earthDays - days) * 24 - hours) * 60);
+      const totalMinutes = Math.floor(earthDays * 1440 + 1e-6);
+      const days = Math.floor(totalMinutes / 1440);
+      const hours = Math.floor((totalMinutes % 1440) / 60);
+      const minutes = totalMinutes % 60;
 
       results.push(
-        { id: 'earthTime', label: `Earth Equivalent of ${sols} Sols`, value: `${days}d ${hours}h ${minutes}m`, highlight: true, color: 'positive' } as CalculatorResult,
-        { id: 'earthDays', label: 'In Earth Days', value: earthDays.toFixed(4) + ' days', highlight: false, color: 'neutral' } as CalculatorResult,
-        { id: 'earthHours', label: 'In Earth Hours', value: earthHours.toFixed(2) + ' hours', highlight: false, color: 'neutral' } as CalculatorResult,
-        { id: 'solSeconds', label: '1 Sol =', value: '24h 39m 35.244s (88,775.244 seconds)', highlight: false, color: 'neutral' } as CalculatorResult,
+        { id: 'earthTime', label: `Earth Equivalent of ${sols} Sols`, value: `${days}d ${hours}h ${minutes}m`, highlight: true, color: 'positive' },
+        { id: 'earthDays', label: 'In Earth Days', value: earthDays.toFixed(4) + ' days', color: 'neutral' },
+        { id: 'earthHours', label: 'In Earth Hours', value: earthHours.toFixed(2) + ' hours', color: 'neutral' },
+        { id: 'solSeconds', label: '1 Sol =', value: '24h 39m 35.244s (88,775.244 seconds)', color: 'neutral' },
       );
     }
 
     if (mode === 'missionTime') {
       const sol = parseFloat(values.missionSols);
-      if (isNaN(sol) || sol < 0) return [];
+      if (!Number.isFinite(sol) || sol < 0) return [];
 
       const landingDates: Record<string, string> = {
-        curiosity: '2012-08-06T05:17:00Z',
+        curiosity: '2012-08-06T05:17:57Z',
         perseverance: '2021-02-18T20:55:00Z',
         insight: '2018-11-26T19:52:59Z',
       };
@@ -149,16 +139,16 @@ const marsTimeConfig: CalculatorConfig = {
         insight: 'InSight — Elysium Planitia',
       };
 
-      const rover = values.rover || 'curiosity';
+      const rover = values.rover && landingDates[values.rover] ? values.rover : 'curiosity';
       const landingDate = new Date(landingDates[rover]);
       const earthElapsed = sol * SOL_SECONDS * 1000;
       const earthDate = new Date(landingDate.getTime() + earthElapsed);
 
       results.push(
-        { id: 'earthDate', label: `Sol ${sol} on Earth`, value: earthDate.toISOString().split('T')[0], highlight: true, color: 'positive' } as CalculatorResult,
-        { id: 'rover', label: 'Rover', value: roverNames[rover], highlight: false, color: 'neutral' } as CalculatorResult,
-        { id: 'landing', label: 'Landed', value: landingDate.toISOString().split('T')[0], highlight: false, color: 'neutral' } as CalculatorResult,
-        { id: 'totalDays', label: 'Earth Days Since Landing', value: Math.floor(earthElapsed / 86400000).toLocaleString(), highlight: false, color: 'neutral' } as CalculatorResult,
+        { id: 'earthDate', label: `Sol ${sol} on Earth`, value: earthDate.toISOString().split('T')[0], highlight: true, color: 'positive', interpretation: 'Same time of sol as the landing, counted from the landing instant (Sol 0).' },
+        { id: 'rover', label: 'Rover', value: roverNames[rover], color: 'neutral' },
+        { id: 'landing', label: 'Landed', value: landingDate.toISOString().split('T')[0], color: 'neutral' },
+        { id: 'totalDays', label: 'Earth Days Since Landing', value: Math.floor(earthElapsed / 86400000).toLocaleString('en-US'), color: 'neutral' },
       );
     }
 
@@ -167,14 +157,14 @@ const marsTimeConfig: CalculatorConfig = {
 
   educational: {
     formula: '1 sol = 24h 39m 35.244s = 88,775.244 seconds',
-    formulaDescription: 'A Mars solar day (sol) is 39 minutes and 35 seconds longer than an Earth day. This is because Mars rotates slightly slower — its sidereal rotation period is 24h 37m 22.7s, but the orbital motion adds ~2 minutes to the solar day. Over a full Mars year (687 Earth days), there are 669 sols.',
+    formulaDescription: 'A Mars solar day (sol) is 39 minutes and 35 seconds longer than an Earth day. This is because Mars rotates slightly slower — its sidereal rotation period is 24h 37m 22.7s, but the orbital motion adds ~2 minutes to the solar day. A Mars year (686.98 Earth days) is about 668.6 sols.',
     diagram: {
-      svg: '<svg viewBox=\'0 0 440 200\' xmlns=\'http://www.w3.org/2000/svg\' style=\'max-width:100%;height:auto\'><rect width=\'440\' height=\'200\' fill=\'transparent\' rx=\'8\'/><text x=\'220\' y=\'30\' text-anchor=\'middle\' font-size=\'14\' font-weight=\'bold\' fill=\'currentColor\'>Mars Time</text><text x=\'220\' y=\'52\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>planetary science</text><rect x=\'40\' y=\'75\' width=\'360\' height=\'80\' rx=\'8\' fill=\'var(--svg-3b82f6)\' opacity=\'0.08\'/><text x=\'220\' y=\'105\' text-anchor=\'middle\' font-size=\'13\' fill=\'currentColor\'>Key domains covered: planetary science</text><text x=\'220\' y=\'128\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>Comprehensive calculator with worked examples</text><text x=\'220\' y=\'148\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>and step-by-step educational content</text><text x=\'220\' y=\'185\' text-anchor=\'middle\' font-size=\'10\' fill=\'var(--svg-6b7280)\'>Interactive · Free · No signup required</text></svg>',
-      alt: 'Educational diagram for Mars Time showing key concepts and the planetary science domain',
-      caption: 'This mars time covers planetary science. Use the worked examples to verify your understanding and bookmark for quick reference.',
+      svg: '<svg viewBox=\'0 0 440 130\' xmlns=\'http://www.w3.org/2000/svg\' style=\'max-width:100%;height:auto\'><text x=\'220\' y=\'20\' text-anchor=\'middle\' font-size=\'13\' font-weight=\'bold\' fill=\'currentColor\'>One day on Earth vs one sol on Mars</text><rect x=\'80\' y=\'40\' width=\'240\' height=\'24\' rx=\'3\' fill=\'var(--svg-3b82f6)\'/><text x=\'72\' y=\'57\' text-anchor=\'end\' font-size=\'11\' fill=\'currentColor\'>Earth</text><text x=\'326\' y=\'57\' font-size=\'11\' fill=\'currentColor\'>24h 00m 00s</text><rect x=\'80\' y=\'74\' width=\'246.6\' height=\'24\' rx=\'3\' fill=\'var(--svg-ef4444)\'/><text x=\'72\' y=\'91\' text-anchor=\'end\' font-size=\'11\' fill=\'currentColor\'>Mars</text><text x=\'332\' y=\'91\' font-size=\'11\' fill=\'currentColor\'>24h 39m 35s</text><text x=\'220\' y=\'120\' text-anchor=\'middle\' font-size=\'10\' fill=\'var(--svg-6b7280)\'>1 sol = 88,775.244 s = 1.0274912517 Earth days</text></svg>',
+      alt: 'Two bars comparing an Earth day of 24 hours with a Mars sol of 24 hours 39 minutes 35 seconds',
+      caption: 'A sol is about 2.7% longer than an Earth day, so Mars-time schedules slip about 40 minutes per Earth day.',
     },
     variables: [
-      { symbol: 'sol', name: 'Mars Solar Day', description: 'The time between two successive solar noons on Mars. 1 sol = 88,775.244 seconds = 1.02749125 Earth days. Mars has 669 sols per year.' },
+      { symbol: 'sol', name: 'Mars Solar Day', description: 'The time between two successive solar noons on Mars. 1 sol = 88,775.244 seconds = 1.02749125 Earth days. A Mars year is about 668.6 sols.' },
       { symbol: 'MSD', name: 'Mars Sol Date', description: 'A continuous count of sols since December 29, 1873 (Gregorian). Analogous to the Julian Date on Earth. Used by NASA mission planners.' },
       { symbol: 'LMST', name: 'Local Mean Solar Time', description: 'The mean solar time at a specific longitude on Mars. Like Earth time zones but continuous — every 15° of longitude shifts LMST by 1 hour.' },
       { symbol: 'MTC', name: 'Coordinated Mars Time', description: 'The Mars equivalent of UTC, defined at the prime meridian (Airy-0 crater, longitude 0°). MTC = LMST at 0° longitude.' },
@@ -187,7 +177,7 @@ const marsTimeConfig: CalculatorConfig = {
     ],
     quickReference: [
       { label: '1 sol', value: '24h 39m 35.244s (1.02749 days)' },
-      { label: '1 Mars year', value: '687 Earth days = 669 sols' },
+      { label: '1 Mars year', value: '686.98 Earth days = 668.6 sols' },
       { label: 'Mars rotation', value: '24h 37m 22.7s (sidereal)' },
       { label: 'Curiosity landing', value: 'Sol 0 = Aug 6, 2012' },
       { label: 'Perseverance landing', value: 'Sol 0 = Feb 18, 2021' },
@@ -202,7 +192,7 @@ const marsTimeConfig: CalculatorConfig = {
       'Astronomy education — teaching students about planetary rotation, solar days, and coordinate systems.',
       'Mars analog missions — HI-SEAS and Mars Society crews practicing Mars-time operations on Earth.',
     ],
-    explanation: "Mars time is both simple and maddening. A Mars solar day (sol) is 24 hours, 39 minutes, and 35.244 seconds of Earth time — only about 40 minutes longer than an Earth day. This small difference means that Mars rover operations teams must shift their work schedule 40 minutes later every Earth day to stay synchronized with the rover's day-night cycle. Over two weeks, this cumulative drift flips day and night completely — mission controllers working Mars time describe it as permanent jet lag. The Mars Sol Date (MSD) system, developed by Michael Allison (1997) and refined by NASA, provides a continuous sol count analogous to the Julian Date used by astronomers. Local Mean Solar Time (LMST) works exactly like Earth time zones: every 15° of longitude shifts LMST by 1 hour. The prime meridian of Mars passes through the tiny crater Airy-0 (diameter ~0.5 km) in Sinus Meridiani, established by the Mariner 9 team in 1972. Mars has seasons too — its 25.2° axial tilt (similar to Earth's 23.4°) produces summer and winter, though each season lasts about twice as long as Earth's because the Mars year is 687 Earth days.",
+    explanation: "Mars time is both simple and maddening. A Mars solar day (sol) is 24 hours, 39 minutes, and 35.244 seconds of Earth time — only about 40 minutes longer than an Earth day. This small difference means that Mars rover operations teams must shift their work schedule 40 minutes later every Earth day to stay synchronized with the rover's day-night cycle. After about 18 days, this cumulative drift flips day and night completely — mission controllers working Mars time describe it as permanent jet lag. The Mars Sol Date (MSD) system, developed by Allison and McEwen (2000) for the NASA GISS Mars24 tool, provides a continuous sol count analogous to the Julian Date used by astronomers. Local Mean Solar Time (LMST) works exactly like Earth time zones: every 15° of longitude shifts LMST by 1 hour. The prime meridian of Mars passes through the tiny crater Airy-0 (diameter ~0.5 km) in Sinus Meridiani, established by the Mariner 9 team in 1972. Mars has seasons too — its 25.2° axial tilt (similar to Earth's 23.4°) produces summer and winter, though each season lasts about twice as long as Earth's because the Mars year is 687 Earth days.",
     faqs: [
       {
         question: 'How many hours, minutes, and seconds is a Mars day compared to Earth?',
@@ -214,15 +204,15 @@ const marsTimeConfig: CalculatorConfig = {
       },
       {
         question: 'Why is a Mars day called a "sol"?',
-        answer: 'The term "sol" was adopted by NASA during the Viking missions (1976) to distinguish Mars solar days from Earth days in mission planning. The word derives from Latin "sol" meaning sun — the same root as "solar." Using a distinct term prevents ambiguity: "Sol 100" unambiguously means 100 Mars solar days after landing, not 100 Earth days. Each NASA Mars mission starts counting from Sol 0 (landing day). The first Mars sunrise after landing marks Sol 1.',
+        answer: 'The term "sol" was adopted by NASA during the Viking missions (1976) to distinguish Mars solar days from Earth days in mission planning. The word derives from Latin "sol" meaning sun — the same root as "solar." Using a distinct term prevents ambiguity: "Sol 100" unambiguously means 100 Mars solar days after landing, not 100 Earth days. Each NASA Mars mission starts counting from Sol 0 (landing day).',
       },
       {
         question: 'How do NASA teams work on Mars time?',
-        answer: 'Mars mission operations teams wear special watches that run on Mars time (24h 39m per "day"). Each Earth day, their schedule shifts ~40 minutes later. After 36 Earth days, they have completely flipped day/night. Teams work in shifts of several months, and the cumulative sleep disruption is significant. Some team members report it is easier to adapt to than transatlantic jet lag (a 9-hour shift) because the daily shift is small. NASA provides blackout curtains, light therapy, and sleep hygiene guidance for Mars time workers.',
+        answer: 'Mars mission operations teams wear special watches that run on Mars time (24h 39m per "day"). Each Earth day, their schedule shifts ~40 minutes later. After about 18 Earth days, they have completely flipped day/night. Teams work in shifts of several months, and the cumulative sleep disruption is significant. Some team members report it is easier to adapt to than transatlantic jet lag (a 9-hour shift) because the daily shift is small.',
       },
       {
         question: "What's the difference between LMST and true solar time on Mars?",
-        answer: 'Local Mean Solar Time (LMST) assumes a perfectly uniform Mars orbit and rotation — it is the "mean" time, like Earth\'s mean solar time before time zones. True solar time varies by up to ±50 seconds due to Mars\' orbital eccentricity (e = 0.093, vs Earth\'s 0.017). This difference is called the equation of time. For most purposes, LMST is sufficient — NASA\'s Mars24 algorithm accounts for these variations.',
+        answer: 'Local Mean Solar Time (LMST) assumes a perfectly uniform Mars orbit and rotation — it is the "mean" time, like Earth\'s mean solar time before time zones. True solar time (the Sun on a sundial) differs from LMST by the equation of time, which on Mars reaches about 50 minutes because of the orbital eccentricity (e = 0.093, vs Earth\'s 0.017). This calculator returns mean time (LMST) only; the Mars24 tool also gives true solar time.',
       },
       {
         question: 'How many sols are in a Mars year?',
@@ -234,33 +224,34 @@ const marsTimeConfig: CalculatorConfig = {
       },
     ],
     proTips: [
-      'For Mars-Earth time conversion apps, always use the NASA Mars24 algorithm (Allison & McEwen 2000, updated 2020). This calculator uses a simplified version — for mission-critical work, use the full NASA algorithm.',
-      'The Mars Sol Date (MSD) origin is Dec 29, 1873, 12:00 UTC. This date was chosen because it places MSD 0 near the Martian northern hemisphere winter solstice of 1873–1874.',
+      'For Mars-Earth time conversion apps, use the NASA Mars24 algorithm (Allison & McEwen 2000). This calculator implements its Mars Sol Date and mean-time steps, including the conversion from UTC to Terrestrial Time.',
+      'The Mars Sol Date (MSD) origin is about Dec 29, 1873, 12:00 (JD 2405522.0029 TT), chosen so that all sol dates since the 1870s are positive.',
       'Mars dust storm season peaks near perihelion (closest approach to Sun, Ls ≈ 250°). Global dust storms can reduce surface solar power to near zero for weeks — mission planners track this carefully.',
-      'If building a Mars watch/simulation, account for the equation of time (±50 seconds) for photorealistic accuracy. The effect is larger on Mars than Earth due to the more eccentric orbit.',
+      'If building a Mars watch/simulation, add the equation of time (up to about 50 minutes) to get true solar time. The effect is much larger on Mars than Earth (about 16 minutes) because of the more eccentric orbit.',
     ],
     workedExamples: [
       {
         scenario: "It is noon UTC on Earth, May 20, 2026. What is the Local Mean Solar Time at Gale Crater (137.4°E), where Curiosity is exploring?",
         inputs: { mode: 'earthToMars', earthDate: '2026-05-20T12:00:00', marsLongitude: '137.4' },
-        result: 'LMST at Gale Crater (137.4°E): approximately 18:22:19, MSD ~54174.38.',
-        insight: "Using the Mars24 algorithm, noon UTC on Earth translates to early evening local time at Gale Crater. The LMST depends on the current Mars-Earth alignment and the rover's longitude. NASA Curiosity team members starting their shift at 8 AM LMST would need to start at roughly 8 PM UTC the previous Earth day, shifting ~40 min later each subsequent day.",
+        result: 'LMST at Gale Crater (137.4°E): 04:24:50, MSD 54169.8023.',
+        insight: "Using the Mars24 algorithm, noon UTC on 20 May 2026 is MSD 54169.8023, so it is 19:15 MTC (19:15:14) at the prime meridian and 04:24:50 LMST at Gale Crater (19:15 plus 9.16 hours of longitude offset). Because a sol is about 40 minutes longer than an Earth day, the same LMST arrives about 40 minutes later each Earth day.",
       },
       {
         scenario: 'Perseverance has been on Mars for 1,000 sols. How many Earth days is this?',
         inputs: { mode: 'solToEarth', sols: '1000' },
         result: '1,000 sols = 1,027d 11h 47m Earth time (1,027.49 Earth days).',
-        insight: '1,000 sols × 88,775.244 seconds = 88,775,244 seconds = 1,027.49 Earth days. That is 2 years, 9 months, and 22 days. Adding that to Perseverance\'s Feb 18, 2021 landing puts Sol 1,000 on December 13, 2023 (Earth date). This milestone represents a major achievement — the primary mission was planned for just 1 Mars year (669 sols).',
+        insight: '1,000 sols × 88,775.244 seconds = 88,775,244 seconds = 1,027.49 Earth days. That is 2 years, 9 months, and 25 days. Adding that to Perseverance\'s Feb 18, 2021 landing (20:55 UTC) puts Sol 1,000 on December 13, 2023 (Earth date). This milestone represents a major achievement — the primary mission was planned for just 1 Mars year (669 sols).',
       },
     ],
     limitations: [
-      'This calculator uses a simplified Mars time algorithm based on the Allison & McEwen (2000) formulation. For precision applications (spacecraft navigation, mission planning), use the full NASA Mars24 algorithm which accounts for ΔT, Mars orbital perturbations, and the Mars equation of time.',
-      'The "Mission Time" mode uses nominal landing dates; actual mission sol counts may differ by ±1 sol due to the exact definition of Sol 0.',
+      'The Mars Sol Date uses the Allison & McEwen (2000) formula with the UTC-to-TT leap-second correction (a built-in table from 1972; earlier dates use 10 s). Equation of time and true solar time are not included. For spacecraft navigation or rover operations use the official NASA Mars24 tool.',
+      'The "Mission Time" mode counts whole sols from the landing instant (Curiosity 2012-08-06 05:17:57 UTC, Perseverance 2021-02-18 20:55 UTC, InSight 2018-11-26 19:52:59 UTC); official mission sol numbers change at local midnight at the landing site, so a date can differ by about a day.',
       'Mars longitude definitions can vary between planetographic (0–360°W) and planetocentric (0–360°E) conventions — this calculator uses east-longitude positive.',
     ],
   citations: [
       { source: 'Wikipedia — Mars Time', url: 'https://en.wikipedia.org/wiki/Mars_Time' },
-      { source: 'Mars Time — Engineering Reference', url: 'https://www.engineeringtoolbox.com/' },
+      { source: 'NASA GISS — Mars24 Sunclock', url: 'https://www.giss.nasa.gov/tools/mars24/' },
+      { source: 'Allison & McEwen (2000), Planetary and Space Science 48, 215-235', url: 'https://doi.org/10.1016/S0032-0633(99)00092-6' },
     ],
   },
 };

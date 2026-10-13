@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WorkingDaysPanel from './WorkingDaysPanel';
+import { workingDaysInfo } from './workingDaysMath';
 
 const workingDaysConfig: CalculatorConfig = {
   inputs: [
@@ -35,90 +36,39 @@ const workingDaysConfig: CalculatorConfig = {
       id: 'holidays',
       label: 'US Public Holidays',
       type: 'select',
-      helpText: 'Choose whether to exclude federal holidays',
+      helpText: 'Exclude the 11 US federal holidays, using their observed weekday when a holiday falls on a weekend (Saturday is observed on Friday, Sunday on Monday). Weekends are always Saturday and Sunday.',
       options: [
-        { label: 'Exclude federal holidays', value: 'yes' },
+        { label: 'Exclude US federal holidays (observed dates)', value: 'yes' },
         { label: 'Include all days (no holiday exclusion)', value: 'no' },
       ],
     },
   ],
   calculate: (values) => {
-    const startStr = values.startDate;
-    const endStr = values.endDate;
-    const countMethod = values.includeStart || 'end';
-    const excludeHolidays = (values.holidays || 'yes') === 'yes';
-
-    if (!startStr || !endStr) return [];
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(startStr) || !/^\d{4}-\d{2}-\d{2}$/.test(endStr)) return [];
-
-    const start = new Date(startStr + 'T00:00:00');
-    const end = new Date(endStr + 'T00:00:00');
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
-    if (start > end) return [];
-
-    const usHolidays = new Set([
-      '01-01', '06-19', '07-04', '11-11', '12-25',
-    ]);
-
-    const isHoliday = (d: Date): boolean => {
-      if (!excludeHolidays) return false;
-      const mmdd = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      return usHolidays.has(mmdd);
-    };
-
-    let workingDays = 0;
-    let weekendDays = 0;
-    let holidayDays = 0;
-
-    const current = new Date(start);
-    const adjustedStart = countMethod === 'neither' || countMethod === 'end'
-      ? (() => { const c = new Date(start); c.setDate(c.getDate() + 1); return c; })()
-      : start;
-    const adjustedEnd = countMethod === 'neither'
-      ? (() => { const c = new Date(end); c.setDate(c.getDate() - 1); return c; })()
-      : end;
-
-    current.setTime(adjustedStart.getTime());
-
-    while (current <= adjustedEnd) {
-      const dow = current.getDay();
-      if (dow === 0 || dow === 6) {
-        weekendDays++;
-      } else if (isHoliday(current)) {
-        holidayDays++;
-      } else {
-        workingDays++;
-      }
-      current.setDate(current.getDate() + 1);
-    }
-
-    const calendarDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const w = workingDaysInfo(values);
+    if (!w) return [];
+    const n = (x: number) => x.toLocaleString('en-US');
+    const rangeNote =
+      w.method === 'both' ? 'Both the start and end dates are counted.' : w.method === 'end' ? 'The start date is not counted; the end date is.' : 'Neither the start nor the end date is counted.';
 
     return [
       {
         id: 'workingDays',
         label: 'Working Days',
-        value: workingDays.toLocaleString(undefined),
+        value: n(w.workingDays),
         highlight: true,
         color: 'positive',
+        interpretation: `${rangeNote} Working day = Monday-Friday${w.excludeHolidays ? ' that is not a US federal holiday' : ''}.`,
       },
-      {
-        id: 'calendarDays',
-        label: 'Total Calendar Days',
-        value: calendarDays.toLocaleString(undefined),
-        color: 'neutral',
-      },
-      {
-        id: 'weekends',
-        label: 'Weekend Days (Sat/Sun)',
-        value: weekendDays.toLocaleString(undefined),
-        color: 'neutral',
-      },
+      { id: 'calendarDays', label: 'Calendar Days Counted', value: n(w.calendarDays), color: 'neutral' },
+      { id: 'weekends', label: 'Weekend Days (Sat/Sun)', value: n(w.weekendDays), color: 'neutral' },
       {
         id: 'holidays',
         label: 'Public Holidays',
-        value: excludeHolidays ? holidayDays.toLocaleString(undefined) : 'Not counted',
+        value: w.excludeHolidays ? n(w.holidayDays) : 'Not counted',
         color: 'neutral',
+        interpretation: w.excludeHolidays && w.holidays.length > 0
+          ? `Weekday holidays in the range: ${w.holidays.slice(0, 8).map((h) => `${new Date(h.day * 86400000).toISOString().slice(0, 10)} ${h.name}`).join('; ')}${w.holidays.length > 8 ? '; …' : ''}.`
+          : undefined,
       },
     ];
   },
@@ -134,12 +84,12 @@ const workingDaysConfig: CalculatorConfig = {
       caption: 'Working days calculation excludes weekends and public holidays',
     },
     formulaDescription:
-      'Working days are calculated by subtracting weekends (Saturday and Sunday) and optionally public holidays from the total calendar days between two dates. The calculation iterates through each day in the date range, counting weekdays and skipping weekends. When the holiday option is enabled, specific fixed-date US federal holidays are also excluded from the working day total. This gives you the net number of business-relevant days for planning or compliance purposes.',
+      'Working days are calculated by subtracting weekends (Saturday and Sunday) and optionally public holidays from the total calendar days between two dates. The calculation iterates through each day in the date range, counting weekdays and skipping weekends. When the holiday option is enabled, the 11 US federal holidays are also excluded on their observed weekday (a Saturday holiday is observed on Friday, a Sunday holiday on Monday). This gives you the net number of business-relevant days for planning or compliance purposes.',
     variables: [
       { symbol: 'Calendar Days', name: 'Total Calendar Days', description: 'The total number of days between the start date and end date, including or excluding boundaries based on the selected count method.' },
       { symbol: 'Working Days', name: 'Business/Working Days', description: 'Monday through Friday days that are neither weekends nor public holidays. This represents the net count of business-relevant days in the date range.' },
       { symbol: 'Weekend Days', name: 'Saturday and Sunday Days', description: 'Days falling on Saturday (day 6) or Sunday (day 0) within the date range. These are always excluded from the working day count.' },
-      { symbol: 'Public Holidays', name: 'US Federal Holidays', description: 'Fixed-date US federal holidays: New Year\'s Day (Jan 1), Independence Day (Jul 4), Veterans Day (Nov 11), Christmas Day (Dec 25), and Juneteenth (Jun 19). Floating holidays are not included.' },
+      { symbol: 'Public Holidays', name: 'US Federal Holidays', description: 'The 11 US federal holidays (5 U.S.C. 6103): New Year\'s Day, Martin Luther King Jr. Day (3rd Monday of January), Washington\'s Birthday (3rd Monday of February), Memorial Day (last Monday of May), Juneteenth (June 19, since 2021), Independence Day (July 4), Labor Day (1st Monday of September), Columbus Day (2nd Monday of October), Veterans Day (November 11), Thanksgiving (4th Thursday of November) and Christmas Day. A holiday on a Saturday is observed on Friday, on a Sunday on Monday.' },
       { symbol: 'Count Method', name: 'Date Boundary Inclusion', description: 'Controls whether the start and end dates are counted. Options: exclude start/include end, include both, or exclude both. Different conventions apply across contracts, rental periods, and notice periods.' },
     ],
     commonUses: [
@@ -156,7 +106,7 @@ const workingDaysConfig: CalculatorConfig = {
       'Use this information for project planning, contract terms, leave calculations, or deadline estimation.',
     ],
     explanation:
-      'Working day calculations are essential for project planning, deadline estimation, contract milestones, and payroll. This calculator counts Monday through Friday as working days and excludes Saturdays and Sundays. The holiday exclusion covers major fixed-date US federal holidays (New Year\'s Day, Independence Day, Veterans Day, Christmas). Floating holidays like Thanksgiving and Labor Day (which depend on the day of the week) are not included in this calculator. For business contexts, knowing the exact number of working days between two dates helps with setting realistic delivery dates, scheduling team capacity, and calculating service-level agreement compliance. For example, a standard 5-business-day turnaround means a project starting on Thursday would be due by Wednesday of the following week, assuming no holidays. In HR contexts, working day counts are used to calculate accrued paid time off, determine probation periods, and measure absenteeism. Many service contracts use "business days" rather than calendar days to exclude weekends from delivery timelines. Freelancers and consultants also use working day calculations to estimate project timelines and set client expectations about turnaround times. Knowing that there are typically 21-23 working days in a month helps with capacity planning and realistic scheduling across teams and departments.',
+      'Working day calculations are essential for project planning, deadline estimation, contract milestones, and payroll. This calculator counts Monday through Friday as working days and excludes Saturdays and Sundays. The holiday exclusion covers the 11 US federal holidays, including the floating ones such as Thanksgiving and Labor Day, with the observed weekday used when a holiday falls on a weekend. State holidays, bank holidays outside the US, company closures and half days are not included. For business contexts, knowing the exact number of working days between two dates helps with setting realistic delivery dates, scheduling team capacity, and calculating service-level agreement compliance. For example, a standard 5-business-day turnaround means a project starting on Thursday would be due by Wednesday of the following week, assuming no holidays. In HR contexts, working day counts are used to calculate accrued paid time off, determine probation periods, and measure absenteeism. Many service contracts use "business days" rather than calendar days to exclude weekends from delivery timelines. Freelancers and consultants also use working day calculations to estimate project timelines and set client expectations about turnaround times. Knowing that there are typically 21-23 working days in a month helps with capacity planning and realistic scheduling across teams and departments.',
     faqs: [
       {
         question: 'Why is my business deadline different from my project management tool?',
@@ -164,11 +114,11 @@ const workingDaysConfig: CalculatorConfig = {
       },
       {
         question: 'Does this include all US holidays?',
-        answer: 'This calculator includes fixed-date federal holidays (New Year\'s Day, Independence Day, Veterans Day, Christmas Day, Juneteenth). Floating holidays like Thanksgiving (4th Thursday in November), Memorial Day (last Monday in May), Labor Day (1st Monday in September), Martin Luther King Jr. Day (3rd Monday in January), and Presidents Day (3rd Monday in February) are not included due to their year-dependent dates. For complete holiday accounting, consult an official holiday calendar for your specific year.',
+        answer: 'It includes the 11 US federal holidays (New Year\'s Day, Martin Luther King Jr. Day, Washington\'s Birthday, Memorial Day, Juneteenth, Independence Day, Labor Day, Columbus Day, Veterans Day, Thanksgiving and Christmas), and when one falls on a Saturday or Sunday it removes the observed Friday or Monday instead. It does not include state or local holidays, religious observances, or company-specific days off, and other countries have different holidays.',
       },
       {
         question: 'How many working days are in a typical year?',
-        answer: 'A standard year has approximately 260 working days (52 weeks x 5 weekdays) minus approximately 10 federal holidays, resulting in roughly 250 working days per year. This varies slightly depending on the year and which holidays fall on weekends (when holiday observances may shift to Friday or Monday, affecting the count).',
+        answer: 'A year has 260 or 261 weekdays (52 weeks of 5 weekdays, plus 1 or 2 extra weekdays). Subtracting the 11 US federal holidays gives roughly 249-251 working days. For example 2026 has 261 weekdays and all 11 federal holidays (including Independence Day observed on Friday 3 July) fall on weekdays, so 250 working days.',
       },
       {
         question: 'What is the difference between working days and business days?',

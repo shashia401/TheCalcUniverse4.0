@@ -1,0 +1,87 @@
+import { createElement } from 'react';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import AspectRatioPanel from './AspectRatioPanel';
+import { aspectInfo } from './aspectMath';
+
+const aspectRatioConfig: CalculatorConfig = {
+  inputs: [
+    {
+      id: 'mode',
+      label: 'Mode',
+      type: 'select',
+      required: true,
+      helpText: 'Calculate ratio from dimensions or find a missing dimension',
+      options: [
+        { label: 'Calculate aspect ratio from dimensions', value: 'calculate-ratio' },
+        { label: 'Find missing dimension from ratio', value: 'find-missing' },
+      ],
+    },
+    // ── Calculate Ratio Mode ─────────────────────────────────────────────
+    {
+      id: 'width',
+      label: 'Width (pixels)',
+      type: 'number',
+      placeholder: '1920',
+      min: 1,
+      step: 1,
+      required: true,
+      helpText: 'Width of the image or screen in pixels',
+      showWhen: (values) => values.mode === 'calculate-ratio',
+    },
+    {
+      id: 'height',
+      label: 'Height (pixels)',
+      type: 'number',
+      placeholder: '1080',
+      min: 1,
+      step: 1,
+      required: true,
+      helpText: 'Height of the image or screen in pixels',
+      showWhen: (values) => values.mode === 'calculate-ratio',
+    },
+    // ── Find Missing Mode ────────────────────────────────────────────────
+    {
+      id: 'ratioA',
+      label: 'Ratio Width (A)',
+      type: 'number',
+      placeholder: '16',
+      min: 1,
+      step: 1,
+      required: true,
+      helpText: 'First number of the aspect ratio (e.g., 16 in 16:9)',
+      showWhen: (values) => values.mode === 'find-missing',
+    },
+    {
+      id: 'ratioB',
+      label: 'Ratio Height (B)',
+      type: 'number',
+      placeholder: '9',
+      min: 1,
+      step: 1,
+      required: true,
+      helpText: 'Second number of the aspect ratio (e.g., 9 in 16:9)',
+      showWhen: (values) => values.mode === 'find-missing',
+    },
+    {
+      id: 'knownDimension',
+      label: 'Known Dimension',
+      type: 'select',
+      required: true,
+      options: [
+        { label: 'Width', value: 'width' },
+        { label: 'Height', value: 'height' },
+      ],
+      showWhen: (values) => values.mode === 'find-missing',
+    },
+    {
+      id: 'knownValue',
+      label: 'Known Value (pixels)',
+      type: 'number',
+      placeholder: '1920',
+      min: 1,
+      step: 1,
+      required: true,
+      helpText: 'The known dimension in pixels',
+      showWhen: (values) => values.mode === 'find-missing',
+    },
+  ],

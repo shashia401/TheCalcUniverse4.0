@@ -2,57 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import HeatIndexPanel from './HeatIndexPanel';
 import { roundStrD as fmt } from '../../../lib/format';
-
-function heatIndex(Tf: number, RH: number): number {
-  if (Tf < 80) return Tf;
-  const HI = -42.379
-    + 2.04901523 * Tf
-    + 10.14333127 * RH
-    - 0.22475541 * Tf * RH
-    - 0.00683783 * Tf * Tf
-    - 0.05481717 * RH * RH
-    + 0.00122874 * Tf * Tf * RH
-    + 0.00085282 * Tf * RH * RH
-    - 0.00000199 * Tf * Tf * RH * RH;
-  return HI;
-}
-
-function getDangerTier(hi: number): { label: string; color: string } {
-  if (hi < 80) return { label: 'Safe', color: '#22c55e' };
-  if (hi < 90) return { label: 'Caution', color: '#eab308' };
-  if (hi < 103) return { label: 'Extreme Caution', color: '#f97316' };
-  if (hi < 125) return { label: 'Danger', color: '#ef4444' };
-  return { label: 'Extreme Danger', color: '#7c3aed' };
-}
-
-function getSafetyRecommendations(hi: number): string[] {
-  if (hi < 80) return ['No heat-related precautions necessary.'];
-  if (hi < 90) return [
-    'Fatigue possible with prolonged exposure or physical activity.',
-    'Stay hydrated and take breaks in the shade or air conditioning.',
-  ];
-  if (hi < 103) return [
-    'Heat cramps and heat exhaustion possible.',
-    'Limit strenuous outdoor activities to early morning or evening.',
-    'Drink water frequently — don\'t wait until you\'re thirsty.',
-    'Wear lightweight, light-colored, loose-fitting clothing.',
-  ];
-  if (hi < 125) return [
-    'Heat cramps and heat exhaustion likely. Heatstroke possible.',
-    'Avoid outdoor activities during midday heat.',
-    'Schedule frequent rest breaks in air-conditioned environments.',
-    'Watch for signs of heat exhaustion: heavy sweating, weakness, cold/clammy skin.',
-    'Seek medical attention if symptoms worsen or persist.',
-  ];
-  return [
-    'Heatstroke highly likely with continued exposure.',
-    'DO NOT engage in outdoor activities.',
-    'Stay in air-conditioned environments — fans alone are insufficient.',
-    'Monitor for heatstroke symptoms: hot/dry skin, confusion, loss of consciousness.',
-    'CALL 911 immediately if heatstroke is suspected.',
-    'While waiting for help: move to a cool area, remove excess clothing, cool with water/ice.',
-  ];
-}
+import { heatIndexF, heatRecommendations as getSafetyRecommendations, heatTier as getDangerTier } from '../../../utils/heatIndex';
 
 const heatIndexConfig: CalculatorConfig = {
   inputs: [
@@ -83,7 +33,8 @@ const heatIndexConfig: CalculatorConfig = {
 
     if ([Tf, RH].some(isNaN) || RH < 0 || RH > 100) return [];
 
-    const hi = heatIndex(Tf, RH);
+    // Shared NWS implementation (src/utils/heatIndex.ts), identical to everyday/heat-index; tiers use the displayed 0.1 value.
+    const hi = Math.round(heatIndexF(Tf, RH) * 10) / 10;
     const danger = getDangerTier(hi);
     const recommendations = getSafetyRecommendations(hi);
 

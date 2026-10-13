@@ -46,7 +46,7 @@ describe('Countdown Calculator', () => {
     const totalDays = parseNumber(getValue(results, 'totalDays'));
     expect(totalDays).toBe(5401);
     const breakdown = getValue(results, 'breakdown');
-    expect(breakdown).toBe('14y 9m 2w 1d');
+    expect(breakdown).toBe('14y 9m 1w 4d'); // dateutil: 14y 9m 11d = 1w 4d (old average-month math said 2w 1d)
   });
 
   it('shows "ago" indicator for a past date', () => {

@@ -38,9 +38,9 @@ describe('Robux / V-Bucks Converter', () => {
 
   it('sets correct effective rate for V-Bucks 13500 package', () => {
     const r = config.calculate({ virtualCurrency: '13500', currencyType: 'V-Bucks', packageType: '13500' });
-    near(parseNumber(getValue(r, 'usdValue')), 79.99);
+    near(parseNumber(getValue(r, 'usdValue')), 89.99);
     const rate = parseNumber(getValue(r, 'effectiveRate'));
-    near(rate, 79.99 / 13500, 0.0001);
+    near(rate, 89.99 / 13500, 0.0001);
   });
 
   it('returns empty for empty or zero amount', () => {

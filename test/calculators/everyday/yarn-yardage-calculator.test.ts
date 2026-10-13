@@ -49,10 +49,8 @@ describe('Yarn Yardage Calculator', () => {
       precutCount: '',
     });
     const yardage = parseNumber(getValue(results, 'yardageNeeded'));
-    // Gauge factor: (22/20) * (26/24) = 1.1 * 1.083 = 1.19
-    // 400 * 1.19 ≈ 477
-    expect(yardage).toBeGreaterThan(450);
-    expect(yardage).toBeLessThan(500);
+    // Row gauge factor 26/24 = 1.083: 400 * 1.083 = 433.3 -> 433 (stitch count does not change yarn per row)
+    expect(yardage).toBe(433);
   });
 
   it('adjusts for looser gauge (needs less yarn)', () => {
@@ -68,10 +66,8 @@ describe('Yarn Yardage Calculator', () => {
       precutCount: '',
     });
     const yardage = parseNumber(getValue(results, 'yardageNeeded'));
-    // Gauge factor: (18/20) * (22/24) = 0.9 * 0.917 = 0.825
-    // 400 * 0.825 = 330
-    expect(yardage).toBeLessThan(360);
-    expect(yardage).toBeGreaterThan(300);
+    // Row gauge factor 22/24 = 0.9167: 400 * 0.9167 = 366.7 -> 367
+    expect(yardage).toBe(367);
   });
 
   it('calculates custom project yardage', () => {
@@ -87,11 +83,9 @@ describe('Yarn Yardage Calculator', () => {
       precutCount: '',
     });
     const yardage = parseNumber(getValue(results, 'yardageNeeded'));
-    // 50*60 / (5*6) * 1.2 = 3000/30 * 1.2 = 120
-    // Actually: stitches per inch = 5, rows per inch = 6, sq inches per st*row unit = 5*6=30
-    // yardage = 3000/30 * 1.2 = 120
-    expect(yardage).toBeGreaterThan(100);
-    expect(yardage).toBeLessThan(150);
+    // Corrected model (the old area / gauge division gave 120 yd for a 50x60 blanket, dimensionally wrong):
+    // 3.5 x 50 x 60 x (24/4 rows per inch) / 36 = 1750 yd, x 1.2 waste = 2100 yd
+    expect(yardage).toBe(2100);
   });
 
   it('does not double-apply the gauge factor for custom projects (regression: a non-baseline custom gauge previously got squared/discounted because gaugeFactor was multiplied on top of an area formula that already divided by the user\'s own gauge)', () => {
@@ -105,11 +99,9 @@ describe('Yarn Yardage Calculator', () => {
       precutType: 'Jelly Roll',
       precutCount: '1',
     });
-    // Area method: (50*60) / (2.5*3) * 1.2 = 400 * 1.2 = 480 yards.
-    // The old code then multiplied by gaugeFactor = (10/20)*(12/24) = 0.25,
-    // wrongly shrinking the result to 120 yards.
+    // 3.5 x 50 x 60 x (12/4) / 36 = 875 yd, x 1.2 = 1050 yd; the gauge is applied once only
     const yardage = parseNumber(getValue(results, 'yardageNeeded'));
-    expect(yardage).toBe(480);
+    expect(yardage).toBe(1050);
   });
 
   it('accounts for precut fabric yardage', () => {
@@ -124,10 +116,11 @@ describe('Yarn Yardage Calculator', () => {
       precutType: 'Jelly Roll',
       precutCount: '1',
     });
-    // Should show precut yardage and remaining needed
+    // Jelly Roll = 40 strips of 2.5" x 42" = 4200 sq in / (36 x 44) = 2.65 yd of fabric -> "3 yards"
     const precutYardage = parseNumber(getValue(results, 'precutYardage'));
-    near(precutYardage, 3); // Jelly Roll ≈ 2.75 yards ≈ 3
-    expect(results.find(r => r.id === 'remainingYardage')).toBeDefined();
+    near(precutYardage, 3);
+    // fabric is not yarn: nothing is subtracted from the yarn estimate any more
+    expect(results.find(r => r.id === 'remainingYardage')).toBeUndefined();
   });
 
   it('returns empty array for invalid gauge', () => {
