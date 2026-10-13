@@ -1,13 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RateLimitPanel from './RateLimitPanel';
-
-const serverDefaults: Record<string, { burstRpm: number; maxConcurrent: number; label: string }> = {
-  'aws-api-gateway': { burstRpm: 10000, maxConcurrent: 5000, label: 'AWS API Gateway' },
-  'cloudflare': { burstRpm: Infinity, maxConcurrent: 15000, label: 'Cloudflare' },
-  'nginx': { burstRpm: 5000, maxConcurrent: 3000, label: 'Nginx' },
-  'custom': { burstRpm: 5000, maxConcurrent: 2000, label: 'Custom' },
-};
+import { computeThroughput } from './rateLimitMath';
 
 const rateLimitConfig: CalculatorConfig = {
   inputs: [
@@ -19,9 +13,10 @@ const rateLimitConfig: CalculatorConfig = {
       unit: 'req/min',
       inputMode: 'decimal',
       min: 1,
+      max: 1e9,
       step: 100,
       required: true,
-      helpText: 'The maximum number of requests your API can handle per minute',
+      helpText: 'The sustained requests per minute you expect or allow (your rate limit)',
     },
     {
       id: 'avgPayloadSize',
@@ -31,9 +26,10 @@ const rateLimitConfig: CalculatorConfig = {
       unit: 'KB',
       inputMode: 'decimal',
       min: 0.01,
+      max: 1e7,
       step: 1,
       required: true,
-      helpText: 'Average size of each API response payload in kilobytes',
+      helpText: 'Average size of each API response payload in kilobytes (1 KB = 1,024 bytes)',
     },
     {
       id: 'peakConcurrentUsers',
@@ -43,109 +39,59 @@ const rateLimitConfig: CalculatorConfig = {
       unit: 'users',
       inputMode: 'decimal',
       min: 1,
+      max: 1e9,
       step: 10,
       helpText: 'Estimated number of concurrent users during peak traffic',
     },
     {
-      id: 'serverType',
-      label: 'Server Type',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'AWS API Gateway', value: 'aws-api-gateway' },
-        { label: 'Cloudflare', value: 'cloudflare' },
-        { label: 'Nginx', value: 'nginx' },
-        { label: 'Custom', value: 'custom' },
-      ],
-      helpText: 'Select your server type for burst capacity defaults',
+      id: 'burstRpm',
+      label: 'Burst Limit You Configured (optional)',
+      type: 'number',
+      placeholder: '120000',
+      unit: 'req/min',
+      inputMode: 'decimal',
+      min: 1,
+      max: 1e9,
+      step: 100,
+      helpText: 'Short-term limit above the sustained rate, e.g. your gateway\'s configured burst. Look it up in your provider\'s documentation or console; this calculator has no built-in provider limits.',
     },
   ],
   calculate: (values) => {
     const rpm = parseFloat(values.maxRpm);
     const payloadSizeKB = parseFloat(values.avgPayloadSize);
     const peakConcurrent = parseFloat(values.peakConcurrentUsers);
-    const serverType = (values.serverType || 'custom') as string;
+    const burst = parseFloat(values.burstRpm);
 
-    if (isNaN(rpm) || isNaN(payloadSizeKB) || rpm <= 0 || payloadSizeKB <= 0) return [];
+    if (![rpm, payloadSizeKB].every(Number.isFinite) || rpm <= 0 || payloadSizeKB <= 0) return [];
 
-    const rps = rpm / 60;
-    const bandwidthKbps = rps * payloadSizeKB;
-    const bandwidthMbps = bandwidthKbps / 1024;
-    const dailyCapacity = rpm * 60 * 24;
-    const serverInfo = serverDefaults[serverType] || serverDefaults['custom'];
+    const t = computeThroughput(rpm, payloadSizeKB);
+    const perUserRpm = Number.isFinite(peakConcurrent) && peakConcurrent > 0 ? rpm / peakConcurrent : 0;
+    const loc = (n: number, d: number) => n.toLocaleString(undefined, { maximumFractionDigits: d });
 
-    let burstLimit: number;
-    let burstLabel: string;
-    if (serverInfo.burstRpm === Infinity) {
-      burstLimit = rpm * 10;
-      burstLabel = 'Unlimited (theoretical)';
-    } else {
-      burstLimit = Math.min(serverInfo.burstRpm, rpm * 10);
-      burstLabel = `${burstLimit.toLocaleString()} RPM`;
-    }
-
-    const maxConcurrent = serverInfo.maxConcurrent;
-    const perUserRpm = peakConcurrent && peakConcurrent > 0 ? rpm / peakConcurrent : 0;
-
-    return [
-      {
-        id: 'rps',
-        label: 'Requests Per Second (RPS)',
-        value: `${rps.toLocaleString(undefined, { maximumFractionDigits: 1 })} req/s`,
-        highlight: true,
-        color: 'positive',
-      },
-      {
-        id: 'bandwidthKbps',
-        label: 'Bandwidth Required',
-        value: `${bandwidthKbps.toLocaleString(undefined, { maximumFractionDigits: 1 })} KB/s`,
-        color: 'neutral',
-      },
-      {
-        id: 'bandwidthMbps',
-        label: 'Bandwidth (Mbps)',
-        value: `${bandwidthMbps.toLocaleString(undefined, { maximumFractionDigits: 2 })} Mbps`,
-        color: bandwidthMbps > 1000 ? 'negative' : bandwidthMbps > 100 ? 'neutral' : 'positive',
-      },
-      {
-        id: 'dailyCapacity',
-        label: 'Daily Request Capacity',
-        value: `${dailyCapacity.toLocaleString(undefined, { maximumFractionDigits: 0 })} req/day`,
-        color: 'neutral',
-      },
-      {
-        id: 'burstLimit',
-        label: `Burst Capacity (${serverInfo.label})`,
-        value: burstLabel,
-        color: 'neutral',
-      },
-      {
-        id: 'maxConcurrent',
-        label: 'Max Recommended Concurrent Users',
-        value: `${maxConcurrent.toLocaleString()} users`,
-        color: 'neutral',
-      },
-      {
-        id: 'serverType',
-        label: 'Server Type',
-        value: serverInfo.label,
-        color: 'neutral',
-      },
-      {
-        id: 'rpm',
-        label: 'Requests Per Minute',
-        value: `${rpm.toLocaleString(undefined, { maximumFractionDigits: 0 })} RPM`,
-        color: 'neutral',
-      },
+    const results: CalculatorResult[] = [
+      { id: 'rps', label: 'Requests Per Second (RPS)', value: `${loc(t.rps, 1)} req/s`, highlight: true, color: 'positive' },
+      { id: 'bandwidthKbps', label: 'Payload Throughput', value: `${loc(t.kBps, 1)} KB/s`, color: 'neutral' },
+      { id: 'bandwidthMbps', label: 'Bandwidth (megabits per second)', value: `${loc(t.mbps, 2)} Mbps`, color: 'neutral' },
+      { id: 'monthlyTransfer', label: 'Data Transferred per 30 Days at This Rate', value: `${loc(t.tbPerMonth, 2)} TB`, color: 'neutral' },
+      { id: 'dailyCapacity', label: 'Daily Request Capacity', value: `${loc(t.requestsPerDay, 0)} req/day`, color: 'neutral' },
+      { id: 'rpm', label: 'Requests Per Minute', value: `${loc(rpm, 0)} RPM`, color: 'neutral' },
       {
         id: 'perUserRpm',
         label: 'RPM Per User',
-        value: perUserRpm > 0
-          ? `${perUserRpm.toFixed(2)} RPM/user`
-          : 'N/A (no concurrent users)',
-        color: perUserRpm > 0 && perUserRpm < 1 ? 'neutral' : 'neutral',
+        value: perUserRpm > 0 ? `${perUserRpm.toFixed(2)} RPM/user` : 'N/A (no concurrent users)',
+        color: 'neutral',
       },
     ];
+    if (Number.isFinite(burst) && burst > 0) {
+      results.splice(5, 0, {
+        id: 'burstLimit',
+        label: 'Burst vs Sustained',
+        value: `${loc(burst, 0)} RPM burst (${loc(burst / rpm, 2)}x the sustained rate)`,
+        color: 'neutral',
+        ...(burst < rpm ? { warning: 'The burst limit is below the sustained rate, so the sustained rate can never be reached.' } : {}),
+      });
+    }
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -153,7 +99,7 @@ const rateLimitConfig: CalculatorConfig = {
   },
   educational: {
     formula:
-      'RPS = RPM / 60\nBandwidth = RPS × Payload Size\nDaily Capacity = RPM × 60 × 24\nPer-User RPM = RPM / Peak Users',
+      'RPS = RPM / 60\nPayload throughput (KB/s) = RPS × Payload Size\nBandwidth (Mbps) = KB/s × 1,024 × 8 / 1,000,000\nDaily Capacity = RPM × 60 × 24\nPer-User RPM = RPM / Peak Users',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="60" y="50" width="320" height="240" fill="var(--svg-f8fafc)" stroke="var(--svg-e2e8f0)" stroke-width="1"/><line x1="60" y1="100" x2="380" y2="100" stroke="var(--svg-ef4444)" stroke-width="2" stroke-dasharray="8,4"/><text x="385" y="104" font-size="11" fill="var(--svg-ef4444)">Limit</text><rect x="80" y="240" width="20" height="50" fill="var(--svg-3b82f6)" rx="2"/><rect x="110" y="220" width="20" height="70" fill="var(--svg-3b82f6)" rx="2"/><rect x="140" y="190" width="20" height="100" fill="var(--svg-3b82f6)" rx="2"/><rect x="170" y="160" width="20" height="130" fill="var(--svg-3b82f6)" rx="2"/><rect x="200" y="140" width="20" height="150" fill="var(--svg-3b82f6)" rx="2"/><rect x="230" y="170" width="20" height="120" fill="var(--svg-3b82f6)" rx="2"/><rect x="260" y="200" width="20" height="90" fill="var(--svg-3b82f6)" rx="2"/><rect x="290" y="230" width="20" height="60" fill="var(--svg-3b82f6)" rx="2"/><rect x="320" y="250" width="20" height="40" fill="var(--svg-3b82f6)" rx="2"/><text x="220" y="310" text-anchor="middle" font-size="12" fill="var(--svg-666666)">Time</text></svg>',
       alt: 'Bar chart showing request volume over time with a red dashed rate limit line',
@@ -187,11 +133,11 @@ const rateLimitConfig: CalculatorConfig = {
       'Enter your API\'s maximum requests per minute (RPM).',
       'Enter the average payload size in KB to calculate bandwidth requirements.',
       'Optionally enter peak concurrent users to see per-user allocation.',
-      'Select your server type to see burst capacity defaults.',
+      'Optionally enter the burst limit you have configured to compare it with the sustained rate.',
       'Use the results to plan infrastructure scaling and set appropriate rate limits.',
     ],
     explanation:
-      'Rate limiting is a critical API management strategy that protects your backend from being overwhelmed by too many requests. When a client exceeds the allowed rate, the server returns HTTP 429 (Too Many Requests). The difference between burst and steady-state capacity is key: burst allows short spikes above the sustained limit, while the sustained rate is what your infrastructure can handle long-term. AWS API Gateway has a default burst limit of 10,000 RPM. Cloudflare offers effectively unlimited burst. Nginx burst depends on worker configurations. For production APIs, set rate limits at 2-3x your expected peak traffic to handle spikes while protecting your backend.',
+      'Rate limiting is a critical API management strategy that protects your backend from being overwhelmed by too many requests. When a client exceeds the allowed rate, the server returns HTTP 429 (Too Many Requests). The difference between burst and steady-state capacity is key: burst allows short spikes above the sustained limit, while the sustained rate is what your infrastructure can handle long-term. Providers publish their own default throttling quotas (for example Amazon API Gateway documents account-level steady-state and burst quotas in requests per second), and Nginx\'s limit_req module takes a rate and a burst you configure yourself, so look up the numbers for your setup rather than assuming defaults. A common practice is to leave headroom above your expected peak traffic so normal usage does not hit 429s, while still protecting the backend.',
     commonUses: [
       'Planning API infrastructure capacity by calculating requests per second, bandwidth requirements, and daily throughput',
       'Setting appropriate rate limits for public APIs to protect backend services from abuse and unexpected traffic spikes',
@@ -205,11 +151,11 @@ const rateLimitConfig: CalculatorConfig = {
       },
       {
         question: 'What is the difference between burst and sustained rate limits?',
-        answer: 'Burst allows short-term spikes above the sustained limit (e.g., 10,000 RPM burst on a 1,000 RPM sustained limit). Sustained is the average rate your system can handle over longer periods.',
+        answer: 'Burst allows short-term spikes above the sustained limit (e.g., a 10,000 RPM burst on top of a 1,000 RPM sustained limit). Sustained is the average rate your system can handle over longer periods.',
       },
       {
         question: 'What is a reasonable rate limit for my API?',
-        answer: 'A common approach is to set the rate limit at 2-3x your expected peak traffic. For a public API, 1000-10000 RPM per user is typical. Adjust based on your infrastructure and user base.',
+        answer: 'Start from measured traffic: set the limit comfortably above your expected legitimate peak so normal usage never sees a 429, and below the rate your backend can sustain. There is no universal per-user number; it depends on your clients and your capacity, so measure real usage first.',
       },
       {
         question: 'How should clients handle 429 errors?',
@@ -223,58 +169,45 @@ const rateLimitConfig: CalculatorConfig = {
     
     workedExamples: [
       {
-        scenario: 'AcmeTech runs a public REST API behind AWS API Gateway with a 60,000 RPM rate limit, serving 50 KB average payload responses to an estimated 1,000 peak concurrent users. Their DevOps team needs to plan bandwidth provisioning and understand per-user allocation.',
-        inputs: {
-          'Max RPM': '60000',
-          'Avg Payload Size': '50 KB',
-          'Peak Concurrent Users': '1000',
-          'Server Type': 'AWS API Gateway',
-        },
-        result: 'RPS: 1,000 req/s. Bandwidth: 48.83 Mbps. Daily Capacity: 86,400,000 req/day. Burst: 10,000 RPM (AWS default). Max Concurrent: 5,000 users. Per-User RPM: 60 RPM/user.',
-        insight: 'At 60,000 RPM (1,000 RPS) and 50 KB per response, AcmeTech needs ~49 Mbps of sustained egress bandwidth. A typical AWS NAT gateway supports up to 4.5 Gbps, so bandwidth is not the bottleneck here. The more important finding is the burst limit: AWS API Gateway caps burst at 10,000 RPM, meaning AcmeTech\'s configured 60,000 RPM limit can only sustain that rate — burst capacity is actually lower than the sustained limit due to the AWS default. With 1,000 concurrent users, each user gets 60 RPM (1 RPS), which is reasonable for most client applications. If AcmeTech expects traffic spikes beyond 10,000 burst RPM, they need to either raise the AWS burst quota or implement client-side throttling with exponential backoff to avoid 429 errors during surges.',
+        scenario: 'A public REST API is limited to 60,000 RPM, serving 50 KB average responses to an estimated 1,000 peak concurrent users. The team needs to plan bandwidth and per-user allocation.',
+        inputs: { maxRpm: '60000', avgPayloadSize: '50', peakConcurrentUsers: '1000' },
+        result: 'RPS: 1,000 req/s. Payload throughput: 50,000 KB/s. Bandwidth: 409.6 Mbps (50,000 KB/s × 1,024 B × 8 ÷ 10⁶). Daily capacity: 86,400,000 req/day. About 132.71 TB per 30 days. Per-user RPM: 60.',
+        insight: 'Megabits, not megabytes: 50,000 KB/s is about 48.8 MB/s, which is 409.6 Mbps on the wire, so a 1 Gbps link is already ~41% utilised by response payloads alone (headers, TLS overhead and requests are extra). At roughly 132.7 TB a month, egress charges can matter more than request fees; check your provider\'s transfer pricing. With 1,000 concurrent users each user can make 60 RPM (1 per second) at the limit.',
       },
       {
-        scenario: 'A small startup runs an Nginx-reverse-proxied microservice with a modest 5,000 RPM capacity and lightweight 2 KB JSON responses. They don\'t yet have concurrent user data but want to understand their daily throughput headroom and bandwidth costs.',
-        inputs: {
-          'Max RPM': '5000',
-          'Avg Payload Size': '2 KB',
-          'Peak Concurrent Users': '',
-          'Server Type': 'Nginx',
-        },
-        result: 'RPS: 83.3 req/s. Bandwidth: 0.16 Mbps. Daily Capacity: 7,200,000 req/day. Burst: 5,000 RPM (Nginx). Max Concurrent: 3,000 users. Per-User RPM: N/A.',
-        insight: 'With only 83 RPS and 0.16 Mbps bandwidth, this microservice can run on minimal infrastructure — even a $5/month VPS with 1 TB transfer could serve ~500 million requests before hitting bandwidth limits. The 7.2 million daily request capacity is generous for a small startup. The Nginx burst limit matching the sustained RPM (5,000) means there is no additional burst headroom beyond the steady-state rate — any traffic spike above 5,000 RPM will immediately trigger rate limiting. The startup should configure Nginx\'s rate-limiting module (`limit_req_zone`) to enforce this limit and return 429 with a `Retry-After` header rather than letting the server crash under unexpected load. Without concurrent user data, per-user allocation cannot be estimated — the team should instrument their app to collect this data before designing per-user rate tiers.',
+        scenario: 'A small Nginx-proxied microservice has a 5,000 RPM limit and 2 KB JSON responses. There is no concurrent-user data yet.',
+        inputs: { maxRpm: '5000', avgPayloadSize: '2', peakConcurrentUsers: '' },
+        result: 'RPS: 83.3 req/s. Payload throughput: 166.7 KB/s. Bandwidth: 1.37 Mbps. Daily capacity: 7,200,000 req/day. About 0.44 TB per 30 days. Per-user RPM: N/A.',
+        insight: 'At 83 RPS and 1.37 Mbps the traffic is tiny for modern infrastructure, so the limit is about protecting the application, not the network. Enforce it in the proxy (for example with Nginx limit_req) and return 429 with a Retry-After header. Collect concurrent-user data before designing per-user tiers.',
       },
     ],
 
     proTips: [
-      'Set your API rate limit at 2–3× expected peak traffic, not at your infrastructure\'s breaking point. This gives you headroom for organic growth and unexpected traffic while still protecting the backend. A limit that is exactly at peak means your users will hit 429s during normal usage.',
-      'Always pair rate-limited APIs with exponential-backoff client libraries. A well-behaved client that retries with 1s → 2s → 4s → 8s delays can reduce perceived downtime from seconds to unnoticeable milliseconds. Return the `Retry-After` header to guide client behavior.',
-      'Per-user RPM allocation is a critical metric for API pricing tiers. If your per-user RPM drops below 10, interactive use (e.g., a dashboard polling an endpoint) becomes sluggish. Aim for 30–60 RPM/user for a responsive experience, and 10+ RPM/user for background/batch operations.',
-      'Bandwidth costs scale with payload size, not request count. If your 50 KB responses are at 1,000 RPS, that\'s ~126 TB/month of egress. At AWS\'s ~$0.09/GB egress rate, that\'s roughly $11,340/month just in data transfer. Consider response compression (gzip/brotli), pagination, and field filtering to reduce payload size before scaling infrastructure.',
+      'Leave headroom between your limit and expected legitimate peak traffic: a limit set exactly at peak means users hit 429s during normal use.',
+      'Pair rate-limited APIs with client libraries that back off exponentially (for example 1s, 2s, 4s, 8s) with random jitter, and honour the Retry-After header.',
+      'Check both numbers: the sustained rate (tokens refilled per second) and the burst (bucket size). Many gateways let you set them separately.',
+      'Bandwidth cost scales with payload size, not request count. At 1,000 RPS, 50 KB responses move about 132 TB a month; compression (gzip/brotli), pagination and field filtering cut that directly.',
     ],
 
     quickReference: [
-      { label: 'AWS API Gateway', value: '10,000 burst RPM · 5,000 max concurrent' },
-      { label: 'Cloudflare', value: 'Unlimited burst · 15,000 max concurrent' },
-      { label: 'Nginx', value: '5,000 burst RPM · 3,000 max concurrent' },
       { label: 'HTTP 429', value: 'Too Many Requests — retry after Retry-After seconds' },
       { label: 'RPS Formula', value: 'RPS = RPM ÷ 60' },
-      { label: 'Bandwidth Formula', value: 'Mbps = (RPS × KB) ÷ 1024' },
+      { label: 'Bandwidth Formula', value: 'Mbps = RPS × KB × 1,024 × 8 ÷ 1,000,000' },
       { label: 'Daily Capacity', value: 'Daily = RPM × 60 × 24' },
-      { label: 'Exponential Backoff', value: '1s → 2s → 4s → 8s → 16s (max 5 retries)' },
-      { label: 'Token Bucket', value: 'Tokens refill at sustained rate; bucket depth = burst capacity' },
-      { label: 'Leaky Bucket', value: 'Requests processed at fixed rate; excess queued or dropped' },
+      { label: 'Exponential Backoff', value: '1s → 2s → 4s → 8s → 16s (with jitter, limited retries)' },
+      { label: 'Token Bucket', value: 'Tokens refill at the sustained rate; bucket depth = burst capacity' },
+      { label: 'Leaky Bucket', value: 'Requests processed at a fixed rate; excess queued or dropped' },
     ],
 
     limitations: [
       'This calculator models steady-state throughput and does not account for traffic burst patterns, cold starts, cache hit ratios, database query latency, or downstream service bottlenecks — all of which affect real-world API capacity.',
-      'Burst capacity server defaults are approximations. Actual burst limits depend on your specific configuration (Nginx worker settings, AWS account quotas, Cloudflare plan tier). Always verify against your provider\'s actual limits.',
-      'Bandwidth estimates assume uncompressed payloads. Real-world bandwidth with gzip/brotli compression can be 50–80% lower for text-based responses (JSON, HTML, XML), making the calculator conservative for compressible payloads.',
+      'Provider limits are not built in: quotas and burst settings differ by provider, plan and configuration, so enter yours (burst is optional) or look them up in your provider\'s documentation.',
+      'Bandwidth estimates use the payload size you enter; if that is the uncompressed size, compression (gzip/brotli) will reduce the wire size of text responses, often by a large factor. Protocol overhead (headers, TLS, TCP) is not included.',
       'Per-user RPM assumes uniform load distribution across users, which is rarely true in practice. A small fraction of power users often generates the majority of requests. Use this calculator for aggregate planning, then instrument actual usage to identify your real per-user distribution.',
     ],
 citations: [
       { source: 'Wikipedia', title: 'Rate Limiting', url: 'https://en.wikipedia.org/wiki/Rate_limiting' },
-      { source: 'Wolfram MathWorld', title: 'Rate Limiting', url: 'https://mathworld.wolfram.com/' },
+      { source: 'IETF RFC 6585', title: 'Additional HTTP Status Codes (429 Too Many Requests)', url: 'https://www.rfc-editor.org/rfc/rfc6585' },
     ],
   },
 };

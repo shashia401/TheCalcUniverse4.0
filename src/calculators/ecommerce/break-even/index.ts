@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import BreakEvenPanel from './BreakEvenPanel';
+import { computeBreakEven } from './breakEvenMath';
 
 const breakEvenConfig: CalculatorConfig = {
   inputs: [
@@ -46,16 +47,13 @@ const breakEvenConfig: CalculatorConfig = {
     const price = parseFloat(values.pricePerUnit);
     const variableCost = parseFloat(values.variableCostPerUnit);
 
-    if ([fixedCosts, price, variableCost].some(isNaN) || price <= 0) return [];
+    if (![fixedCosts, price, variableCost].every(Number.isFinite) || price <= 0 || fixedCosts < 0 || variableCost < 0) return [];
 
-    const contributionMargin = price - variableCost;
-    if (contributionMargin <= 0) return [
+    const be = computeBreakEven(fixedCosts, price, variableCost);
+    if (!be) return [
       { id: 'error', label: 'Error', value: 'Selling price must exceed variable cost', highlight: true, color: 'negative' },
     ];
-
-    const breakEvenUnits = fixedCosts / contributionMargin;
-    const breakEvenRevenue = breakEvenUnits * price;
-    const contributionMarginPct = (contributionMargin / price) * 100;
+    const { contributionMargin, contributionMarginPct, unitsCeil, revenue: breakEvenRevenue } = be;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -64,7 +62,7 @@ const breakEvenConfig: CalculatorConfig = {
       {
         id: 'breakEvenUnits',
         label: 'Break-Even Units',
-        value: `${Math.ceil(breakEvenUnits).toLocaleString(undefined)} units`,
+        value: `${unitsCeil.toLocaleString(undefined)} units`,
         highlight: true,
         color: 'neutral',
         interpretation: `Each unit sold contributes $${fmt(contributionMargin)} toward covering your fixed costs — below this number you're losing money, above it every sale is pure profit. Raising price or cutting variable cost per unit lowers this threshold faster than trying to cut fixed costs, which are usually harder to shrink quickly.`,
@@ -133,7 +131,7 @@ const breakEvenConfig: CalculatorConfig = {
       'Use the result to assess whether your target sales volume is realistic for your market size.',
     ],
     explanation:
-      'The break-even analysis is foundational for any product or business. It tells you the minimum sales volume required to avoid losses. Every unit sold beyond break-even contributes directly to profit at the contribution margin rate. For example, if fixed costs are $10,000, selling price is $50, and variable cost is $20, the contribution margin is $30 per unit and break-even is 334 units. Unit 335 generates $30 of pure profit. This analysis helps with pricing decisions, cost control, and evaluating new product viability. A practical edge case: if your selling price is $25 and variable cost is $25, the contribution margin is $0 and break-even never occurs — you lose your fixed costs every period. This is why businesses must ensure price exceeds variable cost. Another scenario: a software startup with $50,000 in monthly fixed costs (engineering salaries, hosting) selling a $100 per month subscription with $5 per month variable cost (hosting, support). The contribution margin is $95 per month, so break-even is just 527 subscribers — achievable for most B2B SaaS products. A coffee shop with $8,000 in monthly fixed costs selling coffee at $4.50 with $1.20 variable cost per cup has a contribution margin of $3.30 per cup. Break-even is 2,424 cups per month, or about 81 cups per day — which is achievable for a shop in a decent location but challenging for a new business in a low-traffic area.',
+      'The break-even analysis is foundational for any product or business. It tells you the minimum sales volume required to avoid losses. Every unit sold beyond break-even contributes directly to profit at the contribution margin rate. For example, if fixed costs are $10,000, selling price is $50, and variable cost is $20, the contribution margin is $30 per unit and break-even is 334 units. Unit 335 generates $30 of pure profit. This analysis helps with pricing decisions, cost control, and evaluating new product viability. A practical edge case: if your selling price is $25 and variable cost is $25, the contribution margin is $0 and break-even never occurs — you lose your fixed costs every period. This is why businesses must ensure price exceeds variable cost. Another scenario: a software startup with $50,000 in monthly fixed costs (engineering salaries, hosting) selling a $100 per month subscription with $5 per month variable cost (hosting, support). The contribution margin is $95 per month, so break-even is just 527 subscribers — achievable for most B2B SaaS products. A coffee shop with $8,000 in monthly fixed costs selling coffee at $4.50 with $1.20 variable cost per cup has a contribution margin of $3.30 per cup. Break-even is 2,425 cups per month (2,424.2 rounded up), or about 81 cups per day — which is achievable for a shop in a decent location but challenging for a new business in a low-traffic area.',
     commonUses: [
       'Determining the minimum number of units a new product must sell each month to cover fixed costs before launching',
       'Evaluating whether a product pricing strategy is viable by calculating how many sales are needed just to break even',
@@ -158,15 +156,15 @@ const breakEvenConfig: CalculatorConfig = {
       },
       {
         question: 'How does break-even change when I add a new product line?',
-        answer: 'Adding a new product line increases fixed costs (more equipment, space, staff) but should also increase total contribution margin. Run the break-even analysis both with and without the new product line to see if the additional fixed costs are justified by the expected contribution margin from the new product. A common rule of thumb: if the new product line can cover its incremental fixed costs within 6 months, it is worth serious consideration.',
+        answer: 'Adding a new product line increases fixed costs (more equipment, space, staff) but should also increase total contribution margin. Run the break-even analysis both with and without the new product line to see if the additional fixed costs are justified by the expected contribution margin from the new product. Compare how long each option takes to pay back its extra fixed costs.',
       },
       {
         question: 'How should I account for seasonal fluctuations in break-even analysis?',
-        answer: 'For seasonal businesses, use annual fixed costs and annual unit projections rather than monthly numbers. If your business does 60% of annual revenue in Q4, a monthly break-even of 1,000 units may look impossible in February but very achievable in November. Alternatively, calculate break-even for each quarter separately with quarterly fixed costs and adjust variable costs for seasonal supplier pricing. E-commerce businesses with strong Q4 seasonality should ensure Q1-Q3 combined contribution covers at least 70% of annual fixed costs.',
+        answer: 'For seasonal businesses, use annual fixed costs and annual unit projections rather than monthly numbers. If your business does 60% of annual revenue in Q4, a monthly break-even of 1,000 units may look impossible in February but very achievable in November. Alternatively, calculate break-even for each quarter separately with quarterly fixed costs and adjust variable costs for seasonal supplier pricing.',
       },
       {
         question: 'What is the margin of safety and how does it relate to break-even?',
-        answer: 'Margin of safety is how much sales can drop before you reach break-even, expressed as a percentage: (Current Sales − Break-Even Sales) ÷ Current Sales × 100. If your business sells 1,000 units/month and break-even is 600 units, you have a 40% margin of safety — sales could drop 40% before you lose money. A margin of safety below 20% means the business is vulnerable to even modest demand fluctuations or cost increases. Track this metric monthly alongside break-even.',
+        answer: 'Margin of safety is how much sales can drop before you reach break-even, expressed as a percentage: (Current Sales − Break-Even Sales) ÷ Current Sales × 100. If your business sells 1,000 units/month and break-even is 600 units, you have a 40% margin of safety — sales could drop 40% before you lose money. The smaller the margin of safety, the more exposed the business is to demand drops or cost increases. Track this metric monthly alongside break-even.',
       },
     ],
     workedExamples: [
@@ -194,7 +192,7 @@ const breakEvenConfig: CalculatorConfig = {
       'Include your OWN salary in fixed costs, even if you are not paying yourself yet. A business that "breaks even" without owner compensation is still losing money. Your time has value, and this practice also helps with investor conversations — they want to see a business that covers founder salary.',
       'Re-calculate break-even every time a major cost changes. A supplier price increase of just 5% can push break-even up by 15-20% at thin margins. Set calendar reminders to re-run this analysis quarterly or whenever you renegotiate supplier contracts.',
       'For e-commerce, variable costs compound at scale — include returns processing labor, warranty claims, customer support tickets, and loyalty program costs as your business grows. These "invisible" variable costs are often missed in initial break-even calculations and can delay profitability by months.',
-      'If break-even is more than 18 months out at projected volumes, seriously consider whether the product is viable. Faster payback is better — target break-even within 6-12 months of launch for physical products, 12-24 months for software.',
+      'If break-even is far out at projected volumes, seriously consider whether the product is viable: the longer the payback, the more cash and patience it needs.',
     ],
     limitations: [
       'This calculator uses a simplified single-product break-even model with one price, one variable cost per unit, and one fixed cost figure. Real businesses typically have multiple products with varying margins and step-function fixed costs.',
@@ -209,9 +207,6 @@ const breakEvenConfig: CalculatorConfig = {
       { label: 'Break-Even Revenue', value: 'Fixed Costs ÷ CM Ratio' },
       { label: 'At BE Point', value: 'Total Revenue = Total Cost' },
       { label: 'Margin of Safety', value: '(Actual − BE) ÷ Actual × 100' },
-      { label: 'Target: Ecom Product', value: 'BE within 6-12 months' },
-      { label: 'Target: SaaS', value: 'BE within 12-24 months' },
-      { label: 'Target: Brick & Mortar', value: 'BE within 12-18 months' },
       { label: 'Monthly BE units', value: 'Daily BE × 30 or 26 biz days' },
     ],
     citations: [

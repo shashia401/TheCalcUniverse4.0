@@ -92,7 +92,7 @@ describe('SaaS LTV:CAC Calculator', () => {
     expect(ids).toContain('avgLifetimeMonths');
     expect(ids).toContain('arpu');
     expect(ids).toContain('churnRate');
-    expect(ids).toContain('magicNumber');
+    expect(ids).toContain('newMrrPerSpend');
     expect(ids).toContain('grossMargin');
     expect(ids).toContain('totalRevenue');
   });

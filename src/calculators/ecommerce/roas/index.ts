@@ -1,6 +1,7 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import ROASPanel from './ROASPanel';
+import { computeRoas } from './roasMath';
 
 const roasConfig: CalculatorConfig = {
   inputs: [
@@ -57,49 +58,52 @@ const roasConfig: CalculatorConfig = {
     const revenue = parseFloat(values.revenue);
     const grossMarginPct = parseFloat(values.grossMargin);
 
-    if ([adSpend, revenue].some(isNaN) || adSpend <= 0) return [];
+    if (![adSpend, revenue].every(Number.isFinite) || adSpend <= 0 || revenue < 0) return [];
 
-    const roas = revenue / adSpend;
-    const profitFromAds = revenue - adSpend;
     const orders = parseFloat(values.orders);
-    const cpa = orders > 0 ? adSpend / orders : null;
+    const f = computeRoas(adSpend, revenue, grossMarginPct, orders);
+    const { roas } = f;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    const results = [
+    // With a margin, colour by break-even ROAS (the only meaningful threshold); without one, stay neutral.
+    const roasColor =
+      f.status === null ? ('neutral' as const) : f.status === 'above' ? ('positive' as const) : f.status === 'at' ? ('neutral' as const) : ('negative' as const);
+
+    const results: CalculatorResult[] = [
       {
         id: 'roas',
         label: 'Return on Ad Spend (ROAS)',
         value: `${roas.toFixed(2)}x`,
         highlight: true,
-        interpretation: `ROAS is revenue, not profit — a 4x ROAS can still lose money if your product margin is thin, since it doesn't subtract cost of goods or overhead. A more accurate profitability check divides ad spend against gross profit (not revenue); use ROAS to compare campaigns against each other, not as a standalone profit signal.`,
-        color: roas >= 4 ? 'positive' as const : roas >= 2 ? 'neutral' as const : 'negative' as const,
-      },
-      ...(cpa === null
-        ? []
-        : [{
-            id: 'cpa',
-            label: 'Cost per Acquisition',
-            value: `$${fmt(cpa)}`,
-            color: 'neutral' as const,
-          }]),
-      {
-        id: 'profitFromAds',
-        label: 'Revenue Minus Ad Spend',
-        value: `$${fmt(profitFromAds)}`,
-        color: profitFromAds > 0 ? 'positive' as const : 'negative' as const,
+        interpretation: `ROAS is revenue, not profit — a 4x ROAS can still lose money if your product margin is thin, since it doesn't subtract cost of goods or overhead. Enter your gross margin to compare against the break-even ROAS (1 ÷ margin); use ROAS to compare campaigns against each other, not as a standalone profit signal.`,
+        color: roasColor,
       },
     ];
+    if (f.cpa !== null) {
+      results.push({ id: 'cpa', label: 'Cost per Acquisition', value: `$${fmt(f.cpa)}`, color: 'neutral' });
+    }
+    results.push({
+      id: 'profitFromAds',
+      label: 'Revenue Minus Ad Spend',
+      value: `$${fmt(f.revenueMinusSpend)}`,
+      color: f.revenueMinusSpend > 0 ? 'positive' : 'negative',
+    });
 
-    if (!isNaN(grossMarginPct) && grossMarginPct > 0) {
-      const minViableROAS = 1 / (grossMarginPct / 100);
-      const isViable = roas >= minViableROAS;
+    if (f.breakEvenRoas !== null) {
+      const word = f.status === 'above' ? 'Profitable' : f.status === 'at' ? 'Break-even' : 'Unprofitable';
       results.push({
         id: 'minROAS',
         label: `Minimum Break-Even ROAS (${grossMarginPct}% margin)`,
-        value: `${minViableROAS.toFixed(2)}x — ${isViable ? 'Profitable' : 'Unprofitable'}`,
-        color: isViable ? 'positive' as const : 'negative' as const,
+        value: `${f.breakEvenRoas.toFixed(2)}x — ${word}`,
+        color: roasColor,
+      });
+      results.push({
+        id: 'profitAfterAds',
+        label: 'Gross Profit After Ad Spend',
+        value: `$${fmt(f.profitAfterAds!)}`,
+        color: f.profitAfterAds! > 0 ? 'positive' : f.profitAfterAds! < 0 ? 'negative' : 'neutral',
       });
     }
 
@@ -119,7 +123,7 @@ const roasConfig: CalculatorConfig = {
     formulaDescription:
       'ROAS measures how much revenue is generated for every dollar spent on advertising. The break-even ROAS tells you the minimum multiple needed just to cover your product costs.',
     variables: [
-      { symbol: 'ROAS', name: 'Return on Ad Spend', description: 'Revenue divided by ad spend. A ROAS of 4x means $4 in revenue for every $1 spent on ads. Most e-commerce businesses need at least 3-4x to be sustainably profitable after all costs.' },
+      { symbol: 'ROAS', name: 'Return on Ad Spend', description: 'Revenue divided by ad spend. A ROAS of 4x means $4 in revenue for every $1 spent on ads. The ROAS you need depends on your margin and other costs (see break-even ROAS).' },
       { symbol: 'Break-Even ROAS', name: 'Minimum Profitable ROAS', description: '1 divided by gross margin. If margin is 50%, you need at least 2x ROAS to break even on ad spend. If margin is 25%, you need 4x just to cover product costs.' },
       { symbol: 'CPA', name: 'Cost Per Acquisition', description: 'Ad spend divided by number of conversions. A complementary metric to ROAS that helps you understand per-customer acquisition costs.' },
     ],
@@ -128,14 +132,14 @@ const roasConfig: CalculatorConfig = {
       'Enter the revenue attributed to those ads.',
       'Optionally enter your gross margin to calculate your minimum viable ROAS.',
       'A ROAS above your break-even ROAS means advertising is profitable.',
-      'Compare your results against industry benchmarks: Google Shopping 4-8x, Facebook Ads 3-6x, TikTok Ads 2-4x.',
+      'Compare ROAS across your own campaigns and channels; the right target depends on your margin, not on a universal benchmark.',
     ],
     explanation:
-      'ROAS is the e-commerce equivalent of ROI for advertising. A 4x ROAS means $4 revenue per $1 spent. But ROAS alone doesn\'t tell you if you\'re profitable — a 4x ROAS with a 20% gross margin is actually losing money (break-even ROAS = 5x). The minimum viable ROAS is always 1 divided by your gross margin percentage. Industry benchmarks vary: Google Shopping typically targets 4-8x, Facebook Ads 3-6x, and brand campaigns may sustain lower ROAS due to awareness value. A common real-world scenario: a clothing brand spending $5,000 on Facebook Ads generates $20,000 in revenue at a 4x ROAS. With a 50% gross margin, gross profit is $10,000, meaning net ad profit is $5,000. If margins slip to 30%, the same 4x ROAS only yields $1,000 in net profit. Always model ROAS relative to margin, not in isolation.',
+      'ROAS is the e-commerce equivalent of ROI for advertising. A 4x ROAS means $4 revenue per $1 spent. But ROAS alone doesn\'t tell you if you\'re profitable — a 4x ROAS with a 20% gross margin is actually losing money (break-even ROAS = 5x). The minimum viable ROAS is always 1 divided by your gross margin percentage. There is no universal "good" ROAS: it depends on your margin and goals, and brand campaigns may accept a lower ROAS for awareness value. A common real-world scenario: a clothing brand spending $5,000 on Facebook Ads generates $20,000 in revenue at a 4x ROAS. With a 50% gross margin, gross profit is $10,000, meaning net ad profit is $5,000. If margins slip to 30%, the same 4x ROAS only yields $1,000 in net profit. Always model ROAS relative to margin, not in isolation.',
     commonUses: [
       'Measuring advertising campaign profitability by comparing revenue generated to ad dollars spent',
       'Determining the minimum ROAS needed to break even given your product gross margin before scaling ad spend',
-      'Comparing ROAS across advertising channels like Google Shopping, Facebook, and TikTok to allocate budget to the best-performing platforms',
+      'Comparing ROAS across advertising channels (search, shopping, social) to allocate budget to the best-performing platforms',
       'Evaluating whether increased ad spending will generate incremental profit or just higher costs at diminishing returns',
     ],
     faqs: [
@@ -149,11 +153,11 @@ const roasConfig: CalculatorConfig = {
       },
       {
         question: 'What is a realistic ROAS target for a new brand?',
-        answer: 'New brands often see 1.5-3x ROAS while building audiences and optimizing creatives. Established brands with strong customer lists often achieve 4-8x. If your ROAS is below break-even for more than 3-6 months, reassess your product pricing, ad targeting, or funnel conversion rate.',
+        answer: 'There is no standard number. Early campaigns are usually less efficient while you build audiences and test creatives, and established brands with strong customer lists tend to do better. What matters is whether ROAS is above your break-even (1 ÷ gross margin) once you allow for the learning period; if it stays below break-even for months, reassess pricing, targeting or the funnel conversion rate.',
       },
       {
         question: 'How does attribution modeling affect ROAS?',
-        answer: 'Different attribution models can dramatically change your reported ROAS. Last-click attribution tends to underreport the value of upper-funnel channels. Consider using data-driven attribution or media mix modeling for a more complete picture of advertising effectiveness across channels.',
+        answer: 'Different attribution models can change your reported ROAS a lot. Last-click attribution tends to under-credit upper-funnel channels. Consider data-driven attribution or media mix modeling for a more complete picture, and compare platform-reported ROAS with blended business metrics (total revenue ÷ total ad spend).',
       },
       {
         question: 'What is the difference between ROAS and blended ROAS?',
@@ -161,11 +165,11 @@ const roasConfig: CalculatorConfig = {
       },
       {
         question: 'Why does my break-even ROAS go up when I run a discount?',
-        answer: 'Discounts reduce your effective gross margin, which directly increases the ROAS needed to break even. At 50% margin, your break-even ROAS is 2.0x. At 30% margin (after a 20% discount), your break-even ROAS rises to 3.33x — requiring 67% more revenue per dollar of ad spend. Before running a sale, always recalculate your break-even ROAS at the discounted margin to ensure the campaign will not lose money even with higher ad-driven volume.',
+        answer: 'Discounts reduce your effective gross margin, which directly increases the ROAS needed to break even. Take a $100 product with a $50 cost: at full price the margin is 50% and break-even ROAS is 2.0x. At 20% off ($80 price) the margin is 37.5% ($30 ÷ $80) and break-even ROAS rises to 2.67x, which is 33% more revenue per dollar of ad spend. Before running a sale, recalculate break-even ROAS at the discounted margin.',
       },
       {
         question: 'How does iOS 14+ / ATT impact affect my measured ROAS?',
-        answer: 'Apple\'s App Tracking Transparency (ATT) framework and iOS privacy changes significantly reduce Facebook/Instagram\'s ability to track conversions, often understating ROAS by 20-40%. Meta\'s own reporting acknowledges this and recommends using modeled conversions or server-side tracking (Conversions API) to fill attribution gaps. For accurate ROAS, implement server-side event tracking and compare platform-reported ROAS against blended business metrics (total revenue / total ad spend) as a sanity check.',
+        answer: 'Apple\'s App Tracking Transparency (ATT) and other privacy changes limit how well ad platforms can track conversions, so platform-reported ROAS can be under-counted. Platforms such as Meta recommend modeled conversions and server-side tracking (e.g. the Conversions API) to fill gaps. As a sanity check, compare platform-reported ROAS with blended business metrics (total revenue ÷ total ad spend).',
       },
       {
         question: 'Should I use ROAS or profit-per-order for bidding decisions?',
@@ -194,14 +198,14 @@ const roasConfig: CalculatorConfig = {
     ],
     proTips: [
       'Always compare your ROAS to break-even ROAS (1 ÷ Gross Margin %). A 3x ROAS that looks great can be unprofitable if your margin is under 33%. This is the single most common mistake in e-commerce advertising — judging ROAS in isolation without margin context.',
-      'Track ROAS trends weekly, not daily. Day-to-day ROAS is too noisy to act on. Set alerts for when the 7-day moving average drops 20% or more — this typically signals ad fatigue, audience saturation, or a competitor entering the auction.',
-      'Calculate ROAS separately for new customer acquisition vs. retargeting. Retargeting naturally shows much higher ROAS (6-15x) because those users already know you. Blending these two inflates your overall ROAS and masks whether cold-traffic acquisition is actually profitable.',
-      'Consider incrementality: some of your attributed revenue would have happened without ads. Run holdout tests (geographic or audience-based) to measure true incremental ROAS, which is often 20-40% lower than platform-reported ROAS.',
-      'When scaling spend, expect ROAS to decline. There is a maximum efficient spend level for every audience/product combination. Track the relationship between daily spend and ROAS — when each additional $100 of spend generates less than 1.5x in revenue, you have likely hit the efficient frontier.',
+      'Track ROAS trends weekly, not daily: day-to-day ROAS is noisy. A sustained drop usually signals ad fatigue, audience saturation or more competition in the auction.',
+      'Calculate ROAS separately for new customer acquisition vs. retargeting. Retargeting normally shows a much higher ROAS because those users already know you, and blending the two inflates your overall ROAS and hides whether cold-traffic acquisition is profitable.',
+      'Consider incrementality: some of your attributed revenue would have happened without ads. Run holdout tests (geographic or audience-based) to measure true incremental ROAS, which is lower than platform-reported ROAS.',
+      'When scaling spend, expect ROAS to decline. Track the relationship between spend and ROAS: once the revenue from each additional $100 of spend falls below your break-even ROAS (e.g. $200 at a 50% margin), the extra spend loses money.',
     ],
     limitations: [
       'ROAS measures revenue relative to ad spend and does not account for product costs, fulfillment, returns, or taxes. Always use break-even ROAS alongside raw ROAS to determine profitability.',
-      'Ad platform attribution (especially last-click) may over-report or under-report revenue impact by 20-40% depending on your attribution window and tracking setup. iOS privacy changes, ad blockers, and cross-device shopping behavior further reduce attribution accuracy.',
+      'Ad platform attribution (especially last-click) may over-report or under-report revenue impact depending on your attribution window and tracking setup. iOS privacy changes, ad blockers, and cross-device shopping behavior further reduce attribution accuracy.',
       'ROAS does not capture the lifetime value of acquired customers — a customer acquired at a 1.5x ROAS may generate 5x lifetime revenue through repeat purchases. Short-term ROAS does not measure brand-building effects or organic halo.',
       'For accurate channel comparison, use a consistent attribution model across platforms and validate against blended financial metrics. This is a planning tool only — do not rely on it for GAAP financial reporting.',
     ],
@@ -213,13 +217,10 @@ const roasConfig: CalculatorConfig = {
       { label: '30% Margin → BE ROAS', value: '3.33x' },
       { label: '20% Margin → BE ROAS', value: '5.0x' },
       { label: '10% Margin → BE ROAS', value: '10.0x' },
-      { label: 'Google Shopping Target', value: '4-8x ROAS' },
-      { label: 'Facebook Ads Target', value: '3-6x ROAS' },
-      { label: 'TikTok Ads Target', value: '2-4x ROAS' },
     ],
     citations: [
 
-      { source: 'Shopify', url: 'https://www.shopify.com/blog/roas' },
+      { source: 'Shopify', title: 'What is ROAS?', url: 'https://www.shopify.com/blog/roas' },
     ],
   },
 };

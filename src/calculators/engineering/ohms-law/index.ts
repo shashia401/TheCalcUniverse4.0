@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import OHMPanel from './OHMPanel';
+import { solvePair } from './ohmsMath';
 
 const ohmsLawConfig: CalculatorConfig = {
   inputs: [
@@ -25,6 +26,7 @@ const ohmsLawConfig: CalculatorConfig = {
       unit: 'V',
       inputMode: 'decimal',
       min: 0,
+      max: 1e9,
       step: 0.001,
       helpText: 'Electrical potential difference in Volts',
     },
@@ -36,6 +38,7 @@ const ohmsLawConfig: CalculatorConfig = {
       unit: 'A',
       inputMode: 'decimal',
       min: 0,
+      max: 1e9,
       step: 0.001,
       helpText: 'Electric current in Amperes',
     },
@@ -47,6 +50,7 @@ const ohmsLawConfig: CalculatorConfig = {
       unit: 'Ω',
       inputMode: 'decimal',
       min: 0,
+      max: 1e12,
       step: 0.001,
       helpText: 'Electrical resistance in Ohms',
     },
@@ -59,46 +63,47 @@ const ohmsLawConfig: CalculatorConfig = {
 
     const fmt = (n: number, unit: string) => `${parseFloat(n.toFixed(6))} ${unit}`;
 
+    const ok = Number.isFinite;
+
     if (solveFor === 'voltage') {
-      if (isNaN(R) || isNaN(I) || R < 0 || I < 0) return [];
-      const voltage = I * R;
-      const power = voltage * I;
+      if (!ok(R) || !ok(I) || R < 0 || I < 0) return [];
+      const s2 = solvePair('I', I, 'R', R);
+      if (!s2) return [];
       return [
-        { id: 'voltage', label: 'Voltage', value: fmt(voltage, 'V'), highlight: true, color: 'positive' },
-        { id: 'power', label: 'Power', value: fmt(power, 'W'), color: 'neutral' },
+        { id: 'voltage', label: 'Voltage', value: fmt(s2.V, 'V'), highlight: true, color: 'positive' },
+        { id: 'power', label: 'Power', value: fmt(s2.P, 'W'), color: 'neutral' },
         { id: 'formula', label: 'Formula Used', value: 'V = I × R', color: 'neutral' },
       ];
     }
 
     if (solveFor === 'current') {
-      if (isNaN(V) || isNaN(R) || R === 0) return [];
-      const current = V / R;
-      const power = V * current;
+      if (!ok(V) || !ok(R) || V < 0 || R <= 0) return [];
+      const s2 = solvePair('V', V, 'R', R);
+      if (!s2) return [];
       return [
-        { id: 'current', label: 'Current', value: fmt(current, 'A'), highlight: true, color: 'positive' },
-        { id: 'power', label: 'Power', value: fmt(power, 'W'), color: 'neutral' },
+        { id: 'current', label: 'Current', value: fmt(s2.I, 'A'), highlight: true, color: 'positive' },
+        { id: 'power', label: 'Power', value: fmt(s2.P, 'W'), color: 'neutral' },
         { id: 'formula', label: 'Formula Used', value: 'I = V ÷ R', color: 'neutral' },
       ];
     }
 
     if (solveFor === 'resistance') {
-      if (isNaN(V) || isNaN(I) || I === 0) return [];
-      const resistance = V / I;
-      const power = V * I;
+      if (!ok(V) || !ok(I) || V < 0 || I <= 0) return [];
+      const s2 = solvePair('V', V, 'I', I);
+      if (!s2) return [];
       return [
-        { id: 'resistance', label: 'Resistance', value: fmt(resistance, 'Ω'), highlight: true, color: 'positive' },
-        { id: 'power', label: 'Power', value: fmt(power, 'W'), color: 'neutral' },
+        { id: 'resistance', label: 'Resistance', value: fmt(s2.R, 'Ω'), highlight: true, color: 'positive' },
+        { id: 'power', label: 'Power', value: fmt(s2.P, 'W'), color: 'neutral' },
         { id: 'formula', label: 'Formula Used', value: 'R = V ÷ I', color: 'neutral' },
       ];
     }
 
     if (solveFor === 'power') {
-      if (isNaN(V) || isNaN(I)) return [];
-      const power = V * I;
-      const resistance = I > 0 ? V / I : 0;
+      if (!ok(V) || !ok(I) || V < 0 || I < 0) return [];
+      const s2 = solvePair('V', V, 'I', I); // null when I = 0 (R undefined) - power is still V × I = 0
       return [
-        { id: 'power', label: 'Power', value: fmt(power, 'W'), highlight: true, color: 'positive' },
-        { id: 'resistance', label: 'Resistance', value: I > 0 ? fmt(resistance, 'Ω') : 'N/A', color: 'neutral' },
+        { id: 'power', label: 'Power', value: fmt(V * I, 'W'), highlight: true, color: 'positive' },
+        { id: 'resistance', label: 'Resistance', value: s2 ? fmt(s2.R, 'Ω') : 'N/A', color: 'neutral' },
         { id: 'formula', label: 'Formula Used', value: 'P = V × I', color: 'neutral' },
       ];
     }
@@ -146,7 +151,7 @@ const ohmsLawConfig: CalculatorConfig = {
       },
       {
         question: 'How does wire length affect resistance in a circuit?',
-        answer: 'Resistance is proportional to wire length and inversely proportional to cross-sectional area (R = ρL/A). Doubling the wire length doubles the resistance, which reduces current for the same voltage. This is why long extension cords cause voltage drop — a 100-foot 14 AWG extension cord carrying 10A drops about 3 volts, potentially causing motors to run hot or lights to dim. For long runs, use a thicker gauge wire (lower AWG number) to minimize resistance.',
+        answer: 'Resistance is proportional to wire length and inversely proportional to cross-sectional area (R = ρL/A). Doubling the wire length doubles the resistance, which reduces current for the same voltage. This is why long extension cords cause voltage drop — a 100-foot 14 AWG extension cord (200 ft of conductor, about 0.5 Ω) carrying 10A drops about 5 volts, potentially causing motors to run hot or lights to dim. For long runs, use a thicker gauge wire (lower AWG number) to minimize resistance.',
       },
       {
         question: 'Why is power dissipation important in circuit design?',
@@ -164,7 +169,7 @@ const ohmsLawConfig: CalculatorConfig = {
       { label: '12V ÷ 4Ω speaker', value: '3 A, 36 W' },
       { label: '120V, 15A circuit max', value: '1,800 W total' },
       { label: '240V, 30A dryer circuit', value: '7,200 W capacity' },
-      { label: 'Resistor color: Red-Red-Brown', value: '220 Ω ±1%' },
+      { label: 'Resistor color: Red-Red-Brown', value: '220 Ω (first three bands; tolerance is a separate band)' },
       { label: 'AWG 12 wire resistance', value: '~0.0016 Ω/ft' },
     ],
     commonUses: [
@@ -176,10 +181,10 @@ const ohmsLawConfig: CalculatorConfig = {
     ],
     workedExamples: [
       {
-        scenario: 'Sarah is building an LED indicator circuit for her Arduino project. She has a 5V power supply, an LED that draws 20mA (0.02A), and needs to calculate the correct current-limiting resistor.',
-        inputs: { solveFor: 'resistance', voltage: '5', current: '0.02' },
-        result: '250 Ω resistance, 0.1 W power dissipation',
-        insight: 'Sarah needs a 250 Ω resistor. A standard 270 Ω resistor (next E12 value up) will limit the current to 0.0185A, still bright. The power dissipation is only 0.1W, so a standard 1/4W resistor is more than adequate with a 2.5x safety margin. If she used a 100 Ω resistor instead, the current would jump to 50mA — well above the LED\'s 20mA rating, causing it to burn out within seconds.',
+        scenario: 'Sarah is building an LED indicator circuit for her Arduino project. She has a 5V supply and an LED that draws 20mA (0.02A) with a forward voltage of about 2V, so the resistor must drop the remaining 3V.',
+        inputs: { solveFor: 'resistance', voltage: '3', current: '0.02' },
+        result: '150 Ω resistance, 0.06 W power dissipation',
+        insight: 'The resistor sees only the voltage the LED does not use: 5 V − 2 V = 3 V. R = 3 ÷ 0.02 = 150 Ω and it dissipates 3 × 0.02 = 0.06 W, so a standard 1/4 W part is plenty. (Using the full 5 V would give 250 Ω and a dimmer LED, about 12 mA.) A standard 150 Ω value is available; a 100 Ω resistor would pass (5 − 2) ÷ 100 = 30 mA, above the LED\'s 20 mA rating, and can shorten its life.',
       },
       {
         scenario: 'Mike owns a food truck and wants to add a 1500W electric griddle to his existing circuit. His truck has a 120V system with a 20A circuit breaker currently running a 1000W refrigerator, an 800W fryer, and three 60W lights. Can the circuit handle the new griddle?',
@@ -191,7 +196,7 @@ const ohmsLawConfig: CalculatorConfig = {
         scenario: 'Priya is designing a 12V solar-powered off-grid shed. She needs to run a 12V LED light strip (24W), a small 12V water pump (60W), and charge a laptop via a 12V-to-19V boost converter (45W input). She wants to know the total current draw to size her battery and solar panel.',
         inputs: { solveFor: 'power', voltage: '12', current: '10.75' },
         result: 'Total power = 129 W, Total current = 10.75 A at 12V',
-        insight: 'At 10.75A continuous draw, a 100Ah deep-cycle lead-acid battery (50Ah usable at 50% depth of discharge) would last about 4.6 hours. Priya should size her system for at least 150W of solar panels (accounting for 77% real-world efficiency) to generate ~11.6A of charging current during peak sun hours, giving her approximately 5-6 hours of usable runtime per day with a full charge cycle. Upgrading to a 200Ah lithium battery would double runtime to over 18 hours.',
+        insight: 'At 10.75A continuous draw, a 100Ah deep-cycle lead-acid battery (50Ah usable at 50% depth of discharge) would last about 4.6 hours (50 ÷ 10.75). A 150W solar panel at roughly 77% real-world output delivers about 150 × 0.77 ÷ 12 ≈ 9.6A in good sun, so panel size and sun hours need to match the daily energy use (129W × hours of use). A 200Ah lithium battery with most of its capacity usable would run the load for roughly 15 to 18 hours.',
       },
     ],
     proTips: [
@@ -202,7 +207,7 @@ const ohmsLawConfig: CalculatorConfig = {
     ],
     limitations: [
       'When not to use: This calculator applies Ohm\'s Law for DC and purely resistive AC circuits only. Do NOT use for circuits containing inductors (motors, transformers, solenoids), capacitors, semiconductors (diodes, transistors), or any component with non-linear voltage-current characteristics.',
-      'The calculator assumes steady-state DC conditions. It does not account for inrush current (motors draw 3-7x rated current at startup), temperature-dependent resistance, or voltage sag under load.',
+      'The calculator assumes steady-state DC conditions. It does not account for inrush current (motors can draw several times rated current at startup), temperature-dependent resistance, or voltage sag under load.',
       'Results are for educational and planning purposes. For electrical installations subject to building codes (NEC in the US, IEC internationally), consult a licensed electrician.',
     ],
     citations: [

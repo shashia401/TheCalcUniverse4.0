@@ -5,12 +5,7 @@ interface Props {
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
-
-export default function FlowRatePanel({ results }: Props) {
+export default function FlowRatePanel({ values, results }: Props) {
   const velocity = results.find(r => r.id === 'velocity');
   const flowGPM = results.find(r => r.id === 'flowGPM');
   const flowLPM = results.find(r => r.id === 'flowLPM');
@@ -20,7 +15,11 @@ export default function FlowRatePanel({ results }: Props) {
 
   if (!results.length) return null;
 
-  const isSafe = velocity ? parseNum(velocity.value) <= 10 : true;
+  // recompute the velocity from the inputs (same continuity equation) rather than parsing the display string
+  const d = parseFloat(values.pipeDiameter);
+  const q = parseFloat(values.flowRate);
+  const vFps = velocity && d > 0 && q >= 0 ? (q / 448.83) / (Math.PI * Math.pow(d / 24, 2)) : 0;
+  const isSafe = velocity ? Math.round(vFps * 10000) / 10000 <= 10 : true;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">

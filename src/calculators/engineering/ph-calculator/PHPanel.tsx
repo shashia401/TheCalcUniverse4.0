@@ -6,7 +6,7 @@ interface Props {
 }
 
 function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
+  const m = s.replace(/,/g, '').match(/-?[\d.]+/);
   return m ? parseFloat(m[0]) : 0;
 }
 
@@ -32,7 +32,7 @@ export default function PHPanel({ results }: Props) {
     return '#6366f1';
   };
 
-  const phPct = Math.min((phVal / 14) * 100, 100);
+  const phPct = Math.max(0, Math.min((phVal / 14) * 100, 100));
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">

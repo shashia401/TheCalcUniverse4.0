@@ -1,40 +1,26 @@
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
+import { computeRoas } from './roasMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
+const money = (n: number) =>
+  `${n < 0 ? '-' : ''}$${Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export default function ROASPanel({ results }: Props) {
-  const roas = results.find(r => r.id === 'roas');
-  const cpa = results.find(r => r.id === 'cpa');
-  const profit = results.find(r => r.id === 'profitFromAds');
-  const minROAS = results.find(r => r.id === 'minROAS');
+export default function ROASPanel({ values, results }: Props) {
+  const adSpend = parseFloat(values.adSpend);
+  const revenue = parseFloat(values.revenue);
+  if (!results.length || !(adSpend > 0) || !Number.isFinite(revenue)) return null;
+  const f = computeRoas(adSpend, revenue, parseFloat(values.grossMargin), parseFloat(values.orders));
 
-  if (!roas) return null;
-
-  const roasVal = parseNum(roas.value);
-  const minVal = minROAS ? parseNum(minROAS.value) : 0;
-  const barMax = Math.max(roasVal, minVal || 1) * 1.5;
-
-  const bar = (label: string, val: number, color: string, unit: string) => {
-    const pct = barMax > 0 ? (val / barMax) * 100 : 0;
-    return (
-      <div className="flex items-center gap-3 py-1.5">
-        <span className="text-xs font-semibold text-slate-600 w-28 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-5 bg-slate-100 rounded overflow-hidden">
-          <div className={`h-full rounded ${color} transition-all flex items-center justify-end pr-1.5 ${pct < 10 ? 'min-w-[45px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[9px] font-bold text-white">{val.toFixed(2)}{unit}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const barMax = Math.max(f.roas, f.breakEvenRoas ?? 0, 1) * 1.2;
+  const tone =
+    f.status === null ? 'text-slate-700' : f.status === 'above' ? 'text-emerald-700' : f.status === 'at' ? 'text-amber-700' : 'text-red-700';
+  const barColor =
+    f.status === null ? 'bg-blue-700' : f.status === 'above' ? 'bg-emerald-700' : f.status === 'at' ? 'bg-amber-700' : 'bg-red-700';
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -46,30 +32,34 @@ export default function ROASPanel({ results }: Props) {
       </div>
       <div className="p-5 space-y-2">
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Return on Ad Spend</p>
-          <p className={`text-3xl font-bold ${roas.color === 'positive' ? 'text-emerald-700' : roas.color === 'negative' ? 'text-red-600' : 'text-amber-600'}`}>
-            {roas.value}
-          </p>
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Return on Ad Spend</p>
+          <p className={`text-3xl font-bold ${tone}`}>{f.roas.toFixed(2)}x</p>
         </div>
-        {minVal > 0 && bar('Break-Even', minVal, 'bg-slate-400', 'x')}
-        {bar('Actual ROAS', roasVal, roasVal >= 3 ? 'bg-emerald-500' : roasVal >= 1 ? 'bg-amber-500' : 'bg-red-500', 'x')}
-        {cpa && (
+        {f.breakEvenRoas !== null && (
+          <HBarRow label="Break-Even" value={f.breakEvenRoas} max={barMax} display={`${f.breakEvenRoas.toFixed(2)}x`} color="bg-slate-700" labelWidth="w-28" />
+        )}
+        <HBarRow label="Actual ROAS" value={f.roas} max={barMax} display={`${f.roas.toFixed(2)}x`} color={barColor} labelWidth="w-28" />
+        {f.cpa !== null && (
           <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
             <span className="text-xs text-slate-600">Cost per Acquisition</span>
-            <span className="text-sm font-bold text-slate-700">{cpa.value}</span>
+            <span className="text-sm font-bold text-slate-700">{money(f.cpa)}</span>
           </div>
         )}
-        {profit && (
+        <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
+          <span className="text-xs text-slate-600">Revenue Minus Ad Spend</span>
+          <span className={`text-sm font-bold ${f.revenueMinusSpend > 0 ? 'text-emerald-700' : 'text-red-700'}`}>{money(f.revenueMinusSpend)}</span>
+        </div>
+        {f.profitAfterAds !== null && (
           <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
-            <span className="text-xs text-slate-600">Revenue Minus Ad Spend</span>
-            <span className={`text-sm font-bold ${profit.color === 'positive' ? 'text-emerald-600' : 'text-red-600'}`}>{profit.value}</span>
+            <span className="text-xs text-slate-600">Gross Profit After Ad Spend</span>
+            <span className={`text-sm font-bold ${f.profitAfterAds > 0 ? 'text-emerald-700' : f.profitAfterAds < 0 ? 'text-red-700' : 'text-slate-700'}`}>{money(f.profitAfterAds)}</span>
           </div>
         )}
-        {minROAS && (
+        {f.breakEvenRoas !== null && (
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-            <p className="text-xs text-slate-500">{minROAS.label}</p>
-            <p className={`text-sm font-bold ${minROAS.value.includes('Profitable') ? 'text-emerald-600' : 'text-red-600'}`}>
-              {minROAS.value}
+            <p className="text-xs text-slate-600">Break-even ROAS = 1 ÷ gross margin</p>
+            <p className={`text-sm font-bold ${tone}`}>
+              {f.breakEvenRoas.toFixed(2)}x — {f.status === 'above' ? 'Profitable' : f.status === 'at' ? 'Break-even' : 'Unprofitable'}
             </p>
           </div>
         )}

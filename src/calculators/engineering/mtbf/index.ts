@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import MTBFPanel from './MTBFPanel';
+import { HOURS_PER_YEAR, reliabilityPct } from './mtbfMath';
 
 const mtbfConfig: CalculatorConfig = {
   inputs: [
@@ -25,6 +26,7 @@ const mtbfConfig: CalculatorConfig = {
       unit: 'hours',
       inputMode: 'decimal',
       min: 0,
+      max: 1e10,
       step: 100,
       helpText: 'Combined operating hours across all units in the observation period',
     },
@@ -36,6 +38,7 @@ const mtbfConfig: CalculatorConfig = {
       unit: 'failures',
       inputMode: 'decimal',
       min: 1,
+      max: 1e8,
       step: 1,
       helpText: 'Total number of failures observed during those operating hours',
     },
@@ -47,6 +50,7 @@ const mtbfConfig: CalculatorConfig = {
       unit: 'hours',
       inputMode: 'decimal',
       min: 0,
+      max: 1e10,
       step: 100,
       helpText: 'Required for reliability and failures calculations',
     },
@@ -58,8 +62,9 @@ const mtbfConfig: CalculatorConfig = {
       unit: 'hours',
       inputMode: 'decimal',
       min: 0,
+      max: 1e10,
       step: 100,
-      helpText: '8,760 = 1 year of continuous operation',
+      helpText: '8,760 = 1 year of continuous operation. In Expected Failures mode, enter the total fleet hours (units × hours each).',
     },
   ],
   calculate: (values) => {
@@ -72,10 +77,10 @@ const mtbfConfig: CalculatorConfig = {
     const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
     if (mode === 'mtbf') {
-      if (isNaN(operatingHours) || isNaN(failures) || failures <= 0 || operatingHours <= 0) return [];
+      if (!Number.isFinite(operatingHours) || !Number.isFinite(failures) || failures <= 0 || operatingHours <= 0) return [];
       const mtbf = operatingHours / failures;
       const failureRate = 1 / mtbf;
-      const reliability1yr = Math.exp(-8760 / mtbf) * 100;
+      const reliability1yr = reliabilityPct(HOURS_PER_YEAR, mtbf);
       return [
         { id: 'mtbf', label: 'Mean Time Between Failures (MTBF)', value: `${fmt(mtbf)} hours`, highlight: true, color: 'positive' },
         { id: 'failureRate', label: 'Failure Rate (λ)', value: `${failureRate.toExponential(4)} failures/hr`, color: 'neutral' },
@@ -84,8 +89,8 @@ const mtbfConfig: CalculatorConfig = {
     }
 
     if (mode === 'reliability') {
-      if (isNaN(mtbfKnown) || isNaN(missionTime) || mtbfKnown <= 0) return [];
-      const reliability = Math.exp(-missionTime / mtbfKnown) * 100;
+      if (!Number.isFinite(mtbfKnown) || !Number.isFinite(missionTime) || mtbfKnown <= 0 || missionTime < 0) return [];
+      const reliability = reliabilityPct(missionTime, mtbfKnown);
       const unreliability = 100 - reliability;
       return [
         { id: 'reliability', label: `Reliability over ${fmt(missionTime)} hours`, value: `${reliability.toFixed(4)}%`, highlight: true, color: reliability > 90 ? 'positive' : reliability > 70 ? 'neutral' : 'negative' },
@@ -95,7 +100,7 @@ const mtbfConfig: CalculatorConfig = {
     }
 
     if (mode === 'failures') {
-      if (isNaN(mtbfKnown) || isNaN(missionTime) || mtbfKnown <= 0) return [];
+      if (!Number.isFinite(mtbfKnown) || !Number.isFinite(missionTime) || mtbfKnown <= 0 || missionTime < 0) return [];
       const expectedFailures = missionTime / mtbfKnown;
       return [
         { id: 'expectedFailures', label: `Expected Failures over ${fmt(missionTime)} hours`, value: `${expectedFailures.toFixed(2)}`, highlight: true, color: expectedFailures < 1 ? 'positive' : expectedFailures < 3 ? 'neutral' : 'negative' },
@@ -130,7 +135,7 @@ const mtbfConfig: CalculatorConfig = {
       'Use the 1-year reliability result to assess whether your system meets uptime requirements.',
     ],
     explanation:
-      'MTBF is a fundamental reliability engineering metric. It assumes failures follow an exponential distribution (constant failure rate). A system with MTBF of 10,000 hours has a 63.2% probability of failing within 10,000 hours. The exponential reliability model (R = e^−λt) is simple but assumes failures are random and independent — it is most appropriate for mature, complex systems in their normal operating phase (excluding infant mortality and wear-out periods). Real-world example: a data center UPS system has logged 50,000 operating hours with 4 failures. MTBF equals 50,000 divided by 4 which is 12,500 hours. The 1-year reliability is R(8,760) = e^(−8,760/12,500) which equals 49.6% — meaning there is about a 50% chance of at least one failure in any given year. The facility manager would use this to plan redundancy and maintenance schedules. Note that the bathtub curve concept is important here: failure rates are higher early in life (infant mortality) and late in life (wear-out), with a relatively constant rate in the middle. For repairable systems in critical applications like medical equipment or aircraft, design targets often call for an MTBF of 100,000 hours or more. A server power supply with an MTBF of 500,000 hours has a 98.3% chance of surviving one year of continuous operation without failure.',
+      'MTBF is a fundamental reliability engineering metric. It assumes failures follow an exponential distribution (constant failure rate). A system with MTBF of 10,000 hours has a 63.2% probability of failing within 10,000 hours. The exponential reliability model (R = e^−λt) is simple but assumes failures are random and independent — it is most appropriate for mature, complex systems in their normal operating phase (excluding infant mortality and wear-out periods). Real-world example: a data center UPS system has logged 50,000 operating hours with 4 failures. MTBF equals 50,000 divided by 4 which is 12,500 hours. The 1-year reliability is R(8,760) = e^(−8,760/12,500) which equals 49.6% — meaning there is about a 50% chance of at least one failure in any given year. The facility manager would use this to plan redundancy and maintenance schedules. Note that the bathtub curve concept is important here: failure rates are higher early in life (infant mortality) and late in life (wear-out), with a relatively constant rate in the middle. A server power supply with an MTBF of 500,000 hours has a 98.3% chance of surviving one year of continuous operation without failure (if the exponential model applies).',
     commonUses: [
       'Predicting equipment reliability and planning preventive maintenance schedules in manufacturing and industrial operations',
       'Comparing product reliability across different vendors by analyzing field failure data and MTBF specifications',
@@ -141,8 +146,8 @@ const mtbfConfig: CalculatorConfig = {
       { label: 'MTBF 10,000 hrs', value: 'λ = 0.0001 failures/hr, 63.2% failure probability within 10,000 hrs' },
       { label: 'MTBF 50,000 hrs', value: 'Reliability at 1 yr (8,760 hrs) = 83.9%' },
       { label: 'MTBF 100,000 hrs', value: 'Reliability at 1 yr = 91.6%, at 5 yr = 64.5%' },
-      { label: 'MTBF 500,000 hrs', value: 'Reliability at 1 yr = 98.3%, typical for server PSUs' },
-      { label: 'MTBF 1,000,000 hrs', value: 'Reliability at 1 yr = 99.1%, typical for telecom equipment' },
+      { label: 'MTBF 500,000 hrs', value: 'Reliability at 1 yr = 98.3%' },
+      { label: 'MTBF 1,000,000 hrs', value: 'Reliability at 1 yr = 99.1%' },
       { label: 'R(t) at t = MTBF', value: 'Always 36.8% (e⁻¹) — surprisingly low' },
       { label: 'Six 9s (99.9999%)', value: 'Availability requires MTBF/MTTR ratio > 1,000,000' },
       { label: 'Availability formula', value: 'A = MTBF / (MTBF + MTTR)' },
@@ -150,7 +155,7 @@ const mtbfConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What is the difference between MTBF and MTTR?',
-        answer: 'MTBF is the average time between failures (reliability). MTTR (Mean Time To Repair) is the average time to fix a failure (maintainability). System availability = MTBF / (MTBF + MTTR). If MTBF = 500 hours and MTTR = 4 hours, availability = 500 / 504 = 99.2%. To achieve "five nines" availability (99.999%), you need MTBF / MTTR to be at least 100,000. This means for a system with 1-hour MTTR, MTBF must exceed 100,000 hours. Six nines (99.9999%) requires a ratio of 1,000,000.',
+        answer: 'MTBF is the average time between failures (reliability). MTTR (Mean Time To Repair) is the average time to fix a failure (maintainability). System availability = MTBF / (MTBF + MTTR). If MTBF = 500 hours and MTTR = 4 hours, availability = 500 / 504 = 99.2%. "Five nines" availability (99.999%) needs MTBF / MTTR of about 100,000 (exactly 99,999), so with a 1-hour MTTR the MTBF must be about 100,000 hours. Six nines (99.9999%) needs a ratio of about 1,000,000.',
       },
       {
         question: 'Is MTBF the same as product lifetime?',
@@ -170,7 +175,7 @@ const mtbfConfig: CalculatorConfig = {
       },
       {
         question: 'How do I use MTBF to plan spare parts inventory?',
-        answer: 'Use the "Expected Failures" mode: expected failures = operating time / MTBF. For a fleet of 100 pumps, each with MTBF of 25,000 hours, operating 8,760 hours/year: expected failures per year = 100 x 8,760 / 25,000 = 35.04. So you would expect roughly 35 failures per year. For inventory planning, you typically stock 1.5-2x the expected number of failures as safety stock, accounting for lead time variability. Enter your fleet operating hours and known MTBF to get the expected failure count, then multiply by your lead-time safety factor.',
+        answer: 'Use the "Expected Failures" mode with the fleet\'s total hours: expected failures = fleet operating hours / MTBF. For 100 pumps with an MTBF of 25,000 hours operating 8,760 hours a year: 100 × 8,760 / 25,000 = 35.04 expected failures a year. Because failures are random, stock spares using a Poisson calculation for your lead time and the stock-out risk you accept, not a flat multiple of the average.',
       },
       {
         question: 'Why do some manufacturers quote absurdly high MTBF numbers like 1,000,000 hours?',
@@ -181,39 +186,38 @@ const mtbfConfig: CalculatorConfig = {
       {
         scenario: 'A data center operations team has logged 240,000 cumulative operating hours across 50 servers over the past year, during which they experienced 8 unplanned hardware failures. They need to know the MTBF and the probability of at least one failure in any given month (730 hours).',
         inputs: { mode: 'mtbf', operatingHours: '240000', numberOfFailures: '8', mtbf: '', missionTime: '' },
-        result: 'MTBF = 240,000 / 8 = 30,000 hours. Failure rate λ = 1/30,000 = 0.0000333 failures/hour. Reliability over 1 month (730 hours) = e^(-730/30,000) x 100 = 97.6%. Probability of at least one failure in a month = 2.4%.',
-        insight: 'With an MTBF of 30,000 hours, these servers have a solid but not exceptional reliability profile. Over a month, there is a 2.4% chance of at least one failure — which means roughly every 41 months (3.4 years), the data center should expect a server failure. This is within normal expectations for commodity server hardware. The team should maintain at least N+1 redundancy and keep cold spares for the most failure-prone components (power supplies, disks, fans).',
+        result: 'MTBF = 240,000 / 8 = 30,000 hours. Failure rate λ = 1/30,000 = 0.0000333 failures/hour. A single server has reliability e^(-730/30,000) = 97.6% over a month, i.e. a 2.4% chance of failing. The fleet of 50 servers has 50 × 730 / 30,000 = 1.22 expected failures per month.',
+        insight: 'The 2.4% is per server per month. Across all 50 servers the chance of at least one failure in a given month is 1 − e^(−1.217) ≈ 70%, so a failure somewhere in the fleet is the normal case, not the exception. This is why the team should maintain at least N+1 redundancy and keep spares for the most failure-prone components (power supplies, disks, fans).',
       },
       {
         scenario: 'An aerospace manufacturer is evaluating two avionics computers for a new aircraft. Computer A has published MTBF of 120,000 hours. Computer B has MTBF of 80,000 hours but is 40% cheaper. The mission time for a long-haul flight is 14 hours. The aircraft will fly approximately 4,000 hours per year. Which computer is the better value over the aircraft\'s 25-year service life?',
         inputs: { mode: 'reliability', operatingHours: '', numberOfFailures: '', mtbf: '120000', missionTime: '14' },
         result: 'Computer A: R(14 hrs) = e^(-14/120,000) x 100 = 99.98833%. Computer B: R(14 hrs) = e^(-14/80,000) x 100 = 99.98250%. Difference per flight: 0.00583 percentage points. Over 25 years x 4,000 hrs/yr = 100,000 fleet hours, expected failures: A = 100,000/120,000 = 0.83, B = 100,000/80,000 = 1.25.',
-        insight: 'The per-flight reliability difference between 99.988% and 99.983% seems tiny, but it compounds over the fleet life. Computer A expects 0.83 failures vs 1.25 for B over the service life — about 0.42 fewer failures. If each in-flight avionics failure costs $500,000 in investigation, downtime, and reputation, the expected savings from choosing A is $210,000 per aircraft. This far exceeds the price difference, making Computer A the better value despite the higher unit cost. This analysis demonstrates why aerospace companies obsess over MTBF — even seemingly small differences have enormous fleet-level cost implications.',
+        insight: 'The per-flight reliability difference between 99.988% and 99.983% seems tiny, but it compounds over the fleet life. Computer A expects 0.83 failures vs 1.25 for B over the service life — about 0.42 fewer failures. If, purely as an illustration, each in-flight avionics failure cost $500,000 in investigation and downtime, the expected saving from choosing A would be about 0.4167 × $500,000 ≈ $208,000 per aircraft, to be compared with the price difference. This analysis demonstrates why aerospace companies obsess over MTBF — even seemingly small differences have enormous fleet-level cost implications.',
       },
       {
         scenario: 'A factory maintenance manager wants to know how many spare pump motors to stock. The plant has 20 identical pumps running 24/7 (8,760 hrs/yr each). Each pump motor has an MTBF of 40,000 hours. Lead time for replacement motors is 4 weeks (672 hours). The manager wants to avoid stockouts 95% of the time.',
         inputs: { mode: 'failures', operatingHours: '', numberOfFailures: '', mtbf: '40000', missionTime: '175200' },
-        result: 'Expected failures per year = 20 x 8,760 / 40,000 = 4.38 failures/year. During the 4-week lead time (672 hrs), expected failures = 20 x 672 / 40,000 = 0.336. For 95% confidence during lead time, using the Poisson distribution: P(X <= k) >= 0.95 when k = 1 (since P(X <= 1) for λ = 0.336 equals approximately 0.958). Recommended spares: 1.',
-        insight: 'The Poisson distribution (not this calculator, which gives expected values only) tells us that even with 0.336 expected failures during lead time, stocking 1 spare gives 95.8% protection against stockouts during the procurement period. For the full year at 4.38 expected failures, the recommended annual safety stock would be about 7 motors (expected 4.38 + 2 standard deviations of roughly 2.1). The maintenance manager should also consider that these pumps might share a common failure mode (voltage spike, contamination), which violates the independence assumption and could cause clustered failures that the simple Poisson model would underestimate.',
+        result: 'Expected failures per year = 20 x 8,760 / 40,000 = 4.38 failures/year. During the 4-week lead time (672 hrs), expected failures = 20 x 672 / 40,000 = 0.336. For 95% confidence during lead time, using the Poisson distribution: P(X <= k) >= 0.95 when k = 1 (since P(X <= 1) for λ = 0.336 equals approximately 0.955). Recommended spares: 1.',
+        insight: 'The Poisson distribution (not this calculator, which gives expected values only) tells us that even with 0.336 expected failures during lead time, stocking 1 spare gives about 95.5% protection against stockouts during the procurement period. For the full year at 4.38 expected failures, the recommended annual safety stock would be about 9 motors (expected 4.38 plus 2 standard deviations of √4.38 ≈ 2.1). The maintenance manager should also consider that these pumps might share a common failure mode (voltage spike, contamination), which violates the independence assumption and could cause clustered failures that the simple Poisson model would underestimate.',
       },
     ],
     proTips: [
       'MTBF is most useful for comparing similar products, not for predicting exact failure times. Two power supplies with MTBF of 100K and 50K hours: the 100K one will have roughly half the failure rate in a large population. But do NOT schedule maintenance based on MTBF — the exponential distribution means failures happen randomly, not "every 100K hours." Use condition-based maintenance instead of time-based maintenance for electronic systems.',
       'The exponential reliability model assumes a constant failure rate. This is valid for mature electronic systems in their useful life, but NOT for: mechanical wear components (bearings, seals), brand-new systems still in infant mortality, systems operating beyond their design life, or software systems where failures are often correlated. When in doubt, plot your failure data on Weibull probability paper — a Weibull shape parameter β = 1 confirms exponential is appropriate.',
-      'When comparing vendor MTBF claims, ask: what standard was used (MIL-HDBK-217F vs Telcordia SR-332 vs field data)? What ambient temperature was assumed? At what confidence level (60% vs 90%)? What components were included (does the MTBF include the fan, or just the electronics)? Telcordia MTBF numbers are typically 2-5x higher than MIL-HDBK for the same product. Field-measured MTBF is usually the most conservative — and most trustworthy — number.',
+      'When comparing vendor MTBF claims, ask: what standard was used (MIL-HDBK-217F vs Telcordia SR-332 vs field data)? What ambient temperature was assumed? At what confidence level (60% vs 90%)? What components were included (does the MTBF include the fan, or just the electronics)? Different prediction standards can give very different numbers for the same product. Field-measured MTBF is usually the most trustworthy number.',
       'For series systems (where ANY component failure brings down the system), the system failure rate equals the sum of individual failure rates: λ_system = λ1 + λ2 + ... + λn. This means the system MTBF is always LOWER than the lowest individual MTBF. A server with 10 components, each rated 500,000 hours MTBF, has a system MTBF of only 50,000 hours. This is the "series reliability penalty" — always calculate system-level MTBF, not component-level.',
-      'Use the reliability mode with different mission times to understand your risk profile over time. A system with MTBF of 50,000 hours has 83.9% reliability at 1 year (8,760 hours), but only 41.7% at 5 years (43,800 hours). This steep drop-off illustrates why long warranties on electronic products are expensive for manufacturers — reliability decays exponentially, not linearly.',
+      'Use the reliability mode with different mission times to understand your risk profile over time. A system with MTBF of 50,000 hours has 83.9% reliability at 1 year (8,760 hours), but only 41.6% at 5 years (43,800 hours). This steep drop-off illustrates why long warranties on electronic products are expensive for manufacturers — reliability decays exponentially, not linearly.',
     ],
     limitations: [
       'This calculator uses the exponential reliability model (constant failure rate), which assumes failures are random and independent. It is appropriate for electronic and complex repairable systems in their useful life phase, but NOT for systems exhibiting wear-out, infant mortality, or non-constant failure rates.',
       'Series/parallel system reliability combining multiple components requires separate reliability block diagram (RBD) analysis. The calculator handles only single-component or simple system-level reliability, not multi-component redundancy configurations.',
-      'Confidence intervals are not provided. The calculator gives point estimates, but real MTBF should be reported with confidence bounds (e.g., "MTBF = 10,000 hours at 90% lower confidence level"). Accelerated life testing predictions and environmental stress factors are not modeled.',
+      'Confidence intervals are not provided. MTBF = hours ÷ failures is a point estimate that is very uncertain when failures are few (5 failures can easily hide a true MTBF that differs by 2x); real MTBF should be reported with confidence bounds (e.g., "MTBF = 10,000 hours at 90% lower confidence level"). Accelerated life testing predictions and environmental stress factors are not modeled.',
       'Software reliability, preventive maintenance effects, common-cause failures, and time-varying operating conditions are not covered. For safety-critical applications, formal FMECA and Fault Tree Analysis are required in addition to MTBF calculations.',
       'This calculator is a starting point for reliability estimation, not a substitute for formal reliability engineering. Field data should be collected and analyzed with appropriate statistical methods.',
     ],
     citations: [
       { source: 'Wikipedia', title: 'Mean Time Between Failures', url: 'https://en.wikipedia.org/wiki/Mean_time_between_failures' },
-      { source: 'Wolfram MathWorld', title: 'Reliability', url: 'https://en.wikipedia.org/wiki/Mean_time_between_failures' },
     ],
   },
 };

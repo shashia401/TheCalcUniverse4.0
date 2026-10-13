@@ -1,4 +1,5 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { bannerTheme } from './bannerTheme';
 
 interface Props {
   values: Record<string, string>;
@@ -16,14 +17,7 @@ export default function CookieConsentPanel({ values, results }: Props) {
   const layoutVal = values.layout || 'default';
   const themeVal = values.colorTheme || 'Light';
 
-  const isDark = themeVal === 'Dark';
-  const isCustom = themeVal === 'Custom';
-  const bg = isDark ? '#1e293b' : isCustom ? '#0f172a' : '#ffffff';
-  const text = isDark ? '#f1f5f9' : isCustom ? '#e2e8f0' : '#1e293b';
-  const accent = isDark ? '#3b82f6' : isCustom ? '#06b6d4' : '#2563eb';
-  const btnText = isDark ? '#ffffff' : isCustom ? '#0f172a' : '#ffffff';
-  const border = isDark ? '#334155' : isCustom ? '#1e293b' : '#e2e8f0';
-  const muted = isDark ? '#cbd5e1' : isCustom ? '#94a3b8' : '#64748b';
+  const { bg, text, accent, btnText, border, muted, link } = bannerTheme(themeVal);
 
   const isMinimal = layoutVal === 'minimal';
   const isDev = layoutVal === 'developer';
@@ -64,11 +58,11 @@ export default function CookieConsentPanel({ values, results }: Props) {
       return (
         <div style={containerStyle}>
           <p style={{ margin: '0 0 12px 0', fontWeight: 600, color: text, fontSize: '14px' }}>🍪 Cookie Notice — {siteName}</p>
-          <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: muted }}>We use cookies and similar technologies. By continuing, you agree to our <span style={{ color: accent, textDecoration: 'underline' }}>Cookie Policy</span>.</p>
+          <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: muted }}>We use cookies and similar technologies. Choose whether to allow non-essential cookies; see our <span style={{ color: link, textDecoration: 'underline' }}>Cookie Policy</span>.</p>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <span style={{ background: 'transparent', color: text, border: `1px solid ${border}`, padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Cookie Settings</span>
             <span style={{ background: accent, color: btnText, border: 'none', padding: '8px 20px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>Accept All</span>
-            <span style={{ background: 'transparent', color: muted, border: `1px solid ${border}`, padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Decline</span>
+            <span style={{ background: 'transparent', color: text, border: `1px solid ${border}`, padding: '8px 20px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>Decline</span>
           </div>
         </div>
       );
@@ -80,16 +74,17 @@ export default function CookieConsentPanel({ values, results }: Props) {
         <div style={{ fontSize: '24px', marginBottom: '8px' }}>🍪</div>
         <p style={{ margin: '0 0 4px 0', fontWeight: 600, fontSize: '16px', color: text }}>Cookies & Privacy</p>
         <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: muted }}>
-          {siteName} uses cookies to enhance your browsing experience, serve personalized content, and analyze traffic.
+          {siteName} uses cookies to enhance your browsing experience, serve personalized content, and analyze traffic. You can accept or reject non-essential cookies.
         </p>
         <div style={{ display: 'flex', gap: '10px', justifyContent: posVal === 'center-modal' ? 'center' : 'flex-start', flexWrap: 'wrap' }}>
           <span style={{ background: 'transparent', color: text, border: `1px solid ${border}`, padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}>Customize</span>
+          <span style={{ background: 'transparent', color: text, border: `1px solid ${border}`, padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>Reject All</span>
           <span style={{ background: accent, color: btnText, border: 'none', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>Accept All</span>
         </div>
-        <div style={{ marginTop: '12px', fontSize: '11px', color: isDark ? '#64748b' : '#94a3b8' }}>
-          <span style={{ color: accent, textDecoration: 'none' }}>Privacy Policy</span>
+        <div style={{ marginTop: '12px', fontSize: '12px', color: muted }}>
+          <span style={{ color: link, textDecoration: 'underline' }}>Privacy Policy</span>
           <span style={{ margin: '0 6px' }}>&middot;</span>
-          <span style={{ color: accent, textDecoration: 'none' }}>Cookie Policy</span>
+          <span style={{ color: link, textDecoration: 'underline' }}>Cookie Policy</span>
         </div>
       </div>
     );
@@ -98,7 +93,7 @@ export default function CookieConsentPanel({ values, results }: Props) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
       <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
-        <svg aria-hidden="true" className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg aria-hidden="true" className="w-4 h-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Live Cookie Banner Preview</span>
@@ -108,10 +103,10 @@ export default function CookieConsentPanel({ values, results }: Props) {
         {/* Live Preview */}
         <div className="rounded-xl border-2 border-slate-200 bg-white overflow-hidden">
           <div className="px-3 py-2 bg-slate-100 border-b border-slate-200 flex items-center gap-2">
-            <svg aria-hidden="true" className="w-3 h-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="w-3 h-3 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-[10px] font-bold text-slate-500">Browser Preview</span>
+            <span className="text-[10px] font-bold text-slate-600">Browser Preview</span>
             <div className="ml-auto flex gap-1">
               <span className="w-2 h-2 rounded-full bg-red-400" />
               <span className="w-2 h-2 rounded-full bg-amber-400" />
@@ -141,10 +136,10 @@ export default function CookieConsentPanel({ values, results }: Props) {
         {/* Code Display */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-slate-100">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Generated Code</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Generated Code</p>
             <button type="button"
               onClick={handleCopy}
-              className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold text-slate-600 hover:text-slate-700 hover:bg-slate-200 transition-colors"
             >
               <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -163,15 +158,15 @@ export default function CookieConsentPanel({ values, results }: Props) {
         {/* Settings Summary */}
         <div className="grid grid-cols-3 gap-2">
           <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
-            <p className="text-[10px] font-bold text-slate-500 uppercase">Position</p>
+            <p className="text-[10px] font-bold text-slate-600 uppercase">Position</p>
             <p className="text-xs font-bold text-slate-700">{position?.value || '-'}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
-            <p className="text-[10px] font-bold text-slate-500 uppercase">Layout</p>
+            <p className="text-[10px] font-bold text-slate-600 uppercase">Layout</p>
             <p className="text-xs font-bold text-slate-700">{layout?.value || '-'}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
-            <p className="text-[10px] font-bold text-slate-500 uppercase">Theme</p>
+            <p className="text-[10px] font-bold text-slate-600 uppercase">Theme</p>
             <p className="text-xs font-bold text-slate-700">{colorTheme?.value || '-'}</p>
           </div>
         </div>

@@ -80,14 +80,14 @@ function TrafficFlow({ rps, serverLabel }: { rps: number; serverLabel: string })
 
       {/* Arrow */}
       <line x1={userStartX + userCount * 20} y1={55} x2={serverX - 20} y2={55} stroke="#94a3b8" strokeWidth={1.5} />
-      <polygon points={`${serverX - 16},55 ${serverX - 26},49 ${serverX - 26},61`} fill="#94a3b8" />
+      <polygon points={`${serverX - 16},55 ${serverX - 26},49 ${serverX - 26},61`} fill="#64748b" />
 
       {/* Server */}
       <rect x={serverX - 18} y={38} width={36} height={34} rx={5} fill="#1e293b" />
       <rect x={serverX - 12} y={44} width={24} height={22} rx={3} fill="#334155" />
-      <text x={serverX} y={58} textAnchor="middle" fontSize={8} fill="#94a3b8">Server</text>
+      <text x={serverX} y={58} textAnchor="middle" fontSize={8} fill="#64748b">Server</text>
 
-      <text x={130} y={90} textAnchor="middle" fontSize={7} fill="#94a3b8">
+      <text x={130} y={90} textAnchor="middle" fontSize={7} fill="#64748b">
         {users.length} users → {serverLabel}
       </text>
     </svg>
@@ -102,21 +102,14 @@ export default function RateLimitPanel({ values, results }: Props) {
   const bandwidthMbpsStr = getResultValue(results, 'bandwidthMbps');
   const dailyCapacityStr = getResultValue(results, 'dailyCapacity');
   const burstLimitStr = getResultValue(results, 'burstLimit');
-  const maxConcurrentStr = getResultValue(results, 'maxConcurrent');
-  const serverTypeStr = getResultValue(results, 'serverType');
+  const monthlyTransferStr = getResultValue(results, 'monthlyTransfer');
   const perUserRpmStr = getResultValue(results, 'perUserRpm');
 
   const rps = parseFloat(rpsStr) || 0;
   const rpm = parseFloat(values.maxRpm) || 0;
-  const serverType = values.serverType || 'custom';
-  const serverLabel =
-    serverType === 'aws-api-gateway'
-      ? 'AWS API Gateway'
-      : serverType === 'cloudflare'
-      ? 'Cloudflare'
-      : serverType === 'nginx'
-      ? 'Nginx'
-      : 'Custom';
+  const serverLabel = 'your API';
+  const burstRpm = parseFloat(values.burstRpm);
+  const hasBurst = Number.isFinite(burstRpm) && burstRpm > 0;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -130,13 +123,13 @@ export default function RateLimitPanel({ values, results }: Props) {
         {/* Throughput Gauge + Traffic */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-2">
-            <p className="text-[9px] uppercase tracking-wider font-bold text-slate-500 mb-1">
+            <p className="text-[9px] uppercase tracking-wider font-bold text-slate-600 mb-1">
               Throughput
             </p>
             <ThroughputGauge rps={rps} maxRpm={rpm} />
           </div>
           <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-2">
-            <p className="text-[9px] uppercase tracking-wider font-bold text-slate-500 mb-1">
+            <p className="text-[9px] uppercase tracking-wider font-bold text-slate-600 mb-1">
               Traffic Flow
             </p>
             <TrafficFlow rps={rps} serverLabel={serverLabel} />
@@ -146,19 +139,19 @@ export default function RateLimitPanel({ values, results }: Props) {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div className="rounded-lg border border-slate-200 px-3 py-2 text-center">
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+            <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-600">
               RPS
             </div>
             <div className="text-sm font-bold text-slate-700">{rpsStr}</div>
           </div>
           <div className="rounded-lg border border-slate-200 px-3 py-2 text-center">
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-              Bandwidth
+            <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-600">
+              Bandwidth (Mbps)
             </div>
             <div className="text-sm font-bold text-slate-700">{bandwidthMbpsStr}</div>
           </div>
           <div className="rounded-lg border border-slate-200 px-3 py-2 text-center">
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+            <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-600">
               Daily Capacity
             </div>
             <div className="text-sm font-bold text-slate-700">
@@ -166,66 +159,49 @@ export default function RateLimitPanel({ values, results }: Props) {
             </div>
           </div>
           <div className="rounded-lg border border-slate-200 px-3 py-2 text-center">
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-              Server Type
+            <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-600">
+              30-day Transfer
             </div>
-            <div className="text-sm font-bold text-slate-700">{serverTypeStr}</div>
+            <div className="text-sm font-bold text-slate-700">{monthlyTransferStr}</div>
           </div>
         </div>
 
-        {/* Burst vs Steady State */}
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
-            Burst vs. Sustained Capacity
-          </p>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-[9px] uppercase tracking-wider font-bold text-emerald-500 mb-0.5">
-                  Sustained (RPM)
+        {/* Burst vs Steady State (only when the user supplied a burst limit) */}
+        {hasBurst && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1.5">Burst vs. Sustained Capacity</p>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-[9px] uppercase tracking-wider font-bold text-emerald-700 mb-0.5">Sustained (RPM)</div>
+                  <div className="text-lg font-black text-slate-800">{(rpm || 0).toLocaleString()}</div>
                 </div>
-                <div className="text-lg font-black text-slate-800">
-                  {(rpm || 0).toLocaleString()}
+                <div>
+                  <div className="text-[9px] uppercase tracking-wider font-bold text-amber-700 mb-0.5">Burst Limit (RPM)</div>
+                  <div className="text-lg font-black text-slate-800">{burstRpm.toLocaleString()}</div>
                 </div>
               </div>
-              <div>
-                <div className="text-[9px] uppercase tracking-wider font-bold text-amber-500 mb-0.5">
-                  Burst Limit
-                </div>
-                <div className="text-lg font-black text-slate-800">{burstLimitStr}</div>
+              <div className="w-full h-2 bg-slate-200 rounded-full mt-2 overflow-hidden" role="img" aria-label={`Sustained rate is ${Math.min(100, (rpm / burstRpm) * 100).toFixed(0)} percent of the burst limit`}>
+                <div className="h-full rounded-full bg-emerald-700" style={{ width: `${Math.min(100, (rpm / burstRpm) * 100)}%` }} />
               </div>
-            </div>
-            <div className="w-full h-2 bg-slate-200 rounded-full mt-2 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-amber-500"
-                style={{
-                  width: `${Math.min(100, ((rpm || 0) / Math.max(1, parseFloat(burstLimitStr.replace(/,/g, '')) || rpm || 1)) * 100)}%`,
-                }}
-              />
-            </div>
-            <div className="flex justify-between text-[9px] text-slate-500 mt-0.5">
-              <span>Sustained</span>
-              <span>Burst</span>
+              <div className="flex justify-between text-[9px] text-slate-600 mt-0.5">
+                <span>Sustained</span>
+                <span>Burst</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Details Row */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <div className="rounded-lg border border-slate-200 px-2.5 py-1.5">
-            <div className="text-[9px] uppercase tracking-wider font-semibold text-slate-500">
+            <div className="text-[9px] uppercase tracking-wider font-semibold text-slate-600">
               Bandwidth (KB/s)
             </div>
             <div className="text-xs font-bold text-slate-700">{bandwidthKbpsStr}</div>
           </div>
           <div className="rounded-lg border border-slate-200 px-2.5 py-1.5">
-            <div className="text-[9px] uppercase tracking-wider font-semibold text-slate-500">
-              Max Concurrent
-            </div>
-            <div className="text-xs font-bold text-slate-700">{maxConcurrentStr}</div>
-          </div>
-          <div className="rounded-lg border border-slate-200 px-2.5 py-1.5">
-            <div className="text-[9px] uppercase tracking-wider font-semibold text-slate-500">
+            <div className="text-[9px] uppercase tracking-wider font-semibold text-slate-600">
               RPM / User
             </div>
             <div className="text-xs font-bold text-slate-700">{perUserRpmStr}</div>

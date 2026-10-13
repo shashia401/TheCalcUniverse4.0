@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PHPanel from './PHPanel';
+import { classifyPh } from './phMath';
 
 function formatConcentration(value: number): string {
   if (value === 0) return '0 M';
@@ -32,14 +33,6 @@ function formatConcentration(value: number): string {
   }
 
   return `${coefficient} × 10${expFormatted} M`;
-}
-
-function classifyPh(ph: number): string {
-  if (ph === 7) return 'Neutral';
-  if (ph < 3) return 'Acidic (Strong Acid)';
-  if (ph < 7) return 'Acidic (Weak Acid)';
-  if (ph <= 11) return 'Basic/Alkaline (Weak Base)';
-  return 'Basic/Alkaline (Strong Base)';
 }
 
 const phCalculatorConfig: CalculatorConfig = {
@@ -91,8 +84,7 @@ const phCalculatorConfig: CalculatorConfig = {
 
     if (mode === 'ph-to-conc') {
       const ph = parseFloat(values.ph);
-      if (isNaN(ph)) return [];
-      if (ph < 0 || ph > 14) return [];
+      if (!Number.isFinite(ph) || ph < 0 || ph > 14) return [];
 
       const hConcentration = Math.pow(10, -ph);
       const poh = 14 - ph;
@@ -114,10 +106,10 @@ const phCalculatorConfig: CalculatorConfig = {
 
     if (mode === 'h-to-ph') {
       const h = parseFloat(values.hConcentration);
-      if (isNaN(h)) return [];
-      if (h <= 0) return [];
+      if (!Number.isFinite(h) || h <= 0) return [];
 
       const ph = -Math.log10(h);
+      if (ph < -2 || ph > 16) return []; // beyond any real aqueous solution
       const poh = 14 - ph;
       const ohConcentration = Math.pow(10, -poh);
 
@@ -137,10 +129,10 @@ const phCalculatorConfig: CalculatorConfig = {
 
     if (mode === 'oh-to-poh') {
       const oh = parseFloat(values.ohConcentration);
-      if (isNaN(oh)) return [];
-      if (oh <= 0) return [];
+      if (!Number.isFinite(oh) || oh <= 0) return [];
 
       const poh = -Math.log10(oh);
+      if (poh < -2 || poh > 16) return [];
       const ph = 14 - poh;
       const hConcentration = Math.pow(10, -ph);
 
@@ -172,7 +164,7 @@ const phCalculatorConfig: CalculatorConfig = {
       svg: '<svg viewBox="0 0 600 100" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;font-family:Arial,sans-serif">\n  <defs>\n    <linearGradient id="phGrad" x1="0" y1="0" x2="1" y2="0">\n      <stop offset="0%" stop-color="#dc2626"/>\n      <stop offset="14%" stop-color="#f97316"/>\n      <stop offset="28%" stop-color="#eab308"/>\n      <stop offset="42%" stop-color="#84cc16"/>\n      <stop offset="50%" stop-color="#22c55e"/>\n      <stop offset="57%" stop-color="#22c55e"/>\n      <stop offset="71%" stop-color="#14b8a6"/>\n      <stop offset="85%" stop-color="#3b82f6"/>\n      <stop offset="100%" stop-color="#6366f1"/>\n    </linearGradient>\n  </defs>\n  <text x="300" y="15" text-anchor="middle" font-size="12" fill="var(--svg-444444)" font-weight="bold">pH SCALE</text>\n  <rect x="30" y="22" width="540" height="16" rx="8" ry="8" fill="url(#phGrad)"/>\n  <line x1="30" y1="38" x2="30" y2="48" stroke="var(--svg-333333)" stroke-width="1.5"/>\n  <text x="30" y="57" text-anchor="middle" font-size="10" fill="var(--svg-333333)" font-weight="bold">0</text>\n  <line x1="146" y1="38" x2="146" y2="45" stroke="var(--svg-666666)" stroke-width="1"/>\n  <text x="146" y="54" text-anchor="middle" font-size="8" fill="var(--svg-555555)">3</text>\n  <line x1="300" y1="38" x2="300" y2="48" stroke="var(--svg-333333)" stroke-width="1.5"/>\n  <text x="300" y="57" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)" font-weight="bold">7</text>\n  <line x1="454" y1="38" x2="454" y2="45" stroke="var(--svg-666666)" stroke-width="1"/>\n  <text x="454" y="54" text-anchor="middle" font-size="8" fill="var(--svg-555555)">11</text>\n  <line x1="570" y1="38" x2="570" y2="48" stroke="var(--svg-333333)" stroke-width="1.5"/>\n  <text x="570" y="57" text-anchor="middle" font-size="10" fill="var(--svg-333333)" font-weight="bold">14</text>\n  <text x="55" y="19" text-anchor="middle" font-size="7" fill="var(--svg-dc2626)">Battery Acid</text>\n  <text x="120" y="19" text-anchor="middle" font-size="7" fill="var(--svg-ea580c)">Lemon Juice</text>\n  <text x="155" y="19" text-anchor="middle" font-size="7" fill="var(--svg-ca8a04)">Vinegar</text>\n  <text x="220" y="19" text-anchor="middle" font-size="7" fill="var(--svg-65a30d)">Coffee</text>\n  <text x="260" y="19" text-anchor="middle" font-size="7" fill="var(--svg-4d7c0f)">Milk</text>\n  <text x="300" y="73" text-anchor="middle" font-size="8" fill="var(--svg-22c55e)" font-weight="bold">Pure Water</text>\n  <text x="350" y="73" text-anchor="middle" font-size="7" fill="var(--svg-0d9488)">Baking Soda</text>\n  <text x="450" y="73" text-anchor="middle" font-size="7" fill="var(--svg-2563eb)">Ammonia</text>\n  <text x="515" y="73" text-anchor="middle" font-size="7" fill="var(--svg-7c3aed)">Bleach</text>\n  <text x="100" y="88" text-anchor="middle" font-size="9" fill="var(--svg-dc2626)" font-weight="bold">ACIDIC</text>\n  <text x="300" y="88" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)" font-weight="bold">NEUTRAL</text>\n  <text x="500" y="88" text-anchor="middle" font-size="9" fill="var(--svg-6366f1)" font-weight="bold">BASIC</text>\n</svg>',
       alt: 'pH scale from 0 to 14 with a horizontal color gradient bar from red (acidic) through green (neutral at 7) to purple (basic), showing the positions of common substances',
       caption:
-        'The pH scale from 0 (strong acid) to 14 (strong base), with 7 being neutral at 25°C. Common substances are shown at their approximate pH values: battery acid (0–1), lemon juice (2), vinegar (2.5), coffee (5), milk (6.5), pure water (7), baking soda (8.5), ammonia (11), and bleach (12.5).',
+        'The pH scale from 0 (strongly acidic) to 14 (strongly basic), with 7 being neutral at 25°C. Common substances sit at roughly these pH values: battery acid (0–1), lemon juice (2), vinegar (2.5), coffee (5), milk (6.5), pure water (7), baking soda solution (8.5), household ammonia (11), and bleach (12.5).',
     },
     variables: [
       {
@@ -210,7 +202,7 @@ const phCalculatorConfig: CalculatorConfig = {
       'Select your calculation mode: convert pH to concentrations, or enter [H⁺] or [OH⁻] to find pH and pOH.',
       'Enter the known value — pH (0–14), hydrogen ion concentration [H⁺], or hydroxide ion concentration [OH⁻] — in the appropriate field.',
       'The calculator instantly computes all four values: pH, pOH, [H⁺], and [OH⁻], along with the acid-base classification.',
-      'Read the classification result to understand whether the solution is acidic (strong or weak), neutral, or basic/alkaline (weak or strong).',
+      'Read the classification to see how far the solution is from neutral (strongly acidic, acidic, neutral, basic, strongly basic). Note that this describes the pH, not whether a dissolved acid is chemically "strong" or "weak".',
       'Note that all calculations assume a temperature of 25°C, where K_w = 1.0 × 10⁻¹⁴ and pH + pOH = 14.00.',
     ],
     explanation:

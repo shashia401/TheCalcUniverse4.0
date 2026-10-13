@@ -11,9 +11,10 @@ const leadScrewConfig: CalculatorConfig = {
       unit: 'N',
       inputMode: 'decimal',
       min: 0,
+      max: 10000000,
       step: 1,
       required: true,
-      helpText: 'The axial force the lead screw must move. For a 3D printer bed: ~10–50 N. For a CNC axis: 100–1,000 N. For a car jack: 5,000–20,000 N.',
+      helpText: 'The axial force the lead screw must move (weight, cutting force and friction). A 5 kg load is about 49 N.',
     },
     {
       id: 'lead',
@@ -23,6 +24,7 @@ const leadScrewConfig: CalculatorConfig = {
       unit: 'm',
       inputMode: 'decimal',
       min: 0.0001,
+      max: 0.5,
       step: 0.001,
       required: true,
       helpText: 'Distance the nut advances per revolution. Single-start: lead = pitch. Multi-start: lead = pitch × starts. Common 3D printer leads: 8 mm (TR8x8), 2 mm (T8x2).',
@@ -38,7 +40,7 @@ const leadScrewConfig: CalculatorConfig = {
       max: 95,
       step: 1,
       required: true,
-      helpText: 'Acme/trapezoidal screws: 20–40%. Ball screws: 85–95%. The rest is lost to friction. Check manufacturer data for exact values.',
+      helpText: 'Acme/trapezoidal screws are typically about 20–40% efficient and ball screws about 85–95%. The rest is lost to friction. Check manufacturer data for exact values.',
     },
     {
       id: 'safetyFactor',
@@ -50,9 +52,8 @@ const leadScrewConfig: CalculatorConfig = {
       max: 10,
       step: 0.1,
       defaultValue: '1.5',
-      helpText: 'Design safety factor. Supports both metric (N) and imperial (lbf) units. 1.5–2 for general machinery, 3–5 for lifting applications (elevators, jacks).',
-      showWhen: (v) => true,
-},
+      helpText: 'Design margin applied to the calculated torque. Pick it from the standard or code for your application; the higher values are used where failure endangers people (lifting, jacks).',
+    },
 ],
 calculate: (values) => {
     const F = parseFloat(values.axialForce);
@@ -60,7 +61,7 @@ calculate: (values) => {
     const eta = parseFloat(values.efficiency) / 100;
     const sf = parseFloat(values.safetyFactor) || 1;
 
-    if (isNaN(F) || isNaN(p) || isNaN(eta) || F < 0 || p <= 0 || eta <= 0 || eta > 1) return [];
+    if (![F, p, eta].every(Number.isFinite) || F < 0 || p <= 0 || eta <= 0 || eta > 1) return [];
 
     const torque = (F * p) / (2 * Math.PI * eta);
     const torqueWithSF = torque * sf;
@@ -69,7 +70,7 @@ calculate: (values) => {
 
     return [
       { id: 'torque', label: 'Required Torque', value: `${fmt(torque)} N·m`, highlight: true, color: 'positive' },
-      { id: 'torqueSF', label: `Torque with SF ${values.safetyFactor}×`, value: `${fmt(torqueWithSF)} N·m`, color: 'neutral' },
+      { id: 'torqueSF', label: `Torque with SF ${sf}×`, value: `${fmt(torqueWithSF)} N·m`, color: 'neutral' },
       { id: 'mechAdv', label: 'Mechanical Advantage', value: `${fmt(mechanicalAdvantage)} : 1`, color: 'neutral' },
       { id: 'power', label: 'Power at 1 rev/sec', value: `${fmt(powerAt1RPS)} W`, color: 'neutral' },
       { id: 'formula', label: 'Formula Used', value: `T = (F × p) / (2π × η)`, color: 'neutral' },
@@ -84,9 +85,9 @@ calculate: (values) => {
     formula: 'T = F × p / (2π × η)',
     formulaDescription: 'The torque required to drive a lead screw depends on axial force (F), lead (p), and efficiency (η). Higher efficiency (ball screws at 90%+) dramatically reduces torque compared to Acme screws (30–40%). The mechanical advantage = 2πη/p means a fine-pitch screw can multiply force enormously — this is how car jacks lift tons with modest hand force.',
     diagram: {
-      svg: '<svg viewBox=\'0 0 440 200\' xmlns=\'http://www.w3.org/2000/svg\' style=\'max-width:100%;height:auto\'><rect width=\'440\' height=\'200\' fill=\'transparent\' rx=\'8\'/><text x=\'220\' y=\'30\' text-anchor=\'middle\' font-size=\'14\' font-weight=\'bold\' fill=\'currentColor\'>Lead Screw</text><text x=\'220\' y=\'52\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>mechanical power transmission</text><rect x=\'40\' y=\'75\' width=\'360\' height=\'80\' rx=\'8\' fill=\'var(--svg-3b82f6)\' opacity=\'0.08\'/><text x=\'220\' y=\'105\' text-anchor=\'middle\' font-size=\'13\' fill=\'currentColor\'>Key domains covered: mechanical power transmission</text><text x=\'220\' y=\'128\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>Comprehensive calculator with worked examples</text><text x=\'220\' y=\'148\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>and step-by-step educational content</text><text x=\'220\' y=\'185\' text-anchor=\'middle\' font-size=\'10\' fill=\'var(--svg-6b7280)\'>Interactive · Free · No signup required</text></svg>',
-      alt: 'Educational diagram for Lead Screw showing key concepts and the mechanical power transmission domain',
-      caption: 'This lead screw covers mechanical power transmission. Use the worked examples to verify your understanding and bookmark for quick reference.',
+      svg: '<svg viewBox="0 0 440 120" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">Lead Screw Torque</text><rect x="20" y="40" width="400" height="44" rx="8" fill="var(--svg-3b82f6)" opacity="0.1"/><text x="220" y="68" text-anchor="middle" font-size="16" fill="currentColor">T = F · p / (2π · η)</text><text x="220" y="100" text-anchor="middle" font-size="11" fill="var(--svg-6b7280)">F in N · p in m · η as a fraction</text></svg>',
+      alt: 'Lead screw torque formula: axial force times lead divided by two pi times efficiency',
+      caption: 'Torque to turn a lead screw rises with load and lead and falls with efficiency.',
     },
     variables: [
       { symbol: 'T', name: 'Required Torque', description: 'Torque at the screw shaft (N·m). Motor torque must exceed this value. For stepper motors, check torque at operating speed — holding torque ratings are at zero speed.' },
@@ -101,20 +102,20 @@ calculate: (values) => {
       'Set a safety factor — higher for lifting/life-safety applications.',
     ],
     quickReference: [
-      { label: 'TR8x8 (3D printer)', value: 'Lead 8 mm, η ≈ 40%, fast but low force' },
-      { label: 'Acme 1/2"-10', value: 'Lead 2.54 mm, η ≈ 35%, high force, self-locking' },
-      { label: 'Ball screw 16x5', value: 'Lead 5 mm, η ≈ 90%, precision, high efficiency' },
-      { label: 'Car scissor jack', value: 'Lead ~3 mm, η ≈ 30%, massive MA' },
-      { label: 'Self-locking', value: 'Requires η < 50% and lead angle < friction angle' },
+      { label: 'TR8x8 (P2) 3D printer screw', value: 'Lead 8 mm (4 starts, 2 mm pitch)' },
+      { label: 'Acme 1/2"-10', value: 'Lead 2.54 mm (1/10 inch), self-locking in typical use' },
+      { label: 'Ball screw 16x5', value: 'Lead 5 mm, high efficiency, will backdrive' },
+      { label: 'Self-locking', value: 'Requires η < 50% (lead angle below the friction angle)' },
+      { label: 'Mechanical advantage', value: '2π η / p (N of force per N·m of torque)' },
     ],
     commonUses: [
-      '3D printers — TR8x8 lead screws for Z-axis; precise layer height control with low torque steppers.',
+      '3D printers — TR8x8 lead screws for the Z-axis; precise layer height control with low-torque steppers.',
       'CNC machines — ball screws provide high efficiency and zero backlash for precision positioning.',
       'Linear actuators — Acme screws for industrial automation where self-locking prevents backdriving.',
       'Car jacks and lifts — fine-pitch screws provide enormous mechanical advantage for manual lifting.',
       'Medical devices — precision lead screws in syringe pumps, surgical robots, and lab automation.',
     ],
-    explanation: 'A lead screw is a mechanical device that converts rotary motion into linear motion through the inclined plane principle of the screw thread. Invented by Archimedes (c. 250 BCE) as the water screw, the lead screw is one of the oldest machine elements. Modern lead screws fall into two categories: Acme/trapezoidal screws (20–40% efficient) and ball screws (85–95% efficient). The trade-off: Acme screws are inexpensive, self-locking (won\'t backdrive), and tolerate contamination — ideal for car jacks and manual machines. Ball screws recirculate ball bearings between the nut and screw, drastically reducing friction but requiring lubrication and seals — ideal for CNC machines where precision and speed matter. The self-locking property is critical for safety: when efficiency < 50%, the screw cannot be backdriven by the load, so a car jack won\'t spontaneously lower. The mechanical advantage = 2πη/p means a 2 mm lead screw at 40% efficiency gives MA ≈ 1,257:1 — a 1 N·m torque can lift 1,257 N. This is why a person can lift a car with a simple scissor jack — the mechanical advantage transforms modest human effort into enormous lifting force. In modern manufacturing, ball screws enable CNC machines to position cutting tools with micron-level accuracy while absorbing thousands of Newtons of cutting force. The choice between Acme and ball screws involves tradeoffs between cost, precision, speed, maintenance requirements, and whether self-locking is needed for safety. For hobbyist 3D printers and DIY projects, inexpensive Acme screws are sufficient. For production machine tools, medical devices, and aerospace actuators, precision-ground ball screws are essential.',
+    explanation: 'A lead screw is a mechanical device that converts rotary motion into linear motion through the inclined plane principle of the screw thread. The screw as a machine element goes back to antiquity (the water screw is traditionally attributed to Archimedes), making it one of the oldest machine elements. Modern lead screws fall into two categories: Acme/trapezoidal screws (20–40% efficient) and ball screws (85–95% efficient). The trade-off: Acme screws are inexpensive, self-locking (won\'t backdrive), and tolerate contamination — ideal for car jacks and manual machines. Ball screws recirculate ball bearings between the nut and screw, drastically reducing friction but requiring lubrication and seals — ideal for CNC machines where precision and speed matter. The self-locking property is critical for safety: when efficiency < 50%, the screw cannot be backdriven by the load, so a car jack won\'t spontaneously lower. The mechanical advantage = 2πη/p means a 2 mm lead screw at 40% efficiency gives MA ≈ 1,257:1 — a 1 N·m torque can lift 1,257 N. This is why a person can lift a car with a simple scissor jack — the mechanical advantage transforms modest human effort into enormous lifting force. In modern manufacturing, ball screws enable CNC machines to position cutting tools with micron-level accuracy while absorbing thousands of Newtons of cutting force. The choice between Acme and ball screws involves tradeoffs between cost, precision, speed, maintenance requirements, and whether self-locking is needed for safety. For hobbyist 3D printers and DIY projects, inexpensive Acme screws are sufficient. For production machine tools, medical devices, and aerospace actuators, precision-ground ball screws are essential.',
     faqs: [
       {
         question: 'How do I convert lead screw torque to force (or force to torque)?',
@@ -122,37 +123,37 @@ calculate: (values) => {
       },
       {
         question: 'How do I calculate ball screw torque?',
-        answer: 'Use T = (F × p) / (2π × η), where F is the axial force in newtons, p is the screw lead in meters, and η is the efficiency as a decimal (ball screws typically run 0.85–0.95). For example, an 800 N cutting load on a 5 mm lead ball screw at 90% efficiency needs T = (800 × 0.005) / (2π × 0.90) ≈ 0.71 N·m — then apply a safety factor (1.5–2× for general machine design) before sizing the motor.',
+        answer: 'Use T = (F × p) / (2π × η), where F is the axial force in newtons, p is the screw lead in meters, and η is the efficiency as a decimal (ball screws typically run 0.85–0.95). For example, an 800 N cutting load on a 5 mm lead ball screw at 90% efficiency needs T = (800 × 0.005) / (2π × 0.90) ≈ 0.71 N·m — then apply a safety factor appropriate to your design standard before sizing the motor.',
       },
       {
         question: 'What is the difference between lead, pitch, and starts?',
-        answer: 'Pitch (P) is the distance between adjacent thread crests. Lead (L) is the distance the nut travels per revolution. For single-start screws: L = P. For multi-start screws: L = P × number of starts. A TR8x8 has 8 mm lead, typically 2 starts with 4 mm pitch. Multi-start screws are faster but have lower mechanical advantage.',
+        answer: 'Pitch (P) is the distance between adjacent thread crests. Lead (L) is the distance the nut travels per revolution. For single-start screws: L = P. For multi-start screws: L = P × number of starts. A common TR8x8 (P2) screw has an 8 mm lead made of 4 starts with 2 mm pitch. Multi-start screws are faster but have lower mechanical advantage.',
       },
       {
         question: 'Why are ball screws so much more efficient than Acme screws?',
-        answer: 'Ball screws replace sliding friction (Acme threads rubbing together) with rolling friction (ball bearings recirculating between screw and nut). The rolling friction coefficient is ~0.002–0.005 vs ~0.1–0.2 for sliding. This 40–100× reduction in friction is why ball screws achieve 90%+ efficiency. The cost is complexity: precision-ground ball tracks, ball return circuits, and the need for lubrication and contamination protection.',
+        answer: 'Ball screws replace sliding friction (Acme threads rubbing together) with rolling friction (ball bearings recirculating between screw and nut). The effective friction coefficient of a ball screw is on the order of 0.01 or less, versus roughly 0.1–0.2 for lubricated sliding threads. That large reduction is why ball screws reach about 90% efficiency. The cost is complexity: precision-ground ball tracks, ball return circuits, and the need for lubrication and contamination protection.',
       },
       {
         question: 'How do I prevent a lead screw from backdriving?',
-        answer: 'Backdriving occurs when an axial load causes the screw to spin freely. Prevention: (1) Use an Acme screw with efficiency < 35% — it will be self-locking. (2) Ball screws will backdrive (high efficiency) — use a brake or counterbalance. (3) Reduce the lead angle by using a finer pitch. Self-locking condition: lead angle < friction angle, or η < 0.5 (rough rule). Always test: an Acme screw at 40% may creep under vibration.',
+        answer: 'Backdriving occurs when an axial load makes the screw turn by itself. Prevention: (1) use an Acme screw with efficiency below 50% — the screw is then self-locking (lead angle below the friction angle), though vibration can still creep it. (2) Ball screws (high efficiency) will backdrive — use a brake, a self-locking gearbox or a counterbalance. (3) A smaller lead lowers the lead angle.',
       },
       {
         question: 'What motor torque do I need for my lead screw application?',
-        answer: 'Calculate T = F × p / (2π × η), then apply a safety factor (1.5–2 for general use, 3–5 for lifting). Check motor torque at your target SPEED — stepper torque drops with speed. For dynamic loads, add acceleration torque: T_acc = J × α, where J is the reflected inertia (J_screw + J_load) and α is angular acceleration. Most DIY projects fail because they size for static load only — always include dynamic forces.',
+        answer: 'Calculate T = F × p / (2π × η), then apply a safety factor suited to your application. Check motor torque at your target SPEED — stepper torque drops with speed. For dynamic loads, add acceleration torque: T_acc = J × α, where J is the reflected inertia (J_screw + J_load) and α is angular acceleration. Most DIY projects fail because they size for static load only — always include dynamic forces.',
       },
       {
         question: 'What is critical speed and why does it matter?',
-        answer: 'As a lead screw spins faster, it approaches its critical (whirling) speed where the shaft resonates and vibrates violently. Critical speed depends on screw diameter, length, and end support (fixed-free, fixed-supported, fixed-fixed). For a 1 m long, 16 mm diameter screw with fixed-supported ends, critical speed ≈ 1,200 RPM. Always operate below 80% of critical speed. Longer screws need larger diameters to avoid whirling.',
+        answer: 'As a lead screw spins faster it approaches its critical (whirling) speed, where the shaft resonates and vibrates violently. Critical speed scales with screw diameter divided by the square of the unsupported length (n ∝ d / L²) and depends strongly on the end supports (fixed-fixed is highest, simple-simple lowest). Manufacturers publish critical-speed charts or formulas for their screws; keep operating speed well below the limit (a margin of about 20–30% is commonly used) and use a larger diameter or intermediate support for long screws.',
       },
     ],
     proTips: [
       'For 3D printer Z-axis: TR8x8 gives 0.04 mm per full step with 200-step motors — perfect for 0.1–0.2 mm layer heights. Finer screws (T8x2) give better resolution but slower Z hops.',
       'Ball screws are precision devices — protect them from debris. A single metal chip in the ball track will destroy the nut. Always use way covers or bellows in machine tool applications.',
-      'Lead screw efficiency drops under heavy load as lubrication breaks down. For loads above 50% of dynamic load rating, derate efficiency by 5–10% from catalog values.',
-      'Backlash in lead screws causes positioning error when direction reverses. For precision applications, use preloaded ball nuts (double-nut with spring or spacer) to eliminate backlash to <0.01mm. Acme screws inherently have 0.1-0.3mm of axial play that cannot be fully eliminated without an anti-backlash nut, which increases friction and wear. For 3D printers, backlash in the Z-axis is usually acceptable because gravity preloads the nut in one direction.',
-      'Lead screw critical speed (whirling) depends on screw diameter, unsupported length, and end fixity. For a 16mm screw with fixed-supported ends and 1m length, critical speed is approximately 1200 RPM — operate below 960 RPM (80% margin) to avoid catastrophic vibration. Longer screws require larger diameters: doubling the length requires quadrupling the diameter to maintain the same critical speed.',
-      'For CNC applications, always pair ball screws with angular contact bearings — standard deep-groove bearings cannot handle the axial loads and will fail prematurely. Angular contact bearings are available in metric (7000 series) and imperial (R series) sizes to match your screw dimensions.',
-      'The mechanical advantage is enormous: a 2 mm lead screw at 40% efficiency gives MA > 1,200:1. This means a modest 0.5 N·m motor can lift 600+ N — enough to lift a person.',
+      'Catalog efficiency is measured under specific lubrication and load conditions; worn, dry or heavily loaded screws can be less efficient, so verify the figure for your conditions.',
+      'Backlash in lead screws causes positioning error when direction reverses. Precision applications use preloaded ball nuts (double-nut with spring or spacer) or anti-backlash nuts on Acme screws, which remove play but add friction and wear. For 3D printers, Z-axis backlash is usually tolerable because gravity preloads the nut in one direction.',
+      'Lead screw critical speed (whirling) depends on screw diameter, unsupported length and end fixity, scaling as d / L². Doubling the length therefore needs four times the diameter to keep the same critical speed.',
+      'For CNC applications, pair ball screws with bearings rated for axial load (angular-contact or dedicated screw-support bearings); ordinary deep-groove bearings are not meant for heavy thrust.',
+      'Mechanical advantage is 2πη/p: a 2 mm lead at 40% efficiency gives about 1,257 N of axial force per N·m of torque, so a 0.5 N·m motor can push roughly 630 N (before friction in bearings and guides).',
     ],
     workedExamples: [
       {
@@ -175,7 +176,6 @@ calculate: (values) => {
     ],
   citations: [
       { source: 'Wikipedia — Lead Screw', url: 'https://en.wikipedia.org/wiki/Leadscrew' },
-      { source: 'Lead Screw — Engineering Reference', url: 'https://www.engineeringtoolbox.com/' },
     ],
   },
 };

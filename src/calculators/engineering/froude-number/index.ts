@@ -11,9 +11,10 @@ const froudeConfig: CalculatorConfig = {
       unit: 'm/s',
       inputMode: 'decimal',
       min: 0,
+      max: 1000,
       step: 0.1,
       required: true,
-      helpText: 'Supports both metric (SI) and imperial units. The characteristic velocity of the flow. For open channels, use average velocity (Q/A). For ships, use hull speed.',
+      helpText: 'The characteristic velocity of the flow. For open channels, use average velocity (Q/A). For ships, use hull speed.',
       defaultValue: '5',
     },
     {
@@ -24,9 +25,10 @@ const froudeConfig: CalculatorConfig = {
       unit: 'm/s²',
       inputMode: 'decimal',
       min: 0.01,
+      max: 30,
       step: 0.01,
       defaultValue: '9.81',
-      helpText: 'Earth: 9.81 m/s², Mars: 3.72 m/s², Moon: 1.62 m/s². Change for non-Earth applications.',
+      helpText: 'Earth: 9.81 m/s², Mars: 3.71 m/s², Moon: 1.62 m/s². Change for non-Earth applications.',
     },
     {
       id: 'characteristicLength',
@@ -36,6 +38,7 @@ const froudeConfig: CalculatorConfig = {
       unit: 'm',
       inputMode: 'decimal',
       min: 0.001,
+      max: 100000,
       step: 0.1,
       required: true,
       helpText: 'For open channels: hydraulic depth (A/T). For ships: waterline length. For weirs: head above crest.',
@@ -46,19 +49,20 @@ calculate: (values) => {
     const g = parseFloat(values.gravity);
     const L = parseFloat(values.characteristicLength);
 
-    if (isNaN(v) || isNaN(g) || isNaN(L) || v < 0 || g <= 0 || L <= 0) return [];
+    if (![v, g, L].every(Number.isFinite) || v < 0 || g <= 0 || L <= 0) return [];
 
-    const fr = v / Math.sqrt(g * L);
+    // classify on the displayed (4 significant figure) value
+    const fr = Number((v / Math.sqrt(g * L)).toPrecision(4));
 
     let regime = '';
     let color: 'positive' | 'negative' | 'neutral' = 'neutral';
 
     if (fr < 0.3) { regime = 'Subcritical (tranquil) flow — deep, slow, disturbances travel upstream'; color = 'positive'; }
     else if (fr < 0.9) { regime = 'Subcritical — approaching critical'; color = 'positive'; }
-    else if (fr < 1.0) { regime = 'Subcritical — near critical, surface waves stationary'; color = 'neutral'; }
-    else if (fr < 1.1) { regime = 'Critical flow (Fr = 1) — minimum specific energy, hydraulic jump possible'; color = 'neutral'; }
+    else if (fr < 1.0) { regime = 'Subcritical, near critical — small changes can flip the flow regime'; color = 'neutral'; }
+    else if (fr < 1.1) { regime = 'Critical to slightly supercritical (1 ≤ Fr < 1.1) — near minimum specific energy, surface waves stationary, unstable'; color = 'neutral'; }
     else if (fr < 1.7) { regime = 'Supercritical (rapid) flow — shallow, fast, disturbances wash downstream'; color = 'negative'; }
-    else { regime = 'Highly supercritical — shooting flow, standing waves, potential erosion risk'; color = 'negative'; }
+    else { regime = 'Strongly supercritical — shooting flow, a hydraulic jump downstream would dissipate a lot of energy'; color = 'negative'; }
 
     const waveSpeed = Math.sqrt(g * L);
 
@@ -78,13 +82,13 @@ calculate: (values) => {
     formula: 'Fr = v / √(gL)',
     formulaDescription: 'The Froude number is the ratio of flow inertia to gravitational force. Fr < 1 = subcritical (tranquil) flow where gravity dominates and waves travel upstream. Fr = 1 = critical flow (minimum specific energy). Fr > 1 = supercritical (shooting) flow where inertia dominates and disturbances cannot travel upstream.',
     diagram: {
-      svg: '<svg viewBox=\'0 0 440 200\' xmlns=\'http://www.w3.org/2000/svg\' style=\'max-width:100%;height:auto\'><rect width=\'440\' height=\'200\' fill=\'transparent\' rx=\'8\'/><text x=\'220\' y=\'30\' text-anchor=\'middle\' font-size=\'14\' font-weight=\'bold\' fill=\'currentColor\'>Froude Number</text><text x=\'220\' y=\'52\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>open channel hydraulics</text><rect x=\'40\' y=\'75\' width=\'360\' height=\'80\' rx=\'8\' fill=\'var(--svg-3b82f6)\' opacity=\'0.08\'/><text x=\'220\' y=\'105\' text-anchor=\'middle\' font-size=\'13\' fill=\'currentColor\'>Key domains covered: open channel hydraulics</text><text x=\'220\' y=\'128\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>Comprehensive calculator with worked examples</text><text x=\'220\' y=\'148\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>and step-by-step educational content</text><text x=\'220\' y=\'185\' text-anchor=\'middle\' font-size=\'10\' fill=\'var(--svg-6b7280)\'>Interactive · Free · No signup required</text></svg>',
-      alt: 'Educational diagram for Froude Number showing key concepts and the open channel hydraulics domain',
-      caption: 'This froude number covers open channel hydraulics. Use the worked examples to verify your understanding and bookmark for quick reference.',
+      svg: '<svg viewBox="0 0 440 120" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">Froude Number</text><rect x="20" y="40" width="400" height="44" rx="8" fill="var(--svg-3b82f6)" opacity="0.1"/><text x="220" y="68" text-anchor="middle" font-size="16" fill="currentColor">Fr = v / √(g L)</text><text x="220" y="100" text-anchor="middle" font-size="11" fill="var(--svg-6b7280)">Fr < 1 subcritical · Fr = 1 critical · Fr > 1 supercritical</text></svg>',
+      alt: 'Froude number formula: velocity divided by the square root of gravity times length',
+      caption: 'Fr compares flow speed with the speed of a surface wave, √(gL).',
     },
     variables: [
       { symbol: 'v', name: 'Flow Velocity', description: 'Average cross-sectional velocity. For open channels: v = Q/A where Q is discharge (m³/s) and A is cross-sectional area (m²). For ships: hull speed relative to water.' },
-      { symbol: 'g', name: 'Gravitational Acceleration', description: 'Earth standard: 9.80665 m/s². Differs on other planets. The key insight: Fr ties flow behavior to the gravitational environment — the same flow on Mars has a different Fr.' },
+      { symbol: 'g', name: 'Gravitational Acceleration', description: 'Earth standard: 9.80665 m/s² (9.81 is the usual rounding). Differs on other planets. The key insight: Fr ties flow behavior to the gravitational environment — the same flow on Mars has a different Fr.' },
       { symbol: 'L', name: 'Characteristic Length', description: 'Depends on application. Open channels: hydraulic depth D = A/T (area/top width). Ships: waterline length L_wl. Spillways and weirs: head H above crest. The choice of L affects the numerical value of Fr.' },
     ],
     howToUse: [
@@ -97,9 +101,9 @@ calculate: (values) => {
       { label: 'Fr < 1', value: 'Subcritical — tranquil, deep, slow' },
       { label: 'Fr = 1', value: 'Critical — min specific energy' },
       { label: 'Fr > 1', value: 'Supercritical — rapid, shallow, shooting' },
-      { label: 'Typical river', value: 'Fr ≈ 0.1–0.5 (subcritical)' },
-      { label: 'Mountain stream', value: 'Fr ≈ 0.5–2.0 (mixed)' },
-      { label: 'Spillway chute', value: 'Fr ≈ 2–6 (supercritical)' },
+      { label: 'Typical river', value: 'Usually Fr < 1 (subcritical)' },
+      { label: 'Mountain stream', value: 'Can pass between sub- and supercritical' },
+      { label: 'Spillway chute', value: 'Supercritical (Fr > 1)' },
       { label: 'Ship hull (Fr < 0.4)', value: 'Displacement mode' },
       { label: 'Ship hull (Fr > 0.4)', value: 'Semi-planing/planing' },
     ],
@@ -107,7 +111,7 @@ calculate: (values) => {
       'Open channel hydraulics — classifying flow in rivers, canals, and spillways for flood control and irrigation design.',
       'Naval architecture — ship resistance depends critically on Fr; hull speed is reached at Fr ≈ 0.4 (displacement hulls).',
       'Hydraulic jump design — stilling basins use hydraulic jumps (Fr > 1 → Fr < 1) to dissipate energy downstream of dams.',
-      'Dam spillway design — ensuring supercritical flow on the spillway face to prevent cavitation and structural vibration.',
+      'Dam spillway design — spillway chutes run supercritical, so Fr is used to locate and size the stilling basin; high velocities also need a cavitation check.',
       'Stormwater management — culvert and weir design requires Fr analysis to prevent downstream erosion.',
     ],
     explanation: 'The Froude number (Fr), named after British engineer William Froude (1810–1879), is a dimensionless number that characterizes the relative importance of inertial forces to gravitational forces in a fluid flow. Froude pioneered the use of scale models for ship design, establishing the law of dynamic similarity: model and prototype behave similarly when Fr is matched. The Froude number governs all free-surface flows — rivers, spillways, ocean waves, and ship wakes. The critical value Fr = 1 represents a flow state of minimum specific energy. At this point, the flow velocity equals the wave propagation speed (celerity), and surface waves become stationary. A hydraulic jump forms when supercritical flow (Fr > 1) transitions to subcritical (Fr < 1), dissipating large amounts of energy. Hydraulic jumps are intentionally created in stilling basins to protect riverbeds downstream of dams. The Froude number also determines ship wave-making resistance: at "hull speed" (Fr ≈ 0.4 for displacement hulls), the wavelength of the bow wave equals the ship length, causing a sharp increase in drag. Planing hulls operate at Fr > 1, riding on top of their own bow wave.',
@@ -122,7 +126,7 @@ calculate: (values) => {
       },
       {
         question: 'How does the Froude number apply to hydraulic jumps?',
-        answer: 'A hydraulic jump occurs when supercritical flow (Fr > 1) abruptly transitions to subcritical flow (Fr < 1). The energy dissipation depends on the upstream Fr: weak jump (1 < Fr < 1.7, < 5% energy loss), oscillating jump (1.7–2.5, 5–15%), steady jump (2.5–4.5, 15–45%), strong jump (4.5–9, 45–70%), and choppy jump (Fr > 9, up to 85% loss). Stilling basins are designed to produce steady jumps at design flow.',
+        answer: 'A hydraulic jump occurs when supercritical flow (Fr > 1) abruptly transitions to subcritical flow. Jump types by upstream Froude number (US Bureau of Reclamation classification): Fr 1–1.7 undular jump (energy loss under 5%), 1.7–2.5 weak jump (5–15%), 2.5–4.5 oscillating jump (15–45%), 4.5–9 steady jump (45–70%, the best-behaved), above 9 strong jump (70–85%). Stilling basins are normally designed for steady jumps.',
       },
       {
         question: 'Does the Froude number matter for pipe flow?',
@@ -135,9 +139,9 @@ calculate: (values) => {
     ],
     proTips: [
       'For rectangular channels: Fr = v/√(gy) where y is the flow depth (not the channel depth!). This is the simplest and most common form — measure depth, not channel dimensions.',
-      'When designing a stilling basin, target an upstream Fr between 2.5 and 4.5 for a steady, well-defined hydraulic jump. Below 2.5 the jump oscillates and creates surface waves that can overtop channel walls.',
+      'When designing a stilling basin, a steady jump (upstream Fr of about 4.5 to 9) is the best behaved. At Fr of 2.5 to 4.5 the jump oscillates and sends waves downstream, which is why designers avoid that range or add appurtenances.',
       'Ship model testing: Fr similarity and Re similarity cannot be satisfied simultaneously at model scale. Model tests match Fr (gravity-dependent wave patterns) and correct for viscous (Re) effects analytically.',
-      'For environmental flows: Fr < 0.1 is "deep, slow" — mixing is limited. Fr ≈ 0.2–0.5 is typical for lowland rivers. At these values, aeration is poor, and pollutants disperse slowly.',
+      'For rivers, Fr is usually well below 1; confirm with a depth measurement rather than assuming a typical value.',
     ],
     workedExamples: [
       {
@@ -149,8 +153,8 @@ calculate: (values) => {
       {
         scenario: 'A dam spillway has water shooting down at 15 m/s with a depth of 0.3 m. What is the Froude number?',
         inputs: { velocity: '15', gravity: '9.81', characteristicLength: '0.3' },
-        result: 'Fr = 8.75 — highly supercritical (choppy jump regime).',
-        insight: 'Fr = 15 / √(9.81 × 0.3) = 15 / 1.715 = 8.75. This is highly supercritical flow — a "choppy jump" regime. At Fr ≈ 8.75, a hydraulic jump would dissipate about 75% of the incoming energy. A stilling basin is absolutely essential to prevent downstream scour.',
+        result: 'Fr = 8.744 — strongly supercritical (a steady hydraulic jump would follow).',
+        insight: 'Fr = 15 / √(9.81 × 0.3) = 15 / 1.7156 = 8.744. This is strongly supercritical flow. At Fr ≈ 8.7 a hydraulic jump is a steady jump and dissipates roughly 69% of the incoming specific energy (conjugate depth ratio y2/y1 = ½(√(1+8Fr²) − 1) ≈ 11.9). A stilling basin is absolutely essential to prevent downstream scour.',
       },
     ],
 
@@ -161,7 +165,6 @@ calculate: (values) => {
     ],
   citations: [
       { source: 'Wikipedia — Froude Number', url: 'https://en.wikipedia.org/wiki/Froude_Number' },
-      { source: 'Froude Number — Engineering Reference', url: 'https://www.engineeringtoolbox.com/' },
     ],
   },
 };

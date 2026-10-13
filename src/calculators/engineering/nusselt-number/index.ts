@@ -11,9 +11,10 @@ const nusseltConfig: CalculatorConfig = {
       unit: 'W/m²·K',
       inputMode: 'decimal',
       min: 0,
+      max: 1000000,
       step: 0.1,
       required: true,
-      helpText: 'Supports both metric (SI) and imperial units. The convective heat transfer coefficient. Typical values: air (natural) 5-25, air (forced) 10-200, water 500-10,000 W/m²·K.',
+      helpText: 'The convective heat transfer coefficient. Typical values: air (natural) 5-25, air (forced) 10-200, water 500-10,000 W/m²·K.',
     },
     {
       id: 'characteristicLength',
@@ -23,6 +24,7 @@ const nusseltConfig: CalculatorConfig = {
       unit: 'm',
       inputMode: 'decimal',
       min: 0,
+      max: 1000,
       step: 0.001,
       required: true,
       helpText: 'The characteristic length. For a flat plate, use plate length. For a pipe, use diameter. For a sphere, use diameter.',
@@ -35,6 +37,7 @@ const nusseltConfig: CalculatorConfig = {
       unit: 'W/m·K',
       inputMode: 'decimal',
       min: 0.001,
+      max: 1000,
       step: 0.01,
       required: true,
       helpText: 'Thermal conductivity of the fluid. Air: ~0.026, Water: ~0.6, Engine oil: ~0.15 W/m·K at room temperature.',
@@ -45,14 +48,14 @@ calculate: (values) => {
     const L = parseFloat(values.characteristicLength);
     const k = parseFloat(values.thermalConductivity);
 
-    if (isNaN(h) || isNaN(L) || isNaN(k) || h <= 0 || L <= 0 || k <= 0) return [];
+    if (![h, L, k].every(Number.isFinite) || h <= 0 || L <= 0 || k <= 0) return [];
 
-    const nu = (h * L) / k;
+    const nu = Number(((h * L) / k).toPrecision(6)); // trims float noise so Nu = 1 is recognised
 
     return [
       { id: 'nusselt', label: 'Nusselt Number (Nu)', value: fmt(nu), highlight: true, color: 'positive' },
       { id: 'formula', label: 'Formula Used', value: `Nu = (${h} × ${L}) / ${k} = ${fmt(nu)}`, color: 'neutral' },
-      { id: 'interpretation', label: 'Interpretation', value: nu > 1 ? 'Convection dominates conduction' : nu === 1 ? 'Pure conduction (Nu = 1)' : 'Check inputs — Nu < 1 is unusual for natural convection', color: nu > 1 ? 'positive' : 'neutral' },
+      { id: 'interpretation', label: 'Interpretation', value: nu > 1 ? 'Convection enhances heat transfer beyond pure conduction' : nu === 1 ? 'Equivalent to pure conduction across a layer of thickness L (Nu = 1)' : 'Nu < 1: heat transfer is poorer than conduction across a stagnant layer of thickness L — check the characteristic length and h', color: nu > 1 ? 'positive' : 'neutral' },
     ];
   },
 
@@ -62,11 +65,11 @@ calculate: (values) => {
   },
   educational: {
     formula: 'Nu = hL / k',
-    formulaDescription: 'The Nusselt number represents the ratio of convective to conductive heat transfer across a boundary. A Nu > 1 indicates convection enhances heat transfer beyond pure conduction. Nu = 1 represents pure conduction. Higher Nu means more effective convection.',
+    formulaDescription: 'The Nusselt number represents the ratio of convective to conductive heat transfer across a boundary. A Nu > 1 indicates convection enhances heat transfer beyond conduction across a stagnant fluid layer of thickness L. Nu = 1 corresponds to pure conduction. Higher Nu means more effective convection.',
     diagram: {
-      svg: '<svg viewBox=\'0 0 440 200\' xmlns=\'http://www.w3.org/2000/svg\' style=\'max-width:100%;height:auto\'><rect width=\'440\' height=\'200\' fill=\'transparent\' rx=\'8\'/><text x=\'220\' y=\'30\' text-anchor=\'middle\' font-size=\'14\' font-weight=\'bold\' fill=\'currentColor\'>Nusselt Number</text><text x=\'220\' y=\'52\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>convective heat transfer</text><rect x=\'40\' y=\'75\' width=\'360\' height=\'80\' rx=\'8\' fill=\'var(--svg-3b82f6)\' opacity=\'0.08\'/><text x=\'220\' y=\'105\' text-anchor=\'middle\' font-size=\'13\' fill=\'currentColor\'>Key domains covered: convective heat transfer</text><text x=\'220\' y=\'128\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>Comprehensive calculator with worked examples</text><text x=\'220\' y=\'148\' text-anchor=\'middle\' font-size=\'11\' fill=\'var(--svg-6b7280)\'>and step-by-step educational content</text><text x=\'220\' y=\'185\' text-anchor=\'middle\' font-size=\'10\' fill=\'var(--svg-6b7280)\'>Interactive · Free · No signup required</text></svg>',
-      alt: 'Educational diagram for Nusselt Number showing key concepts and the convective heat transfer domain',
-      caption: 'This nusselt number covers convective heat transfer. Use the worked examples to verify your understanding and bookmark for quick reference.',
+      svg: '<svg viewBox="0 0 440 120" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">Nusselt Number</text><rect x="20" y="40" width="400" height="44" rx="8" fill="var(--svg-3b82f6)" opacity="0.1"/><text x="220" y="68" text-anchor="middle" font-size="16" fill="currentColor">Nu = h L / k</text><text x="220" y="100" text-anchor="middle" font-size="11" fill="var(--svg-6b7280)">h in W/m²·K · L in m · k in W/m·K</text></svg>',
+      alt: 'Nusselt number formula: heat transfer coefficient times length divided by thermal conductivity',
+      caption: 'Nu compares convective heat transfer with conduction through the same fluid layer.',
     },
     variables: [
       { symbol: 'h', name: 'Convective Heat Transfer Coefficient', description: 'Rate of heat transfer between a surface and a fluid per unit area per unit temperature difference (W/m²·K). Depends on fluid properties, flow velocity, and geometry.' },
@@ -80,11 +83,11 @@ calculate: (values) => {
       'Review the Nusselt number and interpretation.',
     ],
     quickReference: [
-      { label: 'Nu = 1', value: 'Pure conduction (no convection enhancement)' },
-      { label: 'Nu = 3–5', value: 'Weak natural convection' },
-      { label: 'Nu = 10–100', value: 'Moderate forced convection' },
-      { label: 'Nu = 100–1,000', value: 'Strong forced convection' },
-      { label: 'Nu > 1,000', value: 'Turbulent flow, very efficient heat transfer' },
+      { label: 'Nu = 1', value: 'Conduction across a layer of thickness L' },
+      { label: 'Nu > 1', value: 'Convection enhances heat transfer' },
+      { label: 'h from Nu', value: 'h = Nu × k / L' },
+      { label: 'Laminar flat plate (average)', value: 'Nu = 0.664 Re^0.5 Pr^(1/3)' },
+      { label: 'Turbulent pipe (Dittus-Boelter)', value: 'Nu = 0.023 Re^0.8 Pr^0.4 (heating)' },
     ],
     commonUses: [
       'Heat exchanger design — sizing and rating shell-and-tube, plate, and finned exchangers.',
@@ -93,15 +96,15 @@ calculate: (values) => {
       'Aerospace thermal protection — designing re-entry shields and engine cooling systems.',
       'Chemical reactor design — ensuring adequate heat removal for exothermic reactions.',
     ],
-    explanation: 'The Nusselt number (Nu) is one of the most important dimensionless numbers in heat transfer. Named after Wilhelm Nusselt (1882–1957), it quantifies the enhancement of heat transfer due to convection relative to conduction alone. A Nusselt number of 1 means the fluid is stationary and heat transfers only by conduction. A Nu of 100 means convection increases the heat transfer rate 100-fold compared to pure conduction. Engineers use Nu correlations for specific geometries: Nu = 0.664·Re^(1/2)·Pr^(1/3) for laminar flow over a flat plate, and Nu = 0.023·Re^(4/5)·Pr^(0.4) for turbulent flow in pipes (Dittus-Boelter). The Nusselt number is always ≥ 1 for natural convection and typically >> 1 for forced convection. Understanding Nu is essential for designing radiators, heat sinks, condensers, boilers, and any system where heat must be moved efficiently between a solid surface and a fluid.',
+    explanation: 'The Nusselt number (Nu) is one of the most important dimensionless numbers in heat transfer. Named after Wilhelm Nusselt (1882–1957), it quantifies the enhancement of heat transfer due to convection relative to conduction alone. A Nusselt number of 1 means heat transfers as if by conduction alone across a fluid layer of thickness L. A Nu of 100 means convection increases the heat transfer rate 100-fold compared to pure conduction. Engineers use Nu correlations for specific geometries: Nu = 0.664·Re^(1/2)·Pr^(1/3) for the average over a flat plate in laminar flow (Re below about 5×10⁵, Pr ≥ 0.6), and Nu = 0.023·Re^(4/5)·Pr^n for fully turbulent flow in smooth pipes (Dittus-Boelter: n = 0.4 for heating the fluid, 0.3 for cooling; Re above about 10,000, 0.6 < Pr < 160, L/D above 10). Nu is typically well above 1 for forced convection. Understanding Nu is essential for designing radiators, heat sinks, condensers, boilers, and any system where heat must be moved efficiently between a solid surface and a fluid.',
     faqs: [
       {
         question: 'What does a Nusselt number of 1 mean?',
-        answer: 'A Nu = 1 means pure conduction — the fluid is stagnant and heat transfers solely by molecular conduction through the fluid. There is no convective enhancement. This is the theoretical minimum and occurs when fluid velocity is zero at the wall (no-slip condition).',
+        answer: 'A Nu = 1 means heat moves as if by conduction alone across a fluid layer of thickness L, with no convective enhancement. For a truly stagnant fluid between two walls Nu is exactly 1; for flow over a surface a value near 1 means the flow barely helps.',
       },
       {
         question: 'What is a typical Nusselt number for natural convection?',
-        answer: 'For natural (free) convection, Nu typically ranges from 1 to 25. A vertical plate in still air might have Nu ≈ 10–20. A horizontal cylinder in air might have Nu ≈ 5–15. Higher values occur with larger temperature differences that drive stronger buoyant flows.',
+        answer: 'It depends on geometry and the Rayleigh number (buoyancy strength): for natural convection Nu is usually modest, far below the values for forced convection, and it rises with the temperature difference that drives the buoyant flow. Use a correlation for your geometry (for example Churchill-Chu for a vertical plate) instead of a rule-of-thumb number.',
       },
       {
         question: 'How does the Nusselt number relate to the heat transfer coefficient?',
@@ -117,23 +120,23 @@ calculate: (values) => {
       },
     ],
     proTips: [
-      'For quick estimates, remember: Nu ≈ 0.023·Re^0.8·Pr^0.4 for turbulent pipe flow (Dittus-Boelter). This single correlation covers most industrial pipe-flow heat transfer calculations.',
+      'For fully turbulent flow in smooth pipes, Nu ≈ 0.023·Re^0.8·Pr^0.4 (Dittus-Boelter, heating) is a good first estimate; check its validity range (Re above about 10,000, 0.6 < Pr < 160, L/D above 10) and use Gnielinski for better accuracy.',
       'The characteristic length L must match the geometry used in your Nu correlation. Using the wrong L (e.g., pipe radius instead of diameter) will give results off by a factor of 2 or more.',
-      'Nu is always ≥ 1 for any physically meaningful case. If your calculation gives Nu < 1, check whether the characteristic length is appropriate or if the convection coefficient is unrealistically low.',
+      'If your calculation gives Nu well below 1, check whether the characteristic length is appropriate or whether h is unrealistically low.',
       'Nu, Re, and Pr form the core trio of convective heat transfer. Once you understand how they relate (Nu = f(Re, Pr) for forced convection, Nu = f(Gr, Pr) for natural), you can tackle virtually any convection problem.',
     ],
     workedExamples: [
       {
         scenario: 'Air flows over a 0.5 m flat plate. h = 25 W/m²·K, k_air = 0.026 W/m·K. What is Nu and what does it tell us?',
         inputs: { heatTransferCoeff: '25', characteristicLength: '0.5', thermalConductivity: '0.026' },
-        result: 'Nu = 480.8 — strong forced convection, ~500× more effective than pure conduction.',
-        insight: 'Nu = (25 × 0.5) / 0.026 = 480.8. This is a high Nusselt number indicating strong forced convection — the convective heat transfer is nearly 500× more effective than pure conduction. This is typical for airflow over a surface at moderate speeds.',
+        result: 'Nu = 480.8 — convection about 480× more effective than conduction across a 0.5 m layer of air.',
+        insight: 'Nu = (25 × 0.5) / 0.026 = 480.8. This high Nusselt number means convection moves heat roughly 480 times better than conduction through a 0.5 m air layer would; it is large mainly because air conducts heat so poorly (k = 0.026) while h = 25 W/m²·K is a typical forced-air value.',
       },
       {
         scenario: 'Water flows through a 25 mm diameter tube. h = 8,000 W/m²·K, k_water = 0.6 W/m·K. What is Nu?',
         inputs: { heatTransferCoeff: '8000', characteristicLength: '0.025', thermalConductivity: '0.6' },
-        result: 'Nu = 333.3 — turbulent flow with efficient heat transfer typical of water systems.',
-        insight: 'Nu = (8000 × 0.025) / 0.6 = 333.3. This high Nu is typical for water — its high thermal conductivity and the turbulent flow produce efficient heat transfer. Compare with air: achieving Nu = 333 with air would require much higher velocities.',
+        result: 'Nu = 333.3 — convection about 330× more effective than conduction across a 25 mm water layer.',
+        insight: 'Nu = (8000 × 0.025) / 0.6 = 333.3. Water gives a high h (8,000 W/m²·K here) and a high k, and Nu = hL/k ties them to the tube diameter. Compare air: reaching the same Nu with air would need a far higher h relative to its low k.',
       },
     ],
 
@@ -144,7 +147,6 @@ calculate: (values) => {
     ],
   citations: [
       { source: 'Wikipedia — Nusselt Number', url: 'https://en.wikipedia.org/wiki/Nusselt_Number' },
-      { source: 'Nusselt Number — Engineering Reference', url: 'https://www.engineeringtoolbox.com/' },
     ],
   },
 };

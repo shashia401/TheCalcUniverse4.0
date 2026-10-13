@@ -58,7 +58,21 @@ const gearRatioConfig: CalculatorConfig = {
       inputMode: 'decimal',
       min: 0,
       step: 0.1,
-      helpText: 'Used to calculate output torque (assumes 95% efficiency)',
+      helpText: 'Used to calculate output torque (output and ratio modes)',
+      showWhen: (v) => v.mode !== 'input_rpm',
+    },
+    {
+      id: 'efficiency',
+      label: 'Gear Train Efficiency (optional)',
+      type: 'number',
+      placeholder: '95',
+      unit: '%',
+      inputMode: 'decimal',
+      min: 1,
+      max: 100,
+      step: 0.5,
+      helpText: 'Fraction of torque that survives friction losses. Blank = 95%, a typical assumption for a spur/helical stage; worm gears can be far lower (50-70%) and planetary stages higher (about 97%).',
+      showWhen: (v) => v.mode !== 'input_rpm',
     },
   ],
   calculate: (values) => {
@@ -67,10 +81,13 @@ const gearRatioConfig: CalculatorConfig = {
     const outputRPM = parseFloat(values.outputRPM);
     const gearRatio = parseFloat(values.gearRatio);
     const inputTorque = parseFloat(values.inputTorque);
-    const efficiency = 0.95;
+    const effPct = values.efficiency !== undefined && values.efficiency !== '' ? parseFloat(values.efficiency) : 95;
+    const efficiency = effPct / 100;
+    if (!Number.isFinite(effPct) || effPct <= 0 || effPct > 100) return [];
+    const effLabel = `${fmt(effPct)}% efficiency`;
 
     if (mode === 'output') {
-      if (isNaN(inputRPM) || isNaN(gearRatio) || gearRatio <= 0) return [];
+      if (!Number.isFinite(inputRPM) || !Number.isFinite(gearRatio) || gearRatio <= 0 || inputRPM < 0) return [];
       const calcOutputRPM = inputRPM / gearRatio;
       const results: CalculatorResult[] = [
         { id: 'outputRPM', label: 'Output Speed', value: `${fmt(calcOutputRPM)} RPM`, highlight: true, color: 'positive' as const },
@@ -79,22 +96,26 @@ const gearRatioConfig: CalculatorConfig = {
       ];
       if (!isNaN(inputTorque) && inputTorque > 0) {
         const outputTorque = inputTorque * gearRatio * efficiency;
-        results.push({ id: 'outputTorque', label: 'Output Torque (95% efficiency)', value: `${fmt(outputTorque)} N·m`, color: 'positive' as const });
+        results.push({ id: 'outputTorque', label: `Output Torque (${effLabel})`, value: `${fmt(outputTorque)} N·m`, color: 'positive' as const });
       }
       return results;
     }
 
     if (mode === 'ratio') {
-      if (isNaN(inputRPM) || isNaN(outputRPM) || outputRPM <= 0) return [];
+      if (!Number.isFinite(inputRPM) || !Number.isFinite(outputRPM) || outputRPM <= 0 || inputRPM <= 0) return [];
       const ratio = inputRPM / outputRPM;
-      return [
+      const out: CalculatorResult[] = [
         { id: 'ratio', label: 'Gear Ratio', value: `${fmt(ratio)}:1`, highlight: true, color: 'positive' as const },
         { id: 'type', label: 'Type', value: ratio > 1 ? 'Reduction (output slower)' : ratio < 1 ? 'Overdrive (output faster)' : '1:1 Direct Drive', color: 'neutral' as const },
       ];
+      if (Number.isFinite(inputTorque) && inputTorque > 0) {
+        out.push({ id: 'outputTorque', label: `Output Torque (${effLabel})`, value: `${fmt(inputTorque * ratio * efficiency)} N·m`, color: 'positive' as const });
+      }
+      return out;
     }
 
     if (mode === 'input_rpm') {
-      if (isNaN(outputRPM) || isNaN(gearRatio) || gearRatio <= 0) return [];
+      if (!Number.isFinite(outputRPM) || !Number.isFinite(gearRatio) || gearRatio <= 0 || outputRPM < 0) return [];
       const calcInputRPM = outputRPM * gearRatio;
       return [
         { id: 'inputRPM', label: 'Required Input RPM', value: `${fmt(calcInputRPM)} RPM`, highlight: true, color: 'positive' as const },
@@ -115,10 +136,10 @@ const gearRatioConfig: CalculatorConfig = {
       caption: 'Gear ratio — larger driven gear turns slower but with more torque',
     },
     formulaDescription:
-      'Gear ratios trade speed for torque (or vice versa). A ratio greater than 1 reduces speed and multiplies torque; a ratio less than 1 increases speed and reduces torque. Output Torque = Input Torque × Gear Ratio × Efficiency.',
+      'Gear ratios trade speed for torque (or vice versa). A ratio greater than 1 reduces speed and multiplies torque; a ratio less than 1 increases speed and reduces torque. Output Torque = Input Torque × Gear Ratio × Efficiency (95% unless you enter another value).',
     variables: [
       { symbol: 'Gear Ratio', name: 'Gear Ratio (N₁:N₂)', description: 'The ratio of teeth on the driving gear to teeth on the driven gear. Determines speed and torque relationship. A 3:1 reduction means the output shaft turns once for every 3 turns of the input.' },
-      { symbol: 'Efficiency', name: 'Mechanical Efficiency', description: 'Real gear systems lose 3-10% efficiency to friction and heat. This calculator assumes 95% efficiency. Worm gears can be as low as 50-70% efficient.' },
+      { symbol: 'Efficiency', name: 'Mechanical Efficiency', description: 'Real gear systems lose some torque to friction and heat. This calculator assumes 95% unless you enter a value. Worm gears can be far less efficient (about 50-70%).' },
       { symbol: 'RPM', name: 'Revolutions Per Minute', description: 'Rotational speed. Motors typically run at 1,200-3,600 RPM; gearboxes reduce this to useful speeds like 30-500 RPM for industrial applications.' },
     ],
     howToUse: [
@@ -129,18 +150,17 @@ const gearRatioConfig: CalculatorConfig = {
       'Use the result to select an appropriate gearbox for your application.',
     ],
     explanation:
-      'Gear systems are mechanical force multipliers — they trade speed for torque or torque for speed. A 3:1 reduction gear reduces output speed by 3x but multiplies torque by approximately 3x (minus losses). This is why gearboxes are used on electric motors to match high motor speeds to low-speed, high-torque applications like conveyors, winches, and vehicle drivetrains. Compound gear trains (multiple gear stages) multiply the ratios of each stage. Real-world example: an electric motor running at 1,800 RPM driving a conveyor that needs to operate at 60 RPM. The required gear ratio is 1,800 ÷ 60 = 30:1. A single-stage gearbox is usually limited to about 10:1, so this would need a two-stage gearbox (for example, 6:1 first stage times 5:1 second stage = 30:1). If the motor delivers 50 N·m of torque, the output torque is 50 times 30 times 0.95 = 1,425 N·m — enough to move the conveyor belt with heavy loads. In a vehicle transmission, the gearbox provides multiple ratios for different driving conditions. First gear might be 3.5:1 for maximum torque during acceleration, while fifth gear might be 0.75:1 overdrive for fuel-efficient highway cruising. The differential adds a final reduction of about 3:1 to 4:1, so the overall ratio from engine to wheels in first gear is roughly 10.5:1 to 14:1.',
+      'Gear systems are mechanical force multipliers — they trade speed for torque or torque for speed. A 3:1 reduction gear reduces output speed by 3x but multiplies torque by approximately 3x (minus losses). This is why gearboxes are used on electric motors to match high motor speeds to low-speed, high-torque applications like conveyors, winches, and vehicle drivetrains. Compound gear trains (multiple gear stages) multiply the ratios of each stage. Real-world example: an electric motor running at 1,800 RPM driving a conveyor that needs to operate at 60 RPM. The required gear ratio is 1,800 ÷ 60 = 30:1. A single-stage gearbox is usually limited to about 10:1, so this would need a two-stage gearbox (for example, 6:1 first stage times 5:1 second stage = 30:1). If the motor delivers 50 N·m of torque, the output torque is 50 times 30 times 0.95 = 1,425 N·m — enough to move the conveyor belt with heavy loads. In a vehicle transmission, the gearbox provides multiple ratios for different driving conditions. First gear might be 3.5:1 for maximum torque during acceleration, while fifth gear might be 0.75:1 overdrive for fuel-efficient highway cruising. A differential adds a final reduction of typically about 3:1 to 4:1, so the overall ratio from engine to wheels in first gear would be roughly 10.5:1 to 14:1 for those example values.',
     quickReference: [
       { label: '1,750 RPM → 175 RPM', value: '10:1 reduction (conveyor drive)' },
       { label: '3,600 RPM → 600 RPM', value: '6:1 reduction (pump drive)' },
       { label: '1,800 RPM → 60 RPM', value: '30:1 reduction (mixer/agitator)' },
       { label: '100 N·m × 3:1', value: '285 N·m output (95% eff.)' },
-      { label: 'Car 1st gear', value: '3.0:1 – 4.5:1' },
-      { label: 'Car overdrive', value: '0.7:1 – 0.85:1' },
-      { label: 'Car differential', value: '3.0:1 – 4.5:1' },
-      { label: 'Bicycle low gear', value: '~0.7:1 (climbing)' },
-      { label: 'Bicycle high gear', value: '~3.5:1 (sprinting)' },
-      { label: 'Worm gear single stage', value: '5:1 – 100:1 (50-70% eff.)' },
+      { label: 'Car 1st gear (typical)', value: 'about 3:1 – 4.5:1' },
+      { label: 'Car overdrive (typical)', value: 'below 1:1' },
+      { label: 'Compound train', value: 'multiply the stage ratios' },
+      { label: 'Torque out', value: 'Torque in × ratio × efficiency' },
+      { label: 'Worm gear single stage', value: 'roughly 5:1 – 100:1, lower efficiency' },
     ],
     commonUses: [
       'Designing mechanical systems like conveyor drives, winches, or mixers by calculating the gear reduction needed to match motor speed to load requirements',
@@ -153,30 +173,30 @@ const gearRatioConfig: CalculatorConfig = {
       {
         scenario: 'Carlos is designing a conveyor belt system for a packaging facility. He has a 1,750 RPM electric motor that produces 45 N·m of torque, and the conveyor drive roller needs to turn at 70 RPM to move packages at the correct speed. What gear ratio does he need, and what output torque can he expect?',
         inputs: { mode: 'ratio', inputRPM: '1750', outputRPM: '70', inputTorque: '45' },
-        result: '25:1 gear ratio, ~1,069 N·m output torque at 95% efficiency',
-        insight: 'The required ratio is 1,750 ÷ 70 = 25:1. This is beyond what a single-stage gearbox can provide (typically max 10:1), so Carlos needs a two-stage gearbox — for example, a 5:1 first stage driving a 5:1 second stage (5 × 5 = 25:1). The output torque of 1,069 N·m is enough to move heavy pallets on the conveyor. Carlos should specify a gearbox rated for at least 1,200 N·m output torque with a service factor of 1.25 for continuous duty (1,069 × 1.25 = 1,336 N·m minimum rating). The motor draws about 8.2 kW electrical power (45 N·m × 1,750 RPM ÷ 9,548 × motor efficiency of 92%), which requires a 480V three-phase supply.',
+        result: '25:1 gear ratio, 1,068.75 N·m output torque at 95% efficiency (45 × 25 × 0.95)',
+        insight: 'The required ratio is 1,750 ÷ 70 = 25:1. This is beyond what a single-stage gearbox can provide (typically max 10:1), so Carlos needs a two-stage gearbox — for example, a 5:1 first stage driving a 5:1 second stage (5 × 5 = 25:1). The output torque of 1,069 N·m is enough to move heavy pallets on the conveyor. Carlos should specify a gearbox rated for at least 1,200 N·m output torque with a service factor of 1.25 for continuous duty (1,069 × 1.25 = 1,336 N·m minimum rating). The motor shaft power is 45 N·m × 1,750 RPM ÷ 9,549 ≈ 8.25 kW (about 11 hp), so size the motor and drive from that.',
       },
       {
         scenario: 'Aisha is building an electric go-kart for a college engineering competition. The DC motor produces 12 N·m at 3,000 RPM. The rear wheels are 11 inches in diameter and she wants a top speed of 25 mph. What gear ratio and sprocket combination should she use?',
         inputs: { mode: 'output', inputRPM: '3000', gearRatio: '4', inputTorque: '12' },
-        result: 'Target wheel RPM ≈ 750 RPM → ratio 3.92:1 ≈ 4:1 sprocket combination (12T motor, 48T axle)',
-        insight: 'At 25 mph, an 11-inch diameter wheel covers π × 11 = 34.56 inches per revolution. 25 mph = 26,400 inches/min, so the wheel needs 26,400 ÷ 34.56 ≈ 764 RPM. The gear ratio needed is 3,000 ÷ 764 = 3.92:1. The nearest practical sprocket combination is 12 teeth on the motor and 48 teeth on the axle (4:1 ratio), giving a top speed of ~24.5 mph. Output torque at 4:1 with 95% chain efficiency = 12 × 4 × 0.95 = 45.6 N·m at the wheels. This provides strong acceleration for a 150 lb kart with a 160 lb driver — the thrust force is approximately 45.6 N·m ÷ 0.14 m wheel radius = 326 N (73 lbf) at peak torque.',
+        result: 'Output 750 RPM and 45.6 N·m at the wheels with a 4:1 sprocket pair (12T motor, 48T axle); the exact ratio for 25 mph is 3.93:1',
+        insight: 'At 25 mph, an 11-inch diameter wheel covers π × 11 = 34.56 inches per revolution. 25 mph = 26,400 inches/min, so the wheel needs 26,400 ÷ 34.56 ≈ 764 RPM. The gear ratio needed is 3,000 ÷ 764 = 3.93:1. The nearest practical sprocket combination is 12 teeth on the motor and 48 teeth on the axle (4:1 ratio), giving a top speed of ~24.5 mph. Output torque at 4:1 with 95% chain efficiency = 12 × 4 × 0.95 = 45.6 N·m at the wheels. This provides strong acceleration for a 150 lb kart with a 160 lb driver — the thrust force is approximately 45.6 N·m ÷ 0.14 m wheel radius = 326 N (73 lbf) at peak torque.',
       },
       {
         scenario: 'Raj is spec\'ing a planetary gearbox for a solar tracker that adjusts panel angle throughout the day. The panels weigh 800 kg and need to rotate at approximately 0.1 RPM with high torque. He has a 24V DC motor that runs at 3,000 RPM no-load and produces 0.5 N·m stall torque. What overall ratio does he need?',
         inputs: { mode: 'ratio', inputRPM: '3000', outputRPM: '0.1', inputTorque: '0.5' },
         result: '30,000:1 overall ratio, ~14,250 N·m theoretical output torque',
-        insight: 'A 30,000:1 ratio is extreme for a single gearbox. Raj would need a multi-stage solution: a planetary gearbox (100:1) driving a worm gear stage (300:1) = 30,000:1 overall. However, at this ratio with worm gear efficiency of ~60%, the actual output torque drops to 0.5 × 30,000 × 0.6 = 9,000 N·m. The solar tracker requires roughly 800 kg × 9.81 m/s² × 1.5 m (lever arm) = 11,772 N·m max torque at horizontal position. The system would be marginal — Raj should consider a higher-torque motor (2-3 N·m) or use a harmonic drive (strain wave gear) which can achieve 160:1 in a single stage with zero backlash, making it ideal for precision solar tracking applications.',
+        insight: 'A 30,000:1 ratio is far beyond any single gear stage. Raj would need several stages in series (for example planetary stages followed by a worm stage) whose ratios multiply to 30,000. With a worm stage the overall efficiency may be only ~60%, so the actual output torque drops to 0.5 × 30,000 × 0.6 = 9,000 N·m (enter 60 in the efficiency field to see this). The solar tracker requires roughly 800 kg × 9.81 m/s² × 1.5 m (lever arm) = 11,772 N·m max torque at horizontal position. The system would be marginal — Raj should consider a higher-torque motor (2-3 N·m) or use a harmonic drive (strain wave gear) which can achieve 160:1 in a single stage with zero backlash, making it ideal for precision solar tracking applications.',
       },
     ],
     proTips: [
       'When designing a multi-stage gearbox, keep individual stage ratios below 10:1 for spur/helical gears to avoid excessive tooth wear and noise. A 50:1 reduction is better achieved with a 7:1 first stage and 7:1 second stage (49:1) rather than a single 50:1 stage, which would require an impractically large driven gear or very small drive gear with undercut teeth.',
-      'Always include a service factor when specifying gearboxes. Use 1.0 for smooth loads (fans, centrifugal pumps), 1.25 for moderate shock (conveyors, mixers), 1.5 for heavy shock (crushers, punch presses), and 2.0+ for extreme shock (hammer mills, rock crushers). Multiply your calculated torque by the service factor before selecting a gearbox catalog number — underspecifying the service factor is the #1 cause of premature gearbox failure.',
-      'For reversing applications (forward/reverse) or frequent start/stop, the gearbox experiences torque reversals that can cause backlash-induced impact loads. Use planetary or harmonic drive gearboxes for these applications — they have inherently lower backlash. Backlash in spur gear trains accumulates across stages, so a 4-stage gearbox with 0.5° backlash per stage has 2° total backlash at the output, which is unacceptable for CNC or robotics positioning.',
-      'Bicycle gearing tip: cadence (pedal RPM) × gear ratio = wheel RPM. At 90 RPM cadence with a 48T chainring and 16T cog (3:1 ratio), the wheel spins at 270 RPM. With a 700c wheel (circumference ~2.1 m), speed = 270 × 2.1 × 60 ÷ 1000 = 34 km/h. This relationship lets you calculate exactly which gear combination you need for a target speed at your preferred cadence — most efficient cycling happens at 80-100 RPM cadence.',
+      'Include a service factor when specifying gearboxes: a common rule of thumb is about 1.0 for smooth loads (fans, centrifugal pumps), 1.25 for moderate shock (conveyors, mixers), 1.5 for heavy shock, and higher for extreme shock. Multiply your calculated torque by the factor your gearbox manufacturer or AGMA guidance recommends before choosing a catalog size.',
+      'For reversing applications or frequent start/stop the gearbox sees torque reversals, so backlash matters. Planetary and harmonic-drive gearboxes have inherently low backlash. Backlash at an early stage is reduced at the output by the ratios that follow it, so the last stage (nearest the load) dominates output backlash.',
+      'Bicycle gearing tip: cadence (pedal RPM) × (chainring teeth ÷ cog teeth) = wheel RPM, an overdrive (output faster than input). At 90 RPM cadence with a 48T chainring and 16T cog (3:1 step-up), the wheel spins at 270 RPM. With a 700c wheel (circumference about 2.1 m), speed = 270 × 2.1 × 60 ÷ 1000 ≈ 34 km/h. Many cyclists favour a cadence of roughly 80-100 RPM.',
     ],
     limitations: [
-      'When not to use: This calculator assumes 95% mechanical efficiency for spur/helical gear stages. Real efficiency varies significantly by gear type — worm gears are 50-70% efficient, hypoid gears 85-95%, planetary gears 97-98% per stage. Use manufacturer efficiency data for production designs.',
+      'When not to use: efficiency defaults to 95%, a typical assumption for a spur/helical stage, and applies to torque only. Real efficiency varies significantly by gear type and load — worm gears can be far lower, planetary stages higher per stage. Use manufacturer efficiency data for production designs.',
       'The calculator does not model dynamic effects: inertia matching (motor inertia vs. reflected load inertia), torsional stiffness, backlash accumulation across stages, or thermal effects at high speeds. These are critical for servo systems, robotics, and high-speed applications.',
       'Gear ratio alone does not determine whether a gear pair will work — tooth strength, surface durability (pitting resistance), and lubrication requirements are separate design constraints governed by AGMA standards.',
       'For automotive and vehicle applications, the total gear ratio from engine to wheels includes the transmission ratio × differential ratio × tire diameter. This calculator does not account for tire slip, aerodynamic drag, or rolling resistance.',
@@ -196,7 +216,7 @@ const gearRatioConfig: CalculatorConfig = {
       },
       {
         question: 'How does gear ratio affect motor current draw?',
-        answer: 'A lower reduction ratio (less torque multiplication) forces the motor to work harder to overcome the load, drawing more current. A higher reduction ratio multiplies torque and reduces the reflected load inertia seen by the motor by the square of the ratio — a 10:1 reducer makes the load appear 100x lighter to the motor. This is why a heavily loaded conveyor might stall with a 5:1 gearbox (motor draws locked-rotor current and overheats) but runs easily with a 10:1 gearbox (motor sees 1/4 the effective load). The trade-off is speed: higher reduction means lower output RPM. Match the gear ratio so the motor operates in its efficient range (typically 75-100% of rated speed for induction motors).',
+        answer: 'A lower reduction ratio (less torque multiplication) forces the motor to supply more torque, and so more current, for the same load. The load torque seen by the motor falls in proportion to the ratio, and the reflected load inertia falls with the square of the ratio — a 10:1 reducer makes the load inertia look 100× smaller to the motor. A conveyor that stalls the motor through a 5:1 gearbox may run comfortably through a 10:1 one, because the motor sees half the torque. The trade-off is speed: higher reduction means lower output RPM, so choose the ratio that keeps the motor within its rated speed range.',
       },
       {
         question: 'What is the difference between gear ratio calculated by teeth vs. by diameter?',

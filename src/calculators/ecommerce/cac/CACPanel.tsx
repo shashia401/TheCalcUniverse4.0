@@ -5,11 +5,6 @@ interface Props {
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
-
 export default function CACPanel({ results }: Props) {
   const cac = results.find(r => r.id === 'cac');
   const ltvCac = results.find(r => r.id === 'ltvCac');
@@ -28,13 +23,13 @@ export default function CACPanel({ results }: Props) {
       </div>
       <div className="p-5 space-y-3">
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-blue-600">CAC</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-blue-700">CAC</p>
           <p className="text-3xl font-bold text-blue-700">{cac.value}</p>
         </div>
         {ltvCac && (
           <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
             <span className="text-xs text-slate-600">LTV:CAC Ratio</span>
-            <span className={`text-sm font-bold ${ltvCac.color === 'positive' ? 'text-emerald-600' : ltvCac.color === 'negative' ? 'text-red-600' : 'text-amber-600'}`}>
+            <span className={`text-sm font-bold ${ltvCac.color === 'positive' ? 'text-emerald-700' : ltvCac.color === 'negative' ? 'text-red-700' : 'text-amber-700'}`}>
               {ltvCac.value}
             </span>
           </div>
@@ -42,7 +37,7 @@ export default function CACPanel({ results }: Props) {
         {payback && (
           <div className="flex justify-between items-center rounded-lg border border-slate-200 px-3 py-2">
             <span className="text-xs text-slate-600">Payback Period</span>
-            <span className={`text-sm font-bold ${payback.color === 'positive' ? 'text-emerald-600' : payback.color === 'negative' ? 'text-red-600' : 'text-amber-600'}`}>
+            <span className={`text-sm font-bold ${payback.color === 'positive' ? 'text-emerald-700' : payback.color === 'negative' ? 'text-red-700' : 'text-amber-700'}`}>
               {payback.value}
             </span>
           </div>

@@ -1,31 +1,31 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { OHMS_PER_KFT, voltageDropVolts, type Awg, type Material } from '../wire-gauge/awgData';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
-
-export default function VoltageDropPanel({ results }: Props) {
+export default function VoltageDropPanel({ values, results }: Props) {
   const vDrop = results.find(r => r.id === 'voltageDrop');
   const vAtLoad = results.find(r => r.id === 'voltageAtLoad');
   const wireRes = results.find(r => r.id === 'wireResistance');
 
   if (!vDrop || !vAtLoad) return null;
 
-  const pctStr = vDrop.value.match(/([\d.]+)%/);
-  const pct = pctStr ? parseFloat(pctStr[1]) : 0;
+  // recompute from the inputs with the shared AWG data (no parsing of display strings)
+  const mat: Material = values.conductorMaterial === 'aluminum' ? 'aluminum' : 'copper';
+  const ohms = OHMS_PER_KFT[mat][(values.wireGauge || '12') as Awg] ?? OHMS_PER_KFT.copper[(values.wireGauge || '12') as Awg] ?? 0;
+  const src = parseFloat(values.voltage);
+  const pctRaw = src > 0 ? (voltageDropVolts(parseFloat(values.current), parseFloat(values.wireLength), ohms) / src) * 100 : 0;
+  const pct = Number.isFinite(pctRaw) ? Math.round(pctRaw * 100) / 100 : 0;
   const ok = pct <= 3;
   const warning = pct > 3 && pct <= 5;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
       <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100 bg-slate-50">
-        <svg aria-hidden="true" className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg aria-hidden="true" className="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Voltage Drop</span>
@@ -36,20 +36,20 @@ export default function VoltageDropPanel({ results }: Props) {
           warning ? 'bg-amber-50 border-amber-200' :
           'bg-red-50 border-red-200'
         }`}>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Voltage Drop</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-600">Voltage Drop</p>
           <p className={`text-3xl font-bold ${ok ? 'text-emerald-700' : warning ? 'text-amber-700' : 'text-red-700'}`}>
             {vDrop.value}
           </p>
-          <p className={`text-xs font-bold mt-1 ${ok ? 'text-emerald-600' : warning ? 'text-amber-600' : 'text-red-600'}`}>
+          <p className={`text-xs font-bold mt-1 ${ok ? 'text-emerald-700' : warning ? 'text-amber-700' : 'text-red-700'}`}>
             {ok ? 'Within recommended limit' : warning ? 'Borderline — consider larger wire' : 'Exceeds recommended limit'}
           </p>
         </div>
 
         {/* Gauge bar */}
         <div>
-          <div className="flex justify-between text-xs text-slate-500 mb-1">
+          <div className="flex justify-between text-xs text-slate-600 mb-1">
             <span>Voltage Drop %</span>
-            <span className={ok ? 'text-emerald-600 font-bold' : warning ? 'text-amber-600 font-bold' : 'text-red-600 font-bold'}>
+            <span className={ok ? 'text-emerald-700 font-bold' : warning ? 'text-amber-700 font-bold' : 'text-red-700 font-bold'}>
               {pct.toFixed(2)}%
             </span>
           </div>

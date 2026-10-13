@@ -14,49 +14,51 @@ describe('payment-fees (Stripe/PayPal/Square Fee Calculator)', () => {
     near(parseMoney(getValue(r, 'netAmount')), 100 - (100 * 0.029 + 0.30));
     expect(getValue(r, 'feePercent')).toBe('2.90%');
     expect(getValue(r, 'feeFixed')).toBe('$0.30');
-    expect(getValue(r, 'platform')).toBe('Stripe Domestic');
+    expect(getValue(r, 'platform')).toBe('Stripe (domestic card)');
   });
 
-  it('PayPal International: $250 sale → 4.49% + $0.49', () => {
+  it('PayPal Checkout international: $250 sale → 4.99% + $0.49', () => {
     const r = config.calculate({
       invoiceAmount: '250',
       platform: 'paypal-international',
       reverseMode: 'no',
     });
     const fee = parseMoney(getValue(r, 'fee'));
-    near(fee, 250 * 0.0449 + 0.49);
-    near(parseMoney(getValue(r, 'netAmount')), 250 - (250 * 0.0449 + 0.49));
+    // 250 x 0.0499 + 0.49 = 12.965 -> 12.97 (fee rounded to the cent)
+    near(fee, 12.97);
+    near(parseMoney(getValue(r, 'netAmount')), 237.03);
   });
 
-  it('Square: $50 sale → 2.6% + $0.10', () => {
+  it('Square in-person: $50 sale → 2.6% + $0.15', () => {
     const r = config.calculate({
       invoiceAmount: '50',
       platform: 'square',
       reverseMode: 'no',
     });
     const fee = parseMoney(getValue(r, 'fee'));
-    near(fee, 50 * 0.026 + 0.10);
-    near(parseMoney(getValue(r, 'netAmount')), 50 - (50 * 0.026 + 0.10));
+    near(fee, 1.45); // 1.30 + 0.15
+    near(parseMoney(getValue(r, 'netAmount')), 48.55);
   });
 
-  it('Stripe International: $1,000 sale → 3.9% + $0.30', () => {
+  it('Stripe international card: $1,000 sale → 4.4% (2.9% + 1.5%) + $0.30', () => {
     const r = config.calculate({
       invoiceAmount: '1000',
       platform: 'stripe-international',
       reverseMode: 'no',
     });
     const fee = parseMoney(getValue(r, 'fee'));
-    near(fee, 1000 * 0.039 + 0.30);
+    near(fee, 44.3);
   });
 
-  it('PayPal Domestic: $75 sale → 2.99% + $0.49', () => {
+  it('PayPal Checkout domestic: $75 sale → 3.49% + $0.49', () => {
     const r = config.calculate({
       invoiceAmount: '75',
       platform: 'paypal-domestic',
       reverseMode: 'no',
     });
     const fee = parseMoney(getValue(r, 'fee'));
-    near(fee, 75 * 0.0299 + 0.49);
+    // 75 x 0.0349 + 0.49 = 3.1075 -> 3.11
+    near(fee, 3.11);
   });
 
   it('Reverse mode: to receive $1,000 with Stripe Domestic, invoice ~$1,030.17', () => {
@@ -74,23 +76,20 @@ describe('payment-fees (Stripe/PayPal/Square Fee Calculator)', () => {
   });
 
   it('worked example: $65 Stripe order — regression for narrative drift fix', () => {
-    // Educational workedExamples text previously claimed a net of $62.81 and monthly fees of
-    // $438 for 200 orders; real calculate() output is net $62.82 and monthly fees $437.00
-    // (200 x $2.185, not 200 x the display-rounded $2.19).
+    // Processors round each fee to the cent: 65 x 0.029 + 0.30 = 2.185 -> $2.19, net $62.81,
+    // so 200 orders cost 200 x 2.19 = $438 a month.
     const r = config.calculate({ invoiceAmount: '65', platform: 'stripe-domestic', reverseMode: 'no' });
-    expect(getValue(r, 'netAmount')).toBe('$62.82');
-    // The real per-order fee is 65*0.029+0.30 = $2.185 (displays rounded as $2.19), so the
-    // true monthly total for 200 orders is 200*2.185 = $437, not 200*2.19 = $438.
-    const exactFeePerOrder = 65 * 0.029 + 0.30;
-    near(exactFeePerOrder * 200, 437, 0.5);
+    expect(getValue(r, 'netAmount')).toBe('$62.81');
+    near(parseMoney(getValue(r, 'fee')) * 200, 438);
   });
 
   it('worked example: $5,000 PayPal International reverse mode — regression for narrative drift fix', () => {
-    // Educational workedExamples text previously claimed an invoice of $5,240.77 / fee of
-    // $240.77; the real calculate() output is $5,235.57 / $235.57.
+    // PayPal Checkout international = 3.49% + 1.50% = 4.99% + $0.49.
+    // (5000 + 0.49) / (1 - 0.0499) = 5263.12 -> fee 5263.12 x 0.0499 + 0.49 = 263.12, net exactly 5000.00.
     const r = config.calculate({ invoiceAmount: '5000', platform: 'paypal-international', reverseMode: 'yes' });
-    expect(getValue(r, 'reverseAmount')).toBe('$5,235.57');
-    expect(getValue(r, 'fee')).toBe('$235.57');
+    expect(getValue(r, 'reverseAmount')).toBe('$5,263.12');
+    expect(getValue(r, 'fee')).toBe('$263.12');
+    expect(getValue(r, 'netAmount')).toBe('$5,000.00');
   });
 
   it('Reverse mode: to receive $500 with Square, invoice correctly', () => {
@@ -99,7 +98,7 @@ describe('payment-fees (Stripe/PayPal/Square Fee Calculator)', () => {
       platform: 'square',
       reverseMode: 'yes',
     });
-    const expectedInvoice = Math.ceil((500 + 0.10) / (1 - 0.026) * 100) / 100;
+    const expectedInvoice = Math.ceil((500 + 0.15) / (1 - 0.026) * 100) / 100;
     near(parseMoney(getValue(r, 'reverseAmount')), expectedInvoice);
     near(parseMoney(getValue(r, 'netAmount')), 500, 0.02);
   });
@@ -144,15 +143,15 @@ describe('payment-fees (Stripe/PayPal/Square Fee Calculator)', () => {
     near(parseMoney(getValue(r, 'netAmount')), 4.55);
   });
 
-  it('calculates high-value transaction with PayPal Domestic', () => {
+  it('calculates high-value transaction with PayPal standard card rate', () => {
     const r = config.calculate({
       invoiceAmount: '10000',
-      platform: 'paypal-domestic',
+      platform: 'paypal-cards',
       reverseMode: 'no',
     });
     const fee = parseMoney(getValue(r, 'fee'));
-    near(fee, 10000 * 0.0299 + 0.49);
-    near(parseMoney(getValue(r, 'netAmount')), 10000 - (10000 * 0.0299 + 0.49));
+    near(fee, 299.49); // 10000 x 0.0299 + 0.49
+    near(parseMoney(getValue(r, 'netAmount')), 9700.51);
     expect(getValue(r, 'feePercent')).toBe('2.99%');
   });
 
@@ -162,7 +161,7 @@ describe('payment-fees (Stripe/PayPal/Square Fee Calculator)', () => {
       platform: 'square',
       reverseMode: 'yes',
     });
-    const expectedInvoice = Math.ceil((250 + 0.10) / (1 - 0.026) * 100) / 100;
+    const expectedInvoice = Math.ceil((250 + 0.15) / (1 - 0.026) * 100) / 100;
     near(parseMoney(getValue(r, 'reverseAmount')), expectedInvoice);
     near(parseMoney(getValue(r, 'netAmount')), 250, 0.02);
   });

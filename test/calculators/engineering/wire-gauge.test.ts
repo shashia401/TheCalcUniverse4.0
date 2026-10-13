@@ -3,7 +3,7 @@ import config from '../../../src/calculators/engineering/wire-gauge/index';
 import { getValue, parseNumber, near } from '../../helpers';
 
 describe('Wire Gauge Calculator', () => {
-  it('recommends 12 AWG for 25A at 75°C copper, 1-3 conductors', () => {
+  it('recommends 10 AWG for a 25A circuit at 75°C copper (12 AWG is capped at a 20A breaker by NEC 240.4(D))', () => {
     const results = config.calculate({
       current: '25',
       conductorMaterial: 'copper',
@@ -11,9 +11,9 @@ describe('Wire Gauge Calculator', () => {
       numConductors: '1',
     });
     // derating = 1.0, adj = 25A
-    // 14 AWG = 20A < 25, 12 AWG = 25A >= 25
+    // 12 AWG table ampacity is 25A but NEC 240.4(D) limits 12 AWG copper to a 20A OCPD, so 10 AWG
     const gauge = getValue(results, 'recommended');
-    expect(gauge).toContain('12 AWG');
+    expect(gauge).toContain('10 AWG');
     expect(gauge).toContain('copper');
   });
 
@@ -49,19 +49,19 @@ describe('Wire Gauge Calculator', () => {
       insulationType: '90',
       numConductors: '1',
     });
-    // 90°C copper: 14 AWG = 25A < 30, 12 AWG = 30A >= 30
-    expect(getValue(results, 'recommended')).toContain('12 AWG');
+    // 90°C copper: 12 AWG table = 30A, but NEC 240.4(D) caps 12 AWG at a 20A OCPD, so 10 AWG (40A column)
+    expect(getValue(results, 'recommended')).toContain('10 AWG (copper) — 40A');
   });
 
-  it('recommends 10 AWG aluminum for 30A (NEC Table 310.15(B)(16) 75°C ampacity)', () => {
-    // The table previously listed 10 AWG aluminum at 25A instead of the
-    // correct 30A, which would have wrongly bumped a 26-30A load up to 8 AWG.
+  it('recommends 8 AWG aluminum for a 30A circuit (10 AWG Al is capped at a 25A OCPD, NEC 240.4(D))', () => {
+    // Table 310.16 lists 10 AWG aluminum at 30A, but NEC 240.4(D) limits it to a 25A OCPD.
+    // A 25A circuit still gets 10 AWG (see audit test); 30A needs 8 AWG.
     const results = config.calculate({
       current: '30',
       conductorMaterial: 'aluminum',
       numConductors: '1',
     });
-    expect(getValue(results, 'recommended')).toContain('10 AWG');
+    expect(getValue(results, 'recommended')).toContain('8 AWG');
   });
 
   it('returns empty for zero current', () => {

@@ -11,9 +11,10 @@ const fpDepressionConfig: CalculatorConfig = {
       unit: '°C·kg/mol',
       inputMode: 'decimal',
       min: 0.1,
+      max: 100,
       step: 0.01,
       required: true,
-      helpText: 'Supports both metric (SI) and imperial units. Solvent-specific constant. Water: 1.86, Benzene: 5.12, Camphor: 40, Cyclohexane: 20.2, Acetic acid: 3.90 °C·kg/mol.',
+      helpText: 'Solvent-specific constant. Typical values: water 1.86, benzene 5.12, camphor about 40, cyclohexane about 20, acetic acid 3.90 °C·kg/mol.',
     },
     {
       id: 'molality',
@@ -23,6 +24,7 @@ const fpDepressionConfig: CalculatorConfig = {
       unit: 'mol/kg',
       inputMode: 'decimal',
       min: 0,
+      max: 100,
       step: 0.01,
       required: true,
       helpText: 'Moles of solute per kilogram of SOLVENT (not solution). For NaCl at 1 mol/kg: m = 1, but i = 2 gives effective 2 mol/kg.',
@@ -59,6 +61,7 @@ const fpDepressionConfig: CalculatorConfig = {
       unit: 'g',
       inputMode: 'decimal',
       min: 0.1,
+      max: 1e7,
       step: 1,
       helpText: 'Mass of solvent (NOT solution). For a 1 molal NaCl solution: dissolve 58.44 g NaCl in 1,000 g water (total mass ~1,058 g).',
     },
@@ -72,7 +75,19 @@ const fpDepressionConfig: CalculatorConfig = {
       min: 1,
       step: 0.01,
       helpText: 'Molar mass of the solute. NaCl: 58.44, CaCl₂: 110.98, Sucrose: 342.3, Ethylene glycol: 62.07 g/mol.',
-},
+    },
+    {
+      id: 'solventFp',
+      label: 'Pure-Solvent Freezing Point (optional)',
+      type: 'number',
+      placeholder: '0',
+      unit: '°C',
+      inputMode: 'decimal',
+      min: -200,
+      max: 500,
+      step: 0.1,
+      helpText: 'Freezing point of the pure solvent, used for the new freezing point. Blank = 0 °C (water). Benzene 5.5, cyclohexane 6.5, acetic acid 16.6, camphor about 179.',
+    },
 ],
 calculate: (values) => {
     const kf = parseFloat(values.kf);
@@ -81,8 +96,9 @@ calculate: (values) => {
     const soluteMass = parseFloat(values.soluteMass);
     const solventMass = parseFloat(values.solventMass);
     const molarMass = parseFloat(values.molarMass);
+    const fp0 = values.solventFp !== undefined && values.solventFp !== '' ? parseFloat(values.solventFp) : 0;
 
-    if (isNaN(kf) || kf <= 0) return [];
+    if (!Number.isFinite(kf) || kf <= 0 || !Number.isFinite(fp0)) return [];
 
     // Auto-calculate molality if solute mass, solvent mass, and molar mass are provided
     if (!isNaN(soluteMass) && !isNaN(solventMass) && !isNaN(molarMass) && soluteMass > 0 && solventMass > 0 && molarMass > 0) {
@@ -90,15 +106,15 @@ calculate: (values) => {
       molality = moles / (solventMass / 1000);
     }
 
-    if (isNaN(molality) || molality < 0 || isNaN(i) || i <= 0) return [];
+    if (!Number.isFinite(molality) || molality < 0 || !Number.isFinite(i) || i <= 0) return [];
 
     const deltaTf = kf * molality * i;
 
-    const newFreezingPoint = 0 - deltaTf;
+    const newFreezingPoint = fp0 - deltaTf;
 
     return [
       { id: 'deltaTf', label: 'Freezing Point Depression (ΔTf)', value: `${fmt(deltaTf)}°C`, highlight: true, color: 'positive' },
-      { id: 'newFP', label: 'New Freezing Point', value: `${fmt(newFreezingPoint)}°C`, color: 'neutral' },
+      { id: 'newFP', label: 'New Freezing Point (ideal)', value: `${fmt(newFreezingPoint)}°C`, color: 'neutral' },
       { id: 'formula', label: 'Formula Used', value: `ΔTf = ${kf} × ${fmt(molality)} × ${i} = ${fmt(deltaTf)}°C`, color: 'neutral' },
       { id: 'effectiveMolality', label: 'Effective Molality (m × i)', value: `${fmt(molality * i)} mol/kg`, color: 'neutral' },
     ];
@@ -110,7 +126,7 @@ calculate: (values) => {
   },
   educational: {
     formula: 'ΔTf = Kf × m × i',
-    formulaDescription: "Freezing point depression is a colligative property — it depends only on the NUMBER of dissolved particles, not their identity. ΔTf = Kf × m × i, where Kf is the solvent's cryoscopic constant, m is molality, and i is the van't Hoff factor (number of ions per formula unit). For a 1 molal NaCl solution in water: ΔTf = 1.86 × 1 × 2 = 3.72°C.",
+    formulaDescription: "Freezing point depression is a colligative property — it depends only on the NUMBER of dissolved particles, not their identity. ΔTf = Kf × m × i, where Kf is the solvent's cryoscopic constant, m is molality, and i is the van't Hoff factor (number of ions per formula unit). For a 1 molal NaCl solution in water the ideal result is ΔTf = 1.86 × 1 × 2 = 3.72°C (measured is about 3.4°C because ions are not fully independent at that concentration).",
     variables: [
       { symbol: 'Kf', name: 'Cryoscopic Constant', description: 'Unique to each solvent. Water: 1.86 °C·kg/mol (low — modest depression). Camphor: 40 °C·kg/mol (huge — used for molar mass determination). The larger Kf, the more sensitive the solvent is to solute.' },
       { symbol: 'm', name: 'Molality', description: 'Moles of solute per kilogram of solvent (mol/kg). Different from molarity (mol/L) because volume changes with temperature. Molality is temperature-independent and preferred for colligative properties.' },
@@ -126,7 +142,7 @@ calculate: (values) => {
       { label: 'Water Kf', value: '1.86 °C·kg/mol' },
       { label: 'Sea water (3.5% salt)', value: 'ΔTf ≈ 2.0°C' },
       { label: 'Road salt (23% brine)', value: 'ΔTf ≈ 21°C (eutectic -21°C)' },
-      { label: 'Antifreeze 50/50', value: 'ΔTf ≈ 37°C (protects to -37°C)' },
+      { label: 'Antifreeze 50/50 (by mass)', value: 'Ideal ΔTf ≈ 30°C; real mixtures protect to about -37°C' },
       { label: 'Sucrose 1 molal', value: 'ΔTf = 1.86°C (i = 1)' },
       { label: 'NaCl 1 molal', value: 'ΔTf = 3.72°C (i = 2)' },
       { label: 'CaCl₂ 1 molal', value: 'ΔTf = 5.58°C (i = 3)' },
@@ -134,8 +150,8 @@ calculate: (values) => {
     ],
     commonUses: [
       'Road de-icing — NaCl and CaCl₂ lower the freezing point of water, preventing ice formation down to -21°C (NaCl eutectic).',
-      'Automotive antifreeze — ethylene glycol (i = 1) depresses coolant freezing point to -37°C at 50/50 mix.',
-      'Making ice cream — salt mixed with ice creates a freezing bath well below 0°C, essential for proper ice cream texture.',
+      'Automotive antifreeze — ethylene glycol (i = 1) depresses the coolant freezing point; a 50/50 mix protects to roughly -37°C in practice.',
+      'Making ice cream — salt mixed with ice gives a freezing bath well below 0°C (down to about -21°C for NaCl at the eutectic).',
       'Molar mass determination — cryoscopy uses ΔTf to determine unknown molecular weights (especially with camphor, Kf = 40).',
       'Winter concrete — calcium chloride added to mixing water prevents freezing during cold-weather concrete pours.',
     ],
@@ -151,11 +167,11 @@ calculate: (values) => {
       },
       {
         question: 'How does antifreeze work in a car engine?',
-        answer: 'Ethylene glycol (C₂H₆O₂, MW 62.07) is a non-electrolyte (i = 1) that dissolves in water and depresses the freezing point. A 50/50 ethylene glycol-water mixture has m ≈ 13.2 mol/kg, giving ΔTf = 1.86 × 13.2 × 1 = 24.6°C. Combined with boiling point elevation, this protects engines from roughly -37°C to +129°C. Propylene glycol is a less toxic alternative used in RVs and food-processing equipment.',
+        answer: 'Ethylene glycol (C₂H₆O₂, MW 62.07) is a non-electrolyte (i = 1) that dissolves in water and depresses the freezing point. A 50/50 mixture by mass has m = (500 g ÷ 62.07) ÷ 0.5 kg ≈ 16.1 mol/kg, giving an ideal ΔTf = 1.86 × 16.1 × 1 ≈ 30°C. Real mixtures at this concentration are non-ideal and protect to roughly -37°C (the ideal equation is only accurate for dilute solutions). Propylene glycol is a less toxic alternative used in RVs and food-processing equipment.',
       },
       {
         question: 'Why is CaCl₂ more effective than NaCl for de-icing?',
-        answer: '(1) Van\'t Hoff factor: CaCl₂ → 3 ions (Ca²⁺ + 2Cl⁻) vs NaCl → 2 ions — 50% more particles per mole. (2) Lower eutectic: CaCl₂ brine freezes at -51°C vs NaCl brine at -21°C. (3) CaCl₂ dissolution is exothermic — it releases heat while dissolving, accelerating ice melting. The downside: CaCl₂ is ~3× more expensive and more corrosive to vehicle undercarriages.',
+        answer: '(1) Van\'t Hoff factor: CaCl₂ → 3 ions (Ca²⁺ + 2Cl⁻) vs NaCl → 2 ions — 50% more particles per mole. (2) Lower eutectic: CaCl₂ brine freezes at -51°C vs NaCl brine at -21°C. (3) CaCl₂ dissolution is exothermic — it releases heat while dissolving, accelerating ice melting. The downsides are higher cost and corrosion concerns.',
       },
       {
         question: 'How is freezing point depression used to determine molar mass?',
@@ -163,23 +179,23 @@ calculate: (values) => {
       },
     ],
     proTips: [
-      'For road salt calculations, use NaCl i ≈ 1.9 at typical concentrations (not the ideal 2.0). Ion pairing reduces the effective particle count at high concentrations.',
+      'For salt solutions use a measured van\'t Hoff factor if you have one: at about 1 molal NaCl it is nearer 1.8 than the ideal 2.0 because ions pair up.',
       'Freezing point depression and boiling point elevation use the same molality but different solvent constants (Kf vs Kb). Water: Kf = 1.86, Kb = 0.512.',
       'When testing antifreeze concentration, a refractometer or hydrometer is far more accurate than the ΔTf calculation because commercial antifreeze contains corrosion inhibitors that affect properties.',
-      'For maximum ice cream smoothness, target a freezing bath at -20°C to -25°C using 1:3 salt:ice ratio. The rapid freeze produces smaller ice crystals = smoother texture.',
+      'For an ice-and-salt bath, remember the limit is the eutectic: saturated NaCl brine bottoms out near -21°C, so no amount of extra salt gets colder.',
     ],
     workedExamples: [
       {
         scenario: '58.44 g of NaCl (MW = 58.44 g/mol) is dissolved in 1 kg of water. What is the freezing point of this solution?',
         inputs: { kf: '1.86', soluteMass: '58.44', solventMass: '1000', molarMass: '58.44', vanthoff: '2' },
         result: 'ΔTf = 3.72°C. New freezing point = −3.72°C.',
-        insight: '1 mole of NaCl in 1 kg water = 1 molal. With i = 2, effective molality = 2. ΔTf = 1.86 × 1 × 2 = 3.72°C. New freezing point = 0 − 3.72 = −3.72°C. This is roughly the salinity of seawater and explains why oceans freeze at lower temperatures than lakes.',
+        insight: '1 mole of NaCl in 1 kg water = 1 molal. With i = 2, effective molality = 2. ΔTf = 1.86 × 1 × 2 = 3.72°C. New freezing point = 0 − 3.72 = −3.72°C. (1 molal NaCl is about 5.5% salt by mass, stronger than seawater at about 3.5%.)',
       },
       {
         scenario: 'A 50/50 ethylene glycol-water mixture contains 500 g ethylene glycol (MW 62.07) per 500 g water. What protection does this provide?',
         inputs: { kf: '1.86', soluteMass: '500', solventMass: '500', molarMass: '62.07', vanthoff: '1' },
-        result: 'ΔTf = 30.0°C. Protects to approximately −30°C (up to −37°C in practice).',
-        insight: 'Moles = 500/62.07 = 8.06 mol. Molality = 8.06/0.500 = 16.11 mol/kg. ΔTf = 1.86 × 16.11 × 1 = 30.0°C. This protects to approximately -30°C. In practice, a 50/50 mix protects to about -37°C because the solution is non-ideal at high concentrations — the actual ΔTf is larger due to molecular interactions not captured by the ideal van\'t Hoff equation.',
+        result: 'ΔTf ≈ 29.97°C (ideal). New freezing point ≈ −30°C; real 50/50 antifreeze protects to about −37°C.',
+        insight: 'Moles = 500/62.07 = 8.06 mol. Molality = 8.06/0.500 = 16.11 mol/kg. ΔTf = 1.86 × 16.11 × 1 = 29.97°C. The ideal equation therefore predicts about -30°C. In practice a 50/50 mix protects to about -37°C because the solution is far from ideal at this concentration, so the equation underestimates the depression.',
       },
     ],
 
@@ -190,7 +206,6 @@ calculate: (values) => {
     ],
   citations: [
       { source: 'Wikipedia — Freezing Point Depression', url: 'https://en.wikipedia.org/wiki/Freezing_Point_Depression' },
-      { source: 'Freezing Point Depression — Engineering Reference', url: 'https://www.engineeringtoolbox.com/' },
     ],
   },
 };

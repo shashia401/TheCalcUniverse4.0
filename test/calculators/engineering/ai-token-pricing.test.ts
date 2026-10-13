@@ -15,7 +15,7 @@ describe('ai-token-pricing', () => {
     const r = config.calculate(baseValues);
     const inputTokens = 500;
     const outputTokens = 150;
-    const expectedInputCost = (inputTokens / 1_000_000) * 2.50;
+    const expectedInputCost = (inputTokens / 1_000_000) * 2.50; // GPT-4o list price (unverified row)
     const expectedOutputCost = (outputTokens / 1_000_000) * 10.00;
     const expectedTotal = expectedInputCost + expectedOutputCost;
 
@@ -42,11 +42,10 @@ describe('ai-token-pricing', () => {
     const expectedMonthly = costPerReq * 10000 * 5 * 30;
     const expectedAnnual = expectedMonthly * 12;
 
-    // Monthly cost should be ~$4,125
-    expect(parseMoney(getValue(r, 'monthlyCost'))).toBeGreaterThan(4000);
-    expect(parseMoney(getValue(r, 'monthlyCost'))).toBeLessThan(4300);
-    expect(parseMoney(getValue(r, 'annualCost'))).toBeGreaterThan(48000);
-    expect(parseMoney(getValue(r, 'annualCost'))).toBeLessThan(52000);
+    // 0.002125/request x 50,000/day x 30 = $3,187.50 per 30-day month; annual uses 365 days = $38,781.25
+    near(parseMoney(getValue(r, 'monthlyCost')), expectedMonthly, 5); // displayed as $x.xxK
+    near(parseMoney(getValue(r, 'annualCost')), costPerReq * 50000 * 365, 5);
+    expect(expectedAnnual).toBeGreaterThan(0);
   });
 
   it('calculates cost per user correctly', () => {
@@ -61,28 +60,11 @@ describe('ai-token-pricing', () => {
     near(parseMoney(getValue(r, 'costPerUser')), expectedPerUser);
   });
 
-  it('handles Gemini 3.1 Flash pricing', () => {
+  it('handles Gemini 3 Flash (preview) pricing: $0.50 input / $3.00 output per 1M (Google pricing page)', () => {
     const r = config.calculate({ ...baseValues, model: 'gemini-3-flash' });
-    const expected = (500 / 1_000_000) * 0.15 + (150 / 1_000_000) * 0.60;
-    near(parseMoney(getValue(r, 'costPerRequest')), expected);
-    expect(getValue(r, 'modelName')).toBe('Gemini 3.1 Flash');
-  });
-
-  it('worked example: Gemini 3.1 Flash at 3M requests/day (cached) — regression for narrative drift fix', () => {
-    // Educational workedExamples text previously miscalculated the cached input cost by 10x
-    // (wrote $0.0000001875 instead of $0.000001875), understating cost per request as
-    // ~$0.0000062 and monthly cost as ~$557. The real calculate() output is ~$0.0000079/req
-    // and ~$709/month at 3M requests/day.
-    const r = config.calculate({
-      model: 'gemini-3-flash',
-      promptTokensPerRequest: '100',
-      completionTokensPerRequest: '10',
-      useCachePricing: 'yes',
-      dailyActiveUsers: '1000000',
-      requestsPerUser: '3',
-    });
-    near(parseMoney(getValue(r, 'costPerRequest')), 0.000007875, 0.0000001);
-    near(parseMoney(getValue(r, 'monthlyCost')), 708.75, 1);
+    const expected = (500 / 1_000_000) * 0.5 + (150 / 1_000_000) * 3.0;
+    near(parseMoney(getValue(r, 'costPerRequest')), expected, 1e-9);
+    expect(getValue(r, 'modelName')).toBe('Gemini 3 Flash (preview)');
   });
 
   it('shows Claude Sonnet 4.6 pricing', () => {
@@ -118,8 +100,10 @@ describe('ai-token-pricing', () => {
 
   it('calculates total monthly tokens', () => {
     const r = config.calculate(baseValues);
-    const totalTokens = (500 + 150) * 30;
-    expect(parseNumber(getValue(r, 'totalMonthlyTokens'))).toBe(totalTokens);
+    // needs users x requests; (500 + 150) tokens x 50,000 requests/day x 30 days
+    const withUsers = config.calculate({ ...baseValues, dailyActiveUsers: '10000', requestsPerUser: '5' });
+    expect(parseNumber(getValue(withUsers, 'totalMonthlyTokens').replace(/,/g, ''))).toBe(650 * 50000 * 30);
+    expect(getValue(r, 'totalMonthlyTokens')).toBe('0');
   });
 
   // ─── Educational content ───

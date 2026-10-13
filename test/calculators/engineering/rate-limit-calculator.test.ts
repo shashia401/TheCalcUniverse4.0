@@ -80,21 +80,9 @@ describe('API Rate Limit Calculator', () => {
     expect(ids).toContain('bandwidthKbps');
     expect(ids).toContain('bandwidthMbps');
     expect(ids).toContain('dailyCapacity');
-    expect(ids).toContain('burstLimit');
-    expect(ids).toContain('maxConcurrent');
-    expect(ids).toContain('serverType');
+    expect(ids).toContain('monthlyTransfer');
+    expect(ids).not.toContain('maxConcurrent'); // invented per-provider defaults were removed
     expect(ids).toContain('rpm');
     expect(ids).toContain('perUserRpm');
-  });
-
-  it('uses correct server label per type', () => {
-    const results = rateLimitConfig.calculate({
-      maxRpm: '60000',
-      avgPayloadSize: '50',
-      peakConcurrentUsers: '',
-      serverType: 'aws-api-gateway',
-    });
-    const server = getValue(results, 'serverType');
-    expect(server).toContain('AWS API Gateway');
   });
 });

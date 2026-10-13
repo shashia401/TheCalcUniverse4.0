@@ -1,8 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import VoltageDropPanel from './VoltageDropPanel';
-
-const SQRT3 = Math.sqrt(3);
+import { AMPACITY, AWG_SIZES, OHMS_PER_KFT, SMALL_CONDUCTOR_MAX_OCPD, voltageDropVolts, type Material } from '../../engineering/wire-gauge/awgData';
 
 interface WireEntry {
   awg: string;
@@ -10,20 +9,20 @@ interface WireEntry {
   ampacity: number;
 }
 
-const wireData: WireEntry[] = [
-  { awg: '14 AWG', resistance: 3.07, ampacity: 15 },
-  { awg: '12 AWG', resistance: 1.93, ampacity: 20 },
-  { awg: '10 AWG', resistance: 1.21, ampacity: 30 },
-  { awg: '8 AWG', resistance: 0.764, ampacity: 50 },
-  { awg: '6 AWG', resistance: 0.491, ampacity: 65 },
-  { awg: '4 AWG', resistance: 0.308, ampacity: 85 },
-  { awg: '2 AWG', resistance: 0.194, ampacity: 115 },
-  { awg: '1 AWG', resistance: 0.154, ampacity: 130 },
-  { awg: '1/0 AWG', resistance: 0.122, ampacity: 150 },
-  { awg: '2/0 AWG', resistance: 0.0967, ampacity: 175 },
-  { awg: '3/0 AWG', resistance: 0.0766, ampacity: 200 },
-  { awg: '4/0 AWG', resistance: 0.0608, ampacity: 230 },
-];
+/**
+ * Candidate wires for a material, smallest first. Resistance (NEC Chapter 9 Table 8, stranded, 75 °C) and ampacity
+ * (NEC 310.16, 75 °C column, capped by the NEC 240.4(D) small-conductor limits) come from the shared AWG data used by
+ * the engineering voltage-drop and wire-gauge calculators, so all three agree.
+ */
+function wireTable(material: Material): WireEntry[] {
+  const amp = AMPACITY[material === 'aluminum' ? 'aluminum75' : 'copper75'];
+  const small = SMALL_CONDUCTOR_MAX_OCPD[material];
+  return AWG_SIZES.filter((a) => OHMS_PER_KFT[material][a] !== undefined && amp[a] !== undefined).map((a) => ({
+    awg: `${a} AWG`,
+    resistance: OHMS_PER_KFT[material][a]!,
+    ampacity: Math.min(amp[a]!, small[a] ?? Infinity),
+  }));
+}
 
 const voltageDropConfig: CalculatorConfig = {
   inputs: [
@@ -111,17 +110,16 @@ const voltageDropConfig: CalculatorConfig = {
         : parseFloat(acceptableDrop);
     if (isNaN(maxDropPct) || maxDropPct <= 0) return [];
 
-    const resistanceMultiplier = wireMaterial === 'al' ? 1.6 : 1;
-    const phaseMultiplier = phase === 'three' ? SQRT3 : 2;
+    const wireData = wireTable(wireMaterial === 'al' ? 'aluminum' : 'copper');
+    const ph: 'single' | 'three' = phase === 'three' ? 'three' : 'single';
 
     // Find smallest wire that passes both VD and ampacity requirements
     let bestIdx = -1;
     for (let i = 0; i < wireData.length; i++) {
       const w = wireData[i];
       if (w.ampacity < loadCurrent) continue;
-      const r = w.resistance * resistanceMultiplier;
-      const vdVolts = (phaseMultiplier * oneWayLength * loadCurrent * r) / 1000;
-      const vdPct = (vdVolts / voltage) * 100;
+      const vdVolts = voltageDropVolts(loadCurrent, oneWayLength, w.resistance, ph);
+      const vdPct = Math.round(((vdVolts / voltage) * 100) * 100) / 100; // compare the displayed percentage
       if (vdPct <= maxDropPct) {
         bestIdx = i;
         break;
@@ -132,9 +130,9 @@ const voltageDropConfig: CalculatorConfig = {
     if (bestIdx === -1) bestIdx = wireData.length - 1;
 
     const best = wireData[bestIdx];
-    const r = best.resistance * resistanceMultiplier;
-    const actualVD = (phaseMultiplier * oneWayLength * loadCurrent * r) / 1000;
-    const actualVDPct = (actualVD / voltage) * 100;
+    const r = best.resistance;
+    const actualVD = voltageDropVolts(loadCurrent, oneWayLength, r, ph);
+    const actualVDPct = Math.round(((actualVD / voltage) * 100) * 100) / 100;
     const passes = actualVDPct <= maxDropPct && best.ampacity >= loadCurrent;
 
     const fmtVD = (n: number) => `${n.toFixed(2)} V`;
@@ -150,7 +148,7 @@ const voltageDropConfig: CalculatorConfig = {
         statusStr = `Does not meet ${maxDropPct}% recommendation — consider larger conductor or parallel runs`;
       }
     } else {
-      statusStr = `✔ Passes ${maxDropPct}% recommendation per NEC guidelines`;
+      statusStr = `✔ Passes ${maxDropPct}% recommendation (NEC informational guideline)`;
     }
 
     return [

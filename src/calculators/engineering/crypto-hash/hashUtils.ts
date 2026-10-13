@@ -78,138 +78,84 @@ function md5(s: string): string {
 
 /* ========== SHA-1 (FIPS 180-4) ========== */
 
+const rotl32 = (x: number, n: number) => ((x << n) | (x >>> (32 - n))) >>> 0;
+const rotr32 = (x: number, n: number) => ((x >>> n) | (x << (32 - n))) >>> 0;
+
+/** Pad per FIPS 180-4 (big-endian 64-bit bit length) for 64-byte blocks. */
+function padBlocks64(bytes: number[]): number[] {
+  const msg = [...bytes, 0x80];
+  while (msg.length % 64 !== 56) msg.push(0);
+  const bitLen = BigInt(bytes.length) * 8n;
+  for (let i = 7; i >= 0; i--) msg.push(Number((bitLen >> BigInt(i * 8)) & 0xffn));
+  return msg;
+}
+
+const hex32 = (words: number[]) => words.map((w) => (w >>> 0).toString(16).padStart(8, '0')).join('');
+
 function sha1(s: string): string {
-  const x = strToBytes(s);
-  const ml = BigInt(x.length * 8);
-
-  x.push(0x80);
-  while ((x.length * 8) % 512 !== 448) x.push(0);
-  // 64-bit length in big-endian
-  for (let i = 7; i >= 0; i--) x.push(Number((ml >> BigInt(i * 8)) & 0xFFn));
-
-  const w: bigint[] = [];
-  for (let i = 0; i < x.length; i += 4) {
-    w.push(BigInt((x[i] << 24) | (x[i + 1] << 16) | (x[i + 2] << 8) | x[i + 3]));
-  }
-
-  const MASK32 = 0xFFFFFFFFn;
-
-  let h0 = 0x67452301n, h1 = 0xEFCDAB89n, h2 = 0x98BADCFEn, h3 = 0x10325476n, h4 = 0xC3D2E1F0n;
-
-  for (let i = 0n; i < w.length; i += 16n) {
-    const W: bigint[] = [];
-    for (let t = 0; t < 16; t++) W.push(w[Number(i) + t]);
-
-    // Extend to 80 words (all BigInt)
-    for (let t = 16; t < 80; t++) {
-      const n = W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16];
-      W[t] = ((n << 1n) | (n >> 31n)) & MASK32;
+  const msg = padBlocks64(strToBytes(s));
+  let h0 = 0x67452301, h1 = 0xefcdab89, h2 = 0x98badcfe, h3 = 0x10325476, h4 = 0xc3d2e1f0;
+  const w = new Array<number>(80);
+  for (let i = 0; i < msg.length; i += 64) {
+    for (let t = 0; t < 16; t++) {
+      w[t] = ((msg[i + 4 * t] << 24) | (msg[i + 4 * t + 1] << 16) | (msg[i + 4 * t + 2] << 8) | msg[i + 4 * t + 3]) >>> 0;
     }
-
+    for (let t = 16; t < 80; t++) w[t] = rotl32(w[t - 3] ^ w[t - 8] ^ w[t - 14] ^ w[t - 16], 1);
     let a = h0, b = h1, c = h2, d = h3, e = h4;
-
     for (let t = 0; t < 80; t++) {
-      let f: bigint, k: bigint;
-      if (t < 20) { f = (b & c) ^ ((~b) & d); k = 0x5A827999n; }
-      else if (t < 40) { f = b ^ c ^ d; k = 0x6ED9EBA1n; }
-      else if (t < 60) { f = (b & c) ^ (b & d) ^ (c & d); k = 0x8F1BBCDCn; }
-      else { f = b ^ c ^ d; k = 0xCA62C1D6n; }
-
-      // rotl(a, 5) for 32-bit BigInt: shift left 5, bring top 5 bits down by right-shifting 27
-      const rotl_a5 = ((a << 5n) | (a >> 27n)) & MASK32;
-      const temp = (rotl_a5 + f + e + k + W[t]) & MASK32;
-
-      e = d;
-      d = c;
-      c = ((b << 30n) | (b >> 2n)) & MASK32;
-      b = a;
-      a = temp;
+      let f: number, k: number;
+      if (t < 20) { f = (b & c) | (~b & d); k = 0x5a827999; }
+      else if (t < 40) { f = b ^ c ^ d; k = 0x6ed9eba1; }
+      else if (t < 60) { f = (b & c) | (b & d) | (c & d); k = 0x8f1bbcdc; }
+      else { f = b ^ c ^ d; k = 0xca62c1d6; }
+      const temp = (rotl32(a, 5) + (f >>> 0) + e + k + w[t]) >>> 0;
+      e = d; d = c; c = rotl32(b, 30); b = a; a = temp;
     }
-
-    h0 = (h0 + a) & MASK32;
-    h1 = (h1 + b) & MASK32;
-    h2 = (h2 + c) & MASK32;
-    h3 = (h3 + d) & MASK32;
-    h4 = (h4 + e) & MASK32;
+    h0 = (h0 + a) >>> 0; h1 = (h1 + b) >>> 0; h2 = (h2 + c) >>> 0; h3 = (h3 + d) >>> 0; h4 = (h4 + e) >>> 0;
   }
-
-  const toHex = (n: bigint) => n.toString(16).padStart(8, '0');
-  return toHex(h0) + toHex(h1) + toHex(h2) + toHex(h3) + toHex(h4);
+  return hex32([h0, h1, h2, h3, h4]);
 }
 
 /* ========== SHA-256 (FIPS 180-4) ========== */
 
+const K256 = [
+  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
+];
+
 function sha256(s: string): string {
-  const x = strToBytes(s);
-  const ml = BigInt(x.length * 8);
-
-  // Pad
-  x.push(0x80);
-  while ((x.length * 8) % 512 !== 448) x.push(0);
-  // Append 64-bit length (big-endian)
-  for (let i = 7; i >= 0; i--) x.push(Number((ml >> BigInt(i * 8)) & 0xFFn));
-
-  // Convert to 32-bit big-endian words (as BigInt)
-  const w: bigint[] = [];
-  for (let i = 0; i < x.length; i += 4) {
-    w.push(BigInt((x[i] << 24) | (x[i + 1] << 16) | (x[i + 2] << 8) | x[i + 3]));
-  }
-
-  const K: bigint[] = [
-    0x428a2f98n, 0x71374491n, 0xb5c0fbcfn, 0xe9b5dba5n,
-    0x3956c25bn, 0x59f111f1n, 0x923f82a4n, 0xab1c5ed5n,
-    0xd807aa98n, 0x12835b01n, 0x243185ben, 0x550c7dc3n,
-    0x72be5d74n, 0x80deb1fen, 0x9bdc06a7n, 0xc19bf174n,
-    0xe49b69c1n, 0xefbe4786n, 0x0fc19dc6n, 0x240ca1ccn,
-    0x2de92c6fn, 0x4a7484aan, 0x5cb0a9dcn, 0x76f988dan,
-    0x983e5152n, 0xa831c66dn, 0xb00327c8n, 0xbf597fc7n,
-    0xc6e00bf3n, 0xd5a79147n, 0x06ca6351n, 0x14292967n,
-    0x27b70a85n, 0x2e1b2138n, 0x4d2c6dfcn, 0x53380d13n,
-    0x650a7354n, 0x766a0abbn, 0x81c2c92en, 0x92722c85n,
-    0xa2bfe8a1n, 0xa81a664bn, 0xc24b8b70n, 0xc76c51a3n,
-    0xd192e819n, 0xd6990624n, 0xf40e3585n, 0x106aa070n,
-    0x19a4c116n, 0x1e376c08n, 0x2748774cn, 0x34b0bcb5n,
-    0x391c0cb3n, 0x4ed8aa4an, 0x5b9cca4fn, 0x682e6ff3n,
-    0x748f82een, 0x78a5636fn, 0x84c87814n, 0x8cc70208n,
-    0x90befffan, 0xa4506cebn, 0xbef9a3f7n, 0xc67178f2n,
-  ];
-
-  const M32 = 0xFFFFFFFFn;
-
-  let h0 = 0x6a09e667n, h1 = 0xbb67ae85n, h2 = 0x3c6ef372n, h3 = 0xa54ff53an;
-  let h4 = 0x510e527fn, h5 = 0x9b05688cn, h6 = 0x1f83d9abn, h7 = 0x5be0cd19n;
-
-  const rotr = (x: bigint, n: bigint) => ((x >> n) | (x << (32n - n))) & M32;
-
-  for (let i = 0n; i < w.length; i += 16n) {
-    const W: bigint[] = [];
-    for (let t = 0; t < 16; t++) W.push(w[Number(i) + t]);
-
+  const msg = padBlocks64(strToBytes(s));
+  const h = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+  const w = new Array<number>(64);
+  for (let i = 0; i < msg.length; i += 64) {
+    for (let t = 0; t < 16; t++) {
+      w[t] = ((msg[i + 4 * t] << 24) | (msg[i + 4 * t + 1] << 16) | (msg[i + 4 * t + 2] << 8) | msg[i + 4 * t + 3]) >>> 0;
+    }
     for (let t = 16; t < 64; t++) {
-      const s0 = rotr(W[t - 15], 7n) ^ rotr(W[t - 15], 18n) ^ (W[t - 15] >> 3n);
-      const s1 = rotr(W[t - 2], 17n) ^ rotr(W[t - 2], 19n) ^ (W[t - 2] >> 10n);
-      W[t] = (W[t - 16] + s0 + W[t - 7] + s1) & M32;
+      const s0 = rotr32(w[t - 15], 7) ^ rotr32(w[t - 15], 18) ^ (w[t - 15] >>> 3);
+      const s1 = rotr32(w[t - 2], 17) ^ rotr32(w[t - 2], 19) ^ (w[t - 2] >>> 10);
+      w[t] = (w[t - 16] + (s0 >>> 0) + w[t - 7] + (s1 >>> 0)) >>> 0;
     }
-
-    let a = h0, b = h1, c = h2, d = h3, e = h4, f = h5, g = h6, h = h7;
-
+    let [a, b, c, d, e, f, g, hh] = h;
     for (let t = 0; t < 64; t++) {
-      const S1 = rotr(e, 6n) ^ rotr(e, 11n) ^ rotr(e, 25n);
-      const ch = ((e & f) ^ ((~e) & g)) & M32;
-      const temp1 = (h + S1 + ch + K[t] + W[t]) & M32;
-      const S0 = rotr(a, 2n) ^ rotr(a, 13n) ^ rotr(a, 22n);
-      const maj = ((a & b) ^ (a & c) ^ (b & c)) & M32;
-      const temp2 = (S0 + maj) & M32;
-
-      h = g; g = f; f = e; e = (d + temp1) & M32; d = c; c = b; b = a; a = (temp1 + temp2) & M32;
+      const S1 = (rotr32(e, 6) ^ rotr32(e, 11) ^ rotr32(e, 25)) >>> 0;
+      const ch = ((e & f) ^ (~e & g)) >>> 0;
+      const t1 = (hh + S1 + ch + K256[t] + w[t]) >>> 0;
+      const S0 = (rotr32(a, 2) ^ rotr32(a, 13) ^ rotr32(a, 22)) >>> 0;
+      const maj = ((a & b) ^ (a & c) ^ (b & c)) >>> 0;
+      const t2 = (S0 + maj) >>> 0;
+      hh = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
     }
-
-    h0 = (h0 + a) & M32; h1 = (h1 + b) & M32; h2 = (h2 + c) & M32; h3 = (h3 + d) & M32;
-    h4 = (h4 + e) & M32; h5 = (h5 + f) & M32; h6 = (h6 + g) & M32; h7 = (h7 + h) & M32;
+    h[0] = (h[0] + a) >>> 0; h[1] = (h[1] + b) >>> 0; h[2] = (h[2] + c) >>> 0; h[3] = (h[3] + d) >>> 0;
+    h[4] = (h[4] + e) >>> 0; h[5] = (h[5] + f) >>> 0; h[6] = (h[6] + g) >>> 0; h[7] = (h[7] + hh) >>> 0;
   }
-
-  const toHex = (n: bigint) => n.toString(16).padStart(8, '0');
-  return toHex(h0) + toHex(h1) + toHex(h2) + toHex(h3) + toHex(h4) + toHex(h5) + toHex(h6) + toHex(h7);
+  return hex32(h);
 }
 
 /* ====== SHA-384 / SHA-512 ====== */
@@ -300,91 +246,65 @@ function sha512Core(s: string, is384: boolean): string {
 function sha384(s: string): string { return sha512Core(s, true); }
 function sha512(s: string): string { return sha512Core(s, false); }
 
-/* ====== Keccak-256 (SHA3-256) ====== */
+/* ====== Keccak-256 (original Keccak, as used by Ethereum; NOT NIST SHA3-256) ====== */
 
-function keccak256(s: string): string {
-  const msg = strToBytes(s);
-  const state: bigint[] = new Array(25).fill(0n);
-  const rate = 136;
+const M64 = (1n << 64n) - 1n;
+const rotl64 = (x: bigint, n: number) => (n === 0 ? x : ((x << BigInt(n)) | (x >> BigInt(64 - n))) & M64);
 
-  const padded = [...msg, 0x01];
-  while ((padded.length * 8) % (rate * 8) !== (rate * 8 - 8)) padded.push(0x00);
-  padded.push(0x80);
+const KECCAK_RC = [
+  0x0000000000000001n, 0x0000000000008082n, 0x800000000000808an, 0x8000000080008000n, 0x000000000000808bn,
+  0x0000000080000001n, 0x8000000080008081n, 0x8000000000008009n, 0x000000000000008an, 0x0000000000000088n,
+  0x0000000080008009n, 0x000000008000000an, 0x000000008000808bn, 0x800000000000008bn, 0x8000000000008089n,
+  0x8000000000008003n, 0x8000000000008002n, 0x8000000000000080n, 0x000000000000800an, 0x800000008000000an,
+  0x8000000080008081n, 0x8000000000008080n, 0x0000000080000001n, 0x8000000080008008n,
+];
+// rotation offsets r[x][y] indexed as lane x + 5y
+const KECCAK_ROT = [0, 1, 62, 28, 27, 36, 44, 6, 55, 20, 3, 10, 43, 25, 39, 41, 45, 15, 21, 8, 18, 2, 61, 56, 14];
 
-  for (let i = 0; i < padded.length; i += rate) {
-    for (let j = 0; j < rate; j++) {
-      const lane = j % 8;
-      const plane = Math.floor(j / 8);
-      if (plane < 25 && lane < 8 && (i + j) < padded.length) {
-        state[plane] ^= BigInt(padded[i + j]) << BigInt(8 * lane);
+function keccakF1600(a: bigint[]): void {
+  for (let round = 0; round < 24; round++) {
+    // theta
+    const c = [0, 1, 2, 3, 4].map((x) => a[x] ^ a[x + 5] ^ a[x + 10] ^ a[x + 15] ^ a[x + 20]);
+    for (let x = 0; x < 5; x++) {
+      const d = c[(x + 4) % 5] ^ rotl64(c[(x + 1) % 5], 1);
+      for (let y = 0; y < 25; y += 5) a[x + y] ^= d;
+    }
+    // rho + pi
+    const b = new Array<bigint>(25).fill(0n);
+    for (let x = 0; x < 5; x++) {
+      for (let y = 0; y < 5; y++) {
+        b[y + 5 * ((2 * x + 3 * y) % 5)] = rotl64(a[x + 5 * y], KECCAK_ROT[x + 5 * y]);
       }
+    }
+    // chi
+    for (let y = 0; y < 25; y += 5) {
+      for (let x = 0; x < 5; x++) a[x + y] = b[x + y] ^ (~b[((x + 1) % 5) + y] & M64 & b[((x + 2) % 5) + y]);
+    }
+    // iota
+    a[0] ^= KECCAK_RC[round];
+  }
+}
+
+/** Keccak sponge with a 256-bit output. `domain` is the padding byte: 0x01 = original Keccak, 0x06 = NIST SHA3-256 (FIPS 202). */
+export function keccak256(s: string, domain = 0x01): string {
+  const rate = 136; // bytes (1088 bits) for a 256-bit output
+  const bytes = strToBytes(s);
+  const msg = [...bytes];
+  msg.push(domain);
+  while (msg.length % rate !== 0) msg.push(0);
+  msg[msg.length - 1] |= 0x80;
+  const state = new Array<bigint>(25).fill(0n);
+  for (let off = 0; off < msg.length; off += rate) {
+    for (let i = 0; i < rate / 8; i++) {
+      let lane = 0n;
+      for (let j = 7; j >= 0; j--) lane = (lane << 8n) | BigInt(msg[off + 8 * i + j]);
+      state[i] ^= lane;
     }
     keccakF1600(state);
   }
-
-  const out: bigint[] = [];
-  let squeezed = 0;
-  while (squeezed < 32) {
-    const block = state.slice(0, rate / 8);
-    for (const w of block) {
-      for (let b = 0; b < 8; b++) {
-        out.push((w >> BigInt(8 * b)) & 0xFFn);
-        squeezed++;
-        if (squeezed >= 32) break;
-      }
-      if (squeezed >= 32) break;
-    }
-    if (squeezed < 32) keccakF1600(state);
-  }
-
-  return out.map(n => Number(n).toString(16).padStart(2, '0')).join('');
-}
-
-function keccakF1600(state: bigint[]): void {
-  const ROL64 = (x: bigint, y: bigint) => ((x << y) | (x >> (64n - y))) & 0xFFFFFFFFFFFFFFFFn;
-
-  for (let round = 0; round < 24; round++) {
-    const C = new Array(5).fill(0n);
-    for (let x = 0; x < 5; x++) {
-      C[x] = state[x] ^ state[x + 5] ^ state[x + 10] ^ state[x + 15] ^ state[x + 20];
-    }
-    const D = new Array(5).fill(0n);
-    for (let x = 0; x < 5; x++) {
-      D[x] = C[(x + 4) % 5] ^ ROL64(C[(x + 1) % 5], 1n);
-    }
-    for (let x = 0; x < 25; x++) {
-      state[x] ^= D[x % 5];
-    }
-
-    let x = 1, y = 0;
-    let current = state[1];
-    const shifts = [1n, 3n, 6n, 10n, 15n, 21n, 28n, 36n, 45n, 55n, 2n, 14n, 27n, 41n, 56n, 8n, 25n, 43n, 62n, 18n, 39n, 61n, 20n, 44n];
-    for (let t = 0; t < 24; t++) {
-      const temp = state[5 * y + x];
-      state[5 * y + x] = ROL64(current, shifts[t]);
-      current = temp;
-      const oldX = x;
-      x = y;
-      y = (2 * oldX + 3 * y) % 5;
-    }
-
-    for (let y = 0; y < 25; y += 5) {
-      const t = state.slice(y, y + 5);
-      for (let x = 0; x < 5; x++) {
-        state[y + x] = t[x] ^ ((~t[(x + 1) % 5]) & t[(x + 2) % 5]);
-      }
-    }
-
-    const RC = [
-      0x0000000000000001n, 0x0000000000008082n, 0x800000000000808an, 0x8000000080008000n,
-      0x000000000000808bn, 0x0000000080000001n, 0x8000000080008081n, 0x8000000000008009n,
-      0x000000000000008an, 0x0000000000000088n, 0x0000000080008009n, 0x000000008000000an,
-      0x000000008000808bn, 0x800000000000008bn, 0x8000000000008089n, 0x8000000000008003n,
-      0x8000000000008002n, 0x8000000000000080n, 0x000000000000800an, 0x800000008000000an,
-      0x8000000080008081n, 0x8000000000008080n, 0x0000000080000001n, 0x8000000080008008n,
-    ];
-    state[0] ^= RC[round];
-  }
+  const out: number[] = [];
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 8; j++) out.push(Number((state[i] >> BigInt(8 * j)) & 0xffn));
+  return bytesToHex(out);
 }
 
 /* ====== PUBLIC API ====== */

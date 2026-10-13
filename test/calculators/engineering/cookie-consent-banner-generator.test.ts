@@ -40,7 +40,7 @@ describe('cookie-consent', () => {
     const preview = getValue(r, 'previewText');
     expect(preview).toContain('My Test Site');
     expect(preview).toContain('bottom banner');
-    expect(preview).toContain('GDPR-compliant');
+    expect(preview).not.toContain('GDPR-compliant'); // a template cannot promise compliance
   });
 
   it('shows correct position for center modal', () => {

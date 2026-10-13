@@ -1,16 +1,12 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { panelReliability } from './mtbfMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
-
-export default function MTBFPanel({ results }: Props) {
+export default function MTBFPanel({ values, results }: Props) {
   const mtbf = results.find(r => r.id === 'mtbf');
   const failureRate = results.find(r => r.id === 'failureRate');
   const reliability1yr = results.find(r => r.id === 'reliability1yr');
@@ -21,7 +17,8 @@ export default function MTBFPanel({ results }: Props) {
 
   if (!results.length) return null;
 
-  const relVal = reliability1yr ? parseNum(reliability1yr.value) : reliability ? parseNum(reliability.value) : 0;
+  const relRaw = panelReliability(values);
+  const relVal = relRaw ?? 0;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -34,21 +31,21 @@ export default function MTBFPanel({ results }: Props) {
       <div className="p-5 space-y-3">
         {mtbf && (
           <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-4 text-center">
-            <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">MTBF</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">MTBF</p>
             <p className="text-2xl font-bold text-emerald-700">{mtbf.value}</p>
           </div>
         )}
-        {relVal > 0 && (
+        {relRaw !== null && (
           <div>
             <div className="flex justify-between text-xs text-slate-600 mb-1">
-              <span>Reliability</span>
-              <span className={relVal > 90 ? 'text-emerald-600 font-bold' : relVal > 70 ? 'text-amber-600 font-bold' : 'text-red-600 font-bold'}>
+              <span>{reliability1yr ? 'Reliability over 1 year' : 'Reliability over the mission time'}</span>
+              <span className={relVal > 90 ? 'text-emerald-700 font-bold' : relVal > 70 ? 'text-amber-700 font-bold' : 'text-red-700 font-bold'}>
                 {relVal.toFixed(2)}%
               </span>
             </div>
-            <div className="h-4 bg-slate-100 rounded overflow-hidden">
+            <div className="h-4 bg-slate-100 rounded overflow-hidden" role="img" aria-label={`Reliability ${relVal.toFixed(2)} percent`}>
               <div className={`h-full rounded transition-all ${
-                relVal > 90 ? 'bg-emerald-500' : relVal > 70 ? 'bg-amber-500' : 'bg-red-500'
+                relVal > 90 ? 'bg-emerald-700' : relVal > 70 ? 'bg-amber-700' : 'bg-red-700'
               }`} style={{ width: `${Math.min(relVal, 100)}%` }} />
             </div>
           </div>

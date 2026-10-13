@@ -10,9 +10,9 @@ describe('youtube-revenue (YouTube / AdSense Revenue Calculator)', () => {
     });
     const fillRate = 0.5;
     const cpm = 20;
-    const daily = 50000 * fillRate / 1000 * cpm;
-    const monthly = daily * 30;
-    const yearly = monthly * 12;
+    const daily = 50000 * fillRate / 1000 * cpm * 0.55; // 55% creator share
+    const monthly = daily * 365 / 12;
+    const yearly = daily * 365;
 
     near(parseMoney(getValue(r, 'dailyRevenue')), daily);
     near(parseMoney(getValue(r, 'monthlyRevenue')), monthly);
@@ -28,8 +28,8 @@ describe('youtube-revenue (YouTube / AdSense Revenue Calculator)', () => {
       niche: 'gaming',
     });
     const cpm = 3.5;
-    const daily = 100000 * 0.5 / 1000 * cpm;
-    const monthly = daily * 30;
+    const daily = 100000 * 0.5 / 1000 * cpm * 0.55;
+    const monthly = daily * 365 / 12;
 
     near(parseMoney(getValue(r, 'dailyRevenue')), daily);
     near(parseMoney(getValue(r, 'monthlyRevenue')), monthly);
@@ -43,7 +43,7 @@ describe('youtube-revenue (YouTube / AdSense Revenue Calculator)', () => {
       niche: 'entertainment',
       cpm: '12',
     });
-    const daily = 10000 * 0.5 / 1000 * 12;
+    const daily = 10000 * 0.5 / 1000 * 12 * 0.55;
     near(parseMoney(getValue(r, 'dailyRevenue')), daily);
     expect(getValue(r, 'effectiveCpm')).toBe('$12.00');
   });
@@ -58,13 +58,13 @@ describe('youtube-revenue (YouTube / AdSense Revenue Calculator)', () => {
     near(parseMoney(getValue(r, 'rpm')), rpm);
   });
 
-  it('Monthly views = dailyViews × 30', () => {
+  it('Monthly views = dailyViews × 365 / 12', () => {
     const r = config.calculate({
       dailyViews: '7500',
       niche: 'tech',
     });
     const monthlyViews = parseNumber(getValue(r, 'monthlyViews'));
-    near(monthlyViews, 7500 * 30, 1);
+    near(monthlyViews, 7500 * 365 / 12, 1);
   });
 
   it('Education niche uses midpoint CPM of $14', () => {

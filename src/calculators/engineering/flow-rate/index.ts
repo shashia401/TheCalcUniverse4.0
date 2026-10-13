@@ -25,6 +25,7 @@ const flowRateConfig: CalculatorConfig = {
       unit: 'inches',
       inputMode: 'decimal',
       min: 0,
+      max: 1000,
       step: 0.125,
       helpText: 'Inner diameter of the pipe — larger diameter allows more flow',
     },
@@ -36,6 +37,7 @@ const flowRateConfig: CalculatorConfig = {
       unit: 'GPM',
       inputMode: 'decimal',
       min: 0,
+      max: 1000000,
       step: 0.1,
       helpText: 'Gallons per minute (US)',
     },
@@ -47,8 +49,9 @@ const flowRateConfig: CalculatorConfig = {
       unit: 'ft/s',
       inputMode: 'decimal',
       min: 0,
+      max: 200,
       step: 0.1,
-      helpText: 'Typical ranges: 1-4 ft/s suction, 5-12 ft/s discharge',
+      helpText: 'Common design guidance for water: about 1-4 ft/s on pump suction, 5-12 ft/s on discharge',
     },
   ],
   calculate: (values) => {
@@ -58,7 +61,7 @@ const flowRateConfig: CalculatorConfig = {
     const velocityFps = parseFloat(values.velocity);
 
     if (mode === 'velocity') {
-      if (isNaN(diamIn) || isNaN(flowGPM) || diamIn <= 0) return [];
+      if (!Number.isFinite(diamIn) || !Number.isFinite(flowGPM) || diamIn <= 0 || flowGPM < 0) return [];
       const diamFt = diamIn / 12;
       const areaSqFt = Math.PI * Math.pow(diamFt / 2, 2);
       const flowCFS = flowGPM / 448.83;
@@ -73,7 +76,7 @@ const flowRateConfig: CalculatorConfig = {
     }
 
     if (mode === 'flowrate') {
-      if (isNaN(diamIn) || isNaN(velocityFps) || diamIn <= 0) return [];
+      if (!Number.isFinite(diamIn) || !Number.isFinite(velocityFps) || diamIn <= 0 || velocityFps < 0) return [];
       const diamFt = diamIn / 12;
       const areaSqFt = Math.PI * Math.pow(diamFt / 2, 2);
       const flowCFS = areaSqFt * velocityFps;
@@ -87,7 +90,7 @@ const flowRateConfig: CalculatorConfig = {
     }
 
     if (mode === 'diameter') {
-      if (isNaN(flowGPM) || isNaN(velocityFps) || velocityFps <= 0) return [];
+      if (!Number.isFinite(flowGPM) || !Number.isFinite(velocityFps) || velocityFps <= 0 || flowGPM < 0) return [];
       const flowCFS = flowGPM / 448.83;
       const areaSqFt = flowCFS / velocityFps;
       const diamFt = 2 * Math.sqrt(areaSqFt / Math.PI);
@@ -125,11 +128,11 @@ const flowRateConfig: CalculatorConfig = {
       'If velocity is too high (above 10 ft/s), consider a larger pipe diameter.',
     ],
     explanation:
-      'The continuity equation (Q = AV) is fundamental to fluid mechanics and pipe sizing. Velocity has practical limits: too slow causes sedimentation in slurries; too fast causes pipe erosion, noise, and pressure loss. For water systems, recommended velocities are 2 to 4 ft/s for suction (intake) lines and 5 to 10 ft/s for discharge (pressure) lines. Oversizing pipes reduces velocity and increases cost; undersizing increases velocity losses and erosion risk. A practical example: a 2-inch diameter pipe carrying 25 GPM has a velocity of approximately 2.6 ft/s — well within the discharge range. If you try to push 100 GPM through the same 2-inch pipe, velocity jumps to about 10.2 ft/s, causing excessive noise, erosion risk, and pressure drop. The correct solution is to increase pipe diameter: 100 GPM at 6 ft/s requires approximately 2.6-inch diameter pipe. For HVAC chilled water systems, design velocity is typically kept between 2 and 8 ft/s to balance pump energy cost against pipe material cost. Oversizing pipes reduces pumping energy over the life of the building but increases upfront material cost — the economic pipe size is found by balancing these two factors, often called the life cycle cost analysis.',
+      'The continuity equation (Q = AV) is fundamental to fluid mechanics and pipe sizing. Velocity has practical limits: too slow causes sedimentation in slurries; too fast causes pipe erosion, noise, and pressure loss. For water systems, common guidelines are about 1 to 4 ft/s for suction (intake) lines and 5 to 10 ft/s for discharge (pressure) lines. Oversizing pipes reduces velocity and increases cost; undersizing increases velocity losses and erosion risk. A practical example: a 2-inch diameter pipe carrying 25 GPM has a velocity of approximately 2.6 ft/s — well within the discharge range. If you try to push 100 GPM through the same 2-inch pipe, velocity jumps to about 10.2 ft/s, causing excessive noise, erosion risk, and pressure drop. The correct solution is to increase pipe diameter: 100 GPM at 6 ft/s requires approximately 2.6-inch diameter pipe. For HVAC water systems, design velocity is usually kept moderate to balance pump energy cost against pipe material cost. Oversizing pipes reduces pumping energy over the life of the building but increases upfront material cost — the economic pipe size is found by balancing these two factors, often called the life cycle cost analysis.',
     faqs: [
       {
         question: 'What are typical flow velocities for water systems?',
-        answer: 'Residential plumbing: 4 to 8 ft/s. Suction lines: 1 to 4 ft/s. Pump discharge: 5 to 12 ft/s. Above 10 ft/s in rigid piping can cause noise, water hammer, and erosion over time. For fire sprinkler systems, velocities of 15 to 20 ft/s are acceptable for short durations during a fire event.',
+        answer: 'These are common guidelines, not universal limits: pump suction lines about 1 to 4 ft/s, pump discharge about 5 to 12 ft/s, and building water service lines often limited to roughly 5 to 8 ft/s. High velocities (above about 10 ft/s) can cause noise, water hammer, and erosion over time. Fire protection standards set their own, higher limits for sprinkler piping; follow the standard that applies to your system.',
       },
       {
         question: 'Does this calculator account for friction losses?',
@@ -141,7 +144,7 @@ const flowRateConfig: CalculatorConfig = {
       },
       {
         question: 'What happens if flow velocity is too high?',
-        answer: 'Excessive velocity causes several problems: pipe erosion (especially at bends and fittings), water hammer when valves close suddenly, cavitation in pumps, flow noise (whistling or banging in pipes), and excessive pressure drop that requires larger pumps. In copper piping, velocities above 8 ft/s accelerate erosion-corrosion. In PVC, velocities above 12 ft/s can cause fatigue failure at joints. The general engineering guideline is to keep water velocity below 10 ft/s in most systems.',
+        answer: 'Excessive velocity causes several problems: pipe erosion (especially at bends and fittings), water hammer when valves close suddenly, cavitation in pumps, flow noise (whistling or banging in pipes), and excessive pressure drop that requires larger pumps. Copper tube makers publish lower velocity limits (hot water is limited more than cold) because of erosion-corrosion. A commonly used rule is to keep water velocity below about 10 ft/s in most systems, and lower where noise or erosion matters.',
       },
       {
         question: 'What is the difference between flow rate and flow velocity?',
@@ -154,13 +157,12 @@ const flowRateConfig: CalculatorConfig = {
     ],
     quickReference: [
       { label: '1 GPM', value: '0.1337 ft³/min or 3.785 L/min' },
-      { label: '1/2" pipe at 4 ft/s', value: '~4 GPM' },
-      { label: '3/4" pipe at 6 ft/s', value: '~10 GPM' },
-      { label: '1" pipe at 6 ft/s', value: '~15 GPM' },
-      { label: '2" pipe at 6 ft/s', value: '~60 GPM' },
-      { label: '4" pipe at 8 ft/s', value: '~310 GPM' },
-      { label: 'Typical garden hose', value: '5-10 GPM at 40-60 PSI' },
-      { label: 'Standard shower head', value: '1.5-2.5 GPM (flow-restricted)' },
+      { label: '1/2" ID pipe at 4 ft/s', value: '~2.5 GPM' },
+      { label: '3/4" ID pipe at 6 ft/s', value: '~8.3 GPM' },
+      { label: '1" ID pipe at 6 ft/s', value: '~14.7 GPM' },
+      { label: '2" ID pipe at 6 ft/s', value: '~58.8 GPM' },
+      { label: '4" ID pipe at 8 ft/s', value: '~313 GPM' },
+      { label: '1 ft³/s', value: '448.83 US GPM' },
     ],
     commonUses: [
       'Plumbing design — size pipes for residential and commercial water supply systems to ensure adequate flow at fixtures without excessive noise or pressure drop',

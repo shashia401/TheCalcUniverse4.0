@@ -1,10 +1,10 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import OhmsLawPanel from './OhmsLawPanel';
+import { solvePair, type OhmSolved, type VarName } from '../../engineering/ohms-law/ohmsMath';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type VarName = 'V' | 'I' | 'R' | 'P';
 type KnownPair = [VarName, VarName];
 
 const ALL_VARS: VarName[] = ['V', 'I', 'R', 'P'];
@@ -38,39 +38,11 @@ function fmtScaled(v: number, baseUnit: string, mode: string): string {
 
 // ─── Solve Logic ─────────────────────────────────────────────────────────────
 
-interface Solved {
-  V: number;
-  I: number;
-  R: number;
-  P: number;
-}
-
-function solve(a: VarName, va: number, b: VarName, vb: number): Solved | null {
-  // Defense-in-depth: guard against NaN / non-positive values even if caller validates.
+// The solver lives with the engineering Ohm's-law calculator (same physics); this twin delegates to it.
+function solve(a: VarName, va: number, b: VarName, vb: number): OhmSolved | null {
+  // This calculator requires strictly positive inputs.
   if (isNaN(va) || isNaN(vb) || va <= 0 || vb <= 0) return null;
-  // V = I * R
-  // P = V * I = I^2 * R = V^2 / R
-  if (a === 'V' && b === 'I') return { V: va, I: vb, R: va / vb, P: va * vb };
-  if (a === 'V' && b === 'R') return { V: va, I: va / vb, R: vb, P: (va * va) / vb };
-  if (a === 'V' && b === 'P') return { V: va, I: vb / va, R: (va * va) / vb, P: vb };
-  if (a === 'I' && b === 'V') return { V: vb, I: va, R: vb / va, P: vb * va };
-  if (a === 'I' && b === 'R') return { V: va * vb, I: va, R: vb, P: va * va * vb };
-  if (a === 'I' && b === 'P') return { V: vb / va, I: va, R: vb / (va * va), P: vb };
-  if (a === 'R' && b === 'V') return { V: vb, I: vb / va, R: va, P: (vb * vb) / va };
-  if (a === 'R' && b === 'I') return { V: va * vb, I: vb, R: va, P: va * vb * vb };
-  if (a === 'R' && b === 'P') {
-    const V = Math.sqrt(vb * va);
-    const I = Math.sqrt(vb / va);
-    return { V, I, R: va, P: vb };
-  }
-  if (a === 'P' && b === 'V') return { V: vb, I: va / vb, R: (vb * vb) / va, P: va };
-  if (a === 'P' && b === 'I') return { V: va / vb, I: vb, R: va / (vb * vb), P: va };
-  if (a === 'P' && b === 'R') {
-    const V = Math.sqrt(va * vb);
-    const I = Math.sqrt(va / vb);
-    return { V, I, R: vb, P: va };
-  }
-  return null;
+  return solvePair(a, va, b, vb);
 }
 
 function formulaString(a: VarName, b: VarName): string[] {

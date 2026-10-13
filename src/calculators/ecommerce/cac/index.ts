@@ -51,6 +51,17 @@ const cacConfig: CalculatorConfig = {
       helpText: 'Average revenue per purchase — used to calculate payback period',
     },
     {
+      id: 'ordersPerMonth',
+      label: 'Orders per Customer per Month (optional)',
+      type: 'number',
+      placeholder: '1',
+      min: 0,
+      max: 1000,
+      step: 0.1,
+      inputMode: 'decimal',
+      helpText: 'How often a customer buys. Blank = 1 order a month (a subscription). Use 0.25 for one order every four months.',
+    },
+    {
       id: 'grossMarginPct',
       label: 'Gross Margin %',
       type: 'number',
@@ -60,7 +71,7 @@ const cacConfig: CalculatorConfig = {
       max: 100,
       step: 0.1,
       inputMode: 'decimal',
-      helpText: 'Used to calculate payback period',
+      helpText: 'Gross profit as a share of revenue. Used to calculate payback period',
     },
   ],
   calculate: (values) => {
@@ -69,8 +80,10 @@ const cacConfig: CalculatorConfig = {
     const ltv = parseFloat(values.ltv);
     const aov = parseFloat(values.avgOrderValue);
     const margin = parseFloat(values.grossMarginPct) / 100;
+    const ordersParsed = parseFloat(values.ordersPerMonth);
+    const ordersPerMonth = Number.isFinite(ordersParsed) && ordersParsed > 0 ? ordersParsed : 1;
 
-    if (isNaN(spend) || isNaN(customers) || customers <= 0) return [];
+    if (!Number.isFinite(spend) || !Number.isFinite(customers) || customers <= 0 || spend < 0) return [];
 
     const cac = spend / customers;
     const fmt = (n: number) =>
@@ -87,8 +100,8 @@ const cacConfig: CalculatorConfig = {
       },
     ];
 
-    if (!isNaN(ltv) && ltv > 0) {
-      const ltvCacRatio = cac > 0 ? ltv / cac : Infinity;
+    if (Number.isFinite(ltv) && ltv > 0) {
+      const ltvCacRatio = cac > 0 ? Math.round((ltv / cac) * 100) / 100 : Infinity; // classify on the displayed value
       results.push({
         id: 'ltvCac',
         label: 'LTV:CAC Ratio',
@@ -97,8 +110,9 @@ const cacConfig: CalculatorConfig = {
       });
     }
 
-    if (!isNaN(aov) && !isNaN(margin) && aov > 0 && margin > 0) {
-      const paybackMonths = cac / (aov * margin);
+    if (Number.isFinite(aov) && Number.isFinite(margin) && aov > 0 && margin > 0) {
+      // months until gross profit (AOV x margin x orders per month) repays CAC
+      const paybackMonths = Math.round((cac / (aov * margin * ordersPerMonth)) * 10) / 10;
       results.push({
         id: 'payback',
         label: 'Payback Period (months)',
@@ -132,17 +146,17 @@ const cacConfig: CalculatorConfig = {
     variables: [
       { symbol: 'CAC', name: 'Customer Acquisition Cost', description: 'The total cost of acquiring one new customer across all marketing and sales channels. Includes ad spend, salaries, software, and creative costs.' },
       { symbol: 'LTV:CAC', name: 'Lifetime Value to CAC Ratio', description: 'A key SaaS/e-commerce metric. A ratio above 3:1 is generally healthy. Below 1:1 means you lose money on every customer acquired.' },
-      { symbol: 'Payback Period', name: 'CAC Payback Period', description: 'How many months it takes to recoup the cost of acquiring a customer through gross profit. Under 12 months is excellent for most businesses.' },
+      { symbol: 'Payback Period', name: 'CAC Payback Period', description: 'How many months it takes to recoup the cost of acquiring a customer through gross profit. Shorter is better; under a year is a common target.' },
     ],
     howToUse: [
       'Enter all sales and marketing spend for the period (including salaries).',
       'Enter the number of new customers acquired in the same period.',
-      'Optionally add LTV for the LTV:CAC ratio and AOV + margin for payback period.',
+      'Optionally add LTV for the LTV:CAC ratio, and AOV + gross margin (+ orders per month) for the payback period.',
       'Compare your CAC to LTV and payback period to evaluate marketing efficiency.',
-      'Aim for LTV:CAC above 3:1 and payback period under 12 months.',
+      'A common target is LTV:CAC above 3:1 with payback inside about a year.',
     ],
     explanation:
-      'CAC is one of the most important metrics for any business with a marketing budget. A sustainable business must have an LTV:CAC ratio above 3:1 — meaning each customer generates at least 3x what it cost to acquire them. The CAC payback period tells you how long until marketing investment is recovered. Venture-backed SaaS companies typically target payback periods of 12-18 months. E-commerce brands often need faster payback of 6-12 months. High CAC is sustainable if LTV is proportionally high. Real-world example: a DTC brand spends $50,000 on ads, content, and salaries in a month and acquires 500 customers. The CAC is $100 per customer. If each customer has an LTV of $400, the LTV:CAC ratio is 4:1 — very healthy. If that same brand switches to higher-cost influencer campaigns and CAC rises to $200 while LTV stays at $400, the ratio drops to 2:1 — still workable but with less margin for error. If they further scale and CAC hits $500 while LTV remains $400, the ratio drops below 1:1, meaning every new customer destroys value. At that point the business must either find cheaper acquisition channels, increase prices, improve retention, or reduce spending.',
+      'CAC is one of the most important metrics for any business with a marketing budget. A sustainable business must have an LTV:CAC ratio above 3:1 — meaning each customer generates at least 3x what it cost to acquire them. The CAC payback period tells you how long until marketing investment is recovered. Rules of thumb often cited: SaaS companies aim for payback within roughly 12-18 months, while e-commerce brands usually want it faster. High CAC is sustainable if LTV is proportionally high. Real-world example: a DTC brand spends $50,000 on ads, content, and salaries in a month and acquires 500 customers. The CAC is $100 per customer. If each customer has an LTV of $400, the LTV:CAC ratio is 4:1 — very healthy. If that same brand switches to higher-cost influencer campaigns and CAC rises to $200 while LTV stays at $400, the ratio drops to 2:1 — still workable but with less margin for error. If they further scale and CAC hits $500 while LTV remains $400, the ratio drops below 1:1, meaning every new customer destroys value. At that point the business must either find cheaper acquisition channels, increase prices, improve retention, or reduce spending.',
     commonUses: [
       'Measuring marketing efficiency by tracking how much it costs to acquire each new customer across all channels',
       'Evaluating whether ad spend is sustainable by comparing CAC against customer lifetime value using the LTV:CAC ratio',
@@ -160,7 +174,7 @@ const cacConfig: CalculatorConfig = {
       },
       {
         question: 'How does CAC vary by channel?',
-        answer: 'CAC can vary dramatically by channel. Organic search might have a CAC of $0 (excluding SEO labor), while paid search could be $50-200. Social media ads range from $20-150 depending on targeting. Always calculate CAC per channel to optimize your marketing mix, not just a blended average across all channels.',
+        answer: 'CAC can vary dramatically by channel: organic search may cost little beyond labor, while paid channels often cost far more per customer. Always calculate CAC per channel to optimize your marketing mix, not just a blended average across all channels.',
       },
       {
         question: 'What is the difference between blended CAC and paid CAC?',
@@ -172,15 +186,15 @@ const cacConfig: CalculatorConfig = {
       },
       {
         question: 'What is a good CAC payback period for e-commerce?',
-        answer: 'For e-commerce, a payback period of 6-12 months is considered healthy. DTC brands with strong repeat purchase rates can sustain 12-18 month payback periods because the customer generates ongoing contribution margin. Subscription box services typically need payback within 3-6 months due to higher churn. If your payback period exceeds 18 months, you are essentially financing customer acquisition from operating cash flow — this requires significant working capital and carries substantial risk if customer retention assumptions fail.',
+        answer: 'There is no universal standard: shorter is safer. Brands with strong repeat purchasing can tolerate a longer payback because each customer keeps generating contribution margin, while high-churn businesses need to recover CAC quickly. A long payback means you are financing acquisition from cash flow, which needs working capital and is risky if retention assumptions fail. This calculator assumes the orders-per-month figure you enter (default 1 order a month) holds.',
       },
       {
         question: 'How do I calculate LTV properly for the LTV:CAC ratio?',
-        answer: 'LTV = (Average Order Value × Average Purchase Frequency × Gross Margin %) ÷ Churn Rate. For example: AOV $85, 4 purchases/year, 60% margin, 30% annual churn: LTV = ($85 × 4 × 0.60) ÷ 0.30 = $680. Be conservative: use 12-month LTV rather than multi-year projections, and always use net of returns. Common mistake: using revenue instead of gross profit for LTV, which inflates the ratio. If your LTV calculation uses revenue (not gross profit), the 3:1 benchmark becomes roughly 5:1.',
+        answer: 'LTV = (Average Order Value × Average Purchase Frequency × Gross Margin %) ÷ Churn Rate. For example: AOV $85, 4 purchases/year, 60% margin, 30% annual churn: LTV = ($85 × 4 × 0.60) ÷ 0.30 = $680. Be conservative: use 12-month LTV rather than multi-year projections, and always use net of returns. Common mistake: using revenue instead of gross profit for LTV, which inflates the ratio.',
       },
       {
         question: 'How do brand awareness campaigns affect CAC?',
-        answer: 'Brand campaigns typically have a delayed impact on CAC — they do not drive immediate conversions but reduce CAC across all channels over time as brand recognition increases. A brand-aware audience converts at higher rates and lower costs on paid search and social. For a fair CAC picture, allocate brand campaign spend across total new customers over a 3-6 month rolling window. Many DTC brands allocate 10-20% of marketing budget to brand campaigns and model a 2-3 month lag before seeing CAC reduction in direct response channels.',
+        answer: 'Brand campaigns typically have a delayed impact on CAC — they do not drive immediate conversions but reduce CAC across all channels over time as brand recognition increases. A brand-aware audience converts at higher rates and lower costs on paid search and social. For a fair CAC picture, allocate brand campaign spend across total new customers over a 3-6 month rolling window.',
       },
     ],
     workedExamples: [
@@ -194,21 +208,21 @@ const cacConfig: CalculatorConfig = {
         scenario: 'Lisa runs a B2B SaaS company with $30,000 monthly sales and marketing spend (2 SDRs at $6K each, $10K ads, $8K tools/events). She acquires 100 new customers per month with an average AOV of $200/month, 80% gross margin, and 5% monthly churn. She wants to know payback period.',
         inputs: { totalMarketingSpend: '30000', newCustomers: '100', avgOrderValue: '200', grossMarginPct: '80' },
         result: 'CAC = $300.00 per customer, Payback Period = 1.9 months',
-        insight: 'CAC = $30,000 ÷ 100 = $300 per customer. Monthly gross profit per customer = $200 × 0.80 = $160. Payback = $300 ÷ $160 = 1.9 months — excellent! At 5% monthly churn, average customer lifetime is 20 months. LTV = $160 × 20 = $3,200. LTV:CAC = $3,200 ÷ $300 = 10.7x. This very high ratio suggests Lisa could invest more in acquisition to accelerate growth — she is likely under-investing in marketing relative to the return she is getting.',
+        insight: 'CAC = $30,000 ÷ 100 = $300 per customer. Monthly gross profit per customer = $200 × 0.80 = $160. Payback = $300 ÷ $160 = 1.9 months at 1 order a month — fast. At 5% monthly churn, average customer lifetime is 20 months. LTV = $160 × 20 = $3,200. LTV:CAC = $3,200 ÷ $300 = 10.7x. This very high ratio suggests Lisa could invest more in acquisition to accelerate growth — she is likely under-investing in marketing relative to the return she is getting.',
       },
       {
-        scenario: 'Mateo runs a fashion e-commerce brand. His blended CAC across all channels is $45. He segments by channel: organic search (30% of customers at $5 CAC), email (20% at $3), paid search (25% at $55), social ads (25% at $85). His AOV is $75 at 55% margin.',
-        inputs: { totalMarketingSpend: '18000', newCustomers: '400', avgOrderValue: '75', grossMarginPct: '55' },
-        result: 'CAC = $45.00 per customer (blended), Payback Period = 1.1 months',
-        insight: 'Blended CAC of $45 looks manageable, but channel-level analysis reveals a different story. Paid channels (social at $85, search at $55) have much higher CAC. Monthly gross profit per order = $75 × 0.55 = $41.25. Social ads customers lose money on first purchase ($85 to acquire vs. $41.25 gross profit = −$43.75 deficit). The business is subsidized by organic and email. Mateo needs to either improve social ad ROAS, increase AOV through upsells, or accept that paid social is a loss-leader for future organic growth and repeat purchases.',
+        scenario: 'Mateo runs a fashion e-commerce brand. His blended CAC across all channels works out to $37.10. He segments by channel: organic search (30% of customers at $5 CAC), email (20% at $3), paid search (25% at $55), social ads (25% at $85). His AOV is $75 at 55% margin.',
+        inputs: { totalMarketingSpend: '14840', newCustomers: '400', avgOrderValue: '75', grossMarginPct: '55' },
+        result: 'CAC = $37.10 per customer (blended), Payback Period = 0.9 months (at 1 order a month)',
+        insight: 'Blended CAC of $37.10 (0.30 x $5 + 0.20 x $3 + 0.25 x $55 + 0.25 x $85) looks manageable, but channel-level analysis reveals a different story. Paid channels (social at $85, search at $55) have much higher CAC. Gross profit per order = $75 × 0.55 = $41.25. Social ads customers lose money on first purchase ($85 to acquire vs. $41.25 gross profit = −$43.75 deficit). The business is subsidized by organic and email. Mateo needs to either improve social ad ROAS, increase AOV through upsells, or accept that paid social is a loss-leader for future organic growth and repeat purchases.',
       },
     ],
     proTips: [
       'Calculate CAC per marketing channel, not just blended. A healthy blended CAC of $50 can hide a paid social CAC of $120 and an organic CAC of $5. Per-channel analysis reveals where your money actually works and where it does not — crucial for budget allocation decisions.',
-      'Include customer success and support team costs in your CAC calculation. Many businesses underestimate true acquisition cost by 20-30% by omitting these. Every onboarding email, support ticket, and setup call costs money and should be attributed to acquisition cost.',
+      'Include onboarding and customer-success costs that exist only to win the customer. Omitting them understates true acquisition cost. Every onboarding email, support ticket, and setup call costs money and should be attributed to acquisition cost.',
       'If your CAC payback period exceeds 12 months, ensure you have sufficient working capital to bridge the gap. A $200 CAC with a $15/month contribution margin means 13.3 months to break even — you need to finance 13 months of customer acquisition before seeing positive unit-level cash flow.',
-      'Watch for CAC creep: as you scale, CAC naturally rises because you exhaust the lowest-hanging-fruit audiences first. A 10-20% year-over-year CAC increase is normal for growing brands. If CAC increases faster than that, investigate audience saturation, competitive pressure, or creative fatigue.',
-      'Be conservative in LTV estimates. Use actual churn data, not optimistic projections. A common trap is projecting 24-month LTV when 40% of customers churn in month 3 — your actual weighted LTV may be half of what a simple calculation shows.',
+      'Watch for CAC creep: as you scale, CAC tends to rise because you exhaust the lowest-hanging-fruit audiences first. If CAC climbs quickly, investigate audience saturation, competitive pressure, or creative fatigue.',
+      'Be conservative in LTV estimates. Use actual churn data, not optimistic projections. A common trap is projecting a 24-month LTV when many customers churn in the first few months, so the real weighted LTV is far lower than a simple calculation shows.',
     ],
     limitations: [
       'CAC is inherently backward-looking — you are using historical spend and customer data to calculate a metric that may not predict future performance. Marketing costs typically take 1-3 months to fully materialize in customer acquisition.',
@@ -220,11 +234,7 @@ const cacConfig: CalculatorConfig = {
       { label: 'Healthy LTV:CAC', value: '3:1 minimum' },
       { label: 'Excellent LTV:CAC', value: '5:1 or higher' },
       { label: 'Danger Zone', value: 'Below 1:1 = losing money' },
-      { label: 'Payback Target (Ecom)', value: '6-12 months' },
-      { label: 'Payback Target (SaaS)', value: '12-18 months' },
-      { label: 'DTC Apparel CAC', value: '$15-$50 per customer' },
-      { label: 'Ecom Paid Search CAC', value: '$30-$80 per customer' },
-      { label: 'SaaS B2B CAC', value: '$200-$1,000 per customer' },
+      { label: 'Payback Formula', value: 'CAC ÷ (AOV × GM% × orders/month)' },
       { label: 'CAC Formula', value: 'Marketing Spend ÷ New Customers' },
       { label: 'LTV Formula (Gross)', value: '(AOV × Frequency × GM%) ÷ Churn' },
     ],

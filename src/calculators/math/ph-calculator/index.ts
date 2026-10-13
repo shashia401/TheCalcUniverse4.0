@@ -1,27 +1,21 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import PhPanel from './PhPanel';
+import { classifyPh } from '../../engineering/ph-calculator/phMath';
 
-function getClassification(pH: number): string {
-  if (pH < 0 || pH > 14) return 'Invalid';
-  if (pH < 3) return 'Strong acid';
-  if (pH < 7) return 'Weak acid';
-  if (pH === 7) return 'Neutral';
-  if (pH < 11) return 'Weak base';
-  return 'Strong base';
-}
-
-// Boundaries mirror getClassification() exactly — using a different
+// Boundaries mirror classifyPh() (shared) exactly — using a different
 // operator (<=) here previously put pH 3.00 in "Weak acid" (Strong acid
 // uses < 3) but colored it Red (the strong-acid color), and pH 11.00 in
 // "Strong base" but colored it Blue (the weak-base color).
 function getIndicatorColor(pH: number): string {
   if (pH < 0 || pH > 14) return 'Invalid';
-  if (pH < 3) return 'Red';
-  if (pH < 7) return 'Orange/Yellow';
-  if (pH === 7) return 'Green';
-  if (pH < 11) return 'Blue';
-  return 'Purple';
+  switch (classifyPh(pH)) {
+    case 'Strongly acidic': return 'Red';
+    case 'Acidic': return 'Orange/Yellow';
+    case 'Neutral': return 'Green';
+    case 'Basic': return 'Blue';
+    default: return 'Purple';
+  }
 }
 
 function formatScientificNotation(n: number): string {
@@ -117,7 +111,7 @@ const config: CalculatorConfig = {
       return [];
     }
 
-    const classification = getClassification(pH);
+    const classification = classifyPh(pH); // shared with engineering/ph-calculator so both agree
     const hColor = getIndicatorColor(pH);
 
     return [

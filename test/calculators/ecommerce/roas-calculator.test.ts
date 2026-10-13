@@ -23,7 +23,7 @@ describe('roas', () => {
       revenue: '20000',
       grossMargin: '50',
     });
-    expect(r).toHaveLength(3);
+    expect(r).toHaveLength(4);
 
     // min break-even ROAS = 1 / 0.50 = 2.00x
     near(parseNumber(getValue(r, 'minROAS')), 2.0);
@@ -36,7 +36,7 @@ describe('roas', () => {
       revenue: '15000',
       grossMargin: '25',
     });
-    expect(r).toHaveLength(3);
+    expect(r).toHaveLength(4);
 
     // ROAS = 15000 / 10000 = 1.50x
     // break-even = 1 / 0.25 = 4.00x
@@ -50,7 +50,7 @@ describe('roas', () => {
       revenue: '5000',
       grossMargin: '10',
     });
-    expect(r).toHaveLength(3);
+    expect(r).toHaveLength(4);
 
     // ROAS = 5.00x
     // break-even = 1 / 0.10 = 10.00x
@@ -64,13 +64,13 @@ describe('roas', () => {
       revenue: '10000',
       grossMargin: '50',
     });
-    expect(r).toHaveLength(3);
+    expect(r).toHaveLength(4);
 
     // ROAS = 2.00x
     // break-even = 1 / 0.50 = 2.00x
     near(parseNumber(getValue(r, 'roas')), 2.0);
     near(parseNumber(getValue(r, 'minROAS')), 2.0);
-    expect(getValue(r, 'minROAS')).toContain('Profitable');
+    expect(getValue(r, 'minROAS')).toContain('Break-even'); // exactly at break-even is not "Profitable"
   });
 
   it('returns empty for zero ad spend', () => {
@@ -116,7 +116,7 @@ describe('roas', () => {
       revenue: '5000',
       grossMargin: '100',
     });
-    expect(r).toHaveLength(3);
+    expect(r).toHaveLength(4);
     near(parseNumber(getValue(r, 'roas')), 5.0);
     near(parseNumber(getValue(r, 'minROAS')), 1.0);
     expect(getValue(r, 'minROAS')).toContain('Profitable');

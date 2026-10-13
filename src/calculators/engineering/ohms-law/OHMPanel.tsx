@@ -1,44 +1,26 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { solvePair, type VarName } from './ohmsMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.-]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
-
 export default function OHMPanel({ values, results }: Props) {
   const solveFor = values.solveFor || 'voltage';
+  const formula = results.find((r) => r.id === 'formula');
 
-  // Find results by solving mode
-  const formula = results.find(r => r.id === 'formula');
-  let voltage: CalculatorResult | undefined;
-  let current: CalculatorResult | undefined;
-  let resistance: CalculatorResult | undefined;
-  let power: CalculatorResult | undefined;
-
-  if (solveFor === 'voltage') {
-    voltage = results.find(r => r.id === 'voltage');
-    power = results.find(r => r.id === 'power');
-  } else if (solveFor === 'current') {
-    current = results.find(r => r.id === 'current');
-    power = results.find(r => r.id === 'power');
-  } else if (solveFor === 'resistance') {
-    resistance = results.find(r => r.id === 'resistance');
-    power = results.find(r => r.id === 'power');
-  } else if (solveFor === 'power') {
-    power = results.find(r => r.id === 'power');
-    resistance = results.find(r => r.id === 'resistance');
-  }
-
-  // Calculate all derived values
-  const V = voltage ? parseNum(voltage.value) : (values.voltage ? parseFloat(values.voltage) : 0);
-  const I = current ? parseNum(current.value) : (values.current ? parseFloat(values.current) : 0);
-  const R = resistance ? parseNum(resistance.value) : (values.resistance ? parseFloat(values.resistance) : 0);
-  const P = power ? parseNum(power.value) : 0;
+  // Recompute from the inputs with the shared solver (never parse the formatted result strings).
+  const n = (id: string) => parseFloat(values[id]);
+  const pair: [VarName, number, VarName, number] =
+    solveFor === 'voltage' ? ['I', n('current'), 'R', n('resistance')]
+    : solveFor === 'current' ? ['V', n('voltage'), 'R', n('resistance')]
+    : ['V', n('voltage'), 'I', n('current')];
+  const solved = solvePair(...pair);
+  const V = solved?.V ?? 0;
+  const I = solved?.I ?? 0;
+  const R = solved?.R ?? 0;
+  const P = solved?.P ?? (solveFor === 'power' ? n('voltage') * n('current') || 0 : 0);
 
   if (!results.length) return null;
 
@@ -85,7 +67,7 @@ export default function OHMPanel({ values, results }: Props) {
 
         {/* Derived formulas */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wide font-semibold mb-2 text-center">
+          <p className="text-[10px] text-slate-600 uppercase tracking-wide font-semibold mb-2 text-center">
             Derived Values
           </p>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
@@ -98,7 +80,7 @@ export default function OHMPanel({ values, results }: Props) {
 
         {/* Formula used */}
         {formula && (
-          <div className="mt-3 text-center text-xs text-slate-400">
+          <div className="mt-3 text-center text-xs text-slate-600">
             {formula.value}
           </div>
         )}
@@ -125,7 +107,7 @@ function WheelQuadrant({
       <p className="text-xs font-bold mb-1">{label}</p>
       <p className={`text-base font-bold ${textColor}`}>{value}</p>
       {highlight && (
-        <span className="inline-block mt-1 text-[9px] uppercase tracking-wider font-bold text-indigo-500">
+        <span className="inline-block mt-1 text-[9px] uppercase tracking-wider font-bold text-indigo-700">
           Solved
         </span>
       )}
@@ -136,7 +118,7 @@ function WheelQuadrant({
 function DerivedRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-0.5">
-      <span className="font-semibold text-slate-500 font-mono text-[11px]">{label}</span>
+      <span className="font-semibold text-slate-600 font-mono text-[11px]">{label}</span>
       <span className="font-bold text-slate-700">{value}</span>
     </div>
   );

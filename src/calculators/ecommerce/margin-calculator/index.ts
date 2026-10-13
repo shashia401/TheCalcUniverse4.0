@@ -1,6 +1,7 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import MarginCalculatorPanel from './MarginCalculatorPanel';
+import { marginFromMarkup, solveMargin, type MarginSolution } from './marginMath';
 
 const marginCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -25,6 +26,7 @@ const marginCalculatorConfig: CalculatorConfig = {
       step: 0.01,
       inputMode: 'decimal',
       helpText: 'Your cost to produce or purchase the item (required when solving for margin, markup, or revenue)',
+      showWhen: (v) => v.solveFor !== 'cost',
     },
     {
       id: 'revenueInput',
@@ -36,6 +38,7 @@ const marginCalculatorConfig: CalculatorConfig = {
       step: 0.01,
       inputMode: 'decimal',
       helpText: 'The price you sell the item for (required when solving for margin, markup, or cost)',
+      showWhen: (v) => v.solveFor !== 'revenue',
     },
     {
       id: 'marginInput',
@@ -46,7 +49,8 @@ const marginCalculatorConfig: CalculatorConfig = {
       min: 0,
       step: 0.01,
       inputMode: 'decimal',
-      helpText: 'Enter when solving for revenue or cost using margin (margin = profit / revenue)',
+      helpText: 'Enter when solving for revenue or cost using margin (margin = profit / revenue). Must be under 100. If both margin and markup are filled, margin is used.',
+      showWhen: (v) => v.solveFor === 'revenue' || v.solveFor === 'cost',
     },
     {
       id: 'markupInput',
@@ -57,325 +61,73 @@ const marginCalculatorConfig: CalculatorConfig = {
       min: 0,
       step: 0.01,
       inputMode: 'decimal',
-      helpText: 'Enter when solving for revenue or cost using markup (markup = profit / cost)',
+      helpText: 'Enter when solving for revenue or cost using markup (markup = profit / cost). Used only when margin is blank.',
+      showWhen: (v) => v.solveFor === 'revenue' || v.solveFor === 'cost',
     },
   ],
   calculate: (values) => {
-    const solveFor = values.solveFor || 'margin';
-    const costInput = parseFloat(values.costInput);
-    const revenueInput = parseFloat(values.revenueInput);
-    const marginInput = parseFloat(values.marginInput);
-    const markupInput = parseFloat(values.markupInput);
+    const sol = solveMargin(values);
+    if (!sol) return [];
+    const { solveFor, cost, revenue, profit, margin, markup } = sol;
 
     const fmt = (n: number): string =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // up to 4 dp, trailing zeros trimmed; normalises -0
+    const fmtPct = (n: number): string => `${String(Math.round(n * 1e4) / 1e4 + 0)}%`;
+    const fmtMarkup = markup === null ? 'N/A (cost is zero)' : fmtPct(markup);
 
-    const fmtPct = (n: number): string => `${n.toFixed(4).replace(/\.?0+$/, '')}%`;
+    const exampleMargin = marginFromMarkup(50); // 33.3% - what a 50% markup really is as a margin
+    const profitColor = profit >= 0 ? ('positive' as const) : ('negative' as const);
 
-    // Helper: compute margin from cost+revenue
-    const computeMargin = (cost: number, revenue: number): number =>
-      revenue > 0 ? ((revenue - cost) / revenue) * 100 : 0;
-
-    // Helper: compute markup from cost+revenue
-    const computeMarkup = (cost: number, revenue: number): number =>
-      cost > 0 ? ((revenue - cost) / cost) * 100 : 0;
-
-    // ----- solveFor === 'margin' -----
-    if (solveFor === 'margin') {
-      if (isNaN(costInput) || isNaN(revenueInput) || revenueInput <= 0) return [];
-      const cost = costInput;
-      const revenue = revenueInput;
-      const profit = revenue - cost;
-      const margin = computeMargin(cost, revenue);
-      const markup = computeMarkup(cost, revenue);
-
-      // Explainer: what 50% markup really means in margin terms
-      const exampleMarkup = 50;
-      const exampleMargin = (exampleMarkup / (100 + exampleMarkup)) * 100;
-
-      return [
-        {
-          id: 'solvedValue',
-          label: 'Gross Margin (%)',
-          value: fmtPct(margin),
-          highlight: true,
-          interpretation: `Margin and markup answer different questions from the same numbers — margin is profit as a share of the selling price, markup is profit as a share of cost. A 50% markup is only a ${exampleMargin.toFixed(1)}% margin, which is why the two get confused; always check which one a target or industry benchmark actually refers to.`,
-          color: profit >= 0 ? 'positive' as const : 'negative' as const,
-        },
-        {
-          id: 'secondaryMetric',
-          label: 'Markup (%)',
-          value: fmtPct(markup),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'grossProfit',
-          label: 'Gross Profit (Revenue − Cost)',
-          value: `$${fmt(profit)}`,
-          color: profit >= 0 ? 'positive' as const : 'negative' as const,
-        },
-        {
-          id: 'costResult',
-          label: 'Cost',
-          value: `$${fmt(cost)}`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'revenueResult',
-          label: 'Revenue (Selling Price)',
-          value: `$${fmt(revenue)}`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'marginResult',
-          label: 'Gross Margin (%)',
-          value: fmtPct(margin),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'markupResult',
-          label: 'Markup (%)',
-          value: fmtPct(markup),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'differenceExplainer',
-          label: `Key: 50% Markup ≠ 50% Margin — at 50% markup, margin = ${exampleMargin.toFixed(1)}%`,
-          value: `Markup % ÷ (100 + Markup %) = Margin %`,
-          color: 'neutral' as const,
-        },
-      ];
+    const headline: Record<string, { label: string; value: string; interpretation?: string; secondary?: { label: string; value: string } }> = {
+      margin: {
+        label: 'Gross Margin (%)',
+        value: fmtPct(margin),
+        interpretation: `Margin and markup answer different questions from the same numbers — margin is profit as a share of the selling price, markup is profit as a share of cost. A 50% markup is only a ${exampleMargin.toFixed(1)}% margin, which is why the two get confused; always check which one a target or industry benchmark actually refers to.`,
+        secondary: { label: 'Markup (%)', value: fmtMarkup },
+      },
+      markup: {
+        label: 'Markup (%)',
+        value: fmtMarkup,
+        secondary: { label: 'Gross Margin (%)', value: fmtPct(margin) },
+      },
+      revenue: { label: `Revenue (Selling Price) — from ${sol.solvedVia}`, value: `$${fmt(revenue)}` },
+      cost: { label: `Cost — from ${sol.solvedVia}`, value: `$${fmt(cost)}` },
+    };
+    const formulaNote: Record<string, string> = {
+      margin: 'Markup % ÷ (100 + Markup %) = Margin %',
+      markup: 'Margin % = Markup % ÷ (100 + Markup %)',
+      revenue: 'Revenue from Margin: Cost ÷ (1 − Margin%) | Revenue from Markup: Cost × (1 + Markup%)',
+      cost: 'Cost from Margin: Revenue × (1 − Margin%) | Cost from Markup: Revenue ÷ (1 + Markup%)',
+    };
+    const h = headline[solveFor];
+    const results: CalculatorResult[] = [
+      {
+        id: 'solvedValue',
+        label: h.label,
+        value: h.value,
+        highlight: true,
+        ...(h.interpretation ? { interpretation: h.interpretation } : {}),
+        color: solveFor === 'revenue' || solveFor === 'cost' ? ('positive' as const) : profitColor,
+      },
+    ];
+    if (h.secondary) {
+      results.push({ id: 'secondaryMetric', label: h.secondary.label, value: h.secondary.value, color: 'neutral' as const });
     }
-
-    // ----- solveFor === 'markup' -----
-    if (solveFor === 'markup') {
-      if (isNaN(costInput) || isNaN(revenueInput) || revenueInput <= 0) return [];
-      const cost = costInput;
-      const revenue = revenueInput;
-      const profit = revenue - cost;
-      const margin = computeMargin(cost, revenue);
-      const markup = computeMarkup(cost, revenue);
-
-      const exampleMarkup = 50;
-      const exampleMargin = (exampleMarkup / (100 + exampleMarkup)) * 100;
-
-      return [
-        {
-          id: 'solvedValue',
-          label: 'Markup (%)',
-          value: fmtPct(markup),
-          highlight: true,
-          color: profit >= 0 ? 'positive' as const : 'negative' as const,
-        },
-        {
-          id: 'secondaryMetric',
-          label: 'Gross Margin (%)',
-          value: fmtPct(margin),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'grossProfit',
-          label: 'Gross Profit (Revenue − Cost)',
-          value: `$${fmt(profit)}`,
-          color: profit >= 0 ? 'positive' as const : 'negative' as const,
-        },
-        {
-          id: 'costResult',
-          label: 'Cost',
-          value: `$${fmt(cost)}`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'revenueResult',
-          label: 'Revenue (Selling Price)',
-          value: `$${fmt(revenue)}`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'marginResult',
-          label: 'Gross Margin (%)',
-          value: fmtPct(margin),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'markupResult',
-          label: 'Markup (%)',
-          value: fmtPct(markup),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'differenceExplainer',
-          label: `Key: 50% Markup ≠ 50% Margin — at 50% markup, margin = ${exampleMargin.toFixed(1)}%`,
-          value: `Margin % = Markup % ÷ (100 + Markup %)`,
-          color: 'neutral' as const,
-        },
-      ];
-    }
-
-    // ----- solveFor === 'revenue' -----
-    if (solveFor === 'revenue') {
-      if (isNaN(costInput) || costInput <= 0) return [];
-      const cost = costInput;
-
-      // Prefer margin if filled; fall back to markup
-      const useMargin = !isNaN(marginInput) && marginInput >= 0 && marginInput < 100;
-      const useMarkup = !isNaN(markupInput) && markupInput >= 0;
-
-      if (!useMargin && !useMarkup) return [];
-
-      let revenue: number;
-      let solvedVia: string;
-      let derivedMargin: number;
-      let derivedMarkup: number;
-
-      if (useMargin) {
-        // revenue = cost / (1 - margin/100)
-        if (marginInput >= 100) return [];
-        revenue = cost / (1 - marginInput / 100);
-        solvedVia = `${marginInput}% Margin`;
-        derivedMargin = marginInput;
-        derivedMarkup = computeMarkup(cost, revenue);
-      } else {
-        // revenue = cost * (1 + markup/100)
-        revenue = cost * (1 + markupInput / 100);
-        solvedVia = `${markupInput}% Markup`;
-        derivedMargin = computeMargin(cost, revenue);
-        derivedMarkup = markupInput;
-      }
-
-      const profit = revenue - cost;
-      const exampleMarkup = 50;
-      const exampleMargin = (exampleMarkup / (100 + exampleMarkup)) * 100;
-
-      return [
-        {
-          id: 'solvedValue',
-          label: `Revenue (Selling Price) — from ${solvedVia}`,
-          value: `$${fmt(revenue)}`,
-          highlight: true,
-          color: 'positive' as const,
-        },
-        {
-          id: 'grossProfit',
-          label: 'Gross Profit (Revenue − Cost)',
-          value: `$${fmt(profit)}`,
-          color: profit >= 0 ? 'positive' as const : 'negative' as const,
-        },
-        {
-          id: 'costResult',
-          label: 'Cost',
-          value: `$${fmt(cost)}`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'revenueResult',
-          label: 'Revenue (Selling Price)',
-          value: `$${fmt(revenue)}`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'marginResult',
-          label: 'Gross Margin (%)',
-          value: fmtPct(derivedMargin),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'markupResult',
-          label: 'Markup (%)',
-          value: fmtPct(derivedMarkup),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'differenceExplainer',
-          label: `Key: 50% Markup ≠ 50% Margin — at 50% markup, margin = ${exampleMargin.toFixed(1)}%`,
-          value: `Revenue from Margin: Cost ÷ (1 − Margin%) | Revenue from Markup: Cost × (1 + Markup%)`,
-          color: 'neutral' as const,
-        },
-      ];
-    }
-
-    // ----- solveFor === 'cost' -----
-    if (solveFor === 'cost') {
-      if (isNaN(revenueInput) || revenueInput <= 0) return [];
-      const revenue = revenueInput;
-
-      // Prefer margin if filled; fall back to markup
-      const useMargin = !isNaN(marginInput) && marginInput >= 0 && marginInput < 100;
-      const useMarkup = !isNaN(markupInput) && markupInput >= 0;
-
-      if (!useMargin && !useMarkup) return [];
-
-      let cost: number;
-      let solvedVia: string;
-      let derivedMargin: number;
-      let derivedMarkup: number;
-
-      if (useMargin) {
-        // cost = revenue * (1 - margin/100)
-        cost = revenue * (1 - marginInput / 100);
-        solvedVia = `${marginInput}% Margin`;
-        derivedMargin = marginInput;
-        derivedMarkup = computeMarkup(cost, revenue);
-      } else {
-        // cost = revenue / (1 + markup/100)
-        cost = revenue / (1 + markupInput / 100);
-        solvedVia = `${markupInput}% Markup`;
-        derivedMargin = computeMargin(cost, revenue);
-        derivedMarkup = markupInput;
-      }
-
-      const profit = revenue - cost;
-      const exampleMarkup = 50;
-      const exampleMargin = (exampleMarkup / (100 + exampleMarkup)) * 100;
-
-      return [
-        {
-          id: 'solvedValue',
-          label: `Cost — from ${solvedVia}`,
-          value: `$${fmt(cost)}`,
-          highlight: true,
-          color: 'positive' as const,
-        },
-        {
-          id: 'grossProfit',
-          label: 'Gross Profit (Revenue − Cost)',
-          value: `$${fmt(profit)}`,
-          color: profit >= 0 ? 'positive' as const : 'negative' as const,
-        },
-        {
-          id: 'costResult',
-          label: 'Cost',
-          value: `$${fmt(cost)}`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'revenueResult',
-          label: 'Revenue (Selling Price)',
-          value: `$${fmt(revenue)}`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'marginResult',
-          label: 'Gross Margin (%)',
-          value: fmtPct(derivedMargin),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'markupResult',
-          label: 'Markup (%)',
-          value: fmtPct(derivedMarkup),
-          color: 'neutral' as const,
-        },
-        {
-          id: 'differenceExplainer',
-          label: `Key: 50% Markup ≠ 50% Margin — at 50% markup, margin = ${exampleMargin.toFixed(1)}%`,
-          value: `Cost from Margin: Revenue × (1 − Margin%) | Cost from Markup: Revenue ÷ (1 + Markup%)`,
-          color: 'neutral' as const,
-        },
-      ];
-    }
-
-    return [];
+    results.push(
+      { id: 'grossProfit', label: 'Gross Profit (Revenue − Cost)', value: `$${fmt(profit)}`, color: profitColor },
+      { id: 'costResult', label: 'Cost', value: `$${fmt(cost)}`, color: 'neutral' as const },
+      { id: 'revenueResult', label: 'Revenue (Selling Price)', value: `$${fmt(revenue)}`, color: 'neutral' as const },
+      { id: 'marginResult', label: 'Gross Margin (%)', value: fmtPct(margin), color: 'neutral' as const },
+      { id: 'markupResult', label: 'Markup (%)', value: fmtMarkup, color: 'neutral' as const },
+      {
+        id: 'differenceExplainer',
+        label: `Key: 50% Markup ≠ 50% Margin — at 50% markup, margin = ${exampleMargin.toFixed(1)}%`,
+        value: formulaNote[solveFor],
+        color: 'neutral' as const,
+      },
+    );
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -431,7 +183,7 @@ const marginCalculatorConfig: CalculatorConfig = {
       'All four results (cost, revenue, margin, markup) are shown together so you can see the full picture at once.',
     ],
     explanation:
-      'The single most common mistake in retail and e-commerce pricing is treating margin and markup as the same number. They are not — and confusing them leads to systematic under-pricing that quietly destroys profitability.\n\nHere is the core math: if your cost is $50 and you apply a 50% markup, your price is $75 and your margin is 33.3% — not 50%. Why? Because margin is calculated on the selling price ($25 profit ÷ $75 = 33.3%), while markup is calculated on cost ($25 profit ÷ $50 = 50%). Same $25 profit, two completely different percentages.\n\nThis matters most when communicating with buyers, wholesale partners, or platforms. A buyer might ask for "50% margin" and you quote "50% markup" — you have just accepted a deal that pays you far less than expected.\n\nConversion formulas:\n  Margin from Markup: Margin % = Markup % ÷ (100 + Markup %)\n  Markup from Margin: Markup % = Margin % ÷ (100 − Margin %)\n\nExample: 80% markup → 80 ÷ 180 = 44.4% margin. 50% margin → 50 ÷ 50 = 100% markup.\n\nFor e-commerce specifically, gross margin only tells part of the story. After platform fees (Amazon ~15%, Shopify payments ~2.9%), shipping, returns (~5-20% in apparel), and ad spend (often 20-40% of revenue as TACOS/ACOS), net margin is often 5-15% of what gross margin suggests. Always model your full P&L, not just your margin.',
+      'The single most common mistake in retail and e-commerce pricing is treating margin and markup as the same number. They are not — and confusing them leads to systematic under-pricing that quietly destroys profitability.\n\nHere is the core math: if your cost is $50 and you apply a 50% markup, your price is $75 and your margin is 33.3% — not 50%. Why? Because margin is calculated on the selling price ($25 profit ÷ $75 = 33.3%), while markup is calculated on cost ($25 profit ÷ $50 = 50%). Same $25 profit, two completely different percentages.\n\nThis matters most when communicating with buyers, wholesale partners, or platforms. A buyer might ask for "50% margin" and you quote "50% markup" — you have just accepted a deal that pays you far less than expected.\n\nConversion formulas:\n  Margin from Markup: Margin % = Markup % ÷ (100 + Markup %)\n  Markup from Margin: Markup % = Margin % ÷ (100 − Margin %)\n\nExample: 80% markup → 80 ÷ 180 = 44.4% margin. 50% margin → 50 ÷ 50 = 100% markup.\n\nFor e-commerce specifically, gross margin only tells part of the story. After marketplace referral fees, payment processing, shipping, returns and advertising, net margin can be a small fraction of gross margin. Always model your full P&L, not just your margin.',
     commonUses: [
       'Setting retail or wholesale prices by calculating the correct selling price from cost and your desired margin percentage',
       'Avoiding costly pricing mistakes by understanding the difference between margin and markup when negotiating with buyers',
@@ -452,7 +204,7 @@ const marginCalculatorConfig: CalculatorConfig = {
       {
         question: 'What is a good gross margin for e-commerce?',
         answer:
-          'It varies by category: Consumer electronics 10-25%, Apparel 50-70%, Beauty/personal care 60-80%, Home goods 40-60%, Software/digital goods 70-90%. Amazon FBA sellers often target 30-50% gross margin before fees; after Amazon\'s referral fee (8-15%) and FBA fees, net product margin is often 15-30%. Always model fees explicitly — they are not small.',
+          'It varies a lot by category and business model, and published ranges differ by source, so benchmark against comparable sellers rather than a single number. What matters is that gross margin is large enough to pay for fees, shipping, returns, advertising and overhead and still leave net profit. Amazon sellers should model the referral fee and FBA fees explicitly (see the Amazon FBA calculator) instead of relying on a generic target.',
       },
       {
         question: 'How do I back-calculate what my cost must be to hit a target margin?',
@@ -472,7 +224,7 @@ const marginCalculatorConfig: CalculatorConfig = {
       {
         question: 'How does offering free shipping change my margin calculation?',
         answer:
-          'Free shipping is effectively a cost you absorb. If your shipping cost is $5 per order and you offer free shipping, you should either: (1) include the $5 in COGS before calculating margin, or (2) treat shipping as a separate line item and calculate margin on revenue minus COGS minus shipping. Many e-commerce businesses that switch to free shipping find their effective margin drops 5-10 percentage points. To compensate, some increase product prices slightly to absorb the shipping cost while maintaining margin.',
+          'Free shipping is effectively a cost you absorb. If your shipping cost is $5 per order and you offer free shipping, you should either: (1) include the $5 in COGS before calculating margin, or (2) treat shipping as a separate line item and calculate margin on revenue minus COGS minus shipping. Free shipping lowers your effective margin by the shipping cost as a share of the order, so some sellers raise product prices slightly to compensate.',
       },
       {
         question: 'What is the relationship between margin and inventory turn rate?',
@@ -503,12 +255,12 @@ const marginCalculatorConfig: CalculatorConfig = {
     proTips: [
       'The "Solve For" dropdown lets you work four different pricing problems with one calculator. Learn all four modes: margin from price, markup from price, price from margin, and cost from margin — they cover virtually every pricing question you will face in e-commerce.',
       'Always calculate your cost-back (max COGS) before approaching suppliers. Knowing your ceiling prevents overpaying. The formula is simple: Max Cost = Selling Price × (1 − Target Margin %). Use this calculator\'s "Solve for Cost" mode to verify.',
-      'When negotiating wholesale bulk discounts, run the margin calculation at the new lower cost. A 10% cost reduction increases margin by MORE than 10% — on a $100 item with 40% margin, a 10% cost cut (from $60 to $54) raises margin to 46%, a 15% margin improvement.',
+      'When negotiating wholesale bulk discounts, run the margin calculation at the new lower cost. A 10% cost reduction lifts profit by MORE than 10% — on a $100 item with 40% margin, a 10% cost cut (from $60 to $54) raises margin to 46% and gross profit from $40 to $46, a 15% improvement.',
       'Track your margin at list price AND at your most common discount level. A product with 55% margin at full price drops to 40% at 25% off — knowing both numbers prevents over-discounting during sales events.',
     ],
     limitations: [
       'This calculator computes gross margin using standard formulas with a single-product model and fixed cost/revenue inputs. Results represent gross values before platform fees, payment processing, shipping, returns, advertising, and other operating expenses.',
-      'For e-commerce specifically, effective net margin after all selling costs is often 40-70% lower than gross margin. Multi-product businesses should use weighted average COGS for overall margin analysis.',
+      'For e-commerce specifically, net margin after all selling costs is much lower than gross margin. Multi-product businesses should use weighted average COGS for overall margin analysis.',
       'Volume discounts, supplier tier pricing, seasonal cost fluctuations, and currency exchange rate effects are not modeled.',
       'For financial reporting, tax preparation, or investor presentations, verify figures with an accountant.',
     ],
@@ -521,7 +273,6 @@ const marginCalculatorConfig: CalculatorConfig = {
       { label: 'Margin → Markup', value: 'M% ÷ (100 − M%)' },
       { label: 'Markup → Margin', value: 'Mu% ÷ (100 + Mu%)' },
       { label: 'Price from Cost+Markup', value: 'Cost × (1 + Mu%/100)' },
-      { label: 'Ecom Healthy GM', value: '35-65% depending on category' },
       { label: 'Cost from Price+Margin', value: 'Price × (1 − M%/100)' },
     ],
     citations: [

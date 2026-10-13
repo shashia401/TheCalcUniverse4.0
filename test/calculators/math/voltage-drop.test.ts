@@ -13,9 +13,9 @@ describe('Voltage Drop calculator', () => {
       acceptableDrop: '3',
     });
     expect(getValue(r, 'recommendedWire')).toBe('8 AWG');
-    // VD = 2 × 100 × 20 × 0.764 / 1000 = 3.056V = 2.55%
-    near(parseNumber(getValue(r, 'voltageDrop')), 3.056, 0.01);
-    near(parseNumber(getValue(r, 'voltageDropPercent')), 2.55, 0.05);
+    // NEC Table 8 stranded 8 AWG = 0.778: VD = 2 × 100 × 20 × 0.778 / 1000 = 3.112V = 2.59%
+    near(parseNumber(getValue(r, 'voltageDrop')), 3.112, 0.01);
+    near(parseNumber(getValue(r, 'voltageDropPercent')), 2.59, 0.05);
   });
 
   it('240V single-phase 30A 150ft — recommends 8 AWG', () => {
@@ -28,8 +28,8 @@ describe('Voltage Drop calculator', () => {
       acceptableDrop: '3',
     });
     expect(getValue(r, 'recommendedWire')).toBe('8 AWG');
-    // VD = 2 × 150 × 30 × 0.764 / 1000 = 6.876V = 2.865%
-    near(parseNumber(getValue(r, 'voltageDrop')), 6.876, 0.01);
+    // VD = 2 × 150 × 30 × 0.778 / 1000 = 7.002V = 2.92%
+    near(parseNumber(getValue(r, 'voltageDrop')), 7.002, 0.01);
   });
 
   it('480V three-phase 50A 200ft', () => {
@@ -44,10 +44,10 @@ describe('Voltage Drop calculator', () => {
     expect(r.length).toBeGreaterThan(0);
     // VD = √3 × 200 × 50 × R / 1000
     // 6 AWG (0.491): VD = 1.732 × 200 × 50 × 0.491 / 1000 = 8.50V = 1.77%
-    // 8 AWG (0.764): VD = 1.732 × 200 × 50 × 0.764 / 1000 = 13.23V = 2.76%
-    // 10 AWG (1.21): VD = 20.95V = 4.36% - too high
+    // 8 AWG (0.778): VD = 1.732 × 200 × 50 × 0.778 / 1000 = 13.47V = 2.81%
+    // 10 AWG (1.24): VD = 21.5V = 4.48% - too high
     // Recommended should be 8 AWG
-    near(parseNumber(getValue(r, 'voltageDropPercent')), 2.76, 0.1);
+    near(parseNumber(getValue(r, 'voltageDropPercent')), 2.81, 0.1);
   });
 
   it('passes 3% check when VD <= 3%', () => {
@@ -102,11 +102,8 @@ describe('Voltage Drop calculator', () => {
       oneWayLength: '100',
       acceptableDrop: '3',
     });
-    // Aluminum resistance = 1.6 × copper
-    // 8 AWG copper = 0.764, aluminum = 1.2224
-    // VD = 2 × 100 × 20 × 1.2224 / 1000 = 4.89V = 4.07% - fails 3%
-    // 6 AWG copper = 0.491, aluminum = 0.7856
-    // VD = 2 × 100 × 20 × 0.7856 / 1000 = 3.142V = 2.62% - passes 3%
+    // NEC Table 8 aluminum: 8 AWG = 1.28 -> VD = 5.12V = 4.27% - fails 3%
+    // 6 AWG = 0.808 -> VD = 3.232V = 2.69% - passes 3% (and Al 6 AWG ampacity 50A >= 20A)
     expect(getValue(r, 'recommendedWire')).toBe('6 AWG');
   });
 
@@ -121,8 +118,8 @@ describe('Voltage Drop calculator', () => {
       customDropPercent: '2',
     });
     // With 2% (2.4V at 120V):
-    // 10 AWG (1.21): VD = 4.84V = 4.03% - fails
-    // 8 AWG (0.764): VD = 3.056V = 2.55% - fails 2%!
+    // 10 AWG (1.24): VD = 4.96V = 4.13% - fails
+    // 8 AWG (0.778): VD = 3.112V = 2.59% - fails 2%!
     // 6 AWG (0.491): VD = 1.964V = 1.64% - passes
     expect(getValue(r, 'recommendedWire')).toBe('6 AWG');
   });

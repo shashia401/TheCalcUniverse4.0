@@ -64,16 +64,16 @@ describe('pH Calculator', () => {
 
   // ─── Classification ─────────────────────────────────────
 
-  it('classifies pH 1 as Strong acid', () => {
+  it('classifies pH 1 as Strongly acidic', () => {
     const r = config.calculate({ mode: 'ph-to-h', phInput: '1' });
     const cls = r.find((res) => res.id === 'classification');
-    expect(cls?.value).toBe('Strong acid');
+    expect(cls?.value).toBe('Strongly acidic');
   });
 
-  it('classifies pH 5 as Weak acid', () => {
+  it('classifies pH 5 as Acidic', () => {
     const r = config.calculate({ mode: 'ph-to-h', phInput: '5' });
     const cls = r.find((res) => res.id === 'classification');
-    expect(cls?.value).toBe('Weak acid');
+    expect(cls?.value).toBe('Acidic');
   });
 
   it('classifies pH 7 as Neutral', () => {
@@ -82,16 +82,16 @@ describe('pH Calculator', () => {
     expect(cls?.value).toBe('Neutral');
   });
 
-  it('classifies pH 9 as Weak base', () => {
+  it('classifies pH 9 as Basic', () => {
     const r = config.calculate({ mode: 'ph-to-h', phInput: '9' });
     const cls = r.find((res) => res.id === 'classification');
-    expect(cls?.value).toBe('Weak base');
+    expect(cls?.value).toBe('Basic');
   });
 
-  it('classifies pH 13 as Strong base', () => {
+  it('classifies pH 13 as Strongly basic', () => {
     const r = config.calculate({ mode: 'ph-to-h', phInput: '13' });
     const cls = r.find((res) => res.id === 'classification');
-    expect(cls?.value).toBe('Strong base');
+    expect(cls?.value).toBe('Strongly basic');
   });
 
   // ─── Indicator Color ────────────────────────────────────

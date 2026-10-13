@@ -37,35 +37,35 @@ describe('pH Calculator', () => {
     const results = config.calculate({ mode: 'ph-to-conc', ph: '3' });
     near(parseNumber(getValue(results, 'ph')), 3);
     expect(getValue(results, 'hConcentration')).toBe('1.00 × 10⁻³ M');
-    expect(getValue(results, 'classification')).toContain('Acidic');
+    expect(getValue(results, 'classification')).toContain('cidic');
   });
 
   it('[H+] = 0.001 (1e-3) → pH 3', () => {
     const results = config.calculate({ mode: 'h-to-ph', hConcentration: '0.001' });
     near(parseNumber(getValue(results, 'ph')), 3);
     near(parseNumber(getValue(results, 'poh')), 11);
-    expect(getValue(results, 'classification')).toContain('Acidic');
+    expect(getValue(results, 'classification')).toContain('cidic');
   });
 
   it('[OH-] = 1e-4 → pOH 4, pH 10, basic', () => {
     const results = config.calculate({ mode: 'oh-to-poh', ohConcentration: '1e-4' });
     near(parseNumber(getValue(results, 'poh')), 4);
     near(parseNumber(getValue(results, 'ph')), 10);
-    expect(getValue(results, 'classification')).toContain('Basic');
+    expect(getValue(results, 'classification')).toContain('asic');
   });
 
   it('pH 0 → [H+] = 1, extreme acid', () => {
     const results = config.calculate({ mode: 'ph-to-conc', ph: '0' });
     near(parseNumber(getValue(results, 'ph')), 0);
     expect(getValue(results, 'hConcentration')).toBe('1.00 M');
-    expect(getValue(results, 'classification')).toContain('Strong Acid');
+    expect(getValue(results, 'classification')).toContain('Strongly acidic');
   });
 
   it('pH 14 → [H+] = 1e-14, strong base', () => {
     const results = config.calculate({ mode: 'ph-to-conc', ph: '14' });
     near(parseNumber(getValue(results, 'ph')), 14);
     expect(getValue(results, 'hConcentration')).toBe('1.00 × 10⁻¹⁴ M');
-    expect(getValue(results, 'classification')).toContain('Strong Base');
+    expect(getValue(results, 'classification')).toContain('Strongly basic');
   });
 
   it('empty input → returns []', () => {
@@ -85,7 +85,7 @@ describe('pH Calculator', () => {
 
   it('pH 12 → strong base classification', () => {
     const results = config.calculate({ mode: 'ph-to-conc', ph: '12' });
-    expect(getValue(results, 'classification')).toBe('Basic/Alkaline (Strong Base)');
+    expect(getValue(results, 'classification')).toBe('Strongly basic');
   });
 
   it('[H+] = 0 → returns [] (zero concentration)', () => {

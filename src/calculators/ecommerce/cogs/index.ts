@@ -1,6 +1,7 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import COGSPanel from './COGSPanel';
+import { computeCogs } from './cogsMath';
 
 const cogsConfig: CalculatorConfig = {
   inputs: [
@@ -54,9 +55,10 @@ const cogsConfig: CalculatorConfig = {
     const endInv = parseFloat(values.endingInventory);
     const revenue = parseFloat(values.revenue);
 
-    if ([beginInv, purchases, endInv].some(isNaN)) return [];
+    if (![beginInv, purchases, endInv].every(Number.isFinite) || beginInv < 0 || purchases < 0 || endInv < 0) return [];
 
-    const cogs = Math.max(0, beginInv + purchases - endInv);
+    const f = computeCogs(beginInv, purchases, endInv, revenue);
+    const cogs = f.cogs;
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -68,23 +70,25 @@ const cogsConfig: CalculatorConfig = {
         highlight: true,
         interpretation: `COGS only counts direct product costs — inventory, materials, direct labor — not overhead like rent or marketing. It's the number that feeds gross margin and is deductible on your tax return; keeping accurate inventory records matters here since errors compound into every downstream profit calculation.`,
         color: 'neutral' as const,
+        warning: f.impossible
+          ? 'Ending inventory is larger than beginning inventory plus purchases, which is impossible without further purchases. COGS is shown as $0; re-check the three inventory figures.'
+          : undefined,
       },
       {
         id: 'goodsAvailable',
         label: 'Goods Available for Sale',
-        value: `$${fmt(beginInv + purchases)}`,
+        value: `$${fmt(f.goodsAvailable)}`,
         color: 'neutral' as const,
       },
     ];
 
-    if (!isNaN(revenue) && revenue > 0) {
-      const grossProfit = revenue - cogs;
-      const grossMargin = (grossProfit / revenue) * 100;
-      const cogsPct = (cogs / revenue) * 100;
+    if (f.grossProfit !== undefined) {
+      // classify on the displayed (rounded) margin
+      const grossMargin = Math.round(f.grossMarginPct! * 100) / 100;
       results.push(
-        { id: 'grossProfit', label: 'Gross Profit', value: `$${fmt(grossProfit)}`, color: grossProfit > 0 ? 'positive' as const : 'negative' as const },
+        { id: 'grossProfit', label: 'Gross Profit', value: `$${fmt(f.grossProfit)}`, color: f.grossProfit > 0 ? 'positive' as const : 'negative' as const },
         { id: 'grossMargin', label: 'Gross Margin %', value: `${grossMargin.toFixed(2)}%`, color: grossMargin > 40 ? 'positive' as const : grossMargin > 20 ? 'neutral' as const : 'negative' as const },
-        { id: 'cogsPct', label: 'COGS as % of Revenue', value: `${cogsPct.toFixed(2)}%`, color: 'neutral' as const },
+        { id: 'cogsPct', label: 'COGS as % of Revenue', value: `${f.cogsPct!.toFixed(2)}%`, color: 'neutral' as const },
       );
     }
 
@@ -146,11 +150,11 @@ const cogsConfig: CalculatorConfig = {
       },
       {
         question: 'How does COGS affect my taxes?',
-        answer: 'COGS directly reduces taxable income. The IRS requires businesses that carry inventory to use an accrual method of accounting and accurately track COGS. Overstating ending inventory (and thus understating COGS) inflates taxable profit; understating ending inventory increases COGS and reduces taxable profit.',
+        answer: 'COGS directly reduces taxable income. Businesses that carry inventory generally have to account for it and track COGS (US tax rules for inventory are in IRC section 471, with simplified options for small businesses); confirm the rules for your situation with a tax professional. Overstating ending inventory (and thus understating COGS) inflates taxable profit; understating ending inventory increases COGS and reduces taxable profit.',
       },
       {
         question: 'How does the costing method (FIFO vs. LIFO) affect COGS?',
-        answer: 'In periods of rising prices, FIFO assumes older (cheaper) inventory is sold first, resulting in lower COGS and higher reported profit. LIFO assumes newer (more expensive) inventory is sold first, resulting in higher COGS and lower taxable income. Weighted average smooths price fluctuations. FIFO is the most common method and is required under IFRS accounting standards.',
+        answer: 'In periods of rising prices, FIFO assumes older (cheaper) inventory is sold first, resulting in lower COGS and higher reported profit. LIFO assumes newer (more expensive) inventory is sold first, resulting in higher COGS and lower taxable income. Weighted average smooths price fluctuations. FIFO and weighted average are accepted under both US GAAP and IFRS, while LIFO is allowed only under US GAAP.',
       },
     ],
     citations: [

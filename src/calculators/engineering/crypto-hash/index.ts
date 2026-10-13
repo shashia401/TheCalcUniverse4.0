@@ -25,7 +25,7 @@ const cryptoHashConfig: CalculatorConfig = {
         { label: 'SHA-1', value: 'sha-1' },
         { label: 'SHA-384', value: 'sha-384' },
         { label: 'SHA-512', value: 'sha-512' },
-        { label: 'Keccak-256 (SHA3-256)', value: 'keccak-256' },
+        { label: 'Keccak-256 (Ethereum; not NIST SHA3-256)', value: 'keccak-256' },
       ],
     },
   ],
@@ -67,7 +67,7 @@ const cryptoHashConfig: CalculatorConfig = {
       { symbol: 'MD5', name: 'Message Digest 5', description: '128-bit hash. Fast but cryptographically broken — vulnerable to collision attacks. Do not use for security. Still used for checksums.' },
       { symbol: 'SHA-1', name: 'Secure Hash Algorithm 1', description: '160-bit hash. Deprecated after SHAttered collision attack in 2017. Being phased out of TLS certificates.' },
       { symbol: 'SHA-512', name: 'Secure Hash Algorithm 512-bit', description: '256-bit security level. Outputs 64 bytes (128 hex chars). Used in high-security applications.' },
-      { symbol: 'Keccak-256', name: 'Keccak (SHA-3) 256-bit', description: 'SHA-3 winner. Uses sponge construction instead of Merkle-Damgard. Different internals than SHA-2.' },
+      { symbol: 'Keccak-256', name: 'Keccak (SHA-3) 256-bit', description: 'The original Keccak sponge (winner of the NIST SHA-3 competition) as used by Ethereum. NIST later standardised SHA3-256 (FIPS 202) with different padding, so Keccak-256 and SHA3-256 give DIFFERENT hashes for the same input.' },
     ],
     howToUse: [
       'Type or paste text into the input field.',
@@ -89,7 +89,7 @@ const cryptoHashConfig: CalculatorConfig = {
       { label: 'MD5 (16 bytes / 128 bits)', value: 'Broken — collisions found. Use only for non-security checksums. Output: 32 hex chars.' },
       { label: 'SHA-1 (20 bytes / 160 bits)', value: 'Deprecated — SHAttered collision (2017). Phased out of TLS. Output: 40 hex chars.' },
       { label: 'SHA-512 (64 bytes / 512 bits)', value: 'High-security variant. Used in PGP, DNSSEC. Output: 128 hex chars.' },
-      { label: 'Keccak-256 (32 bytes)', value: 'SHA-3 winner. Sponge construction. Different internals than SHA-2 family.' },
+      { label: 'Keccak-256 (32 bytes)', value: 'Original Keccak (Ethereum). Sponge construction. Not identical to NIST SHA3-256, which uses different padding.' },
       { label: 'SHA-384 (48 bytes / 384 bits)', value: 'Truncated SHA-512. Used where 256-bit security margin needed. Output: 96 hex chars.' },
     ],
     workedExamples: [
@@ -122,11 +122,11 @@ const cryptoHashConfig: CalculatorConfig = {
       'Use SHA-256 for all new projects. It has no known practical vulnerabilities and is the most widely supported secure hash algorithm across platforms and languages.',
       'For password storage, never hash alone — use a key-derivation function like bcrypt, Argon2, or PBKDF2 with a random salt. Hashing alone is vulnerable to rainbow table attacks.',
       'When verifying file downloads, always check the hash from the official website (not from a forum post). Attackers have been known to replace both the file and the posted hash on compromised sites.',
-      'The Web Crypto API used by this calculator runs entirely in your browser. No data is sent to any server — you can verify this by disconnecting from the internet and still generating hashes.',
-      'For blockchain and Merkle tree applications, double-SHA-256 (SHA-256 of SHA-256) is standard. Bitcoin uses this two-round approach to protect against length-extension attacks.',
+      'The hashing in this calculator is plain JavaScript that runs entirely in your browser; the text is not sent to any server, so you can disconnect from the internet and still generate hashes. Text is hashed as UTF-8 bytes, so non-ASCII characters (é, 你, emoji) use more than one byte each.',
+      'For blockchain and Merkle tree applications, double-SHA-256 (SHA-256 of SHA-256) is standard. Bitcoin uses this two-round approach, which also sidesteps length-extension attacks on a single SHA-256.',
     ],
     limitations: [
-      'This calculator performs hashing entirely in the browser using the Web Crypto API (SubtleCrypto). It does NOT perform keyed hashing (HMAC) or password-based key derivation (PBKDF2/bcrypt/Argon2).',
+      'This calculator hashes entirely in the browser with built-in JavaScript implementations (checked against OpenSSL and the published FIPS/RFC test vectors), not the Web Crypto API. It does NOT perform keyed hashing (HMAC) or password-based key derivation (PBKDF2/bcrypt/Argon2).',
       'MD5 and SHA-1 are included for educational and compatibility purposes only — both are cryptographically broken and should never be used for security-sensitive applications.',
       'The calculator does not detect hash type (you cannot paste a hash to identify the algorithm). For production password storage, use a proper key-derivation function with a random salt, not plain hashing.',
     ],
@@ -149,7 +149,7 @@ const cryptoHashConfig: CalculatorConfig = {
       },
       {
         question: 'What is the difference between SHA-256 and SHA3-256?',
-        answer: 'Despite the similar naming, they are completely different hash functions with different internal designs. SHA-256 uses the Merkle-Damgard construction with the Davies-Meyer compression function. SHA3-256 (Keccak) uses a sponge construction. SHA-3 was selected through an open NIST competition after concerns about SHA-2 emerged. Both are considered secure as of 2026, but SHA-3 offers a structurally different backup in case weaknesses are ever found in the SHA-2 family.',
+        answer: 'Despite the similar naming, they are completely different hash functions with different internal designs. SHA-256 uses the Merkle-Damgard construction with the Davies-Meyer compression function. SHA3-256 (NIST FIPS 202) uses the Keccak sponge construction. SHA-3 was selected through an open NIST competition as a structurally different backup to SHA-2. Note that this calculator offers Keccak-256 as used by Ethereum, which is the original Keccak submission: it differs from NIST SHA3-256 only in a padding byte, but that is enough to give a completely different hash for the same input. Both SHA-2 and SHA-3 are considered secure.',
       },
       {
         question: 'Why does SHA-512 produce 128 hex characters when it says 512 bits?',
@@ -157,7 +157,7 @@ const cryptoHashConfig: CalculatorConfig = {
       },
       {
         question: 'What is a collision attack and why is it dangerous?',
-        answer: 'A collision attack occurs when an attacker can find two different inputs that produce the same hash output. This is dangerous because it means a malicious file could have the same hash as a legitimate one. Digital signatures and certificates rely on collision resistance — if an attacker can create a fake certificate that hashes the same as a real one, they can impersonate any website. MD5 collisions can be computed in seconds on a laptop; SHA-1 collisions were demonstrated in 2017 using Google\'s computing power. No practical collision attack is known against SHA-256 or SHA-3 as of 2026.',
+        answer: 'A collision attack occurs when an attacker can find two different inputs that produce the same hash output. This is dangerous because it means a malicious file could have the same hash as a legitimate one. Digital signatures and certificates rely on collision resistance — if an attacker can create a fake certificate that hashes the same as a real one, they can impersonate any website. MD5 collisions can be computed in seconds on a laptop; SHA-1 collisions were demonstrated in 2017 using Google\'s computing power. No practical collision attack on SHA-256 or SHA-3 was publicly known at the time of writing.',
       },
     ],
     citations: [

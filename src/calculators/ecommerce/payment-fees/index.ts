@@ -1,20 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import PaymentFeesPanel from './PaymentFeesPanel';
-
-interface FeeStructure {
-  rate: number;
-  fixed: number;
-  label: string;
-}
-
-const FEE_MAP: Record<string, FeeStructure> = {
-  'stripe-domestic': { rate: 0.029, fixed: 0.30, label: 'Stripe Domestic' },
-  'stripe-international': { rate: 0.039, fixed: 0.30, label: 'Stripe International' },
-  'paypal-domestic': { rate: 0.0299, fixed: 0.49, label: 'PayPal Domestic' },
-  'paypal-international': { rate: 0.0449, fixed: 0.49, label: 'PayPal International' },
-  'square': { rate: 0.026, fixed: 0.10, label: 'Square' },
-};
+import { FEE_MAP, forwardFee, reverseInvoice } from './paymentMath';
 
 const paymentFeesConfig: CalculatorConfig = {
   inputs: [
@@ -36,12 +23,14 @@ const paymentFeesConfig: CalculatorConfig = {
       type: 'select',
       required: true,
       options: [
-        { label: 'Stripe Domestic', value: 'stripe-domestic' },
-        { label: 'Stripe International', value: 'stripe-international' },
-        { label: 'PayPal Domestic', value: 'paypal-domestic' },
-        { label: 'PayPal International', value: 'paypal-international' },
-        { label: 'Square', value: 'square' },
+        { label: 'Stripe — domestic card (2.9% + $0.30)', value: 'stripe-domestic' },
+        { label: 'Stripe — international card (4.4% + $0.30)', value: 'stripe-international' },
+        { label: 'PayPal Checkout — domestic (3.49% + $0.49)', value: 'paypal-domestic' },
+        { label: 'PayPal — standard card payment (2.99% + $0.49)', value: 'paypal-cards' },
+        { label: 'PayPal Checkout — international (4.99% + $0.49)', value: 'paypal-international' },
+        { label: 'Square — in-person (2.6% + $0.15)', value: 'square' },
       ],
+      helpText: 'Published US standard rates, checked October 2026 (Square in-person from fee guides, not confirmed on Square\'s page). Negotiated, interchange-plus and currency-conversion fees are not included.',
     },
     {
       id: 'reverseMode',
@@ -61,113 +50,35 @@ const paymentFeesConfig: CalculatorConfig = {
     const reverseMode = values.reverseMode || 'no';
     const feeInfo = FEE_MAP[platform];
     if (!feeInfo) return [];
-    if (isNaN(amount) || amount <= 0) return [];
+    if (!Number.isFinite(amount) || amount <= 0) return [];
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    if (reverseMode === 'yes') {
-      // Calculate what to invoice to receive exactly `amount`
-      const invoiceAmount = Math.ceil((amount + feeInfo.fixed) / (1 - feeInfo.rate) * 100) / 100;
-      const fee = invoiceAmount * feeInfo.rate + feeInfo.fixed;
-      const net = invoiceAmount - fee;
-
-      return [
-        {
-          id: 'fee',
-          label: 'Processing Fee',
-          value: `$${fmt(fee)}`,
-          color: 'negative' as const,
-        },
-        {
-          id: 'feePercent',
-          label: 'Fee Rate',
-          value: `${(feeInfo.rate * 100).toFixed(2)}%`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'feeFixed',
-          label: 'Fixed Fee',
-          value: `$${fmt(feeInfo.fixed)}`,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'netAmount',
-          label: 'You Receive',
-          value: `$${fmt(net)}`,
-          highlight: true,
-          color: 'positive' as const,
-        },
-        {
-          id: 'platform',
-          label: 'Platform',
-          value: feeInfo.label,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'reverseAmount',
-          label: 'Amount to Invoice',
-          value: `$${fmt(invoiceAmount)}`,
-          highlight: true,
-          color: 'positive' as const,
-        },
-        {
-          id: 'totalPlatformFee',
-          label: 'Total Fee Charged',
-          value: `$${fmt(fee)}`,
-          color: 'negative' as const,
-        },
-      ];
-    }
-
-    const fee = amount * feeInfo.rate + feeInfo.fixed;
-    const net = amount - fee;
+    const reverse = reverseMode === 'yes';
+    // forward: the customer pays `amount`; reverse: `amount` is the net you need, the invoice is solved for
+    const p = reverse ? reverseInvoice(amount, feeInfo) : forwardFee(amount, feeInfo);
 
     return [
-      {
-        id: 'fee',
-        label: 'Processing Fee',
-        value: `$${fmt(fee)}`,
-        color: 'negative' as const,
-      },
-      {
-        id: 'feePercent',
-        label: 'Fee Rate',
-        value: `${(feeInfo.rate * 100).toFixed(2)}%`,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'feeFixed',
-        label: 'Fixed Fee',
-        value: `$${fmt(feeInfo.fixed)}`,
-        color: 'neutral' as const,
-      },
+      { id: 'fee', label: 'Processing Fee', value: `$${fmt(p.fee)}`, color: 'negative' as const },
+      { id: 'feePercent', label: 'Fee Rate', value: `${(feeInfo.rate * 100).toFixed(2)}%`, color: 'neutral' as const },
+      { id: 'feeFixed', label: 'Fixed Fee', value: `$${fmt(feeInfo.fixed)}`, color: 'neutral' as const },
       {
         id: 'netAmount',
         label: 'You Receive',
-        value: `$${fmt(net)}`,
+        value: `$${fmt(p.net)}`,
         highlight: true,
-        interpretation: `Payment processors charge a percentage plus a small fixed fee per transaction — the fixed portion hits small transactions hardest, so tiny sales lose a disproportionate share to fees. Comparing processors on rate alone misses this; check the fixed fee too if you sell a lot of low-ticket items.`,
+        ...(reverse
+          ? {}
+          : {
+              interpretation: `Payment processors charge a percentage plus a small fixed fee per transaction — the fixed portion hits small transactions hardest, so tiny sales lose a disproportionate share to fees (here ${p.effectivePct.toFixed(2)}% of the sale). Comparing processors on rate alone misses this; check the fixed fee too if you sell a lot of low-ticket items.`,
+            }),
         color: 'positive' as const,
       },
-      {
-        id: 'platform',
-        label: 'Platform',
-        value: feeInfo.label,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'reverseAmount',
-        label: 'Amount to Invoice',
-        value: '—',
-        color: 'neutral' as const,
-      },
-      {
-        id: 'totalPlatformFee',
-        label: 'Total Fee Charged',
-        value: `$${fmt(fee)}`,
-        color: 'negative' as const,
-      },
+      { id: 'platform', label: 'Platform', value: feeInfo.label, color: 'neutral' as const },
+      reverse
+        ? { id: 'reverseAmount', label: 'Amount to Invoice', value: `$${fmt(p.charged)}`, highlight: true, color: 'positive' as const }
+        : { id: 'reverseAmount', label: 'Amount to Invoice', value: '—', color: 'neutral' as const },
+      { id: 'totalPlatformFee', label: 'Total Fee Charged', value: `$${fmt(p.fee)}`, color: 'negative' as const },
     ];
   },
 
@@ -186,23 +97,24 @@ const paymentFeesConfig: CalculatorConfig = {
     formulaDescription:
       'Payment processors charge a percentage of the transaction amount plus a fixed per-transaction fee. The net amount is what you actually receive after fees.',
     variables: [
-      { symbol: 'Rate', name: 'Percentage Fee', description: 'The percentage of the transaction amount charged by the processor, typically 2.5–4.5%.' },
-      { symbol: 'Fixed', name: 'Fixed Per-Transaction Fee', description: 'A flat fee charged on each transaction, typically $0.10–$0.49.' },
+      { symbol: 'Rate', name: 'Percentage Fee', description: 'The percentage of the transaction amount charged by the processor (about 2.6% to 5% for the plans in this calculator).' },
+      { symbol: 'Fixed', name: 'Fixed Per-Transaction Fee', description: 'A flat fee charged on each transaction ($0.15 to $0.49 for the plans in this calculator).' },
       { symbol: 'Net', name: 'Net Amount (Payout)', description: 'The amount you actually receive after all fees are deducted.' },
     ],
     quickReference: [
-      { label: 'Stripe Domestic', value: '2.9% + $0.30' },
-      { label: 'Stripe International', value: '3.9% + $0.30 (+1% cross-border)' },
-      { label: 'PayPal Domestic', value: '2.99% + $0.49' },
-      { label: 'PayPal International', value: '4.49% + $0.49' },
-      { label: 'Square', value: '2.6% + $0.10 (lowest per-transaction fixed fee)' },
+      { label: 'Stripe domestic card', value: '2.9% + $0.30' },
+      { label: 'Stripe international card', value: '4.4% + $0.30 (2.9% + 1.5%); +1% more if currency conversion is needed' },
+      { label: 'PayPal Checkout (domestic)', value: '3.49% + $0.49' },
+      { label: 'PayPal standard card payment', value: '2.99% + $0.49' },
+      { label: 'PayPal international', value: '+1.50% on top of the domestic rate' },
+      { label: 'Square in-person (Free plan)', value: '2.6% + $0.15 (online is 3.3% + $0.30)' },
       { label: '$10 transaction, Stripe', value: 'Fee = $0.59 (effective rate 5.9%)' },
       { label: '$100 transaction, Stripe', value: 'Fee = $3.20 (effective rate 3.20%)' },
       { label: '$1,000 transaction, Stripe', value: 'Fee = $29.30 (effective rate 2.93%)' },
     ],
     howToUse: [
       'Enter the invoice or sale amount you plan to charge.',
-      'Select your payment platform (Stripe, PayPal, or Square).',
+      'Select your payment platform and fee tier (Stripe, PayPal, or Square in-person).',
       'Toggle "Calculate what to invoice" to see how much to charge to receive a specific net amount.',
       'View the fee breakdown and your net payout.',
     ],
@@ -216,7 +128,7 @@ const paymentFeesConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'Why do international transactions cost more?',
-        answer: 'International transactions incur higher interchange fees because of currency conversion, cross-border settlement, and increased fraud risk. Stripe charges 3.9% + $0.30 for international cards vs. 2.9% + $0.30 for domestic ones.',
+        answer: 'Cards issued outside your country usually carry higher network and issuer costs, and processors pass that on. Stripe adds 1.5% for international cards (4.4% + $0.30 versus 2.9% + $0.30 domestic) and another 1% if currency conversion is needed; PayPal adds 1.50% to its domestic rate for international commercial transactions.',
       },
       {
         question: 'How should I account for fees when pricing?',
@@ -224,57 +136,57 @@ const paymentFeesConfig: CalculatorConfig = {
       },
       {
         question: 'Which platform has the lowest fees?',
-        answer: 'For domestic transactions, Square has the lowest rate at 2.6% + $0.10. Stripe Domestic (2.9% + $0.30) and PayPal Domestic (2.99% + $0.49) are comparable. For international, Stripe\'s 3.9% + $0.30 is generally lower than PayPal\'s 4.49% + $0.49. However, consider other factors like features, integrations, and customer experience.',
+        answer: 'It depends on the ticket size and channel. In-person, Square (2.6% + $0.15) is cheapest of the three for most sales. Online, Stripe (2.9% + $0.30) is cheaper than PayPal Checkout (3.49% + $0.49) at every amount, and also cheaper than PayPal\'s standard card rate (2.99% + $0.49), because both its percentage and fixed fee are lower. Square\'s online rate (3.3% + $0.30 on the Free plan) is higher than Stripe\'s. Features, payouts, integrations and dispute handling matter too.',
       },
       {
         question: 'What is the difference between interchange, assessment, and processor markup?',
-        answer: 'Interchange fees are paid to the card-issuing bank (typically 1.5–2.5% of the transaction) and are set by card networks. Assessment fees are paid to the card network (Visa, Mastercard, Amex) and are typically 0.13–0.15%. The processor markup is what Stripe, PayPal, or Square charges for their service — this is where they make their profit. Flat-rate processors like the ones in this calculator bundle all three into a single rate, making them simpler but sometimes more expensive than interchange-plus pricing for high-volume merchants processing over $50K/month.',
+        answer: 'Interchange fees are paid to the card-issuing bank (typically around 1.5–2.5% of the transaction) and are set by card networks. Assessment fees are paid to the card network (Visa, Mastercard, Amex) and are typically 0.13–0.15%. The processor markup is what Stripe, PayPal, or Square charges for their service — this is where they make their profit. Flat-rate processors like the ones in this calculator bundle all three into a single rate, making them simpler but often more expensive than interchange-plus pricing for high-volume merchants.',
       },
       {
         question: 'Should I pass processing fees to customers?',
-        answer: 'In most US states, you can legally add a surcharge for credit card payments (typically up to 4%), but you must: display clear signage at the point of sale, list the surcharge as a separate line item on the receipt, and NOT apply surcharges to debit cards even when processed as credit. Some states (Colorado, Connecticut, Massachusetts) restrict surcharging. Passing fees to customers saves you money but may create friction — many businesses instead build the processing cost into their pricing, treating it as a cost of doing business. For B2B invoices over $500, consider ACH/bank transfer payments which cost $0.50–1.50 flat fee instead of a percentage.',
+        answer: 'Rules vary by state and by card network: some states restrict or prohibit credit-card surcharges, card networks cap them and require clear disclosure, and surcharging debit cards is generally not allowed. Check the current rules for your location and your processor\'s terms before adding one. Many businesses instead build the processing cost into their prices.',
       },
       {
         question: 'How do chargeback fees factor into my costs?',
-        answer: 'Beyond the processing fee, chargebacks (when a customer disputes a charge) come with additional fees of $15–25 per incident regardless of who wins the dispute. Even if you win, you typically still pay the fee (Stripe is an exception — they refund the $15 dispute fee if you win). A single chargeback can wipe out the profit from many small transactions. Chargeback rates above 0.75–1% can result in your merchant account being terminated or placed in a high-risk category with even higher processing rates. This calculator does not include chargeback costs — factor them separately based on your business\'s dispute history.',
+        answer: 'Beyond the processing fee, a dispute (chargeback) usually adds a separate per-dispute fee from your processor, and card-network programs can penalise merchants with high dispute rates. A single chargeback can wipe out the profit from many small sales. This calculator does not include chargeback costs; check your processor\'s dispute fee and factor in your own dispute history.',
       },
     ],
     workedExamples: [
       {
-        scenario: 'Sarah runs a small online boutique and processes 200 orders per month at an average order value of $65. She currently uses Stripe and is considering switching to Square to save on fees.',
+        scenario: 'Sarah runs a small online boutique and processes 200 orders per month at an average order value of $65 through Stripe. She is comparing PayPal Checkout for the same orders.',
         inputs: { invoiceAmount: '65', platform: 'stripe-domestic', reverseMode: 'no' },
-        result: 'Stripe fee: $2.19 per order (65 × 0.029 + 0.30). Net: $62.82. Monthly fees across 200 orders: $437. Square would charge $1.79 per order (65 × 0.026 + 0.10), saving $0.40/order or $79/month — $948/year.',
-        insight: 'The $80/month savings from switching to Square is real but modest for 200 orders. Sarah should also consider that: Square integrates less deeply with some e-commerce platforms than Stripe; Stripe offers more advanced fraud protection tools (Radar) that might reduce chargeback costs; and Square\'s flat 2.6% rate doesn\'t distinguish between card types, while Stripe\'s rate is the same. For Sarah\'s $13,000/month volume, the $948/year savings may not justify switching if she\'s happy with Stripe\'s features. The tipping point where these fee differences become meaningful is around $5,000+/month in volume.',
+        result: 'Stripe fee: $2.19 per order (65 × 0.029 + 0.30 = 2.185, rounded to the cent). Net: $62.81. Monthly fees across 200 orders: $438. PayPal Checkout would charge $2.76 per order (65 × 0.0349 + 0.49 = 2.7585), about $0.57 more per order or $114 more per month.',
+        insight: 'On a $65 order Stripe is both lower in rate and lower in fixed fee than PayPal Checkout, so the gap is $0.57 per order. Over 200 orders that is about $114 a month, or $1,368 a year. Many shops still offer PayPal because some customers prefer it; the cost is worth knowing when deciding whether to make it the default.',
       },
       {
         scenario: 'A freelance designer needs to receive exactly $5,000 net from an international client. The client will pay via PayPal. How much should the designer invoice?',
         inputs: { invoiceAmount: '5000', platform: 'paypal-international', reverseMode: 'yes' },
-        result: 'To receive $5,000 net: Invoice amount needs to be ~$5,235.57. Fee = $235.57. The client pays $5,235.57, the designer nets approximately $5,000.',
-        insight: 'Using reverse mode, the designer discovers they need to add $235.57 to the invoice just to cover PayPal fees. Alternative approaches: wire transfer ($15–30 flat fee, much cheaper for $5K), Wise/TransferWise (~0.5% + small fixed fee, ~$25), or requesting the client cover processing fees. For international freelancing, processing fees are a significant cost — the designer should factor these into their rate or standard terms. If the client pays by credit card, the 4.49% fee is unavoidable; the alternative is requesting a bank transfer where available, saving $200+ on this single invoice.',
+        result: 'To receive $5,000 net: invoice $5,263.12. Fee = $263.12 (4.99% + $0.49). The client pays $5,263.12, the designer nets $5,000.00.',
+        insight: 'Using reverse mode, the designer discovers they need to add $263.12 to the invoice just to cover PayPal fees. Alternatives include a bank or wire transfer (often a flat fee), or asking the client to cover processing costs. For large international invoices the percentage fee is a significant cost, so factor it into your rate or payment terms.',
       },
       {
         scenario: 'A SaaS company processes $150,000/month across 3,000 transactions (average $50/transaction) via Stripe. They want to understand their effective processing rate and whether interchange-plus pricing would save money.',
         inputs: { invoiceAmount: '50', platform: 'stripe-domestic', reverseMode: 'no' },
         result: 'Per-transaction fee: $1.75 (50 × 0.029 + 0.30). Effective rate: 3.5%. Total monthly fees: $5,250. Annual: $63,000.',
-        insight: 'At $150K/month, the effective rate of 3.5% (inflated by the $0.30 fixed fee on small transactions) means the SaaS company is paying $63K/year in processing fees. At this volume, they should negotiate interchange-plus pricing with a processor. A typical interchange-plus quote for this volume might be: interchange (pass-through, ~1.8%) + 0.3% assessment + 0.2% processor markup = 2.3% + $0.10 per transaction. Monthly cost at interchange-plus: ~$3,750 vs. $5,250 flat rate — saving ~$18,000/year. The break-even for interchange-plus is typically around $10K–20K/month in volume, making it a clear win here. The SaaS company should also explore ACH/debit options for annual subscription payments to reduce fees further.',
+        insight: 'At $150K/month, the effective rate of 3.5% (inflated by the $0.30 fixed fee on small transactions) means the SaaS company is paying $63K/year in processing fees. At this volume it is worth asking processors for custom or interchange-plus pricing. Purely as an illustration (not a quote): if such a plan cost 2.3% + $0.10 per transaction, monthly cost would be 150,000 × 0.023 + 3,000 × 0.10 = $3,750 versus $5,250 on flat-rate, saving $18,000 a year. Real quotes depend on card mix, risk and negotiation.',
       },
     ],
     proTips: [
-      'Always use the reverse mode when invoicing clients — enter the amount you NEED to receive, and the calculator tells you what to charge. This ensures processing fees come out of the client\'s payment rather than your margin. For B2B invoices over $500, consider ACH or wire transfer as an alternative — flat fees of $0.50–1.50 for ACH are dramatically cheaper than 2.9% on large amounts.',
-      'The $0.30 fixed fee has a disproportionate impact on small transactions. A $5 coffee purchase processed via Stripe has an effective rate of 8.9% (fee of $0.45 on $5). If you sell low-priced items, consider: bundling products to increase average order value, setting a minimum transaction amount, using a micropayments rate if your processor offers one, or switching to a processor with a lower fixed fee (Square at $0.10 is better for small transactions).',
-      'For subscription/recurring billing, Stripe charges the same rate as one-time payments. However, if you have high-value annual subscriptions ($500+), encourage annual billing with a small discount (e.g., 5% off) — you pay one transaction fee instead of 12 monthly fees, saving significantly on processing costs while improving cash flow predictability. For a $100/month subscription: 12 × ($100 × 0.029 + $0.30) = $38.40/year in fees vs. one annual charge: ($1,200 × 0.029 + $0.30) = $35.10 — saving $3.30/year per customer plus improving retention.',
-      'International sellers lose 1% extra on cross-border transactions with Stripe. If you sell internationally, consider: setting up a local entity or Stripe account in your largest foreign market (e.g., Stripe UK for European customers), using a merchant of record service that handles local payment methods, or accepting local payment methods (iDEAL in Netherlands, SEPA in EU) that have lower fees than international card processing.',
-      'Fraud and chargeback costs can dwarf processing fees. For every $100 in processing fees you pay, a single $50 chargeback (with $15 dispute fee) can cost an additional $65+. Use Stripe Radar (included) or similar fraud tools, require CVV for all transactions, and consider 3D Secure for high-risk orders. The calculator shows processing fees — always add 0.5–1% to your mental model for fraud and dispute costs.',
+      'Use the reverse mode when invoicing clients: enter the amount you NEED to receive and the calculator tells you what to charge, so processing fees come out of the invoice rather than your margin. For large B2B invoices, ask your processor about lower-cost bank-transfer options.',
+      'The fixed fee has a disproportionate impact on small transactions. A $5 sale on Stripe costs $0.45 in fees (an effective rate of 9%). If you sell low-priced items, consider bundling to raise the average order value, setting a minimum order, or choosing a plan with a lower fixed fee.',
+      'Compare processors on your own mix of ticket size, card origin and channel, not just the headline percentage: a lower rate with a higher fixed fee can lose on small orders, and international cards and currency conversion add percentage points.',
+      'For subscriptions, billing annually instead of monthly means one transaction fee instead of twelve. For a $100/month plan, 12 × ($100 × 0.029 + $0.30) = $38.40 a year in Stripe fees versus ($1,200 × 0.029 + $0.30) = $35.10 for one annual charge. Check whether your processor adds separate billing or recurring-payment fees on top.',
+      'Fraud and chargeback costs can dwarf processing fees; use your processor\'s fraud tools and keep a record of fulfilment to contest disputes. This calculator shows processing fees only.',
     ],
     limitations: [
-      'This calculator compares flat-rate pricing from major processors (Stripe, PayPal, Square) using their publicly listed standard rates as of 2026. It does not account for negotiated/custom rates or interchange-plus pricing.',
-      'It does not include additional fees such as monthly gateway fees ($10–25/month), PCI compliance fees, chargeback/dispute fees ($15–25 per incident), or ACH/bank transfer alternatives.',
-      'Currency conversion fees (typically 1–2% above the mid-market rate) and tax handling (sales tax, VAT, GST) are not modeled.',
-      'Rates were verified at time of development but processors change pricing periodically — always check the processor\'s current pricing page before making business decisions.',
+      'This calculator uses publicly listed US standard rates checked in October 2026 (Stripe and PayPal from their pricing pages; Square in-person from 2026 fee guides because Square\'s page could not be read automatically). It does not account for negotiated/custom rates or interchange-plus pricing.',
+      'It does not include additional fees such as monthly gateway or platform fees, PCI compliance fees, chargeback/dispute fees, or ACH/bank transfer alternatives.',
+      'Currency conversion fees (Stripe adds 1%; PayPal applies a 3-4% spread) and tax handling (sales tax, VAT, GST) are not modeled.',
+      'Processors change pricing periodically, so always check the current pricing page before making business decisions. Processors round each fee to the cent; this calculator does the same.',
     ],
     citations: [
       { source: 'Stripe', url: 'https://stripe.com/pricing' },
-      { source: 'PayPal', url: 'https://www.paypal.com/us/webapps/mpp/merchant-fees' },
+      { source: 'PayPal', url: 'https://www.paypal.com/us/business/paypal-business-fees' },
       { source: 'Square', url: 'https://squareup.com/us/en/pricing' },
     ],
   },

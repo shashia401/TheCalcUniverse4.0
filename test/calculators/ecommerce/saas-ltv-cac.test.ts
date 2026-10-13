@@ -44,15 +44,15 @@ const noGarbage = (r: unknown) => expect(JSON.stringify(r)).not.toMatch(/NaN|Inf
 
 describe('edge inputs: zero marketing spend', () => {
   const base = { arpu: '100', monthlyChurnRate: '5', totalMarketingSpend: '50000', newCustomersAcquired: '200', grossMargin: '80' };
-  it('zero spend shows N/A for ratio and magic number', () => {
+  it('zero spend shows N/A for ratio and new-MRR-per-dollar', () => {
     const r = config.calculate({ ...base, totalMarketingSpend: '0' });
     noGarbage(r);
-    expect(r.find((x) => x.id === 'magicNumber')?.value).toBe('N/A (no spend)');
+    expect(r.find((x) => x.id === 'newMrrPerSpend')?.value).toBe('N/A (no spend)');
     expect(r.find((x) => x.id === 'ltvCacRatio')?.value).toBe('N/A (no spend)');
   });
   it('normal input unchanged', () => {
     const r = config.calculate(base);
     expect(r.find((x) => x.id === 'ltvCacRatio')?.value).toBe('6.40:1');
-    expect(r.find((x) => x.id === 'magicNumber')?.value).toBe('0.40x');
+    expect(r.find((x) => x.id === 'newMrrPerSpend')?.value).toBe('$0.40');
   });
 });

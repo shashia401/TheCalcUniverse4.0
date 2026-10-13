@@ -2,42 +2,9 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import AITokenPricingPanel from './AITokenPricingPanel';
 
-// Prices per 1M tokens. Source: official provider pricing as of May 2026
-interface ModelInfo {
-  inputPrice: number;
-  outputPrice: number;
-  cachedInput?: number;
-  label: string;
-  provider: string;
-}
+import { MODELS, PRICES_AS_OF, estimateTokens, requestCost } from './aiPricingData';
 
-const MODELS: Record<string, ModelInfo> = {
-  // OpenAI — GPT-5 series
-  'gpt-5': { inputPrice: 15.00, outputPrice: 60.00, cachedInput: 2.50, label: 'GPT-5', provider: 'OpenAI' },
-  'gpt-5-mini': { inputPrice: 2.00, outputPrice: 8.00, cachedInput: 0.30, label: 'GPT-5-mini', provider: 'OpenAI' },
-  'gpt-4o': { inputPrice: 2.50, outputPrice: 10.00, cachedInput: 0.625, label: 'GPT-4o', provider: 'OpenAI' },
-  'gpt-4o-mini': { inputPrice: 0.15, outputPrice: 0.60, cachedInput: 0.0375, label: 'GPT-4o-mini', provider: 'OpenAI' },
-  // Anthropic — Claude 4.x series
-  'claude-opus-4': { inputPrice: 15.00, outputPrice: 75.00, cachedInput: 1.50, label: 'Claude Opus 4.7', provider: 'Anthropic' },
-  'claude-sonnet-4': { inputPrice: 3.00, outputPrice: 15.00, cachedInput: 0.30, label: 'Claude Sonnet 4.6', provider: 'Anthropic' },
-  'claude-haiku-4': { inputPrice: 0.25, outputPrice: 1.25, cachedInput: 0.025, label: 'Claude Haiku 4.5', provider: 'Anthropic' },
-  // Google — Gemini 3.x series
-  'gemini-3-pro': { inputPrice: 1.50, outputPrice: 6.00, cachedInput: 0.1875, label: 'Gemini 3.1 Pro', provider: 'Google' },
-  'gemini-3-flash': { inputPrice: 0.15, outputPrice: 0.60, cachedInput: 0.01875, label: 'Gemini 3.1 Flash', provider: 'Google' },
-  // DeepSeek
-  'deepseek-v3': { inputPrice: 0.50, outputPrice: 2.00, label: 'DeepSeek V3', provider: 'DeepSeek' },
-  // xAI — Grok
-  'grok-3': { inputPrice: 3.00, outputPrice: 15.00, label: 'Grok 3', provider: 'xAI' },
-  // Meta — Llama
-  'llama-4': { inputPrice: 0.50, outputPrice: 1.50, label: 'Llama 4', provider: 'Meta' },
-};
-
-// Rough token estimation: ~4 chars per token for English
-function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
-}
-
-const LAST_UPDATED = '2026-05-02';
+const LAST_UPDATED = PRICES_AS_OF;
 
 const aiTokenPricingConfig: CalculatorConfig = {
   inputs: [
@@ -46,21 +13,8 @@ const aiTokenPricingConfig: CalculatorConfig = {
       label: 'AI Model',
       type: 'select',
       required: true,
-      helpText: 'Current pricing as of May 2026 — 12 models across 6 providers',
-      options: [
-        { label: 'GPT-5 (OpenAI)', value: 'gpt-5' },
-        { label: 'GPT-5-mini (OpenAI)', value: 'gpt-5-mini' },
-        { label: 'GPT-4o (OpenAI)', value: 'gpt-4o' },
-        { label: 'GPT-4o-mini (OpenAI)', value: 'gpt-4o-mini' },
-        { label: 'Claude Opus 4.7 (Anthropic)', value: 'claude-opus-4' },
-        { label: 'Claude Sonnet 4.6 (Anthropic)', value: 'claude-sonnet-4' },
-        { label: 'Claude Haiku 4.5 (Anthropic)', value: 'claude-haiku-4' },
-        { label: 'Gemini 3.1 Pro (Google)', value: 'gemini-3-pro' },
-        { label: 'Gemini 3.1 Flash (Google)', value: 'gemini-3-flash' },
-        { label: 'DeepSeek V3', value: 'deepseek-v3' },
-        { label: 'Grok 3 (xAI)', value: 'grok-3' },
-        { label: 'Llama 4 (Meta)', value: 'llama-4' },
-      ],
+      helpText: `List prices snapshot dated ${LAST_UPDATED}, not live data. Anthropic and Google rows were read from the providers' pricing pages; models marked "unverified" are indicative only.`,
+      options: Object.entries(MODELS).map(([value, m]) => ({ label: `${m.label} (${m.provider})${m.verified ? '' : ' — unverified'}`, value })),
     },
     {
       id: 'promptText',
@@ -76,6 +30,7 @@ const aiTokenPricingConfig: CalculatorConfig = {
       inputMode: 'numeric',
       placeholder: '500',
       min: 0,
+      max: 100000000,
       step: 1,
       required: true,
       helpText: 'Input tokens per request (system prompt + message). Auto-filled from text above.',
@@ -87,6 +42,7 @@ const aiTokenPricingConfig: CalculatorConfig = {
       inputMode: 'numeric',
       placeholder: '150',
       min: 0,
+      max: 100000000,
       step: 1,
       required: true,
       helpText: 'Output tokens per request (the model response)',
@@ -95,11 +51,24 @@ const aiTokenPricingConfig: CalculatorConfig = {
       id: 'useCachePricing',
       label: 'Use Prompt Caching',
       type: 'select',
-      helpText: 'Prompt caching reduces input costs by ~75-90% for repeated context blocks',
+      helpText: 'Prompt caching bills repeated prompt prefixes at a much lower cached-read rate (Anthropic and Google: 10% of the input price). Cache writes may cost extra and are not modelled.',
       options: [
         { label: 'No — standard pricing', value: 'no' },
         { label: 'Yes — use cached input pricing', value: 'yes' },
       ],
+    },
+    {
+      id: 'cachedShare',
+      label: 'Share of Prompt Read from Cache (optional)',
+      type: 'number',
+      inputMode: 'decimal',
+      placeholder: '100',
+      unit: '%',
+      min: 0,
+      max: 100,
+      step: 1,
+      helpText: 'Only used when caching is on. Blank = 100% of prompt tokens at the cached rate; set e.g. 80 if 80% of the prompt is a repeated prefix.',
+      showWhen: (v) => v.useCachePricing === 'yes',
     },
     {
       id: 'dailyActiveUsers',
@@ -108,6 +77,7 @@ const aiTokenPricingConfig: CalculatorConfig = {
       inputMode: 'numeric',
       placeholder: '10000',
       min: 0,
+      max: 1000000000,
       step: 1,
       helpText: 'Number of unique users making requests each day',
     },
@@ -118,6 +88,7 @@ const aiTokenPricingConfig: CalculatorConfig = {
       inputMode: 'numeric',
       placeholder: '5',
       min: 0,
+      max: 1000000,
       step: 1,
       helpText: 'Average number of requests each user makes per day',
     },
@@ -136,12 +107,11 @@ const aiTokenPricingConfig: CalculatorConfig = {
     if (promptTokens <= 0 || completionTokens <= 0) return [];
 
     const useCache = values.useCachePricing === 'yes';
-    const effectiveInputPrice = useCache && modelInfo.cachedInput ? modelInfo.cachedInput : modelInfo.inputPrice;
-
-    const inputCost = (promptTokens / 1_000_000) * effectiveInputPrice;
-    const outputCost = (completionTokens / 1_000_000) * modelInfo.outputPrice;
-    const costPerRequest = inputCost + outputCost;
-    const totalMonthlyTokens = (promptTokens + completionTokens) * 30;
+    const shareRaw = values.cachedShare !== undefined && values.cachedShare !== '' ? parseFloat(values.cachedShare) : 100;
+    if (!Number.isFinite(shareRaw) || shareRaw < 0 || shareRaw > 100) return [];
+    const cost = requestCost(modelInfo, promptTokens, completionTokens, useCache, shareRaw / 100);
+    const { inputCost, outputCost, effectiveInputPrice } = cost;
+    const costPerRequest = cost.total;
 
     const dau = parseFloat(values.dailyActiveUsers);
     const rpu = parseFloat(values.requestsPerUser);
@@ -150,12 +120,14 @@ const aiTokenPricingConfig: CalculatorConfig = {
     let annualCost = 0;
     let costPerUser = 0;
     let requestsPerDay = 0;
+    let totalMonthlyTokens = 0;
 
-    if (!isNaN(dau) && !isNaN(rpu) && dau > 0 && rpu > 0) {
+    if (Number.isFinite(dau) && Number.isFinite(rpu) && dau > 0 && rpu > 0) {
       requestsPerDay = dau * rpu;
-      monthlyCost = costPerRequest * requestsPerDay * 30;
-      annualCost = monthlyCost * 12;
+      monthlyCost = costPerRequest * requestsPerDay * 30; // 30-day month
+      annualCost = costPerRequest * requestsPerDay * 365;
       costPerUser = monthlyCost / dau;
+      totalMonthlyTokens = (promptTokens + completionTokens) * requestsPerDay * 30;
     }
 
     const fmtDollar = (n: number) => {
@@ -166,34 +138,23 @@ const aiTokenPricingConfig: CalculatorConfig = {
       return `$${n.toFixed(8)}`;
     };
 
-    // Compute all-model comparison for the panel
-    const modelComparison = Object.entries(MODELS).map(([id, m]) => ({
-      id,
-      label: m.label,
-      provider: m.provider,
-      inputPrice: m.inputPrice,
-      outputPrice: m.outputPrice,
-      cachedInput: m.cachedInput,
-      costPerRequest: (promptTokens / 1_000_000) * m.inputPrice + (completionTokens / 1_000_000) * m.outputPrice,
-    })).sort((a, b) => a.costPerRequest - b.costPerRequest);
-
     return [
       { id: 'modelName', label: 'Model', value: modelInfo.label },
       { id: 'provider', label: 'Provider', value: modelInfo.provider },
-      { id: 'lastUpdated', label: 'Prices Last Updated', value: LAST_UPDATED },
-      { id: 'inputPrice', label: useCache ? 'Cached Input Price (per 1M tokens)' : 'Input Price (per 1M tokens)', value: `$${effectiveInputPrice.toFixed(2)}`, color: 'neutral' },
+      { id: 'lastUpdated', label: 'Prices Snapshot Date', value: LAST_UPDATED },
+      { id: 'priceStatus', label: 'Price Source', value: modelInfo.verified ? "Read from the provider's pricing page on the snapshot date" : 'Unverified / indicative — confirm on the provider site', color: modelInfo.verified ? 'neutral' : 'negative' },
+      { id: 'inputPrice', label: useCache && modelInfo.cachedInput !== undefined ? 'Effective Input Price with Cache (per 1M tokens)' : 'Input Price (per 1M tokens)', value: `$${effectiveInputPrice >= 0.1 ? effectiveInputPrice.toFixed(2) : effectiveInputPrice.toFixed(4)}`, color: 'neutral' },
       { id: 'outputPrice', label: 'Output Price (per 1M tokens)', value: `$${modelInfo.outputPrice.toFixed(2)}`, color: 'neutral' },
       { id: 'promptTokens', label: 'Prompt Tokens', value: promptTokens.toLocaleString(), color: 'neutral' },
       { id: 'completionTokens', label: 'Completion Tokens', value: completionTokens.toLocaleString(), color: 'neutral' },
       { id: 'inputCost', label: 'Input Cost per Request', value: fmtDollar(inputCost), color: 'neutral' },
       { id: 'outputCost', label: 'Output Cost per Request', value: fmtDollar(outputCost), color: 'neutral' },
       { id: 'costPerRequest', label: 'Cost per Request', value: fmtDollar(costPerRequest), highlight: true, color: 'positive' },
-      { id: 'totalMonthlyTokens', label: 'Total Monthly Tokens', value: totalMonthlyTokens.toLocaleString(), color: 'neutral' },
+      { id: 'totalMonthlyTokens', label: 'Total Monthly Tokens (30 days, needs users + requests)', value: totalMonthlyTokens.toLocaleString(), color: 'neutral' },
       { id: 'monthlyCost', label: 'Estimated Monthly Cost', value: fmtDollar(monthlyCost), highlight: true, color: 'positive' },
-      { id: 'annualCost', label: 'Estimated Annual Cost', value: fmtDollar(annualCost), color: 'neutral' },
+      { id: 'annualCost', label: 'Estimated Annual Cost (365 days)', value: fmtDollar(annualCost), color: 'neutral' },
       { id: 'costPerUser', label: 'Cost per User per Month', value: fmtDollar(costPerUser), color: 'neutral' },
       { id: 'requestsPerDay', label: 'Requests per Day', value: requestsPerDay.toLocaleString(), color: 'neutral' },
-      { id: '_allModels', label: 'All Model Comparisons', value: JSON.stringify(modelComparison) },
     ];
   },
   extraPanel: (values, results) => {
@@ -203,96 +164,97 @@ const aiTokenPricingConfig: CalculatorConfig = {
   educational: {
     formula: 'Cost = (PromptTokens / 1M × InputPrice) + (CompletionTokens / 1M × OutputPrice)',
     formulaDescription:
-      'AI model pricing is based on token usage, split between input (prompt) tokens and output (completion) tokens. Output tokens typically cost 3-6x more than input tokens because generating tokens requires sequential compute. Prompt caching can reduce input costs by up to 90% for repeated context blocks.',
+      'LLM APIs bill per token, with separate rates per million input (prompt) and output (completion) tokens. Output tokens usually cost several times more than input tokens (about 5x for the Anthropic and Google models here). Cached prompt prefixes are billed at a reduced read rate: 10% of the input price for the Anthropic and Google models in this calculator. All prices are a dated snapshot, not live.',
     variables: [
-      { symbol: 'Prompt Tokens', name: 'Input Tokens', description: 'Tokens in the user prompt / system message. Includes system instructions, conversation history, and the user\'s current query.' },
-      { symbol: 'Completion Tokens', name: 'Output Tokens', description: 'Tokens generated by the model in its response. Depends on task complexity and model\'s response style.' },
-      { symbol: 'Input Price', name: 'Price per 1M Input Tokens', description: 'Cost per million tokens for the prompt portion. Ranges from $0.075 (Gemini Flash) to $15.00 (GPT-5, Opus).' },
-      { symbol: 'Output Price', name: 'Price per 1M Output Tokens', description: 'Cost per million tokens for the generated response. Usually 3-6x input price.' },
-      { symbol: 'Cached Input', name: 'Cached Input Price', description: 'Discounted rate for repeated prompt context blocks. Available on OpenAI, Anthropic, and Google. Typically 10-25% of standard input price.' },
+      { symbol: 'Prompt Tokens', name: 'Input Tokens', description: 'Tokens sent to the model: system instructions, conversation history and the current query.' },
+      { symbol: 'Completion Tokens', name: 'Output Tokens', description: 'Tokens the model generates. Reasoning/thinking tokens are billed as output on most providers even though they may not be shown.' },
+      { symbol: 'Input Price', name: 'Price per 1M Input Tokens', description: 'List price per million prompt tokens on the snapshot date. Varies by model and sometimes by prompt length.' },
+      { symbol: 'Output Price', name: 'Price per 1M Output Tokens', description: 'List price per million generated tokens.' },
+      { symbol: 'Cached Input', name: 'Cached Input Price', description: 'Discounted rate for prompt tokens read from a prompt cache. Anthropic and Google bill reads at 10% of the input price; cache writes or storage can cost extra and are not modelled.' },
     ],
     quickReference: [
-      { label: 'GPT-5 (OpenAI)', value: '$15.00 input / $60.00 output per 1M tokens — cached: $2.50. Top-tier reasoning.' },
-      { label: 'GPT-4o-mini (OpenAI)', value: '$0.15 input / $0.60 output per 1M tokens — cached: $0.0375. Budget workhorse.' },
-      { label: 'Claude Opus 4.7 (Anthropic)', value: '$15.00 input / $75.00 output per 1M tokens — cached: $1.50. Premium reasoning.' },
-      { label: 'Claude Haiku 4.5 (Anthropic)', value: '$0.25 input / $1.25 output per 1M tokens — cached: $0.025. Fast & cheap.' },
-      { label: 'Gemini 3.1 Flash (Google)', value: '$0.15 input / $0.60 output per 1M tokens — cached: $0.01875. Lowest cost.' },
-      { label: 'DeepSeek V3', value: '$0.50 input / $2.00 output per 1M tokens. Strong open competition.' },
-      { label: 'Prompt Caching Savings', value: '75-90% off input costs. Reuse system prompts, conversation history, few-shot examples.' },
+      { label: 'Claude Opus 4.7', value: '$5 input / $25 output per 1M tokens, cache hit $0.50 (Anthropic pricing page, snapshot 2026-10-12)' },
+      { label: 'Claude Sonnet 4.6', value: '$3 / $15, cache hit $0.30 (Anthropic)' },
+      { label: 'Claude Haiku 4.5', value: '$1 / $5, cache hit $0.10 (Anthropic)' },
+      { label: 'Gemini 3.1 Pro (preview, prompts up to 200k)', value: '$2 / $12, context cache $0.20 (Google)' },
+      { label: 'Gemini 3 Flash (preview)', value: '$0.50 / $3.00, context cache $0.05 (Google)' },
+      { label: 'OpenAI, xAI, DeepSeek, Meta rows', value: 'Unverified, indicative only — check the provider site' },
+      { label: 'Tokens ↔ words', value: 'About 4 characters or 0.75 words per token in English' },
     ],
     workedExamples: [
       {
-        scenario: 'Customer support chatbot: 10K DAU, 5 requests/user, 500 prompt + 150 output tokens each, GPT-4o',
-        inputs: { model: 'gpt-4o', promptTokensPerRequest: '500', completionTokensPerRequest: '150', useCachePricing: 'yes', dailyActiveUsers: '10000', requestsPerUser: '5' },
-        result: 'Cost per request: $0.0018125; Monthly: ~$2,719; Annual: ~$32,625 (with caching).',
-        insight: 'With prompt caching enabled (cached input at $0.625/1M), input cost = $0.0003125/req + output cost = $0.0015/req = $0.0018125/req. 50K requests/day = ~$90.63/day, ~$2,719/month, ~$32,625/year. Without caching (standard $2.50/1M input): ~$4,125/month. Caching saves ~34% here since output tokens dominate the cost. Switch to GPT-4o-mini (cached) and monthly costs drop to ~$163/month — roughly a 17x reduction for simple classification/FAQ-style support.',
+        scenario: 'Support chatbot: 10,000 daily users × 5 requests, 500 prompt + 150 completion tokens, Claude Sonnet 4.6, no caching',
+        inputs: { model: 'claude-sonnet-4', promptTokensPerRequest: '500', completionTokensPerRequest: '150', useCachePricing: 'no', dailyActiveUsers: '10000', requestsPerUser: '5' },
+        result: 'Per request: 500/1M × $3 + 150/1M × $15 = $0.0015 + $0.00225 = $0.00375. 50,000 requests/day: $187.50/day, $5,625/month (30 days), $68,437.50/year (365 days).',
+        insight: 'Output is 60% of the cost even though it is under a quarter of the tokens, because output costs 5x input. With the whole prompt served from cache ($0.30/1M) the input part falls to $0.00015 and the request to $0.0024, a monthly bill of $3,600. In practice only a repeated prefix is cached, so set the cached share to match.',
       },
       {
-        scenario: 'Code review agent: 100 DAU devs, 20 requests/dev/day, 8000 prompt (codebase context) + 2000 output tokens, Claude Opus 4.7',
-        inputs: { model: 'claude-opus-4', promptTokensPerRequest: '8000', completionTokensPerRequest: '2000', useCachePricing: 'yes', dailyActiveUsers: '100', requestsPerUser: '20' },
-        result: 'Cost per request: $0.162; Daily: $324; Monthly: ~$9,720; Annual: ~$116,640.',
-        insight: 'With caching at $1.50/1M input, cost = (8000/1M * $1.50) + (2000/1M * $75) = $0.012 + $0.15 = $0.162/request. 2000 requests/day = $324/day = ~$9,720/month, ~$116,640/year. For a 100-person team, that is ~$97/dev/month. Without caching, it would be ~$540/day. Claude Sonnet 4.6 at $3.00/$15.00 would reduce costs to ~$84/day while still providing excellent code review quality.',
+        scenario: 'Code review agent: 100 developers × 20 requests/day, 8,000 prompt + 2,000 completion tokens, Claude Opus 4.7, prompt fully cached',
+        inputs: { model: 'claude-opus-4', promptTokensPerRequest: '8000', completionTokensPerRequest: '2000', useCachePricing: 'yes', cachedShare: '100', dailyActiveUsers: '100', requestsPerUser: '20' },
+        result: 'Per request: 8,000/1M × $0.50 + 2,000/1M × $25 = $0.004 + $0.05 = $0.054. 2,000 requests/day: $108/day, $3,240/month, $39,420/year.',
+        insight: 'Uncached, the input would cost 8,000/1M × $5 = $0.04, making a request $0.09 and the month $5,400. Cached or not, the 2,000 output tokens dominate. Per developer that is $32.40 a month with caching.',
       },
       {
-        scenario: 'Simple text classification pipeline: 1M DAU free-tier users, 3 requests/user, 100 prompt + 10 output tokens, Gemini 3.1 Flash',
-        inputs: { model: 'gemini-3-flash', promptTokensPerRequest: '100', completionTokensPerRequest: '10', useCachePricing: 'yes', dailyActiveUsers: '1000000', requestsPerUser: '3' },
-        result: 'Cost per request: ~$0.0000079; Monthly: ~$709 at 3M requests/day.',
-        insight: 'With cached input at $0.01875/1M: cost = (100/1M * $0.01875) + (10/1M * $0.60) = $0.000001875 + $0.000006 = $0.000007875/req. 3M requests/day = $23.63/day = ~$709/month. At this scale, even tiny prompt optimizations matter — shaving 10 tokens off the prompt saves ~$56/month. Model choice at scale has enormous leverage: GPT-5 (standard, no cache) would cost $0.0021/req = $189,000/month for the same pipeline — a 267x difference.',
+        scenario: 'Bulk classification: 1,000,000 daily users × 3 requests, 100 prompt + 10 completion tokens, Gemini 3 Flash (preview), prompt cached',
+        inputs: { model: 'gemini-3-flash', promptTokensPerRequest: '100', completionTokensPerRequest: '10', useCachePricing: 'yes', cachedShare: '100', dailyActiveUsers: '1000000', requestsPerUser: '3' },
+        result: 'Per request: 100/1M × $0.05 + 10/1M × $3 = $0.000005 + $0.00003 = $0.000035. 3,000,000 requests/day: $105/day, $3,150/month.',
+        insight: 'The same traffic on Claude Opus 4.7 without caching costs $0.00075 per request (100/1M × $5 + 10/1M × $25), about 21x more. Model choice matters far more than shaving prompt tokens at this scale.',
       },
     ],
     proTips: [
-      'Enable prompt caching for any production workload. It reduces input costs by 75-90% and is supported by all major providers (OpenAI, Anthropic, Google). Structure your prompts to keep static content (system instructions, few-shot examples) at the beginning of the prompt — this is the portion that gets cached.',
-      'Use tiered model routing: send simple tasks (classification, keyword extraction, formatting) to budget models like GPT-4o-mini or Gemini Flash, and route complex tasks (reasoning, code generation, analysis) to premium models like GPT-5 or Claude Opus. This can cut costs 50-70% without any user-perceptible quality difference.',
-      'Track your actual token counts from API responses rather than estimating. Each provider returns prompt_tokens and completion_tokens in the API response. Use this data to build accurate cost dashboards. Our 4-char-per-token estimate is directionally useful but insufficient for production budgeting.',
-      'Be aware that thinking/reasoning tokens (Claude\'s extended thinking, OpenAI\'s o-series) are charged at output token rates but are not visible to users. A model might consume 2000 thinking tokens to generate a 200-token response. Factor this into cost estimates for reasoning-heavy tasks — actual costs can be 5-10x higher than visible output suggests.',
+      'Cache the stable front of your prompt (system instructions, tool definitions, few-shot examples) and put changing content last; only a repeated prefix can be read from cache.',
+      'Route simple tasks (classification, extraction, formatting) to a small, cheap model and reserve the large model for hard requests. Measure quality on your own data first.',
+      'Use the token counts returned in each API response for budgeting. The 4-characters-per-token estimate here is only a rough guide; code and non-English text can differ a lot, and newer tokenizers can produce noticeably more tokens for the same text.',
+      'Reasoning/thinking tokens are billed as output but may not be visible, so a short visible answer can hide a much larger billed output.',
+      'Check batch or flex tiers and volume discounts with your provider: they can change the effective price substantially but are not modelled here.',
     ],
     limitations: [
-      'This calculator uses list prices from official API pricing pages as of the last-updated date. It does NOT account for volume discounts (OpenAI and Anthropic offer tiered pricing for $5K+/month committed spend), fine-tuning API costs (which have different token rates), batch/async API pricing (typically 50% off for 24-hour turnaround), or image/audio input token pricing (which uses different multipliers).',
-      'The token counter uses a rough 4-characters-per-token estimate, which is accurate to about +/-20% for English text but diverges significantly for code, non-English languages, and structured data. For exact token counts, use each provider\'s official tokenizer: tiktoken (OpenAI), Anthropic\'s token-count API, or Google\'s countTokens endpoint.',
-      'Pricing changes frequently — always verify against the provider\'s official pricing page before making budget commitments.',
+      'Prices are a dated snapshot of list prices (see the snapshot date in the results) and change often. Only the Anthropic and Google rows were read from the providers\' pricing pages; OpenAI, xAI, DeepSeek and Meta rows are indicative and may be out of date. Always confirm before budgeting.',
+      'Not modelled: batch/flex discounts, volume or committed-use pricing, long-context surcharges (some models charge more for prompts above a size threshold), cache write and storage fees, fine-tuning, image/audio token rates, tool-use or search fees, and taxes.',
+      'The token counter uses a rough 4-characters-per-token estimate for English; use each provider\'s tokenizer or the usage field in API responses for exact counts.',
+      'Monthly cost assumes a 30-day month and annual cost 365 days, with identical usage every day.',
     ],
     howToUse: [
-      'Select your AI model from 12 options across 6 providers.',
-      'Paste your actual prompt text to auto-count tokens, or enter token counts manually.',
-      'Toggle prompt caching to see cached vs standard pricing.',
-      'Enter daily active users and requests per user to project monthly and annual costs.',
-      'Compare costs across all models to optimize your AI spend.',
-      'Prices are updated regularly — last updated date is shown in results.',
+      'Select an AI model.',
+      'Paste your prompt to estimate tokens, or enter prompt and completion token counts directly.',
+      'Turn on prompt caching and set what share of the prompt is read from cache, if you use it.',
+      'Enter daily active users and requests per user to project monthly and annual cost.',
+      'Compare the same request across all models in the table below the results.',
     ],
     explanation:
-      'AI token pricing varies dramatically across models and providers. GPT-5 and Claude Opus 4.7 are the most capable (and most expensive) at $15/$60 and $15/$75 per million tokens respectively. For high-volume production workloads, GPT-4o-mini ($0.15/$0.60) or Gemini 3.1 Flash ($0.15/$0.60) offer the best value. Prompt caching is now a standard feature across all major providers — cached input tokens cost 75-90% less than standard input. For production deployments, enabling caching and choosing the right model tier for each task are the two most impactful cost optimization strategies. A customer support chatbot handling 10K conversations/day might cost $50/day on GPT-5 but only $1.65/day on GPT-4o-mini — a 30x difference. Use the model comparison table below to find the optimal price/performance balance for your use case.',
+      'Token-priced LLM APIs charge separately for what you send and what the model writes. For example, a 500-token prompt with a 150-token answer on a model priced at $3 input and $15 output per million tokens costs 500/1,000,000 × $3 + 150/1,000,000 × $15 = $0.00375. Output tokens are the more expensive side (5x here), so response length is usually the main cost lever; prompt caching helps when the same prefix is sent repeatedly. Pricing differs widely between model tiers: a small model can cost a small fraction of a frontier model per request, so routing tasks to the right tier is the biggest saving at scale. Prices change frequently, so treat this as a planning tool and check the provider\'s page for current rates.',
     commonUses: [
-      'Estimating production AI costs by comparing per-request pricing across 12+ models from OpenAI, Anthropic, Google, and others',
-      'Choosing the most cost-effective model for each task — from budget-friendly (GPT-4o-mini, Gemini Flash) to premium (GPT-5, Claude Opus)',
-      'Budgeting monthly AI infrastructure costs with usage projections based on daily active users and requests per user',
-      'Optimizing prompt design and implementing caching strategies to reduce token consumption and lower operational costs',
+      'Estimating the cost of an LLM feature before building it',
+      'Comparing the same workload across models and providers',
+      'Budgeting monthly spend from users and requests per user',
+      'Judging how much prompt caching or a smaller model would save',
     ],
     faqs: [
       {
-        question: 'Which AI model is cheapest for production?',
-        answer: 'GPT-4o-mini ($0.15/$0.60 per million tokens) and Gemini 3.1 Flash ($0.15/$0.60) are the most cost-effective models for high-volume production workloads. DeepSeek V3 ($0.50/$2.00) and Llama 4 ($0.50/$1.50) are competitive mid-range options. GPT-5 ($15/$60) and Claude Opus 4.7 ($15/$75) are premium models for complex reasoning tasks.',
+        question: 'Why do output tokens cost more than input tokens?',
+        answer: 'Generating text is sequential: each output token needs its own pass through the model, while the prompt can be processed in parallel. Providers therefore price output higher; in this snapshot it is 4x to 6x the input price for most models.',
       },
       {
         question: 'What is prompt caching and how much does it save?',
-        answer: 'Prompt caching stores repeated context blocks (system prompts, conversation history) and charges a reduced rate when they\'re reused. OpenAI charges $0.625/1M cached tokens vs $2.50/1M standard (75% savings). Anthropic charges $0.30/1M vs $3.00/1M (90% savings). Google charges $0.01875/1M vs $0.15/1M (87.5% savings). In practice, caching can reduce total API costs by 30-60% for production workloads with shared context.',
+        answer: 'When the start of a prompt repeats across requests, the provider can reuse its processed form and bill those tokens at a reduced cache-read rate. Anthropic and Google bill cache reads at 10% of the normal input price (Sonnet 4.6: $0.30 instead of $3 per million), so the maximum saving on the cached part of the input is 90%. Only the repeated prefix qualifies, and writing to the cache or storing it can cost extra, so real savings are smaller than the headline.',
       },
       {
-        question: 'Why do output tokens cost more than input?',
-        answer: 'Output tokens require autoregressive generation — the model generates each token one at a time, with each step requiring a full forward pass through the network. Input tokens are processed in parallel during encoding, making them computationally cheaper. This typically results in output costing 3-6x more than input across all providers.',
+        question: 'How do I estimate tokens without a tokenizer?',
+        answer: 'A common rule for English is about 4 characters or 0.75 words per token, so a 500-word article is roughly 670 tokens. Code, non-English text and different tokenizers vary; for exact counts use the provider\'s token-counting tool or the usage numbers returned by the API.',
       },
       {
-        question: 'How do I estimate tokens without an exact tokenizer?',
-        answer: 'As a rough rule of thumb, one token equals approximately 4 characters for English text, or about 0.75 words. A 500-word article is roughly 667 tokens. Code and non-English languages may have different ratios. For exact counts, use each provider\'s official tokenizer — OpenAI\'s tiktoken, Anthropic\'s tokenizer API, or Google\'s token counting endpoint. Our paste-text counter uses the 4-character approximation.',
+        question: 'How current are the prices?',
+        answer: 'The results show the snapshot date. Anthropic and Google prices were read from their pricing pages on that date. OpenAI, xAI, DeepSeek and Meta rows are marked unverified because their pages could not be read automatically. LLM pricing changes often, so always check the provider before committing a budget.',
       },
       {
-        question: 'What is the best model for my use case?',
-        answer: 'For simple classification and extraction: GPT-4o-mini or Gemini Flash ($0.001-0.003 per request). For customer support chatbots: Claude Sonnet 4.6 or GPT-4o ($0.005-0.02 per request). For complex reasoning, code generation, or analysis: GPT-5 or Claude Opus 4.7 ($0.02-0.10 per request). Use the comparison table to see exactly how each model prices the same request.',
+        question: 'Which model is cheapest?',
+        answer: 'Use the comparison table: it prices your exact request on every model. Cheaper per-token models are not always cheaper overall if they need longer prompts, retries or produce lower-quality answers, so test quality on your own tasks too.',
       },
     ],
     citations: [
-      { source: 'OpenAI — API Pricing', url: 'https://openai.com/api/pricing/' },
-      { source: 'Anthropic — API Pricing', url: 'https://www.anthropic.com/pricing' },
-      { source: 'Google AI — Gemini API Pricing', url: 'https://ai.google.dev/pricing' },
+      { source: 'Anthropic — Claude API pricing', url: 'https://platform.claude.com/docs/en/about-claude/pricing' },
+      { source: 'Google AI — Gemini API pricing', url: 'https://ai.google.dev/gemini-api/docs/pricing' },
+      { source: 'OpenAI — API pricing (not machine-readable; verify manually)', url: 'https://openai.com/api/pricing/' },
     ],
   },
 };

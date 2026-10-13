@@ -1,6 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SaaSltvCACPanel from './SaaSltvCACPanel';
+import { computeSaas } from './saasMath';
 
 const saasLtvCacConfig: CalculatorConfig = {
   inputs: [
@@ -25,7 +26,7 @@ const saasLtvCacConfig: CalculatorConfig = {
       max: 100,
       step: 0.1,
       required: true,
-      helpText: 'Percentage of customers who cancel each month',
+      helpText: 'Percentage of customers who cancel each month. Customer lifetime is 1 ÷ churn, capped at 120 months.',
     },
     {
       id: 'totalMarketingSpend',
@@ -66,30 +67,19 @@ const saasLtvCacConfig: CalculatorConfig = {
     const marketingSpend = parseFloat(values.totalMarketingSpend);
     const customersAcquired = parseFloat(values.newCustomersAcquired);
     const rawMargin = values.grossMargin;
-    const grossMargin = (rawMargin !== undefined && rawMargin !== '') ? parseFloat(rawMargin) : 80;
+    const grossMargin = rawMargin !== undefined && rawMargin !== '' ? parseFloat(rawMargin) : 80;
 
     if (
-      isNaN(arpu) ||
-      isNaN(churnRate) ||
-      isNaN(marketingSpend) ||
-      isNaN(customersAcquired) ||
+      ![arpu, churnRate, marketingSpend, customersAcquired, grossMargin].every(Number.isFinite) ||
       arpu <= 0 ||
-      customersAcquired <= 0
+      customersAcquired <= 0 ||
+      marketingSpend < 0 ||
+      churnRate < 0
     )
       return [];
 
-    const churnDecimal = churnRate / 100;
-    const lifetimeMonths =
-      churnDecimal > 0
-        ? Math.min(120, 1 / churnDecimal)
-        : 120;
-    const marginDecimal = grossMargin / 100;
-    const ltv = arpu * lifetimeMonths * marginDecimal;
-    const cac = marketingSpend / customersAcquired;
-    const ltvCacRatio = cac > 0 ? ltv / cac : Infinity;
-    const paybackMonths = marginDecimal > 0 ? cac / (arpu * marginDecimal) : Infinity;
-    const magicNumber = marketingSpend > 0 ? (arpu * customersAcquired) / marketingSpend : Infinity;
-    const totalRevenue = arpu * customersAcquired * lifetimeMonths;
+    const f = computeSaas(arpu, churnRate, marketingSpend, customersAcquired, grossMargin);
+    const { lifetimeMonths, ltv, cac, ltvCacRatio, paybackMonths, mrrPerSpend, cohortRevenue } = f;
 
     const fmt = (val: number) =>
       val >= 1_000_000
@@ -99,10 +89,13 @@ const saasLtvCacConfig: CalculatorConfig = {
             maximumFractionDigits: 2,
           })}`;
 
+    // classify on the displayed (rounded) values
+    const ratioShown = Math.round(ltvCacRatio * 100) / 100;
     const ratioColor: 'positive' | 'neutral' | 'negative' =
-      ltvCacRatio >= 3 ? 'positive' : ltvCacRatio >= 1 ? 'neutral' : 'negative';
+      ratioShown >= 3 ? 'positive' : ratioShown >= 1 ? 'neutral' : 'negative';
+    const paybackShown = Math.round(paybackMonths * 10) / 10;
 
-    return [
+    const results: CalculatorResult[] = [
       {
         id: 'ltv',
         label: 'Customer Lifetime Value (LTV)',
@@ -128,11 +121,11 @@ const saasLtvCacConfig: CalculatorConfig = {
         id: 'paybackMonths',
         label: 'CAC Payback Period',
         value: isFinite(paybackMonths) ? `${paybackMonths.toFixed(1)} months` : 'N/A (0% margin)',
-        color: isFinite(paybackMonths) ? (paybackMonths <= 12 ? 'positive' : paybackMonths <= 24 ? 'neutral' : 'negative') : 'neutral',
+        color: isFinite(paybackMonths) ? (paybackShown <= 12 ? 'positive' : paybackShown <= 24 ? 'neutral' : 'negative') : 'neutral',
       },
       {
         id: 'avgLifetimeMonths',
-        label: 'Avg. Customer Lifetime',
+        label: f.lifetimeCapped ? 'Avg. Customer Lifetime (capped at 10 years)' : 'Avg. Customer Lifetime',
         value: `${lifetimeMonths.toFixed(1)} months`,
         color: 'neutral',
       },
@@ -146,13 +139,13 @@ const saasLtvCacConfig: CalculatorConfig = {
         id: 'churnRate',
         label: 'Monthly Churn Rate',
         value: `${churnRate.toFixed(1)}%`,
-        color: churnRate <= 3 ? 'positive' : churnRate <= 7 ? 'neutral' : 'negative',
+        color: 'neutral',
       },
       {
-        id: 'magicNumber',
-        label: 'SaaS Magic Number',
-        value: isFinite(magicNumber) ? `${magicNumber.toFixed(2)}x` : 'N/A (no spend)',
-        color: magicNumber >= 1 ? 'positive' : magicNumber >= 0.5 ? 'neutral' : 'negative',
+        id: 'newMrrPerSpend',
+        label: 'New Monthly Revenue per $1 of Spend',
+        value: isFinite(mrrPerSpend) ? `$${mrrPerSpend.toFixed(2)}` : 'N/A (no spend)',
+        color: 'neutral',
       },
       {
         id: 'grossMargin',
@@ -163,10 +156,11 @@ const saasLtvCacConfig: CalculatorConfig = {
       {
         id: 'totalRevenue',
         label: 'Total Revenue from Cohort',
-        value: fmt(totalRevenue),
+        value: fmt(cohortRevenue),
         color: 'positive',
       },
     ];
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -174,14 +168,14 @@ const saasLtvCacConfig: CalculatorConfig = {
   },
   educational: {
     formula:
-      'LTV = ARPU × (1 / Monthly Churn Rate) × (Gross Margin %)\nCAC = Marketing Spend / New Customers\nLTV:CAC Ratio = LTV / CAC\nPayback = CAC / (ARPU × Gross Margin %)',
+      'LTV = ARPU × (1 / Monthly Churn Rate) × (Gross Margin %)\nCAC = Marketing Spend / New Customers\nLTV:CAC Ratio = LTV / CAC\nPayback = CAC / (ARPU × Gross Margin %)\nNew MRR per $1 = (ARPU × New Customers) / Marketing Spend',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="60" y="100" width="130" height="200" fill="var(--svg-3b82f6)" rx="4"/><rect x="240" y="140" width="130" height="160" fill="var(--svg-8b5cf6)" rx="4"/><line x1="60" y1="300" x2="370" y2="300" stroke="var(--svg-666666)" stroke-width="2"/><text x="125" y="320" text-anchor="middle" font-size="14" fill="var(--svg-333333)">LTV</text><text x="305" y="320" text-anchor="middle" font-size="14" fill="var(--svg-333333)">CAC</text><text x="125" y="90" text-anchor="middle" font-size="13" fill="var(--svg-3b82f6)">$300</text><text x="305" y="130" text-anchor="middle" font-size="13" fill="var(--svg-8b5cf6)">$100</text></svg>',
       alt: 'Two bars comparing LTV to CAC showing the ratio relationship',
       caption: 'LTV:CAC Ratio — healthy SaaS businesses target 3:1 or higher',
     },
     formulaDescription:
-      'These four formulas form the backbone of SaaS financial modeling. LTV measures how much revenue a customer generates over their lifetime. CAC measures how much it costs to acquire them. The LTV:CAC ratio tells you if your unit economics are healthy.',
+      'These formulas form the backbone of SaaS unit-economics modeling. LTV measures how much revenue a customer generates over their lifetime. CAC measures how much it costs to acquire them. The LTV:CAC ratio tells you if your unit economics are healthy.',
     variables: [
       {
         symbol: 'LTV',
@@ -196,7 +190,7 @@ const saasLtvCacConfig: CalculatorConfig = {
       {
         symbol: 'LTV:CAC & Payback',
         name: 'Key SaaS Metrics (Ratio & Payback Period)',
-        description: 'LTV:CAC ratio should be 3:1 or higher for healthy unit economics. Payback period (months to recoup CAC) should ideally be under 12 months.',
+        description: 'LTV:CAC ratio should be 3:1 or higher for healthy unit economics. Payback period (months of gross profit needed to recoup CAC) is commonly targeted at about a year or less.',
       },
     ],
     howToUse: [
@@ -204,21 +198,21 @@ const saasLtvCacConfig: CalculatorConfig = {
       'Enter your monthly churn rate (percentage of customers who cancel each month).',
       'Enter your total marketing and sales spend for the period.',
       'Enter the number of new customers acquired in the same period.',
-      'The calculator will compute LTV, CAC, ratio, payback period, and the SaaS Magic Number.',
-      'A healthy SaaS business has LTV:CAC > 3:1 and payback under 12 months.',
+      'The calculator will compute LTV, CAC, ratio, payback period and new monthly revenue per dollar of spend.',
+      'A commonly cited target is LTV:CAC above 3:1 with payback of roughly a year or less.',
     ],
     explanation:
-      'The LTV:CAC ratio is the single most important metric in SaaS. It tells you whether your customer acquisition engine is efficient. The golden standard is 3:1 — you generate $3 of lifetime value for every $1 spent acquiring a customer. Below 1:1 means you are losing money on every customer. Between 1:1 and 3:1 is workable but has room for improvement. Above 3:1 indicates a healthy, scalable business. The payback period — how long it takes to recoup your CAC from a customer\'s gross margin — should ideally be under 12 months. The SaaS Magic Number (new revenue / marketing spend) measures sales efficiency: above 1.0x is excellent, 0.5-1.0x is good, below 0.5x needs improvement.',
+      'The LTV:CAC ratio is the single most important metric in SaaS. It tells you whether your customer acquisition engine is efficient. The golden standard is 3:1 — you generate $3 of lifetime value for every $1 spent acquiring a customer. Below 1:1 means you are losing money on every customer. Between 1:1 and 3:1 is workable but has room for improvement. Above 3:1 indicates a healthy, scalable business. The payback period — how long it takes to recoup your CAC from a customer\'s gross margin — is commonly targeted at about a year or less. "New monthly revenue per $1 of spend" shows how much recurring revenue each marketing dollar buys; it is not the classic SaaS Magic Number, which compares quarter-over-quarter revenue growth with the previous quarter\'s spend and needs data this calculator does not collect.',
     commonUses: [
       'Evaluating SaaS business unit economics by comparing customer lifetime value to customer acquisition cost',
       'Determining how many months it takes to recoup customer acquisition costs through monthly recurring revenue and gross margin',
       'Assessing the impact of churn rate changes on customer lifetime value and overall business sustainability',
-      'Calculating the SaaS Magic Number to measure sales and marketing efficiency quarter over quarter',
+      'Checking how much new recurring revenue each marketing dollar buys',
     ],
     faqs: [
       {
         question: 'What is a good LTV:CAC ratio?',
-        answer: 'The golden standard is 3:1. Below 1:1 is problematic, 1-3:1 has room for improvement, and above 3:1 indicates a healthy, scalable business with strong unit economics.',
+        answer: 'A widely cited benchmark is 3:1. Below 1:1 is problematic, 1-3:1 has room for improvement, and above 3:1 indicates healthy unit economics. It is a rule of thumb, not a law: it depends on churn assumptions and how fast you can fund growth.',
       },
       {
         question: 'How do I reduce my CAC payback period?',
@@ -226,11 +220,11 @@ const saasLtvCacConfig: CalculatorConfig = {
       },
       {
         question: 'What is the SaaS Magic Number?',
-        answer: 'The Magic Number measures sales and marketing efficiency. It is calculated as (new revenue this quarter — new revenue last quarter) / marketing spend. Above 1.0x is world-class, 0.5-1.0x is good, below 0.5x needs improvement.',
+        answer: 'The classic Magic Number measures sales efficiency as (this quarter\'s revenue − last quarter\'s revenue) × 4 ÷ last quarter\'s sales and marketing spend. This calculator shows a simpler figure instead: new monthly recurring revenue (ARPU × new customers) per dollar of marketing spend. Both indicate how much recurring revenue each marketing dollar buys, but they are not the same number.',
       },
       {
         question: 'What is considered a healthy churn rate for SaaS?',
-        answer: 'For B2B SaaS, monthly churn under 3% is good, under 2% is excellent. For B2C SaaS, monthly churn under 5-7% is typical. Reducing churn by even 1% can dramatically increase LTV.',
+        answer: 'There is no single threshold: B2B SaaS with annual contracts usually churns far less per month than self-serve B2C subscriptions. What matters is the trend and how churn feeds your lifetime: lifetime = 1 ÷ churn, so cutting monthly churn from 5% to 4% lengthens the average lifetime from 20 to 25 months (+25%).',
       },
       {
         question: 'How does customer segmentation affect LTV and CAC?',

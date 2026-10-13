@@ -1,5 +1,6 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { computeFba, isFbaCategory, type FbaCategory } from './fbaMath';
 import AmazonFBAPanel from './AmazonFBAPanel';
 
 const amazonFbaConfig: CalculatorConfig = {
@@ -11,6 +12,7 @@ const amazonFbaConfig: CalculatorConfig = {
       placeholder: '29.99',
       prefix: '$',
       min: 0,
+      max: 100000,
       step: 0.01,
       inputMode: 'decimal',
       required: true,
@@ -23,6 +25,7 @@ const amazonFbaConfig: CalculatorConfig = {
       placeholder: '7.50',
       prefix: '$',
       min: 0,
+      max: 100000,
       step: 0.01,
       inputMode: 'decimal',
       required: true,
@@ -35,6 +38,7 @@ const amazonFbaConfig: CalculatorConfig = {
       placeholder: '1.2',
       unit: 'lbs',
       min: 0,
+      max: 150,
       step: 0.1,
       inputMode: 'decimal',
       required: true,
@@ -46,64 +50,54 @@ const amazonFbaConfig: CalculatorConfig = {
       type: 'select',
       required: true,
       options: [
-        { label: 'General / Standard (15%)', value: '15' },
-        { label: 'Apparel & Accessories (17%)', value: '17' },
-        { label: 'Electronics (8%)', value: '8' },
-        { label: 'Books / Media (15%)', value: '15' },
-        { label: 'Jewelry (20%)', value: '20' },
-        { label: 'Beauty & Health (8%)', value: '8' },
-        { label: 'Sports & Outdoors (15%)', value: '15' },
+        { label: 'General / Standard (15%)', value: 'general' },
+        { label: 'Apparel & Accessories (5% / 10% / 17% by price)', value: 'apparel' },
+        { label: 'Consumer Electronics (8%)', value: 'electronics' },
+        { label: 'Electronics Accessories (15% up to $100, 8% above)', value: 'electronics-accessories' },
+        { label: 'Books / Media (15% + $1.80 closing fee)', value: 'books' },
+        { label: 'Jewelry (20% up to $250, 5% above)', value: 'jewelry' },
+        { label: 'Beauty, Health & Personal Care (8% to $10, 15% above)', value: 'beauty' },
+        { label: 'Sports & Outdoors (15%)', value: 'sports' },
       ],
-      helpText: 'The Amazon category your product is listed in determines the referral fee percentage. Choose carefully -- listing in an incorrect category can lead to listing suppression or fee adjustments.',
+      helpText: 'The Amazon category your product is listed in determines the referral fee. Several categories (apparel, jewelry, beauty, electronics accessories) use price-tiered rates, applied automatically. Rates per Amazon\'s published referral-fee schedule, checked October 2026.',
+    },
+    {
+      id: 'volume',
+      label: 'Packaged Volume (optional)',
+      type: 'number',
+      placeholder: '0.1',
+      unit: 'cu ft',
+      min: 0,
+      max: 100,
+      step: 0.01,
+      inputMode: 'decimal',
+      helpText: 'Packaged length x width x height in cubic feet (inches: L x W x H / 1,728). Used to estimate ONE month of storage per unit. Leave blank to exclude storage.',
     },
   ],
   calculate: (values) => {
     const price = parseFloat(values.sellingPrice);
     const cost = parseFloat(values.productCost);
     const weight = parseFloat(values.weight);
-    const referralPct = parseFloat(values.category || '15') / 100;
+    const volume = parseFloat(values.volume);
+    const category: FbaCategory = isFbaCategory(values.category) ? values.category : 'general';
 
-    if ([price, cost, weight].some(isNaN) || price <= 0 || weight <= 0) return [];
+    if (![price, cost, weight].every(Number.isFinite) || price <= 0 || weight <= 0 || cost < 0) return [];
 
-    const referralFee = price * referralPct;
-
-    // Amazon's real fee schedule has a "Large Standard" tier between the
-    // ~21lb ceiling of the standard-size formula and the ~90lb start of the
-    // oversize formula, but its exact current per-pound rate isn't something
-    // this calculator can verify against Amazon's published rate card (it
-    // changes periodically). Rather than guess a fake-precise number, this
-    // bridges the two tiers this file already computes (21lb -> $12.13 from
-    // the standard formula, 90lb -> $89.98 from the oversize formula) with a
-    // straight line, so the fee is at least continuous and monotonic instead
-    // of jumping ~$20 for a 0.01lb difference in weight. For an exact
-    // mid-weight quote, check Amazon's current FBA fee table directly.
-    const fee21lb = 5.29 + (21 - 3) * 0.38; // = 12.13, the standard-tier formula's own value at its ceiling
-    const fee90lb = 89.98; // the oversize formula's own value at its floor
-    let fbaFulfillmentFee: number;
-    if (weight <= 1) fbaFulfillmentFee = 3.22;
-    else if (weight <= 2) fbaFulfillmentFee = 4.18;
-    else if (weight <= 3) fbaFulfillmentFee = 5.29;
-    else if (weight <= 21) fbaFulfillmentFee = 5.29 + (weight - 3) * 0.38;
-    else if (weight <= 90) fbaFulfillmentFee = fee21lb + (weight - 21) * ((fee90lb - fee21lb) / (90 - 21));
-    else fbaFulfillmentFee = 89.98 + (weight - 90) * 0.83;
-
-    const monthlyStorageFee = weight * 0.75;
-    const totalFees = referralFee + fbaFulfillmentFee + monthlyStorageFee;
-    const netProfit = price - cost - totalFees;
-    const roi = cost > 0 ? (netProfit / cost) * 100 : 0;
-    const margin = (netProfit / price) * 100;
+    const f = computeFba(price, cost, weight, category, Number.isFinite(volume) ? volume : 0);
+    const margin = Math.round(f.marginPct * 10) / 10;
+    const roi = Math.round(f.roiPct * 10) / 10;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    return [
+    const results: CalculatorResult[] = [
       {
         id: 'netProfit',
         label: 'Net Profit per Unit',
-        value: `$${fmt(netProfit)}`,
+        value: `$${fmt(f.netProfit)}`,
         highlight: true,
-        color: netProfit > 0 ? 'positive' : 'negative',
-        interpretation: `This is per-unit after Amazon's referral and FBA fulfillment fees — multiply by monthly unit volume to see real cash flow, since a healthy-looking margin can still lose money at low volume once storage and advertising costs are added. Aim for enough margin to absorb PPC spend, which most new listings need to gain visibility.`,
+        color: f.netProfit > 0 ? 'positive' : 'negative',
+        interpretation: `This is per-unit after Amazon's referral and FBA fulfillment fees (fulfillment is an illustrative weight-only estimate) — multiply by monthly unit volume to see real cash flow. Advertising (PPC), returns and inbound shipping are not included, and most new listings need ad spend to gain visibility.`,
       },
       {
         id: 'margin',
@@ -119,140 +113,136 @@ const amazonFbaConfig: CalculatorConfig = {
       },
       {
         id: 'referralFee',
-        label: `Referral Fee (${(referralPct * 100).toFixed(0)}%)`,
-        value: `$${fmt(referralFee)}`,
+        label: `Referral Fee (${f.referralPct.toFixed(1)}% effective)`,
+        value: `$${fmt(f.referral)}`,
         color: 'negative',
       },
+    ];
+    if (f.closing > 0) {
+      results.push({ id: 'closingFee', label: 'Media Closing Fee', value: `$${fmt(f.closing)}`, color: 'negative' });
+    }
+    results.push(
       {
         id: 'fbaFee',
-        label: 'FBA Fulfillment Fee',
-        value: `$${fmt(fbaFulfillmentFee)}`,
+        label: 'FBA Fulfillment Fee (illustrative)',
+        value: `$${fmt(f.fulfillment)}`,
         color: 'negative',
       },
       {
         id: 'storageFee',
         label: 'Est. Monthly Storage Fee',
-        value: `$${fmt(monthlyStorageFee)}/mo`,
+        value: `$${fmt(f.storage)}/mo`,
         color: 'negative',
       },
-    ];
+    );
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(AmazonFBAPanel, { values, results });
   },
   educational: {
-    formula: 'Net Profit = Price − COGS − Referral Fee − FBA Fee − Storage Fee',
+    formula: 'Net Profit = Price − COGS − Referral Fee − FBA Fulfillment Fee − Storage Fee',
+    formulaSource:
+      'Referral-fee percentages follow Amazon\'s published US referral-fee schedule (sell.amazon.com/pricing, checked October 2026). The FBA fulfillment and storage figures are illustrative weight-only approximations of Amazon\'s rate card, not the current published rates.',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="80" y="30" width="280" height="260" fill="var(--svg-e5e7eb)" rx="4"/><rect x="80" y="30" width="280" height="50" fill="var(--svg-22c55e)" rx="4"/><rect x="80" y="80" width="280" height="50" fill="var(--svg-ef4444)" rx="4"/><rect x="80" y="130" width="280" height="50" fill="var(--svg-3b82f6)" rx="4"/><rect x="80" y="180" width="280" height="50" fill="var(--svg-8b5cf6)" rx="4"/><rect x="80" y="230" width="280" height="60" fill="var(--svg-22c55e)" rx="4"/><text x="220" y="58" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)" font-weight="bold">Price</text><text x="220" y="108" text-anchor="middle" font-size="12" fill="var(--svg-ffffff)">Referral + FBA + Storage</text><text x="220" y="158" text-anchor="middle" font-size="12" fill="var(--svg-ffffff)">COGS</text><text x="220" y="208" text-anchor="middle" font-size="12" fill="var(--svg-ffffff)">Fees</text><text x="220" y="268" text-anchor="middle" font-size="13" fill="var(--svg-ffffff)" font-weight="bold">Profit</text></svg>',
       alt: 'Stacked bar chart showing price breakdown into fees and profit',
       caption: 'Amazon FBA fees — referral, fulfillment, and storage fees reduce your profit',
     },
     formulaDescription:
-      'Amazon FBA profitability requires accounting for Amazon\'s referral fee (percentage of sale price), fulfillment fees (based on weight and size), and storage fees.',
+      'Amazon FBA profitability requires accounting for Amazon\'s referral fee (a percentage of the sale price, tiered by price in some categories), the fulfillment fee (based on size, weight and price band), and storage fees.',
     variables: [
-      { symbol: 'Referral Fee', name: 'Category Referral Fee', description: 'Amazon charges 8-20% of the sale price depending on product category.' },
-      { symbol: 'FBA Fee', name: 'Fulfillment by Amazon Fee', description: 'Per-unit fee for Amazon to pick, pack, and ship your product based on weight and dimensions.' },
-      { symbol: 'Storage Fee', name: 'Monthly Inventory Storage', description: 'Fee for storing your inventory in Amazon\'s fulfillment centers (higher Oct-Dec).' },
+      { symbol: 'Referral Fee', name: 'Category Referral Fee', description: 'A percentage of the sale price that depends on category; apparel, jewelry, beauty and electronics accessories use price tiers. Most categories have a $0.30 minimum per item.' },
+      { symbol: 'FBA Fee', name: 'Fulfillment by Amazon Fee', description: 'Per-unit fee for Amazon to pick, pack, and ship your product. Here: an illustrative weight-only estimate.' },
+      { symbol: 'Storage Fee', name: 'Monthly Inventory Storage', description: 'Charged per cubic foot per month on packaged volume; the rate is higher in October-December. Here: one month per unit at an illustrative Jan-Sep rate.' },
     ],
     howToUse: [
       'Enter your Amazon selling price and product cost (landed cost).',
-      'Enter the packaged weight of the unit.',
-      'Select the product category for the correct referral fee percentage.',
-      'View net profit, margin, ROI, and itemized fee breakdown.',
+      'Enter the packaged weight of the unit, and optionally its packaged volume for a storage estimate.',
+      'Select the product category for the correct referral fee.',
+      'View net profit, margin, ROI, and itemized fee breakdown. Check the exact FBA fee for your ASIN in Amazon\'s Revenue Calculator.',
     ],
     explanation:
-      'Amazon FBA sellers must account for multiple layers of fees that can significantly erode margins. The referral fee (8-20%) is charged on every sale. The FBA fulfillment fee covers picking, packing, and shipping. Monthly storage fees apply for all inventory held in Amazon warehouses (significantly higher October through December for Q4). Successful FBA sellers typically target a minimum 25-30% net margin after all fees. Products with margins below 15-20% are generally not viable on Amazon due to competition and advertising costs.',
+      'Amazon FBA sellers must account for several layers of fees. The referral fee is charged on every sale; for example Consumer Electronics is 8%, Sports & Outdoors 15%, Apparel is 5% up to $15, 10% from $15 to $20 and 17% above $20, and Jewelry is 20% on the first $250 and 5% above that. The FBA fulfillment fee covers picking, packing and shipping and depends on size tier, weight and (since 2026) price band; this calculator uses an illustrative weight-only estimate. Storage is billed monthly per cubic foot, at a higher rate in Q4. Net margin and ROI are then computed from what is left after cost and fees. Advertising, returns and inbound freight are not included, so treat the result as a ceiling, not a forecast.',
     faqs: [
       {
         question: 'Are advertising costs included in this calculator?',
-        answer: 'No. Amazon PPC (Pay-Per-Click) advertising is a major additional cost not included here. Many sellers spend 15-30% of revenue on ads, especially for new products.',
+        answer: 'No. Amazon PPC (pay-per-click) advertising is a major additional cost that is not included here. Subtract your expected ad cost per unit from the net profit shown to get a more realistic figure.',
       },
       {
         question: 'What is the difference between FBA and FBM?',
-        answer: 'FBA (Fulfilled by Amazon) has Amazon warehouse and ship your products. FBM (Fulfilled by Merchant) means you ship directly to customers. FBA typically wins the Buy Box more reliably but has higher fees.',
-      },
-      {
-        question: 'What margins should I target for Amazon FBA?',
-        answer: 'Most successful FBA sellers target 25-40% net margins before advertising. After ads, a 15-20% net margin is sustainable. Below 10% net is very difficult to build a profitable business.',
+        answer: 'FBA (Fulfilled by Amazon) has Amazon store, pack and ship your products. FBM (Fulfilled by Merchant) means you ship directly to customers. FBA listings are eligible for Prime, which usually helps win the Buy Box, but carry fulfillment and storage fees.',
       },
       {
         question: 'How does the FBA fulfillment fee change with weight?',
-        answer: 'FBA fulfillment fees increase with weight and size tier. Small standard items under 1 lb cost around $3.22 to fulfill. Large standard items up to 21 lbs have base fees plus $0.38 per additional pound over 3 lbs. Oversize items over 90 lbs cost $89.98 plus $0.83 per additional pound over 90 lbs. Dimensional weight may also apply for large but lightweight items. Always check the latest Amazon fee schedule, as rates are adjusted annually.',
+        answer: 'In this calculator: $3.22 up to 1 lb, $4.18 up to 2 lb, $5.29 up to 3 lb, then $0.38 per extra pound up to 21 lb, a straight line between 21 lb and 90 lb, and $0.83 per pound above 90 lb. These are illustrative figures from an earlier rate card, not Amazon\'s current ones: the real fee also depends on size tier, dimensional weight and, from 2026, the item\'s price band. Use the Revenue Calculator in Seller Central for an exact ASIN quote.',
       },
       {
         question: 'What is the referral fee and how does it vary by category?',
-        answer: 'The referral fee is Amazon\'s commission on each sale, typically 8-20% of the selling price. Electronics and Beauty/Health categories have the lowest referral fees at 8%. Jewelry has the highest at 20%. Most standard categories like Home, Sports, and Books are 15%. Apparel and Accessories are 17%. There is also a minimum per-item referral fee ($0.30 for most categories). Category selection when listing a product can significantly affect profitability.',
+        answer: 'The referral fee is Amazon\'s commission on each sale. Consumer Electronics is 8%; Electronics Accessories are 15% up to $100 and 8% above; Sports & Outdoors and most general categories are 15%; Books and Media are 15% plus a $1.80 closing fee; Apparel is 5% up to $15, 10% from $15 to $20 and 17% above $20; Jewelry is 20% on the first $250 and 5% above; Beauty, Health & Personal Care is 8% up to $10 and 15% above. Most categories have a $0.30 minimum per item. Rates checked against Amazon\'s published schedule in October 2026; Amazon can change them.',
       },
       {
         question: 'What other costs should FBA sellers consider?',
-        answer: 'Beyond the fees shown in this calculator, successful sellers account for: Amazon PPC advertising (typically 15-30% of revenue for new products), return processing fees (FBA charges the fulfillment fee again for returned items), long-term storage fees (for inventory held over 365 days), removal or disposal fees (for unsold inventory), and prep service fees (if using a third-party to label and prep items). Many experienced sellers find that all-in costs including advertising represent 35-50% of the selling price.',
+        answer: 'Beyond the fees shown here: PPC advertising, return-processing fees, aged-inventory and long-term storage surcharges, removal or disposal fees, prep and labeling services, inbound freight and duties (these belong in your landed COGS), and the Professional selling plan fee ($39.99 per month at the time of checking).',
       },
     ],
     workedExamples: [
       {
         scenario: 'Private Label Kitchen Gadget: Garlic Press at $24.99, Standard Category',
-        inputs: { sellingPrice: '24.99', productCost: '6.50', weight: '0.8', category: '15' },
-        result: 'Referral fee (15%): $3.75. FBA fulfillment (0.8 lbs, under 1 lb): $3.22. Monthly storage (0.8 lbs): $0.60. Total fees: $7.57. Net profit: $24.99 - $6.50 - $7.57 = $10.92. Net margin: 43.7%. ROI: 168.0%.',
-        insight: 'This is a healthy FBA product with strong unit economics. At $10.92 net profit per unit, selling 100 units/month = $1,092 profit before advertising. If PPC ads cost 20% of revenue ($5.00 per unit for a new product), net-after-ads profit drops to $5.92 (23.7% margin) -- still viable. The key to this product\'s success: low weight (0.8 lbs) keeps fulfillment fees at the minimum tier ($3.22), and the standard 15% referral fee is manageable. A common optimization: ordering 3,000 units instead of 1,000 could drop COGS from $6.50 to $4.80, adding $1.70/unit profit. At 100 units/month, that is $2,040 additional annual profit from a single negotiation with the supplier.',
+        inputs: { sellingPrice: '24.99', productCost: '6.50', weight: '0.8', category: 'general', volume: '0.1' },
+        result: 'Referral fee (15%): $3.75. FBA fulfillment (0.8 lb, up to 1 lb tier): $3.22. Storage (0.1 cu ft x $0.78): $0.08. Total fees: $7.05. Net profit: $24.99 - $6.50 - $7.05 = $11.44. Net margin: 45.8%. ROI: 176.1%.',
+        insight: 'Strong unit economics before advertising. If PPC adds, say, $5.00 per unit, net profit drops to about $6.44 (25.8% margin), still viable. Light weight keeps the fulfillment fee in the lowest tier.',
       },
       {
         scenario: 'Heavy Fitness Equipment: Adjustable Dumbbell Set at $89.99, Sports Category',
-        inputs: { sellingPrice: '89.99', productCost: '35.00', weight: '12', category: '15' },
-        result: 'Referral fee (15%): $13.50. FBA fulfillment (12 lbs, tier 3-21 lbs): 5.29 + (12-3) x 0.38 = $8.71. Monthly storage (12 lbs): $9.00. Total fees: $31.21. Net profit: $89.99 - $35.00 - $31.21 = $23.78. Net margin: 26.4%. ROI: 67.9%.',
-        insight: 'Heavy products present a unique FBA challenge: fulfillment and storage fees become significant. At 12 lbs, the FBA fee ($8.71) is nearly 10% of the selling price on its own, and monthly storage ($9.00 for one unit) is more than the product\'s daily profit in ad spend scenarios. For heavy items, consider: (1) FBM (Fulfilled by Merchant) where you ship yourself -- UPS/FedEx ground for a 12 lb package is typically $12-$18, which may be more than FBA but avoids storage fees for slow-moving inventory. (2) Bundling with lighter accessories (workout guide, resistance bands) to add perceived value without adding much weight. (3) Dimensional weight: if this dumbbell set ships in a 24x14x8 inch box, the dimensional weight is (24x14x8)/139 = 19.3 lbs -- which is more than the actual 12 lbs. Amazon charges based on the GREATER of actual weight and dimensional weight, so the true FBA fee may be $5.29 + (19.3-3) x 0.38 = $11.48. This product becomes much less profitable when dimensional weight applies. Heavy/bulky products on FBA require large margins to absorb the fulfillment costs.',
+        inputs: { sellingPrice: '89.99', productCost: '35.00', weight: '12', category: 'sports', volume: '1.56' },
+        result: 'Referral fee (15%): $13.50. FBA fulfillment (12 lb): 5.29 + (12 - 3) x 0.38 = $8.71. Storage (1.56 cu ft x $0.78): $1.22. Total fees: $23.43. Net profit: $89.99 - $35.00 - $23.43 = $31.56. Net margin: 35.1%. ROI: 90.2%.',
+        insight: 'Heavy items make fulfillment and storage material. Also check dimensional weight: in a 24 x 14 x 8 inch box it is 24 x 14 x 8 / 139 = 19.3 lb, above the 12 lb actual weight, and Amazon bills the greater of the two. Re-running this calculator with 19.3 lb gives a fulfillment fee of about $11.50 and cuts net profit by roughly $2.79.',
       },
       {
-        scenario: 'Low-Cost Electronics Accessory: Phone Charging Cable at $15.99, Electronics Category',
-        inputs: { sellingPrice: '15.99', productCost: '2.80', weight: '0.2', category: '8' },
-        result: 'Referral fee (8%): $1.28. FBA fulfillment (0.2 lbs, under 1 lb): $3.22. Monthly storage (0.2 lbs): $0.15. Total fees: $4.65. Net profit: $15.99 - $2.80 - $4.65 = $8.54. Net margin: 53.4%. ROI: 305.0%.',
-        insight: 'Low-cost electronics accessories have attractive unit economics because of the 8% electronics referral fee (the lowest Amazon offers). At $8.54 profit on a $15.99 item with only $2.80 COGS, this looks fantastic on paper. But the fatal flaw is competition: phone charging cables are one of the most saturated categories on Amazon with thousands of sellers. To win the Buy Box in this category, you will likely need to spend aggressively on PPC ($4-$6 per unit, or 25-38% of revenue) and may need to price at $12.99 to be competitive, which drops net profit to $12.99 - $2.80 - ($1.04 ref + $3.22 FBA + $0.15 storage) = $5.78 before ads, and approximately $1-$2 after ads. The high-ROI calculation is deceptive without accounting for competitive pricing pressure and ad costs. The electronics category also has a high return rate (5-10%) because cables fail, arrive defective, or the customer ordered the wrong connector type -- FBA charges the fulfillment fee AGAIN for returned items that are resellable. Lesson: always model the competitive selling price and ad spend, not just the aspirational price. For unsaturated electronics subcategories (niche adapters, specialty cables, B2B electronics), these margins can be real.',
+        scenario: 'Phone Charging Cable at $15.99, Electronics Accessories',
+        inputs: { sellingPrice: '15.99', productCost: '2.80', weight: '0.2', category: 'electronics-accessories', volume: '0.02' },
+        result: 'Referral fee (15% of the first $100): $2.40. FBA fulfillment (0.2 lb): $3.22. Storage (0.02 cu ft x $0.78): $0.02. Total fees: $5.63. Net profit: $15.99 - $2.80 - $5.63 = $7.56. Net margin: 47.3%. ROI: 269.9%.',
+        insight: 'Cables and chargers are Electronics Accessories (15% up to $100), not Consumer Electronics (8%): listing the same item at 8% would overstate profit by $1.12. These categories are heavily contested, so model the competitive price and ad cost before trusting a high pre-ad margin.',
       },
     ],
     proTips: [
-      'Always include your actual landed cost (manufacturing + freight + customs + inspection + labeling), not just the per-unit manufacturing price. A product that costs $3/unit to manufacture in Shenzhen may have a landed cost of $6-7/unit after: sea freight ($1-2/unit for a 40ft container), US customs duties (0-25% depending on product category and country of origin -- check the USITC HTS database), freight forwarder fees ($0.50-1/unit), Amazon labeling/prep ($0.50-1/unit), and 3PL receiving/inspection ($0.50-1/unit). Forgetting freight and duties is the most common new-seller profit-killer.',
-      'Use the Amazon Revenue Calculator (Seller Central > Inventory > Revenue Calculator) for exact FBA fees on specific ASINs. This free calculator gives you the exact fulfillment fee for any specific product by ASIN, accounting for both actual weight and dimensional weight. The fee estimates in this calculator are based on weight tiers and are approximate -- dimensional weight may increase your actual fee. Large but lightweight items (pillows, comforters, foam products) are particularly affected because their dimensional weight far exceeds actual weight.',
-      'Factor PPC advertising costs into your profit model before sourcing any product. A realistic PPC budget for a new FBA product: 15-30% of revenue for the first 3-6 months while building organic ranking, tapering to 10-15% for established products with strong organic positions. A product with 25% net margin before ads becomes barely profitable (5-10%) after a 20% ad spend. The "Rule of 40" is a useful guideline: your pre-ad margin + your organic rank velocity should sum to at least 40 for a sustainably profitable product. If your pre-ad margin is 30% and you have strong organic ranking (low ad dependency), you are well above 40. If your pre-ad margin is 15% and you are ad-dependent, you are in trouble.',
-      'Watch for long-term storage fees (LTSF) if inventory sits in Amazon warehouses for more than 365 days. For inventory aged 271-365 days, Amazon charges a long-term storage fee of approximately $1.50 per cubic foot per month (in addition to the monthly storage fee of $0.75/cu ft). For inventory aged 365+ days, the fee jumps to $6.90 per cubic foot per month or $0.15 per unit, whichever is greater. A slow-moving product with 1,000 units in storage can accumulate thousands in LTSF fees over a year. Proactive sellers set up automated removal orders for inventory approaching 270 days and either liquidate the stock (eBay, wholesale lots, liquidation marketplaces), run promotional discounts to clear it, or have it returned to a 3PL.',
-      'Consider dimensional weight, not just scale weight. Amazon charges the GREATER of actual weight and dimensional weight (length x width x height in inches / 139 for standard-size items). A product weighing 1 lb in a 20x15x3 inch box has dimensional weight of (20x15x3)/139 = 6.47 lbs, so you pay the 6+ lb fulfillment rate ($5.29 + 3.47 x $0.38 = $6.61) rather than the 1 lb rate ($3.22). This more than doubles the fulfillment cost. The solution: optimize packaging to reduce dimensional weight. Changing that 20x15x3 box to 18x13x3 reduces dimensional weight to (18x13x3)/139 = 5.05 lbs, saving money. Custom packaging that fits the product snugly pays for itself in FBA fee savings within months.',
-      'Plan inventory for Q4 (October-December) with precision. Monthly storage fees triple from $0.75/cu ft (Jan-Sep) to $2.40/cu ft (Oct-Dec). A shipment of 5,000 units arriving in September that does not sell through until January will incur 4 months of elevated storage fees at $2.40/cu ft vs $0.75/cu ft -- a difference that can erase the Q4 profit margin on slow-moving SKUs. Time your Q4 inventory to arrive in late October/early November (not September) so the expensive storage window is shorter, and use Amazon\'s Inventory Performance Index (IPI) dashboard to monitor sell-through rate.',
-      'Bundle products to improve margins. Instead of selling a single garlic press for $24.99 with $3.75 referral + $3.22 FBA fees ($6.97 total fee on $24.99 = 27.9%), create a bundle: garlic press + peeler + cleaning brush + recipe guide for $34.99 at 0.9 lbs. Referral fee: $5.25. FBA fee: $3.22 (still under 1 lb). Total fees: $8.47 on $34.99 = 24.2%. The bundle increases perceived value more than it increases fees because the weight stays under the 1 lb threshold. Bundling is the most underused profit optimization strategy on FBA.',
+      'Use your actual landed cost (manufacturing + freight + customs duties + inspection + labeling), not just the factory price. Forgetting freight and duties is the most common way new sellers overstate profit.',
+      'Use the Amazon Revenue Calculator (Seller Central) for exact FBA fees on a specific ASIN; it accounts for dimensional weight, size tier and price band.',
+      'Model advertising separately: subtract expected PPC cost per unit from net profit to see whether the product still clears your minimum margin.',
+      'Compare categories carefully: an item listed as Consumer Electronics (8%) versus Electronics Accessories (15%) changes the referral fee by almost half.',
+      'Time inventory so it is not sitting in fulfillment centers during Q4 when storage rates rise, and watch aged-inventory surcharges on slow sellers.',
     ],
     limitations: [
-      'FBA fulfillment fees in this calculator are based on item weight only and DO NOT account for dimensional weight. Amazon charges the greater of actual weight and dimensional weight (L x W x H in inches / 139 for standard-size items). Large, lightweight items (pillows, blankets, foam products, empty storage bins, lampshades) will have dimensional weights far exceeding their actual weights, and their true FBA fee could be 2-5x higher than what this calculator shows. For large or bulky items, use the Amazon Revenue Calculator on Seller Central for exact dimensional-weight-based fees by ASIN.',
-      'Amazon adjusts FBA fees annually (typically in February) and occasionally mid-year. The fee schedule used in this calculator may not reflect the most current rates. Significant fee changes in recent years include: the introduction of dimensional weight pricing, the addition of a fuel and inflation surcharge (5% average increase across all tiers in 2022-2023), and the restructuring of oversize and large-standard tiers. Always verify current rates at Amazon Seller Central > Fulfillment by Amazon > FBA features and fees.',
-      'For items between 21 and 90 lbs, this calculator estimates the fee by interpolating a straight line between the standard-size and oversize formulas rather than using Amazon\'s exact published mid-weight tier rates, which are not modeled here. For products in this weight range, check Amazon\'s current FBA fee table directly for a precise figure.',
-      'Storage fees shown are estimates based on weight and do not account for cubic footage, which is how Amazon actually bills monthly storage. Amazon charges $0.75 per cubic foot per month (January-September) and $2.40 per cubic foot (October-December) for standard-size products, based on the product\'s packaged dimensions. Products with inefficient packaging (large box, small product) pay disproportionately more storage fees than this calculator estimates. The calculator uses a rough weight-based estimate that may not reflect actual cubic-foot-based charges.',
-      'This calculator does NOT include: (a) Amazon PPC advertising costs (typically 15-30% of revenue for new/competitive products), (b) return processing fees (FBA charges the fulfillment fee again for returned items that are resellable), (c) long-term storage fees for inventory held 271+ days ($1.50-$6.90/cu ft), (d) removal or disposal fees for unsold inventory ($1.50-$3.00 per unit), (e) prep service fees if using a third-party to label, polybag, or bubble wrap items ($0.50-$2.00/unit), (f) costs of giveaways or promotional discounts for launch, (g) trademark/brand registry costs ($225-$525 per class), and (h) professional seller account fee ($39.99/month). All-in costs for an FBA product typically represent 35-55% of the selling price, well above what this calculator shows.',
-      'The calculator assumes all units sell at the listed price. In reality, competitive pressure may force price reductions, and Amazon\'s automated repricing tools can drive prices down as competitors match or undercut each other. Additionally, Amazon sometimes suppresses the Buy Box on listings where the price is not competitive relative to other e-commerce sites (including the brand\'s own website), which can reduce sales velocity dramatically. Successful sellers model a range of selling prices, not a single point estimate, to understand the profit profile at different competitive price points.',
+      'FBA fulfillment fees here are an ILLUSTRATIVE weight-only estimate. Amazon bills by size tier, shipping weight (the greater of actual and dimensional weight, L x W x H / 139 for standard size), and since 2026 by price band; it also adds periodic surcharges. Large, light items can cost several times more than shown. Use the Revenue Calculator in Seller Central for an exact quote.',
+      'Amazon revises FBA fees every year and sometimes mid-year, so the fulfillment and storage figures here may be out of date. The referral-fee percentages follow Amazon\'s published schedule as checked in October 2026.',
+      'Between 21 lb and 90 lb the fee is a straight-line bridge between two formulas, not Amazon\'s published mid-weight tiers.',
+      'Storage is estimated as one month of the entered packaged volume at an illustrative standard-size Jan-Sep rate; enter no volume to exclude it. Q4 rates are roughly three times higher and aged inventory is surcharged.',
+      'Not included: PPC advertising, return processing, long-term/aged inventory surcharges, removal fees, prep services, promotions, inbound freight (put it in COGS) and the Professional plan fee.',
+      'Assumes every unit sells at the listed price; competition or Buy Box loss can force lower prices.',
     ],
     quickReference: [
-      { label: 'Referral Fee (Electronics)', value: '8% of selling price' },
-      { label: 'Referral Fee (Standard)', value: '15% of selling price' },
-      { label: 'Referral Fee (Jewelry)', value: '20% of selling price' },
-      { label: 'Referral Fee (Apparel)', value: '17% of selling price' },
-      { label: 'FBA Fee (under 1 lb)', value: '~$3.22' },
-      { label: 'FBA Fee (1-2 lbs)', value: '~$4.18' },
-      { label: 'FBA Fee (2-3 lbs)', value: '~$5.29' },
-      { label: 'FBA Fee (3+ lbs, per lb over 3)', value: '+$0.38/lb' },
-      { label: 'Monthly Storage (std, Jan-Sep)', value: '~$0.75/cu ft' },
-      { label: 'Monthly Storage (std, Oct-Dec)', value: '~$2.40/cu ft' },
-      { label: 'Pro Seller Account (monthly)', value: '$39.99/month' },
-      { label: 'Min net margin target (pre-ad)', value: '25-30%' },
-      { label: 'Min net margin target (post-ad)', value: '15-20%' },
-      { label: 'Typical PPC ad spend', value: '15-30% of revenue' },
+      { label: 'Referral (Consumer Electronics)', value: '8%' },
+      { label: 'Referral (Electronics Accessories)', value: '15% to $100, 8% above' },
+      { label: 'Referral (Sports, most general)', value: '15%' },
+      { label: 'Referral (Apparel)', value: '5% / 10% / 17% by price' },
+      { label: 'Referral (Jewelry)', value: '20% to $250, 5% above' },
+      { label: 'Referral (Beauty & Health)', value: '8% to $10, 15% above' },
+      { label: 'Books/Media closing fee', value: '$1.80 per item' },
+      { label: 'Minimum referral fee', value: '$0.30 per item' },
+      { label: 'Professional plan', value: '$39.99/month' },
     ],
     commonUses: [
-      'Product sourcing evaluation -- analyze potential products before purchasing inventory to verify that margins are viable after all Amazon fees',
-      'Pricing strategy -- determine the minimum selling price needed to maintain target margins across different product categories and weight tiers',
-      'Fee comparison across categories -- compare how profitability changes if a product is listed in different Amazon categories with different referral fee percentages',
-      'Inventory planning -- estimate total fee burden per unit to forecast monthly and annual profit across projected sales volumes',
-      'ROI analysis -- calculate return on investment including all fees to compare Amazon FBA against other sales channels like eBay, Shopify, or wholesale',
+      'Product sourcing evaluation -- check that margins survive Amazon\'s fees before buying inventory',
+      'Pricing strategy -- find the minimum selling price that keeps a target margin',
+      'Fee comparison across categories -- see how the category changes the referral fee',
+      'ROI analysis -- compare Amazon FBA against other sales channels',
     ],
     citations: [
+      { source: 'Amazon -- Selling plans and referral fees', url: 'https://sell.amazon.com/pricing' },
       { source: 'Amazon Seller Central -- FBA Features and Fees', url: 'https://sellercentral.amazon.com/help/hub/reference/G201074180' },
       { source: 'Amazon Seller Central -- Referral Fees', url: 'https://sellercentral.amazon.com/help/hub/reference/G200336920' },
-
       { source: 'USITC Harmonized Tariff Schedule', url: 'https://hts.usitc.gov/' },
     ],
   },

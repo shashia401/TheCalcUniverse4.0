@@ -67,7 +67,7 @@ describe('engagement-rate', () => {
     });
     // ER = 220 / 10000 * 100 = 2.2%
     near(parseNumber(getValue(r, 'engagementRate')), 2.2);
-    expect(getResult(r, 'benchmark').value).toBe('Average engagement');
+    expect(getResult(r, 'benchmark').value).toBe('Typical engagement');
   });
 
   it('classifies high engagement rate (>3.5%)', () => {

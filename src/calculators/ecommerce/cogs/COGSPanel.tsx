@@ -1,42 +1,27 @@
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
+import { computeCogs } from './cogsMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
+const money = (n: number) =>
+  `${n < 0 ? '-' : ''}$${Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
-export default function COGSPanel({ results }: Props) {
-  const cogs = results.find(r => r.id === 'cogs');
-  const goodsAvailable = results.find(r => r.id === 'goodsAvailable');
-  const grossProfit = results.find(r => r.id === 'grossProfit');
-  const grossMargin = results.find(r => r.id === 'grossMargin');
-  const cogsPct = results.find(r => r.id === 'cogsPct');
+export default function COGSPanel({ values, results }: Props) {
+  const cogsRow = results.find((r) => r.id === 'cogs');
+  if (!cogsRow) return null;
 
-  if (!cogs) return null;
-
-  const cogsVal = parseNum(cogs.value);
-  const goodsVal = goodsAvailable ? parseNum(goodsAvailable.value) : 0;
-  const gpVal = grossProfit ? parseNum(grossProfit.value) : 0;
-  const maxVal = Math.max(cogsVal, goodsVal, gpVal);
-
-  const bar = (label: string, val: number, color: string) => {
-    const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
-    return (
-      <div className="flex items-center gap-3 py-1.5">
-        <span className="text-xs font-semibold text-slate-600 w-32 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-5 bg-slate-100 rounded overflow-hidden">
-          <div className={`h-full rounded ${color} transition-all flex items-center justify-end pr-1.5 ${pct < 10 ? 'min-w-[45px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[9px] font-bold text-white">${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const begin = parseFloat(values.beginningInventory);
+  const purchases = parseFloat(values.purchases);
+  const ending = parseFloat(values.endingInventory);
+  if (![begin, purchases, ending].every(Number.isFinite)) return null;
+  const revenue = parseFloat(values.revenue);
+  const f = computeCogs(begin, purchases, ending, revenue);
+  const hasRevenue = f.grossProfit !== undefined;
+  const maxBar = Math.max(f.goodsAvailable, f.cogs, hasRevenue ? revenue : 0, 1);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -48,24 +33,26 @@ export default function COGSPanel({ results }: Props) {
       </div>
       <div className="p-5 space-y-2">
         <div className="rounded-xl bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 p-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-red-600">Cost of Goods Sold</p>
-          <p className="text-2xl font-bold text-red-700">{cogs.value}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-red-700">Cost of Goods Sold</p>
+          <p className="text-2xl font-bold text-red-700">{cogsRow.value}</p>
         </div>
-        {goodsVal > 0 && bar('Goods Available', goodsVal, 'bg-blue-500')}
-        {gpVal > 0 && bar('Gross Profit', gpVal, 'bg-emerald-500')}
-        {grossMargin && (
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-              <p className="text-[10px] font-bold text-emerald-700 uppercase">Gross Margin</p>
-              <p className="text-lg font-bold text-emerald-700">{grossMargin.value}</p>
-            </div>
-            {cogsPct && (
+        <HBarRow label="Goods Available" value={f.goodsAvailable} max={maxBar} display={money(f.goodsAvailable)} color="bg-blue-700" />
+        <HBarRow label="COGS" value={f.cogs} max={maxBar} display={money(f.cogs)} color="bg-red-700" />
+        {hasRevenue && (
+          <>
+            <HBarRow label="Revenue" value={revenue} max={maxBar} display={money(revenue)} color="bg-slate-700" />
+            <HBarRow label="Gross Profit" value={Math.max(0, f.grossProfit!)} max={maxBar} display={money(f.grossProfit!)} color="bg-emerald-700" />
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <div className={`rounded-xl border p-3 ${f.grossProfit! >= 0 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
+                <p className={`text-[10px] font-bold uppercase ${f.grossProfit! >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>Gross Margin</p>
+                <p className={`text-lg font-bold ${f.grossProfit! >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>{f.grossMarginPct!.toFixed(2)}%</p>
+              </div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                 <p className="text-[10px] font-bold text-slate-600 uppercase">COGS %</p>
-                <p className="text-lg font-bold text-slate-700">{cogsPct.value}</p>
+                <p className="text-lg font-bold text-slate-700">{f.cogsPct!.toFixed(2)}%</p>
               </div>
-            )}
-          </div>
+            </div>
+          </>
         )}
       </div>
     </div>

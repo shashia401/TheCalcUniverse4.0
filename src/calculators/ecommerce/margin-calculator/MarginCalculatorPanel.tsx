@@ -1,43 +1,23 @@
 import { CalculatorResult } from '../../../types/calculator';
+import HBarRow from '../../../components/calculator/HBarRow';
+import { solveMargin } from './marginMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
+const money = (n: number) =>
+  `${n < 0 ? '-' : ''}$${Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export default function MarginCalculatorPanel({ results }: Props) {
-  const solved = results.find(r => r.id === 'solvedValue');
-  const gp = results.find(r => r.id === 'grossProfit');
-  const costR = results.find(r => r.id === 'costResult');
-  const revenueR = results.find(r => r.id === 'revenueResult');
-  const marginR = results.find(r => r.id === 'marginResult');
-  const markupR = results.find(r => r.id === 'markupResult');
+export default function MarginCalculatorPanel({ values, results }: Props) {
+  const solved = results.find((r) => r.id === 'solvedValue');
+  const marginR = results.find((r) => r.id === 'marginResult');
+  const markupR = results.find((r) => r.id === 'markupResult');
+  const sol = solveMargin(values);
+  if (!solved || !sol) return null;
 
-  if (!solved) return null;
-
-  const costVal = costR ? parseNum(costR.value) : 0;
-  const revVal = revenueR ? parseNum(revenueR.value) : 0;
-  const gpVal = gp ? parseNum(gp.value) : 0;
-  const maxVal = Math.max(costVal, revVal, gpVal);
-
-  const bar = (label: string, val: number, color: string) => {
-    const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
-    return (
-      <div className="flex items-center gap-3 py-1.5">
-        <span className="text-xs font-semibold text-slate-600 w-28 flex-shrink-0">{label}</span>
-        <div className="flex-1 h-5 bg-slate-100 rounded overflow-hidden">
-          <div className={`h-full rounded ${color} transition-all flex items-center justify-end pr-1.5 ${pct < 10 ? 'min-w-[45px]' : ''}`} style={{ width: `${Math.max(pct, 5)}%` }}>
-            <span className="text-[9px] font-bold text-white">${val.toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const max = Math.max(sol.cost, sol.revenue, Math.abs(sol.profit), 0.01);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -49,21 +29,28 @@ export default function MarginCalculatorPanel({ results }: Props) {
       </div>
       <div className="p-5 space-y-2">
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">{solved.label}</p>
-          <p className="text-2xl font-bold text-emerald-700">{solved.value}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">{solved.label}</p>
+          <p className="text-2xl font-bold text-emerald-800">{solved.value}</p>
         </div>
-        {costVal > 0 && bar('Cost', costVal, 'bg-red-500')}
-        {gpVal > 0 && bar('Gross Profit', gpVal, 'bg-emerald-500')}
-        {revVal > 0 && bar('Revenue', revVal, 'bg-blue-500')}
+        <HBarRow label="Cost" value={sol.cost} max={max} display={money(sol.cost)} color="bg-red-700" labelWidth="w-28" />
+        <HBarRow
+          label={sol.profit >= 0 ? 'Gross Profit' : 'Gross Loss'}
+          value={Math.abs(sol.profit)}
+          max={max}
+          display={money(sol.profit)}
+          color={sol.profit >= 0 ? 'bg-emerald-700' : 'bg-red-800'}
+          labelWidth="w-28"
+        />
+        <HBarRow label="Revenue" value={sol.revenue} max={max} display={money(sol.revenue)} color="bg-blue-700" labelWidth="w-28" />
         {marginR && markupR && (
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-center">
-              <p className="text-[10px] font-bold text-blue-600 uppercase">Margin</p>
-              <p className="text-lg font-bold text-blue-700">{marginR.value}</p>
+              <p className="text-[10px] font-bold text-blue-700 uppercase">Margin</p>
+              <p className="text-lg font-bold text-blue-800">{marginR.value}</p>
             </div>
             <div className="rounded-xl border border-purple-200 bg-purple-50 p-3 text-center">
-              <p className="text-[10px] font-bold text-purple-600 uppercase">Markup</p>
-              <p className="text-lg font-bold text-purple-700">{markupR.value}</p>
+              <p className="text-[10px] font-bold text-purple-700 uppercase">Markup</p>
+              <p className="text-lg font-bold text-purple-800">{markupR.value}</p>
             </div>
           </div>
         )}
