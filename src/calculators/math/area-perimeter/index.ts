@@ -2,7 +2,16 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import AreaPanel from './AreaPanel';
 import { circleEdu, rectangleEdu, squareEdu, triangleEdu, trapezoidEdu, parallelogramEdu, hexagonEdu } from './educational';
-import { roundStr6 as fmt } from '../../../lib/format';
+import { roundStrAuto } from '../../../lib/format';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import type { CalculatorResult } from '../../../types/calculator';
+
+const fmt = (n: number) => (Number.isFinite(n) ? roundStrAuto(n, 6) : 'too large to display');
+const err = (value: string): CalculatorResult[] => [{ id: 'error', label: 'Error', value, color: 'negative' }];
+const pos = (raw: string | undefined): number => {
+  const n = parseNumberStrict(raw);
+  return n > 0 ? n : NaN; // a shape needs strictly positive dimensions
+};
 
 const shapeTabs = [
   { label: 'Circle', value: 'circle', slug: 'circle' },
@@ -38,7 +47,8 @@ const areaPerimeterConfig: CalculatorConfig = {
     // Triangle
     { id: 'triBase', label: 'Base', type: 'number', inputMode: 'decimal', placeholder: '8', min: 0, step: 0.001, required: true, showWhen: (v) => v.shape === 'triangle', helpText: 'The length of the triangle base (any side can serve as base)' },
     { id: 'triHeight', label: 'Height', type: 'number', inputMode: 'decimal', placeholder: '6', min: 0, step: 0.001, required: true, showWhen: (v) => v.shape === 'triangle', helpText: 'The perpendicular distance from base to the opposite vertex' },
-    { id: 'triSide', label: '3rd Side (for perimeter)', type: 'number', inputMode: 'decimal', placeholder: '7', min: 0, step: 0.001, showWhen: (v) => v.shape === 'triangle', helpText: 'Length of the third side needed to compute full perimeter' },
+    { id: 'triSide', label: 'Second Side (for perimeter)', type: 'number', inputMode: 'decimal', placeholder: '5', min: 0, step: 0.001, showWhen: (v) => v.shape === 'triangle', helpText: 'Length of one of the two slanted sides. The perimeter needs both other sides, because the height is not a side.' },
+    { id: 'triSide3', label: 'Third Side (for perimeter)', type: 'number', inputMode: 'decimal', placeholder: '5', min: 0, step: 0.001, showWhen: (v) => v.shape === 'triangle', helpText: 'Length of the remaining side. With both sides entered the perimeter is base + second side + third side.' },
     // Trapezoid
     { id: 'trapBase1', label: 'Base 1 (a)', type: 'number', inputMode: 'decimal', placeholder: '10', min: 0, step: 0.001, required: true, showWhen: (v) => v.shape === 'trapezoid', helpText: 'Length of the top parallel side of the trapezoid' },
     { id: 'trapBase2', label: 'Base 2 (b)', type: 'number', inputMode: 'decimal', placeholder: '6', min: 0, step: 0.001, required: true, showWhen: (v) => v.shape === 'trapezoid', helpText: 'Length of the bottom parallel side of the trapezoid' },
@@ -71,13 +81,12 @@ const areaPerimeterConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for precision — all geometric formulas use high-precision arithmetic
     const shape = values.shape || 'circle';
     const pi = Math.PI;
 
     if (shape === 'circle') {
-      const r = parseFloat(values.circleRadius);
-      if (isNaN(r) || r <= 0) return [];
+      const r = pos(values.circleRadius);
+      if (isNaN(r)) return [];
       return [
         { id: 'area', label: 'Area', value: fmt(pi * r * r), highlight: true, color: 'positive' },
         { id: 'circumference', label: 'Circumference (Perimeter)', value: fmt(2 * pi * r), color: 'neutral' },
@@ -86,14 +95,19 @@ const areaPerimeterConfig: CalculatorConfig = {
     }
 
     if (shape === 'rectangle') {
-      const l = parseFloat(values.rectLength);
-      const w = parseFloat(values.rectWidth);
+      const l = pos(values.rectLength);
+      const w = pos(values.rectWidth);
       if (isNaN(l) || isNaN(w)) return [];
 
       const compound = values.compound || 'none';
-      const compR = parseFloat(values.compRadius);
+      const compR = parseNumberStrict(values.compRadius);
 
-      if (compound === 'rectSemi' && !isNaN(compR) && compR > 0) {
+      if (compound === 'rectSemi' && compR > 0) {
+        // The semicircle (diameter 2R) sits on a side of the rectangle: its flat edge is inside the shape, so the outline
+        // loses 2R of rectangle edge and gains the half-circumference pi*R. That only holds when 2R fits on a side.
+        if (2 * compR > Math.max(l, w)) {
+          return err(`The semicircle diameter (${fmt(2 * compR)}) is longer than the rectangle's longest side (${fmt(Math.max(l, w))}), so it cannot sit on it. Use a smaller radius.`);
+        }
         const rectArea = l * w;
         const semiArea = (pi * compR * compR) / 2;
         const totalArea = rectArea + semiArea;
@@ -111,54 +125,62 @@ const areaPerimeterConfig: CalculatorConfig = {
       return [
         { id: 'area', label: 'Area', value: fmt(l * w), highlight: true, color: 'positive' },
         { id: 'perimeter', label: 'Perimeter', value: fmt(2 * (l + w)), color: 'neutral' },
-        { id: 'diagonal', label: 'Diagonal', value: fmt(Math.sqrt(l * l + w * w)), color: 'neutral' },
+        { id: 'diagonal', label: 'Diagonal', value: fmt(Math.hypot(l, w)), color: 'neutral' },
       ];
     }
 
     if (shape === 'square') {
-      const s = parseFloat(values.squareSide);
-      if (isNaN(s) || s <= 0) return [];
+      const s = pos(values.squareSide);
+      if (isNaN(s)) return [];
       return [
         { id: 'area', label: 'Area', value: fmt(s * s), highlight: true, color: 'positive' },
         { id: 'perimeter', label: 'Perimeter', value: fmt(4 * s), color: 'neutral' },
-        { id: 'diagonal', label: 'Diagonal', value: fmt(s * Math.sqrt(2)), color: 'neutral' },
+        { id: 'diagonal', label: 'Diagonal', value: fmt(s * Math.SQRT2), color: 'neutral' },
       ];
     }
 
     if (shape === 'triangle') {
-      const b = parseFloat(values.triBase);
-      const h = parseFloat(values.triHeight);
+      const b = pos(values.triBase);
+      const h = pos(values.triHeight);
       if (isNaN(b) || isNaN(h)) return [];
       const area = 0.5 * b * h;
-      const side3 = parseFloat(values.triSide);
-      if (!isNaN(side3)) {
-        return [
-          { id: 'area', label: 'Area', value: fmt(area), highlight: true, color: 'positive' },
-          { id: 'perimeter', label: 'Perimeter', value: fmt(b + h + side3), color: 'neutral' },
-        ];
+      const rows: CalculatorResult[] = [{ id: 'area', label: 'Area', value: fmt(area), highlight: true, color: 'positive' }];
+      const s2 = pos(values.triSide);
+      const s3 = pos(values.triSide3);
+      if (!isNaN(s2) && !isNaN(s3)) {
+        // Perimeter = the three SIDES (the height is not one of them). Validate that they form a triangle.
+        if (b + s2 <= s3 || b + s3 <= s2 || s2 + s3 <= b) {
+          return err(`Sides ${fmt(b)}, ${fmt(s2)} and ${fmt(s3)} cannot form a triangle: each side must be shorter than the sum of the other two.`);
+        }
+        const perimeter: CalculatorResult = { id: 'perimeter', label: 'Perimeter', value: fmt(b + s2 + s3), color: 'neutral' };
+        // Heron's formula from the three sides must agree with half base times height
+        const p = (b + s2 + s3) / 2;
+        const heron = Math.sqrt(Math.max(0, p * (p - b) * (p - s2) * (p - s3)));
+        if (Math.abs(heron - area) > 1e-6 * Math.max(heron, area)) {
+          perimeter.warning = `These sides and this height describe different triangles: the three sides give an area of ${fmt(heron)} (Heron's formula) but half base times height is ${fmt(area)}. The area shown uses the height you entered.`;
+        }
+        rows.push(perimeter);
       }
-      return [
-        { id: 'area', label: 'Area', value: fmt(area), highlight: true, color: 'positive' },
-      ];
+      return rows;
     }
 
     if (shape === 'trapezoid') {
-      const b1 = parseFloat(values.trapBase1);
-      const b2 = parseFloat(values.trapBase2);
-      const h = parseFloat(values.trapHeight);
+      const b1 = pos(values.trapBase1);
+      const b2 = pos(values.trapBase2);
+      const h = pos(values.trapHeight);
       if (isNaN(b1) || isNaN(b2) || isNaN(h)) return [];
-      const area = 0.5 * (b1 + b2) * h;
       return [
-        { id: 'area', label: 'Area', value: fmt(area), highlight: true, color: 'positive' },
+        { id: 'area', label: 'Area', value: fmt(0.5 * (b1 + b2) * h), highlight: true, color: 'positive' },
         { id: 'midsegment', label: 'Midsegment Length', value: fmt((b1 + b2) / 2), color: 'neutral' },
       ];
     }
 
     if (shape === 'parallelogram') {
-      const b = parseFloat(values.paraBase);
-      const a = parseFloat(values.paraSide);
-      const h = parseFloat(values.paraHeight);
+      const b = pos(values.paraBase);
+      const a = pos(values.paraSide);
+      const h = pos(values.paraHeight);
       if (isNaN(b) || isNaN(a) || isNaN(h)) return [];
+      if (a < h) return err(`The sloping side (${fmt(a)}) cannot be shorter than the height (${fmt(h)}): the height is measured straight across and the side is slanted.`);
       return [
         { id: 'area', label: 'Area', value: fmt(b * h), highlight: true, color: 'positive' },
         { id: 'perimeter', label: 'Perimeter', value: fmt(2 * (b + a)), color: 'neutral' },
@@ -166,14 +188,12 @@ const areaPerimeterConfig: CalculatorConfig = {
     }
 
     if (shape === 'hexagon') {
-      const s = parseFloat(values.hexSide);
-      if (isNaN(s) || s <= 0) return [];
-      const area = (3 * Math.sqrt(3) / 2) * s * s;
-      const perimeter = 6 * s;
+      const s = pos(values.hexSide);
+      if (isNaN(s)) return [];
       return [
-        { id: 'area', label: 'Area', value: fmt(area), highlight: true, color: 'positive' },
-        { id: 'perimeter', label: 'Perimeter', value: fmt(perimeter), color: 'neutral' },
-        { id: 'apothem', label: 'Apothem (inradius)', value: fmt(s * Math.sqrt(3) / 2), color: 'neutral' },
+        { id: 'area', label: 'Area', value: fmt((3 * Math.sqrt(3) / 2) * s * s), highlight: true, color: 'positive' },
+        { id: 'perimeter', label: 'Perimeter', value: fmt(6 * s), color: 'neutral' },
+        { id: 'apothem', label: 'Apothem (inradius)', value: fmt((s * Math.sqrt(3)) / 2), color: 'neutral' },
       ];
     }
 
@@ -187,7 +207,7 @@ const areaPerimeterConfig: CalculatorConfig = {
       caption: 'Each shape has a unique area and perimeter formula based on its dimensions',
     },
     formulaDescription:
-      'Area measures the two-dimensional space enclosed within a shape (in square units), while perimeter measures the total distance around the edge (in linear units). Each shape has its own formula derived from geometry. The circle has the highest area-to-perimeter ratio of any shape — nature exploits this in bubbles, cells, and planets. Rectangles and squares use simple multiplication of dimensions. Triangles are always half the area of a rectangle with the same base and height. Trapezoids average the two parallel bases before multiplying by height. Parallelograms use the same area formula as rectangles (base x height) because the slanted sides do not affect area — the perpendicular height is what matters. Compound shapes combine multiple basic shapes; their total area is the sum of individual areas.',
+      'Area measures the two-dimensional space enclosed within a shape (in square units), while perimeter measures the total distance around the edge (in linear units). Each shape has its own formula derived from geometry. For a given perimeter the circle encloses the greatest area of any shape — nature exploits this in bubbles, cells, and planets. Rectangles and squares use simple multiplication of dimensions. Triangles are always half the area of a rectangle with the same base and height. Trapezoids average the two parallel bases before multiplying by height. Parallelograms use the same area formula as rectangles (base x height) because the slanted sides do not affect area — the perpendicular height is what matters. Compound shapes combine multiple basic shapes; their total area is the sum of individual areas.',
     variables: [
       { symbol: 'r', name: 'Radius', description: 'Distance from the center of a circle to its edge. Twice the radius equals the diameter (d = 2r).' },
       { symbol: 'l, w', name: 'Length & Width', description: 'The two perpendicular dimensions of a rectangle. Area = length x width. The diagonal forms the hypotenuse of a right triangle.' },
@@ -291,7 +311,7 @@ const areaPerimeterConfig: CalculatorConfig = {
     ],
   },
   extraPanel: (values, results) => {
-    if (!results.length) return null;
+    if (!results.length || results[0].id === 'error') return null;
     return createElement(AreaPanel, { values, results });  },
 };
 

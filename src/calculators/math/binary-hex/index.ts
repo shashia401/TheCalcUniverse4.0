@@ -36,27 +36,39 @@ function superscript(n: number): string {
 
 // ─── BigInt helpers ─────────────────────────────────────────────────────────
 
-/** Parse a value string in the given base to BigInt. Supports 0x/0b/0o prefixes and negative sign. */
+const MAX_DIGITS = 2048; // input length cap (positional breakdown is O(n^2) in BigInt work)
+const MAX_SHIFT = 4096; // largest shift when no bit width is chosen (1 << 10^9 would exhaust memory)
+/** The prefix that is legal for each base: "0x" only for hex, "0b" only for binary, "0o" only for octal ("0B1" is a valid hex number). */
+const PREFIX: Record<number, string> = { 16: '0X', 2: '0B', 8: '0O' };
+
+/** Sign and digits of a value string, with the base's own prefix removed. null when empty or too long. */
+function cleanDigits(value: string, base: number): { neg: boolean; digits: string } | null {
+  let v = value.trim().toUpperCase();
+  let neg = false;
+  if (v.startsWith('-')) {
+    neg = true;
+    v = v.slice(1);
+  } else if (v.startsWith('+')) {
+    v = v.slice(1);
+  }
+  const pre = PREFIX[base];
+  if (pre && v.startsWith(pre) && v.length > pre.length) v = v.slice(pre.length);
+  if (v.length === 0 || v.length > MAX_DIGITS) return null;
+  return { neg, digits: v };
+}
+
+/** Parse a value string in the given base to BigInt. Supports the base's own 0x/0b/0o prefix and a leading sign. */
 function parseBigInt(value: string, base: number): bigint | null {
-  let v = value.trim();
-  if (v.length === 0) return null;
-  if (/^0x/i.test(v)) v = v.slice(2);
-  else if (/^0b/i.test(v)) v = v.slice(2);
-  else if (/^0o/i.test(v)) v = v.slice(2);
-  if (v.length === 0) return null;
-
-  const neg = v.startsWith('-');
-  if (neg) v = v.slice(1);
-  if (v.length === 0) return null;
-
+  const c = cleanDigits(value, base);
+  if (!c) return null;
   let result = 0n;
   const baseBI = BigInt(base);
-  for (const c of v) {
-    const d = digitValue(c);
+  for (const ch of c.digits) {
+    const d = digitValue(ch);
     if (Number.isNaN(d) || d >= base) return null;
     result = result * baseBI + BigInt(d);
   }
-  return neg ? -result : result;
+  return c.neg ? -result : result;
 }
 
 /** Convert a BigInt to a string in the given base (2, 8, 10, 16). */
@@ -476,8 +488,7 @@ function doConvert(values: Record<string, string>): CalculatorResult[] {
   if (decimal === null) return [];
 
   // Positional breakdown (BigInt-safe)
-  const upper = rawValue.trim().toUpperCase();
-  const clean = upper.replace(/^-/, '');
+  const clean = cleanDigits(rawValue, fromBase)!.digits; // valid: parseBigInt succeeded above
   const chars = clean.split('').reverse();
   const breakdownRows: BreakdownRow[] = [];
   let breakdownSum = 0n;
@@ -668,7 +679,12 @@ function doCalculate(values: Record<string, string>): CalculatorResult[] {
   } else if (opKey === 'Left Shift' || opKey === 'Right Shift') {
     // For shifts, left shift the unsigned value, mask; right shift the unsigned value
     const aOp = bits > 0 ? toUnsigned(a, bits) : a;
-    const shiftAmount = b < 0n ? 0n : b; // negative shift = no shift
+    let shiftAmount = b < 0n ? 0n : b; // negative shift = no shift
+    if (bits > 0) {
+      if (shiftAmount > BigInt(bits)) shiftAmount = BigInt(bits); // shifting by the full width already clears every bit
+    } else if (shiftAmount > BigInt(MAX_SHIFT)) {
+      return [{ id: 'error', label: 'Error', value: `Shift amounts above ${MAX_SHIFT} need more memory than a browser tab should use; pick a bit width or a smaller shift.`, color: 'negative' }];
+    }
     const shifted = op.fn(aOp, shiftAmount);
     if (shifted === null) return [];
     rawResult = opKey === 'Left Shift' && bits > 0 ? toUnsigned(shifted, bits) : shifted;
@@ -721,6 +737,8 @@ function doCalculate(values: Record<string, string>): CalculatorResult[] {
   } else {
     // Arithmetic
     stepDetail = `${baseStrA} ${operatorSymbol} ${baseStrB} = ${toBaseStr(rawResult, base)}`;
+    if (opKey === 'Divide') stepDetail += `
+  (integer division, truncated toward zero; remainder ${toBaseStr(a % b, base)})`;
     if (bits > 0 && rawResult !== resultSigned) {
       stepDetail += `\n  (wrapped to ${bits}-bit: ${resultStr})`;
     }

@@ -2,54 +2,73 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BigNumberPanel from './BigNumberPanel';
 import { createElement } from 'react';
 
-function bigIntOperation(a: string, b: string, op: string): { result: string; remainder?: string; steps: string[] } {
-  try {
-    const bigA = BigInt(a);
-    const bigB = BigInt(b);
-    const steps: string[] = [];
+/** Per-operand digit cap: keeps a 10,000 x 10,000-digit multiplication to a few milliseconds. */
+export const MAX_DIGITS = 10000;
+const MAX_POWER = 100;
 
-    let result: bigint;
-    let remainder: string | undefined;
-    switch (op) {
-      case 'add':
-        result = bigA + bigB;
-        steps.push(`${a} + ${b} = ${result}`);
-        break;
-      case 'subtract':
-        result = bigA - bigB;
-        steps.push(`${a} - ${b} = ${result}`);
-        break;
-      case 'multiply':
-        result = bigA * bigB;
-        steps.push(`${a} × ${b} = ${result}`);
-        break;
-      case 'divide':
-        if (bigB === 0n) return { result: '', steps: ['Cannot divide by zero'] };
-        result = bigA / bigB;
-        const rem = bigA % bigB;
-        if (rem !== 0n) remainder = rem.toString();
-        steps.push(`${a} ÷ ${b} = ${result}${rem ? ` (remainder ${rem})` : ''}`);
-        break;
-      case 'power':
-        if (bigB < 0n || bigB > 100n) return { result: '', steps: ['Exponent must be 0-100'] };
-        result = 1n;
-        for (let i = 0n; i < bigB; i++) {
-          result *= bigA;
-          if (result.toString().length > 10000) {
-            return { result: '', steps: ['Result too large (>10,000 digits)'] };
-          }
-        }
-        steps.push(`${a}^${b} = ${result}`);
-        break;
-      default:
-        return { result: '', steps: ['Unknown operation'] };
+const digitsOf = (n: bigint): number => (n < 0n ? -n : n).toString().length;
+
+/** Long numbers are abbreviated inside the step text only ("123456789012…12345678 (2,500 digits)"); the Result row keeps every digit. */
+function short(n: bigint): string {
+  const s = n.toString();
+  const neg = s.startsWith('-');
+  const d = neg ? s.slice(1) : s;
+  if (d.length <= 40) return s;
+  return `${neg ? '-' : ''}${d.slice(0, 20)}…${d.slice(-10)} (${d.length.toLocaleString('en-US')} digits)`;
+}
+
+type OpOutcome = { ok: true; result: bigint; remainder?: bigint; step: string } | { ok: false; message: string };
+
+function bigIntOperation(a: bigint, b: bigint, op: string): OpOutcome {
+  switch (op) {
+    case 'add': {
+      const result = a + b;
+      return { ok: true, result, step: `${short(a)} + ${short(b)} = ${short(result)}` };
     }
-
-    return { result: result.toString(), remainder, steps };
-  } catch {
-    return { result: '', steps: ['Invalid integer input'] };
+    case 'subtract': {
+      const result = a - b;
+      return { ok: true, result, step: `${short(a)} - ${short(b)} = ${short(result)}` };
+    }
+    case 'multiply': {
+      const result = a * b;
+      return { ok: true, result, step: `${short(a)} × ${short(b)} = ${short(result)}` };
+    }
+    case 'divide': {
+      if (b === 0n) return { ok: false, message: 'Cannot divide by zero.' };
+      // JavaScript BigInt division truncates toward zero; the remainder takes the sign of the dividend (same as C, Java, JS %).
+      const result = a / b;
+      const rem = a % b;
+      return {
+        ok: true,
+        result,
+        remainder: rem !== 0n ? rem : undefined,
+        step: `${short(a)} ÷ ${short(b)} = ${short(result)}${rem !== 0n ? ` (remainder ${short(rem)})` : ''}, truncated toward zero`,
+      };
+    }
+    case 'power': {
+      if (b < 0n || b > BigInt(MAX_POWER)) {
+        return { ok: false, message: `The exponent must be a whole number from 0 to ${MAX_POWER} (negative exponents give fractions, which BigInt cannot hold).` };
+      }
+      const e = Number(b);
+      // |a|^e has between (d-1)e+1 and d*e digits: refuse before computing anything that large
+      if ((digitsOf(a) - 1) * e + 1 > MAX_DIGITS) {
+        return { ok: false, message: `The result would have more than ${MAX_DIGITS.toLocaleString('en-US')} digits; try a smaller base or exponent.` };
+      }
+      const result = a ** b;
+      if (digitsOf(result) > MAX_DIGITS) {
+        return { ok: false, message: `The result would have more than ${MAX_DIGITS.toLocaleString('en-US')} digits; try a smaller base or exponent.` };
+      }
+      return { ok: true, result, step: `${short(a)}^${b} = ${short(result)}` };
+    }
+    default:
+      return { ok: false, message: 'Unknown operation.' };
   }
 }
+
+const err = (value: string): CalculatorResult[] => [{ id: 'error', label: 'Error', value, color: 'negative' as const }];
+
+const INT_RE = /^[+-]?\d+$/;
+const DECIMALISH_RE = /^[+-]?(\d+\.\d*|\.\d+|\d+(\.\d*)?[eE][+-]?\d+)$/;
 
 const bigNumberConfig: CalculatorConfig = {
   inputs: [
@@ -58,7 +77,8 @@ const bigNumberConfig: CalculatorConfig = {
       label: 'Value 1',
       type: 'text',
       placeholder: '12345678901234567890',
-      helpText: 'Enter any integer (supports arbitrarily large numbers)',
+      inputMode: 'numeric',
+      helpText: `Enter any whole number (up to ${MAX_DIGITS.toLocaleString('en-US')} digits, optional leading minus)`,
     },
     {
       id: 'op',
@@ -79,44 +99,47 @@ const bigNumberConfig: CalculatorConfig = {
       label: 'Value 2',
       type: 'text',
       placeholder: '9876543210987654321',
-      helpText: 'Second operand (for division and power)',
+      inputMode: 'numeric',
+      helpText: 'Second operand (the divisor for division, the exponent 0-100 for power)',
     },
   ],
-  calculate: (values) => {
-    const a = values.a?.trim();
-    const b = values.b?.trim();
+  calculate: (values): CalculatorResult[] => {
+    const aRaw = values.a?.trim();
+    const bRaw = values.b?.trim();
     const op = values.op || 'add';
 
-    if (!a || !b) return [];
-    if (!/^-?\d+$/.test(a) || !/^-?\d+$/.test(b)) return [];
-    if (isNaN(Number(a)) || isNaN(Number(b))) return [];
+    if (!aRaw || !bRaw) return [];
+    for (const raw of [aRaw, bRaw]) {
+      if (!INT_RE.test(raw)) {
+        return DECIMALISH_RE.test(raw) ? err('Enter whole numbers only: BigInt arithmetic has no decimals or exponents.') : [];
+      }
+      if (raw.replace(/^[+-]/, '').replace(/^0+(?=\d)/, '').length > MAX_DIGITS) {
+        return err(`Numbers are limited to ${MAX_DIGITS.toLocaleString('en-US')} digits.`);
+      }
+    }
 
-    const { result, remainder, steps } = bigIntOperation(a, b, op);
-    if (!result) return [];
+    const a = BigInt(aRaw);
+    const b = BigInt(bRaw);
+    const out = bigIntOperation(a, b, op);
+    if (!out.ok) return err(out.message);
 
-    // Canonical digit counts (strip leading zeros via BigInt re-parse)
-    const canonicalA = BigInt(a).toString();
-    const canonicalB = BigInt(b).toString();
-    const digitCountA = Math.round(canonicalA.replace(/^-/, '').length);
-    const digitCountB = Math.round(canonicalB.replace(/^-/, '').length);
-    const digitCountR = Math.round(result.replace(/^-/, '').length);
-
+    const { result, remainder, step } = out;
     const output: CalculatorResult[] = [
-      { id: 'result', label: 'Result', value: result, highlight: true, color: 'positive' },
-      { id: 'digitCount', label: 'Digits in Result', value: digitCountR.toString() },
-      { id: 'digitCountA', label: 'Digits in Value 1', value: digitCountA.toString() },
-      { id: 'digitCountB', label: 'Digits in Value 2', value: digitCountB.toString() },
-      { id: 'steps', label: 'Steps', value: steps.join(' | ') },
+      { id: 'result', label: 'Result', value: result.toString(), highlight: true, color: 'positive' },
+      { id: 'digitCount', label: 'Digits in Result', value: digitsOf(result).toString() },
+      { id: 'digitCountA', label: 'Digits in Value 1', value: digitsOf(a).toString() }, // canonical: leading zeros stripped by BigInt
+      { id: 'digitCountB', label: 'Digits in Value 2', value: digitsOf(b).toString() },
+      { id: 'steps', label: 'Steps', value: step },
     ];
 
     if (remainder !== undefined) {
-      output.push({ id: 'remainder', label: 'Remainder', value: remainder });
+      output.push({ id: 'remainder', label: 'Remainder', value: remainder.toString() });
     }
 
     return output;
   },
   extraPanel: (values, results) => {
-    if (!results.length) return null;
+    if (!results.length || results[0].id === 'error') return null;
     return createElement(BigNumberPanel, { values, results });
   },
   educational: {
@@ -138,14 +161,14 @@ const bigNumberConfig: CalculatorConfig = {
       'Select an operation: add, subtract, multiply, divide (integer division with remainder), or power (exponent). Each operation shows the exact result immediately.',
       'View the exact result without any precision loss, rounding, or scientific notation. Every digit is preserved exactly as computed.',
       'Check the digit counts for each value to appreciate the magnitude of the numbers and result at a glance.',
-      'Power operations are capped at exponent 100 and results are limited to 10,000 digits to prevent browser freezing or excessive memory consumption.',
+      'Each number may have up to 10,000 digits. Power operations are capped at exponent 100 and results are limited to 10,000 digits to prevent browser freezing or excessive memory consumption.',
       'Use the extra panel visualization to see the place value breakdown and understand where standard 64-bit arithmetic would fail.',
     ],
     explanation:
-      'A big integer calculator (also called a big int or arbitrary-precision calculator) performs exact arithmetic on integers of any size without losing precision. Standard JavaScript numbers use the IEEE 754 64-bit floating-point format, which can only represent integers exactly up to 2^53 (about 9 quadrillion or 9,007,199,254,740,991). Beyond this point, precision is silently lost — digits are rounded off and results become incorrect. This is known as the "integer precision limit" and has caused real-world bugs in financial systems, scientific computing, and database operations. The concept of arbitrary-precision computation dates back to the earliest days of computing: John von Neumann discussed the need for exact arithmetic in his 1945 "First Draft of a Report on the EDVAC," and early Lisp systems in the 1950s included "bignum" libraries. Today, modern cryptography depends on arbitrary-precision arithmetic: RSA encryption uses prime numbers with hundreds of digits, and elliptic curve cryptography requires exact operations on large integers. This calculator uses JavaScript BigInt, introduced in ES2020, which can handle integers with thousands of digits — limited only by available browser memory. For perspective, a number with just 100 digits is already larger than the estimated number of atoms in the observable universe (about 10^80). The calculator supports five basic operations: addition, subtraction, multiplication, integer division (with remainder), and exponentiation. The digit count display helps you quickly grasp the magnitude of results — each additional digit increases the number range tenfold.',
+      'A big integer calculator (also called a big int or arbitrary-precision calculator) performs exact arithmetic on integers of any size without losing precision. Standard JavaScript numbers use the IEEE 754 64-bit floating-point format, which can only represent integers exactly up to 2^53 (about 9 quadrillion or 9,007,199,254,740,991). Beyond this point, precision is silently lost — digits are rounded off and results become incorrect. This is known as the "integer precision limit" and has caused real-world bugs in financial systems, scientific computing, and database operations. Arbitrary-precision ("bignum") integers have long been a standard feature of programming languages such as Lisp, Python (int), Java (BigInteger) and now JavaScript (BigInt). Today, modern cryptography depends on arbitrary-precision arithmetic: RSA encryption uses prime numbers with hundreds of digits, and elliptic curve cryptography requires exact operations on large integers. This calculator uses JavaScript BigInt, introduced in ES2020, which can handle integers with thousands of digits — limited only by available browser memory. For perspective, a number with just 100 digits is already larger than the estimated number of atoms in the observable universe (about 10^80). The calculator supports five basic operations: addition, subtraction, multiplication, integer division (with remainder), and exponentiation. The digit count display helps you quickly grasp the magnitude of results — each additional digit increases the number range tenfold.',
     commonUses: [
       'Cryptography and cybersecurity: working with RSA keys (typically 2048-bit, about 617 digits) and Diffie-Hellman key exchange parameters that require exact big-integer arithmetic',
-      'Number theory research: exploring properties of very large primes, Mersenne primes (the largest known primes have over 24 million digits), and perfect numbers',
+      'Number theory research: exploring properties of very large primes, Mersenne primes (the largest known prime, the Mersenne prime 2^136,279,841 - 1 found in 2024, has over 41 million digits), and perfect numbers',
       'Combinatorics and probability: computing exact factorial values, binomial coefficients, and permutation counts for large n where approximations are insufficient',
       'Astronomy and physics: calculating extremely large distances (the observable universe is about 8.8 x 10^26 meters across), particle counts, and cosmological parameters',
       'Educational demonstrations: showing students the limits of standard floating-point arithmetic and the importance of arbitrary-precision computation in computer science',
@@ -175,7 +198,7 @@ const bigNumberConfig: CalculatorConfig = {
       'When working with extremely large exponents, remember that the number of digits in a^b is approximately b x log10(a). A 10-digit base raised to the 100th power produces roughly 1,000 digits — right at the edge of practical computation in a browser.',
       'BigInt operations in JavaScript are generally slower than native 64-bit arithmetic because they are implemented in software, not hardware. For repeated operations on numbers under 2^53, consider using regular Number type for performance.',
       'Use the digit count feature as a quick sanity check: if your expected result should have roughly n digits but the output shows significantly more or fewer digits, you likely have an input error or operand swap.',
-      'For division, remember that BigInt division truncates toward zero (not floor). The remainder has the same sign as the dividend, which matches the Euclidean division convention used in most mathematical contexts.',
+      'For division, remember that BigInt division truncates toward zero (not floor). The remainder has the same sign as the dividend, which matches C, Java and JavaScript\'s % operator; Python\'s // and % use floor division instead, so -7 / 2 gives -3 remainder -1 here but -4 remainder 1 in Python.',
     ],
     limitations: [
       'This calculator only supports integer arithmetic — decimal numbers and fractions are not supported by JavaScript BigInt. For decimal arithmetic with large numbers, scale your values by an appropriate power of 10 (e.g., work in cents instead of dollars) or use a specialized decimal library.',
@@ -224,7 +247,7 @@ const bigNumberConfig: CalculatorConfig = {
       },
       {
         question: 'How does this compare to Python\'s arbitrary-precision integers?',
-        answer: 'Python has supported arbitrary-precision integers natively since its inception — in Python, integers automatically expand to accommodate any size. JavaScript BigInt (introduced in ES2020) provides similar capabilities but with some differences: BigInt requires the "n" suffix for literals (e.g., 123n), cannot be mixed with regular Number types without explicit conversion, and does not support decimals (unlike Python\'s decimal module). Both languages implement arbitrary-precision using similar algorithms (Karatsuba multiplication for medium-sized numbers, Toom-Cook or FFT for very large ones). This calculator provides a Python-like experience in the browser by handling all the BigInt details for you.',
+        answer: 'Python has supported arbitrary-precision integers natively since its inception — in Python, integers automatically expand to accommodate any size. JavaScript BigInt (introduced in ES2020) provides similar capabilities but with some differences: BigInt requires the "n" suffix for literals (e.g., 123n), cannot be mixed with regular Number types without explicit conversion, and does not support decimals (unlike Python\'s decimal module). Both use sub-quadratic multiplication algorithms for big operands (CPython uses Karatsuba; V8, the engine behind Chrome and Node.js, also uses Toom-Cook and FFT-based multiplication for very large numbers). This calculator provides a Python-like experience in the browser by handling all the BigInt details for you.',
       },
       {
         question: 'Can I use this for modular arithmetic or prime number testing?',

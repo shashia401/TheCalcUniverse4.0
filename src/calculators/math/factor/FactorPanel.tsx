@@ -1,15 +1,11 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid,
-} from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
+import { parsePositiveSafeInt } from '../../../utils/numberTheory';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#84cc16'];
 
 export default function FactorPanel({ values, results }: Props) {
   const pairsData = results.find(r => r.id === '_pairsData')?.value;
@@ -18,8 +14,9 @@ export default function FactorPanel({ values, results }: Props) {
     if (pairsData) pairs = JSON.parse(pairsData);
   } catch { /* ignore */ }
 
-  const n = parseInt(values.number) || 0;
-  if (!n || results.length === 0) return null;
+  const parsed = parsePositiveSafeInt(values.number);
+  const n = parsed.kind === 'ok' ? parsed.n : 0;
+  if (!n || results.length === 0 || !pairsData) return null;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -53,32 +50,18 @@ export default function FactorPanel({ values, results }: Props) {
           </table>
         </div>
 
-        {/* Factor pairs bar chart */}
+        {/* Factor pairs as rectangles of area n: perimeter 2(a + b) is smallest for the squarest pair */}
         {pairs.length > 0 && (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Factor Pairs Visual</p>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart
-                data={pairs.map(([a, b], i) => ({
-                  name: `${a} × ${b}`,
-                  a,
-                  b,
-                  index: i,
-                }))}
-                margin={{ top: 4, right: 8, bottom: 4, left: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} interval={0} angle={-20} textAnchor="end" height={50} />
-                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={40} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  formatter={((_: unknown, name: string) => [(_ as number).toLocaleString(), name]) as any}
-                />
-                <Bar dataKey="a" name="Factor 1" fill="#3b82f6" radius={[3, 3, 0, 0]} maxBarSize={40} stackId="stack" />
-                <Bar dataKey="b" name="Factor 2" fill="#f59e0b" radius={[3, 3, 0, 0]} maxBarSize={40} stackId="stack" />
-              </BarChart>
-            </ResponsiveContainer>
-            <p className="text-[10px] text-slate-400 mt-1 text-center">Each bar shows the two factors stacked; their total equals n = {n}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Rectangle perimeter for each factor pair</p>
+            <SvgBarChart
+              data={pairs.map(([a, b]) => ({ label: `${a}×${b}`, value: 2 * (a + b) }))}
+              ariaLabel={`Perimeter 2(a + b) of the rectangle with area ${n} for each factor pair a × b`}
+              height={200}
+              color="#3b82f6"
+              maxBarWidth={40}
+            />
+            <p className="text-[10px] text-slate-500 mt-1 text-center">Every a × b rectangle has area n = {n.toLocaleString('en-US')}; the squarest pair has the smallest perimeter 2(a + b).</p>
           </div>
         )}
 

@@ -39,9 +39,10 @@ describe('Big Number calculator', () => {
   });
 
   // ── Edge cases and validation ───────────────────────────────────
-  it('returns empty array for division by zero', () => {
+  it('explains division by zero instead of returning nothing', () => {
     const r = config.calculate({ a: '5', b: '0', op: 'divide' });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty array for non-integer input', () => {
@@ -54,14 +55,15 @@ describe('Big Number calculator', () => {
     expect(r).toEqual([]);
   });
 
-  it('returns empty array for decimal inputs (BigInt is integer-only)', () => {
+  it('explains that decimal inputs are not supported (BigInt is integer-only)', () => {
     const r = config.calculate({ a: '3.14', b: '2', op: 'add' });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
-  it('returns empty array for inputs with special characters', () => {
+  it('explains that exponent notation is not supported', () => {
     const r = config.calculate({ a: '1e10', b: '5', op: 'multiply' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   // ── Negative number support ─────────────────────────────────────
@@ -119,14 +121,14 @@ describe('Big Number calculator', () => {
     expect(getValue(r, 'result')).toBe('1');
   });
 
-  it('returns empty for exponent > 100', () => {
+  it('rejects an exponent > 100 with a message', () => {
     const r = config.calculate({ a: '2', b: '101', op: 'power' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
-  it('returns empty for negative exponent', () => {
+  it('rejects a negative exponent with a message', () => {
     const r = config.calculate({ a: '2', b: '-1', op: 'power' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   // ── Very large multiplication ───────────────────────────────────

@@ -101,15 +101,15 @@ describe('Fraction Calculator', () => {
     expect(r).toEqual([]);
   });
 
-  it('treats NaN numerator as zero (parseInt fallback)', () => {
+  it('flags a non-numeric numerator instead of treating it as zero', () => {
     const r = config.calculate({ mode: 'add', aNum: 'abc', aDen: '4', bNum: '1', bDen: '3' });
-    // parseInt("abc") returns NaN, which falls back to 0 via || 0
-    expect(getValue(r, 'result')).toBe('1/3');
+    expect(r[0].id).toBe('error');
   });
 
-  it('returns empty for division by zero (bNum=0)', () => {
+  it('reports division by zero (bNum=0) with an error row', () => {
     const r = config.calculate({ mode: 'divide', aNum: '1', aDen: '2', bNum: '0', bDen: '3' });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
   // ── Operation display ──────────────────────────────────────────────

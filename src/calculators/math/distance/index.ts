@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import DistancePanel from './DistancePanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { roundStrAuto } from '../../../lib/format';
 
 const distanceConfig: CalculatorConfig = {
   inputs: [
@@ -23,7 +25,7 @@ const distanceConfig: CalculatorConfig = {
       placeholder: '3',
       step: 0.1,
       required: true,
-      inputMode: 'numeric',
+      inputMode: 'decimal',
       helpText: 'Coordinate of the first point on the number line',
       showWhen: (v) => v.mode === '1d',
     },
@@ -34,7 +36,7 @@ const distanceConfig: CalculatorConfig = {
       placeholder: '7',
       step: 0.1,
       required: true,
-      inputMode: 'numeric',
+      inputMode: 'decimal',
       helpText: 'Coordinate of the second point on the number line',
       showWhen: (v) => v.mode === '1d',
     },
@@ -46,7 +48,7 @@ const distanceConfig: CalculatorConfig = {
       placeholder: '2',
       step: 0.1,
       required: true,
-      inputMode: 'numeric',
+      inputMode: 'decimal',
       helpText: 'X-coordinate of first point',
       showWhen: (v) => v.mode === '2d' || v.mode === '3d',
     },
@@ -57,7 +59,7 @@ const distanceConfig: CalculatorConfig = {
       placeholder: '3',
       step: 0.1,
       required: true,
-      inputMode: 'numeric',
+      inputMode: 'decimal',
       helpText: 'Y-coordinate of first point',
       showWhen: (v) => v.mode === '2d' || v.mode === '3d',
     },
@@ -68,7 +70,7 @@ const distanceConfig: CalculatorConfig = {
       placeholder: '5',
       step: 0.1,
       required: true,
-      inputMode: 'numeric',
+      inputMode: 'decimal',
       helpText: 'X-coordinate of second point',
       showWhen: (v) => v.mode === '2d' || v.mode === '3d',
     },
@@ -79,7 +81,7 @@ const distanceConfig: CalculatorConfig = {
       placeholder: '7',
       step: 0.1,
       required: true,
-      inputMode: 'numeric',
+      inputMode: 'decimal',
       helpText: 'Y-coordinate of second point',
       showWhen: (v) => v.mode === '2d' || v.mode === '3d',
     },
@@ -91,7 +93,7 @@ const distanceConfig: CalculatorConfig = {
       placeholder: '1',
       step: 0.1,
       required: true,
-      inputMode: 'numeric',
+      inputMode: 'decimal',
       helpText: 'Z-coordinate of first point',
       showWhen: (v) => v.mode === '3d',
     },
@@ -102,7 +104,7 @@ const distanceConfig: CalculatorConfig = {
       placeholder: '4',
       step: 0.1,
       required: true,
-      inputMode: 'numeric',
+      inputMode: 'decimal',
       helpText: 'Z-coordinate of second point',
       showWhen: (v) => v.mode === '3d',
     },
@@ -110,16 +112,21 @@ const distanceConfig: CalculatorConfig = {
   calculate: (values) => {
     const mode = values.mode || '2d';
 
+    // 6 decimals; a non-zero value below 1e-6 keeps 6 significant digits instead of printing 0
     const fmt = (n: number) => {
+      if (!Number.isFinite(n)) return 'too large to display';
       if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-      return parseFloat(n.toFixed(6)).toString();
+      return roundStrAuto(n, 6);
     };
+    const num = (k: string) => parseNumberStrict(values[k]);
+    const finite = (...n: number[]) => n.every(Number.isFinite);
 
     if (mode === '1d') {
-      const x1 = parseFloat(values.x1_1d);
-      const x2 = parseFloat(values.x2_1d);
+      const x1 = num('x1_1d');
+      const x2 = num('x2_1d');
       if (isNaN(x1) || isNaN(x2)) return [];
       const dist = Math.abs(x2 - x1);
+      if (!finite(dist)) return [];
 
       const diff = x2 - x1;
       let stepStr: string;
@@ -153,15 +160,16 @@ const distanceConfig: CalculatorConfig = {
     }
 
     if (mode === '2d') {
-      const x1 = parseFloat(values.x1);
-      const y1 = parseFloat(values.y1);
-      const x2 = parseFloat(values.x2);
-      const y2 = parseFloat(values.y2);
+      const x1 = num('x1');
+      const y1 = num('y1');
+      const x2 = num('x2');
+      const y2 = num('y2');
       if ([x1, y1, x2, y2].some(isNaN)) return [];
 
       const dx = x2 - x1;
       const dy = y2 - y1;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      const dist = Math.hypot(dx, dy); // no overflow of dx*dx for coordinates near 1e200
+      if (!finite(dist)) return [];
 
       return [
         {
@@ -192,25 +200,26 @@ const distanceConfig: CalculatorConfig = {
         {
           id: 'slope',
           label: 'Slope',
-          value: dx !== 0 ? fmt(dy / dx) : 'Undefined (vertical)',
+          value: dx !== 0 ? fmt(dy / dx) : dy !== 0 ? 'Undefined (vertical line)' : 'Undefined (the two points are identical)',
           color: 'neutral' as const,
         },
       ];
     }
 
     if (mode === '3d') {
-      const x1 = parseFloat(values.x1);
-      const y1 = parseFloat(values.y1);
-      const z1 = parseFloat(values.z1);
-      const x2 = parseFloat(values.x2);
-      const y2 = parseFloat(values.y2);
-      const z2 = parseFloat(values.z2);
+      const x1 = num('x1');
+      const y1 = num('y1');
+      const z1 = num('z1');
+      const x2 = num('x2');
+      const y2 = num('y2');
+      const z2 = num('z2');
       if ([x1, y1, z1, x2, y2, z2].some(isNaN)) return [];
 
       const dx = x2 - x1;
       const dy = y2 - y1;
       const dz = z2 - z1;
-      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const dist = Math.hypot(dx, dy, dz);
+      if (!finite(dist)) return [];
 
       return [
         {
@@ -311,7 +320,7 @@ const distanceConfig: CalculatorConfig = {
       'Use 1D mode for any single-axis comparison: temperature differences, price gaps between two products, time intervals, or altitude changes between two geographic points.',
       'The midpoint is the center of the line segment connecting two points — useful for finding the center of a rectangle from opposite corners, positioning UI elements between two anchors, or calculating the centroid of two data points.',
       'When the slope shows "undefined," it means the line is vertical (x₁ = x₂). This is a valid geometric case — the distance is simply |y₂ − y₁|, and you can verify this by using 1D mode along the Y axis.',
-      'For the classic 3-4-5 triangle test (points (0,0) and (3,4)), expect distance = 5 exactly. If you get 4.999999 or 5.000001, this is normal floating-point rounding — the calculator formats to 6 significant figures for clean display.',
+      'For the classic 3-4-5 triangle test (points (0,0) and (3,4)), expect distance = 5 exactly. If you get 4.999999 or 5.000001, this is normal floating-point rounding — the calculator rounds the display to 6 decimal places.',
       'In 3D mode, the distance formula generalizes to any number of dimensions. For n-dimensional data (common in machine learning), just keep adding squared differences: d = √(Σ(Δxᵢ)²) for i = 1 to n.',
     ],
     limitations: [

@@ -1,17 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import CommonFactorPanel from './CommonFactorPanel';
-
-function getFactors(n: number): number[] {
-  const factors: number[] = [];
-  for (let i = 1; i <= Math.sqrt(n); i++) {
-    if (n % i === 0) {
-      factors.push(i);
-      if (i !== n / i) factors.push(n / i);
-    }
-  }
-  return factors.sort((a, b) => a - b);
-}
+import { analyzeCommonFactors } from './commonFactorMath';
+import { MAX_FACTOR_INPUT, capList, parsePositiveSafeInt } from '../../../utils/numberTheory';
 
 const commonFactorConfig: CalculatorConfig = {
   inputs: [
@@ -21,8 +12,10 @@ const commonFactorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '24',
       min: 1,
+      max: MAX_FACTOR_INPUT,
       step: 1,
-      helpText: 'Enter the first positive integer to find common factors',
+      inputMode: 'numeric',
+      helpText: 'Enter the first positive whole number (up to 9,007,199,254,740,991)',
     },
     {
       id: 'b',
@@ -30,28 +23,30 @@ const commonFactorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '36',
       min: 1,
+      max: MAX_FACTOR_INPUT,
       step: 1,
-      helpText: 'Enter the second positive integer to find common factors',
+      inputMode: 'numeric',
+      helpText: 'Enter the second positive whole number (up to 9,007,199,254,740,991)',
     },
   ],
-  calculate: (values) => {
-    const a = parseInt(values.a);
-    const b = parseInt(values.b);
+  calculate: (values): CalculatorResult[] => {
+    const pa = parsePositiveSafeInt(values.a);
+    const pb = parsePositiveSafeInt(values.b);
+    if (pa.kind === 'invalid') return [{ id: 'error', label: 'Error', value: `Number A: ${pa.message}`, color: 'negative' }];
+    if (pb.kind === 'invalid') return [{ id: 'error', label: 'Error', value: `Number B: ${pb.message}`, color: 'negative' }];
+    if (pa.kind !== 'ok' || pb.kind !== 'ok') return [];
+    const { a, b } = { a: pa.n, b: pb.n };
 
-    if (isNaN(a) || isNaN(b) || a < 1 || b < 1 || !Number.isFinite(a) || !Number.isFinite(b)) return [];
-
-    const factorsA = getFactors(a);
-    const factorsB = getFactors(b);
-    const common = factorsA.filter(f => factorsB.includes(f));
-    const gcf = common.length > 0 ? common[common.length - 1] : 1;
+    const { gcf, factorsA, factorsB, common, lcm } = analyzeCommonFactors(a, b);
 
     return [
       { id: 'gcf', label: 'Greatest Common Factor (GCF)', value: gcf.toString(), highlight: true, color: 'positive' },
-      { id: 'commonFactors', label: 'All Common Factors', value: common.join(', ') },
+      { id: 'commonFactors', label: 'All Common Factors', value: capList(common) },
       { id: 'commonCount', label: 'Number of Common Factors', value: common.length.toString() },
-      { id: 'factorsA', label: `Factors of ${a}`, value: factorsA.join(', ') },
-      { id: 'factorsB', label: `Factors of ${b}`, value: factorsB.join(', ') },
-      { id: '_commonData', label: 'Common Factors Data', value: JSON.stringify({ common, a, b }) },
+      { id: 'lcm', label: 'Least Common Multiple (LCM)', value: lcm.toString() },
+      { id: 'factorsA', label: `Factors of ${a}`, value: capList(factorsA) },
+      { id: 'factorsB', label: `Factors of ${b}`, value: capList(factorsB) },
+      { id: '_commonData', label: 'Common Factors Data', value: JSON.stringify({ common: common.slice(0, 500), a, b }) },
     ];
   },
   extraPanel: (values, results) => {

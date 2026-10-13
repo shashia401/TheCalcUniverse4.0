@@ -1,45 +1,33 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
+import { bigToScientific } from '../../../utils/bigMath';
+import { parseIntegerStrict } from '../../../utils/rational';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function computeFactorial(n: number): number {
-  if (n === 0) return 1;
-  let result = 1;
-  for (let i = 2; i <= n; i++) {
-    result *= i;
-  }
-  return result;
-}
+const BAR_COLORS = ['#16a34a', '#2563eb', '#7c3aed', '#d97706', '#dc2626', '#db2777', '#0891b2', '#65a30d'];
+const MAX_BARS = 15; // 0! .. 15! stays readable; 15! = 1.3 x 10^12
 
-const BAR_COLORS = ['#22c55e', '#22c55e', '#3b82f6', '#3b82f6', '#8b5cf6', '#8b5cf6', '#f59e0b', '#f59e0b', '#ef4444', '#ef4444', '#ec4899', '#ec4899', '#06b6d4', '#06b6d4', '#84cc16', '#84cc16'];
+// Compact tick/tooltip text: 1,307,674,368,000 -> 1.31e12
+const fmtFact = (v: number) => (v >= 1e6 ? bigToScientific(BigInt(Math.round(v)), 3) : v.toLocaleString('en-US'));
 
 export default function FactorialPanel({ values, results }: Props) {
-  const n = parseInt(values.n, 10);
-  if (isNaN(n) || n < 0 || n > 170) return null;
-
+  const nBig = parseIntegerStrict(values.n, 6);
   const factorialRow = results.find((r) => r.id === 'factorial');
+  const digitRow = results.find((r) => r.id === 'digitCount');
+  if (nBig === null || nBig < 0n || nBig > 1000n || !factorialRow) return null;
+  const n = Number(nBig);
 
-  const chartData = useMemo(() => {
-    const maxDisplay = Math.min(n, 15); // Show up to 15! max for readability
-    const data: { n: number; fact: number }[] = [];
-    for (let i = 0; i <= maxDisplay; i++) {
-      const fact = computeFactorial(i);
-      data.push({ n: i, fact: fact > 1e15 ? parseFloat(fact.toExponential(2)) : fact });
-    }
-    return data;
-  }, [n]);
-
-  const tooltipFormatter: any = (value: number) => {
-    if (value > 1e15) {
-      return [Number(value).toExponential(4), 'n!'];
-    }
-    return [Number(value).toLocaleString(), 'n!'];
-  };
+  const last = Math.min(n, MAX_BARS);
+  const data = [];
+  let f = 1n; // exact 0!, 1!, 2!, ... (Number() of these is exact up to 22!)
+  for (let i = 0; i <= last; i++) {
+    if (i > 1) f *= BigInt(i);
+    data.push({ label: String(i), value: Number(f), color: BAR_COLORS[Math.floor(i / 2) % BAR_COLORS.length] });
+  }
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -53,39 +41,26 @@ export default function FactorialPanel({ values, results }: Props) {
       </div>
 
       <div className="p-5 space-y-4">
-        {chartData.length > 0 && (
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
-              0! through {chartData[chartData.length - 1].n}!
-            </p>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-                <XAxis dataKey="n" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} label={{ value: 'n', position: 'insideBottomRight', offset: -4, fontSize: 10, fill: '#94a3b8' }} />
-                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={55} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  formatter={tooltipFormatter}
-                />
-                <Bar dataKey="fact" radius={[3, 3, 0, 0]} maxBarSize={32}>
-                  {chartData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-            <p className="text-[10px] text-slate-400 text-center mt-1">
-              Factorials grow super-exponentially. {n}! has {computeFactorial(n) > 1e15 ? 'many' : ''} digits.
-            </p>
-          </div>
-        )}
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
+            0! through {last}!
+          </p>
+          <SvgBarChart
+            data={data}
+            ariaLabel={`Bar chart of the factorials 0! through ${last}!, growing from 1 to ${fmtFact(data[data.length - 1].value)}`}
+            height={260}
+            format={fmtFact}
+            maxBarWidth={32}
+          />
+          <p className="text-[10px] text-slate-600 text-center mt-1">
+            Factorials grow super-exponentially. {n}! has {digitRow?.value ?? '?'} digit{digitRow?.value === '1' ? '' : 's'}.
+          </p>
+        </div>
 
-        {/* Result */}
-        {factorialRow && (
-          <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-5 text-center">
-            <p className="text-sm text-slate-500 mb-1">{factorialRow.label}</p>
-            <p className="text-2xl font-bold text-blue-700 font-mono break-all">{factorialRow.value}</p>
-          </div>
-        )}
+        <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-5 text-center">
+          <p className="text-sm text-slate-600 mb-1">{factorialRow.label}</p>
+          <p className="text-2xl font-bold text-blue-700 font-mono break-all max-h-48 overflow-y-auto">{factorialRow.value}</p>
+        </div>
       </div>
     </div>
   );

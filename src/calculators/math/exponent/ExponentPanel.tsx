@@ -1,6 +1,9 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
+import SvgLineChart from '../../../components/charts/SvgLineChart';
+import { analyzePower, parseNumberStrict } from './exponentMath';
+
+// y-axis labels for values that can reach 1e300: 1.2e+24 rather than "1.2e+24B"
+const fmtY = (v: number) => (Math.abs(v) >= 1e6 || (v !== 0 && Math.abs(v) < 1e-3) ? v.toExponential(1) : String(+v.toPrecision(3)));
 
 interface Props {
   values: Record<string, string>;
@@ -16,25 +19,27 @@ export default function ExponentPanel({ values, results }: Props) {
 
   if (!resultRow) return null;
 
-  const base = parseFloat(values.base);
-  const exp = parseFloat(values.exponent);
+  const base = parseNumberStrict(values.base);
+  const exp = parseNumberStrict(values.exponent);
+  if (Number.isNaN(base) || Number.isNaN(exp)) return null;
   const isIntExp = Number.isInteger(exp);
-  const result = Math.pow(base, exp);
+  const power = analyzePower(base, exp);
+  const result = power.kind === 'real' ? (power.value as number) : NaN;
 
-  // Generate curve points for the function
-  const curveData = useMemo(() => {
-    const points: { x: number; y: number }[] = [];
-    if (base <= 0 || isNaN(base)) return points;
+  // Curve of f(x) = base^x around the chosen exponent (only for a positive base: it is real for every x)
+  const curvePoints: { x: number; y: number }[] = [];
+  if (base > 0) {
     const xMin = exp > 0 ? Math.min(0, exp - 2) : Math.min(exp - 2, -2);
     const xMax = exp > 0 ? Math.max(exp + 2, 2) : Math.max(0, exp + 2);
     const steps = 80;
     for (let i = 0; i <= steps; i++) {
       const x = xMin + (i / steps) * (xMax - xMin);
       const y = Math.pow(base, x);
-      if (isFinite(y)) points.push({ x: parseFloat(x.toFixed(4)), y: parseFloat(y.toFixed(4)) });
+      if (Number.isFinite(y)) curvePoints.push({ x, y });
     }
-    return points;
-  }, [base, exp]);
+  }
+  const showCurve = curvePoints.length > 1 && Number.isFinite(result);
+  const expText = String(exp);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -50,28 +55,22 @@ export default function ExponentPanel({ values, results }: Props) {
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 text-center">
           <p className="text-sm text-slate-500 mb-2">Result</p>
           <p className="text-3xl font-bold text-blue-700">
-            {base}<sup className="text-lg">{exp < 0 ? `(${exp})` : exp}</sup> = {resultRow.value}
+            {base < 0 ? `(${base})` : base}<sup className="text-lg">{exp < 0 ? `(${exp})` : exp}</sup> = {resultRow.value}
           </p>
         </div>
 
         {/* Function curve */}
-        {curveData.length > 1 && (
+        {showCurve && (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Exponential Curve f(x) = {base}<sup>x</sup></p>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={curveData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                <XAxis dataKey="x" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} type="number" domain={['auto', 'auto']} />
-                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={50} type="number" domain={['auto', 'auto']} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  formatter={(_: unknown) => [parseFloat((_ as number).toFixed(6)), 'f(x)']}
-                />
-                <ReferenceLine y={0} stroke="#cbd5e1" strokeWidth={1} />
-                <ReferenceLine x={0} stroke="#cbd5e1" strokeWidth={1} />
-                <ReferenceDot x={exp} y={result} r={5} fill="#ef4444" stroke="#fff" strokeWidth={2} label={{ value: `(${exp}, ${resultRow.value})`, position: 'top', fontSize: 10, fill: '#ef4444', fontWeight: 'bold' }} />
-                <Line type="monotone" dataKey="y" stroke="#3b82f6" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            <SvgLineChart
+              series={[{ name: `f(x) = ${base}^x`, points: curvePoints, color: '#2563eb' }]}
+              dots={[{ x: exp, y: result, label: `(${expText}, ${resultRow.value})`, color: '#dc2626' }]}
+              refLines={[{ y: 0, color: '#cbd5e1', dashed: false }, { x: 0, color: '#cbd5e1', dashed: false }]}
+              ariaLabel={`Curve of f(x) = ${base} to the power x, with the point (${expText}, ${resultRow.value}) marked`}
+              height={220}
+              yFormat={fmtY}
+            />
           </div>
         )}
 
@@ -83,10 +82,11 @@ export default function ExponentPanel({ values, results }: Props) {
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-[10px] font-bold text-slate-500 uppercase">Power Definition</p>
             <p className="text-xs font-mono text-slate-700 mt-1">
-              {base}<sup>{isIntExp && exp >= 0 ? exp : `(${exp})`}</sup>
-              {isIntExp && exp >= 0 ? ` = ${base} raised to the ${exp}th power` : ''}
-              {isIntExp && exp < 0 ? ` = 1 divided by ${base} raised to the ${Math.abs(exp)}th power` : ''}
-              {!isIntExp ? ` = ${base} raised to the ${exp} power` : ''}
+              {base < 0 ? `(${base})` : base}<sup>{isIntExp && exp >= 0 ? exp : `(${exp})`}</sup>
+              {isIntExp && exp > 0 ? ` = the product of ${exp} factor${exp === 1 ? '' : 's'} of ${base}` : ''}
+              {isIntExp && exp === 0 ? ' = an empty product, which is 1' : ''}
+              {isIntExp && exp < 0 ? ` = 1 divided by ${base} raised to the power ${Math.abs(exp)}` : ''}
+              {!isIntExp ? ` = ${base} raised to the power ${exp}` : ''}
             </p>
           </div>
 
@@ -103,7 +103,7 @@ export default function ExponentPanel({ values, results }: Props) {
           {/* Fraction conversion */}
           {fractionRow && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-              <p className="text-[10px] font-bold text-amber-600 uppercase">Negative Exponent — Fraction Conversion</p>
+              <p className="text-[10px] font-bold text-amber-800 uppercase">Negative Exponent — Fraction Conversion</p>
               <p className="text-xs font-mono text-amber-800 mt-1">{fractionRow.value}</p>
             </div>
           )}
@@ -119,7 +119,7 @@ export default function ExponentPanel({ values, results }: Props) {
           {/* Inverse / root */}
           {inverseRow && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-              <p className="text-[10px] font-bold text-blue-500 uppercase">Inverse Root</p>
+              <p className="text-[10px] font-bold text-blue-700 uppercase">Inverse Root</p>
               <p className="text-sm font-mono text-blue-700 mt-1">{inverseRow.value}</p>
             </div>
           )}

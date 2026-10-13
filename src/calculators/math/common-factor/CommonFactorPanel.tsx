@@ -1,22 +1,24 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { parsePositiveSafeInt } from '../../../utils/numberTheory';
+import { analyzeCommonFactors } from './commonFactorMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
+const LIST_CAP = 200; // chips rendered per list (highly composite numbers have thousands of factors)
+
 export default function CommonFactorPanel({ values, results }: Props) {
-  const parsedA = parseInt(values.a, 10);
-  const a = isNaN(parsedA) ? 0 : parsedA;
-  const parsedB = parseInt(values.b, 10);
-  const b = isNaN(parsedB) ? 0 : parsedB;
+  const pa = parsePositiveSafeInt(values.a);
+  const pb = parsePositiveSafeInt(values.b);
+  if (pa.kind !== 'ok' || pb.kind !== 'ok' || results.length === 0) return null;
+  const a = pa.n;
+  const b = pb.n;
 
-  if (!a || !b || results.length === 0) return null;
-
-  const gcf = results.find(r => r.id === 'gcf')?.value || '';
-  const commonFactors = results.find(r => r.id === 'commonFactors')?.value || '';
-  const factorsA = results.find(r => r.id === 'factorsA')?.value || '';
-  const factorsB = results.find(r => r.id === 'factorsB')?.value || '';
+  const { gcf, factorsA, factorsB, common } = analyzeCommonFactors(a, b);
+  const commonSet = new Set(common);
+  const more = (list: number[]) => (list.length > LIST_CAP ? list.length - LIST_CAP : 0);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -30,19 +32,20 @@ export default function CommonFactorPanel({ values, results }: Props) {
       <div className="p-5 space-y-4">
         {/* GCF Highlight */}
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-5 text-center">
-          <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Greatest Common Factor</p>
+          <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-1">Greatest Common Factor</p>
           <p className="text-4xl font-bold font-mono text-emerald-700">{gcf}</p>
         </div>
 
         {/* Common Factors */}
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">Common Factors</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-2">Common Factors</p>
           <div className="flex flex-wrap gap-1.5">
-            {commonFactors.split(', ').map((f, i) => (
-              <span key={`item-${i}`} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-blue-100 text-blue-700">
+            {common.slice(0, LIST_CAP).map((f) => (
+              <span key={f} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-blue-100 text-blue-700">
                 {f}
               </span>
             ))}
+            {more(common) > 0 && <span className="text-xs text-slate-600 self-center">+{more(common)} more</span>}
           </div>
         </div>
 
@@ -51,21 +54,23 @@ export default function CommonFactorPanel({ values, results }: Props) {
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
             <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Factors of {a}</p>
             <div className="flex flex-wrap gap-1">
-              {factorsA.split(', ').map((f, i) => (
-                <span key={`item-${i}`} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold ${commonFactors.split(', ').includes(f) ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'}`}>
+              {factorsA.slice(0, LIST_CAP).map((f) => (
+                <span key={f} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold ${commonSet.has(f) ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'}`}>
                   {f}
                 </span>
               ))}
+              {more(factorsA) > 0 && <span className="text-xs text-slate-600 self-center">+{more(factorsA)} more</span>}
             </div>
           </div>
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
             <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Factors of {b}</p>
             <div className="flex flex-wrap gap-1">
-              {factorsB.split(', ').map((f, i) => (
-                <span key={`item-${i}`} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold ${commonFactors.split(', ').includes(f) ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'}`}>
+              {factorsB.slice(0, LIST_CAP).map((f) => (
+                <span key={f} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold ${commonSet.has(f) ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'}`}>
                   {f}
                 </span>
               ))}
+              {more(factorsB) > 0 && <span className="text-xs text-slate-600 self-center">+{more(factorsB)} more</span>}
             </div>
           </div>
         </div>

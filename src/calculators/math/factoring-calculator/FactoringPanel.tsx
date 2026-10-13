@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
+import { analyzeQuadratic } from './quadratic';
 
 interface Props {
   values: Record<string, string>;
@@ -8,10 +8,9 @@ interface Props {
 }
 
 export default function FactoringPanel({ values, results }: Props) {
-  const a = parseFloat(values.a);
-  const b = parseFloat(values.b);
-  const c = parseFloat(values.c);
-  if ([a, b, c].some(isNaN) || a === 0) return null;
+  const q = analyzeQuadratic(values);
+  if (!q) return null;
+  const { a, b, c } = q;
 
   const stepsRow = results.find((r) => r.id === 'steps');
   const originalRow = results.find((r) => r.id === 'original');
@@ -39,31 +38,21 @@ export default function FactoringPanel({ values, results }: Props) {
           <p className="text-xl font-bold text-blue-700 font-mono">{originalRow.value}</p>
         </div>
 
-        {/* Coefficient visual */}
-        {(() => {
-          const rootParts = rootsRow ? (rootsRow.value.match(/[-]?\d+\.?\d*/g)?.map(Number) || []) : [];
-          const chartData = [
-            { name: 'a (x²)', value: a, color: '#3b82f6' },
-            { name: 'b (x)', value: b, color: '#8b5cf6' },
-            { name: 'c (const)', value: c, color: '#10b981' },
-            ...rootParts.map((r, i) => ({ name: `Root ${i+1}`, value: r, color: i === 0 ? '#f59e0b' : '#ef4444' })),
-          ];
-          return (
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Coefficients &amp; Roots</p>
-              <ResponsiveContainer width="100%" height={140}>
-                <BarChart data={chartData} margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} width={40} />
-                  <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={48}>
-                    {chartData.map((entry, i) => (<Cell key={i} fill={entry.color} />))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          );
-        })()}
+        {/* Coefficients and (real) roots; roots come from the exact analysis, not from parsing the result text */}
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Coefficients &amp; Roots</p>
+          <SvgBarChart
+            data={[
+              { label: 'a (x²)', value: a, color: '#2563eb' },
+              { label: 'b (x)', value: b, color: '#7c3aed' },
+              { label: 'c (const)', value: c, color: '#059669' },
+              ...q.roots.map((r, i) => ({ label: `Root ${i + 1}`, value: r, color: i === 0 ? '#d97706' : '#dc2626' })),
+            ]}
+            ariaLabel={`Bar chart of the coefficients a = ${a}, b = ${b}, c = ${c}${q.roots.length ? ` and the roots ${q.rootTexts.join(' and ')}` : ' (the roots are complex, so none are plotted)'}`}
+            height={160}
+            maxBarWidth={48}
+          />
+        </div>
 
         {/* Factored form */}
         {factoredRow && (

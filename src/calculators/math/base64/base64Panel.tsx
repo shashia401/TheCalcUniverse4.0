@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { calculate } from './index';
+import { calculate, encodeBytesResults } from './index';
+import type { Base64Variant } from './base64Codec';
 
 const Base64Panel: React.FC<{
   values?: Record<string, unknown>;
@@ -8,12 +9,18 @@ const Base64Panel: React.FC<{
   const [inputType, setInputType] = useState('Text');
   const [inputText, setInputText] = useState('');
   const [mode, setMode] = useState('Encode');
+  const [variant, setVariant] = useState<Base64Variant>('standard');
+  const [fileBytes, setFileBytes] = useState<Uint8Array | null>(null);
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // A binary file is encoded from its raw bytes (reading it as a data URL would encode the "data:...;base64," text instead).
   const results = useMemo(
-    () => calculate({ inputText, mode }),
-    [inputText, mode]
+    () =>
+      fileBytes && mode === 'Encode'
+        ? encodeBytesResults(fileBytes, variant, fileBytes.length)
+        : calculate({ inputText, mode, variant }),
+    [inputText, mode, variant, fileBytes]
   );
 
   const getResult = (label: string): string => {
@@ -30,17 +37,15 @@ const Base64Panel: React.FC<{
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const isBinary = !file.type.startsWith('text/') && file.type !== '';
     const reader = new FileReader();
     reader.onload = (event) => {
-      const text = event.target?.result as string;
-      setInputText(text);
+      const buf = event.target?.result as ArrayBuffer;
+      const bytes = new Uint8Array(buf);
+      setFileBytes(bytes);
+      // Decode mode (and the length counter) work on the text of the file
+      setInputText(new TextDecoder('utf-8').decode(bytes));
     };
-    if (isBinary) {
-      reader.readAsDataURL(file);
-    } else {
-      reader.readAsText(file);
-    }
+    reader.readAsArrayBuffer(file);
   }, []);
 
   const handleCopy = useCallback(async () => {
@@ -56,6 +61,7 @@ const Base64Panel: React.FC<{
 
   const handleClear = useCallback(() => {
     setInputText('');
+    setFileBytes(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -82,6 +88,7 @@ const Base64Panel: React.FC<{
             onChange={(e) => {
               setInputType(e.target.value);
               setInputText('');
+              setFileBytes(null);
             }}
             style={{
               padding: '8px 12px',
@@ -115,6 +122,28 @@ const Base64Panel: React.FC<{
           >
             <option value="Encode">Encode</option>
             <option value="Decode">Decode</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="base64-variant" style={{ display: 'block', marginBottom: '4px', fontWeight: 600, fontSize: '13px' }}>
+            Variant (encoding)
+          </label>
+          <select
+            id="base64-variant"
+            value={variant}
+            onChange={(e) => setVariant(e.target.value as Base64Variant)}
+            style={{
+              padding: '8px 12px',
+              border: '1px solid var(--border-warm)',
+              borderRadius: '6px',
+              fontSize: '14px',
+              background: 'var(--surface-card)',
+              color: 'var(--surface-text)',
+            }}
+          >
+            <option value="standard">Standard (+ / =)</option>
+            <option value="url">URL-safe (- _ =)</option>
+            <option value="urlnopad">URL-safe, no padding</option>
           </select>
         </div>
       </div>

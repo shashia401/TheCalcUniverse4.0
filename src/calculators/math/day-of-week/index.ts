@@ -1,52 +1,40 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import DayOfWeekPanel from './DayOfWeekPanel';
+import { isLeapYear } from '../../../utils/dates';
+import { parseIntegerStrict } from '../../../utils/rational';
 
 /* ------------------------------------------------------------------ */
 /*  Zeller's Congruence                                                */
 /* ------------------------------------------------------------------ */
 
 /**
- * Calculate the day of the week using Zeller's Congruence for the
- * Gregorian calendar.
- *
- * Returns: 0=Saturday, 1=Sunday, 2=Monday, ..., 6=Friday
+ * Day of the week by Zeller's Congruence for the (proleptic) Gregorian calendar.
+ * Returns 0=Saturday, 1=Sunday, 2=Monday, ..., 6=Friday.
+ *   h = (q + floor(13(m+1)/5) + K + floor(K/4) + floor(J/4) - 2J) mod 7
+ * with q the day, m the month (March = 3 ... February = 14, January and February counting as months 13 and 14 of
+ * the previous year), K = year mod 100 and J = floor(year / 100). Pure integer arithmetic: no Date object, so there is
+ * no 1900 + yy mapping for years 0-99 and no time-zone dependence.
  */
 function zellersCongruence(q: number, m: number, y: number): number {
-  // Zeller's Congruence for Gregorian calendar:
-  // h = (q + floor((13*(m+1))/5) + K + floor(K/4) + floor(J/4) - 2J) mod 7
-  //
-  // Where:
-  //   h = day of week (0=Saturday, 1=Sunday, ..., 6=Friday)
-  //   q = day of month
-  //   m = month (3=March, ..., 14=February; Jan/Feb are month 13/14 of previous year)
-  //   K = year of the century (year mod 100)
-  //   J = century (floor(year/100))
-
-  // January and February are counted as months 13 and 14 of the previous year
   if (m < 3) {
     m += 12;
     y -= 1;
   }
-
   const K = y % 100;
   const J = Math.floor(y / 100);
-
   const h = (q + Math.floor((13 * (m + 1)) / 5) + K + Math.floor(K / 4) + Math.floor(J / 4) - 2 * J) % 7;
-
-  // JavaScript's % can return negative, so normalize
-  return ((h % 7) + 7) % 7;
+  return ((h % 7) + 7) % 7; // JavaScript's % can be negative
 }
 
 const DAY_NAMES = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-/**
- * Validate that a date actually exists (handles e.g. Feb 30, April 31)
- */
-function isValidDate(year: number, month: number, day: number): boolean {
-  const d = new Date(year, month - 1, day);
-  return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day;
-}
+const daysInMonth = (year: number, month: number): number =>
+  month === 2 ? (isLeapYear(year) ? 29 : 28) : [4, 6, 9, 11].includes(month) ? 30 : 31;
+
+/** Last year the calculator accepts (4-digit years; matches the other date tools). */
+export const MAX_YEAR = 9999;
 
 /* ------------------------------------------------------------------ */
 /*  Day of Week calculator config                                      */
@@ -58,9 +46,11 @@ const dayOfWeekConfig: CalculatorConfig = {
       id: 'month',
       label: 'Month',
       type: 'number',
-      placeholder: '1-12',
+      placeholder: '3',
       min: 1,
       max: 12,
+      step: 1,
+      inputMode: 'numeric',
       required: true,
       helpText: 'Enter month as a number (1 = January, 12 = December)',
     },
@@ -68,9 +58,11 @@ const dayOfWeekConfig: CalculatorConfig = {
       id: 'day',
       label: 'Day',
       type: 'number',
-      placeholder: '1-31',
+      placeholder: '15',
       min: 1,
       max: 31,
+      step: 1,
+      inputMode: 'numeric',
       required: true,
       helpText: 'Enter the day of the month',
     },
@@ -78,42 +70,32 @@ const dayOfWeekConfig: CalculatorConfig = {
       id: 'year',
       label: 'Year',
       type: 'number',
-      placeholder: 'e.g., 2024',
+      placeholder: '2024',
       min: 1,
+      max: MAX_YEAR,
+      step: 1,
+      inputMode: 'numeric',
       required: true,
-      helpText: 'Enter any positive year',
+      helpText: 'Enter a year from 1 to 9999 (proleptic Gregorian calendar)',
     },
   ],
 
-  calculate: (values) => {
-    const monthStr = values.month;
-    const dayStr = values.day;
-    const yearStr = values.year;
+  calculate: (values): CalculatorResult[] => {
+    const m = parseIntegerStrict(values.month, 3);
+    const d = parseIntegerStrict(values.day, 3);
+    const y = parseIntegerStrict(values.year, 6);
+    if (m === null || d === null || y === null) return [];
 
-    if (!monthStr || !dayStr || !yearStr) return [];
-
-    const month = parseInt(monthStr, 10);
-    const day = parseInt(dayStr, 10);
-    const year = parseInt(yearStr, 10);
-
-    if (isNaN(month) || isNaN(day) || isNaN(year)) return [];
-    if (month < 1 || month > 12) return [];
-    if (day < 1 || day > 31) return [];
-    if (year < 1) return [];
-
-    // Validate the date actually exists (e.g., Feb 30 is invalid)
-    if (!isValidDate(year, month, day)) return [];
+    const month = Number(m);
+    const day = Number(d);
+    const year = Number(y);
+    if (month < 1 || month > 12 || year < 1 || year > MAX_YEAR) return [];
+    // A date that does not exist (Feb 30, Apr 31, Feb 29 in a common year) has no weekday
+    if (day < 1 || day > daysInMonth(year, month)) return [];
 
     const dowIndex = zellersCongruence(day, month, year);
     const dayName = DAY_NAMES[dowIndex];
-
-    const date = new Date(year, month - 1, day);
-    const formattedDate = date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    const formattedDate = `${dayName}, ${MONTH_NAMES[month - 1]} ${day}, ${year}`;
 
     // Compute Zeller's variables for display
     let zellerMonth = month;
@@ -125,9 +107,9 @@ const dayOfWeekConfig: CalculatorConfig = {
     const K = zellerYear % 100;
     const J = Math.floor(zellerYear / 100);
     const q = day;
-    const m = zellerMonth;
+    const mm = zellerMonth;
 
-    const term1 = Math.floor((13 * (m + 1)) / 5);
+    const term1 = Math.floor((13 * (mm + 1)) / 5);
     const term2 = K;
     const term3 = Math.floor(K / 4);
     const term4 = Math.floor(J / 4);
@@ -135,60 +117,33 @@ const dayOfWeekConfig: CalculatorConfig = {
 
     const rawH = q + term1 + term2 + term3 + term4 - term5;
 
-    return [
-      {
-        id: 'dayOfWeek',
-        label: 'Day of the Week',
-        value: dayName,
-        highlight: true,
-        color: 'positive',
-      },
-      {
-        id: 'formattedDate',
-        label: 'Date',
-        value: formattedDate,
-      },
-      {
-        id: 'month',
-        label: 'Month',
-        value: String(month),
-      },
-      {
-        id: 'day',
-        label: 'Day',
-        value: String(day),
-      },
-      {
-        id: 'year',
-        label: 'Year',
-        value: String(year),
-      },
-      {
-        id: 'zellersFormula',
-        label: "Zeller's Congruence",
-        value: 'h = (q + ⌊13(m+1)/5⌋ + K + ⌊K/4⌋ + ⌊J/4⌋ − 2J) mod 7',
-      },
-      {
-        id: 'zellersResult',
-        label: 'Zeller Result (h)',
-        value: `${dowIndex} → ${dayName}`,
-      },
+    const rows: CalculatorResult[] = [
+      { id: 'dayOfWeek', label: 'Day of the Week', value: dayName, highlight: true, color: 'positive' },
+      { id: 'formattedDate', label: 'Date', value: formattedDate },
+      { id: 'month', label: 'Month', value: String(month) },
+      { id: 'day', label: 'Day', value: String(day) },
+      { id: 'year', label: 'Year', value: String(year) },
+      { id: 'zellersFormula', label: "Zeller's Congruence", value: 'h = (q + ⌊13(m+1)/5⌋ + K + ⌊K/4⌋ + ⌊J/4⌋ − 2J) mod 7' },
+      { id: 'zellersResult', label: 'Zeller Result (h)', value: `${dowIndex} → ${dayName}` },
       {
         id: 'zellersBreakdown',
         label: 'Formula Breakdown',
-        value: `q=${q}, m=${m}, K=${K}, J=${J} → h = (${q} + ${term1} + ${term2} + ${term3} + ${term4} − ${term5}) mod 7 = ${rawH} mod 7 = ${dowIndex}`,
+        value: `q=${q}, m=${mm}, K=${K}, J=${J} → h = (${q} + ${term1} + ${term2} + ${term3} + ${term4} − ${term5}) mod 7 = ${rawH} mod 7 = ${dowIndex}`,
       },
-      {
-        id: 'firstDayOfMonth',
-        label: 'First Day of Month',
-        value: DAY_NAMES[zellersCongruence(1, month, year)],
-      },
-      {
-        id: 'daysInMonth',
-        label: 'Days in Month',
-        value: String(new Date(year, month, 0).getDate()),
-      },
+      { id: 'firstDayOfMonth', label: 'First Day of Month', value: DAY_NAMES[zellersCongruence(1, month, year)] },
+      { id: 'daysInMonth', label: 'Days in Month', value: String(daysInMonth(year, month)) },
     ];
+
+    // Before the Gregorian reform (15 October 1582) the Julian calendar was in use in Catholic Europe, and later elsewhere
+    if (year < 1582 || (year === 1582 && (month < 10 || (month === 10 && day < 15)))) {
+      rows.push({
+        id: 'calendarNote',
+        label: 'Calendar note',
+        value:
+          'This date is before the Gregorian calendar was introduced (15 October 1582). The weekday shown extends the Gregorian rules backwards (the proleptic Gregorian calendar of ISO 8601); a date recorded in the Julian calendar at the time falls on a different weekday.',
+      });
+    }
+    return rows;
   },
 
   extraPanel: (values, results) => {

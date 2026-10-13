@@ -1,45 +1,62 @@
 import { createElement } from 'react';
 import type { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import Base64Panel from './base64Panel';
+import { Base64Variant, base64ToBytes, bytesToBase64, bytesToText, hexPreview, textToBytes } from './base64Codec';
 
-export function calculate(
-  values: Record<string, unknown>
-): CalculatorResult[] {
+const codePoints = (s: string): number => Array.from(s).length;
+
+const VARIANTS: Base64Variant[] = ['standard', 'url', 'urlnopad'];
+const parseVariant = (v: unknown): Base64Variant => (VARIANTS.includes(v as Base64Variant) ? (v as Base64Variant) : 'standard');
+
+/** Encode raw bytes (also used by the panel for binary files). `originalChars` is the text length when the input was text. */
+export function encodeBytesResults(bytes: Uint8Array, variant: Base64Variant, originalChars: number): CalculatorResult[] {
+  const encoded = bytesToBase64(bytes, variant);
+  return [
+    { id: 'Output', label: 'Output', value: encoded },
+    { id: 'Original Character Count', label: 'Original Character Count', value: String(originalChars) },
+    { id: 'Encoded Character Count', label: 'Encoded Character Count', value: String(encoded.length) },
+    { id: 'Mode', label: 'Mode', value: 'Encode' },
+    { id: 'Original Byte Count', label: 'Input Size (UTF-8 bytes)', value: String(bytes.length) },
+  ];
+}
+
+export function calculate(values: Record<string, unknown>): CalculatorResult[] {
   const inputText = String(values.inputText ?? '');
   const mode = String(values.mode || 'Encode');
+  const variant = parseVariant(values.variant);
 
-  if (!inputText.trim()) {
-    return [];
-  }
+  if (!inputText.trim()) return [];
 
-  const originalChars = inputText.length;
+  const originalChars = codePoints(inputText);
 
   if (mode === 'Encode') {
-    const encoded = btoa(inputText);
-    return [
-      { id: 'Output', label: 'Output', value: encoded },
-      { id: 'Original Character Count', label: 'Original Character Count', value: String(originalChars) },
-      { id: 'Encoded Character Count', label: 'Encoded Character Count', value: String(encoded.length) },
-      { id: 'Mode', label: 'Mode', value: 'Encode' },
-    ];
+    // UTF-8 first, as RFC 4648 encodes bytes: "héllo" -> "aMOpbGxv" (btoa would give the Latin-1 bytes "aOlsbG8=")
+    return encodeBytesResults(textToBytes(inputText), variant, originalChars);
   }
 
   if (mode === 'Decode') {
-    try {
-      const decoded = atob(inputText);
-      return [
-        { id: 'Output', label: 'Output', value: decoded },
-        { id: 'Original Character Count', label: 'Original Character Count', value: String(originalChars) },
-        { id: 'Decoded Character Count', label: 'Decoded Character Count', value: String(decoded.length) },
-        { id: 'Mode', label: 'Mode', value: 'Decode' },
-      ];
-    } catch {
+    const dec = base64ToBytes(inputText);
+    if (!dec.ok) {
       return [
         { id: 'Output', label: 'Output', value: '[Invalid Base64]' },
         { id: 'Original Character Count', label: 'Original Character Count', value: String(originalChars) },
         { id: 'Mode', label: 'Mode', value: 'Decode' },
+        { id: 'Error', label: 'Why it is invalid', value: dec.reason },
       ];
     }
+    const text = bytesToText(dec.bytes);
+    const rows: CalculatorResult[] = [
+      {
+        id: 'Output',
+        label: 'Output',
+        value: text ?? `[Binary data, ${dec.bytes.length} bytes, not UTF-8 text] hex: ${hexPreview(dec.bytes)}`,
+      },
+      { id: 'Original Character Count', label: 'Original Character Count', value: String(originalChars) },
+      { id: 'Decoded Character Count', label: 'Decoded Character Count', value: String(text === null ? dec.bytes.length : codePoints(text)) },
+      { id: 'Mode', label: 'Mode', value: 'Decode' },
+      { id: 'Decoded Byte Count', label: 'Decoded Size (bytes)', value: String(dec.bytes.length) },
+    ];
+    return rows;
   }
 
   return [];
@@ -47,7 +64,7 @@ export function calculate(
 
 const base64Config: CalculatorConfig = {
   inputs: [
-    { id: 'inputText', label: 'Input Text', type: 'text', placeholder: 'Enter text to encode or decode', required: true, helpText: 'Enter text to encode or Base64 string to decode' },
+    { id: 'inputText', label: 'Input Text', type: 'text', placeholder: 'Enter text to encode or decode', required: true, helpText: 'Enter text to encode (UTF-8) or a Base64 string to decode (standard or URL-safe alphabet, padding optional)' },
     {
       id: 'mode', label: 'Mode', type: 'select', required: true,
       options: [
@@ -55,6 +72,15 @@ const base64Config: CalculatorConfig = {
         { value: 'Decode', label: 'Decode (Base64 → Text)' },
       ],
       helpText: 'Choose whether to encode or decode the input',
+    },
+    {
+      id: 'variant', label: 'Encoding variant', type: 'select',
+      options: [
+        { value: 'standard', label: 'Standard (RFC 4648 §4: + / and = padding)' },
+        { value: 'url', label: 'URL-safe (RFC 4648 §5: - _ with = padding)' },
+        { value: 'urlnopad', label: 'URL-safe, no padding (JWT style)' },
+      ],
+      helpText: 'Applies to encoding. Decoding accepts both alphabets and missing padding.',
     },
   ],
 
@@ -99,7 +125,7 @@ const base64Config: CalculatorConfig = {
       },
       {
         question: 'What is the difference between Base64 and Base64URL?',
-        answer: 'Standard Base64 uses + and / characters, which have special meaning in URLs (a + becomes a space in query strings, and / is a path separator). Base64URL is a variant that replaces + with - and / with _, and omits the = padding entirely. This makes Base64URL-encoded strings safe in URLs, query parameters, and filenames without additional percent-encoding, and it is commonly used in JSON Web Tokens (JWTs).',
+        answer: 'Standard Base64 uses + and / characters, which have special meaning in URLs (a + becomes a space in query strings, and / is a path separator). Base64URL is a variant that replaces + with - and / with _, and typically omits the = padding (RFC 4648 makes padding optional there; this calculator offers both). This makes Base64URL-encoded strings safe in URLs, query parameters, and filenames without additional percent-encoding, and it is commonly used in JSON Web Tokens (JWTs).',
       },
     ],
     citations: [

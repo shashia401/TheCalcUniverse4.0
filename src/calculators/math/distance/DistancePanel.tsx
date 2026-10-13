@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceDot } from 'recharts';
+import SvgLineChart from '../../../components/charts/SvgLineChart';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
 interface Props {
   values: Record<string, string>;
@@ -16,13 +16,13 @@ export default function DistancePanel({ values, results }: Props) {
 
   if (!distance || !formula) return null;
 
-  const x1 = parseFloat(values.x1 || values.x1_1 || '0');
-  const y1 = parseFloat(values.y1 || values.y1_1 || '0');
-  const x2 = parseFloat(values.x2 || values.x2_1 || '0');
-  const y2 = parseFloat(values.y2 || values.y2_1 || '0');
-
-  const dim = parseFloat(values.dim || '2');
-  const hasCoords = ![x1, y1, x2, y2].some(isNaN) && dim >= 2;
+  // Segment drawn in the x-y plane (2D mode, and the projection for 3D); 1D has no plane.
+  const mode = values.mode || '2d';
+  const x1 = parseNumberStrict(values.x1);
+  const y1 = parseNumberStrict(values.y1);
+  const x2 = parseNumberStrict(values.x2);
+  const y2 = parseNumberStrict(values.y2);
+  const hasCoords = mode === '2d' && [x1, y1, x2, y2].every(Number.isFinite);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -46,16 +46,15 @@ export default function DistancePanel({ values, results }: Props) {
         {hasCoords && (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Line Segment</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={[{ x: 0, y: 0 }, { x: x1, y: y1 }, { x: x2, y: y2 }].filter(p => isFinite(p.x) && isFinite(p.y))} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
-                <XAxis dataKey="x" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} type="number" domain={['auto', 'auto']} />
-                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={45} type="number" domain={['auto', 'auto']} />
-                <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px' }} />
-                <Line type="linear" dataKey="y" stroke="#3b82f6" strokeWidth={2.5} dot={false} activeDot={false} isAnimationActive={false} />
-                <ReferenceDot x={x1} y={y1} r={6} fill="#ef4444" stroke="#fff" strokeWidth={2} label={{ value: `(${x1}, ${y1})`, position: 'top', fontSize: 10, fill: '#ef4444', fontWeight: 'bold' }} />
-                <ReferenceDot x={x2} y={y2} r={6} fill="#10b981" stroke="#fff" strokeWidth={2} label={{ value: `(${x2}, ${y2})`, position: 'top', fontSize: 10, fill: '#10b981', fontWeight: 'bold' }} />
-              </LineChart>
-            </ResponsiveContainer>
+            <SvgLineChart
+              series={[{ name: 'Segment from point 1 to point 2', points: [{ x: x1, y: y1 }, { x: x2, y: y2 }], color: '#2563eb' }]}
+              dots={[
+                { x: x1, y: y1, label: `(${x1}, ${y1})`, color: '#dc2626' },
+                { x: x2, y: y2, label: `(${x2}, ${y2})`, color: '#059669' },
+              ]}
+              ariaLabel={`Line segment from (${x1}, ${y1}) to (${x2}, ${y2}) in the plane`}
+              height={220}
+            />
           </div>
         )}
 
@@ -68,7 +67,7 @@ export default function DistancePanel({ values, results }: Props) {
         {/* Step-by-step */}
         {steps && (
           <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-blue-500 uppercase mb-1">Calculation Steps</p>
+            <p className="text-[10px] font-bold text-blue-700 uppercase mb-1">Calculation Steps</p>
             <p className="text-sm font-mono text-blue-700 whitespace-pre-wrap">{steps.value}</p>
           </div>
         )}

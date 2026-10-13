@@ -71,7 +71,7 @@ const QUICK_REF: Record<string, QuickRefEntry[]> = {
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
-  weight: 'âš–',
+  weight: '⚖️',
   length: '📏',
   temperature: '🌡',
   volume: '🧪',
@@ -172,7 +172,7 @@ export default function ConversionPanel({ values, results }: Props) {
         {/* Category badge */}
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-            <span>{icon}</span>
+            <span aria-hidden="true">{icon}</span>
             <span>{categoryRow.value}</span>
           </span>
         </div>

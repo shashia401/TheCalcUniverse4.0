@@ -1,6 +1,12 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import FractionToDecimalPanel from './FractionToDecimalPanel';
+import { computeF2d, describeDecimal, nearestSimpleFraction, percentOf } from './f2dMath';
+import { subFrac } from '../../../utils/rational';
+
+// Exact BigInt rational arithmetic (src/utils/rational.ts): the decimal typed in "Decimal -> Fraction" is
+// read digit-for-digit (0.1 is exactly 1/10), and a fraction's decimal is produced by long division so the
+// repeating block and its period are exact.
 
 const fractionToDecimalConfig: CalculatorConfig = {
   inputs: [
@@ -21,7 +27,9 @@ const fractionToDecimalConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '3',
       step: 1,
-      helpText: 'The integer part of a mixed number (e.g., the 3 in 3½)',
+      inputMode: 'numeric',
+      helpText: 'The integer part of a mixed number (e.g., the 3 in 3½). Put the minus sign here: −2 3/4 means −(2 + 3/4).',
+      showWhen: (v) => v.mode === 'mixed',
     },
     {
       id: 'numerator',
@@ -30,6 +38,7 @@ const fractionToDecimalConfig: CalculatorConfig = {
       placeholder: '3',
       step: 1,
       helpText: 'The top number of the fraction',
+      showWhen: (v) => v.mode !== 'dtof',
     },
     {
       id: 'denominator',
@@ -39,6 +48,7 @@ const fractionToDecimalConfig: CalculatorConfig = {
       step: 1,
       min: 1,
       helpText: 'The bottom number of the fraction',
+      showWhen: (v) => v.mode !== 'dtof',
     },
     {
       id: 'decimal',
@@ -46,61 +56,72 @@ const fractionToDecimalConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '0.75',
       step: 0.0001,
-      helpText: 'For decimal → fraction conversion',
+      inputMode: 'decimal',
+      helpText: 'For decimal → fraction conversion. Read exactly as typed (0.333333 is 333333/1000000).',
+      showWhen: (v) => v.mode === 'dtof',
     },
   ],
-  calculate: (values) => {
-    const mode = values.mode || 'ftod';
-
-    const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b);
-
-    if (mode === 'ftod') {
-      const num = parseFloat(values.numerator);
-      const den = parseFloat(values.denominator);
-      if (isNaN(num) || isNaN(den) || den === 0) return [];
-      const decimal = num / den;
-      const pct = decimal * 100;
-      return [
-        { id: 'decimal', label: 'Decimal', value: decimal.toString(), highlight: true, color: 'positive' },
-        { id: 'percentage', label: 'As Percentage', value: `${pct.toFixed(4).replace(/\.?0+$/, '')}%`, color: 'neutral' },
-        { id: 'simplified', label: 'Simplified Fraction', value: (() => { const g = gcd(Math.abs(Math.round(num)), Math.abs(Math.round(den))); return `${Math.round(num)/g}/${Math.round(den)/g}`; })(), color: 'neutral' },
-      ];
-    }
+  calculate: (values): CalculatorResult[] => {
+    const out = computeF2d(values);
+    if (out.kind === 'incomplete') return [];
+    if (out.kind === 'invalid') return [{ id: 'error', label: 'Error', value: out.message, color: 'negative' }];
+    const { mode, frac, improper } = out.comp;
+    const dec = describeDecimal(frac);
+    const rows: CalculatorResult[] = [];
 
     if (mode === 'dtof') {
-      const decimal = parseFloat(values.decimal);
-      if (isNaN(decimal)) return [];
-      const precision = 1000000;
-      const num = Math.round(decimal * precision);
-      const den = precision;
-      const g = gcd(Math.abs(num), den);
-      const simplNum = num / g;
-      const simplDen = den / g;
-      return [
-        { id: 'fraction', label: 'Fraction', value: `${simplNum}/${simplDen}`, highlight: true, color: 'positive' },
-        { id: 'percentage', label: 'As Percentage', value: `${(decimal * 100).toFixed(4).replace(/\.?0+$/, '')}%`, color: 'neutral' },
-      ];
+      rows.push({ id: 'fraction', label: 'Fraction', value: `${frac.n}/${frac.d}`, highlight: true, color: 'positive' });
+      if (frac.d > 1000n) {
+        const near = nearestSimpleFraction(frac, 1000n);
+        // only suggest it when it is a genuinely close match (relative error below 1e-5): 0.333333 -> 1/3, but never 0.000125 -> 0
+        const diff = subFrac(near, frac);
+        const close = near.n !== 0n && (diff.n < 0n ? -diff.n : diff.n) * 100000n * frac.d < (frac.n < 0n ? -frac.n : frac.n) * diff.d;
+        if (close && (near.n !== frac.n || near.d !== frac.d)) {
+          rows.push({
+            id: 'nearestFraction',
+            label: 'Nearest simple fraction (denominator up to 1000)',
+            value: `${near.n}/${near.d}`,
+            color: 'neutral',
+          });
+        }
+      }
+      if (frac.d !== 1n && (frac.n < 0n ? -frac.n : frac.n) > frac.d) {
+        const abs = frac.n < 0n ? -frac.n : frac.n;
+        rows.push({ id: 'mixedNumber', label: 'As a Mixed Number', value: `${frac.n < 0n ? '-' : ''}${abs / frac.d} ${abs % frac.d}/${frac.d}`, color: 'neutral' });
+      }
+      rows.push({ id: 'percentage', label: 'As Percentage', value: percentOf(frac), color: 'neutral' });
+      return rows;
     }
 
-    if (mode === 'mixed') {
-      const whole = parseFloat(values.wholeNumber) || 0;
-      const num = parseFloat(values.numerator);
-      const den = parseFloat(values.denominator);
-      if (isNaN(num) || isNaN(den) || den === 0) return [];
-      const decimal = whole + num / den;
-      const improperNum = whole * den + num;
-      return [
-        { id: 'decimal', label: 'Decimal', value: decimal.toString(), highlight: true, color: 'positive' },
-        { id: 'improper', label: 'Improper Fraction', value: `${improperNum}/${den}`, color: 'neutral' },
-        { id: 'percentage', label: 'As Percentage', value: `${(decimal * 100).toFixed(4).replace(/\.?0+$/, '')}%`, color: 'neutral' },
-      ];
+    rows.push({ id: 'decimal', label: 'Decimal', value: dec.rounded, highlight: true, color: 'positive' });
+    if (dec.exact !== dec.rounded) {
+      rows.push({
+        id: 'exactDecimal',
+        label: dec.terminating ? 'Exact decimal' : 'Exact decimal (repeating digits in brackets)',
+        value: dec.exact,
+        color: 'neutral',
+      });
     }
-
-    return [];
+    rows.push({
+      id: 'decimalType',
+      label: 'Decimal type',
+      value: dec.terminating
+        ? 'Terminating'
+        : dec.truncated
+          ? 'Repeating (period longer than 2000 digits)'
+          : `Repeating, period ${dec.period}`,
+      color: 'neutral',
+    });
+    rows.push({ id: 'percentage', label: 'As Percentage', value: percentOf(frac), color: 'neutral' });
+    if (mode === 'mixed' && improper) {
+      rows.push({ id: 'improper', label: 'Improper Fraction', value: `${improper.n}/${improper.d}`, color: 'neutral' });
+    }
+    rows.push({ id: 'simplified', label: 'Simplified Fraction', value: `${frac.n}/${frac.d}`, color: 'neutral' });
+    return rows;
   },
 
   extraPanel: (values, results) => {
-    if (!results.length) return null;
+    if (!results.length || results[0].id === 'error') return null;
     return createElement(FractionToDecimalPanel, { values, results });
   },
 
@@ -130,7 +151,7 @@ const fractionToDecimalConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What is a repeating decimal?',
-        answer: 'A decimal that repeats a pattern infinitely, like 0.333... (1/3) or 0.142857142857... (1/7). These fractions have denominators with prime factors other than 2 or 5. The repeating pattern is called the repetend and is often written with a vinculum (bar) over the repeating digits: 0.3. Every rational number (fraction of integers) either terminates or repeats — there is no third possibility.',
+        answer: 'A decimal that repeats a pattern infinitely, like 0.333... (1/3) or 0.142857142857... (1/7). These fractions have denominators with prime factors other than 2 or 5. The repeating pattern is called the repetend and is often written with a vinculum (bar) over the repeating digits, or in bracket notation as this calculator does: 0.(3) for 1/3 and 0.(142857) for 1/7. Every rational number (fraction of integers) either terminates or repeats — there is no third possibility.',
       },
       {
         question: 'How do I simplify a fraction?',
@@ -138,7 +159,7 @@ const fractionToDecimalConfig: CalculatorConfig = {
       },
       {
         question: 'Why do some decimals terminate while others repeat?',
-        answer: 'A decimal terminates when the denominator\'s only prime factors are 2 and 5 — the prime factors of 10 (our base-10 number system). For example, 1/8 = 0.125 because 8 = 2. If the denominator has any other prime factor (like 3, 7, 11), the decimal repeats. This is a fundamental property of our base-10 number system.',
+        answer: 'A decimal terminates when the denominator\'s only prime factors are 2 and 5 — the prime factors of 10 (our base-10 number system). For example, 1/8 = 0.125 because 8 = 2³. If the denominator has any other prime factor (like 3, 7, 11), the decimal repeats. This is a fundamental property of our base-10 number system.',
       },
       {
         question: 'How do I convert a mixed number like 2 3/4 to a decimal?',

@@ -334,11 +334,11 @@ function CalculationPanel({ results }: { results: CalculatorResult[] }) {
               </p>
               <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
                 <pre className="text-xs font-mono text-slate-700 leading-relaxed">
-                  <span className="text-amber-600">{detail.carryBits}</span>  <span className="text-[10px] text-amber-500">(carry bits)</span>{'\n'}
-                  {ops.a}  <span className="text-[10px] text-slate-400">(operand 1)</span>{'\n'}
-                  {ops.b}  <span className="text-[10px] text-slate-400">(operand 2)</span>{'\n'}
+                  <span className="text-amber-600">{detail.carryBits}</span>  <span className="text-[10px] text-amber-700">(carry bits)</span>{'\n'}
+                  {ops.a}  <span className="text-[10px] text-slate-600">(operand 1)</span>{'\n'}
+                  {ops.b}  <span className="text-[10px] text-slate-600">(operand 2)</span>{'\n'}
                   <span className="text-slate-300">{'─'.repeat(Math.max(ops.a.length, 16))}</span>{'\n'}
-                  <span className="text-blue-700 font-bold">{detail.sumBits}</span>  <span className="text-[10px] text-blue-500">(sum)</span>
+                  <span className="text-blue-700 font-bold">{detail.sumBits}</span>  <span className="text-[10px] text-blue-700">(sum)</span>
                 </pre>
                 <p className="text-[10px] text-slate-500 mt-1">
                   Carry-out: <span className="font-mono font-bold">{detail.finalCarry}</span>
@@ -517,7 +517,7 @@ function ByteLayoutSection({ results }: { results: CalculatorResult[] }) {
                     key={`byte-${i}`}
                     className={`border-b border-slate-100 ${isDiff ? 'bg-amber-50/60' : ''}`}
                   >
-                    <td className="py-1.5 px-3 text-slate-400">{addr}</td>
+                    <td className="py-1.5 px-3 text-slate-600">{addr}</td>
                     <td className={`py-1.5 px-3 font-bold ${isDiff ? 'text-amber-700' : 'text-slate-700'}`}>
                       {valBE}
                     </td>

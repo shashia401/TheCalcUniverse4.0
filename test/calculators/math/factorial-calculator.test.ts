@@ -49,7 +49,7 @@ describe('Factorial calculator', () => {
     expect(getValue(r, 'trailingZeros')).toBe('24');
   });
 
-  it('computes 170! (max valid)', () => {
+  it('computes 170! (last factorial a double can hold)', () => {
     const r = config.calculate({ n: '170' });
     const fact = getValue(r, 'factorial');
     expect(fact).toBeDefined();
@@ -72,8 +72,9 @@ describe('Factorial calculator', () => {
     expect(config.calculate({ n: '-1' })).toEqual([]);
   });
 
-  it('returns empty for n > 170', () => {
-    expect(config.calculate({ n: '171' })).toEqual([]);
+  it('returns empty for n > 1000 (171..1000 are exact since the BigInt rewrite)', () => {
+    expect(config.calculate({ n: '1001' })).toEqual([]);
+    expect(getValue(config.calculate({ n: '171' }), 'digitCount')).toBe('310'); // Python len(str(171!))
   });
 
   it('returns empty for invalid input', () => {

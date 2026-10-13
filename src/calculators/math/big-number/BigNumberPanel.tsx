@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
 
 interface Props {
   values: Record<string, string>;
@@ -45,7 +44,7 @@ export default function BigNumberPanel({ values, results }: Props) {
         {/* Result */}
         {result && (
           <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-5">
-            <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Exact Result</p>
+            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-1">Exact Result</p>
             <div className="text-sm font-mono text-emerald-700 break-all max-h-40 overflow-y-auto leading-relaxed">
               {result}
             </div>
@@ -63,7 +62,7 @@ export default function BigNumberPanel({ values, results }: Props) {
             <p className="text-sm font-bold font-mono text-slate-700">{results.find(r => r.id === 'digitCountB')?.value}</p>
           </div>
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-center">
-            <p className="text-[10px] font-bold text-emerald-500 uppercase">Result Digits</p>
+            <p className="text-[10px] font-bold text-emerald-700 uppercase">Result Digits</p>
             <p className="text-sm font-bold font-mono text-emerald-700">{digitCount}</p>
           </div>
         </div>
@@ -75,26 +74,20 @@ export default function BigNumberPanel({ values, results }: Props) {
           const dR = parseInt(digitCount || '0', 10);
           if (dA <= 0 && dB <= 0 && dR <= 0) return null;
           const chartData = [
-            { name: 'Value 1', value: dA, color: '#3b82f6' },
-            { name: 'Value 2', value: dB, color: '#8b5cf6' },
-            { name: 'Result', value: dR, color: '#10b981' },
+            { label: 'Value 1', value: dA, color: '#2563eb' },
+            { label: 'Value 2', value: dB, color: '#7c3aed' },
+            { label: 'Result', value: dR, color: '#059669' },
           ];
           return (
             <div className="rounded-xl border border-slate-200 bg-white p-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Digit Count Comparison</p>
-              <ResponsiveContainer width="100%" height={160}>
-                <BarChart data={chartData} margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} width={40} />
-                  <Tooltip
-                    contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                    formatter={((val: number) => [`${val} digits`, 'Count']) as any}
-                  />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={48}>
-                    {chartData.map((entry, i) => (<Cell key={i} fill={entry.color} />))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <SvgBarChart
+                data={chartData}
+                ariaLabel={`Digits in Value 1 (${dA}), Value 2 (${dB}) and the result (${dR})`}
+                height={160}
+                format={(v) => `${Math.round(v)}`}
+                maxBarWidth={48}
+              />
             </div>
           );
         })()}

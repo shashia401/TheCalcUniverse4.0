@@ -1,44 +1,53 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import FractionPanel from './FractionPanel';
-import Decimal from 'decimal.js';
+import { fmtFrac, computeFraction, decimalViews, mixedNumber, OP_LABEL, OP_SYMBOL, FractionComputation } from './fractionMath';
 
-// Decimal.js used for decimal-to-precision conversion when fractions
-// involve very large denominators where native division can drift.
-// Core fraction arithmetic is integer-based and exact.
+// All arithmetic is exact BigInt rational arithmetic (src/utils/rational.ts): no float is ever involved,
+// so very large numerators/denominators stay exact. fractionMath.ts is shared with FractionPanel.
 
-function gcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) {
-    [a, b] = [b, a % b];
+function stepsFor(c: FractionComputation) {
+  const { op, a, b } = c;
+  const f = (n: bigint, d: bigint) => `${n}/${d}`;
+  const steps: { label: string; expr: string; note?: string }[] = [];
+  if (op === 'add' || op === 'subtract') {
+    const sym = OP_SYMBOL[op];
+    steps.push({
+      label: 'Find a common denominator (LCM)',
+      expr: `LCM(${a.d}, ${b.d}) = ${c.lcd}`,
+      note: 'You can only add or subtract fractions that share a denominator.',
+    });
+    steps.push({
+      label: 'Rewrite both fractions over it',
+      expr: `${f(a.n, a.d)} = ${f(c.adjA!, c.lcd!)}  ·  ${f(b.n, b.d)} = ${f(c.adjB!, c.lcd!)}`,
+    });
+    steps.push({
+      label: `${op === 'add' ? 'Add' : 'Subtract'} the numerators`,
+      expr: `(${c.adjA} ${sym} ${c.adjB})/${c.lcd} = ${f(c.rawN, c.rawD)}`,
+    });
+  } else if (op === 'multiply') {
+    steps.push({
+      label: 'Multiply straight across',
+      expr: `${f(a.n, a.d)} × ${f(b.n, b.d)} = (${a.n}×${b.n})/(${a.d}×${b.d}) = ${f(c.rawN, c.rawD)}`,
+      note: 'No common denominator is needed for multiplication.',
+    });
+  } else {
+    steps.push({
+      label: 'Flip the second fraction and multiply',
+      expr: `${f(a.n, a.d)} ÷ ${f(b.n, b.d)} = ${f(a.n, a.d)} × ${f(b.d, b.n)}`,
+      note: 'Keep, change, flip — dividing is multiplying by the reciprocal.',
+    });
+    steps.push({
+      label: 'Multiply straight across',
+      expr: `(${a.n}×${b.d})/(${a.d}×${b.n}) = ${f(c.rawN, c.rawD)}`,
+    });
   }
-  return a;
-}
-
-function lcm(a: number, b: number): number {
-  if (a === 0 || b === 0) return 0;
-  return Math.abs(a * b) / gcd(a, b);
-}
-
-interface Fraction {
-  numerator: number;
-  denominator: number;
-}
-
-function simplify(frac: Fraction): Fraction {
-  if (frac.denominator === 0) return frac;
-  const g = gcd(Math.abs(frac.numerator), Math.abs(frac.denominator));
-  const sign = frac.denominator < 0 ? -1 : 1;
-  return {
-    numerator: (frac.numerator / g) * sign,
-    denominator: (frac.denominator / g) * sign,
-  };
-}
-
-function toDecimal(frac: Fraction): number {
-  if (frac.denominator === 0) return NaN;
-  return frac.numerator / frac.denominator;
+  steps.push({
+    label: 'Simplify to lowest terms',
+    expr: `${f(c.rawN, c.rawD)} = ${fmtFrac(c.result)}`,
+    note: 'Divide the top and bottom by their greatest common divisor (GCD), keeping the denominator positive.',
+  });
+  return steps;
 }
 
 const fractionConfig: CalculatorConfig = {
@@ -63,7 +72,7 @@ const fractionConfig: CalculatorConfig = {
       step: 1,
       inputMode: 'numeric',
       required: true,
-      helpText: 'Top number of the first fraction. Can be positive, negative, or zero.',
+      helpText: 'Top number of the first fraction. Any whole number: positive, negative, or zero.',
     },
     {
       id: 'aDen',
@@ -74,7 +83,7 @@ const fractionConfig: CalculatorConfig = {
       inputMode: 'numeric',
       min: 1,
       required: true,
-      helpText: 'Bottom number of the first fraction. Must be a positive integer greater than zero.',
+      helpText: 'Bottom number of the first fraction. Must be a positive whole number greater than zero.',
     },
     {
       id: 'bNum',
@@ -84,7 +93,7 @@ const fractionConfig: CalculatorConfig = {
       step: 1,
       inputMode: 'numeric',
       required: true,
-      helpText: 'Top number of the second fraction. Can be positive, negative, or zero.',
+      helpText: 'Top number of the second fraction. Any whole number: positive, negative, or zero.',
     },
     {
       id: 'bDen',
@@ -95,185 +104,54 @@ const fractionConfig: CalculatorConfig = {
       inputMode: 'numeric',
       min: 1,
       required: true,
-      helpText: 'Bottom number of the second fraction. Must be a positive integer greater than zero.',
+      helpText: 'Bottom number of the second fraction. Must be a positive whole number greater than zero.',
     },
   ],
   explainSteps: (values) => {
-    const mode = values.mode || 'add';
-    const aNum = parseInt(values.aNum) || 0;
-    const aDen = parseInt(values.aDen);
-    const bNum = parseInt(values.bNum) || 0;
-    const bDen = parseInt(values.bDen);
-
-    if (isNaN(aDen) || isNaN(bDen) || aDen <= 0 || bDen <= 0) return [];
-
-    const fmtFrac = (f: Fraction) => (f.denominator === 1 ? `${f.numerator}` : `${f.numerator}/${f.denominator}`);
-    const steps: { label: string; expr: string; note?: string }[] = [];
-
-    if (mode === 'add' || mode === 'subtract') {
-      const op = mode === 'add' ? '+' : '−';
-      const commonLcm = lcm(aDen, bDen);
-      const factorA = commonLcm / aDen;
-      const factorB = commonLcm / bDen;
-      const adjustedANum = aNum * factorA;
-      const adjustedBNum = bNum * factorB;
-      const resultNum = mode === 'add' ? adjustedANum + adjustedBNum : adjustedANum - adjustedBNum;
-      const result = simplify({ numerator: resultNum, denominator: commonLcm });
-      steps.push({
-        label: 'Find a common denominator (LCM)',
-        expr: `LCM(${aDen}, ${bDen}) = ${commonLcm}`,
-        note: 'You can only add or subtract fractions that share a denominator.',
-      });
-      steps.push({
-        label: 'Rewrite both fractions over it',
-        expr: `${aNum}/${aDen} = ${adjustedANum}/${commonLcm}  ·  ${bNum}/${bDen} = ${adjustedBNum}/${commonLcm}`,
-      });
-      steps.push({
-        label: `${mode === 'add' ? 'Add' : 'Subtract'} the numerators`,
-        expr: `(${adjustedANum} ${op} ${adjustedBNum})/${commonLcm} = ${resultNum}/${commonLcm}`,
-      });
-      steps.push({
-        label: 'Simplify to lowest terms',
-        expr: `${resultNum}/${commonLcm} = ${fmtFrac(result)}`,
-        note: 'Divide the top and bottom by their greatest common divisor (GCD).',
-      });
-      return steps;
-    }
-
-    if (mode === 'multiply') {
-      const resultNum = aNum * bNum;
-      const resultDen = aDen * bDen;
-      const result = simplify({ numerator: resultNum, denominator: resultDen });
-      steps.push({
-        label: 'Multiply straight across',
-        expr: `${aNum}/${aDen} × ${bNum}/${bDen} = (${aNum}×${bNum})/(${aDen}×${bDen}) = ${resultNum}/${resultDen}`,
-        note: 'No common denominator is needed for multiplication.',
-      });
-      steps.push({
-        label: 'Simplify to lowest terms',
-        expr: `${resultNum}/${resultDen} = ${fmtFrac(result)}`,
-      });
-      return steps;
-    }
-
-    // divide: flip and multiply
-    const resultNum = aNum * bDen;
-    const resultDen = aDen * bNum;
-    if (resultDen === 0) return [];
-    const result = simplify({ numerator: resultNum, denominator: resultDen });
-    steps.push({
-      label: 'Flip the second fraction and multiply',
-      expr: `${aNum}/${aDen} ÷ ${bNum}/${bDen} = ${aNum}/${aDen} × ${bDen}/${bNum}`,
-      note: 'Keep, change, flip — dividing is multiplying by the reciprocal.',
-    });
-    steps.push({
-      label: 'Multiply straight across',
-      expr: `(${aNum}×${bDen})/(${aDen}×${bNum}) = ${resultNum}/${resultDen}`,
-    });
-    steps.push({
-      label: 'Simplify to lowest terms',
-      expr: `${resultNum}/${resultDen} = ${fmtFrac(result)}`,
-    });
-    return steps;
+    const out = computeFraction(values);
+    return out.kind === 'ok' ? stepsFor(out.comp) : [];
   },
-  calculate: (values) => {
-    const mode = values.mode || 'add';
-    const aNum = parseInt(values.aNum) || 0;
-    const aDen = parseInt(values.aDen);
-    const bNum = parseInt(values.bNum) || 0;
-    const bDen = parseInt(values.bDen);
-
-    if (isNaN(aDen) || isNaN(bDen) || aDen <= 0 || bDen <= 0) return [];
-
-    const fmt = (n: number) => {
-      if (Number.isInteger(n)) return n.toString();
-      // Use Decimal for precision on non-integer values
-      try {
-        const d = new Decimal(n);
-        const fixed = d.toFixed(8).replace(/\.?0+$/, '');
-        // If the decimal is very long, truncate to 4 decimal places
-        if (fixed.includes('.') && fixed.split('.')[1].length > 4) {
-          return d.toFixed(4).replace(/\.?0+$/, '');
-        }
-        return fixed;
-      } catch {
-        return n.toFixed(4).replace(/\.?0+$/, '');
-      }
-    };
-
-    let result: Fraction;
-
-    const modeLabels: Record<string, string> = {
-      add: 'Addition',
-      subtract: 'Subtraction',
-      multiply: 'Multiplication',
-      divide: 'Division',
-    };
-    const opSymbols: Record<string, string> = {
-      add: '+',
-      subtract: '−',
-      multiply: '×',
-      divide: '÷',
-    };
-
-    if (mode === 'add' || mode === 'subtract') {
-      const commonLcm = lcm(aDen, bDen);
-      const factorA = commonLcm / aDen;
-      const factorB = commonLcm / bDen;
-
-      const adjustedANum = aNum * factorA;
-      const adjustedBNum = bNum * factorB;
-
-      const resultNum = mode === 'add' ? adjustedANum + adjustedBNum : adjustedANum - adjustedBNum;
-      result = simplify({ numerator: resultNum, denominator: commonLcm });
-
-    } else if (mode === 'multiply') {
-      const resultNum = aNum * bNum;
-      const resultDen = aDen * bDen;
-      result = simplify({ numerator: resultNum, denominator: resultDen });
-
-    } else {
-      // divide: flip and multiply
-      const resultNum = aNum * bDen;
-      const resultDen = aDen * bNum;
-      if (resultDen === 0) return []; // division by zero in the flipped denominator
-      result = simplify({ numerator: resultNum, denominator: resultDen });
-
+  calculate: (values): CalculatorResult[] => {
+    const out = computeFraction(values);
+    if (out.kind === 'incomplete') return [];
+    if (out.kind === 'invalid') {
+      return [{ id: 'error', label: 'Error', value: out.message, color: 'negative' }];
     }
+    const { comp } = out;
+    const { result: r, op, a, b } = comp;
+    const views = decimalViews(r);
+    const mixed = mixedNumber(r);
 
-    const decimal = toDecimal(result);
-    const isInteger = result.denominator === 1;
-
-    return [
+    const rows: CalculatorResult[] = [
       {
         id: 'operation',
-        label: `${modeLabels[mode]}`,
-        value: `${aNum}/${aDen} ${opSymbols[mode]} ${bNum}/${bDen}`,
+        label: OP_LABEL[op],
+        value: `${a.n}/${a.d} ${OP_SYMBOL[op]} ${b.n}/${b.d}`,
         highlight: true,
         color: 'positive',
       },
-      {
-        id: 'result',
-        label: 'Result (Fraction)',
-        value: isInteger ? `${result.numerator}` : `${result.numerator}/${result.denominator}`,
-        color: 'neutral',
-      },
-      {
-        id: 'decimal',
-        label: 'Decimal Equivalent',
-        value: fmt(decimal),
-        color: 'neutral',
-      },
-      {
-        id: 'simplified',
-        label: 'Simplified',
-        value: result.numerator === 0 ? '0' : `${fmt(Math.abs(result.numerator))}/${fmt(Math.abs(result.denominator))}`,
-        color: mode === 'add' ? 'positive' : mode === 'subtract' ? 'negative' : 'neutral',
-      },
+      { id: 'result', label: 'Result (Fraction)', value: fmtFrac(r), color: 'neutral' },
     ];
+    if (mixed) rows.push({ id: 'mixedNumber', label: 'As a Mixed Number', value: mixed, color: 'neutral' });
+    rows.push({ id: 'decimal', label: 'Decimal Equivalent', value: views.rounded, color: 'neutral' });
+    if (views.exact) {
+      rows.push({
+        id: 'exactDecimal',
+        label: 'Exact Decimal (repeating digits in brackets)',
+        value: views.exact,
+        color: 'neutral',
+      });
+    }
+    rows.push({
+      id: 'simplified',
+      label: 'Simplified',
+      value: `${r.n}/${r.d}`,
+      color: op === 'add' ? 'positive' : op === 'subtract' ? 'negative' : 'neutral',
+    });
+    return rows;
   },
   extraPanel: (values, results) => {
-    if (!results.length) return null;
+    if (!results.length || results[0].id === 'error') return null;
     return createElement(FractionPanel, { values, results });
   },
   educational: {
@@ -310,7 +188,7 @@ const fractionConfig: CalculatorConfig = {
       'Review the step-by-step work in the extra panel, which shows the LCM calculation for addition/subtraction and the reciprocal flip for division.',
     ],
     explanation:
-      'A fraction represents a part of a whole and is one of the oldest mathematical concepts, dating back to ancient Egyptian civilization around 1800 BCE. The Rhind Mathematical Papyrus, a famous Egyptian document, contains extensive work with unit fractions (fractions with numerator 1). The word "fraction" comes from the Latin "fractio" meaning "to break," reflecting the idea of breaking a whole into equal parts. The denominator (bottom number) tells you how many equal parts the whole is divided into, while the numerator (top number) tells you how many of those parts you have. Fractions are foundational to all of mathematics — they are the gateway to algebra, ratios, proportions, percentages, probability, and calculus. The key insight for fraction arithmetic is that you can only directly add or subtract fractions when they share the same denominator, because the denominator defines the "size" of each part. For addition and subtraction, the calculator finds the least common multiple (LCM) of the denominators to create equivalent fractions with a common denominator, then adds or subtracts the numerators. For multiplication, you simply multiply numerators together and denominators together — no common denominator is needed because multiplication naturally combines the fractional parts. For division, you multiply by the reciprocal of the second fraction (flip it upside down), which is equivalent to the "keep-change-flip" mnemonic taught in schools. Every result is automatically simplified to lowest terms by dividing both the numerator and denominator by their greatest common divisor (GCD). Fractions appear everywhere in daily life: cooking uses cup and teaspoon fractions, construction uses inch fractions (1/16, 1/8, 1/4), music uses time signatures like 3/4 and 4/4, photography uses aperture fractions (f/2.8, f/4), and finance uses fractional shares and stock splits.',
+      'A fraction represents a part of a whole and is one of the oldest mathematical concepts, dating back to Egyptian papyri from around 1800 BCE. The Rhind Mathematical Papyrus (c. 1550 BCE), a famous Egyptian document, contains extensive work with unit fractions (fractions with numerator 1). The word "fraction" comes from the Latin "fractio" meaning "to break," reflecting the idea of breaking a whole into equal parts. The denominator (bottom number) tells you how many equal parts the whole is divided into, while the numerator (top number) tells you how many of those parts you have. Fractions are foundational to all of mathematics — they are the gateway to algebra, ratios, proportions, percentages, probability, and calculus. The key insight for fraction arithmetic is that you can only directly add or subtract fractions when they share the same denominator, because the denominator defines the "size" of each part. For addition and subtraction, the calculator finds the least common multiple (LCM) of the denominators to create equivalent fractions with a common denominator, then adds or subtracts the numerators. For multiplication, you simply multiply numerators together and denominators together — no common denominator is needed because multiplication naturally combines the fractional parts. For division, you multiply by the reciprocal of the second fraction (flip it upside down), which is equivalent to the "keep-change-flip" mnemonic taught in schools. Every result is automatically simplified to lowest terms by dividing both the numerator and denominator by their greatest common divisor (GCD). Fractions appear everywhere in daily life: cooking uses cup and teaspoon fractions, construction uses inch fractions (1/16, 1/8, 1/4), music uses time signatures like 3/4 and 4/4, photography uses aperture fractions (f/2.8, f/4), and finance uses fractional shares and stock splits.',
     commonUses: [
       'Cooking and baking: scaling recipes using fractional measurements — doubling 1/3 cup to 2/3 cup, or halving 3/4 teaspoon to 3/8 teaspoon',
       'Construction and carpentry: working with inch fractions (1/16, 1/8, 1/4, 1/2) for precise measurements and material cuts',
@@ -347,7 +225,7 @@ const fractionConfig: CalculatorConfig = {
     ],
     limitations: [
       'This calculator works with proper and improper fractions using integer numerators and denominators. Denominators must be positive integers greater than zero. Mixed numbers (e.g., 2 1/3) must be converted to improper fractions (7/3) before entry.',
-      'The decimal equivalent uses double-precision floating-point which provides about 15-17 significant digits, and may show very slight rounding for fractions with very large denominators.',
+      'Arithmetic is exact for whole numbers of any practical size (it does not use floating point). The decimal equivalent is rounded to 8 decimal places; when the exact decimal is longer or repeats, a second row shows it with the repeating digits in brackets (for example 1/7 = 0.(142857)).',
       'For comparing which fraction is larger (e.g., 3/7 vs 4/9), use the decimal equivalents or cross-multiply — this calculator performs arithmetic, not comparison.',
       'This tool handles only finite rational arithmetic between two fractions at a time. For symbolic fractions involving variables, continued fractions, or infinite series, use a computer algebra system.',
     ],
@@ -378,7 +256,7 @@ const fractionConfig: CalculatorConfig = {
       },
       {
         question: 'How do I enter a mixed number like 2 1/3?',
-        answer: 'Convert the mixed number to an improper fraction first. For 2 1/3: multiply the whole number by the denominator (2 × 3 = 6), then add the numerator (6 + 1 = 7), and place over the original denominator (7/3). So enter numerator 7 and denominator 3. If you have two mixed numbers, convert both before entering. This calculator works with improper fractions and simplified fractions — it does not have a separate mixed-number mode.',
+        answer: 'Convert the mixed number to an improper fraction first. For 2 1/3: multiply the whole number by the denominator (2 × 3 = 6), then add the numerator (6 + 1 = 7), and place over the original denominator (7/3). So enter numerator 7 and denominator 3. If you have two mixed numbers, convert both before entering. This calculator works with improper fractions and simplified fractions — it does not have a separate mixed-number input mode (a result greater than 1 is also shown as a mixed number).',
       },
       {
         question: 'What happens when the result is a whole number?',

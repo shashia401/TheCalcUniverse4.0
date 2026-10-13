@@ -1,121 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import FactoringPanel from './FactoringPanel';
-import { roundStr6 as fmt } from '../../../lib/format';
+import { analyzeQuadratic } from './quadratic';
 
-function gcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) {
-    [a, b] = [b, a % b];
-  }
-  return a;
-}
-
-const SUPER_TWO = '²';
-
-interface FactorResult {
-  r: number;
-  s: number;
-  t: number;
-  u: number;
-}
-
-function findIntegerFactors(a: number, b: number, c: number): FactorResult | null {
-  const ac = a * c;
-  let p = 0;
-  let q = 0;
-  let found = false;
-
-  const absAc = Math.abs(ac);
-  for (let i = 1; i <= Math.sqrt(absAc); i++) {
-    if (ac % i !== 0) continue;
-    const j = ac / i;
-
-    const candidates: [number, number][] = [
-      [i, j], [-i, -j],
-    ];
-    if (i !== j) {
-      candidates.push([j, i], [-j, -i]);
-    }
-
-    for (const [pi, qi] of candidates) {
-      if (pi + qi === b) {
-        p = pi;
-        q = qi;
-        found = true;
-        break;
-      }
-    }
-    if (found) break;
-  }
-
-  if (!found) return null;
-
-  // From p = r*u and q = s*t, find r,s,t,u such that:
-  //   r*t = a, r*u = p, s*t = q, s*u = c
-  const absA = Math.abs(a);
-  for (let r = 1; r <= absA; r++) {
-    if (a % r !== 0) continue;
-    const t = a / r;
-    if (p % r !== 0) continue;
-    const u = p / r;
-    if (q % t !== 0) continue;
-    const s = q / t;
-    if (s * u === c) {
-      return { r, s, t, u };
-    }
-  }
-
-  return null;
-}
-
-function formatTerm(coeff: number, power: number, isFirst: boolean): string {
-  if (coeff === 0) return '';
-  let result = '';
-  if (isFirst) {
-    if (coeff < 0) result += '-';
-  } else {
-    result += coeff > 0 ? ' + ' : ' − ';
-  }
-  const absC = Math.abs(coeff);
-  if (power === 0) {
-    result += absC;
-  } else if (absC === 1) {
-    result += 'x';
-  } else {
-    result += `${absC}x`;
-  }
-  if (power > 1) {
-    result += SUPER_TWO;
-  }
-  return result;
-}
-
-function polyString(a: number, b: number, c: number): string {
-  let s = formatTerm(a, 2, true);
-  s += formatTerm(b, 1, s === '');
-  s += formatTerm(c, 0, s === '');
-  return s;
-}
-
-function formatFactor(coeff: number, constant: number): string {
-  if (coeff === 0) return `(${constant})`;
-  let inner = '';
-  if (coeff === 1) inner = 'x';
-  else if (coeff === -1) inner = '-x';
-  else inner = `${coeff}x`;
-
-  if (constant > 0) inner += ` + ${constant}`;
-  else if (constant < 0) inner += ` − ${Math.abs(constant)}`;
-
-  return `(${inner})`;
-}
-
-function formatRoot(root: number): string {
-  if (Number.isInteger(root)) return root.toString();
-  return parseFloat(root.toFixed(6)).toString();
-}
+const COEFF_LIMIT = 1e12;
 
 const factoringConfig: CalculatorConfig = {
   inputs: [
@@ -124,6 +12,9 @@ const factoringConfig: CalculatorConfig = {
       label: 'Coefficient a (x²)',
       type: 'number',
       placeholder: 'x² coefficient',
+      min: -COEFF_LIMIT,
+      max: COEFF_LIMIT,
+      inputMode: 'decimal',
       required: true,
       helpText: 'The coefficient of the x² term (non-zero)',
     },
@@ -132,6 +23,9 @@ const factoringConfig: CalculatorConfig = {
       label: 'Coefficient b (x)',
       type: 'number',
       placeholder: 'x coefficient',
+      min: -COEFF_LIMIT,
+      max: COEFF_LIMIT,
+      inputMode: 'decimal',
       required: true,
       helpText: 'The coefficient of the x term',
     },
@@ -140,201 +34,49 @@ const factoringConfig: CalculatorConfig = {
       label: 'Constant c',
       type: 'number',
       placeholder: 'constant',
+      min: -COEFF_LIMIT,
+      max: COEFF_LIMIT,
+      inputMode: 'decimal',
       required: true,
       helpText: 'The constant term',
     },
   ],
-  calculate: (values) => {
-    const a = parseFloat(values.a);
-    const b = parseFloat(values.b);
-    const c = parseFloat(values.c);
+  calculate: (values): CalculatorResult[] => {
+    const q = analyzeQuadratic(values);
+    if (!q) return [];
 
-    if (isNaN(a) || isNaN(b) || isNaN(c) || a === 0) return [];
+    const results: CalculatorResult[] = [
+      { id: 'original', label: 'Original Polynomial', value: q.original, highlight: true, color: 'neutral' },
+      {
+        id: 'discriminant',
+        label: 'Discriminant (b² − 4ac)',
+        value: q.discriminant,
+        color: q.discriminantSign > 0 ? 'positive' : q.discriminantSign === 0 ? 'neutral' : 'negative',
+      },
+    ];
 
-    const discriminant = b * b - 4 * a * c;
-    const ac = a * c;
-    const factors = findIntegerFactors(a, b, c);
-
-    const results: CalculatorResult[] = [];
-
-    // Original polynomial
-    results.push({
-      id: 'original',
-      label: 'Original Polynomial',
-      value: polyString(a, b, c),
-      highlight: true,
-      color: 'neutral',
-    });
-
-    // Discriminant
-    results.push({
-      id: 'discriminant',
-      label: 'Discriminant (b² − 4ac)',
-      value: fmt(discriminant),
-      color: discriminant > 0 ? 'positive' : discriminant === 0 ? 'neutral' : 'negative',
-    });
-
-    // Determine p and q for step display
-    let pVal = 0;
-    let qVal = 0;
-    if (factors) {
-      // Re-derive p,q from r,s,t,u
-      pVal = factors.r * factors.u;
-      qVal = factors.s * factors.t;
+    if (q.kind === 'complex') {
+      results.push({ id: 'factored', label: 'Factored Form', value: q.factored, color: 'negative' });
+      results.push({ id: 'roots', label: 'Roots (Complex)', value: q.rootsLine, color: 'negative' });
     } else {
-      // Find p,q anyway for step display even if not factorable
-      const absAc = Math.abs(ac);
-      for (let i = 1; i <= Math.sqrt(absAc); i++) {
-        if (ac % i !== 0) continue;
-        const j = ac / i;
-        const candidates: [number, number][] = [[i, j], [-i, -j]];
-        if (i !== j) candidates.push([j, i], [-j, -i]);
-        for (const [pi, qi] of candidates) {
-          if (pi + qi === b) {
-            pVal = pi;
-            qVal = qi;
-            break;
-          }
-        }
-        if (pVal !== 0 || qVal !== 0) break;
-      }
+      results.push({ id: 'factored', label: 'Factored Form', value: q.factored, highlight: true, color: 'positive' });
+      results.push({ id: 'roots', label: 'Roots (Zeros)', value: q.rootsLine, color: 'neutral' });
+      results.push({ id: 'root1', label: 'Root x₁', value: q.rootTexts[0], color: 'positive' });
+      results.push({ id: 'root2', label: 'Root x₂', value: q.rootTexts[1], color: 'positive' });
     }
 
-    // Build steps
-    const steps: string[] = [];
-    steps.push(`Step 1: Identify coefficients — a = ${fmt(a)}, b = ${fmt(b)}, c = ${fmt(c)}`);
-    steps.push(`Step 2: Multiply a × c = ${fmt(a)} × ${fmt(c)} = ${fmt(ac)}`);
-    steps.push(`Step 3: Find two numbers p and q such that p + q = b = ${fmt(b)} and p × q = a × c = ${fmt(ac)}`);
-    steps.push(`  p = ${fmt(pVal)}, q = ${fmt(qVal)} (since ${fmt(pVal)} + ${fmt(qVal)} = ${fmt(pVal + qVal)} and ${fmt(pVal)} × ${fmt(qVal)} = ${fmt(pVal * qVal)})`);
-
-    if (factors) {
-      const { r, s, t, u } = factors;
-      // Step 4: Rewrite middle term
-      steps.push(`Step 4: Rewrite ${fmt(a)}x² + ${fmt(b)}x + ${fmt(c)} as ${fmt(a)}x² + ${fmt(pVal)}x + ${fmt(qVal)}x + ${fmt(c)}`);
-
-      // Step 5: Group and factor
-      const g1 = gcd(a, pVal);
-      const g2 = gcd(qVal, c);
-      const g1Str = g1 === 1 ? '' : g1;
-      const g2Str = g2 === 1 ? '' : g2;
-      steps.push(`Step 5: Group the terms — (${fmt(a)}x² + ${fmt(pVal)}x) + (${fmt(qVal)}x + ${fmt(c)})`);
-      steps.push(`  Factor out the GCF from each group:`);
-      steps.push(`    Group 1: ${fmt(a)}x² + ${fmt(pVal)}x = ${g1Str === '' ? '' : g1}x(${fmt(a / g1)}x + ${fmt(pVal / g1)})`.replace('=  ', '= '));
-      steps.push(`    Group 2: ${fmt(qVal)}x + ${fmt(c)} = ${g2Str === '' ? '' : g2}(${fmt(qVal / g2)}x + ${fmt(c / g2)})`.replace('=  ', '= '));
-      steps.push(`Step 6: Factor out the common binomial — ${formatFactor(r, s)}${formatFactor(t, u)}`);
-      steps.push(`  Final factored form: ${formatFactor(r, s)} × ${formatFactor(t, u)}`);
-
-      results.push({
-        id: 'factored',
-        label: 'Factored Form',
-        value: `${formatFactor(r, s)}${formatFactor(t, u)}`,
-        highlight: true,
-        color: 'positive',
-      });
-
-      // Roots
-      const root1 = -s / r;
-      const root2 = -u / t;
-      results.push({
-        id: 'roots',
-        label: 'Roots (Zeros)',
-        value: `x = ${formatRoot(root1)}, x = ${formatRoot(root2)}`,
-        color: 'neutral',
-      });
-      results.push({
-        id: 'root1',
-        label: 'Root x₁',
-        value: formatRoot(root1),
-        color: 'positive',
-      });
-      results.push({
-        id: 'root2',
-        label: 'Root x₂',
-        value: formatRoot(root2),
-        color: 'positive',
-      });
-    } else if (discriminant >= 0) {
-      // Factorable using quadratic formula (may not have integer factors)
-      const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
-      const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
-
-      steps.push(`Step 4: No integer factor pairs found — using the quadratic formula`);
-      steps.push(`  x = (−b ± √(b² − 4ac)) / (2a)`);
-      steps.push(`  x = (−(${fmt(b)}) ± √(${fmt(discriminant)})) / (2 × ${fmt(a)})`);
-      steps.push(`  x₁ = ${fmt(root1)}, x₂ = ${fmt(root2)}`);
-      steps.push(`Step 5: Write the factored form using roots`);
-      steps.push(`  ${fmt(a)}(x − ${fmt(root1)})(x − ${fmt(root2)})`);
-
-      results.push({
-        id: 'factored',
-        label: 'Factored Form',
-        value: `${fmt(a)}(x − ${fmt(root1)})(x − ${fmt(root2)})`,
-        highlight: true,
-        color: 'positive',
-      });
-
-      results.push({
-        id: 'roots',
-        label: 'Roots (Zeros)',
-        value: `x = ${fmt(root1)}, x = ${fmt(root2)}`,
-        color: 'neutral',
-      });
-      results.push({
-        id: 'root1',
-        label: 'Root x₁',
-        value: fmt(root1),
-        color: 'positive',
-      });
-      results.push({
-        id: 'root2',
-        label: 'Root x₂',
-        value: fmt(root2),
-        color: 'positive',
-      });
-    } else {
-      // Complex roots
-      const realPart = -b / (2 * a);
-      const imagPart = Math.sqrt(-discriminant) / (2 * a);
-
-      steps.push(`Step 4: The discriminant is negative — roots are complex`);
-      steps.push(`  x = (−b ± √(b² − 4ac)) / (2a)`);
-      steps.push(`  x = (−(${fmt(b)}) ± √(${fmt(discriminant)})) / (2 × ${fmt(a)})`);
-      steps.push(`  The square root of a negative number involves the imaginary unit i`);
-      steps.push(`  x₁ = ${fmt(realPart)} + ${fmt(imagPart)}i`);
-      steps.push(`  x₂ = ${fmt(realPart)} − ${fmt(imagPart)}i`);
-
-      results.push({
-        id: 'factored',
-        label: 'Factored Form',
-        value: 'Does not factor over the reals (complex roots)',
-        color: 'negative',
-      });
-
-      results.push({
-        id: 'roots',
-        label: 'Roots (Complex)',
-        value: `x = ${fmt(realPart)} ± ${fmt(imagPart)}i`,
-        color: 'negative',
-      });
-    }
-
-    // Steps as a single result
-    results.push({
-      id: 'steps',
-      label: 'Step-by-Step Solution',
-      value: steps.join('\n'),
-    });
-
+    results.push({ id: 'steps', label: 'Step-by-Step Solution', value: q.steps.join('\n') });
     return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(FactoringPanel, { values, results });
   },
+
   educational: {
     formula: 'ax² + bx + c = a(x − r₁)(x − r₂) | where r₁, r₂ are the roots',
     formulaDescription:
-      'Factoring a quadratic polynomial reverses the FOIL (First, Outer, Inner, Last) multiplication process. The factoring by grouping method finds two numbers p and q that add to b and multiply to a × c, then splits the middle term and factors common binomials. This calculator handles integer factoring when possible and falls back to the quadratic formula for non-integer or complex roots.',
+      'Factoring a quadratic polynomial reverses the FOIL (First, Outer, Inner, Last) multiplication process. The factoring by grouping method finds two numbers p and q that add to b and multiply to a × c, then splits the middle term and factors common binomials. This calculator reads decimal coefficients exactly, factors out the GCF, factors over the integers whenever that is possible, and otherwise falls back to the quadratic formula for irrational or complex roots.',
     variables: [
       { symbol: 'a', name: 'Quadratic Coefficient', description: 'The coefficient of the x² term. Must be non-zero. Determines whether the parabola opens upward (a > 0) or downward (a < 0).' },
       { symbol: 'b', name: 'Linear Coefficient', description: 'The coefficient of the x term. Together with a and c, determines the position of the parabola and the nature of the roots.' },
@@ -372,7 +114,7 @@ const factoringConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What does it mean if a polynomial "does not factor"?',
-        answer: 'Some quadratic polynomials have no integer factor pairs — this happens when no two integers p and q satisfy both p + q = b and p × q = a × c. The polynomial may still factor over the rational numbers, or it may require the quadratic formula. In all cases, every quadratic can be solved using the quadratic formula, which always produces roots (real or complex).',
+        answer: 'Some quadratic polynomials have no integer factor pairs — this happens when no two integers p and q satisfy both p + q = b and p × q = a × c. For a polynomial with integer coefficients this means it cannot be factored over the rational numbers either (Gauss\'s lemma), although it may still have real irrational roots such as x² − 2. Every quadratic can be solved with the quadratic formula, which always produces roots (real or complex).',
       },
       {
         question: 'How is factoring by grouping different from simple factoring?',

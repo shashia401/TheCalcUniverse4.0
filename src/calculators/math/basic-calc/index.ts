@@ -1,24 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BasicCalcPanel from './BasicCalcPanel';
-import { safeEval } from '../shared/safeEval';
-
-// BasicCalcPanel (the actual interactive keypad) already uses the shared
-// parser below — this wrapper exists so the (currently unreachable, since
-// `inputs` is empty) expression-field path can't regress to `new Function`
-// if a text input is ever added here.
-function evaluateExpression(expr: string): number | string {
-  const trimmed = expr.trim();
-  if (!trimmed) return 'empty';
-  const sanitized = trimmed.replace(/\s/g, '').replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
-  try {
-    const result = safeEval(sanitized);
-    if (isFinite(result)) return result;
-    return 'invalid';
-  } catch {
-    return 'invalid';
-  }
-}
+import { evaluateDisplay } from './basicCalcMath';
 
 // This calculator is a special case — the keypad panel is the primary interface.
 // The form inputs are intentionally empty; the panel handles all interaction internally.
@@ -28,11 +11,10 @@ const basicCalcConfig: CalculatorConfig = {
   calculate: (values: Record<string, string>): CalculatorResult[] => {
     const expr = values.expression || '';
     if (!expr.trim()) return [];
-    const result = evaluateExpression(expr);
-    if (result === 'empty') return [];
-    if (result === 'invalid') return [{ id: 'error', label: 'Error', value: 'Invalid expression' }];
+    const out = evaluateDisplay(expr);
+    if (!out.ok) return [{ id: 'error', label: 'Error', value: 'Invalid expression' }];
     return [
-      { id: 'result', label: 'Result', value: String(result), highlight: true, color: 'positive' as const },
+      { id: 'result', label: 'Result', value: out.text, highlight: true, color: 'positive' as const },
       { id: 'expression', label: 'Expression', value: expr },
     ];
   },

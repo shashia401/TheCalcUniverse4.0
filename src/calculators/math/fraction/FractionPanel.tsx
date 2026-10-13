@@ -1,6 +1,7 @@
 import type React from 'react';
 import { CalculatorResult } from '../../../types/calculator';
 import MiniRing from '../../../components/calculator/MiniRing';
+import { computeFraction, OP_SYMBOL } from './fractionMath';
 
 interface Props {
   values: Record<string, string>;
@@ -17,54 +18,30 @@ function FractionPie({ numerator, denominator, label, color }: { numerator: numb
   );
 }
 
-function gcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) {
-    [a, b] = [b, a % b];
-  }
-  return a;
-}
-
-function lcm(a: number, b: number): number {
-  if (a === 0 || b === 0) return 0;
-  return Math.abs(a * b) / gcd(a, b);
-}
-
 export default function FractionPanel({ values, results }: Props) {
-  const operationRow = results.find(r => r.id === 'operation');
   const resultRow = results.find(r => r.id === 'result');
   const decimalRow = results.find(r => r.id === 'decimal');
-  if (!operationRow || !resultRow) return null;
+  const outcome = computeFraction(values);
+  if (outcome.kind !== 'ok' || !resultRow) return null;
+  const { comp } = outcome;
 
-  const mode = values.mode || 'add';
-  const aNum = parseInt(values.aNum) || 0;
-  const aDen = parseInt(values.aDen) || 1;
-  const bNum = parseInt(values.bNum) || 0;
-  const bDen = parseInt(values.bDen) || 1;
+  // Exact BigInt values from the shared computation, shown as strings (no float round-trip).
+  const mode = comp.op;
+  const opSymbol = OP_SYMBOL[mode];
+  const small = (n: bigint) => Number(n); // only used for the <= 20-part pie charts, where n is tiny or clamped
+  const abs = (n: bigint) => (n < 0n ? -n : n);
+  const { n: aNum, d: aDen } = comp.a;
+  const { n: bNum, d: bDen } = comp.b;
 
-  const fmt = (n: number) => {
-    if (Number.isInteger(n)) return n.toString();
-    return n.toFixed(4).replace(/\.?0+$/, '');
-  };
-
-  const opSymbols: Record<string, string> = {
-    add: '+',
-    subtract: '−',
-    multiply: '×',
-    divide: '÷',
-  };
-  const opSymbol = opSymbols[mode] || '+';
-
-  const renderFraction = (num: number, den: number, size: 'sm' | 'md' = 'md') => {
+  const renderFraction = (num: bigint, den: bigint, size: 'sm' | 'md' = 'md') => {
     const textClass = size === 'md' ? 'text-sm' : 'text-xs';
     return (
       <span className={`inline-flex flex-col items-center mx-1 ${textClass}`}>
-        <span className={`border-b border-slate-500 px-1.5 ${num < 0 ? 'text-red-600' : 'text-slate-800'}`}>
-          {fmt(num)}
+        <span className={`border-b border-slate-500 px-1.5 ${num < 0n ? 'text-red-600' : 'text-slate-800'}`}>
+          {num.toString()}
         </span>
         <span className="px-1.5 text-slate-600">
-          {fmt(den)}
+          {den.toString()}
         </span>
       </span>
     );
@@ -73,15 +50,15 @@ export default function FractionPanel({ values, results }: Props) {
   let stepsContent: React.ReactNode;
 
   if (mode === 'add' || mode === 'subtract') {
-    const commonLcm = lcm(aDen, bDen);
-    const factorA = commonLcm / aDen;
-    const factorB = commonLcm / bDen;
-    const adjustedANum = aNum * factorA;
-    const adjustedBNum = bNum * factorB;
-    const resultNum = mode === 'add' ? adjustedANum + adjustedBNum : adjustedANum - adjustedBNum;
-    const resultGcd = gcd(Math.abs(resultNum), commonLcm);
-    const simplifiedNum = resultNum / resultGcd;
-    const simplifiedDen = commonLcm / resultGcd;
+    const commonLcm = comp.lcd!;
+    const factorA = comp.factorA!;
+    const factorB = comp.factorB!;
+    const adjustedANum = comp.adjA!;
+    const adjustedBNum = comp.adjB!;
+    const resultNum = comp.rawN;
+    const resultGcd = comp.gcd;
+    const simplifiedNum = comp.result.n;
+    const simplifiedDen = comp.result.d;
 
     stepsContent = (
       <div className="space-y-3">
@@ -89,7 +66,7 @@ export default function FractionPanel({ values, results }: Props) {
         <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
           <p className="text-[10px] font-bold text-slate-500 uppercase">Step 1: Find LCM of Denominators</p>
           <p className="text-xs font-mono text-slate-700 mt-1">
-            LCM({aDen}, {bDen}) = {commonLcm}
+            LCM({aDen.toString()}, {bDen.toString()}) = {commonLcm.toString()}
           </p>
         </div>
 
@@ -100,13 +77,13 @@ export default function FractionPanel({ values, results }: Props) {
             {renderFraction(aNum, aDen)}
             <span className="text-slate-500 mx-1">→</span>
             {renderFraction(adjustedANum, commonLcm)}
-            <span className="text-slate-500 mx-1">(×{fmt(factorA)})</span>
+            <span className="text-slate-500 mx-1">(×{factorA.toString()})</span>
           </p>
           <p className="text-xs font-mono text-slate-700 mt-1 flex items-center flex-wrap">
             {renderFraction(bNum, bDen)}
             <span className="text-slate-500 mx-1">→</span>
             {renderFraction(adjustedBNum, commonLcm)}
-            <span className="text-slate-500 mx-1">(×{fmt(factorB)})</span>
+            <span className="text-slate-500 mx-1">(×{factorB.toString()})</span>
           </p>
         </div>
 
@@ -123,11 +100,11 @@ export default function FractionPanel({ values, results }: Props) {
         </div>
 
         {/* Step 4: Simplify */}
-        {resultGcd > 1 && (
+        {resultGcd > 1n && (
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-[10px] font-bold text-slate-500 uppercase">Step 4: Simplify</p>
             <p className="text-xs font-mono text-slate-700 mt-1">
-              GCD({fmt(Math.abs(resultNum))}, {commonLcm}) = {resultGcd}
+              GCD({abs(resultNum).toString()}, {commonLcm.toString()}) = {resultGcd.toString()}
             </p>
             <p className="text-xs font-mono text-slate-700 mt-1 flex items-center flex-wrap">
               {renderFraction(resultNum, commonLcm)}
@@ -147,11 +124,11 @@ export default function FractionPanel({ values, results }: Props) {
       </div>
     );
   } else if (mode === 'multiply') {
-    const resultNum = aNum * bNum;
-    const resultDen = aDen * bDen;
-    const resultGcd = gcd(Math.abs(resultNum), resultDen);
-    const simplifiedNum = resultNum / resultGcd;
-    const simplifiedDen = resultDen / resultGcd;
+    const resultNum = comp.rawN;
+    const resultDen = comp.rawD;
+    const resultGcd = comp.gcd;
+    const simplifiedNum = comp.result.n;
+    const simplifiedDen = comp.result.d;
 
     stepsContent = (
       <div className="space-y-3">
@@ -163,18 +140,18 @@ export default function FractionPanel({ values, results }: Props) {
             {renderFraction(bNum, bDen)}
             <span className="text-slate-500 mx-1">=</span>
             <span className="inline-flex flex-col items-center mx-1 text-sm">
-              <span className="border-b border-slate-500 px-1.5 text-slate-800">{aNum}×{bNum}</span>
-              <span className="px-1.5 text-slate-600">{aDen}×{bDen}</span>
+              <span className="border-b border-slate-500 px-1.5 text-slate-800">{aNum.toString()}×{bNum.toString()}</span>
+              <span className="px-1.5 text-slate-600">{aDen.toString()}×{bDen.toString()}</span>
             </span>
             <span className="text-slate-500 mx-1">=</span>
             {renderFraction(resultNum, resultDen)}
           </p>
         </div>
-        {resultGcd > 1 && (
+        {resultGcd > 1n && (
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-[10px] font-bold text-slate-500 uppercase">Step 2: Simplify</p>
             <p className="text-xs font-mono text-slate-700 mt-1">
-              GCD({fmt(Math.abs(resultNum))}, {resultDen}) = {resultGcd}
+              GCD({abs(resultNum).toString()}, {resultDen.toString()}) = {resultGcd.toString()}
             </p>
             <p className="text-xs font-mono text-slate-700 mt-1 flex items-center flex-wrap">
               {renderFraction(resultNum, resultDen)}
@@ -190,11 +167,11 @@ export default function FractionPanel({ values, results }: Props) {
       </div>
     );
   } else if (mode === 'divide') {
-    const resultNum = aNum * bDen;
-    const resultDen = bNum !== 0 ? aDen * bNum : 1;
-    const resultGcd = gcd(Math.abs(resultNum), Math.abs(resultDen));
-    const simplifiedNum = resultNum / resultGcd;
-    const simplifiedDen = resultDen / resultGcd;
+    const resultNum = comp.rawN;
+    const resultDen = comp.rawD;
+    const resultGcd = comp.gcd;
+    const simplifiedNum = comp.result.n;
+    const simplifiedDen = comp.result.d;
 
     stepsContent = (
       <div className="space-y-3">
@@ -216,11 +193,11 @@ export default function FractionPanel({ values, results }: Props) {
             {renderFraction(resultNum, resultDen)}
           </p>
         </div>
-        {resultGcd > 1 && (
+        {resultGcd > 1n && (
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-[10px] font-bold text-slate-500 uppercase">Step 3: Simplify</p>
             <p className="text-xs font-mono text-slate-700 mt-1">
-              GCD({fmt(Math.abs(resultNum))}, {Math.abs(resultDen)}) = {resultGcd}
+              GCD({abs(resultNum).toString()}, {abs(resultDen).toString()}) = {resultGcd.toString()}
             </p>
             <p className="text-xs font-mono text-slate-700 mt-1 flex items-center flex-wrap">
               {renderFraction(resultNum, resultDen)}
@@ -261,14 +238,14 @@ export default function FractionPanel({ values, results }: Props) {
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3 text-center">Visual Representation</p>
           <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
-            <FractionPie numerator={aNum} denominator={aDen} label={`${Math.abs(aNum)}/${aDen}`} color="#3b82f6" />
-            <span className="text-xl font-bold text-slate-400">{opSymbol}</span>
-            <FractionPie numerator={bNum} denominator={bDen} label={`${Math.abs(bNum)}/${bDen}`} color="#f59e0b" />
-            <span className="text-xl font-bold text-slate-400">=</span>
+            <FractionPie numerator={small(abs(aNum))} denominator={small(aDen)} label={`${aNum}/${aDen}`} color="#3b82f6" />
+            <span aria-hidden="true" className="text-xl font-bold text-slate-600">{opSymbol}</span>
+            <FractionPie numerator={small(abs(bNum))} denominator={small(bDen)} label={`${bNum}/${bDen}`} color="#f59e0b" />
+            <span aria-hidden="true" className="text-xl font-bold text-slate-600">=</span>
             <FractionPie
-              numerator={parseInt((results.find(r => r.id === 'result')?.value || '0').split('/')[0])}
-              denominator={parseInt((results.find(r => r.id === 'result')?.value || '1').split('/')[1] || '1')}
-              label={results.find(r => r.id === 'result')?.value || ''}
+              numerator={small(abs(comp.result.n))}
+              denominator={small(comp.result.d)}
+              label={resultRow.value}
               color="#8b5cf6"
             />
           </div>

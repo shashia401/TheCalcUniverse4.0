@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { safeEval } from '../shared/safeEval';
+import { evaluateDisplay } from './basicCalcMath';
 
 interface Props {
   values: Record<string, string>;
@@ -16,14 +16,14 @@ export default function BasicCalcPanel({}: Props) {
 
   const handleButton = useCallback((val: string) => {
     if (justEvaluated) {
-      if ('+-×÷'.includes(val)) {
+      if ('+-−×÷'.includes(val)) {
         setDisplay(d => d + val);
       } else {
         setDisplay(val === '=' ? '' : val);
       }
       setJustEvaluated(false);
     } else {
-      setDisplay(d => d + val);
+      setDisplay(d => (d === 'Error' ? val : d + val)); // typing after an error starts fresh
     }
   }, [justEvaluated]);
 
@@ -37,20 +37,14 @@ export default function BasicCalcPanel({}: Props) {
 
   const handleEvaluate = useCallback(() => {
     if (!display.trim()) return;
-    try {
-      const sanitized = display.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
-      const result = safeEval(sanitized);
-      if (!isFinite(result)) {
-        setDisplay('Error');
-        return;
-      }
-      const fmt = parseFloat(result.toFixed(10)).toString();
-      setHistory(h => [...h, { expression: display, result: fmt }]);
-      setDisplay(fmt);
-      setJustEvaluated(true);
-    } catch {
+    const out = evaluateDisplay(display);
+    if (!out.ok) {
       setDisplay('Error');
+      return;
     }
+    setHistory(h => [...h, { expression: display, result: out.text }]);
+    setDisplay(out.text);
+    setJustEvaluated(true);
   }, [display]);
 
   const clearHistory = useCallback(() => {
@@ -77,7 +71,7 @@ export default function BasicCalcPanel({}: Props) {
         {/* Calculator keypad */}
         <div className="p-4 flex-1">
           {/* Display */}
-          <div className="bg-slate-900 text-white rounded-xl p-4 mb-4 min-h-[60px] flex items-center justify-end">
+          <div role="status" aria-live="polite" aria-label="Calculator display" className="bg-slate-900 text-white rounded-xl p-4 mb-4 min-h-[60px] flex items-center justify-end">
             <span className="text-2xl font-mono font-bold text-right break-all max-w-full">
               {display || '0'}
             </span>
@@ -86,13 +80,13 @@ export default function BasicCalcPanel({}: Props) {
           {/* Button grid */}
           <div className="grid grid-cols-4 gap-2">
             {/* First row with C and ⌫ */}
-            <button type="button" onClick={handleClear} className="col-span-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-3 rounded-xl text-sm transition-colors">
+            <button type="button" aria-label="Clear" onClick={handleClear} className="col-span-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-3 rounded-xl text-sm transition-colors">
               C
             </button>
-            <button type="button" onClick={handleBackspace} className="col-span-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-sm transition-colors">
+            <button type="button" aria-label="Backspace" onClick={handleBackspace} className="col-span-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-sm transition-colors">
               ⌫
             </button>
-            <button type="button" onClick={handleEvaluate} className="col-span-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl text-sm transition-colors">
+            <button type="button" aria-label="Equals" onClick={handleEvaluate} className="col-span-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl text-sm transition-colors">
               =
             </button>
 

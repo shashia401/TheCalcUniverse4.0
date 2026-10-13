@@ -43,31 +43,31 @@ describe('day counter calculator', () => {
     expect(parseNumber(getValue(r, 'totalDays'))).toBe(1);
   });
 
-  it('business days only: Mon-Fri week = 5 business days', () => {
+  it('business days only: Mon-Fri week = 5 business days (end date included)', () => {
     const r = config.calculate({
       startDate: '2024-01-22',
       endDate: '2024-01-26',
-      includeEndDate: 'no',
+      includeEndDate: 'yes',
       countBusinessDays: 'yes',
     });
     expect(parseNumber(getValue(r, 'businessDaysCount'))).toBe(5);
   });
 
-  it('business days: Fri to Mon = 2 business days', () => {
+  it('business days: Fri to Mon = 2 business days (end date included)', () => {
     const r = config.calculate({
       startDate: '2024-01-19',
       endDate: '2024-01-22',
-      includeEndDate: 'no',
+      includeEndDate: 'yes',
       countBusinessDays: 'yes',
     });
     expect(parseNumber(getValue(r, 'businessDaysCount'))).toBe(2);
   });
 
-  it('business days: 2 weeks = 10 business days', () => {
+  it('business days: 2 weeks = 10 business days (end date included)', () => {
     const r = config.calculate({
       startDate: '2024-01-22',
       endDate: '2024-02-02',
-      includeEndDate: 'no',
+      includeEndDate: 'yes',
       countBusinessDays: 'yes',
     });
     expect(parseNumber(getValue(r, 'businessDaysCount'))).toBe(10);
@@ -139,14 +139,15 @@ describe('day counter calculator', () => {
     expect(r).toEqual([]);
   });
 
-  it('end date before start date returns empty array', () => {
+  it('end date before start date explains that the end must not precede the start', () => {
     const r = config.calculate({
       startDate: '2024-06-01',
       endDate: '2024-01-01',
       includeEndDate: 'no',
       countBusinessDays: 'no',
     });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
   it('formatted breakdown is present', () => {

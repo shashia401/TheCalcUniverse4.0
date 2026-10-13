@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { roundStr6 as fmt } from '../../../lib/format';
+import { roundStrAuto } from '../../../lib/format';
+
+const fmt = (n: number) => roundStrAuto(n, 6);
 
 interface Props {
   values: Record<string, string>;
@@ -184,9 +186,9 @@ function ShapeDiagram({ shape, d1, d2, d3 }: { shape: string; d1: number; d2: nu
 /*  Formula Application – shows the formula with actual values         */
 /* ------------------------------------------------------------------ */
 function FormulaApplication({
-  shape, d1, d2, d3,
+  shape, d1, d2, d3, d4, perimVal,
 }: {
-  shape: string; d1: number; d2: number; d3: number;
+  shape: string; d1: number; d2: number; d3: number; d4: number;
   perimVal: string | undefined;
 }) {
   const pi = Math.PI;
@@ -212,8 +214,9 @@ function FormulaApplication({
       break;
     case 'triangle':
       addCard('Area', 'A = ½bh', `½ × ${d1} × ${d2}`, fmt(0.5 * d1 * d2));
-      if (d3 > 0) {
-        addCard('Perimeter', 'P = a + b + c', `${d1} + ${d2} + ${d3}`, fmt(d1 + d2 + d3));
+      if (d3 > 0 && d4 > 0 && perimVal) {
+        // the height is NOT a side: the perimeter adds the base and the other two sides
+        addCard('Perimeter', 'P = a + b + c', `${d1} + ${d3} + ${d4}`, perimVal);
       }
       break;
     case 'trapezoid':
@@ -267,7 +270,7 @@ function ShapeInsight({ shape }: { shape: string }) {
 
   return (
     <div className="rounded-xl border border-purple-200 bg-purple-50 px-5 py-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600 mb-1">Why This Matters</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-purple-800 mb-1">Why This Matters</p>
       <p className="text-xs text-purple-800 leading-relaxed">{text}</p>
     </div>
   );
@@ -281,15 +284,18 @@ export default function AreaPanel({ values, results }: Props) {
   const shape = values.shape || 'circle';
   const compound = values.compound || 'none';
   const isCompound = compound === 'rectSemi';
-  const d1 = parseFloat(
-    values.circleRadius || values.rectLength || values.squareSide || values.triBase || values.trapBase1 || values.paraBase || values.hexSide || '0'
-  ) || 0;
-  const d2 = parseFloat(
-    values.rectWidth || values.triHeight || values.trapBase2 || values.paraSide || '0'
-  ) || 0;
-  const d3 = parseFloat(
-    values.triSide || values.trapHeight || values.paraHeight || '0'
-  ) || 0;
+  // Dimensions are read per shape: a value typed for another shape (hidden inputs keep their text) must not leak in.
+  const num = (k: string) => parseFloat(values[k] ?? '') || 0;
+  const dims: Record<string, number[]> = {
+    circle: [num('circleRadius')],
+    rectangle: [num('rectLength'), num('rectWidth')],
+    square: [num('squareSide')],
+    triangle: [num('triBase'), num('triHeight'), num('triSide'), num('triSide3')],
+    trapezoid: [num('trapBase1'), num('trapBase2'), num('trapHeight')],
+    parallelogram: [num('paraBase'), num('paraSide'), num('paraHeight')],
+    hexagon: [num('hexSide')],
+  };
+  const [d1 = 0, d2 = 0, d3 = 0, d4 = 0] = dims[shape] ?? [];
 
   if (!results.length) return null;
 
@@ -359,7 +365,7 @@ export default function AreaPanel({ values, results }: Props) {
               <div className="grid grid-cols-2 gap-2">
                 {results.filter(r => !['area', 'perimeter', 'circumference', 'compoundLabel'].includes(r.id)).map(rr => (
                   <div key={rr.id} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center">
-                    <p className="text-[9px] font-bold text-slate-500 uppercase">{rr.label}</p>
+                    <p className="text-[9px] font-bold text-slate-600 uppercase">{rr.label}</p>
                     <p className="text-xs font-mono font-bold text-slate-700 mt-0.5">{rr.value}</p>
                   </div>
                 ))}
@@ -372,7 +378,7 @@ export default function AreaPanel({ values, results }: Props) {
         {isCompound && (
           <div className="space-y-3">
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Compound Shape: Rectangle + Semicircle</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-800 mb-1">Compound Shape: Rectangle + Semicircle</p>
               <p className="text-xs text-amber-800 leading-relaxed">
                 Total area = rectangle area + semicircle area. The semicircle sits on top of the rectangle.
                 This is useful for windows, archways, and driveways.
@@ -403,7 +409,7 @@ export default function AreaPanel({ values, results }: Props) {
 
         {/* Formula application */}
         {!isCompound && d1 > 0 && (
-          <FormulaApplication shape={shape} d1={d1} d2={d2} d3={d3} perimVal={perimRow?.value} />
+          <FormulaApplication shape={shape} d1={d1} d2={d2} d3={d3} d4={d4} perimVal={perimRow?.value} />
         )}
 
         {/* Formula reference grid */}
@@ -413,9 +419,9 @@ export default function AreaPanel({ values, results }: Props) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
               {Object.entries(shapeFormulas).map(([key, f]) => (
                 <div key={key} className={`rounded-lg border p-2 text-center ${key === shape ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-slate-50'}`}>
-                  <p className="text-[9px] font-bold text-slate-500 uppercase">{key}</p>
+                  <p className="text-[9px] font-bold text-slate-600 uppercase">{key}</p>
                   <p className="text-[10px] font-mono text-slate-700">{f.area}</p>
-                  <p className="text-[10px] font-mono text-slate-500">{f.perimeter}</p>
+                  <p className="text-[10px] font-mono text-slate-600">{f.perimeter}</p>
                 </div>
               ))}
             </div>

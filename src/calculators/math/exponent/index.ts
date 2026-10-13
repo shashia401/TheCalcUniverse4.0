@@ -1,10 +1,25 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ExponentPanel from './ExponentPanel';
+import { analyzePower, ordinal, parseNumberStrict } from './exponentMath';
 
-// Decimal.js is used for precision edge cases: very large integer exponents
-// and small decimal results where native IEEE 754 double-precision can drift.
-// Most calculations use Math.pow for speed; Decimal provides verification.
+// Math.pow (IEEE 754 doubles, ~15-16 significant digits) does the arithmetic. exponentMath.ts handles the
+// cases it gets wrong or hides (0^negative, negative bases with fractional exponents); integer powers beyond
+// 2^53 additionally get an exact BigInt row.
+
+const SAFE = Number.MAX_SAFE_INTEGER;
+
+/** 12 significant digits, no binary noise; non-finite values never leak into the UI. */
+const fmt = (n: number): string => {
+  if (!Number.isFinite(n)) return 'too large to display';
+  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
+  return parseFloat(n.toPrecision(12)).toString();
+};
+
+/** An operand inside an expression: negative numbers are parenthesised, (-2)^3 not -2^3. */
+const operand = (n: number): string => (n < 0 ? `(${fmt(n)})` : fmt(n));
+
+const neutral = 'neutral' as const;
 
 const exponentConfig: CalculatorConfig = {
   inputs: [
@@ -29,122 +44,71 @@ const exponentConfig: CalculatorConfig = {
       helpText: 'The power to raise the base to. Supports integers, fractions, decimals, and negative numbers.',
     },
   ],
-  calculate: (values) => {
-    const base = parseFloat(values.base);
-    const exp = parseFloat(values.exponent);
+  calculate: (values): CalculatorResult[] => {
+    const base = parseNumberStrict(values.base);
+    const exp = parseNumberStrict(values.exponent);
+    if (Number.isNaN(base) || Number.isNaN(exp)) return [];
 
-    if ([base, exp].some(isNaN)) return [];
+    const p = analyzePower(base, exp);
 
-    // Guard: 0^0 is indeterminate
-    if (base === 0 && exp === 0) {
+    if (p.kind === 'indeterminate') {
       return [
         { id: 'result', label: 'Result', value: 'Undefined', highlight: true, color: 'negative' },
-        { id: 'explanation', label: 'Why Undefined', value: '0^0 is mathematically indeterminate. In analysis, it is an indeterminate form (limits can approach different values). In combinatorics, it is sometimes defined as 1 by convention, but standard real analysis treats it as undefined.', color: 'neutral' },
-        { id: 'inverse', label: 'Root (inverse)', value: 'Undefined', color: 'neutral' },
-        { id: 'reciprocal', label: 'Reciprocal (1/result)', value: 'Undefined', color: 'neutral' },
+        { id: 'explanation', label: 'Why Undefined', value: '0^0 is mathematically indeterminate. In analysis, it is an indeterminate form (limits can approach different values). In combinatorics, it is sometimes defined as 1 by convention, but standard real analysis treats it as undefined.', color: neutral },
+        { id: 'inverse', label: 'Root b^(1/n)', value: 'Undefined', color: neutral },
+        { id: 'reciprocal', label: 'Reciprocal (1/result)', value: 'Undefined', color: neutral },
       ];
     }
 
-    // Guard: negative base raised to non-integer exponent is complex
-    if (base < 0 && !Number.isInteger(exp) && exp !== 0) {
-      // Compute the magnitude: |base|^exp
-      const magnitude = Math.pow(Math.abs(base), exp);
-      // For real-valued results with odd-denominator rational exponents, attempt
-      // For negative base ^ rational with odd denominator, the result is real negative
-      // For general non-integer exponents, the result is complex
-      const isRationalOddDenom = (() => {
-        // Check if exponent is a rational with odd denominator by testing
-        // up to a reasonable denominator. Negative base ^ rational with
-        // odd denominator = real (e.g., (-8)^(1/3) = -2).
-        for (let d = 1; d <= 100; d++) {
-          const n = exp * d;
-          if (Math.abs(n - Math.round(n)) < 1e-10 && d % 2 === 1) {
-            const num = Math.round(n);
-            // For odd denominators, use: sign(base) * |base|^(num/d)
-            // This handles cube roots, fifth roots, etc. correctly
-            const absResult = Math.pow(Math.abs(base), num / d);
-            if (isFinite(absResult) && !isNaN(absResult)) {
-              // Result is negative if numerator is odd (for negative base)
-              return num % 2 === 1 ? -absResult : absResult;
-            }
-          }
-        }
-        return null;
-      })();
-
-      if (isRationalOddDenom !== null) {
-        const fmt = (n: number) => {
-          if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-          return parseFloat(n.toPrecision(12)).toString();
-        };
-        const resultVal = isRationalOddDenom;
-        const sqCheck = base * base;
-        return [
-          { id: 'result', label: 'Result', value: fmt(resultVal), highlight: true, color: 'positive' },
-          { id: 'inverse', label: `Root (inverse)`, value: `${fmt(Math.abs(exp))}${Math.abs(exp) > 0 ? 'th' : ''} root of ${fmt(base)} = ${fmt(Math.pow(Math.abs(base), 1 / (Math.abs(exp) || 1)) * (base < 0 && Math.abs(exp) % 2 === 1 ? -1 : 1))}`, color: 'neutral' },
-          { id: 'reciprocal', label: 'Reciprocal (1/result)', value: resultVal !== 0 ? fmt(1 / resultVal) : 'Undefined', color: 'neutral' },
-          { id: 'squaredCheck', label: 'Base Squared (b²)', value: fmt(sqCheck), color: 'neutral' },
-        ];
-      }
-
+    if (p.kind === 'divByZero') {
       return [
-        { id: 'result', label: 'Result', value: `Complex: ${magnitude.toFixed(6)} × (cos(${(Math.PI * (exp % 1)).toFixed(4)}) + i·sin(${(Math.PI * (exp % 1)).toFixed(4)}))`, highlight: true, color: 'negative' },
-        { id: 'explanation', label: 'Why Complex', value: `A negative base (${base}) raised to a non-integer exponent (${exp}) generally produces a complex number. The magnitude is ${magnitude.toFixed(6)} and the argument involves trigonometric functions. For rational exponents with odd denominators (like cube roots), the result IS real — try exponents like 1/3 or 1/5.`, color: 'neutral' },
-        { id: 'inverse', label: 'Root (inverse)', value: `${Math.abs(exp)}th root of ${base} — complex-valued`, color: 'neutral' },
-        { id: 'reciprocal', label: 'Reciprocal (1/result)', value: 'Complex-valued', color: 'neutral' },
-        { id: 'squaredCheck', label: 'Base Squared (b²)', value: (base * base).toString(), color: 'neutral' },
+        { id: 'result', label: 'Result', value: 'Undefined (division by zero)', highlight: true, color: 'negative' },
+        { id: 'explanation', label: 'Why Undefined', value: `0 raised to a negative power is 1 divided by 0 raised to a positive power: 0^${fmt(exp)} = 1 / 0^${fmt(-exp)} = 1 / 0, which has no value.`, color: neutral },
       ];
     }
 
-    const result = Math.pow(base, exp);
-    if (!isFinite(result)) {
+    if (p.kind === 'complex') {
+      const { magnitude: mag = 0, re = 0, im = 0 } = p;
+      const part = (n: number) => fmt(Math.abs(n) < mag * 1e-12 ? 0 : n); // cos(pi/2) is 6e-17, not 0
+      const reS = part(re);
+      const imS = part(Math.abs(im));
+      const sign = im < 0 ? '−' : '+';
       return [
-        { id: 'result', label: 'Result', value: result > 0 ? 'Overflow: more than 1.8 × 10^308' : 'Overflow: less than -1.8 × 10^308', highlight: true, color: 'negative' },
-        { id: 'explanation', label: 'Overflow', value: `The result exceeds the maximum representable floating-point number (≈ 1.8 × 10^308). Try a smaller exponent.`, color: 'negative' },
-        { id: 'reciprocal', label: 'Reciprocal', value: '0', color: 'neutral' },
+        { id: 'result', label: 'Result', value: `Complex: ${reS} ${sign} ${imS}i`, highlight: true, color: 'negative' },
+        { id: 'explanation', label: 'Why Complex', value: `A negative base (${fmt(base)}) raised to a non-integer exponent (${fmt(exp)}) has no real value unless the exponent is a fraction with an odd denominator (like 1/3 or 2/5). This is the principal complex value: magnitude ${fmt(mag)} at angle π × ${fmt(exp)} radians, i.e. ${fmt(mag)} × (cos(${fmt(Math.PI * exp)}) + i·sin(${fmt(Math.PI * exp)})).`, color: neutral },
+        { id: 'reciprocal', label: 'Reciprocal (1/result)', value: mag === 0 ? 'Undefined' : `Complex: ${part(re / (mag * mag))} ${im < 0 ? '+' : '−'} ${part(Math.abs(im) / (mag * mag))}i`, color: neutral },
+        { id: 'squaredCheck', label: 'Base Squared (b²)', value: fmt(base * base), color: neutral },
       ];
     }
 
-    const fmt = (n: number) => {
-      // e.g. the k-th root for a tiny k, or 1/result of a denormal, overflows a double
-      if (!isFinite(n)) return 'too large to display';
-      if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-      const s = parseFloat(n.toPrecision(12)).toString();
-      return s;
-    };
+    if (p.kind === 'overflow') {
+      return [
+        { id: 'result', label: 'Result', value: p.negative ? 'Overflow: less than -1.8 × 10^308' : 'Overflow: more than 1.8 × 10^308', highlight: true, color: 'negative' },
+        { id: 'explanation', label: 'Overflow', value: 'The result exceeds the largest floating-point number (≈ 1.8 × 10^308). Try a smaller exponent.', color: 'negative' },
+        { id: 'reciprocal', label: 'Reciprocal', value: 'Effectively 0 (smaller than 5 × 10^-324)', color: neutral },
+      ];
+    }
 
-    const fmtExpanded = (n: number) => {
-      if (Number.isInteger(n)) return n.toString();
-      return n.toFixed(4).replace(/\.?0+$/, '');
-    };
+    const result = p.value as number;
+    const isIntExp = Number.isInteger(exp);
+    const intExp = exp;
 
-    // Expanded form: show multiplication string for positive integer exponents
+    // Expanded form: show the multiplication for small integer exponents
     let expandedForm = '';
-    const intExp = Math.floor(exp);
-    const isIntExp = exp === intExp && Number.isInteger(exp);
-
     if (isIntExp && intExp > 0 && intExp <= 20) {
-      expandedForm = Array(intExp).fill(fmtExpanded(base)).join(' × ');
-      expandedForm += ` = ${fmt(result)}`;
+      expandedForm = `${Array(intExp).fill(operand(base)).join(' × ')} = ${fmt(result)}`;
     } else if (isIntExp && intExp < 0 && intExp >= -20) {
-      expandedForm = `1 / (${Array(Math.abs(intExp)).fill(fmtExpanded(base)).join(' × ')}) = ${fmt(result)}`;
+      expandedForm = `1 / (${Array(-intExp).fill(operand(base)).join(' × ')}) = ${fmt(result)}`;
     }
 
     // Fraction conversion for negative integer exponents
     let fractionForm = '';
     if (isIntExp && intExp < 0) {
-      const absN = Math.abs(intExp);
-      fractionForm = `${base}^${fmtExpanded(exp)} = 1 / ${fmtExpanded(Math.pow(base, absN))} = ${fmt(result)}`;
+      fractionForm = `${operand(base)}^${intExp} = 1 / ${fmt(Math.pow(base, -intExp))} = ${fmt(result)}`;
     }
 
     // Scientific notation for very large/small results
-    let sciNotation = '';
-    if (Math.abs(result) >= 1e6 || (Math.abs(result) < 0.001 && result !== 0)) {
-      sciNotation = result.toExponential(6);
-    }
-
-    // Squared check: base × base
-    const squaredCheck = base * base;
+    const sciNotation = Math.abs(result) >= 1e6 || (Math.abs(result) < 0.001 && result !== 0) ? result.toExponential(6) : '';
 
     // Exponent identity breakdown for larger integer exponents
     let exponentIdentity = '';
@@ -152,72 +116,49 @@ const exponentConfig: CalculatorConfig = {
       const half = Math.floor(intExp / 2);
       const remainder = intExp - half - half;
       const halfPower = Math.pow(base, half);
-      if (isFinite(halfPower) && Math.abs(halfPower) < 1e15) {
+      if (Number.isFinite(halfPower) && Math.abs(halfPower) < 1e15) {
         const halfStr = Number.isInteger(halfPower) ? halfPower.toString() : halfPower.toPrecision(6);
-        if (remainder === 0) {
-          exponentIdentity = `${base}^${intExp} = ${base}^${half} × ${base}^${half} = ${halfStr} × ${halfStr} = ${fmt(result)}`;
-        } else {
-          exponentIdentity = `${base}^${intExp} = ${base}^${half} × ${base}^${half} × ${base}^${remainder} = ${halfStr} × ${halfStr} × ${fmtExpanded(Math.pow(base, remainder))} = ${fmt(result)}`;
-        }
+        const b = operand(base);
+        exponentIdentity =
+          remainder === 0
+            ? `${b}^${intExp} = ${b}^${half} × ${b}^${half} = ${halfStr} × ${halfStr} = ${fmt(result)}`
+            : `${b}^${intExp} = ${b}^${half} × ${b}^${half} × ${b}^${remainder} = ${halfStr} × ${halfStr} × ${fmt(Math.pow(base, remainder))} = ${fmt(result)}`;
       }
     }
 
-    const results = [
-      {
-        id: 'result',
-        label: 'Result',
-        value: fmt(result),
-        highlight: true,
-        color: 'positive' as const,
-      },
-      ...(expandedForm ? [{
-        id: 'expandedForm' as const,
-        label: 'Expanded Form',
-        value: expandedForm,
-        color: 'neutral' as const,
-      }] : []),
-      ...(fractionForm ? [{
-        id: 'fractionForm' as const,
-        label: 'Fraction Conversion',
-        value: fractionForm,
-        color: 'neutral' as const,
-      }] : []),
-      ...(sciNotation ? [{
-        id: 'sciNotation' as const,
-        label: 'Scientific Notation',
-        value: sciNotation,
-        color: 'neutral' as const,
-      }] : []),
-      ...(exponentIdentity ? [{
-        id: 'exponentIdentity' as const,
-        label: 'Power Rule Breakdown',
-        value: exponentIdentity,
-        color: 'neutral' as const,
-      }] : []),
-      {
-        id: 'squaredCheck',
-        label: 'Base Squared (b²)',
-        value: fmt(squaredCheck),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'inverse',
-        label: 'Root (inverse)',
-        value: `${fmtExpanded(Math.abs(exp))}${Math.abs(exp) > 0 ? 'th' : ''} root of ${fmtExpanded(base)} = ${fmt(Math.pow(Math.abs(base), 1 / (Math.abs(exp) || 1)))}`,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'reciprocal',
-        label: 'Reciprocal (1/result)',
-        value: result !== 0 ? fmt(1 / result) : 'Undefined',
-        color: 'neutral' as const,
-      },
-    ];
+    // Exact integer value once a double can no longer hold it (|value| >= 2^53): 2^100 = 1267650600228229401496703205376
+    let exactValue = '';
+    if (Number.isInteger(base) && isIntExp && intExp >= 2 && Math.abs(base) >= 2 && Math.abs(base) <= SAFE && Math.abs(result) >= SAFE) {
+      if (intExp * Math.log10(Math.abs(base)) < 400) exactValue = (BigInt(base) ** BigInt(intExp)).toString();
+    }
 
-    return results;
+    // The b^(1/n) root: the number that, raised to n, gives b
+    let rootValue = '';
+    if (exp !== 0) {
+      const root = analyzePower(base, 1 / exp);
+      const rootName = Number.isInteger(exp) && exp >= 2 ? (exp === 2 ? 'square root' : exp === 3 ? 'cube root' : `${ordinal(exp)} root`) : '';
+      const lhs = rootName ? `${rootName} of ${fmt(base)}` : `${operand(base)}^(1/${fmt(exp)})`;
+      if (root.kind === 'real') rootValue = `${lhs} = ${fmt(root.value as number)}`;
+      else if (root.kind === 'complex') rootValue = `${lhs} has no real value (complex)`;
+      else if (root.kind === 'overflow') rootValue = `${lhs} is too large to represent`;
+      else rootValue = `${lhs} has no defined value (division by zero)`;
+    }
+
+    const rows: CalculatorResult[] = [
+      { id: 'result', label: 'Result', value: p.underflow ? 'Underflow: smaller than 5 × 10^-324 (shown as 0)' : fmt(result), highlight: true, color: 'positive' },
+    ];
+    if (expandedForm) rows.push({ id: 'expandedForm', label: 'Expanded Form', value: expandedForm, color: neutral });
+    if (fractionForm) rows.push({ id: 'fractionForm', label: 'Fraction Conversion', value: fractionForm, color: neutral });
+    if (sciNotation) rows.push({ id: 'sciNotation', label: 'Scientific Notation', value: sciNotation, color: neutral });
+    if (exactValue) rows.push({ id: 'exactValue', label: 'Exact Integer Value', value: exactValue, color: neutral });
+    if (exponentIdentity) rows.push({ id: 'exponentIdentity', label: 'Power Rule Breakdown', value: exponentIdentity, color: neutral });
+    rows.push({ id: 'squaredCheck', label: 'Base Squared (b²)', value: fmt(base * base), color: neutral });
+    if (rootValue) rows.push({ id: 'inverse', label: 'Root b^(1/n)', value: rootValue, color: neutral });
+    rows.push({ id: 'reciprocal', label: 'Reciprocal (1/result)', value: result !== 0 ? fmt(1 / result) : 'Undefined', color: neutral });
+    return rows;
   },
   extraPanel: (values, results) => {
-    if (!results.length) return null;
+    if (!results.length || results[0].id !== 'result') return null;
     return createElement(ExponentPanel, { values, results });
   },
   educational: {
@@ -236,7 +177,7 @@ const exponentConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Enter the base value (positive, negative, or decimal). For negative bases, integer exponents work normally; non-integer exponents produce complex results.',
-      'Enter the exponent (integer, fractional, negative, or decimal). Use 0.5 for square roots, 1/3 for cube roots (enter as 0.3333), and negative values like -2 for reciprocal squares.',
+      'Enter the exponent (integer, fractional, negative, or decimal). Use 0.5 for square roots, 0.3333333333333333 for cube roots (recognised as 1/3), and negative values like -2 for reciprocal squares.',
       'View the result, expanded form (for small integer exponents), and the fractional conversion for negative exponents.',
       'Check the "Base Squared" row to quickly verify b × b — useful as an arithmetic sanity check.',
       'The Power Rule Breakdown appears for integer exponents > 2 and demonstrates how b^(m+n) = b^m × b^n can decompose a large exponent into smaller, verifiable pieces.',
@@ -259,7 +200,7 @@ const exponentConfig: CalculatorConfig = {
         scenario: 'A biologist is tracking bacterial growth in a petri dish. The colony doubles every hour. Starting with 5 bacteria, how many will there be after 8 hours? The growth follows the formula: final = initial × 2^(hours).',
         inputs: { base: '2', exponent: '8' },
         result: '2^8 = 256',
-        insight: '2^8 = 256. Starting with 5 bacteria, after 8 hours there will be 5 × 256 = 1,280 bacteria. The exponent 8 tells you the bacteria doubled 8 times. The calculator shows the expanded form (2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 = 256) and the power rule breakdown (2^8 = 2^4 × 2^4 = 16 × 16 = 256), which helps verify the result. This exponential growth is why infections can spread so rapidly — a single bacterium can produce over a billion descendants in just 10 hours of doubling.',
+        insight: '2^8 = 256. Starting with 5 bacteria, after 8 hours there will be 5 × 256 = 1,280 bacteria. The exponent 8 tells you the bacteria doubled 8 times. The calculator shows the expanded form (2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 = 256) and the power rule breakdown (2^8 = 2^4 × 2^4 = 16 × 16 = 256), which helps verify the result. This exponential growth is why infections can spread so rapidly — ten doublings turn a single bacterium into 1,024, and thirty doublings into over a billion.',
       },
       {
         scenario: 'An investor wants to understand compound interest. If an investment grows at 7% annually, the 10-year growth multiplier is (1.07)^10. What is this multiplier?',
@@ -271,24 +212,24 @@ const exponentConfig: CalculatorConfig = {
         scenario: 'A pharmaceutical researcher calculates the remaining amount of a drug in a patient\'s bloodstream. The drug has a half-life of 6 hours, meaning after 6 hours half remains. The fraction remaining after t hours is (1/2)^(t/6). After 18 hours (3 half-lives), what fraction remains? In other words, compute (1/2)^3.',
         inputs: { base: '0.5', exponent: '3' },
         result: '(1/2)^3 = 0.125 = 1/8',
-        insight: '(1/2)^3 = 0.125 = 1/8. After 3 half-lives, only 1/8 of the original drug amount remains in the bloodstream. This is why medications have dosing schedules — to maintain therapeutic levels between doses. The fraction form (1/2)^3 = 1/8 makes it clear that each half-life halves the remaining amount. After 4 half-lives only 1/16 remains, and after 5 half-lives only 1/32 — less than 3.125% of the original dose.',
+        insight: '(1/2)^3 = 0.125 = 1/8. After 3 half-lives, only 1/8 of the original drug amount remains in the bloodstream. This is why medications have dosing schedules — to maintain therapeutic levels between doses. The fraction form (1/2)^3 = 1/8 makes it clear that each half-life halves the remaining amount. After 4 half-lives only 1/16 remains, and after 5 half-lives only 1/32 — just 3.125% of the original dose.',
       },
       {
-        scenario: 'An engineer needs to compute the fourth root of 81 to determine the side length of a square plot that has area 81 square meters — but let\'s verify that the square root relationship works: the length of one side is 81^(1/4) when the volume is 81 for a 4D hypercube. More practically, find the cube root of 27 by computing 27^(1/3).',
-        inputs: { base: '27', exponent: '0.333333333333' },
+        scenario: 'An engineer wants the side of a cube whose volume is 27 cubic metres. The side is the cube root of 27, which equals 27^(1/3).',
+        inputs: { base: '27', exponent: '0.3333333333333333' },
         result: '27^(1/3) ≈ 3 (cube root of 27)',
-        insight: '27^(1/3) ≈ 3. The cube root of 27 is exactly 3, because 3^3 = 27. The calculator uses the fractional exponent 1/3 (approximated as 0.3333...) to compute the cube root. This demonstrates the equivalence of roots and fractional exponents: the nth root of b equals b^(1/n). Square roots use exponent 0.5, cube roots use 0.3333..., and fourth roots use 0.25.',
+        insight: '27^(1/3) ≈ 3. The cube root of 27 is exactly 3, because 3^3 = 27. The calculator uses the fractional exponent 1/3 (approximated as 0.3333...) to compute the cube root. This demonstrates the equivalence of roots and fractional exponents: the nth root of b equals b^(1/n). Square roots use exponent 0.5, cube roots use 0.3333333333333333 (read as 1/3), and fourth roots use 0.25.',
       },
     ],
     proTips: [
-      'Use fractional exponents to compute roots: enter 0.5 for square root, 0.3333 for cube root, 0.25 for fourth root. This is often faster than using a dedicated root calculator for quick checks.',
+      'Use fractional exponents to compute roots: enter 0.5 for square root, 0.3333333333333333 for cube root (the calculator recognises it as 1/3), 0.25 for fourth root. With a shorter entry such as 0.3333 the result is only approximate, and a negative base is treated as complex.',
       'The Product Rule (b^m × b^n = b^(m+n)) means you can decompose a large exponent into smaller ones you already know. For example, 2^16 = 2^8 × 2^8 = 256 × 256 = 65536 — the calculator shows this breakdown when possible.',
       'For compound interest estimates, memorize that (1+r)^n ≈ e^(rn) for small r. At 7% over 10 years, e^0.7 ≈ 2.01 — very close to the actual 1.967. This "rule of 70" (doubling time ≈ 70 / rate%) is a quick mental check.',
       'When working with negative bases, always check if your exponent is an integer. Negative base ^ integer exponent is always real (alternating signs). Negative base ^ non-integer exponent is typically complex — the calculator warns you.',
       'The reciprocal of b^n is b^(-n), and vice versa. If you need 1/32, you can compute 2^(-5) = 1/32 = 0.03125. This relationship is fundamental to understanding negative exponents.',
     ],
     limitations: [
-      'Very large results (exceeding roughly 1.8 × 10^308) will produce Infinity; very small results (below roughly 5 × 10^(-324)) will produce 0 due to floating-point underflow.',
+      'Results beyond roughly 1.8 × 10^308 are reported as an overflow, and non-zero results below roughly 5 × 10^(-324) as an underflow, because they cannot be stored as 64-bit floating-point numbers. Integer powers whose exact value passes 2^53 also show an exact BigInt row.',
       'For negative bases with non-integer exponents, the result is generally a complex number — the calculator attempts to detect rational exponents with odd denominators and compute the real result.',
       'Do not use for modular exponentiation (a^b mod m) used in cryptography — use a dedicated modular arithmetic tool.',
       'Do not use for symbolic manipulation of exponential expressions — use a computer algebra system.',
@@ -326,7 +267,7 @@ const exponentConfig: CalculatorConfig = {
       },
       {
         question: 'How are exponents used in real-world computing and technology?',
-        answer: 'Exponents are everywhere in computing. Memory and storage sizes use powers of 2: 1 KB = 2^10 = 1,024 bytes, 1 MB = 2^20 ≈ 1.05 million bytes, 1 GB = 2^30, 1 TB = 2^40. IP addressing: IPv4 uses 32 bits for 2^32 ≈ 4.3 billion addresses, while IPv6 uses 128 bits for 2^128 ≈ 3.4 × 10^38 addresses. Encryption key strength is measured in bits: a 256-bit key means 2^256 possible keys — a number so large that brute-forcing it would take longer than the age of the universe. Hash functions and proof-of-work in Bitcoin rely on the one-way nature of modular exponentiation.',
+        answer: 'Exponents are everywhere in computing. Memory and storage sizes use powers of 2: 1 KB = 2^10 = 1,024 bytes, 1 MB = 2^20 ≈ 1.05 million bytes, 1 GB = 2^30, 1 TB = 2^40. IP addressing: IPv4 uses 32 bits for 2^32 ≈ 4.3 billion addresses, while IPv6 uses 128 bits for 2^128 ≈ 3.4 × 10^38 addresses. Encryption key strength is measured in bits: a 256-bit key means 2^256 possible keys — a number so large that brute-forcing it would take longer than the age of the universe. RSA and Diffie-Hellman key exchange rely on modular exponentiation, which is easy to compute but hard to reverse.',
       },
       {
         question: 'What is the relationship between exponents and logarithms?',

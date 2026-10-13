@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ConversionPanel from './ConversionPanel';
+import { CUP_L, FLOZ_L, FT3_L, FT_M, GAL_US_L, IN_M, LB_KG, MI_M, PT_L, QT_L, SECONDS_PER_HOUR, TBSP_L, TSP_L, YD_M } from '../../../utils/unitConvert';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { roundStrAuto } from '../../../lib/format';
 
 // ─── Category definitions ────────────────────────────────────────────────────
 
@@ -12,7 +15,7 @@ const CATEGORIES = [
   { label: 'Data Storage', value: 'data' },
   { label: 'Speed', value: 'speed' },
   { label: 'Area', value: 'area' },
-  { label: 'Currency (USD base)', value: 'currency' },
+  { label: 'Currency (indicative rates)', value: 'currency' },
 ];
 
 // ─── All units in one flat list ──────────────────────────────────────────────
@@ -24,7 +27,7 @@ const ALL_UNITS = [
   { label: 'Kilogram (weight)', value: 'kilogram' },
   { label: 'Ounce (weight)', value: 'ounce' },
   { label: 'Pound (weight)', value: 'pound' },
-  { label: 'Ton (weight)', value: 'ton' },
+  { label: 'US Ton, short (weight)', value: 'ton' },
   { label: 'Metric Ton (weight)', value: 'metric-ton' },
   // Length
   { label: 'Millimeter (length)', value: 'millimeter' },
@@ -91,39 +94,46 @@ const ALL_UNITS = [
 
 type FactorMap = Record<string, number>;
 
+// Factors are EXACT by definition (NIST SP 811 / the 1959 international yard-and-pound agreement), derived from the shared
+// constants in utils/unitConvert.ts. The old table carried hand-rounded 5-6 digit values (1 oz = 28.3495 g, 1 mi = 1609.34 m,
+// 1 acre = 4046.86 m²) that made round trips and large values drift by up to ~0.02 %.
 const FACTORS: Record<string, FactorMap> = {
+  // base unit: gram
   weight: {
     milligram: 0.001,
     gram: 1,
     kilogram: 1000,
-    ounce: 28.3495,
-    pound: 453.592,
-    ton: 907185,
+    ounce: (LB_KG * 1000) / 16, // avoirdupois ounce = 28.349523125 g exactly
+    pound: LB_KG * 1000, // 453.59237 g exactly
+    ton: LB_KG * 1000 * 2000, // US short ton = 2000 lb = 907 184.74 g exactly
     'metric-ton': 1000000,
   },
+  // base unit: metre
   length: {
     millimeter: 0.001,
     centimeter: 0.01,
     meter: 1,
     kilometer: 1000,
-    inch: 0.0254,
-    foot: 0.3048,
-    yard: 0.9144,
-    mile: 1609.34,
+    inch: IN_M,
+    foot: FT_M,
+    yard: YD_M,
+    mile: MI_M, // 1609.344 m exactly
   },
+  // base unit: litre (US customary volumes, all exact fractions of 231 in³ per gallon)
   volume: {
     milliliter: 0.001,
     liter: 1,
-    'gallon-us': 3.78541,
-    quart: 0.946353,
-    pint: 0.473176,
-    cup: 0.236588,
-    'fluid-ounce': 0.0295735,
-    tablespoon: 0.0147868,
-    teaspoon: 0.00492892,
+    'gallon-us': GAL_US_L,
+    quart: QT_L,
+    pint: PT_L,
+    cup: CUP_L,
+    'fluid-ounce': FLOZ_L,
+    tablespoon: TBSP_L,
+    teaspoon: TSP_L,
     'cubic-meter': 1000,
-    'cubic-foot': 28.3168,
+    'cubic-foot': FT3_L, // 28.316846592 L exactly
   },
+  // base unit: byte. SI (decimal) prefixes: 1 kB = 1000 B (the binary 1024 units are KiB, MiB, ...)
   data: {
     bit: 0.125,
     byte: 1,
@@ -133,24 +143,27 @@ const FACTORS: Record<string, FactorMap> = {
     terabyte: 1e12,
     petabyte: 1e15,
   },
+  // base unit: metre per second
   speed: {
     mps: 1,
-    kmph: 0.277778,
-    mph: 0.44704,
-    knot: 0.514444,
-    fps: 0.3048,
+    kmph: 1 / 3.6, // 1000 m / 3600 s
+    mph: MI_M / SECONDS_PER_HOUR, // 0.44704 m/s exactly
+    knot: 1852 / SECONDS_PER_HOUR, // 1 nautical mile (1852 m) per hour
+    fps: FT_M,
   },
+  // base unit: square metre
   area: {
     'sq-mm': 1e-6,
     'sq-cm': 0.0001,
     'sq-m': 1,
     'sq-km': 1e6,
-    'sq-in': 0.00064516,
-    'sq-ft': 0.092903,
-    'sq-yd': 0.836127,
-    acre: 4046.86,
+    'sq-in': IN_M ** 2, // 0.00064516 m² exactly
+    'sq-ft': FT_M ** 2, // 0.09290304 m² exactly
+    'sq-yd': YD_M ** 2, // 0.83612736 m² exactly
+    acre: 43560 * FT_M ** 2, // international acre = 4046.8564224 m² exactly
     hectare: 10000,
   },
+  // INDICATIVE static rates against USD: not live and not maintained, shown with a warning row.
   currency: {
     usd: 1,
     eur: 1.08,
@@ -160,7 +173,7 @@ const FACTORS: Record<string, FactorMap> = {
     inr: 0.012,
     cad: 0.73,
     aud: 0.65,
-    brl: 0.20,
+    brl: 0.2,
   },
 };
 
@@ -189,7 +202,7 @@ const UNIT_LABELS: Record<string, string> = {
   kilogram: 'kg',
   ounce: 'oz',
   pound: 'lb',
-  ton: 'tn',
+  ton: 'US tn',
   'metric-ton': 't',
   // length
   millimeter: 'mm',
@@ -272,10 +285,14 @@ const UNITS_BY_CATEGORY: Record<string, { label: string; value: string }[]> = Ob
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+// 6 decimals, but a non-zero result below 0.000001 keeps 6 significant digits (1 mg = 1e-9 t, not "0")
 function fmt(n: number): string {
   if (!isFinite(n)) return '0';
-  return parseFloat(n.toFixed(6)).toString();
+  return roundStrAuto(n, 6);
 }
+
+const CURRENCY_NOTE =
+  'Indicative fixed rates against USD for illustration only; they are not live market rates. Check a current source before converting money.';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -325,7 +342,7 @@ const conversionConfig: CalculatorConfig = {
     const category = (values.category || '').trim();
     const fromUnit = (values[`fromUnit_${category}`] || '').trim();
     const toUnit = (values[`toUnit_${category}`] || '').trim();
-    const fromValue = parseFloat(values.fromValue);
+    const fromValue = parseNumberStrict(values.fromValue);
 
     if (isNaN(fromValue)) return [];
     if (!category || !fromUnit || !toUnit) return [];
@@ -374,13 +391,15 @@ const conversionConfig: CalculatorConfig = {
     const result = fromValue * fromFactor / toFactor;
     const formatted = fmt(result);
 
-    return [
-      { id: 'result', label: 'Result', value: `${formatted} ${toLabel}`, highlight: true, color: 'positive' },
+    const rows = [
+      { id: 'result', label: 'Result', value: `${formatted} ${toLabel}`, highlight: true, color: 'positive' as const },
       { id: 'formula', label: 'Conversion', value: `${fromValue} ${fromLabel} = ${formatted} ${toLabel}` },
       { id: 'category', label: 'Category', value: categoryLabel },
       { id: 'fromDetail', label: 'From', value: `${fromValue} ${fromLabel}` },
       { id: 'toDetail', label: 'To', value: `${formatted} ${toLabel}` },
     ];
+    if (category === 'currency') rows.push({ id: 'rateNote', label: 'Rates', value: CURRENCY_NOTE });
+    return rows;
   },
   extraPanel: (_values, results) => {
     if (!results.length) return null;
@@ -431,7 +450,7 @@ const conversionConfig: CalculatorConfig = {
         scenario: 'Maria, a European baker, is following an American recipe that calls for 3 cups of flour and 2 sticks of butter (each stick is 4 ounces). Her kitchen scale and measuring tools are metric. She needs to convert to milliliters and grams.',
         inputs: { category: 'volume', fromValue: '3', fromUnit_volume: 'cup', toUnit_volume: 'milliliter' },
         result: '709.764 mL',
-        insight: '3 cups × 0.236588 L/cup = 0.709764 L = 709.764 mL. For the butter: 8 oz × 28.3495 g/oz = 226.796 g. Maria should measure approximately 710 mL of flour and 227 g of butter. Understanding cup-to-mL conversion is essential for baking precision since flour density means volume measurements can vary — professional bakers prefer weight-based recipes for consistency.',
+        insight: '3 cups × 0.2365882365 L/cup = 0.709765 L = 709.765 mL. For the butter: 8 oz × 28.3495 g/oz = 226.796 g. Maria should measure approximately 710 mL of flour and 227 g of butter. Understanding cup-to-mL conversion is essential for baking precision since flour density means volume measurements can vary — professional bakers prefer weight-based recipes for consistency.',
       },
       {
         scenario: 'James, a logistics manager, is shipping a container from the US to Germany. The cargo weighs 24,500 pounds, but the German port authority requires weight declarations in metric tons. He also needs the total in kilograms for the shipping manifest.',

@@ -1,21 +1,23 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import DayCounterPanel from './DayCounterPanel';
+import { addDays, calendarDiff, daysBetween, parseIsoDate } from '../../../utils/dates';
 
-function countWeekdaysInRange(start: Date, end: Date): number {
-  let count = 0;
-  const current = new Date(start);
-  current.setHours(0, 0, 0, 0);
-  const endNorm = new Date(end);
-  endNorm.setHours(0, 0, 0, 0);
+const MONDAY_EPOCH = new Date(1969, 11, 29); // a Monday: weekday counting is anchored here
 
-  while (current <= endNorm) {
-    const dow = current.getDay();
-    if (dow !== 0 && dow !== 6) count++;
-    current.setDate(current.getDate() + 1);
-  }
-  return count;
+/** Number of Monday-Friday days in the half-open range [start, end), in O(1) (5 per full week plus the leftover days). */
+function weekdaysBetween(start: Date, end: Date): number {
+  const upTo = (d: Date) => {
+    const k = daysBetween(MONDAY_EPOCH, d); // days since that Monday
+    const weeks = Math.floor(k / 7);
+    const rest = k - weeks * 7; // 0..6 (Mon..Sun): the first 5 are weekdays
+    return weeks * 5 + Math.min(rest, 5);
+  };
+  return upTo(end) - upTo(start);
 }
+
+const err = (value: string): CalculatorResult[] => [{ id: 'error', label: 'Error', value, color: 'negative' }];
+const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? '' : 's'}`;
 
 const dayCounterConfig: CalculatorConfig = {
   inputs: [
@@ -41,6 +43,7 @@ const dayCounterConfig: CalculatorConfig = {
         { label: 'No', value: 'no' },
         { label: 'Yes', value: 'yes' },
       ],
+      helpText: 'Yes counts the end date as a full day too (a Friday-to-Sunday stay is 3 days inclusive). The business-day count follows the same rule.',
     },
     {
       id: 'countBusinessDays',
@@ -54,107 +57,50 @@ const dayCounterConfig: CalculatorConfig = {
     },
   ],
 
-  calculate: (values) => {
+  calculate: (values): CalculatorResult[] => {
     const startStr = values.startDate;
     const endStr = values.endDate;
-    const includeEnd = values.includeEndDate;
-    const businessDays = values.countBusinessDays;
-
     if (!startStr || !endStr) return [];
 
-    const start = new Date(startStr + 'T00:00:00');
-    const end = new Date(endStr + 'T00:00:00');
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
+    // Strict, DST-proof parsing: 2025-02-30 is rejected instead of rolling into March, and day numbers come from UTC
+    // arithmetic (a local-midnight difference is 23 or 25 hours across a clock change and floor() lost a day).
+    const start = parseIsoDate(startStr);
+    const end = parseIsoDate(endStr);
+    if (!start || !end) return [];
+    if (end < start) return err('The end date must be on the same day as or after the start date.');
 
-    if (end < start) return [];
+    const includeEnd = values.includeEndDate === 'yes';
+    const businessOnly = values.countBusinessDays === 'yes';
 
-    const diffMs = end.getTime() - start.getTime();
-    let totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    // The counted range is [start, end) or, with "Include End Date", [start, end + 1 day)
+    const rangeEnd = includeEnd ? addDays(end, 1) : end;
+    const totalDays = daysBetween(start, rangeEnd);
 
-    if (includeEnd === 'yes') {
-      totalDays += 1;
+    // Exact calendar breakdown (real month lengths), not the old 365-day year / 30-day month approximation
+    const diff = calendarDiff(start, rangeEnd);
+
+    const results: CalculatorResult[] = [
+      { id: 'totalDays', label: 'Total Days', value: String(totalDays), highlight: true, color: 'positive' },
+      {
+        id: 'formattedBreakdown',
+        label: 'Duration',
+        value: `${plural(diff.years, 'year')}, ${plural(diff.months, 'month')}, ${plural(diff.days, 'day')}`,
+      },
+      { id: 'totalWeeks', label: 'Total Weeks', value: String(Math.floor(totalDays / 7)) },
+      { id: 'totalHours', label: 'Total Hours', value: String(totalDays * 24) },
+      { id: 'totalMinutes', label: 'Total Minutes', value: String(totalDays * 1440) },
+    ];
+
+    if (businessOnly) {
+      results.push({ id: 'businessDaysCount', label: 'Business Days', value: String(weekdaysBetween(start, rangeEnd)) });
     }
 
-    let businessDaysCount = 0;
-    if (businessDays === 'yes') {
-      // countWeekdaysInRange is already inclusive of both start and end
-      // (it uses <=), so no extra +1 day is needed when includeEnd is
-      // 'yes' — adding one previously double-counted a day whenever the
-      // day immediately after `end` was itself a weekday.
-      businessDaysCount = countWeekdaysInRange(start, end);
-    }
-
-    // Approximate years, months, days
-    const years = Math.floor(totalDays / 365);
-    const remainingAfterYears = totalDays % 365;
-    const months = Math.floor(remainingAfterYears / 30);
-    const days = remainingAfterYears % 30;
-
-    const results: CalculatorResult[] = [];
-
-    results.push({
-      id: 'totalDays',
-      label: 'Total Days',
-      value: String(totalDays),
-      highlight: true,
-      color: 'positive',
-    });
-
-    results.push({
-      id: 'formattedBreakdown',
-      label: 'Duration',
-      value: `${years} years, ${months} months, ${days} days`,
-    });
-
-    results.push({
-      id: 'totalWeeks',
-      label: 'Total Weeks',
-      value: String(Math.floor(totalDays / 7)),
-    });
-
-    results.push({
-      id: 'totalHours',
-      label: 'Total Hours',
-      value: String(totalDays * 24),
-    });
-
-    results.push({
-      id: 'totalMinutes',
-      label: 'Total Minutes',
-      value: String(totalDays * 1440),
-    });
-
-    if (businessDays === 'yes') {
-      results.push({
-        id: 'businessDaysCount',
-        label: 'Business Days',
-        value: String(businessDaysCount),
-      });
-    }
-
-    results.push({
-      id: 'startDateDisplay',
-      label: 'Start Date',
-      value: startStr,
-    });
-
-    results.push({
-      id: 'endDateDisplay',
-      label: 'End Date',
-      value: endStr,
-    });
-
-    results.push({
-      id: 'includeEndNote',
-      label: 'Include End Date',
-      value: includeEnd === 'yes' ? 'Yes (+1 day)' : 'No',
-    });
-
-    results.push({
-      id: 'businessMode',
-      label: 'Mode',
-      value: businessDays === 'yes' ? 'Business Days Only' : 'All Days',
-    });
+    results.push(
+      { id: 'startDateDisplay', label: 'Start Date', value: startStr },
+      { id: 'endDateDisplay', label: 'End Date', value: endStr },
+      { id: 'includeEndNote', label: 'Include End Date', value: includeEnd ? 'Yes (+1 day)' : 'No' },
+      { id: 'businessMode', label: 'Mode', value: businessOnly ? 'Business Days Only' : 'All Days' },
+    );
 
     return results;
   },
@@ -183,7 +129,7 @@ const dayCounterConfig: CalculatorConfig = {
       'Use the business days option for project timelines and shipping estimates that exclude weekends.',
     ],
     explanation:
-      'This calculator counts the number of days between two dates. It can include or exclude the end date, count only business days (Monday-Friday), and show the result in various time units. The "Include End Date" option is particularly useful when computing the total length of a stay, rental period, or event that spans from a start date to an end date inclusive. The year/month/day breakdown provides an approximate but intuitive sense of the time span, using 365 days per year and 30 days per month as a standardized approximation.',
+      'This calculator counts the number of days between two dates. It can include or exclude the end date, count only business days (Monday-Friday), and show the result in various time units. The "Include End Date" option is particularly useful when computing the total length of a stay, rental period, or event that spans from a start date to an end date inclusive. The year/month/day breakdown gives an intuitive sense of the time span using real calendar months (not a 365-day year or 30-day month).',
     faqs: [
       {
         question: 'What is the difference between including and excluding the end date?',
@@ -191,19 +137,19 @@ const dayCounterConfig: CalculatorConfig = {
       },
       {
         question: 'How are business days calculated?',
-        answer: 'Business days count only Monday through Friday, excluding Saturdays and Sundays. The calculation iterates through each day in the date range and counts only weekdays. This is useful for estimating project timelines, shipping times that exclude weekends, and work schedules. Note that this option does not account for public holidays.',
+        answer: 'Business days count only Monday through Friday, excluding Saturdays and Sundays. The calculation counts whole weeks (5 weekdays each) plus the leftover days, over the same range as the day total: the start date is counted, the end date only when Include End Date is Yes. Monday 22 to Friday 26 January is therefore 4 business days, or 5 when the end date is included.',
       },
       {
         question: 'Is the year/month/day breakdown exact?',
-        answer: 'The breakdown uses an approximation of 365 days per year and 30 days per month for simplicity. For example, 400 days would be shown as approximately 1 year, 1 month, and 5 days. For precise accounting of months with varying lengths (January has 31 days, February has 28 or 29, etc.), use a dedicated date calculator that considers actual calendar month boundaries.',
+        answer: 'The breakdown uses real calendar months: it counts whole years and whole months from the start date, then the leftover days, so 2024-01-31 to 2024-03-01 is 1 month and 1 day. Total days, weeks, hours and minutes are exact calendar-day counts.',
       },
       {
         question: 'Does the calculator account for leap years?',
-        answer: 'Yes. The total days calculation uses the actual calendar dates you enter, so leap years are automatically handled by the browser\'s date engine. For example, the range from January 1, 2024 (a leap year) to January 1, 2025 returns 366 days, while the same range in a non-leap year returns 365 days. The year/month/day approximate breakdown, however, uses a fixed 365-day year, so it may display slightly differently for leap-year ranges.',
+        answer: 'Yes. The total days calculation uses the actual calendar dates you enter, so leap years are automatically handled by the browser\'s date engine. For example, the range from January 1, 2024 (a leap year) to January 1, 2025 returns 366 days, while the same range in a non-leap year returns 365 days. The year/month/day breakdown uses real calendar months, so 2024-01-01 to 2025-01-01 shows exactly 1 year.',
       },
       {
         question: 'Can I use this calculator to find my exact age in days?',
-        answer: 'Yes. Enter your birth date as the start date and today\'s date (or any other date) as the end date with "Include End Date" set to "No" to get your age in days. The total will show your age in days, weeks, and an approximate years/months/days breakdown. For a more precise age calculation that accounts for actual calendar month lengths, see the dedicated Age Calculator.',
+        answer: 'Yes. Enter your birth date as the start date and today\'s date (or any other date) as the end date with "Include End Date" set to "No" to get your age in days. The total will show your age in days, weeks, and a years/months/days breakdown using real calendar months. For a more precise age calculation that accounts for actual calendar month lengths, see the dedicated Age Calculator.',
       },
       {
         question: 'What date formats are supported?',
@@ -215,7 +161,7 @@ const dayCounterConfig: CalculatorConfig = {
         scenario: 'Sarah is planning a 2-week vacation to Japan from December 20, 2025 to January 3, 2026. She needs to know the exact number of days for booking accommodations and calculating her travel budget.',
         inputs: { startDate: '2025-12-20', endDate: '2026-01-03', includeEndDate: 'yes', countBusinessDays: 'no' },
         result: '15',
-        insight: 'The trip spans 15 days including both the departure and return dates. This is important for hotel bookings, which typically charge per night — 14 nights for a 15-day trip with both end dates included. The year boundary crossing is handled automatically, and the approximate breakdown shows the trip as about 0 years, 0 months, and 15 days.',
+        insight: 'The trip spans 15 days including both the departure and return dates. This is important for hotel bookings, which typically charge per night — 14 nights for a 15-day trip with both end dates included. The year boundary crossing is handled automatically, and the breakdown shows the trip as 0 years, 0 months, and 15 days.',
       },
       {
         scenario: 'Marcus is a project manager who needs to estimate the working days available for a software development sprint. The sprint starts Monday March 2, 2026 and ends Friday March 27, 2026.',
@@ -227,13 +173,13 @@ const dayCounterConfig: CalculatorConfig = {
         scenario: 'Priya wants to know how many days until her wedding on October 15, 2026, counting from today (May 18, 2026), so she can plan the remaining preparations.',
         inputs: { startDate: '2026-05-18', endDate: '2026-10-15', includeEndDate: 'no', countBusinessDays: 'no' },
         result: '150',
-        insight: 'There are exactly 150 days until the wedding. This breaks down to approximately 0 years, 4 months, and 27 days. Priya can use this to plan her preparation timeline — for example, vendors typically need to be booked 3-6 months out, which is roughly 90-180 days, so she is right in the critical booking window. She can also toggle business days mode to see how many working days are available for DIY projects.',
+        insight: 'There are exactly 150 days until the wedding. This breaks down to 0 years, 4 months, and 27 days (May 18 to Sep 18 is 4 months, then 27 more days to Oct 15). Priya can use this to plan her preparation timeline — for example, vendors typically need to be booked 3-6 months out, which is roughly 90-180 days, so she is right in the critical booking window. She can also toggle business days mode to see how many working days are available for DIY projects.',
       },
     ],
     proTips: [
       'Use "Include End Date = Yes" for hotel stays, rental periods, and event durations where both the first and last day count. For example, a Friday-to-Sunday hotel stay is 2 nights but 3 days inclusive.',
       'Toggle between "All Days" and "Business Days Only" to compare total calendar days vs. working days. This is the quickest way to estimate project timelines — if a 30-day project has 22 business days, you know you have about 8 weekend days baked in.',
-      'For long-range planning (90+ days), the year/month/day approximate breakdown becomes less accurate. Use total weeks (totalDays / 7) for a more practical sense of the timespan — 180 days = about 25.7 weeks, which is easier to grasp than "0 years, 5 months, 30 days."',
+      'For long-range planning (90+ days), the year/month/day breakdown is harder to read at a glance. Use total weeks (totalDays / 7) for a more practical sense of the timespan — 180 days = about 25.7 weeks, which is easier to grasp than "0 years, 5 months, 30 days."',
       'The total minutes and hours outputs are useful for precise calculations in logistics and shipping. One full day = 1,440 minutes or 86,400 seconds — the calculator handles these conversions automatically.',
     ],
     quickReference: [
@@ -249,7 +195,7 @@ const dayCounterConfig: CalculatorConfig = {
     ],
     limitations: [
       'This calculator does not account for public holidays when counting business days — only Saturdays and Sundays are excluded. For accurate business day counts that respect specific regional holiday calendars, use a dedicated business day calculator with a holiday database.',
-      'The year/month/day breakdown is an approximation (365-day year, 30-day month) and should not be used for precise age calculations or legal date computations where exact calendar month boundaries matter.',
+      'The year/month/day breakdown follows real calendar months, but month-end conventions differ between jurisdictions and contracts (is 31 January plus one month the 28th or the 1st of March?), so confirm the rule that applies before using it for legal deadlines.',
       'The calculator handles dates from year 1 to year 275760 in most browsers, but dates before 1582 (the Gregorian calendar reform) may produce historically inaccurate results.',
       'End date inclusion logic assumes a simple +1 day adjustment — for edge cases spanning multiple years or leap seconds, verify results independently.',
     ],

@@ -1,55 +1,23 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import Decimal from 'decimal.js';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import FibonacciPanel from './FibonacciPanel';
+import { fibonacciSequenceBig } from '../../../utils/bigMath';
+import { parseIntegerStrict } from '../../../utils/rational';
+
+export const MAX_FIBONACCI_N = 100;
+
+// 60 significant digits: phi^n / sqrt(5) for n <= 100 has 21 digits, so rounding it to an integer is exact.
+const BinetDecimal = Decimal.clone({ precision: 60 });
 
 /**
- * Generate the first n Fibonacci numbers iteratively.
- * F(0) = 0, F(1) = 1, F(2) = 1, F(n) = F(n-1) + F(n-2)
- * Returns an array of length n (1-indexed positions).
+ * Binet's formula F(n) = round(phi^n / sqrt(5)), evaluated in high precision (a 64-bit double is already off at n = 71:
+ * it returns F(100) as 354,224,848,179,263,100,000 instead of 354,224,848,179,261,915,075).
  */
-function generateFibonacciSequence(n: number): number[] {
-  const seq: number[] = [];
-  let a = 0; // F(0)
-  let b = 1; // F(1)
-  for (let i = 1; i <= n; i++) {
-    if (i === 1) {
-      seq.push(1); // F(1) = 1
-    } else {
-      const next = a + b;
-      seq.push(next);
-      a = b;
-      b = next;
-    }
-  }
-  return seq;
-}
-
-/**
- * Compute the nth Fibonacci number using iteration.
- * F(1) = 1, F(2) = 1, F(n) = F(n-1) + F(n-2)
- */
-function fibonacciNth(n: number): number {
-  if (n <= 0) return 0;
-  if (n === 1 || n === 2) return 1;
-  let a = 1; // F(1)
-  let b = 1; // F(2)
-  for (let i = 3; i <= n; i++) {
-    const temp = a + b;
-    a = b;
-    b = temp;
-  }
-  return b;
-}
-
-/**
- * Compute Binet's approximation of the nth Fibonacci number.
- * F(n) ≈ φⁿ / √5, where φ = (1 + √5) / 2
- * Returns a rounded number.
- */
-function binetApproximation(n: number): number {
-  const phi = (1 + Math.sqrt(5)) / 2;
-  const sqrt5 = Math.sqrt(5);
-  return Math.round(Math.pow(phi, n) / sqrt5);
+function binetApproximation(n: number): string {
+  const sqrt5 = BinetDecimal.sqrt(5);
+  const phi = sqrt5.plus(1).div(2);
+  return phi.pow(n).div(sqrt5).toDecimalPlaces(0).toFixed(0);
 }
 
 const fibonacciConfig: CalculatorConfig = {
@@ -61,43 +29,27 @@ const fibonacciConfig: CalculatorConfig = {
       placeholder: 'Enter position n',
       defaultValue: '10',
       min: 1,
-      max: 100,
+      max: MAX_FIBONACCI_N,
+      step: 1,
+      inputMode: 'numeric',
       required: true,
-      helpText: 'Enter the position in the Fibonacci sequence to calculate',
+      helpText: 'Enter the position in the Fibonacci sequence to calculate (F(1) = F(2) = 1)',
     },
   ],
-  calculate: (values) => {
-    const n = parseInt(values.n, 10);
-    if (isNaN(n) || n < 1 || n > 100 || !Number.isFinite(n)) return [];
+  calculate: (values): CalculatorResult[] => {
+    const big = parseIntegerStrict(values.n, 6);
+    if (big === null || big < 1n || big > BigInt(MAX_FIBONACCI_N)) return [];
+    const n = Number(big);
 
-    const nth = fibonacciNth(n);
-    const seq = generateFibonacciSequence(n);
-    const seqSum = seq.reduce((acc, val) => acc + val, 0);
-    const binet = binetApproximation(n);
+    const seq = fibonacciSequenceBig(n); // exact BigInt: F(79) and beyond exceed 2^53
+    const nth = seq[n - 1];
+    const seqSum = seq.reduce((acc, v) => acc + v, 0n); // = F(n+2) - 1
 
     return [
-      {
-        id: 'nthTerm',
-        label: `F(${n})`,
-        value: nth.toString(),
-        highlight: true,
-        color: 'positive',
-      },
-      {
-        id: 'sequence',
-        label: `First ${n} Terms`,
-        value: seq.join(', '),
-      },
-      {
-        id: 'sum',
-        label: `Sum of First ${n} Terms`,
-        value: seqSum.toString(),
-      },
-      {
-        id: 'binetApproximation',
-        label: `Binet's Formula Approximation`,
-        value: binet.toString(),
-      },
+      { id: 'nthTerm', label: `F(${n})`, value: nth.toString(), highlight: true, color: 'positive' },
+      { id: 'sequence', label: `First ${n} Terms`, value: seq.join(', ') },
+      { id: 'sum', label: `Sum of First ${n} Terms`, value: seqSum.toString() },
+      { id: 'binetApproximation', label: `Binet's Formula Approximation`, value: binetApproximation(n) },
     ];
   },
   educational: {
@@ -131,7 +83,7 @@ const fibonacciConfig: CalculatorConfig = {
       'View the exact value of F(n) displayed prominently.',
       'Scroll through the complete sequence of the first n terms, comma-separated.',
       'Check the sum of the first n Fibonacci numbers for patterns and relationships.',
-      'Compare the iterative result with Binet\'s formula approximation, which becomes increasingly accurate for larger n.',
+      'Compare the iterative result with Binet\'s formula: it is evaluated in 60-digit precision here, so rounding phi^n / sqrt(5) reproduces F(n) exactly for every n up to 100.',
     ],
     quickReference: [
       { label: 'F(1)', value: '1' },
@@ -142,7 +94,7 @@ const fibonacciConfig: CalculatorConfig = {
     commonUses: [
       'Algorithm analysis: Fibonacci numbers measure the worst-case time complexity of Euclid\'s algorithm for GCD and appear in the analysis of Fibonacci heaps.',
       'Nature: Fibonacci numbers appear in plant phyllotaxis (leaf arrangement), pinecone spirals, sunflower seed heads, and nautilus shell growth patterns.',
-      'Art and design: The golden ratio derived from Fibonacci numbers is used in composition, architecture (Parthenon), and visual design for aesthetic proportions.',
+      'Art and design: The golden ratio derived from Fibonacci numbers is used in composition, architecture, and visual design for aesthetic proportions.',
       'Financial markets: Some traders use Fibonacci retracement levels (23.6%, 38.2%, 61.8%) derived from the golden ratio for technical analysis.',
       'Computer science: Fibonacci numbers are used in data structures like Fibonacci heaps, in pseudorandom number generation, and as a test case for recursion and dynamic programming.',
     ],
@@ -167,7 +119,7 @@ const fibonacciConfig: CalculatorConfig = {
       },
       {
         question: 'How large can n be before the numbers overflow?',
-        answer: 'This calculator supports n from 1 to 100. F(78) = 894,439,432,379,146 is the last Fibonacci number below 10^16 (safe integer precision). F(79) = 1,446,773,453,678,131,541 begins to exceed JavaScript\'s safe integer range of 2^53 - 1 (about 9 quadrillion). For n up to 100, the values still fit within JavaScript\'s 64-bit floating point range (F(100) = 354,224,848,179,261,915,075 which is about 3.5 x 10^20), so results are approximate beyond n = 78 due to floating-point rounding.',
+        answer: 'This calculator supports n from 1 to 100 and computes every term exactly with arbitrary-precision integers, so no digit is rounded. F(78) = 8,944,394,323,791,464 is the last Fibonacci number below 2^53 (about 9.007 x 10^15), the largest range in which ordinary floating-point numbers are exact; F(79) = 14,472,334,024,676,221 is the first above it. Code that uses doubles therefore goes wrong from n = 79 (it prints F(100) as 354,224,848,179,262,000,000), whereas the exact value is F(100) = 354,224,848,179,261,915,075, about 3.5 x 10^20.',
       },
     ],
     diagram: {

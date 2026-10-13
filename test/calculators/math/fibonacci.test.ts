@@ -60,8 +60,7 @@ describe('Fibonacci calculator', () => {
     const r = config.calculate({ n: '100' });
     const nth = getValue(r, 'nthTerm');
     expect(nth).toBeDefined();
-    // JavaScript number precision limits mean F(100) is approximate
-    expect(nth).toContain('354224848179');
+    expect(nth).toBe('354224848179261915075'); // exact since the BigInt rewrite (OEIS A000045)
   });
 
   it('returns empty for n < 1', () => {

@@ -1,7 +1,10 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import CirclePanel from './CirclePanel';
-import { roundStr8 as fmt } from '../../../lib/format';
+import { roundStrAuto } from '../../../lib/format';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+
+const fmt = (n: number) => roundStrAuto(n, 8);
 
 const circleConfig: CalculatorConfig = {
   inputs: [
@@ -30,11 +33,10 @@ const circleConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for precision — all circle formulas use high-precision π arithmetic
     const inputType = values.inputType || 'radius';
-    const inputVal = parseFloat(values.value);
+    const inputVal = parseNumberStrict(values.value);
 
-    if (isNaN(inputVal) || inputVal <= 0) return [];
+    if (!(inputVal > 0)) return [];
 
     const pi = Math.PI;
 
@@ -74,7 +76,7 @@ const circleConfig: CalculatorConfig = {
         return [];
     }
 
-    if (!isFinite(r)) return [];
+    if (![r, d, C, A].every(Number.isFinite)) return []; // e.g. an area of 1e200 would overflow r² * π
 
     const results = [
       {
@@ -154,13 +156,13 @@ const circleConfig: CalculatorConfig = {
       {
         scenario: "A mechanical engineer in Stuttgart, Germany needs to manufacture a circular metal plate with a required area of exactly 500 cm² for a pressure vessel component. What diameter should the CNC machine be programmed to cut?",
         inputs: { inputType: 'area', value: '500' },
-        result: 'Radius = 12.61566261, Diameter = 25.23132522, Circumference = 79.26654525, Area = 500',
+        result: 'Radius = 12.61566261, Diameter = 25.23132522, Circumference = 79.26654595, Area = 500',
         insight: 'Working backwards from area: r = √(500/π) = √159.15 = 12.62 cm. Diameter = 2 × 12.62 = 25.23 cm. Circumference = 79.27 cm. The engineer programs the CNC to cut a 25.23 cm diameter circle and verifies the circumference at 79.27 cm with a tape measure to confirm accuracy.',
       },
       {
         scenario: "Coach Maria tracks her athletes running on a standard 400-meter circular track in Barcelona. The track's circumference is 400 m. She wants to know the track's radius to mark the exact center for an event setup.",
         inputs: { inputType: 'circumference', value: '400' },
-        result: 'Radius = 63.66197724, Diameter = 127.32395447, Circumference = 400, Area = 12732.39544769',
+        result: 'Radius = 63.66197724, Diameter = 127.32395447, Circumference = 400, Area = 12732.39544735',
         insight: 'r = C/(2π) = 400/(2π) = 63.66 m radius. The diameter is 127.32 m. The area enclosed is π × 63.66² = 12,732 m² — about 1.27 hectares or 3.15 acres. Maria can now place the starting line midpoint at 63.66 m from the center mark.',
       },
     ],

@@ -1,5 +1,7 @@
 import { CalculatorResult } from '../../../types/calculator';
-import { roundStr6 as fmt } from '../../../lib/format';
+import { roundStrAuto } from '../../../lib/format';
+
+const fmt = (n: number) => roundStrAuto(n, 6);
 
 interface Props {
   values: Record<string, string>;
@@ -67,19 +69,19 @@ export default function CirclePanel({ results }: Props) {
 
           <div className="flex-1 min-w-0 grid grid-cols-2 gap-2 w-full">
             <div className={`rounded-lg border px-3 py-2.5 text-center ${radius.highlight ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-white'}`}>
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Radius</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Radius</p>
               <p className="text-sm font-mono font-bold text-slate-700 mt-0.5">{radius.value}</p>
             </div>
             <div className={`rounded-lg border px-3 py-2.5 text-center ${diameter.highlight ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-white'}`}>
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Diameter</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Diameter</p>
               <p className="text-sm font-mono font-bold text-slate-700 mt-0.5">{diameter.value}</p>
             </div>
             <div className={`rounded-lg border px-3 py-2.5 text-center ${circumference.highlight ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-white'}`}>
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Circumference</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Circumference</p>
               <p className="text-sm font-mono font-bold text-slate-700 mt-0.5">{circumference.value}</p>
             </div>
             <div className={`rounded-lg border px-3 py-2.5 text-center ${area.highlight ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-white'}`}>
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Area</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Area</p>
               <p className="text-sm font-mono font-bold text-slate-700 mt-0.5">{area.value}</p>
             </div>
           </div>
@@ -91,7 +93,7 @@ export default function CirclePanel({ results }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {formulaCards.map((c, i) => (
               <div key={`item-${i}`} className="rounded-xl border border-blue-200 bg-blue-50/60 p-3">
-                <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">{c.label}</p>
+                <p className="text-[10px] font-bold text-slate-600 uppercase mb-1">{c.label}</p>
                 <p className="text-sm font-mono font-bold text-slate-700">{c.formula}</p>
                 <p className="text-xs font-mono text-slate-500 mt-0.5">{c.sub}</p>
                 <p className="text-base font-bold text-blue-700 mt-1">{c.result}</p>
@@ -117,7 +119,7 @@ export default function CirclePanel({ results }: Props) {
         <div className="rounded-xl border border-purple-200 bg-purple-50 px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600 mb-1">Why the Circle is Special</p>
           <p className="text-xs text-purple-800 leading-relaxed">
-            The circle has the highest area-to-perimeter ratio of any shape — for a given perimeter, a circle encloses
+            Of all shapes with the same perimeter, the circle encloses the largest area: for a given perimeter, a circle encloses
             the maximum possible area. The ratio of any circle's circumference to its diameter is always π (~3.14159),
             a constant discovered independently by ancient civilizations worldwide. This relationship means that
             knowing just the radius (one measurement) gives you every other property of the circle.

@@ -1,33 +1,30 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
+import { bigToScientific, fibonacciSequenceBig, groupDigits } from '../../../utils/bigMath';
+import { parseIntegerStrict } from '../../../utils/rational';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#84cc16'];
+const COLORS = ['#2563eb', '#059669', '#d97706', '#7c3aed', '#db2777', '#0891b2', '#ea580c', '#65a30d'];
 
-export default function FibonacciPanel({ results }: Props) {
+// Axis/tooltip text for values that may reach 3.5e20.
+const fmtTerm = (v: number) => (v >= 1e6 ? bigToScientific(BigInt(Math.round(v)), 3) : v.toLocaleString('en-US'));
+
+export default function FibonacciPanel({ values, results }: Props) {
   const nthTerm = results.find(r => r.id === 'nthTerm');
-  const seqRow = results.find(r => r.id === 'sequence');
   const sumRow = results.find(r => r.id === 'sum');
   const binetRow = results.find(r => r.id === 'binetApproximation');
+  const nBig = parseIntegerStrict(values.n, 6);
 
-  if (!seqRow || !nthTerm) return null;
+  if (!nthTerm || nBig === null || nBig < 1n || nBig > 100n) return null;
+  const n = Number(nBig);
 
-  const seq = seqRow.value.split(', ').map(Number);
-
-  const chartData = useMemo(() =>
-    seq.map((v, i) => ({ label: `${i + 1}`, value: v })),
-    [seq.join(',')]
-  );
-
-  const maxVal = Math.max(...seq);
-  const yTicks = maxVal > 10
-    ? [0, Math.round(maxVal / 4), Math.round(maxVal / 2), Math.round((3 * maxVal) / 4), maxVal]
-    : undefined;
+  // Exact BigInt terms; Number() only for bar heights (the printed values stay exact strings).
+  const seq = fibonacciSequenceBig(n);
+  const data = seq.map((v, i) => ({ label: String(i + 1), value: Number(v), color: COLORS[i % COLORS.length] }));
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -41,61 +38,45 @@ export default function FibonacciPanel({ results }: Props) {
       <div className="p-5 space-y-4">
         {/* Result card */}
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 text-center">
-          <p className="text-sm text-slate-500 mb-1">{nthTerm.label}</p>
-          <p className="text-3xl font-bold text-blue-700 font-mono">{nthTerm.value}</p>
+          <p className="text-sm text-slate-600 mb-1">{nthTerm.label}</p>
+          <p className="text-3xl font-bold text-blue-700 font-mono break-all">{groupDigits(nthTerm.value)}</p>
         </div>
 
         {/* Bar chart */}
-        {chartData.length > 1 && (
+        {data.length > 1 && (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Sequence Growth</p>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
-                  axisLine={{ stroke: '#e2e8f0' }}
-                  tickLine={false}
-                  label={{ value: 'n', position: 'insideBottomRight', offset: -8, fontSize: 10, fill: '#94a3b8' }}
-                  interval={Math.max(1, Math.floor(chartData.length / 15))}
-                />
-                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={50} ticks={yTicks} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  formatter={(_: unknown) => [(_ as any).toLocaleString(), 'F(n)'] as any}
-                  labelFormatter={(l) => `n = ${l}`}
-                />
-                <Bar dataKey="value" radius={[3, 3, 0, 0]} maxBarSize={chartData.length > 50 ? 8 : 24}>
-                  {chartData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Sequence Growth (F(1) to F({n}))</p>
+            <SvgBarChart
+              data={data}
+              ariaLabel={`Bar chart of the first ${n} Fibonacci numbers, F(1) = 1 up to F(${n}) = ${fmtTerm(data[data.length - 1].value)}`}
+              height={240}
+              format={fmtTerm}
+              maxBarWidth={data.length > 50 ? 8 : 24}
+            />
           </div>
         )}
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-center">
-            <p className="text-[10px] font-bold text-emerald-600 uppercase">Max Value</p>
-            <p className="text-sm font-bold font-mono text-emerald-700">{nthTerm.value}</p>
+            <p className="text-[10px] font-bold text-emerald-800 uppercase">Largest Term</p>
+            <p className="text-sm font-bold font-mono text-emerald-800 break-all">{groupDigits(nthTerm.value)}</p>
           </div>
           {sumRow && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-center">
-              <p className="text-[10px] font-bold text-blue-600 uppercase">Sum of Terms</p>
-              <p className="text-sm font-bold font-mono text-blue-700">{parseInt(sumRow.value).toLocaleString()}</p>
+              <p className="text-[10px] font-bold text-blue-800 uppercase">Sum of Terms</p>
+              <p className="text-sm font-bold font-mono text-blue-800 break-all">{groupDigits(sumRow.value)}</p>
             </div>
           )}
           {binetRow && (
             <div className="rounded-lg border border-purple-200 bg-purple-50 px-3 py-2.5 text-center">
-              <p className="text-[10px] font-bold text-purple-600 uppercase">Binet's Approx</p>
-              <p className="text-sm font-bold font-mono text-purple-700">{binetRow.value}</p>
+              <p className="text-[10px] font-bold text-purple-800 uppercase">Binet&apos;s Formula</p>
+              <p className="text-sm font-bold font-mono text-purple-800 break-all">{groupDigits(binetRow.value)}</p>
             </div>
           )}
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-center">
-            <p className="text-[10px] font-bold text-amber-600 uppercase">Terms</p>
-            <p className="text-sm font-bold font-mono text-amber-700">{seq.length}</p>
+            <p className="text-[10px] font-bold text-amber-800 uppercase">Terms</p>
+            <p className="text-sm font-bold font-mono text-amber-800">{seq.length}</p>
           </div>
         </div>
       </div>

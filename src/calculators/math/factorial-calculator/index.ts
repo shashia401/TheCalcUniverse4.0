@@ -1,59 +1,21 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import FactorialPanel from './FactorialPanel';
+import { bigToScientific, factorialBig, factorialTrailingZeros, groupDigits } from '../../../utils/bigMath';
+import { parseIntegerStrict } from '../../../utils/rational';
 
-/**
- * Compute n! using regular multiplication.
- * Returns 0 for out-of-range inputs.
- */
-function computeFactorial(n: number): number {
-  if (n === 0) return 1;
-  let result = 1;
-  for (let i = 2; i <= n; i++) {
-    result *= i;
-  }
-  return result;
-}
+/** Largest n accepted: 1000! has 2,568 digits, still instant with exact BigInt arithmetic. */
+export const MAX_FACTORIAL_N = 1000;
 
-/**
- * Build the step-by-step multiplication string: n × (n-1) × ... × 1 = result.
- */
-function buildSteps(n: number): string {
+/** "5 × 4 × 3 × 2 × 1 = 120"; long products are abbreviated and point at the exact value above. */
+function buildSteps(n: number, fact: bigint): string {
   if (n === 0) return '0! = 1 (by definition)';
-  const terms: string[] = [];
-  for (let i = n; i >= 1; i--) {
-    terms.push(i.toString());
+  if (n <= 20) {
+    const terms: string[] = [];
+    for (let i = n; i >= 1; i--) terms.push(i.toString());
+    return `${terms.join(' × ')} = ${groupDigits(fact)}`;
   }
-  return terms.join(' × ') + ' = ' + computeFactorial(n).toLocaleString(undefined);
-}
-
-/**
- * Count the number of digits in n! using logarithms.
- * digits = floor(log10(n!)) + 1
- */
-function countDigits(n: number): number {
-  if (n === 0 || n === 1) return 1;
-  let logSum = 0;
-  for (let i = 2; i <= n; i++) {
-    logSum += Math.log10(i);
-  }
-  return Math.floor(logSum) + 1;
-}
-
-/**
- * Count trailing zeros in n!.
- * Trailing zeros come from factors of 10 = 2 × 5.
- * Since there are always more factors of 2 than 5, count factors of 5:
- * floor(n/5) + floor(n/25) + floor(n/125) + ...
- */
-function countTrailingZeros(n: number): number {
-  let count = 0;
-  let power = 5;
-  while (power <= n) {
-    count += Math.floor(n / power);
-    power *= 5;
-  }
-  return count;
+  return `${n} × ${n - 1} × ${n - 2} × … × 3 × 2 × 1 = ${bigToScientific(fact)} (exact value above)`;
 }
 
 const factorialConfig: CalculatorConfig = {
@@ -65,45 +27,36 @@ const factorialConfig: CalculatorConfig = {
       placeholder: 'Enter n',
       defaultValue: '5',
       min: 0,
-      max: 170,
+      max: MAX_FACTORIAL_N,
+      step: 1,
+      inputMode: 'numeric',
       required: true,
-      helpText: 'Enter a non-negative integer to calculate its factorial (0-170)',
+      helpText: `Enter a non-negative whole number to calculate its factorial (0-${MAX_FACTORIAL_N})`,
     },
   ],
-  calculate: (values) => {
-    const n = parseInt(values.n, 10);
-    if (isNaN(n) || n < 0 || n > 170 || !Number.isFinite(n)) return [];
+  calculate: (values): CalculatorResult[] => {
+    const big = parseIntegerStrict(values.n, 6);
+    if (big === null || big < 0n || big > BigInt(MAX_FACTORIAL_N)) return [];
+    const n = Number(big);
 
-    const fact = computeFactorial(n);
-    const steps = buildSteps(n);
-    const digits = countDigits(n);
-    const zeros = countTrailingZeros(n);
+    const fact = factorialBig(n);
+    const digits = fact.toString().length; // exact digit count (no log10 rounding)
+    const zeros = factorialTrailingZeros(n);
 
-    return [
-      {
-        id: 'factorial',
-        label: `Factorial (${n}!)`,
-        value: fact.toLocaleString(undefined),
-        highlight: true,
-        color: 'positive',
-      },
-      {
-        id: 'steps',
-        label: 'Step-by-Step Calculation',
-        value: steps,
-      },
-      {
-        id: 'digitCount',
-        label: 'Number of Digits',
-        value: digits.toString(),
-      },
-      {
-        id: 'trailingZeros',
-        label: 'Trailing Zeros',
-        value: zeros.toString(),
-      },
+    const rows: CalculatorResult[] = [
+      { id: 'factorial', label: `Factorial (${n}!)`, value: groupDigits(fact), highlight: true, color: 'positive' },
+      { id: 'steps', label: 'Step-by-Step Calculation', value: buildSteps(n, fact) },
+      { id: 'digitCount', label: 'Number of Digits', value: digits.toString() },
+      { id: 'trailingZeros', label: 'Trailing Zeros', value: zeros.toString() },
     ];
+    if (digits > 15) rows.push({ id: 'scientific', label: 'Scientific Notation', value: bigToScientific(fact) });
+    return rows;
   },
+  extraPanel: (values, results) => {
+    if (!results.length) return null;
+    return createElement(FactorialPanel, { values, results });
+  },
+
   educational: {
     formula: 'n! = n x (n-1) x (n-2) x ... x 1',
     formulaDescription:
@@ -117,7 +70,7 @@ const factorialConfig: CalculatorConfig = {
       {
         symbol: 'n',
         name: 'Input Number',
-        description: 'A non-negative integer whose factorial is being computed. Must be between 0 and 170 for JavaScript to maintain precision.',
+        description: 'A non-negative integer whose factorial is being computed. Must be a whole number from 0 to 1000 (1000! already has 2,568 digits).',
       },
       {
         symbol: 'd',
@@ -131,7 +84,7 @@ const factorialConfig: CalculatorConfig = {
       },
     ],
     howToUse: [
-      'Enter a non-negative integer n (from 0 to 170) in the input field.',
+      'Enter a non-negative whole number n (from 0 to 1000) in the input field.',
       'View the factorial result displayed with comma separators for readability.',
       'Read the step-by-step multiplication showing how each term contributes to the final product.',
       'Check the digit count to understand how large the factorial result is.',
@@ -151,11 +104,11 @@ const factorialConfig: CalculatorConfig = {
       'Computer science: factorial growth models the worst-case complexity of certain algorithms and appears in asymptotic analysis.',
     ],
     explanation:
-      'The factorial function is one of the most important functions in mathematics, appearing throughout combinatorics, algebra, analysis, and number theory. For a non-negative integer n, the factorial n! is defined as the product of all positive integers from 1 to n: n! = n x (n-1) x (n-2) x ... x 2 x 1. The special case 0! = 1 is defined for consistency — it makes combinatorial formulas work (there is exactly one way to arrange zero objects, and the binomial coefficient (0 choose 0) = 1). Factorials grow at an astonishing rate. While 5! = 120 is modest, 10! = 3,628,800, 15! = 1,307,674,368,000, and 20! = 2,432,902,008,176,640,000. By 170!, the value exceeds 10^306, which is the limit of JavaScript\'s 64-bit floating-point precision (Number.MAX_VALUE is about 1.79 x 10^308). Beyond 170, the factorial overflows to Infinity. The number of trailing zeros in n! can be found without computing the full factorial: count how many factors of 5 appear in the numbers 1 through n (since factors of 2 are always more abundant). This is computed as floor(n/5) + floor(n/25) + floor(n/125) + ... For example, 25! has 6 trailing zeros: floor(25/5) = 5 from multiples of 5, plus floor(25/25) = 1 from the extra factor of 5 in 25 itself. The digit count of n! can be approximated using Stirling\'s approximation: n! ~ sqrt(2*pi*n) x (n/e)^n, which gives ln(n!) ~ n*ln(n) - n + 0.5*ln(2*pi*n). Taking log10 gives the number of decimal digits.',
+      'The factorial function is one of the most important functions in mathematics, appearing throughout combinatorics, algebra, analysis, and number theory. For a non-negative integer n, the factorial n! is defined as the product of all positive integers from 1 to n: n! = n x (n-1) x (n-2) x ... x 2 x 1. The special case 0! = 1 is defined for consistency — it makes combinatorial formulas work (there is exactly one way to arrange zero objects, and the binomial coefficient (0 choose 0) = 1). Factorials grow at an astonishing rate. While 5! = 120 is modest, 10! = 3,628,800, 15! = 1,307,674,368,000, and 20! = 2,432,902,008,176,640,000. By 170!, the value has reached about 7.26 x 10^306, the last factorial a 64-bit floating-point number can hold (171! overflows to Infinity); this calculator uses exact arbitrary-precision integers instead, so every digit shown is correct up to 1000! (2,568 digits). The number of trailing zeros in n! can be found without computing the full factorial: count how many factors of 5 appear in the numbers 1 through n (since factors of 2 are always more abundant). This is computed as floor(n/5) + floor(n/25) + floor(n/125) + ... For example, 25! has 6 trailing zeros: floor(25/5) = 5 from multiples of 5, plus floor(25/25) = 1 from the extra factor of 5 in 25 itself. The digit count of n! can be approximated using Stirling\'s approximation: n! ~ sqrt(2*pi*n) x (n/e)^n, which gives ln(n!) ~ n*ln(n) - n + 0.5*ln(2*pi*n). Taking log10 gives the number of decimal digits.',
     faqs: [
       {
         question: 'What is 24 factorial?',
-        answer: '24! = 620,448,401,733,239,439,360,000 — a 24-digit number. It\'s a commonly searched example because it\'s the first factorial large enough that most calculators and spreadsheet software either round it or switch to scientific notation, while this tool computes and displays it exactly. Enter 24 above to see the full step-by-step multiplication (24 x 23 x 22 x ... x 1) and its digit count and trailing zero count.',
+        answer: '24! = 620,448,401,733,239,439,360,000 — a 24-digit number. It\'s a commonly searched example because at 24 digits it is longer than most calculators and spreadsheets can display, so they round it or switch to scientific notation, while this tool computes and displays it exactly. Enter 24 above to see the full step-by-step multiplication (24 x 23 x 22 x ... x 1) and its digit count and trailing zero count.',
       },
       {
         question: 'Why is 0! defined as 1?',
@@ -163,7 +116,7 @@ const factorialConfig: CalculatorConfig = {
       },
       {
         question: 'What is the largest factorial my calculator can compute?',
-        answer: 'This calculator can compute factorials up to 170! using JavaScript\'s 64-bit floating-point numbers. 170! is approximately 7.26 x 10^306, just below the maximum representable value of about 1.79 x 10^308. For n > 170, the result overflows to Infinity and cannot be displayed accurately. For exact arithmetic on larger numbers, you would need arbitrary-precision libraries or specialized software.',
+        answer: 'This calculator computes factorials exactly up to 1000! (2,568 digits) using arbitrary-precision integers, so no digits are rounded. For comparison, ordinary 64-bit floating-point numbers stop at 170! (about 7.26 x 10^306) because 171! exceeds the maximum value of about 1.79 x 10^308. Beyond 1000, use specialized software or Stirling\'s approximation.',
       },
       {
         question: 'How do you calculate trailing zeros without computing the whole factorial?',
@@ -183,10 +136,6 @@ const factorialConfig: CalculatorConfig = {
       { source: 'Wikipedia — Factorial', url: 'https://en.wikipedia.org/wiki/Factorial' },
       { source: 'Wolfram MathWorld — Factorial', url: 'https://mathworld.wolfram.com/Factorial.html' },
     ],
-  },
-  extraPanel: (values, results) => {
-    if (!results.length) return null;
-    return createElement(FactorialPanel, { values, results });
   },
 };
 

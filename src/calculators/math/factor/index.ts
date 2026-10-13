@@ -1,27 +1,27 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import FactorPanel from './FactorPanel';
+import {
+  MAX_FACTOR_INPUT,
+  capList,
+  divisorsOf,
+  factorize,
+  formatFactorization,
+  parsePositiveSafeInt,
+  sigma,
+} from '../../../utils/numberTheory';
 
-function getFactors(n: number): number[] {
-  const factors: number[] = [];
-  for (let i = 1; i <= Math.sqrt(Math.abs(n)); i++) {
-    if (n % i === 0) {
-      factors.push(i);
-      if (i !== n / i) factors.push(n / i);
-    }
-  }
-  return factors.sort((a, b) => a - b);
-}
-
-function getFactorPairs(n: number): [number, number][] {
+/** Factor pairs [d, n/d] with d <= sqrt(n), from the divisor list (already ascending). */
+export function factorPairs(n: number, divisors: number[]): [number, number][] {
   const pairs: [number, number][] = [];
-  for (let i = 1; i <= Math.sqrt(Math.abs(n)); i++) {
-    if (n % i === 0) {
-      pairs.push([i, n / i]);
-    }
+  for (const d of divisors) {
+    if (d * d > n) break;
+    pairs.push([d, n / d]);
   }
   return pairs;
 }
+
+const PAIR_CAP = 100; // a highly composite number has thousands of pairs; show the first ones
 
 const factorConfig: CalculatorConfig = {
   inputs: [
@@ -31,26 +31,42 @@ const factorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '24',
       min: 1,
+      max: MAX_FACTOR_INPUT,
       step: 1,
       inputMode: 'numeric',
-      helpText: 'Enter a positive integer to find its factors',
+      helpText: 'Enter a positive whole number (up to 9,007,199,254,740,991) to find its factors',
     },
   ],
-  calculate: (values) => {
-    const n = parseInt(values.number);
-    if (isNaN(n) || n < 1 || !Number.isFinite(n)) return [];
+  calculate: (values): CalculatorResult[] => {
+    const parsed = parsePositiveSafeInt(values.number);
+    if (parsed.kind === 'incomplete') return [];
+    if (parsed.kind === 'invalid') return [{ id: 'error', label: 'Error', value: parsed.message, color: 'negative' }];
+    const n = parsed.n;
 
-    const factors = getFactors(n);
-    const pairs = getFactorPairs(n);
-    const pairStr = pairs.map(([a, b]) => `${a} × ${b}`).join(' | ');
+    const primes = factorize(n);
+    const factors = divisorsOf(n);
+    const pairs = factorPairs(n, factors);
+    const shownPairs = pairs.slice(0, PAIR_CAP);
+    const pairStr =
+      shownPairs.map(([a, b]) => `${a} × ${b}`).join(' | ') +
+      (pairs.length > PAIR_CAP ? ` | … (${pairs.length - PAIR_CAP} more pairs)` : '');
+    const total = sigma(primes);
+    const properSum = total - BigInt(n);
+    const kind = n === 1 ? 'deficient' : properSum === BigInt(n) ? 'perfect' : properSum > BigInt(n) ? 'abundant' : 'deficient';
 
     return [
       { id: 'count', label: 'Total Factors', value: factors.length.toString(), highlight: true },
-      { id: 'factorList', label: 'All Factors', value: factors.join(', ') },
+      { id: 'factorList', label: 'All Factors', value: capList(factors) },
       { id: 'factorPairs', label: 'Factor Pairs', value: pairStr, color: 'positive' },
-      { id: 'sum', label: 'Sum of Factors', value: factors.reduce((s, f) => s + f, 0).toString() },
+      { id: 'primeFactorization', label: 'Prime Factorization', value: formatFactorization(primes) },
+      {
+        id: 'sum',
+        label: 'Sum of Factors',
+        value: total.toString(),
+        interpretation: `The proper factors (all except ${n} itself) add up to ${properSum}, so ${n} is a ${kind} number.`,
+      },
       { id: 'isPrime', label: 'Prime?', value: factors.length === 2 ? 'Yes' : 'No' },
-      { id: '_pairsData', label: 'Pairs Data', value: JSON.stringify(pairs) },
+      { id: '_pairsData', label: 'Pairs Data', value: JSON.stringify(shownPairs) },
     ];
   },
   extraPanel: (values, results) => {
@@ -73,7 +89,7 @@ const factorConfig: CalculatorConfig = {
       'The sum of all factors is also displayed, which is useful for classifying numbers as deficient, perfect, or abundant.',
     ],
     explanation:
-      'Finding factors is a fundamental number theory skill with applications throughout mathematics. A factor of n is any integer that divides n evenly with no remainder. Every positive integer greater than 1 has at least two factors: 1 and itself. Numbers with exactly two factors are called prime numbers, while numbers with more than two factors are called composite numbers. The number 1 is neither prime nor composite — it has exactly one factor. To find all factors efficiently, you only need to test divisors up to the square root of n: for each divisor d that divides n evenly, both d and n/d are factors. This is why the calculator can find factors of large numbers quickly. For example, for n = 36, the square root is 6, so testing divisors 1 through 6 reveals: 1 × 36, 2 × 18, 3 × 12, 4 × 9, and 6 × 6. The sum of all proper factors (excluding n itself) determines whether a number is deficient (sum < n), perfect (sum = n, like 6 = 1+2+3), or abundant (sum > n).',
+      'Finding factors is a fundamental number theory skill with applications throughout mathematics. A factor of n is any integer that divides n evenly with no remainder. Every positive integer greater than 1 has at least two factors: 1 and itself. Numbers with exactly two factors are called prime numbers, while numbers with more than two factors are called composite numbers. The number 1 is neither prime nor composite — it has exactly one factor. To find all factors efficiently, you only need to test divisors up to the square root of n: for each divisor d that divides n evenly, both d and n/d are factors. Factoring the number into primes first lets the calculator list every divisor of even very large numbers instantly. For example, for n = 36, the square root is 6, so testing divisors 1 through 6 reveals: 1 × 36, 2 × 18, 3 × 12, 4 × 9, and 6 × 6. The sum of all proper factors (excluding n itself) determines whether a number is deficient (sum < n), perfect (sum = n, like 6 = 1+2+3), or abundant (sum > n).',
     quickReference: [
       { label: 'Prime number', value: 'Exactly 2 factors (1 and itself)' },
       { label: 'Composite number', value: 'More than 2 factors' },
@@ -115,8 +131,8 @@ const factorConfig: CalculatorConfig = {
     ],
     limitations: [
       'This calculator works only with positive integers. Negative numbers, zero, decimals, and fractions are not supported. For negative integer factors, treat the sign separately.',
-      'For extremely large numbers (over 10¹²), the trial-division algorithm becomes slow. Cryptographic applications use specialized factoring algorithms (Pollard rho, quadratic sieve) instead.',
-      'The prime/not-prime check only counts total factors. It does not perform a Miller-Rabin primality test or provide a certainty level — it assumes trial division is sufficient for the entered number.',
+      'Numbers are limited to 9,007,199,254,740,991 (2⁵³ − 1), the largest integer a JavaScript number holds exactly; larger values are refused rather than silently rounded. Factoring uses Miller-Rabin and Pollard rho, so even a product of two 47-bit primes is instant, but cryptographic-size numbers (hundreds of digits) are far out of reach.',
+      'The prime/not-prime answer is exact (a number is prime when it has exactly two factors); for very highly composite numbers only the first 500 factors and 100 factor pairs are listed, while the counts and sum still cover all of them.',
     ],
     faqs: [
       {

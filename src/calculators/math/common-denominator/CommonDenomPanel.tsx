@@ -1,19 +1,23 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
+import { fracToNumber, makeFrac } from '../../../utils/rational';
 
+// index.ts emits plain numbers when exactly representable, decimal strings otherwise.
+type Big = number | string;
 interface ConvertedFraction {
-  numerator: number;
-  denominator: number;
-  originalNumerator: number;
-  originalDenominator: number;
-  multiplier: number;
+  numerator: Big;
+  denominator: Big;
+  originalNumerator: Big;
+  originalDenominator: Big;
+  multiplier: Big;
 }
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
+
+const CHART_COLORS = ['#2563eb', '#059669', '#7c3aed', '#d97706', '#dc2626', '#db2777', '#0891b2'];
 
 export default function CommonDenomPanel({ results }: Props) {
   const lcd = results.find(r => r.id === 'lcd');
@@ -48,43 +52,32 @@ export default function CommonDenomPanel({ results }: Props) {
       <div className="p-5 space-y-4">
         {/* LCD result */}
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-5 text-center">
-          <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Least Common Denominator (LCD)</p>
+          <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-1">Least Common Denominator (LCD)</p>
           <p className="text-3xl font-bold font-mono text-emerald-700">{lcd.value}</p>
         </div>
 
-        {/* Fraction bar chart */}
-        {converted.length > 0 && (() => {
-          const chartColors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
-          const chartData = converted.map((cf, i) => ({
-            name: `${cf.originalNumerator}/${cf.originalDenominator}`,
-            value: cf.numerator / cf.denominator,
-            color: chartColors[i % chartColors.length],
-            label: `${cf.numerator}/${cf.denominator}`,
-          }));
-          return (
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Fraction Comparison (Common Denominator)</p>
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={chartData} margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} width={40} tickFormatter={(v: number) => v.toFixed(2)} />
-                  <Tooltip
-                    contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                    formatter={((_: unknown, __: unknown, props: { payload: { label: string } }) => [props.payload.label, 'Converted']) as any}
-                  />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={48}>
-                    {chartData.map((entry, i) => (<Cell key={i} fill={entry.color} />))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          );
-        })()}
+        {/* Fraction comparison: each converted fraction's value (numerator / LCD) */}
+        {converted.length > 0 && (
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Fraction Comparison (Common Denominator)</p>
+            <SvgBarChart
+              data={converted.map((cf, i) => ({
+                label: `${cf.originalNumerator}/${cf.originalDenominator}`,
+                value: fracToNumber(makeFrac(BigInt(cf.numerator), BigInt(cf.denominator))),
+                color: CHART_COLORS[i % CHART_COLORS.length],
+              }))}
+              ariaLabel="Bar chart comparing the value of each fraction after conversion to the common denominator"
+              height={180}
+              format={(v) => v.toFixed(2)}
+              maxBarWidth={48}
+            />
+          </div>
+        )}
 
         {/* Converted fractions table */}
         {converted.length > 0 && (
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-3">Converted Fractions</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-3">Converted Fractions</p>
             <div className="space-y-2">
               {converted.map((cf, i) => (
                 <div key={`item-${i}`} className="flex items-center gap-3 text-sm">
@@ -103,7 +96,7 @@ export default function CommonDenomPanel({ results }: Props) {
                 </div>
               ))}
             </div>
-            <p className="text-[10px] text-blue-400 mt-2">
+            <p className="text-[10px] text-blue-700 mt-2">
               Each fraction is scaled by multiplying numerator and denominator by (LCD / original denominator).
             </p>
           </div>
@@ -112,11 +105,11 @@ export default function CommonDenomPanel({ results }: Props) {
         {/* Step-by-step work */}
         {workSteps.length > 0 && (
           <div className="rounded-xl border border-purple-200 bg-purple-50 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-purple-500 mb-3">Step-by-Step LCM Computation</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-3">Step-by-Step LCM Computation</p>
             <div className="space-y-2">
               {workSteps.map((ws, i) => (
                 <div key={`item-${i}`} className="flex gap-2">
-                  <span className="text-[10px] font-bold text-purple-500 min-w-[48px] shrink-0 mt-0.5">
+                  <span className="text-[10px] font-bold text-purple-700 min-w-[48px] shrink-0 mt-0.5">
                     {ws.label}:
                   </span>
                   <span className="text-xs font-mono text-purple-700 leading-relaxed">

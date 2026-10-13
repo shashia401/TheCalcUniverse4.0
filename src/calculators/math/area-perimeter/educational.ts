@@ -14,7 +14,7 @@ export const circleDiagram: EducationalSvgDiagram = {
   <text x="120" y="185" text-anchor="middle" fill="#64748b" font-size="12">Circle — A = πr², C = 2πr</text>
 </svg>`,
   alt: 'Circle diagram showing radius r and diameter d = 2r',
-  caption: 'A circle has the highest area-to-perimeter ratio of any 2D shape',
+  caption: 'Of all 2D shapes with the same perimeter, the circle encloses the greatest area',
 };
 
 export const rectangleDiagram: EducationalSvgDiagram = {
@@ -101,7 +101,7 @@ export const hexagonDiagram: EducationalSvgDiagram = {
 export const circleEdu: EducationalContent = {
   formula: 'A = πr² | C = 2πr',
   diagram: circleDiagram,
-  formulaDescription: 'A circle has the highest area-to-perimeter ratio of any 2D shape. Area grows with the square of the radius (doubling the radius quadruples the area). The circumference is the perimeter — the distance around the circle.',
+  formulaDescription: 'Of all 2D shapes with the same perimeter, the circle encloses the greatest area. Area grows with the square of the radius (doubling the radius quadruples the area). The circumference is the perimeter — the distance around the circle.',
   variables: [
     { symbol: 'r', name: 'Radius', description: 'Distance from center to the outer edge. All points on the circle are exactly radius r from center.' },
     { symbol: 'd', name: 'Diameter', description: 'Twice the radius: d = 2r. The longest distance across the circle.' },
@@ -171,7 +171,7 @@ export const triangleEdu: EducationalContent = {
     { symbol: 'h', name: 'Height', description: 'The perpendicular distance from the base to the opposite vertex.' },
     { symbol: 'a, b, c', name: 'Side Lengths', description: 'The three sides of the triangle. Their sum gives the perimeter.' },
   ],
-  howToUse: ['Select "Triangle" from the shape tabs above.', 'Enter the base, height, and optionally the third side for perimeter.', 'View the area and perimeter.'],
+  howToUse: ['Select "Triangle" from the shape tabs above.', 'Enter the base, height, and optionally the two other sides for the perimeter (the height is not a side).', 'View the area and perimeter.'],
   explanation: 'The triangle is the only rigid polygon — it does not deform under pressure because triangles distribute forces along their sides. This structural property makes triangles essential in bridges, roofs, trusses, bicycle frames, and Eiffel Tower-like structures. The area formula A = ½bh dates back to ancient Egypt (Rhind Papyrus, ~1550 BCE). The ½ comes from the fact that any triangle is exactly half of a parallelogram with the same base and height — this is easily seen with right triangles, but holds for all triangles regardless of shape. Triangles are also the basis of trigonometry, surveying, and navigation through the law of sines and law of cosines.',
   faqs: [
     { question: 'Why is the area of a triangle half of base × height?', answer: 'Any triangle can be placed inside a rectangle of the same base and height. The triangle fills exactly half the rectangle — two identical triangles make a parallelogram (or rectangle for right triangles) of the same base and height.' },

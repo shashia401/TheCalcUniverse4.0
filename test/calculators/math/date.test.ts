@@ -165,7 +165,7 @@ describe('date calculator', () => {
 
   // ── New tests ──
 
-  it('handles leap year overflow: Feb 29, 2024 + 1 year = Mar 1, 2025', () => {
+  it('clamps to month end: Feb 29, 2024 + 1 year = Feb 28, 2025 (Excel EDATE / dateutil)', () => {
     const r = config.calculate({
       startDate: '2024-02-29',
       action: 'add',
@@ -175,10 +175,10 @@ describe('date calculator', () => {
       days: '0',
       businessDays: 'all',
     });
-    expect(getValue(r, 'resultDate')).toBe('Mar 1, 2025');
+    expect(getValue(r, 'resultDate')).toBe('Feb 28, 2025');
   });
 
-  it('handles month-end overflow: Jan 31 + 1 month = Mar 3, 2025', () => {
+  it('clamps to month end: Jan 31 + 1 month = Feb 28, 2025', () => {
     const r = config.calculate({
       startDate: '2025-01-31',
       action: 'add',
@@ -188,7 +188,7 @@ describe('date calculator', () => {
       days: '0',
       businessDays: 'all',
     });
-    expect(getValue(r, 'resultDate')).toBe('Mar 3, 2025');
+    expect(getValue(r, 'resultDate')).toBe('Feb 28, 2025');
   });
 
   it('cross-year date adds correctly: Dec 25, 2024 + 10 days = Jan 4, 2025', () => {

@@ -1,46 +1,7 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import BaseConverterPanel from './BaseConverterPanel';
-
-/**
- * Check that every character in `input` is valid for the given `fromBase`.
- * Digits 0-9 are valid positions 0-9. Letters A-Z (case-insensitive) are
- * valid positions 10-35.
- */
-function isValidForBase(input: string, fromBase: number): boolean {
-  const upper = input.toUpperCase();
-  for (const ch of upper) {
-    const code = ch.charCodeAt(0);
-    if (code >= 48 && code <= 57) {
-      // 0-9
-      if (code - 48 >= fromBase) return false;
-    } else if (code >= 65 && code <= 90) {
-      // A-Z
-      if (code - 65 + 10 >= fromBase) return false;
-    } else {
-      // Not a valid digit character
-      return false;
-    }
-  }
-  return upper.length > 0;
-}
-
-/**
- * Parse the input string as a number in the given base (2-36) and
- * return the decimal value, or NaN if invalid.
- */
-function parseInBase(input: string, fromBase: number): number {
-  return parseInt(input, fromBase);
-}
-
-/**
- * Convert a decimal number to a target base (2-36) string.
- * Uses upper-case letters for digits > 9.
- */
-function convertToBase(decimal: number, toBase: number): string {
-  if (decimal === 0) return '0';
-  return decimal.toString(toBase).toUpperCase();
-}
+import { MAX_FRACTION_DIGITS, MAX_INPUT_DIGITS, convertBase, decimalText } from './baseMath';
 
 const baseConverterConfig: CalculatorConfig = {
   inputs: [
@@ -50,7 +11,7 @@ const baseConverterConfig: CalculatorConfig = {
       type: 'text',
       placeholder: 'Enter number',
       required: true,
-      helpText: 'Enter the digits of the number you want to convert. Use letters A-Z for digits above 9.',
+      helpText: `Enter the digits of the number you want to convert (up to ${MAX_INPUT_DIGITS} digits). Use letters A-Z for digits above 9; an optional minus sign and a fractional point are allowed.`,
     },
     {
       id: 'fromBase',
@@ -61,6 +22,7 @@ const baseConverterConfig: CalculatorConfig = {
       required: true,
       min: 2,
       max: 36,
+      step: 1,
       inputMode: 'numeric',
       helpText: 'The base of the input number (2 to 36).',
     },
@@ -73,73 +35,38 @@ const baseConverterConfig: CalculatorConfig = {
       required: true,
       min: 2,
       max: 36,
+      step: 1,
       inputMode: 'numeric',
       helpText: 'The base to convert to (2 to 36).',
     },
   ],
 
-  calculate: (values) => {
-    const input = (values.input || '').trim().toUpperCase();
-    const fromBaseRaw = values.fromBase;
-    const toBaseRaw = values.toBase;
+  calculate: (values): CalculatorResult[] => {
+    const out = convertBase(values);
+    if (out.kind !== 'ok') return [];
+    const { from, to, parsed, out: converted } = out;
 
-    if (!input || !fromBaseRaw || !toBaseRaw) return [];
-
-    const fromBase = parseInt(fromBaseRaw, 10);
-    const toBase = parseInt(toBaseRaw, 10);
-
-    if (isNaN(fromBase) || isNaN(toBase)) return [];
-    if (fromBase < 2 || fromBase > 36 || toBase < 2 || toBase > 36) return [];
-
-    // Validate all digits are valid for the source base
-    if (!isValidForBase(input, fromBase)) return [];
-
-    // Parse as decimal
-    const decimal = parseInBase(input, fromBase);
-    if (isNaN(decimal)) return [];
-
-    // Handle special large-number edge case: if parseInt can't represent it
-    // (e.g., very large numbers), it returns NaN or Infinity
-    if (!isFinite(decimal)) return [];
-
-    // Convert to target base
-    const converted = convertToBase(decimal, toBase);
-
-    // Length of result (digit count)
-    const length = converted.length;
-
-    // Build validation info
-    const originalValid = `All digits valid in base ${fromBase}`;
-
-    return [
-      {
-        id: 'result',
-        label: `Result (base ${toBase})`,
-        value: converted,
-        highlight: true,
-        color: 'positive',
-      },
-      {
-        id: 'decimalValue',
-        label: 'Intermediate Decimal',
-        value: decimal.toString(),
-      },
-      {
-        id: 'originalValid',
-        label: 'Input Validation',
-        value: originalValid,
-      },
-      {
-        id: 'length',
-        label: 'Digit Count in Result',
-        value: length.toString(),
-      },
+    const rows: CalculatorResult[] = [
+      { id: 'result', label: `Result (base ${to})`, value: converted.text, highlight: true, color: 'positive' },
+      { id: 'decimalValue', label: 'Intermediate Decimal', value: decimalText(parsed.value) },
+      { id: 'originalValid', label: 'Input Validation', value: `All digits valid in base ${from}` },
+      { id: 'length', label: 'Digit Count in Result', value: converted.digitCount.toString() },
     ];
+    if (converted.truncated) {
+      rows.push({
+        id: 'precisionNote',
+        label: 'Precision',
+        value: `The fractional part does not terminate in base ${to}; it is cut (not rounded) after ${MAX_FRACTION_DIGITS} digits.`,
+        color: 'neutral',
+      });
+    }
+    return rows;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(BaseConverterPanel, { values, results });
   },
+
   educational: {
     formula: 'N_b = d_{n-1} × b^{n-1} + d_{n-2} × b^{n-2} + ... + d_0 × b^0',
     formulaDescription:

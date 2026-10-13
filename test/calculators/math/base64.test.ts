@@ -26,8 +26,8 @@ describe('Base64 Calculator', () => {
 
     it('encodes unicode text to base64', () => {
       const results = calculate({ inputText: 'héllo wörld', mode: 'Encode' });
-      const expected = btoa('héllo wörld');
-      expect(getValue(results, 'Output')).toBe(expected);
+      // RFC 4648 encodes the UTF-8 bytes (Python base64.b64encode('héllo wörld'.encode())); btoa gave Latin-1 'aOlsbG8gd/ZybGQ='
+      expect(getValue(results, 'Output')).toBe('aMOpbGxvIHfDtnJsZA==');
     });
 
     it('shows character counts for encode', () => {

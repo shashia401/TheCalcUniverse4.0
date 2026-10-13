@@ -28,9 +28,9 @@ describe('Big Number calculator', () => {
     expect(getValue(r, 'digitCount')).toBe('20');
   });
 
-  it('returns empty for division by zero', () => {
+  it('reports division by zero as an error row', () => {
     const r = config.calculate({ a: '5', b: '0', op: 'divide' });
-    expect(r).toEqual([]);
+    expect(r.map((x) => x.id)).toEqual(['error']);
   });
 
   it('returns empty for non-integer input', () => {

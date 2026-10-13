@@ -1,41 +1,41 @@
-﻿import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { createElement } from 'react';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import CommonDenomPanel from './CommonDenomPanel';
+import { gcdBig, lcmBig } from '../../../utils/rational';
 
-/** Euclidean algorithm for GCD */
-function gcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) { [a, b] = [b, a % b]; }
-  return a;
-}
+const MAX_ENTRIES = 100; // fractions per run
+const MAX_DIGITS = 100; // digits per entry (the LCD itself is unbounded BigInt)
 
-/** Least Common Multiple */
-function lcm(a: number, b: number): number {
-  if (a === 0 || b === 0) return 0;
-  return (a / gcd(a, b)) * b;
-}
+type ListParse = { kind: 'blank' } | { kind: 'garbage' } | { kind: 'decimal' } | { kind: 'ok'; list: bigint[] } | { kind: 'long' };
 
-/** Parse comma-separated string of numbers */
-function parseList(raw: string | undefined): number[] | null {
+/** Parse a comma / space separated list of whole numbers exactly (parseInt would turn "1.5" into 1 and "2/3" into 2). */
+function parseList(raw: string | undefined): ListParse {
   const s = (raw ?? '').trim();
-  if (!s) return null;
-  const nums = s.split(/[,\s]+/).map(x => parseInt(x.trim(), 10));
-  if (nums.some(n => isNaN(n) || n <= 0)) return null;
-  return nums;
+  if (!s) return { kind: 'blank' };
+  const tokens = s.split(/[,\s]+/).filter(Boolean);
+  if (tokens.length > MAX_ENTRIES) return { kind: 'long' };
+  const list: bigint[] = [];
+  for (const t of tokens) {
+    if (/^[+-]?\d+$/.test(t)) {
+      if (t.replace(/^[+-]/, '').length > MAX_DIGITS) return { kind: 'long' };
+      list.push(BigInt(t));
+    } else if (/^[+-]?(\d+\.\d*|\.\d+|\d+(\.\d*)?[eE][+-]?\d+)$/.test(t)) {
+      return { kind: 'decimal' };
+    } else {
+      return { kind: 'garbage' };
+    }
+  }
+  return { kind: 'ok', list };
 }
+
+const err = (value: string): CalculatorResult[] => [{ id: 'error', label: 'Error', value, color: 'negative' as const }];
+
+/** JSON-friendly: a plain number when it is exactly representable, else a decimal string (the panel prints both). */
+const jsonNum = (n: bigint): number | string => (n >= -9007199254740991n && n <= 9007199254740991n ? Number(n) : n.toString());
 
 interface WorkStep {
   step: string;
   detail: string;
-}
-
-interface ConvertedFraction {
-  numerator: number;
-  denominator: number;
-  originalNumerator: number;
-  originalDenominator: number;
-  multiplier: number;
 }
 
 const commonDenomConfig: CalculatorConfig = {
@@ -54,97 +54,57 @@ const commonDenomConfig: CalculatorConfig = {
       type: 'text',
       placeholder: '2, 3, 4',
       defaultValue: '2, 3, 4',
-      helpText: 'Enter the corresponding denominators, separated by commas. Must be positive integers.',
+      helpText: 'Enter the corresponding denominators, separated by commas. Must be positive whole numbers.',
     },
   ],
 
-  calculate: (values) => {
-    let numerators = parseList(values.numerators);
-    const denominators = parseList(values.denominators);
-    if (!numerators || !denominators) return [];
+  calculate: (values): CalculatorResult[] => {
+    const np = parseList(values.numerators);
+    const dp = parseList(values.denominators);
+    if (np.kind === 'blank' || dp.kind === 'blank' || np.kind === 'garbage' || dp.kind === 'garbage') return [];
+    if (np.kind === 'decimal' || dp.kind === 'decimal') return err('Enter whole numbers only (no decimals): multiply numerator and denominator by a power of 10 first.');
+    if (np.kind === 'long' || dp.kind === 'long') return err(`Too many or too long entries (up to{MAX_ENTRIES} fractions of ${MAX_DIGITS} digits each).`);
+    let numerators = np.list;
+    const denominators = dp.list;
     // Broadcast single numerator across multiple denominators (e.g. 3/4 and 3/6)
     if (numerators.length === 1 && denominators.length > 1) {
-      const singleNum = numerators[0];
-      numerators = Array(denominators.length).fill(singleNum);
+      numerators = Array(denominators.length).fill(numerators[0]);
     }
     if (numerators.length !== denominators.length) {
-      return [
-        {
-          id: 'error',
-          label: 'Error',
-          value: 'The number of numerators must match the number of denominators.',
-          color: 'negative' as const,
-        },
-      ];
+      return err('The number of numerators must match the number of denominators.');
     }
+    if (denominators.some((d) => d <= 0n)) return err('Denominators must be positive whole numbers.');
 
-    // Calculate LCD (LCM of all denominators)
+    // LCD = LCM of all denominators, pairwise with the GCD (Euclid) shown step by step
+    const work: WorkStep[] = [{ step: 'Step 1', detail: `Denominators: [${denominators.join(', ')}]` }];
     let lcd = denominators[0];
     for (let i = 1; i < denominators.length; i++) {
-      lcd = lcm(lcd, denominators[i]);
-    }
-
-    if (!isFinite(lcd) || lcd > 1e12) {
-      return [{ id: 'result', label: 'LCD', value: 'Result too large (> 10¹²)' }];
-    }
-
-    // Build work steps for finding LCM of denominators
-    const work: WorkStep[] = [];
-    work.push({ step: 'Step 1', detail: `Denominators: [${denominators.join(', ')}]` });
-
-    // Show GCD/LCM step-by-step for each pair
-    let currentLCM = denominators[0];
-    for (let i = 1; i < denominators.length; i++) {
-      const g = gcd(currentLCM, denominators[i]);
-      const l = lcm(currentLCM, denominators[i]);
+      const g = gcdBig(lcd, denominators[i]);
+      const l = lcmBig(lcd, denominators[i]);
       work.push({
         step: `Step ${i + 1}`,
-        detail: i === 1
-          ? `LCM(${denominators[0]}, ${denominators[i]}) = ${denominators[0]} × ${denominators[i]} / GCD(${denominators[0]}, ${denominators[i]}) = ${denominators[0]} × ${denominators[i]} / ${g} = ${l}`
-          : `LCM(${currentLCM}, ${denominators[i]}) = ${currentLCM} × ${denominators[i]} / GCD(${currentLCM}, ${denominators[i]}) = ${currentLCM} × ${denominators[i]} / ${g} = ${l}`,
+        detail: `LCM(${lcd}, ${denominators[i]}) = ${lcd} × ${denominators[i]} / GCD(${lcd}, ${denominators[i]}) = ${lcd} × ${denominators[i]} / ${g} = ${l}`,
       });
-      currentLCM = l;
+      lcd = l;
     }
-
-    // Confirm final LCD
     work.push({ step: 'Result', detail: `LCD = LCM of all denominators = ${lcd}` });
 
-    // Build converted fractions
-    const converted: ConvertedFraction[] = numerators.map((num, i) => {
+    const converted = numerators.map((num, i) => {
       const den = denominators[i];
-      const multiplier = Math.round(lcd / den);
+      const multiplier = lcd / den;
       return {
-        numerator: num * multiplier,
-        denominator: lcd,
-        originalNumerator: num,
-        originalDenominator: den,
-        multiplier,
+        numerator: jsonNum(num * multiplier),
+        denominator: jsonNum(lcd),
+        originalNumerator: jsonNum(num),
+        originalDenominator: jsonNum(den),
+        multiplier: jsonNum(multiplier),
       };
     });
 
-    // Display work
-    const workStr = work.map(w => `${w.step}: ${w.detail}`).join(' | ');
-
     return [
-      {
-        id: 'lcd',
-        label: 'Least Common Denominator (LCD)',
-        value: lcd.toString(),
-        highlight: true,
-        color: 'positive' as const,
-      },
-      {
-        id: '_convertedFractions',
-        label: 'Converted Fractions',
-        value: JSON.stringify(converted),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'work',
-        label: 'Work Steps',
-        value: workStr,
-        color: 'neutral' as const,
-      },
+      { id: 'lcd', label: 'Least Common Denominator (LCD)', value: lcd.toString(), highlight: true, color: 'positive' },
+      { id: '_convertedFractions', label: 'Converted Fractions', value: JSON.stringify(converted), color: 'neutral' },
+      { id: 'work', label: 'Work Steps', value: work.map((w) => `${w.step}: ${w.detail}`).join(' | '), color: 'neutral' },
     ];
   },
 
@@ -203,7 +163,7 @@ const commonDenomConfig: CalculatorConfig = {
     ],
     limitations: [
       'The calculator requires integer denominators. For mixed numbers like 1 1/2, first convert to an improper fraction (3/2) before entering. Decimal denominators (e.g., 0.5) must be converted to integers by multiplying numerator and denominator by a power of 10.',
-      'Very large denominators can produce an LCD exceeding 10^12, at which point the calculator returns an overflow message. For most practical fraction problems with denominators like 2, 3, 4, 5, 6, 8, 10, 12, the LCD stays well within this range.',
+      'Arithmetic is exact for whole numbers of any practical size (it uses arbitrary-precision integers, so there is no overflow), but input is limited to 100 fractions and 100 digits per entry to keep the page responsive.',
       'The step-by-step work display shows intermediate LCM calculations between pairs of denominators but does not show the full Euclidean algorithm division chain (GCD-by-repeated-division steps).',
       'The calculator converts fractions to equivalent forms with the LCD as the new denominator but does not automatically simplify the final result. Use the Fraction Simplifier calculator to reduce fractions to their lowest terms.',
     ],
@@ -222,7 +182,7 @@ const commonDenomConfig: CalculatorConfig = {
       },
       {
         question: 'What happens if the numbers are very large?',
-        answer: 'The calculator uses JavaScript double-precision floating point internally. If the LCD exceeds 10^12, the calculator returns a "Result too large" message. For most practical fraction problems involving denominators like 2, 3, 4, 5, 6, 8, 10, 12, the LCD stays well within a reasonable range.',
+        answer: 'The calculator uses exact arbitrary-precision integer arithmetic, so large denominators do not overflow or lose digits: the LCD of 1000000007 and 998244353 is shown as the exact product 998244359987710471. Entries are limited to 100 fractions and 100 digits each.',
       },
       {
         question: 'How does the Euclidean algorithm for GCD work?',
