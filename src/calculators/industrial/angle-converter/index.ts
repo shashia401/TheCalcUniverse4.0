@@ -1,16 +1,13 @@
-import { createElement } from 'react';
 import { createConverter, type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   { value: 'deg', label: 'Degree (°)', shortLabel: '°', factor: 1 },
-  { value: 'rad', label: 'Radian (rad)', shortLabel: 'rad', factor: 57.29577951308232 },
+  { value: 'rad', label: 'Radian (rad)', shortLabel: 'rad', factor: 180 / Math.PI },
   { value: 'grad', label: 'Gradian (grad)', shortLabel: 'grad', factor: 0.9 },
-  { value: 'arcmin', label: 'Minute of Arc (\')', shortLabel: '\'', factor: 1 / 60 },
+  { value: 'arcmin', label: "Minute of Arc (')", shortLabel: "'", factor: 1 / 60 },
   { value: 'arcsec', label: 'Second of Arc (")', shortLabel: '"', factor: 1 / 3600 },
   { value: 'turn', label: 'Full Circle (turn)', shortLabel: 'turn', factor: 360 },
-  { value: 'mrad', label: 'Milliradian (mrad)', shortLabel: 'mrad', factor: 0.05729577951308232 },
+  { value: 'mrad', label: 'Milliradian (mrad)', shortLabel: 'mrad', factor: 180 / Math.PI / 1000 },
   { value: 'point', label: 'Compass Point (1/32 of circle)', shortLabel: 'pt', factor: 11.25 },
 ];
 
@@ -142,15 +139,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const converterConfig = createConverter({ units: UNITS, educational: EDUCATIONAL });
-const configWithPanel = {
-  ...converterConfig,
-  inputs: converterConfig.inputs.map((input) =>
-    input.id === 'value' ? { ...input, inputMode: 'decimal' as const } : input,
-  ),
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Angle Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Angle Conversion', quantity: 'angle', educational: EDUCATIONAL });

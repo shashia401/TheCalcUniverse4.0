@@ -1,17 +1,16 @@
-import { createElement } from 'react';
 import { createConverter, type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { LB_KG } from '../../../utils/unitConvert';
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   { value: 'mg', label: 'Milligram (mg)', shortLabel: 'mg', factor: 0.001 },
   { value: 'g', label: 'Gram (g)', shortLabel: 'g', factor: 1 },
   { value: 'kg', label: 'Kilogram (kg)', shortLabel: 'kg', factor: 1000 },
-  { value: 't', label: 'Metric Tonne (t)', shortLabel: 't', factor: 1000000 },
-  { value: 'oz', label: 'Ounce (oz)', shortLabel: 'oz', factor: 28.349523125 },
-  { value: 'lb', label: 'Pound (lb)', shortLabel: 'lb', factor: 453.59237 },
-  { value: 'st', label: 'Stone (st)', shortLabel: 'st', factor: 6350.29318 },
-  { value: 'usTon', label: 'US Ton', shortLabel: 'ton', factor: 907184.74 },
+  { value: 't', label: 'Metric Tonne (t)', shortLabel: 't', factor: 1e6 },
+  { value: 'oz', label: 'Ounce (oz)', shortLabel: 'oz', factor: (LB_KG * 1000) / 16 },
+  { value: 'lb', label: 'Pound (lb)', shortLabel: 'lb', factor: LB_KG * 1000 },
+  { value: 'st', label: 'Stone (st)', shortLabel: 'st', factor: 14 * LB_KG * 1000 },
+  { value: 'usTon', label: 'US Ton (short ton, 2,000 lb)', shortLabel: 'ton', factor: 2000 * LB_KG * 1000 },
+  { value: 'ukTon', label: 'UK Ton (long ton, 2,240 lb)', shortLabel: 'long ton', factor: 2240 * LB_KG * 1000 },
 ];
 
 const EDUCATIONAL = {
@@ -22,7 +21,7 @@ const EDUCATIONAL = {
     { symbol: 'g', name: 'Gram', description: 'The metric base unit of mass. One gram is defined as 1/1000 of a kilogram. The mass of one cubic centimeter of water at 4°C.' },
     { symbol: 'kg', name: 'Kilogram', description: 'The SI base unit of mass. Originally defined as the mass of one liter of water, now defined by the Planck constant. The standard for everyday weight worldwide outside the US.' },
     { symbol: 'lb & oz', name: 'Pound & Ounce', description: 'Pound (453.59237 g): the primary weight unit in the US, UK, and some Commonwealth countries. Ounce (28.3495 g): 1/16 of a pound, used for food, mail, and precious metals.' },
-    { symbol: 't & usTon', name: 'Tonne & US Ton', description: 'Metric tonne (1,000 kg): used worldwide for industrial and commercial weight. US ton (2,000 lb ≈ 907 kg): used in the US for heavy goods, vehicles, and freight.' },
+    { symbol: 't & usTon', name: 'Tonne & US Ton', description: 'Metric tonne (1,000 kg): used worldwide for industrial and commercial weight. US (short) ton: 2,000 lb = 907.18474 kg, used in the US for freight and vehicles. The UK long ton is 2,240 lb = 1,016.0469 kg.' },
   ],
   howToUse: [
     'Enter the weight value you want to convert.',
@@ -72,7 +71,7 @@ const EDUCATIONAL = {
     caption: 'Metric and imperial weight units compared. The kilogram is the SI standard; the pound is the US/UK customary unit.',
   },
   explanation:
-    'Weight measurement (more precisely, mass measurement) is fundamental to commerce, science, and daily life. The kilogram is the SI base unit of mass and the only SI base unit still defined by a physical constant (the Planck constant) after the 2019 redefinition. Before 2019, the kilogram was defined by the International Prototype of the Kilogram (IPK), a platinum-iridium cylinder kept in a vault near Paris. The gram is 1/1000 of a kilogram and is the everyday unit for cooking and small quantities. The pound has ancient origins, dating back to Roman times (libra pondo), which gives lb its symbol. The international avoirdupois pound was standardized as exactly 0.45359237 kg in 1959. The ounce (1/16 lb) is used for food portions, letters, and precious metals. The stone (14 lb) remains common in the UK and Ireland for expressing body weight — someone weighing 70 kg is about 11 stone. Metric tonnes (1,000 kg) are used for industrial quantities; US tons (2,000 lb) for heavy goods in the US. Understanding weight conversions is crucial for international shipping, fitness tracking, and cooking across cultures.',
+    'Weight measurement (more precisely, mass measurement) is fundamental to commerce, science, and daily life. The kilogram is the SI base unit of mass; since the 2019 redefinition it is defined by fixing the value of the Planck constant. Before 2019, the kilogram was defined by the International Prototype of the Kilogram (IPK), a platinum-iridium cylinder kept in a vault near Paris. The gram is 1/1000 of a kilogram and is the everyday unit for cooking and small quantities. The pound has ancient origins, dating back to Roman times (libra pondo), which gives lb its symbol. The international avoirdupois pound was standardized as exactly 0.45359237 kg in 1959. The ounce (1/16 lb) is used for food portions, letters, and precious metals. The stone (14 lb) remains common in the UK and Ireland for expressing body weight — someone weighing 70 kg is about 11 stone. Metric tonnes (1,000 kg) are used for industrial quantities; US tons (2,000 lb) for heavy goods in the US. Understanding weight conversions is crucial for international shipping, fitness tracking, and cooking across cultures.',
   faqs: [
     {
       question: 'What is the difference between weight and mass?',
@@ -97,12 +96,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const converterConfig = createConverter({ units: UNITS, defaultFrom: 'kg', defaultTo: 'lb', educational: EDUCATIONAL });
-const configWithPanel = {
-  ...converterConfig,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Weight Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Weight Conversion', quantity: 'weight (mass)', defaultFrom: 'kg', defaultTo: 'lb', educational: EDUCATIONAL });

@@ -1,97 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import HtmlMinifierPanel from './HtmlMinifierPanel';
-
-function minifyHtml(code: string): string {
-  // Remove HTML comments
-  let result = code.replace(/<!--[\s\S]*?-->/g, '');
-
-  // Preserve <pre> blocks before whitespace collapsing
-  const preBlocks: string[] = [];
-  result = result.replace(/<pre[\s>][\s\S]*?<\/pre>/gi, (match) => {
-    preBlocks.push(match);
-    return `\x00PRE${preBlocks.length - 1}\x00`;
-  });
-
-  // Collapse multiple whitespace (but preserve single spaces between words)
-  result = result.replace(/\s+/g, ' ');
-  // Remove whitespace between tags
-  result = result.replace(/>\s+</g, '><');
-  // Remove whitespace around attributes
-  result = result.replace(/\s*=\s*/g, '=');
-  // Remove optional quotes around simple attribute values (&quot; form)
-  result = result.replace(/\s+([a-z-]+)=&quot;([a-zA-Z0-9_\-:.]+)&quot;/gi, ' $1=$2');
-  // Remove optional quotes around simple attribute values (straight quote form)
-  result = result.replace(/\s+([a-z-]+)="([a-zA-Z0-9_\-:.]+)"/gi, ' $1=$2');
-  // Remove unnecessary closing slashes in void elements
-  result = result.replace(/<(\w+)([^>]*?)\s*\/>/g, '<$1$2>');
-
-  // Restore <pre> blocks
-  result = result.replace(/\x00PRE(\d+)\x00/g, (_, i) => preBlocks[parseInt(i)]);
-
-  // Trim
-  result = result.trim();
-  return result;
-}
-
-function minifyCss(code: string): string {
-  let result = code;
-  // Remove CSS comments
-  result = result.replace(/\/\*[\s\S]*?\*\//g, '');
-
-  // Preserve calc() expressions to avoid breaking operators inside them
-  const calcBlocks: string[] = [];
-  result = result.replace(/calc\([\s\S]*?\)/gi, (match) => {
-    calcBlocks.push(match);
-    return `\x00CALC${calcBlocks.length - 1}\x00`;
-  });
-
-  // Remove whitespace around brackets
-  result = result.replace(/\s*\{\s*/g, '{');
-  result = result.replace(/\s*\}\s*/g, '}');
-  // Remove whitespace around colons
-  result = result.replace(/\s*:\s*/g, ':');
-  // Remove whitespace around semicolons
-  result = result.replace(/\s*;\s*/g, ';');
-  // Remove whitespace around commas
-  result = result.replace(/\s*,\s*/g, ',');
-  // Remove trailing semicolons before closing braces
-  result = result.replace(/;\}/g, '}');
-  // Collapse any remaining whitespace runs to a single space — this is
-  // significant in space-separated value lists (box-shadow, margin, padding,
-  // font, transform) and descendant-combinator selectors ("div p"). Removing
-  // it entirely (the previous behavior) glued adjacent values together into
-  // one invalid token, e.g. "0 2px 4px rgba(...)" became "02px4pxrgba(...)".
-  result = result.replace(/\s+/g, ' ').trim();
-
-  // Restore calc() expressions
-  result = result.replace(/\x00CALC(\d+)\x00/g, (_, i) => calcBlocks[parseInt(i)]);
-
-  return result;
-}
-
-function minifyJs(code: string): string {
-  let result = code;
-  // Remove single-line comments
-  result = result.replace(/\/\/[^\n]*/g, '');
-  // Remove multi-line comments
-  result = result.replace(/\/\*[\s\S]*?\*\//g, '');
-  // Remove whitespace at start/end of lines
-  result = result.replace(/^\s+/gm, '');
-  result = result.replace(/\s+$/gm, '');
-  // Collapse multiple spaces to single
-  result = result.replace(/[ \t]+/g, ' ');
-  // Remove spaces around operators (basic)
-  result = result.replace(/\s*([=+\-*/%<>&|!?:;,{}()[\]])\s*/g, '$1');
-  // Remove unnecessary semicolons before closing braces
-  result = result.replace(/;\}/g, '}');
-  // Remove leading/trailing whitespace on each line
-  result = result.replace(/^\s+|\s+$/gm, '');
-  // Collapse newlines
-  result = result.replace(/\n+/g, '\n');
-  result = result.trim();
-  return result;
-}
+import { minifyCss, minifyHtml, minifyJs } from './minify';
 
 const htmlMinifierConfig: CalculatorConfig = {
   inputs: [
@@ -149,17 +59,23 @@ const htmlMinifierConfig: CalculatorConfig = {
         value: minified,
         highlight: true,
         color: 'positive',
+        interpretation:
+          codeType === 'JavaScript'
+            ? 'Conservative mode: comments, indentation and blank lines are removed; strings, template literals and regex literals are untouched and every line break is kept. For variable renaming and full compression use terser or esbuild.'
+            : codeType === 'HTML'
+              ? 'Whitespace inside <pre>, <textarea>, <script> and <style> is left exactly as written; spaces between inline elements are kept as single spaces.'
+              : 'Strings, url() and calc() are left untouched; colons in selectors are preserved.',
       },
       {
         id: 'originalSize',
         label: 'Original Size',
-        value: `${originalSize.toLocaleString(undefined)} bytes`,
+        value: `${originalSize.toLocaleString('en-US')} characters`,
         color: 'neutral',
       },
       {
         id: 'minifiedSize',
         label: 'Minified Size',
-        value: `${minifiedSize.toLocaleString(undefined)} bytes`,
+        value: `${minifiedSize.toLocaleString('en-US')} characters`,
         color: 'neutral',
       },
       {

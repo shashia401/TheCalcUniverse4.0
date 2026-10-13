@@ -2,6 +2,38 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import UnixTimestampPanel from './UnixTimestampPanel';
 
+/** |timestamp| at or above this is read as milliseconds (1e11 s is year 5138; 1e11 ms is March 1973). */
+export const MS_THRESHOLD = 1e11;
+
+const daysInMonth = (y: number, m: number) => [31, (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1];
+
+/**
+ * Strict ISO 8601 / RFC 3339 parse. `new Date('2025-02-31')` silently rolls over to 3 March, so the calendar
+ * fields are validated first. Returns the epoch milliseconds, null for an impossible date, undefined when the
+ * text is not ISO-shaped (caller falls back to the browser's Date parser).
+ */
+export function parseIsoStrict(text: string): number | null | undefined {
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,9}))?)?(Z|[+-]\d{2}:?\d{2})?)?$/i.exec(text.trim());
+  if (!m) return undefined;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const [h, mi, sec] = [Number(m[4] ?? 0), Number(m[5] ?? 0), Number(m[6] ?? 0)];
+  if (mo < 1 || mo > 12 || d < 1 || d > daysInMonth(y, mo) || h > 23 || mi > 59 || sec > 59) return null;
+  const ms = Number(((m[7] ?? '0') + '00').slice(0, 3));
+  const zone = m[8];
+  let t: number;
+  if (zone === undefined && m[4] !== undefined) {
+    t = new Date(y, mo - 1, d, h, mi, sec, ms).getTime(); // date-time without zone = local time (ECMAScript)
+  } else {
+    t = Date.UTC(y, mo - 1, d, h, mi, sec, ms);
+    if (zone && zone.toUpperCase() !== 'Z') {
+      const sign = zone[0] === '-' ? -1 : 1;
+      const digits = zone.slice(1).replace(':', '');
+      t -= sign * (Number(digits.slice(0, 2)) * 60 + Number(digits.slice(2))) * 60000;
+    }
+  }
+  return Number.isFinite(t) ? t : null;
+}
+
 const unixTimestampConfig: CalculatorConfig = {
   inputs: [
     {
@@ -44,15 +76,21 @@ const unixTimestampConfig: CalculatorConfig = {
       const rawTs = values.timestamp || '';
       if (!rawTs.trim()) return [];
 
-      const ts = parseFloat(rawTs);
-      if (isNaN(ts)) return [];
+      const ts = Number(rawTs.trim());
+      if (!Number.isFinite(ts)) return [];
 
-      const isMs = ts > 1e11;
+      const isMs = Math.abs(ts) >= MS_THRESHOLD;
       const date = new Date(isMs ? ts : ts * 1000);
       if (isNaN(date.getTime())) return [];
 
       return [
-        { id: 'localDate', label: 'Local Date/Time', value: date.toLocaleString(), color: 'positive' },
+        {
+          id: 'localDate',
+          label: 'Local Date/Time',
+          value: date.toLocaleString(),
+          color: 'positive',
+          interpretation: `Read as ${isMs ? 'milliseconds' : 'seconds'} (values of 1e11 or more in magnitude are treated as milliseconds). Local time zone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}.`,
+        },
         { id: 'utcDate', label: 'UTC Date/Time', value: date.toUTCString(), color: 'neutral' },
         { id: 'isoString', label: 'ISO 8601', value: date.toISOString(), color: 'neutral' },
         {
@@ -68,10 +106,10 @@ const unixTimestampConfig: CalculatorConfig = {
       const dateStr = values.dateInput || '';
       if (!dateStr.trim()) return [];
 
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return [];
-
-      const ms = date.getTime();
+      const iso = parseIsoStrict(dateStr);
+      if (iso === null) return [];
+      const ms = iso !== undefined ? iso : new Date(dateStr).getTime();
+      if (!Number.isFinite(ms) || Math.abs(ms) > 8.64e15) return [];
       const seconds = Math.floor(ms / 1000);
 
       return [
@@ -134,7 +172,7 @@ const unixTimestampConfig: CalculatorConfig = {
       { label: 'Epoch start', value: '1970-01-01 00:00:00 UTC' },
       { label: 'Y2K38 threshold', value: '2038-01-19 03:14:07 UTC' },
       { label: 'Current timestamp', value: 'Math.floor(Date.now() / 1000)' },
-      { label: 'Seconds vs ms check', value: '> 1e11 = milliseconds' },
+      { label: 'Seconds vs ms check', value: '|value| >= 1e11 = milliseconds' },
     ],
     commonUses: [
       'Converting database timestamps to human-readable dates for debugging and analysis.',

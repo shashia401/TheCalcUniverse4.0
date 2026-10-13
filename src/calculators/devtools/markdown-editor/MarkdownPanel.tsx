@@ -39,12 +39,12 @@ export default function MarkdownPanel({ values, results }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
         {/* Raw markdown (read-only) */}
         <div className="p-4 bg-slate-50">
-          <div className="text-[9px] uppercase tracking-wider font-bold text-slate-500 mb-2">
+          <div className="text-xs uppercase tracking-wider font-bold text-slate-600 mb-2">
             Raw Markdown ({lineCount} lines)
           </div>
           <pre className="text-xs text-slate-700 font-mono whitespace-pre-wrap break-words leading-relaxed max-h-96 overflow-y-auto">
             {markdown || (
-              <span className="text-slate-400 italic">
+              <span className="text-slate-600 italic">
                 Type markdown in the input field to see it here...
               </span>
             )}
@@ -53,7 +53,7 @@ export default function MarkdownPanel({ values, results }: Props) {
 
         {/* Rendered preview */}
         <div className="p-4">
-          <div className="text-[9px] uppercase tracking-wider font-bold text-slate-500 mb-2">
+          <div className="text-xs uppercase tracking-wider font-bold text-slate-600 mb-2">
             Rendered Preview
           </div>
           <div

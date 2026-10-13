@@ -1,17 +1,15 @@
-import { createElement } from 'react';
 import { createConverter, type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { FT_M, IN_M, MI_M, YD_M } from '../../../utils/unitConvert';
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   { value: 'mm', label: 'Millimeter (mm)', shortLabel: 'mm', factor: 0.001 },
   { value: 'cm', label: 'Centimeter (cm)', shortLabel: 'cm', factor: 0.01 },
   { value: 'm', label: 'Meter (m)', shortLabel: 'm', factor: 1 },
   { value: 'km', label: 'Kilometer (km)', shortLabel: 'km', factor: 1000 },
-  { value: 'in', label: 'Inch (in)', shortLabel: 'in', factor: 0.0254 },
-  { value: 'ft', label: 'Foot (ft)', shortLabel: 'ft', factor: 0.3048 },
-  { value: 'yd', label: 'Yard (yd)', shortLabel: 'yd', factor: 0.9144 },
-  { value: 'mi', label: 'Mile (mi)', shortLabel: 'mi', factor: 1609.344 },
+  { value: 'in', label: 'Inch (in)', shortLabel: 'in', factor: IN_M },
+  { value: 'ft', label: 'Foot (ft)', shortLabel: 'ft', factor: FT_M },
+  { value: 'yd', label: 'Yard (yd)', shortLabel: 'yd', factor: YD_M },
+  { value: 'mi', label: 'Mile (mi)', shortLabel: 'mi', factor: MI_M },
   { value: 'nmi', label: 'Nautical Mile (nmi)', shortLabel: 'nmi', factor: 1852 },
 ];
 
@@ -23,7 +21,7 @@ const EDUCATIONAL = {
     { symbol: 'm', name: 'Meter', description: 'The SI base unit of length. Defined as the distance light travels in a vacuum in 1/299,792,458 of a second. The foundation of the metric system.' },
     { symbol: 'ft', name: 'Foot', description: 'The imperial/US customary unit of length. 1 foot = 12 inches. Originally based on the length of a human foot. The standard unit for US construction and aviation altitude.' },
     { symbol: 'mi & km', name: 'Mile & Kilometer', description: 'Mile (1,609.344 m): the primary distance unit in the US and UK for road travel. Kilometer (1,000 m): used by the rest of the world for road distances.' },
-    { symbol: 'nmi', name: 'Nautical Mile', description: 'One nautical mile = 1,852 meters exactly. Defined as one minute of latitude along any meridian. Used in aviation, shipping, and GPS navigation.' },
+    { symbol: 'nmi', name: 'Nautical Mile', description: 'One nautical mile = 1,852 meters exactly. Originally one minute of latitude (the 1,852 m value is the exact international definition). Used in aviation, shipping, and GPS navigation.' },
   ],
   howToUse: [
     'Enter the length value you want to convert.',
@@ -74,7 +72,7 @@ const EDUCATIONAL = {
     caption: 'Metric and imperial length units compared visually. The meter is the SI standard; the foot, inch, and yard are US customary units.',
   },
   explanation:
-    'Length measurement is one of humanity\'s oldest quantified concepts, dating back to the cubit (the length of a forearm) in ancient Egypt and Mesopotamia. Today, the world is split between two major systems: the metric system (SI) and the US customary / imperial system. The metric system, established in France in 1795 and now adopted by every country except the United States, Liberia, and Myanmar, is based on the meter — originally defined as 1/10,000,000 of the distance from the equator to the North Pole along the Paris meridian. Today, the meter is defined with extreme precision by the speed of light: exactly 1/299,792,458 of a light-second. The imperial system uses the foot (12 inches), yard (3 feet), and mile (5,280 feet), with origins in Roman and Anglo-Saxon measurement. The inch is now formally defined as exactly 25.4 mm by international agreement (1959). Nautical miles (1,852 m) are used in aviation and maritime navigation because they correspond to one minute of latitude, making map calculations straightforward. Understanding both systems is essential for international trade, engineering, construction, and travel.',
+    'Length measurement is one of humanity\'s oldest quantified concepts, dating back to the cubit (the length of a forearm) in ancient Egypt and Mesopotamia. Today, the world is split between two major systems: the metric system (SI) and the US customary / imperial system. The metric system, established in France in 1795 and now the official system of nearly every country (the United States is the main exception for everyday use), is based on the meter — originally defined as 1/10,000,000 of the distance from the equator to the North Pole along the Paris meridian. Today, the meter is defined with extreme precision by the speed of light: exactly 1/299,792,458 of a light-second. The imperial system uses the foot (12 inches), yard (3 feet), and mile (5,280 feet), with origins in Roman and Anglo-Saxon measurement. The inch is now formally defined as exactly 25.4 mm by international agreement (1959). Nautical miles (1,852 m) are used in aviation and maritime navigation because they correspond to one minute of latitude, making map calculations straightforward. Understanding both systems is essential for international trade, engineering, construction, and travel.',
   faqs: [
     {
       question: 'Why does the US still use imperial units for length?',
@@ -82,7 +80,7 @@ const EDUCATIONAL = {
     },
     {
       question: 'What is the difference between a nautical mile and a statute mile?',
-      answer: 'A statute mile (5,280 ft = 1,609.344 m) is used for road distances in the US and UK. A nautical mile (1,852 m = 6,076.1 ft = 1.151 mi) is used in aviation and maritime navigation. The nautical mile is special because it equals exactly one minute of latitude (1/60 of a degree) along any meridian. This makes navigation calculations simple: a difference of 1 minute of latitude = 1 nautical mile. A ship traveling at 1 knot (1 nautical mile per hour) covers one minute of latitude per hour. This relationship to the Earth\'s geometry makes nautical miles indispensable for GPS, aviation charts, and marine navigation.',
+      answer: 'A statute mile (5,280 ft = 1,609.344 m) is used for road distances in the US and UK. A nautical mile (1,852 m = 6,076.1 ft = 1.151 mi) is used in aviation and maritime navigation. The nautical mile is special because it was derived from one minute of latitude (1/60 of a degree); the international value of 1,852 m is a fixed definition, while the true length of a minute of latitude varies from about 1,843 m at the equator to 1,862 m at the poles. This makes navigation calculations simple: a difference of 1 minute of latitude = 1 nautical mile. A ship traveling at 1 knot (1 nautical mile per hour) covers one minute of latitude per hour. This relationship to the Earth\'s geometry makes nautical miles indispensable for GPS, aviation charts, and marine navigation.',
     },
     {
       question: 'How do I estimate metric-to-imperial conversions in my head?',
@@ -102,7 +100,7 @@ const EDUCATIONAL = {
       },
       {
         question: 'Why are there different definitions of the foot?',
-      answer: 'Historically, the "foot" varied by region — the Roman foot (29.6 cm), Greek foot (30.8 cm), and various European feet all differed. In 1959, English-speaking nations agreed on the international foot of exactly 0.3048 m (30.48 cm). However, the US survey foot (defined as 1200/3937 m ≈ 30.48006 cm) was used for US land surveying until 2022, when federal agencies switched to the international foot. The difference is tiny (about 1/100 of an inch per mile) but matters for large-scale surveys like state boundaries. This agreement standardized length worldwide, ending centuries of confusion.',
+      answer: 'Historically, the "foot" varied by region — the Roman foot (29.6 cm), Greek foot (30.8 cm), and various European feet all differed. In 1959, English-speaking nations agreed on the international foot of exactly 0.3048 m (30.48 cm). However, the US survey foot (defined as 1200/3937 m ≈ 30.48006 cm) was used for US land surveying until 2022, when federal agencies switched to the international foot. The difference is tiny (2 parts per million, about 1/8 of an inch per mile) but matters for large-scale surveys like state boundaries. This agreement standardized length worldwide, ending centuries of confusion.',
     },
   ],
   citations: [
@@ -119,7 +117,7 @@ const EDUCATIONAL = {
     {
       scenario: 'A marathon runner from the US is traveling to run the Berlin Marathon. She trains in miles and wants to understand the race distance in miles. The marathon is 42.195 km. She also wants to know how many feet that is to correlate with her track workouts.',
       inputs: { value: '42.195', from: 'km', to: 'mi' },
-      result: '42.195 km = 26.219 mi. Also: 42.195 km = 138,435 ft. The standard marathon distance of 42.195 km equals exactly 26 miles 385 yards.',
+      result: '42.195 km = 26.219 mi. Also: 42.195 km = 138,435 ft. The marathon distance of 42.195 km is the metric rounding of 26 miles 385 yards (42.194988 km).',
       insight: 'The seemingly arbitrary 42.195 km distance comes from the 1908 London Olympics where the course was extended from 25 miles to 26 miles 385 yards so it could start at Windsor Castle and finish in front of the royal box at White City Stadium. This royal convenience gave us the standard marathon distance. The runner can use the feet conversion to break the race into 400m track intervals (1,312 ft each, roughly 105.5 laps total).',
     },
     {
@@ -133,7 +131,7 @@ const EDUCATIONAL = {
     'For mental estimation, memorize the Fibonacci-like relationship between miles and kilometers: 3 mi ≈ 5 km, 5 mi ≈ 8 km, 8 mi ≈ 13 km. This works because the golden ratio (1.618) is close to the mile/kilometer ratio (1.609). A marathon (26.2 mi ≈ 42.2 km) follows this pattern: 21 mi ≈ 34 km, 34 mi ≈ 55 km.',
     'When converting construction dimensions, always work in decimal feet or decimal inches — not feet-and-inches notation. 5 ft 7 in = 5.583 ft (NOT 5.7 ft, which is 5 ft 8.4 in). Many costly construction errors trace back to decimal vs. duodecimal confusion. Surveyors and civil engineers use decimal feet (tenths of a foot) specifically to avoid this.',
     'For cross-border e-commerce, when a product page says "12 inches" for the US market and "30 cm" for the EU market, the EU measurement is approximate (12 in = 30.48 cm). This 1.6% difference matters for products with tight tolerances like phone cases, mounting brackets, and connectors. Always use the exact conversion (25.4 mm per inch) for precision products.',
-    'GPS coordinates use nautical miles for distance calculations because 1 minute of latitude = 1 nautical mile everywhere on Earth. If your GPS shows you are 0.5 minutes of latitude from your waypoint, you are exactly 0.5 nautical miles (926 meters) away. This property does NOT hold for longitude — 1 minute of longitude equals 1 nautical mile times cos(latitude), so at 60 degrees north it is only 0.5 nautical miles.',
+    'Navigation charts use nautical miles because 1 minute of latitude is about 1 nautical mile. If you are 0.5 minutes of latitude from your waypoint, you are about 0.5 nautical miles (926 meters) away. This property does NOT hold for longitude — 1 minute of longitude equals 1 nautical mile times cos(latitude), so at 60 degrees north it is only about 0.5 nautical miles.',
     'When reading non-US maps (which almost always use metric), the scale bar is your friend. A 1:25,000 map means 1 cm = 250 m or 4 cm = 1 km. A quick thumb measurement: the width of an adult thumbnail is roughly 1.5 cm, which equals about 375 m on such a map — useful for rough distance estimation while hiking.',
   ],
   limitations: [
@@ -144,15 +142,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const converterConfig = createConverter({ units: UNITS, defaultFrom: 'm', defaultTo: 'ft', educational: EDUCATIONAL });
-const configWithPanel = {
-  ...converterConfig,
-  inputs: converterConfig.inputs.map((input) =>
-    input.id === 'value' ? { ...input, inputMode: 'decimal' as const, defaultValue: '1' } : input,
-  ),
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Length Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Length Conversion', quantity: 'length', defaultFrom: 'm', defaultTo: 'ft', educational: EDUCATIONAL });

@@ -1,141 +1,47 @@
 import { describe, it, expect } from 'vitest';
 import config from '../../../src/calculators/devtools/qr-code-generator/index';
-import { getValue } from '../../helpers';
 
-describe('QR Code Generator', () => {
-  it('generates QR code info for text content', () => {
-    const r = config.calculate({ content: 'Hello World', size: '200' });
-    expect(getValue(r, 'info')).toContain('QR code generated for: Hello World');
-    expect(getValue(r, '_qrData')).toBeTruthy();
+const get = (r: { id: string; value: string }[], id: string) => r.find((x) => x.id === id)?.value;
+
+describe('QR Code Generator (client-side encoder)', () => {
+  it('reports version, module count and bytes used (no third-party URL)', () => {
+    const r = config.calculate({ content: 'https://example.com/', size: '200', errorCorrection: 'M' });
+    expect(get(r, 'info')).toBe('QR code generated for: https://example.com/');
+    // 20 bytes at level M -> version 2 (capacity 26), 25 x 25 modules
+    expect(get(r, 'version')).toBe('Version 2 (25 × 25 modules)');
+    expect(get(r, 'capacity')).toBe('20 of 26 bytes at level M');
+    expect(JSON.stringify(r)).not.toMatch(/qrserver|https:\/\/api\./);
   });
-
-  it('generates QR code info for URL content', () => {
-    const r = config.calculate({ content: 'https://example.com', size: '200' });
-    expect(getValue(r, 'info')).toContain('QR code generated for: https://example.com');
+  it('error-correction level changes the version it needs (L holds more than H)', () => {
+    const text = 'x'.repeat(30);
+    expect(get(config.calculate({ content: text, errorCorrection: 'L' }), 'version')).toMatch(/^Version 2 /); // L capacity v2 = 32
+    expect(get(config.calculate({ content: text, errorCorrection: 'H' }), 'version')).toMatch(/^Version 4 /); // H capacity v3 = 24, v4 = 34
   });
-
-  it('uses default size of 200 when size is empty', () => {
-    const r = config.calculate({ content: 'test', size: '' });
-    const qrData = JSON.parse(getValue(r, '_qrData'));
-    expect(qrData.size).toBe(200);
+  it('trims, ignores unknown levels (falls back to M)', () => {
+    expect(get(config.calculate({ content: '  hi  ', errorCorrection: 'Z' }), 'capacity')).toBe('2 of 14 bytes at level M');
   });
-
-  it('uses custom size', () => {
-    const r = config.calculate({ content: 'test', size: '300' });
-    const qrData = JSON.parse(getValue(r, '_qrData'));
-    expect(qrData.size).toBe(300);
+  it('blank content returns []', () => {
+    expect(config.calculate({ content: '' })).toEqual([]);
+    expect(config.calculate({ content: '   ' })).toEqual([]);
   });
-
-  it('clamps size to minimum of 100', () => {
-    const r = config.calculate({ content: 'test', size: '50' });
-    const qrData = JSON.parse(getValue(r, '_qrData'));
-    expect(qrData.size).toBe(100);
+  it('over-long content gives an explanatory error, not a broken image', () => {
+    const r = config.calculate({ content: 'a'.repeat(3000), errorCorrection: 'L' });
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
+    expect(r[0].value).toMatch(/maximum 2953 bytes/);
   });
-
-  it('clamps size to maximum of 500', () => {
-    const r = config.calculate({ content: 'test', size: '1000' });
-    const qrData = JSON.parse(getValue(r, '_qrData'));
-    expect(qrData.size).toBe(500);
+  it('counts UTF-8 bytes, not characters', () => {
+    expect(get(config.calculate({ content: '日本語', errorCorrection: 'L' }), 'capacity')).toBe('9 of 17 bytes at level L');
   });
-
-  it('generates correct image URL', () => {
-    const r = config.calculate({ content: 'hello', size: '200' });
-    const qrData = JSON.parse(getValue(r, '_qrData'));
-    expect(qrData.imageUrl).toContain('api.qrserver.com');
-    expect(qrData.imageUrl).toContain('size=200x200');
-    expect(qrData.imageUrl).toContain('data=hello');
+  it('worked examples use real input ids and produce a symbol', () => {
+    for (const w of config.educational.workedExamples!) {
+      expect(Object.keys(w.inputs).sort()).toEqual(['content', 'errorCorrection', 'size']);
+      expect(get(config.calculate(w.inputs), 'version')).toMatch(/^Version \d+/);
+    }
+    expect(get(config.calculate(config.educational.workedExamples![1].inputs), 'version')).toMatch(/^Version 5 /);
   });
-
-  it('URL-encodes content in image URL', () => {
-    const r = config.calculate({ content: 'hello world', size: '200' });
-    const qrData = JSON.parse(getValue(r, '_qrData'));
-    expect(qrData.imageUrl).toContain('hello%20world');
-  });
-
-  it('returns empty array for empty content', () => {
-    const r = config.calculate({ content: '', size: '200' });
-    expect(r).toEqual([]);
-  });
-
-  it('returns empty array for whitespace-only content', () => {
-    const r = config.calculate({ content: '   ', size: '200' });
-    expect(r).toEqual([]);
-  });
-
-  it('truncates content preview to 40 characters in info', () => {
-    const longContent = 'a'.repeat(100);
-    const r = config.calculate({ content: longContent, size: '200' });
-    expect(getValue(r, 'info')).toContain('...');
-    expect(getValue(r, 'info').length).toBeLessThan(100);
-  });
-
-  it('handles non-numeric size gracefully', () => {
-    const r = config.calculate({ content: 'test', size: 'abc' });
-    const qrData = JSON.parse(getValue(r, '_qrData'));
-    expect(qrData.size).toBe(200);
-  });
-
-  it('stores content in _qrData', () => {
-    const r = config.calculate({ content: 'my content', size: '150' });
-    const qrData = JSON.parse(getValue(r, '_qrData'));
-    expect(qrData.content).toBe('my content');
-    expect(qrData.size).toBe(150);
-  });
-
-  describe('educational content', () => {
-    it('has formula', () => {
-      expect(config.educational.formula).toBeTruthy();
-    });
-
-    it('has formulaDescription over 100 chars', () => {
-      expect(config.educational.formulaDescription!.length).toBeGreaterThan(100);
-    });
-
-    it('has 3-5 variables', () => {
-      expect(config.educational.variables!.length).toBeGreaterThanOrEqual(3);
-      expect(config.educational.variables!.length).toBeLessThanOrEqual(5);
-    });
-
-    it('has 3-5 howToUse steps', () => {
-      expect(config.educational.howToUse!.length).toBeGreaterThanOrEqual(3);
-      expect(config.educational.howToUse!.length).toBeLessThanOrEqual(5);
-    });
-
-    it('has 2-4 quickReference items', () => {
-      expect(config.educational.quickReference!.length).toBeGreaterThanOrEqual(2);
-      expect(config.educational.quickReference!.length).toBeLessThanOrEqual(4);
-    });
-
-    it('has 3-5 commonUses items', () => {
-      expect(config.educational.commonUses!.length).toBeGreaterThanOrEqual(3);
-      expect(config.educational.commonUses!.length).toBeLessThanOrEqual(5);
-    });
-
-    it('has explanation over 300 chars', () => {
-      expect(config.educational.explanation!.length).toBeGreaterThan(300);
-    });
-
-    it('has 2-5 FAQs', () => {
-      expect(config.educational.faqs!.length).toBeGreaterThanOrEqual(2);
-      expect(config.educational.faqs!.length).toBeLessThanOrEqual(5);
-    });
-
-    it('has diagram with svg, alt, and caption', () => {
-      expect(config.educational.diagram).toBeDefined();
-      expect(config.educational.diagram!.svg).toBeTruthy();
-      expect(config.educational.diagram!.alt).toBeTruthy();
-      expect(config.educational.diagram!.caption).toBeTruthy();
-    });
-
-    it('has 1-2 citations with real URLs', () => {
-      const citations = (config.educational as any).citations;
-      expect(citations).toBeDefined();
-      expect(citations.length).toBeGreaterThanOrEqual(1);
-      expect(citations.length).toBeLessThanOrEqual(2);
-      for (const c of citations) {
-        expect(c.title).toBeTruthy();
-        expect(c.url).toMatch(/^https?:\/\//);
-      }
-    });
+  it('panel is built from the inputs', () => {
+    const vals = { content: 'hello', size: '200', errorCorrection: 'Q' };
+    expect(config.extraPanel!(vals, config.calculate(vals))).not.toBeNull();
   });
 });

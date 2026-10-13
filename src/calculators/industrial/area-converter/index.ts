@@ -1,28 +1,28 @@
-import { createElement } from 'react';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { createConverter, type UnitDef } from '../unit-converter';
+import { FT_M, IN_M, MI_M, YD_M } from '../../../utils/unitConvert';
 
-const UNITS = [
-  { value: 'mm2', label: 'Square Millimeter (mm²)', shortLabel: 'mm²', factor: 0.000001 },
-  { value: 'cm2', label: 'Square Centimeter (cm²)', shortLabel: 'cm²', factor: 0.0001 },
+export const UNITS: UnitDef[] = [
+  { value: 'mm2', label: 'Square Millimeter (mm²)', shortLabel: 'mm²', factor: 1e-6 },
+  { value: 'cm2', label: 'Square Centimeter (cm²)', shortLabel: 'cm²', factor: 1e-4 },
   { value: 'm2', label: 'Square Meter (m²)', shortLabel: 'm²', factor: 1 },
-  { value: 'ha', label: 'Hectare (ha)', shortLabel: 'ha', factor: 10000 },
-  { value: 'km2', label: 'Square Kilometer (km²)', shortLabel: 'km²', factor: 1000000 },
-  { value: 'in2', label: 'Square Inch (in²)', shortLabel: 'in²', factor: 0.00064516 },
-  { value: 'ft2', label: 'Square Foot (ft²)', shortLabel: 'ft²', factor: 0.092903 },
-  { value: 'ac', label: 'Acre (ac)', shortLabel: 'ac', factor: 4046.86 },
-  { value: 'mi2', label: 'Square Mile (mi²)', shortLabel: 'mi²', factor: 2589988.1 },
+  { value: 'ha', label: 'Hectare (ha)', shortLabel: 'ha', factor: 1e4 },
+  { value: 'km2', label: 'Square Kilometer (km²)', shortLabel: 'km²', factor: 1e6 },
+  { value: 'in2', label: 'Square Inch (in²)', shortLabel: 'in²', factor: IN_M ** 2 },
+  { value: 'ft2', label: 'Square Foot (ft²)', shortLabel: 'ft²', factor: FT_M ** 2 },
+  { value: 'yd2', label: 'Square Yard (yd²)', shortLabel: 'yd²', factor: YD_M ** 2 },
+  { value: 'ac', label: 'Acre (ac, international)', shortLabel: 'ac', factor: 43560 * FT_M ** 2 },
+  { value: 'mi2', label: 'Square Mile (mi²)', shortLabel: 'mi²', factor: MI_M ** 2 },
 ];
 
 const EDUCATIONAL = {
   formula: 'result = value × (factor_from ÷ factor_to)',
   formulaDescription:
     'Area conversion uses linear scaling factors relative to the square meter, the SI unit of area. Each unit has a fixed conversion factor to square meters. To convert from unit A to unit B, multiply the input value by the ratio of the two factors.',
-  formulaSource: 'The square meter (m²) was adopted by the CGPM in 1960 as the SI derived unit of area. The acre was standardized by Edward I of England in the 14th century (Statute for Measuring Land) as 4 rods × 40 rods (66 ft × 660 ft = 43,560 ft²). The hectare was introduced in France in 1795 as part of the metric system as 100 ares, where 1 are = 100 m². The international foot (1959) fixed the relationship 1 ft = 0.3048 m exactly, thereby fixing 1 ft² = 0.09290304 m² and all derived area units. The square mile (1 mi² = 640 acres) was fundamental to the US Public Land Survey System (PLSS) established by the Land Ordinance of 1785.',
+  formulaSource: 'The square meter (m²) was adopted by the CGPM in 1960 as the SI derived unit of area. The acre was standardized in medieval England around 1300 (Statute for Measuring Land, attributed to Edward I or II) as 4 rods × 40 rods (66 ft × 660 ft = 43,560 ft²). The hectare was introduced in France in 1795 as part of the metric system as 100 ares, where 1 are = 100 m². The international foot (1959) fixed the relationship 1 ft = 0.3048 m exactly, thereby fixing 1 ft² = 0.09290304 m² and all derived area units. The square mile (1 mi² = 640 acres) was fundamental to the US Public Land Survey System (PLSS) established by the Land Ordinance of 1785.',
   variables: [
     { symbol: 'm²', name: 'Square Meter', description: 'The SI unit of area. The area of a square measuring one meter on each side. Used worldwide for room sizes, construction, and land measurement. A typical parking space is about 12.5 m² (2.5 m × 5 m).' },
     { symbol: 'ft²', name: 'Square Foot', description: 'The US customary unit of area. The area of a square measuring one foot on each side (144 in²). Used for real estate, construction, and HVAC in the US. A typical American house is 1,500-2,500 ft².' },
-    { symbol: 'ac', name: 'Acre', description: 'The traditional US/UK land unit: exactly 43,560 ft² = 4,046.86 m² = 0.404686 ha. Originally the area a yoke of oxen could plow in one day. Still used for US real estate, agriculture, and land surveying.' },
+    { symbol: 'ac', name: 'Acre', description: 'The traditional US/UK land unit: exactly 43,560 ft² = 4,046.8564 m² = 0.40468564 ha (the international acre; the old US survey acre is about 2 ppm larger). Originally the area a yoke of oxen could plow in one day. Still used for US real estate, agriculture, and land surveying.' },
     { symbol: 'ha', name: 'Hectare', description: 'The metric land unit: exactly 10,000 m² = 100 m × 100 m = 2.471 acres. Used worldwide for agriculture, forestry, and land management. Roughly the size of a rugby pitch or international soccer field.' },
     { symbol: 'km²', name: 'Square Kilometer', description: 'One million square meters (1,000 m × 1,000 m). Used for city sizes, national parks, and country areas. Manhattan is 59.1 km². The smallest country, Vatican City, is 0.44 km².' },
     { symbol: 'mi²', name: 'Square Mile', description: 'Exactly 640 acres = 2.59 km². Used for large land areas in the US. A US "township" in the PLSS is 36 mi² (6 mi × 6 mi), divided into 36 sections of 1 mi² each.' },
@@ -56,7 +56,7 @@ const EDUCATIONAL = {
       scenario: 'A family from London is looking at a vacation home listing in Florida. The listing says 2,400 ft². They want to compare it to their London flat, which is 85 m². How big is the Florida house in m², and how does it compare?',
       inputs: { value: '2400', from: 'ft2', to: 'm2' },
       result: '2,400 ft² × 0.092903 = 222.97 m². The Florida house is about 223 m² — roughly 2.6 times larger than their 85 m² London flat. A typical UK 3-bedroom house is 90-110 m², while a typical US 3-bedroom is 1,500-2,000 ft² (139-186 m²). The Florida house at 2,400 ft² is a spacious 4-bedroom family home.',
-      insight: 'US real estate listings use ft² exclusively, while UK listings use m² for new builds but often use number of bedrooms as the primary measure for older homes. When comparing international real estate, always convert to the same unit — a "large" apartment means very different things in Tokyo (60 m²) vs. Houston (200 m²). Pro tip: Zillow and Rightmove both show m² and ft² if you change the display settings.',
+      insight: 'US real estate listings use ft² exclusively, while UK listings use m² for new builds but often use number of bedrooms as the primary measure for older homes. When comparing international real estate, always convert to the same unit — a "large" apartment means very different things in Tokyo (60 m²) vs. Houston (200 m²).',
     },
     {
       scenario: 'A farmer in Iowa is negotiating to buy an adjacent 80-acre field to expand their corn operation. Their European equipment supplier quotes seeding rates in kg per hectare. The farmer needs to know: how many hectares is 80 acres, and how much total seed is needed at 25 kg/ha?',
@@ -111,19 +111,19 @@ const EDUCATIONAL = {
     },
     {
       question: 'Why does the US use acres instead of hectares?',
-      answer: 'The acre has been used in English-speaking countries since the Middle Ages. It was standardized as 43,560 ft² by Edward I in the late 13th century in the Statute for Measuring Land. The US inherited the acre from British colonial practice and embedded it deeply into the Public Land Survey System of 1785, which divided the western US into townships (36 mi²) and sections (1 mi² = 640 acres). This grid became the basis for all US land ownership, with property deeds referencing aliquot parts of sections (e.g., "the NW quarter of the SE quarter of Section 15"). Changing to hectares would require re-surveying the entire country. While the UK officially adopted the hectare for land registration in 1985, the US has not followed — and given the PLSS legacy, likely never will. The acre persists in US real estate, agriculture (USDA reports), and land management (National Park Service, BLM).',
+      answer: 'The acre has been used in English-speaking countries since the Middle Ages. It was standardized as 43,560 ft² around 1300 in the Statute for Measuring Land. The US inherited the acre from British colonial practice and embedded it deeply into the Public Land Survey System of 1785, which divided the western US into townships (36 mi²) and sections (1 mi² = 640 acres). This grid became the basis for all US land ownership, with property deeds referencing aliquot parts of sections (e.g., "the NW quarter of the SE quarter of Section 15"). Changing to hectares would require re-surveying the entire country. The US has not adopted the hectare for land records, and the PLSS legacy makes a change unlikely. The acre persists in US real estate, agriculture (USDA reports), and land management (National Park Service, BLM).',
     },
     {
       question: 'How is area measured for irregular-shaped properties?',
-      answer: 'For irregular properties, surveyors use coordinate geometry. The property boundary is surveyed as a series of vertices (corners) with precise GPS or total station measurements, and the area is calculated using the Shoelace formula (also called the surveyor\'s formula). This formula works for any simple polygon: Area = ½ |Σ(xᵢyᵢ₊₁ − xᵢ₊₁yᵢ)|. Modern GIS software and CAD programs can also calculate areas from satellite imagery or digital maps. For practical real estate purposes, listings often use approximate rectangular dimensions (e.g., "100 ft × 150 ft lot"), but the legal property description in the deed is based on the surveyed boundary. For curved boundaries, approximations using many short line segments are used. The accuracy of property surveys is typically ±0.1 ft + 50 ppm of the distance measured.',
+      answer: 'For irregular properties, surveyors use coordinate geometry. The property boundary is surveyed as a series of vertices (corners) with precise GPS or total station measurements, and the area is calculated using the Shoelace formula (also called the surveyor\'s formula). This formula works for any simple polygon: Area = ½ |Σ(xᵢyᵢ₊₁ − xᵢ₊₁yᵢ)|. Modern GIS software and CAD programs can also calculate areas from satellite imagery or digital maps. For practical real estate purposes, listings often use approximate rectangular dimensions (e.g., "100 ft × 150 ft lot"), but the legal property description in the deed is based on the surveyed boundary. For curved boundaries, approximations using many short line segments are used.',
     },
     {
       question: 'What is the difference between gross area, net area, and livable area?',
-      answer: 'Gross Floor Area (GFA) includes everything within the exterior walls: all rooms, hallways, closets, staircases, wall thicknesses, and mechanical spaces. Net Internal Area (NIA) excludes walls, columns, elevators, and common areas. Living Area (or finished area) excludes garages, basements (unless finished), attics, and unheated spaces. Different countries and purposes use different standards: US residential listings use "finished living area" per ANSI Z765. US commercial uses BOMA standards (Gross Leasable Area). The UK uses RICS standards (Net Internal Area for residential, Gross Internal Area for commercial). Europe uses various national standards, typically "usable floor area" (Wohnfläche in Germany, superficie utile in France). This means a 2,000 ft² US house might be advertised as 170 m² in Europe (not 186 m² as the raw math suggests) due to different measurement inclusion rules.',
+      answer: 'Gross Floor Area (GFA) includes everything within the exterior walls: all rooms, hallways, closets, staircases, wall thicknesses, and mechanical spaces. Net Internal Area (NIA) excludes walls, columns, elevators, and common areas. Living Area (or finished area) excludes garages, basements (unless finished), attics, and unheated spaces. Different countries and purposes use different standards: US residential listings use "finished living area" per ANSI Z765. US commercial uses BOMA standards (Gross Leasable Area). The UK uses RICS standards (Net Internal Area for residential, Gross Internal Area for commercial). Europe uses various national standards, typically "usable floor area" (Wohnfläche in Germany, superficie utile in France). This means the same house can have a different advertised area in different countries even after unit conversion, because the measurement rules differ.',
     },
     {
-      question: 'How many acres is a typical farm, and how does that compare globally?',
-      answer: 'US average farm size: 446 acres (180 ha) as of 2023, though this varies enormously — a small family farm might be 50-200 acres while a large corporate grain operation can be 5,000+ acres. By global comparison: average farm size in India is about 2.7 acres (1.1 ha), in Brazil about 158 acres (64 ha), in the UK about 210 acres (85 ha), and in Australia about 10,700 acres (4,331 ha) due to extensive sheep and cattle stations. Iowa farms average about 359 acres (145 ha) while Montana farms average 2,157 acres (873 ha). The largest single farm in the world is the Mudanjiang City Mega Farm in China at 22.5 million acres (9.1 million ha) — roughly the size of Portugal.',
+      question: 'How do acres, hectares and square miles relate?',
+      answer: 'Exact relations: 1 international acre = 43,560 ft² = 4,046.8564224 m² (0.40468564 ha); 1 hectare = 10,000 m² = 2.4710538 acres; 1 square mile = 640 acres = 2.5899881 km² = 258.99881 ha; 1 km² = 100 ha = 0.3861022 mi². Because all of them derive from the international foot (0.3048 m exactly), every conversion on this page is exact up to display rounding.',
     },
     {
       question: 'How do I calculate carpet or flooring area from room dimensions?',
@@ -132,80 +132,9 @@ const EDUCATIONAL = {
   ],
   citations: [
 
-    { source: 'USDA - Land Measurement and Survey Standards', url: 'https://www.nrcs.usda.gov/resources/data-and-reports' },
+    { source: 'NIST SP 811 Appendix B - Conversion Factors', url: 'https://www.nist.gov/pml/special-publication-811/nist-guide-si-appendix-b-conversion-factors' },
     { source: 'RICS - Code of Measuring Practice', url: 'https://www.rics.org/profession-standards/rics-standards-and-guidance/sector-standards/real-estate-standards/code-of-measuring-practice' },
   ],
 };
 
-const inputs = [
-  {
-    id: 'value',
-    label: 'Value to Convert',
-    type: 'number' as const,
-    placeholder: 'Enter area (e.g., 1500)',
-    inputMode: 'numeric' as const,
-    required: true,
-    helpText: 'The numeric area value you want to convert between units',
-  },
-  {
-    id: 'from',
-    label: 'From Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: 'm2',
-    helpText: 'The area unit you are converting from (e.g., m², ft², acres)',
-  },
-  {
-    id: 'to',
-    label: 'To Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: 'ft2',
-    showWhen: (values: Record<string, string>) => !!values.value,
-    helpText: 'The area unit you are converting to (e.g., ft² for US real estate)',
-  },
-];
-
-const calculate = (values: Record<string, string>) => {
-  if (!values || Object.keys(values).length === 0) return [];
-  if (values.value === undefined || values.value === null || values.value.trim() === '') return [];
-  const val = parseFloat(values.value);
-  if (isNaN(val) || !isFinite(val)) return [];
-
-  const fromUnit = values.from || 'm2';
-  const toUnit = values.to || 'ft2';
-
-  const fromDef = UNITS.find((u) => u.value === fromUnit);
-  const toDef = UNITS.find((u) => u.value === toUnit);
-  if (!fromDef || !toDef) return [];
-  if (toDef.factor === 0) return [];
-
-  const result = (val * fromDef.factor) / toDef.factor;
-
-  return [
-    {
-      id: 'result',
-      label: `Result (${fromUnit} → ${toUnit})`,
-      value: `${val} ${fromUnit} = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${toUnit}`,
-      highlight: true,
-      color: 'positive' as const,
-    },
-    {
-      id: 'formula',
-      label: 'Formula',
-      value: `${val} × (${fromDef.factor} ÷ ${toDef.factor}) = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })}`,
-      color: 'neutral' as const,
-    },
-  ];
-};
-
-const configWithPanel = {
-  inputs,
-  calculate,
-  educational: EDUCATIONAL,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Area Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Area Conversion', quantity: 'area', defaultFrom: 'm2', defaultTo: 'ft2', educational: EDUCATIONAL });

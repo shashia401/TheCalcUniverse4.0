@@ -10,24 +10,30 @@ import StringCasePanel from './StringCasePanel';
 // instead of the intended per-word case conversion.
 function splitWords(input: string): string[] {
   return input
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-    .split(/[^a-zA-Z0-9]+/)
+    .replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, '$1 $2')
+    .replace(/(\p{Lu}+)(\p{Lu}\p{Ll})/gu, '$1 $2')
+    .split(/[^\p{L}\p{N}\p{M}]+/u) // Unicode-aware: "café", "naïve", Cyrillic and CJK letters are word characters
     .filter(Boolean);
+}
+
+/** Upper-case the first code point (not UTF-16 unit, so astral letters survive) and lower-case the rest. */
+function capitalize(w: string): string {
+  const [first, ...rest] = Array.from(w);
+  return first.toUpperCase() + rest.join('').toLowerCase();
 }
 
 function toCamelCase(input: string): string {
   const words = splitWords(input);
   if (words.length === 0) return '';
   const first = words[0].toLowerCase();
-  const rest = words.slice(1).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  const rest = words.slice(1).map(capitalize);
   return first + rest.join('');
 }
 
 function toPascalCase(input: string): string {
   const words = splitWords(input);
   if (words.length === 0) return '';
-  return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+  return words.map(capitalize).join('');
 }
 
 function toSnakeCase(input: string): string {
@@ -50,12 +56,12 @@ function toTitleCase(input: string): string {
   return input
     .split(/\s+/)
     .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .map(capitalize)
     .join(' ');
 }
 
 function toStartCase(input: string): string {
-  return input.replace(/(^|[^a-zA-Z0-9])([a-zA-Z])/g, (_, before, char) => {
+  return input.replace(/(^|[^\p{L}\p{N}])(\p{L})/gu, (_, before, char) => {
     return before + char.toUpperCase();
   });
 }

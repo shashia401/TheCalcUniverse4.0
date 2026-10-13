@@ -42,9 +42,9 @@ describe('Color Converter (devtools)', () => {
       expect(r).toEqual([]);
     });
 
-    it('returns empty array for short hex string', () => {
-      const r = config.calculate({ mode: 'HEX → RGB/HSL', hexInput: '#FFF' });
-      expect(r).toEqual([]);
+    it('returns empty array for 2- or 5-digit hex (not a CSS length)', () => {
+      expect(config.calculate({ mode: 'HEX → RGB/HSL', hexInput: '#FF' })).toEqual([]);
+      expect(config.calculate({ mode: 'HEX → RGB/HSL', hexInput: '#FFFFF' })).toEqual([]);
     });
   });
 

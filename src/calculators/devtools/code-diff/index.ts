@@ -1,7 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import DiffPanel from './DiffPanel';
-import { computeDiff } from './diffUtils';
+import { computeDiff, toLines } from './diffUtils';
 
 const codeDiffConfig: CalculatorConfig = {
   inputs: [
@@ -42,10 +42,10 @@ const codeDiffConfig: CalculatorConfig = {
 
     if (!leftRaw && !rightRaw) return [{ id: '_empty', label: '', value: '' }];
 
-    const leftLines = leftRaw ? leftRaw.split('\n') : [];
-    const rightLines = rightRaw ? rightRaw.split('\n') : [];
-
-    const diff = computeDiff(leftLines, rightLines);
+    const diff = computeDiff(toLines(leftRaw), toLines(rightRaw));
+    if (!diff) {
+      return [{ id: 'error', label: 'Too large to diff in the browser', value: 'The changed region is too large (over 16 million line pairs). Compare smaller sections, or use a command-line diff for very large files.', color: 'negative', highlight: true }];
+    }
 
     const additions = diff.rightLines.filter((l) => l.type === 'added').length;
     const deletions = diff.leftLines.filter((l) => l.type === 'removed').length;

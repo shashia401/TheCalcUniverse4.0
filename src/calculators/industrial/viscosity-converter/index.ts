@@ -1,41 +1,35 @@
-import { createElement } from 'react';
 import { createConverter, type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { convertUnits, findUnit, formatQty, parseQty } from '../../../utils/unitConvert';
 
-// Dynamic viscosity units (indices 0-3) and kinematic viscosity units (indices 4-6)
-const DYNAMIC_KEYS = new Set(['pas', 'mpas', 'p', 'cp']);
-const KINEMATIC_KEYS = new Set(['m2s', 'st', 'cst']);
-
-function isDynamic(v: string): boolean { return DYNAMIC_KEYS.has(v); }
-function isKinematic(v: string): boolean { return KINEMATIC_KEYS.has(v); }
-
-const UNITS: UnitDef[] = [
-  // Dynamic viscosity
+// Dynamic viscosity (base Pa·s) and kinematic viscosity (base m²/s). Converting between the two needs the fluid
+// density: kinematic = dynamic / density.
+export const UNITS: UnitDef[] = [
   { value: 'pas', label: 'Pascal-Second (Pa·s) — Dynamic', shortLabel: 'Pa·s', factor: 1 },
   { value: 'mpas', label: 'Millipascal-Second (mPa·s) — Dynamic', shortLabel: 'mPa·s', factor: 0.001 },
   { value: 'p', label: 'Poise (P) — Dynamic', shortLabel: 'P', factor: 0.1 },
   { value: 'cp', label: 'Centipoise (cP) — Dynamic', shortLabel: 'cP', factor: 0.001 },
-  // Kinematic viscosity
   { value: 'm2s', label: 'Square Meter per Second (m²/s) — Kinematic', shortLabel: 'm²/s', factor: 1 },
   { value: 'st', label: 'Stokes (St) — Kinematic', shortLabel: 'St', factor: 0.0001 },
   { value: 'cst', label: 'Centistokes (cSt) — Kinematic', shortLabel: 'cSt', factor: 0.000001 },
 ];
 
+const KINEMATIC = new Set(['m2s', 'st', 'cst']);
+export const isKinematic = (id: string) => KINEMATIC.has(id);
+
 const EDUCATIONAL = {
   formula: 'result = value × (factor_from ÷ factor_to)',
   formulaDescription:
-    'Viscosity conversion within the same type (dynamic or kinematic) uses linear factors relative to the SI base units (Pa·s for dynamic, m²/s for kinematic). Dynamic viscosity measures a fluid\'s resistance to shear flow, while kinematic viscosity is dynamic viscosity divided by density. To convert between dynamic and kinematic viscosity: kinematic = dynamic ÷ density. The density must be known — this converter only handles within-type conversions accurately.',
+    'Viscosity conversion within the same type (dynamic or kinematic) uses linear factors relative to the SI base units (Pa·s for dynamic, m²/s for kinematic). Dynamic viscosity measures a fluid\'s resistance to shear flow, while kinematic viscosity is dynamic viscosity divided by density. To convert between dynamic and kinematic viscosity: kinematic = dynamic ÷ density. Enter the fluid density (kg/m³) when you pick one dynamic and one kinematic unit; the density field appears automatically.',
   variables: [
     { symbol: 'μ', name: 'Dynamic Viscosity (mu)', description: 'A fluid\'s resistance to shear or flow when an external force is applied. Measured in Pa·s (SI) or poise (CGS). Honey has high viscosity; water has low viscosity.' },
     { symbol: 'ν', name: 'Kinematic Viscosity (nu)', description: 'Dynamic viscosity divided by fluid density. Represents resistance to flow under gravity alone. Measured in m²/s (SI) or stokes (CGS).' },
-    { symbol: '1 cP & 1 cSt', name: 'Centigrade Scale References (cP & cSt)', description: '1 cP = 1 mPa·s — water at 20°C has about 1 cP dynamic viscosity. 1 cSt = 1 mm²/s — water at 20°C also has about 1 cSt kinematic viscosity. These coincidentally equal 1 for water since its density is 1,000 kg/m³.' },
+    { symbol: '1 cP & 1 cSt', name: 'Centipoise & Centistokes (cP & cSt)', description: '1 cP = 1 mPa·s — water at 20°C has about 1 cP dynamic viscosity. 1 cSt = 1 mm²/s — water at 20°C also has about 1 cSt kinematic viscosity. These coincidentally equal 1 for water since its density is 1,000 kg/m³.' },
   ],
   howToUse: [
     'Enter the viscosity value you want to convert.',
     'Select the current viscosity unit from the "From" dropdown. Units are labeled as Dynamic or Kinematic.',
     'Select the desired viscosity unit from the "To" dropdown.',
-    'The converted value is displayed instantly. Convert only within the same type (dynamic → dynamic or kinematic → kinematic) unless you know the fluid density.',
+    'The converted value is displayed instantly. When you mix a dynamic and a kinematic unit, enter the fluid density at the same temperature as the viscosity.',
     'Refer to the quick reference for viscosity ranges of common fluids like water, engine oil, and honey at various temperatures.',
   ],
   quickReference: [
@@ -51,10 +45,10 @@ const EDUCATIONAL = {
   commonUses: [
     'Engine oil viscosity: SAE 5W-30 is the most common multigrade recommendation',
     'Hydraulic oil: ISO VG 32 (32 cSt at 40°C) for most industrial hydraulics',
-    'Gear oil: SAE 75W-90 (15–24 cSt at 100°C) for manual transmissions',
+    'Gear oil: SAE 75W-90 (13.5–24 cSt at 100°C) for manual transmissions',
     'Paint viscosity: 70–100 KU (Krebs units) for spray application',
     'Blood plasma: ~1.5 cP at body temperature (37°C)',
-    'Cooking oil: ~30–40 cP at frying temperature (180°C)',
+    'Cooking oil: roughly 60 cP at 20°C, falling to around 5–10 cP at frying temperature (180°C)',
   ],
 
   diagram: {
@@ -94,7 +88,7 @@ const EDUCATIONAL = {
     },
     {
       question: 'What is the viscosity of common fluids?',
-      answer: 'Viscosity varies enormously: Water at 20°C: 1.0 cP. Olive oil at 20°C: 84 cP. SAE 30 motor oil at 20°C: 500-700 cP. SAE 30 motor oil at 100°C: 9-12 cP (viscosity drops dramatically with temperature). Honey at 20°C: 2,000-10,000 cP depending on type. Ketchup: 50,000-100,000 cP (shear-thinning — it flows more when squeezed). Peanut butter: 150,000-250,000 cP. Glass at room temperature: 10^20+ cP (it is technically an extremely slow-flowing liquid). Pitch (the famous "pitch drop experiment"): 2.3 × 10^11 cP — about 230 billion times more viscous than water.',
+      answer: 'Viscosity varies enormously: Water at 20°C: 1.0 cP. Olive oil at 20°C: 84 cP. SAE 30 motor oil at 40°C: roughly 80-100 cP. SAE 30 motor oil at 100°C: 9-12 cP (viscosity drops dramatically with temperature). Honey at 20°C: 2,000-10,000 cP depending on type. Ketchup: roughly 10,000-50,000 cP at low shear (shear-thinning — it flows more when squeezed). Peanut butter: 150,000-250,000 cP. Glass at room temperature: effectively infinite for practical purposes (well above 10^20 Pa·s). Pitch (the famous "pitch drop experiment"): 2.3 × 10^11 cP — about 230 billion times more viscous than water.',
     },
     {
       question: 'Why does viscosity change with temperature?',
@@ -108,77 +102,45 @@ const EDUCATIONAL = {
   ],
 };
 
-const baseConfig = createConverter({ units: UNITS, educational: EDUCATIONAL });
-
-const converterConfig = {
-  inputs: [
-    ...baseConfig.inputs,
+export default createConverter({
+  units: UNITS,
+  label: 'Viscosity Conversion',
+  quantity: 'viscosity',
+  defaultFrom: 'pas',
+  defaultTo: 'mpas',
+  extraInputs: [
     {
       id: 'density',
       label: 'Fluid Density (for Dynamic ↔ Kinematic)',
-      type: 'number' as const,
+      type: 'number',
       placeholder: '1000',
-      min: 0,
+      defaultValue: '1000',
+      min: 0.001,
       step: 1,
-      helpText: 'Density in kg/m³. Water ≈ 1000, Oil ≈ 800–900, Honey ≈ 1400–1500.',
+      unit: 'kg/m³',
+      helpText: 'Only used when converting between dynamic and kinematic units. Water ≈ 1000, oil ≈ 800–900, honey ≈ 1400–1500 kg/m³.',
+      showWhen: (v) => !!v.from && !!v.to && isKinematic(v.from) !== isKinematic(v.to),
     },
   ],
-  calculate: (values: Record<string, string>) => {
-    if (values.value === undefined || values.value === '') return [];
-
-    const val = parseFloat(values.value);
-    const fromUnit = values.from || 'pas';
-    const toUnit = values.to || 'mpas';
-
-    if (isNaN(val)) return [];
-
-    const fromDef = UNITS.find((u) => u.value === fromUnit);
-    const toDef = UNITS.find((u) => u.value === toUnit);
-    if (!fromDef || !toDef) return [];
-
+  compute: (values, units) => {
+    const input = parseQty(values.value);
+    const from = findUnit(units, values.from || 'pas');
+    const to = findUnit(units, values.to || 'mpas');
+    if (input === null || !from || !to) return null;
     let result: number;
-
-    if ((isDynamic(fromUnit) && isDynamic(toUnit)) || (isKinematic(fromUnit) && isKinematic(toUnit))) {
-      // Same type: simple factor conversion
-      result = (val * fromDef.factor) / toDef.factor;
-    } else if (isDynamic(fromUnit) && isKinematic(toUnit)) {
-      // Dynamic → Kinematic: ν = μ / ρ
-      const density = parseFloat(values.density);
-      if (isNaN(density) || density <= 0) return [];
-      result = (val * fromDef.factor / density) / toDef.factor;
-    } else if (isKinematic(fromUnit) && isDynamic(toUnit)) {
-      // Kinematic → Dynamic: μ = ν × ρ
-      const density = parseFloat(values.density);
-      if (isNaN(density) || density <= 0) return [];
-      result = (val * fromDef.factor * density) / toDef.factor;
+    let note: string | undefined;
+    if (isKinematic(from.value) === isKinematic(to.value)) {
+      result = convertUnits(input, from, to);
     } else {
-      return [];
+      const rho = parseQty(values.density);
+      if (rho === null || rho <= 0) return null;
+      // dynamic (Pa·s) = kinematic (m²/s) × ρ ; kinematic = dynamic / ρ
+      const baseValue = input * from.factor;
+      const converted = isKinematic(from.value) ? baseValue * rho : baseValue / rho;
+      result = converted / to.factor;
+      note = `${isKinematic(from.value) ? 'μ = ν × ρ' : 'ν = μ ÷ ρ'} with ρ = ${formatQty(rho)} kg/m³ → ${formatQty(result)} ${to.shortLabel}`;
     }
-
-    return [
-      {
-        id: 'result',
-        label: `Result (${fromUnit} → ${toUnit})`,
-        value: `${val} ${fromDef.shortLabel || fromUnit} = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${toDef.shortLabel || toUnit}`,
-        highlight: true,
-        color: 'positive' as const,
-      },
-      {
-        id: 'formula',
-        label: 'Formula',
-        value: `${val} × (${fromDef.factor} ÷ ${toDef.factor}) = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })}`,
-        color: 'neutral' as const,
-      },
-    ];
+    return Number.isFinite(result) ? { input, result, from, to, note } : null;
   },
   educational: EDUCATIONAL,
-};
-
-const configWithPanel = {
-  ...converterConfig,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Viscosity Conversion' });
-  },
-};
-export default configWithPanel;
+});

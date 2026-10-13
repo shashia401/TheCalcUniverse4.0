@@ -1,154 +1,60 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import type { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { formatQty, parseQty } from '../../../utils/unitConvert';
 import HardnessPanel from './HardnessPanel';
+import { fromHV, scaleRange, toHV, type HardnessScaleId } from './hardnessTable';
 
-// Hardness conversion between scales is non-linear and material-dependent.
-// This implementation uses ASTM E140-12b approximate conversion formulas for steel.
-// Results are approximate — use certified reference standards for critical applications.
+// Hardness conversion is empirical and material dependent. This tool interpolates ASTM E140-12b Table 1
+// (non-austenitic steels) linearly between printed rows and never extrapolates outside the table.
 
 interface HardnessScale {
-  value: string;
+  value: HardnessScaleId;
   label: string;
   shortLabel: string;
-  /** Convert from this scale to approximate HV (Vickers) */
-  toHV: (v: number) => number | null;
-  /** Convert from HV to this scale */
-  fromHV: (hv: number) => number | null;
-  /** Valid range description */
-  range: string;
+  /** Decimal places shown (E140 prints Rockwell numbers to 0.1 and the rest as whole numbers). */
+  decimals: number;
 }
 
-/** Piecewise-linear interpolation over a [x, y] table sorted ascending by x. */
-function interpolate(table: [number, number][], x: number): number | null {
-  if (x < table[0][0] || x > table[table.length - 1][0]) return null;
-  for (let i = 0; i < table.length - 1; i++) {
-    const [x0, y0] = table[i];
-    const [x1, y1] = table[i + 1];
-    if (x >= x0 && x <= x1) return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
-  }
-  return null;
-}
-
-/** Inverse of interpolate(): look up x for a given y, over the same ascending table. */
-function interpolateInverse(table: [number, number][], y: number): number | null {
-  const minY = table[0][1];
-  const maxY = table[table.length - 1][1];
-  if (y < minY || y > maxY) return null;
-  for (let i = 0; i < table.length - 1; i++) {
-    const [x0, y0] = table[i];
-    const [x1, y1] = table[i + 1];
-    if (y >= y0 && y <= y1) return x0 + ((x1 - x0) * (y - y0)) / (y1 - y0);
-  }
-  return null;
-}
-
-// ASTM E140 reference data for non-austenitic (hardened) steel, via published
-// ASTM E140 conversion tables (metricmech.com/reference/hardness-conversion-chart,
-// cross-checked against independent sources confirming HRC 60 ≈ HV 697).
-const HRC_HV_TABLE: [number, number][] = [
-  [20, 244], [22, 253], [24, 263], [26, 277], [28, 291], [30, 305],
-  [32, 319], [34, 336], [36, 354], [38, 372], [40, 392], [42, 412],
-  [44, 434], [46, 458], [48, 484], [50, 513], [52, 544], [54, 577],
-  [56, 613], [58, 653], [60, 697], [62, 746], [65, 832], [68, 940],
-];
-const HRB_HV_TABLE: [number, number][] = [
-  [60, 118], [62, 122], [64, 126], [66, 130], [68, 134], [70, 139],
-  [72, 143], [74, 148], [76, 153], [78, 157], [80, 163], [82, 170],
-  [84, 176], [86, 182], [88, 189], [90, 195], [92, 203], [94, 212],
-  [96, 219], [98, 228], [100, 240],
+export const SCALES: HardnessScale[] = [
+  { value: 'hrc', label: 'Rockwell C (HRC)', shortLabel: 'HRC', decimals: 1 },
+  { value: 'hrb', label: 'Rockwell B (HRB)', shortLabel: 'HRB', decimals: 1 },
+  { value: 'hra', label: 'Rockwell A (HRA)', shortLabel: 'HRA', decimals: 1 },
+  { value: 'hbw', label: 'Brinell (HBW), 10 mm ball, 3000 kgf', shortLabel: 'HBW', decimals: 0 },
+  { value: 'hv', label: 'Vickers (HV)', shortLabel: 'HV', decimals: 0 },
+  { value: 'hs', label: 'Shore scleroscope (HS)', shortLabel: 'HS', decimals: 0 },
+  { value: 'nmm2', label: 'Tensile strength estimate (N/mm², about 3.2 × HV)', shortLabel: 'N/mm²', decimals: 0 },
 ];
 
-const SCALES: HardnessScale[] = [
-  {
-    value: 'hrc',
-    label: 'Rockwell C (HRC)',
-    shortLabel: 'HRC',
-    toHV: (v) => interpolate(HRC_HV_TABLE, v),
-    fromHV: (hv) => interpolateInverse(HRC_HV_TABLE, hv),
-    range: 'HRC 20–68',
-  },
-  {
-    value: 'hrb',
-    label: 'Rockwell B (HRB)',
-    shortLabel: 'HRB',
-    toHV: (v) => interpolate(HRB_HV_TABLE, v),
-    fromHV: (hv) => interpolateInverse(HRB_HV_TABLE, hv),
-    range: 'HRB 60–100',
-  },
-  {
-    value: 'hra',
-    label: 'Rockwell A (HRA)',
-    shortLabel: 'HRA',
-    toHV: (v) => {
-      if (v < 50 || v > 85) return null;
-      return Math.pow((v - 25) / 0.06, 1 / 1.1);
-    },
-    fromHV: (hv) => {
-      if (hv < 150 || hv > 1000) return null;
-      const hra = 0.06 * Math.pow(hv, 1.1) + 25;
-      if (hra < 50 || hra > 85) return null;
-      return hra;
-    },
-    range: 'HRA 50–85',
-  },
-  {
-    value: 'hbw',
-    label: 'Brinell (HBW) 3000 kg',
-    shortLabel: 'HBW',
-    toHV: (v) => {
-      if (v < 100 || v > 750) return null;
-      return v; // HB ≈ HV in mid-range for steel
-    },
-    fromHV: (hv) => {
-      if (hv < 100 || hv > 750) return null;
-      return hv;
-    },
-    range: 'HB 100–750',
-  },
-  {
-    value: 'hv',
-    label: 'Vickers (HV)',
-    shortLabel: 'HV',
-    toHV: (v) => v,
-    fromHV: (hv) => hv,
-    range: 'HV 100–1000',
-  },
-  {
-    value: 'hs',
-    label: 'Shore (HS)',
-    shortLabel: 'HS',
-    toHV: (v) => {
-      if (v < 20 || v > 100) return null;
-      return Math.pow(v * 4.5 - 50, 1.15);
-    },
-    fromHV: (hv) => {
-      if (hv < 50 || hv > 950) return null;
-      return (Math.pow(hv, 1 / 1.15) + 50) / 4.5;
-    },
-    range: 'HS 20–100',
-  },
-  {
-    value: 'nmm2',
-    label: 'Tensile Strength — N/mm² (≈ 3.2 × HV for steel)',
-    shortLabel: 'N/mm²',
-    toHV: (v) => {
-      if (v < 300 || v > 3200) return null;
-      return v / 3.2;
-    },
-    fromHV: (hv) => {
-      if (hv < 100 || hv > 1000) return null;
-      return hv * 3.2;
-    },
-    range: 'N/mm² 300–3200',
-  },
-];
-
+const SCALE_MAP: Record<string, HardnessScale> = Object.fromEntries(SCALES.map((s) => [s.value, s]));
 const OPTIONS = SCALES.map((s) => ({ label: s.label, value: s.value }));
-const OPTIONS_SORTED = [...OPTIONS].sort((a, b) => a.label.localeCompare(b.label));
 
-const SCALE_MAP: Record<string, HardnessScale> = {};
-for (const s of SCALES) {
-  SCALE_MAP[s.value] = s;
+export const rangeText = (scale: HardnessScale): string => {
+  const [lo, hi] = scaleRange(scale.value);
+  return `${scale.shortLabel} ${formatQty(lo)}–${formatQty(hi)}`;
+};
+
+const round = (v: number, d: number) => Number(v.toFixed(d));
+
+export interface HardnessConversion {
+  value: number;
+  from: HardnessScale;
+  /** Vickers pivot, null when the input is outside the table for its scale */
+  hv: number | null;
+  equivalents: { scale: HardnessScale; value: number }[];
+}
+
+/** Pure conversion used by calculate() and the panel: HV pivot, every other scale that has a table entry. */
+export function convertHardness(raw: string | undefined, fromId: string | undefined): HardnessConversion | null {
+  const value = parseQty(raw);
+  const from = fromId ? SCALE_MAP[fromId] : undefined;
+  if (value === null || !from) return null;
+  const hv = toHV(from.value, value);
+  if (hv === null) return { value, from, hv: null, equivalents: [] };
+  const equivalents = SCALES.filter((s) => s.value !== from.value)
+    .map((scale) => ({ scale, raw: fromHV(scale.value, hv) }))
+    .filter((e): e is { scale: HardnessScale; raw: number } => e.raw !== null)
+    .map((e) => ({ scale: e.scale, value: round(e.raw, e.scale.decimals) }));
+  return { value, from, hv, equivalents };
 }
 
 const hardnessConfig: CalculatorConfig = {
@@ -158,100 +64,96 @@ const hardnessConfig: CalculatorConfig = {
       label: 'Hardness Value',
       type: 'number',
       placeholder: '40',
+      defaultValue: '40',
       step: 0.1,
       required: true,
-      helpText: 'Enter the hardness value in the selected scale (approximate conversions for steel per ASTM E140)',
+      helpText: 'Enter the hardness number in the selected scale. Approximate conversions for non-austenitic steel (ASTM E140-12b).',
     },
     {
       id: 'fromUnit',
       label: 'From Scale',
       type: 'select',
       required: true,
-      options: OPTIONS_SORTED,
+      defaultValue: 'hrc',
+      options: OPTIONS,
     },
   ],
   calculate: (values) => {
-    const rawValue = values.fromValue?.trim();
-    const fromUnit = values.fromUnit?.trim();
-    if (!rawValue || !fromUnit) return [];
-
-    const fromValue = parseFloat(rawValue);
-    if (isNaN(fromValue) || !isFinite(fromValue)) return [];
-
-    const fromScale = SCALE_MAP[fromUnit];
-    if (!fromScale) return [];
-
-    // Convert to HV first
-    const hv = fromScale.toHV(fromValue);
-    if (hv === null || !isFinite(hv)) return [];
-
+    const c = convertHardness(values.fromValue, values.fromUnit?.trim());
+    if (!c) return [];
+    if (c.hv === null) {
+      return [
+        {
+          id: 'error',
+          label: 'Outside the conversion table',
+          value: `${formatQty(c.value)} ${c.from.shortLabel} is outside the ASTM E140 table for this scale (valid range ${rangeText(c.from)}). Values are not extrapolated.`,
+          highlight: true,
+          color: 'negative',
+        },
+      ];
+    }
     const results: CalculatorResult[] = [
       {
         id: 'result',
-        label: `Result (in ${fromScale.shortLabel})`,
-        value: `${rawValue} ${fromScale.shortLabel}`,
+        label: `Input (${c.from.shortLabel})`,
+        value: `${formatQty(c.value)} ${c.from.shortLabel}`,
         highlight: true,
-        color: 'positive' as const,
+        color: 'positive',
+        interpretation:
+          'Approximate equivalents for carbon, alloy and tool steel only (ASTM E140-12b Table 1, linear interpolation between printed rows). They do not apply to austenitic stainless steel, aluminium, brass, copper or cast iron. Use them for estimates, not for acceptance: test in the specified scale.',
       },
     ];
-
-    // Show equivalents in all other scales
-    for (const scale of SCALES) {
-      if (scale.value === fromUnit) continue;
-      const converted = scale.fromHV(hv);
-      if (converted === null || !isFinite(converted)) continue;
-      const formatted = parseFloat(converted.toFixed(1)).toString();
+    for (const e of c.equivalents) {
       results.push({
-        id: `eq_${scale.value}`,
-        label: `Approx. ${scale.shortLabel}`,
-        value: `≈ ${formatted} ${scale.shortLabel}`,
-        color: 'neutral' as const,
+        id: `eq_${e.scale.value}`,
+        label: `Approx. ${e.scale.shortLabel}`,
+        value: `≈ ${formatQty(e.value)} ${e.scale.shortLabel}`,
+        color: 'neutral',
       });
     }
-
     return results;
   },
   extraPanel: (values, results) => {
-    if (!results.length) return null;
+    if (!results.some((r) => r.id === 'result')) return null;
     return createElement(HardnessPanel, { values, results });
   },
   educational: {
-    formula: 'Approximate polynomial per ASTM E140-12b | Valid for carbon & alloy steel only',
+    formula: 'Piecewise-linear lookup in ASTM E140-12b Table 1 (HV is the pivot scale): X → HV → Y',
     formulaDescription:
-      'Hardness conversions between scales (Rockwell, Brinell, Vickers, Shore) are inherently approximate and material-dependent. There is no simple linear formula because each test measures hardness differently — Rockwell uses depth of indentation, Brinell uses diameter of indentation, Vickers uses diagonal length, and Shore uses rebound height. The American Society for Testing and Materials (ASTM) publishes standard conversion tables (E140) that provide approximate equivalents for specific material types. The formulas used in this tool are polynomial curve fits to the ASTM E140-12b data for carbon and alloy steel, the most common conversion scenario. For critical applications, always use certified reference blocks or the official ASTM conversion tables.',
+      'Hardness scales measure different things (Rockwell: indentation depth under a major load; Brinell: diameter of a ball impression; Vickers: diagonal of a pyramid impression; scleroscope: rebound height), so no formula converts one to another. ASTM E140 publishes empirical tables for groups of materials. This tool uses Table 1 (non-austenitic steels: carbon, alloy and tool steel) and interpolates linearly between the printed rows with Vickers as the pivot. Each scale is accepted only inside the range the table covers (HRC 20–68, HRB 81–100, HV 160–940, HBW 153–739) and nothing is extrapolated. Treat every result as approximate; for critical work test in the scale the drawing specifies.',
+    formulaSource:
+      'ASTM E140-12b, Standard Hardness Conversion Tables for Metals (Table 1, non-austenitic steels). The tensile figure is the common rule of thumb Rm ≈ 3.2 × HV (MPa) for steels, shown only up to HV 650; it is not part of E140 (see ISO 18265 for tabulated values).',
     variables: [
-      { symbol: 'HRC', name: 'Rockwell C', description: 'Diamond cone indenter, 150 kg load. Most common for hardened steel (HRC 20-70). Used for tools, dies, gears, shafts.' },
-      { symbol: 'HRB', name: 'Rockwell B', description: '1/16" steel ball indenter, 100 kg load. Used for softer metals like annealed steel, brass, and aluminum (HRB 40-100).' },
-      { symbol: 'HBW', name: 'Brinell', description: 'Tungsten carbide ball, typically 3000 kg load. One of the oldest hardness tests, produces a large indentation for accurate bulk material measurement.' },
-      { symbol: 'HV', name: 'Vickers', description: 'Diamond pyramid indenter, variable load (typically 1-120 kg). Very precise, works on all materials from soft to very hard. Standard for thin materials and case-hardened layers.' },
-      { symbol: 'HS', name: 'Shore (Durometer)', description: 'A spring-loaded indenter scale. Shore A for soft rubbers (e.g., tires Shore A 60-75), Shore D for harder plastics (e.g., hard hats Shore D 75). Common for elastomer and plastic testing.' },
+      { symbol: 'HRC', name: 'Rockwell C', description: 'Diamond cone, 150 kgf major load. Hardened steel, valid roughly HRC 20–70. Tools, dies, gears, shafts.' },
+      { symbol: 'HRB', name: 'Rockwell B', description: '1/16 in steel ball, 100 kgf. Softer metals such as annealed steel, brass and aluminium. This tool covers HRB 81–100, where E140 Table 1 lists Vickers values.' },
+      { symbol: 'HRA', name: 'Rockwell A', description: 'Diamond cone, 60 kgf. Very hard materials, thin or case-hardened sections, carbides.' },
+      { symbol: 'HBW', name: 'Brinell', description: '10 mm tungsten-carbide ball, 3000 kgf. Large impression that averages coarse structures; for hardened steel it reads lower than Vickers (HRC 40: HBW 371 vs HV 392).' },
+      { symbol: 'HV', name: 'Vickers', description: 'Diamond pyramid, any load from gram-force to 100 kgf. Works across soft to very hard materials and thin layers; the pivot scale here.' },
+      { symbol: 'HS', name: 'Shore scleroscope', description: 'Height a diamond-tipped hammer rebounds from the surface. This is not the Shore A/D durometer used for rubber and plastics, which cannot be converted with this table.' },
     ],
     howToUse: [
-      'Select the hardness scale you want to convert FROM (e.g., HRC for hardened steel).',
-      'Enter the hardness value in that scale.',
-      'View approximate equivalents in all other scales for carbon/alloy steel.',
-      'Note: conversions are approximate per ASTM E140. Always verify with certified reference blocks for critical applications.',
-      'Use the quick reference table for typical hardness equivalents like HRC 40 and its approximate HV and HBW values.',
+      'Select the scale your reading is in (for example HRC) and enter the number.',
+      'The approximate equivalents in every other scale that has a table entry at that hardness appear below it.',
+      'If the value is outside the table (for example HRC 15) the tool says so instead of extrapolating.',
+      'Use the results for estimates only, and only for carbon, alloy and tool steel.',
     ],
     quickReference: [
-      { label: 'HRC 40', value: '≈ HB 392 / HV 392 / HRA 67.7' },
-      { label: 'HRC 50', value: '≈ HB 513 / HV 513 / HRA 82.4' },
-      { label: 'HRC 60', value: '≈ HB 697 / HV 697' },
-      { label: 'HRB 80', value: '≈ HB 163 / HV 163' },
-      { label: 'HRB 95', value: '≈ HB 215.5 / HV 215.5' },
-      { label: 'HV 200', value: '≈ HRB 91.3 / HB 200' },
-      { label: 'HV 600', value: '≈ HRC 55.3 / HB 600' },
-      { label: 'N/mm² estimate', value: 'tensile ≈ 3.2 × HV (carbon steel)' },
+      { label: 'HRC 40', value: '≈ HV 392 / HBW 371 / HRA 70.4 / HS 54' },
+      { label: 'HRC 45', value: '≈ HV 446 / HBW 421 / HRA 73.1 / HS 60' },
+      { label: 'HRC 50', value: '≈ HV 513 / HBW 475 / HRA 75.9 / HS 67' },
+      { label: 'HRC 60', value: '≈ HV 697 / HBW 654 / HRA 81.2 / HS 81' },
+      { label: 'HRB 90', value: '≈ HV 192 / HBW 185 / HRA 55.5' },
+      { label: 'HRB 100', value: '≈ HV 254 / HBW 240 (about HRC 23)' },
+      { label: 'HV 600', value: '≈ HRC 55.3 / HBW 565' },
+      { label: 'Tensile estimate', value: 'Rm [MPa] ≈ 3.2 × HV (steel, up to HV 650)' },
     ],
     commonUses: [
-      'Kitchen knives: HRC 55–62 (Japanese chef knives: HRC 60–64)',
-      'Structural steel (A36): ~HB 120–140 (~65 HRB)',
-      'File/tool steel: HRC 60–65 for cutting edges',
-      'Gear teeth: HRC 58–62 for wear resistance',
-      'Automotive camshaft: HRC 48–55 lobe surface hardness',
-      'Case-hardened shafts: surface HRC 58–62, core HRB 85–95',
+      'Kitchen knives: typically HRC 55–62 (some Japanese knives 60–64)',
+      'Gear teeth and bearing races: surface about HRC 58–62',
+      'Quick shop-floor estimate of Brinell or Vickers from a Rockwell reading on a steel part',
+      'Estimating tensile strength of steel from a non-destructive hardness reading',
+      'Comparing a supplier certificate in HBW with a drawing that calls out HRC',
     ],
-
     diagram: {
       svg: '<svg viewBox="0 0 480 130" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto">' +
         '<text x="240" y="18" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-1e293b)" font-weight="700" text-anchor="middle">Hardness Test Methods &mdash; Indenter Comparison</text>' +
@@ -274,57 +176,53 @@ const hardnessConfig: CalculatorConfig = {
         '<rect x="355" y="65" width="10" height="15" rx="1" fill="var(--svg-64748b)"/>' +
         '<line x1="360" y1="45" x2="360" y2="65" stroke="var(--svg-64748b)" stroke-width="1.5"/>' +
         '<circle cx="360" cy="50" r="3" fill="var(--svg-64748b)"/>' +
-        '<text x="360" y="90" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-1e293b)" text-anchor="middle" font-weight="600">Shore</text>' +
-        '<text x="360" y="102" font-family="system-ui,sans-serif" font-size="7" fill="var(--svg-64748b)" text-anchor="middle">Rebound Hammer</text>' +
-        '<text x="240" y="122" font-family="system-ui,sans-serif" font-size="7" fill="var(--svg-64748b)" text-anchor="middle">Each test uses a different indenter &mdash; conversions are approximate (ASTM E140)</text>' +
+        '<text x="360" y="90" font-family="system-ui,sans-serif" font-size="9" fill="var(--svg-1e293b)" text-anchor="middle" font-weight="600">Scleroscope</text>' +
+        '<text x="360" y="102" font-family="system-ui,sans-serif" font-size="7" fill="var(--svg-64748b)" text-anchor="middle">Rebound Height</text>' +
+        '<text x="240" y="122" font-family="system-ui,sans-serif" font-size="7" fill="var(--svg-64748b)" text-anchor="middle">Each test measures something different &mdash; conversions are approximate (ASTM E140)</text>' +
         '</svg>',
       alt: 'Comparison of four hardness test indenters: Rockwell diamond cone, Brinell ball, Vickers pyramid, Shore rebound hammer',
       caption: 'Each hardness test measures a different physical response — no simple linear conversion exists',
     },
     explanation:
-      'Hardness measures a material\'s resistance to localized plastic deformation (indentation). It is a critical property in metallurgy, manufacturing, and quality control. The most common scales are Rockwell (HRC/HRB/HRSCales), Brinell (HBW), and Vickers (HV). Each uses a different indenter geometry, load, and measurement method — Rockwell measures indentation depth, Brinell measures indentation diameter, and Vickers measures indentation diagonal length. Because the test methods differ fundamentally, conversions between scales are inherently approximate and material-dependent. The ASTM E140 standard provides conversion tables for steel, aluminum, brass, and other common alloys. For carbon and alloy steel (the most common case), the conversion between HRC and HBW follows a reasonably consistent curve. This tool uses polynomial approximations derived from the ASTM E140-12b standard tables for carbon and alloy steel. For other materials (stainless steel, cast iron, aluminum), the conversions may differ. Always use certified reference blocks or the official ASTM tables for quality-critical applications. In practice, most engineering drawings specify both a hardness range AND a test method (e.g., "HRC 40-45") rather than relying on cross-scale conversions.',
+      'Hardness is resistance to localized plastic deformation. Rockwell is fast and reads a dial, Brinell averages over a large impression, and Vickers works from soft metals to hard coatings. Because the physics of each test differs, conversions are empirical and depend on the material family: the same HRC maps to a different HV on austenitic stainless steel than on tool steel. ASTM E140 Table 1 covers non-austenitic steels, and this tool is built on exactly that table, so use it only for those steels. Outside the table the tool declines to answer rather than guess. Engineering drawings normally specify a hardness range together with the test method (for example "HRC 58–62") instead of relying on cross-scale conversion.',
     faqs: [
       {
-        question: 'Is there a hardness conversion chart or table?',
-        answer: 'Yes — this calculator is an interactive version of the standard ASTM E140 hardness conversion chart. Instead of looking up a value in a static table, enter your hardness number in any scale (HRC, HRB, HBW, HV, HS, or N/mm²) and every other scale\'s equivalent is computed instantly. The quickReference section below lists common fixed points from the chart (e.g., HRC 40 ≈ HB 392 ≈ HV 392) if you just need a quick lookup without entering a value.',
+        question: 'Is this the ASTM E140 hardness conversion chart?',
+        answer: 'It is an interactive version of E140-12b Table 1 (non-austenitic steels). Enter a number in any supported scale and the equivalents in the others are interpolated between the printed rows. Values outside the printed range are refused. The standard itself calls the numbers approximate.',
+      },
+      {
+        question: 'How do I convert HRC to Brinell (HBW)?',
+        answer: 'Select Rockwell C, enter the value, and read the Brinell line. For steel per E140: HRC 40 is about HBW 371, HRC 50 about 475 and HRC 60 about 654. Brinell reads lower than Vickers on hard steel (HRC 40 is HV 392), so do not assume HB equals HV. The table prints no Brinell number above HRC 65.',
       },
       {
         question: 'How do I convert HRB to HRC?',
-        answer: 'There usually isn\'t a reliable one, because the two scales barely overlap: Rockwell B is used for softer materials (annealed steel, brass, aluminum) and Rockwell C for hardened steel, with the crossover sitting right around HRB 100 ≈ HRC 20 per published ASTM E140 data — right at the edge of where either method gives a trustworthy reading. If this calculator doesn\'t return an HRC value for your HRB input, the material is likely too soft for a meaningful Rockwell C measurement; use HRB or convert to Vickers (HV) instead.',
+        answer: 'The two scales barely overlap. E140 pairs HRB 100 with about HRC 23 (HV 254); below HRC 20 the C scale is outside its valid range and above HRB 100 the B scale is. Values near the overlap are the least reliable, so use Vickers or Brinell as the common scale instead.',
       },
       {
-        question: 'How do I convert HRC to HB (Brinell)?',
-        answer: 'Select "Rockwell C (HRC)" as the From Scale above, enter your HRC value, and the Brinell (HBW) equivalent appears instantly alongside every other scale. For carbon and alloy steel per ASTM E140, HRC 40 ≈ HB 392, HRC 50 ≈ HB 513, and HRC 60 ≈ HB 697 — the relationship is non-linear, so a simple multiplier does not work across the full range. These figures are approximate and apply to steel only; other materials follow different conversion curves.',
+        question: 'How do I convert Rockwell to Vickers?',
+        answer: 'Enter the HRC or HRB value. For steel, HRC 40 is about HV 392, HRC 50 about HV 513 and HRC 60 about HV 697. Vickers is the pivot scale of this tool.',
       },
       {
-        question: 'How do I convert Rockwell to Vickers hardness?',
-        answer: 'Enter your Rockwell (HRC or HRB) value with "Rockwell C" or "Rockwell B" selected as the From Scale, and the Vickers (HV) equivalent is calculated automatically. For steel, HRC and HV track closely in the mid-to-upper range — HRC 40 ≈ HV 392, HRC 50 ≈ HV 513 — because Rockwell C and Vickers were both calibrated against similar indentation-depth data for hardened steel in the ASTM E140 tables.',
+        question: "Why can't hardness scales be converted with an exact formula?",
+        answer: 'Each test measures a different response (depth, impression diameter, impression diagonal, rebound height) under a different load, and the relationships depend on work-hardening and elastic behaviour of the material. That is why E140 gives separate empirical tables per material group and flags every value as approximate.',
       },
       {
-        question: 'Why can\'t hardness scales be converted with a simple formula?',
-        answer: 'Each hardness test measures a different physical property: Rockwell measures indentation depth (a macro-scale depth measurement), Brinell measures indentation diameter (macro-scale width), Vickers measures indentation diagonal (micro-to-macro scale), and Shore measures rebound height (dynamic elastic response). A material that is very elastic might read differently on a depth-based scale vs. a width-based scale. Additionally, conversion relationships change with material type — steel, aluminum, and brass have different conversion curves. The only truly reliable conversion is direct testing with the specified method.',
+        question: 'Can I use this for rubber or plastic (Shore A / Shore D)?',
+        answer: 'No. Shore A and D durometers measure elastomers and plastics and have no conversion to Rockwell, Brinell or Vickers. The "HS" scale here is the Shore scleroscope (rebound) scale used on metals.',
       },
       {
-        question: 'What is the most common hardness scale for knives?',
-        answer: 'Knife hardness is typically specified in HRC (Rockwell C). Most quality kitchen knives range from HRC 55-62. Japanese chef knives: HRC 60-64 (very hard, holds edge longer but more brittle and harder to sharpen). German-style knives: HRC 55-58 (softer, easier to sharpen but needs more frequent sharpening). Budget knives: HRC 50-54. Hardness above HRC 64 becomes increasingly brittle and prone to chipping for most knife applications. Pocket knives typically run HRC 56-60. The ideal knife hardness depends on intended use — a hunting knife that might hit bone should be softer (HRC 55-58) while a fillet knife can be harder (HRC 58-62).',
-      },
-      {
-        question: 'What is the difference between Rockwell B and Rockwell C?',
-        answer: 'Rockwell B (HRB) uses a 1/16" hardened steel ball indenter with a 100 kg load, designed for softer materials (annealed steel, brass, copper, aluminum). Typical HRB range: 40-100. Rockwell C (HRC) uses a diamond cone (Brale) indenter with a 150 kg load, designed for harder materials (hardened steel, tool steel, carburized surfaces). Typical HRC range: 20-70. The "C" scale is the most widely specified hardness test in the heat treating industry. HRB below 40 should use the HRE or HRF scales with lighter loads. HRC above 70 approaches the limit of the diamond indenter and may damage it.',
-      },
-      {
-        question: 'How is Brinell hardness used in structural steel specifications?',
-        answer: 'Brinell hardness (HBW) is widely used in structural steel specifications because the large indentation (typically 2-6 mm diameter) provides a bulk material measurement averaging out local variations. Common structural steel grades: A36 steel ≈ HB 120-140, ASTM A572 Grade 50 ≈ HB 150-180, high-strength quenched and tempered steel (A514) ≈ HB 235-300. Steel tensile strength is approximately correlated to Brinell hardness: tensile strength (psi) ≈ 500 × HB. This relationship allows non-destructive hardness testing to estimate the strength of in-service steel structures. A498 steel at HB 200 has an estimated tensile strength of 100,000 psi (690 MPa).',
-      },
-      {
-        question: 'What is the Shore hardness scale used for?',
-        answer: 'Shore (Durometer) hardness measures the resistance of materials to indentation by a spring-loaded indenter. It is most commonly used for elastomers (rubber), plastics, and soft metals. The A scale (Shore A) is for flexible rubbers and soft plastics (e.g., O-rings: Shore A 70, car tires: Shore A 60-75). The D scale (Shore D) is for harder plastics and semi-rigid materials (e.g., hard hat: Shore D 75, nylon gears: Shore D 80-90). Unlike Rockwell/Brinell/Vickers which use dead-weight loads, Shore uses a spring-loaded indenter and reads instantly. Shore hardness is NOT convertible to Rockwell or Brinell for soft materials due to the fundamental difference in measurement principle — this converter provides approximate equivalents only for harder materials (Shore D 50+).',
+        question: 'How good is the tensile strength estimate?',
+        answer: 'The rule Rm ≈ 3.2 × HV (MPa) is a rough guide for steels (HV 400 gives about 1,280 MPa). It degrades for very hard or work-hardened material and is not part of E140, so the tool limits it to HV 650 and you should use ISO 18265 or mill certificates for specification work.',
       },
     ],
-  
     citations: [
-      { source: 'ASTM E140 - Hardness Tables', url: 'https://www.astm.org/e0140-12b.html' },
-      { source: 'ISO - Hardness Testing', url: 'https://www.iso.org/standard/30669.html' },
+      { source: 'ASTM E140-12b - Standard Hardness Conversion Tables for Metals', url: 'https://www.astm.org/e0140-12b.html' },
+      { source: 'ISO 18265 - Metallic materials, conversion of hardness values', url: 'https://www.iso.org/standard/36485.html' },
+    ],
+    limitations: [
+      'Only for non-austenitic steels (carbon, alloy, tool) that are homogeneous. Austenitic stainless, nickel alloys, aluminium, brass, copper and cast iron have their own tables.',
+      'Linear interpolation between printed rows; E140 itself states the numbers are approximate and warns against using conversions for acceptance testing.',
+      'Brinell is not listed above HRC 65 and Rockwell B is covered only for HRB 81–100 (the range where E140 Table 1 prints Vickers values).',
     ],
   },
 };

@@ -1,18 +1,16 @@
-import { createElement } from 'react';
-import { type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { createConverter, type UnitDef } from '../unit-converter';
+import { FTLBF_J, G0 } from '../../../utils/unitConvert';
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   { value: 'nm', label: 'Newton Meter (N·m)', shortLabel: 'N·m', factor: 1 },
   { value: 'knm', label: 'Kilonewton Meter (kN·m)', shortLabel: 'kN·m', factor: 1000 },
-  { value: 'lbfft', label: 'Pound-Force Foot (lbf·ft)', shortLabel: 'lbf·ft', factor: 1.35582 },
-  { value: 'lbfin', label: 'Pound-Force Inch (lbf·in)', shortLabel: 'lbf·in', factor: 0.112985 },
-  { value: 'ozfin', label: 'Ounce-Force Inch (ozf·in)', shortLabel: 'ozf·in', factor: 0.00706155 },
-  { value: 'kgfcm', label: 'Kilogram-Force Centimeter (kgf·cm)', shortLabel: 'kgf·cm', factor: 0.0980665 },
-  { value: 'kgfm', label: 'Kilogram-Force Meter (kgf·m)', shortLabel: 'kgf·m', factor: 9.80665 },
-  { value: 'dyncm', label: 'Dyne Centimeter (dyn·cm)', shortLabel: 'dyn·cm', factor: 0.0000001 },
-  { value: 'kipft', label: 'Kilopound-Force Foot (kip·ft)', shortLabel: 'kip·ft', factor: 1355.82 },
+  { value: 'lbfft', label: 'Pound-Force Foot (lbf·ft)', shortLabel: 'lbf·ft', factor: FTLBF_J },
+  { value: 'lbfin', label: 'Pound-Force Inch (lbf·in)', shortLabel: 'lbf·in', factor: FTLBF_J / 12 },
+  { value: 'ozfin', label: 'Ounce-Force Inch (ozf·in)', shortLabel: 'ozf·in', factor: FTLBF_J / 12 / 16 },
+  { value: 'kgfcm', label: 'Kilogram-Force Centimeter (kgf·cm)', shortLabel: 'kgf·cm', factor: G0 / 100 },
+  { value: 'kgfm', label: 'Kilogram-Force Meter (kgf·m)', shortLabel: 'kgf·m', factor: G0 },
+  { value: 'dyncm', label: 'Dyne Centimeter (dyn·cm)', shortLabel: 'dyn·cm', factor: 1e-7 },
+  { value: 'kipft', label: 'Kilopound-Force Foot (kip·ft)', shortLabel: 'kip·ft', factor: 1000 * FTLBF_J },
 ];
 
 const EDUCATIONAL = {
@@ -76,7 +74,7 @@ const EDUCATIONAL = {
     'Store your torque wrench at its lowest setting (not zero). The internal spring needs some preload to maintain calibration. Storing at zero or at maximum can cause the spring to take a set, permanently affecting accuracy. Most manufacturers recommend the lowest scale marking (typically 10-20% of full scale).',
     'For critical fasteners, use the "torque plus angle" method rather than pure torque. Torque-to-yield bolts (common in modern engines) are tightened to a base torque (e.g., 30 N·m) plus a specified angle (e.g., +90°). The angle component compensates for friction variations between fasteners, giving more consistent clamp force than torque alone.',
     'When in doubt about a conversion, verify using two different methods: multiply by the conversion factor AND divide by its inverse. If 100 N·m × 0.738 = 73.8 lbf·ft, then 73.8 lbf·ft ÷ 0.738 should equal 100 N·m. This catches arithmetic errors before they become fastener failures.',
-    'Never use an extension or universal joint with a torque wrench without recalculating the torque setting. Adding length to the wrench changes the effective lever arm. The formula is: Adjusted Torque = Specified Torque × (Wrench Length / (Wrench Length + Extension Length)). A 6-inch extension on a 12-inch wrench reduces delivered torque by 33%.',
+    'Never use an extension or universal joint with a torque wrench without recalculating the torque setting. Adding length to the wrench changes the effective lever arm. The formula is: Adjusted Torque = Specified Torque × (Wrench Length / (Wrench Length + Extension Length)). With a 6-inch extension on a 12-inch wrench you must set the wrench to two-thirds of the specified torque; without the correction the bolt is tightened 50% too much.',
   ],
   limitations: [
     'When not to rely on torque conversion alone: This calculator performs linear unit conversion only. It does not account for friction variations between fasteners (dry vs. lubricated threads can change actual clamp force by 30-40% at the same torque reading). Always follow the assembly specification for thread lubrication.',
@@ -111,7 +109,7 @@ const EDUCATIONAL = {
   faqs: [
     {
       question: 'What is the difference between torque and horsepower?',
-      answer: 'Torque is the rotational force an engine produces — measured in N·m or lbf·ft. Horsepower is the rate at which that torque is delivered over time. The relationship is: Horsepower = Torque × RPM ÷ 5252 (for imperial units). An engine with high torque at low RPM feels strong off the line (like a diesel truck), while an engine with high horsepower at high RPM feels fast at top speed (like a sports car). Both measurements serve different purposes in understanding engine performance, but torque is the direct output of combustion force while horsepower reflects work rate. A Formula 1 engine produces relatively modest torque (around 350 N·m) but at 15,000+ RPM, yielding over 1,000 hp.',
+      answer: 'Torque is the rotational force an engine produces — measured in N·m or lbf·ft. Horsepower is the rate at which that torque is delivered over time. The relationship is: Horsepower = Torque × RPM ÷ 5252 (for imperial units). An engine with high torque at low RPM feels strong off the line (like a diesel truck), while an engine with high horsepower at high RPM feels fast at top speed (like a sports car). Both measurements serve different purposes in understanding engine performance, but torque is the direct output of combustion force while horsepower reflects work rate. A Formula 1 engine produces relatively modest torque (around 350-400 N·m) but at 15,000 RPM that is roughly 550-630 kW (740-840 hp) before hybrid assistance.',
     },
     {
       question: 'How do I convert N·m to lbf·ft for a torque wrench?',
@@ -141,77 +139,4 @@ const EDUCATIONAL = {
   ],
 };
 
-// Explicit inputs (visible to automated review tools)
-const inputs = [
-  {
-    id: 'value',
-    label: 'Value to Convert',
-    type: 'number' as const,
-    placeholder: 'Enter torque value (e.g., 100)',
-    inputMode: 'numeric' as const,
-    required: true,
-    helpText: 'The numeric torque value you want to convert between units',
-  },
-  {
-    id: 'from',
-    label: 'From Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: UNITS[0]?.value || 'nm',
-    helpText: 'The torque unit you are converting from (e.g., N·m, lbf·ft, kgf·cm)',
-  },
-  {
-    id: 'to',
-    label: 'To Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: UNITS[1]?.value || 'lbfft',
-    showWhen: (values: Record<string, string>) => !!values.value,
-    helpText: 'The torque unit you are converting to (e.g., lbf·ft for American torque wrenches)',
-  },
-];
-
-// Explicit edge-case handling (isNaN + return [] visible to automated review tools)
-const calculate = (values: Record<string, string>) => {
-  if (!values || Object.keys(values).length === 0) return [];
-  if (values.value === undefined || values.value === null || values.value.trim() === '') return [];
-  const val = parseFloat(values.value);
-  if (isNaN(val) || !isFinite(val)) return [];
-
-  const fromUnit = values.from || UNITS[0]?.value || 'nm';
-  const toUnit = values.to || (UNITS.length > 1 ? UNITS[1].value : UNITS[0]?.value) || 'lbfft';
-
-  const fromDef = UNITS.find((u) => u.value === fromUnit);
-  const toDef = UNITS.find((u) => u.value === toUnit);
-  if (!fromDef || !toDef) return [];
-  if (toDef.factor === 0) return [];
-
-  const result = (val * fromDef.factor) / toDef.factor;
-
-  return [
-    {
-      id: 'result',
-      label: `Result (${fromUnit} → ${toUnit})`,
-      value: `${val} ${fromDef.shortLabel || fromUnit} = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${toDef.shortLabel || toUnit}`,
-      highlight: true,
-      color: 'positive' as const,
-    },
-    {
-      id: 'formula',
-      label: 'Formula',
-      value: `${val} × (${fromDef.factor} ÷ ${toDef.factor}) = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })}`,
-      color: 'neutral' as const,
-    },
-  ];
-};
-
-const configWithPanel = {
-  inputs,
-  calculate,
-  educational: EDUCATIONAL,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Torque Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Torque Conversion', quantity: 'torque', defaultFrom: 'nm', defaultTo: 'lbfft', educational: EDUCATIONAL });

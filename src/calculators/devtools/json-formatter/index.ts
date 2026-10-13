@@ -2,6 +2,93 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import JsonFormatterPanel from './JsonFormatterPanel';
 
+export interface JsonScan {
+  formatted: string;
+  unsafeNumbers: string[];
+  duplicateKeys: string[];
+}
+
+/**
+ * Pretty-prints already-validated JSON by re-flowing the ORIGINAL tokens instead of JSON.parse + JSON.stringify.
+ * That keeps big integers exact (parse would turn 12345678901234567890 into 12345678901234567000), keeps duplicate
+ * keys visible (parse silently keeps only the last), and keeps key order (stringify moves integer-like keys first).
+ * Also reports integers beyond 2^53 and duplicated keys so the user knows what other tools would corrupt.
+ */
+export function scanAndFormatJson(text: string, indent: string): JsonScan {
+  const unsafeNumbers: string[] = [];
+  const duplicateKeys: string[] = [];
+  const keyStack: Set<string>[] = [];
+  let out = '';
+  let depth = 0;
+  const nl = () => '\n' + indent.repeat(depth);
+  let i = 0;
+  const n = text.length;
+  const nextSignificant = (from: number) => {
+    let j = from;
+    while (j < n && /\s/.test(text[j])) j++;
+    return j;
+  };
+  while (i < n) {
+    const c = text[i];
+    if (/\s/.test(c)) {
+      i++;
+    } else if (c === '"') {
+      let j = i + 1;
+      while (j < n && text[j] !== '"') j += text[j] === '\\' ? 2 : 1;
+      const token = text.slice(i, j + 1);
+      const after = text[nextSignificant(j + 1)];
+      const top = keyStack[keyStack.length - 1];
+      if (after === ':' && top) {
+        const key = JSON.parse(token) as string;
+        if (top.has(key)) duplicateKeys.push(key);
+        top.add(key);
+      }
+      out += token;
+      i = j + 1;
+    } else if (c === '{' || c === '[') {
+      const j = nextSignificant(i + 1);
+      if (text[j] === (c === '{' ? '}' : ']')) {
+        out += c + text[j];
+        i = j + 1;
+      } else {
+        keyStack.push(new Set());
+        depth++;
+        out += c + nl();
+        i++;
+      }
+    } else if (c === '}' || c === ']') {
+      keyStack.pop();
+      depth--;
+      out += nl() + c;
+      i++;
+    } else if (c === ',') {
+      out += ',' + nl();
+      i++;
+    } else if (c === ':') {
+      out += ': ';
+      i++;
+    } else {
+      let j = i;
+      while (j < n && !/[\s,\]}:]/.test(text[j])) j++;
+      const lit = text.slice(i, j);
+      if (/^-?\d+$/.test(lit) && !Number.isSafeInteger(Number(lit))) unsafeNumbers.push(lit);
+      out += lit;
+      i = j;
+    }
+  }
+  return { formatted: out, unsafeNumbers, duplicateKeys };
+}
+
+/** "Unexpected token } in JSON at position 12" -> "... (line 2, column 5)". Newer engines already include line/column. */
+export function describeJsonError(message: string, input: string): string {
+  if (/line \d+ column \d+/i.test(message)) return message;
+  const m = /position (\d+)/.exec(message);
+  if (!m) return message;
+  const pos = Math.min(Number(m[1]), input.length);
+  const before = input.slice(0, pos).split('\n');
+  return `${message} (line ${before.length}, column ${before[before.length - 1].length + 1})`;
+}
+
 const jsonFormatterConfig: CalculatorConfig = {
   inputs: [
     {
@@ -32,14 +119,18 @@ const jsonFormatterConfig: CalculatorConfig = {
     if (!input.trim()) return [];
 
     try {
-      const parsed = JSON.parse(input);
-      const indentStr = indent === 'tab' ? '\t' : parseInt(indent, 10);
-      const formatted = JSON.stringify(parsed, null, indentStr);
+      JSON.parse(input); // validation only: formatting re-flows the original tokens (see scanAndFormatJson)
+      const indentStr = indent === 'tab' ? '\t' : ' '.repeat(parseInt(indent, 10) || 2);
+      const scan = scanAndFormatJson(input, indentStr);
+      const formatted = scan.formatted;
+      const warnings: string[] = [];
+      if (scan.unsafeNumbers.length) warnings.push(`Integer(s) beyond 2^53 lose precision in JavaScript (JSON.parse): ${scan.unsafeNumbers.slice(0, 3).join(', ')}. They are kept exactly here; use strings or BigInt-aware parsing in code.`);
+      if (scan.duplicateKeys.length) warnings.push(`Duplicate key(s): ${[...new Set(scan.duplicateKeys)].slice(0, 5).join(', ')}. JSON.parse keeps only the last value of each.`);
       const charCount = input.length;
       const lineCount = formatted.split('\n').length;
 
       return [
-        { id: 'status', label: 'Status', value: 'Valid JSON', color: 'positive' },
+        { id: 'status', label: 'Status', value: 'Valid JSON', color: 'positive', ...(warnings.length ? { warning: warnings.join(' ') } : {}) },
         { id: 'formatted', label: 'Formatted JSON', value: formatted, highlight: true },
         { id: 'charCount', label: 'Character Count', value: `${charCount}`, color: 'neutral' },
         { id: 'lineCount', label: 'Line Count', value: `${lineCount}`, color: 'neutral' },
@@ -47,7 +138,7 @@ const jsonFormatterConfig: CalculatorConfig = {
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Unknown parse error';
       return [
-        { id: 'status', label: 'Status', value: `Invalid JSON: ${message}`, color: 'negative' },
+        { id: 'status', label: 'Status', value: `Invalid JSON: ${describeJsonError(message, input)}`, color: 'negative' },
         { id: 'formatted', label: 'Formatted JSON', value: '', color: 'neutral' },
         { id: 'charCount', label: 'Character Count', value: `${input.length}`, color: 'neutral' },
         { id: 'lineCount', label: 'Line Count', value: '0', color: 'neutral' },
@@ -59,7 +150,7 @@ const jsonFormatterConfig: CalculatorConfig = {
     return createElement(JsonFormatterPanel, { values, results });
   },
   educational: {
-    formula: 'Formatted = JSON.stringify(JSON.parse(input), null, indent)',
+    formula: 'Validate with JSON.parse(input), then re-flow the original tokens with the chosen indent',
     diagram: {
       svg: '<svg viewBox="0 0 440 280" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="40" y="20" width="360" height="240" fill="var(--svg-f8fafc)" stroke="var(--svg-e2e8f0)" stroke-width="1.5" rx="8"/><text x="220" y="48" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-1e293b)">JSON Formatter &amp; Validator</text><rect x="60" y="65" width="140" height="70" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="6"/><text x="130" y="95" text-anchor="middle" font-size="11" fill="var(--svg-2563eb)">Raw JSON</text><text x="130" y="115" text-anchor="middle" font-size="10" fill="var(--svg-64748b)">{"a":1,"b":2}</text><line x1="200" y1="100" x2="240" y2="100" stroke="var(--svg-64748b)" stroke-width="1.5"/><polygon points="240,95 252,100 240,105" fill="var(--svg-64748b)"/><rect x="255" y="60" width="140" height="80" fill="var(--svg-8b5cf6)" stroke="var(--svg-7c3aed)" stroke-width="1.5" rx="6"/><text x="325" y="95" text-anchor="middle" font-size="11" fill="var(--svg-ffffff)">JSON.parse()</text><text x="325" y="115" text-anchor="middle" font-size="10" fill="var(--svg-ddd6fe)">Validates syntax</text><line x1="325" y1="140" x2="325" y2="165" stroke="var(--svg-64748b)" stroke-width="1.5"/><polygon points="320,165 325,175 330,165" fill="var(--svg-64748b)"/><rect x="140" y="180" width="170" height="45" fill="var(--svg-22c55e)" stroke="var(--svg-16a34a)" stroke-width="1.5" rx="6"/><text x="225" y="200" text-anchor="middle" font-size="11" fill="var(--svg-ffffff)">JSON.stringify()</text><text x="225" y="216" text-anchor="middle" font-size="10" fill="var(--svg-bbf7d0)">Formatted output</text></svg>',
       alt: 'Flow diagram showing raw JSON being parsed by JSON.parse() and formatted by JSON.stringify()',

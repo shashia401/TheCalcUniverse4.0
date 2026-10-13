@@ -92,11 +92,8 @@ describe('HTML Entity Encoder/Decoder', () => {
       input: '&amp;lt; &amp;gt; &amp;amp;',
     });
     const output = r.find((x) => x.id === 'output')?.value || '';
-    // Double-encoded input decodes fully: &amp;lt; -> &lt; -> <
-    // but because &amp; is decoded first (longest match), then &lt;, etc.
-    expect(output).toContain('<');
-    expect(output).toContain('>');
-    expect(output).toContain('&');
+    // HTML5 decodes ONE level: &amp;lt; -> the literal text &lt; (the old sequential replace double-decoded it to '<').
+    expect(output).toBe('&lt; &gt; &amp;');
   });
 
   it('has educational content', () => {

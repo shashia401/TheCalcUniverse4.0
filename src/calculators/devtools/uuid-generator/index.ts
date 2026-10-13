@@ -1,30 +1,33 @@
 const CROCKFORD_BASE32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
-function generateUUIDv4(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+/** Cryptographically secure random bytes. Never falls back to Math.random: IDs must be unguessable. */
+export type RandomBytes = (n: number) => Uint8Array;
+export const secureRandomBytes: RandomBytes = (n) => {
+  const c = globalThis.crypto;
+  if (!c || typeof c.getRandomValues !== 'function') throw new Error('Secure random source (crypto.getRandomValues) is not available in this browser.');
+  return c.getRandomValues(new Uint8Array(n));
+};
+
+/** RFC 9562 section 5.4 UUID version 4: 122 random bits, version nibble = 4, variant bits = 10xx. */
+export function generateUUIDv4(rng: RandomBytes = secureRandomBytes): string {
+  const b = rng(16);
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 
-function generateULID(): string {
-  const timestamp = Date.now();
-
-  let ts = timestamp;
+/** ULID spec: 48-bit millisecond timestamp (10 Crockford base32 chars) + 80 random bits (16 chars). */
+export function generateULID(now: number = Date.now(), rng: RandomBytes = secureRandomBytes): string {
+  let ts = Math.trunc(now);
   const timeChars: string[] = [];
   for (let i = 0; i < 10; i++) {
     timeChars.unshift(CROCKFORD_BASE32[ts % 32]);
     ts = Math.trunc(ts / 32);
   }
-
+  const rand = rng(16);
   const randomChars: string[] = [];
-  for (let i = 0; i < 16; i++) {
-    randomChars.push(CROCKFORD_BASE32[Math.floor(Math.random() * 32)]);
-  }
+  for (let i = 0; i < 16; i++) randomChars.push(CROCKFORD_BASE32[rand[i] & 31]); // 256 % 32 === 0: no modulo bias
 
   return timeChars.join('') + randomChars.join('');
 }
@@ -76,14 +79,19 @@ const uuidGeneratorConfig: CalculatorConfig = {
   calculate: (values: Record<string, string>) => {
     const format = values.format || 'uuid';
     const countStr = values.count || '';
-    const count = countStr ? parseInt(countStr, 10) : 5;
+    const count = countStr ? Number(countStr) : 5;
 
-    if (isNaN(count) || count < 1) {
+    if (!Number.isInteger(count) || count < 1) {
       return [];
     }
 
     const clampedCount = Math.min(count, 50);
-    const ids = generateIDs(format, clampedCount);
+    let ids: string[];
+    try {
+      ids = generateIDs(format, clampedCount);
+    } catch (e) {
+      return [{ id: 'error', label: 'Cannot generate secure IDs', value: (e as Error).message, color: 'negative', highlight: true }];
+    }
 
     return [
       {
@@ -179,7 +187,7 @@ const uuidGeneratorConfig: CalculatorConfig = {
       },
     ],
     citations: [
-      { title: 'RFC 4122 — A Universally Unique IDentifier (UUID) URN Namespace', url: 'https://tools.ietf.org/html/rfc4122' },
+      { title: 'RFC 9562 — Universally Unique IDentifiers (UUIDs), obsoletes RFC 4122', url: 'https://www.rfc-editor.org/rfc/rfc9562' },
       { title: 'ULID Spec — GitHub', url: 'https://github.com/ulid/spec' },
     ],
   },

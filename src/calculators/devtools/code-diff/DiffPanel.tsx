@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { computeDiff, type DiffLine, type DiffData } from './diffUtils';
+import { computeDiff, toLines, type DiffLine, type DiffData } from './diffUtils';
 
 interface DiffPanelProps {
   values: Record<string, string>;
@@ -85,7 +85,7 @@ function DiffView({ data }: { data: DiffData }) {
     <div className="w-full">
       {/* Stats bar */}
       <div className="flex items-center gap-4 px-4 py-2 text-xs font-semibold border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-        <span className="text-slate-500 dark:text-slate-400">{hunks.length} hunk{hunks.length !== 1 ? 's' : ''}</span>
+        <span className="text-slate-600 dark:text-slate-400">{hunks.length} hunk{hunks.length !== 1 ? 's' : ''}</span>
         <span className="text-emerald-700 dark:text-emerald-400">+{adds} additions</span>
         <span className="text-red-600 dark:text-red-400">-{dels} deletions</span>
       </div>
@@ -101,15 +101,15 @@ function DiffView({ data }: { data: DiffData }) {
         {/* Left panel */}
         <div className="flex-1 min-w-0 border-r border-slate-200 dark:border-slate-700">
           {hunks.length === 0 && (
-            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-500">No differences found</div>
+            <div className="p-8 text-center text-sm text-slate-600 dark:text-slate-500">No differences found</div>
           )}
           {hunks.map((hunk, hi) => (
             <div key={hi}>
               <button
                 onClick={() => toggleHunk(hi)}
-                className="flex items-center w-full px-3 py-1 text-[11px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                className="flex items-center w-full px-3 py-1 text-[11px] font-mono text-slate-600 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
               >
-                <span className={`mr-2 text-[10px] transition-transform ${collapsed.has(hi) ? '' : 'rotate-90'}`}>▶</span>
+                <span className={`mr-2 text-xs transition-transform ${collapsed.has(hi) ? '' : 'rotate-90'}`}>▶</span>
                 <span>@@ -{hunk.leftStart},{hunk.lines.length} @@</span>
               </button>
               {!collapsed.has(hi) && hunk.lines.map((line, li) => {
@@ -121,8 +121,8 @@ function DiffView({ data }: { data: DiffData }) {
                 const content = line.left?.text ?? '';
                 return (
                   <div key={li} className={`flex font-mono text-[12px] leading-[1.6] ${bg} border-b border-slate-100 dark:border-slate-800/50`}>
-                    <span className="w-[50px] flex-shrink-0 text-right pr-2 text-slate-400 dark:text-slate-500 select-none py-0.5">{hunk.leftStart + li}</span>
-                    <span className="w-[30px] flex-shrink-0 text-center text-slate-400 dark:text-slate-500 select-none py-0.5">{marker}</span>
+                    <span className="w-[50px] flex-shrink-0 text-right pr-2 text-slate-600 dark:text-slate-500 select-none py-0.5">{hunk.leftStart + li}</span>
+                    <span className="w-[30px] flex-shrink-0 text-center text-slate-600 dark:text-slate-500 select-none py-0.5">{marker}</span>
                     <span className="flex-1 whitespace-pre-wrap break-all py-0.5 px-1 text-slate-800 dark:text-slate-200" dangerouslySetInnerHTML={{ __html: content ? highlightLine(content) : '&nbsp;' }} />
                   </div>
                 );
@@ -135,8 +135,8 @@ function DiffView({ data }: { data: DiffData }) {
         <div className="flex-1 min-w-0">
           {hunks.map((hunk, hi) => (
             <div key={hi}>
-              <div className="flex items-center px-3 py-1 text-[11px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                <span className="mr-2 text-[10px] invisible">▶</span>
+              <div className="flex items-center px-3 py-1 text-[11px] font-mono text-slate-600 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                <span className="mr-2 text-xs invisible">▶</span>
                 <span>@@ +{hunk.rightStart},{hunk.lines.length} @@</span>
               </div>
               {!collapsed.has(hi) && hunk.lines.map((line, li) => {
@@ -148,8 +148,8 @@ function DiffView({ data }: { data: DiffData }) {
                 const content = line.right?.text ?? '';
                 return (
                   <div key={li} className={`flex font-mono text-[12px] leading-[1.6] ${bg} border-b border-slate-100 dark:border-slate-800/50`}>
-                    <span className="w-[50px] flex-shrink-0 text-right pr-2 text-slate-400 dark:text-slate-500 select-none py-0.5">{hunk.rightStart + li}</span>
-                    <span className="w-[30px] flex-shrink-0 text-center text-slate-400 dark:text-slate-500 select-none py-0.5">{marker}</span>
+                    <span className="w-[50px] flex-shrink-0 text-right pr-2 text-slate-600 dark:text-slate-500 select-none py-0.5">{hunk.rightStart + li}</span>
+                    <span className="w-[30px] flex-shrink-0 text-center text-slate-600 dark:text-slate-500 select-none py-0.5">{marker}</span>
                     <span className="flex-1 whitespace-pre-wrap break-all py-0.5 px-1 text-slate-800 dark:text-slate-200" dangerouslySetInnerHTML={{ __html: content ? highlightLine(content) : '&nbsp;' }} />
                   </div>
                 );
@@ -175,13 +175,8 @@ const DiffPanel: React.FC<DiffPanelProps> = ({ results, onValuesChange }) => {
   const rightInputRef = useRef<HTMLInputElement>(null);
 
   const updateDiff = useCallback((left: string, right: string) => {
-    const lLines = left ? left.split('\n') : [];
-    const rLines = right ? right.split('\n') : [];
-    if (lLines[lLines.length - 1] === '') lLines.pop();
-    if (rLines[rLines.length - 1] === '') rLines.pop();
-    if (left.endsWith('\n')) lLines.push('');
-    if (right.endsWith('\n')) rLines.push('');
-    const data = computeDiff(lLines, rLines);
+    // same line splitting and diff as calculate(), so the stats and the panel can never disagree
+    const data = computeDiff(toLines(left), toLines(right));
     setDiffData(data);
   }, []);
 
@@ -276,7 +271,7 @@ const DiffPanel: React.FC<DiffPanelProps> = ({ results, onValuesChange }) => {
   return (
     <div className="w-full">
       {/* Disclaimer */}
-      <div className="flex items-center gap-2 px-4 py-2 text-[11px] text-slate-500 dark:text-slate-500 bg-amber-50/50 dark:bg-amber-900/10 border-b border-slate-200 dark:border-slate-700">
+      <div className="flex items-center gap-2 px-4 py-2 text-[11px] text-slate-600 dark:text-slate-500 bg-amber-50/50 dark:bg-amber-900/10 border-b border-slate-200 dark:border-slate-700">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 flex-shrink-0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         Your code is processed entirely in your browser. Nothing is uploaded or stored.
       </div>
@@ -358,10 +353,10 @@ const DiffPanel: React.FC<DiffPanelProps> = ({ results, onValuesChange }) => {
       )}
 
       {!leftText && !rightText && !diffResult && (
-        <div className="py-16 text-center text-sm text-slate-500 dark:text-slate-500">
+        <div className="py-16 text-center text-sm text-slate-600 dark:text-slate-500">
           <div className="text-3xl mb-3">⇄</div>
           <p className="font-medium">Enter or load text on both sides to compare</p>
-          <p className="text-xs mt-1 text-slate-400 dark:text-slate-500">Supports file upload, drag & drop, and paste</p>
+          <p className="text-xs mt-1 text-slate-600 dark:text-slate-500">Supports file upload, drag & drop, and paste</p>
         </div>
       )}
     </div>

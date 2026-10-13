@@ -1,16 +1,14 @@
-import { createElement } from 'react';
-import { type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { createConverter, type UnitDef } from '../unit-converter';
+import { FT_M, G0, LBF_N, LB_KG } from '../../../utils/unitConvert';
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   { value: 'n', label: 'Newton (N)', shortLabel: 'N', factor: 1 },
   { value: 'kn', label: 'Kilonewton (kN)', shortLabel: 'kN', factor: 1000 },
-  { value: 'lbf', label: 'Pound-Force (lbf)', shortLabel: 'lbf', factor: 4.44822 },
-  { value: 'kip', label: 'Kilopound-Force (kip)', shortLabel: 'kip', factor: 4448.22 },
-  { value: 'kgf', label: 'Kilogram-Force (kgf)', shortLabel: 'kgf', factor: 9.80665 },
-  { value: 'dyn', label: 'Dyne (dyn)', shortLabel: 'dyn', factor: 0.00001 },
-  { value: 'pdl', label: 'Poundal (pdl)', shortLabel: 'pdl', factor: 0.138255 },
+  { value: 'lbf', label: 'Pound-Force (lbf)', shortLabel: 'lbf', factor: LBF_N },
+  { value: 'kip', label: 'Kilopound-Force (kip)', shortLabel: 'kip', factor: 1000 * LBF_N },
+  { value: 'kgf', label: 'Kilogram-Force (kgf)', shortLabel: 'kgf', factor: G0 },
+  { value: 'dyn', label: 'Dyne (dyn)', shortLabel: 'dyn', factor: 1e-5 },
+  { value: 'pdl', label: 'Poundal (pdl)', shortLabel: 'pdl', factor: LB_KG * FT_M },
 ];
 
 const EDUCATIONAL = {
@@ -42,9 +40,9 @@ const EDUCATIONAL = {
   ],
   commonUses: [
     'Structural engineering: column loads are specified in kN or kips. A typical office building column carries 1,000-5,000 kN (225-1,124 kips). Converting between kN (metric structural standard) and kips (US structural standard) is essential for international construction projects where teams use different unit systems.',
-    'Mechanical engineering: bolt preload and clamp force specifications. An M16 Grade 8.8 bolt has a recommended preload of 85-100 kN (19,100-22,500 lbf). Converting to the correct unit ensures that torque wrenches are set properly in mixed-unit workshops. A 1 N·m torque on an M10 bolt produces approximately 500-700 N of clamp force.',
+    'Mechanical engineering: bolt preload and clamp force specifications. An M16 grade 8.8 bolt has a proof load of about 91 kN (157 mm² × 580 MPa), and preload is normally set at a fraction of that. Converting to the correct unit ensures that torque wrenches are set properly in mixed-unit workshops. A 1 N·m torque on an M10 bolt produces approximately 500-700 N of clamp force.',
     'Aerospace: rocket engine thrust is measured in kN or lbf. The SpaceX Raptor 3 engine produces 2,750 kN (618,000 lbf) of thrust at sea level. The Saturn V F-1 engines from the Apollo program produced 6,770 kN (1,522,000 lbf) each. Unit conversion enables meaningful comparison between historical and modern propulsion systems.',
-    'Physics education: understanding the relationship between mass and weight. A 70 kg student has a mass of 70 kg everywhere in the universe, but a weight of 686 N on Earth, 114 N on the Moon, 259 N on Mars, and 1,654 N on Jupiter. Converting between N, lbf, and kgf builds student intuition for gravitational force as distinct from mass.',
+    'Physics education: understanding the relationship between mass and weight. A 70 kg student has a mass of 70 kg everywhere in the universe, but a weight of 686 N on Earth, 114 N on the Moon, 259 N on Mars, and 1,735 N on Jupiter. Converting between N, lbf, and kgf builds student intuition for gravitational force as distinct from mass.',
     'Material testing: tensile strength is reported in MPa (N/mm²) or psi (lbf/in²). Converting force units is necessary when comparing material test certificates from European testing laboratories (which use SI units) and American laboratories (which use imperial units). A steel with 400 MPa yield strength equals approximately 58,000 psi.',
     'Everyday forces: the force to open a soda can tab is about 10 N, a car braking force is 5,000-10,000 N (5-10 kN), and the bite force of a large dog is about 2,000 N. These benchmarks help develop intuition for newton-scale forces in daily life.',
   ],
@@ -64,14 +62,14 @@ const EDUCATIONAL = {
     {
       scenario: 'An aerospace engineering student in Bangalore is comparing historic and modern rocket engines. The Saturn V F-1 engine produced 1,522,000 lbf of thrust. The modern SpaceX Raptor 3 produces 2,750 kN. Which engine is more powerful? Convert both to a common unit for a direct comparison.',
       inputs: { value: '2750', from: 'kn', to: 'lbf' },
-      result: 'Raptor 3: 2,750 kN = 618,210 lbf (~618,000 lbf). Saturn V F-1: 1,522,000 lbf = 6,770 kN. The F-1 engine produces 6,770 kN vs Raptor 3 at 2,750 kN — the F-1 was 2.46 times more powerful. However, 9 Raptor engines on Super Heavy produce 24,750 kN total, comparable to 3.65 F-1 engines.',
+      result: 'Raptor 3: 2,750 kN = 618,225 lbf (~618,000 lbf). Saturn V F-1: 1,522,000 lbf = 6,770 kN. The F-1 engine produces 6,770 kN vs Raptor 3 at 2,750 kN — the F-1 was 2.46 times more powerful. However, the 33 Raptor engines on Super Heavy would produce about 90,750 kN in total, equal to about 13.4 F-1 engines.',
       insight: 'Unit conversion reveals the engineering philosophy difference between eras. The Saturn V (1960s) used 5 enormous F-1 engines, each the most powerful single-chamber liquid-fueled engine ever flown. SpaceX\'s approach uses many smaller, mass-produced engines (33 Raptors on Super Heavy) that share components across vehicle variants. This modular strategy reduces development cost and enables engine-out capability — the vehicle can complete its mission even if multiple engines fail. The 1999 Mars Climate Orbiter loss ($327 million), caused by a unit conversion error between lbf and newtons, underscores why explicit unit labeling and verification is critical in aerospace engineering.',
     },
   ],
   proTips: [
     'In US structural engineering, always distinguish between lbf (pound-force) and lbm (pound-mass). Under standard gravity, 1 lbm exerts 1 lbf by definition. But in dynamic analysis (earthquake engineering, vibration analysis), mass and force must be treated as distinct quantities — confusing them leads to errors by a factor of g (32.2 ft/s² in imperial units). Always check whether your software expects mass or force inputs.',
     'For bolt torque-to-clamp-force calculations: T = K × F × d, where T is applied torque, K is the nut factor (typically 0.15-0.20 for lubricated threads, 0.20-0.30 for dry), F is the desired clamp force, and d is the bolt diameter. A 100 N·m torque on a lubricated M12 bolt produces approximately 40-55 kN of clamp force. Always confirm the K-factor for your specific thread condition — it is the largest source of uncertainty.',
-    'Quick mental conversions for construction sites: 1 kN is approximately the weight of a 100 kg person (actually 0.98 kN — 2% error). 1 kip is approximately the weight of a small car (actually about 3-4 kips for a compact car, but the benchmark helps catch gross errors). A 10-story building column might carry 500-2,000 kN — roughly 50-200 car-weights.',
+    'Quick mental conversions for construction sites: 1 kN is approximately the weight of a 100 kg person (actually 0.98 kN — 2% error). 1 kip is the weight of about 454 kg (a large motorcycle); a compact car weighs about 3 kips. A 10-story building column might carry 500-2,000 kN — roughly 35-140 compact cars.',
     'When reading international research papers or equipment specifications, always identify the force unit being used before performing any calculations. Japanese papers often use kgf, German papers use kN, UK papers may use either N or lbf depending on the field, and US structural papers almost exclusively use kips and ksi. Convert all data to a single consistent unit before analyzing.',
     'The Mars Climate Orbiter loss (1999) was caused by one engineering team using pound-force seconds for thruster impulse data while another team interpreted the values as newton-seconds. The $327 million spacecraft entered the Martian atmosphere at too low an altitude and burned up. Always explicitly label force values with their units in engineering documents, software interfaces, and data exchange formats — never assume the unit system. A simple unit annotation would have saved the mission.',
     'For force-to-pressure conversions (e.g., determining if a floor can support a piece of equipment): pressure = force ÷ area. A 10,000 N concentrated load on a 0.01 m² base plate produces 1,000,000 Pa (1 MPa or 145 psi). Spreading the same load over 0.1 m² reduces the pressure to 100 kPa (14.5 psi), well within the bearing capacity of most floor slabs. Always consider the contact area when assessing structural load capacity.',
@@ -115,7 +113,7 @@ const EDUCATIONAL = {
     },
     {
       question: 'What is a kilonewton (kN) used for in engineering?',
-      answer: 'The kilonewton (1 kN = 1,000 N) is the standard unit for structural and mechanical engineering loads where forces are in the thousands of newtons. Common examples: a small car weighs about 15 kN, a large SUV about 30 kN. A building column in a high-rise might carry 1,000-5,000 kN of axial load. Bolt clamping forces range from 5 kN for small fasteners to 500+ kN for large structural bolts. Concrete compressive strength is measured in MPa (which equals N/mm²) — a 30 MPa concrete cylinder fails at 30,000 N per square millimeter. Steel cable tensile strength ranges from 50-200 kN for typical construction cables. Using kN avoids writing large numbers everywhere: 50,000 N becomes simply 50 kN, making engineering calculations and documentation cleaner and less error-prone.',
+      answer: 'The kilonewton (1 kN = 1,000 N) is the standard unit for structural and mechanical engineering loads where forces are in the thousands of newtons. Common examples: a small car weighs about 15 kN, a large SUV about 30 kN. A building column in a high-rise might carry 1,000-5,000 kN of axial load. Bolt clamping forces range from 5 kN for small fasteners to 500+ kN for large structural bolts. Concrete compressive strength is measured in MPa (which equals N/mm²) — a 30 MPa concrete cylinder fails at 30 N per square millimeter. Steel cable tensile strength ranges from 50-200 kN for typical construction cables. Using kN avoids writing large numbers everywhere: 50,000 N becomes simply 50 kN, making engineering calculations and documentation cleaner and less error-prone.',
     },
     {
       question: 'What is the difference between pound-force (lbf) and pound-mass (lb)?',
@@ -123,7 +121,7 @@ const EDUCATIONAL = {
     },
     {
       question: 'How do engineers use force in structural design?',
-      answer: 'Structural engineers analyze three main force types: dead loads (permanent weight of the structure itself), live loads (temporary occupancy loads from people, furniture, and equipment), and environmental loads (wind, snow, seismic, and thermal forces). Buildings are designed with safety factors to withstand the most critical combination of these forces. A typical residential floor is designed for 40 psf live load (approximately 1.92 kN/m²). A structural steel beam might carry 50 kN of bending moment. Connections (bolts, welds) are designed for specific force capacities with safety factors of 1.5-3x applied to account for material variability, construction tolerances, and unforeseen loading conditions. In seismic design, forces are amplified by the building\'s dynamic response to earthquake ground motion — a building in a high-seismic zone may need to resist lateral forces equivalent to 10-20% of its total weight.',
+      answer: 'Structural engineers analyze three main force types: dead loads (permanent weight of the structure itself), live loads (temporary occupancy loads from people, furniture, and equipment), and environmental loads (wind, snow, seismic, and thermal forces). Buildings are designed with safety factors to withstand the most critical combination of these forces. A typical residential floor is designed for 40 psf live load (approximately 1.92 kN/m²). A structural steel beam might carry 50 kN·m of bending moment. Connections (bolts, welds) are designed for specific force capacities with safety factors of 1.5-3x applied to account for material variability, construction tolerances, and unforeseen loading conditions. In seismic design, forces are amplified by the building\'s dynamic response to earthquake ground motion — a building in a high-seismic zone may need to resist lateral forces equivalent to 10-20% of its total weight.',
     },
     {
       question: 'What is a kip and why is it used in US engineering?',
@@ -137,77 +135,4 @@ const EDUCATIONAL = {
   ],
 };
 
-// Explicit inputs (visible to automated review tools)
-const inputs = [
-  {
-    id: 'value',
-    label: 'Value to Convert',
-    type: 'number' as const,
-    placeholder: 'Enter force value (e.g., 1000)',
-    inputMode: 'numeric' as const,
-    required: true,
-    helpText: 'The numeric force value you want to convert between units',
-  },
-  {
-    id: 'from',
-    label: 'From Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: UNITS[0]?.value || 'n',
-    helpText: 'The force unit you are converting from (e.g., N for newtons, lbf for pound-force)',
-  },
-  {
-    id: 'to',
-    label: 'To Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: UNITS[3]?.value || 'kip',
-    showWhen: (values: Record<string, string>) => !!values.value,
-    helpText: 'The force unit you are converting to (e.g., kN for structural loads, kip for US engineering)',
-  },
-];
-
-// Explicit edge-case handling (isNaN + return [] visible to automated review tools)
-const calculate = (values: Record<string, string>) => {
-  if (!values || Object.keys(values).length === 0) return [];
-  if (values.value === undefined || values.value === null || values.value.trim() === '') return [];
-  const val = parseFloat(values.value);
-  if (isNaN(val) || !isFinite(val)) return [];
-
-  const fromUnit = values.from || UNITS[0]?.value || 'n';
-  const toUnit = values.to || (UNITS.length > 1 ? UNITS[3].value : UNITS[0]?.value) || 'kip';
-
-  const fromDef = UNITS.find((u) => u.value === fromUnit);
-  const toDef = UNITS.find((u) => u.value === toUnit);
-  if (!fromDef || !toDef) return [];
-  if (toDef.factor === 0) return [];
-
-  const result = (val * fromDef.factor) / toDef.factor;
-
-  return [
-    {
-      id: 'result',
-      label: `Result (${fromUnit} → ${toUnit})`,
-      value: `${val} ${fromDef.shortLabel || fromUnit} = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${toDef.shortLabel || toUnit}`,
-      highlight: true,
-      color: 'positive' as const,
-    },
-    {
-      id: 'formula',
-      label: 'Formula',
-      value: `${val} × (${fromDef.factor} ÷ ${toDef.factor}) = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })}`,
-      color: 'neutral' as const,
-    },
-  ];
-};
-
-const configWithPanel = {
-  inputs,
-  calculate,
-  educational: EDUCATIONAL,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Force Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Force Conversion', quantity: 'force', defaultFrom: 'n', defaultTo: 'kip', educational: EDUCATIONAL });

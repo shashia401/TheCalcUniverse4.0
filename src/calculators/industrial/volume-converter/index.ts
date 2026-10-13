@@ -1,21 +1,23 @@
-import { createElement } from 'react';
 import { createConverter, type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { CUP_L, FLOZ_L, FT3_L, GAL_UK_L, GAL_US_L, IN3_L, PT_L, QT_L, TBSP_L, TSP_L } from '../../../utils/unitConvert';
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   { value: 'ml', label: 'Milliliter (mL)', shortLabel: 'mL', factor: 0.001 },
   { value: 'l', label: 'Liter (L)', shortLabel: 'L', factor: 1 },
   { value: 'm3', label: 'Cubic Meter (m³)', shortLabel: 'm³', factor: 1000 },
-  { value: 'tsp', label: 'Teaspoon (tsp)', shortLabel: 'tsp', factor: 0.00492892 },
-  { value: 'tbsp', label: 'Tablespoon (tbsp)', shortLabel: 'tbsp', factor: 0.0147868 },
-  { value: 'floz', label: 'Fluid Ounce (fl oz)', shortLabel: 'fl oz', factor: 0.0295735 },
-  { value: 'cup', label: 'US Cup', shortLabel: 'cup', factor: 0.236588 },
-  { value: 'pt', label: 'US Pint (pt)', shortLabel: 'pt', factor: 0.473176 },
-  { value: 'qt', label: 'US Quart (qt)', shortLabel: 'qt', factor: 0.946353 },
-  { value: 'gal', label: 'US Gallon (gal)', shortLabel: 'gal', factor: 3.78541 },
-  { value: 'in3', label: 'Cubic Inch (in³)', shortLabel: 'in³', factor: 0.0163871 },
-  { value: 'ft3', label: 'Cubic Foot (ft³)', shortLabel: 'ft³', factor: 28.3168 },
+  { value: 'tsp', label: 'US Teaspoon (tsp)', shortLabel: 'tsp', factor: TSP_L },
+  { value: 'tbsp', label: 'US Tablespoon (tbsp)', shortLabel: 'tbsp', factor: TBSP_L },
+  { value: 'floz', label: 'US Fluid Ounce (fl oz)', shortLabel: 'fl oz', factor: FLOZ_L },
+  { value: 'cup', label: 'US Cup', shortLabel: 'cup', factor: CUP_L },
+  { value: 'pt', label: 'US Pint (pt)', shortLabel: 'pt', factor: PT_L },
+  { value: 'qt', label: 'US Quart (qt)', shortLabel: 'qt', factor: QT_L },
+  { value: 'gal', label: 'US Gallon (gal)', shortLabel: 'gal', factor: GAL_US_L },
+  { value: 'in3', label: 'Cubic Inch (in³)', shortLabel: 'in³', factor: IN3_L },
+  { value: 'ft3', label: 'Cubic Foot (ft³)', shortLabel: 'ft³', factor: FT3_L },
+  { value: 'ukfloz', label: 'UK Fluid Ounce (imperial)', shortLabel: 'UK fl oz', factor: GAL_UK_L / 160 },
+  { value: 'ukpt', label: 'UK Pint (imperial)', shortLabel: 'UK pt', factor: GAL_UK_L / 8 },
+  { value: 'ukqt', label: 'UK Quart (imperial)', shortLabel: 'UK qt', factor: GAL_UK_L / 4 },
+  { value: 'ukgal', label: 'UK Gallon (imperial)', shortLabel: 'UK gal', factor: GAL_UK_L },
 ];
 
 const EDUCATIONAL = {
@@ -103,12 +105,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const converterConfig = createConverter({ units: UNITS, defaultFrom: 'l', defaultTo: 'gal', educational: EDUCATIONAL });
-const configWithPanel = {
-  ...converterConfig,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Volume Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Volume Conversion', quantity: 'volume', defaultFrom: 'l', defaultTo: 'gal', educational: EDUCATIONAL });

@@ -36,14 +36,15 @@ function generateSentences(count: number): string {
   return sentences.join(' ');
 }
 
-function generateParagraphs(count: number): string {
+/** `offset` rotates the sentence pool so a paragraph can skip the classic "Lorem ipsum dolor sit amet" opening. */
+export function generateParagraphs(count: number, offset = 0): string {
   const paragraphs: string[] = [];
   for (let i = 0; i < count; i++) {
     const sentenceCount = 3 + (i % 4);
     const sentenceArr: string[] = [];
     for (let j = 0; j < sentenceCount; j++) {
       sentenceArr.push(
-        LOREM_IPSUM_SENTENCES[(i + j) % LOREM_IPSUM_SENTENCES.length]
+        LOREM_IPSUM_SENTENCES[(offset + i + j) % LOREM_IPSUM_SENTENCES.length]
       );
     }
     paragraphs.push(sentenceArr.join(' '));
@@ -94,9 +95,9 @@ const loremIpsumConfig: CalculatorConfig = {
 
     if (!countRaw || countRaw.trim() === '') return [];
 
-    const count = parseInt(countRaw, 10);
+    const count = Number(countRaw);
 
-    if (isNaN(count) || count < 1 || count > 50) return [];
+    if (!Number.isInteger(count) || count < 1 || count > 50) return [];
 
     let generatedText = '';
 
@@ -105,7 +106,7 @@ const loremIpsumConfig: CalculatorConfig = {
     } else if (unit === 'Sentences') {
       generatedText = generateSentences(count);
     } else {
-      generatedText = generateParagraphs(count);
+      generatedText = generateParagraphs(count, values.startWithClassic === 'no' ? 4 : 0);
     }
 
     const wordCount = generatedText.split(/\s+/).filter((w) => w.length > 0).length;

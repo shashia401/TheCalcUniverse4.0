@@ -1,7 +1,5 @@
-import { createElement } from 'react';
-import { CalculatorResult } from '../../../types/calculator';
-import { type UnitDef } from '../unit-converter';
-import ConverterPanel from '../ConverterPanel';
+import { createConverter, type UnitDef } from '../unit-converter';
+import { runConversion } from '../../../utils/unitConvert';
 
 // Electrical units span multiple sub-categories (voltage, current, resistance, etc.).
 // All units within a sub-category are linearly related to their SI base unit.
@@ -9,7 +7,7 @@ import ConverterPanel from '../ConverterPanel';
 // Converting between sub-categories (e.g., volts to amps) is mathematically possible
 // but physically meaningless without additional context (Ohm's law, etc.).
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   // Voltage
   { value: 'uv', label: 'Voltage — Microvolt (µV)', shortLabel: 'µV', factor: 0.000001 },
   { value: 'mv_v', label: 'Voltage — Millivolt (mV)', shortLabel: 'mV', factor: 0.001 },
@@ -49,6 +47,9 @@ const UNITS: UnitDef[] = [
   { value: 'mah', label: 'Charge — Milliampere-Hour (mAh)', shortLabel: 'mAh', factor: 3.6 },
   { value: 'ah', label: 'Charge — Ampere-Hour (Ah)', shortLabel: 'Ah', factor: 3600 },
 ];
+
+/** Units are grouped by physical quantity via the "Category — Name" label prefix. */
+export const categoryOf = (u: UnitDef) => u.label.split(' — ')[0];
 
 const EDUCATIONAL = {
   formula: 'result = value × (factor_from ÷ factor_to)',
@@ -120,16 +121,12 @@ const EDUCATIONAL = {
     },
     {
       question: 'What does mAh mean on a battery?',
-      answer: 'mAh (milliampere-hours) measures a battery\'s charge capacity — how much current it can deliver for one hour. A 3,000 mAh phone battery can deliver 3,000 mA (3 A) for 1 hour, or 300 mA for 10 hours. To convert to coulombs (the SI unit of charge): mAh × 3.6 = C. So 3,000 mAh = 10,800 C. To convert to watt-hours (energy): mAh ÷ 1000 × V = Wh. A 3,000 mAh phone battery at 3.8 V = 11.4 Wh. A 60,000 mAh (60 Ah) Tesla Model 3 battery at 350 V = 21,000 Wh = 21 kWh (about 80 miles of range). Higher mAh = longer runtime, but the voltage must also be considered for energy comparisons.',
+      answer: 'mAh (milliampere-hours) measures a battery\'s charge capacity — how much current it can deliver for one hour. A 3,000 mAh phone battery can deliver 3,000 mA (3 A) for 1 hour, or 300 mA for 10 hours. To convert to coulombs (the SI unit of charge): mAh × 3.6 = C. So 3,000 mAh = 10,800 C. To convert to watt-hours (energy): mAh ÷ 1000 × V = Wh. A 3,000 mAh phone battery at 3.8 V = 11.4 Wh. A 60 Ah (60,000 mAh) pack at 350 V = 21,000 Wh = 21 kWh. Higher mAh = longer runtime, but the voltage must also be considered for energy comparisons.',
     },
     {
       question: 'Why do some capacitors use confusing unit markings?',
       answer: 'Capacitor markings evolved historically, and many conventions coexist. A capacitor marked "104" means 10 × 10^4 pF = 100,000 pF = 100 nF = 0.1 µF. "473" = 47 × 10^3 pF = 47,000 pF = 47 nF. "225" = 22 × 10^5 pF = 2,200,000 pF = 2.2 µF. Some capacitors use colored bands like resistors (brown-black-orange = 10,000 pF = 10 nF). Electrolytic capacitors typically print the value directly (e.g., "100 µF 25V"). This converter handles all common capacitor unit conversions so you can decode any marking system.',
     },
-    {
-      question: 'What is the difference between conductance (siemens) and resistance (ohms) in practice?',
-        answer: 'Conductance in siemens is the reciprocal of resistance in ohms: G = 1/R. A 100 Ω resistor has conductance of 0.01 S = 10 mS. Conductance is more natural for parallel circuits — total conductance = sum of individual conductances (G_total = G1 + G2 + ...). This makes parallel analysis simpler in siemens. The unit "siemens" was renamed from "mho" (ohm spelled backwards) in 1971.',
-      },
       {
         question: 'How do I convert between henries, millihenries, and microhenries?',
         answer: '1 H = 1,000 mH = 1,000,000 µH. Inductors in power supplies are typically 100 µH to 10 mH. RF inductors are often in nH (nanohenries, 0.001 µH) range — though the calculator does not include nanohenry units, you can convert: 100 nH = 0.1 µH. Inductance conversion follows the same metric prefix pattern as other electrical units. A common filter inductor for audio circuits might be 47 mH = 47,000 µH.',
@@ -179,93 +176,21 @@ const EDUCATIONAL = {
   ],
 };
 
-// Explicit inputs (visible to automated review tools)
-const inputs = [
-  {
-    id: 'value',
-    label: 'Value to Convert',
-    type: 'number' as const,
-    placeholder: 'Enter value',
-    defaultValue: '1',
-    required: true,
-    inputMode: 'decimal' as const,
-    helpText: 'The numeric value you want to convert',
+export default createConverter({
+  units: UNITS,
+  label: 'Electrical Conversion',
+  quantity: 'electrical quantity',
+  defaultFrom: 'v',
+  defaultTo: 'kv',
+  errorLabel: 'Incompatible Units',
+  // Voltage, current, resistance, ... are not interconvertible by a factor: only same-category pairs are valid.
+  compute: (values, units) => {
+    const o = runConversion(values.value, units, values.from || 'v', values.to || 'kv');
+    if (!o) return null;
+    if (categoryOf(o.from) !== categoryOf(o.to)) {
+      return `${o.from.label} and ${o.to.label} measure different physical quantities and cannot be converted by a simple factor. Select two units from the same category (e.g., both Voltage, or both Resistance).`;
+    }
+    return o;
   },
-  {
-    id: 'from',
-    label: 'From',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: UNITS[0]?.value || 'v',
-    helpText: 'The unit you are converting from',
-  },
-  {
-    id: 'to',
-    label: 'To',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: (UNITS.length > 1 ? UNITS[1].value : UNITS[0]?.value) || 'mv_v',
-    helpText: 'The unit you are converting to',
-  },
-];
-
-// Explicit edge-case handling (isNaN + return [] visible to automated review tools)
-const calculate = (values: Record<string, string>) => {
-  if (!values || Object.keys(values).length === 0) return [];
-  if (values.value === undefined || values.value === null || values.value.trim() === '') return [];
-  const val = parseFloat(values.value);
-  if (isNaN(val) || !isFinite(val)) return [];
-
-  const fromUnit = values.from || UNITS[0]?.value || 'v';
-  const toUnit = values.to || ((UNITS.length > 1 ? UNITS[1].value : UNITS[0]?.value) || 'mv_v');
-
-  const fromDef = UNITS.find((u) => u.value === fromUnit);
-  const toDef = UNITS.find((u) => u.value === toUnit);
-  if (!fromDef || !toDef) return [];
-  if (toDef.factor === 0) return [];
-
-  // Units are grouped by physical quantity via the "Category — Name" label
-  // prefix (see comment above UNITS). Voltage, current, resistance, etc. are
-  // not interconvertible by a factor — only same-category pairs are valid.
-  const category = (u: UnitDef) => u.label.split(' — ')[0];
-  if (category(fromDef) !== category(toDef)) {
-    return [
-      {
-        id: 'error',
-        label: 'Incompatible Units',
-        value: `${fromDef.label} and ${toDef.label} measure different physical quantities and cannot be converted by a simple factor. Select two units from the same category (e.g., both Voltage, or both Resistance).`,
-        color: 'negative' as const,
-        highlight: true,
-      },
-    ];
-  }
-
-  const result = (val * fromDef.factor) / toDef.factor;
-
-  return [
-    {
-      id: 'result',
-      label: `Result (${fromUnit} → ${toUnit})`,
-      value: `${val} ${fromUnit} = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${toUnit}`,
-      highlight: true,
-      color: 'positive' as const,
-    },
-    {
-      id: 'formula',
-      label: 'Formula',
-      value: `${val} × (${fromDef.factor} ÷ ${toDef.factor}) = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })}`,
-      color: 'neutral' as const,
-    },
-  ];
-};
-
-const configWithPanel = {
-  inputs,
-  calculate,
   educational: EDUCATIONAL,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Electrical Conversion' });
-  },
-};
-export default configWithPanel;
+});

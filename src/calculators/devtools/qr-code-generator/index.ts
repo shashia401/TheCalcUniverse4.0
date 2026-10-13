@@ -1,6 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import QRCodePanel from './QRCodePanel';
+import { byteCapacity, encodeQr, type Ecl } from '../../../utils/qrcode';
 
 const qrCodeGeneratorConfig: CalculatorConfig = {
   inputs: [
@@ -42,28 +43,31 @@ const qrCodeGeneratorConfig: CalculatorConfig = {
     },
   ],
   calculate: (values: Record<string, string>) => {
-    const content = values.content || '';
-    const sizeStr = values.size || '';
-    const size = sizeStr ? parseInt(sizeStr, 10) : 200;
-
-    if (!content.trim()) return [];
-
-    const clampedSize = Math.round(Math.max(100, Math.min(500, isNaN(size) ? 200 : size)));
-    const encodedContent = encodeURIComponent(content.trim());
-    const imageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${clampedSize}x${clampedSize}&data=${encodedContent}`;
+    const content = (values.content || '').trim();
+    if (!content) return [];
+    const ecl = (['L', 'M', 'Q', 'H'].includes(values.errorCorrection) ? values.errorCorrection : 'M') as Ecl;
+    const qr = encodeQr(content, ecl);
+    if (!qr) {
+      return [
+        {
+          id: 'error',
+          label: 'Content too long',
+          value: `${new TextEncoder().encode(content).length} bytes do not fit in a QR code at error-correction level ${ecl} (maximum ${byteCapacity(40, ecl)} bytes). Shorten the text or choose a lower level.`,
+          color: 'negative',
+          highlight: true,
+        },
+      ];
+    }
     const preview = content.length > 40 ? content.substring(0, 40) + '...' : content;
-
     return [
+      { id: 'info', label: 'Info', value: `QR code generated for: ${preview}`, color: 'positive' },
+      { id: 'version', label: 'QR Version', value: `Version ${qr.version} (${qr.size} × ${qr.size} modules)`, color: 'neutral' },
       {
-        id: 'info',
-        label: 'Info',
-        value: `QR code generated for: ${preview}`,
-        color: 'positive',
-      },
-      {
-        id: '_qrData',
-        label: 'QR Data',
-        value: JSON.stringify({ content: content.trim(), size: clampedSize, imageUrl }),
+        id: 'capacity',
+        label: 'Data Used',
+        value: `${qr.byteLength} of ${byteCapacity(qr.version, ecl)} bytes at level ${ecl}`,
+        color: 'neutral',
+        interpretation: 'Generated in your browser (byte mode, UTF-8): the text is never sent to any server.',
       },
     ];
   },
@@ -106,8 +110,8 @@ const qrCodeGeneratorConfig: CalculatorConfig = {
       'Enter the text, URL, WiFi credentials, or any content you want to encode in the QR code.',
       'Adjust the pixel size (100px to 500px) using the slider or number input to control image resolution.',
       'Select the desired error correction level (L, M, Q, H) to balance between data capacity and damage resilience.',
-      'The QR code image is generated via the QR Server API and displayed in the interactive preview panel below.',
-      'Use the download button to save the QR code as a PNG image file for use in print, web, or sharing.',
+      'The QR code is generated in your browser (nothing is uploaded) and drawn as a crisp SVG in the preview panel below.',
+      'Use the download buttons to save the QR code as a PNG or a scalable SVG file for print, web, or sharing.',
     ],
     quickReference: [
       { label: 'Version 1 capacity', value: '25 alphanumeric / 17 bytes / 10 kanji' },
@@ -150,8 +154,9 @@ const qrCodeGeneratorConfig: CalculatorConfig = {
       {
         scenario: 'A marketing team is designing a brochure and wants to include a QR code linking to their product landing page at https://shop.example.com/brand-new-widget. They need the QR code to be large enough for print at 300 DPI.',
         inputs: {
-          'Content': 'https://shop.example.com/brand-new-widget',
-          'Size': '350 px',
+          content: 'https://shop.example.com/brand-new-widget',
+          size: '350',
+          errorCorrection: 'M',
         },
         result: 'QR code generated for: https://shop.example.com/brand-new-widget (350x350 px)',
         insight: 'For print use at 300 DPI, a 350 px QR code produces a physical size of approximately 1.17 inches (350/300). This is large enough for a standard brochure. Always test print a sample before mass production to verify scannability under real-world lighting conditions.',
@@ -159,11 +164,12 @@ const qrCodeGeneratorConfig: CalculatorConfig = {
       {
         scenario: 'A developer needs to encode a PostgreSQL connection string: "postgresql://user:password@db.internal.example.com:5432/mydb?sslmode=require" and verify that special characters like colons, slashes, and question marks are handled correctly.',
         inputs: {
-          'Content': 'postgresql://user:password@db.internal.example.com:5432/mydb?sslmode=require',
-          'Size': '200 px',
+          content: 'postgresql://user:password@db.internal.example.com:5432/mydb?sslmode=require',
+          size: '200',
+          errorCorrection: 'M',
         },
         result: 'QR code generated for: postgresql://user:password@db.internal.example.com:5432/... (200x200 px)',
-        insight: 'QR codes handle special characters including colons, slashes, question marks, and @ symbols without any issue. However, for security, never encode passwords or connection strings in QR codes that will be shared publicly — anyone who scans the code can extract the full content.',
+        insight: 'QR codes handle special characters including colons, slashes, question marks, and @ symbols without any issue (this 76-byte string needs a version 5 symbol at level M). However, for security, never encode passwords or connection strings in QR codes that will be shared publicly — anyone who scans the code can extract the full content.',
       },
     ],
     proTips: [
@@ -175,9 +181,9 @@ const qrCodeGeneratorConfig: CalculatorConfig = {
       'Dynamic QR codes (encoding a redirect URL) let you update the destination without reprinting. Services like Bitly or QR Code API can create trackable dynamic QR codes with scan analytics.',
     ],
     limitations: [
-      'This generator uses a third-party API (api.qrserver.com) to generate QR code images, which means it requires an internet connection. Offline QR generation would require a JavaScript library like qrcode.js running entirely in the browser.',
+      'The encoder uses byte mode only (UTF-8), so the capacity is 17 to 2,953 bytes depending on level, not the larger numeric or alphanumeric capacities of the standard. Numeric-only text such as a long phone number therefore needs a bigger symbol than a specialised encoder would use. It does not produce Micro QR, structured append or ECI-tagged symbols.',
       'The maximum data capacity depends on the QR code version and error correction level. Very long content (over ~2000 characters) may fail to generate as it exceeds even a Version 40 QR code with Level L correction. When not to use: encoding very large payloads like full documents or large JSON blobs.',
-      'QR codes cannot encode binary data or non-UTF-8 character sets through this API interface. For binary data encoding, use a specialized QR library that supports byte mode directly.',
+      'Text is encoded as UTF-8 without an ECI header. Modern phone cameras read this correctly; some older scanners assume ISO-8859-1 and will garble accented or non-Latin characters.',
       'The generated QR code images are static — once created, the encoded data cannot be changed. When not to use for: updatable content like dynamic event schedules or changing URLs without a redirect service.',
       'Print scaling should maintain a 1:1 pixel ratio. If a 200px QR code is printed at 2x physical size, the effective resolution halves, making smaller modules harder to scan. The smallest module should be at least 0.4mm in physical size.',
     ],

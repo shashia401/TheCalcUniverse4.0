@@ -1,14 +1,11 @@
-import { createElement } from 'react';
 import { createConverter, type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   { value: 'hz', label: 'Hertz (Hz)', shortLabel: 'Hz', factor: 1 },
-  { value: 'khz', label: 'Kilohertz (kHz)', shortLabel: 'kHz', factor: 1000 },
-  { value: 'mhz', label: 'Megahertz (MHz)', shortLabel: 'MHz', factor: 1_000_000 },
-  { value: 'ghz', label: 'Gigahertz (GHz)', shortLabel: 'GHz', factor: 1_000_000_000 },
-  { value: 'thz', label: 'Terahertz (THz)', shortLabel: 'THz', factor: 1_000_000_000_000 },
+  { value: 'khz', label: 'Kilohertz (kHz)', shortLabel: 'kHz', factor: 1e3 },
+  { value: 'mhz', label: 'Megahertz (MHz)', shortLabel: 'MHz', factor: 1e6 },
+  { value: 'ghz', label: 'Gigahertz (GHz)', shortLabel: 'GHz', factor: 1e9 },
+  { value: 'thz', label: 'Terahertz (THz)', shortLabel: 'THz', factor: 1e12 },
   { value: 'rpm', label: 'Revolutions per Minute (RPM)', shortLabel: 'RPM', factor: 1 / 60 },
   { value: 'rads', label: 'Radians per Second (rad/s)', shortLabel: 'rad/s', factor: 1 / (2 * Math.PI) },
   { value: 'dps', label: 'Degrees per Second (°/s)', shortLabel: '°/s', factor: 1 / 360 },
@@ -80,7 +77,7 @@ const EDUCATIONAL = {
     },
     {
       question: 'Why is US power 60 Hz but Europe uses 50 Hz?',
-      answer: 'The choice is historical — Westinghouse/Tesla standardized 60 Hz in the US for better lighting performance (less visible flicker), while AEG/European systems adopted 50 Hz for metric convenience (50 Hz aligns well with 1,500 RPM synchronous motors). 60 Hz provides about 20% more power delivery for the same transformer size but results in slightly higher transmission losses. Aircraft use 400 Hz because it allows dramatically smaller and lighter transformers and motors — a 400 Hz transformer is about 1/8 the weight of a 60 Hz unit. Both 50 Hz and 60 Hz work fine for most applications, but 50 Hz equipment run on 60 Hz power (or vice versa) will operate at the wrong speed.',
+      answer: 'The choice is historical — Westinghouse/Tesla standardized 60 Hz in the US for better lighting performance (less visible flicker), while AEG/European systems adopted 50 Hz for metric convenience (50 Hz aligns well with 1,500 RPM synchronous motors). Aircraft use 400 Hz because higher frequency allows much smaller and lighter transformers and motors. Both 50 Hz and 60 Hz work fine for most applications, but 50 Hz equipment run on 60 Hz power (or vice versa) will operate at the wrong speed.',
     },
     {
       question: 'What frequencies does WiFi use?',
@@ -102,19 +99,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const converterConfig = createConverter({ units: UNITS, educational: EDUCATIONAL });
-const configWithPanel = {
-  ...converterConfig,
-  calculate: (values: Record<string, string>) => {
-    if (values.value !== undefined && values.value !== '') {
-      const val = parseFloat(values.value);
-      if (!isNaN(val) && val < 0) return [];
-    }
-    return converterConfig.calculate(values);
-  },
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Frequency Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Frequency Conversion', quantity: 'frequency', nonNegative: true, educational: EDUCATIONAL });

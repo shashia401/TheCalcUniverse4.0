@@ -32,6 +32,21 @@ function isValidBase64Url(str: string): boolean {
   return /^[A-Za-z0-9\-_]+$/.test(str);
 }
 
+function parseJsonObject(str: string): Record<string, unknown> | null {
+  try {
+    const v = JSON.parse(str);
+    return v !== null && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** NumericDate (RFC 7519 section 2): seconds since the Unix epoch; returns null for non-numbers / unrepresentable dates. */
+function claimDate(v: unknown): string | null {
+  if (typeof v !== 'number' || !Number.isFinite(v) || Math.abs(v) > 8.64e12 / 1000) return null;
+  return new Date(v * 1000).toISOString().replace('.000Z', 'Z');
+}
+
 function formatJson(str: string): string {
   try {
     const parsed = JSON.parse(str);
@@ -86,7 +101,8 @@ const jwtDebuggerConfig: CalculatorConfig = {
 
     const [headerB64, payloadB64, signatureB64] = parts;
 
-    if (!isValidBase64Url(headerB64) || !isValidBase64Url(payloadB64) || !isValidBase64Url(signatureB64)) {
+    // an unsigned (alg none) token legitimately has an EMPTY signature segment
+    if (!isValidBase64Url(headerB64) || !isValidBase64Url(payloadB64) || (signatureB64 !== '' && !isValidBase64Url(signatureB64))) {
       return [
         {
           id: 'isValid',
@@ -141,6 +157,23 @@ const jwtDebuggerConfig: CalculatorConfig = {
       ];
     }
 
+    const headerObj = parseJsonObject(decodedHeader);
+    const payloadObj = parseJsonObject(decodedPayload);
+    if (!headerObj || !payloadObj) {
+      return [
+        { id: 'isValid', label: 'Validation', value: `Invalid JWT format: the ${headerObj ? 'payload' : 'header'} is not a JSON object`, color: 'negative' },
+        { id: 'header', label: 'Header', value: 'N/A' },
+        { id: 'payload', label: 'Payload', value: 'N/A' },
+        { id: 'signature', label: 'Signature', value: 'N/A' },
+      ];
+    }
+
+    const alg = typeof headerObj.alg === 'string' ? headerObj.alg : '';
+    const warnings: string[] = [];
+    if (!alg) warnings.push('The header has no "alg" claim.');
+    else if (alg.toLowerCase() === 'none') warnings.push('Algorithm "none": this token is unsigned. A server must never accept it as proof of identity.');
+    else if (signatureB64 === '') warnings.push(`The token claims ${alg} but its signature segment is empty.`);
+
     const formattedHeader = formatJson(decodedHeader);
     const formattedPayload = formatJson(decodedPayload);
     const truncatedSignature = signatureB64.length > 20
@@ -153,6 +186,9 @@ const jwtDebuggerConfig: CalculatorConfig = {
         label: 'Validation',
         value: 'Valid JWT format',
         color: 'positive',
+        interpretation:
+          'Decoded only. The signature is NOT verified here (that needs the secret or public key), so nothing in this token can be trusted as authentic. Never paste production tokens into tools you do not control.',
+        ...(warnings.length ? { warning: warnings.join(' ') } : {}),
       },
       {
         id: 'header',
@@ -174,6 +210,15 @@ const jwtDebuggerConfig: CalculatorConfig = {
         value: truncatedSignature,
         color: 'neutral',
       },
+      ...(['iat', 'nbf', 'exp'] as const)
+        .map((k) => ({ k, d: claimDate(payloadObj[k]) }))
+        .filter((x): x is { k: 'iat' | 'nbf' | 'exp'; d: string } => x.d !== null)
+        .map(({ k, d }) => ({
+          id: `claim_${k}`,
+          label: k === 'iat' ? 'Issued at (iat, UTC)' : k === 'nbf' ? 'Not before (nbf, UTC)' : 'Expires (exp, UTC)',
+          value: d,
+          color: 'neutral' as const,
+        })),
     ];
   },
   extraPanel: (values, results) => {
@@ -221,7 +266,7 @@ const jwtDebuggerConfig: CalculatorConfig = {
       {
         scenario: 'Inspecting an OAuth2 access token to check expiration time',
         inputs: { token: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtleS0xMjMifQ.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiaXNzIjoiaHR0cHM6Ly9hdXRoLmV4YW1wbGUuY29tIiwiYXVkIjoiYXBpLmV4YW1wbGUuY29tIiwiZXhwIjoxOTkyNTkyODAwLCJpYXQiOjE5OTI1OTEwMDAsInNjb3BlIjoicmVhZDpwcm9maWxlIHdyaXRlOnBvc3RzIn0.dGVzdC1zaWduYXR1cmU' },
-        result: 'Valid JWT format — Header: RS256 algorithm, Payload: user@example.com with read/write scope, expiring at Unix timestamp 1992592800',
+        result: 'Valid JWT format — Header: RS256 algorithm, Payload: user@example.com with read/write scope, expiring at Unix timestamp 1992592800 (2033-02-21T10:00:00Z), issued at 1992591000 (2033-02-21T09:30:00Z)',
         insight: 'Paste any JWT into the debugger and look at the payload. The "exp" claim (Unix timestamp) tells you exactly when the token expires. The "iat" claim shows when it was issued. The "aud" claim should match the API you are calling — if it says "api.example.com" but you are calling "other-api.com", the token will be rejected. The "scope" claim reveals what permissions the token grants. This is the fastest way to debug "401 Unauthorized" errors in OAuth2 flows.',
       },
       {

@@ -4,13 +4,43 @@ import ColorConverterPanel from './ColorConverterPanel';
 
 // ─── Color conversion utilities ───────────────────────────────────────────────
 
-function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+/** CSS hex colour: #RGB, #RGBA, #RRGGBB or #RRGGBBAA (with or without '#'). alpha is 0-1 or null when absent. */
+export function parseHex(hex: string): { r: number; g: number; b: number; a: number | null } | null {
   const cleaned = hex.startsWith('#') ? hex.slice(1) : hex;
-  if (!/^[0-9A-Fa-f]{6}$/.test(cleaned)) return null;
+  if (!/^(?:[0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(cleaned)) return null;
+  const full = cleaned.length <= 4 ? cleaned.split('').map((c) => c + c).join('') : cleaned;
   return {
-    r: parseInt(cleaned.slice(0, 2), 16),
-    g: parseInt(cleaned.slice(2, 4), 16),
-    b: parseInt(cleaned.slice(4, 6), 16),
+    r: parseInt(full.slice(0, 2), 16),
+    g: parseInt(full.slice(2, 4), 16),
+    b: parseInt(full.slice(4, 6), 16),
+    a: full.length === 8 ? parseInt(full.slice(6, 8), 16) / 255 : null,
+  };
+}
+
+/** HSV/HSB: V = max channel, S = chroma / V. */
+export function rgbToHsv(r: number, g: number, b: number): { h: number; s: number; v: number } {
+  const [rN, gN, bN] = [r / 255, g / 255, b / 255];
+  const max = Math.max(rN, gN, bN);
+  const delta = max - Math.min(rN, gN, bN);
+  let h = 0;
+  if (delta !== 0) {
+    if (max === rN) h = ((gN - bN) / delta + (gN < bN ? 6 : 0)) * 60;
+    else if (max === gN) h = ((bN - rN) / delta + 2) * 60;
+    else h = ((rN - gN) / delta + 4) * 60;
+  }
+  return { h: Math.round(h) % 360, s: Math.round((max === 0 ? 0 : delta / max) * 100), v: Math.round(max * 100) };
+}
+
+/** Naive sRGB -> CMYK (K = 1 - max). Not colour-managed: a print shop's ICC profile will give different CMYK. */
+export function rgbToCmyk(r: number, g: number, b: number): { c: number; m: number; y: number; k: number } {
+  const [rN, gN, bN] = [r / 255, g / 255, b / 255];
+  const k = 1 - Math.max(rN, gN, bN);
+  if (k === 1) return { c: 0, m: 0, y: 0, k: 100 };
+  return {
+    c: Math.round(((1 - rN - k) / (1 - k)) * 100),
+    m: Math.round(((1 - gN - k) / (1 - k)) * 100),
+    y: Math.round(((1 - bN - k) / (1 - k)) * 100),
+    k: Math.round(k * 100),
   };
 }
 
@@ -50,7 +80,7 @@ function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: n
   }
 
   return {
-    h: Math.round(h),
+    h: Math.round(h) % 360,
     s: Math.round(s * 100),
     l: Math.round(l * 100),
   };
@@ -108,7 +138,7 @@ const colorConverterConfig: CalculatorConfig = {
       label: 'HEX Value',
       type: 'text',
       placeholder: '#FF0000 or FF0000...',
-      helpText: 'Enter a hex color code with or without the # prefix',
+      helpText: 'Enter a hex color code with or without the #: 3, 4, 6 or 8 digits (#RGB, #RGBA, #RRGGBB, #RRGGBBAA)',
       showWhen: (v) => v.mode === 'HEX → RGB/HSL',
     },
     {
@@ -181,34 +211,38 @@ const colorConverterConfig: CalculatorConfig = {
     let r: number;
     let g: number;
     let b: number;
+    let alpha: number | null = null;
 
     if (mode === 'HEX → RGB/HSL') {
       const hex = (values.hexInput || '').trim();
       if (!hex) return [];
 
-      const parsed = hexToRgb(hex);
+      const parsed = parseHex(hex);
       if (!parsed) return [];
 
       r = parsed.r;
       g = parsed.g;
       b = parsed.b;
+      alpha = parsed.a;
     } else if (mode === 'RGB → HEX/HSL') {
-      const red = parseInt(values.r, 10);
-      const green = parseInt(values.g, 10);
-      const blue = parseInt(values.b, 10);
+      if (!values.r?.trim() || !values.g?.trim() || !values.b?.trim()) return [];
+      const red = Math.round(Number(values.r));
+      const green = Math.round(Number(values.g));
+      const blue = Math.round(Number(values.b));
 
-      if (isNaN(red) || isNaN(green) || isNaN(blue)) return [];
+      if (!Number.isFinite(red) || !Number.isFinite(green) || !Number.isFinite(blue)) return [];
       if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 || blue > 255) return [];
 
       r = red;
       g = green;
       b = blue;
     } else if (mode === 'HSL → HEX/RGB') {
-      const hue = parseFloat(values.h);
-      const sat = parseFloat(values.s);
-      const lit = parseFloat(values.l);
+      if (!values.h?.trim() || !values.s?.trim() || !values.l?.trim()) return [];
+      const hue = Number(values.h);
+      const sat = Number(values.s);
+      const lit = Number(values.l);
 
-      if (isNaN(hue) || isNaN(sat) || isNaN(lit)) return [];
+      if (!Number.isFinite(hue) || !Number.isFinite(sat) || !Number.isFinite(lit)) return [];
       if (hue < 0 || hue > 360 || sat < 0 || sat > 100 || lit < 0 || lit > 100) return [];
 
       const rgb = hslToRgb(hue, sat, lit);
@@ -222,10 +256,27 @@ const colorConverterConfig: CalculatorConfig = {
     const hexResult = rgbToHex(r, g, b);
     const hsl = rgbToHsl(r, g, b);
 
+    const hsv = rgbToHsv(r, g, b);
+    const cmyk = rgbToCmyk(r, g, b);
+    const a255 = alpha === null ? null : Math.round(alpha * 255);
+
     return [
       { id: 'hex', label: 'HEX', value: hexResult, highlight: true },
       { id: 'rgb', label: 'RGB', value: `rgb(${r}, ${g}, ${b})` },
       { id: 'hsl', label: 'HSL', value: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)` },
+      { id: 'hsv', label: 'HSV / HSB', value: `hsv(${hsv.h}, ${hsv.s}%, ${hsv.v}%)` },
+      {
+        id: 'cmyk',
+        label: 'CMYK (naive)',
+        value: `cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`,
+        interpretation: 'Simple sRGB-to-CMYK formula for reference. Print production needs an ICC-profile conversion, which gives different numbers.',
+      },
+      ...(a255 === null
+        ? []
+        : [
+            { id: 'rgba', label: 'RGBA', value: `rgba(${r}, ${g}, ${b}, ${Number((a255 / 255).toFixed(3))})` },
+            { id: 'hex8', label: 'HEX with alpha', value: `${hexResult}${a255.toString(16).padStart(2, '0').toUpperCase()}` },
+          ]),
     ];
   },
   extraPanel: (values, results) => {

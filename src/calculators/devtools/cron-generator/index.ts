@@ -102,6 +102,79 @@ function generateNextRunDescription(
   return [desc, ...scheduleSuffixParts(dom, month, dow)].join(' ');
 }
 
+const FIELD_RANGES = { minute: [0, 59], hour: [0, 23], dom: [1, 31], month: [1, 12], dow: [0, 7] } as const;
+
+/** Expand one cron field (star, N, N-M, star-slash-S, N-M/S, comma lists) into the set of matching values; null when invalid. */
+export function parseCronField(field: string, min: number, max: number): Set<number> | null {
+  const out = new Set<number>();
+  for (const part of field.split(',')) {
+    const m = /^(\*|\d+(?:-\d+)?)(?:\/(\d+))?$/.exec(part);
+    if (!m) return null;
+    const step = m[2] === undefined ? 1 : Number(m[2]);
+    if (step < 1) return null;
+    let lo: number;
+    let hi: number;
+    if (m[1] === '*') {
+      lo = min;
+      hi = max;
+    } else if (m[1].includes('-')) {
+      [lo, hi] = m[1].split('-').map(Number);
+    } else {
+      lo = Number(m[1]);
+      hi = m[2] === undefined ? lo : max; // "5/15" means 5-max/15
+    }
+    if (lo < min || hi > max || lo > hi) return null;
+    for (let v = lo; v <= hi; v += step) out.add(v);
+  }
+  return out;
+}
+
+/**
+ * Next `count` run times (UTC, minute resolution) of a 5-field cron expression after `fromMs`.
+ * Standard Vixie-cron rule: when BOTH day-of-month and day-of-week are restricted the job runs when EITHER matches.
+ * Day-of-week 7 is Sunday (same as 0). Returns [] for invalid expressions or a schedule that never fires within 8 years
+ * (for example 31 February). Cron itself runs in the server's local time zone: around a DST change a local-time job can
+ * be skipped or run twice, which a UTC preview cannot show.
+ */
+export function nextCronRuns(expr: string, fromMs: number, count = 5): number[] {
+  const f = expr.trim().split(/\s+/);
+  if (f.length !== 5) return [];
+  const sets = [
+    parseCronField(f[0], 0, 59),
+    parseCronField(f[1], 0, 23),
+    parseCronField(f[2], 1, 31),
+    parseCronField(f[3], 1, 12),
+    parseCronField(f[4], 0, 7),
+  ];
+  if (sets.some((x) => x === null)) return [];
+  const [mins, hours, doms, months, dowRaw] = sets as Set<number>[];
+  const dows = new Set([...dowRaw].map((d) => d % 7));
+  const domStar = f[2].startsWith('*');
+  const dowStar = f[4].startsWith('*');
+  const dayMatches = (d: Date) => {
+    const domOk = doms.has(d.getUTCDate());
+    const dowOk = dows.has(d.getUTCDay());
+    if (domStar && dowStar) return true;
+    if (domStar) return dowOk;
+    if (dowStar) return domOk;
+    return domOk || dowOk;
+  };
+  const runs: number[] = [];
+  const start = new Date(Math.floor(fromMs / 60000) * 60000 + 60000);
+  const day = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()));
+  const limit = day.getTime() + 8 * 366 * 86400000;
+  for (; day.getTime() < limit && runs.length < count; day.setUTCDate(day.getUTCDate() + 1)) {
+    if (!months.has(day.getUTCMonth() + 1) || !dayMatches(day)) continue;
+    for (const h of [...hours].sort((a, b) => a - b)) {
+      for (const mi of [...mins].sort((a, b) => a - b)) {
+        const t = day.getTime() + h * 3600000 + mi * 60000;
+        if (t >= start.getTime() && runs.length < count) runs.push(t);
+      }
+    }
+  }
+  return runs;
+}
+
 const cronGeneratorConfig: CalculatorConfig = {
   inputs: [
     {
@@ -194,24 +267,37 @@ const cronGeneratorConfig: CalculatorConfig = {
 
       if (!minuteVal || !hourVal) return [];
 
-      const minuteNum = parseInt(minuteVal, 10);
-      const hourNum = parseInt(hourVal, 10);
-
-      if (isNaN(minuteNum) || isNaN(hourNum)) return [];
+      if (!/^\d+$/.test(minuteVal) || !/^\d+$/.test(hourVal)) return [];
+      const minuteNum = Number(minuteVal);
+      const hourNum = Number(hourVal);
       if (minuteNum < 0 || minuteNum > 59) return [];
       if (hourNum < 0 || hourNum > 23) return [];
 
       minute = String(minuteNum);
       hour = String(hourNum);
-      dom = (!domVal || domVal === '*' || domVal === '?') ? '*' : String(parseInt(domVal, 10));
-      month = (!monthVal || monthVal === '*' || monthVal === '?') ? '*' : String(parseInt(monthVal, 10));
-      dow = (!dowVal || dowVal === '*' || dowVal === '?') ? '*' : String(parseInt(dowVal, 10));
+      // Optional fields: blank / * / ? mean "every"; anything else must be a whole number inside the cron range.
+      const optional = (raw: string, [lo, hi]: readonly [number, number]): string | null => {
+        if (!raw || raw === '*' || raw === '?') return '*';
+        if (!/^\d+$/.test(raw)) return null;
+        const n = Number(raw);
+        return n >= lo && n <= hi ? String(n) : null;
+      };
+      const d = optional(domVal, FIELD_RANGES.dom);
+      const mo = optional(monthVal, FIELD_RANGES.month);
+      const w = optional(dowVal, FIELD_RANGES.dow);
+      if (d === null || mo === null || w === null) return [];
+      dom = d;
+      month = mo;
+      dow = w === '7' ? '0' : w; // 7 and 0 are both Sunday; 0 is the portable spelling
 
       description = generateDescription(minute, hour, dom, month, dow);
     }
 
     const expression = `${minute} ${hour} ${dom} ${month} ${dow}`;
     const nextRunDesc = generateNextRunDescription(minute, hour, dom, month, dow);
+
+    const runs = nextCronRuns(expression, Date.now(), 5);
+    const never = runs.length === 0;
 
     return [
       {
@@ -232,6 +318,15 @@ const cronGeneratorConfig: CalculatorConfig = {
         label: 'Schedule',
         value: nextRunDesc,
         color: 'neutral',
+      },
+      {
+        id: 'nextRuns',
+        label: 'Next 5 runs (UTC)',
+        value: never ? 'Never fires (for example day 31 of a 30-day month)' : runs.map((t) => new Date(t).toISOString().replace(':00.000Z', 'Z')).join(', '),
+        color: never ? 'negative' : 'neutral',
+        ...(never ? { warning: 'This day/month combination does not exist on the calendar, so the job would never run.' } : {}),
+        interpretation:
+          'Previewed in UTC. Cron uses the server time zone: around daylight-saving changes a local-time job can be skipped (spring forward) or run twice (fall back). Run critical jobs in UTC. When both day-of-month and day-of-week are set, cron runs on either match.',
       },
     ];
   },

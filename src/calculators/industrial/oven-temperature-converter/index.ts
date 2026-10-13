@@ -1,70 +1,19 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import OvenTempPanel from './OvenTempPanel';
+import { closestGasMark, cToF, fToC, gasMarkToTemps } from '../../../utils/ovenTemp';
 
-const GAS_MARK_TABLE: { mark: string; value: number; celsius: number; fahrenheit: number }[] = [
-  { mark: 'Gas Mark ¼', value: 0.25, celsius: 110, fahrenheit: 225 },
-  { mark: 'Gas Mark ½', value: 0.5, celsius: 130, fahrenheit: 250 },
-  { mark: 'Gas Mark 1', value: 1, celsius: 140, fahrenheit: 275 },
-  { mark: 'Gas Mark 2', value: 2, celsius: 150, fahrenheit: 300 },
-  { mark: 'Gas Mark 3', value: 3, celsius: 165, fahrenheit: 325 },
-  { mark: 'Gas Mark 4', value: 4, celsius: 180, fahrenheit: 350 },
-  { mark: 'Gas Mark 5', value: 5, celsius: 190, fahrenheit: 375 },
-  { mark: 'Gas Mark 6', value: 6, celsius: 200, fahrenheit: 400 },
-  { mark: 'Gas Mark 7', value: 7, celsius: 220, fahrenheit: 425 },
-  { mark: 'Gas Mark 8', value: 8, celsius: 230, fahrenheit: 450 },
-  { mark: 'Gas Mark 9', value: 9, celsius: 240, fahrenheit: 475 },
-  { mark: 'Gas Mark 10', value: 10, celsius: 260, fahrenheit: 500 },
-];
-
-const OVEN_TERMS: { label: string; celsiusMin: number; celsiusMax: number; fahrenheitMin: number; fahrenheitMax: number }[] = [
-  { label: 'Very slow', celsiusMin: 110, celsiusMax: 130, fahrenheitMin: 225, fahrenheitMax: 250 },
-  { label: 'Slow', celsiusMin: 140, celsiusMax: 150, fahrenheitMin: 275, fahrenheitMax: 300 },
-  { label: 'Moderate', celsiusMin: 160, celsiusMax: 180, fahrenheitMin: 325, fahrenheitMax: 350 },
-  { label: 'Moderately hot', celsiusMin: 190, celsiusMax: 200, fahrenheitMin: 375, fahrenheitMax: 400 },
-  { label: 'Hot', celsiusMin: 210, celsiusMax: 230, fahrenheitMin: 425, fahrenheitMax: 450 },
-  { label: 'Very hot', celsiusMin: 240, celsiusMax: 260, fahrenheitMin: 475, fahrenheitMax: 500 },
-];
-
-function getOvenTerm(celsius: number): string {
-  for (const term of OVEN_TERMS) {
-    if (celsius >= term.celsiusMin && celsius <= term.celsiusMax) {
-      return `${term.label} oven (${term.celsiusMin}°C–${term.celsiusMax}°C / ${term.fahrenheitMin}°F–${term.fahrenheitMax}°F)`;
-    }
-  }
-  if (celsius < 110) return 'Below typical oven temperature range';
-  return 'Above typical oven temperature range (very hot)';
-}
+const markLabel = (mark: number) => (mark === 0.25 ? 'Gas Mark ¼' : mark === 0.5 ? 'Gas Mark ½' : `Gas Mark ${mark}`);
 
 function celsiusToGasMarkLabel(celsius: number): string {
-  // Check exact or nearest match in the table
-  if (celsius < 110) return 'N/A';
-
-  // Special fractional marks
-  if (celsius >= 105 && celsius <= 115) return 'Gas Mark ¼';
-  if (celsius >= 125 && celsius <= 135) return 'Gas Mark ½';
-
-  // Standard gas marks: GM = round((C - 135) / 14 + 1)
-  const gm = Math.round((celsius - 135) / 14 + 1);
-  if (gm >= 1 && gm <= 10) {
-    // Find closest celsius in table for this gm
-    const entry = GAS_MARK_TABLE.find(e => e.value === gm);
-    if (entry) return entry.mark;
-  }
-  return 'N/A';
+  const row = closestGasMark(celsius);
+  return row ? markLabel(row.mark) : 'N/A';
 }
 
-function gasMarkValueToCelsius(gasValue: number): number | null {
-  const entry = GAS_MARK_TABLE.find(e => e.value === gasValue);
-  if (entry) return entry.celsius;
-
-  // Try to find closest if not exact
-  if (gasValue >= 0.25 && gasValue <= 10) {
-    // Approximate using formula: C = (GM - 1) * 14 + 135
-    const approxC = (gasValue - 1) * 14 + 135;
-    return Math.round(approxC);
-  }
-  return null;
+function getOvenTerm(celsius: number): string {
+  const row = closestGasMark(celsius);
+  if (row) return `${row.description} oven (nearest gas mark: ${row.celsius}°C / ${row.fahrenheit}°F)`;
+  return celsius < 110 ? 'Below typical oven temperature range' : 'Above typical oven temperature range (very hot)';
 }
 
 const config: CalculatorConfig = {
@@ -114,15 +63,15 @@ const config: CalculatorConfig = {
     // Convert input to celsius and fahrenheit
     if (from === 'c') {
       celsius = val;
-      fahrenheit = celsius * 9 / 5 + 32;
+      fahrenheit = cToF(celsius);
     } else if (from === 'f') {
       fahrenheit = val;
-      celsius = (fahrenheit - 32) * 5 / 9;
+      celsius = fToC(fahrenheit);
     } else if (from === 'gas') {
-      const c = gasMarkValueToCelsius(val);
-      if (c === null) return [];
-      celsius = c;
-      fahrenheit = celsius * 9 / 5 + 32;
+      const temps = gasMarkToTemps(val);
+      if (!temps) return [];
+      celsius = temps.celsius;
+      fahrenheit = temps.fahrenheit;
     } else {
       return [];
     }
@@ -181,9 +130,9 @@ const config: CalculatorConfig = {
   },
   educational: {
     formula:
-      '°F = °C × 9/5 + 32 | °C = (°F − 32) × 5/9 | Gas Mark = round((°C − 135) / 14 + 1) for °C ≥ 135',
+      '°F = °C × 9/5 + 32 | °C = (°F − 32) × 5/9 | Gas Mark: table lookup (≈ 14°C per mark, °C ≈ 14 × mark + 121 for marks ≥ 1)',
     formulaDescription:
-      'Oven temperature conversion involves three distinct scales: Celsius (used in most countries), Fahrenheit (used in the United States), and Gas Mark (a unique UK system that maps oven regulator settings to temperature ranges). Each Gas Mark increment represents approximately 14°C (25°F), with Gas Mark 4 (180°C / 350°F) serving as the standard moderate baking temperature. Fan or convection ovens typically require reducing the temperature by about 20°C (36°F) compared to conventional ovens, because the circulating air transfers heat more efficiently.',
+      'Oven temperature conversion involves three distinct scales: Celsius (used in most countries), Fahrenheit (used in the United States), and Gas Mark (a unique UK system that maps oven regulator settings to temperature ranges). Each Gas Mark increment represents approximately 14°C (25°F), with Gas Mark 4 (180°C / 350°F) serving as the standard moderate baking temperature. The Celsius figures in the usual gas mark table are rounded kitchen values (350°F is exactly 176.7°C but is listed as 180°C), so gas mark results are the nearest table entry. Fan or convection ovens typically require reducing the temperature by about 20°C (36°F) compared to conventional ovens, because the circulating air transfers heat more efficiently.',
     variables: [
       {
         symbol: '°C',
@@ -218,7 +167,7 @@ const config: CalculatorConfig = {
     ],
     quickReference: [
       { label: 'Gas Mark 4 (Standard)', value: '180°C / 350°F / Moderate' },
-      { label: 'Very slow', value: '110–130°C / 225–250°F / ¼–½' },
+      { label: 'Very slow', value: '110–120°C / 225–250°F / ¼–½' },
       { label: 'Hot oven', value: '210–230°C / 425–450°F / Gas Mark 7–8' },
       { label: 'Very hot', value: '240–260°C / 475–500°F / Gas Mark 9–10' },
       { label: 'Fan oven adjustment', value: 'Reduce by 20°C (36°F) from recipe temperature' },
@@ -272,17 +221,17 @@ const config: CalculatorConfig = {
         'Oven temperature scales compared side by side with descriptive oven terms. Fan ovens typically require a 20°C reduction.',
     },
     explanation:
-      'Oven temperature conversion is an essential skill for any cook or baker working with international recipes. Unlike simple unit conversions, oven temperature scales include the unique Gas Mark system, a method developed for traditional British gas ovens where the thermostat dial was marked with numbers rather than specific temperatures. The Gas Mark system works on an approximately linear scale: Gas Mark 1 corresponds to 140°C (275°F), and each subsequent mark increases by roughly 14°C (25°F) up to Gas Mark 10 at 260°C (500°F). This means Gas Mark 4 (180°C / 350°F) is the standard moderate oven temperature used for most baking. A critical consideration in oven temperature conversion is whether you are using a conventional oven or a fan-assisted (convection) oven. Fan ovens circulate hot air using a built-in fan, which transfers heat more efficiently and evenly throughout the oven cavity. As a result, fan ovens reach the effective cooking temperature more quickly and maintain it more consistently. The general rule is to reduce the temperature by about 20°C (36°F) when converting a conventional oven recipe for use in a fan oven. For example, if a recipe calls for 180°C (350°F) in a conventional oven, set a fan oven to 160°C (320°F). If a recipe specifies fan oven temperature and you are using a conventional oven, increase by the same amount. Beyond the numbers, common oven terms like "moderate" or "hot" provide a rough guide: a moderate oven is 160–180°C (325–350°F), good for cakes and biscuits; a hot oven is 210–230°C (425–450°F), ideal for roasting vegetables and searing meats; and a very hot oven at 240–260°C (475–500°F) is used for pizzas and bread to achieve a crisp crust. Understanding these relationships allows you to confidently adapt any recipe regardless of the temperature scale or oven type specified.',
+      'Oven temperature conversion is an essential skill for any cook or baker working with international recipes. Unlike simple unit conversions, oven temperature scales include the unique Gas Mark system, a method developed for traditional British gas ovens where the thermostat dial was marked with numbers rather than specific temperatures. The Gas Mark system works on an approximately linear scale: Gas Mark 1 corresponds to 140°C (275°F), and each subsequent mark increases by roughly 14°C (25°F) up to Gas Mark 10 at 260°C (500°F); the fractional marks ¼ and ½ are 110°C and 120°C. This means Gas Mark 4 (180°C / 350°F) is the standard moderate oven temperature used for most baking. A critical consideration in oven temperature conversion is whether you are using a conventional oven or a fan-assisted (convection) oven. Fan ovens circulate hot air using a built-in fan, which transfers heat more efficiently and evenly throughout the oven cavity. As a result, fan ovens reach the effective cooking temperature more quickly and maintain it more consistently. The general rule is to reduce the temperature by about 20°C (36°F) when converting a conventional oven recipe for use in a fan oven. For example, if a recipe calls for 180°C (350°F) in a conventional oven, set a fan oven to 160°C (320°F). If a recipe specifies fan oven temperature and you are using a conventional oven, increase by the same amount. Beyond the numbers, common oven terms like "moderate" or "hot" provide a rough guide: a moderate oven is 160–180°C (325–350°F), good for cakes and biscuits; a hot oven is 210–230°C (425–450°F), ideal for roasting vegetables and searing meats; and a very hot oven at 240–260°C (475–500°F) is used for pizzas and bread to achieve a crisp crust. Understanding these relationships allows you to confidently adapt any recipe regardless of the temperature scale or oven type specified.',
     faqs: [
       {
         question: 'What is the Gas Mark system and why was it invented?',
         answer:
-          'The Gas Mark system originated in the United Kingdom in the early 20th century when gas ovens became common in households. Gas ovens did not have precise temperature controls, so manufacturers assigned numbers (marks) to specific gas regulator settings. The first standardized Gas Mark table was published by the British Standards Institution in the 1930s. Gas Mark 4 (180°C / 350°F) became the default moderate oven setting for most baking. The system persists in UK cookbooks and on many modern British ovens, even though most now also display Celsius. Understanding gas marks is essential for anyone following traditional UK recipes or using vintage cookbooks.',
+          'The Gas Mark system originated in the United Kingdom in the 1920s-30s, when gas cookers got numbered regulator settings. Gas ovens did not have precise temperature controls, so manufacturers assigned numbers (marks) to specific gas regulator settings. Gas Mark 4 (180°C / 350°F) became the default moderate oven setting for most baking. The system persists in UK cookbooks and on many modern British ovens, even though most now also display Celsius. Understanding gas marks is essential for anyone following traditional UK recipes or using vintage cookbooks.',
       },
       {
         question: 'When should I reduce the temperature for a fan oven?',
         answer:
-          'You should reduce the temperature for a fan (convection) oven by approximately 20°C (36°F) when following a recipe designed for a conventional (non-fan) oven. This is because the fan circulates hot air, transferring heat to the food more efficiently. The same principle applies to cooking times: fan ovens often cook food 10–25% faster. If a recipe gives a fan oven temperature, use that directly. If only conventional temperatures are given, the conversion rule of thumb is: fan temperature = conventional temperature minus 20°C. For precise results, many modern recipes explicitly state temperatures for both oven types.',
+          'You should reduce the temperature for a fan (convection) oven by approximately 20°C (36°F) when following a recipe designed for a conventional (non-fan) oven. This is because the fan circulates hot air, transferring heat to the food more efficiently. Fan ovens also tend to cook a little faster, so check food early. If a recipe gives a fan oven temperature, use that directly. If only conventional temperatures are given, the conversion rule of thumb is: fan temperature = conventional temperature minus 20°C. For precise results, many modern recipes explicitly state temperatures for both oven types.',
       },
       {
         question: 'Can I use Gas Mark settings on an electric oven?',
@@ -307,7 +256,7 @@ const config: CalculatorConfig = {
       },
       {
         source: 'Wikipedia - Gas Mark',
-        url: 'https://en.wikipedia.org/wiki/Gas_Mark',
+        url: 'https://en.wikipedia.org/wiki/Gas_mark',
       },
     ],
   },

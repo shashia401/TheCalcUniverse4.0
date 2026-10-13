@@ -1,19 +1,17 @@
-import { createElement } from 'react';
 import { createConverter, type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { FT3_L, GAL_UK_L, GAL_US_L, IN3_L, LB_KG } from '../../../utils/unitConvert';
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   { value: 'kgm3', label: 'Kilogram per Cubic Meter (kg/m³)', shortLabel: 'kg/m³', factor: 1 },
   { value: 'gcm3', label: 'Gram per Cubic Centimeter (g/cm³)', shortLabel: 'g/cm³', factor: 1000 },
   { value: 'gml', label: 'Gram per Milliliter (g/mL)', shortLabel: 'g/mL', factor: 1000 },
-  { value: 'lbft3', label: 'Pound per Cubic Foot (lb/ft³)', shortLabel: 'lb/ft³', factor: 16.0185 },
-  { value: 'lbin3', label: 'Pound per Cubic Inch (lb/in³)', shortLabel: 'lb/in³', factor: 27679.9 },
-  { value: 'lbgalus', label: 'Pound per US Gallon (lb/gal)', shortLabel: 'lb/gal (US)', factor: 119.826 },
-  { value: 'lbgaluk', label: 'Pound per UK Gallon (lb/gal)', shortLabel: 'lb/gal (UK)', factor: 99.7764 },
-  { value: 'ozin3', label: 'Ounce per Cubic Inch (oz/in³)', shortLabel: 'oz/in³', factor: 1729.99 },
-  { value: 'ozft3', label: 'Ounce per Cubic Foot (oz/ft³)', shortLabel: 'oz/ft³', factor: 1.00116 },
-  { value: 'sg', label: 'Specific Gravity (relative to water at 4°C)', shortLabel: 'SG', factor: 1000 },
+  { value: 'lbft3', label: 'Pound per Cubic Foot (lb/ft³)', shortLabel: 'lb/ft³', factor: LB_KG / (FT3_L / 1000) },
+  { value: 'lbin3', label: 'Pound per Cubic Inch (lb/in³)', shortLabel: 'lb/in³', factor: LB_KG / (IN3_L / 1000) },
+  { value: 'lbgalus', label: 'Pound per US Gallon (lb/gal)', shortLabel: 'lb/gal (US)', factor: LB_KG / (GAL_US_L / 1000) },
+  { value: 'lbgaluk', label: 'Pound per UK Gallon (lb/gal)', shortLabel: 'lb/gal (UK)', factor: LB_KG / (GAL_UK_L / 1000) },
+  { value: 'ozin3', label: 'Ounce per Cubic Inch (oz/in³)', shortLabel: 'oz/in³', factor: LB_KG / 16 / (IN3_L / 1000) },
+  { value: 'ozft3', label: 'Ounce per Cubic Foot (oz/ft³)', shortLabel: 'oz/ft³', factor: LB_KG / 16 / (FT3_L / 1000) },
+  { value: 'sg', label: 'Specific Gravity (water = 1000 kg/m³)', shortLabel: 'SG', factor: 1000 },
 ];
 
 const EDUCATIONAL = {
@@ -73,7 +71,7 @@ const EDUCATIONAL = {
     caption: 'Density determines if an object floats (SG < 1) or sinks (SG > 1) in water',
   },
   explanation:
-    'Density is a fundamental material property — how much mass occupies a given volume. It determines whether objects float or sink, affects structural weight calculations, and is essential for fluid dynamics, material selection, and quality control in manufacturing. Water at 4°C (its maximum density) has a density of exactly 1 g/cm³, 1,000 kg/m³, or SG 1.0. This is the reference point for specific gravity — gold is 19.3 times denser than water (SG 19.3), meaning a gold bar the size of a water bottle weighs as much as 19 water bottles. Air has a density of about 1.225 kg/m³ at sea level (1/815th the density of water). This large difference explains why sound travels faster in water than in air. Density varies with temperature and pressure — hot air rises because it is less dense, and cold water sinks because it is denser. Material density determines practical applications: aluminum (2.7 g/cm³) is used in aircraft because it is light, tungsten (19.3 g/cm³) in radiation shielding because it is dense.',
+    'Density is a fundamental material property — how much mass occupies a given volume. It determines whether objects float or sink, affects structural weight calculations, and is essential for fluid dynamics, material selection, and quality control in manufacturing. Water at 4°C (its maximum density) has a density of almost exactly 1 g/cm³ (0.99997 g/cm³), about 1,000 kg/m³, or SG 1.0. This is the reference point for specific gravity — gold is 19.3 times denser than water (SG 19.3), meaning a gold bar the size of a water bottle weighs as much as 19 water bottles. Air has a density of about 1.225 kg/m³ at sea level (1/815th the density of water). Density varies with temperature and pressure — hot air rises because it is less dense, and cold water sinks because it is denser. Material density determines practical applications: aluminum (2.7 g/cm³) is used in aircraft because it is light, tungsten (19.3 g/cm³) in radiation shielding because it is dense.',
   faqs: [
     {
       question: 'What is the difference between density and specific gravity?',
@@ -103,12 +101,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const converterConfig = createConverter({ units: UNITS, educational: EDUCATIONAL });
-const configWithPanel = {
-  ...converterConfig,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Density Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Density Conversion', quantity: 'density', educational: EDUCATIONAL });

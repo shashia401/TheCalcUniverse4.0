@@ -83,22 +83,24 @@ describe('Regex Tester & Debugger', () => {
     expect(r).toEqual([]);
   });
 
-  it('returns empty array for invalid regex pattern', () => {
+  it('returns an explanatory error row for an invalid regex pattern', () => {
     const r = config.calculate({
       pattern: '[abc',
       flags: 'g',
       testString: 'test',
     });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
+    expect(r[0].value).toMatch(/Unterminated character class/i);
   });
 
-  it('returns empty array for invalid regex with quantifier', () => {
+  it('returns an explanatory error row for an unclosed group', () => {
     const r = config.calculate({
       pattern: '(abc',
       flags: 'g',
       testString: 'test',
     });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   it('handles regex with special characters', () => {

@@ -58,34 +58,46 @@ charToEntityMap['>'] = '&gt;';
 charToEntityMap['"'] = '&quot;';
 charToEntityMap["'"] = '&#39;';
 
-function encodeHtml(input: string): string {
-  return input.replace(/[&<>"']/g, (char) => charToEntityMap[char] || char);
+// More frequently used HTML5 named references (the full HTML5 list has 2,231; unknown names are left untouched).
+Object.assign(htmlEntityMap, {
+  '&ndash;': '–', '&mdash;': '—', '&lsquo;': '‘', '&rsquo;': '’', '&ldquo;': '“', '&rdquo;': '”', '&bull;': '•',
+  '&hellip;': '…', '&trade;': '™', '&larr;': '←', '&rarr;': '→', '&uarr;': '↑', '&darr;': '↓', '&hearts;': '♥',
+  '&infin;': '∞', '&ne;': '≠', '&le;': '≤', '&ge;': '≥', '&alpha;': 'α', '&beta;': 'β', '&pi;': 'π', '&Omega;': 'Ω',
+  '&check;': '✓', '&dagger;': '†', '&permil;': '‰', '&sum;': '∑', '&radic;': '√',
+});
+
+/** HTML spec numeric-reference fix-up for 0x80-0x9F (windows-1252 code points). */
+const WIN1252 = '€\u0081‚ƒ„…†‡ˆ‰Š‹Œ\u008dŽ\u008f\u0090‘’“”•–—˜™š›œ\u009džŸ';
+
+/** One code point from a numeric reference, following the HTML5 parsing rules (invalid -> U+FFFD, never throws). */
+export function codePointFromReference(cp: number): string {
+  if (!Number.isFinite(cp) || cp === 0 || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff)) return '�';
+  if (cp >= 0x80 && cp <= 0x9f) return WIN1252[cp - 0x80];
+  return String.fromCodePoint(cp);
 }
 
-function decodeHtml(input: string): string {
-  // Decode named entities first
-  let result = input;
-  // Sort by length (longest first) to avoid partial replacements
-  const sortedEntities = Object.entries(htmlEntityMap).sort(
-    (a, b) => b[0].length - a[0].length
-  );
-  for (const [entity, char] of sortedEntities) {
-    result = result.replace(new RegExp(entity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), char);
+/**
+ * Decode named, decimal and hex references in ONE pass. A sequential replace-per-entity would turn "&amp;lt;" into "<"
+ * (double decoding); the correct result is the literal text "&lt;".
+ */
+export function decodeHtml(input: string): string {
+  return input.replace(/&(?:#(\d{1,8})|#[xX]([0-9a-fA-F]{1,8})|([A-Za-z][A-Za-z0-9]*));/g, (match, dec, hex, name) => {
+    if (dec !== undefined) return codePointFromReference(parseInt(dec, 10));
+    if (hex !== undefined) return codePointFromReference(parseInt(hex, 16));
+    return htmlEntityMap[`&${name};`] ?? match;
+  });
+}
+
+/** Escape the five markup characters. With `nonAscii`, every other character above U+007E becomes a named or numeric reference. */
+export function encodeHtml(input: string, nonAscii = false): string {
+  let out = '';
+  for (const ch of input) {
+    // for...of walks code points, so an astral character (surrogate pair) stays ONE reference: 😀 -> &#x1F600;
+    if (charToEntityMap[ch] && /[&<>"']/.test(ch)) out += charToEntityMap[ch];
+    else if (nonAscii && ch.codePointAt(0)! > 0x7e) out += charToEntityMap[ch] ?? `&#x${ch.codePointAt(0)!.toString(16).toUpperCase()};`;
+    else out += ch;
   }
-
-  // Decode decimal entities &#123;
-  result = result.replace(/&#(\d+);/g, (_match, dec) => {
-    const codePoint = parseInt(dec, 10);
-    return isNaN(codePoint) ? _match : String.fromCodePoint(codePoint);
-  });
-
-  // Decode hex entities &#x1F;
-  result = result.replace(/&#x([0-9a-fA-F]+);/g, (_match, hex) => {
-    const codePoint = parseInt(hex, 16);
-    return isNaN(codePoint) ? _match : String.fromCodePoint(codePoint);
-  });
-
-  return result;
+  return out;
 }
 
 const htmlEntityEncoderConfig: CalculatorConfig = {
@@ -98,6 +110,7 @@ const htmlEntityEncoderConfig: CalculatorConfig = {
       helpText: 'Choose to encode special chars or decode entities back',
       options: [
         { label: 'Encode to Entities', value: 'encode' },
+        { label: 'Encode + non-ASCII as entities', value: 'encode-all' },
         { label: 'Decode to Text', value: 'decode' },
       ],
     },
@@ -117,8 +130,8 @@ const htmlEntityEncoderConfig: CalculatorConfig = {
     if (!input.trim()) return [];
 
     let output: string;
-    if (mode === 'encode') {
-      output = encodeHtml(input);
+    if (mode === 'encode' || mode === 'encode-all') {
+      output = encodeHtml(input, mode === 'encode-all');
     } else {
       output = decodeHtml(input);
     }
@@ -126,7 +139,7 @@ const htmlEntityEncoderConfig: CalculatorConfig = {
     return [
       {
         id: 'output',
-        label: mode === 'encode' ? 'Encoded Output' : 'Decoded Output',
+        label: mode === 'decode' ? 'Decoded Output' : 'Encoded Output',
         value: output,
         highlight: true,
         color: 'positive',

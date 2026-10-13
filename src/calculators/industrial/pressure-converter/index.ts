@@ -1,21 +1,21 @@
-import { createElement } from 'react';
 import { createConverter, type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { ATM_PA, IN_M, LBF_N, MMH2O_PA, MMHG_PA } from '../../../utils/unitConvert';
 
-const UNITS: UnitDef[] = [
+// mmHg is taken equal to the torr (101325/760 Pa) so that 760 mmHg = 1 atm exactly; the conventional mmHg (133.322387415 Pa) differs by 1.4e-7.
+// inHg uses the conventional mercury density (NIST SP 811: 0 degC). Negative values are allowed (gauge vacuum readings).
+export const UNITS: UnitDef[] = [
   { value: 'pa', label: 'Pascal (Pa)', shortLabel: 'Pa', factor: 1 },
   { value: 'hpa', label: 'Hectopascal (hPa)', shortLabel: 'hPa', factor: 100 },
   { value: 'kpa', label: 'Kilopascal (kPa)', shortLabel: 'kPa', factor: 1000 },
-  { value: 'mpa', label: 'Megapascal (MPa)', shortLabel: 'MPa', factor: 1_000_000 },
-  { value: 'bar', label: 'Bar', shortLabel: 'bar', factor: 100_000 },
-  { value: 'psi', label: 'Pound per Square Inch (PSI)', shortLabel: 'psi', factor: 6894.76 },
-  { value: 'atm', label: 'Atmosphere (atm)', shortLabel: 'atm', factor: 101_325 },
-  { value: 'torr', label: 'Torr', shortLabel: 'Torr', factor: 133.322 },
-  { value: 'mmhg', label: 'Millimeter of Mercury (mmHg)', shortLabel: 'mmHg', factor: 133.322 },
-  { value: 'inhg', label: 'Inch of Mercury (inHg)', shortLabel: 'inHg', factor: 3386.39 },
-  { value: 'mmh2o', label: 'Millimeter of Water (mmH₂O)', shortLabel: 'mmH₂O', factor: 9.80665 },
-  { value: 'inh2o', label: 'Inch of Water (inH₂O)', shortLabel: 'inH₂O', factor: 249.089 },
+  { value: 'mpa', label: 'Megapascal (MPa)', shortLabel: 'MPa', factor: 1e6 },
+  { value: 'bar', label: 'Bar', shortLabel: 'bar', factor: 1e5 },
+  { value: 'psi', label: 'Pound per Square Inch (PSI)', shortLabel: 'psi', factor: LBF_N / IN_M ** 2 },
+  { value: 'atm', label: 'Atmosphere (atm)', shortLabel: 'atm', factor: ATM_PA },
+  { value: 'torr', label: 'Torr (1/760 atm)', shortLabel: 'Torr', factor: ATM_PA / 760 },
+  { value: 'mmhg', label: 'Millimeter of Mercury (mmHg)', shortLabel: 'mmHg', factor: ATM_PA / 760 },
+  { value: 'inhg', label: 'Inch of Mercury (inHg)', shortLabel: 'inHg', factor: MMHG_PA * 25.4 },
+  { value: 'mmh2o', label: 'Millimeter of Water (mmH₂O)', shortLabel: 'mmH₂O', factor: MMH2O_PA },
+  { value: 'inh2o', label: 'Inch of Water (inH₂O)', shortLabel: 'inH₂O', factor: MMH2O_PA * 25.4 },
 ];
 
 const EDUCATIONAL = {
@@ -80,7 +80,7 @@ const EDUCATIONAL = {
     },
     {
       question: 'Why do weather forecasters use different pressure units?',
-      answer: 'Meteorologists in the US use inches of mercury (inHg) for barometric pressure, while most other countries use hectopascals (hPa) or millibars (mbar), which are numerically identical. The US National Weather Service has considered switching to hPa but the change would require replacing millions of analog barometers. Standard sea-level pressure is 29.92 inHg, 1013.25 hPa, or 1013.25 mbar.',
+      answer: 'Meteorologists in the US use inches of mercury (inHg) for barometric pressure, while most other countries use hectopascals (hPa) or millibars (mbar), which are numerically identical. Standard sea-level pressure is 29.92 inHg, 1013.25 hPa, or 1013.25 mbar.',
     },
     {
       question: 'How do I convert tire pressure from PSI to bar?',
@@ -92,7 +92,7 @@ const EDUCATIONAL = {
     },
     {
       question: 'What is the difference between gauge pressure and absolute pressure?',
-      answer: 'Gauge pressure (PSIG, barg) measures pressure relative to atmospheric pressure — a tire gauge reads 0 PSIG at ambient pressure. Absolute pressure (PSIA, bara) includes the atmospheric pressure baseline. Absolute = Gauge + Atmospheric. At sea level: 0 PSIG = 14.7 PSIA, and 2 bar gauge = 3.013 bar absolute. Most pressure converters in this tool handle absolute units, but always check which type your application requires — tire pressure is gauge, while scuba and vacuum systems use absolute.',
+      answer: 'Gauge pressure (PSIG, barg) measures pressure relative to atmospheric pressure — a tire gauge reads 0 PSIG at ambient pressure. Absolute pressure (PSIA, bara) includes the atmospheric pressure baseline. Absolute = Gauge + Atmospheric. At sea level: 0 PSIG = 14.7 PSIA, and 2 bar gauge = 3.013 bar absolute. Most pressure converters in this tool handle absolute units, but always check which type your application requires — tire and scuba-tank gauges read gauge pressure, while vacuum work and weather reports use absolute pressure.',
     },
   ],
 
@@ -102,19 +102,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const converterConfig = createConverter({ units: UNITS, educational: EDUCATIONAL });
-const configWithPanel = {
-  ...converterConfig,
-  calculate: (values: Record<string, string>) => {
-    if (values.value !== undefined && values.value !== '') {
-      const val = parseFloat(values.value);
-      if (!isNaN(val) && val < 0) return [];
-    }
-    return converterConfig.calculate(values);
-  },
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Pressure Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Pressure Conversion', quantity: 'pressure', educational: EDUCATIONAL });

@@ -2,6 +2,38 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RegexTesterPanel from './RegexTesterPanel';
 
+/**
+ * A JavaScript regex cannot be interrupted, so a pattern like (a+)+$ on a long non-matching string freezes the tab.
+ * Heuristic guard: a group that itself contains a quantifier and is quantified again, or two adjacent unbounded
+ * wildcard quantifiers, are the classic exponential shapes. Such patterns only run on very short input.
+ */
+export function catastrophicRisk(pattern: string, input: string): string | null {
+  const nested = /\((?:[^()\\]|\\.)*[+*](?:[^()\\]|\\.)*\)\s*(?:[+*]|\{\d+,\d*\})/.test(pattern);
+  const alternationRepeat = /\((?:[^()\\]|\\.)*\|(?:[^()\\]|\\.)*\)\s*(?:[+*]|\{\d+,\d*\})/.test(pattern) && /\.\*|\.\+|\\w\+|\\w\*/.test(pattern);
+  if ((nested || alternationRepeat) && input.length > 18) {
+    return 'The pattern repeats a group that already contains a repeat (like (a+)+). Against more than 18 characters this can take exponential time and freeze the page, so it was not run. Rewrite it without nested quantifiers, or shorten the test string.';
+  }
+  return null;
+}
+
+export interface FoundMatch {
+  text: string;
+  index: number;
+}
+
+/** All matches (global scan) capped at 1000. Zero-length matches advance by one so the scan always terminates. */
+export function findMatches(pattern: string, flags: string, input: string, cap = 1000): { matches: FoundMatch[]; truncated: boolean } {
+  const re = new RegExp(pattern, flags.includes('g') ? flags : flags + 'g');
+  const matches: FoundMatch[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(input)) !== null) {
+    if (matches.length >= cap) return { matches, truncated: true };
+    matches.push({ text: m[0], index: m.index });
+    if (m[0] === '') re.lastIndex++; // /a*/g would otherwise loop forever on an empty match
+  }
+  return { matches, truncated: false };
+}
+
 const regexTesterConfig: CalculatorConfig = {
   inputs: [
     {
@@ -23,7 +55,8 @@ const regexTesterConfig: CalculatorConfig = {
         { label: 'g (global)', value: 'g' },
         { label: 'gi (global, case-insensitive)', value: 'gi' },
         { label: 'gm (global, multiline)', value: 'gm' },
-        { label: 'gmi (all)', value: 'gmi' },
+        { label: 'gmi (global, multiline, case-insensitive)', value: 'gmi' },
+        { label: 'gims (global, case-insensitive, multiline, dot matches newline)', value: 'gims' },
       ],
     },
     {
@@ -42,33 +75,28 @@ const regexTesterConfig: CalculatorConfig = {
 
     if (!pattern.trim() || !testString) return [];
 
+    let regex: RegExp;
     try {
-      const regex = new RegExp(pattern, rawFlags);
-      const isMatch = regex.test(testString);
-      regex.lastIndex = 0;
-
-      const countingFlags = rawFlags.includes('g') ? rawFlags : rawFlags + 'g';
-      const countingRe = new RegExp(pattern, countingFlags);
-
-      let matchCount = 0;
-      const matchList: string[] = [];
-      let m: RegExpExecArray | null;
-      while ((m = countingRe.exec(testString)) !== null) {
-        matchCount++;
-        if (matchList.length < 10) {
-          matchList.push(m[0]);
-        }
-      }
-
-      return [
-        { id: 'isMatch', label: 'Match Found', value: isMatch ? 'Yes' : 'No', color: isMatch ? 'positive' : 'negative' },
-        { id: 'matchCount', label: 'Match Count', value: `${matchCount}`, color: matchCount > 0 ? 'positive' : 'neutral' },
-        { id: 'matches', label: 'Matches (first 10)', value: matchList.length > 0 ? matchList.join(', ') : '(none)', highlight: matchList.length > 0 },
-        { id: 'pattern', label: 'Pattern Used', value: `/${pattern}/${rawFlags}`, color: 'neutral' },
-      ];
-    } catch {
-      return [];
+      regex = new RegExp(pattern, rawFlags);
+    } catch (e) {
+      return [{ id: 'error', label: 'Invalid pattern', value: (e as Error).message, color: 'negative', highlight: true }];
     }
+
+    const warning = catastrophicRisk(pattern, testString);
+    if (warning) return [{ id: 'error', label: 'Not run: possible catastrophic backtracking', value: warning, color: 'negative', highlight: true }];
+
+    const isMatch = regex.test(testString);
+    const { matches, truncated } = findMatches(pattern, rawFlags, testString);
+    const matchList = matches.slice(0, 10).map((m) => m.text);
+    const positions = matches.slice(0, 10).map((m) => `${m.index}${m.text === '' ? ' (empty)' : `–${m.index + m.text.length}`}`);
+
+    return [
+      { id: 'isMatch', label: 'Match Found', value: isMatch ? 'Yes' : 'No', color: isMatch ? 'positive' : 'negative' },
+      { id: 'matchCount', label: 'Match Count', value: `${matches.length}${truncated ? '+' : ''}`, color: matches.length > 0 ? 'positive' : 'neutral' },
+      { id: 'matches', label: 'Matches (first 10)', value: matchList.length > 0 ? matchList.join(', ') : '(none)', highlight: matchList.length > 0 },
+      { id: 'positions', label: 'Match positions (start–end, 0-based)', value: positions.length > 0 ? positions.join(', ') : '(none)', color: 'neutral' },
+      { id: 'pattern', label: 'Pattern Used', value: `/${pattern}/${rawFlags}`, color: 'neutral' },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

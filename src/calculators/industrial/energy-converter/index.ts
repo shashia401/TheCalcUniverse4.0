@@ -1,20 +1,19 @@
-import { createElement } from 'react';
 import { createConverter, type UnitDef } from '../unit-converter';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { BTU_J, CAL_J, FTLBF_J } from '../../../utils/unitConvert';
 
-const UNITS: UnitDef[] = [
+export const UNITS: UnitDef[] = [
   { value: 'j', label: 'Joule (J)', shortLabel: 'J', factor: 1 },
   { value: 'kj', label: 'Kilojoule (kJ)', shortLabel: 'kJ', factor: 1000 },
-  { value: 'cal', label: 'Calorie (cal)', shortLabel: 'cal', factor: 4.184 },
-  { value: 'kcal', label: 'Kilocalorie (kcal / Food Calorie)', shortLabel: 'kcal', factor: 4184 },
+  { value: 'mj', label: 'Megajoule (MJ)', shortLabel: 'MJ', factor: 1e6 },
+  { value: 'cal', label: 'Calorie (cal, thermochemical)', shortLabel: 'cal', factor: CAL_J },
+  { value: 'kcal', label: 'Kilocalorie (kcal / Food Calorie)', shortLabel: 'kcal', factor: CAL_J * 1000 },
   { value: 'wh', label: 'Watt-hour (Wh)', shortLabel: 'Wh', factor: 3600 },
-  { value: 'kwh', label: 'Kilowatt-hour (kWh)', shortLabel: 'kWh', factor: 3_600_000 },
-  { value: 'btu', label: 'British Thermal Unit (BTU)', shortLabel: 'BTU', factor: 1055.06 },
-  { value: 'ftlb', label: 'Foot-Pound (ft·lb)', shortLabel: 'ft·lb', factor: 1.35582 },
+  { value: 'kwh', label: 'Kilowatt-hour (kWh)', shortLabel: 'kWh', factor: 3.6e6 },
+  { value: 'btu', label: 'British Thermal Unit (BTU, IT)', shortLabel: 'BTU', factor: BTU_J },
+  { value: 'ftlb', label: 'Foot-Pound (ft·lbf)', shortLabel: 'ft·lbf', factor: FTLBF_J },
   { value: 'ev', label: 'Electronvolt (eV)', shortLabel: 'eV', factor: 1.602176634e-19 },
-  { value: 'therm', label: 'Therm', shortLabel: 'therm', factor: 105_506_000 },
-  { value: 'tce', label: 'Tonne of Coal Equivalent (TCE)', shortLabel: 'TCE', factor: 29_307_600_000 },
+  { value: 'therm', label: 'Therm (100,000 BTU IT)', shortLabel: 'therm', factor: 100000 * BTU_J },
+  { value: 'tce', label: 'Tonne of Coal Equivalent (TCE)', shortLabel: 'TCE', factor: 29.3076e9 },
 ];
 
 const EDUCATIONAL = {
@@ -105,12 +104,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const converterConfig = createConverter({ units: UNITS, educational: EDUCATIONAL });
-const configWithPanel = {
-  ...converterConfig,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Energy Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Energy Conversion', quantity: 'energy', educational: EDUCATIONAL });

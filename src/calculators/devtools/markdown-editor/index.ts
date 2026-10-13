@@ -10,24 +10,29 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function sanitizeUrl(url: string): string {
+const SAFE_SCHEMES = new Set(['http', 'https', 'mailto', 'tel']);
+
+/**
+ * Allow-list URL filter. Browsers ignore tabs/newlines/control characters inside a URL scheme ("java<TAB>script:" still
+ * runs), so they are stripped BEFORE the scheme is inspected. Only http(s), mailto, tel, relative and #fragment URLs pass.
+ */
+export function sanitizeUrl(url: string): string {
   const trimmed = url.trim();
-  const lower = trimmed.toLowerCase();
-  if (
-    lower.startsWith('javascript:') ||
-    lower.startsWith('data:') ||
-    lower.startsWith('vbscript:')
-  ) {
-    return '';
-  }
+  // eslint-disable-next-line no-control-regex
+  const compact = trimmed.replace(/[\p{Cc}\p{Cf}\p{Z}]/gu, '');
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(compact);
+  if (scheme && !SAFE_SCHEMES.has(scheme[1].toLowerCase())) return '';
+  // "&#106;avascript:" style entities cannot occur: the input was HTML-escaped (& -> &amp;) before this runs.
   return trimmed;
 }
 
-function parseInlineCode(text: string): string {
-  return text.replace(/`([^`]+)`/g, '<code>$1</code>');
-}
-
 function parseInlineFormatting(text: string): string {
+  // Code spans are lifted out first so markdown inside `code` is not formatted.
+  const codeSpans: string[] = [];
+  text = text.replace(/`([^`]+)`/g, (_m: string, code: string) => {
+    codeSpans.push(`<code>${code}</code>`);
+    return `\u0001C${codeSpans.length - 1}\u0001`;
+  });
   let result = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   result = result.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   result = result.replace(
@@ -40,15 +45,18 @@ function parseInlineFormatting(text: string): string {
     (_match: string, text: string, url: string) =>
       `<a href="${sanitizeUrl(url)}" target="_blank" rel="noopener noreferrer">${text}</a>`
   );
-  result = parseInlineCode(result);
-  return result;
+  // eslint-disable-next-line no-control-regex
+  return result.replace(/\u0001C(\d+)\u0001/g, (_m: string, i: string) => codeSpans[Number(i)]);
 }
 
-function parseMarkdown(markdown: string): string {
+export function parseMarkdown(markdown: string): string {
   if (!markdown || !markdown.trim()) return '';
 
   const lines = markdown.split('\n');
   const htmlParts: string[] = [];
+  // list items are tagged so consecutive items of the same kind become one <ul> / <ol>
+  const UL = '\u0001ul\u0001';
+  const OL = '\u0001ol\u0001';
 
   let inCodeBlock = false;
   let codeBlockContent = '';
@@ -96,11 +104,11 @@ function parseMarkdown(markdown: string): string {
       continue;
     }
 
-    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+    if (/^[-*+]\s/.test(trimmed)) {
       const content = parseInlineFormatting(
         escapeHtml(trimmed.replace(/^[-*+]\s+/, ''))
       );
-      htmlParts.push(`<li>${content}</li>`);
+      htmlParts.push(`${UL}<li>${content}</li>`);
       continue;
     }
 
@@ -108,7 +116,7 @@ function parseMarkdown(markdown: string): string {
       const content = parseInlineFormatting(
         escapeHtml(trimmed.replace(/^\d+\.\s+/, ''))
       );
-      htmlParts.push(`<li style="list-style-type:decimal">${content}</li>`);
+      htmlParts.push(`${OL}<li>${content}</li>`);
       continue;
     }
 
@@ -127,19 +135,28 @@ function parseMarkdown(markdown: string): string {
     );
   }
 
-  const wrappedHtml = htmlParts
-    .join('\n')
-    .replace(/(<li[^>]*>.*?<\/li>(\n<li[^>]*>.*?<\/li>)*)/g, (match) => {
-      if (match.includes('style="list-style-type:decimal"')) {
-        const cleaned = match.replace(
-          /<li style="list-style-type:decimal">/g,
-          '<li>'
-        );
-        return `<ol>\n${cleaned}\n</ol>`;
-      }
-      return `<ul>\n${match}\n</ul>`;
-    })
-    .replace(/__PARAGRAPH_BREAK__/g, '');
+  const out: string[] = [];
+  let list: { tag: 'ul' | 'ol'; items: string[] } | null = null;
+  const flush = () => {
+    if (list) out.push(`<${list.tag}>\n${list.items.join('\n')}\n</${list.tag}>`);
+    list = null;
+  };
+  for (const part of htmlParts) {
+    const tag = part.startsWith(UL) ? 'ul' : part.startsWith(OL) ? 'ol' : null;
+    if (tag) {
+      const li = part.slice(UL.length);
+      if (list && list.tag !== tag) flush();
+      if (!list) list = { tag, items: [] };
+      list.items.push(li);
+    } else if (part === '__PARAGRAPH_BREAK__') {
+      continue; // a blank line does not end a list (matches the previous behaviour)
+    } else {
+      flush();
+      out.push(part);
+    }
+  }
+  flush();
+  const wrappedHtml = out.join('\n');
 
   return wrappedHtml;
 }

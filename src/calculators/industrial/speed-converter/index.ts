@@ -1,15 +1,14 @@
-import { createElement } from 'react';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { createConverter, type UnitDef } from '../unit-converter';
+import { FT_M, MI_M } from '../../../utils/unitConvert';
 
-const UNITS = [
+export const UNITS: UnitDef[] = [
   { value: 'ms', label: 'Meter per Second (m/s)', shortLabel: 'm/s', factor: 1 },
-  { value: 'kmh', label: 'Kilometer per Hour (km/h)', shortLabel: 'km/h', factor: 0.277778 },
-  { value: 'mph', label: 'Mile per Hour (mph)', shortLabel: 'mph', factor: 0.44704 },
-  { value: 'fts', label: 'Foot per Second (ft/s)', shortLabel: 'ft/s', factor: 0.3048 },
-  { value: 'kn', label: 'Knot (kn)', shortLabel: 'kn', factor: 0.514444 },
+  { value: 'kmh', label: 'Kilometer per Hour (km/h)', shortLabel: 'km/h', factor: 1 / 3.6 },
+  { value: 'mph', label: 'Mile per Hour (mph)', shortLabel: 'mph', factor: MI_M / 3600 },
+  { value: 'fts', label: 'Foot per Second (ft/s)', shortLabel: 'ft/s', factor: FT_M },
+  { value: 'kn', label: 'Knot (kn)', shortLabel: 'kn', factor: 1852 / 3600 },
   { value: 'c', label: 'Speed of Light (c)', shortLabel: 'c', factor: 299792458 },
-  { value: 'mach', label: 'Mach (at sea level)', shortLabel: 'Mach', factor: 340.29 },
+  { value: 'mach', label: 'Mach (ISA sea level, 15 °C)', shortLabel: 'Mach', factor: 340.294 },
 ];
 
 const EDUCATIONAL = {
@@ -36,10 +35,10 @@ const EDUCATIONAL = {
     { label: '60 mph', value: '96.56 km/h / 26.82 m/s / 52.14 kn' },
     { label: '10 m/s', value: '36 km/h / 22.37 mph / 19.44 kn' },
     { label: '1 kn', value: '1.852 km/h / 1.151 mph / 0.5144 m/s' },
-    { label: 'Mach 1 (sea level)', value: '1,225 km/h / 761.2 mph / 661.7 kn / 340.3 m/s' },
+    { label: 'Mach 1 (sea level)', value: '1,225 km/h / 761.2 mph / 661.5 kn / 340.3 m/s' },
     { label: 'Speed of light', value: '299,792,458 m/s / 1.079×10⁹ km/h / 6.706×10⁸ mph' },
     { label: 'Walking pace', value: '5 km/h / 3.1 mph / 1.4 m/s' },
-    { label: 'Sprinting (elite)', value: '37.6 km/h / 23.4 mph / 10.4 m/s (Usain Bolt peak)' },
+    { label: 'Sprinting (elite)', value: '37.6 km/h / 23.4 mph / 10.4 m/s (Usain Bolt, average over his 100 m world record)' },
   ],
   commonUses: [
     'Driving: converting speed limits and vehicle speeds between km/h and mph when traveling between countries (e.g., crossing from Canada to the US)',
@@ -59,26 +58,26 @@ const EDUCATIONAL = {
     {
       scenario: 'A pilot is flying from London to New York at a cruising speed of 480 knots at 35,000 feet. The flight computer shows ground speed in km/h for the passenger information display. What ground speed in km/h should be displayed? Also, what is the Mach number at this altitude?',
       inputs: { value: '480', from: 'kn', to: 'kmh' },
-      result: '480 kn × 1.852 = 888.96 km/h. Ground speed ≈ 889 km/h (assuming zero wind). Mach number at 35,000 ft: speed of sound at −54°C is ~295 m/s (1,062 km/h). Mach = 889 ÷ 1,062 ≈ 0.837 — typical for long-haul airliners cruising at Mach 0.78-0.85.',
-      insight: 'The speed of sound decreases with altitude because air temperature drops. At sea level (15°C), Mach 1 = 340 m/s (1,225 km/h). At 35,000 ft (−54°C), Mach 1 ≈ 295 m/s (1,062 km/h). This means an aircraft flying at the same true airspeed climbs to a higher Mach number at altitude — important for avoiding the transonic drag rise near Mach 1. Actual ground speed depends on headwind/tailwind.',
+      result: '480 kn × 1.852 = 888.96 km/h. Ground speed ≈ 889 km/h (assuming zero wind). Mach number at 35,000 ft: speed of sound at −54°C is ~297 m/s (1,068 km/h). Mach = 889 ÷ 1,068 ≈ 0.83 — typical for long-haul airliners cruising at Mach 0.78-0.85.',
+      insight: 'The speed of sound decreases with altitude because air temperature drops. At sea level (15°C), Mach 1 = 340 m/s (1,225 km/h). At 35,000 ft (−54°C), Mach 1 ≈ 297 m/s (1,068 km/h). This means an aircraft flying at the same true airspeed climbs to a higher Mach number at altitude — important for avoiding the transonic drag rise near Mach 1. Actual ground speed depends on headwind/tailwind.',
     },
     {
       scenario: 'A physics teacher in Tokyo wants to demonstrate the speed of sound to students. They want to express Mach 1 in familiar everyday units: a baseball pitch in km/h, a cheetah\'s top speed in m/s, and a bullet train\'s cruising speed in km/h for comparison.',
       inputs: { value: '1', from: 'mach', to: 'kmh' },
-      result: 'Mach 1 (sea level) = 340.29 m/s = 1,225 km/h. Comparisons: fastest baseball pitch = 169.1 km/h (0.138 Mach), cheetah top speed = 29 m/s (0.08 Mach), Shinkansen bullet train = 320 km/h (0.26 Mach), commercial jet = 900 km/h (~Mach 0.73). Only fighter jets and Concorde (Mach 2.04) routinely exceed Mach 1.',
-      insight: 'Mach 1 is remarkably fast — about 3.4 football fields per second. Everyday speeds are a tiny fraction of Mach 1. Even the fastest production car (Bugatti Chiron Super Sport at 490 km/h) reaches only Mach 0.40. The speed of sound has been broken by humans on land (ThrustSSC, 1,228 km/h, 1997), water (Spirit of Australia, 511 km/h, 1978 — not supersonic, water speed record is subsonic), and of course in the air (Chuck Yeager, Bell X-1, 1947).',
+      result: 'Mach 1 (sea level) = 340.29 m/s = 1,225 km/h. Comparisons: fastest recorded baseball pitch ≈ 170 km/h (0.14 Mach), cheetah top speed ≈ 29 m/s (0.09 Mach), Shinkansen bullet train = 320 km/h (0.26 Mach), commercial jet = 900 km/h (~Mach 0.73). Only fighter jets and Concorde (Mach 2.04) routinely exceed Mach 1.',
+      insight: 'Mach 1 is remarkably fast — about 3.7 football fields (100 yd) per second. Everyday speeds are a tiny fraction of Mach 1. Even the fastest production car (Bugatti Chiron Super Sport at 490 km/h) reaches only Mach 0.40. The speed of sound has been broken by humans on land (ThrustSSC, 1,228 km/h, 1997), and of course in the air (Chuck Yeager, Bell X-1, 1947).',
     },
   ],
   proTips: [
     'For highway driving abroad, remember the 8/5 rule: mph × 8 ÷ 5 = km/h (error < 1%). The reverse: km/h × 5 ÷ 8 = mph. Write these on a sticky note in your rental car — most speedometer errors happen in the first hour of driving in a new country.',
     'When reading aviation weather (METAR), wind speeds are ALWAYS in knots. If you need km/h for a weather report, multiply knots by 1.852. A 20-knot wind is 37 km/h — strong enough to make cycling difficult. A 50-knot wind (93 km/h) is storm-force.',
-    'Real-world Mach number is altitude-dependent. At sea level: Mach 1 ≈ 1,225 km/h. At 35,000 ft: Mach 1 ≈ 1,062 km/h. An aircraft "flying at Mach 0.85" is flying at a different true airspeed depending on altitude. Use this converter with the sea-level Mach value and adjust mentally for altitude.',
+    'Real-world Mach number is altitude-dependent. At sea level: Mach 1 ≈ 1,225 km/h. At 35,000 ft: Mach 1 ≈ 1,068 km/h. An aircraft "flying at Mach 0.85" is flying at a different true airspeed depending on altitude. Use this converter with the sea-level Mach value and adjust mentally for altitude.',
     'For running pace: most GPS watches show speed in min/km or min/mile. To convert: speed (km/h) = 60 ÷ pace (min/km). A 5:00 min/km pace = 12 km/h. Speed (mph) = 60 ÷ pace (min/mile). A 8:00 min/mile pace = 7.5 mph. Use this converter for km/h to mph after calculating speed from pace.',
     'When shopping for a car abroad, convert the horsepower and top speed specs: German cars list top speed in km/h, UK cars in mph. A car listed at "250 km/h electronically limited" is 155 mph — the famous German "gentlemen\'s agreement" limit. Use this converter to compare specs across markets.',
     'For sailing passage planning: 1 knot = 1 nautical mile per hour. If your destination is 60 nautical miles away and you sail at 5 knots, it takes 12 hours. This elegant relationship (1 minute of latitude = 1 nautical mile) is why knots persist in navigation despite metrication of almost everything else.',
   ],
   limitations: [
-    'Mach number conversion in this calculator uses the sea-level standard (340.29 m/s at 15°C). At altitude, the speed of sound decreases significantly — at 35,000 ft (−54°C), Mach 1 is only 295 m/s, 13% slower. For aerospace applications requiring altitude-corrected Mach numbers, use a specialized aviation calculator with temperature input.',
+    'Mach number conversion in this calculator uses the sea-level standard (340.29 m/s at 15°C). At altitude, the speed of sound decreases significantly — at 35,000 ft (−54°C), Mach 1 is only 297 m/s, 13% slower. For aerospace applications requiring altitude-corrected Mach numbers, use a specialized aviation calculator with temperature input.',
     'The speed-of-light unit (c) assumes vacuum speed (299,792,458 m/s). Light travels slower in any medium — about 225,000 km/s in water (25% slower) and 200,000 km/s in glass (33% slower). For fiber optics and refraction calculations, use the refractive index of the specific medium.',
     'This calculator converts linear speed magnitudes only. It does not handle rotational speed (RPM, rad/s — use the Frequency Converter for that), angular velocity, or relativistic velocity addition. For speeds approaching c, relativistic effects (time dilation, length contraction) become significant and this simple linear conversion is inadequate.',
     'The wind speed conversions (knots to km/h to mph) cover the Beaufort scale range, but gusts and sustained wind have different meanings: "wind speed" in forecasts typically means sustained wind averaged over 1-10 minutes, while gusts are 1-3 second peaks. This converter handles the units, not the meteorological definitions.',
@@ -102,15 +101,15 @@ const EDUCATIONAL = {
     caption: 'Common speeds from walking to jet aircraft. The bar widths show relative velocity.',
   },
   explanation:
-    'Speed is a fundamental physical quantity that measures how fast an object covers distance. The SI unit is meters per second (m/s), but everyday life uses km/h or mph depending on the country. The history of speed measurement reflects human transportation evolution: horse-drawn carriages gave way to steam locomotives (which popularized mph), then automobiles (which standardized km/h in most of the world), aircraft (which adopted knots), and spacecraft (which use km/s). Speed converters are essential because different domains use different units: car speedometers in the US show mph; everywhere else shows km/h. Aviation uses knots (nautical miles per hour) for airspeed and altitude rates, but Mach number for high-speed flight relative to the speed of sound. Meteorology reports wind speeds in knots internationally, km/h in most countries, and mph in the US. The knot is uniquely useful in navigation because one knot equals one nautical mile per hour, and one nautical mile equals one minute of latitude — making time-distance calculations at sea and in the air straightforward. The speed of sound (Mach 1) varies with temperature and altitude: at sea level (15°C), it is about 340.29 m/s (1,225 km/h), but at 11,000 m cruising altitude where air is colder, it drops to about 295 m/s (1,062 km/h). The speed of light (299,792,458 m/s) is the universe\'s speed limit and a fundamental physical constant — it was measured with increasing precision from Ole Rømer\'s observations of Jupiter\'s moons (1676) to the 1983 CGPM definition that fixed c as exact.',
+    'Speed is a fundamental physical quantity that measures how fast an object covers distance. The SI unit is meters per second (m/s), but everyday life uses km/h or mph depending on the country. The history of speed measurement reflects human transportation evolution: horse-drawn carriages gave way to steam locomotives (which popularized mph), then automobiles (which standardized km/h in most of the world), aircraft (which adopted knots), and spacecraft (which use km/s). Speed converters are essential because different domains use different units: car speedometers in the US show mph; everywhere else shows km/h. Aviation uses knots (nautical miles per hour) for airspeed and altitude rates, but Mach number for high-speed flight relative to the speed of sound. Meteorology reports wind speeds in knots internationally, km/h in most countries, and mph in the US. The knot is uniquely useful in navigation because one knot equals one nautical mile per hour, and one nautical mile equals one minute of latitude — making time-distance calculations at sea and in the air straightforward. The speed of sound (Mach 1) varies with temperature and altitude: at sea level (15°C), it is about 340.29 m/s (1,225 km/h), but at 11,000 m cruising altitude where air is colder, it drops to about 297 m/s (1,068 km/h). The speed of light (299,792,458 m/s) is the universe\'s speed limit and a fundamental physical constant — it was measured with increasing precision from Ole Rømer\'s observations of Jupiter\'s moons (1676) to the 1983 CGPM definition that fixed c as exact.',
   faqs: [
     {
       question: 'Why does aviation use knots instead of km/h or mph?',
-      answer: 'Aviation and maritime use knots because of the elegant relationship to latitude and longitude. One knot equals one nautical mile per hour, and one nautical mile equals one minute of latitude (about 1.852 km). This makes navigation calculations intuitive: if you fly 60 nautical miles north or south, you have changed latitude by exactly 1 degree. Charts and maps are marked in degrees and minutes, so plotting courses is straightforward — you can measure distance directly from the latitude scale on the edge of the chart. Additionally, international aviation standards (ICAO) use knots universally — a pilot flying from the US to Europe uses the same speed units throughout the flight. Air traffic control worldwide uses knots for speed and feet for altitude, creating a consistent global system that avoids conversion errors in busy airspace.',
+      answer: 'Aviation and maritime use knots because of the elegant relationship to latitude and longitude. One knot equals one nautical mile per hour, and one nautical mile is about one minute of latitude (1.852 km by definition). This makes navigation calculations intuitive: if you fly 60 nautical miles north or south, you have changed latitude by about 1 degree. Charts and maps are marked in degrees and minutes, so plotting courses is straightforward — you can measure distance directly from the latitude scale on the edge of the chart. Additionally, international aviation standards (ICAO) use knots universally — a pilot flying from the US to Europe uses the same speed units throughout the flight. Air traffic control worldwide uses knots for speed and feet for altitude, creating a consistent global system that avoids conversion errors in busy airspace.',
     },
     {
       question: 'How is Mach number calculated and why does it change with altitude?',
-      answer: 'Mach number is the ratio of an object\'s speed to the speed of sound in the surrounding medium. Mach 1 = the speed of sound, which is determined by air temperature: speed of sound = √(γ × R × T), where γ ≈ 1.4 (ratio of specific heats for air), R = 287 J/(kg·K), and T is the absolute temperature in Kelvin. At sea level at 15°C (288 K), Mach 1 ≈ 340 m/s (1,225 km/h, 761 mph). At 35,000 ft cruising altitude (−54°C or 219 K), Mach 1 ≈ 295 m/s (1,062 km/h). So an aircraft flying at Mach 0.85 at 35,000 ft has a true airspeed of about 0.85 × 1,062 = 903 km/h. Supersonic flight begins at Mach 1 (the sound barrier), transonic flow occurs between Mach 0.8-1.2, and hypersonic flight is typically Mach 5+. The term honors Ernst Mach, who photographed bullets in flight to study shock waves.',
+      answer: 'Mach number is the ratio of an object\'s speed to the speed of sound in the surrounding medium. Mach 1 = the speed of sound, which is determined by air temperature: speed of sound = √(γ × R × T), where γ ≈ 1.4 (ratio of specific heats for air), R = 287 J/(kg·K), and T is the absolute temperature in Kelvin. At sea level at 15°C (288 K), Mach 1 ≈ 340 m/s (1,225 km/h, 761 mph). At 35,000 ft cruising altitude (−54°C or 219 K), Mach 1 ≈ 297 m/s (1,068 km/h). So an aircraft flying at Mach 0.85 at 35,000 ft has a true airspeed of about 0.85 × 1,068 = 908 km/h. Supersonic flight begins at Mach 1 (the sound barrier), transonic flow occurs between Mach 0.8-1.2, and hypersonic flight is typically Mach 5+. The term honors Ernst Mach, who photographed bullets in flight to study shock waves.',
     },
     {
       question: 'How do I quickly convert between km/h and mph in my head?',
@@ -122,7 +121,7 @@ const EDUCATIONAL = {
     },
     {
       question: 'What is the fastest speed ever achieved by a human?',
-      answer: 'The fastest speed achieved by humans: Apollo 10 astronauts reached 39,897 km/h (24,791 mph, about Mach 36) during their return from the Moon in 1969 — the fastest humans have ever traveled relative to Earth. For unmanned objects: the Parker Solar Probe reached 635,266 km/h (394,736 mph) in 2024 during its closest approach to the Sun, making it the fastest human-made object. On land: ThrustSSC reached 1,228 km/h (763 mph, Mach 1.02) in 1997, breaking the sound barrier on land. On water: the current record is 511 km/h (317 mph), set by Spirit of Australia in 1978 — no watercraft has broken the sound barrier. In a production car: the Bugatti Chiron Super Sport 300+ reached 490 km/h (304 mph) in 2019.',
+      answer: 'The fastest speed achieved by humans: Apollo 10 astronauts reached 39,897 km/h (24,791 mph, roughly 33 times the speed of sound at sea level) during their return from the Moon in 1969 — the fastest humans have ever traveled relative to Earth. For unmanned objects: the Parker Solar Probe reached about 692,000 km/h (430,000 mph) at its closest approach to the Sun in December 2024, making it the fastest human-made object. On land: ThrustSSC reached 1,228 km/h (763 mph, Mach 1.02) in 1997, breaking the sound barrier on land. On water: the current record is 511 km/h (317 mph), set by Spirit of Australia in 1978 — no watercraft has broken the sound barrier. In a production car: the Bugatti Chiron Super Sport 300+ reached 490 km/h (304 mph) in 2019.',
     },
     {
       question: 'Why do ships and aircraft measure speed in knots?',
@@ -136,75 +135,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const inputs = [
-  {
-    id: 'value',
-    label: 'Value to Convert',
-    type: 'number' as const,
-    placeholder: 'Enter speed (e.g., 100)',
-    inputMode: 'numeric' as const,
-    required: true,
-    helpText: 'The numeric speed value you want to convert between units',
-  },
-  {
-    id: 'from',
-    label: 'From Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: 'kmh',
-    helpText: 'The speed unit you are converting from (e.g., km/h, mph, knots)',
-  },
-  {
-    id: 'to',
-    label: 'To Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: 'mph',
-    showWhen: (values: Record<string, string>) => !!values.value,
-    helpText: 'The speed unit you are converting to (e.g., mph for US speedometers)',
-  },
-];
-
-const calculate = (values: Record<string, string>) => {
-  if (!values || Object.keys(values).length === 0) return [];
-  if (values.value === undefined || values.value === null || values.value.trim() === '') return [];
-  const val = parseFloat(values.value);
-  if (isNaN(val) || !isFinite(val)) return [];
-
-  const fromUnit = values.from || 'kmh';
-  const toUnit = values.to || 'mph';
-
-  const fromDef = UNITS.find((u) => u.value === fromUnit);
-  const toDef = UNITS.find((u) => u.value === toUnit);
-  if (!fromDef || !toDef) return [];
-  if (toDef.factor === 0) return [];
-
-  const result = (val * fromDef.factor) / toDef.factor;
-
-  return [
-    {
-      id: 'result',
-      label: `Result (${fromUnit} → ${toUnit})`,
-      value: `${val} ${fromUnit} = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${toUnit}`,
-      highlight: true,
-      color: 'positive' as const,
-    },
-    {
-      id: 'formula',
-      label: 'Formula',
-      value: `${val} × (${fromDef.factor} ÷ ${toDef.factor}) = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })}`,
-      color: 'neutral' as const,
-    },
-  ];
-};
-
-const configWithPanel = {
-  inputs,
-  calculate,
-  educational: EDUCATIONAL,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Speed Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Speed Conversion', quantity: 'speed', defaultFrom: 'kmh', defaultTo: 'mph', educational: EDUCATIONAL });

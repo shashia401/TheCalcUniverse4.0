@@ -1,27 +1,29 @@
-import { createElement } from 'react';
-import { CalculatorResult } from '../../../types/calculator';
-import ConverterPanel from '../ConverterPanel';
+import { createConverter, type UnitDef } from '../unit-converter';
+import { CUP_L, FLOZ_L, GAL_US_L, LB_KG, PT_L, QT_L, TBSP_L, TSP_L } from '../../../utils/unitConvert';
 
-const UNITS = [
+export const UNITS: UnitDef[] = [
   { value: 'ml', label: 'Milliliter (mL)', shortLabel: 'mL', factor: 1 },
   { value: 'l', label: 'Liter (L)', shortLabel: 'L', factor: 1000 },
-  { value: 'tsp', label: 'Teaspoon (tsp)', shortLabel: 'tsp', factor: 4.92892 },
-  { value: 'tbsp', label: 'Tablespoon (tbsp)', shortLabel: 'tbsp', factor: 14.7868 },
-  { value: 'floz', label: 'Fluid Ounce (fl oz)', shortLabel: 'fl oz', factor: 29.5735 },
-  { value: 'cup', label: 'US Cup', shortLabel: 'cup', factor: 236.588 },
-  { value: 'pt', label: 'US Pint (pt)', shortLabel: 'pt', factor: 473.176 },
-  { value: 'qt', label: 'US Quart (qt)', shortLabel: 'qt', factor: 946.353 },
-  { value: 'gal', label: 'US Gallon (gal)', shortLabel: 'gal', factor: 3785.41 },
+  { value: 'tsp', label: 'US Teaspoon (tsp)', shortLabel: 'tsp', factor: TSP_L * 1000 },
+  { value: 'tbsp', label: 'US Tablespoon (tbsp)', shortLabel: 'tbsp', factor: TBSP_L * 1000 },
+  { value: 'floz', label: 'US Fluid Ounce (fl oz)', shortLabel: 'fl oz', factor: FLOZ_L * 1000 },
+  { value: 'cup', label: 'US Cup (236.588 mL)', shortLabel: 'cup', factor: CUP_L * 1000 },
+  { value: 'pt', label: 'US Pint (pt)', shortLabel: 'pt', factor: PT_L * 1000 },
+  { value: 'qt', label: 'US Quart (qt)', shortLabel: 'qt', factor: QT_L * 1000 },
+  { value: 'gal', label: 'US Gallon (gal)', shortLabel: 'gal', factor: GAL_US_L * 1000 },
+  { value: 'mtsp', label: 'Metric Teaspoon (5 mL)', shortLabel: 'metric tsp', factor: 5 },
+  { value: 'mtbsp', label: 'Metric Tablespoon (15 mL)', shortLabel: 'metric tbsp', factor: 15 },
+  { value: 'mcup', label: 'Metric Cup (250 mL)', shortLabel: 'metric cup', factor: 250 },
   { value: 'gram', label: 'Gram (g) - water equivalent', shortLabel: 'g', factor: 1 },
-  { value: 'oz_weight', label: 'Ounce (oz) - water equivalent', shortLabel: 'oz', factor: 28.3495 },
-  { value: 'lb_weight', label: 'Pound (lb) - water equivalent', shortLabel: 'lb', factor: 453.592 },
+  { value: 'oz_weight', label: 'Ounce (oz) - water equivalent', shortLabel: 'oz', factor: (LB_KG * 1000) / 16 },
+  { value: 'lb_weight', label: 'Pound (lb) - water equivalent', shortLabel: 'lb', factor: LB_KG * 1000 },
 ];
 
 const EDUCATIONAL = {
   formula: 'result = value × (factor_from ÷ factor_to)',
   formulaDescription:
     'Cooking measurement conversion uses linear scaling factors relative to milliliters (mL). Volume-to-volume conversions are exact. Volume-to-weight conversions assume the ingredient has the same density as water (1 g/mL), which is NOT accurate for most ingredients — see limitations below. For accurate baking, use a kitchen scale.',
-  formulaSource: 'The US customary cooking units (cup, tablespoon, teaspoon, fluid ounce) were legally defined in the US by the Metric Conversion Act of 1975 and the FDA Nutrition Labeling regulations. 1 US fluid ounce = 29.5735295625 mL, based on 1 US gallon = 231 in³ exactly, and 1 in = 2.54 cm. The US cup for nutrition labeling is exactly 240 mL (a slight simplification for nutrition facts), while the US customary cup (used in recipes) is exactly 8 US fl oz = 236.5882365 mL. The tablespoon is derived as 1/2 fl oz = 14.78676478125 mL. UK imperial cooking measures differ: 1 UK fl oz = 28.4130625 mL, 1 UK cup = 284.130625 mL (10 UK fl oz), 1 UK pint = 568.26125 mL (20 UK fl oz). This calculator uses US customary units.',
+  formulaSource: 'The US customary cooking units (cup, tablespoon, teaspoon, fluid ounce) are exact fractions of the US gallon (231 in³ = 3.785411784 L, using 1 in = 2.54 cm): 1 US fluid ounce = 29.5735295625 mL. The US cup for nutrition labeling is exactly 240 mL (a slight simplification for nutrition facts), while the US customary cup (used in recipes) is exactly 8 US fl oz = 236.5882365 mL. The tablespoon is derived as 1/2 fl oz = 14.78676478125 mL. UK imperial cooking measures differ: 1 UK fl oz = 28.4130625 mL, 1 UK cup = 284.130625 mL (10 UK fl oz), 1 UK pint = 568.26125 mL (20 UK fl oz). This calculator uses US customary units plus the metric measures used in most other recipes (metric cup 250 mL, tablespoon 15 mL, teaspoon 5 mL). Australian tablespoons are 20 mL and are not included.',
   variables: [
     { symbol: 'cup', name: 'US Cup (Customary)', description: 'The standard US cooking volume: 1 cup = 236.588 mL = 8 fl oz = 16 tbsp = 48 tsp. All standard US cookbooks and recipes use this cup. Not to be confused with the FDA "nutrition labeling cup" of exactly 240 mL or the UK cup of 284 mL.' },
     { symbol: 'tbsp', name: 'US Tablespoon', description: '1 tablespoon = 14.787 mL = 3 teaspoons = 0.5 fl oz. The standard unit for both liquid ingredients (oil, vanilla extract) and dry ingredients (sugar, cocoa powder) in US recipes. 16 tbsp = 1 cup.' },
@@ -37,8 +39,9 @@ const EDUCATIONAL = {
   ],
   quickReference: [
     { label: '1 cup', value: '236.6 mL / 8 fl oz / 16 tbsp / 48 tsp' },
+    { label: '1 metric cup', value: '250 mL = 1.057 US cups (metric tbsp 15 mL, metric tsp 5 mL)' },
     { label: '1 tbsp', value: '14.79 mL / 3 tsp / 0.5 fl oz' },
-    { label: '1 tsp', value: '4.93 mL / 1/3 tbsp / ~1.67 fl dram' },
+    { label: '1 tsp', value: '4.93 mL / 1/3 tbsp / ~1.33 fl dram' },
     { label: '1 fl oz', value: '29.57 mL / 2 tbsp / 0.125 cup' },
     { label: '1 pt', value: '473.2 mL / 2 cups / 16 fl oz' },
     { label: '1 qt', value: '946.4 mL / 4 cups / 2 pt / 32 fl oz' },
@@ -76,7 +79,7 @@ const EDUCATIONAL = {
       scenario: 'A cocktail enthusiast in London is following a US cocktail recipe that calls for 2 fl oz of bourbon, 0.75 fl oz of simple syrup, and 0.5 fl oz of lemon juice. Their jigger measures in mL (25 mL and 50 mL sides). Convert the recipe to mL and suggest jigger measurements.',
       inputs: { value: '2', from: 'floz', to: 'ml' },
       result: 'Bourbon: 2 fl oz × 29.574 = 59.1 mL (use one 50 mL jigger + one 10 mL pour, or round to 60 mL). Simple syrup: 0.75 fl oz = 22.2 mL (fill 25 mL jigger to ~90%). Lemon juice: 0.5 fl oz = 14.8 mL (about one tablespoon). Total cocktail volume: 3.25 fl oz = 96 mL — fits standard 90-120 mL cocktail glass.',
-      insight: 'UK cocktail bars have largely metricated, with 25 mL and 50 mL being the standard jigger measures (the 1984 Weights and Measures Act mandated metric for licensed premises). A "single" in the UK is 25 mL while a "double" is 50 mL. In the US, a standard pour is 1.5 fl oz (44 mL). So a UK bartender making a US recipe needs to decide: follow the US spec precisely (59 mL bourbon) or adapt to UK standard measures (50 mL bourbon for a slightly lighter drink). Most craft bars now stock dual-unit jiggers showing both mL and fl oz.',
+      insight: 'UK bars serve spirits in metric measures, typically 25 mL or 35 mL, with 50 mL as a double of the 25 mL measure. In the US, a standard pour is 1.5 fl oz (44 mL). So a UK bartender making a US recipe needs to decide: follow the US spec precisely (59 mL bourbon) or adapt to UK standard measures (50 mL bourbon for a slightly lighter drink). Most craft bars now stock dual-unit jiggers showing both mL and fl oz.',
     },
   ],
   proTips: [
@@ -90,7 +93,7 @@ const EDUCATIONAL = {
   ],
   limitations: [
     'CRITICAL: Volume-to-weight conversions (cups to grams, tablespoons to ounces) in this calculator use WATER DENSITY (1 g/mL). Flour is ~0.5-0.6 g/mL, sugar is ~0.85 g/mL, honey is ~1.4 g/mL. Using the water-equivalent weight for dry ingredients will give WRONG results for baking. The gram and ounce weight units are provided for water and water-like liquids (milk, broth, juice, vinegar). For dry ingredients, always use a kitchen scale.',
-    'This calculator uses US customary units (1 cup = 236.588 mL). UK/imperial units differ significantly: UK tablespoon = 17.76 mL (vs US 14.79 mL), UK cup = 284.1 mL (vs US 236.6 mL), UK pint = 568.3 mL (vs US 473.2 mL), UK gallon = 4.546 L (vs US 3.785 L). A recipe from a British cookbook using "cups" may mean the imperial cup. Australian tablespoons are 20 mL (4 teaspoons), different from both US and UK. Always verify which measuring system a recipe uses.',
+    'This calculator uses US customary units (1 cup = 236.588 mL) and the metric cup (250 mL). UK/imperial units differ significantly: UK tablespoon = 17.76 mL (vs US 14.79 mL), UK cup = 284.1 mL (vs US 236.6 mL), UK pint = 568.3 mL (vs US 473.2 mL), UK gallon = 4.546 L (vs US 3.785 L). A recipe from a British cookbook using "cups" may mean the imperial cup. Australian tablespoons are 20 mL (4 teaspoons), different from both US and UK. Always verify which measuring system a recipe uses.',
     'Temperature matters for volume: water is densest at 4°C (1.000 g/mL) and expands with heating. At boiling (100°C), water density drops to 0.958 g/mL — a 4.2% difference. Room-temperature water (20°C) is 0.998 g/mL. For most cooking purposes, treating mL = g for water is close enough, but for precision canning or candy making, temperature matters.',
     'Altitude affects boiling points but not volume conversion. At 5,000 ft (1,524 m), water boils at 95°C (203°F) instead of 100°C. This does not affect measurement conversion, but it does affect recipe outcomes — cakes rise differently, liquids evaporate faster, and sugar stages change. Measurement conversion is the same at all altitudes, but recipe instructions (baking time, temperature) may need adjustment.',
     'Recipe scaling is not always linear. Doubling a recipe works for most baked goods, but for delicate items (souffles, meringues, some custards), structural integrity may fail at larger volumes. Spices should be scaled at 50-75% of the linear factor when tripling or more — they concentrate during cooking. Salt should be scaled at about 80% — you can always add more, but you cannot remove it.',
@@ -150,75 +153,4 @@ const EDUCATIONAL = {
   ],
 };
 
-const inputs = [
-  {
-    id: 'value',
-    label: 'Value to Convert',
-    type: 'number' as const,
-    placeholder: 'Enter measurement (e.g., 2)',
-    inputMode: 'numeric' as const,
-    required: true,
-    helpText: 'The numeric cooking measurement value to convert between units',
-  },
-  {
-    id: 'from',
-    label: 'From Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: 'cup',
-    helpText: 'The cooking unit you are converting from (e.g., cups, tbsp, mL)',
-  },
-  {
-    id: 'to',
-    label: 'To Unit',
-    type: 'select' as const,
-    options: UNITS.map((u) => ({ label: u.label, value: u.value })),
-    defaultValue: 'ml',
-    showWhen: (values: Record<string, string>) => !!values.value,
-    helpText: 'The cooking unit you are converting to (weight conversions are water-equivalent only)',
-  },
-];
-
-const calculate = (values: Record<string, string>) => {
-  if (!values || Object.keys(values).length === 0) return [];
-  if (values.value === undefined || values.value === null || values.value.trim() === '') return [];
-  const val = parseFloat(values.value);
-  if (isNaN(val) || !isFinite(val)) return [];
-
-  const fromUnit = values.from || 'cup';
-  const toUnit = values.to || 'ml';
-
-  const fromDef = UNITS.find((u) => u.value === fromUnit);
-  const toDef = UNITS.find((u) => u.value === toUnit);
-  if (!fromDef || !toDef) return [];
-  if (toDef.factor === 0) return [];
-
-  const result = (val * fromDef.factor) / toDef.factor;
-
-  return [
-    {
-      id: 'result',
-      label: `Result (${fromUnit} → ${toUnit})`,
-      value: `${val} ${fromUnit} = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${toUnit}`,
-      highlight: true,
-      color: 'positive' as const,
-    },
-    {
-      id: 'formula',
-      label: 'Formula',
-      value: `${val} × (${fromDef.factor} ÷ ${toDef.factor}) = ${result.toLocaleString(undefined, { maximumFractionDigits: 6 })}`,
-      color: 'neutral' as const,
-    },
-  ];
-};
-
-const configWithPanel = {
-  inputs,
-  calculate,
-  educational: EDUCATIONAL,
-  extraPanel: (values: Record<string, string>, results: CalculatorResult[]) => {
-    if (!results.length) return null;
-    return createElement(ConverterPanel, { values, results, label: 'Cooking Conversion' });
-  },
-};
-export default configWithPanel;
+export default createConverter({ units: UNITS, label: 'Cooking Conversion', quantity: 'cooking measurement', defaultFrom: 'cup', defaultTo: 'ml', educational: EDUCATIONAL });
