@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PercentagePanel from './PercentagePanel';
+import { computePercentage, fmtPct } from './percentageMath';
 
 const percentageConfig: CalculatorConfig = {
   inputs: [
@@ -40,122 +41,94 @@ const percentageConfig: CalculatorConfig = {
     },
   ],
   explainSteps: (values) => {
-    const mode = values.mode || 'percentOf';
-    const x = parseFloat(values.x);
-    const y = parseFloat(values.y);
-    if ([x, y].some(isNaN)) return [];
-    const g = (n: number) => (Number.isInteger(n) ? n.toString() : n.toFixed(2).replace(/\.?0+$/, ''));
+    const c = computePercentage(values.mode, values.x, values.y);
+    if (c.kind !== 'ok') return [];
+    const { mode, x, y, ratio, result, extra } = c;
+    const g = fmtPct;
 
     if (mode === 'percentOf') {
       return [
-        { label: 'Turn the percent into a decimal', expr: `${g(x)}% = ${g(x)} ÷ 100 = ${g(x / 100)}`, note: '"Percent" means "per hundred", so divide by 100.' },
-        { label: 'Multiply by the whole', expr: `${g(x / 100)} × ${g(y)} = ${g((x / 100) * y)}` },
+        { label: 'Turn the percent into a decimal', expr: `${g(x)}% = ${g(x)} ÷ 100 = ${g(ratio)}`, note: '"Percent" means "per hundred", so divide by 100.' },
+        { label: 'Multiply by the whole', expr: `${g(ratio)} × ${g(y)} = ${g(result)}` },
       ];
     }
     if (mode === 'whatPercent') {
-      if (y === 0) return [];
       return [
-        { label: 'Make a fraction: part over whole', expr: `${g(x)} ÷ ${g(y)} = ${g(x / y)}` },
-        { label: 'Convert the fraction to a percent', expr: `${g(x / y)} × 100 = ${g((x / y) * 100)}%`, note: 'Multiplying by 100 turns a decimal into a percent.' },
+        { label: 'Make a fraction: part over whole', expr: `${g(x)} ÷ ${g(y)} = ${g(ratio)}` },
+        { label: 'Convert the fraction to a percent', expr: `${g(ratio)} × 100 = ${g(result)}%`, note: 'Multiplying by 100 turns a decimal into a percent.' },
       ];
     }
     if (mode === 'pctChange') {
-      if (x === 0) return [];
-      const diff = y - x;
+      const diff = y.minus(x);
       return [
         { label: 'Find the change', expr: `${g(y)} − ${g(x)} = ${g(diff)}` },
-        { label: 'Divide by the original value', expr: `${g(diff)} ÷ ${g(x)} = ${g(diff / x)}` },
-        { label: 'Convert to a percent', expr: `${g(diff / x)} × 100 = ${g((diff / x) * 100)}%`, note: diff >= 0 ? 'A positive result is an increase.' : 'A negative result is a decrease.' },
+        { label: 'Divide by the original value', expr: `${g(diff)} ÷ ${g(x.abs())} = ${g(ratio)}`, note: 'The base is the size of the original value, so a negative original still gives the right direction.' },
+        { label: 'Convert to a percent', expr: `${g(ratio)} × 100 = ${g(result)}%`, note: diff.isNegative() ? 'A negative result is a decrease.' : 'A positive result is an increase.' },
       ];
     }
     if (mode === 'addPct') {
       return [
-        { label: 'Find the amount to add', expr: `${g(x)}% of ${g(y)} = ${g((x / 100) * y)}` },
-        { label: 'Add it to the original', expr: `${g(y)} + ${g((x / 100) * y)} = ${g(y * (1 + x / 100))}` },
+        { label: 'Find the amount to add', expr: `${g(x)}% of ${g(y)} = ${g(extra)}` },
+        { label: 'Add it to the original', expr: `${g(y)} + ${g(extra)} = ${g(result)}` },
       ];
     }
-    // subPct
     return [
-      { label: 'Find the amount to subtract', expr: `${g(x)}% of ${g(y)} = ${g((x / 100) * y)}` },
-      { label: 'Subtract it from the original', expr: `${g(y)} − ${g((x / 100) * y)} = ${g(Math.max(0, y * (1 - x / 100)))}` },
+      { label: 'Find the amount to subtract', expr: `${g(x)}% of ${g(y)} = ${g(extra)}` },
+      { label: 'Subtract it from the original', expr: `${g(y)} − ${g(extra)} = ${g(result)}` },
     ];
   },
   calculate: (values) => {
-    const mode = values.mode || 'percentOf';
-    const x = parseFloat(values.x);
-    const y = parseFloat(values.y);
-
-    if ([x, y].some(isNaN)) return [];
-    if (y === 0) {
-      if (mode === 'whatPercent') {
-        return [{ id: 'error', label: 'Cannot divide by zero', value: 'Undefined', color: 'negative' as const }];
-      }
-      return [];
+    const c = computePercentage(values.mode, values.x, values.y);
+    if (c.kind === 'incomplete') return [];
+    if (c.kind === 'zero-whole') return [{ id: 'error', label: 'Cannot divide by zero', value: 'Undefined', color: 'negative' as const }];
+    if (c.kind === 'zero-base') {
+      return [
+        { id: 'error', label: 'Cannot calculate percent change from zero', value: 'Undefined', color: 'negative' as const },
+        { id: 'explanation', label: 'Why?', value: 'Percent change divides by the original value (X). When X = 0, division by zero is mathematically undefined.', color: 'neutral' as const },
+      ];
     }
-
-    // NOTE: .toFixed() always uses '.' as the decimal separator (locale-blind).
-    // This is acceptable here because the result values are interpolated into string
-    // labels (e.g., "$${fmt(y)}") and displayed in a UI that expects '.' decimals.
-    // For locale-aware formatting, replace with n.toLocaleString(undefined, { ... }).
-    const fmt = (n: number) => {
-      if (Number.isInteger(n)) return n.toString();
-      return n.toFixed(2).replace(/\.?0+$/, '');
-    };
+    const { mode, x, y, ratio, result, extra } = c;
+    const fmt = fmtPct;
 
     let results: Array<{ id: string; label: string; value: string; highlight?: boolean; color: 'positive' | 'negative' | 'neutral' }> = [];
 
     if (mode === 'percentOf') {
-      // "What is X% of Y?"
-      const result = (x / 100) * y;
       results = [
         { id: 'result', label: `What is ${fmt(x)}% of ${fmt(y)}?`, value: fmt(result), highlight: true, color: 'positive' },
         { id: 'formula', label: 'Calculation', value: `${fmt(x)} ÷ 100 × ${fmt(y)} = ${fmt(result)}`, color: 'neutral' },
-        { id: 'decimal', label: 'Decimal Equivalent', value: `${fmt(x / 100)}`, color: 'neutral' },
+        { id: 'decimal', label: 'Decimal Equivalent', value: `${fmt(ratio)}`, color: 'neutral' },
         { id: 'example', label: 'Real-World Example', value: `If calculating a tip: ${fmt(x)}% of a $${fmt(y)} bill is $${fmt(result)}`, color: 'neutral' },
       ];
     } else if (mode === 'whatPercent') {
-      // "X is what % of Y?"
-      const pct = (x / y) * 100;
       results = [
-        { id: 'result', label: `${fmt(x)} is what % of ${fmt(y)}?`, value: `${fmt(pct)}%`, highlight: true, color: 'positive' },
-        { id: 'formula', label: 'Calculation', value: `${fmt(x)} ÷ ${fmt(y)} × 100 = ${fmt(pct)}%`, color: 'neutral' },
-        { id: 'decimal', label: 'Decimal Ratio', value: `${fmt(x / y)}`, color: 'neutral' },
-        { id: 'example', label: 'Real-World Example', value: `If you scored ${fmt(x)} out of ${fmt(y)}: your grade is ${fmt(pct)}%`, color: 'neutral' },
+        { id: 'result', label: `${fmt(x)} is what % of ${fmt(y)}?`, value: `${fmt(result)}%`, highlight: true, color: 'positive' },
+        { id: 'formula', label: 'Calculation', value: `${fmt(x)} ÷ ${fmt(y)} × 100 = ${fmt(result)}%`, color: 'neutral' },
+        { id: 'decimal', label: 'Decimal Ratio', value: `${fmt(ratio)}`, color: 'neutral' },
+        { id: 'example', label: 'Real-World Example', value: `If you scored ${fmt(x)} out of ${fmt(y)}: your grade is ${fmt(result)}%`, color: 'neutral' },
       ];
     } else if (mode === 'pctChange') {
-      // "What is the % change from X to Y?"
-      if (x === 0) {
-        return [
-          { id: 'error', label: 'Cannot calculate percent change from zero', value: 'Undefined', color: 'negative' as const },
-          { id: 'explanation', label: 'Why?', value: 'Percent change divides by the original value (X). When X = 0, division by zero is mathematically undefined.', color: 'neutral' as const },
-        ];
-      }
-      const change = ((y - x) / x) * 100;
-      const absChange = Math.abs(change);
-      const direction = change >= 0 ? 'increase' : 'decrease';
+      const dir = c.changeDirection!;
+      const absChange = result.abs();
+      const word = dir === 'none' ? 'no change' : dir;
       results = [
-        { id: 'result', label: `% Change from ${fmt(x)} to ${fmt(y)}`, value: `${fmt(absChange)}% ${direction}`, highlight: true, color: change >= 0 ? 'positive' : 'negative' },
-        { id: 'formula', label: 'Calculation', value: `(${fmt(y)} − ${fmt(x)}) ÷ ${fmt(x)} × 100 = ${fmt(absChange)}% ${direction}`, color: 'neutral' },
-        { id: 'difference', label: 'Absolute Difference', value: fmt(Math.abs(y - x)), color: 'neutral' },
-        { id: 'example', label: 'Real-World Example', value: change >= 0 ? `Price increased from $${fmt(x)} to $${fmt(y)} — a ${fmt(absChange)}% markup` : `Price dropped from $${fmt(x)} to $${fmt(y)} — a ${fmt(absChange)}% discount`, color: 'neutral' },
+        { id: 'result', label: `% Change from ${fmt(x)} to ${fmt(y)}`, value: dir === 'none' ? '0% (no change)' : `${fmt(absChange)}% ${dir}`, highlight: true, color: dir === 'decrease' ? 'negative' : 'positive' },
+        { id: 'formula', label: 'Calculation', value: `(${fmt(y)} − ${fmt(x)}) ÷ ${fmt(x.abs())} × 100 = ${fmt(absChange)}% ${word}`, color: 'neutral' },
+        { id: 'difference', label: 'Absolute Difference', value: fmt(extra), color: 'neutral' },
+        { id: 'example', label: 'Real-World Example', value: dir === 'decrease' ? `Price dropped from $${fmt(x)} to $${fmt(y)} — a ${fmt(absChange)}% discount` : `Price went from $${fmt(x)} to $${fmt(y)} — a ${fmt(absChange)}% markup`, color: 'neutral' },
       ];
     } else if (mode === 'addPct') {
-      // "Add X% to Y"
-      const result = y * (1 + x / 100);
       results = [
         { id: 'result', label: `${fmt(y)} + ${fmt(x)}% = ?`, value: fmt(result), highlight: true, color: 'positive' },
-        { id: 'formula', label: 'Calculation', value: `${fmt(y)} × (1 + ${fmt(x)} ÷ 100) = ${fmt(y)} × ${fmt(1 + x / 100)} = ${fmt(result)}`, color: 'neutral' },
-        { id: 'increaseAmount', label: 'Increase Amount', value: fmt(result - y), color: 'neutral' },
+        { id: 'formula', label: 'Calculation', value: `${fmt(y)} × (1 + ${fmt(x)} ÷ 100) = ${fmt(y)} × ${fmt(ratio)} = ${fmt(result)}`, color: 'neutral' },
+        { id: 'increaseAmount', label: 'Increase Amount', value: fmt(extra), color: 'neutral' },
         { id: 'example', label: 'Real-World Example', value: `$${fmt(y)} with ${fmt(x)}% tax added = $${fmt(result)} total`, color: 'neutral' },
       ];
-    } else if (mode === 'subPct') {
-      // "Subtract X% from Y"
-      const result = y * (1 - x / 100);
+    } else {
       results = [
-        { id: 'result', label: `${fmt(y)} − ${fmt(x)}% = ?`, value: fmt(Math.max(0, result)), highlight: true, color: 'positive' },
-        { id: 'formula', label: 'Calculation', value: `${fmt(y)} × (1 − ${fmt(x)} ÷ 100) = ${fmt(y)} × ${fmt(1 - x / 100)} = ${fmt(Math.max(0, result))}`, color: 'neutral' },
-        { id: 'decreaseAmount', label: 'Discount Amount', value: fmt(y - result), color: 'neutral' },
-        { id: 'example', label: 'Real-World Example', value: `$${fmt(y)} with ${fmt(x)}% off = $${fmt(Math.max(0, result))} (save $${fmt(y - result)})`, color: 'neutral' },
+        { id: 'result', label: `${fmt(y)} − ${fmt(x)}% = ?`, value: fmt(result), highlight: true, color: 'positive' },
+        { id: 'formula', label: 'Calculation', value: `${fmt(y)} × (1 − ${fmt(x)} ÷ 100) = ${fmt(y)} × ${fmt(ratio)} = ${fmt(result)}`, color: 'neutral' },
+        { id: 'decreaseAmount', label: 'Discount Amount', value: fmt(extra), color: 'neutral' },
+        { id: 'example', label: 'Real-World Example', value: `$${fmt(y)} with ${fmt(x)}% off = $${fmt(result)} (save $${fmt(extra)})`, color: 'neutral' },
       ];
     }
 
@@ -170,23 +143,7 @@ const percentageConfig: CalculatorConfig = {
     formulaDescription:
       'A percentage expresses a number as a fraction of 100. The "% of" formula multiplies the base by the percentage divided by 100. Percent change compares the difference between two values relative to the original.',
     diagram: {
-      svg: '<svg viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto">' +
-        '<rect x="10" y="10" width="36" height="36" rx="3" fill="var(--svg-3b82f6)" opacity="0.9"/><rect x="48" y="10" width="36" height="36" rx="3" fill="var(--svg-3b82f6)" opacity="0.9"/><rect x="86" y="10" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="124" y="10" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="162" y="10" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="200" y="10" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="238" y="10" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="276" y="10" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="314" y="10" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="352" y="10" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="10" y="48" width="36" height="36" rx="3" fill="var(--svg-3b82f6)" opacity="0.9"/><rect x="48" y="48" width="36" height="36" rx="3" fill="var(--svg-3b82f6)" opacity="0.9"/><rect x="86" y="48" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="124" y="48" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="162" y="48" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="200" y="48" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="238" y="48" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="276" y="48" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="314" y="48" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="352" y="48" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="10" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="48" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="86" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="124" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="162" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="200" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="238" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="276" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="314" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="352" y="86" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="10" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="48" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="86" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="124" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="162" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="200" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="238" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="276" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="314" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="352" y="124" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="10" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="48" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="86" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="124" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="162" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="200" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="238" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="276" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="314" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="352" y="162" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="10" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="48" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="86" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="124" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="162" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="200" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="238" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="276" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="314" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="352" y="200" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="10" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="48" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="86" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="124" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="162" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<rect x="200" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="238" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="276" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="314" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/><rect x="352" y="238" width="36" height="36" rx="3" fill="var(--svg-e2e8f0)"/>' +
-        '<text x="190" y="296" font-family="system-ui,sans-serif" font-size="14" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">20 out of 100 squares = 20%</text>' +
-        '</svg>',
+      svg: '<svg viewBox="0 0 260 290" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><rect x="10" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="34" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="58" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="82" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="106" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="130" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="154" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="178" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="202" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="226" y="10" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="10" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="34" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="58" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="82" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="106" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="130" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="154" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="178" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="202" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="226" y="34" width="22" height="22" rx="3" fill="var(--svg-3b82f6)"/><rect x="10" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="34" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="58" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="82" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="106" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="130" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="154" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="178" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="202" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="226" y="58" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="10" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="34" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="58" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="82" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="106" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="130" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="154" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="178" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="202" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="226" y="82" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="10" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="34" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="58" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="82" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="106" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="130" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="154" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="178" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="202" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="226" y="106" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="10" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="34" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="58" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="82" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="106" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="130" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="154" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="178" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="202" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="226" y="130" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="10" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="34" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="58" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="82" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="106" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="130" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="154" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="178" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="202" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="226" y="154" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="10" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="34" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="58" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="82" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="106" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="130" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="154" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="178" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="202" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="226" y="178" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="10" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="34" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="58" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="82" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="106" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="130" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="154" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="178" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="202" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="226" y="202" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="10" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="34" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="58" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="82" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="106" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="130" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="154" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="178" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="202" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><rect x="226" y="226" width="22" height="22" rx="3" fill="var(--svg-e2e8f0)"/><text x="130" y="274" font-family="system-ui,sans-serif" font-size="14" fill="var(--svg-1e293b)" font-weight="600" text-anchor="middle">20 out of 100 squares = 20%</text></svg>',
       alt: 'Ten-by-ten grid with 20 filled squares showing 20 out of 100 equals 20 percent',
       caption: 'A 10×10 grid visually demonstrates that 20% means 20 out of every 100 units',
     },

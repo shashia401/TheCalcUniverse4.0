@@ -1,37 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import LCMPanel from './LCMPanel';
-
-function gcd(a: number, b: number): number {
-  while (b) { [a, b] = [b, a % b]; }
-  return a;
-}
-
-function lcm(a: number, b: number): number {
-  return (a / gcd(a, b)) * b;
-}
-
-function getPrimeFactors(n: number): { factor: number; exponent: number }[] {
-  const factors: { factor: number; exponent: number }[] = [];
-  let num = n;
-  for (let p = 2; p * p <= num; p++) {
-    if (num % p === 0) {
-      let count = 0;
-      while (num % p === 0) { num /= p; count++; }
-      factors.push({ factor: p, exponent: count });
-    }
-  }
-  if (num > 1) factors.push({ factor: num, exponent: 1 });
-  return factors;
-}
-
-function getMultiples(n: number, limit: number): number[] {
-  const multiples: number[] = [];
-  for (let i = 1; i <= limit; i++) {
-    multiples.push(n * i);
-  }
-  return multiples;
-}
+import { LCM_MAX_COUNT, analyzeLcm, parseLcmInput } from './lcmMath';
 
 const lcmConfig: CalculatorConfig = {
   inputs: [
@@ -41,50 +11,24 @@ const lcmConfig: CalculatorConfig = {
       type: 'text',
       placeholder: '12, 18, 24',
       inputMode: 'numeric',
-      helpText: 'Enter two or more positive integers separated by commas',
+      helpText: `Enter two or more positive whole numbers (up to ${LCM_MAX_COUNT}) separated by commas or spaces`,
     },
   ],
-  calculate: (values) => {
-    const raw = values.numbers?.trim();
-    if (!raw) return [];
+  calculate: (values): CalculatorResult[] => {
+    const parsed = parseLcmInput(values.numbers);
+    if (parsed.kind === 'invalid') return [{ id: 'error', label: 'Error', value: parsed.message, color: 'negative' }];
+    if (parsed.kind !== 'ok') return [];
+    const { nums } = parsed;
 
-    const nums = raw.split(/[,\s]+/).map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0);
-    if (nums.length < 2) return [];
-
-    // Calculate LCM
-    let result = nums[0];
-    for (let i = 1; i < nums.length; i++) {
-      result = lcm(result, nums[i]);
-    }
-
-    if (!isFinite(result) || result > 1e15) {
-      return [{ id: 'result', label: 'LCM', value: 'Result too large (> 10¹⁵)' }];
-    }
-
-    // Prime factorization method
-    const pfacs = nums.map(n => ({
-      number: n,
-      factors: getPrimeFactors(n),
-    }));
-
-    // List of multiples for the first two numbers (up to LCM)
-    const multiplesLimit = 100;
-    const multiplesA = getMultiples(nums[0], Math.min(multiplesLimit, Math.ceil(result / nums[0])));
-    const multiplesB = nums.length > 1 ? getMultiples(nums[1], Math.min(multiplesLimit, Math.ceil(result / nums[1]))) : [];
+    // BigInt throughout: the answer is exact however large it gets (the old double + 10^15 cap lost digits).
+    const { lcm, gcd, steps } = analyzeLcm(nums);
+    const list = nums.length > 6 ? `${nums.slice(0, 6).join(', ')}, …` : nums.join(', ');
 
     return [
-      { id: 'result', label: `LCM of ${nums.join(', ')}`, value: result.toString(), highlight: true, color: 'positive' },
+      { id: 'result', label: `LCM of ${list}`, value: lcm.toString(), highlight: true, color: 'positive' },
       { id: 'lcmFormula', label: 'LCM Formula', value: `LCM(a,b) = (a × b) / GCD(a,b)` },
-      { id: 'gcdValue', label: `GCD of ${nums[0]} and ${nums[1]}`, value: gcd(nums[0], nums[1]).toString() },
-      { id: '_primeData', label: 'Prime Factorization Data', value: JSON.stringify(pfacs) },
-      { id: '_multiplesData', label: 'Multiples Data', value: JSON.stringify({
-        a: nums[0],
-        b: nums.length > 1 ? nums[1] : nums[0],
-        multiplesA,
-        multiplesB,
-        lcm: result,
-      }) },
-      { id: '_inputNums', label: 'Input Numbers', value: JSON.stringify(nums) },
+      { id: 'gcdValue', label: nums.length === 2 ? `GCD of ${nums[0]} and ${nums[1]}` : `GCD of all ${nums.length} numbers`, value: gcd.toString() },
+      ...(nums.length > 2 ? [{ id: 'lcmSteps', label: 'Chained steps', value: steps.join(' | ') }] : []),
     ];
   },
   extraPanel: (values, results) => {
@@ -104,7 +48,7 @@ const lcmConfig: CalculatorConfig = {
       'Enter two or more positive integers separated by commas.',
       'View the LCM calculated via the efficient GCD-based method.',
       'Compare the "List of Multiples" and "Prime Factorization" solution methods side by side to understand different approaches.',
-      'Check the GCD of the first two numbers, which is used as an intermediate step in the calculation.',
+      'Check the GCD of all the numbers, and the chained pairwise steps when you enter three or more numbers.',
       'Use the LCM as the common denominator when adding or subtracting fractions.',
     ],
     explanation:
@@ -139,7 +83,7 @@ const lcmConfig: CalculatorConfig = {
         scenario: 'Three planets orbit in 88, 225, and 365 days. When will they align again?',
         inputs: { numbers: '88, 225, 365' },
         result: 'LCM(88, 225, 365) = 1,445,400',
-        insight: 'The planets align approximately every 3,960 years at this exact configuration. In practice, orbital mechanics has perturbations, but the LCM gives the theoretical recurrence period.',
+        insight: '88 = 2³×11, 225 = 3²×5², 365 = 5×73, so the LCM is 2³×3²×5²×11×73 = 1,445,400 days, about 3,957 years (1,445,400 ÷ 365.25) with these rounded periods. In practice, orbital mechanics has perturbations, but the LCM gives the theoretical recurrence period.',
       },
     ],
     proTips: [
@@ -149,9 +93,10 @@ const lcmConfig: CalculatorConfig = {
       'For three or more numbers, chain the calculation: LCM(a, b, c) = LCM(LCM(a, b), c). Never try to multiply all numbers and divide by their GCD — that only works for two numbers.',
     ],
     limitations: [
-      'This calculator limits results to 10¹⁵. For numbers with LCM exceeding this (e.g., very large co-prime pairs), the result will show an overflow message.',
+      'Up to 30 positive whole numbers of at most 100 digits each. The LCM is computed with exact big-integer arithmetic, so even a result with thousands of digits is digit-for-digit correct; only the multiples chart and the prime-factor view are limited to numbers below 9,007,199,254,740,991.',
+      'Zero, negatives and decimals are rejected with a message (by convention LCM(0, n) = 0 and LCM(−a, b) = LCM(a, b), which this tool does not use).',
       'The LCM formula LCM = (a×b)/GCD only works for exactly two numbers. For three or more, you must chain calculations pairwise. The result is independent of pairing order due to associativity.',
-      'The "list of multiples" method is only practical for small numbers. It explores multiples up to the LCM or 100, whichever is smaller, so for very large LCMs the list is truncated.',
+      'The "list of multiples" method is only practical for small numbers. The lists show the first 60 multiples of each of the first three numbers (or fewer, when the LCM comes sooner), so for very large LCMs the LCM itself is not in the list; the chained steps always give the exact value.',
     ],
     faqs: [
       {

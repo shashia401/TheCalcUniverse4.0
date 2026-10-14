@@ -1,135 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import NumberSequencePanel from './NumberSequencePanel';
-
-interface SequenceResult {
-  type: 'Arithmetic' | 'Geometric' | 'Fibonacci' | 'Unknown';
-  terms: number[];
-  commonDifference?: number;
-  commonRatio?: number;
-  nthTermFormula: string;
-  nextTerms: number[];
-  steps: string[];
-}
-
-function identifySequence(terms: number[]): SequenceResult {
-  const steps: string[] = [];
-  const n = terms.length;
-
-  if (n < 3) {
-    return {
-      type: 'Unknown',
-      terms,
-      nthTermFormula: 'Need at least 3 terms to identify a sequence pattern.',
-      nextTerms: [],
-      steps: ['Need at least 3 terms to determine the sequence type.'],
-    };
-  }
-
-  // Check for Fibonacci (need at least 4 terms to confirm)
-  let isFibonacci = n >= 4;
-  for (let i = 2; i < n; i++) {
-    if (terms[i] !== terms[i - 1] + terms[i - 2]) {
-      isFibonacci = false;
-      break;
-    }
-  }
-  if (isFibonacci && n >= 3) {
-    steps.push('Checking differences: each term is the sum of the two preceding terms.');
-    steps.push(`${terms[n - 2]} + ${terms[n - 3]} = ${terms[n - 1]}, confirming Fibonacci pattern.`);
-
-    const nextTerms: number[] = [];
-    let a = terms[n - 2], b = terms[n - 1];
-    for (let i = 0; i < 5; i++) {
-      const next = a + b;
-      nextTerms.push(next);
-      a = b;
-      b = next;
-    }
-
-    return {
-      type: 'Fibonacci',
-      terms,
-      nthTermFormula: `F(n) = F(n-1) + F(n-2), where F(1) = ${terms[0]}, F(2) = ${terms[1]}`,
-      nextTerms,
-      steps,
-    };
-  }
-
-  // Check for Arithmetic
-  const diff1 = terms[1] - terms[0];
-  let isArithmetic = true;
-  for (let i = 1; i < n; i++) {
-    if (terms[i] - terms[i - 1] !== diff1) {
-      isArithmetic = false;
-      break;
-    }
-  }
-  if (isArithmetic) {
-    steps.push(`Common difference d = ${terms[1]} − ${terms[0]} = ${diff1}`);
-    steps.push(`Verified: all consecutive differences equal ${diff1}.`);
-    steps.push(`nth-term formula: a(n) = ${terms[0]} + (n-1) × ${diff1}`);
-
-    const nextTerms: number[] = [];
-    let last = terms[n - 1];
-    for (let i = 0; i < 5; i++) {
-      last += diff1;
-      nextTerms.push(last);
-    }
-
-    const firstTerm = terms[0];
-    const d = diff1;
-    const formula = `a(n) = ${firstTerm}${d >= 0 ? '+' : ''}${d}(n-1) = ${d === 0 ? firstTerm : d === 1 ? 'n' + (firstTerm !== 1 ? `+${firstTerm - 1}` : '') : `${d}n${firstTerm - d >= 0 ? '+' : ''}${firstTerm - d !== 0 ? firstTerm - d : ''}`}`;
-
-    return {
-      type: 'Arithmetic',
-      terms,
-      commonDifference: diff1,
-      nthTermFormula: formula,
-      nextTerms,
-      steps,
-    };
-  }
-
-  // Check for Geometric
-  const ratio1 = terms[1] / terms[0];
-  let isGeometric = true;
-  for (let i = 1; i < n; i++) {
-    if (terms[i] / terms[i - 1] !== ratio1) {
-      isGeometric = false;
-      break;
-    }
-  }
-  if (isGeometric) {
-    steps.push(`Common ratio r = ${terms[1]} ÷ ${terms[0]} = ${ratio1}`);
-    steps.push(`Verified: all consecutive ratios equal ${ratio1}.`);
-    steps.push(`nth-term formula: a(n) = ${terms[0]} × ${ratio1}^(n-1)`);
-
-    const nextTerms: number[] = [];
-    let last = terms[n - 1];
-    for (let i = 0; i < 5; i++) {
-      last *= ratio1;
-      nextTerms.push(last);
-    }
-
-    return {
-      type: 'Geometric',
-      terms,
-      commonRatio: ratio1,
-      nthTermFormula: `a(n) = ${terms[0]} × ${ratio1}^(n-1)`,
-      nextTerms,
-      steps,
-    };
-  }
-
-  return {
-    type: 'Unknown',
-    terms,
-    nthTermFormula: 'The sequence does not follow a simple arithmetic, geometric, or Fibonacci pattern.',
-    nextTerms: [],
-    steps: ['No consistent arithmetic difference, geometric ratio, or Fibonacci pattern detected.'],
-  };
-}
+import { SEQ_MAX_NEXT, SEQ_MAX_TERMS, fmtTerm, parseSequence } from './sequenceMath';
 
 const numberSequenceConfig: CalculatorConfig = {
   inputs: [
@@ -139,7 +11,7 @@ const numberSequenceConfig: CalculatorConfig = {
       type: 'text',
       placeholder: '2, 4, 6, 8, 10',
       required: true,
-      helpText: 'Enter comma-separated numbers (at least 3 terms)',
+      helpText: `Enter comma-separated numbers (at least 3, at most ${SEQ_MAX_TERMS} terms)`,
     },
     {
       id: 'nextCount',
@@ -148,87 +20,22 @@ const numberSequenceConfig: CalculatorConfig = {
       placeholder: '5',
       step: 1,
       required: true,
-      helpText: 'Number of additional terms to compute',
+      helpText: `Number of additional terms to compute (1-${SEQ_MAX_NEXT})`,
     },
   ],
-  calculate: (values) => {
-    const raw = values.sequence || '';
-    const nextCount = Math.min(Math.max(parseInt(values.nextCount) || 5, 1), 20);
-    const terms = raw.split(',').map(t => parseFloat(t.trim())).filter(t => !isNaN(t));
-
-    if (terms.length < 2) return [];
-
-    const result = identifySequence(terms);
-    const fmt = (n: number) => {
-      if (Number.isInteger(n)) return n.toString();
-      return n.toFixed(4).replace(/\.?0+$/, '');
-    };
-
-    // Generate requested number of next terms
-    let nextTerms = result.nextTerms;
-    if (result.type === 'Arithmetic' && result.commonDifference !== undefined) {
-      nextTerms = [];
-      let last = terms[terms.length - 1];
-      for (let i = 0; i < nextCount; i++) {
-        last += result.commonDifference;
-        nextTerms.push(last);
-      }
-    } else if (result.type === 'Geometric' && result.commonRatio !== undefined) {
-      nextTerms = [];
-      let last = terms[terms.length - 1];
-      for (let i = 0; i < nextCount; i++) {
-        last *= result.commonRatio;
-        nextTerms.push(last);
-      }
-    } else if (result.type === 'Fibonacci') {
-      nextTerms = [];
-      let a = terms[terms.length - 2], b = terms[terms.length - 1];
-      for (let i = 0; i < nextCount; i++) {
-        const next = a + b;
-        nextTerms.push(next);
-        a = b;
-        b = next;
-      }
-    }
+  calculate: (values): CalculatorResult[] => {
+    const p = parseSequence(values.sequence, values.nextCount);
+    if (p.kind === 'invalid') return [{ id: 'error', label: 'Error', value: p.message, color: 'negative' }];
+    if (p.kind !== 'ok') return [];
+    const { type, terms, next, d, r, formula } = p.analysis;
 
     return [
-      {
-        id: 'sequenceType',
-        label: 'Sequence Type',
-        value: result.type,
-        highlight: true,
-        color: result.type === 'Unknown' ? 'negative' : 'positive',
-      },
-      {
-        id: 'nthTerm',
-        label: 'nth-Term Formula',
-        value: result.nthTermFormula,
-        color: 'neutral',
-      },
-      {
-        id: 'nextTerms',
-        label: `Next ${nextTerms.length} Term(s)`,
-        value: nextTerms.map(t => fmt(t)).join(', '),
-        color: 'neutral',
-      },
-      ...(result.commonDifference !== undefined ? [{
-        id: 'commonDifference' as const,
-        label: 'Common Difference (d)',
-        value: fmt(result.commonDifference),
-        color: 'neutral' as const,
-      }] : []),
-      ...(result.commonRatio !== undefined ? [{
-        id: 'commonRatio' as const,
-        label: 'Common Ratio (r)',
-        value: fmt(result.commonRatio),
-        color: 'neutral' as const,
-      }] : []),
-      {
-        id: 'fullSequence',
-        label: 'Extended Sequence',
-        value: [...terms, ...nextTerms].map(t => fmt(t)).join(', '),
-        color: 'neutral',
-      },
+      { id: 'sequenceType', label: 'Sequence Type', value: type, highlight: true, color: type === 'Unknown' ? 'negative' : 'positive' },
+      { id: 'nthTerm', label: 'nth-Term Formula', value: formula, color: 'neutral' },
+      { id: 'nextTerms', label: `Next ${next.length} Term(s)`, value: next.map(fmtTerm).join(', '), color: 'neutral' },
+      ...(d ? [{ id: 'commonDifference' as const, label: 'Common Difference (d)', value: fmtTerm(d), color: 'neutral' as const }] : []),
+      ...(r ? [{ id: 'commonRatio' as const, label: 'Common Ratio (r)', value: fmtTerm(r), color: 'neutral' as const }] : []),
+      { id: 'fullSequence', label: 'Extended Sequence', value: [...terms, ...next].map(fmtTerm).join(', '), color: 'neutral' },
     ];
   },
   extraPanel: (values, results) => {

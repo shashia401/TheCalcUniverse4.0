@@ -1,22 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ScientificNotationPanel from './ScientificNotationPanel';
-
-function decimalToScientific(n: number): { coefficient: string; exponent: number; moves: number; direction: 'left' | 'right' } {
-  if (n === 0) return { coefficient: '0', exponent: 0, moves: 0, direction: 'left' };
-
-  const abs = Math.abs(n);
-  const exp = Math.floor(Math.log10(abs));
-  const coeff = abs / Math.pow(10, exp);
-  const moves = Math.abs(exp);
-
-  return {
-    coefficient: (n < 0 ? -coeff : coeff).toFixed(6).replace(/\.?0+$/, ''),
-    exponent: exp,
-    moves,
-    direction: exp >= 0 ? 'left' : 'right',
-  };
-}
+import { toDecimal, toScientific } from './sciNotationMath';
 
 const scientificNotationConfig: CalculatorConfig = {
   inputs: [
@@ -52,47 +37,37 @@ const scientificNotationConfig: CalculatorConfig = {
       helpText: 'The power of 10 exponent',
     },
   ],
-  calculate: (values) => {
+  calculate: (values): CalculatorResult[] => {
     const mode = values.mode || 'toScientific';
 
     if (mode === 'toScientific') {
-      const raw = values.decimal?.trim();
-      if (!raw) return [];
-      const num = parseFloat(raw.replace(/,/g, ''));
-      if (isNaN(num)) return [];
-
-      const { coefficient, exponent, moves, direction } = decimalToScientific(num);
-      const sciStr = `${coefficient} × 10^${exponent}`;
-      const eStr = `${coefficient}e${exponent}`;
-
+      if (!values.decimal?.trim()) return [];
+      const r = toScientific(values.decimal);
+      if (!r) return [];
       return [
-        { id: 'scientific', label: 'Scientific Notation', value: sciStr, highlight: true, color: 'positive' },
-        { id: 'eNotation', label: 'E Notation', value: eStr },
-        { id: 'coefficient', label: 'Coefficient', value: coefficient },
-        { id: 'exponent', label: 'Exponent', value: exponent.toString() },
-        { id: 'moves', label: 'Decimal Moves', value: moves.toString() },
-        { id: 'direction', label: 'Decimal Direction', value: direction === 'left' ? 'Moved left (large number)' : 'Moved right (small number)' },
-        { id: '_animationData', label: 'Animation Data', value: JSON.stringify({ coefficient, exponent, moves, direction, original: raw, isNegative: num < 0 }) },
+        { id: 'scientific', label: 'Scientific Notation', value: r.sci, highlight: true, color: 'positive' },
+        { id: 'eNotation', label: 'E Notation', value: r.eNotation },
+        { id: 'coefficient', label: 'Coefficient', value: r.coefficient },
+        { id: 'exponent', label: 'Exponent', value: r.exponent.toString() },
+        { id: 'moves', label: 'Decimal Moves', value: r.moves.toString() },
+        {
+          id: 'direction',
+          label: 'Decimal Direction',
+          value: r.direction === 'none' ? 'No movement (already between 1 and 10)' : r.direction === 'left' ? 'Moved left (large number)' : 'Moved right (small number)',
+        },
+        { id: 'sigFigs', label: 'Significant Figures', value: r.sigFigs.toString() },
       ];
     }
 
     // toDecimal mode
-    const coeff = values.coefficient?.trim();
-    const exp = values.exponent?.trim();
-    if (!coeff || !exp) return [];
-
-    const c = parseFloat(coeff);
-    const e = parseInt(exp);
-    if (isNaN(c) || isNaN(e)) return [];
-
-    const decimal = c * Math.pow(10, e);
-    const fmt = Math.abs(decimal) > 1e15 || (Math.abs(decimal) < 1e-10 && decimal !== 0)
-      ? decimal.toExponential(10)
-      : parseFloat(decimal.toFixed(12)).toString();
-
+    if (!values.coefficient?.trim() || !values.exponent?.trim()) return [];
+    const d = toDecimal(values.coefficient, values.exponent);
+    if (!d) return [];
     return [
-      { id: 'decimal', label: 'Decimal Form', value: fmt, highlight: true, color: 'positive' },
-      { id: 'scientific', label: 'Scientific Notation', value: `${coeff} × 10^${exp}` },
+      { id: 'decimal', label: 'Decimal Form', value: d.plain ?? `${d.eNotation} (too long to write out in full)`, highlight: true, color: 'positive' },
+      { id: 'scientific', label: 'Scientific Notation', value: `${values.coefficient.trim()} × 10^${values.exponent.trim()}` },
+      ...(d.alreadyNormal ? [] : [{ id: 'normalized', label: 'Normalized (1 ≤ |a| < 10)', value: d.normalized }]),
+      { id: 'eNotation', label: 'E Notation', value: d.eNotation },
     ];
   },
   extraPanel: (values, results) => {
@@ -115,7 +90,7 @@ const scientificNotationConfig: CalculatorConfig = {
       'The "Decimal Moves" counter tells you exactly how many places the decimal point moved and in which direction.',
     ],
     explanation:
-      'Scientific notation is a compact way to write very large or very small numbers. Instead of writing 6,022,140,760,000,000,000,000,000 (Avogadro\'s number), you write 6.022 × 10²³. The decimal point "jumps" left for large numbers (positive exponent) and right for small numbers (negative exponent). The coefficient is always between 1 and 10 (exclusive of 10). For example, 4,500 becomes 4.5 × 10³ — the decimal moved 3 places left. And 0.0045 becomes 4.5 × 10⁻³ — the decimal moved 3 places right. Zero is a special case expressed as 0 × 10⁰. E notation is a computer-friendly variant: 4.5e3 means 4.5 × 10³. Scientific notation is essential in physics (speed of light = 3 × 10⁸ m/s), chemistry (Avogadro\'s number = 6.022 × 10²³), astronomy (distance to Andromeda = 2.5 × 10⁶ light-years), and computer science (data sizes in bytes).',
+      'Scientific notation is a compact way to write very large or very small numbers. Instead of writing 602,214,076,000,000,000,000,000 (Avogadro\'s number), you write 6.022 × 10²³. The decimal point "jumps" left for large numbers (positive exponent) and right for small numbers (negative exponent). The coefficient is always between 1 and 10 (exclusive of 10). For example, 4,500 becomes 4.5 × 10³ — the decimal moved 3 places left. And 0.0045 becomes 4.5 × 10⁻³ — the decimal moved 3 places right. Zero is a special case expressed as 0 × 10⁰. E notation is a computer-friendly variant: 4.5e3 means 4.5 × 10³. Scientific notation is essential in physics (speed of light = 3 × 10⁸ m/s), chemistry (Avogadro\'s number = 6.022 × 10²³), astronomy (distance to Andromeda = 2.5 × 10⁶ light-years), and computer science (data sizes in bytes).',
     diagram: {
       svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="25" text-anchor="middle" fill="var(--svg-374151)" font-size="11" font-weight="bold">Large Number: 4,500</text><text x="110" y="50" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="13">4</text><text x="130" y="50" text-anchor="middle" fill="var(--svg-ef4444)" font-size="13">5</text><text x="150" y="50" text-anchor="middle" fill="var(--svg-ef4444)" font-size="13">0</text><text x="170" y="50" text-anchor="middle" fill="var(--svg-ef4444)" font-size="13">0</text><line x1="105" y1="55" x2="175" y2="55" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><line x1="120" y1="58" x2="120" y2="68" stroke="var(--svg-ef4444)" stroke-width="1"/><line x1="140" y1="58" x2="140" y2="68" stroke="var(--svg-ef4444)" stroke-width="1"/><line x1="160" y1="58" x2="160" y2="68" stroke="var(--svg-ef4444)" stroke-width="1"/><text x="160" y="82" text-anchor="middle" fill="var(--svg-059669)" font-size="13" font-weight="bold">4.5 &amp;times; 10&amp;sup3;</text><text x="160" y="97" text-anchor="middle" fill="var(--svg-6b7280)" font-size="10">Decimal moved 3 places left</text><line x1="30" y1="105" x2="290" y2="105" stroke="var(--svg-d1d5db)" stroke-width="1"/><text x="160" y="125" text-anchor="middle" fill="var(--svg-374151)" font-size="11" font-weight="bold">Small Number: 0.0045</text><text x="80" y="148" text-anchor="middle" fill="var(--svg-ef4444)" font-size="13">0</text><text x="98" y="148" text-anchor="middle" fill="var(--svg-ef4444)" font-size="13">.</text><text x="116" y="148" text-anchor="middle" fill="var(--svg-ef4444)" font-size="13">0</text><text x="134" y="148" text-anchor="middle" fill="var(--svg-ef4444)" font-size="13">0</text><text x="152" y="148" text-anchor="middle" fill="var(--svg-ef4444)" font-size="13">4</text><text x="170" y="148" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="13">5</text><line x1="74" y1="153" x2="176" y2="153" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><line x1="108" y1="156" x2="108" y2="166" stroke="var(--svg-ef4444)" stroke-width="1"/><line x1="126" y1="156" x2="126" y2="166" stroke="var(--svg-ef4444)" stroke-width="1"/><line x1="144" y1="156" x2="144" y2="166" stroke="var(--svg-ef4444)" stroke-width="1"/><text x="160" y="180" text-anchor="middle" fill="var(--svg-059669)" font-size="13" font-weight="bold">4.5 &amp;times; 10&amp;minus;&amp;sup3;</text><text x="160" y="195" text-anchor="middle" fill="var(--svg-6b7280)" font-size="10">Decimal moved 3 places right</text></svg>',
       alt: 'Scientific notation showing decimal point movement for large number 4,500 and small number 0.0045',

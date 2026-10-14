@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
+import SvgLineChart from '../../../components/charts/SvgLineChart';
+import { computeLog } from './logMath';
 
 interface Props {
   values: Record<string, string>;
@@ -15,26 +15,23 @@ export default function LogPanel({ values, results }: Props) {
   const lnRow = results.find(r => r.id === 'naturalLog');
   const log2Row = results.find(r => r.id === 'log2');
 
-  if (!resultRow) return null;
+  const calc = computeLog(values.base, values.value);
+  if (!resultRow || calc.kind !== 'ok') return null;
 
-  const base = parseFloat(values.base);
-  const x = parseFloat(values.value);
-  const result = parseFloat(resultRow.value);
+  const base = calc.base.toNumber();
+  const x = calc.x.toNumber();
+  const result = calc.result.toNumber();
 
-  // Generate log curve
-  const curveData = useMemo(() => {
-    const points: { x: number; y: number }[] = [];
-    if (isNaN(base) || isNaN(x) || base <= 0 || base === 1) return points;
-    const xMax = Math.max(x + 2, 5);
-    const xMin = 0.01;
-    const steps = 100;
-    for (let i = 0; i <= steps; i++) {
-      const px = xMin + (i / steps) * (xMax - xMin);
-      const py = Math.log(px) / Math.log(base);
-      if (isFinite(py)) points.push({ x: parseFloat(px.toFixed(4)), y: parseFloat(py.toFixed(4)) });
-    }
-    return points;
-  }, [base, x]);
+  // Log curve f(t) = ln t / ln b on (0, xMax]
+  const xMax = Math.max(x + 2, 5);
+  const xMin = 0.01;
+  const steps = 100;
+  const points: { x: number; y: number }[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const px = xMin + (i / steps) * (xMax - xMin);
+    const py = Math.log(px) / Math.log(base);
+    if (Number.isFinite(py)) points.push({ x: px, y: py });
+  }
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -53,23 +50,15 @@ export default function LogPanel({ values, results }: Props) {
         </div>
 
         {/* Log curve */}
-        {curveData.length > 1 && (
+        {points.length > 1 && (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Logarithmic Curve f(x) = log<sub>{base}</sub>(x)</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={curveData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                <XAxis dataKey="x" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} type="number" domain={['auto', 'auto']} />
-                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={50} type="number" domain={['auto', 'auto']} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  formatter={(_: unknown) => [parseFloat((_ as number).toFixed(6)), 'log(x)']}
-                />
-                <ReferenceLine y={0} stroke="#cbd5e1" strokeWidth={1} />
-                <ReferenceLine x={1} stroke="#94a3b8" strokeWidth={1} strokeDasharray="3 2" />
-                <ReferenceDot x={x} y={result} r={5} fill="#ef4444" stroke="#fff" strokeWidth={2} label={{ value: `(${x}, ${resultRow.value})`, position: 'top', fontSize: 10, fill: '#ef4444', fontWeight: 'bold' }} />
-                <Line type="monotone" dataKey="y" stroke="#3b82f6" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Logarithmic Curve f(x) = log<sub>{values.base}</sub>(x)</p>
+            <SvgLineChart
+              ariaLabel={`Graph of log base ${base} of x with the point (${x}, ${resultRow.value})`}
+              series={[{ name: `log_${base}(x)`, points, color: '#2563eb' }]}
+              refLines={[{ x: 1, color: '#94a3b8' }]}
+              dots={[{ x, y: result, label: `(${x}, ${resultRow.value})`, color: '#dc2626' }]}
+            />
           </div>
         )}
 
@@ -87,9 +76,9 @@ export default function LogPanel({ values, results }: Props) {
           {/* Change of base */}
           {changeRow && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-              <p className="text-[10px] font-bold text-amber-600 uppercase">Change of Base Formula</p>
+              <p className="text-[10px] font-bold text-amber-700 uppercase">Change of Base Formula</p>
               <p className="text-xs font-mono text-amber-800 mt-1">{changeRow.value}</p>
-              <p className="text-[10px] text-amber-600 mt-1">
+              <p className="text-[10px] text-amber-700 mt-1">
                 Use this formula when your calculator only has log₁₀ or ln buttons.
               </p>
             </div>

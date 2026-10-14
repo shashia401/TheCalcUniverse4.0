@@ -49,9 +49,9 @@ describe('Long Division Calculator', () => {
     expect(quotient!.value).toBe('-20');
   });
 
-  it('returns empty array for division by zero', () => {
+  it('reports division by zero', () => {
     const r = config.calculate({ dividend: '100', divisor: '0' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty array for missing dividend', () => {
@@ -76,16 +76,9 @@ describe('Long Division Calculator', () => {
     expect(parseInt(quotient!.value)).toBeGreaterThan(100000);
   });
 
-  it('includes division steps data', () => {
+  it('includes a check row', () => {
     const r = config.calculate({ dividend: '48', divisor: '12' });
-    const stepsData = r.find((x) => x.id === '_divisionData');
-    expect(stepsData).toBeTruthy();
-    const parsed = JSON.parse(stepsData!.value);
-    expect(parsed.dividend).toBe(48);
-    expect(parsed.divisor).toBe(12);
-    expect(parsed.quotient).toBe(4);
-    expect(parsed.steps).toBeInstanceOf(Array);
-    expect(parsed.steps.length).toBeGreaterThan(0);
+    expect(r.find((x) => x.id === 'check')!.value).toBe('4 × 12 + 0 = 48');
   });
 
   it('has educational content', () => {

@@ -70,8 +70,8 @@ describe('Prime Number calculator', () => {
     expect(getValue(r, 'isPrime')).toBe('No');
   });
 
-  it('returns empty for n < 2', () => {
-    expect(config.calculate({ n: '1' })).toEqual([]);
+  it('1 is reported as not prime (not an empty result); 0 and negatives stay empty', () => {
+    expect(getValue(config.calculate({ n: '1' }), 'isPrime')).toBe('No');
     expect(config.calculate({ n: '0' })).toEqual([]);
     expect(config.calculate({ n: '-5' })).toEqual([]);
   });
@@ -81,8 +81,8 @@ describe('Prime Number calculator', () => {
     expect(config.calculate({ n: '' })).toEqual([]);
   });
 
-  it('returns empty for number exceeding max', () => {
-    expect(config.calculate({ n: '10000001' })).toEqual([]);
+  it('handles numbers above the old 10,000,000 limit', () => {
+    expect(getValue(config.calculate({ n: '10000019' }), 'isPrime')).toBe('Yes');
   });
 
   it('calculates divisor count of a prime correctly', () => {

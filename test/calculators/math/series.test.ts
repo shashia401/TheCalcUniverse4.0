@@ -50,7 +50,7 @@ describe('Series Calculator', () => {
 
   it('returns empty when start > end', () => {
     const r = config.calculate({ start: '10', end: '1', expression: 'n' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   it('handles harmonic series', () => {

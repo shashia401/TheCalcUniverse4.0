@@ -1,25 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import PermutationCombinationPanel from './PermutationCombinationPanel';
-
-function factorial(n: number): number {
-  if (n < 0) return NaN;
-  if (n === 0 || n === 1) return 1;
-  if (n > 170) return Infinity;
-  let result = 1;
-  for (let i = 2; i <= n; i++) result *= i;
-  return result;
-}
-
-function permutation(n: number, r: number): number {
-  if (r > n) return 0;
-  return factorial(n) / factorial(n - r);
-}
-
-function combination(n: number, r: number): number {
-  if (r > n) return 0;
-  return factorial(n) / (factorial(r) * factorial(n - r));
-}
+import { PC_MAX, computePermComb, fmtBigCount } from './permCombMath';
 
 const permCombConfig: CalculatorConfig = {
   inputs: [
@@ -29,7 +11,7 @@ const permCombConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '5',
       min: 0,
-      max: 170,
+      max: PC_MAX,
       step: 1,
       required: true,
       helpText: 'The total number of items to choose from (n ≥ 0)',
@@ -40,7 +22,7 @@ const permCombConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '3',
       min: 0,
-      max: 170,
+      max: PC_MAX,
       step: 1,
       required: true,
       helpText: 'How many items you are selecting (r ≥ 0)',
@@ -55,75 +37,39 @@ const permCombConfig: CalculatorConfig = {
         { label: 'No — Order Does Not Matter (Combination)', value: 'combination' },
       ],
     },
+    {
+      id: 'repetition',
+      label: 'Can Items Repeat?',
+      type: 'select',
+      defaultValue: 'no',
+      options: [
+        { label: 'No — each item used at most once', value: 'no' },
+        { label: 'Yes — items may be chosen again (with repetition)', value: 'yes' },
+      ],
+      helpText: 'With repetition: permutations = n^r, combinations = C(n + r − 1, r)',
+    },
   ],
-  calculate: (values) => {
-    const n = parseInt(values.n);
-    const r = parseInt(values.r);
-    const orderMatters = values.orderMatters === 'permutation';
-
-    if (isNaN(n) || isNaN(r)) return [];
-    if (n < 0 || r < 0 || r > n) return [];
-    if (n > 170) return [];
-
-    const fmt = (num: number): string => {
-      if (!isFinite(num)) return 'Infinity';
-      if (Number.isInteger(num) && num < 1e15) return num.toLocaleString(undefined);
-      return num.toExponential(6);
-    };
-
-    const isPerm = orderMatters;
+  calculate: (values): CalculatorResult[] => {
+    const p = computePermComb(values.n, values.r, values.orderMatters, values.repetition);
+    if (p.kind === 'invalid') return [{ id: 'error', label: 'Error', value: p.message, color: 'negative' }];
+    if (p.kind !== 'ok') return [];
+    const { n, r, isPerm, repetition, value, symbol, formula, applied, cells } = p.result;
     const typeLabel = isPerm ? 'Permutation' : 'Combination';
-    const result = isPerm ? permutation(n, r) : combination(n, r);
-    const symbol = isPerm ? 'P' : 'C';
+    const ids = ['nFactorial', 'rFactorial', 'nMinusRFactorial'] as const;
 
     return [
       {
         id: 'result',
-        label: `${typeLabel}: ${n}${symbol}${r}`,
-        value: fmt(result),
+        label: `${typeLabel}${repetition ? ' with repetition' : ''}: ${symbol}`,
+        value: fmtBigCount(value),
         highlight: true,
         color: 'positive' as const,
       },
-      {
-        id: 'type',
-        label: 'Type',
-        value: typeLabel,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'formula',
-        label: 'Formula',
-        value: isPerm
-          ? `P(${n},${r}) = ${n}! / (${n} − ${r})!`
-          : `C(${n},${r}) = ${n}! / (${r}! × (${n} − ${r})!)`,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'formulaApplied',
-        label: 'Formula Applied',
-        value: isPerm
-          ? `${n}! / ${n - r}! = ${fmt(factorial(n))} / ${fmt(factorial(n - r))} = ${fmt(result)}`
-          : `${n}! / (${r}! × ${n - r}!) = ${fmt(factorial(n))} / (${fmt(factorial(r))} × ${fmt(factorial(n - r))}) = ${fmt(result)}`,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'nFactorial',
-        label: 'n!',
-        value: fmt(factorial(n)),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'rFactorial',
-        label: 'r!',
-        value: fmt(factorial(r)),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'nMinusRFactorial',
-        label: '(n−r)!',
-        value: fmt(factorial(n - r)),
-        color: 'neutral' as const,
-      },
+      ...(value.toString().length > 21 ? [{ id: 'exact', label: 'Exact value', value: value.toString(), color: 'neutral' as const }] : []),
+      { id: 'type', label: 'Type', value: typeLabel, color: 'neutral' as const },
+      { id: 'formula', label: 'Formula', value: formula, color: 'neutral' as const },
+      { id: 'formulaApplied', label: 'Formula Applied', value: applied, color: 'neutral' as const },
+      ...cells.map((c, i) => ({ id: ids[i], label: c.label, value: c.value, color: 'neutral' as const })),
     ];
   },
   extraPanel: (values, results) => {
@@ -140,7 +86,7 @@ const permCombConfig: CalculatorConfig = {
     formulaDescription:
       'Permutations count arrangements where order matters. Combinations count selections where order does not matter. The key difference is dividing by r! in combinations to eliminate counting different orders as distinct outcomes.',
     variables: [
-      { symbol: 'n', name: 'Total Items', description: 'The total number of distinct items available to choose from. Must be a non-negative integer up to 170.' },
+      { symbol: 'n', name: 'Total Items', description: 'The total number of distinct items available to choose from. Must be a non-negative integer up to 1000.' },
       { symbol: 'r', name: 'Items Chosen', description: 'How many items you are selecting at a time. Must be between 0 and n.' },
       { symbol: 'n!', name: 'n Factorial', description: 'The product of all positive integers from 1 to n: n × (n−1) × ... × 1. By convention, 0! = 1.' },
       { symbol: 'P(n,r)', name: 'Permutation', description: 'Number of ways to arrange r items from n when order matters: n!/(n−r)!' },
@@ -151,10 +97,10 @@ const permCombConfig: CalculatorConfig = {
       'Toggle "Does Order Matter?" to switch between permutations (order matters) and combinations (order does not matter).',
       'View the result, formula, and detailed step-by-step calculation showing each factorial value.',
       'Compare permutation vs. combination results — notice that combinations are always smaller because order no longer contributes distinct arrangements.',
-      'The maximum value of n is 170 due to JavaScript factorial overflow limits. For larger values, use the big-number calculator.',
+      'n and r can be up to 1000. The arithmetic is exact (big integers); results longer than 21 digits are shown in scientific notation with the exact value on its own line.',
     ],
     explanation:
-      'Permutations and combinations are fundamental counting techniques in combinatorics and probability. Permutations (order matters) count arrangements like passwords ("123" differs from "321"), race rankings (1st, 2nd, 3rd place), and seating arrangements. Combinations (order does not matter) count selections like lottery numbers (the same set of numbers wins regardless of draw order), committee members, and poker hands. The key mathematical insight is that the combination formula is the permutation formula divided by r! — dividing by r! removes the count of different orderings for the same set of items. The factorial function grows extremely fast: 10! = 3,628,800, and 20! is about 2.43 quintillion. This rapid growth is why the calculator caps n at 170 — beyond this, JavaScript\'s number type can no longer represent the factorial exactly. For larger values, you would need the big-number calculator with arbitrary-precision integers. Real-world applications include password security analysis (how many possible 8-character passwords?), tournament bracket design, genetics (gene combinations), and quality control sampling plans.',
+      'Permutations and combinations are fundamental counting techniques in combinatorics and probability. Permutations (order matters) count arrangements like passwords ("123" differs from "321"), race rankings (1st, 2nd, 3rd place), and seating arrangements. Combinations (order does not matter) count selections like lottery numbers (the same set of numbers wins regardless of draw order), committee members, and poker hands. The key mathematical insight is that the combination formula is the permutation formula divided by r! — dividing by r! removes the count of different orderings for the same set of items. The factorial function grows extremely fast: 10! = 3,628,800, and 20! is about 2.43 quintillion. Because the factorial overflows ordinary floating-point numbers beyond 170!, this calculator uses exact big-integer arithmetic and accepts n and r up to 1000. Real-world applications include password security analysis (how many possible 8-character passwords?), tournament bracket design, genetics (gene combinations), and quality control sampling plans.',
     faqs: [
       {
         question: 'What is the difference between permutations and combinations?',
@@ -166,7 +112,11 @@ const permCombConfig: CalculatorConfig = {
       },
       {
         question: 'Can r be greater than n?',
-        answer: 'No. You cannot choose more items than are available. If r > n, the calculator returns 0 because there are zero ways to select r items from n available items. This is also why n must be at least r.',
+        answer: 'No. You cannot choose more items than are available. If r > n (and items cannot repeat), the calculator shows 0 because there are zero ways to select r different items from n available items. With repetition allowed, r may exceed n.',
+      },
+      {
+        question: 'What changes when items can repeat?',
+        answer: 'Ordered selections with repetition (like PIN codes or passwords) number n^r, because each of the r positions can be any of the n items: 10 digits, 4 positions gives 10^4 = 10,000. Unordered selections with repetition (like choosing 3 scoops from 5 flavours, flavours may repeat) number C(n + r - 1, r): C(7, 3) = 35.',
       },
     ],
     citations: [

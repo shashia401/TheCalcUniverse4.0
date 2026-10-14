@@ -1,4 +1,6 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { parseSlot } from '../proportion-calculator/proportionMath';
+import { ASPECT_PRESETS, simplifyRatio } from './ratioMath';
 
 interface Props {
   values: Record<string, string>;
@@ -10,20 +12,15 @@ export default function RatioPanel({ values, results }: Props) {
   const decimal = results.find(r => r.id === 'decimal');
   const proportionResult = results.find(r => r.id === 'proportionResult');
   const proportionSteps = results.find(r => r.id === 'proportionSteps');
-  const preset = values.preset || 'none';
-
-  const aspectRatios: Record<string, { a: number; b: number; label: string }> = {
-    '16:9': { a: 16, b: 9, label: 'HD Video / Widescreen' },
-    '4:3': { a: 4, b: 3, label: 'Standard Screen' },
-    '1:1': { a: 1, b: 1, label: 'Square' },
-    '21:9': { a: 21, b: 9, label: 'Ultrawide' },
-    '3:2': { a: 3, b: 2, label: 'Photo (35mm)' },
-    '8:5': { a: 8, b: 5, label: '16:10 Display' },
-    '9:16': { a: 9, b: 16, label: 'Portrait Phone' },
-    '2:3': { a: 2, b: 3, label: 'Portrait Photo' },
-    '4:5': { a: 4, b: 5, label: 'Instagram Portrait' },
-    '5:4': { a: 5, b: 4, label: 'Medium Format' },
-  };
+  // Highlight the common aspect ratio that matches the entered A : B (or the chosen preset when A and B are blank).
+  const sa = parseSlot(values.a);
+  const sb = parseSlot(values.b);
+  let selectedKey = ASPECT_PRESETS[values.preset ?? ''] && !sa && !sb ? (values.preset ?? '') : '';
+  if (sa && sb && sa !== 'bad' && sb !== 'bad' && sa.n > 0n && sb.n > 0n) {
+    const [x, y] = simplifyRatio(sa, sb);
+    selectedKey = Object.entries(ASPECT_PRESETS).find(([, p]) => BigInt(p.a) === x && BigInt(p.b) === y)?.[0] ?? '';
+  }
+  const aspectRatios = ASPECT_PRESETS;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -38,7 +35,7 @@ export default function RatioPanel({ values, results }: Props) {
         {/* Simplified ratio */}
         {simplified && (
           <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-1">Simplified Ratio</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-1">Simplified Ratio</p>
             <p className="text-3xl font-bold text-blue-700 font-mono">{simplified.value}</p>
             {decimal && <p className="text-xs text-slate-500 mt-1">= {decimal.value}</p>}
           </div>
@@ -47,9 +44,9 @@ export default function RatioPanel({ values, results }: Props) {
         {/* Proportion result */}
         {proportionResult && proportionSteps && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">Proportion</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-1">Proportion</p>
             <p className="text-sm font-mono font-bold text-emerald-700">{proportionResult.value}</p>
-            <p className="text-xs font-mono text-emerald-600 mt-1">{proportionSteps.value}</p>
+            <p className="text-xs font-mono text-emerald-700 mt-1">{proportionSteps.value}</p>
           </div>
         )}
 
@@ -58,7 +55,7 @@ export default function RatioPanel({ values, results }: Props) {
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Aspect Ratio Visual Reference</p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             {Object.entries(aspectRatios).map(([key, ar]) => {
-              const isSelected = preset === key;
+              const isSelected = selectedKey === key;
               const ratio = ar.a / ar.b;
               const w = 60;
               const h = w / ratio;

@@ -1,30 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ScientificPanel from './ScientificPanel';
-import { safeEval as sharedSafeEval } from '../shared/safeEval';
-
-function safeEval(expr: string): string {
-  try {
-    // Preprocess display characters and factorial expansion only.
-    // Everything else (sin, cos, pi, e, ^, etc.) is handled by the shared safe evaluator.
-    const sanitized = expr
-      .replace(/×/g, '*')
-      .replace(/÷/g, '/')
-      .replace(/π/g, 'pi')
-      .replace(/(\d+)!/g, (_, n: string) => {
-        let f = 1;
-        for (let i = 2; i <= parseInt(n, 10); i++) f *= i;
-        return f.toString();
-      });
-
-    const result = sharedSafeEval(sanitized);
-    if (!isFinite(result)) return 'Error';
-    const rounded = Math.round(result * 1e10) / 1e10;
-    return rounded.toPrecision(12).replace(/\.?0+$/, '');
-  } catch {
-    return 'Error';
-  }
-}
+import { evaluateExpression, fmtResult } from './scientificMath';
 
 const scientificConfig: CalculatorConfig = {
   inputs: [
@@ -35,29 +12,29 @@ const scientificConfig: CalculatorConfig = {
       placeholder: 'e.g., 2 + 2 × 5',
       helpText: 'Enter a math expression or use the interactive calculator below',
     },
+    {
+      id: 'angleMode',
+      label: 'Angle unit for sin, cos, tan',
+      type: 'select',
+      defaultValue: 'rad',
+      options: [
+        { label: 'Radians (RAD)', value: 'rad' },
+        { label: 'Degrees (DEG)', value: 'deg' },
+      ],
+      helpText: 'The keypad below has its own RAD/DEG switch',
+    },
   ],
-  calculate: (values) => {
+  calculate: (values): CalculatorResult[] => {
     const expr = (values.expression || '').trim();
     if (!expr) return [];
-    if (isNaN(Number(expr)) && !/[a-z_]/i.test(expr) && !/[+\-*/^%()]/.test(expr)) return [];
 
-    const result = safeEval(expr);
-    if (result === 'Error') return [];
+    const out = evaluateExpression(expr, values.angleMode === 'deg' ? 'deg' : 'rad');
+    // Half-typed input (unbalanced bracket, trailing operator...) stays empty; real maths errors are explained.
+    if (!out.ok) return out.domain ? [{ id: 'error', label: 'Error', value: out.error, color: 'negative' }] : [];
 
     return [
-      {
-        id: 'expression',
-        label: 'Expression',
-        value: expr,
-        highlight: true,
-        color: 'positive',
-      },
-      {
-        id: 'result',
-        label: 'Result',
-        value: result,
-        color: 'neutral',
-      },
+      { id: 'expression', label: 'Expression', value: expr, highlight: true, color: 'positive' },
+      { id: 'result', label: 'Result', value: fmtResult(out.value), color: 'neutral' },
     ];
   },
   extraPanel: (_values, _results) => {
@@ -86,7 +63,7 @@ const scientificConfig: CalculatorConfig = {
       'Scientific functions (sin, cos, tan, log, ln, sqrt) operate on the number that immediately follows them or on the value in parentheses. Use the keypad for quick access.',
       'Memory buttons (M+, M-, MR, MC) store and retrieve values. This is especially useful when a calculation produces an intermediate result you need later.',
       'View the history tape below the calculator to review your last 10 calculations. Each entry shows the expression and the computed result.',
-      'All trigonometric functions use radians by default. To work in degrees, multiply your angle by pi/180 before applying the trig function.',
+      'Trigonometric functions use radians by default. Switch to degrees with the RAD/DEG toggle on the keypad or the Angle unit menu; in DEG mode sin(30) = 0.5 and sin(180) = 0 exactly.',
     ],
     explanation:
       `A scientific calculator is an electronic calculator designed to handle advanced mathematical functions beyond basic arithmetic. It is a fundamental tool for students, engineers, scientists, and anyone working with mathematics above the elementary level. The first handheld scientific calculator, the Hewlett-Packard HP-35, was introduced in 1972 at a price of $395 (about $2,800 in today's dollars). It could compute trigonometric functions, logarithms, and exponentials — capabilities that previously required slide rules or expensive mainframe computers. Before electronic calculators, engineers and scientists used slide rules for centuries, dating back to William Oughtred's invention of the logarithmic slide rule in 1622. The slide rule worked on the principle that logarithms convert multiplication into addition: log(a x b) = log(a) + log(b). This calculator implements modern equivalents of those functions using JavaScript's Math library. The operator precedence follows the standard mathematical convention known as PEMDAS (Parentheses, Exponents, Multiplication/Division, Addition/Subtraction) or BODMAS (Brackets, Orders, Division/Multiplication, Addition/Subtraction). Operator precedence is crucial for correct evaluation: the expression 2 + 3 x 4 equals 14 (not 20) because multiplication has higher precedence than addition. The memory register allows you to store intermediate results during complex multi-step calculations, which was a key innovation in early electronic calculators. The history tape preserves the last 10 calculations with their expressions and results, providing an audit trail that is particularly valuable during problem-solving and homework.`,
@@ -113,7 +90,7 @@ const scientificConfig: CalculatorConfig = {
       {
         scenario: 'James, a financial analyst, is computing the continuously compounded annual growth rate of an investment that grew from $10,000 to $27,000 over 8 years. Continuous compounding uses the formula r = ln(A/P) / t.',
         inputs: { expression: 'ln(27000/10000)/8' },
-        result: '0.1241564716 (approximately 12.42% continuously compounded annual growth rate). The natural log function is the inverse of exponential growth, giving the exact continuous rate.',
+        result: '0.124156471626 (approximately 12.42% continuously compounded annual growth rate). The natural log function is the inverse of exponential growth, giving the exact continuous rate.',
         insight: 'The expression evaluates to approximately 0.1242, or a 12.42% continuously compounded annual growth rate. Using the natural log (ln) function is essential here — it is the inverse of the exponential growth function and gives the exact continuous rate.',
       },
     ],
@@ -125,7 +102,7 @@ const scientificConfig: CalculatorConfig = {
       'When computing very large or very small results, the calculator shows up to 12 significant digits. For results beyond this range, use scientific notation to preserve precision and avoid rounding errors in subsequent calculations.',
     ],
     limitations: [
-      'Trigonometric functions (sin, cos, tan) operate in radians only — there is no built-in degree mode toggle. You must manually convert degrees to radians by multiplying by pi/180 before applying trig functions.',
+      'Trigonometric functions work in radians or degrees (your choice), and the inverse functions asin, acos and atan return the same unit. The keypad buttons use the unit shown on its RAD/DEG switch.',
       'The calculator uses double-precision floating-point arithmetic (IEEE 754), which provides about 15-17 significant digits but can produce tiny rounding errors in edge cases, particularly with very large or very small numbers.',
       'Complex numbers are not supported. Expressions like sqrt(-1) will produce "Error" rather than returning the imaginary unit i. For complex number calculations, use a dedicated complex number tool or computer algebra system.',
       'Implicit multiplication is not supported — 4pi must be written as 4*pi, and 3(2+1) must be written as 3*(2+1). Always use the explicit multiplication operator (*).',
@@ -138,8 +115,8 @@ const scientificConfig: CalculatorConfig = {
       { label: 'Natural log', value: 'ln(x)' },
       { label: 'Log base 10', value: 'log(x)' },
       { label: 'Square root', value: 'sqrt(x)' },
-      { label: 'Sine (radians)', value: 'sin(x)' },
-      { label: 'Cosine (radians)', value: 'cos(x)' },
+      { label: 'Sine', value: 'sin(x)  (RAD or DEG)' },
+      { label: 'Cosine', value: 'cos(x)  (RAD or DEG)' },
     ],
     faqs: [
       {
@@ -148,7 +125,7 @@ const scientificConfig: CalculatorConfig = {
       },
       {
         question: 'Are trigonometric functions in degrees or radians?',
-        answer: 'Trig functions (sin, cos, tan) use radians by default, which is the standard unit in higher mathematics, physics, and engineering. To convert degrees to radians, multiply by pi/180. For example, sin(90 degrees) = sin(90 x pi/180) = sin(pi/2) = 1. A full circle is 2pi radians (about 6.283) or 360 degrees. Always double-check whether your problem uses radians or degrees.',
+        answer: 'Either: radians (RAD) is the default and degrees (DEG) is one click away on the keypad, or via the Angle unit menu for typed expressions. In DEG mode sin(90) = 1 and tan(90) is reported as undefined; in RAD mode use sin(pi/2). A full circle is 2pi radians (about 6.283) or 360 degrees. Always double-check which unit your problem uses.',
       },
       {
         question: 'How do I use the memory functions?',
@@ -175,5 +152,4 @@ const scientificConfig: CalculatorConfig = {
   },
 };
 
-export { safeEval };
 export default scientificConfig;

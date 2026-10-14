@@ -1,4 +1,5 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { roundExact, RoundMethod } from './roundingMath';
 
 interface Props {
   values: Record<string, string>;
@@ -6,36 +7,23 @@ interface Props {
 }
 
 export default function RoundingPanel({ values, results }: Props) {
-  const data = results.find(r => r.id === '_roundingData')?.value;
-  if (!data || results.length === 0) return null;
+  const out = roundExact(values.number, values.place || 'unit', (values.method || 'half-up') as RoundMethod, values.sigFigs);
+  if (out.kind !== 'ok' || results.length === 0) return null;
+  const r = out.r;
 
-  let info: { lower: number; upper: number; direction: string; digit: number; rounded: number; divisor: number };
-  try {
-    info = JSON.parse(data);
-  } catch {
-    return null;
-  }
-
-  const original = parseFloat(results.find(r => r.id === 'original')?.value || '0');
-  const rounded = parseFloat(results.find(r => r.id === 'rounded')?.value || '0');
-
-  // SVG number line
+  // SVG number line between the two surrounding landmarks
   const svgW = 500;
-  const svgH = 120;
-  const range = Math.max(info.upper - info.lower, 1);
-  const padding = range * 0.15;
-  const minX = info.lower - padding;
-  const maxX = info.upper + padding;
+  const svgH = 130;
+  const span = r.upperNum - r.lowerNum;
+  const padding = span * 0.15;
+  const minX = r.lowerNum - padding;
+  const maxX = r.upperNum + padding;
   const scale = (svgW - 60) / (maxX - minX);
-
   const xPos = (v: number) => 30 + (v - minX) * scale;
-  const centerY = 60;
-
-  const placeLabels: Record<string, string> = {
-    ten: 'ten', hundred: 'hundred', thousand: 'thousand', million: 'million',
-    unit: 'unit', tenth: 'tenth', hundredth: 'hundredth', thousandth: 'thousandth',
-    'ten-thousandth': 'ten-thousandth',
-  };
+  const centerY = 70;
+  const mid = r.lowerNum + span / 2;
+  const target = r.direction === 'down' ? r.lowerNum : r.upperNum;
+  const exact = r.direction === 'exact';
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -47,63 +35,43 @@ export default function RoundingPanel({ values, results }: Props) {
       </div>
 
       <div className="p-5 space-y-4">
-        {/* SVG Number Line */}
-        <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full" style={{ maxHeight: '140px' }} role="img" aria-label="Number line diagram showing rounding direction and midpoint">
-          {/* Horizontal line */}
-          <line x1={xPos(info.lower)} y1={centerY} x2={xPos(info.upper)} y2={centerY} stroke="#94a3b8" strokeWidth="2" />
-          {/* Tick marks */}
-          <line x1={xPos(info.lower)} y1={centerY - 8} x2={xPos(info.lower)} y2={centerY + 8} stroke="#94a3b8" strokeWidth="2" />
-          <line x1={xPos(info.upper)} y1={centerY - 8} x2={xPos(info.upper)} y2={centerY + 8} stroke="#94a3b8" strokeWidth="2" />
-          {/* Midpoint */}
-          <line x1={xPos(info.lower + range / 2)} y1={centerY - 5} x2={xPos(info.lower + range / 2)} y2={centerY + 5} stroke="#cbd5e1" strokeWidth="1" strokeDasharray="3,3" />
+        <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full" style={{ maxHeight: '150px' }} role="img"
+          aria-label={`Number line: ${r.original} lies between ${r.lower} and ${r.upper} and rounds to ${r.rounded}`}>
+          <line x1={xPos(r.lowerNum)} y1={centerY} x2={xPos(r.upperNum)} y2={centerY} stroke="#94a3b8" strokeWidth="2" />
+          <line x1={xPos(r.lowerNum)} y1={centerY - 8} x2={xPos(r.lowerNum)} y2={centerY + 8} stroke="#94a3b8" strokeWidth="2" />
+          <line x1={xPos(r.upperNum)} y1={centerY - 8} x2={xPos(r.upperNum)} y2={centerY + 8} stroke="#94a3b8" strokeWidth="2" />
+          <line x1={xPos(mid)} y1={centerY - 5} x2={xPos(mid)} y2={centerY + 5} stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
 
-          {/* Labels */}
-          <text x={xPos(info.lower)} y={centerY + 25} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#3b82f6">{info.lower}</text>
-          <text x={xPos(info.upper)} y={centerY + 25} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#3b82f6">{info.upper}</text>
-          <text x={xPos(info.lower + range / 2)} y={centerY - 15} textAnchor="middle" fontSize="10" fill="#94a3b8">Midpoint</text>
-          <text x={xPos(info.lower + range / 2)} y={centerY + 40} textAnchor="middle" fontSize="10" fill="#94a3b8">{info.lower + range / 2}</text>
+          <text x={xPos(r.lowerNum)} y={centerY + 26} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#1d4ed8">{r.lower}</text>
+          <text x={xPos(r.upperNum)} y={centerY + 26} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#1d4ed8">{r.upper}</text>
+          <text x={xPos(mid)} y={centerY + 44} textAnchor="middle" fontSize="10" fill="#475569">Midpoint</text>
 
-          {/* Dot at original value */}
-          <circle cx={xPos(original)} cy={centerY} r="6" fill="#ef4444" />
-          {/* Arrow from dot to nearest bound */}
-          {info.direction === 'down' ? (
+          <circle cx={xPos(r.originalNum)} cy={centerY} r="6" fill="#dc2626" />
+          <text x={xPos(r.originalNum)} y={centerY - 14} textAnchor="middle" fontSize="11" fontWeight="bold" fill="#b91c1c">{r.original}</text>
+          {!exact && (
             <>
-              <path d={`M ${xPos(original)} ${centerY - 10} L ${xPos(info.lower)} ${centerY - 25} L ${xPos(info.lower) + 8} ${centerY - 25}`} fill="none" stroke="#3b82f6" strokeWidth="1.5" markerEnd="url(#arrowhead)" />
-              <text x={(xPos(original) + xPos(info.lower)) / 2} y={centerY - 32} textAnchor="middle" fontSize="10" fill="#3b82f6">Round Down</text>
-            </>
-          ) : (
-            <>
-              <path d={`M ${xPos(original)} ${centerY - 10} L ${xPos(info.upper)} ${centerY - 25} L ${xPos(info.upper) - 8} ${centerY - 25}`} fill="none" stroke="#3b82f6" strokeWidth="1.5" />
-              <text x={(xPos(original) + xPos(info.upper)) / 2} y={centerY - 32} textAnchor="middle" fontSize="10" fill="#3b82f6">Round Up</text>
+              <path d={`M ${xPos(r.originalNum)} ${centerY - 30} L ${xPos(target)} ${centerY - 30}`} fill="none" stroke="#1d4ed8" strokeWidth="1.5" />
+              <text x={(xPos(r.originalNum) + xPos(target)) / 2} y={centerY - 36} textAnchor="middle" fontSize="10" fill="#1d4ed8">
+                {r.direction === 'up' ? 'Round Up' : 'Round Down'} to {r.rounded}
+              </text>
             </>
           )}
-
-          {/* Arrowhead marker */}
-          <defs>
-            <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
-              <polygon points="0 0, 6 2, 0 4" fill="#3b82f6" />
-            </marker>
-          </defs>
-
-          {/* Value label above dot */}
-          <text x={xPos(original)} y={centerY - 12} textAnchor="middle" fontSize="11" fontWeight="bold" fill="#ef4444">{original}</text>
         </svg>
 
-        {/* Explanation */}
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <p className="text-xs text-blue-700">
-            <strong>Rounding {original} to the nearest {placeLabels[values.place || 'unit']}:</strong>{' '}
-            Since the digit is {info.digit}, which is {info.direction === 'down' ? 'less than 5' : '5 or greater'}, round {info.direction}.
+          <p className="text-xs text-blue-900">
+            <strong>Rounding {r.original} to the {r.placeLabel}:</strong> {r.explanation}
           </p>
-          <p className="text-xs text-blue-600 mt-1">
-            {original} is between {info.lower} and {info.upper}. It is <strong>{info.direction === 'down' ? 'below' : 'above'} the midpoint</strong> ({info.lower + range / 2}), so it rounds to <strong>{rounded}</strong>.
-          </p>
+          {!exact && (
+            <p className="text-xs text-blue-800 mt-1">
+              {r.original} is between {r.lower} and {r.upper}.
+            </p>
+          )}
         </div>
 
-        {/* Result */}
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-4 text-center">
-          <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest">Rounded Value</p>
-          <p className="text-2xl font-bold font-mono text-emerald-700">{rounded}</p>
+          <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest">Rounded Value</p>
+          <p className="text-2xl font-bold font-mono text-emerald-700 break-all">{r.rounded}</p>
         </div>
       </div>
     </div>

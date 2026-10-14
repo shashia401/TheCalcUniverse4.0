@@ -1,64 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import LongDivisionPanel from './LongDivisionPanel';
-
-function longDivision(dividend: number, divisor: number): {
-  quotient: number;
-  remainder: number;
-  steps: { digit: number; product: number; subtraction: number; result: number; broughtDown: number }[];
-  decimalResult: string;
-} {
-  const isDecimal = dividend % 1 !== 0 || divisor % 1 !== 0;
-  if (isDecimal) {
-    const quotient = dividend / divisor;
-    return {
-      quotient: Math.floor(quotient),
-      remainder: 0,
-      steps: [],
-      decimalResult: quotient.toFixed(6),
-    };
-  }
-
-  const dividendStr = Math.abs(dividend).toString();
-  const absDivisor = Math.abs(divisor);
-  const sign = (dividend < 0) !== (divisor < 0) ? -1 : 1;
-
-  let current = 0;
-  const steps: { digit: number; product: number; subtraction: number; result: number; broughtDown: number }[] = [];
-
-  for (let i = 0; i < dividendStr.length; i++) {
-    const digit = parseInt(dividendStr[i]);
-    current = current * 10 + digit;
-    const product = Math.floor(current / absDivisor) * absDivisor;
-    const subtraction = current - product;
-    steps.push({
-      digit,
-      product,
-      subtraction,
-      result: Math.floor(current / absDivisor),
-      broughtDown: current,
-    });
-    current = subtraction;
-  }
-
-  const quotient = Math.floor(Math.abs(dividend) / absDivisor) * sign;
-  const remainder = Math.abs(dividend) % absDivisor;
-
-  // Decimal continuation
-  let decimalPart = '';
-  let rem = remainder;
-  let precision = 0;
-  while (rem > 0 && precision < 6) {
-    rem *= 10;
-    const d = Math.floor(rem / absDivisor);
-    decimalPart += d.toString();
-    rem = rem % absDivisor;
-    precision++;
-  }
-  const decimalResult = decimalPart ? `${Math.abs(quotient)}.${decimalPart}` : Math.abs(quotient).toString();
-
-  return { quotient, remainder, steps, decimalResult };
-}
+import { LD_MAX_DIGITS, parseLongDivision } from './longDivisionMath';
 
 const longDivisionConfig: CalculatorConfig = {
   inputs: [
@@ -68,7 +11,8 @@ const longDivisionConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '4876',
       step: 1,
-      helpText: 'The number being divided',
+      inputMode: 'numeric',
+      helpText: `The number being divided (whole number, up to ${LD_MAX_DIGITS} digits)`,
     },
     {
       id: 'divisor',
@@ -77,35 +21,27 @@ const longDivisionConfig: CalculatorConfig = {
       placeholder: '12',
       min: 1,
       step: 1,
-      helpText: 'The number doing the dividing',
+      inputMode: 'numeric',
+      helpText: 'The number doing the dividing (whole number, not zero)',
     },
   ],
-  calculate: (values) => {
-    const dividend = parseInt(values.dividend);
-    const divisor = parseInt(values.divisor);
-
-    if (isNaN(dividend) || isNaN(divisor) || divisor === 0) return [];
-
-    const result = longDivision(Math.abs(dividend), Math.abs(divisor));
-    const sign = (dividend < 0) !== (divisor < 0) ? -1 : 1;
-
+  calculate: (values): CalculatorResult[] => {
+    const p = parseLongDivision(values.dividend, values.divisor);
+    if (p.kind === 'invalid') return [{ id: 'error', label: 'Error', value: p.message, color: 'negative' }];
+    if (p.kind !== 'ok') return [];
+    const r = p.result;
     return [
-      ...(result.steps.length > 0 ? [
-        { id: 'quotient', label: 'Quotient', value: (result.quotient * sign).toString(), highlight: true, color: 'positive' as const },
-        { id: 'remainder', label: 'Remainder', value: result.remainder.toString() },
-        { id: 'decimalResult', label: 'Decimal Result', value: (parseFloat(result.decimalResult) * sign).toString() },
-        { id: '_divisionData', label: 'Division Steps', value: JSON.stringify({
-          dividend: Math.abs(dividend),
-          divisor: Math.abs(divisor),
-          steps: result.steps,
-          quotient: Math.abs(result.quotient),
-          remainder: result.remainder,
-          decimalResult: result.decimalResult,
-        }) },
-      ] : [
-        { id: 'quotient', label: 'Quotient', value: (parseFloat(result.decimalResult) * sign).toString(), highlight: true, color: 'positive' as const },
-        { id: 'decimalResult', label: 'Decimal Result', value: (parseFloat(result.decimalResult) * sign).toString() },
-      ]),
+      { id: 'quotient', label: 'Quotient', value: r.quotient.toString(), highlight: true, color: 'positive' },
+      { id: 'remainder', label: 'Remainder', value: r.remainder.toString() },
+      { id: 'decimalResult', label: 'Decimal Result (6 places)', value: r.decimal6 },
+      ...(r.remainder === 0n
+        ? []
+        : [{
+            id: 'expansion',
+            label: r.terminates ? 'Exact Decimal (terminates)' : r.truncated ? 'Decimal Expansion (cut off)' : `Exact Decimal (repeats every ${r.period} digit${r.period === 1 ? '' : 's'})`,
+            value: r.expansion,
+          }]),
+      { id: 'check', label: 'Check', value: `${r.quotient} × ${r.divisor} + ${r.remainder} = ${r.quotient * r.divisor + r.remainder}` },
     ];
   },
   extraPanel: (values, results) => {
@@ -120,7 +56,7 @@ const longDivisionConfig: CalculatorConfig = {
       { symbol: 'Dividend', name: 'Dividend', description: 'The number being divided, placed inside the division bracket. It represents the total amount to be split into equal parts.' },
       { symbol: 'Divisor', name: 'Divisor', description: 'The number doing the dividing, placed outside the bracket. It represents the size of each group or the number of groups.' },
       { symbol: 'Quotient', name: 'Quotient', description: 'The whole-number result of the division, written above the bracket. Each digit is determined sequentially through the division algorithm.' },
-      { symbol: 'Remainder', name: 'Remainder', description: 'The amount left over after dividing completely. Always less than the divisor. Can be continued as a decimal for fractional results.' },
+      { symbol: 'Remainder', name: 'Remainder', description: 'The amount left over after dividing completely. Always smaller than the divisor in size. For a negative dividend the remainder is negative too (dividend = quotient × divisor + remainder, with the quotient truncated toward zero). Can be continued as a decimal for fractional results.' },
     ],
     howToUse: [
       'Enter the dividend (the number being divided) in the first field.',
@@ -143,7 +79,7 @@ const longDivisionConfig: CalculatorConfig = {
       },
       {
         question: 'What happens when the division doesn\'t end evenly?',
-        answer: 'When the division does not come out even, the remainder is the amount left over after the last subtraction. You can continue the division by adding a decimal point and zeros to the dividend, producing a decimal result. The calculator can continue to up to 6 decimal places. For example, 10 ÷ 3 = 3 R1, or as a decimal 3.333333... where the 3 repeats infinitely.',
+        answer: 'When the division does not come out even, the remainder is the amount left over after the last subtraction. You can continue the division by adding a decimal point and zeros to the dividend, producing a decimal result. The calculator shows the result rounded to 6 decimal places and also the exact expansion with the repeating block marked, e.g. 10 ÷ 3 = 3 R1 = 3.(3), and 1 ÷ 7 = 0.(142857) which repeats every 6 digits.',
       },
       {
         question: 'What is the difference between integer division and decimal division?',
@@ -151,11 +87,11 @@ const longDivisionConfig: CalculatorConfig = {
       },
       {
         question: 'How many decimal places should I use in my answer?',
-        answer: 'It depends on the context. For financial calculations, 2 decimal places (cents) are standard. For scientific work, 3-6 significant figures are typical. For pure math problems, the exact fraction (quotient R remainder) is often preferred. This calculator shows up to 6 decimal places by default, which covers most practical needs.',
+        answer: 'It depends on the context. For financial calculations, 2 decimal places (cents) are standard. For scientific work, 3-6 significant figures are typical. For pure math problems, the exact fraction (quotient R remainder) is often preferred. This calculator shows 6 decimal places (rounded) by default plus the exact repeating expansion, which covers most practical needs.',
       },
       {
         question: 'Can long division handle very large numbers?',
-        answer: 'Yes, the algorithm works for any size numbers. The step-by-step process is the same whether you are dividing 25 ÷ 5 or 12,345,678 ÷ 123. Each step processes one digit at a time, so the difficulty scales linearly with the number of digits in the dividend, not exponentially. Computer-based long division can handle numbers with hundreds of digits.',
+        answer: 'Yes, the algorithm works for any size numbers. The step-by-step process is the same whether you are dividing 25 ÷ 5 or 12,345,678 ÷ 123. Each step processes one digit at a time, so the difficulty scales linearly with the number of digits in the dividend, not exponentially. This calculator accepts whole numbers of up to 30 digits and computes them exactly (no floating point).',
       },
     ],
     commonUses: [

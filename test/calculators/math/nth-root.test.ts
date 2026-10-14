@@ -35,7 +35,8 @@ describe('nth Root calculator', () => {
 
   it('returns empty for even root of negative number', () => {
     const r = config.calculate({ index: '2', radicand: '-4' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
+    expect(r[0].value).toContain('0 + 2i');
   });
 
   it('allows odd root of negative number', () => {

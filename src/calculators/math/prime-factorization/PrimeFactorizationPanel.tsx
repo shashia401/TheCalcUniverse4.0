@@ -1,57 +1,18 @@
-import type { ReactElement } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
+import { factorize, formatFactorization, parsePositiveSafeInt } from '../../../utils/numberTheory';
+import { buildFactorTree, layoutTree } from './factorTree';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-interface TreeNode {
-  value: number;
-  isPrime?: boolean;
-  left?: TreeNode;
-  right?: TreeNode;
-}
-
-function renderTree(node: TreeNode, x: number, y: number, xSpacing: number, level: number): ReactElement | null {
-  const hasChildren = node.left && node.right;
-  return (
-    <g key={`${x}-${y}`}>
-      {/* Node circle */}
-      <circle cx={x} cy={y} r="16" fill={node.isPrime ? '#dbeafe' : '#f1f5f9'} stroke={node.isPrime ? '#3b82f6' : '#94a3b8'} strokeWidth="1.5" />
-      <text x={x} y={y + 1} textAnchor="middle" dominantBaseline="middle" fontSize="11" fontWeight="bold" fill={node.isPrime ? '#1d4ed8' : '#334155'}>
-        {node.value}
-      </text>
-
-      {/* Branches */}
-      {hasChildren && (
-        <>
-          <line x1={x - 8} y1={y + 12} x2={x - xSpacing / 2} y2={y + 60} stroke="#94a3b8" strokeWidth="1" />
-          <line x1={x + 8} y1={y + 12} x2={x + xSpacing / 2} y2={y + 60} stroke="#94a3b8" strokeWidth="1" />
-          {renderTree(node.left!, x - xSpacing / 2, y + 65, xSpacing / 1.8, level + 1)}
-          {renderTree(node.right!, x + xSpacing / 2, y + 65, xSpacing / 1.8, level + 1)}
-        </>
-      )}
-
-      {/* Prime indicator */}
-      {node.isPrime && !hasChildren && (
-        <text x={x} y={y + 30} textAnchor="middle" fontSize="9" fill="#3b82f6" fontWeight="bold">prime</text>
-      )}
-    </g>
-  );
-}
-
 export default function PrimeFactorizationPanel({ values, results }: Props) {
-  const n = parseInt(values.number) || 0;
-  const factorization = results.find(r => r.id === 'factorization')?.value || '';
-  const treeData = results.find(r => r.id === '_treeData')?.value;
-
-  if (!n || results.length === 0) return null;
-
-  let tree: TreeNode[] = [];
-  try {
-    if (treeData) tree = JSON.parse(treeData);
-  } catch { /* ignore */ }
+  const p = parsePositiveSafeInt(values.number);
+  if (p.kind !== 'ok' || p.n < 2 || results.length === 0) return null;
+  const n = p.n;
+  const factorization = formatFactorization(factorize(n));
+  const tree = layoutTree(buildFactorTree(n));
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -63,20 +24,26 @@ export default function PrimeFactorizationPanel({ values, results }: Props) {
       </div>
 
       <div className="p-5 space-y-4">
-        {/* Factor Tree SVG */}
-        {tree.length > 0 && (
-          <div className="flex justify-center overflow-auto" tabIndex={0} role="img" aria-label={'Prime factor tree diagram showing factorization of ' + n}>
-            <svg width={280} height={200} viewBox="0 0 280 200" aria-hidden="true">
-              {renderTree(tree[0], 140, 25, 80, 0)}
-            </svg>
-          </div>
-        )}
+        <div className="flex justify-center overflow-auto" tabIndex={0}>
+          <svg width={tree.width} height={tree.height} viewBox={`0 0 ${tree.width} ${tree.height}`} role="img" aria-label={`Prime factor tree of ${n}: ${factorization}`}>
+            {tree.edges.map((e, i) => (
+              <line key={`e${i}`} x1={e.x1} y1={e.y1 + 14} x2={e.x2} y2={e.y2 - 14} stroke="#94a3b8" strokeWidth="1.2" />
+            ))}
+            {tree.nodes.map((nd, i) => (
+              <g key={`n${i}`}>
+                <circle cx={nd.x} cy={nd.y} r="17" fill={nd.isPrime ? '#dbeafe' : '#f1f5f9'} stroke={nd.isPrime ? '#2563eb' : '#64748b'} strokeWidth="1.5" />
+                <text x={nd.x} y={nd.y + 1} textAnchor="middle" dominantBaseline="middle" fontSize={String(nd.value).length > 5 ? 8 : 11} fontWeight="bold" fill={nd.isPrime ? '#1e40af' : '#334155'}>
+                  {nd.value}
+                </text>
+              </g>
+            ))}
+          </svg>
+        </div>
 
-        {/* Prime factorization */}
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-5 text-center">
-          <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-2">Prime Factorization</p>
-          <p className="text-lg font-mono font-bold text-emerald-700">{factorization}</p>
-          <p className="text-xs text-emerald-500 mt-1">{n} = {factorization}</p>
+          <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Prime Factorization</p>
+          <p className="text-lg font-mono font-bold text-emerald-700 break-all">{factorization}</p>
+          <p className="text-xs text-emerald-700 mt-1 break-all">{n} = {factorization}</p>
         </div>
       </div>
     </div>

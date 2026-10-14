@@ -1,7 +1,10 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import PythagoreanPanel from './PythagoreanPanel';
-import { roundStr8 as fmt } from '../../../lib/format';
+import { roundStrAuto } from '../../../lib/format';
+import { solveRightTriangle } from './pythagoreanMath';
+
+const fmt = (n: number) => roundStrAuto(n, 8);
 
 const pythagoreanConfig: CalculatorConfig = {
   inputs: [
@@ -46,64 +49,38 @@ const pythagoreanConfig: CalculatorConfig = {
       showWhen: (values) => values.mode !== 'hypotenuse',
     },
   ],
-  calculate: (values) => {
-    const mode = values.mode || 'hypotenuse';
-    const a = parseFloat(values.a);
-    const b = parseFloat(values.b);
-    const c = parseFloat(values.c);
-
-    const deg = (r: number) => r * (180 / Math.PI);
+  calculate: (values): CalculatorResult[] => {
+    const r = solveRightTriangle(values.mode, values.a, values.b, values.c);
+    if (r.kind === 'incomplete') return [];
+    if (r.kind === 'error') return [{ id: 'error', label: 'Cannot solve', value: r.message, color: 'negative' }];
+    const { mode, a, b, c, area, perimeter, angleA, angleB } = r.t;
+    const ang = (d: number) => `${d.toFixed(4)}°`;
 
     if (mode === 'hypotenuse') {
-      if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) return [];
-      const hyp = Math.sqrt(a * a + b * b);
-      const area = 0.5 * a * b;
-      const perimeter = a + b + hyp;
-      const angleA = deg(Math.atan(a / b));
-      const angleB = 90 - angleA;
-
       // SOH CAH TOA steps
-      const soh = `sin(α) = opposite/hypotenuse = a/c = ${a}/${fmt(hyp)} = ${(a / hyp).toFixed(4)} → α = ${angleA.toFixed(2)}°`;
-      const cah = `cos(α) = adjacent/hypotenuse = b/c = ${b}/${fmt(hyp)} = ${(b / hyp).toFixed(4)} → α = ${angleA.toFixed(2)}°`;
-      const toa = `tan(α) = opposite/adjacent = a/b = ${a}/${b} = ${(a / b).toFixed(4)} → α = ${angleA.toFixed(2)}°`;
-
+      const soh = `sin(α) = opposite/hypotenuse = a/c = ${fmt(a)}/${fmt(c)} = ${(a / c).toFixed(4)} → α = ${angleA.toFixed(2)}°`;
+      const cah = `cos(α) = adjacent/hypotenuse = b/c = ${fmt(b)}/${fmt(c)} = ${(b / c).toFixed(4)} → α = ${angleA.toFixed(2)}°`;
+      const toa = `tan(α) = opposite/adjacent = a/b = ${fmt(a)}/${fmt(b)} = ${(a / b).toFixed(4)} → α = ${angleA.toFixed(2)}°`;
       return [
-        { id: 'hyp', label: 'Hypotenuse (c)', value: fmt(hyp), highlight: true, color: 'positive' },
+        { id: 'hyp', label: 'Hypotenuse (c)', value: fmt(c), highlight: true, color: 'positive' },
         { id: 'area', label: 'Triangle Area', value: fmt(area), color: 'neutral' },
         { id: 'perimeter', label: 'Perimeter', value: fmt(perimeter), color: 'neutral' },
-        { id: 'angleA', label: 'Angle A (opposite leg a)', value: `${angleA.toFixed(4)}°`, color: 'neutral' },
-        { id: 'angleB', label: 'Angle B (opposite leg b)', value: `${angleB.toFixed(4)}°`, color: 'neutral' },
+        { id: 'angleA', label: 'Angle A (opposite leg a)', value: ang(angleA), color: 'neutral' },
+        { id: 'angleB', label: 'Angle B (opposite leg b)', value: ang(angleB), color: 'neutral' },
         { id: 'sohStep', label: 'SOH Step', value: soh, color: 'neutral' },
         { id: 'cahStep', label: 'CAH Step', value: cah, color: 'neutral' },
         { id: 'toaStep', label: 'TOA Step', value: toa, color: 'neutral' },
       ];
     }
 
-    if (mode === 'leg_a') {
-      if (isNaN(c) || isNaN(b) || c <= 0 || b <= 0 || c <= b) return [];
-      const legA = Math.sqrt(c * c - b * b);
-      const angleA = deg(Math.atan(legA / b));
-      return [
-        { id: 'leg_a', label: 'Leg a', value: fmt(legA), highlight: true, color: 'positive' },
-        { id: 'area', label: 'Triangle Area', value: fmt(0.5 * legA * b), color: 'neutral' },
-        { id: 'angleA', label: 'Angle A (opposite leg a)', value: `${angleA.toFixed(4)}°`, color: 'neutral' },
-        { id: 'angleB', label: 'Angle B (opposite leg b)', value: `${(90 - angleA).toFixed(4)}°`, color: 'neutral' },
-      ];
-    }
-
-    if (mode === 'leg_b') {
-      if (isNaN(c) || isNaN(a) || c <= 0 || a <= 0 || c <= a) return [];
-      const legB = Math.sqrt(c * c - a * a);
-      const angleA = deg(Math.atan(a / legB));
-      return [
-        { id: 'leg_b', label: 'Leg b', value: fmt(legB), highlight: true, color: 'positive' },
-        { id: 'area', label: 'Triangle Area', value: fmt(0.5 * a * legB), color: 'neutral' },
-        { id: 'angleA', label: 'Angle A (opposite leg a)', value: `${angleA.toFixed(4)}°`, color: 'neutral' },
-        { id: 'angleB', label: 'Angle B (opposite leg b)', value: `${(90 - angleA).toFixed(4)}°`, color: 'neutral' },
-      ];
-    }
-
-    return [];
+    const isA = mode === 'leg_a';
+    return [
+      { id: isA ? 'leg_a' : 'leg_b', label: isA ? 'Leg a' : 'Leg b', value: fmt(isA ? a : b), highlight: true, color: 'positive' },
+      { id: 'area', label: 'Triangle Area', value: fmt(area), color: 'neutral' },
+      { id: 'perimeter', label: 'Perimeter', value: fmt(perimeter), color: 'neutral' },
+      { id: 'angleA', label: 'Angle A (opposite leg a)', value: ang(angleA), color: 'neutral' },
+      { id: 'angleB', label: 'Angle B (opposite leg b)', value: ang(angleB), color: 'neutral' },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -119,9 +96,9 @@ const pythagoreanConfig: CalculatorConfig = {
       { symbol: 'α, β', name: 'Acute Angles', description: 'The two acute angles opposite legs a and b respectively. Always sum to 90°.' },
     ],
     howToUse: [
-      'Select what you want to find — hypotenuse, leg a, leg b, or the acute angles.',
-      'Enter the known values for the other two sides or angle.',
-      'View the missing side, calculated area, perimeter, and both acute angles.',
+      'Select what you want to find — the hypotenuse, leg a, or leg b.',
+      'Enter the two known sides (the hypotenuse must be the longest).',
+      'View the missing side, the area, the perimeter, and both acute angles (the acute angles are always computed, never entered).',
       'The SOH CAH TOA trigonometry steps show exactly how each angle is derived from the side ratios.',
       'The SVG right triangle dynamically scales based on the side lengths, showing labeled sides and angles.',
     ],

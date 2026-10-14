@@ -25,6 +25,6 @@ describe('Scientific Calculator', () => {
   });
 
   it('returns empty for invalid expression', () => {
-    expect(scientificConfig.calculate({ expression: '1/0' })).toEqual([]);
+    expect(scientificConfig.calculate({ expression: '1/0' })[0].id).toBe('error');
   });
 });

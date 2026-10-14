@@ -8,7 +8,7 @@ describe('quadratic calculator', () => {
     near(parseNumber(getValue(r, 'discriminant')), 1);
     near(parseNumber(getValue(r, 'x1')), 3);
     near(parseNumber(getValue(r, 'x2')), 2);
-    expect(getValue(r, 'equation')).toBe('1x² - 5x + 6 = 0');
+    expect(getValue(r, 'equation')).toBe('x² - 5x + 6 = 0');
   });
 
   it('finds one repeated root when discriminant = 0', () => {
@@ -31,7 +31,7 @@ describe('quadratic calculator', () => {
   });
 
   it('returns empty for zero a coefficient', () => {
-    expect(config.calculate({ a: '0', b: '2', c: '3' })).toHaveLength(0);
+    expect(config.calculate({ a: '0', b: '2', c: '3' })[0].id).toBe('error');
   });
 
   it('returns empty for empty inputs', () => {

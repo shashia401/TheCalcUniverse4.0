@@ -26,6 +26,6 @@ describe('Scientific Calculator', () => {
   it('evaluates continuous growth rate example (regression: workedExamples narrative drift)', () => {
     // ln(27000/10000)/8 = 0.12415647..., NOT the previously-documented 0.12411612881
     const r = config.calculate({ expression: 'ln(27000/10000)/8' });
-    expect(getValue(r, 'result')).toBe('0.1241564716');
+    expect(getValue(r, 'result')).toBe('0.124156471626'); // 12 significant digits, as the page documents
   });
 });

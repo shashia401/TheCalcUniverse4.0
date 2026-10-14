@@ -34,9 +34,9 @@ describe('Percentage calculator', () => {
     near(parseNumber(getValue(r, 'result')), 150);
   });
 
-  it('returns empty when y is 0', () => {
+  it('50% of 0 is 0 (only X is what % of 0 is undefined)', () => {
     const r = config.calculate({ mode: 'percentOf', x: '50', y: '0' });
-    expect(r).toEqual([]);
+    expect(getValue(r, 'result')).toBe('0');
   });
 
   it('returns all result fields for each mode', () => {

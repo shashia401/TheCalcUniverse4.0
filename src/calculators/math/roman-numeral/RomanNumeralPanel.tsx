@@ -30,7 +30,7 @@ export default function RomanNumeralPanel({ results }: Props) {
         <>
           <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-md shadow-amber-200/60 overflow-hidden">
             <div className="px-6 py-4 border-b border-amber-100 text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-700">
                 Roman Numeral
               </span>
             </div>
@@ -38,7 +38,7 @@ export default function RomanNumeralPanel({ results }: Props) {
               <p className="text-6xl sm:text-7xl md:text-8xl font-serif font-black tracking-widest text-amber-900 select-all">
                 {romanResult}
               </p>
-              <p className="mt-4 text-sm text-amber-600">
+              <p className="mt-4 text-sm text-amber-700">
                 Value: {arabicValue}
               </p>
             </div>
@@ -68,7 +68,7 @@ export default function RomanNumeralPanel({ results }: Props) {
         <>
           <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 shadow-md shadow-emerald-200/60 overflow-hidden">
             <div className="px-6 py-4 border-b border-emerald-100">
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-600">
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">
                 Converted Value
               </span>
             </div>
@@ -76,7 +76,7 @@ export default function RomanNumeralPanel({ results }: Props) {
               <p className="text-6xl sm:text-7xl font-black tracking-tight text-emerald-700">
                 {arabicResult}
               </p>
-              <p className="mt-3 text-sm text-emerald-600 font-medium">
+              <p className="mt-3 text-sm text-emerald-700 font-medium">
                 {romanOriginal}
               </p>
             </div>
@@ -84,7 +84,7 @@ export default function RomanNumeralPanel({ results }: Props) {
 
           <div className={`rounded-2xl border ${isWarning ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'} shadow-sm overflow-hidden`}>
             <div className="flex items-start gap-3 px-5 py-4">
-              <svg aria-hidden="true" className={`w-5 h-5 ${isWarning ? 'text-red-500' : 'text-emerald-500'} mt-0.5 shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg aria-hidden="true" className={`w-5 h-5 ${isWarning ? 'text-red-700' : 'text-emerald-700'} mt-0.5 shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 {isWarning ? (
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 ) : (
@@ -104,7 +104,7 @@ export default function RomanNumeralPanel({ results }: Props) {
         <>
           <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-md shadow-indigo-200/60 overflow-hidden">
             <div className="px-6 py-4 border-b border-indigo-100">
-              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+              <span className="text-xs font-bold uppercase tracking-widest text-indigo-700">
                 Roman Date
               </span>
             </div>
@@ -112,7 +112,7 @@ export default function RomanNumeralPanel({ results }: Props) {
               <p className="text-5xl sm:text-6xl md:text-7xl font-serif font-black tracking-widest text-indigo-800 select-all">
                 {romanDate}
               </p>
-              <p className="mt-3 text-sm text-indigo-500">
+              <p className="mt-3 text-sm text-indigo-700">
                 {gregorianDate}
               </p>
             </div>
@@ -123,7 +123,7 @@ export default function RomanNumeralPanel({ results }: Props) {
       {/* Tattoo Verification Humorous Note */}
       <div className="rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50 shadow-sm overflow-hidden">
         <div className="flex items-start gap-3 px-5 py-4">
-          <svg aria-hidden="true" className="w-5 h-5 text-pink-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg aria-hidden="true" className="w-5 h-5 text-pink-700 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
           <div>
@@ -148,7 +148,7 @@ export default function RomanNumeralPanel({ results }: Props) {
               How Romans Used Numerals
             </p>
             <p className="text-xs text-slate-600 leading-relaxed">
-              The Romans developed their numeral system around 500 BC. Unlike our place-value system, Roman numerals are purely additive and subtractive. Romans used them for counting, trade, recording dates, and numbering chapters. The system persisted in Europe throughout the medieval period and can still be found on monuments, clock faces, and in formal contexts today.
+              The Roman numeral system developed in the first millennium BCE, building on earlier Etruscan numerals. Unlike our place-value system, Roman numerals are purely additive and subtractive. Romans used them for counting, trade, recording dates, and numbering chapters. The system persisted in Europe throughout the medieval period and can still be found on monuments, clock faces, and in formal contexts today.
             </p>
           </div>
         </div>

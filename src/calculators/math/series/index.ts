@@ -1,7 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SeriesPanel from './SeriesPanel';
-import { safeEval } from '../shared/safeEval';
+import { SERIES_MAX_TERMS, fmtTermValue, runSeries } from './seriesMath';
 
 const seriesConfig: CalculatorConfig = {
   inputs: [
@@ -34,65 +34,25 @@ const seriesConfig: CalculatorConfig = {
       helpText: 'Write the formula using n as the variable. Use ^ for exponents. Supports pi for π.',
     },
   ],
-  calculate: (values) => {
-    const start = parseInt(values.start, 10);
-    const end = parseInt(values.end, 10);
-    const expression = (values.expression || '').trim();
-
-    if (isNaN(start) || isNaN(end) || !expression) return [];
-    if (start > end) return [];
-
-    const fmt = (n: number) => {
-      if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-      return parseFloat(n.toFixed(10)).toString();
-    };
-
-    const terms: number[] = [];
-    let sum = 0;
-
-    const maxIter = 1000;
-    const actualEnd = Math.min(end, start + maxIter - 1);
-    for (let n = start; n <= actualEnd; n++) {
-      try {
-        const result = safeEval(expression, { n });
-        if (!isFinite(result)) continue;
-        terms.push(result);
-        sum += result;
-      } catch {
-        return [];
-      }
-    }
-
-    if (terms.length === 0) return [];
-
-    const first20Terms = terms.slice(0, 20);
+  calculate: (values): CalculatorResult[] => {
+    const out = runSeries(values.start, values.end, values.expression);
+    if (out.kind === 'incomplete') return [];
+    if (out.kind === 'error') return [{ id: 'error', label: 'Cannot sum the series', value: out.message, color: 'negative' }];
+    const { run } = out;
 
     return [
-      {
-        id: 'sum',
-        label: 'Sum of Series',
-        value: fmt(sum),
-        highlight: true,
-        color: 'positive' as const,
-      },
-      {
-        id: 'terms',
-        label: 'First 20 Terms',
-        value: first20Terms.map((t) => fmt(t)).join(', '),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'termCount',
-        label: 'Number of Terms',
-        value: terms.length.toString(),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'lastTerm',
-        label: 'Last Term Value',
-        value: fmt(terms[terms.length - 1]),
-        color: 'neutral' as const,
-      },
+      { id: 'sum', label: 'Sum of Series', value: fmtTermValue(run.sum), highlight: true, color: 'positive' as const },
+      { id: 'terms', label: 'First 20 Terms', value: run.terms.slice(0, 20).map(fmtTermValue).join(', '), color: 'neutral' as const },
+      { id: 'termCount', label: 'Number of Terms', value: run.count.toString(), color: 'neutral' as const },
+      { id: 'lastTerm', label: 'Last Term Value', value: fmtTermValue(run.last), color: 'neutral' as const },
+      ...(run.truncated
+        ? [{
+            id: 'note',
+            label: 'Range shortened',
+            value: `Only the first ${SERIES_MAX_TERMS.toLocaleString('en-US')} terms were summed (n = ${run.start} to ${run.end}); you asked for n up to ${run.requestedEnd}.`,
+            color: 'negative' as const,
+          }]
+        : []),
     ];
   },
   extraPanel: (values, results) => {
@@ -120,7 +80,7 @@ const seriesConfig: CalculatorConfig = {
       'Write the expression using n as the variable. Use ^ for exponents (e.g., 2^n, n^2).',
       'Use pi for the mathematical constant π. The calculator supports basic arithmetic operators and parentheses.',
       'View the total sum, the first 20 terms in the series, the number of terms, and the last term value.',
-      'The expression is safely evaluated for each integer n in the range. Invalid or non-finite terms are skipped.',
+      'The expression is safely evaluated for each integer n in the range. If any term cannot be evaluated (for example 1/(n-5) at n = 5) the calculator tells you which n failed instead of skipping it.',
     ],
     quickReference: [
       { label: 'Sum of constants', value: 'Σ c = c × (b − a + 1)' },
@@ -140,11 +100,11 @@ const seriesConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What types of expressions does the series calculator support?',
-        answer: 'The calculator supports basic arithmetic operations (+, -, *, /), exponents (^), parentheses for grouping, the constant pi (π), and the variable n. Examples: 1/n, 1/2^n, n^2, 1/(n*(n+1)), n/(n+1). The expression is safely evaluated using JavaScript\'s Math functions, so large values may have floating-point precision limitations.',
+        answer: 'The calculator supports basic arithmetic operations (+, -, *, /), exponents (^), parentheses for grouping, the constant pi (π), and the variable n. Examples: 1/n, 1/2^n, n^2, 1/(n*(n+1)), n/(n+1). Functions such as sqrt, sin, cos, tan, ln, log, abs, exp and the factorial operator ! are also available. Terms are double-precision numbers (the running sum uses compensated addition), so very large values may have floating-point precision limitations.',
       },
       {
         question: 'What happens if the start value is larger than the end value?',
-        answer: 'If the start value exceeds the end value, the calculator returns an empty result. The summation requires a valid range where start ≤ end. If you need a descending sum, reverse the start and end values and negate the expression if necessary.',
+        answer: 'If the start value exceeds the end value, the calculator shows a message instead of a result. The summation requires a valid range where start ≤ end. If you need a descending sum, reverse the start and end values and negate the expression if necessary.',
       },
       {
         question: 'Does the calculator support infinite series?',
@@ -174,17 +134,17 @@ const seriesConfig: CalculatorConfig = {
       },
     ],
     proTips: [
-      'Use integer start and end values for clean results. While decimal bounds technically work in the summation loop, series notation conventionally uses integer indices.',
-      'When the expression produces very large terms, watch for JavaScript floating-point overflow. The calculator handles values up to about 10^308, and terms beyond this become Infinity and are skipped.',
-      'To simulate an arithmetic series with common difference d, use the expression "start + (n - start) * d" or more simply calculate manually using the closed-form formula.',
-      'For alternating series, use expressions like "(-1)^n / n" for the alternating harmonic series, or "(-1)^n / (2n+1)" for the Leibniz series approximating pi/4.',
-      'The calculator is capped at 1000 terms for performance. If your range exceeds this, only the first 1000 terms are summed — the actual end value used is shown in the results.',
+      'Start and end must be whole numbers. Use * for multiplication (write 2*n, not 2n), ^ for powers, ! for factorials, and functions such as sqrt, sin, cos, ln, log, abs, exp.',
+      'Terms are computed as double-precision numbers (up to about 10^308); if a term or the sum overflows, the calculator reports it rather than skipping it.',
+      'For an arithmetic series with first term a and difference d use the expression a + (n - 1)*d from n = 1; for a geometric series use a*r^(n - 1).',
+      'For alternating series, use expressions like (-1)^n / n for the alternating harmonic series, or (-1)^n / (2*n+1) from n = 0 for the Leibniz series, whose sum tends to pi/4.',
+      'The calculator sums at most 10,000 terms. If your range is longer, only the first 10,000 terms are summed and a "Range shortened" note shows the end index actually used.',
       'To explore convergence behavior, try a series known to converge (like 1/2^n) with increasing end values and observe how the sum approaches its limit — the "Last Term Value" shows when terms become negligible.',
     ],
     limitations: [
-      'Limited to 1000 terms maximum (start + 999) to ensure responsive performance. If your range exceeds this, only the first 1000 terms are summed and the actual end value used is reflected in the results.',
-      'Very large numbers exceeding approximately 10^308 cause floating-point overflow and are skipped from the sum, potentially undercounting the total. If your terms involve rapid exponential growth, verify that all terms remained finite.',
-      'Expressions containing discontinuities within the summation range (like 1/(n-5) when n=5) produce non-finite terms that are silently skipped, which may affect the total sum if you do not notice.',
+      'Limited to 10,000 terms (start + 9,999) to keep the page responsive. A longer range is shortened, with a note showing the end index that was actually summed.',
+      'A term or sum beyond about 10^308 overflows a double; the calculator reports the first n where this happens rather than undercounting the total.',
+      'Expressions that are undefined inside the range (like 1/(n-5) when n = 5) stop the calculation with a message naming the failing n, so a wrong total is never shown.',
       'Finite-precision floating-point arithmetic (IEEE 754 double) means sums of many small terms or terms with very different magnitudes may lose precision due to rounding accumulation. For high-precision summation needs, use a dedicated CAS.',
       'This calculator computes finite sums only and cannot evaluate infinite series limits or determine convergence/divergence. Use the Taylor Series calculator for series expansions and convergence analysis.',
     ],

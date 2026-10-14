@@ -27,7 +27,7 @@ describe('Long Division calculator', () => {
 
   it('includes division steps data', () => {
     const r = config.calculate({ dividend: '4876', divisor: '12' });
-    expect(getValue(r, '_divisionData')).toContain('steps');
+    expect(getValue(r, 'check')).toBe('406 × 12 + 4 = 4876');
   });
 
   it('divides 10 by 2 = 5 exactly', () => {
@@ -35,9 +35,9 @@ describe('Long Division calculator', () => {
     expect(parseInt(getValue(r, 'quotient'))).toBe(5);
   });
 
-  it('returns empty for zero divisor', () => {
+  it('reports an error for zero divisor', () => {
     const r = config.calculate({ dividend: '5', divisor: '0' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty for NaN input', () => {

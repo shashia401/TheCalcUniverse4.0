@@ -26,7 +26,7 @@ export default function ProportionPanel({ results }: Props) {
       <div className="p-5 space-y-4">
         {/* Missing value — hero result */}
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-1">{result.label}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-1">{result.label}</p>
           <p className="text-3xl font-bold text-blue-700 font-mono">{result.value}</p>
         </div>
 
@@ -43,9 +43,9 @@ export default function ProportionPanel({ results }: Props) {
         </div>
 
         {/* Verification */}
-        <div className={`rounded-xl border p-4 ${verification.value.endsWith('  OK') ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
+        <div className={`rounded-xl border p-4 ${verification.color === 'positive' ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
           <p className="text-[10px] font-bold uppercase tracking-widest mb-1 text-slate-500">Verification</p>
-          <p className={`text-sm font-mono font-bold ${verification.value.endsWith('  OK') ? 'text-emerald-700' : 'text-red-700'}`}>
+          <p className={`text-sm font-mono font-bold ${verification.color === 'positive' ? 'text-emerald-700' : 'text-red-700'}`}>
             {verification.value}
           </p>
         </div>
@@ -53,7 +53,7 @@ export default function ProportionPanel({ results }: Props) {
         {/* Solution steps */}
         {solution && (
           <div className="rounded-xl border border-purple-200 bg-purple-50 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-purple-500 mb-1">Solution Steps</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-1">Solution Steps</p>
             <p className="text-sm font-mono text-purple-700">{solution.value}</p>
           </div>
         )}

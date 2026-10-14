@@ -1,47 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import PrimeFactorizationPanel from './PrimeFactorizationPanel';
-
-interface FactorTreeNode {
-  value: number;
-  isPrime?: boolean;
-  left?: FactorTreeNode;
-  right?: FactorTreeNode;
-}
-
-function primeFactors(n: number): { factor: number; exponent: number }[] {
-  const factors: { factor: number; exponent: number }[] = [];
-  let num = n;
-  for (let p = 2; p * p <= num; p++) {
-    if (num % p === 0) {
-      let count = 0;
-      while (num % p === 0) {
-        num /= p;
-        count++;
-      }
-      factors.push({ factor: p, exponent: count });
-    }
-  }
-  if (num > 1) factors.push({ factor: num, exponent: 1 });
-  return factors;
-}
-
-function buildFactorTree(n: number): FactorTreeNode[] {
-  function helper(num: number): FactorTreeNode {
-    if (num <= 1) return { value: num, isPrime: true };
-    for (let p = 2; p * p <= num; p++) {
-      if (num % p === 0) {
-        return {
-          value: num,
-          left: helper(p),
-          right: helper(num / p),
-        };
-      }
-    }
-    return { value: num, isPrime: true };
-  }
-  return [helper(n)];
-}
+import { MAX_FACTOR_INPUT, factorize, formatFactorization, parsePositiveSafeInt } from '../../../utils/numberTheory';
 
 const primeFactorizationConfig: CalculatorConfig = {
   inputs: [
@@ -51,24 +11,22 @@ const primeFactorizationConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '72',
       min: 2,
+      max: MAX_FACTOR_INPUT,
       step: 1,
       inputMode: 'numeric',
-      helpText: 'Enter a positive integer ≥ 2 to find its prime factorization',
+      helpText: 'Enter a whole number from 2 up to 9,007,199,254,740,991 to find its prime factorization',
     },
   ],
-  calculate: (values) => {
-    const n = parseInt(values.number);
-    if (isNaN(n) || n < 2 || !Number.isFinite(n) || n > 1000000) return [];
+  calculate: (values): CalculatorResult[] => {
+    const p = parsePositiveSafeInt(values.number);
+    if (p.kind === 'invalid') return [{ id: 'error', label: 'Error', value: p.message, color: 'negative' }];
+    if (p.kind !== 'ok' || p.n < 2) return [];
 
-    const factors = primeFactors(n);
-    const factorization = factors.map(f => f.exponent > 1 ? `${f.factor}^${f.exponent}` : `${f.factor}`).join(' × ');
-    const treeData = buildFactorTree(n);
-
+    const factors = factorize(p.n);
     return [
-      { id: 'factorization', label: 'Prime Factorization', value: factorization, highlight: true, color: 'positive' },
-      { id: 'primeFactors', label: 'Prime Factors', value: factors.map(f => f.factor).join(', ') },
-      { id: 'totalPrimes', label: 'Prime Factors (with multiplicity)', value: factors.reduce((s, f) => s + f.exponent, 0).toString() },
-      { id: '_treeData', label: 'Factor Tree Data', value: JSON.stringify(treeData) },
+      { id: 'factorization', label: 'Prime Factorization', value: formatFactorization(factors), highlight: true, color: 'positive' },
+      { id: 'primeFactors', label: 'Prime Factors', value: factors.map(([q]) => q).join(', ') },
+      { id: 'totalPrimes', label: 'Prime Factors (with multiplicity)', value: factors.reduce((sum, [, e]) => sum + e, 0).toString() },
     ];
   },
   extraPanel: (values, results) => {
@@ -133,9 +91,9 @@ const primeFactorizationConfig: CalculatorConfig = {
       'When building a factor tree by hand, start with the most obvious factor pair — even a bad split still converges to the same primes. There is no wrong path: 72 can split into 8×9 or 6×12 or 2×36, and all paths lead to 2³×3².',
     ],
     limitations: [
-      'This calculator is restricted to numbers up to 1,000,000. Beyond this limit, trial division becomes too slow. Professional factoring algorithms (Pollard rho, quadratic sieve, general number field sieve) are needed for large integers — these are used in cryptography.',
-      'The factor tree visualization always splits at the smallest prime factor, producing a specific tree shape. Other factor trees (splitting at different factoring choices) produce different visual shapes but the same prime leaves — the result is always identical.',
-      'This calculator uses trial division, which tests all primes up to √n. For numbers near the 10⁶ limit, this is fast enough, but it does not implement probabilistic primality tests (Miller-Rabin) or advanced factoring methods.',
+      'This calculator accepts whole numbers up to 9,007,199,254,740,991 (2⁵³ − 1), the largest range in which a JavaScript number is exact. For numbers with hundreds of digits you need specialised software (quadratic sieve, general number field sieve) — the same difficulty that protects cryptography.',
+      'The factor tree always splits the sorted list of prime factors in half, which keeps it shallow. Splitting differently (8 × 9 instead of 4 × 18, say) gives a different tree shape but the same prime leaves — the factorization is always identical.',
+      'Factoring uses trial division by small primes, then deterministic Miller–Rabin primality tests (exact for every supported input) and Pollard rho, so even the product of two 8-digit primes factors instantly. It is not a general-purpose big-number factoring tool.',
     ],
     faqs: [
       {
@@ -152,7 +110,7 @@ const primeFactorizationConfig: CalculatorConfig = {
       },
       {
         question: 'Why is the prime factorization unique?',
-        answer: 'The Fundamental Theorem of Arithmetic guarantees that every integer greater than 1 has exactly one prime factorization (ignoring order). This was proved by Euclid around 300 BCE. If factorizations were not unique, the entire edifice of number theory would collapse — divisibility, GCD, LCM, and much of modern mathematics depend on this uniqueness.',
+        answer: 'The Fundamental Theorem of Arithmetic guarantees that every integer greater than 1 has exactly one prime factorization (ignoring order). Euclid (around 300 BCE) proved the key lemma that a prime dividing a product divides one of the factors, and Gauss gave the first clear statement and proof of unique factorization in 1801. If factorizations were not unique, the entire edifice of number theory would collapse — divisibility, GCD, LCM, and much of modern mathematics depend on this uniqueness.',
       },
       {
         question: 'How do I know when to stop factoring?',
@@ -160,7 +118,7 @@ const primeFactorizationConfig: CalculatorConfig = {
       },
       {
         question: 'How is prime factorization used in cryptography?',
-        answer: 'RSA encryption, which secures most internet communication, relies on the fact that multiplying two large primes is easy, but factoring their product back into the two original primes is extremely difficult. A 2048-bit RSA key is the product of two ~300-digit primes. While our calculator handles numbers up to 10⁶ in milliseconds, factoring a 600-digit number would take the world\'s best computers billions of years using current algorithms.',
+        answer: 'RSA encryption, which secures most internet communication, relies on the fact that multiplying two large primes is easy, but factoring their product back into the two original primes is extremely difficult. A 2048-bit RSA key is the product of two ~300-digit primes. While this calculator factors any supported number (up to 9×10¹⁵) in milliseconds, no known classical algorithm can factor a properly chosen 600-digit number in practical time.',
       },
     ],
     citations: [

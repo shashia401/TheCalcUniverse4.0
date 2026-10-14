@@ -79,20 +79,6 @@ describe('Prime Factorization calculator', () => {
     expect(getValue(r, 'totalPrimes')).toBe('4'); // 2^2 + 3 + 7 = 2+1+1 = 4
   });
 
-  // ── Factor Tree Data ────────────────────────────────────────────────
-  it('shows factor tree data for panel', () => {
-    const r = config.calculate({ number: '72' });
-    expect(getValue(r, '_treeData')).toContain('value');
-    expect(getValue(r, '_treeData')).toContain('isPrime');
-  });
-
-  it('factor tree data is valid JSON with tree structure', () => {
-    const r = config.calculate({ number: '72' });
-    const tree = JSON.parse(getValue(r, '_treeData'));
-    expect(Array.isArray(tree)).toBe(true);
-    expect(tree[0].value).toBe(72);
-  });
-
   // ── Invalid Inputs ──────────────────────────────────────────────────
   it('returns empty for number < 2', () => {
     expect(config.calculate({ number: '1' })).toEqual([]);
@@ -102,8 +88,8 @@ describe('Prime Factorization calculator', () => {
     expect(config.calculate({ number: 'abc' })).toEqual([]);
   });
 
-  it('returns empty for number > 1000000', () => {
-    expect(config.calculate({ number: '9999999' })).toEqual([]);
+  it('factors numbers above the old 1,000,000 limit', () => {
+    expect(getValue(config.calculate({ number: '9999999' }), 'factorization')).toBe('3^2 × 239 × 4649');
   });
 
   it('returns empty for NaN', () => {

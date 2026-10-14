@@ -40,12 +40,12 @@ describe('pythagorean', () => {
 
   it('rejects c <= b in leg_a mode (would produce sqrt of negative)', () => {
     const r = config.calculate({ mode: 'leg_a', a: '', b: '5', c: '3' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   it('rejects c <= a in leg_b mode', () => {
     const r = config.calculate({ mode: 'leg_b', a: '5', b: '', c: '3' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty for missing legs in hypotenuse mode', () => {

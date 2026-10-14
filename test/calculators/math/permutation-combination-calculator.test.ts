@@ -50,7 +50,7 @@ describe('Permutation and Combination calculator', () => {
 
   it('returns empty for r > n', () => {
     const r = config.calculate({ n: '3', r: '5', orderMatters: 'permutation' });
-    expect(r).toEqual([]);
+    expect(getValue(r, 'result')).toBe('0');
   });
 
   it('returns empty for NaN input', () => {

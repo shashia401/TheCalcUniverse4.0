@@ -73,7 +73,7 @@ describe('Percent Error calculator', () => {
   // ── Edge case tests ──
   it('returns empty for zero accepted', () => {
     const r = config.calculate({ accepted: '0', experimental: '5' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty for NaN values', () => {

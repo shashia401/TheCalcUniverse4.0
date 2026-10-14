@@ -60,25 +60,6 @@ describe('LCM calculator', () => {
     expect(getValue(r, 'result')).toBe('72');
   });
 
-  // ── Data for Extra Panel ────────────────────────────────────────────
-  it('LCM includes prime factorization data', () => {
-    const r = config.calculate({ numbers: '12, 18' });
-    expect(getValue(r, '_primeData')).toContain('factor');
-    expect(getValue(r, '_primeData')).toContain('factor');
-  });
-
-  it('LCM includes multiples data', () => {
-    const r = config.calculate({ numbers: '12, 18' });
-    expect(getValue(r, '_multiplesData')).toContain('multiplesA');
-    expect(getValue(r, '_multiplesData')).toContain('multiplesA');
-  });
-
-  it('LCM includes inputNums data', () => {
-    const r = config.calculate({ numbers: '12, 18, 24' });
-    expect(getValue(r, '_inputNums')).toContain('12');
-    expect(getValue(r, '_inputNums')).toContain('24');
-  });
-
   it('LCM shows GCD of first two numbers', () => {
     const r = config.calculate({ numbers: '12, 18' });
     expect(getValue(r, 'gcdValue')).toBe('6');
@@ -103,21 +84,11 @@ describe('LCM calculator', () => {
     expect(config.calculate({ numbers: '   ' })).toEqual([]);
   });
 
-  it('returns empty for invalid input', () => {
-    expect(config.calculate({ numbers: 'abc, def' })).toEqual([]);
-  });
-
-  it('returns empty when mixed valid and invalid', () => {
-    // "5, xyz" → only one valid number → needs 2+
-    expect(config.calculate({ numbers: '5, xyz' })).toEqual([]);
-  });
-
-  it('returns empty for zero in input', () => {
-    expect(config.calculate({ numbers: '0, 5' })).toEqual([]);
-  });
-
-  it('returns empty for negative numbers', () => {
-    expect(config.calculate({ numbers: '-5, 10' })).toEqual([]);
+  // Invalid tokens used to be silently dropped (changing the LCM); now they are reported.
+  it.each(['abc, def', '5, xyz', '0, 5', '-5, 10', '2.5, 4'])('reports an error for %s', (numbers) => {
+    const r = config.calculate({ numbers });
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
   // ── Educational Content Exists ──────────────────────────────────────

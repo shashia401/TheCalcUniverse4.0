@@ -1,45 +1,5 @@
 import { useState, useCallback } from 'react';
-import { safeEval } from '../shared/safeEval';
-
-// ─── Safe math expression evaluator ────────────────────────────────────────
-function evaluate(expr: string): { result: number; error?: string } {
-  try {
-    // Preprocess display characters and factorial expansion only.
-    // Everything else (sin, cos, pi, e, ^, etc.) is handled by the shared safe evaluator.
-    const sanitized = expr
-      .replace(/×/g, '*').replace(/÷/g, '/')
-      .replace(/π/g, 'pi')
-      // Scientific notation (\d[.\d]*e[+-]?\d+) → (num)*10^(exp)
-      // before the bare-e→Math.E look-up so 1e5 becomes 100000, not 13.59
-      .replace(/(\d[\d.]*)[eE](\+?-?\d+)/g, '($1)*10^($2)')
-      // Handle (n)! where n is a parenthesized expression — evaluate inner, then factorial
-      .replace(/\(([^)]+)\)!/g, (_, inner: string) => {
-        const val = safeEval(inner);
-        if (typeof val !== 'number' || !isFinite(val) || val < 0 || !Number.isInteger(val)) throw new Error('Invalid factorial');
-        let f = 1;
-        for (let i = 2; i <= val; i++) f *= i;
-        return f.toString();
-      })
-      .replace(/(\d+)!/g, (_, n: string) => {
-        let f = 1;
-        for (let i = 2; i <= parseInt(n, 10); i++) f *= i;
-        return f.toString();
-      });
-
-    const result = safeEval(sanitized);
-    if (typeof result !== 'number') return { result: 0, error: 'Invalid' };
-    if (!isFinite(result)) return { result: 0, error: result > 0 ? 'Infinity' : '-Infinity' };
-    return { result };
-  } catch (err) {
-    return { result: 0, error: (err as Error).message?.includes('nvalid') ? 'Error' : 'Error' };
-  }
-}
-
-function fmt(n: number): string {
-  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-  const s = n.toPrecision(12);
-  return parseFloat(s).toString();
-}
+import { AngleMode, evaluateExpression, fmtResult as fmt } from './scientificMath';
 
 interface HistoryEntry {
   expression: string;
@@ -57,6 +17,7 @@ export default function ScientificPanel() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [angle, setAngle] = useState<AngleMode>('rad');
 
   const addToHistory = useCallback((expr: string, res: string) => {
     setHistory(prev => [{ expression: expr, result: res }, ...prev].slice(0, 10));
@@ -86,75 +47,58 @@ export default function ScientificPanel() {
     const val = parseFloat(display);
     if (isNaN(val)) return;
 
-    if (fn === 'square') {
-      const r = val * val;
-      const s = fmt(r);
-      setDisplay(s);
-      setExpression(`${val}²`);
-      setJustEvaluated(true);
-    } else if (fn === 'cube') {
-      const r = val * val * val;
-      const s = fmt(r);
-      setDisplay(s);
-      setExpression(`${val}³`);
-      setJustEvaluated(true);
-    } else if (fn === 'inv') {
-      if (val === 0) { setError('Cannot divide by zero'); return; }
-      const r = 1 / val;
-      const s = fmt(r);
-      setDisplay(s);
-      setExpression(`1÷${val}`);
-      setJustEvaluated(true);
-    } else if (fn === 'fact') {
-      if (val < 0 || !Number.isInteger(val) || val > 170) {
-        setError('Invalid for factorial');
-        return;
-      }
-      let f = 1;
-      for (let i = 2; i <= val; i++) f *= i;
-      const s = fmt(f);
-      setDisplay(s);
-      setExpression(`${val}!`);
-      setJustEvaluated(true);
-    } else {
-      // sin, cos, tan, log, ln, sqrt
-      let r: number;
-      let label: string;
-      switch (fn) {
-        case 'sin': r = Math.sin(val); label = `sin(${val})`; break;
-        case 'cos': r = Math.cos(val); label = `cos(${val})`; break;
-        case 'tan': r = Math.tan(val); label = `tan(${val})`; break;
-        case 'log': r = Math.log10(val); label = `log(${val})`; break;
-        case 'ln': r = Math.log(val); label = `ln(${val})`; break;
-        case 'sqrt': r = Math.sqrt(val); label = `√(${val})`; break;
-        default: return;
-      }
-      if (!isFinite(r)) { setError('Undefined result'); return; }
-      const s = fmt(r);
-      setDisplay(s);
-      setExpression(label);
-      setJustEvaluated(true);
+    // Every function goes through the same parser as the "=" key, so degrees, domain errors and formatting agree.
+    const call: Record<CalcFn, string> = {
+      sin: `sin(${val})`,
+      cos: `cos(${val})`,
+      tan: `tan(${val})`,
+      log: `log(${val})`,
+      ln: `ln(${val})`,
+      sqrt: `sqrt(${val})`,
+      square: `(${val})^2`,
+      cube: `(${val})^3`,
+      inv: `1/(${val})`,
+      fact: `(${val})!`,
+    };
+    const label: Record<CalcFn, string> = {
+      sin: `sin(${val})`,
+      cos: `cos(${val})`,
+      tan: `tan(${val})`,
+      log: `log(${val})`,
+      ln: `ln(${val})`,
+      sqrt: `√(${val})`,
+      square: `${val}²`,
+      cube: `${val}³`,
+      inv: `1÷${val}`,
+      fact: `${val}!`,
+    };
+    const out = evaluateExpression(call[fn], angle);
+    if (!out.ok) {
+      setError(fn === 'inv' && val === 0 ? 'Cannot divide by zero' : out.error);
+      return;
     }
-  }, [display]);
+    setDisplay(fmt(out.value));
+    setExpression(label[fn]);
+    setJustEvaluated(true);
+  }, [display, angle]);
 
   const pressEquals = useCallback(() => {
     setError(null);
     const expr = expression.trim();
     if (!expr) return;
 
-    // Replace display value placeholder for inline evaluation
-    const { result, error: evalError } = evaluate(expr);
-    if (evalError) {
-      setError(evalError);
+    const out = evaluateExpression(expr, angle);
+    if (!out.ok) {
+      setError(out.error);
       return;
     }
 
-    const resultStr = fmt(result);
+    const resultStr = fmt(out.value);
     setDisplay(resultStr);
     setExpression(expr);
     setJustEvaluated(true);
     addToHistory(expr + ' =', resultStr);
-  }, [expression, addToHistory]);
+  }, [expression, angle, addToHistory]);
 
   const pressClear = useCallback(() => {
     setDisplay('0');
@@ -239,7 +183,14 @@ export default function ScientificPanel() {
           <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Scientific Calculator</span>
         </div>
         <div className="flex gap-2">
-          {hasMemory && <span className="text-[10px] font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded">M</span>}
+          {hasMemory && <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">M</span>}
+          <button type="button"
+            onClick={() => setAngle(a => (a === 'rad' ? 'deg' : 'rad'))}
+            aria-label={`Angle unit: ${angle === 'rad' ? 'radians' : 'degrees'}. Press to switch.`}
+            className="text-[10px] font-bold px-2 py-0.5 rounded transition-colors bg-slate-100 text-slate-700 hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
+          >
+            {angle === 'rad' ? 'RAD' : 'DEG'}
+          </button>
           <button type="button"
             onClick={() => setShowHistory(!showHistory)}
             className={`text-[10px] font-bold px-2 py-0.5 rounded transition-colors ${showHistory ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
@@ -255,7 +206,7 @@ export default function ScientificPanel() {
           {/* Display */}
           <div className="rounded-xl bg-slate-900 px-4 py-3 min-h-[80px]">
             {error ? (
-              <p className="text-red-400 text-sm font-mono text-right">{error}</p>
+              <p className="text-red-700 text-sm font-mono text-right">{error}</p>
             ) : (
               <>
                 <p className="text-slate-500 text-xs font-mono text-right truncate min-h-[16px]">
@@ -347,7 +298,7 @@ export default function ScientificPanel() {
             <button type="button" onClick={() => pressConstant('e')} className={`${btnFn} py-2 text-xs`}>e</button>
             <button type="button"
               onClick={() => setError(null)}
-              className="text-[10px] text-slate-500 hover:text-slate-600 py-2"
+              className="text-[10px] text-slate-600 hover:text-slate-800 py-2"
             >
               Clear Error
             </button>

@@ -1,6 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import NthRootPanel from './NthRootPanel';
+import { MAX_ROOT_INDEX, fmtRoot, parseNthRoot, radicalSymbol } from './nthRootMath';
 
 const nthRootConfig: CalculatorConfig = {
   inputs: [
@@ -10,6 +11,7 @@ const nthRootConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '3',
       min: 1,
+      max: MAX_ROOT_INDEX,
       step: 1,
       helpText: 'The degree of the root (2 for square root, 3 for cube root, etc.)',
     },
@@ -21,55 +23,19 @@ const nthRootConfig: CalculatorConfig = {
       helpText: 'The number under the radical sign',
     },
   ],
-  calculate: (values) => {
-    const n = parseInt(values.index);
-    const x = parseFloat(values.radicand);
-
-    if (isNaN(n) || isNaN(x) || n < 1) return [];
-    if (n === 1) return [{ id: 'result', label: 'Result', value: x.toString() }];
-    if (n % 2 === 0 && x < 0) return [];
-
-    const isInt = x === Math.floor(x) && Number.isFinite(x);
-    const result = Math.sign(x) * Math.pow(Math.abs(x), 1 / n);
-    if (!isFinite(result)) return [];
-
-    const fmt = (v: number) => parseFloat(v.toFixed(10)).toString();
-
-    // Build exponential form string
-    const exponentForm = `${fmt(x)}^(${fmt(1)}/${n})`;
-
-    // Simplified radical for integers
-    let simplifiedRadical = '';
-    if (isInt && Math.abs(x) <= 10000 && x > 0) {
-      // Find perfect nth powers that divide x
-      const absX = Math.abs(x);
-      let perfectPower = 1;
-      let remainder = absX;
-      for (let i = Math.floor(Math.pow(absX, 1 / n)); i >= 2; i--) {
-        const p = Math.pow(i, n);
-        if (absX % p === 0) {
-          perfectPower = i;
-          remainder = absX / p;
-          break;
-        }
-      }
-      if (perfectPower > 1) {
-        const coeff = n === 2 ? `√${remainder}` : `∛${remainder}`;
-        simplifiedRadical = `${perfectPower}${coeff}`;
-      } else {
-        const intRoot = Math.round(result);
-        if (Math.abs(intRoot - result) < 1e-10) {
-          simplifiedRadical = intRoot.toString();
-        }
-      }
-    }
+  calculate: (values): CalculatorResult[] => {
+    const r = parseNthRoot(values.index, values.radicand);
+    if (r.kind === 'incomplete') return [];
+    if (r.kind === 'error') return [{ id: 'error', label: 'Not a real number', value: r.message, color: 'negative' }];
+    const { n, x, value, simplified } = r;
+    if (n === 1) return [{ id: 'result', label: 'Result', value: fmtRoot(x) }];
 
     return [
-      { id: 'result', label: 'Result', value: fmt(result), highlight: true, color: 'positive' },
-      { id: 'decimal', label: 'Decimal Form', value: fmt(result) },
-      { id: 'radicalForm', label: 'Radical Expression', value: n === 2 ? `√(${fmt(x)})` : `∛(${fmt(x)})` },
-      { id: 'exponentForm', label: 'Fractional Exponent', value: exponentForm },
-      ...(simplifiedRadical ? [{ id: 'simplifiedRadical' as const, label: 'Simplified Radical', value: simplifiedRadical, color: 'positive' as const }] : []),
+      { id: 'result', label: 'Result', value: fmtRoot(value), highlight: true, color: 'positive' },
+      { id: 'decimal', label: 'Decimal Form', value: fmtRoot(value) },
+      { id: 'radicalForm', label: 'Radical Expression', value: `${radicalSymbol(n)}(${fmtRoot(x)})` },
+      { id: 'exponentForm', label: 'Fractional Exponent', value: `${fmtRoot(x)}^(1/${n})` },
+      ...(simplified ? [{ id: 'simplifiedRadical' as const, label: 'Simplified Radical', value: simplified, color: 'positive' as const }] : []),
     ];
   },
   extraPanel: (values, results) => {
@@ -94,18 +60,18 @@ const nthRootConfig: CalculatorConfig = {
       'Enter the root index (n) — use 2 for square root, 3 for cube root, 4 for fourth root, etc.',
       'Enter the radicand (x) — the number under the radical sign.',
       'View the result as both a decimal value and a fractional exponent (x^(1/n)).',
-      'For integers, the calculator may show a simplified radical form when the radicand has a perfect nth power factor.',
+      'For integers, the calculator may show an exact simplified radical (e.g. ∜48 = 2∜3) when the radicand has a perfect nth-power factor.',
     ],
     explanation:
       'The nth root of a number x is written as ⁿ√x. It is the inverse operation of exponentiation: if y = ⁿ√x, then yⁿ = x. The nth root can also be expressed as a fractional exponent: x^(1/n). For example, 27^(1/3) = ³√27 = 3 because 3³ = 27. For even indices (n = 2, 4, 6...), the radicand must be non-negative because no real number multiplied by itself an even number of times produces a negative result. For odd indices (n = 3, 5, 7...), negative radicands are allowed: ³√(-8) = -2 because (-2)³ = -8. The calculator attempts to simplify radicals by factoring out perfect nth powers. For example, √12 = 2√3 because 12 = 4 × 3 and √4 = 2. This simplified radical form is often preferred in mathematics because it is exact, unlike the decimal approximation. Roots appear throughout geometry (side lengths, diagonal calculations), physics (wave functions, inverse-square laws), and finance (calculating interest rates from growth factors).',
     faqs: [
       {
         question: 'What is the difference between square root and nth root?',
-        answer: 'The square root (n = 2) finds a number that, when multiplied by itself once (two factors), equals x. The cube root (n = 3) finds a number that, when multiplied by itself twice (three factors total), equals x. The nth root extends this concept to any positive integer n. As n increases, the nth root of a number approaches 1 (for numbers greater than 1) or the number itself (for numbers between 0 and 1).',
+        answer: 'The square root (n = 2) finds a number that, when multiplied by itself once (two factors), equals x. The cube root (n = 3) finds a number that, when multiplied by itself twice (three factors total), equals x. The nth root extends this concept to any positive integer n. As n increases, the nth root of any positive number approaches 1 (for example 2^(1/2) is about 1.414, 2^(1/10) about 1.072, 2^(1/100) about 1.007).',
       },
       {
         question: 'Can I take the nth root of a negative number?',
-        answer: 'Yes, when the index n is odd. For example, ³√(-8) = -2 because (-2)³ = -8. But when n is even, the result is not a real number — there is no real number that, when multiplied by itself an even number of times, gives a negative product. The calculator will return empty for even-indexed roots of negative numbers.',
+        answer: 'Yes, when the index n is odd. For example, ³√(-8) = -2 because (-2)³ = -8. But when n is even, the result is not a real number — there is no real number that, when multiplied by itself an even number of times, gives a negative product. The calculator explains this and shows the principal complex value instead (for example √(−4) = 0 + 2i).',
       },
       {
         question: 'What does x^(1/n) mean?',

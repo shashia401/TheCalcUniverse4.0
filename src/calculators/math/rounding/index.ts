@@ -1,45 +1,15 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RoundingPanel from './RoundingPanel';
+import { SIG_MAX, roundExact, RoundMethod } from './roundingMath';
 
-function roundTo(num: number, place: string): { rounded: number; raw: number } {
-  let divisor: number;
-  switch (place) {
-    case 'ten': divisor = 10; break;
-    case 'hundred': divisor = 100; break;
-    case 'thousand': divisor = 1000; break;
-    case 'tenth': divisor = 0.1; break;
-    case 'hundredth': divisor = 0.01; break;
-    case 'thousandth': divisor = 0.001; break;
-    case 'ten-thousandth': divisor = 0.0001; break;
-    case 'unit': divisor = 1; break;
-    case 'million': divisor = 1000000; break;
-    default: divisor = 1;
-  }
-  return { rounded: Math.round(num / divisor) * divisor, raw: num };
-}
-
-function getRoundingDescription(num: number, place: string): { lower: number; upper: number; direction: 'up' | 'down'; digit: number } {
-  let divisor: number;
-  switch (place) {
-    case 'ten': divisor = 10; break;
-    case 'hundred': divisor = 100; break;
-    case 'thousand': divisor = 1000; break;
-    case 'tenth': divisor = 0.1; break;
-    case 'hundredth': divisor = 0.01; break;
-    case 'thousandth': divisor = 0.001; break;
-    case 'ten-thousandth': divisor = 0.0001; break;
-    case 'unit': divisor = 1; break;
-    case 'million': divisor = 1000000; break;
-    default: divisor = 1;
-  }
-  const lower = Math.floor(num / divisor) * divisor;
-  const upper = lower + divisor;
-  const mid = lower + divisor / 2;
-  const direction = num >= mid ? 'up' : 'down';
-  const digit = Math.floor((num / divisor) % 10);
-  return { lower, upper, direction, digit };
-}
+const METHOD_LABEL: Record<RoundMethod, string> = {
+  'half-up': 'Half away from zero (standard)',
+  'half-even': "Half to even (banker's rounding)",
+  ceil: 'Always up (toward +∞)',
+  floor: 'Always down (toward −∞)',
+  trunc: 'Toward zero (truncate)',
+};
 
 const roundingConfig: CalculatorConfig = {
   inputs: [
@@ -67,23 +37,49 @@ const roundingConfig: CalculatorConfig = {
         { label: 'Nearest Hundredth', value: 'hundredth' },
         { label: 'Nearest Thousandth', value: 'thousandth' },
         { label: 'Nearest Ten-Thousandth', value: 'ten-thousandth' },
+        { label: 'Significant figures (choose how many below)', value: 'sig' },
       ],
     },
+    {
+      id: 'sigFigs',
+      label: 'Significant figures',
+      type: 'number',
+      placeholder: '3',
+      min: 1,
+      max: SIG_MAX,
+      step: 1,
+      inputMode: 'numeric',
+      showWhen: (v) => v.place === 'sig',
+      helpText: `How many significant figures to keep (1-${SIG_MAX})`,
+    },
+    {
+      id: 'method',
+      label: 'Rounding rule',
+      type: 'select',
+      defaultValue: 'half-up',
+      options: [
+        { label: 'Half away from zero (standard: 2.5 → 3, −2.5 → −3)', value: 'half-up' },
+        { label: "Half to even (banker's: 2.5 → 2, 3.5 → 4)", value: 'half-even' },
+        { label: 'Always up (toward +∞)', value: 'ceil' },
+        { label: 'Always down (toward −∞)', value: 'floor' },
+        { label: 'Toward zero (truncate)', value: 'trunc' },
+      ],
+      helpText: 'What happens to the value in between landmarks; the half rules differ only on an exact half',
+    },
   ],
-  calculate: (values) => {
-    const num = parseFloat(values.number);
-    const place = values.place || 'unit';
-
-    if (isNaN(num)) return [];
-
-    const { rounded } = roundTo(num, place);
-    const info = getRoundingDescription(num, place);
+  calculate: (values): CalculatorResult[] => {
+    const r = roundExact(values.number, values.place || 'unit', (values.method || 'half-up') as RoundMethod, values.sigFigs);
+    if (r.kind === 'incomplete') return [];
+    if (r.kind === 'error') return [{ id: 'error', label: 'Error', value: r.message, color: 'negative' }];
+    const { original, rounded, direction, method, explanation } = r.r;
+    const methodLabel = METHOD_LABEL[method];
 
     return [
-      { id: 'original', label: 'Original Number', value: num.toString() },
-      { id: 'rounded', label: 'Rounded Value', value: rounded.toString(), highlight: true, color: 'positive' },
-      { id: 'direction', label: 'Rounding Direction', value: info.direction === 'up' ? 'Round Up' : 'Round Down' },
-      { id: '_roundingData', label: 'Rounding Data', value: JSON.stringify({ ...info, rounded, divisor: place === 'ten' ? 10 : place === 'hundred' ? 100 : place === 'thousand' ? 1000 : place === 'tenth' ? 0.1 : place === 'hundredth' ? 0.01 : place === 'thousandth' ? 0.001 : place === 'ten-thousandth' ? 0.0001 : place === 'million' ? 1000000 : 1 }) },
+      { id: 'original', label: 'Original Number', value: original },
+      { id: 'rounded', label: 'Rounded Value', value: rounded, highlight: true, color: 'positive' },
+      { id: 'direction', label: 'Rounding Direction', value: direction === 'up' ? 'Round Up' : direction === 'down' ? 'Round Down' : 'Already exact (no rounding needed)' },
+      { id: 'method', label: 'Rounding Rule', value: methodLabel },
+      { id: 'explanation', label: 'Why', value: explanation },
     ];
   },
   extraPanel: (values, results) => {
@@ -138,7 +134,7 @@ const roundingConfig: CalculatorConfig = {
         scenario: 'Round 74.5 to the nearest unit (whole number) to test the midpoint rule.',
         inputs: { number: '74.5', place: 'unit' },
         result: '75',
-        insight: '74.5 is exactly at the midpoint between 74 and 75. The standard "round half up" rule rounds 0.5 up, so 74.5 → 75. Note that bankers\' rounding would round to 74 (nearest even number) instead.',
+        insight: '74.5 is exactly at the midpoint between 74 and 75. The default rule (exact halves round away from zero) gives 74.5 → 75. Note that bankers\' rounding would round to 74 (nearest even number) instead.',
       },
     ],
     proTips: [
@@ -148,9 +144,9 @@ const roundingConfig: CalculatorConfig = {
       'For scientific work, consider using significant figures instead of fixed decimal places. Significant figures convey both the value and the precision: 0.050 has two significant figures (the leading zeros do not count), while 0.0500 has three.',
     ],
     limitations: [
-      'This calculator uses the standard "round half up" convention (0.5 rounds up). It does not implement bankers\' rounding (round half to even), stochastic rounding, or round-toward-zero (truncation). For accounting applications requiring unbiased rounding, use a specialized tool.',
-      'Negative numbers follow standard rounding toward the nearest value. For example, -3.5 rounds to -4 (not -3), because -4 is the next integer in the negative direction. Some programming languages (like Python\'s round()) handle this differently, so verify your environment.',
-      'The precision is limited to the ten-thousandth place (0.0001). For scientific notation values, convert to decimal form first. The maximum supported rounding place is nearest million — larger magnitudes should be expressed in scientific notation.',
+      'The default rule is the standard school convention: exact halves round away from zero (2.5 → 3, −2.5 → −3). Banker\'s rounding (half to even), always-up, always-down and truncation are available in the "Rounding rule" menu; stochastic rounding is not.',
+      'Negative numbers follow the same digit rule on their magnitude: -3.5 rounds to -4 (not -3) under the default rule. Some tools differ (JavaScript Math.round gives -3; Python round() rounds half to even, so round(-2.5) is -2), so check the rule when comparing.',
+      'Places run from the nearest million down to the ten-thousandth; for anything else choose significant figures (1 to 30). The arithmetic is exact on the digits you type (up to 100 digits), so 1.005 correctly rounds to 1.01 at the hundredth.',
     ],
     faqs: [
       {
@@ -167,7 +163,7 @@ const roundingConfig: CalculatorConfig = {
       },
       {
         question: 'What is bankers\' rounding and how is it different?',
-        answer: "Bankers' rounding (also called round half to even) rounds 0.5 to the nearest even number instead of always rounding up. So 2.5 → 2, 3.5 → 4, 4.5 → 4. This eliminates the systematic upward bias of always rounding 0.5 up, which is important in financial accounting and large datasets. Our calculator uses standard round-half-up, not bankers' rounding.",
+        answer: "Bankers' rounding (also called round half to even) rounds an exact half to the nearest even number instead of always rounding away from zero. So 2.5 → 2, 3.5 → 4, 4.5 → 4. This removes the systematic bias of always rounding halves the same way, which matters in financial accounting and large datasets. Choose it in the Rounding rule menu; the default is the standard half-away-from-zero rule.",
       },
       {
         question: 'Why does rounding matter in real life?',

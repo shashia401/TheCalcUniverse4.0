@@ -1,42 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ProportionPanel from './ProportionPanel';
-import { roundStr8 as fmt } from '../../../lib/format';
-
-/**
- * Solve a proportion a/b = c/d for the missing value.
- * Given any three values, the fourth is computed via cross-multiplication.
- */
-function solveMissing(
-  a: number | null,
-  b: number | null,
-  c: number | null,
-  d: number | null,
-): { missing: string; value: number; label: string } | null {
-  // Exactly one value is missing (null)
-  const known = [a, b, c, d].filter((x) => x !== null).length;
-  if (known !== 3) return null;
-
-  if (a === null) {
-    // a = (b * c) / d
-    const val = (b! * c!) / d!;
-    return { missing: 'a', value: val, label: `a = (${b} × ${c}) / ${d} = ${val}` };
-  }
-  if (b === null) {
-    // b = (a * d) / c
-    const val = (a! * d!) / c!;
-    return { missing: 'b', value: val, label: `b = (${a} × ${d}) / ${c} = ${val}` };
-  }
-  if (c === null) {
-    // c = (a * d) / b
-    const val = (a! * d!) / b!;
-    return { missing: 'c', value: val, label: `c = (${a} × ${d}) / ${b} = ${val}` };
-  }
-  // d === null
-  // d = (b * c) / a
-  const val = (b! * c!) / a!;
-  return { missing: 'd', value: val, label: `d = (${b} × ${c}) / ${a} = ${val}` };
-}
+import { fmtExact as fmt, parseSlot, ratioOf, solveProportion } from './proportionMath';
 
 const proportionConfig: CalculatorConfig = {
   inputs: [
@@ -78,102 +43,35 @@ const proportionConfig: CalculatorConfig = {
     },
   ],
 
-  calculate: (values) => {
-    // Parse each input; treat empty or "?" as null (missing)
-    const parseOpt = (v: string | undefined): number | null => {
-      const s = (v ?? '').trim();
-      if (!s || s === '?') return null;
-      const n = parseFloat(s);
-      return isNaN(n) ? null : n;
+  calculate: (values): CalculatorResult[] => {
+    const out = solveProportion({ a: parseSlot(values.a), b: parseSlot(values.b), c: parseSlot(values.c), d: parseSlot(values.d) });
+    if (out.kind === 'incomplete') return [];
+    if (out.kind === 'error') return [{ id: 'error', label: 'Cannot solve', value: out.message, color: 'negative' }];
+
+    const { a, b, c, d } = out.full;
+    const left = ratioOf(a, b);
+    const right = ratioOf(c, d);
+    const leftFrac = `${fmt(a)}/${fmt(b)}`;
+    const rightFrac = `${fmt(c)}/${fmt(d)}`;
+    const verification = out.equal
+      ? `${leftFrac} = ${rightFrac}  (${fmt(left)} = ${fmt(right)})  OK`
+      : `${leftFrac} ≠ ${rightFrac}  (${fmt(left)} ≠ ${fmt(right)})  Check inputs`;
+    const verificationRow = {
+      id: 'verification',
+      label: 'Verification',
+      value: verification,
+      highlight: true,
+      color: out.equal ? ('positive' as const) : ('negative' as const),
     };
 
-    const a = parseOpt(values.a);
-    const b = parseOpt(values.b);
-    const c = parseOpt(values.c);
-    const d = parseOpt(values.d);
-
-    // Need three known values (solve) or four (verification), all positive
-    const knowns = [a, b, c, d].filter((x) => x !== null) as number[];
-    const allFour = knowns.length === 4;
-    if (knowns.length < 3) return [];
-    if (knowns.some((x) => x <= 0)) return [];
-
-    if (allFour) {
-      const leftVal = a! / b!;
-      const rightVal = c! / d!;
-      const match = Math.abs(leftVal - rightVal) < 0.0001;
-      const leftFrac = `${fmt(a!)}/${fmt(b!)}`;
-      const rightFrac = `${fmt(c!)}/${fmt(d!)}`;
-      return [
-        {
-          id: 'verification',
-          label: 'Verification',
-          value: match
-            ? `${leftFrac} = ${rightFrac}  (${fmt(leftVal)} = ${fmt(rightVal)})  OK`
-            : `${leftFrac} ≠ ${rightFrac}  (${fmt(leftVal)} ≠ ${fmt(rightVal)})  Check inputs`,
-          highlight: true,
-          color: 'neutral' as const,
-        },
-      ];
-    }
-
-    const solved = solveMissing(a, b, c, d);
-    if (!solved) return [];
-
-    const missingVar = solved.missing;
-    const missingVal = solved.value;
-    const allVals: Record<string, number> = { a: a ?? missingVal, b: b ?? missingVal, c: c ?? missingVal, d: d ?? missingVal };
-
-    // Build fraction and percentage for the solved proportion
-    const fractionA = allVals.a;
-    const fractionB = allVals.b;
-    const fractionC = allVals.c;
-    const fractionD = allVals.d;
-
-    // verification: left = a/b, right = c/d
-    const leftVal = fractionA / fractionB;
-    const rightVal = fractionC / fractionD;
-    const match = Math.abs(leftVal - rightVal) < 0.0001;
-    const leftFrac = `${fmt(fractionA)}/${fmt(fractionB)}`;
-    const rightFrac = `${fmt(fractionC)}/${fmt(fractionD)}`;
-    const leftPct = ((fractionA / fractionB) * 100);
-    const rightPct = ((fractionC / fractionD) * 100);
+    if (out.kind === 'check') return [verificationRow];
 
     return [
-      {
-        id: 'result',
-        label: `${missingVar.toUpperCase()} (Missing Value)`,
-        value: fmt(missingVal),
-        highlight: true,
-        color: 'positive' as const,
-      },
-      {
-        id: 'fraction',
-        label: 'Proportion (Fraction)',
-        value: `${leftFrac} = ${rightFrac}`,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'percentage',
-        label: 'Percentage Equivalent',
-        value: `${fmt(leftPct)}% = ${fmt(rightPct)}%`,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'verification',
-        label: 'Verification',
-        value: match
-          ? `${leftFrac} = ${rightFrac}  (${fmt(leftVal)} = ${fmt(rightVal)})  OK`
-          : `${leftFrac} ≠ ${rightFrac}  (${fmt(leftVal)} ≠ ${fmt(rightVal)})  Check inputs`,
-        highlight: true,
-        color: match ? ('positive' as const) : ('negative' as const),
-      },
-      {
-        id: 'solution',
-        label: 'Solution Steps',
-        value: solved.label,
-        color: 'neutral' as const,
-      },
+      { id: 'result', label: `${out.missing.toUpperCase()} (Missing Value)`, value: fmt(out.value), highlight: true, color: 'positive' as const },
+      { id: 'fraction', label: 'Proportion (Fraction)', value: `${leftFrac} = ${rightFrac}`, color: 'neutral' as const },
+      { id: 'percentage', label: 'Percentage Equivalent', value: `${fmt({ n: left.n * 100n, d: left.d })}% = ${fmt({ n: right.n * 100n, d: right.d })}%`, color: 'neutral' as const },
+      verificationRow,
+      { id: 'solution', label: 'Solution Steps', value: out.step, color: 'neutral' as const },
     ];
   },
 
@@ -199,9 +97,9 @@ const proportionConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Enter any three of the four values (a, b, c, d) in the proportion a/b = c/d. Leave the missing value empty or enter "?" — the calculator solves for the missing value automatically.',
-      'All provided values must be positive numbers. The calculator validates the proportion by cross-multiplying and verifying both sides are equal within a small tolerance.',
+      'All provided values must be positive numbers. The calculator validates the proportion by cross-multiplying and checking that both sides are exactly equal.',
       'Review the fraction form (a/b = c/d) to see the complete proportion, and check the percentage equivalent to understand the ratio in percentage format.',
-      'Check the verification result — it confirms whether a/b equals c/d within a small tolerance of 0.01%, giving you confidence in the solution.',
+      'Check the verification result — it confirms exactly (by cross-multiplication) whether a/b equals c/d.',
       'Use the solution steps panel to see the cross-multiplication formula and understand exactly how the missing value was computed from the three known values.',
       'If you enter all four values, the calculator verifies whether the proportion holds rather than solving for a missing value.',
     ],
@@ -210,7 +108,7 @@ const proportionConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What happens if I enter all four values?',
-        answer: 'If all four values are provided, the calculator verifies whether a/b equals c/d within a small tolerance. If the proportion holds, you will see a confirmation message. If not, the calculator flags the discrepancy so you can adjust the inputs.',
+        answer: 'If all four values are provided, the calculator verifies whether a/b equals c/d exactly (a × d = b × c). If the proportion holds, you will see a confirmation message. If not, the calculator flags the discrepancy so you can adjust the inputs.',
       },
       {
         question: 'Can I use zero or negative numbers?',
@@ -222,7 +120,7 @@ const proportionConfig: CalculatorConfig = {
       },
       {
         question: 'How accurate is the calculator for decimal inputs?',
-        answer: 'The calculator uses JavaScript double-precision floating point and rounds results to 8 decimal places. Verification uses a tolerance of 0.01% to account for floating-point rounding. For most practical purposes (cooking measurements, construction, finance), this precision is more than sufficient.',
+        answer: 'The calculator works with exact decimal fractions (no floating point) and rounds results to 8 decimal places. Verification compares a × d with b × c exactly, so 1/3 and 0.33333/1 are correctly reported as different. For most practical purposes (cooking measurements, construction, finance), this precision is more than sufficient.',
       },
       {
         question: 'How is a proportion different from a percentage?',

@@ -51,6 +51,14 @@ function fromRoman(s: string): number {
   return total;
 }
 
+/** Strict standard form (subtractive pairs only, runs of at most three): rejects IIII, VX, IC, IL, XM, VV, MMMM ... */
+const STRICT_ROMAN = /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+
+const isLeap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+function daysInMonth(year: number, month: number): number {
+  return month === 2 ? (isLeap(year) ? 29 : 28) : [4, 6, 9, 11].includes(month) ? 30 : 31;
+}
+
 function getBreakdown(n: number): string {
   if (!Number.isInteger(n) || n < 1 || n > 3999) return '';
   const parts: string[] = [];
@@ -190,42 +198,25 @@ const romanConfig: CalculatorConfig = {
       const input = (values.romanInput || '').trim().toUpperCase();
       if (!input || !/^[IVXLCDM]+$/.test(input)) return [];
       const num = fromRoman(input);
-      if (num === 0) return [];
-      const validRoman = toRoman(num);
-      if (validRoman !== input) {
+      if (num < 1) return [];
+      if (STRICT_ROMAN.test(input)) {
         return [
-          {
-            id: 'arabicResult',
-            label: 'Number',
-            value: String(num),
-          },
-          {
-            id: 'romanOriginal',
-            label: 'Roman',
-            value: input,
-          },
-          {
-            id: 'validationNote',
-            label: 'Warning',
-            value: `Not a valid Roman numeral (standard form: ${validRoman})`,
-          },
+          { id: 'arabicResult', label: 'Number', value: String(num) },
+          { id: 'romanOriginal', label: 'Roman', value: input },
+          { id: 'validationNote', label: 'Valid Roman Numeral', value: 'Yes' },
         ];
       }
+      // Not in standard form: still show the (lenient) value, plus the standard spelling when one exists.
+      const standard = toRoman(num);
       return [
-        {
-          id: 'arabicResult',
-          label: 'Number',
-          value: String(num),
-        },
-        {
-          id: 'romanOriginal',
-          label: 'Roman',
-          value: input,
-        },
+        { id: 'arabicResult', label: 'Number', value: String(num) },
+        { id: 'romanOriginal', label: 'Roman', value: input },
         {
           id: 'validationNote',
-          label: 'Valid Roman Numeral',
-          value: 'Yes',
+          label: 'Warning',
+          value: standard
+            ? `Not a valid Roman numeral (standard form: ${standard})`
+            : 'Not a valid Roman numeral (standard Roman numerals only cover 1 to 3999)',
         },
       ];
     }
@@ -237,6 +228,9 @@ const romanConfig: CalculatorConfig = {
       const dateFormat = values.dateFormat || 'mdy';
       if (isNaN(year) || isNaN(month) || isNaN(day)) return [];
       if (year < 1 || year > 3999 || month < 1 || month > 12 || day < 1 || day > 31) return [];
+      if (day > daysInMonth(year, month)) {
+        return [{ id: 'error', label: 'Invalid date', value: `${year}-${pad(month)} has only ${daysInMonth(year, month)} days (${isLeap(year) ? 'a leap year' : 'not a leap year'}).`, color: 'negative' }];
+      }
       const romanDate = fmtDate(year, month, day, dateFormat);
       if (!romanDate) return [];
       return [
@@ -310,7 +304,7 @@ const romanConfig: CalculatorConfig = {
       'Review your converted result with a complete subtractive notation breakdown showing each step.',
     ],
     explanation:
-      'Roman numerals originated in ancient Rome around 1000 BCE and remained the standard way of writing numbers throughout Europe for over a thousand years. The system uses seven letters from the Latin alphabet: I, V, X, L, C, D, and M. Numbers are formed by combining these symbols and adding their values. The subtractive notation convention (e.g., IV for 4 instead of IIII, IX for 9 instead of VIIII) was developed to prevent long strings of identical symbols and became the standard during the Middle Ages. This is why valid Roman numerals follow strict rules about placement: I can only precede V and X, X can only precede L and C, and C can only precede D and M. Symbols that represent 5s (V, L, D) are never subtracted and never repeated. Symbols representing powers of 10 (I, X, C, M) can be repeated up to three times in a row.',
+      'Roman numerals developed in ancient Rome from earlier Etruscan numerals during the first millennium BCE and remained the standard way of writing numbers throughout Europe for over a thousand years. The system uses seven letters from the Latin alphabet: I, V, X, L, C, D, and M. Numbers are formed by combining these symbols and adding their values. The subtractive notation convention (e.g., IV for 4 instead of IIII, IX for 9 instead of VIIII) was developed to prevent long strings of identical symbols and became the standard during the Middle Ages. This is why valid Roman numerals follow strict rules about placement: I can only precede V and X, X can only precede L and C, and C can only precede D and M. Symbols that represent 5s (V, L, D) are never subtracted and never repeated. Symbols representing powers of 10 (I, X, C, M) can be repeated up to three times in a row.',
     diagram: {
       svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="18" text-anchor="middle" fill="var(--svg-374151)" font-size="12" font-weight="bold">Roman Numeral Reference</text><rect x="15" y="30" width="42" height="30" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="4"/><text x="36" y="49" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="13" font-weight="bold">I</text><text x="36" y="72" text-anchor="middle" fill="var(--svg-6b7280)" font-size="9">1</text><rect x="60" y="30" width="42" height="30" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="4"/><text x="81" y="49" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="13" font-weight="bold">V</text><text x="81" y="72" text-anchor="middle" fill="var(--svg-6b7280)" font-size="9">5</text><rect x="105" y="30" width="42" height="30" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="4"/><text x="126" y="49" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="13" font-weight="bold">X</text><text x="126" y="72" text-anchor="middle" fill="var(--svg-6b7280)" font-size="9">10</text><rect x="150" y="30" width="42" height="30" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="4"/><text x="171" y="49" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="13" font-weight="bold">L</text><text x="171" y="72" text-anchor="middle" fill="var(--svg-6b7280)" font-size="9">50</text><rect x="195" y="30" width="42" height="30" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="4"/><text x="216" y="49" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="13" font-weight="bold">C</text><text x="216" y="72" text-anchor="middle" fill="var(--svg-6b7280)" font-size="9">100</text><rect x="240" y="30" width="42" height="30" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="4"/><text x="261" y="49" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="13" font-weight="bold">D</text><text x="261" y="72" text-anchor="middle" fill="var(--svg-6b7280)" font-size="9">500</text><rect x="40" y="82" width="100" height="30" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="4"/><text x="90" y="101" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="13" font-weight="bold">M</text><text x="90" y="122" text-anchor="middle" fill="var(--svg-6b7280)" font-size="9">1000</text><text x="210" y="100" text-anchor="middle" fill="var(--svg-374151)" font-size="10" font-weight="bold">Subtractive Notation</text><rect x="160" y="130" width="140" height="22" fill="var(--svg-fef3c7)" stroke="var(--svg-ef4444)" stroke-width="1.5" rx="4"/><text x="230" y="144" text-anchor="middle" fill="var(--svg-991b1b)" font-size="10">IV = 4, IX = 9, XL = 40</text><rect x="160" y="158" width="140" height="22" fill="var(--svg-fef3c7)" stroke="var(--svg-ef4444)" stroke-width="1.5" rx="4"/><text x="230" y="172" text-anchor="middle" fill="var(--svg-991b1b)" font-size="10">XC = 90, CD = 400, CM = 900</text><rect x="20" y="130" width="120" height="22" fill="var(--svg-d1fae5)" stroke="var(--svg-059669)" stroke-width="1.5" rx="4"/><text x="80" y="144" text-anchor="middle" fill="var(--svg-065f46)" font-size="9">1994 = MCMXCIV</text></svg>',
       alt: 'Roman numeral reference chart showing I, V, X, L, C, D, M with their values and subtractive notation examples',
@@ -342,7 +336,7 @@ const romanConfig: CalculatorConfig = {
       {
         question: 'Why is 4 written as IV and not IIII?',
         answer:
-          'Subtractive notation avoids long runs of identical symbols. IV means "one before five" (5 - 1 = 4). This became the standard form during the Middle Ages for clarity and brevity, though IIII is still seen on some traditional clock faces (especially Big Ben in London) for aesthetic symmetry with the VIII on the opposite side.',
+          'Subtractive notation avoids long runs of identical symbols. IV means "one before five" (5 - 1 = 4). This became the standard form during the Middle Ages for clarity and brevity, though IIII is still seen on some traditional clock faces (a traditional choice on many clock faces) for aesthetic symmetry with the VIII on the opposite side.',
       },
       {
         question: 'What is the largest number that can be written in standard Roman numerals?',
@@ -357,7 +351,7 @@ const romanConfig: CalculatorConfig = {
       {
         question: 'Are Roman numerals still used today?',
         answer:
-          'Yes! Roman numerals appear on clock faces and watches, in movie copyright dates (the year of production), for Super Bowl numbering (Super Bowl LVIII), in outlines (I, II, III, A, B, C), for monarch and pope names (Elizabeth II, Pope Francis I), in book chapter and volume numbering, for Olympic Games numbering, and sometimes in formal document dating.',
+          'Yes! Roman numerals appear on clock faces and watches, in movie copyright dates (the year of production), for Super Bowl numbering (Super Bowl LVIII), in outlines (I, II, III, A, B, C), for monarch and pope names (Elizabeth II, Pope John Paul II), in book chapter and volume numbering, for Olympic Games numbering, and sometimes in formal document dating.',
       },
       {
         question: 'What are the rules for forming Roman numerals?',

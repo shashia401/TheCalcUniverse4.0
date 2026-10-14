@@ -1,25 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import GCFPanel from './GCFPanel';
-
-function gcd(a: number, b: number): number {
-  while (b) { [a, b] = [b, a % b]; }
-  return a;
-}
-
-function getPrimeFactors(n: number): { factor: number; exponent: number }[] {
-  const factors: { factor: number; exponent: number }[] = [];
-  let num = n;
-  for (let p = 2; p * p <= num; p++) {
-    if (num % p === 0) {
-      let count = 0;
-      while (num % p === 0) { num /= p; count++; }
-      factors.push({ factor: p, exponent: count });
-    }
-  }
-  if (num > 1) factors.push({ factor: num, exponent: 1 });
-  return factors;
-}
+import { analyzeGcf, fmtFactors } from './gcfMath';
+import { MAX_FACTOR_INPUT, parsePositiveSafeInt } from '../../../utils/numberTheory';
 
 const gcfConfig: CalculatorConfig = {
   inputs: [
@@ -29,9 +12,10 @@ const gcfConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '24',
       min: 1,
+      max: MAX_FACTOR_INPUT,
       step: 1,
       inputMode: 'numeric',
-      helpText: 'Enter the first positive integer',
+      helpText: 'Enter the first positive whole number (up to 9,007,199,254,740,991)',
     },
     {
       id: 'b',
@@ -39,45 +23,26 @@ const gcfConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '36',
       min: 1,
+      max: MAX_FACTOR_INPUT,
       step: 1,
       inputMode: 'numeric',
-      helpText: 'Enter the second positive integer',
+      helpText: 'Enter the second positive whole number (up to 9,007,199,254,740,991)',
     },
   ],
-  calculate: (values) => {
-    const a = parseInt(values.a);
-    const b = parseInt(values.b);
+  calculate: (values): CalculatorResult[] => {
+    const pa = parsePositiveSafeInt(values.a);
+    const pb = parsePositiveSafeInt(values.b);
+    if (pa.kind === 'invalid') return [{ id: 'error', label: 'Error', value: `Number A: ${pa.message}`, color: 'negative' }];
+    if (pb.kind === 'invalid') return [{ id: 'error', label: 'Error', value: `Number B: ${pb.message}`, color: 'negative' }];
+    if (pa.kind !== 'ok' || pb.kind !== 'ok') return [];
+    const { a, b } = { a: pa.n, b: pb.n };
 
-    if (isNaN(a) || isNaN(b) || a < 1 || b < 1 || !Number.isFinite(a) || !Number.isFinite(b)) return [];
-
-    const gcf = gcd(a, b);
-    const pfA = getPrimeFactors(a);
-    const pfB = getPrimeFactors(b);
-
-    // Find shared prime factors
-    const shared: { factor: number; exponent: number }[] = [];
-    for (const f of pfA) {
-      const match = pfB.find(p => p.factor === f.factor);
-      if (match) {
-        shared.push({ factor: f.factor, exponent: Math.min(f.exponent, match.exponent) });
-      }
-    }
-
-    // Euclidean algorithm steps
-    const euclidSteps: string[] = [];
-    let x = a, y = b;
-    while (y) {
-      const r = x % y;
-      euclidSteps.push(`${x} = ${y} × ${Math.floor(x / y)} + ${r}`);
-      [x, y] = [y, r];
-    }
-    euclidSteps.push(`GCF(${a}, ${b}) = ${x}`);
+    const { gcf, euclidSteps, shared } = analyzeGcf(a, b);
 
     return [
       { id: 'gcf', label: `GCF of ${a} and ${b}`, value: gcf.toString(), highlight: true, color: 'positive' },
       { id: 'euclidSteps', label: 'Euclidean Algorithm', value: euclidSteps.join(' | ') },
-      { id: '_primeData', label: 'Prime Data', value: JSON.stringify({ a: pfA, b: pfB, shared }) },
-      { id: 'sharedFactors', label: 'Shared Prime Factors', value: shared.map(f => `${f.factor}^${f.exponent}`).join(' × ') },
+      { id: 'sharedFactors', label: 'Shared Prime Factors', value: fmtFactors(shared) || 'None (co-prime)' },
     ];
   },
   extraPanel: (values, results) => {
@@ -142,8 +107,8 @@ const gcfConfig: CalculatorConfig = {
     ],
     limitations: [
       'This calculator finds the GCF of exactly two numbers. For three or more numbers, find the GCF of the first two, then find the GCF of that result with the third, and so on: GCF(a, b, c) = GCF(GCF(a, b), c).',
-      'Only positive integers are supported. Negative numbers, zero, and non-integers are rejected because GCF is defined only for positive integers in standard arithmetic.',
-      'The prime factorization method used in the Venn diagram becomes computationally expensive for numbers with large prime factors (e.g., numbers near 10⁹ or larger). The Euclidean algorithm result remains accurate in those cases.',
+      'Only positive whole numbers up to 9,007,199,254,740,991 (2⁵³ − 1) are supported; beyond that a JavaScript number is no longer exact. Zero, negatives and decimals give no result (by convention GCF(0, n) = n and GCF(−a, b) = GCF(a, b), but both are outside this tool).',
+      'The prime-factor Venn diagram uses Miller–Rabin and Pollard rho, so it stays instant even for two 15-digit primes; the Euclidean steps are exact for every supported input.',
     ],
     faqs: [
       {

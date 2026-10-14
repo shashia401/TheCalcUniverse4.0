@@ -1,4 +1,6 @@
+import Decimal from 'decimal.js';
 import { CalculatorResult } from '../../../types/calculator';
+import { computePercentError, fmt4 } from './percentErrorMath';
 
 interface Props {
   values: Record<string, string>;
@@ -6,17 +8,17 @@ interface Props {
 }
 
 export default function PercentErrorPanel({ values }: Props) {
-  const accepted = parseFloat(values.accepted);
-  const experimental = parseFloat(values.experimental);
-  if (isNaN(accepted) || isNaN(experimental) || accepted === 0) return null;
-
-  const absoluteError = Math.abs(accepted - experimental);
-  const percentError = (absoluteError / Math.abs(accepted)) * 100;
-  const signedError = ((experimental - accepted) / Math.abs(accepted)) * 100;
-  const accuracy = Math.max(0, 100 - percentError);
+  const c = computePercentError(values.accepted, values.experimental);
+  if (c.kind !== 'ok') return null;
+  const accepted = c.accepted.toNumber();
+  const experimental = c.experimental.toNumber();
+  const absoluteError = c.absoluteError.toNumber();
+  const percentError = c.percentError.toNumber();
+  const signedError = c.signedError.toNumber();
+  const accuracy = c.accuracy.toNumber();
   const direction = signedError >= 0 ? 'overestimate' : 'underestimate';
-  const fmt = (n: number) => n.toFixed(4).replace(/\.?0+$/, '');
-  const pct = (n: number) => n.toFixed(2).replace(/\.?0+$/, '');
+  const fmt = (n: number) => fmt4(new Decimal(n));
+  const pct = (n: number) => parseFloat(n.toFixed(2)).toString();
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -67,7 +69,7 @@ export default function PercentErrorPanel({ values }: Props) {
 
           {/* Step 4: Signed Error */}
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-amber-500 uppercase">Signed Error (Direction)</p>
+            <p className="text-[10px] font-bold text-amber-700 uppercase">Signed Error (Direction)</p>
             <p className="text-xs font-mono text-amber-800 mt-1">
               ({fmt(experimental)} − {fmt(accepted)}) ÷ |{fmt(accepted)}| × 100% = {pct(Math.abs(signedError))}% {direction}
             </p>
@@ -75,7 +77,7 @@ export default function PercentErrorPanel({ values }: Props) {
 
           {/* Step 5: Accuracy */}
           <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-blue-500 uppercase">Experimental Accuracy</p>
+            <p className="text-[10px] font-bold text-blue-700 uppercase">Experimental Accuracy</p>
             <p className="text-sm font-bold text-blue-700 mt-1">
               {pct(accuracy)}% accurate
             </p>

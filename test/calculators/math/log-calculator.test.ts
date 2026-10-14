@@ -112,27 +112,32 @@ describe('Log calculator', () => {
   // ── Invalid input tests ──
   it('returns empty for base = 1', () => {
     const r = config.calculate({ base: '1', value: '100' });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty for base = 0', () => {
     const r = config.calculate({ base: '0', value: '100' });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty for negative base', () => {
     const r = config.calculate({ base: '-2', value: '8' });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty for negative value', () => {
     const r = config.calculate({ base: '2', value: '-8' });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty for zero value', () => {
     const r = config.calculate({ base: '2', value: '0' });
-    expect(r).toEqual([]);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('error');
   });
 
   it('returns empty for NaN input', () => {

@@ -1,13 +1,7 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import PercentErrorPanel from './PercentErrorPanel';
-
-// Decimal.js for accurate percent error calculations — ensures precision
-// when the accepted and experimental values differ by tiny amounts (e.g.,
-// comparing 0.001 vs 0.0012), where native JS floating-point subtraction
-// could introduce relative errors larger than the percent error itself.
-Decimal.set({ precision: 20, rounding: Decimal.ROUND_HALF_UP });
+import { computePercentError, fmt4 as fmt } from './percentErrorMath';
 
 const percentErrorConfig: CalculatorConfig = {
   inputs: [
@@ -32,41 +26,15 @@ const percentErrorConfig: CalculatorConfig = {
       helpText: 'The measured or approximate value (what you got)',
     },
   ],
-  calculate: (values) => {
-    const accepted = values.accepted;
-    const experimental = values.experimental;
+  calculate: (values): CalculatorResult[] => {
+    const c = computePercentError(values.accepted, values.experimental);
+    if (c.kind === 'incomplete') return [];
+    if (c.kind === 'error') return [{ id: 'error', label: 'Cannot calculate', value: c.message, color: 'negative' }];
+    const { accepted: aDec, experimental: eDec, absoluteError, percentError, signedError, accuracy, relativeError, direction } = c;
 
-    if (!accepted || !experimental) return [];
-
-    let aDec: Decimal;
-    let eDec: Decimal;
-    try {
-      aDec = new Decimal(accepted);
-      eDec = new Decimal(experimental);
-    } catch {
-      return [];
-    }
-
-    if (!aDec.isFinite() || !eDec.isFinite() || aDec.isZero()) return [];
-
-    // Percent error = |(accepted - experimental) / accepted| * 100%
-    const absoluteError = aDec.minus(eDec).abs();
-    const percentError = absoluteError.div(aDec.abs()).times(100);
-
-    // Signed error (positive = overestimate, negative = underestimate)
-    const signedError = eDec.minus(aDec).div(aDec.abs()).times(100);
-    const direction = signedError.greaterThanOrEqualTo(0) ? 'overestimate' : 'underestimate';
-
-    const accuracy = new Decimal(100).minus(percentError);
-    const relativeError = absoluteError.div(aDec.abs());
-
-    const fmt = (n: Decimal) => {
-      const rounded = n.toFixed(4);
-      // Remove trailing zeros after decimal
-      return parseFloat(rounded).toString();
-    };
-
-    const percentErrNum = percentError.toNumber();
+    // Classify on the DISPLAYED (4-decimal) values so the colour matches the number the user reads.
+    const shownPct = percentError.toDecimalPlaces(4).toNumber();
+    const shownAcc = accuracy.toDecimalPlaces(4).toNumber();
 
     return [
       {
@@ -74,38 +42,23 @@ const percentErrorConfig: CalculatorConfig = {
         label: 'Percent Error',
         value: `${fmt(percentError)}%`,
         highlight: true,
-        color: percentErrNum < 5 ? 'positive' : percentErrNum < 15 ? 'neutral' : 'negative',
+        color: shownPct < 5 ? 'positive' : shownPct < 15 ? 'neutral' : 'negative',
       },
-      {
-        id: 'absoluteError',
-        label: 'Absolute Error',
-        value: fmt(absoluteError),
-        color: 'neutral',
-      },
+      { id: 'absoluteError', label: 'Absolute Error', value: fmt(absoluteError), color: 'neutral' },
       {
         id: 'signedError',
         label: `Signed Error (${direction})`,
-        value: `${fmt(signedError.abs())}% ${direction}`,
-        color: signedError.greaterThanOrEqualTo(0) ? 'neutral' : 'negative',
+        value: direction === 'exact' ? '0% (exact match)' : `${fmt(signedError.abs())}% ${direction}`,
+        color: signedError.isNegative() ? 'negative' : 'neutral',
       },
       {
         id: 'accuracy',
         label: 'Experimental Accuracy',
         value: `${fmt(accuracy)}%`,
-        color: accuracy.greaterThanOrEqualTo(95) ? 'positive' : accuracy.greaterThanOrEqualTo(85) ? 'neutral' : 'negative',
+        color: shownAcc >= 95 ? 'positive' : shownAcc >= 85 ? 'neutral' : 'negative',
       },
-      {
-        id: 'relativeError',
-        label: 'Relative Error',
-        value: fmt(relativeError),
-        color: 'neutral',
-      },
-      {
-        id: 'formula',
-        label: 'Formula Used',
-        value: `δ = |(${fmt(aDec)} - ${fmt(eDec)}) / ${fmt(aDec)}| x 100%`,
-        color: 'neutral',
-      },
+      { id: 'relativeError', label: 'Relative Error', value: fmt(relativeError), color: 'neutral' },
+      { id: 'formula', label: 'Formula Used', value: `δ = |(${fmt(aDec)} - ${fmt(eDec)}) / ${fmt(aDec)}| × 100%`, color: 'neutral' },
     ];
   },
   extraPanel: (values, results) => {
@@ -190,7 +143,7 @@ const percentErrorConfig: CalculatorConfig = {
       },
       {
         question: 'What is a "good" percent error?',
-        answer: 'In introductory lab settings, under 5% is excellent, 5-10% is acceptable, and over 15% suggests a significant error in procedure or measurement. In advanced analytical chemistry, errors under 1% are expected. In social sciences, 10-20% may be acceptable due to inherent variability. Always check the standards in your specific field.',
+        answer: 'In introductory lab settings, under 5% is excellent, 5-15% is acceptable, and over 15% suggests a significant error in procedure or measurement. In advanced analytical chemistry, errors under 1% are expected. In social sciences, 10-20% may be acceptable due to inherent variability. Always check the standards in your specific field.',
       },
       {
         question: 'What is the difference between percent error and percent difference?',
@@ -216,7 +169,7 @@ const percentErrorConfig: CalculatorConfig = {
     citations: [
       { source: 'Wikipedia - Approximation Error', url: 'https://en.wikipedia.org/wiki/Approximation_error' },
 
-      { source: 'NIST - Measurement Uncertainty', url: 'https://www.nist.gov/pml/owm' },
+      { source: 'NIST - Office of Weights and Measures', url: 'https://www.nist.gov/pml/owm' },
     ],
   },
 };

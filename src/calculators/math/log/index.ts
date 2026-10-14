@@ -1,15 +1,7 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import LogPanel from './LogPanel';
-
-// Decimal.js provides high-precision logarithm results for arbitrary bases.
-// While Math.log is adequate for most cases, Decimal.js ensures consistent
-// precision in the change-of-base computation (log_c(x) / log_c(b)) where
-// numerator and denominator are each computed at 20-digit precision before
-// division, preventing cancellation errors when the result is very close to
-// an integer or when x and b are extremely large/small.
-Decimal.set({ precision: 20, rounding: Decimal.ROUND_HALF_UP });
+import { computeLog, fmtLog as fmt } from './logMath';
 
 const logConfig: CalculatorConfig = {
   inputs: [
@@ -35,47 +27,11 @@ const logConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const baseStr = values.base;
-    const xStr = values.value;
-
-    if (!baseStr || !xStr) return [];
-
-    let base: Decimal;
-    let x: Decimal;
-    try {
-      base = new Decimal(baseStr);
-      x = new Decimal(xStr);
-    } catch {
-      return [];
-    }
-
-    if (!base.isFinite() || !x.isFinite()) return [];
-    if (base.isNegative() || base.isZero() || base.equals(1)) return [];
-    if (x.isNegative() || x.isZero()) return [];
-
-    // Compute log_b(x) = ln(x) / ln(b) using Decimal.js
-    const lnx = x.ln();
-    const lnb = base.ln();
-    const result = lnx.div(lnb);
-
-    // Standard logs
-    const log10 = x.log();
-    const ln = x.ln();
-    const log2 = x.log(2);
-
-    const fmt = (n: Decimal) => {
-      if (n.isInteger() && n.abs().lessThan(1e15)) return n.toFixed(0);
-      return parseFloat(n.toPrecision(10)).toString();
-    };
-
-    // Check if result is an exact integer
-    const rounded = result.toDecimalPlaces(10);
-    const isExact = base.isInteger() && x.isInteger() &&
-      rounded.minus(rounded.round()).abs().lessThan(new Decimal(1).div(1e10));
-
-    const exponentForm = isExact
-      ? `${fmt(base)}^${fmt(rounded.round())} = ${fmt(x)}`
-      : '';
+    const r = computeLog(values.base, values.value);
+    if (r.kind === 'incomplete') return [];
+    if (r.kind === 'error') return [{ id: 'error', label: 'Error', value: r.message, color: 'negative' as const }];
+    const { base, x, result, log10, ln, log2, exactExponent } = r;
+    const exponentForm = exactExponent !== null ? `${base.toFixed()}^${exactExponent} = ${x.toFixed()}` : '';
 
     return [
       {
@@ -85,34 +41,19 @@ const logConfig: CalculatorConfig = {
         highlight: true,
         color: 'positive',
       },
-      ...(isExact ? [{
+      ...(exactExponent !== null ? [{
         id: 'exponentForm' as const,
         label: 'Exponential Form',
         value: exponentForm,
         color: 'neutral' as const,
       }] : []),
-      {
-        id: 'log10',
-        label: 'log₁₀(x)',
-        value: fmt(log10),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'naturalLog',
-        label: 'ln(x)',
-        value: fmt(ln),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'log2',
-        label: 'log₂(x)',
-        value: fmt(log2),
-        color: 'neutral' as const,
-      },
+      { id: 'log10', label: 'log₁₀(x) (common log)', value: fmt(log10), color: 'neutral' as const },
+      { id: 'naturalLog', label: 'ln(x) (natural log, base e)', value: fmt(ln), color: 'neutral' as const },
+      { id: 'log2', label: 'log₂(x) (binary log)', value: fmt(log2), color: 'neutral' as const },
       {
         id: 'changeOfBase',
         label: 'Change of Base',
-        value: `log_${fmt(base)}(${fmt(x)}) = log₁₀(${fmt(x)}) / log₁₀(${fmt(base)}) = ${fmt(log10)} / ${fmt(base.log())} = ${fmt(result)}`,
+        value: `log_${fmt(base)}(${fmt(x)}) = log₁₀(${fmt(x)}) / log₁₀(${fmt(base)}) = ${fmt(log10)} / ${fmt(base.log(10))} = ${fmt(result)}`,
         color: 'neutral' as const,
       },
     ];

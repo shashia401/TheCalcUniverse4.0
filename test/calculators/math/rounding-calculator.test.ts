@@ -85,7 +85,7 @@ describe('Rounding calculator', () => {
 
   it('includes rounding data for panel', () => {
     const r = config.calculate({ number: '74', place: 'ten' });
-    expect(getValue(r, '_roundingData')).toContain('direction');
+    expect(getValue(r, 'explanation')).toContain('first dropped digit is 4');
   });
 
   it('returns empty array for NaN input', () => {

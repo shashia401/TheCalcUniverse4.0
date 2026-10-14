@@ -64,7 +64,7 @@ describe('Quadratic Equation Calculator', () => {
 
   // ── Validation ────────────────────────────────────────────────────
   it('returns empty for zero a coefficient', () => {
-    expect(config.calculate({ a: '0', b: '2', c: '3' })).toHaveLength(0);
+    expect(config.calculate({ a: '0', b: '2', c: '3' })[0].id).toBe('error');
   });
 
   it('returns empty for empty inputs', () => {

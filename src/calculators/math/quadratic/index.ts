@@ -1,12 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import QuadraticPanel from './QuadraticPanel';
-import Decimal from 'decimal.js';
-import { roundStr8 as fmt } from '../../../lib/format';
-
-// Decimal.js is used for precision in the discriminant computation (b² − 4ac)
-// and root calculations where near-zero discriminants or nearly-canceling
-// terms can cause catastrophic cancellation in IEEE 754 double precision.
+import { fracToString } from '../../../utils/rational';
+import { equationText, factoredText, fmtF, fmtN, solveQuadratic } from './quadraticMath';
 
 const quadraticConfig: CalculatorConfig = {
   inputs: [
@@ -41,102 +37,39 @@ const quadraticConfig: CalculatorConfig = {
       helpText: 'The constant term. This is the y-intercept — the parabola crosses the y-axis at (0, c).',
     },
   ],
-  calculate: (values) => {
-    const a = parseFloat(values.a);
-    const b = parseFloat(values.b);
-    const c = parseFloat(values.c);
+  calculate: (values): CalculatorResult[] => {
+    const r = solveQuadratic(values.a, values.b, values.c);
+    if (r.kind === 'incomplete') return [];
+    if (r.kind === 'linear') return [{ id: 'error', label: 'Not a quadratic equation', value: r.message, color: 'negative' }];
+    const { q } = r;
 
-    if (isNaN(a) || isNaN(b) || isNaN(c) || a === 0) return [];
-
-    // Use Decimal for precise discriminant to catch near-zero cases
-    let discriminant: number;
-    try {
-      const dA = new Decimal(a);
-      const dB = new Decimal(b);
-      const dC = new Decimal(c);
-      discriminant = dB.pow(2).minus(dA.mul(dC).mul(4)).toNumber();
-    } catch {
-      discriminant = b * b - 4 * a * c;
-    }
-
-    const vertexX = -b / (2 * a);
-    const vertexY = a * vertexX * vertexX + b * vertexX + c;
-    const axisOfSymmetry = -b / (2 * a);
-
-    const fmtComplex = (n: number) => {
-      const abs = Math.abs(n);
-      if (abs < 1e-14) return '0';
-      return parseFloat(abs.toFixed(8)).toString();
-    };
-
-    // Determine nature of roots
-    const discriminantFmt = parseFloat(discriminant.toFixed(8));
-    const discriminantDisplay = Math.abs(discriminantFmt) < 1e-12 ? '0' : fmt(discriminantFmt);
-
-    // Factored form: a(x − r₁)(x − r₂)
-    let factoredForm = '';
-    // Sum and product of roots (Vieta's formulas)
-    const sumOfRoots = -b / a;
-    const productOfRoots = c / a;
-
-    const results = [
-      {
-        id: 'equation',
-        label: 'Equation',
-        value: `${fmt(a)}x²${b !== 0 ? ` ${b >= 0 ? '+' : '-'} ${fmt(Math.abs(b))}x` : ''}${c !== 0 ? ` ${c >= 0 ? '+' : '-'} ${fmt(Math.abs(c))}` : ''} = 0`,
-        highlight: true,
-        color: 'neutral' as const,
-      },
-      { id: 'discriminant', label: 'Discriminant (Δ = b² − 4ac)', value: discriminantDisplay, color: discriminant > 0 ? 'positive' as const : discriminant === 0 ? 'neutral' as const : 'negative' as const },
-      { id: 'vertex', label: 'Vertex (h, k)', value: `(${fmt(vertexX)}, ${fmt(vertexY)})`, color: 'neutral' as const },
-      { id: 'axis', label: 'Axis of Symmetry', value: `x = ${fmt(axisOfSymmetry)}`, color: 'neutral' as const },
-      { id: 'yIntercept', label: 'Y-intercept', value: `(0, ${fmt(c)})`, color: 'neutral' as const },
-      { id: 'opensDirection', label: 'Parabola Opens', value: a > 0 ? 'Upward (∪) — minimum at vertex' : 'Downward (∩) — maximum at vertex', color: 'neutral' as const },
+    const results: CalculatorResult[] = [
+      { id: 'equation', label: 'Equation', value: equationText(q), highlight: true, color: 'neutral' },
+      { id: 'discriminant', label: 'Discriminant (Δ = b² − 4ac)', value: fmtF(q.disc), color: q.kind === 'two-real' ? 'positive' : q.kind === 'repeated' ? 'neutral' : 'negative' },
+      { id: 'vertex', label: 'Vertex (h, k)', value: `(${fmtF(q.vertexX)}, ${fmtF(q.vertexY)})`, color: 'neutral' },
+      { id: 'axis', label: 'Axis of Symmetry', value: `x = ${fmtF(q.vertexX)}`, color: 'neutral' },
+      { id: 'yIntercept', label: 'Y-intercept', value: `(0, ${fmtF(q.c)})`, color: 'neutral' },
+      { id: 'opensDirection', label: 'Parabola Opens', value: q.a.n > 0n ? 'Upward (∪) — minimum at vertex' : 'Downward (∩) — maximum at vertex', color: 'neutral' },
     ];
 
-    if (discriminant > 0) {
-      const sqrtD = Math.sqrt(discriminant);
-      const x1 = (-b + sqrtD) / (2 * a);
-      const x2 = (-b - sqrtD) / (2 * a);
-      results.push({ id: 'rootNature', label: 'Root Nature', value: 'Two distinct real roots (Δ > 0)', color: 'positive' as const });
-      results.push({ id: 'x1', label: 'Root x₁', value: fmt(x1), color: 'positive' as const });
-      results.push({ id: 'x2', label: 'Root x₂', value: fmt(x2), color: 'positive' as const });
-
-      // Factored form
-      const r1Str = x1 >= 0 ? `(x − ${fmt(x1)})` : `(x + ${fmt(Math.abs(x1))})`;
-      const r2Str = x2 >= 0 ? `(x − ${fmt(x2)})` : `(x + ${fmt(Math.abs(x2))})`;
-      if (Math.abs(a) === 1) {
-        factoredForm = (a === 1 ? '' : '-') + `${r1Str}${r2Str}`;
-      } else {
-        factoredForm = `${fmt(a)}${r1Str}${r2Str}`;
-      }
-    } else if (Math.abs(discriminant) < 1e-12) {
-      const x = -b / (2 * a);
-      results.push({ id: 'rootNature', label: 'Root Nature', value: 'One repeated real root (double root, Δ = 0)', color: 'neutral' as const });
-      results.push({ id: 'x', label: 'Repeated Root', value: fmt(x), color: 'neutral' as const });
-      // Factored form for perfect square
-      const rootStr = x >= 0 ? `(x − ${fmt(x)})²` : `(x + ${fmt(Math.abs(x))})²`;
-      if (Math.abs(a) === 1) {
-        factoredForm = (a === 1 ? '' : '-') + rootStr;
-      } else {
-        factoredForm = `${fmt(a)}${rootStr}`;
-      }
+    if (q.kind === 'two-real') {
+      results.push({ id: 'rootNature', label: 'Root Nature', value: 'Two distinct real roots (Δ > 0)', color: 'positive' });
+      results.push({ id: 'x1', label: 'Root x₁', value: q.exact ? fmtF(q.exact.x1) : fmtN(q.x1!), color: 'positive' });
+      results.push({ id: 'x2', label: 'Root x₂', value: q.exact ? fmtF(q.exact.x2) : fmtN(q.x2!), color: 'positive' });
+    } else if (q.kind === 'repeated') {
+      results.push({ id: 'rootNature', label: 'Root Nature', value: 'One repeated real root (double root, Δ = 0)', color: 'neutral' });
+      results.push({ id: 'x', label: 'Repeated Root', value: fmtF(q.vertexX), color: 'neutral' });
     } else {
-      const realPart = -b / (2 * a);
-      const imagPart = Math.sqrt(-discriminant) / (2 * a);
-      results.push({ id: 'rootNature', label: 'Root Nature', value: 'Two complex conjugate roots (Δ < 0)', color: 'negative' as const });
-      results.push({ id: 'complex1', label: 'Root x₁ (complex)', value: `${fmt(realPart)} + ${fmtComplex(imagPart)}i`, color: 'negative' as const });
-      results.push({ id: 'complex2', label: 'Root x₂ (complex)', value: `${fmt(realPart)} − ${fmtComplex(imagPart)}i`, color: 'negative' as const });
+      results.push({ id: 'rootNature', label: 'Root Nature', value: 'Two complex conjugate roots (Δ < 0)', color: 'negative' });
+      results.push({ id: 'complex1', label: 'Root x₁ (complex)', value: `${fmtN(q.re!)} + ${fmtN(q.im!)}i`, color: 'negative' });
+      results.push({ id: 'complex2', label: 'Root x₂ (complex)', value: `${fmtN(q.re!)} − ${fmtN(q.im!)}i`, color: 'negative' });
     }
+    if (q.surd) results.push({ id: 'exactForm', label: 'Exact Form', value: `x = ${q.surd}`, color: 'neutral' });
+    else if (q.exact && q.kind === 'two-real') results.push({ id: 'exactForm', label: 'Exact Form', value: `x = ${fracToString(q.exact.x1)} or x = ${fracToString(q.exact.x2)}`, color: 'neutral' });
 
-    // Vieta's formulas check
-    results.push({ id: 'vietaSum', label: 'Sum of Roots (Vieta)', value: fmt(sumOfRoots), color: 'neutral' as const });
-    results.push({ id: 'vietaProduct', label: 'Product of Roots (Vieta)', value: fmt(productOfRoots), color: 'neutral' as const });
-
-    if (factoredForm) {
-      results.push({ id: 'factoredForm', label: 'Factored Form', value: factoredForm, color: 'positive' as const });
-    }
-
+    results.push({ id: 'vietaSum', label: 'Sum of Roots (Vieta)', value: fmtF(q.sum), color: 'neutral' });
+    results.push({ id: 'vietaProduct', label: 'Product of Roots (Vieta)', value: fmtF(q.product), color: 'neutral' });
+    if (q.kind !== 'complex') results.push({ id: 'factoredForm', label: 'Factored Form', value: factoredText(q), color: 'positive' });
     return results;
   },
   educational: {
@@ -177,8 +110,8 @@ const quadraticConfig: CalculatorConfig = {
       {
         scenario: 'A baseball player hits a ball straight up with an initial velocity of 30 m/s from a height of 1 meter. The height function is h(t) = −4.9t² + 30t + 1. At what times does the ball reach a height of 20 meters? Solve −4.9t² + 30t + 1 = 20, or −4.9t² + 30t − 19 = 0.',
         inputs: { a: '-4.9', b: '30', c: '-19' },
-        result: 'Two real roots: t₁ ≈ 0.69070773 (on the way up), t₂ ≈ 5.60780268 (on the way down). Discriminant Δ = 527.6. Vertex at (3.06122449, 46.90816327). Axis of symmetry: x = 3.06122449. Parabola opens downward.',
-        insight: 'The discriminant Δ = 30² − 4(−4.9)(−19) = 900 − 372.4 = 527.6. Since Δ > 0, there are two real solutions. Using the quadratic formula: t₁ ≈ 0.69 seconds (on the way up) and t₂ ≈ 5.43 seconds (on the way down). The ball passes 20 meters twice. The maximum height is h(3.06) = −4.9(3.06)² + 30(3.06) + 1 ≈ 46.9 meters, occurring at the vertex t = −b/(2a) = −30/(2(−4.9)) ≈ 3.06 seconds.',
+        result: 'Two real roots: t₁ ≈ 0.71739336 (on the way up), t₂ ≈ 5.40505562 (on the way down). Discriminant Δ = 527.6. Vertex of this quadratic at (3.06122449, 26.91836735). Axis of symmetry: x = 3.06122449. Parabola opens downward.',
+        insight: 'The discriminant Δ = 30² − 4(−4.9)(−19) = 900 − 372.4 = 527.6. Since Δ > 0, there are two real solutions. Using the quadratic formula: t₁ = (−30 + √527.6)/(−9.8) ≈ 0.717 seconds (on the way up) and t₂ = (−30 − √527.6)/(−9.8) ≈ 5.405 seconds (on the way down). The ball passes 20 meters twice. The maximum height of the original path h(t) = −4.9t² + 30t + 1 is at the same t = −b/(2a) = 30/9.8 ≈ 3.061 seconds: h(3.061) ≈ 46.92 meters (the vertex y-value 26.92 above belongs to the shifted equation −4.9t² + 30t − 19, i.e. 46.92 − 20).',
       },
       {
         scenario: 'A farmer has 100 meters of fencing and wants to build a rectangular enclosure against an existing wall (so only three sides need fencing). What dimensions maximize the area? If width = w and length = l, then 2w + l = 100, so l = 100 − 2w. Area A = w × l = w(100 − 2w) = −2w² + 100w. To find the maximum, set the derivative to zero or find the vertex of the quadratic.',
@@ -189,7 +122,7 @@ const quadraticConfig: CalculatorConfig = {
       {
         scenario: 'An architect designs a parabolic arch for a bridge. The arch follows y = −0.01x² + 2x where x is the horizontal distance from the left base in meters and y is the height. At what horizontal distances is the arch height equal to 75 meters? Solve −0.01x² + 2x = 75, or −0.01x² + 2x − 75 = 0.',
         inputs: { a: '-0.01', b: '2', c: '-75' },
-        result: 'Two real roots: x₁ = 50, x₂ = 150. Discriminant Δ = 1. Vertex at (100, 100). Parabola opens downward. The arch reaches 75 m at 50 m from the left base and at 150 m (50 m from the right base at total span of 200 m).',
+        result: 'Two real roots: x₁ = 50, x₂ = 150. Discriminant Δ = 1. Vertex of this quadratic at (100, 25) (the arch itself peaks at (100, 100) before the −75 shift). Parabola opens downward. The arch reaches 75 m at 50 m from the left base and at 150 m (50 m from the right base at total span of 200 m).',
         insight: 'Multiply through by 100 for easier coefficients: −x² + 200x − 7500 = 0, but the calculator handles decimals directly. Δ = 4 − 4(−0.01)(−75) = 4 − 3 = 1. Since Δ > 0, there are two real solutions: x₁ = 50 meters and x₂ = 150 meters. The arch reaches 75 meters height at 50m from the left and again at 150m (which is 50m from the right base at 200m total span). The symmetry is expected for a parabolic arch.',
       },
     ],
@@ -200,10 +133,10 @@ const quadraticConfig: CalculatorConfig = {
       'The vertex form y = a(x − h)² + k reveals the maximum/minimum immediately. Convert from standard form: h = −b/(2a), k = f(h). This is essential for optimization problems where you need the extreme value.',
     ],
     limitations: [
-      'For quadratics with extremely large coefficients or very small discriminants near the floating-point precision limit (≈10^−15), root values may lose a few digits of precision. Decimal.js improves discriminant precision but does not eliminate all floating-point edge cases.',
-      'Do not use for linear equations (a = 0) — this calculator requires a ≠ 0. For linear equations, use an equation solver or the slope calculator instead.',
+      'For quadratics with extremely large coefficients or very small discriminants near the floating-point precision limit (≈10^−15), root values may lose a few digits of precision. The discriminant, vertex and Vieta values are computed exactly from the decimals you type, and the roots use the cancellation-free form of the quadratic formula, so only the final square root is rounded.',
+      'For a = 0 the equation is linear, not quadratic: the calculator says so and shows the linear solution x = −c/b instead of roots.',
       'Do not use for cubic, quartic, or higher-degree polynomial equations — the quadratic formula only applies to degree-2 polynomials. Use the polynomial calculator for higher-degree equations.',
-      'For exact symbolic solutions (e.g., keeping √2 instead of 1.414), use a computer algebra system like SymPy or Mathematica. This calculator provides numeric approximations only.',
+      'The Exact Form row gives closed forms such as (1 ± √5) / 2 only for integer coefficients; for decimal coefficients, or for symbolic work, use a computer algebra system like SymPy or Mathematica.',
       'The factored form a(x − r₁)(x − r₂) is displayed only for real roots. Complex conjugate roots are not factorable over the reals.',
     ],
     quickReference: [

@@ -60,8 +60,7 @@ describe('GCF calculator', () => {
   // ── Prime Factorization Data ────────────────────────────────────────
   it('shows prime factorization data', () => {
     const r = config.calculate({ a: '24', b: '36' });
-    expect(getValue(r, '_primeData')).toContain('shared');
-    expect(getValue(r, '_primeData')).toContain('shared');
+    expect(getValue(r, 'sharedFactors')).toBe('2^2 × 3');
   });
 
   it('shows shared prime factors', () => {

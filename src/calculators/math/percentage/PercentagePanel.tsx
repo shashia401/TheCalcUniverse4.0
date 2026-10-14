@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import MiniRing from '../../../components/calculator/MiniRing';
+import { computePercentage } from './percentageMath';
 import { Lightbulb } from 'lucide-react';
 
 interface Props {
@@ -17,21 +17,13 @@ export default function PercentagePanel({ values, results }: Props) {
 
   if (!resultRow || !formulaRow) return null;
 
+  const calc = computePercentage(values.mode, values.x, values.y);
   const mode = values.mode || 'percentOf';
-  const x = parseFloat(values.x || '0');
-  const y = parseFloat(values.y || '0');
 
-  // Compute percentage for visualization
-  const pctForViz = useMemo(() => {
-    if (mode === 'percentOf') return x; // X%
-    if (mode === 'whatPercent') return (x / y) * 100;
-    if (mode === 'pctChange') return (Math.abs(y - x) / x) * 100;
-    if (mode === 'addPct') return x;
-    if (mode === 'subPct') return x;
-    return 50;
-  }, [mode, x, y]);
-
+  // Part-of-whole share for the ring: "X%" of Y, or X as a share of Y.
+  const pctForViz = calc.kind !== 'ok' ? 0 : mode === 'whatPercent' ? calc.result.toNumber() : calc.x.toNumber();
   const clampedPct = Math.min(Math.max(pctForViz || 0, 0), 100);
+  const showRing = calc.kind === 'ok' && calc.y.isPositive() && mode !== 'pctChange';
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -49,29 +41,19 @@ export default function PercentagePanel({ values, results }: Props) {
           <p className="text-3xl font-bold text-blue-700">{resultRow.value}</p>
         </div>
 
-        {/* Percentage donut chart — hidden when value exceeds 100% */}
-        {y > 0 && mode !== 'pctChange' && clampedPct <= 100 && (
+        {/* Percentage ring */}
+        {showRing && (
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 text-center">Visual Breakdown</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2 text-center">Visual Breakdown</p>
             <div className="flex items-center justify-center gap-6">
               <div className="relative" style={{ width: 140, height: 140 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={[
-                      { name: 'Part', value: clampedPct },
-                      { name: 'Remaining', value: 100 - clampedPct },
-                    ]} dataKey="value" cx="50%" cy="50%" innerRadius={38} outerRadius={62} startAngle={90} endAngle={-270} paddingAngle={0}>
-                      <Cell fill="#3b82f6" />
-                      <Cell fill="#e2e8f0" />
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                <MiniRing value={clampedPct} total={100} color="#2563eb" size={140} label={`${clampedPct.toFixed(1)}% of the whole`} />
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <span className="text-lg font-bold text-blue-700">{clampedPct.toFixed(1)}%</span>
                 </div>
               </div>
-              <div className="text-xs text-slate-600 space-y-1">
-                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded bg-blue-500 inline-block" /> Part</div>
+              <div className="text-xs text-slate-700 space-y-1">
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded bg-blue-600 inline-block" /> Part</div>
                 <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded bg-slate-200 inline-block" /> Remaining</div>
               </div>
             </div>
@@ -106,7 +88,7 @@ export default function PercentagePanel({ values, results }: Props) {
 
           {/* Final step */}
           <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-blue-500 uppercase">Result</p>
+            <p className="text-[10px] font-bold text-blue-700 uppercase">Result</p>
             <p className="text-sm font-bold text-blue-700 mt-1">{resultRow.value}</p>
           </div>
         </div>
@@ -115,8 +97,8 @@ export default function PercentagePanel({ values, results }: Props) {
         {exampleRow && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
             <div className="flex items-center gap-1.5 mb-1">
-              <Lightbulb size={13} className="text-amber-600" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">Real-World Application</p>
+              <Lightbulb size={13} className="text-amber-700" />
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Real-World Application</p>
             </div>
             <p className="text-xs text-amber-800 leading-relaxed">{exampleRow.value}</p>
           </div>

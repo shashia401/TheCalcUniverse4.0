@@ -40,7 +40,7 @@ describe('Proportion Calculator', () => {
 
   it('returns empty for zero values', () => {
     const r = config.calculate({ a: '0', b: '0', c: '1', d: '' });
-    expect(r).toEqual([]);
+    expect(r[0].id).toBe('error');
   });
 
   it('handles d placeholder as ?', () => {

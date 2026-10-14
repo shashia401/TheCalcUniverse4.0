@@ -2,8 +2,8 @@
  * Safe math expression evaluator.
  *
  * Recursive-descent parser that ONLY supports:
- *   - Digits (0-9) and decimals (.)
- *   - Operators: +, -, *, /, ^, %
+ *   - Digits (0-9), decimals (.) and E-notation (1.5e-3)
+ *   - Operators: +, -, *, /, ^, %, and postfix ! (factorial, integers 0..170)
  *   - Parentheses: (, )
  *   - Named functions: sqrt, sin, cos, tan, asin, acos, atan, log, ln, abs, exp, ceil, floor
  *   - Constants: PI (pi), E (e)
@@ -24,6 +24,7 @@ type TokenType =
   | 'SLASH'
   | 'CARET'
   | 'PERCENT'
+  | 'BANG'
   | 'LPAREN'
   | 'RPAREN'
   | 'EOF';
@@ -60,12 +61,18 @@ function tokenize(input: string): Token[] {
         num += input[i];
         i++;
       }
+      // E-notation: 1e5, 2.5E-3 (a bare "e" with no digits after it stays the constant e)
+      const expMatch = /^[eE][+-]?\d+/.exec(input.slice(i));
+      if (expMatch) {
+        num += expMatch[0];
+        i += expMatch[0].length;
+      }
       // Validate number format – at most one dot
-      const dotCount = (num.match(/\./g) || []).length;
+      const dotCount = (num.replace(/[eE].*$/, '').match(/\./g) || []).length;
       if (dotCount > 1) {
         throw new SafeEvalError(`Invalid number: "${num}"`);
       }
-      if (num === '.') {
+      if (num === '.' || /^\.[eE]/.test(num)) {
         throw new SafeEvalError('Lone decimal point');
       }
       tokens.push({ type: 'NUMBER', value: num });
@@ -103,6 +110,9 @@ function tokenize(input: string): Token[] {
       case '%':
         tokens.push({ type: 'PERCENT', value: '%' });
         break;
+      case '!':
+        tokens.push({ type: 'BANG', value: '!' });
+        break;
       case '(':
         tokens.push({ type: 'LPAREN', value: '(' });
         break;
@@ -126,24 +136,55 @@ function tokenize(input: string): Token[] {
  *
  *   expression  → term (('+' | '-') term)*
  *   term        → factor (('*' | '/') factor)*
- *   factor      → unary ('^' factor)?          // right-associative exponentiation
- *   unary       → '-' unary | '+' unary | postfix
- *   postfix     → call '%'?
+ *   unary       → '-' unary | '+' unary | power      // so -2^2 = -(2^2) = -4, as in maths
+ *   power       → postfix ('^' unary)?              // right-associative; 2^-3 and 2^3^2 work
+ *   postfix     → call ('%' | '!')*
  *   call        → IDENT '(' expression ')' | atom
  *   atom        → NUMBER | IDENT | '(' expression ')'
  *
  *  `%` is a postfix "divide by 100" operator (e.g. 15% → 0.15).
  */
 
+/** sin of an angle in degrees, exact at multiples of 30 degrees so sin(180) is 0 and sin(30) is 0.5 (not 1.2e-16 / 0.49999999999999994). */
+function sinDeg(x: number): number {
+  const r = ((x % 360) + 360) % 360;
+  if (r === 0 || r === 180) return 0;
+  if (r === 90) return 1;
+  if (r === 270) return -1;
+  if (r === 30 || r === 150) return 0.5;
+  if (r === 210 || r === 330) return -0.5;
+  return Math.sin((x * Math.PI) / 180);
+}
+
+function tanDeg(x: number): number {
+  const r = ((x % 180) + 180) % 180;
+  if (r === 90) throw new SafeEvalError('tan has no value at 90 degrees');
+  if (r === 0) return 0;
+  if (r === 45) return 1;
+  if (r === 135) return -1;
+  return Math.tan((x * Math.PI) / 180);
+}
+
+/** n! for an integer 0 <= n <= 170 (171! overflows a double); anything else is an error, never a long loop. */
+function factorial(n: number): number {
+  if (!Number.isInteger(n) || n < 0) throw new SafeEvalError('Factorial needs a non-negative whole number');
+  if (n > 170) throw new SafeEvalError('Factorial is limited to 170! (the largest that fits in a double)');
+  let f = 1;
+  for (let i = 2; i <= n; i++) f *= i;
+  return f;
+}
+
 class Parser {
   private tokens: Token[];
   private pos: number;
   private vars: Record<string, number>;
+  private deg: boolean;
 
-  constructor(tokens: Token[], vars: Record<string, number>) {
+  constructor(tokens: Token[], vars: Record<string, number>, deg = false) {
     this.tokens = tokens;
     this.pos = 0;
     this.vars = vars;
+    this.deg = deg;
   }
 
   private peek(): Token {
@@ -187,13 +228,13 @@ class Parser {
 
   /** term → factor (('*' | '/') factor)* */
   private term(): number {
-    let left = this.factor();
+    let left = this.unary();
     while (this.peek().type === 'STAR' || this.peek().type === 'SLASH') {
       if (this.match('STAR')) {
-        left *= this.factor();
+        left *= this.unary();
       } else {
         this.consume('SLASH');
-        const right = this.factor();
+        const right = this.unary();
         if (right === 0) throw new SafeEvalError('Division by zero');
         left /= right;
       }
@@ -201,12 +242,12 @@ class Parser {
     return left;
   }
 
-  /** factor → unary ('^' factor)?  (right-associative) */
+  /** power → postfix ('^' unary)?  (right-associative: the exponent is a unary, which recurses into power) */
   private factor(): number {
-    const left = this.unary();
+    const left = this.postfix();
     if (this.peek().type === 'CARET') {
       this.consume('CARET');
-      const right = this.factor(); // right-associative – recurse, not loop
+      const right = this.unary();
       if (left < 0 && !Number.isInteger(right)) {
         throw new SafeEvalError(
           'Negative base with fractional exponent',
@@ -217,21 +258,27 @@ class Parser {
     return left;
   }
 
-  /** unary → '-' unary | '+' unary | postfix */
+  /** unary → '-' unary | '+' unary | power */
   private unary(): number {
     if (this.match('MINUS')) return -this.unary();
     if (this.match('PLUS')) return this.unary();
-    return this.postfix();
+    return this.factor();
   }
 
-  /** postfix → call '%'? */
+  /** postfix → call ('%' | '!')* */
   private postfix(): number {
-    const value = this.call();
-    if (this.peek().type === 'PERCENT') {
-      this.consume('PERCENT');
-      return value / 100;
+    let value = this.call();
+    for (;;) {
+      if (this.peek().type === 'PERCENT') {
+        this.consume('PERCENT');
+        value /= 100;
+      } else if (this.peek().type === 'BANG') {
+        this.consume('BANG');
+        value = factorial(value);
+      } else {
+        return value;
+      }
     }
-    return value;
   }
 
   /** call → IDENT '(' expression ')' | atom */
@@ -255,17 +302,17 @@ class Parser {
       case 'sqrt':
         return Math.sqrt(arg);
       case 'sin':
-        return Math.sin(arg);
+        return this.deg ? sinDeg(arg) : Math.sin(arg);
       case 'cos':
-        return Math.cos(arg);
+        return this.deg ? sinDeg(arg + 90) : Math.cos(arg);
       case 'tan':
-        return Math.tan(arg);
+        return this.deg ? tanDeg(arg) : Math.tan(arg);
       case 'asin':
-        return Math.asin(arg);
+        return this.deg ? (Math.asin(arg) * 180) / Math.PI : Math.asin(arg);
       case 'acos':
-        return Math.acos(arg);
+        return this.deg ? (Math.acos(arg) * 180) / Math.PI : Math.acos(arg);
       case 'atan':
-        return Math.atan(arg);
+        return this.deg ? (Math.atan(arg) * 180) / Math.PI : Math.atan(arg);
       case 'log':
         return Math.log10(arg);
       case 'ln':
@@ -339,17 +386,19 @@ class Parser {
  *
  * @param expression - The expression to evaluate (e.g. "2+3*4", "sin(pi/2)").
  * @param vars       - Optional variable bindings (e.g. `{ x: 5 }`).
+ * @param options    - `{ angle: 'deg' }` makes sin/cos/tan take, and asin/acos/atan return, degrees.
  * @returns The numeric result.
  * @throws SafeEvalError on invalid input, unknown identifiers, or arithmetic errors.
  */
 export function safeEval(
   expression: string,
   vars: Record<string, number> = {},
+  options: { angle?: 'rad' | 'deg' } = {},
 ): number {
   if (!expression || expression.trim().length === 0) {
     throw new SafeEvalError('Empty expression');
   }
   const tokens = tokenize(expression);
-  const parser = new Parser(tokens, vars);
+  const parser = new Parser(tokens, vars, options.angle === 'deg');
   return parser.parse();
 }

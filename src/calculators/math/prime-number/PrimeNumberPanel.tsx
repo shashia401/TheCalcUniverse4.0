@@ -1,28 +1,18 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { parsePositiveSafeInt } from '../../../utils/numberTheory';
+import { analyzePrime } from './primeNumberMath';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.-]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
-
 export default function PrimeNumberPanel({ values, results }: Props) {
-  const isPrime = results.find(r => r.id === 'isPrime');
-  const factors = results.find(r => r.id === 'factors');
-  const divisorCount = results.find(r => r.id === 'divisorCount');
-
-  if (!isPrime) return null;
-
-  const prime = isPrime.value === 'Yes';
-  const num = parseNum(values.n ?? '0');
-  const factorStr = factors?.value ?? '';
-
-  // Parse factors for display
-  const factorList = factorStr ? factorStr.split(',').map(s => s.trim()).filter(s => s) : [];
+  const p = parsePositiveSafeInt(values.n);
+  if (p.kind !== 'ok' || results.length === 0) return null;
+  const { n, prime, factors, divisorCount } = analyzePrime(p.n);
+  const verdict = n === 1 ? 'NEITHER PRIME NOR COMPOSITE' : prime ? 'PRIME' : 'COMPOSITE';
+  const good = prime;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -33,54 +23,37 @@ export default function PrimeNumberPanel({ values, results }: Props) {
         <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Primality Result</span>
       </div>
       <div className="p-5 space-y-4">
-        {/* Prime / Composite indicator */}
         <div className="flex flex-col items-center">
-          <div className={`w-20 h-20 rounded-full flex items-center justify-center ${
-            prime ? 'bg-emerald-100' : 'bg-red-100'
-          }`}>
-            <span className={`text-3xl font-bold ${
-              prime ? 'text-emerald-600' : 'text-red-600'
-            }`}>
-              {prime ? 'P' : 'C'}
-            </span>
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center ${good ? 'bg-emerald-100' : 'bg-red-100'}`}>
+            <span className={`text-3xl font-bold ${good ? 'text-emerald-700' : 'text-red-700'}`}>{prime ? 'P' : n === 1 ? '1' : 'C'}</span>
           </div>
-          <span className={`mt-2 text-lg font-bold ${
-            prime ? 'text-emerald-600' : 'text-red-600'
-          }`}>
-            {num} is {prime ? 'PRIME' : 'COMPOSITE'}
+          <span className={`mt-2 text-lg font-bold text-center break-all ${good ? 'text-emerald-700' : 'text-red-700'}`}>
+            {n} is {verdict}
           </span>
         </div>
 
-        {/* Factor cards */}
-        {!prime && factorList.length > 0 && (
+        {!prime && factors.length > 0 && (
           <div>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wide font-semibold mb-1.5">
-              Prime Factors
-            </p>
+            <p className="text-[10px] text-slate-600 uppercase tracking-wide font-semibold mb-1.5">Prime Factors</p>
             <div className="flex flex-wrap gap-1.5">
-              {factorList.map((f, i) => (
+              {factors.map((f, i) => (
                 <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-xs font-bold text-indigo-700">
                   {f}
-                  {i < factorList.length - 1 && (
-                    <span className="ml-1 text-indigo-300 font-normal">&times;</span>
-                  )}
+                  {i < factors.length - 1 && <span className="ml-1 text-indigo-700 font-normal" aria-hidden="true">&times;</span>}
                 </span>
               ))}
             </div>
           </div>
         )}
 
-        {/* Stats */}
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wide font-semibold">Is Prime</p>
-            <p className={`text-sm font-bold mt-0.5 ${prime ? 'text-emerald-600' : 'text-red-600'}`}>
-              {isPrime.value}
-            </p>
+            <p className="text-[10px] text-slate-600 uppercase tracking-wide font-semibold">Is Prime</p>
+            <p className={`text-sm font-bold mt-0.5 ${good ? 'text-emerald-700' : 'text-red-700'}`}>{prime ? 'Yes' : 'No'}</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wide font-semibold">Divisors</p>
-            <p className="text-sm font-bold text-slate-700 mt-0.5">{divisorCount?.value ?? '-'}</p>
+            <p className="text-[10px] text-slate-600 uppercase tracking-wide font-semibold">Divisors</p>
+            <p className="text-sm font-bold text-slate-700 mt-0.5">{divisorCount.toLocaleString('en-US')}</p>
           </div>
         </div>
       </div>

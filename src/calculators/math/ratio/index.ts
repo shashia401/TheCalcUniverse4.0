@@ -1,19 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RatioPanel from './RatioPanel';
-import { roundStr6 as fmt } from '../../../lib/format';
-
-function gcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) { [a, b] = [b, a % b]; }
-  return a;
-}
-
-function simplifyRatio(a: number, b: number): [number, number] {
-  const g = gcd(Math.round(a * 1e9), Math.round(b * 1e9));
-  return [Math.round(a * 1e9) / g, Math.round(b * 1e9) / g];
-}
+import { fmtExact as fmt, parseSlot, ratioOf, solveProportion } from '../proportion-calculator/proportionMath';
+import { ASPECT_PRESETS, simplifyRatio } from './ratioMath';
 
 const ratioConfig: CalculatorConfig = {
   inputs: [
@@ -54,6 +43,7 @@ const ratioConfig: CalculatorConfig = {
     {
       id: 'preset',
       label: 'Aspect Ratio Presets',
+      helpText: 'Choose a preset with A and B left blank to start from that ratio',
       type: 'select',
       required: false,
       options: [
@@ -71,81 +61,53 @@ const ratioConfig: CalculatorConfig = {
       ],
     },
   ],
-  calculate: (values) => {
-    const a = parseFloat(values.a);
-    const b = parseFloat(values.b);
-    const cRaw = values.c;
-    const dRaw = values.d;
-    const c = cRaw ? parseFloat(cRaw) : NaN;
-    const d = dRaw ? parseFloat(dRaw) : NaN;
+  calculate: (values): CalculatorResult[] => {
+    // A preset fills A : B when both are left blank (the preset field used to have no effect on the maths).
+    const preset = ASPECT_PRESETS[values.preset ?? ''];
+    const usePreset = !!preset && !(values.a ?? '').trim() && !(values.b ?? '').trim();
+    const sa = usePreset ? { n: BigInt(preset.a), d: 1n } : parseSlot(values.a);
+    const sb = usePreset ? { n: BigInt(preset.b), d: 1n } : parseSlot(values.b);
+    if (!sa || !sb || sa === 'bad' || sb === 'bad') return [];
+    if (sa.n <= 0n || sb.n <= 0n) return [];
 
-    if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) return [];
+    const [ra, rb] = simplifyRatio(sa, sb);
+    const ratio = ratioOf(sa, sb);
+    const sc = parseSlot(values.c);
+    const sd = parseSlot(values.d);
 
-    const [sa, sb] = simplifyRatio(a, b);
-    const ratio = a / b;
-
-    // Solve proportion A:B = C:D
-    let solvedValue: string | null = null;
-    let solveLabel = '';
-
-    if (!isNaN(c) && isNaN(d) && c > 0) {
-      // Solve for D: D = B * C / A
-      const solvedD = (b * c) / a;
-      solvedValue = fmt(solvedD);
-      solveLabel = `D = ${fmt(solvedD)}   (${fmt(c)} : ${fmt(solvedD)})`;
-    } else if (isNaN(c) && !isNaN(d) && d > 0) {
-      // Solve for C: C = A * D / B
-      const solvedC = (a * d) / b;
-      solvedValue = fmt(solvedC);
-      solveLabel = `C = ${fmt(solvedC)}   (${fmt(solvedC)} : ${fmt(d)})`;
-    } else if (!isNaN(c) && !isNaN(d) && c > 0 && d > 0) {
-      // Both given — check if proportional
-      const ratio2 = c / d;
-      const match = Math.abs(ratio - ratio2) < 0.001;
-      solvedValue = match ? 'Proportional ✓' : `Not proportional (${fmt(c / d)} vs ${fmt(ratio)})`;
-      solveLabel = `${fmt(c)} : ${fmt(d)} = ${fmt(c / d)}`;
+    // Solve A:B = C:D (or check it when both are given) with the shared exact proportion solver.
+    const prop = solveProportion({ a: sa, b: sb, c: sc, d: sd });
+    let proportionRows: CalculatorResult[] = [];
+    if (prop.kind === 'solved') {
+      const { c, d } = prop.full;
+      const label = prop.missing.toUpperCase();
+      const value = prop.missing === 'c' ? c : d;
+      proportionRows = [
+        { id: 'proportionResult', label: 'Missing Value Solved', value: fmt(value), highlight: true, color: 'positive' },
+        { id: 'proportionSteps', label: 'Proportion Steps', value: `${label} = ${fmt(value)}   (${fmt(c)} : ${fmt(d)})`, color: 'neutral' },
+      ];
+    } else if (prop.kind === 'check') {
+      const { c, d } = prop.full;
+      proportionRows = [
+        {
+          id: 'proportionResult',
+          label: 'Proportion Check',
+          value: prop.equal ? 'Proportional ✓' : `Not proportional (${fmt(ratioOf(c, d))} vs ${fmt(ratio)})`,
+          highlight: true,
+          color: prop.equal ? 'positive' : 'negative',
+        },
+        { id: 'proportionSteps', label: 'Proportion Steps', value: `${fmt(c)} : ${fmt(d)} = ${fmt(ratioOf(c, d))}`, color: 'neutral' },
+      ];
+    } else if (prop.kind === 'error') {
+      proportionRows = [{ id: 'proportionError', label: 'Proportion', value: 'C and D must be positive numbers.', color: 'negative' }];
     }
 
-    const results = [
-      {
-        id: 'simplified',
-        label: 'Simplified Ratio',
-        value: `${sa} : ${sb}`,
-        highlight: true,
-        color: 'positive' as const,
-      },
-      {
-        id: 'decimal',
-        label: 'Decimal (A/B)',
-        value: fmt(ratio),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'fraction',
-        label: 'As Fraction',
-        value: `${fmt(a)} / ${fmt(b)}`,
-        color: 'neutral' as const,
-      },
-      ...(solvedValue !== null
-        ? [{
-            id: 'proportionResult' as const,
-            label: solveLabel.includes('D =') || solveLabel.includes('C =') ? 'Missing Value Solved' : 'Proportion Check',
-            value: solvedValue,
-            highlight: true,
-            color: 'positive' as const,
-          } as const]
-        : []),
-      ...(solvedValue !== null
-        ? [{
-            id: 'proportionSteps' as const,
-            label: 'Proportion Steps',
-            value: solveLabel,
-            color: 'neutral' as const,
-          } as const]
-        : []),
+    return [
+      { id: 'simplified', label: 'Simplified Ratio', value: `${ra} : ${rb}`, highlight: true, color: 'positive' },
+      { id: 'decimal', label: 'Decimal (A/B)', value: fmt(ratio), color: 'neutral' },
+      { id: 'fraction', label: 'As Fraction', value: `${fmt(sa)} / ${fmt(sb)}`, color: 'neutral' },
+      ...proportionRows,
     ];
-
-    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

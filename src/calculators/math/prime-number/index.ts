@@ -1,92 +1,8 @@
-﻿import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { MAX_FACTOR_INPUT, parsePositiveSafeInt } from '../../../utils/numberTheory';
+import { analyzePrime } from './primeNumberMath';
 import { createElement } from 'react';
 import PrimeNumberPanel from './PrimeNumberPanel';
-
-/**
- * Check if n is prime using trial division up to sqrt(n).
- * Returns true for primes >= 2, false otherwise.
- */
-function isPrime(n: number): boolean {
-  if (n < 2) return false;
-  if (n === 2) return true;
-  if (n % 2 === 0) return false;
-  const limit = Math.floor(Math.sqrt(n));
-  for (let i = 3; i <= limit; i += 2) {
-    if (n % i === 0) return false;
-  }
-  return true;
-}
-
-/**
- * Find all prime factors of n (with multiplicity).
- * Only called for n >= 2. Uses trial division starting from 2.
- */
-function getPrimeFactors(n: number): number[] {
-  const factors: number[] = [];
-  let num = n;
-  // Divide by 2
-  while (num % 2 === 0) {
-    factors.push(2);
-    num /= 2;
-  }
-  // Divide by odd numbers
-  for (let p = 3; p * p <= num; p += 2) {
-    while (num % p === 0) {
-      factors.push(p);
-      num /= p;
-    }
-  }
-  // If num is still > 1, it's a prime factor
-  if (num > 1) factors.push(num);
-  return factors;
-}
-
-/**
- * Count the number of divisors of n using prime factorization:
- * If n = p1^a * p2^b * ..., then divisor count = (a+1)(b+1)...
- */
-function countDivisors(n: number): number {
-  if (n < 2) return n === 1 ? 1 : 0;
-  let count = 1;
-  let num = n;
-  let p = 2;
-  while (p * p <= num) {
-    let exp = 0;
-    while (num % p === 0) {
-      exp++;
-      num /= p;
-    }
-    if (exp > 0) count *= exp + 1;
-    p = p === 2 ? 3 : p + 2;
-  }
-  if (num > 1) count *= 2; // remaining prime factor with exponent 1
-  return count;
-}
-
-/**
- * Build a human-readable description of the primality checking steps.
- */
-function buildPrimalitySteps(n: number): string {
-  if (n < 2) return `Numbers less than 2 are not prime by definition.`;
-  if (n === 2) return `2 is the only even prime number. It is divisible only by 1 and itself.`;
-  if (n % 2 === 0) return `Even numbers greater than 2 are not prime (divisible by 2).`;
-
-  const limit = Math.floor(Math.sqrt(n));
-  const steps: string[] = [];
-  steps.push(`Checking divisibility of ${n} by odd numbers from 3 up to √${n} = ${limit}:\n`);
-  let foundDivisor = false;
-  for (let i = 3; i <= limit; i += 2) {
-    if (n % i === 0) {
-      steps.push(`  ${n} ÷ ${i} = ${n / i} — divisible! ${n} is composite.`);
-      foundDivisor = true;
-      break;
-    }
-  }
-  if (!foundDivisor) {
-    steps.push(`  No divisors found up to ${limit}. Therefore, ${n} is prime.`);
-  }
-  return steps.join('\n');
-}
 
 const primeNumberConfig: CalculatorConfig = {
   inputs: [
@@ -97,44 +13,26 @@ const primeNumberConfig: CalculatorConfig = {
       placeholder: 'Enter a number',
       defaultValue: '97',
       min: 1,
-      max: 10000000,
+      max: MAX_FACTOR_INPUT,
       required: true,
       inputMode: 'numeric',
       helpText: 'Enter a positive integer to check if it is prime',
     },
   ],
-  calculate: (values) => {
-    const n = parseInt(values.n, 10);
-    if (isNaN(n) || n < 2 || !Number.isFinite(n) || n > 10000000) return [];
+  calculate: (values): CalculatorResult[] => {
+    const p = parsePositiveSafeInt(values.n);
+    if (p.kind === 'invalid') return [{ id: 'error', label: 'Error', value: p.message, color: 'negative' }];
+    if (p.kind !== 'ok') return [];
+    const { n } = p;
 
-    const prime = isPrime(n);
-    const factorList = prime ? [] : getPrimeFactors(n);
-    const divisorCount = countDivisors(n);
-    const steps = buildPrimalitySteps(n);
+    const { prime, factors, divisorCount, steps } = analyzePrime(n);
+    const factorText = n === 1 ? 'None (1 is neither prime nor composite)' : factors.length > 0 ? factors.join(', ') : `${n} (prime)`;
 
     return [
-      {
-        id: 'isPrime',
-        label: 'Is Prime',
-        value: prime ? 'Yes' : 'No',
-        highlight: true,
-        color: prime ? 'positive' : 'negative',
-      },
-      {
-        id: 'factors',
-        label: 'Prime Factors',
-        value: factorList.length > 0 ? factorList.join(', ') : (prime ? n.toString() + ' (prime)' : 'None'),
-      },
-      {
-        id: 'divisorCount',
-        label: 'Number of Divisors',
-        value: divisorCount.toLocaleString(),
-      },
-      {
-        id: 'primalityCheck',
-        label: 'Primality Check Steps',
-        value: steps,
-      },
+      { id: 'isPrime', label: 'Is Prime', value: prime ? 'Yes' : 'No', highlight: true, color: prime ? 'positive' : 'negative' },
+      { id: 'factors', label: 'Prime Factors', value: factorText },
+      { id: 'divisorCount', label: 'Number of Divisors', value: divisorCount.toLocaleString('en-US') },
+      { id: 'primalityCheck', label: 'Primality Check Steps', value: steps },
     ];
   },
   extraPanel: (values, results) => {
@@ -168,7 +66,7 @@ const primeNumberConfig: CalculatorConfig = {
       },
     ],
     howToUse: [
-      'Enter any positive integer between 1 and 10,000,000 in the input field.',
+      'Enter any positive whole number from 1 up to 9,007,199,254,740,991 in the input field.',
       'The calculator instantly tells you whether the number is prime or composite.',
       'If the number is composite, view its complete list of prime factors separated by commas.',
       'See the divisor count to understand how many numbers divide the input evenly.',
@@ -180,7 +78,7 @@ const primeNumberConfig: CalculatorConfig = {
       { label: 'First 5 primes', value: '2, 3, 5, 7, 11' },
       { label: 'Composite example', value: '12 = 2 x 2 x 3' },
       { label: 'Primes under 100', value: '25 primes' },
-      { label: 'Trial division limit', value: 'sqrt(n), check up to 3162 for 10M' },
+      { label: 'Trial division limit', value: 'sqrt(n), e.g. odd divisors up to 3161 for n = 10 million' },
     ],
     faqs: [
       {
@@ -189,7 +87,7 @@ const primeNumberConfig: CalculatorConfig = {
       },
       {
         question: 'What is the largest known prime number?',
-        answer: 'The largest known prime as of early 2025 is 2^136279841 - 1, a Mersenne prime discovered by the Great Internet Mersenne Prime Search (GIMPS) project. It has over 41 million digits. Mersenne primes are of the form 2^p - 1 and are easier to test for primality using the Lucas-Lehmer test. New ones are discovered regularly by distributed computing projects.',
+        answer: 'The largest known prime (as of the most recent GIMPS announcement we have verified, October 2024) is 2^136279841 - 1, a Mersenne prime found by the Great Internet Mersenne Prime Search (GIMPS) project. It has 41,024,320 digits. Mersenne primes are of the form 2^p - 1 and are easier to test for primality using the Lucas-Lehmer test. New ones are discovered regularly by distributed computing projects.',
       },
       {
         question: 'What is the difference between a prime and a composite number?',
@@ -201,7 +99,7 @@ const primeNumberConfig: CalculatorConfig = {
       },
       {
         question: 'How do prime numbers relate to cryptography?',
-        answer: 'RSA encryption, one of the most widely used encryption systems, relies on the fact that multiplying two large primes together is easy, but factoring the result back into primes is extremely hard. A typical RSA key uses two primes that are each hundreds of digits long. The security of the system depends on this asymmetry — even with the fastest computers, factoring a 2048-bit number into its prime factors would take longer than the age of the universe with current algorithms.',
+        answer: 'RSA encryption, one of the most widely used encryption systems, relies on the fact that multiplying two large primes together is easy, but factoring the result back into primes is extremely hard. A typical RSA key uses two primes that are each hundreds of digits long. The security of the system depends on this asymmetry — no known classical algorithm can factor a properly generated 2048-bit number in practical time.',
       },
     ],
     diagram: {
@@ -226,14 +124,14 @@ const primeNumberConfig: CalculatorConfig = {
     proTips: [
       'All primes greater than 3 are of the form 6k+1 or 6k-1. Use this fact to quickly spot likely primes: a number not fitting either form cannot be prime (except 2 and 3).',
       'Numbers ending in 0, 2, 4, 6, or 8 (even numbers > 2) and numbers ending in 5 (> 5) are always composite — you do not need a calculator for these.',
-      'If you are testing many numbers, remember that the trial division algorithm checks up to sqrt(n). For n = 10,000,000, this means at most 1,581 odd numbers need to be checked, which is very fast.',
+      'If you are testing many numbers, remember that the trial division algorithm checks up to sqrt(n). For n = 10,000,000, √n ≈ 3162, so at most 1,580 odd divisors (3, 5, …, 3161) need to be checked, which is very fast. Above that, this calculator switches to the Miller–Rabin test.',
       'The divisor count result is especially useful: a prime has exactly 2 divisors, a prime power p^k has k+1 divisors, and composite numbers with many small prime factors can have surprisingly many divisors (e.g., 720 has 30 divisors).',
-      'For cryptographic or large-number use cases, note that this calculator is limited to 10 million. Prime generation for RSA keys (which uses 1024-bit or 2048-bit numbers) requires specialized libraries and probabilistic primality tests.',
+      'For cryptographic or large-number use cases, note that this calculator stops at 9,007,199,254,740,991 (2⁵³ − 1). Prime generation for RSA keys (which uses 1024-bit or 2048-bit numbers) requires specialized big-number libraries.',
     ],
     limitations: [
-      'The trial division algorithm becomes computationally expensive for numbers near the 10 million upper bound, though still within practical limits (sqrt(10M) = 3162 divisions).',
-      'Numbers larger than 10 million cannot be tested with this calculator.',
-      'The primality test is deterministic for the supported range but does not provide a certificate of primality suitable for cryptographic verification.',
+      'Up to 10 million the steps list shows the trial divisions; above that the answer comes from the Miller–Rabin test, which is instant but is not shown division by division.',
+      'Numbers larger than 9,007,199,254,740,991 cannot be tested (a JavaScript number is no longer exact beyond that).',
+      'The primality test is deterministic (not probabilistic) for the whole supported range, but it does not produce a certificate of primality suitable for cryptographic verification.',
       'The prime factorization shown for composite numbers may not be unique in its display format, though the fundamental theorem of arithmetic guarantees uniqueness of the factor set.',
     ],
     citations: [
