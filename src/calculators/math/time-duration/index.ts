@@ -1,62 +1,26 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import TimeDurationPanel from './TimeDurationPanel';
+import { parseClockTime } from '../../../utils/clockTime';
+import { parseIsoDateUtc } from '../../../utils/isoDate';
 
 /* ------------------------------------------------------------------ */
 /*  Parse helpers                                                      */
 /* ------------------------------------------------------------------ */
 
-interface ParsedTime {
-  hours: number;
-  minutes: number;
-}
+// Times are parsed by the shared parseClockTime (src/utils/clockTime.ts).
 
-function parseTime(input: string): ParsedTime | null {
-  const trimmed = input.trim();
-  if (!trimmed) return null;
+const DAY_MS = 86_400_000;
 
-  // Try 12-hour format: "h:mm AM/PM" or "h AM/PM"
-  const ampmMatch = /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i.exec(trimmed);
-  if (ampmMatch) {
-    let hours = parseInt(ampmMatch[1], 10);
-    const minutes = ampmMatch[2] ? parseInt(ampmMatch[2], 10) : 0;
-    const isPM = ampmMatch[3].toUpperCase() === 'PM';
-
-    if (hours < 1 || hours > 12) return null;
-    if (minutes < 0 || minutes > 59) return null;
-
-    if (isPM && hours !== 12) hours += 12;
-    if (!isPM && hours === 12) hours = 0;
-
-    return { hours, minutes };
-  }
-
-  // Try 24-hour format: "HH:MM"
-  const h24Match = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
-  if (h24Match) {
-    const hours = parseInt(h24Match[1], 10);
-    const minutes = parseInt(h24Match[2], 10);
-
-    if (hours < 0 || hours > 23) return null;
-    if (minutes < 0 || minutes > 59) return null;
-
-    return { hours, minutes };
-  }
-
-  return null;
-}
-
-function countWeekdays(start: Date, end: Date): number {
-  let count = 0;
-  const current = new Date(start);
-  current.setHours(0, 0, 0, 0);
-  const endNorm = new Date(end);
-  endNorm.setHours(0, 0, 0, 0);
-
-  while (current <= endNorm) {
-    const dow = current.getDay();
+/** Weekdays (Mon-Fri) from `startDay` to `endDay` inclusive, both UTC midnights. Closed form: no per-day loop. */
+function countWeekdays(startDay: number, endDay: number): number {
+  const total = Math.round((endDay - startDay) / DAY_MS) + 1;
+  const fullWeeks = Math.floor(total / 7);
+  const startDow = new Date(startDay).getUTCDay();
+  let count = fullWeeks * 5;
+  for (let i = 0; i < total % 7; i++) {
+    const dow = (startDow + i) % 7;
     if (dow !== 0 && dow !== 6) count++;
-    current.setDate(current.getDate() + 1);
   }
   return count;
 }
@@ -117,23 +81,32 @@ const timeDurationConfig: CalculatorConfig = {
 
     if (!startDateStr || !endDateStr || !startTimeStr || !endTimeStr) return [];
 
-    const startDate = new Date(startDateStr + 'T00:00:00');
-    const endDate = new Date(endDateStr + 'T00:00:00');
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return [];
+    // Wall-clock arithmetic in UTC: the times carry no time zone, so the answer must not depend on the visitor's
+    // own DST rules (the old local-time Date gave different results on a spring-forward day depending on where
+    // the browser was). Dates are validated strictly instead of letting 2025-02-31 roll over to March 3.
+    const startDay = parseIsoDateUtc(startDateStr);
+    const endDay = parseIsoDateUtc(endDateStr);
+    if (startDay === null || endDay === null) return [];
 
-    const startTime = parseTime(startTimeStr);
-    const endTime = parseTime(endTimeStr);
-    if (!startTime || !endTime) return [];
+    const startTime = parseClockTime(startTimeStr);
+    const endTime = parseClockTime(endTimeStr);
+    if (startTime === null || endTime === null) return [];
 
-    const start = new Date(startDate);
-    start.setHours(startTime.hours, startTime.minutes, 0, 0);
+    const startMs = startDay + startTime * 60_000;
+    const endMs = endDay + endTime * 60_000;
 
-    const end = new Date(endDate);
-    end.setHours(endTime.hours, endTime.minutes, 0, 0);
+    if (endMs < startMs) {
+      return [
+        {
+          id: 'error',
+          label: 'End is before start',
+          value: 'The end must come after the start. For an overnight shift, choose the next calendar day as the end date.',
+          color: 'negative',
+        },
+      ];
+    }
 
-    if (end < start) return [];
-
-    const diffMs = end.getTime() - start.getTime();
+    const diffMs = endMs - startMs;
     const totalMinutes = Math.floor(diffMs / 60000);
     const totalHours = diffMs / 3600000;
     const totalSeconds = Math.floor(diffMs / 1000);
@@ -173,6 +146,13 @@ const timeDurationConfig: CalculatorConfig = {
       value: `${days}d ${hours}h ${minutes}m`,
     });
 
+    // Numbers for the panel (ids starting with "_" are hidden), so it never has to parse "6d 2h 5m".
+    results.push({
+      id: '_parts',
+      label: '',
+      value: JSON.stringify({ days, hours, minutes, totalHours }),
+    });
+
     results.push({
       id: 'weeksDaysHours',
       label: 'Duration (W:D:H)',
@@ -180,7 +160,7 @@ const timeDurationConfig: CalculatorConfig = {
     });
 
     if (businessDaysOnly === 'yes') {
-      const bizDays = countWeekdays(start, end);
+      const bizDays = countWeekdays(startDay, endDay);
       results.push({
         id: 'businessDays',
         label: 'Business Days (Mon-Fri)',
@@ -236,15 +216,15 @@ const timeDurationConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'Does it handle overnight shifts?',
-        answer: 'Yes. Enter the actual end time even if it is earlier than the start time (e.g., start at 11:00 PM, end at 7:00 AM). The calculator handles overnight durations correctly because the date component ensures the end date-time is always after the start date-time overall. This makes the calculator ideal for tracking overnight work shifts, flights that cross midnight, and server maintenance windows.',
+        answer: 'Yes. Enter the actual end time and choose the next calendar day as the end date (e.g., start 11:00 PM on June 5, end 7:00 AM on June 6 = 8 hours). The end date and time together must come after the start; if they do not, the calculator tells you so instead of guessing. This makes it ideal for tracking overnight work shifts, flights that cross midnight, and server maintenance windows.',
       },
       {
         question: 'What is the difference between calendar days and business days?',
-        answer: 'Calendar days count every day including weekends. Business days count only Monday through Friday, excluding Saturday and Sunday from the duration. Use business days mode for work-related calculations like project task durations that should not include non-working days. For example, a task from Friday to Monday might show 3 calendar days but only 1 business day.',
+        answer: 'Calendar days count every day including weekends. Business days count only Monday through Friday, excluding Saturday and Sunday from the duration. Use business days mode for work-related calculations like project task durations that should not include non-working days. The count includes both the start and end dates, so a task from Friday to the following Monday spans 3 days of elapsed time but 2 business days (Friday and Monday).',
       },
       {
         question: 'What time formats are supported?',
-        answer: 'Both 12-hour format (e.g., 9:00 AM, 2:30 PM) and 24-hour format (e.g., 09:00, 14:30) are supported. Hours and minutes are required; seconds are optional. The calculator also exports the duration in different views: total decimal hours for payroll, D:H:M for human readability, and W:D:H for very long durations spanning multiple weeks.',
+        answer: 'Both 12-hour format (e.g., 9:00 AM, 2:30 PM) and 24-hour format (e.g., 09:00, 14:30) are supported. Hours and minutes are required; seconds are not supported. The calculator also exports the duration in different views: total decimal hours for payroll, D:H:M for human readability, and W:D:H for very long durations spanning multiple weeks.',
       },
       {
         question: 'How does this calculator differ from the Day Counter?',
@@ -284,7 +264,7 @@ const timeDurationConfig: CalculatorConfig = {
       'The total seconds output is the most precise measurement — use it to verify other calculations or when precision matters (e.g., scientific experiments, server uptime tracking, or athletic timing). There are exactly 86,400 seconds in a day and 3,600 in an hour.',
       'Combine with the Day Counter for a complete time analysis toolkit: use Day Counter for "how many calendar/business days between these dates," then use Time Duration for the exact hours within that span. Together they give you both the macro and micro view of any time range.',
       'The Business Days mode counts only weekdays (Mon-Fri) that fall between the start and end dates, regardless of the hour range. This is the count of distinct business dates, not the fraction of business hours — for hourly business-hours calculations, use the Time Zone calculator\'s business hours overlay.',
-      'When computing durations that span Daylight Saving Time transitions (e.g., "spring forward" or "fall back"), the calculator uses the date values as entered. For the most accurate results during DST transitions, verify with your local time authority or use UTC times.',
+      'The calculator subtracts the wall-clock times exactly as entered and ignores Daylight Saving Time, so the answer is the same wherever you open it. On a spring-forward day, 1:00 AM to 4:00 AM is shown as 3 hours although only 2 hours actually elapse on the clocks; for exact elapsed time across a DST change, enter both times in UTC.',
     ],
     quickReference: [
       { label: '1 day', value: '24 hours = 1,440 min = 86,400 sec' },
@@ -301,7 +281,7 @@ const timeDurationConfig: CalculatorConfig = {
       'Business days counting excludes only Saturdays and Sundays — it does not exclude public holidays, which vary by country and year. For project management, combine this with a holiday-aware calendar for precise workday estimates.',
       'The business days count is based on the calendar dates spanned (distinct business dates between start and end), not the number of business hours. A task spanning 2 business days may have only a few working hours.',
       'End time must be after start time in absolute terms (the date+time combination). Overnight shifts on the same date require selecting the next day as the end date.',
-      'Results use JavaScript\'s Date engine which handles dates from year 1 to 275760 in most browsers; extreme historical or far-future dates may produce inaccurate results.',
+      'Dates are read as proleptic Gregorian calendar dates from year 0001 to 9999; historical calendar changes (such as the 1582 Gregorian reform) are not modelled. Impossible dates such as February 31 are rejected.',
     ],
     citations: [
       { source: 'Wikipedia - Time', url: 'https://en.wikipedia.org/wiki/Time' },

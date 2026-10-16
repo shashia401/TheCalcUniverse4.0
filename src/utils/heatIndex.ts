@@ -2,8 +2,8 @@
 // Source: NWS Weather Prediction Center, "The Heat Index Equation" (Rothfusz 1990 regression of
 // Steadman's apparent-temperature model): https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
 
-export const cToF = (c: number) => (c * 9) / 5 + 32;
-export const fToC = (f: number) => ((f - 32) * 5) / 9;
+import { cToF, fToC } from './temperature';
+export { cToF, fToC };
 
 /**
  * Heat index in degrees F for air temperature `T` (F) and relative humidity `RH` (%).

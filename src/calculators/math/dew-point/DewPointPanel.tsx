@@ -252,7 +252,7 @@ export default function DewPointPanel({ results }: Props) {
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">HVAC Relevance</p>
           <p className="text-xs text-slate-600 leading-relaxed">
             For optimal indoor comfort and health, HVAC systems should maintain an indoor dew point between <strong>45-55°F</strong>
-            {' '}(approximately 30-50% relative humidity at 70°F). Dew points above 60°F indoors can promote mold growth,
+            {' '}(about 40-60% relative humidity at 70°F). Dew points above 60°F indoors (over roughly 70% relative humidity at 70°F) can promote mold growth,
             dust mite proliferation, and respiratory issues. If the outdoor dew point is very high, a properly sized air
             conditioning system with adequate dehumidification is essential. Consider a whole-house dehumidifier in humid climates.
           </p>

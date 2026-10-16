@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
 
 interface Props {
   values: Record<string, string>;
@@ -133,7 +132,7 @@ export default function TimeCardPanel({ results }: Props) {
                   const isHigh = entry.hours > 10;
                   return (
                     <tr
-                      key={entry.day}
+                      key={`${entry.day}-${_idx}`}
                       className={`${
                         isWeekend ? 'bg-blue-50/50' : ''
                       } ${
@@ -179,7 +178,7 @@ export default function TimeCardPanel({ results }: Props) {
               const pct = maxDayHours > 0 ? (entry.hours / maxDayHours) * 100 : 0;
               const isOvertimeDay = entry.hours > 10;
               return (
-                <div key={entry.day} className="flex items-center gap-3">
+                <div key={`${entry.day}-${_idx}`} className="flex items-center gap-3">
                   <span className="w-10 text-xs font-medium text-slate-600 text-right shrink-0">
                     {entry.dayLabel.slice(0, 3)}
                   </span>
@@ -201,27 +200,23 @@ export default function TimeCardPanel({ results }: Props) {
         </div>
       )}
 
-      {/* ── Recharts Daily Hours Bar Chart ── */}
+      {/* ── Daily Hours Bar Chart (shared SVG chart, no charting library) ── */}
       {dailyData.length > 0 && (() => {
-        const chartColors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
+        const chartColors = ['#2563eb', '#059669', '#7c3aed', '#b45309', '#dc2626', '#be185d', '#0e7490'];
         return (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Daily Hours (Recharts)</p>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={dailyData} margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
-                <XAxis dataKey="dayLabel" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} width={40} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  formatter={((val: number) => [`${val.toFixed(2)} hrs`, 'Hours']) as any}
-                />
-                <Bar dataKey="hours" radius={[4, 4, 0, 0]} maxBarSize={40}>
-                  {dailyData.map((entry, i) => (
-                    <Cell key={i} fill={entry.hours > 10 ? '#ef4444' : entry.day === 'sat' || entry.day === 'sun' ? '#06b6d4' : chartColors[i % chartColors.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Daily Hours</p>
+            <SvgBarChart
+              height={200}
+              maxBarWidth={40}
+              ariaLabel={`Hours worked per day: ${dailyData.map((d) => `${d.dayLabel} ${fmtHours(d.hours)}`).join(', ')}`}
+              format={(n) => `${n}`}
+              data={dailyData.map((entry, i) => ({
+                label: entry.dayLabel,
+                value: entry.hours,
+                color: entry.hours > 10 ? '#dc2626' : entry.day === 'sat' || entry.day === 'sun' ? '#0e7490' : chartColors[i % chartColors.length],
+              }))}
+            />
           </div>
         );
       })()}

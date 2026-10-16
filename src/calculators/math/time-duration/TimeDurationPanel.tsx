@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
 import type { CalculatorResult } from '../../../types/calculator';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
 import { CalendarRange, Briefcase, Timer } from 'lucide-react';
 import { getResultValue as getValue } from '../../../utils/calcResults';
 
@@ -23,13 +22,15 @@ export default function TimeDurationPanel({ results }: Props) {
 
   if (!totalHours) return null;
 
-  // Parse days, hours, minutes from the D:H:M string for SVG
-  const dhMatch = daysHoursMinutes.match(/(\d+)d\s+(\d+)h\s+(\d+)m/);
-  const dhDays = dhMatch ? parseInt(dhMatch[1]) : 0;
-  const dhHours = dhMatch ? parseInt(dhMatch[2]) : 0;
+  // Days / hours / minutes come straight from the calculator (no parsing of the "6d 2h 5m" display string)
+  let parts = { days: 0, hours: 0, minutes: 0, totalHours: 0 };
+  try { parts = { ...parts, ...JSON.parse(getValue(results, '_parts')) }; } catch { /* keep zeros */ }
+  const dhDays = parts.days;
+  const dhHours = parts.hours;
+  const dhMinutes = parts.minutes;
 
   // For timeline: show a proportional visual
-  const totalDisplayHours = parseFloat(totalHours);
+  const totalDisplayHours = parts.totalHours;
   const timelineRatio = Math.min(totalDisplayHours / 168, 1); // Cap at 1 week
 
   return (
@@ -53,7 +54,7 @@ export default function TimeDurationPanel({ results }: Props) {
             <text x="30" y="72" textAnchor="middle" fontSize="9" fill="#475569" fontWeight="bold">
               Start
             </text>
-            <text x="30" y="84" textAnchor="middle" fontSize="7" fill="#94a3b8">
+            <text x="30" y="84" textAnchor="middle" fontSize="8" fill="#64748b">
               {startDateTime}
             </text>
 
@@ -62,7 +63,7 @@ export default function TimeDurationPanel({ results }: Props) {
             <text x="310" y="72" textAnchor="middle" fontSize="9" fill="#475569" fontWeight="bold">
               End
             </text>
-            <text x="310" y="84" textAnchor="middle" fontSize="7" fill="#94a3b8">
+            <text x="310" y="84" textAnchor="middle" fontSize="8" fill="#64748b">
               {endDateTime}
             </text>
 
@@ -76,33 +77,16 @@ export default function TimeDurationPanel({ results }: Props) {
 
       {/* Duration Bar Chart */}
       {(() => {
-        const d = dhDays;
-        const h = dhHours;
-        const m = parseInt(daysHoursMinutes.match(/(\d+)m/)?.[1] || '0', 10);
-        const totalDisplay = d * 24 + h + m / 60;
-        if (totalDisplay <= 0) return null;
         const chartData = [
-          { name: 'Days', value: d, color: '#6366f1' },
-          { name: 'Hours', value: h, color: '#10b981' },
-          { name: 'Minutes', value: m, color: '#f59e0b' },
-        ].filter(item => item.value > 0);
+          { label: 'Days', value: dhDays, color: '#4f46e5' },
+          { label: 'Hours', value: dhHours, color: '#059669' },
+          { label: 'Minutes', value: dhMinutes, color: '#b45309' },
+        ].filter((item) => item.value > 0);
+        if (!chartData.length) return null;
         return (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Duration by Unit</p>
-            <ResponsiveContainer width="100%" height={140}>
-              <BarChart data={chartData} margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
-                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} width={40} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={48}>
-                  {chartData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <SvgBarChart data={chartData} ariaLabel={`Duration by unit: ${daysHoursMinutes}`} height={160} maxBarWidth={48} />
           </div>
         );
       })()}
@@ -144,8 +128,8 @@ export default function TimeDurationPanel({ results }: Props) {
           <p className="text-xs text-slate-500 mt-1 font-medium uppercase tracking-wide">Hours</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden p-5 text-center">
-          <p className="text-3xl font-black text-amber-600">
-            {daysHoursMinutes.match(/(\d+)m/)?.[1] || '0'}
+          <p className="text-3xl font-black text-amber-700">
+            {dhMinutes}
           </p>
           <p className="text-xs text-slate-500 mt-1 font-medium uppercase tracking-wide">Minutes</p>
         </div>
@@ -164,8 +148,8 @@ export default function TimeDurationPanel({ results }: Props) {
                 <p className="text-3xl font-black text-amber-700">{businessDays}</p>
                 <p className="text-xs text-amber-600 mt-1 font-medium">Business Days (Mon-Fri)</p>
               </div>
-              <div className="text-xs text-amber-700/70 leading-relaxed max-w-xs">
-                Weekends (Saturday and Sunday) were excluded from this count. Only weekdays between the start and end dates are included.
+              <div className="text-xs text-amber-800 leading-relaxed max-w-xs">
+                Weekends (Saturday and Sunday) were excluded from this count. Only weekdays from the start date through the end date, both included, are counted.
               </div>
             </div>
           </div>

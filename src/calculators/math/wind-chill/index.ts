@@ -2,31 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WindChillPanel from './WindChillPanel';
 import { roundStrD as fmt } from '../../../lib/format';
-
-function fToC(f: number): number {
-  return (f - 32) * 5 / 9;
-}
-
-function cToF(c: number): number {
-  return (c * 9 / 5) + 32;
-}
-
-function kmhToMph(kmh: number): number {
-  return kmh / 1.60934;
-}
-
-function getFrostbiteRisk(windChillF: number): string {
-  if (windChillF > -18) return 'Low risk';
-  if (windChillF >= -27) return 'Frostbite possible in 30 min';
-  if (windChillF >= -39) return 'Frostbite possible in 10 min';
-  if (windChillF >= -60) return 'Frostbite possible in 5 min';
-  return 'Frostbite in under 2 min';
-}
-
-function windChillF(Tf: number, Vmph: number): number {
-  if (Tf > 50 || Vmph < 3) return Tf;
-  return 35.74 + 0.6215 * Tf - 35.75 * Math.pow(Vmph, 0.16) + 0.4275 * Tf * Math.pow(Vmph, 0.16);
-}
+import { cToF, fToC, frostbiteZone, isFrostbiteDanger, kmhToMph, windChillF } from './windChillMath';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
 const windChillConfig: CalculatorConfig = {
   inputs: [
@@ -75,8 +52,8 @@ const windChillConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const temp = parseFloat(values.temperature);
-    const ws = parseFloat(values.windSpeed);
+    const temp = parseNumberStrict(values.temperature);
+    const ws = parseNumberStrict(values.windSpeed);
     const tempUnit = values.tempUnit || 'F';
     const speedUnit = values.speedUnit || 'mph';
 
@@ -88,7 +65,8 @@ const windChillConfig: CalculatorConfig = {
 
     const wcF = windChillF(Tf, Vmph);
     const wcC = fToC(wcF);
-    const frostbite = getFrostbiteRisk(wcF);
+    const frostbite = frostbiteZone(wcC).risk;
+    const danger = isFrostbiteDanger(wcC);
 
     return [
       {
@@ -96,7 +74,7 @@ const windChillConfig: CalculatorConfig = {
         label: 'Wind Chill Temperature',
         value: `${fmt(wcF)}°F / ${fmt(wcC)}°C`,
         highlight: true,
-        color: wcF <= -18 ? 'negative' as const : 'positive' as const,
+        color: danger ? 'negative' as const : 'positive' as const,
       },
       {
         id: 'windChillF',
@@ -126,7 +104,7 @@ const windChillConfig: CalculatorConfig = {
         id: 'frostbiteRisk',
         label: 'Frostbite Risk',
         value: frostbite,
-        color: wcF <= -18 ? 'negative' as const : 'positive' as const,
+        color: danger ? 'negative' as const : 'positive' as const,
       },
       {
         id: '_chartData',
@@ -156,7 +134,7 @@ const windChillConfig: CalculatorConfig = {
       caption: 'Wind chill measures how cold it feels when wind is combined with cold air temperature',
     },
     formulaDescription:
-      'The National Weather Service (NWS) wind chill formula calculates how cold it feels when wind is combined with cold air. Wind accelerates heat loss from exposed skin, making the air feel significantly colder than the actual temperature. The formula applies only when the temperature is at or below 50°F and wind speed is at least 3 mph.',
+      'The National Weather Service (NWS) wind chill formula calculates how cold it feels when wind is combined with cold air. Wind accelerates heat loss from exposed skin, making the air feel significantly colder than the actual temperature. The formula is defined only when the temperature is at or below 50°F and the wind speed is above 3 mph.',
     variables: [
       { symbol: 'T', name: 'Air Temperature', description: 'The actual air temperature in degrees Fahrenheit.' },
       { symbol: 'V', name: 'Wind Speed', description: 'The wind speed in miles per hour at 33 feet (standard anemometer height).' },
@@ -169,7 +147,7 @@ const windChillConfig: CalculatorConfig = {
       'Review the frostbite risk category and safety recommendations.',
     ],
     explanation:
-      'Wind chill is based on the rate of heat loss from exposed skin caused by wind and cold. As wind increases, it draws heat away from the body, cooling the skin surface faster. The NWS wind chill formula was developed through research involving human volunteers and face cooling measurements in a controlled wind tunnel. Frostbite can occur in minutes when wind chill temperatures are very low. The risk categories help outdoor workers, athletes, and recreationists make informed decisions about exposure time and protective clothing. Wind chill applies only to people and animals — inanimate objects like car radiators or pipes will not cool below the actual air temperature. Practical example: if the actual temperature is 20°F with a 25 mph wind, the wind chill calculation yields: 35.74 + (0.6215 × 20) - (35.75 × 25^0.16) + (0.4275 × 20 × 25^0.16) = 35.74 + 12.43 - 35.75 × 1.6737 + 0.4275 × 20 × 1.6737 = 48.17 - 59.83 + 14.31 = 2.6°F. So 20°F feels like 2.6°F! At this level, frostbite is possible in about 30 minutes of exposure. Edge cases: the NWS formula is valid only when the temperature is at or below 50°F and wind speed is at least 3 mph. If the temperature is 55°F and wind is 20 mph, the wind chill equals the actual temperature (55°F) because the formula does not apply above 50°F. For wind speeds above 50 mph, the additional cooling effect diminishes — the formula asymptotically approaches a limit because the body cannot lose heat faster than the wind can carry it away. For wet skin (sweating or rain), the cooling effect is much more dramatic because water conducts heat 25 times faster than air — this is called hypothermia risk even in 50°F weather with wind and rain. For runners and cyclists, the effective wind speed is the sum of the actual wind and their forward speed, meaning they experience greater wind chill than a stationary person.',
+      'Wind chill is based on the rate of heat loss from exposed skin caused by wind and cold. As wind increases, it draws heat away from the body, cooling the skin surface faster. The NWS wind chill formula was developed through research involving human volunteers and face cooling measurements in a controlled wind tunnel. Frostbite can occur in minutes when wind chill temperatures are very low. The risk categories help outdoor workers, athletes, and recreationists make informed decisions about exposure time and protective clothing. Wind chill applies only to people and animals — inanimate objects like car radiators or pipes will not cool below the actual air temperature. Practical example: if the actual temperature is 20°F with a 25 mph wind, the wind chill calculation yields: 35.74 + (0.6215 × 20) - (35.75 × 25^0.16) + (0.4275 × 20 × 25^0.16) = 35.74 + 12.43 - 35.75 × 1.6737 + 0.4275 × 20 × 1.6737 = 48.17 - 59.83 + 14.31 = 2.6°F. So 20°F feels like 2.6°F (about −16°C), a moderate-risk wind chill: frostbite is unlikely in a short exposure, but long unprotected exposure is risky. Edge cases: the NWS formula is defined only when the temperature is at or below 50°F and the wind speed is above 3 mph. If the temperature is 55°F and wind is 20 mph, the wind chill equals the actual temperature (55°F) because the formula does not apply above 50°F. Environment Canada notes that in sustained winds over 50 km/h (about 31 mph) frostbite can occur faster than the published times. For wet skin (sweating or rain), the cooling effect is much more dramatic because water conducts heat more than 20 times faster than air — this is called hypothermia risk even in 50°F weather with wind and rain. For runners and cyclists, the effective wind speed is the sum of the actual wind and their forward speed, meaning they experience greater wind chill than a stationary person.',
     faqs: [
       {
         question: 'Does wind chill affect inanimate objects?',
@@ -185,7 +163,7 @@ const windChillConfig: CalculatorConfig = {
       },
       {
         question: 'How quickly can frostbite occur?',
-        answer: 'At wind chill values below -18°F, frostbite becomes a concern. At -18°F to -27°F, frostbite is possible in about 30 minutes of exposure. At -28°F to -39°F, it drops to 10 minutes. Below -40°F, frostbite can occur in 5 minutes. Below -60°F, exposed skin can freeze in under 2 minutes. Always cover exposed skin in extreme cold.',
+        answer: 'This calculator uses the Environment Canada risk bands (wind chill in whole °C): −10 to −27 °C is moderate risk, with frostbite possible after long unprotected exposure. At −28 to −39 °C (about −18 to −38°F) frostbite on exposed skin is possible in 10 to 30 minutes. At −40 to −47 °C (about −40 to −53°F) it is 5 to 10 minutes, at −48 to −54 °C (about −54 to −65°F) 2 to 5 minutes, and at −55 °C (−67°F) or colder under 2 minutes. For comparison, the US National Weather Service says a −19°F wind chill can freeze exposed skin in 30 minutes. Always cover exposed skin in extreme cold.',
       },
       {
         question: 'How does wind chill affect pets and livestock differently than humans?',
@@ -193,7 +171,8 @@ const windChillConfig: CalculatorConfig = {
       },
     ],
     citations: [
-
+      { source: 'National Weather Service - Wind Chill Chart', url: 'https://www.weather.gov/safety/cold-wind-chill-chart' },
+      { source: 'Environment Canada - Wind Chill Index', url: 'https://www.canada.ca/en/services/environment/weather/severeweather/wind-chill-index.html' },
       { source: 'Wikipedia - Wind Chill', url: 'https://en.wikipedia.org/wiki/Wind_chill' },
     ],
   },

@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import TimeCardPanel from './TimeCardPanel';
+import Decimal from 'decimal.js';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { parseClockTime } from '../../../utils/clockTime';
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
 
@@ -22,79 +25,43 @@ const DAY_MAP: Record<string, string> = {
 // ─── Time parsing ───────────────────────────────────────────────────────────────
 
 /**
- * Parse a time string to minutes since midnight.
- * Handles both 12-hour (AM/PM) and 24-hour formats.
- *
- * "9:00" / "09:00"       -> 540
- * "9:00 AM" / "9:00 am"  -> 540
- * "1:30 PM" / "1:30 pm"  -> 810
- * "17:00"                -> 1020
- * "12:00 PM"             -> 720 (noon)
- * "12:00 AM"             -> 0   (midnight)
+ * Shared clock-time parser, allowing a bare hour ("9" = 09:00) and "24:00" as the end of a shift that runs to
+ * midnight. "25:00", "13:00 PM", "9:75", "abc" are null (they used to be counted as garbage hours or as 0).
  */
-function parseTime(t: string): number {
-  const s = t.trim();
-  if (!s) return 0;
-
-  const upper = s.toUpperCase();
-  const is12Hour = upper.includes('AM') || upper.includes('PM');
-  const isPM = upper.includes('PM');
-
-  // Strip AM/PM suffix
-  const cleaned = upper.replace(/[\s]*(AM|PM)[\s]*/, '').trim();
-  const parts = cleaned.split(':');
-  const hours = parseInt(parts[0], 10);
-  const minutes = parts.length > 1 ? parseInt(parts[1], 10) : 0;
-
-  if (isNaN(hours) || isNaN(minutes)) return 0;
-
-  if (is12Hour) {
-    let h = hours;
-    if (isPM && h !== 12) h += 12;
-    if (!isPM && h === 12) h = 0;
-    return h * 60 + minutes;
-  }
-
-  // 24-hour format
-  return hours * 60 + minutes;
-}
+const parseTime = (t: string): number | null => parseClockTime(t, { bareHour: true, endOfDay: true });
 
 /**
- * Parse a duration string "hh:mm" to minutes.
- * Unlike parseTime, this always treats the value as a duration, not a wall-clock time.
+ * Parse an unpaid break to minutes, or null when malformed. "0:30" and "1:15" are hours:minutes; a bare number
+ * is minutes ("30" = 30 minutes; it used to be read as 30 HOURS, which wiped out the whole day); blank = 0.
  */
-function parseDuration(d: string): number {
+function parseBreak(d: string): number | null {
   const s = d.trim();
   if (!s) return 0;
-  const parts = s.split(':');
-  const hours = parseInt(parts[0], 10) || 0;
-  const minutes = parts.length > 1 ? parseInt(parts[1], 10) || 0 : 0;
-  return hours * 60 + minutes;
+  const m = /^(\d+)(?::(\d{2}))?$/.exec(s);
+  if (!m) return null;
+  if (m[2] === undefined) return Number(m[1]);
+  if (Number(m[2]) > 59) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────────
-
-function parseNum(v: string | undefined): number {
-  return parseFloat(v?.trim() || '');
-}
-
-function isValidNum(n: number): boolean {
-  return !isNaN(n) && n > 0;
-}
 
 function fmtHours(n: number): string {
   return n.toFixed(2);
 }
 
-function fmtCurrency(n: number): string {
-  return n.toLocaleString(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
+// The "$" prefix is deliberate: CurrencyContext replaces it with the visitor's currency symbol.
+function fmtCurrency(n: Decimal): string {
+  return `$${n.toNumber().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function fmtDate(isoDate: string): string {
-  if (!isoDate) return '';
-  const d = new Date(isoDate + 'T00:00:00');
-  if (isNaN(d.getTime())) return '';
-  return 'Week of ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate.trim());
+  if (!m) return '';
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  // reject impossible dates (Feb 31 would roll over to March 3) and format in UTC so the visitor's zone cannot shift the day
+  if (d.getUTCMonth() !== Number(m[2]) - 1 || d.getUTCDate() !== Number(m[3])) return '';
+  return 'Week of ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 }
 
 // ─── Calculate ───────────────────────────────────────────────────────────────────
@@ -103,8 +70,9 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
   const entriesRaw = (values.entries || '').trim();
   const weekStart = values.weekStart || '';
   const paySettings = values.paySettings || 'skip';
-  const overtimeThreshold = parseFloat(values.overtimeThreshold || '40');
-  const regularRate = parseNum(values.regularRate);
+  const thresholdRaw = parseFloat(values.overtimeThreshold || '40');
+  const overtimeThreshold = Number.isNaN(thresholdRaw) ? 40 : thresholdRaw;
+  const regularRate = parseNumberStrict(values.regularRate);
   const overtimeMult = OVERTIME_MULTIPLIERS[values.overtimeRate || '1.5'] ?? 1.5;
 
   if (!entriesRaw) return [];
@@ -122,29 +90,49 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
     breakStr: string;
     hours: number;
   }> = [];
+  const dayMinutes: number[] = [];
+  const skipped: string[] = [];
 
   let totalMinutes = 0;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     const parts = line.split(',').map((p) => p.trim());
-    if (parts.length < 3) continue;
+    const n = i + 1;
+    if (parts.length < 3 || !parts[0]) {
+      skipped.push(`line ${n} needs "Day, Start, End, Break"`);
+      continue;
+    }
 
     const dayLabel = parts[0];
     const startRaw = parts[1];
     const endRaw = parts[2];
     const breakRaw = parts.length > 3 ? parts[3] : '0';
 
+    // A line that cannot be read is reported, not silently counted as 0 hours (or, for "25:00", as 25 hours).
     const startMins = parseTime(startRaw);
     const endMins = parseTime(endRaw);
-    const breakMins = parseDuration(breakRaw);
+    const breakMins = parseBreak(breakRaw);
+    if (startMins === null || endMins === null) {
+      skipped.push(`line ${n}: "${startRaw}" or "${endRaw}" is not a time`);
+      continue;
+    }
+    if (breakMins === null) {
+      skipped.push(`line ${n}: break "${breakRaw}" should be h:mm or minutes`);
+      continue;
+    }
 
     let diff = endMins - startMins;
     if (diff < 0) diff += MINUTES_PER_DAY; // crosses midnight
-    const workMins = Math.max(0, diff - breakMins);
+    if (breakMins > diff) {
+      skipped.push(`line ${n}: the break is longer than the shift`);
+      continue;
+    }
+    const workMins = diff - breakMins;
     const workHours = workMins / 60;
 
     totalMinutes += workMins;
+    dayMinutes.push(workMins);
 
     // Determine day key
     const lowerDay = dayLabel.toLowerCase().slice(0, 3);
@@ -160,31 +148,45 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
     });
   }
 
+  const skippedResult: CalculatorResult | null = skipped.length
+    ? {
+        id: 'skippedLines',
+        label: `${skipped.length} line${skipped.length === 1 ? '' : 's'} not counted`,
+        value: skipped.join('; '),
+        color: 'negative',
+      }
+    : null;
+
+  if (dailyData.length === 0) return skippedResult ? [skippedResult] : [];
+
   const totalHours = totalMinutes / 60;
 
   // Overtime. The "8 hours/day" option is daily overtime (each day's hours
   // beyond 8 are OT, e.g. California-style rules) — a fundamentally
   // different calculation from the weekly-total options (35/38/40/44/0),
   // which compare the whole week's total against a single threshold.
+  // Worked in whole minutes so the hours and the pay below are exact.
   const isDailyOvertime = (values.overtimeThreshold || '40') === '8';
 
-  let regularHours: number;
-  let overtimeHours: number;
+  let regularMinutes: number;
+  let overtimeMinutes: number;
 
   if (isDailyOvertime) {
-    regularHours = dailyData.reduce((sum, d) => sum + Math.min(d.hours, 8), 0);
-    overtimeHours = dailyData.reduce((sum, d) => sum + Math.max(0, d.hours - 8), 0);
+    regularMinutes = dayMinutes.reduce((sum, m) => sum + Math.min(m, 8 * 60), 0);
+    overtimeMinutes = dayMinutes.reduce((sum, m) => sum + Math.max(0, m - 8 * 60), 0);
   } else if (overtimeThreshold <= 0) {
     // No overtime — all hours are regular
-    regularHours = totalHours;
-    overtimeHours = 0;
-  } else if (totalHours <= overtimeThreshold) {
-    regularHours = totalHours;
-    overtimeHours = 0;
+    regularMinutes = totalMinutes;
+    overtimeMinutes = 0;
+  } else if (totalMinutes <= overtimeThreshold * 60) {
+    regularMinutes = totalMinutes;
+    overtimeMinutes = 0;
   } else {
-    regularHours = overtimeThreshold;
-    overtimeHours = totalHours - overtimeThreshold;
+    regularMinutes = overtimeThreshold * 60;
+    overtimeMinutes = totalMinutes - overtimeThreshold * 60;
   }
+  const regularHours = regularMinutes / 60;
+  const overtimeHours = overtimeMinutes / 60;
 
   // Results
   const results: CalculatorResult[] = [
@@ -217,11 +219,18 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
     },
   ];
 
-  // Include pay results only if a valid rate was entered
-  if (paySettings === 'enter' && isValidNum(regularRate)) {
-    const regularPay = regularHours * regularRate;
-    const overtimePay = overtimeHours * regularRate * overtimeMult;
-    const totalPay = regularPay + overtimePay;
+  if (skippedResult) results.push(skippedResult);
+
+  // Include pay results only if a valid rate was entered. Exact decimal arithmetic (minutes / 60 x rate x multiplier),
+  // each pay line rounded half-up to the cent and the total being the sum of the printed lines, so the figures add up.
+  // (Float maths was a cent off in about 3% of cases, e.g. 0.75 h x $10.10 = $7.575 printed as $7.57.)
+  if (paySettings === 'enter' && regularRate > 0) {
+    const rate = new Decimal((values.regularRate || '').trim());
+    const pay = (minutes: number, mult: number): Decimal =>
+      new Decimal(minutes).div(60).times(rate).times(mult).toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
+    const regularPay = pay(regularMinutes, 1);
+    const overtimePay = pay(overtimeMinutes, overtimeMult);
+    const totalPay = regularPay.plus(overtimePay);
 
     results.push({
       id: 'totalPay',
@@ -292,7 +301,7 @@ const timeCardConfig: CalculatorConfig = {
       label: 'Time Entries',
       required: true,
       placeholder: `Mon, 9:00, 17:00, 0:30\nTue, 8:30, 17:30, 1:00\n...`,
-      helpText: 'Format each line: Day, Start, End, Break. Use 24hr or 12hr time (e.g., 9:00 AM, 17:00, 1:30 PM). Break is hours:minutes.',
+      helpText: 'Format each line: Day, Start, End, Break. Use 24hr or 12hr time (e.g., 9:00 AM, 17:00, 1:30 PM). Break is h:mm or just minutes (0:30 or 30). Times without AM/PM are read as 24-hour.',
     },
     {
       id: 'overtimeThreshold',
@@ -300,10 +309,10 @@ const timeCardConfig: CalculatorConfig = {
       label: 'Overtime After',
       options: [
         { label: '40 hours/week (U.S. Standard)', value: '40' },
-        { label: '44 hours/week (Canada)', value: '44' },
-        { label: '38 hours/week (Australia)', value: '38' },
-        { label: '35 hours/week (France)', value: '35' },
-        { label: '8 hours/day (Daily OT)', value: '8' },
+        { label: '44 hours/week (e.g., Ontario)', value: '44' },
+        { label: '38 hours/week (Australian standard week)', value: '38' },
+        { label: '35 hours/week (French legal week)', value: '35' },
+        { label: '8 hours/day (daily OT instead of weekly)', value: '8' },
         { label: 'None (straight time)', value: '0' },
       ],
       defaultValue: '40',
@@ -335,18 +344,18 @@ const timeCardConfig: CalculatorConfig = {
       {
         symbol: 'B',
         name: 'Break Duration',
-        description: 'The total unpaid break time taken during the day, in hours:minutes format (e.g., 0:30 for 30 minutes, 1:00 for 1 hour).',
+        description: 'The total unpaid break time taken during the day, as hours:minutes (e.g., 0:30 for 30 minutes, 1:00 for 1 hour) or a plain number of minutes (30).',
       },
       {
         symbol: 'OT',
         name: 'Overtime Threshold',
         description:
-          'The number of hours per week after which overtime pay applies. Standard is 40 hours per week. Set to 0 for straight time (no overtime, all hours at regular rate).',
+          'The number of hours per week after which overtime pay applies. Standard is 40 hours per week. Choose "8 hours/day" to count each day\'s hours beyond 8 as overtime instead (the weekly total is then not tested), or "None" for straight time (all hours at the regular rate).',
       },
     ],
     howToUse: [
       'Select the Monday date of the work week (optional, used for the weekly display header).',
-      'Toggle the hourly rate switch to enable gross pay calculation with overtime.',
+      'Choose "Enter Hourly Rate" under Pay Settings to add gross pay with overtime.',
       'Enter time entries one per line in the text area.',
       'Format each line as: Day, Start, End, Break (e.g., Mon, 9:00, 17:00, 0:30).',
       'Set the overtime threshold (defaults to 40 hours per week). The standard work week in many countries.',
@@ -363,16 +372,16 @@ const timeCardConfig: CalculatorConfig = {
       {
         question: 'Can I use 12-hour time with AM/PM?',
         answer:
-          'Yes. The calculator accepts both 12-hour format (e.g., 9:00 AM, 1:30 PM, 11:59 PM) and 24-hour format (e.g., 09:00, 13:30, 23:59). Just be consistent within each entry — mixing formats in a single line may cause parsing errors. The calculator also accepts entries without AM/PM in 12-hour mode by assuming reasonable defaults.',
+          'Yes. The calculator accepts both 12-hour format (e.g., 9:00 AM, 1:30 PM, 11:59 PM) and 24-hour format (e.g., 09:00, 13:30, 23:59). A time without AM/PM is read as a 24-hour time, so write 5:00 PM or 17:00 (a bare 5:00 means 5 AM). Times that are not real times of day, such as 25:00 or 13:00 PM, are not counted: the calculator lists those lines instead of guessing.',
       },
       {
         question: 'How is overtime calculated?',
         answer:
-          'Overtime is calculated as total weekly hours minus the overtime threshold. For example, if you work 45 hours with a 40-hour threshold, the first 40 hours are regular time and the remaining 5 hours are overtime. Overtime is typically paid at 1.5x (time and a half) or 2x (double time) your regular hourly rate, though this is configurable. Some jurisdictions also have daily overtime rules (e.g., hours beyond 8 in a single day), which this calculator tracks alongside weekly overtime.',
+          'Overtime is calculated as total weekly hours minus the overtime threshold. For example, if you work 45 hours with a 40-hour threshold, the first 40 hours are regular time and the remaining 5 hours are overtime. Overtime is typically paid at 1.5x (time and a half) or 2x (double time) your regular hourly rate, though this is configurable. Some jurisdictions use daily overtime instead (e.g., hours beyond 8 in a single day): choose "8 hours/day" and each day\'s hours past 8 are overtime. The two methods are alternatives here, not combined.',
       },
       {
         question: 'What happens if I forget to enter a break time?',
-        answer: 'Break duration is optional. If you leave it blank, the calculator assumes zero break time. You should enter your unpaid break duration in hours:minutes format (e.g., 0:30 for a 30-minute lunch break, 1:00 for a 1-hour break). The break time is subtracted from the total time between start and end to compute hours worked.',
+        answer: 'Break duration is optional. If you leave it blank, the calculator assumes zero break time. You should enter your unpaid break duration as hours:minutes (e.g., 0:30 for a 30-minute lunch break, 1:00 for a 1-hour break) or as a plain number of minutes (30). The break time is subtracted from the total time between start and end to compute hours worked.',
       },
       {
         question: 'Can I save or export my time card data?',
@@ -404,13 +413,13 @@ const timeCardConfig: CalculatorConfig = {
       'For break durations, the input format is hours:minutes (not minutes alone). Enter "0:30" for 30 minutes, "1:00" for a 1-hour lunch. The calculator also accepts just minutes if you prefer — for quick input, you can type "30" and it will be treated as 30 minutes.',
       'The overtime threshold selector includes "None (straight time)" which treats all hours as regular regardless of total. Use this when your employer pays straight time for all hours, or when you want to see the raw total hours without overtime splitting.',
       'Toggle between 1.5x and 2x overtime rates to compare pay scenarios. If you are unsure which rate applies to your situation, calculate both and discuss with your employer. Double time (2x) is common for holidays and hours beyond 12 in a single day in some jurisdictions.',
-      'Copy-paste the daily breakdown JSON into a spreadsheet for record-keeping. The numeric hours values can be summed, averaged, or charted over multiple weeks to track work patterns.',
+      'Copy the daily breakdown table into a spreadsheet for record-keeping. The hours column can be summed, averaged, or charted over multiple weeks to track work patterns.',
     ],
     quickReference: [
       { label: 'Standard work week', value: '40 hours (U.S. FLSA)' },
       { label: 'Overtime threshold', value: '40 hours/week (configurable)' },
       { label: 'Time entry format', value: 'Day, Start, End, Break' },
-      { label: 'Break format', value: 'Hours:Minutes (e.g., 0:30)' },
+      { label: 'Break format', value: 'h:mm or minutes (0:30 or 30)' },
       { label: '', value: '' },
       { label: '1.5x Overtime', value: 'Time and a half' },
       { label: '2x Overtime', value: 'Double time' },
@@ -418,7 +427,7 @@ const timeCardConfig: CalculatorConfig = {
       { label: '24h time', value: 'e.g., 09:00, 17:00' },
     ],
     limitations: [
-      'This calculator does not enforce daily overtime rules (e.g., California requires overtime after 8 hours in a single day). It only computes weekly overtime based on the total-hours-over-threshold method.',
+      'Overtime is either weekly (hours over a weekly threshold) or daily (hours over 8 in a day), never both together, and there is no double-time tier. Rules such as California\'s (daily overtime after 8 hours, double time after 12, and weekly overtime after 40) therefore need to be checked by hand.',
       'Public holidays are not accounted for — holiday premium pay rates (often 2x or 2.5x) must be calculated separately. The calculator treats all days as standard workdays.',
       'Break deductions assume unpaid breaks; paid breaks should be entered as 0:00. If your breaks are compensated, do not deduct them.',
       'The calculator provides estimates only and should not replace official payroll processing systems. Labor laws vary by jurisdiction — consult your local labor board or HR department for the rules that apply to your specific situation.',

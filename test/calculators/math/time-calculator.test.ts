@@ -82,14 +82,14 @@ describe('Time & Hours calculator', () => {
     expect(grossRow).toBeUndefined();
   });
 
-  it('break deduction larger than shift results in 0', () => {
+  it('break deduction larger than shift explains itself instead of silently showing 0 hours', () => {
     const r = config.calculate({
       startTime: '9:00 AM',
       endTime: '10:00 AM',
       breakMinutes: '90',
     });
-    expect(getValue(r, 'standardTime')).toContain('0 hours');
-    near(parseNumber(getValue(r, 'decimalTime')), 0);
+    expect(r.map((x) => x.id)).toEqual(['error']);
+    expect(r[0].value).toContain('longer than the 60-minute shift');
   });
 
   it('startLabel and endLabel show original input', () => {

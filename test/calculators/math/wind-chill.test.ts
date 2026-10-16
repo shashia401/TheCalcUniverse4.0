@@ -41,38 +41,56 @@ describe('Wind Chill calculator', () => {
     near(parseNumber(getValue(r, 'windChill')), 30);
   });
 
-  it('returns "Low risk" for above -18°F wind chill', () => {
+  // Frostbite bands follow Environment Canada's table in whole °C (the old code applied the same numbers to °F).
+  // Wind chills below were computed independently with the NWS formula in Python.
+  it('Low risk: 30°F at 5 mph -> 24.7°F (-4°C)', () => {
     const r = config.calculate({ temperature: '30', tempUnit: 'F', windSpeed: '5', speedUnit: 'mph' });
-    const frostbite = getValue(r, 'frostbiteRisk');
-    expect(frostbite).toBe('Low risk');
+    expect(getValue(r, 'frostbiteRisk')).toBe('Low risk');
   });
 
-  it('returns "30 min" risk in -18°F to -27°F range', () => {
-    // temp=-5°F, wind=15 mph → wind chill ≈ -22.9°F
-    const r = config.calculate({ temperature: '-5', tempUnit: 'F', windSpeed: '15', speedUnit: 'mph' });
-    const frostbite = getValue(r, 'frostbiteRisk');
-    expect(frostbite).toContain('30 min');
+  it('Moderate risk (-10 to -27 °C): 10°F at 15 mph -> -6.6°F (-21°C), no frostbite time stated', () => {
+    const r = config.calculate({ temperature: '10', tempUnit: 'F', windSpeed: '15', speedUnit: 'mph' });
+    expect(getValue(r, 'frostbiteRisk')).toContain('Moderate risk');
+    expect(getValue(r, 'frostbiteRisk')).not.toContain('minutes');
   });
 
-  it('returns "10 min" risk in -28°F to -39°F range', () => {
-    // temp=-10°F, wind=25 mph → wind chill ≈ -32.3°F
-    const r = config.calculate({ temperature: '-10', tempUnit: 'F', windSpeed: '25', speedUnit: 'mph' });
-    const frostbite = getValue(r, 'frostbiteRisk');
-    expect(frostbite).toContain('10 min');
+  it('High risk, 10 to 30 minutes (-28 to -39 °C): -10°F at 20 mph -> -35.1°F (-37°C)', () => {
+    const r = config.calculate({ temperature: '-10', tempUnit: 'F', windSpeed: '20', speedUnit: 'mph' });
+    expect(getValue(r, 'frostbiteRisk')).toContain('10 to 30 minutes');
   });
 
-  it('returns "5 min" risk in -40°F to -60°F range', () => {
-    // temp=-25°F, wind=30 mph → wind chill ≈ -50.2°F
-    const r = config.calculate({ temperature: '-25', tempUnit: 'F', windSpeed: '30', speedUnit: 'mph' });
-    const frostbite = getValue(r, 'frostbiteRisk');
-    expect(frostbite).toContain('5 min');
+  it('Very high risk, 5 to 10 minutes (-40 to -47 °C): -20°F at 25 mph -> -50.8°F (-46°C)', () => {
+    const r = config.calculate({ temperature: '-20', tempUnit: 'F', windSpeed: '25', speedUnit: 'mph' });
+    expect(getValue(r, 'frostbiteRisk')).toContain('5 to 10 minutes');
   });
 
-  it('returns "under 2 min" risk below -60°F', () => {
-    // temp=-40°F, wind=40 mph → wind chill ≈ -67.3°F
-    const r = config.calculate({ temperature: '-40', tempUnit: 'F', windSpeed: '40', speedUnit: 'mph' });
-    const frostbite = getValue(r, 'frostbiteRisk');
-    expect(frostbite).toContain('under 2 min');
+  it('Severe risk, 2 to 5 minutes (-48 to -54 °C): -25°F at 25 mph -> -57.5°F (-50°C)', () => {
+    const r = config.calculate({ temperature: '-25', tempUnit: 'F', windSpeed: '25', speedUnit: 'mph' });
+    expect(getValue(r, 'frostbiteRisk')).toContain('2 to 5 minutes');
+  });
+
+  it('Extreme risk, under 2 minutes (-55 °C or colder): -30°F at 30 mph -> -66.6°F (-55°C)', () => {
+    const r = config.calculate({ temperature: '-30', tempUnit: 'F', windSpeed: '30', speedUnit: 'mph' });
+    expect(getValue(r, 'frostbiteRisk')).toContain('under 2 minutes');
+  });
+
+  it('NWS example: 0°F at 15 mph is -19°F, where exposed skin can freeze in about 30 minutes', () => {
+    const r = config.calculate({ temperature: '0', tempUnit: 'F', windSpeed: '15', speedUnit: 'mph' });
+    expect(getValue(r, 'windChillF')).toBe('-19.4°F');
+    expect(getValue(r, 'frostbiteRisk')).toContain('10 to 30 minutes');
+  });
+
+  it('the formula is defined only for wind ABOVE 3 mph: exactly 3 mph returns the air temperature', () => {
+    const at3 = config.calculate({ temperature: '30', tempUnit: 'F', windSpeed: '3', speedUnit: 'mph' });
+    expect(getValue(at3, 'windChillF')).toBe('30°F');
+    const above = config.calculate({ temperature: '30', tempUnit: 'F', windSpeed: '3.1', speedUnit: 'mph' });
+    expect(getValue(above, 'windChillF')).toBe('26.9°F');
+  });
+
+  it('Celsius/km/h agrees with the Environment Canada formula: -30 °C at 20 km/h is -43.1 °C', () => {
+    // EC: 13.12 + 0.6215·T − 11.37·v^0.16 + 0.3965·T·v^0.16 = -43.10 °C
+    const r = config.calculate({ temperature: '-30', tempUnit: 'C', windSpeed: '20', speedUnit: 'kmh' });
+    near(parseNumber(getValue(r, 'windChillC')), -43.1, 0.1);
   });
 
   it('returns empty for missing temperature', () => {

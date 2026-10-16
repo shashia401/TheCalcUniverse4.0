@@ -2,20 +2,14 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import DewPointPanel from './DewPointPanel';
 import { roundStrD as fmt } from '../../../lib/format';
+import { ABSOLUTE_ZERO_F, cToF, fToC } from '../../../utils/temperature';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
-function fToC(f: number): number {
-  return (f - 32) * 5 / 9;
-}
-
-function cToF(c: number): number {
-  return (c * 9 / 5) + 32;
-}
-
+/** Magnus-Tetens dew point (°C) for air at `Tc` °C and `RH` % (0 < RH <= 100). Constants as in the page's formula. */
 function dewPoint(Tc: number, RH: number): number {
   const a = 17.27;
   const b = 237.7;
-  const safeRH = Math.max(RH, 0.001);
-  const gamma = (a * Tc) / (b + Tc) + Math.log(safeRH / 100);
+  const gamma = (a * Tc) / (b + Tc) + Math.log(RH / 100);
   return (b * gamma) / (a - gamma);
 }
 
@@ -36,9 +30,11 @@ const dewPointConfig: CalculatorConfig = {
       label: 'Temperature (°F)',
       type: 'number',
       placeholder: '75',
+      min: -80,
+      max: 140,
       step: 0.1,
       required: true,
-      helpText: 'The current air temperature in degrees Fahrenheit',
+      helpText: 'The current air temperature in degrees Fahrenheit (−80 to 140°F, the range the Magnus formula is used over)',
     },
     {
       id: 'humidity',
@@ -53,10 +49,23 @@ const dewPointConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const Tf = parseFloat(values.temperature);
-    const RH = parseFloat(values.humidity);
+    const Tf = parseNumberStrict(values.temperature);
+    const RH = parseNumberStrict(values.humidity);
 
-    if ([Tf, RH].some(isNaN) || RH < 0 || RH > 100) return [];
+    if ([Tf, RH].some(isNaN) || RH < 0 || RH > 100 || Tf <= ABSOLUTE_ZERO_F) return [];
+
+    // With no water vapour at all (0% RH) the dew point does not exist; the old code substituted 0.001% and
+    // printed a made-up value (about −88 °C at 20 °C).
+    if (RH === 0) {
+      return [
+        {
+          id: 'error',
+          label: 'Dew point not defined',
+          value: 'At 0% relative humidity the air holds no water vapour, so there is no dew point. Enter a humidity above 0%.',
+          color: 'negative' as const,
+        },
+      ];
+    }
 
     const Tc = fToC(Tf);
     const dpC = dewPoint(Tc, RH);
@@ -143,7 +152,7 @@ const dewPointConfig: CalculatorConfig = {
       'A dew point below 55°F is comfortable; above 70°F feels oppressive.',
     ],
     explanation:
-      'The dew point is a critical meteorological measure that directly indicates the moisture content of the air. Unlike relative humidity, which changes with temperature, the dew point is an absolute measure of atmospheric moisture. This makes it a more reliable indicator of human comfort. A dew point below 55°F feels dry and comfortable, while a dew point above 70°F feels oppressive. The Magnus formula provides an accurate approximation of the dew point for temperatures above freezing. Understanding the dew point is essential for HVAC system design, agricultural frost prediction, fog forecasting, and assessing mold growth risk in buildings. When the temperature drops to the dew point, fog, dew, or frost will form depending on conditions. Practical example: if the temperature is 85°F and relative humidity is 70%, the Magnus formula gives a dew point of approximately 74°F. This means the air contains as much moisture as air at 74°F would hold at 100% humidity. According to the comfort scale, 74°F is in the "oppressive" range — the air feels very humid and sticky. If the temperature drops to 74°F overnight, fog will form. Edge cases: when the dew point is below 32°F (freezing), frost forms instead of dew. If the temperature is also below freezing, the saturation vapor pressure over ice differs from that over liquid water, so the Magnus constants change (a = 21.875, b = 265.5 for ice). For indoor humidity management, the dew point should ideally be between 45-55°F to prevent both mold growth (which requires dew points above 55°F) and excessive dryness (which can cause respiratory irritation and static electricity). For instrument calibration and industrial applications (e.g., compressed air systems), the dew point is measured directly with a chilled mirror hygrometer. In tropical climates, dew points of 75-80°F are common and can be dangerous when combined with high temperatures because the body cannot cool itself through sweat evaporation.',
+      'The dew point is a critical meteorological measure that directly indicates the moisture content of the air. Unlike relative humidity, which changes with temperature, the dew point is an absolute measure of atmospheric moisture. This makes it a more reliable indicator of human comfort. A dew point below 55°F feels dry and comfortable, while a dew point above 70°F feels oppressive. The Magnus formula provides an accurate approximation of the dew point for temperatures above freezing. Understanding the dew point is essential for HVAC system design, agricultural frost prediction, fog forecasting, and assessing mold growth risk in buildings. When the temperature drops to the dew point, fog, dew, or frost will form depending on conditions. Practical example: if the temperature is 85°F and relative humidity is 70%, the Magnus formula gives a dew point of approximately 74°F. This means the air contains as much moisture as air at 74°F would hold at 100% humidity. According to the comfort scale, 74°F is in the "oppressive" range — the air feels very humid and sticky. If the temperature drops to 74°F overnight, fog will form. Edge cases: when the dew point is below 32°F (freezing), frost forms instead of dew. If the temperature is also below freezing, the saturation vapor pressure over ice differs from that over liquid water, so the Magnus constants change (a = 21.875, b = 265.5 for ice). For indoor humidity management, an indoor dew point between about 45-55°F (roughly 40-60% relative humidity at 70°F) helps avoid both mold growth, which needs sustained high humidity, and excessive dryness (which can cause respiratory irritation and static electricity). For instrument calibration and industrial applications (e.g., compressed air systems), the dew point is measured directly with a chilled mirror hygrometer. In tropical climates, dew points of 75-80°F are common and can be dangerous when combined with high temperatures because the body cannot cool itself through sweat evaporation.',
     faqs: [
       {
         question: 'Why is dew point better than relative humidity for comfort?',
@@ -159,11 +168,11 @@ const dewPointConfig: CalculatorConfig = {
       },
       {
         question: 'What is the relationship between dew point and HVAC?',
-        answer: 'HVAC systems use dew point to control dehumidification. When the dew point is high, air conditioners must work harder to remove moisture. The recommended indoor dew point for comfort is between 45-55°F (corresponding to 30-50% relative humidity at 70°F). High indoor dew points can lead to mold growth and dust mite proliferation.',
+        answer: 'HVAC systems use dew point to control dehumidification. When the dew point is high, air conditioners must work harder to remove moisture. The recommended indoor dew point for comfort is between 45-55°F (corresponding to about 40-60% relative humidity at 70°F). High indoor dew points can lead to mold growth and dust mite proliferation.',
       },
       {
         question: 'How does dew point relate to fog formation?',
-        answer: 'Fog forms when the air temperature drops to within about 4°F of the dew point. As the air cools overnight, it approaches the dew point temperature, at which point the air becomes saturated and water vapor begins to condense into tiny suspended water droplets — fog. The type of fog depends on how the cooling occurs: radiation fog forms on clear, calm nights when the ground radiates heat away and cools the air above it; advection fog forms when warm, moist air moves over a cooler surface (common in coastal areas like San Francisco); and upslope fog forms when moist air is forced up a mountainside and cools adiabatically. The most dangerous fog for driving is radiation fog, which often forms in low-lying areas near rivers and lakes just before dawn and can reduce visibility to near zero in patches. Pilots use the "temperature-dew point spread" (the difference between the air temperature and dew point) to forecast fog — when the spread is 4°F or less with light winds and clearing skies, fog is likely to form overnight. For aviation, the dew point is also used to calculate the cloud base height using the formula: cloud base (feet) = (temperature - dew point) × 400, which gives the altitude at which cumulus clouds will form.',
+        answer: 'Fog forms when the air temperature drops to within about 4°F of the dew point. As the air cools overnight, it approaches the dew point temperature, at which point the air becomes saturated and water vapor begins to condense into tiny suspended water droplets — fog. The type of fog depends on how the cooling occurs: radiation fog forms on clear, calm nights when the ground radiates heat away and cools the air above it; advection fog forms when warm, moist air moves over a cooler surface (common in coastal areas like San Francisco); and upslope fog forms when moist air is forced up a mountainside and cools adiabatically. The most dangerous fog for driving is radiation fog, which often forms in low-lying areas near rivers and lakes just before dawn and can reduce visibility to near zero in patches. Pilots use the "temperature-dew point spread" (the difference between the air temperature and dew point) to forecast fog — when the spread is 4°F or less with light winds and clearing skies, fog is likely to form overnight. For aviation, the dew point is also used to calculate the cloud base height using the rule of thumb: cloud base (feet above ground) ≈ (temperature − dew point in °C) × 400, or about 222 feet for every °F of spread, which estimates the altitude at which cumulus clouds will form.',
       },
     ],
     citations: [

@@ -1,4 +1,5 @@
 import { CalculatorResult } from '../../../types/calculator';
+import { FROSTBITE_ZONES, frostbiteZone, fToC, isFrostbiteDanger } from './windChillMath';
 
 interface Props {
   values: Record<string, string>;
@@ -16,13 +17,8 @@ interface ChartData {
   frostbite: string;
 }
 
-const frostbiteZones = [
-  { label: 'Low Risk', min: -18, max: Infinity, color: '#22c55e', textColor: '#166534' },
-  { label: '30 min risk', min: -27, max: -18, color: '#eab308', textColor: '#854d0e' },
-  { label: '10 min risk', min: -39, max: -27, color: '#f97316', textColor: '#9a3412' },
-  { label: '5 min risk', min: -60, max: -39, color: '#ef4444', textColor: '#991b1b' },
-  { label: '< 2 min risk', min: -Infinity, max: -60, color: '#7c3aed', textColor: '#4c1d95' },
-];
+const cRange = (min: number, max: number): string =>
+  min === -Infinity ? `${max} °C or colder` : max === Infinity ? `${min} °C or warmer` : `${max} to ${min} °C`;
 
 export default function WindChillPanel({ results }: Props) {
   const wcRow = results.find(r => r.id === 'windChill');
@@ -63,11 +59,9 @@ export default function WindChillPanel({ results }: Props) {
     return tubeBottom - ratio * tubeH;
   };
 
-  // Get frostbite zone color for a given temp
-  const getTempColor = (t: number) => {
-    const zone = frostbiteZones.find(z => t > z.min && t <= z.max);
-    return zone ? zone.color : '#6b7280';
-  };
+  // Get frostbite zone color for a given temp (°F)
+  const getTempColor = (t: number) => frostbiteZone(fToC(t)).color;
+  const danger = isFrostbiteDanger(wcC);
 
   const wcY = tempToY(wcF);
   const wcYclamped = Math.max(tubeTop + 5, Math.min(tubeBottom - 5, wcY));
@@ -108,8 +102,8 @@ export default function WindChillPanel({ results }: Props) {
   const speedAng = speedAngle(speedMph);
   const needleEnd = polarToCart(gaugeCX, gaugeCY, gaugeR - 12, speedAng);
 
-  // Frostbite zone legend items
-  const legendItems = frostbiteZones.slice().reverse();
+  // Frostbite zone legend items (warmest first)
+  const legendItems = FROSTBITE_ZONES.slice().reverse();
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -124,9 +118,9 @@ export default function WindChillPanel({ results }: Props) {
 
       <div className="p-5 space-y-5">
         {/* Wind Chill value */}
-        <div className={`rounded-xl border p-5 text-center ${wcF <= -18 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+        <div className={`rounded-xl border p-5 text-center ${danger ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Wind Chill</p>
-          <p className={`text-3xl font-bold font-mono mt-1 ${wcF <= -18 ? 'text-red-600' : 'text-green-700'}`}>
+          <p className={`text-3xl font-bold font-mono mt-1 ${danger ? 'text-red-700' : 'text-green-700'}`}>
             {wcF.toFixed(1)}°F
           </p>
           <p className="text-xs font-mono text-slate-500 mt-1">
@@ -150,7 +144,7 @@ export default function WindChillPanel({ results }: Props) {
             {/* Temperature scale */}
             {[-80, -60, -40, -18, 0, 20, 40, 60].map(t => {
               const y = tempToY(t);
-              const isFrostbite = t <= -18;
+              const isFrostbite = isFrostbiteDanger(fToC(t));
               return (
                 <g key={t}>
                   <line x1={tubeRight + 4} y1={y} x2={tubeRight + 12} y2={y} stroke={isFrostbite ? '#ef4444' : '#94a3b8'} strokeWidth="1" />
@@ -208,8 +202,7 @@ export default function WindChillPanel({ results }: Props) {
                   style={{ backgroundColor: zone.color }}
                 />
                 <span>
-                  {zone.min === -Infinity ? `Below ${zone.max}°F: ` : zone.max === Infinity ? `Above ${zone.min}°F: ` : `${zone.min}°F to ${zone.max}°F: `}
-                  <span className="font-medium">{zone.label}</span>
+                  {cRange(zone.minC, zone.maxC)}: <span className="font-medium">{zone.label}</span>
                 </span>
               </div>
             ))}
@@ -217,7 +210,7 @@ export default function WindChillPanel({ results }: Props) {
         </div>
 
         {/* Safety warning box */}
-        {wcF <= -18 && (
+        {danger && (
           <div className="rounded-xl border-2 border-red-300 bg-red-50 px-5 py-4">
             <div className="flex items-start gap-3">
               <svg aria-hidden="true" className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

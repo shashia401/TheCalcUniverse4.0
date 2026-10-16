@@ -326,18 +326,21 @@ describe('time duration calculator', () => {
   });
 
   // ── Invalid range: end before start ─────────────────────────────────────
-  it('end date before start date returns []', () => {
-    expect(config.calculate({
+  it('end date before start date explains the problem (a single error result)', () => {
+    const r = config.calculate({
       startDate: '2025-06-01', startTime: '9:00 AM',
       endDate: '2025-01-01', endTime: '5:00 PM', businessDays: 'no',
-    })).toEqual([]);
+    });
+    expect(r.map((x) => x.id)).toEqual(['error']);
   });
 
-  it('same date, end time before start time returns []', () => {
-    expect(config.calculate({
+  it('same date, end time before start time explains the problem (overnight needs the next date)', () => {
+    const r = config.calculate({
       startDate: '2025-01-15', startTime: '5:00 PM',
       endDate: '2025-01-15', endTime: '9:00 AM', businessDays: 'no',
-    })).toEqual([]);
+    });
+    expect(r.map((x) => x.id)).toEqual(['error']);
+    expect(r[0].value).toContain('next calendar day');
   });
 
   // ── Date-time display ───────────────────────────────────────────────────

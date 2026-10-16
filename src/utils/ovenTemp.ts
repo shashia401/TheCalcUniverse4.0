@@ -3,6 +3,8 @@
 // Source: the conventional table reproduced by Wikipedia ("Gas mark") and UK cookery guides; Celsius values are the
 // rounded kitchen figures, not an exact conversion of the Fahrenheit column (e.g. 350 F = 176.7 C is listed as 180 C).
 
+import { cToF, fToC } from './temperature';
+
 export interface GasMarkRow {
   mark: number;
   fahrenheit: number;
@@ -28,8 +30,7 @@ export const GAS_MARK_TABLE: GasMarkRow[] = [
 export const MIN_GAS_MARK = GAS_MARK_TABLE[0].mark;
 export const MAX_GAS_MARK = GAS_MARK_TABLE[GAS_MARK_TABLE.length - 1].mark;
 
-export const cToF = (c: number) => (c * 9) / 5 + 32;
-export const fToC = (f: number) => ((f - 32) * 5) / 9;
+export { cToF, fToC };
 
 /** Nearest table row by Celsius (a tie goes to the cooler mark); null when more than 10 C outside the table's range. */
 export function closestGasMark(celsius: number): GasMarkRow | null {

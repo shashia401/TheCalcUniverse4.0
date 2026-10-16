@@ -73,7 +73,7 @@ describe('time zone calculator', () => {
       fromZone: 'gmt',
       toZone: 'est',
       time: '12:00 PM',
-      date: '',
+      date: '2025-01-15', // winter: EST is UTC-5 (with no date the answer depends on today's DST)
       includeBusinessHours: 'no',
     });
     // 12:00 GMT = 7:00 AM EST (UTC-5)
@@ -85,7 +85,7 @@ describe('time zone calculator', () => {
       fromZone: 'gmt',
       toZone: 'cet',
       time: '12:00 AM',
-      date: '',
+      date: '2025-01-15', // winter: CET is UTC+1
       includeBusinessHours: 'no',
     });
     // 00:00 GMT = 1:00 AM CET (UTC+1)
@@ -274,7 +274,7 @@ describe('time zone calculator', () => {
       fromZone: 'jst',
       toZone: 'pst',
       time: '6:00 PM',
-      date: '2025-06-15',
+      date: '2025-01-15', // winter: PST is UTC-8 (in June it is PDT, UTC-7, and the answer is 2:00 AM)
       includeBusinessHours: 'no',
     });
     // JST (UTC+9) to PST (UTC-8) = 17 hours behind
@@ -283,55 +283,28 @@ describe('time zone calculator', () => {
   });
 
   /* ------------------------------------------------------------------ */
-  /*  Date handling — date is a reference label, not validated           */
+  /*  Date handling — the date decides daylight saving, so it is validated */
   /* ------------------------------------------------------------------ */
 
-  it('still converts with non-standard date format (date is reference only)', () => {
-    const r = config.calculate({
-      fromZone: 'est',
-      toZone: 'pst',
-      time: '2:30 PM',
-      date: '01-15-2025',
-      includeBusinessHours: 'no',
-    });
-    expect(r).not.toEqual([]);
-    expect(getValue(r, 'convertedTime')).toBe('11:30 AM');
+  const withDate = (date: string) =>
+    config.calculate({ fromZone: 'est', toZone: 'pst', time: '2:30 PM', date, includeBusinessHours: 'no' });
+
+  it('a non-standard date format is rejected (it used to be ignored as a "reference label")', () => {
+    expect(withDate('01-15-2025')).toEqual([]);
   });
 
-  it('still converts with unrealistic month (date is reference only)', () => {
-    const r = config.calculate({
-      fromZone: 'est',
-      toZone: 'pst',
-      time: '2:30 PM',
-      date: '2025-13-01',
-      includeBusinessHours: 'no',
-    });
-    expect(r).not.toEqual([]);
-    expect(getValue(r, 'convertedTime')).toBe('11:30 AM');
+  it('an unrealistic month is rejected', () => {
+    expect(withDate('2025-13-01')).toEqual([]);
   });
 
-  it('still converts with unrealistic day (date is reference only)', () => {
-    const r = config.calculate({
-      fromZone: 'est',
-      toZone: 'pst',
-      time: '2:30 PM',
-      date: '2025-01-32',
-      includeBusinessHours: 'no',
-    });
-    expect(r).not.toEqual([]);
-    expect(getValue(r, 'convertedTime')).toBe('11:30 AM');
+  it('an unrealistic day is rejected', () => {
+    expect(withDate('2025-01-32')).toEqual([]);
   });
 
-  it('still converts with historical date (date is reference only)', () => {
-    const r = config.calculate({
-      fromZone: 'est',
-      toZone: 'pst',
-      time: '2:30 PM',
-      date: '1800-01-01',
-      includeBusinessHours: 'no',
-    });
-    expect(r).not.toEqual([]);
-    expect(getValue(r, 'convertedTime')).toBe('11:30 AM');
+  it('a date before 1970 is out of range, with an explanation', () => {
+    const r = withDate('1800-01-01');
+    expect(r.map((x) => x.id)).toEqual(['error']);
+    expect(r[0].value).toContain('1970');
   });
 
   /* ------------------------------------------------------------------ */
@@ -356,7 +329,7 @@ describe('time zone calculator', () => {
       fromZone: 'est',
       toZone: 'gmt',
       time: '3:00 PM',
-      date: '2025-06-15',
+      date: '2025-01-15', // winter; on 15 June New York is on EDT (UTC-4) and the answer is 7:00 PM
       includeBusinessHours: 'no',
     });
     // EST (UTC-5) to UTC = 5 hours ahead
@@ -415,7 +388,7 @@ describe('time zone calculator', () => {
       fromZone: 'pst',
       toZone: 'gmt',
       time: '9:00 AM',
-      date: '2026-06-15',
+      date: '2026-01-15', // winter: PST (UTC-8). In June it is PDT (UTC-7) and the UTC overlap is 1 hour.
       includeBusinessHours: 'yes',
     });
     expect(getValue(r, 'convertedTime')).toBe('5:00 PM');

@@ -2,69 +2,8 @@ import { createElement } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import TimePanel from './TimePanel';
-
-/* ------------------------------------------------------------------ */
-/*  Parse helpers                                                      */
-/* ------------------------------------------------------------------ */
-
-interface ParsedTime {
-  hours: number;
-  minutes: number;
-  isPM: boolean | null; // null for 24-hour format
-}
-
-/**
- * Parse a time string into hours, minutes, and AM/PM indicator.
- * Supports "h:mm AM/PM", "h AM/PM", and "HH:MM" (24-hour) formats.
- */
-function parseTime(input: string): ParsedTime | null {
-  const trimmed = input.trim();
-  if (!trimmed) return null;
-
-  // Try 12-hour format: "h:mm AM/PM" or "h AM/PM"
-  const ampmMatch = /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i.exec(trimmed);
-  if (ampmMatch) {
-    let hours = parseInt(ampmMatch[1], 10);
-    const minutes = ampmMatch[2] ? parseInt(ampmMatch[2], 10) : 0;
-    const isPM = ampmMatch[3].toUpperCase() === 'PM';
-
-    if (hours < 1 || hours > 12) return null;
-    if (minutes < 0 || minutes > 59) return null;
-
-    // Convert 12-hour to 24-hour
-    if (isPM && hours !== 12) hours += 12;
-    if (!isPM && hours === 12) hours = 0;
-
-    return { hours, minutes, isPM };
-  }
-
-  // Try 24-hour format: "HH:MM"
-  const h24Match = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
-  if (h24Match) {
-    const hours = parseInt(h24Match[1], 10);
-    const minutes = parseInt(h24Match[2], 10);
-
-    if (hours < 0 || hours > 23) return null;
-    if (minutes < 0 || minutes > 59) return null;
-
-    return { hours, minutes, isPM: null };
-  }
-
-  return null;
-}
-
-/** Convert parsed time to total minutes from midnight. */
-function timeToMinutes(time: ParsedTime): number {
-  return time.hours * 60 + time.minutes;
-}
-
-/** Calculate minutes between start and end, accounting for overnight. */
-function timeDiffMinutes(startMinutes: number, endMinutes: number): number {
-  if (endMinutes < startMinutes) {
-    return endMinutes + 24 * 60 - startMinutes;
-  }
-  return endMinutes - startMinutes;
-}
+import { parseClockTime, minutesBetween } from '../../../utils/clockTime';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
 /* ------------------------------------------------------------------ */
 /*  Time calculator config                                            */
@@ -94,9 +33,10 @@ const timeConfig: CalculatorConfig = {
       label: 'Break Deduction (minutes)',
       type: 'number',
       placeholder: '30',
-      inputMode: 'decimal',
+      inputMode: 'numeric',
       min: 0,
-      helpText: 'Unpaid break time in minutes',
+      step: 1,
+      helpText: 'Unpaid break time in whole minutes',
     },
     {
       id: 'hourlyRate',
@@ -114,27 +54,44 @@ const timeConfig: CalculatorConfig = {
 
     const startInput = (values.startTime ?? '').trim();
     const endInput = (values.endTime ?? '').trim();
-    const breakInput = values.breakMinutes ?? '';
-    const rateInput = values.hourlyRate ?? '';
+    const breakInput = (values.breakMinutes ?? '').trim();
+    const rateInput = (values.hourlyRate ?? '').trim();
 
-    const startParsed = parseTime(startInput);
-    const endParsed = parseTime(endInput);
+    const startMinutes = parseClockTime(startInput);
+    const endMinutes = parseClockTime(endInput);
+    if (startMinutes === null || endMinutes === null) return [];
 
-    if (!startParsed || !endParsed) return [];
+    // The break is whole minutes (blank = none). "7.5" used to be cut to 7 and "-30" was accepted.
+    const breakNum = breakInput === '' ? 0 : parseNumberStrict(breakInput);
+    if (Number.isNaN(breakNum) || breakNum < 0 || !Number.isInteger(breakNum)) {
+      return [
+        { id: 'error', label: 'Check the break', value: 'Enter the unpaid break as a whole number of minutes (0 or more).', color: 'negative' as const },
+      ];
+    }
+    const breakMins = breakNum;
 
-    const startMinutes = timeToMinutes(startParsed);
-    const endMinutes = timeToMinutes(endParsed);
-
-    const diffMinutes = timeDiffMinutes(startMinutes, endMinutes);
-    const breakMins = parseInt(breakInput, 10) || 0;
-    let workingMinutes = diffMinutes - breakMins;
-    if (workingMinutes <= 0) workingMinutes = 0;
+    // End earlier than start means the shift crosses midnight; identical times are a zero-length shift (not 24 h).
+    const diffMinutes = minutesBetween(startMinutes, endMinutes);
+    if (breakMins > diffMinutes) {
+      return [
+        {
+          id: 'error',
+          label: 'Break longer than the shift',
+          value: `The ${breakMins}-minute break is longer than the ${diffMinutes}-minute shift, so there is no paid time.`,
+          color: 'negative' as const,
+        },
+      ];
+    }
+    const workingMinutes = diffMinutes - breakMins;
 
     const standardHours = Math.floor(workingMinutes / 60);
     const standardMinutes = workingMinutes % 60;
     const decimalHours = new Decimal(workingMinutes).div(60);
-    const rate = parseFloat(rateInput) || 0;
-    const grossPay = rate > 0 ? Number(decimalHours.times(rate).toFixed(2)) : 0;
+    // Exact decimal pay (hours x rate), rounded half-up to the cent. A malformed or non-positive rate means "no pay".
+    const rateNum = rateInput === '' ? NaN : parseNumberStrict(rateInput);
+    const rate = !Number.isNaN(rateNum) && rateNum > 0 ? new Decimal(rateInput) : null;
+    const grossPay = rate ? decimalHours.times(rate).toDecimalPlaces(2, Decimal.ROUND_HALF_UP) : new Decimal(0);
+    const money = (d: Decimal) => `$${d.toNumber().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     const results = [];
 
@@ -179,20 +136,34 @@ const timeConfig: CalculatorConfig = {
       value: endInput,
     });
 
-    if (rate > 0) {
+    if (rate) {
       results.push({
         id: 'grossPay',
         label: 'Gross Pay',
-        value: `$${grossPay.toFixed(2)}`,
+        value: money(grossPay),
         color: 'neutral' as const,
       });
 
       results.push({
         id: 'hourlyRate',
         label: 'Hourly Rate',
-        value: `$${rate.toFixed(2)}/hr`,
+        value: `$${rate.toFixed(Math.max(2, rate.decimalPlaces()))}/hr`, // at least 2 decimals, more if the rate has them
       });
     }
+
+    // Numbers for the panel (ids starting with "_" are hidden), so it never has to re-parse the times.
+    results.push({
+      id: '_parts',
+      label: '',
+      value: JSON.stringify({
+        startMinutes,
+        endMinutes,
+        breakMinutes: breakMins,
+        workingMinutes,
+        overnight: endMinutes < startMinutes,
+        decimalHours: decimalHours.toNumber(),
+      }),
+    });
 
     return results;
   },
@@ -251,7 +222,7 @@ const timeConfig: CalculatorConfig = {
       },
       {
         question: 'What time formats are accepted?',
-        answer: 'Both 12-hour format (e.g., 9:00 AM, 2:30 PM, 11:59 PM) and 24-hour/military format (e.g., 09:00, 14:30, 23:59) are supported. The calculator automatically detects which format you are using. Hours and minutes are required; seconds are optional and will be ignored if provided.',
+        answer: 'Both 12-hour format (e.g., 9:00 AM, 2:30 PM, 11:59 PM) and 24-hour/military format (e.g., 09:00, 14:30, 23:59) are supported. The calculator automatically detects which format you are using. Hours and minutes are required; seconds are not supported (a time such as 9:00:30 is not recognised).',
       },
     ],
  
@@ -302,7 +273,7 @@ const timeConfig: CalculatorConfig = {
     limitations: [
       'This calculator handles single shifts at a single pay rate. It does not account for overtime premiums (1.5x or 2x rates), shift differentials (night/weekend premium pay), or multiple shifts in a day. For weekly time tracking with overtime, use the Time Card calculator.',
       'Break deductions assume the break is a single continuous period — if breaks are split, add the durations and enter the total. Paid breaks should be entered as 0 minutes.',
-      'The calculator uses browser time parsing and may not handle historical date boundaries or leap seconds. For critical payroll calculations, always verify results against your employer\'s official timekeeping system.',
+      'Identical start and end times are a zero-length shift, not a 24-hour one; for anything that spans more than one day use the Time Duration calculator. The break must be a whole number of minutes and cannot be longer than the shift. For critical payroll calculations, always verify results against your employer\'s official timekeeping system.',
       'The calculator operates on clock times only and does not factor in calendar dates — use the Time Duration calculator for date-spanning calculations (e.g., multi-day projects spanning weeks or months).',
     ],
 citations: [

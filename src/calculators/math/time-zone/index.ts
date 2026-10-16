@@ -1,143 +1,27 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import TimeZonePanel from './TimeZonePanel';
-
-/* ------------------------------------------------------------------ */
-/*  Timezone data                                                      */
-/* ------------------------------------------------------------------ */
-
-interface TzEntry {
-  id: string;
-  label: string;
-  offset: number;
-}
-
-const TIMEZONES: TzEntry[] = [
-  { id: 'pst', label: 'Pacific (PST/PDT)', offset: -8 },
-  { id: 'mst', label: 'Mountain (MST/MDT)', offset: -7 },
-  { id: 'cst_am', label: 'Central (CST/CDT)', offset: -6 },
-  { id: 'est', label: 'Eastern (EST/EDT)', offset: -5 },
-  { id: 'gmt', label: 'GMT/UTC', offset: 0 },
-  { id: 'bst', label: 'British (BST)', offset: 1 },
-  { id: 'cet', label: 'Central Europe (CET/CEST)', offset: 1 },
-  { id: 'eet', label: 'Eastern Europe (EET/EEST)', offset: 2 },
-  { id: 'msk', label: 'Moscow (MSK)', offset: 3 },
-  { id: 'gst', label: 'Gulf (GST)', offset: 4 },
-  { id: 'ist', label: 'India (IST)', offset: 5.5 },
-  { id: 'bdt', label: 'Bangladesh (BDT)', offset: 6 },
-  { id: 'wib', label: 'Western Indonesia (WIB)', offset: 7 },
-  { id: 'cst_china', label: 'China (CST)', offset: 8 },
-  { id: 'awst', label: 'Australia Western (AWST)', offset: 8 },
-  { id: 'jst', label: 'Japan (JST)', offset: 9 },
-  { id: 'aest', label: 'Australia Eastern (AEST/AEDT)', offset: 10 },
-  { id: 'acdt', label: 'Australia Central (ACDT)', offset: 10.5 },
-  { id: 'nzst', label: 'New Zealand (NZST/NZDT)', offset: 12 },
-  { id: 'hst', label: 'Hawaii (HST)', offset: -10 },
-  { id: 'akst', label: 'Alaska (AKST/AKDT)', offset: -9 },
-  { id: 'nst', label: 'Newfoundland (NST/NDT)', offset: -3.5 },
-  { id: 'art', label: 'Argentina (ART)', offset: -3 },
-  { id: 'brt', label: 'Brasilia (BRT)', offset: -3 },
-];
-
-/* ------------------------------------------------------------------ */
-/*  Parse helpers                                                      */
-/* ------------------------------------------------------------------ */
-
-function parseTime(s: string): { hours: number; minutes: number } | null {
-  if (!s) return null;
-  const t = s.trim();
-  if (!t) return null;
-
-  // 12-hour format: "H:MM AM/PM", "HH:MM AM/PM", or "H AM/PM" (minutes optional)
-  const ampm = /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i.exec(t);
-  if (ampm) {
-    let h = parseInt(ampm[1], 10);
-    const m = ampm[2] ? parseInt(ampm[2], 10) : 0;
-    if (h < 1 || h > 12 || m < 0 || m > 59) return null;
-    if (ampm[3].toUpperCase() === 'PM' && h !== 12) h += 12;
-    if (ampm[3].toUpperCase() === 'AM' && h === 12) h = 0;
-    return { hours: h, minutes: m };
-  }
-
-  // 24-hour format: "HH:MM"
-  const mil = /^(\d{1,2}):(\d{2})$/.exec(t);
-  if (mil) {
-    const h = parseInt(mil[1], 10);
-    const m = parseInt(mil[2], 10);
-    if (h < 0 || h > 23 || m < 0 || m > 59) return null;
-    return { hours: h, minutes: m };
-  }
-
-  return null;
-}
-
-function findZone(id: string): TzEntry | undefined {
-  return TIMEZONES.find((z) => z.id === id);
-}
-
-function formatOffset(offset: number): string {
-  const sign = offset >= 0 ? '+' : '';
-  const abs = Math.abs(offset);
-  if (Number.isInteger(offset)) return `UTC${sign}${abs}`;
-  const whole = Math.floor(abs);
-  const frac = Math.round((abs - whole) * 60);
-  return `UTC${sign}${whole}:${frac < 10 ? '0' : ''}${frac}`;
-}
-
-function formatClock(hours: number, minutes: number): string {
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const display = hours % 12 || 12;
-  const minStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
-  return `${display}:${minStr} ${period}`;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Business hours overlap                                             */
-/* ------------------------------------------------------------------ */
-
-interface BizHourCell {
-  hour: number;
-  color: 'green' | 'yellow' | 'gray';
-}
-
-interface OverlapResult {
-  overlapStart: number;
-  overlapEnd: number;
-  durationHours: number;
-  hours: BizHourCell[];
-}
-
-function calcOverlap(srcOff: number, dstOff: number): OverlapResult {
-  // Business hours 9-17 in each zone, projected to UTC
-  const srcStart = 9 - srcOff;
-  const srcEnd = 17 - srcOff;
-  const dstStart = 9 - dstOff;
-  const dstEnd = 17 - dstOff;
-
-  const oStart = Math.max(srcStart, dstStart);
-  const oEnd = Math.min(srcEnd, dstEnd);
-  const duration = Math.max(0, oEnd - oStart);
-
-  const hours: BizHourCell[] = [];
-  for (let h = 0; h < 24; h++) {
-    const inSrc = h >= 9 && h < 17;
-    const targetH = ((h - srcOff + dstOff + 2400) % 24);
-    const inDst = targetH >= 9 && targetH < 17;
-    let color: 'green' | 'yellow' | 'gray';
-    if (inSrc && inDst) color = 'green';
-    else if (inSrc || inDst) color = 'yellow';
-    else color = 'gray';
-    hours.push({ hour: h, color });
-  }
-
-  return { overlapStart: oStart, overlapEnd: oEnd, durationHours: duration, hours };
-}
+import {
+  ZONES,
+  WORLD_CLOCK,
+  calcOverlap,
+  dayLabel,
+  findZone,
+  formatClock,
+  formatOffset,
+  isDaylightTime,
+  localAt,
+  wallToUtc,
+} from './tzMath';
+import { parseClockTime } from '../../../utils/clockTime';
+import { parseIsoDateUtc } from '../../../utils/isoDate';
 
 /* ------------------------------------------------------------------ */
 /*  Calculator config                                                  */
 /* ------------------------------------------------------------------ */
 
-const tzOptions = TIMEZONES.map((z) => ({ label: z.label, value: z.id }));
+// Zones, offsets (DST-aware, by date), parsing and overlap maths live in tzMath.ts / the shared utils.
+const tzOptions = ZONES.map((z) => ({ label: z.label, value: z.id }));
 
 const config: CalculatorConfig = {
   inputs: [
@@ -165,7 +49,7 @@ const config: CalculatorConfig = {
       id: 'date',
       label: 'Date',
       type: 'date',
-      helpText: 'Select the date (for DST context)',
+      helpText: 'The day you mean. Daylight saving time is applied for this date in each zone; leave blank for today.',
     },
     {
       id: 'includeBusinessHours',
@@ -181,99 +65,140 @@ const config: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const fromZone = values.fromZone;
-    const toZone = values.toZone;
-    const timeStr = values.time;
-    if (!fromZone || !toZone || !timeStr) return [];
+    const src = findZone(values.fromZone ?? '');
+    const dst = findZone(values.toZone ?? '');
+    const minutes = parseClockTime(values.time ?? '');
+    if (!src || !dst || minutes === null) return [];
 
-    const parsed = parseTime(timeStr);
-    if (!parsed) return [];
-
-    const src = findZone(fromZone);
-    const dst = findZone(toZone);
-    if (!src || !dst) return [];
-
-    const fromOff = src.offset;
-    const toOff = dst.offset;
-
-    // Convert source minutes to target minutes
-    const srcMin = parsed.hours * 60 + parsed.minutes;
-    const diffMin = (toOff - fromOff) * 60;
-    let tgtMin = srcMin + diffMin;
-
-    let dayAdjust = '';
-    if (tgtMin >= 1440) {
-      dayAdjust = ' (next day)';
-      tgtMin -= 1440;
-    } else if (tgtMin < 0) {
-      dayAdjust = ' (previous day)';
-      tgtMin += 1440;
+    // The DATE decides daylight saving. Blank means today; a typed date must be a real calendar date.
+    const dateStr = (values.date ?? '').trim();
+    let dayMs: number;
+    if (dateStr === '') {
+      const now = new Date();
+      dayMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    } else {
+      const parsed = parseIsoDateUtc(dateStr);
+      if (parsed === null) return [];
+      dayMs = parsed;
     }
+    const year = new Date(dayMs).getUTCFullYear();
+    if (year < 1970 || year > 2100) {
+      return [{ id: 'error', label: 'Date out of range', value: 'Choose a date between 1970 and 2100.', color: 'negative' as const }];
+    }
+    const isoDay = new Date(dayMs).toISOString().slice(0, 10);
 
-    const tgtH = Math.floor(tgtMin / 60);
-    const tgtM = Math.round(tgtMin % 60);
+    try {
+      // One instant in time, read off the clocks of both zones; each zone's own offset on THAT date is used.
+      const { utcMs, kind } = wallToUtc(src.iana, dayMs + minutes * 60_000);
+      const from = localAt(src.iana, utcMs);
+      const to = localAt(dst.iana, utcMs);
+      const diffMin = to.offsetMin - from.offsetMin;
+      const dayDelta = to.dayNumber - from.dayNumber;
 
-    const convertedTime = formatClock(tgtH, tgtM) + dayAdjust;
+      const convertedTime = formatClock(to.minutesOfDay) + dayLabel(dayDelta);
 
-    // Time difference text
-    const diff = toOff - fromOff;
-    let diffDesc: string;
-    if (diff === 0) diffDesc = 'Same time';
-    else if (diff > 0) diffDesc = `${diff} hour${diff !== 1 ? 's' : ''} ahead`;
-    else diffDesc = `${Math.abs(diff)} hour${Math.abs(diff) !== 1 ? 's' : ''} behind`;
+      // Time difference on that date, e.g. "9.5 hours ahead"
+      const diff = diffMin / 60;
+      const abs = Math.abs(diff);
+      const hoursText = `${abs} hour${abs !== 1 ? 's' : ''}`;
+      const diffDesc = diff === 0 ? 'Same time' : diff > 0 ? `${hoursText} ahead` : `${hoursText} behind`;
 
-    const results: CalculatorResult[] = [
-      {
-        id: 'convertedTime',
-        label: 'Converted Time',
-        value: convertedTime,
-        highlight: true,
-        color: 'positive',
-      },
-      {
-        id: 'fromInfo',
-        label: 'From',
-        value: `${src.label} -- ${formatOffset(fromOff)}`,
-      },
-      {
-        id: 'toInfo',
-        label: 'To',
-        value: `${dst.label} -- ${formatOffset(toOff)}`,
-      },
-      {
-        id: 'timeDifference',
-        label: 'Time Difference',
-        value: diffDesc,
-      },
-    ];
+      const withDst = (z: { iana: string; label: string }, off: number) =>
+        `${z.label} -- ${formatOffset(off)}${isDaylightTime(z.iana, utcMs) ? ' (DST)' : ''}`;
 
-    if (values.includeBusinessHours === 'yes') {
-      const overlap = calcOverlap(fromOff, toOff);
+      const results: CalculatorResult[] = [
+        {
+          id: 'convertedTime',
+          label: 'Converted Time',
+          value: convertedTime,
+          highlight: true,
+          color: 'positive',
+        },
+        {
+          id: 'fromInfo',
+          label: 'From',
+          value: withDst(src, from.offsetMin),
+        },
+        {
+          id: 'toInfo',
+          label: 'To',
+          value: withDst(dst, to.offsetMin),
+        },
+        {
+          id: 'timeDifference',
+          label: 'Time Difference',
+          value: diffDesc,
+        },
+        {
+          id: 'dateUsed',
+          label: 'Date used for daylight saving',
+          value: dateStr === '' ? `${isoDay} (today)` : isoDay,
+        },
+      ];
 
-      if (overlap.durationHours > 0) {
-        const olStart = ((overlap.overlapStart + toOff + 48) % 24);
-        const olEnd = ((overlap.overlapEnd + toOff + 48) % 24);
+      if (kind === 'gap') {
         results.push({
-          id: 'businessOverlap',
-          label: 'Business Hours Overlap',
-          value: `${formatClock(Math.floor(olStart), 0)} -- ${formatClock(Math.floor(olEnd), 0)} (${Math.round(overlap.durationHours)} hours)`,
+          id: 'dstNote',
+          label: 'Clock change',
+          value: `${formatClock(minutes)} does not exist on ${isoDay} in ${src.label}: the clocks jump forward. It is read as ${formatClock(from.minutesOfDay)}.`,
+          color: 'negative',
         });
-      } else {
+      } else if (kind === 'ambiguous') {
         results.push({
-          id: 'businessOverlap',
-          label: 'Business Hours Overlap',
-          value: 'No overlap in business hours',
+          id: 'dstNote',
+          label: 'Clock change',
+          value: `${formatClock(minutes)} happens twice on ${isoDay} in ${src.label}: the clocks fall back. The first one (daylight time) is used.`,
+          color: 'negative',
         });
       }
 
-      results.push({
-        id: 'overlapData',
-        label: 'Overlap Data',
-        value: JSON.stringify(overlap),
-      });
-    }
+      if (values.includeBusinessHours === 'yes') {
+        const overlap = calcOverlap(diffMin);
+        const wrap = (m: number) => ((m % 1440) + 1440) % 1440;
 
-    return results;
+        if (overlap.durationHours > 0) {
+          const n = overlap.durationHours;
+          results.push({
+            id: 'businessOverlap',
+            label: 'Business Hours Overlap',
+            value: `${formatClock(wrap(overlap.overlapStart + diffMin))} -- ${formatClock(wrap(overlap.overlapEnd + diffMin))} (${n} hour${n !== 1 ? 's' : ''}, ${dst.label} time)`,
+          });
+        } else {
+          results.push({
+            id: 'businessOverlap',
+            label: 'Business Hours Overlap',
+            value: 'No overlap in business hours',
+          });
+        }
+
+        results.push({
+          id: 'overlapData',
+          label: 'Overlap Data',
+          value: JSON.stringify(overlap),
+        });
+      }
+
+      // Everything the panel draws, so it never re-parses the inputs or guesses offsets (ids starting "_" are hidden).
+      results.push({
+        id: '_tz',
+        label: '',
+        value: JSON.stringify({
+          fromLabel: src.label,
+          toLabel: dst.label,
+          sourceClock: formatClock(from.minutesOfDay),
+          targetClock: formatClock(to.minutesOfDay),
+          dayDelta,
+          worldClock: WORLD_CLOCK.map((w) => {
+            const t = localAt(w.iana, utcMs);
+            return { label: w.label, clock: formatClock(t.minutesOfDay), dayDelta: t.dayNumber - from.dayNumber };
+          }),
+        }),
+      });
+
+      return results;
+    } catch {
+      return []; // an engine without full Intl time zone support
+    }
   },
 
   extraPanel: (values, results) => {
@@ -284,7 +209,7 @@ const config: CalculatorConfig = {
   educational: {
     formula: 'TargetTime = SourceTime - SourceOffset + TargetOffset',
     formulaDescription:
-      'Convert a time from one time zone to another by accounting for the UTC offset difference between the two zones. Every time zone has a UTC offset (e.g., EST is UTC-5, PST is UTC-8). To convert, first normalize the source time to UTC by subtracting its offset, then apply the target offset to get the local time in the destination zone. This two-step process ensures accuracy regardless of which direction the conversion goes.',
+      'Convert a time from one time zone to another by accounting for the UTC offset difference between the two zones. Every time zone has a UTC offset (e.g., EST is UTC-5, PST is UTC-8). To convert, first normalize the source time to UTC by subtracting its offset, then apply the target offset to get the local time in the destination zone. This two-step process ensures accuracy regardless of which direction the conversion goes. Offsets are not fixed: each zone\'s offset is looked up for the date you choose, so Daylight Saving Time (EDT instead of EST, BST instead of GMT, and so on) is applied automatically and the gap between two zones can change during the year.',
     variables: [
       { symbol: 'SourceTime', name: 'Source Time', description: 'The time in the original time zone that you want to convert from.' },
       { symbol: 'SourceOffset', name: 'Source Offset', description: 'UTC offset of the source time zone. Eastern Standard Time is UTC-5, Central European Time is UTC+1, etc.' },
@@ -303,12 +228,12 @@ const config: CalculatorConfig = {
       {
         question: 'Do you account for Daylight Saving Time?',
         answer:
-          'This calculator uses standard UTC offsets for each zone. While DST affects the actual offset on specific dates, the calculator applies the nominal zone offset. For example, EST (UTC-5) becomes EDT (UTC-4) during DST months. Select a specific date if the zone you are converting uses DST, and the calculator will apply the seasonal offset. For precise DST handling with automatic adjustment, consult an up-to-date time zone database or use the IANA time zone database (tzdata).',
+          'Yes. Each zone follows the IANA time zone database (the same one your phone and operating system use), and the date you pick decides which offset applies. For example, New York is UTC-5 (EST) in January and UTC-4 (EDT) in July, and London is UTC+0 in winter and UTC+1 (BST) in summer. Because countries change their clocks on different dates, the gap between two zones can differ for a few weeks a year: New York to London is 4 hours on 20 March 2026 (the US has already changed, the UK has not) but 5 hours on 31 March. Leave the date blank to use today. If the time you enter does not exist (the hour skipped when clocks go forward) or happens twice (the hour repeated when they go back), the calculator says so and explains how it read it.',
       },
       {
         question: 'What are business hours?',
         answer:
-          'Business hours are defined as 9:00 AM to 5:00 PM local time, Monday through Friday. The overlay shows when both zones overlap during these hours, color-coded: green (both zones are in business hours), yellow (only one zone is in business hours), or gray (neither zone is in business hours). This is useful for finding the best times for international meetings.',
+          'Business hours are defined as 9:00 AM to 5:00 PM local time (weekdays versus weekends are not considered). The overlay shows when both zones overlap during these hours, color-coded: green (both zones are in business hours), yellow (only one zone is in business hours), or gray (neither zone is in business hours). This is useful for finding the best times for international meetings.',
       },
       {
         question: 'How do I convert times that are already in UTC?',
@@ -320,7 +245,7 @@ const config: CalculatorConfig = {
       },
       {
         question: 'Why does the converted time show "(next day)" or "(previous day)"?',
-        answer: 'When the time zone difference causes the converted time to cross midnight, the calculator adds a label indicating the day shift. For example, 9:00 AM PST (UTC-8) converted to JST (UTC+9) is a 17-hour difference, resulting in 2:00 AM the next day. This is essential for scheduling international calls — you don\'t want to call someone at 2:00 AM their time. The "(next day)" and "(previous day)" markers help you spot these day-boundary crossings immediately.',
+        answer: 'When the time zone difference causes the converted time to cross midnight, the calculator adds a label indicating the day shift. For example, in winter 9:00 AM PST (UTC-8) converted to JST (UTC+9) is a 17-hour difference, resulting in 2:00 AM the next day. This is essential for scheduling international calls — you don\'t want to call someone at 2:00 AM their time. The "(next day)" and "(previous day)" markers help you spot these day-boundary crossings immediately.',
       },
       {
         question: 'What are half-hour and quarter-hour time zones?',
@@ -329,28 +254,28 @@ const config: CalculatorConfig = {
     ],
     workedExamples: [
       {
-        scenario: 'Sarah is a product manager in San Francisco (PST) scheduling a video call with her engineering team in London (GMT). She wants to propose 9:00 AM her time and needs to know what time that is for the London team.',
-        inputs: { fromZone: 'pst', toZone: 'gmt', time: '9:00 AM', date: '2026-06-15', includeBusinessHours: 'yes' },
-        result: '5:00 PM GMT (8 hours ahead); No overlap in business hours',
-        insight: '9:00 AM PST = 5:00 PM GMT -- right at the very end of London\'s workday. Because PST business hours (9 AM-5 PM, which map to 5 PM-1 AM GMT) and GMT business hours (9 AM-5 PM) are two 8-hour windows separated by exactly the 8-hour offset, they never overlap -- a well-known scheduling headache between California and the UK. Teams in this situation typically have to schedule outside one side\'s normal business hours, such as an early call for the Bay Area team or a late one for London.',
+        scenario: 'Sarah is a product manager in San Francisco scheduling a video call with her engineering team in London on 15 June 2026. She wants to propose 9:00 AM her time and needs to know what time that is for the London team.',
+        inputs: { fromZone: 'pst', toZone: 'bst', time: '9:00 AM', date: '2026-06-15', includeBusinessHours: 'yes' },
+        result: '5:00 PM London time (8 hours ahead); No overlap in business hours',
+        insight: 'In June San Francisco is on PDT (UTC-7) and London on BST (UTC+1), so 9:00 AM in San Francisco = 5:00 PM in London -- right at the very end of London\'s workday. Because San Francisco business hours (9 AM-5 PM, which map to 5 PM-1 AM London time) and London business hours (9 AM-5 PM) are two 8-hour windows separated by exactly the 8-hour offset, they never overlap -- a well-known scheduling headache between California and the UK. Teams in this situation typically have to schedule outside one side\'s normal business hours, such as an early call for the Bay Area team or a late one for London.',
       },
       {
-        scenario: 'Raj is based in Mumbai (IST, UTC+5:30) and needs to join a webinar hosted from New York (EST) at 2:00 PM Eastern Time. He wants to know if he will need to stay up late.',
-        inputs: { fromZone: 'est', toZone: 'ist', time: '2:00 PM', date: '2026-07-20', includeBusinessHours: 'no' },
+        scenario: 'Raj is based in Mumbai (IST, UTC+5:30) and needs to join a webinar hosted from New York at 2:00 PM Eastern Time on 20 January 2026. He wants to know if he will need to stay up late.',
+        inputs: { fromZone: 'est', toZone: 'ist', time: '2:00 PM', date: '2026-01-20', includeBusinessHours: 'no' },
         result: '12:30 AM IST (next day); 10.5 hours ahead',
-        insight: '2:00 PM EST = 12:30 AM IST (next day). The 10.5-hour difference means Raj would need to join at half past midnight. This is typical for US-India scheduling — US business hours (9 AM-5 PM) map to 7:30 PM-3:30 AM IST. For a more convenient time, the US presenter should consider an early morning slot (7:00 AM EST = 5:30 PM IST), which is reasonable for both parties.',
+        insight: '2:00 PM EST = 12:30 AM IST (next day). The 10.5-hour difference means Raj would need to join at half past midnight. (In July, when New York is on EDT, the gap shrinks to 9.5 hours and the same call would be 11:30 PM IST.) This is typical for US-India scheduling — US business hours (9 AM-5 PM) map to 7:30 PM-3:30 AM IST. For a more convenient time, the US presenter should consider an early morning slot (7:00 AM EST = 5:30 PM IST), which is reasonable for both parties.',
       },
       {
         scenario: 'A global customer support team with offices in Tokyo (JST), London (GMT), and New York (EST) needs to find overlapping business hours for a handoff meeting. They want to know: when are all three offices simultaneously in business hours?',
-        inputs: { fromZone: 'est', toZone: 'jst', time: '8:00 AM', date: '2026-08-10', includeBusinessHours: 'yes' },
+        inputs: { fromZone: 'est', toZone: 'jst', time: '8:00 AM', date: '2026-01-12', includeBusinessHours: 'yes' },
         result: '8:00 AM EST = 10:00 PM JST (same day); 14 hours ahead; No overlap in business hours',
-        insight: 'This is a "follow the sun" challenge. EST (UTC-5) 8:00 AM = GMT (UTC+0) 1:00 PM = JST (UTC+9) 10:00 PM. JST is outside business hours at 10 PM. Running the pairwise checks: EST-GMT overlap is 8:00 AM-12:00 PM EST / 1:00-5:00 PM GMT. GMT-JST overlap is minimal — JST business hours (9 AM-5 PM) are GMT 12:00 AM-8:00 AM. The three zones never fully overlap in standard business hours. The best compromise is a 7:00 AM EST / 12:00 PM GMT / 9:00 PM JST call, where JST is just at the edge.',
+        insight: 'This is a "follow the sun" challenge. EST (UTC-5) 8:00 AM = GMT (UTC+0) 1:00 PM = JST (UTC+9) 10:00 PM. JST is outside business hours at 10 PM. Running the pairwise checks (in January): EST-GMT overlap is 9:00 AM-12:00 PM EST / 2:00-5:00 PM GMT. GMT-JST has no overlap — JST business hours (9 AM-5 PM) are GMT 12:00 AM-8:00 AM. The three zones never overlap in standard business hours. The best compromise is a 7:00 AM EST / 12:00 PM GMT / 9:00 PM JST call, where JST is just at the edge.',
       },
     ],
     proTips: [
-      'Bookmark the most common conversions you use. For example, if you regularly convert between EST and IST, memorize the 10.5-hour difference: EST + 10.5 hours = IST (and IST - 10.5 hours = EST). The calculator confirms this, but knowing the offset speeds up quick mental checks.',
+      'Bookmark the most common conversions you use. For example, if you regularly convert between New York and India, remember the difference is 10.5 hours in winter (EST) and 9.5 hours in summer (EDT). The calculator applies the right one for the date, but knowing the pattern speeds up quick mental checks.',
       'Use the Business Hours Overlay as a "meeting time finder." Green hours (both zones 9 AM-5 PM) are the only times you should propose for synchronous meetings. Yellow hours mean one side is working outside normal hours — a signal to negotiate or find an alternative.',
-      'For recurring meetings across DST-observing zones, be aware that the time difference may shift by 1 hour when one zone changes clocks but the other does not (or when they change on different dates). The calculator uses standard offsets; for DST-adjusted conversions, verify the specific date\'s offset.',
+      'For recurring meetings across DST-observing zones, the time difference shifts by an hour when one zone changes its clocks and the other does not (or when they change on different dates; the US, Europe and Australia all use different dates, and the southern hemisphere moves the opposite way). Check the date of every occurrence, not just the first one: the calculator applies each zone\'s rules for the date you enter.',
       'When converting times for flight bookings, always confirm with the airline\'s published schedule. The calculator gives you the mathematical conversion, but airlines may use different time zone references (local departure time vs. local arrival time) that align with this calculation.',
       'The JSON overlap data in the results is useful for developers building scheduling apps. Parse the "overlapData" result field to get the raw hour-by-hour array with color codes, which you can use to build custom meeting-time visualizations.',
     ],
@@ -367,11 +292,11 @@ const config: CalculatorConfig = {
       { label: 'Green = overlap', value: 'Both zones working' },
     ],
     limitations: [
-      'The calculator uses standard (non-DST) UTC offsets for each time zone. Daylight Saving Time adjustments are not automatically applied based on the date — for DST-aware conversions, verify the offset for your specific date using the IANA time zone database (tzdata).',
+      'Offsets come from the time zone database built into your browser (IANA tzdata) and cover 1970 to 2100. Future daylight saving rules can still be changed by governments after this page is loaded, and dates beyond the next few years are projections of today\'s rules.',
       'The business hours overlay uses a fixed 9:00 AM-5:00 PM window for all zones, which may not match actual working hours in all cultures (e.g., Spain often works 9:00 AM-2:00 PM and 4:00 PM-7:00 PM; some Middle Eastern countries work Sunday-Thursday).',
       'The calculator supports 24 pre-defined time zones — it does not cover every IANA time zone (there are over 300), so some specific regional zones may not be listed.',
       'The overlay does not account for lunch breaks, flexible hours, or 4-day work weeks. The green/yellow/gray color coding is a rough scheduling guide, not a definitive calendar.',
-      'The date field is not parsed for DST offset adjustments; it serves only as a reference label for the conversion result.',
+      'The business hours overlay compares 9 AM-5 PM in each zone using the offsets for the chosen date; it does not look at weekdays, so a Saturday in one zone is treated like any other day.',
     ],
     citations: [
       { source: 'Wikipedia - Time Zone', url: 'https://en.wikipedia.org/wiki/Time_zone' },
