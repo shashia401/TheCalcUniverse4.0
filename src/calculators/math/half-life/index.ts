@@ -12,7 +12,7 @@ const halfLifeConfig: CalculatorConfig = {
       options: [
         { label: 'Remaining Quantity (Nt)', value: 'remainingQuantity' },
         { label: 'Initial Quantity (N₀)', value: 'initialQuantity' },
-        { label: 'Half-Life (t₁₂⁄₂)', value: 'halfLife' },
+        { label: 'Half-Life (t₁⁄₂)', value: 'halfLife' },
         { label: 'Time Elapsed (t)', value: 'timeElapsed' },
       ],
     },
@@ -42,7 +42,7 @@ const halfLifeConfig: CalculatorConfig = {
     },
     {
       id: 'halfLife',
-      label: 'Half-Life (t₁₂⁄₂)',
+      label: 'Half-Life (t₁⁄₂)',
       type: 'number',
       placeholder: '5',
       min: 0,
@@ -111,33 +111,22 @@ const halfLifeConfig: CalculatorConfig = {
       return parseFloat(n.toPrecision(10)).toString();
     };
 
+    // Each quantity appears once: the solved one is highlighted, the other three follow.
+    // (Listing the solved id twice produced duplicate React keys in the results grid.)
+    const labels = {
+      initialQuantity: 'Initial Quantity (N₀)',
+      remainingQuantity: 'Remaining Quantity (Nₜ)',
+      halfLife: 'Half-Life (t₁⁄₂)',
+      timeElapsed: 'Time Elapsed (t)',
+    };
+    const nums = { initialQuantity: N0, remainingQuantity: Nt, halfLife: t12, timeElapsed: t };
+    const solved = solveFor as keyof typeof nums;
+
     return [
-      {
-        id: solveFor,
-        label:
-          solveFor === 'remainingQuantity'
-            ? 'Remaining Quantity (Nₜ)'
-            : solveFor === 'initialQuantity'
-              ? 'Initial Quantity (N₀)'
-              : solveFor === 'halfLife'
-                ? 'Half-Life (t₁₂⁄₂)'
-                : 'Time Elapsed (t)',
-        value: fmt(
-          solveFor === 'remainingQuantity'
-            ? Nt
-            : solveFor === 'initialQuantity'
-              ? N0
-              : solveFor === 'halfLife'
-                ? t12
-                : t
-        ),
-        highlight: true,
-        color: 'positive',
-      },
-      { id: 'initialQuantity', label: 'Initial Quantity (N₀)', value: fmt(N0), color: 'neutral' },
-      { id: 'remainingQuantity', label: 'Remaining Quantity (Nₜ)', value: fmt(Nt), color: 'neutral' },
-      { id: 'halfLife', label: 'Half-Life (t₁₂⁄₂)', value: fmt(t12), color: 'neutral' },
-      { id: 'timeElapsed', label: 'Time Elapsed (t)', value: fmt(t), color: 'neutral' },
+      { id: solved, label: labels[solved], value: fmt(nums[solved]), highlight: true, color: 'positive' },
+      ...(Object.keys(nums) as (keyof typeof nums)[])
+        .filter((k) => k !== solved)
+        .map((k) => ({ id: k, label: labels[k], value: fmt(nums[k]), color: 'neutral' as const })),
       { id: 'halfLives', label: 'Half-Lives Elapsed', value: t12 > 0 ? fmt(t / t12) : '—', color: 'neutral' },
       {
         id: 'percentRemaining',
@@ -152,14 +141,14 @@ const halfLifeConfig: CalculatorConfig = {
     return createElement(HalfLifePanel, { values, results });
   },
   educational: {
-    formula: 'N(t) = N₀ × (1/2)^(t / t₁₂⁄₂)',
+    formula: 'N(t) = N₀ × (1/2)^(t / t₁⁄₂)',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="var(--svg-333333)">Exponential Decay &amp; Half-Life</text><line x1="40" y1="290" x2="400" y2="290" stroke="var(--svg-999999)" stroke-width="1.5"/><text x="410" y="294" font-size="12" fill="var(--svg-666666)">Time</text><line x1="60" y1="290" x2="60" y2="40" stroke="var(--svg-999999)" stroke-width="1.5"/><text x="66" y="38" font-size="12" fill="var(--svg-666666)">N</text><path d="M60,60 C80,70 100,85 140,120 C180,155 220,175 280,200 C320,212 360,220 400,225" fill="none" stroke="var(--svg-3b82f6)" stroke-width="3" stroke-linecap="round"/><circle cx="60" cy="60" r="5" fill="var(--svg-ef4444)"/><text x="45" y="52" text-anchor="end" font-size="13" font-weight="bold" fill="var(--svg-ef4444)">N&#8320;</text><line x1="140" y1="120" x2="140" y2="300" stroke="var(--svg-22c55e)" stroke-width="1.5" stroke-dasharray="5,3"/><text x="140" y="315" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-22c55e)">t&#8321;&#8260;&#8322; (half-life)</text><circle cx="140" cy="120" r="5" fill="var(--svg-22c55e)"/><text x="155" y="115" font-size="12" font-weight="bold" fill="var(--svg-22c55e)">N&#8320;/2</text><line x1="220" y1="175" x2="220" y2="300" stroke="var(--svg-22c55e)" stroke-width="1.5" stroke-dasharray="5,3"/><text x="220" y="315" text-anchor="middle" font-size="12" fill="var(--svg-22c55e)">2 &times; t&#8321;&#8260;&#8322;</text><circle cx="220" cy="175" r="5" fill="var(--svg-22c55e)"/><text x="235" y="170" font-size="12" font-weight="bold" fill="var(--svg-22c55e)">N&#8320;/4</text><text x="220" y="248" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-8b5cf6)">Decay Formula</text><text x="220" y="270" text-anchor="middle" font-size="14" fill="var(--svg-555555)">N(t) = N&#8320; &times; (1/2)^(t / t&#8321;&#8260;&#8322;)</text></svg>',
       alt: 'Exponential decay curve on a coordinate plane showing initial quantity N0 decreasing by half after each half-life period',
       caption: 'The half-life is the time required for a quantity to reduce to half its initial value',
     },
     formulaDescription:
-      'The radioactive decay formula describes how a quantity of a radioactive substance decreases over time. The half-life (t₁₂⁄₂) is the time required for the quantity to reduce to half its initial value. After each half-life, exactly half of the remaining atoms decay, producing an exponential decay curve. This same formula applies to any process that follows first-order kinetics, including drug elimination from the body and capacitor discharge.',
+      'The radioactive decay formula describes how a quantity of a radioactive substance decreases over time. The half-life (t₁⁄₂) is the time required for the quantity to reduce to half its initial value. After each half-life, exactly half of the remaining atoms decay, producing an exponential decay curve. This same formula applies to any process that follows first-order kinetics, including drug elimination from the body and capacitor discharge.',
     variables: [
       {
         symbol: 'N₀, N(t)',
@@ -167,7 +156,7 @@ const halfLifeConfig: CalculatorConfig = {
         description: 'N₀ is the starting amount of the substance at time t = 0. N(t) is the amount remaining after time t has passed. Both can be measured in atoms, grams, moles, or any proportional unit.',
       },
       {
-        symbol: 't₁₂⁄₂',
+        symbol: 't₁⁄₂',
         name: 'Half-Life',
         description: 'The characteristic time constant: the time required for the quantity to fall to exactly half its current value. Each isotope has a unique half-life.',
       },
@@ -195,7 +184,7 @@ const halfLifeConfig: CalculatorConfig = {
         scenario: 'Pharmacist Ms. Rodriguez is counseling a patient taking a new antibiotic. The drug has an elimination half-life of 4 hours, and the effective therapeutic level is 15 mg in the bloodstream. The patient takes a 500 mg dose at 8:00 AM. At what time will the drug level drop below the therapeutic threshold, indicating it is time for the next dose?',
         inputs: { solveFor: 'timeElapsed', initialQuantity: '500', remainingQuantity: '15', halfLife: '4' },
         result: 'Time elapsed ≈ 20.2 hours (about 5.05 half-lives)',
-        insight: 'Time elapsed ≈ 20.2 hours. The drug level drops below the therapeutic threshold around 4:12 AM the next morning — well before the next scheduled dose at 8:00 AM. This is a dosing gap of nearly 4 hours where the infection is not being effectively treated. Ms. Rodriguez should recommend either a more frequent dosing schedule (every 16-18 hours) or a higher initial dose to maintain coverage through the night. Many antibiotics use a loading dose strategy precisely to avoid this problem.',
+        insight: 'Time elapsed ≈ 20.2 hours. The drug level drops below the therapeutic threshold around 4:14 AM the next morning — well before the next scheduled dose at 8:00 AM. This is a dosing gap of nearly 4 hours where the infection is not being effectively treated. Ms. Rodriguez should recommend either a more frequent dosing schedule (every 16-18 hours) or a higher initial dose to maintain coverage through the night. Many antibiotics use a loading dose strategy precisely to avoid this problem.',
       },
       {
         scenario: 'Nuclear safety engineer Mr. Thompson is evaluating a spent fuel rod from a decommissioned reactor. The rod initially contained 50 kg of Strontium-90 (half-life 28.8 years). Regulations require the radioactivity to drop to 0.1% of original levels before the rod can be moved to long-term geological storage. How many years must the rod cool in the spent fuel pool?',
@@ -226,7 +215,7 @@ const halfLifeConfig: CalculatorConfig = {
       { label: '5 half-lives', value: '3.125% remains' },
       { label: '7 half-lives', value: '~0.78% remains' },
       { label: '10 half-lives', value: '~0.098% remains (negligible)' },
-      { label: 'Decay constant (λ)', value: 'λ = ln(2) / t₁₂⁄₂' },
+      { label: 'Decay constant (λ)', value: 'λ = ln(2) / t₁⁄₂' },
       { label: 'C-14 half-life', value: '5,730 years' },
       { label: 'U-238 half-life', value: '4.468 billion years' },
     ],
@@ -238,7 +227,7 @@ const halfLifeConfig: CalculatorConfig = {
       'Environmental science — modeling the persistence of pollutants and pesticides in soil and groundwater using half-life degradation rates',
     ],
     explanation:
-      'Radioactive decay is a random process at the atomic level, but for large numbers of atoms, it follows a precise exponential law. The half-life is independent of the starting amount: after one half-life, half of the original atoms remain; after two half-lives, one-quarter remain; after three, one-eighth; and so on. This means the quantity never reaches zero — it asymptotically approaches it. The number of half-lives elapsed (n = t / t₁₂⁄₂) determines the fraction remaining: (1/2)^n. This concept extends beyond radioactivity to carbon dating, pharmacokinetics (drug half-life), nuclear medicine, environmental science, and any system exhibiting first-order exponential decay.',
+      'Radioactive decay is a random process at the atomic level, but for large numbers of atoms, it follows a precise exponential law. The half-life is independent of the starting amount: after one half-life, half of the original atoms remain; after two half-lives, one-quarter remain; after three, one-eighth; and so on. This means the quantity never reaches zero — it asymptotically approaches it. The number of half-lives elapsed (n = t / t₁⁄₂) determines the fraction remaining: (1/2)^n. This concept extends beyond radioactivity to carbon dating, pharmacokinetics (drug half-life), nuclear medicine, environmental science, and any system exhibiting first-order exponential decay.',
     faqs: [
       {
         question: 'Can the remaining quantity ever reach exactly zero?',
@@ -246,7 +235,7 @@ const halfLifeConfig: CalculatorConfig = {
       },
       {
         question: 'What is the difference between half-life and mean lifetime?',
-        answer: 'The half-life (t₁₂⁄₂) is the time for half the atoms to decay. The mean lifetime (τ) is the average time an atom survives before decaying. They are related by τ = t₁₂⁄₂ / ln(2) ≈ 1.443 × t₁₂⁄₂. The decay constant λ = 1/τ = ln(2) / t₁₂⁄₂.',
+        answer: 'The half-life (t₁⁄₂) is the time for half the atoms to decay. The mean lifetime (τ) is the average time an atom survives before decaying. They are related by τ = t₁⁄₂ / ln(2) ≈ 1.443 × t₁⁄₂. The decay constant λ = 1/τ = ln(2) / t₁⁄₂.',
       },
       {
         question: 'Can I use this calculator for drug half-life / pharmacokinetics?',
@@ -271,7 +260,7 @@ const halfLifeConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia - Half-Life', url: 'https://en.wikipedia.org/wiki/Half-life' },
-      { source: 'NIH - Radioactivity: Half-Life', url: 'https://www.niehs.nih.gov/health/topics/agents/radon' },
+      { source: 'U.S. NRC Glossary - Half-life', url: 'https://www.nrc.gov/reading-rm/basic-ref/glossary/half-life.html' },
     ],
   },
 };

@@ -70,7 +70,7 @@ describe('Law of Cosines Calculator', () => {
     const r = config.calculate({ mode: 'sas', a: '3', b: '4', angleC: '90' });
     const steps = getValue(r, 'steps');
     expect(steps).toContain('c²');
-    expect(steps).toContain('cos⁻¹');
+    expect(steps).toContain('Angle A');
   });
 
   // ─── Edge cases: invalid inputs ──────────────────────────
@@ -100,9 +100,9 @@ describe('Law of Cosines Calculator', () => {
     expect(r).toEqual([]);
   });
 
-  it('returns empty when triangle inequality is violated in SSS', () => {
+  it('explains when the triangle inequality is violated in SSS', () => {
     const r = config.calculate({ mode: 'sss', a: '1', b: '2', c: '10' });
-    expect(r).toEqual([]);
+    expect(getValue(r, 'triangleError')).toContain('cannot form a triangle');
   });
 
   it('returns empty for negative sides', () => {
@@ -110,9 +110,9 @@ describe('Law of Cosines Calculator', () => {
     expect(r).toEqual([]);
   });
 
-  it('returns empty for invalid angle in SAS (angle >= 180)', () => {
+  it('explains an invalid angle in SAS (angle >= 180)', () => {
     const r = config.calculate({ mode: 'sas', a: '3', b: '4', angleC: '200' });
-    expect(r).toEqual([]);
+    expect(getValue(r, 'triangleError')).toContain('less than 180');
   });
 
   // ─── Educational content ──────────────────────────────────

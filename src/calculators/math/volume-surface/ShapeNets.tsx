@@ -15,7 +15,7 @@ export function CubeNetImproved() {
           <circle key={`item-${i}`} cx={p.x} cy={p.y} r="2" fill="#3b82f6" opacity="0.5" />
         ))}
       </g>
-      <text x={80} y={205} textAnchor="middle" fill="#64748b" fontSize="9">6 equal squares &mdash; fold along edges</text>
+      <text x={80} y={205} textAnchor="middle" fill="#64748b" fontSize="9">6 equal squares — fold along edges</text>
     </svg>
   );
 }
@@ -28,9 +28,9 @@ export function CylinderNetImproved({ r, h, unit }: { r: number; h: number; unit
     <svg width={360} height={240} viewBox="0 0 180 120" role="img" aria-label="Cylinder net diagram showing two circles and a rectangle">
       <circle cx={rn + 8} cy={rn + 5} r={rn} fill="rgba(59,130,246,0.08)" stroke="#3b82f6" strokeWidth="1.5" />
       <circle cx={rn + 8} cy={95 - rn} r={rn} fill="rgba(59,130,246,0.08)" stroke="#3b82f6" strokeWidth="1.5" />
-      <text x={rn + 8} y={rn + 5} textAnchor="middle" fill="#64748b" fontSize="8" dominantBaseline="middle">{r}&pi;</text>
+      <text x={rn + 8} y={rn + 5} textAnchor="middle" fill="#64748b" fontSize="8" dominantBaseline="middle">{r}π</text>
       <rect x={rn * 2 + 14} y={95 - hh - 10} width={rectW} height={hh} fill="rgba(59,130,246,0.06)" stroke="#3b82f6" strokeWidth="1.5" rx="1" />
-      <text x={rn * 2 + 14 + rectW / 2} y={95 - hh - 10 + hh / 2} textAnchor="middle" fill="#64748b" fontSize="8" dominantBaseline="middle">2&pi;r = {rectW.toFixed(0)}</text>
+      <text x={rn * 2 + 14 + rectW / 2} y={95 - hh - 10 + hh / 2} textAnchor="middle" fill="#64748b" fontSize="8" dominantBaseline="middle">2πr = {rectW.toFixed(0)}</text>
       <text x={rn * 2 + 14 + rectW + 6} y={95 - 10} textAnchor="start" fill="#64748b" fontSize="8">h = {h}{unit}</text>
       <text x={90} y={115} textAnchor="middle" fill="#64748b" fontSize="8">2 circles + 1 rectangle</text>
     </svg>
@@ -63,8 +63,8 @@ export function SphereNetImproved() {
           <ellipse key={`item-${i}`} cx={100 + dx} cy="35" rx="10" ry="28" fill="rgba(59,130,246,0.05)" stroke="#94a3b8" strokeWidth="0.8" />
         ))}
       </g>
-      <text x={100} y={62} textAnchor="middle" fill="#64748b" fontSize="9">A sphere has NO flat net &mdash; its surface is curved</text>
-      <text x={100} y={73} textAnchor="middle" fill="#94a3b8" fontSize="8">Surface area = 4&pi;r&sup2; (same as 4 great circles)</text>
+      <text x={100} y={62} textAnchor="middle" fill="#64748b" fontSize="9">A sphere has NO flat net — its surface is curved</text>
+      <text x={100} y={73} textAnchor="middle" fill="#94a3b8" fontSize="8">Surface area = 4πr² (same as 4 great circles)</text>
     </svg>
   );
 }
@@ -121,11 +121,11 @@ export function ShapeNetView({ shape, r, h, l, w, unit }: { shape: string; r: nu
 export function netDescription(shape: string, vals: { r?: number; h?: number; l?: number; w?: number; s?: number }) {
   switch (shape) {
     case 'cube': return `A cube has 6 congruent square faces. When unfolded, they form a cross. Each square has side length ${vals.s || 's'}. All edges are equal.`;
-    case 'cylinder': return `A cylinder unfolds into 2 circles (top + bottom, area = &pi;r&sup2; each) and 1 rectangle (the lateral surface). The rectangle's width equals the circumference (2&pi;r &asymp; ${(2 * Math.PI * (vals.r || 0)).toFixed(1)}) and its height equals the cylinder height (${vals.h || 'h'}).`;
-    case 'cone': return `A cone unfolds into 1 circle (the base, area = &pi;r&sup2;) and 1 sector of a larger circle (the lateral surface). The sector's radius equals the slant height (l = &radic;(r&sup2; + h&sup2;) &asymp; ${Math.sqrt((vals.r || 0) ** 2 + (vals.h || 0) ** 2).toFixed(2)}).`;
-    case 'sphere': return `A sphere is unique among 3D shapes &mdash; it has NO flat net because its surface is continuously curved. Unlike polyhedra, a sphere cannot be unfolded into flat polygons without distortion (similar to how you cannot flatten an orange peel without tearing). Use formulas directly: SA = 4&pi;r&sup2;.`;
-    case 'box': return `A rectangular prism (box) has 6 faces in 3 congruent pairs: top/bottom (l&times;w), front/back (l&times;h), and left/right (w&times;h). The net shows all 6 rectangles unfolded in a cross pattern.`;
-    case 'pyramid': return `A square pyramid unfolds into 1 square base (area = b&sup2;) and 4 congruent isosceles triangles. Each triangle has base = side length (${vals.r || 'b'}) and height equal to the slant height (l = &radic;(h&sup2; + (b/2)&sup2;) &asymp; ${Math.sqrt((vals.h || 0) ** 2 + ((vals.r || 0) / 2) ** 2).toFixed(2)}).`;
+    case 'cylinder': return `A cylinder unfolds into 2 circles (top + bottom, area = πr² each) and 1 rectangle (the lateral surface). The rectangle's width equals the circumference (2πr ≈ ${(2 * Math.PI * (vals.r || 0)).toFixed(1)}) and its height equals the cylinder height (${vals.h || 'h'}).`;
+    case 'cone': return `A cone unfolds into 1 circle (the base, area = πr²) and 1 sector of a larger circle (the lateral surface). The sector's radius equals the slant height (l = √(r² + h²) ≈ ${Math.sqrt((vals.r || 0) ** 2 + (vals.h || 0) ** 2).toFixed(2)}).`;
+    case 'sphere': return `A sphere is unique among 3D shapes — it has NO flat net because its surface is continuously curved. Unlike polyhedra, a sphere cannot be unfolded into flat polygons without distortion (similar to how you cannot flatten an orange peel without tearing). Use formulas directly: SA = 4πr².`;
+    case 'box': return `A rectangular prism (box) has 6 faces in 3 congruent pairs: top/bottom (l×w), front/back (l×h), and left/right (w×h). The net shows all 6 rectangles unfolded in a cross pattern.`;
+    case 'pyramid': return `A square pyramid unfolds into 1 square base (area = b²) and 4 congruent isosceles triangles. Each triangle has base = side length (${vals.r || 'b'}) and height equal to the slant height (l = √(h² + (b/2)²) ≈ ${Math.sqrt((vals.h || 0) ** 2 + ((vals.r || 0) / 2) ** 2).toFixed(2)}).`;
     default: return '';
   }
 }

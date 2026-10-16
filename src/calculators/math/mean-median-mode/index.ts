@@ -1,70 +1,7 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import MeanMedianModePanel from './MeanMedianModePanel';
-
-// Decimal.js with 20-digit precision for consistent mean, sum, and range
-// calculations — eliminates the floating-point approximation errors that can
-// occur when summing many decimal values (e.g., 0.1 + 0.2 ≠ 0.3 in native JS).
-Decimal.set({ precision: 20, rounding: Decimal.ROUND_HALF_UP });
-
-function parseData(input: string): Decimal[] {
-  const nums = input
-    .split(/[,;\s]+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 0)
-    .map(s => { try { return new Decimal(s); } catch { return null; } })
-    .filter((d): d is Decimal => d !== null && d.isFinite());
-  return nums;
-}
-
-function mean(arr: Decimal[]): Decimal {
-  if (arr.length === 0) return new Decimal(0);
-  return arr.reduce((s, v) => s.plus(v), new Decimal(0)).div(arr.length);
-}
-
-function median(arr: Decimal[]): { value: Decimal; sorted: Decimal[]; middleTwo: [Decimal, Decimal] | null } {
-  const sorted = [...arr].sort((a, b) => a.comparedTo(b));
-  const n = sorted.length;
-  let value: Decimal;
-  let middleTwo: [Decimal, Decimal] | null = null;
-
-  if (n % 2 === 1) {
-    value = sorted[Math.floor(n / 2)];
-  } else {
-    const mid = n / 2;
-    middleTwo = [sorted[mid - 1], sorted[mid]];
-    value = sorted[mid - 1].plus(sorted[mid]).div(2);
-  }
-
-  return { value, sorted, middleTwo };
-}
-
-function mode(arr: Decimal[]): Decimal[] {
-  const freq = new Map<string, { value: Decimal; count: number }>();
-  arr.forEach(v => {
-    const key = v.toString();
-    const entry = freq.get(key);
-    if (entry) {
-      entry.count++;
-    } else {
-      freq.set(key, { value: v, count: 1 });
-    }
-  });
-  const maxFreq = Math.max(1, ...Array.from(freq.values()).map(e => e.count));
-  if (maxFreq === 1) return [];
-  return Array.from(freq.values())
-    .filter(e => e.count === maxFreq)
-    .map(e => e.value)
-    .sort((a, b) => a.comparedTo(b));
-}
-
-function range(arr: Decimal[]): Decimal {
-  if (arr.length === 0) return new Decimal(0);
-  const max = Decimal.max(...arr);
-  const min = Decimal.min(...arr);
-  return max.minus(min);
-}
+import { parseDataset, summarize, fmtDec, ignoredRow, type Dec } from '../../../utils/stats';
 
 const meanMedianModeConfig: CalculatorConfig = {
   inputs: [
@@ -79,77 +16,44 @@ const meanMedianModeConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const data = parseData(values.data || '');
+    // Shared exact-decimal engine (src/utils/stats.ts).
+    const { values: data, ignored } = parseDataset(values.data);
     if (data.length < 2) return [];
 
-    const m = mean(data);
-    const med = median(data);
-    const mod = mode(data);
-    const r = range(data);
+    const s = summarize(data);
+    const fmt = (n: Dec) => fmtDec(n);
+    const n = s.n;
+    const middleTwo: [Dec, Dec] | null = n % 2 === 0 ? [s.sorted[n / 2 - 1], s.sorted[n / 2]] : null;
+    const modeText = s.modes.length === 0 ? 'No mode (all values unique)' : s.modes.map(fmt).join(', ');
 
-    const fmt = (n: Decimal) => {
-      if (n.isInteger() && n.abs().lessThan(1e15)) return n.toFixed(0);
-      const str = n.toPrecision(10);
-      return parseFloat(str).toString();
-    };
-
-    const results = [
-      {
-        id: 'mean',
-        label: 'Mean (Average)',
-        value: fmt(m),
-        highlight: true,
-        color: 'positive' as const,
-      },
-      {
-        id: 'median',
-        label: 'Median',
-        value: fmt(med.value),
-        highlight: true,
-        color: 'positive' as const,
-      },
-      {
-        id: 'mode',
-        label: 'Mode',
-        value: mod.length === 0 ? 'No mode (all values unique)' : mod.map(fmt).join(', '),
-        highlight: true,
-        color: 'positive' as const,
-      },
-      {
-        id: 'range',
-        label: 'Range',
-        value: fmt(r),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'sortedData',
-        label: 'Sorted Data',
-        value: med.sorted.map(fmt).join(', '),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'dataCount',
-        label: 'Count (n)',
-        value: data.length.toString(),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'sum',
-        label: 'Sum',
-        value: fmt(data.reduce((s, v) => s.plus(v), new Decimal(0))),
-        color: 'neutral' as const,
-      },
-      ...(med.middleTwo
+    return [
+      { id: 'mean', label: 'Mean (Average)', value: fmt(s.mean), highlight: true, color: 'positive' },
+      { id: 'median', label: 'Median', value: fmt(s.median), highlight: true, color: 'positive' },
+      { id: 'mode', label: 'Mode', value: modeText, highlight: true, color: 'positive' },
+      { id: 'range', label: 'Range', value: fmt(s.range), color: 'neutral' },
+      { id: 'sortedData', label: 'Sorted Data', value: s.sorted.map(fmt).join(', '), color: 'neutral' },
+      { id: 'dataCount', label: 'Count (n)', value: String(n), color: 'neutral' },
+      { id: 'sum', label: 'Sum', value: fmtDec(s.sum, 20), color: 'neutral' },
+      ...(middleTwo
         ? [{
-            id: 'medianDetail' as const,
+            id: 'medianDetail',
             label: 'Median (Even Dataset)',
-            value: `(${fmt(med.middleTwo[0])} + ${fmt(med.middleTwo[1])}) / 2 = ${fmt(med.value)}`,
+            value: `(${fmt(middleTwo[0])} + ${fmt(middleTwo[1])}) / 2 = ${fmt(s.median)}`,
             color: 'neutral' as const,
           }]
         : []),
+      ...ignoredRow(ignored),
+      // Full-precision numbers for the panel (it never parses the formatted strings above).
+      {
+        id: '_data',
+        label: '',
+        value: JSON.stringify({
+          sorted: s.sorted.map((d) => d.toNumber()),
+          mean: s.mean.toNumber(),
+          median: s.median.toNumber(),
+        }),
+      },
     ];
-
-    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -196,7 +100,7 @@ const meanMedianModeConfig: CalculatorConfig = {
         scenario: 'Mr. Thompson, a math teacher, graded his students\' final exams. The scores were: 72, 85, 91, 78, 85, 63, 85, 94, 88, 76. He wants to report the class average, find the middle score, and identify if there is a most common score.',
         inputs: { data: '72, 85, 91, 78, 85, 63, 85, 94, 88, 76' },
         result: 'Mean = 81.7, Median = 85, Mode = 85 (appears 3 times), Range = 31. The mode of 85 is the most common score, and the median indicates half the class scored above 85.',
-        insight: 'Mean = 81.7, Median = 85, Mode = 85. The mode of 85 appears three times -- it is the most common score. The median of 85 means half the students scored above 85 and half below. The mean of 81.7 is slightly below the median because one low score of 63 pulled the average down. Mr. Thompson can use these statistics to discuss whether the exam was appropriately challenging.',
+        insight: 'Mean = 81.7, Median = 85, Mode = 85. The mode of 85 appears three times -- it is the most common score. The median of 85 means half the students scored 85 or higher and half scored 85 or lower (three students tied at exactly 85). The mean of 81.7 is slightly below the median because one low score of 63 pulled the average down. Mr. Thompson can use these statistics to discuss whether the exam was appropriately challenging.',
       },
       {
         scenario: 'Raj, a product manager, surveyed customers about how many times they used his app last month. The responses: 15, 2, 8, 42, 7, 3, 12, 5, 0, 6, 4, 11. He needs to understand typical usage to set engagement targets.',
@@ -245,7 +149,7 @@ const meanMedianModeConfig: CalculatorConfig = {
       },
       {
         question: 'Can a dataset have more than one mode?',
-        answer: 'Yes. A dataset with two modes is called bimodal, and one with more than two is multimodal. Bimodal data often indicates two underlying subpopulations. For example, height data combining men and women is bimodal (peaks around 170cm and 183cm). When you see multiple modes, consider whether your data is actually a mix of distinct groups that should be analyzed separately.',
+        answer: 'Yes. A dataset with two modes is called bimodal, and one with more than two is multimodal. Bimodal data often indicates two underlying subpopulations. For example, a data set that mixes the heights of men and women often shows two humps (one per group). When you see multiple modes, consider whether your data is actually a mix of distinct groups that should be analyzed separately.',
       },
       {
         question: 'When should I use the median instead of the mean?',

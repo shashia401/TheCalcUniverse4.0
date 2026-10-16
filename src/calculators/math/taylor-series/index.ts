@@ -1,120 +1,25 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import TaylorSeriesPanel from './TaylorSeriesPanel';
-import { safeEval } from '../shared/safeEval';
+import { CasError, type Node, evalNode, parse, taylorCoefficients } from '../shared/cas';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { MAX_ORDER, evalTaylor, ratApprox } from './taylorFormat';
 
-function factorial(n: number): number {
-  if (n < 0) return 1;
-  let result = 1;
-  for (let i = 2; i <= n; i++) result *= i;
-  return result;
-}
+const numStr = (v: number): string => String(Number(v.toPrecision(10)));
 
-function getKnownTaylorTerms(expr: string, center: number, order: number): string[] | null {
-  const s = expr.trim().replace(/\s/g, '');
-  const c = center;
-
-  const terms: string[] = [];
-  const fmt = (n: number) => {
-    if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-    return parseFloat(n.toFixed(6)).toString();
-  };
-
-  if (s === 'e^x' || s === 'exp(x)') {
-    // e^x = Σ x^n/n!
-    for (let n = 0; n <= order; n++) {
-      if (n === 0) {
-        terms.push('1');
-      } else {
-        const coeff = Math.exp(c) / factorial(n);
-        const term = `(${fmt(coeff)})·(x-${fmt(c)})^${n}`;
-        terms.push(term);
-      }
-    }
-    return terms;
+/** One term "c_k (x - a)^k" as text, without its sign. */
+function termText(c: number, k: number, a: number): string {
+  const v = a === 0 ? 'x' : a > 0 ? `(x - ${numStr(a)})` : `(x + ${numStr(-a)})`;
+  const mono = k === 0 ? '' : k === 1 ? v : `${v}^${k}`;
+  const r = ratApprox(Math.abs(c));
+  if (!r) {
+    const d = String(Number(Math.abs(c).toPrecision(6)));
+    return k === 0 ? d : `${d}*${mono}`;
   }
-
-  if (s === 'sin(x)') {
-    // sin(x) = Σ (-1)^n * x^(2n+1)/(2n+1)!
-    for (let n = 0; n <= order; n++) {
-      const power = 2 * n + 1;
-      if (power > order) break;
-      // More direct approach: use derivative pattern
-    }
-    // Simpler: compute terms around center using derivatives
-    for (let k = 0; k <= order; k++) {
-      if (k === 0) {
-        terms.push(fmt(Math.sin(c)));
-      } else {
-        // derivative pattern: sin → cos → -sin → -cos → sin
-        const deriv = k % 4;
-        let derivVal = 0;
-        if (deriv === 0) derivVal = Math.sin(c);
-        else if (deriv === 1) derivVal = Math.cos(c);
-        else if (deriv === 2) derivVal = -Math.sin(c);
-        else derivVal = -Math.cos(c);
-        const coeff = derivVal / factorial(k);
-        if (coeff === 0) continue;
-        const term = `(${fmt(coeff)})·(x-${fmt(c)})^${k}`;
-        terms.push(term);
-      }
-    }
-    return terms;
-  }
-
-  if (s === 'cos(x)') {
-    for (let k = 0; k <= order; k++) {
-      if (k === 0) {
-        terms.push(fmt(Math.cos(c)));
-      } else {
-        const deriv = k % 4;
-        let derivVal = 0;
-        if (deriv === 0) derivVal = Math.cos(c);
-        else if (deriv === 1) derivVal = -Math.sin(c);
-        else if (deriv === 2) derivVal = -Math.cos(c);
-        else derivVal = Math.sin(c);
-        const coeff = derivVal / factorial(k);
-        if (coeff === 0) continue;
-        const term = `(${fmt(coeff)})·(x-${fmt(c)})^${k}`;
-        terms.push(term);
-      }
-    }
-    return terms;
-  }
-
-  if (s === '1/(1-x)' && c === 0) {
-    // 1/(1-x) = Σ x^n for n=0..order, valid for |x|<1
-    for (let n = 0; n <= order; n++) {
-      if (n === 0) {
-        terms.push('1');
-      } else {
-        const term = `x^${n}`;
-        terms.push(term);
-      }
-    }
-    return terms;
-  }
-
-  return null;
-}
-
-function evaluateTaylorPoly(terms: string[], xVal: number): number {
-  // Simple evaluation: parse each term of form "(coeff)·(x-c)^k"
-  let sum = 0;
-  for (const term of terms) {
-    const match = term.match(/^\(([^)]+)\)·\(x-([^)]+)\)\^(\d+)$/);
-    if (match) {
-      const coeff = parseFloat(match[1]);
-      const center = parseFloat(match[2]);
-      const power = parseInt(match[3], 10);
-      sum += coeff * Math.pow(xVal - center, power);
-    } else if (term === '1') {
-      sum += 1;
-    } else if (/^\d/.test(term)) {
-      sum += parseFloat(term);
-    }
-  }
-  return sum;
+  const [p, q] = r;
+  if (k === 0) return q === 1 ? `${p}` : `${p}/${q}`;
+  if (q === 1) return p === 1 ? mono : `${p}*${mono}`;
+  return p === 1 ? `${mono}/${q}` : `${p}*${mono}/${q}`;
 }
 
 const taylorConfig: CalculatorConfig = {
@@ -123,9 +28,10 @@ const taylorConfig: CalculatorConfig = {
       id: 'expression',
       label: 'Function f(x)',
       type: 'text',
-      placeholder: 'e.g. e^x, sin(x), cos(x), 1/(1-x)',
+      placeholder: 'e.g. e^x, sin(x), ln(1+x), 1/(1-x)',
       required: true,
-      helpText: 'Enter the function to expand. Known expansions: e^x, sin(x), cos(x), 1/(1-x)',
+      helpText:
+        'Any function of x built from + - * / ^, sin cos tan asin acos atan sinh cosh tanh exp ln log sqrt, and the constants pi and e. Coefficients are exact derivatives f^(k)(a)/k!, not finite differences.',
     },
     {
       id: 'center',
@@ -142,8 +48,10 @@ const taylorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: 'n (order)',
       step: 1,
+      min: 0,
+      max: MAX_ORDER,
       inputMode: 'numeric',
-      helpText: 'The highest power term to include in the approximation (default: 5)',
+      helpText: `The highest power term to include in the approximation, 0 to ${MAX_ORDER} (default: 5)`,
     },
     {
       id: 'xValue',
@@ -159,158 +67,63 @@ const taylorConfig: CalculatorConfig = {
     const expression = (values.expression || '').trim();
     if (!expression) return [];
 
-    const center = values.center !== undefined && values.center !== ''
-      ? parseFloat(values.center)
-      : 0;
-    const order = values.order !== undefined && values.order !== ''
-      ? parseInt(values.order, 10)
-      : 5;
-    const xVal = values.xValue !== undefined && values.xValue !== ''
-      ? parseFloat(values.xValue)
-      : undefined;
+    const blank = (s?: string) => (s ?? '').trim() === '';
+    const center = blank(values.center) ? 0 : parseNumberStrict(values.center);
+    const order = blank(values.order) ? 5 : parseNumberStrict(values.order);
+    const xVal = blank(values.xValue) ? undefined : parseNumberStrict(values.xValue);
+    if (!Number.isFinite(center) || !Number.isInteger(order) || order < 0) return [];
+    const n = Math.min(order, MAX_ORDER);
 
-    if (isNaN(center) || isNaN(order)) return [];
-
-    const fmtPoly = (n: number) => {
-      return parseFloat(n.toFixed(6)).toString();
-    };
-
-    let terms: string[];
-
-    const knownTerms = getKnownTaylorTerms(expression, center, order);
-    if (knownTerms) {
-      terms = knownTerms;
-    } else {
-      // Unknown function: compute numeric derivatives using finite differences
-      const h = 0.001;
-      const evalFn = (x: number): number => {
-        try {
-          return safeEval(expression, { x });
-        } catch {
-          return NaN;
-        }
-      };
-
-      // Compute f at center
-      const f0 = evalFn(center);
-      if (isNaN(f0)) return [];
-
-      terms = [];
-      if (f0 !== 0) terms.push(fmtPoly(f0));
-
-      for (let k = 1; k <= order; k++) {
-        // Compute k-th derivative using finite difference
-        let derivVal = 0;
-        try {
-          // Use central difference for first derivative, extended for higher orders
-          if (k === 1) {
-            derivVal = (evalFn(center + h) - evalFn(center - h)) / (2 * h);
-          } else if (k === 2) {
-            derivVal = (evalFn(center + h) - 2 * evalFn(center) + evalFn(center - h)) / (h * h);
-          } else if (k === 3) {
-            derivVal = (evalFn(center + 2 * h) - 2 * evalFn(center + h) + 2 * evalFn(center - h) - evalFn(center - 2 * h)) / (2 * h * h * h);
-          } else if (k === 4) {
-            derivVal = (evalFn(center + 2 * h) - 4 * evalFn(center + h) + 6 * evalFn(center) - 4 * evalFn(center - h) + evalFn(center - 2 * h)) / (h * h * h * h);
-          } else {
-            // For higher orders, use repeated first derivative approach
-            derivVal = 0;
-          }
-        } catch {
-          break;
-        }
-
-        if (!isFinite(derivVal) || Math.abs(derivVal) < 1e-12) continue;
-
-        const coeff = derivVal / factorial(k);
-        const term = `(${fmtPoly(coeff)})·(x-${fmtPoly(center)})^${k}`;
-        terms.push(term);
-      }
+    let tree: Node;
+    try {
+      tree = parse(expression);
+    } catch (e) {
+      if (e instanceof CasError) return [];
+      throw e;
     }
 
-    // Build polynomial string
-    let polyStr = '';
-    for (let i = 0; i < terms.length; i++) {
-      const term = terms[i];
-      const isFirst = i === 0;
-      let sign = '+';
-      let cleaned = term;
-
-      const match = term.match(/^\(([^)]+)\)·\(x-([^)]+)\)\^(\d+)$/);
-      if (match) {
-        const coeff = parseFloat(match[1]);
-        const c = match[2];
-        const power = parseInt(match[3], 10);
-        sign = coeff >= 0 ? '+' : '-';
-        const absCoeff = Math.abs(coeff);
-        let termStr = '';
-        if (power === 0) {
-          termStr = fmtPoly(absCoeff);
-        } else if (power === 1) {
-          termStr = absCoeff === 1 ? `(x-${c})` : `${fmtPoly(absCoeff)}·(x-${c})`;
-        } else {
-          termStr = absCoeff === 1 ? `(x-${c})^${power}` : `${fmtPoly(absCoeff)}·(x-${c})^${power}`;
-        }
-        cleaned = termStr;
-      } else {
-        // Constant term
-        if (term === '1') {
-          cleaned = '1';
-        } else {
-          const numVal = parseFloat(term);
-          if (!isNaN(numVal)) {
-            sign = numVal >= 0 ? '+' : '-';
-            cleaned = fmtPoly(Math.abs(numVal));
-          }
-        }
+    let coeffs: number[];
+    try {
+      coeffs = taylorCoefficients(tree, center, n);
+    } catch (e) {
+      if (e instanceof CasError) {
+        return [{ id: 'approximation', label: 'Taylor Polynomial', value: `Not available: ${e.message}`, color: 'negative' }];
       }
-
-      if (isFirst && sign === '+') {
-        polyStr += cleaned;
-      } else {
-        polyStr += ' ' + sign + ' ' + cleaned;
-      }
+      throw e;
     }
 
-    if (!polyStr) polyStr = '0';
+    // Rounding noise (1e-17 where the exact coefficient is 0) must not become a term: a coefficient counts as
+    // zero when it is negligible next to its neighbours (relative test, so genuinely tiny ones like 1/20! survive).
+    const c = coeffs.map((v, k) => {
+      const near = Math.max(...[k - 2, k - 1, k + 1, k + 2].map((j) => (j >= 0 && j < coeffs.length ? Math.abs(coeffs[j]) : 0)));
+      return Math.abs(v) <= 2e-15 * near ? 0 : v;
+    });
 
-    // Evaluate at x if provided
-    let evaluation: string | undefined;
-    if (xVal !== undefined && !isNaN(xVal)) {
-      const known = getKnownTaylorTerms(expression, center, order);
-      if (known) {
-        evaluation = fmtPoly(evaluateTaylorPoly(known, xVal));
-      } else {
-        evaluation = fmtPoly(evaluateTaylorPoly(terms, xVal));
-      }
-    }
+    const terms: { text: string; neg: boolean }[] = [];
+    c.forEach((v, k) => {
+      if (v !== 0) terms.push({ text: termText(v, k, center), neg: v < 0 });
+    });
 
-    return [
-      {
-        id: 'approximation',
-        label: 'Taylor Polynomial',
-        value: polyStr,
-        highlight: true,
-        color: 'positive' as const,
-      },
-      {
-        id: 'terms',
-        label: 'Individual Terms',
-        value: terms.join(' | '),
-        color: 'neutral' as const,
-      },
-      {
-        id: 'numberOfTerms',
-        label: 'Number of Terms',
-        value: terms.length.toString(),
-        color: 'neutral' as const,
-      },
-      ...(evaluation !== undefined ? [{
-        id: 'evaluation' as const,
-        label: `f(${fmtPoly(xVal!)}) ≈`,
-        value: evaluation,
-        color: 'positive' as const,
-      }] : []),
+    const polyStr = terms.length
+      ? terms.map((t, i) => (i === 0 ? (t.neg ? `-${t.text}` : t.text) : `${t.neg ? '-' : '+'} ${t.text}`)).join(' ')
+      : '0';
+
+    const results: CalculatorResult[] = [
+      { id: 'approximation', label: 'Taylor Polynomial', value: polyStr, highlight: true, color: 'positive' },
+      { id: 'terms', label: 'Individual Terms', value: terms.length ? terms.map((t) => `${t.neg ? '-' : ''}${t.text}`).join(' | ') : '0', color: 'neutral' },
+      { id: 'numberOfTerms', label: 'Number of Terms', value: terms.length.toString(), color: 'neutral' },
     ];
+
+    if (xVal !== undefined && Number.isFinite(xVal)) {
+      const p = evalTaylor(c, center, xVal);
+      const f = evalNode(tree, xVal);
+      results.push({ id: 'evaluation', label: `P${n}(${numStr(xVal)}) ≈`, value: numStr(p), color: 'positive' });
+      if (Number.isFinite(f)) {
+        results.push({ id: 'actual', label: `f(${numStr(xVal)}) (exact function value)`, value: numStr(f), color: 'neutral' });
+        results.push({ id: 'error', label: 'Approximation error |f − P|', value: numStr(Math.abs(f - p)), color: 'neutral' });
+      }
+    }
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -364,46 +177,45 @@ const taylorConfig: CalculatorConfig = {
         answer: 'Higher order means more terms are included, which generally gives a more accurate approximation near the center point. However, far from the center, adding more terms might initially make the approximation worse (a phenomenon known as Runge\'s phenomenon for some functions). For well-behaved functions like e^x and sin(x), the approximation improves everywhere as order increases.',
       },
       {
-        question: 'What happens if I use a function that is not in the known list?',
-        answer: 'The calculator will attempt to compute the Taylor series using finite-difference approximations of the derivatives. This numerical approach works for many differentiable functions but may be less accurate for functions with rapid changes or discontinuities. Results are best for smooth functions near the center point.',
+        question: 'Which functions are supported, and how accurate are the coefficients?',
+        answer: 'Any function built from + - * / ^, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, exp, ln, log, sqrt, abs and the constants pi and e, e.g. e^x, ln(1+x), 1/(1-x), x*exp(x), tan(x), (1+x)^(1/3). The coefficients f^(k)(a)/k! are computed exactly by power-series arithmetic (not finite differences), and shown as fractions when they are rational (x - x^3/6 + x^5/120 for sin x). Expansions are refused, with a message, where the function is not analytic at the centre (for example ln(x) or sqrt(x) at 0, or 1/x at 0).',
       },
       {
         question: 'Can I use the Taylor series to compute values of functions?',
         answer: 'Yes! By providing an x value in the "Evaluate at x" field, the calculator computes the Taylor polynomial approximation at that point. This is exactly how calculators and computers compute values of functions like sin(x), e^x, and many others — they use Taylor series (or similar polynomial approximations) evaluated to sufficient precision.',
       },
       {
-        question: 'Why does the calculator show only a few known functions with exact symbolic terms?',
-        answer: 'The calculator provides exact symbolic Taylor expansions (with analytically computed derivatives) for the most commonly used functions: e^x, sin(x), cos(x), and 1/(1-x). These functions have simple, well-known derivative patterns that allow exact term generation. For other functions, the calculator uses numerical finite-difference approximations of the derivatives, which can produce approximate coefficients but may lack the elegant symbolic form. The finite-difference approach is a practical trade-off that lets you explore Taylor expansions for arbitrary differentiable functions without requiring a full computer algebra system.',
+        question: 'Why are some coefficients decimals instead of fractions?',
+        answer: 'A coefficient is printed as a fraction p/q when it equals one to 13 significant digits (denominator up to 5,000,000, enough for 1/10!). Coefficients that involve irrational numbers, such as those of e^x around a = 1 (powers of e divided by k!) or sin(x) around a = 1, are printed as decimals with 6 significant digits.',
       },
     ],
     workedExamples: [
       {
         scenario: 'An engineering student needs to approximate sin(0.1) using a 3rd-order Maclaurin series to verify a hand calculation for their numerical methods homework.',
         inputs: { expression: 'sin(x)', center: '0', order: '3', xValue: '0.1' },
-        result: 'x - 0.166667·(x-0)^3; f(0.1) ≈ 0.099833',
+        result: 'x - x^3/6; P3(0.1) ≈ 0.099833; f(0.1) = 0.099833',
         insight: 'The 3rd-order Maclaurin series for sin(x) around a=0 is: sin(0) + cos(0)(x-0)^1 + (-sin(0))(x-0)^2/2! + (-cos(0))(x-0)^3/3! = x - x^3/6. Evaluating at x=0.1 gives 0.1 - 0.001/6 = 0.1 - 0.0001667 = 0.0998333. The actual sin(0.1) = 0.0998334, so the approximation is accurate to 7 decimal places with just 2 non-zero terms.',
       },
       {
         scenario: 'A physics student wants to compute e^2 using a 5th-order Taylor expansion around a=0 to compare with the exact value from their scientific calculator.',
         inputs: { expression: 'e^x', center: '0', order: '5', xValue: '2' },
-        result: '1 + x + 0.5·x^2 + 0.166667·x^3 + 0.041667·x^4 + 0.008333·x^5; f(2) ≈ 7.266664',
-        insight: 'The Maclaurin series for e^x is 1 + x + x^2/2! + x^3/3! + x^4/4! + x^5/5! = 1 + 2 + 2 + 1.333 + 0.667 + 0.267 = 7.267 (the calculator\'s rounded per-term coefficients give 7.266664). The exact e^2 = 7.389, giving an error of about 1.7%. With a 10th-order expansion, the approximation improves to 7.389 - nearly exact. This demonstrates both the power of Taylor series and the need for sufficient terms when evaluating far from the center.',
+        result: '1 + x + x^2/2 + x^3/6 + x^4/24 + x^5/120; P5(2) ≈ 7.266667; f(2) = 7.389056',
+        insight: 'The Maclaurin series for e^x is 1 + x + x^2/2! + x^3/3! + x^4/4! + x^5/5! = 1 + 2 + 2 + 1.333 + 0.667 + 0.267 = 7.267. The exact e^2 = 7.389, giving an error of about 1.7%. With a 10th-order expansion, the approximation improves to 7.389 - nearly exact. This demonstrates both the power of Taylor series and the need for sufficient terms when evaluating far from the center.',
       },
     ],
     proTips: [
       'For best accuracy, choose a center point (a) as close as possible to the region where you plan to evaluate the function. The approximation quality degrades as |x - a| increases.',
       'When using the calculator to check homework, always note the order used. Many textbook problems specify the order or number of terms explicitly — matching this ensures you are solving the same problem.',
-      'The finite-difference method for unknown functions uses a step size h = 0.001. For functions with very rapid oscillations or sharp features, the numerical derivatives may lose accuracy. Stick to smooth, well-behaved functions for best results.',
       'Use the "Evaluate at x" field to test how well the polynomial approximates the actual function value. Try several different x values at different distances from the center to understand the convergence behavior.',
       'For periodic functions like sin(x) and cos(x), use the angle reduction property (e.g., sin(x + 2pi) = sin(x)) to move the evaluation point closer to the center, improving accuracy for a given order.',
       'Remember that the Taylor series for 1/(1-x) only converges for |x| < 1. Evaluating at x = 2 will give a wildly incorrect result no matter how many terms you include — this is a fundamental limitation of the series, not a calculator error.',
     ],
     limitations: [
       'Taylor series only converge within their radius of convergence — evaluating outside this radius produces meaningless results regardless of the number of terms. For example, the series for 1/(1-x) diverges for |x| >= 1.',
-      'The finite-difference derivative approximation becomes unreliable for functions with discontinuities, cusps, or very rapid oscillations near the center point. Stick to smooth, well-behaved functions for best results.',
+      'The coefficients are exact derivatives, but a Taylor polynomial is only a local approximation: far from the centre (or outside the radius of convergence) the error can be large, which is why the actual function value and the error are shown next to the polynomial value.',
       'Numerical precision limits (about 15-16 significant digits in double-precision floating-point) mean that coefficients for very high orders may accumulate rounding errors.',
       'The calculator does not provide the Lagrange remainder term, which quantifies the error between the polynomial approximation and the true function value. For error bounds, consult Taylor\'s theorem and compute the remainder manually.',
-      'For functions not in the known list (e^x, sin(x), cos(x), 1/(1-x)), only numerical approximations of terms are available, not exact symbolic forms.',
+      'Only functions of the single variable x are supported, and the centre must be a point where the function is analytic (smooth with a convergent series).',
     ],
     citations: [
       { source: 'Wikipedia - Taylor Series', url: 'https://en.wikipedia.org/wiki/Taylor_series' },

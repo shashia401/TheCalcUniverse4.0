@@ -1,16 +1,20 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import DicePanel from './DicePanel';
+import { randomInt, type RandomU32 } from '../../../utils/random';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+
+/** Allowed die sizes (the select below offers exactly these). */
+const SIDES = [4, 6, 8, 10, 12, 20, 100];
 
 /**
- * Roll a single die with `sides` using crypto.getRandomValues().
- * Returns a value in [1, sides].
+ * Roll `count` dice of `sides` faces with crypto.getRandomValues() and rejection sampling
+ * (src/utils/random.ts), so every face is exactly equally likely: `x % sides` over 2^32 values is biased for
+ * every size here except D4 and D8 (2^32 is not divisible by 6, 10, 12, 20 or 100).
+ * `source` is injectable so tests can supply a deterministic stream.
  */
-function rollDie(sides: number): number {
-  const array = new Uint32Array(1);
-  crypto.getRandomValues(array);
-  // Map Uint32 [0, 4294967295] → [0, 1) → [1, sides]
-  return (array[0] % sides) + 1;
+export function rollDice(count: number, sides: number, source?: RandomU32): number[] {
+  return Array.from({ length: count }, () => randomInt(1, sides, source));
 }
 
 function formatModifier(modifier: number): string {
@@ -42,6 +46,7 @@ const diceRollerConfig: CalculatorConfig = {
         { label: 'D10', value: '10' },
         { label: 'D12', value: '12' },
         { label: 'D20', value: '20' },
+        { label: 'D100 (percentile)', value: '100' },
       ],
       required: true,
     },
@@ -59,17 +64,16 @@ const diceRollerConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    // Decimal.js for precision — dice statistics use high-precision arithmetic
-    const count = parseInt(values.count) || 0;
-    const sides = parseInt(values.sides) || 6;
-    const modifier = parseInt(values.modifier) || 0;
+    // Strict integers: parseInt("2.5") used to roll 2 dice silently, and parseInt("3abc") rolled 3.
+    const count = parseNumberStrict(values.count);
+    const sides = (values.sides ?? '').trim() === '' ? 6 : parseNumberStrict(values.sides);
+    const modifier = (values.modifier ?? '').trim() === '' ? 0 : parseNumberStrict(values.modifier);
 
-    if (count < 1) return [];
+    if (!Number.isInteger(count) || count < 1 || count > 100) return [];
+    if (!SIDES.includes(sides)) return [];
+    if (!Number.isInteger(modifier) || Math.abs(modifier) > 1000) return [];
 
-    const rolls: number[] = [];
-    for (let i = 0; i < count; i++) {
-      rolls.push(rollDie(sides));
-    }
+    const rolls = rollDice(count, sides);
 
     const rawSum = rolls.reduce((a, b) => a + b, 0);
     const total = rawSum + modifier;
@@ -93,6 +97,11 @@ const diceRollerConfig: CalculatorConfig = {
         value: JSON.stringify(rolls),
       },
       {
+        id: '_sides',
+        label: 'Die Sides',
+        value: String(sides),
+      },
+      {
         id: 'count',
         label: 'Dice',
         value: `D${sides} × ${count}`,
@@ -108,6 +117,16 @@ const diceRollerConfig: CalculatorConfig = {
         // Per-die average of the raw rolls, not diluted by the flat modifier
         // (the modifier is added once to the total, not per die).
         value: (rawSum / count).toFixed(1),
+      },
+      {
+        id: 'expected',
+        label: 'Expected Total (N × (S + 1) / 2 + modifier)',
+        value: String((count * (sides + 1)) / 2 + modifier),
+      },
+      {
+        id: 'totalRange',
+        label: 'Possible Total Range',
+        value: `${count + modifier} to ${count * sides + modifier}`,
       },
     ];
   },
@@ -145,13 +164,13 @@ const diceRollerConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Choose how many dice to roll (1 to 10 dice per roll).',
-      'Select the die type from the dropdown: D4, D6, D8, D10, D12, or D20.',
+      'Select the die type from the dropdown: D4, D6, D8, D10, D12, D20 or D100.',
       'Optionally add a modifier (e.g., +5 for a proficiency bonus, or -2 for a penalty).',
       'Click calculate to see individual die results, the total sum, and the average expected value.',
       'The dice are displayed visually — pip patterns for D6 and numeric faces for other dice types.',
     ],
     explanation:
-      'Dice rolling is fundamental to tabletop role-playing games (TTRPGs) like Dungeons & Dragons, as well as board games, war games, and probability simulations. Each die produces a uniformly distributed random integer. For a fair S-sided die, every face has a 1/S probability of appearing. The sum of multiple dice approximates a normal distribution due to the Central Limit Theorem — the more dice you roll, the more the results cluster around the average in a bell curve shape. The average roll of a single die is (S + 1) / 2, so 2D6 averages 7, and 2D6+3 averages 10. All rolls use crypto.getRandomValues() for cryptographically secure randomness, which is superior to the default Math.random() for gaming applications where fair results matter.',
+      'Dice rolling is fundamental to tabletop role-playing games (TTRPGs) like Dungeons & Dragons, as well as board games, war games, and probability simulations. Each die produces a uniformly distributed random integer. For a fair S-sided die, every face has a 1/S probability of appearing. The sum of multiple dice approximates a normal distribution due to the Central Limit Theorem — the more dice you roll, the more the results cluster around the average in a bell curve shape. The average roll of a single die is (S + 1) / 2, so 2D6 averages 7, and 2D6+3 averages 10. All rolls use crypto.getRandomValues() for cryptographically secure randomness with rejection sampling (no modulo bias), which is superior to the default Math.random() for gaming applications where fair results matter.',
     workedExamples: [
       {
         scenario: "During a D&D campaign in Chicago, DM Kevin's player attacks with a +1 longsword. The attack roll is 1D20+5 (Strength +3, proficiency +2). The damage is 1D8+3 on a hit. What are the expected values for both rolls?",
@@ -191,7 +210,7 @@ const diceRollerConfig: CalculatorConfig = {
       },
       {
         question: 'What is advantage and disadvantage in D&D 5e?',
-        answer: 'Advantage means rolling two D20s and taking the higher result — this significantly increases your chance of success. Disadvantage means rolling two D20s and taking the lower result. With advantage, the chance of rolling a natural 20 increases from 5% to 9.75%, and the average result rises from 10.5 to about 13.82. With disadvantage, the average drops to about 7.17. A common rule of thumb is that advantage/disadvantage is mathematically equivalent to roughly a ±5 modifier for middle-range target numbers, though the exact effect depends on the target DC.',
+        answer: 'Advantage means rolling two D20s and taking the higher result — this significantly increases your chance of success. Disadvantage means rolling two D20s and taking the lower result. With advantage, the chance of rolling a natural 20 increases from 5% to 9.75%, and the average result rises from 10.5 to 13.825. With disadvantage, the average drops to 7.175. A common rule of thumb is that advantage/disadvantage is mathematically equivalent to roughly a ±5 modifier for middle-range target numbers, though the exact effect depends on the target DC.',
       },
       {
         question: 'How does the Central Limit Theorem apply to dice?',
@@ -201,14 +220,14 @@ const diceRollerConfig: CalculatorConfig = {
     proTips: [
       'For D&D 5e players: the "take 10" rule for passive checks means assuming a D20 roll of 10. Add your modifier to 10 for your passive score. This is mathematically the average result of a D20 roll (10.5 rounded down).',
       'When designing a TTRPG system, use 2D6 or 3D6 for skill checks (bell curve rewards consistent skill) and D20 for combat (flat curve makes every bonus matter equally). The difference in feel is significant — players notice the reliability of bell-curve systems.',
-      'CSPRNG (crypto.getRandomValues) is mathematically provable to have no detectable patterns, unlike Math.random() which can show subtle biases over millions of rolls. For any human-scale game session, both are fine, but CSPRNG is the gold standard.',
+      'A CSPRNG (crypto.getRandomValues) is designed so that its output cannot be told apart from true randomness, whereas Math.random() makes no such guarantee. Combined with rejection sampling there is no modulo bias either. For any human-scale game session both are fine, but this is the safer choice when fairness matters.',
       'Expected value quick reference: 1D4=2.5, 1D6=3.5, 1D8=4.5, 1D10=5.5, 1D12=6.5, 1D20=10.5. To find the average of any NdS, multiply N by (S+1)/2 and add the modifier.',
       'For D&D DMs balancing encounters: a creatures average damage per round = (average die roll + modifier) multiplied by (chance to hit). Use 1D20+modifier vs AC to calculate hit chance: (21 + modifier - AC) / 20, clamped to 0.05-0.95.',
     ],
     limitations: [
-      'Supported dice types & unsupported mechanics: Supports 1-10 dice of types D4, D6, D8, D10, D12, and D20. Does not support dice pools with success counting (e.g., Vampire: The Masquerade or Shadowrun systems), exploding dice (where max rolls are re-rolled and added), Fudge/Fate dice (with +/blank/− faces), or keeping highest/lowest N dice (advantage/disadvantage can be simulated by rolling twice).',
-      'Custom/advanced dice limitations: Does not support custom-sided dice (D3, D100, D30), percentile dice (D%), or dice with faces beyond the standard polyhedral set. The modulo-based mapping from Uint32 values is uniform for all supported die sizes but not for custom prime-sided dice above 32 faces.',
-      'Randomness technical limitation: Uses crypto.getRandomValues() with modulo-based mapping, which is cryptographically qualified for randomness but not certified for all use cases. The modulo approach is uniformly distributed for supported die sizes (D4, D6, D8, D10, D12, D20) since Uint32 range (2³²) is divisible by all supported side counts.',
+      'Supported dice types & unsupported mechanics: Supports 1-10 dice of types D4, D6, D8, D10, D12, D20 and D100. Does not support dice pools with success counting (e.g., Vampire: The Masquerade or Shadowrun systems), exploding dice (where max rolls are re-rolled and added), Fudge/Fate dice (with +/blank/− faces), or keeping highest/lowest N dice (advantage/disadvantage can be simulated by rolling twice).',
+      'Custom/advanced dice limitations: Does not support custom-sided dice (D3, D30) or dice with faces beyond the standard polyhedral set. D100 is a single 100-sided roll (1 to 100), not a pair of ten-sided dice.',
+      'Randomness technical limitation: Uses crypto.getRandomValues() with rejection sampling: 32-bit random values at or above the largest multiple of the die size are discarded and redrawn, so every face is exactly equally likely (a plain "x mod sides" over 2³² values would slightly favour low faces on D6, D10, D12, D20 and D100, because 2³² is not divisible by those sizes). The generator is not certified for all use cases.',
       'When not to use: Do not use for cryptographic key generation (crypto.getRandomValues is qualified for randomness but key generation has additional requirements), for legal gambling (requires certified hardware RNG in most jurisdictions), or for game systems requiring specialized dice mechanics beyond simple NdS+M.',
     ],
     quickReference: [
@@ -217,8 +236,8 @@ const diceRollerConfig: CalculatorConfig = {
       { label: 'D20 Average', value: '10.5 per die' },
       { label: 'D6 Average', value: '3.5 per die' },
       { label: '2D6 Most Likely', value: '7 (probability 1/6)' },
-      { label: 'Advantage Avg', value: '~13.82 (vs 10.5 normal)' },
-      { label: 'Disadvantage Avg', value: '~7.17 (vs 10.5 normal)' },
+      { label: 'Advantage Avg', value: '13.825 (vs 10.5 normal)' },
+      { label: 'Disadvantage Avg', value: '7.175 (vs 10.5 normal)' },
       { label: 'Critical Hit (nat 20)', value: '5% per roll (1/20)' },
     ],
     citations: [

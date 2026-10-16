@@ -55,9 +55,9 @@ describe('Standard Deviation calculator', () => {
     near(cv, 10.68, 0.5);
   });
 
-  it('returns CV of 0 when mean is 0', () => {
+  it('CV is undefined (not 0%) when the mean is 0', () => {
     const r = config.calculate({ dataSet: '-5, -3, 0, 3, 5', population: 'sample' });
-    expect(getValue(r, 'cv')).toBe('0.00%');
+    expect(getValue(r, 'cv')).toBe('Undefined (mean is 0)');
   });
 
   it('calculates correct CV for known ratio', () => {

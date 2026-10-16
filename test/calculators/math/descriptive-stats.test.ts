@@ -49,13 +49,20 @@ describe('Descriptive Statistics Calculator', () => {
   });
 
   it('calculates variance (population)', () => {
-    const r = config.calculate({ data: '1, 2, 3, 4, 5' });
+    const r = config.calculate({ data: '1, 2, 3, 4, 5', type: 'population' });
     near(parseFloat(getValue(r, 'variance')), 2, 0.01);
   });
 
   it('calculates standard deviation (population)', () => {
+    const r = config.calculate({ data: '1, 2, 3, 4, 5', type: 'population' });
+    // numpy.std([1..5]) = 1.4142135623730951
+    expect(getValue(r, 'variance')).toBe('2 / 1.414213562');
+  });
+
+  it('defaults to SAMPLE variance and SD (n-1): statistics.variance([1..5]) = 2.5, stdev = 1.5811388300841898', () => {
     const r = config.calculate({ data: '1, 2, 3, 4, 5' });
-    expect(getValue(r, 'variance')).toBe('2 / 1.414214');
+    expect(getValue(r, 'variance')).toBe('2.5 / 1.58113883');
+    expect(r.find((x) => x.id === 'variance')?.label).toBe('Variance (s²) / Std Dev (s)');
   });
 
   it('finds minimum and maximum via minmax', () => {

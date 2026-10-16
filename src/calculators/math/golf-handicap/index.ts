@@ -1,44 +1,35 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import GolfPanel from './GolfPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+// World Handicap System arithmetic (Rules 5.1, 5.2, 6.1) lives in whs.ts so it is tested on its own.
+import { courseHandicap, formatCourseHandicap, formatIndex, handicapIndex, scoreDifferential } from './whs';
 
 interface RoundData {
   score: number;
   rating: number;
   slope: number;
+  pcc: number;
 }
 
+/**
+ * One round per line: "Score, CourseRating, SlopeRating" with an optional 4th number, the Playing Conditions
+ * Calculation (PCC, −1 to +3). Malformed lines and values outside the WHS limits (Slope Rating 55–155) are skipped.
+ */
 function parseRounds(text: string): RoundData[] {
-  const lines = text.trim().split('\n');
   const rounds: RoundData[] = [];
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    const parts = trimmed.split(',').map((s) => s.trim());
+  for (const line of text.trim().split('\n')) {
+    const parts = line.trim().split(',').map((s) => s.trim());
     if (parts.length < 3) continue;
-    const score = parseFloat(parts[0]);
-    const rating = parseFloat(parts[1]);
-    const slope = parseFloat(parts[2]);
-    if (isNaN(score) || isNaN(rating) || isNaN(slope)) continue;
-    if (slope <= 0) continue;
-    rounds.push({ score, rating, slope });
+    const score = parseNumberStrict(parts[0]);
+    const rating = parseNumberStrict(parts[1]);
+    const slope = parseNumberStrict(parts[2]);
+    const pcc = parts.length >= 4 && parts[3] !== '' ? parseNumberStrict(parts[3]) : 0;
+    if ([score, rating, slope, pcc].some(isNaN)) continue;
+    if (score <= 0 || rating <= 0 || slope < 55 || slope > 155 || pcc < -1 || pcc > 3) continue;
+    rounds.push({ score, rating, slope, pcc });
   }
   return rounds;
-}
-
-function calcDifferential(round: RoundData): number {
-  return ((round.score - round.rating) * 113) / round.slope;
-}
-
-function getLowestCount(numRounds: number): number {
-  if (numRounds <= 6) return 1;
-  if (numRounds <= 8) return 2;
-  if (numRounds <= 11) return 3;
-  if (numRounds <= 14) return 4;
-  if (numRounds <= 16) return 5;
-  if (numRounds <= 18) return 6;
-  if (numRounds === 19) return 7;
-  return 8;
 }
 
 const golfConfig: CalculatorConfig = {
@@ -48,7 +39,7 @@ const golfConfig: CalculatorConfig = {
       label: 'Recent Rounds',
       type: 'text',
       placeholder: 'Score, Course Rating, Slope Rating\n85, 72.5, 130\n92, 74.0, 140',
-      helpText: 'One round per line. Format: Score, CourseRating, SlopeRating',
+      helpText: 'One round per line, most recent first. Format: Score, CourseRating, SlopeRating (optional 4th number: PCC, −1 to +3). At least 3 scores are needed.',
     },
     {
       id: 'numRounds',
@@ -60,38 +51,74 @@ const golfConfig: CalculatorConfig = {
         { label: 'Last 20 rounds (WHS standard)', value: '20' },
       ],
     },
+    {
+      id: 'courseSlope',
+      label: 'Course to Play: Slope Rating (optional)',
+      type: 'number',
+      placeholder: '125',
+      min: 55,
+      max: 155,
+      step: 1,
+      helpText: 'With the course rating and par below, shows your Course Handicap for that set of tees.',
+    },
+    {
+      id: 'courseRating',
+      label: 'Course to Play: Course Rating (optional)',
+      type: 'number',
+      placeholder: '71.4',
+      min: 50,
+      max: 90,
+      step: 0.1,
+    },
+    {
+      id: 'coursePar',
+      label: 'Course to Play: Par (optional)',
+      type: 'number',
+      placeholder: '72',
+      min: 54,
+      max: 80,
+      step: 1,
+    },
   ],
   calculate: (values) => {
-    const roundsText = values.rounds || '';
-    const maxRounds = parseInt(values.numRounds || '20', 10);
+    const parsedMax = parseInt(values.numRounds || '20', 10);
+    const maxRounds = Number.isNaN(parsedMax) ? 20 : parsedMax;
 
-    const allRounds = parseRounds(roundsText);
+    const allRounds = parseRounds(values.rounds || '');
     if (allRounds.length === 0) return [];
 
-    // Take only the last N rounds as specified
+    // Most recent first; only the chosen number of rounds (never more than the WHS 20) are considered.
     const rounds = allRounds.slice(0, maxRounds);
+    const diffs = rounds.map((r) => scoreDifferential(r.score, r.rating, r.slope, r.pcc));
+    const hi = handicapIndex(diffs);
 
-    const diffs = rounds.map(calcDifferential);
-    const count = getLowestCount(rounds.length);
-    // Use index-based selection to avoid duplicate values inflating the count
-    const sortedWithIdx = diffs.map((d, i) => ({ d, i })).sort((a, b) => a.d - b.d);
-    const selectedItems = sortedWithIdx.slice(0, count);
-    const selectedDiffs = selectedItems.map(x => x.d);
-    const selectedIndices = new Set(selectedItems.map(x => x.i));
-    const avgDiff = selectedDiffs.reduce((s, d) => s + d, 0) / selectedDiffs.length;
-    // WHS Rule 5.1b: the Handicap Index is truncated (not rounded) to one
-    // decimal place, e.g. 15.284 -> 15.2, never 15.3.
-    const index = Math.trunc(avgDiff * 0.96 * 10) / 10;
-    const courseHandicap = Math.round(index);
+    if (!hi) {
+      return [
+        {
+          id: 'warning',
+          label: 'Not enough scores',
+          value: `A Handicap Index needs at least 3 scores (you entered ${rounds.length}). Add more rounds, most recent first.`,
+          highlight: true,
+          color: 'negative',
+        },
+      ];
+    }
 
-    const roundsUsedStr = `Lowest ${count} of ${rounds.length}`;
-    const avgDiffStr = avgDiff.toFixed(2);
+    const used = new Set(hi.usedIndices);
 
-    return [
+    // Course Handicap (WHS Rule 6.1) for the course to be played, when its slope, rating and par are all given;
+    // otherwise for a neutral course (slope 113, course rating = par), which is just the index rounded.
+    const cSlope = parseNumberStrict(values.courseSlope);
+    const cRating = parseNumberStrict(values.courseRating);
+    const cPar = parseNumberStrict(values.coursePar);
+    const haveCourse = !isNaN(cSlope) && !isNaN(cRating) && !isNaN(cPar) && cSlope >= 55 && cSlope <= 155 && cRating > 0 && cPar > 0;
+    const ch = haveCourse ? courseHandicap(hi.index, cSlope, cRating, cPar) : courseHandicap(hi.index, 113, 0, 0);
+
+    const results: CalculatorResult[] = [
       {
         id: 'handicapIndex',
         label: 'Handicap Index',
-        value: String(index),
+        value: formatIndex(hi.index),
         highlight: true,
         color: 'positive',
       },
@@ -104,27 +131,38 @@ const golfConfig: CalculatorConfig = {
             score: rounds[i].score,
             rating: rounds[i].rating,
             slope: rounds[i].slope,
-            differential: Math.round(d * 100) / 100,
-            used: selectedIndices.has(i),
+            differential: d,
+            used: used.has(i),
           }))
         ),
       },
       {
         id: 'roundsUsed',
         label: 'Rounds Used',
-        value: roundsUsedStr,
+        value: `Lowest ${hi.count} of ${hi.scoresUsed}`,
       },
       {
         id: 'averageDifferential',
         label: 'Avg Differential',
-        value: avgDiffStr,
-      },
-      {
-        id: 'courseHandicap',
-        label: 'Course Handicap (slope 113)',
-        value: String(courseHandicap),
+        value: hi.average.toFixed(2),
       },
     ];
+
+    if (hi.adjustment !== 0) {
+      results.push({
+        id: 'adjustment',
+        label: 'Adjustment (fewer than 20 scores)',
+        value: `−${Math.abs(hi.adjustment).toFixed(1)}`,
+      });
+    }
+
+    results.push({
+      id: 'courseHandicap',
+      label: haveCourse ? 'Course Handicap (course to play)' : 'Course Handicap (slope 113, rating = par)',
+      value: formatCourseHandicap(ch),
+    });
+
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -132,9 +170,9 @@ const golfConfig: CalculatorConfig = {
   },
   educational: {
     formula:
-      'Differential = (Score - Course Rating) × 113 / Slope Rating | Index = Avg(Lowest 8 of 20) × 0.96',
+      'Differential = (113 ÷ Slope) × (Adjusted Gross − Course Rating − PCC) | Index = average of the lowest 8 of your last 20 differentials',
     formulaDescription:
-      'The World Handicap System (WHS) calculates a Handicap Index from your recent scores, adjusted for course difficulty. Each round produces a Score Differential, and the best differentials are averaged and reduced by 4%.',
+      'The World Handicap System (WHS) calculates a Handicap Index from your recent scores, adjusted for course difficulty. Each round produces a Score Differential (rounded to one decimal), and the best differentials are averaged and rounded to one decimal. There is no 0.96 multiplier: that "bonus of excellence" belonged to the old pre-2020 USGA system and was removed when the WHS began. With fewer than 20 scores, fewer differentials are used and, for 3, 4 or 6 scores, a small adjustment is subtracted.',
     variables: [
       {
         symbol: 'Score',
@@ -153,13 +191,13 @@ const golfConfig: CalculatorConfig = {
       },
     ],
     howToUse: [
-      'Enter your recent rounds in the format: Score, CourseRating, SlopeRating (one per line).',
+      'Enter your recent rounds, most recent first, in the format: Score, CourseRating, SlopeRating (one per line). At least 3 scores are needed.',
       'Select the number of rounds to consider (5, 10, or the WHS standard 20).',
-      'Read your Handicap Index, differentials, and category.',
-      'Use the Course Handicap to determine your playing handicap for a specific course.',
+      'Read your Handicap Index, the differentials that were used, and the category.',
+      'Optionally enter the slope rating, course rating and par of the course you are about to play to see your Course Handicap there.',
     ],
     explanation:
-      'The World Handicap System (WHS) unified six previous handicap systems in 2020. It measures a golfer\'s demonstrated ability by calculating score differentials relative to course difficulty. The Handicap Index represents the average of the best 8 differentials from the last 20 rounds, with a 4% reduction factor. This ensures your handicap reflects your potential, not your average. Practical example: a golfer posts scores of 85, 92, 88, 80, and 83 from a course with rating 72.5 and slope 130. The differentials are: (85-72.5)×113/130 = 10.9, (92-72.5)×113/130 = 17.0, (88-72.5)×113/130 = 13.5, (80-72.5)×113/130 = 6.5, (83-72.5)×113/130 = 9.1. With only 5 rounds, the lowest 1 differential is used: 6.5 × 0.96 = 6.2 handicap index. Edge cases: for nine-hole rounds, the system combines two nine-hole scores to create an 18-hole differential before calculating the index. If you play from different tee boxes (e.g., forward tees with a different course rating), each set of tees produces a different differential for the same score. A golfer who plays only easy courses may have a lower index than their skill warrants because the slope rating amplifies score differences on harder courses. The maximum handicap index under WHS is 54.0 for both men and women, accommodating beginner golfers. Equitable Stroke Control (ESC) limits the maximum score per hole based on your course handicap to prevent one bad hole from inflating your index.',
+      'The World Handicap System (WHS) unified six previous handicap systems in 2020. It measures a golfer\'s demonstrated ability by calculating score differentials relative to course difficulty. The Handicap Index represents the average of the best 8 differentials from the last 20 rounds, so it reflects your potential rather than your average score. Practical example: a golfer posts scores of 85, 92, 88, 80, and 83 from a course with rating 72.5 and slope 130. The differentials are: (85−72.5)×113/130 = 10.9, (92−72.5)×113/130 = 17.0, (88−72.5)×113/130 = 13.5, (80−72.5)×113/130 = 6.5, (83−72.5)×113/130 = 9.1. With 5 scores, the lowest 1 differential is used with no adjustment, so the Handicap Index is 6.5. With only the first 3 of those scores (10.9, 17.0, 13.5) the lowest differential, 10.9, is reduced by 2.0 to give 8.9. Course Handicap = Handicap Index × (Slope ÷ 113) + (Course Rating − Par): an index of 12.4 on a course with slope 125, rating 71.4 and par 72 gives 12.4 × 125 ÷ 113 − 0.6 = 13.1, rounded to 13. Edge cases: for nine-hole rounds, the system combines two nine-hole scores to create an 18-hole differential before calculating the index. If you play from different tee boxes (e.g., forward tees with a different course rating), each set of tees produces a different differential for the same score. The maximum Handicap Index under WHS is 54.0 for both men and women. Scores are entered as adjusted gross scores (each hole capped at net double bogey), and this calculator does not apply the soft/hard cap against your Low Handicap Index or the Exceptional Score Reduction, which need your full history.',
     faqs: [
       {
         question: 'What is a good handicap index?',
@@ -179,19 +217,24 @@ const golfConfig: CalculatorConfig = {
       {
         question: 'Can I track fewer than 20 rounds?',
         answer:
-          'Yes. With fewer rounds, the system adjusts how many differentials are used. For 5-6 rounds, only the lowest 1 is used. For 7-8 rounds, the lowest 2 are used, and so on up to 20 rounds where the lowest 8 are used.',
+          'Yes, from 3 scores up. The WHS uses fewer differentials when you have fewer scores: 3 scores use the lowest 1 minus 2.0; 4 scores the lowest 1 minus 1.0; 5 scores the lowest 1; 6 scores the lowest 2 minus 1.0; 7-8 scores the lowest 2; 9-11 the lowest 3; 12-14 the lowest 4; 15-16 the lowest 5; 17-18 the lowest 6; 19 the lowest 7; and 20 scores the lowest 8. With fewer than 3 scores no Handicap Index can be established.',
       },
       {
         question: 'How does playing different tee boxes affect my handicap calculation?',
-        answer: 'Different tee boxes have different course ratings and slope ratings, which means the same gross score produces different differentials. For example, shooting 90 from the back tees (rating 74.0, slope 140) gives a differential of (90 - 74.0) × 113 / 140 = 12.9. Shooting 90 from the forward tees (rating 69.5, slope 120) gives a differential of (90 - 69.5) × 113 / 120 = 19.3. The difference of 6.4 strokes reflects that the forward tees are significantly easier. The WHS system handles this correctly by using each round\'s specific course rating and slope rating. This is why you should always record which tees you played when posting scores. For match play, when players use different tee boxes, the player playing the more difficult tees receives additional strokes equal to the difference in course ratings rounded to the nearest whole number. For example, if the back tees are rated 73.2 and the forward tees are rated 68.7, the back-tee player gets an additional 4 strokes (73.2 - 68.7 = 4.5, rounded to 4) for that match.',
+        answer: 'Different tee boxes have different course ratings and slope ratings, which means the same gross score produces different differentials. For example, shooting 90 from the back tees (rating 74.0, slope 140) gives a differential of (90 - 74.0) × 113 / 140 = 12.9. Shooting 90 from the forward tees (rating 69.5, slope 120) gives a differential of (90 - 69.5) × 113 / 120 = 19.3. The difference of 6.4 strokes reflects that the forward tees are significantly easier. The WHS system handles this correctly by using each round\'s specific course rating and slope rating. This is why you should always record which tees you played when posting scores. When you play, your Course Handicap for those tees is Handicap Index × (Slope ÷ 113) + (Course Rating − Par), so a player on harder tees automatically receives more strokes than one on easier tees.',
       },
     ],
     citations: [
-      { source: 'USGA - Handicap System', url: 'https://www.usga.org/content/usga/home-page/handicapping.html' },
+      { source: 'Wikipedia - World Handicap System', url: 'https://en.wikipedia.org/wiki/World_Handicap_System' },
       { source: 'Wikipedia - Handicap (Golf)', url: 'https://en.wikipedia.org/wiki/Handicap_(golf)' },
     ],
+    limitations: [
+      'Needs at least 3 scores. The soft cap and hard cap against your Low Handicap Index, the Exceptional Score Reduction, and the conversion of nine-hole scores depend on your full history and are not modelled; your official Handicap Index from your golf association is the only one valid for competition.',
+      'Scores must already be adjusted gross scores (each hole limited to net double bogey). The calculator does not apply that limit for you.',
+      'Slope Rating must be between 55 and 155. Lines outside that range, or with a malformed number, are skipped.',
+    ],
     diagram: {
-      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-333333)">World Handicap System</text><rect x="10" y="35" width="300" height="50" rx="6" fill="var(--svg-eff6ff)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="20" y="55" font-size="9" fill="var(--svg-555555)">Step 1: Score Differential per round</text><text x="20" y="72" font-size="11" fill="var(--svg-3b82f6)" font-weight="bold">Differential = (Score − CourseRating) × 113 / SlopeRating</text><rect x="10" y="95" width="300" height="50" rx="6" fill="var(--svg-eff6ff)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="20" y="115" font-size="9" fill="var(--svg-555555)">Step 2: Average best differentials</text><text x="20" y="132" font-size="11" fill="var(--svg-3b82f6)" font-weight="bold">Index = Avg(Lowest 8 of 20) × 0.96</text><rect x="10" y="155" width="300" height="38" rx="6" fill="var(--svg-f8fafc)" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="20" y="172" font-size="9" fill="var(--svg-555555)">Example: Score 85, Rating 72.5, Slope 130</text><text x="20" y="187" font-size="10" fill="var(--svg-333333)">Differential = (85−72.5) × 113/130 = 10.9</text></svg>',
+      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-333333)">World Handicap System</text><rect x="10" y="35" width="300" height="50" rx="6" fill="var(--svg-eff6ff)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="20" y="55" font-size="9" fill="var(--svg-555555)">Step 1: Score Differential per round</text><text x="20" y="72" font-size="11" fill="var(--svg-3b82f6)" font-weight="bold">Differential = (Score − CourseRating) × 113 / Slope</text><rect x="10" y="95" width="300" height="50" rx="6" fill="var(--svg-eff6ff)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="20" y="115" font-size="9" fill="var(--svg-555555)">Step 2: Average best differentials</text><text x="20" y="132" font-size="11" fill="var(--svg-3b82f6)" font-weight="bold">Index = Avg(Lowest 8 of 20 differentials)</text><rect x="10" y="155" width="300" height="38" rx="6" fill="var(--svg-f8fafc)" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="20" y="172" font-size="9" fill="var(--svg-555555)">Example: Score 85, Rating 72.5, Slope 130</text><text x="20" y="187" font-size="10" fill="var(--svg-333333)">Differential = (85−72.5) × 113/130 = 10.9</text></svg>',
       alt: 'Golf handicap formula showing differential calculation and index formula',
       caption: 'Handicap Index uses score differentials adjusted for course difficulty, averaging the best 8 of 20 rounds.',
     },

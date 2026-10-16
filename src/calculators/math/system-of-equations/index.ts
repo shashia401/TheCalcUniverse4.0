@@ -1,9 +1,27 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SystemOfEquationsPanel from './SystemOfEquationsPanel';
+import { type Frac, divFrac, fracToFixed, fracToNumber, makeFrac, mulFrac, parseDecimalExact, subFrac } from '../../../utils/rational';
+import { fmtExact } from '../matrix/matrixMath';
+import { fmtFrac } from '../polynomial-calculator/polyMath';
 
-function fmt(n: number): string {
-  return parseFloat(n.toFixed(6)).toString();
+// All arithmetic is exact (BigInt fractions): with floats, 0.1x + 0.2y = 0.3 / 0.3x + 0.6y = 0.9 had
+// D = 0.1·0.6 − 0.3·0.2 = 6.9e-18 ≠ 0 and reported a bogus unique solution (a dependent system).
+const fmt = (f: Frac): string => fracToFixed(f, 6);
+const isZero = (f: Frac) => f.n === 0n;
+
+/** "2x + 3y = 7"; zero coefficients are dropped, unit coefficients implied. */
+function eqText(a: Frac, b: Frac, c: Frac): string {
+  const term = (f: Frac, v: string, first: boolean) => {
+    if (isZero(f)) return '';
+    const n = f.n < 0n;
+    const mag = makeFrac(n ? -f.n : f.n, f.d);
+    const body = mag.n === 1n && mag.d === 1n ? v : `${fmt(mag)}${v}`;
+    return first ? `${n ? '-' : ''}${body}` : ` ${n ? '−' : '+'} ${body}`;
+  };
+  const t1 = term(a, 'x', true);
+  const t2 = term(b, 'y', t1 === '');
+  return `${t1}${t2 || ''}${t1 === '' && t2 === '' ? '0' : ''} = ${fmt(c)}`;
 }
 
 const systemOfEquationsConfig: CalculatorConfig = {
@@ -71,75 +89,85 @@ const systemOfEquationsConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const a1 = parseFloat(values.a1);
-    const b1 = parseFloat(values.b1);
-    const c1 = parseFloat(values.c1);
-    const a2 = parseFloat(values.a2);
-    const b2 = parseFloat(values.b2);
-    const c2 = parseFloat(values.c2);
+    const f = (k: string) => parseDecimalExact(values[k], 40);
+    const a1 = f('a1'), b1 = f('b1'), c1 = f('c1'), a2 = f('a2'), b2 = f('b2'), c2 = f('c2');
+    if (!a1 || !b1 || !c1 || !a2 || !b2 || !c2) return [];
 
-    if (isNaN(a1) || isNaN(b1) || isNaN(c1) || isNaN(a2) || isNaN(b2) || isNaN(c2)) {
-      return [];
-    }
-
-    const D = a1 * b2 - a2 * b1;
-    const Dx = c1 * b2 - c2 * b1;
-    const Dy = a1 * c2 - a2 * c1;
+    const D = subFrac(mulFrac(a1, b2), mulFrac(a2, b1));
+    const Dx = subFrac(mulFrac(c1, b2), mulFrac(c2, b1));
+    const Dy = subFrac(mulFrac(a1, c2), mulFrac(a2, c1));
 
     const steps: string[] = [];
     steps.push(`System of equations:`);
-    steps.push(`  ${fmt(a1)}x + ${fmt(b1)}y = ${fmt(c1)}`);
-    steps.push(`  ${fmt(a2)}x + ${fmt(b2)}y = ${fmt(c2)}`);
-    steps.push(`Determinant D = a₁·b₂ − a₂·b₁ = ${fmt(a1)}·${fmt(b2)} − ${fmt(a2)}·${fmt(b1)} = ${fmt(D)}`);
+    steps.push(`  ${eqText(a1, b1, c1)}`);
+    steps.push(`  ${eqText(a2, b2, c2)}`);
+    steps.push(`Determinant D = a₁·b₂ − a₂·b₁ = ${fmt(a1)}·${fmt(b2)} − ${fmt(a2)}·${fmt(b1)} = ${fmtFrac(D)}`);
 
-    const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color?: 'positive' | 'negative' | 'neutral' }> = [
+    const results: CalculatorResult[] = [
       {
         id: 'system',
         label: 'System',
-        value: `${fmt(a1)}x + ${fmt(b1)}y = ${fmt(c1)}  |  ${fmt(a2)}x + ${fmt(b2)}y = ${fmt(c2)}`,
+        value: `${eqText(a1, b1, c1)}  |  ${eqText(a2, b2, c2)}`,
         highlight: true,
-        color: 'neutral' as const,
+        color: 'neutral',
       },
-      {
-        id: 'determinant',
-        label: 'Determinant (D)',
-        value: fmt(D),
-        color: D !== 0 ? 'positive' as const : 'negative' as const,
-      },
+      { id: 'determinant', label: 'Determinant (D)', value: fmtFrac(D), color: !isZero(D) ? 'positive' : 'negative' },
     ];
 
-    if (D !== 0) {
-      const x = Dx / D;
-      const y = Dy / D;
-
+    if (!isZero(D)) {
+      const x = divFrac(Dx, D);
+      const y = divFrac(Dy, D);
       steps.push(`Dx = c₁·b₂ − c₂·b₁ = ${fmt(c1)}·${fmt(b2)} − ${fmt(c2)}·${fmt(b1)} = ${fmt(Dx)}`);
       steps.push(`Dy = a₁·c₂ − a₂·c₁ = ${fmt(a1)}·${fmt(c2)} − ${fmt(a2)}·${fmt(c1)} = ${fmt(Dy)}`);
-      steps.push(`D = ${fmt(D)} ≠ 0 → unique solution`);
-      steps.push(`x = Dx / D = ${fmt(Dx)} / ${fmt(D)} = ${fmt(x)}`);
-      steps.push(`y = Dy / D = ${fmt(Dy)} / ${fmt(D)} = ${fmt(y)}`);
-
-      results.push({ id: 'x', label: 'x', value: fmt(x), highlight: true, color: 'positive' as const });
-      results.push({ id: 'y', label: 'y', value: fmt(y), highlight: true, color: 'positive' as const });
-      results.push({ id: 'solutionType', label: 'Solution Type', value: 'Unique solution', color: 'positive' as const });
-    } else if (Dx === 0 && Dy === 0) {
-      steps.push(`D = 0 and Dx = Dy = 0 → infinite solutions (dependent system)`);
-      results.push({ id: 'x', label: 'x', value: 'No unique value', color: 'neutral' as const });
-      results.push({ id: 'y', label: 'y', value: 'No unique value', color: 'neutral' as const });
-      results.push({ id: 'solutionType', label: 'Solution Type', value: 'Infinite solutions (dependent system)', color: 'neutral' as const });
+      steps.push(`D = ${fmtFrac(D)} ≠ 0 → unique solution`);
+      steps.push(`x = Dx / D = ${fmt(Dx)} / ${fmtFrac(D)} = ${fmt(x)}`);
+      steps.push(`y = Dy / D = ${fmt(Dy)} / ${fmtFrac(D)} = ${fmt(y)}`);
+      results.push({ id: 'x', label: 'x', value: fmt(x), highlight: true, color: 'positive' });
+      results.push({ id: 'y', label: 'y', value: fmt(y), highlight: true, color: 'positive' });
+      results.push({ id: 'solutionType', label: 'Solution Type', value: 'Unique solution', color: 'positive' });
+      const ex = fmtExact(x);
+      const ey = fmtExact(y);
+      if (ex.includes('/') || ey.includes('/')) {
+        results.push({ id: 'exact', label: 'Exact values', value: `x = ${ex}, y = ${ey}`, color: 'neutral' });
+      }
+      results.push({ id: '_solution', label: 'solution', value: JSON.stringify([fracToNumber(x), fracToNumber(y)]) });
     } else {
-      steps.push(`D = 0 but Dx = ${fmt(Dx)} and Dy = ${fmt(Dy)} (not both zero) → no solution (inconsistent system)`);
-      results.push({ id: 'x', label: 'x', value: 'No solution', color: 'negative' as const });
-      results.push({ id: 'y', label: 'y', value: 'No solution', color: 'negative' as const });
-      results.push({ id: 'solutionType', label: 'Solution Type', value: 'No solution (inconsistent system)', color: 'negative' as const });
+      // D = 0: compare rank(A) with rank([A | c]) — Dx = Dy = 0 alone cannot tell "0 = 0" from "0 = 5".
+      const coefZero = isZero(a1) && isZero(b1) && isZero(a2) && isZero(b2);
+      const rankA = coefZero ? 0 : 1;
+      let consistent: boolean;
+      let line: string | null = null;
+      if (rankA === 0) {
+        consistent = isZero(c1) && isZero(c2);
+      } else {
+        // At least one equation has a non-zero coefficient; the other must be a multiple of it (D = 0) and match the constant.
+        const useFirst = !(isZero(a1) && isZero(b1));
+        const [pa, pb, pc] = useFirst ? [a1, b1, c1] : [a2, b2, c2];
+        const [qa, qb, qc] = useFirst ? [a2, b2, c2] : [a1, b1, c1];
+        const qIsZero = isZero(qa) && isZero(qb);
+        const k = !isZero(pa) ? divFrac(qa, pa) : divFrac(qb, pb);
+        consistent = qIsZero ? isZero(qc) : isZero(subFrac(qc, mulFrac(k, pc)));
+        line = eqText(pa, pb, pc);
+      }
+      if (consistent) {
+        steps.push(`D = 0 and the equations are multiples of each other → infinite solutions (dependent system)`);
+        results.push({ id: 'x', label: 'x', value: 'No unique value', color: 'neutral' });
+        results.push({ id: 'y', label: 'y', value: 'No unique value', color: 'neutral' });
+        results.push({ id: 'solutionType', label: 'Solution Type', value: 'Infinite solutions (dependent system)', color: 'neutral' });
+        results.push({
+          id: 'solutionSet',
+          label: 'Solution set',
+          value: line ? `Every point on the line ${line}` : 'Every point (x, y) satisfies 0 = 0',
+          color: 'neutral',
+        });
+      } else {
+        steps.push(`D = 0 but the constants do not match (Dx = ${fmt(Dx)}, Dy = ${fmt(Dy)}) → no solution (inconsistent system)`);
+        results.push({ id: 'x', label: 'x', value: 'No solution', color: 'negative' });
+        results.push({ id: 'y', label: 'y', value: 'No solution', color: 'negative' });
+        results.push({ id: 'solutionType', label: 'Solution Type', value: 'No solution (inconsistent system)', color: 'negative' });
+      }
     }
-
-    results.push({
-      id: 'steps',
-      label: 'Step-by-Step Work',
-      value: steps.join('\n'),
-      color: 'neutral' as const,
-    });
-
+    results.push({ id: 'steps', label: 'Step-by-Step Work', value: steps.join('\n'), color: 'neutral' });
     return results;
   },
 
@@ -186,7 +214,7 @@ const systemOfEquationsConfig: CalculatorConfig = {
       },
       {
         question: 'What if my coefficients are fractions or decimals?',
-        answer: 'Cramer\'s rule works with any real numbers — integers, fractions, decimals, or irrational numbers. The calculator handles all real number coefficients. If you have fractions, you can enter them as decimals (e.g., 1/3 as 0.333). The formula x = Dx/D and y = Dy/D works the same way regardless of the coefficient type.',
+        answer: 'Coefficients are decimal numbers, read exactly (0.1 is exactly 1/10) and solved with exact fractions, so the answer has no floating-point error. Fractions must be entered as decimals, and 1/3 is not 0.333: to keep a fraction exact, multiply the whole equation by its denominator first (x/3 + y = 2 becomes x + 3y = 6). When x or y is a fraction such as 1/3 an "Exact values" row shows it.',
       },
       {
         question: 'How do I check if my solution is correct?',
@@ -194,7 +222,7 @@ const systemOfEquationsConfig: CalculatorConfig = {
       },
       {
         question: 'What happens if the coefficients are very large or very small numbers?',
-        answer: 'Cramer\'s rule works mathematically for any real numbers, but with extreme values, floating-point precision can affect accuracy. Very large coefficients (e.g., 10^12) or very small ones (e.g., 10^-12) may introduce rounding errors in the determinant calculation. For better precision with extreme values, consider scaling all coefficients by a common factor before entering them. Systems with ill-conditioned matrices (where the determinant is very close to zero) are particularly sensitive to rounding errors — a small change in coefficients can produce a very different solution. In such cases, numerical methods with pivoting (like Gaussian elimination with partial pivoting) may give more reliable results than Cramer\'s rule.',
+        answer: 'Because the arithmetic is exact (BigInt fractions), there is no rounding error even for very large or very small coefficients, and nearly-parallel lines are decided correctly: D = 0 is detected only when the determinant is exactly zero. The displayed decimals are rounded to 6 places. A nearly singular system (D very close to zero) still has a huge but exact solution, and its solution changes a lot if you change a coefficient slightly, which matters when the coefficients come from measurements.',
       },
     ],
     workedExamples: [

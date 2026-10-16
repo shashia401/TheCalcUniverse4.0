@@ -1,35 +1,40 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#84cc16'];
+interface MmmData {
+  sorted: number[];
+  mean: number;
+  median: number;
+}
+
+const COLORS = ['#1d4ed8', '#047857', '#b45309', '#6d28d9', '#be185d', '#0e7490', '#c2410c', '#4d7c0f'];
+const MAX_CHIPS = 200;
 
 export default function MeanMedianModePanel({ results }: Props) {
-  const sortedRow = results.find(r => r.id === 'sortedData');
-  const meanRow = results.find(r => r.id === 'mean');
-  const medianRow = results.find(r => r.id === 'median');
-  const medianDetail = results.find(r => r.id === 'medianDetail');
-  const dataCount = results.find(r => r.id === 'dataCount');
-  const rangeRow = results.find(r => r.id === 'range');
-  const modeRow = results.find(r => r.id === 'mode');
-  const sumRow = results.find(r => r.id === 'sum');
-
-  if (!sortedRow || !medianRow || !dataCount) return null;
-
-  const sortedValues = sortedRow.value.split(', ').map(Number);
-  const count = parseInt(dataCount.value);
+  const raw = results.find((r) => r.id === '_data');
+  if (!raw) return null;
+  let data: MmmData;
+  try {
+    data = JSON.parse(raw.value) as MmmData;
+  } catch {
+    return null;
+  }
+  const get = (id: string) => results.find((r) => r.id === id)?.value;
+  const medianRow = get('median');
+  const meanRow = get('mean');
+  const modeRow = get('mode');
+  const rangeRow = get('range');
+  const sumRow = get('sum');
+  const sorted = data.sorted;
+  const count = sorted.length;
+  if (count === 0) return null;
   const isEven = count % 2 === 0;
   const mid = Math.floor(count / 2);
-
-  const chartData = useMemo(() =>
-    sortedValues.map((v, i) => ({ label: `${i + 1}`, value: v })),
-    [sortedValues.join(',')]
-  );
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -42,75 +47,59 @@ export default function MeanMedianModePanel({ results }: Props) {
 
       <div className="p-5 space-y-4">
         {/* Bar chart */}
-        {chartData.length > 1 && meanRow && (
+        {count > 1 && (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Data Distribution</p>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-                <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} label={{ value: 'Position (sorted)', position: 'insideBottomRight', offset: -4, fontSize: 10, fill: '#94a3b8' }} />
-                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={45} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  formatter={(_: unknown) => [_, 'Value'] as any}
-                />
-                <ReferenceLine y={parseFloat(meanRow.value)} stroke="#ef4444" strokeDasharray="5 3" label={{ value: `Mean: ${meanRow.value}`, position: 'insideTopRight', fontSize: 10, fill: '#ef4444', fontWeight: 'bold' }} />
-                <ReferenceLine y={parseFloat(medianRow.value)} stroke="#3b82f6" strokeDasharray="5 3" label={{ value: `Median: ${medianRow.value}`, position: 'insideBottomRight', fontSize: 10, fill: '#3b82f6', fontWeight: 'bold' }} />
-                <Bar dataKey="value" radius={[3, 3, 0, 0]} maxBarSize={32}>
-                  {chartData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-3">
+              Data Distribution (sorted){count > 100 ? ', first 100 values' : ''}
+            </p>
+            <SvgBarChart
+              ariaLabel={`Bar chart of ${Math.min(count, 100)} sorted values with mean ${meanRow} and median ${medianRow}`}
+              data={sorted.slice(0, 100).map((v, i) => ({ label: `${i + 1}`, value: v, color: COLORS[i % COLORS.length] }))}
+              refLines={[
+                { y: data.mean, label: `Mean: ${meanRow}`, color: '#b91c1c' },
+                { y: data.median, label: `Median: ${medianRow}`, color: '#1d4ed8' },
+              ]}
+            />
           </div>
         )}
 
         {/* Sorted data visualization */}
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">
             Sorted Data ({count} values)
           </p>
           <div className="flex flex-wrap gap-1">
-            {sortedValues.map((val, i) => {
-              const isMiddle = isEven
-                ? (i === mid - 1 || i === mid)
-                : i === mid;
+            {sorted.slice(0, MAX_CHIPS).map((val, i) => {
+              const isMiddle = isEven ? i === mid - 1 || i === mid : i === mid;
               return (
                 <span
                   key={`item-${i}`}
                   className={`px-2 py-1 rounded text-xs font-mono font-bold ${
-                    isMiddle
-                      ? 'bg-blue-100 text-blue-700 ring-2 ring-blue-400'
-                      : 'bg-slate-100 text-slate-600'
+                    isMiddle ? 'bg-blue-100 text-blue-800 ring-2 ring-blue-500' : 'bg-slate-100 text-slate-700'
                   }`}
                 >
                   {val}
                 </span>
               );
             })}
+            {count > MAX_CHIPS && <span className="text-xs text-slate-600 self-center">+{count - MAX_CHIPS} more</span>}
           </div>
         </div>
 
         {/* Median bracket for even datasets */}
-        {isEven && medianDetail && (
+        {isEven && (
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-2">
               Median Calculation (Even Dataset)
             </p>
-            <div className="flex items-center justify-center gap-3 text-sm font-mono">
-              <span className="px-3 py-1.5 bg-white rounded border border-blue-300 font-bold text-blue-700">
-                {sortedValues[mid - 1]}
-              </span>
-              <span className="text-blue-400 text-lg">+</span>
-              <span className="px-3 py-1.5 bg-white rounded border border-blue-300 font-bold text-blue-700">
-                {sortedValues[mid]}
-              </span>
-              <span className="text-blue-400 text-lg">/ 2 =</span>
-              <span className="px-3 py-1.5 bg-blue-600 text-white rounded font-bold">
-                {medianRow.value}
-              </span>
+            <div className="flex items-center justify-center gap-3 text-sm font-mono flex-wrap">
+              <span className="px-3 py-1.5 bg-white rounded border border-blue-300 font-bold text-blue-700">{sorted[mid - 1]}</span>
+              <span className="text-blue-700 text-lg">+</span>
+              <span className="px-3 py-1.5 bg-white rounded border border-blue-300 font-bold text-blue-700">{sorted[mid]}</span>
+              <span className="text-blue-700 text-lg">/ 2 =</span>
+              <span className="px-3 py-1.5 bg-blue-700 text-white rounded font-bold">{medianRow}</span>
             </div>
-            <p className="text-xs text-blue-600 text-center mt-2">
+            <p className="text-xs text-blue-700 text-center mt-2">
               With an even number of values, take the average of the two middle numbers
             </p>
           </div>
@@ -119,47 +108,43 @@ export default function MeanMedianModePanel({ results }: Props) {
         {/* Odd dataset median highlight */}
         {!isEven && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-2">
-              Median (Odd Dataset)
-            </p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-2">Median (Odd Dataset)</p>
             <p className="text-sm font-mono font-bold text-emerald-700">
-              The middle value at position {mid + 1} of {count}: <span className="text-lg">{medianRow.value}</span>
+              The middle value at position {mid + 1} of {count}: <span className="text-lg">{medianRow}</span>
             </p>
           </div>
         )}
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {meanRow && (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-center">
-              <p className="text-[10px] font-bold text-emerald-600 uppercase">Mean</p>
-              <p className="text-sm font-bold font-mono text-emerald-700">{meanRow.value}</p>
-            </div>
-          )}
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-center">
+            <p className="text-[10px] font-bold text-emerald-700 uppercase">Mean</p>
+            <p className="text-sm font-bold font-mono text-emerald-700">{meanRow}</p>
+          </div>
           <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-center">
-            <p className="text-[10px] font-bold text-blue-600 uppercase">Median</p>
-            <p className="text-sm font-bold font-mono text-blue-700">{medianRow.value}</p>
+            <p className="text-[10px] font-bold text-blue-700 uppercase">Median</p>
+            <p className="text-sm font-bold font-mono text-blue-700">{medianRow}</p>
           </div>
           {modeRow && (
             <div className="rounded-lg border border-purple-200 bg-purple-50 px-3 py-2 text-center">
-              <p className="text-[10px] font-bold text-purple-600 uppercase">Mode</p>
-              <p className="text-sm font-bold font-mono text-purple-700 truncate" title={modeRow.value}>{modeRow.value}</p>
+              <p className="text-[10px] font-bold text-purple-700 uppercase">Mode</p>
+              <p className="text-sm font-bold font-mono text-purple-700 truncate" title={modeRow}>{modeRow}</p>
             </div>
           )}
           {rangeRow && (
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Range</p>
-              <p className="text-sm font-bold font-mono text-slate-700">{rangeRow.value}</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Range</p>
+              <p className="text-sm font-bold font-mono text-slate-700">{rangeRow}</p>
             </div>
           )}
           {sumRow && (
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Sum</p>
-              <p className="text-sm font-bold font-mono text-slate-700">{sumRow.value}</p>
+              <p className="text-[10px] font-bold text-slate-600 uppercase">Sum</p>
+              <p className="text-sm font-bold font-mono text-slate-700 break-all">{sumRow}</p>
             </div>
           )}
           <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center">
-            <p className="text-[10px] font-bold text-slate-500 uppercase">Count</p>
+            <p className="text-[10px] font-bold text-slate-600 uppercase">Count</p>
             <p className="text-sm font-bold font-mono text-slate-700">{count}</p>
           </div>
         </div>

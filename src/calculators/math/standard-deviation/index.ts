@@ -1,24 +1,7 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import StandardDeviationPanel from './StandardDeviationPanel';
-
-// Decimal.js for variance and standard deviation calculations — prevents
-// catastrophic cancellation and floating-point rounding errors when computing
-// squared deviations from the mean, especially for datasets with many values
-// or values of very different magnitudes.
-Decimal.set({ precision: 20, rounding: Decimal.ROUND_HALF_UP });
-
-function parseData(input: string): Decimal[] {
-  if (!input || !input.trim()) return [];
-  const nums = input
-    .split(/[,;\s]+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 0)
-    .map(s => { try { return new Decimal(s); } catch { return null; } })
-    .filter((d): d is Decimal => d !== null && d.isFinite());
-  return nums;
-}
+import { parseDataset, summarize, fmtDec, ignoredRow } from '../../../utils/stats';
 
 const standardDeviationConfig: CalculatorConfig = {
   inputs: [
@@ -43,52 +26,55 @@ const standardDeviationConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const raw = values.dataSet;
-    const dataType = values.population || 'sample';
-
-    if (!raw) return [];
-
-    const nums = parseData(raw);
+    const dataType = values.population === 'population' ? 'population' : 'sample';
+    const { values: nums, ignored } = parseDataset(values.dataSet);
     if (nums.length < 2) return [];
 
-    const n = nums.length;
-    const m = nums.reduce((s, v) => s.plus(v), new Decimal(0)).div(n);
-    const sumSquaredDiffs = nums.reduce((acc, x) => acc.plus(x.minus(m).pow(2)), new Decimal(0));
-    const variance = dataType === 'sample'
-      ? sumSquaredDiffs.div(n - 1)
-      : sumSquaredDiffs.div(n);
-    const stdDev = variance.sqrt();
-
-    const sorted = [...nums].sort((a, b) => a.comparedTo(b));
-    const min = sorted[0];
-    const max = sorted[n - 1];
-    const rangeVal = max.minus(min);
-    const medianVal = n % 2 === 0
-      ? sorted[n / 2 - 1].plus(sorted[n / 2]).div(2)
-      : sorted[Math.floor(n / 2)];
-    const cvPct = m.abs().greaterThan(0)
-      ? stdDev.div(m.abs()).times(100)
-      : new Decimal(0);
-
-    const fmt = (x: Decimal) => {
-      if (x.isInteger() && x.abs().lessThan(1e15)) return x.toFixed(0);
-      return parseFloat(x.toFixed(6)).toString();
-    };
+    // Exact two-pass arithmetic (src/utils/stats.ts): no cancellation even for 1e9-offset data.
+    const s = summarize(nums);
+    const isSample = dataType === 'sample';
+    const variance = isSample ? s.varianceSample! : s.variancePop;
+    const stdDev = isSample ? s.sdSample! : s.sdPop;
+    // Coefficient of variation is undefined when the mean is 0 (not "0%").
+    const cv = s.mean.isZero() ? null : stdDev.div(s.mean.abs()).times(100);
 
     return [
       {
         id: 'stdDev',
-        label: `Standard Deviation (${dataType === 'sample' ? 's' : 'σ'})`,
-        value: fmt(stdDev),
+        label: `Standard Deviation (${isSample ? 's' : 'σ'})`,
+        value: fmtDec(stdDev),
         highlight: true,
         color: 'positive',
       },
-      { id: 'mean', label: 'Mean (Average)', value: fmt(m), color: 'neutral' },
-      { id: 'variance', label: 'Variance', value: fmt(variance), color: 'neutral' },
-      { id: 'median', label: 'Median', value: fmt(medianVal), color: 'neutral' },
-      { id: 'count', label: 'Count (n)', value: n.toString(), color: 'neutral' },
-      { id: 'range', label: 'Range', value: `${fmt(min)} to ${fmt(max)} (span: ${fmt(rangeVal)})`, color: 'neutral' },
-      { id: 'cv', label: 'Coefficient of Variation', value: `${cvPct.toFixed(2)}%`, color: 'neutral' },
+      { id: 'mean', label: 'Mean (Average)', value: fmtDec(s.mean), color: 'neutral' },
+      { id: 'variance', label: `Variance (${isSample ? 's²' : 'σ²'})`, value: fmtDec(variance), color: 'neutral' },
+      { id: 'median', label: 'Median', value: fmtDec(s.median), color: 'neutral' },
+      { id: 'count', label: 'Count (n)', value: String(s.n), color: 'neutral' },
+      { id: 'range', label: 'Range', value: `${fmtDec(s.min)} to ${fmtDec(s.max)} (span: ${fmtDec(s.range)})`, color: 'neutral' },
+      {
+        id: 'cv',
+        label: 'Coefficient of Variation',
+        value: cv ? `${cv.toDecimalPlaces(2).toFixed(2)}%` : 'Undefined (mean is 0)',
+        color: 'neutral',
+      },
+      ...ignoredRow(ignored),
+      // Full-precision numbers for the step-by-step panel (it never re-parses the input text).
+      {
+        id: '_data',
+        label: '',
+        value: JSON.stringify({
+          values: nums.map((d) => d.toNumber()),
+          mean: s.mean.toNumber(),
+          ss: s.ss.toNumber(),
+          variance: variance.toNumber(),
+          stdDev: stdDev.toNumber(),
+          median: s.median.toNumber(),
+          modes: s.modes.map((d) => d.toNumber()),
+          modeCount: s.modeCount,
+          cv: cv ? cv.toNumber() : null,
+          sample: isSample,
+        }),
+      },
     ];
   },
   educational: {
@@ -135,22 +121,22 @@ const standardDeviationConfig: CalculatorConfig = {
     ],
     workedExamples: [
       {
-        scenario: 'Dr. Chen, a pharmaceutical quality manager, is testing the weight consistency of 500mg ibuprofen tablets. A sample of 8 tablets weighs: 498, 502, 499, 505, 497, 503, 501, 500 mg. The FDA requires that the relative standard deviation (CV) stay under 2%. Is this batch compliant?',
+        scenario: 'Dr. Chen, a pharmaceutical quality manager, is testing the weight consistency of 500mg ibuprofen tablets. A sample of 8 tablets weighs: 498, 502, 499, 505, 497, 503, 501, 500 mg. The lab\'s release limit is a relative standard deviation (CV) under 2%. Does this batch pass?',
         inputs: { dataSet: '498, 502, 499, 505, 497, 503, 501, 500', population: 'sample' },
-        result: 'Sample SD (s) ≈ 2.669. Mean = 500.625. Variance ≈ 7.125. Median = 500.5. Count (n) = 8. Range: 497 to 505 (span: 8). CV = 0.53%. Batch is FDA compliant (CV < 2%).',
-        insight: 'Mean = 500.625 mg, Sample SD ≈ 2.67 mg, CV = (2.67 / 500.625) × 100 = 0.53%. The CV is well under the FDA 2% limit. The process is well-controlled and the batch passes quality standards. Dr. Chen can release the batch with confidence.',
+        result: 'Sample SD (s) ≈ 2.669. Mean = 500.625. Variance ≈ 7.125. Median = 500.5. Count (n) = 8. Range: 497 to 505 (span: 8). CV = 0.53%. Batch passes the 2% CV limit.',
+        insight: 'Mean = 500.625 mg, Sample SD ≈ 2.67 mg, CV = (2.669 / 500.625) × 100 = 0.53%. The CV is well under the 2% limit. The process is well-controlled and the batch passes. Dr. Chen can release the batch with confidence.',
       },
       {
         scenario: 'Maria, a high school counselor, wants to compare the consistency of math scores versus English scores from a standardized test. Math: 72, 85, 91, 78, 88, 76, 84, 90. English: 80, 82, 81, 84, 79, 83, 81, 80. Which subject has more consistent scores?',
         inputs: { dataSet: '72, 85, 91, 78, 88, 76, 84, 90', population: 'sample' },
-        result: 'Sample SD (s) ≈ 6.760. Mean = 83. Variance ≈ 45.714. Median = 81. Count (n) = 8. Range: 72 to 91 (span: 19). CV = 8.15%. Math scores show moderate variability.',
-        insight: 'Math: Mean = 83, SD ≈ 6.76, CV = 8.14%. English: Mean = 81.25, SD ≈ 1.67, CV = 2.05%. English scores are far more consistent (CV of 2% vs 8% for math). This suggests that student ability in English is more uniform, while math performance varies significantly. The counselor might recommend differentiated math instruction to address the wider spread.',
+        result: 'Sample SD (s) ≈ 6.949. Mean = 83. Variance ≈ 48.286. Median = 84.5. Count (n) = 8. Range: 72 to 91 (span: 19). CV = 8.37%. Math scores show moderate variability.',
+        insight: 'Math: Mean = 83, SD ≈ 6.95, CV = 8.37%. English: Mean = 81.25, SD ≈ 1.67, CV = 2.05%. English scores are far more consistent (CV of 2% vs 8% for math). This suggests that student ability in English is more uniform, while math performance varies significantly. The counselor might recommend differentiated math instruction to address the wider spread.',
       },
       {
         scenario: 'James, an investor, is comparing two mutual funds. Fund A had annual returns: 8%, 12%, -3%, 15%, 7%. Fund B had annual returns: 9%, 10%, 8%, 9%, 11%. Both have similar means but James wants to understand the risk difference.',
         inputs: { dataSet: '8, 12, -3, 15, 7', population: 'sample' },
-        result: 'Sample SD (s) ≈ 7.190. Mean = 7.8. Variance ≈ 51.7. Median = 8. Count (n) = 5. Range: -3 to 15 (span: 18). CV = 92.18%. Fund A has very high volatility — returns swing wildly including a loss year.',
-        insight: 'Fund A: Mean = 7.8%, SD ≈ 7.19%, CV = 92.2%. Fund B: Mean = 9.4%, SD ≈ 1.14%, CV = 12.1%. Fund B has lower returns on average but dramatically lower volatility. Fund A\'s 92% CV means returns swing wildly year to year (including a loss of -3%). James should choose Fund B if he wants steady returns, or Fund A if he can tolerate high volatility for occasional big gains.',
+        result: 'Sample SD (s) ≈ 6.834. Mean = 7.8. Variance ≈ 46.7. Median = 8. Count (n) = 5. Range: -3 to 15 (span: 18). CV = 87.61%. Fund A has very high volatility — returns swing wildly including a loss year.',
+        insight: 'Fund A: Mean = 7.8%, SD ≈ 6.83%, CV = 87.6%. Fund B: Mean = 9.4%, SD ≈ 1.14%, CV = 12.1%. Fund B has lower returns on average but dramatically lower volatility. Fund A\'s 88% CV means returns swing wildly year to year (including a loss of -3%). James should choose Fund B if he wants steady returns, or Fund A if he can tolerate high volatility for occasional big gains.',
       },
     ],
     proTips: [
@@ -165,7 +151,7 @@ const standardDeviationConfig: CalculatorConfig = {
       'Do not use the empirical rule (68-95-99.7) for data that is clearly non-normal (skewed or bimodal). The empirical rule only applies to normally distributed data. For non-normal data, use percentile-based methods.',
       'Do not use the coefficient of variation when the mean is zero or very close to zero — CV becomes meaningless as the denominator approaches zero. CV also cannot be negative, so it loses interpretability near zero means.',
       'Do not use sample SD (n-1) when you genuinely have the entire population (e.g., census data or a complete company database). In that case, switch to population SD (n) for the exact parameter value.',
-      'This calculator uses the standard two-pass formula for variance. It does not implement Welford\'s online algorithm, which would be more numerically stable for datasets with extreme value ranges or millions of entries.',
+      'The mean and the squared deviations are computed in exact decimal arithmetic (50 significant digits, two passes), so data with a huge common offset such as 1000000004, 1000000007, 1000000013, 1000000016 still gives the exact variance (30). Values pasted as extremely long digit strings are limited to 50 significant digits.',
     ],
     quickReference: [
       { label: 'Sample SD (s)', value: 'sqrt(Σ(x-x̄)² / (n-1))' },

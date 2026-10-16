@@ -51,11 +51,11 @@ describe('Taylor Series Calculator', () => {
 
   it('shows individual terms', () => {
     const r = config.calculate({ expression: 'e^x', center: '0', order: '2' });
-    expect(getValue(r, 'terms')).toContain('·');
+    expect(getValue(r, 'terms')).toBe('1 | x | x^2/2');
   });
 
-  it('regression: e^x order-5 evaluated at x=2 matches worked example (was 7.266667, actually 7.266664)', () => {
+  it('regression: e^x order-5 at x=2 is exactly 1+2+2+4/3+2/3+4/15 = 109/15 = 7.2666667 (old code used rounded 6-digit coefficients: 7.266664)', () => {
     const r = config.calculate({ expression: 'e^x', center: '0', order: '5', xValue: '2' });
-    expect(getValue(r, 'evaluation')).toBe('7.266664');
+    expect(getValue(r, 'evaluation')).toBe('7.266666667');
   });
 });

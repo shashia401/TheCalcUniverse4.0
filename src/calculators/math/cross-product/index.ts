@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import CrossProductPanel from './CrossProductPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { roundStrAuto } from '../../../lib/format';
+import { allFinite, cross3, dot3, norm3, type V3 } from '../../../utils/vector';
 
 const crossProductConfig: CalculatorConfig = {
   inputs: [
@@ -64,42 +67,29 @@ const crossProductConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const v1x = parseFloat(values.v1x);
-    const v1y = parseFloat(values.v1y);
-    const v1z = parseFloat(values.v1z);
-    const v2x = parseFloat(values.v2x);
-    const v2y = parseFloat(values.v2y);
-    const v2z = parseFloat(values.v2z);
+    const n = (k: string) => parseNumberStrict(values[k]);
+    const a: V3 = [n('v1x'), n('v1y'), n('v1z')];
+    const b: V3 = [n('v2x'), n('v2y'), n('v2z')];
+    if (!allFinite(...a, ...b)) return [];
 
-    if ([v1x, v1y, v1z, v2x, v2y, v2z].some(isNaN)) return [];
-
-    const fmt = (n: number) => {
-      if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-      return parseFloat(n.toFixed(6)).toString();
-    };
-
+    const fmt = roundStrAuto;
     // Cross product: a × b = (a₂b₃ − a₃b₂, a₃b₁ − a₁b₃, a₁b₂ − a₂b₁)
-    const crossX = v1y * v2z - v1z * v2y;
-    const crossY = v1z * v2x - v1x * v2z;
-    const crossZ = v1x * v2y - v1y * v2x;
+    const c = cross3(a, b);
+    if (!allFinite(...c)) return []; // components so large the product overflows a double
+    const magnitude = norm3(c);
+    if (!Number.isFinite(magnitude)) return [];
 
-    const crossStr = `${fmt(crossX)}, ${fmt(crossY)}, ${fmt(crossZ)}`;
+    const crossStr = c.map((x) => fmt(x)).join(', ');
+    const unitVector =
+      magnitude > 0
+        ? `(${c.map((x) => fmt(x / magnitude)).join(', ')})`
+        : 'Undefined (zero vector: a and b are parallel)';
 
-    // Magnitude
-    const magnitude = Math.sqrt(crossX * crossX + crossY * crossY + crossZ * crossZ);
-
-    // Unit vector
-    let unitVector = 'undefined (zero vector)';
-    if (magnitude > 0) {
-      unitVector = `${fmt(crossX / magnitude)}, ${fmt(crossY / magnitude)}, ${fmt(crossZ / magnitude)}`;
-    }
-
-    // Verification: dot with each original should be ~0
-    const dotWithA = crossX * v1x + crossY * v1y + crossZ * v1z;
-    const dotWithB = crossX * v2x + crossY * v2y + crossZ * v2z;
-
-    // Area of parallelogram = magnitude
-    const area = magnitude;
+    // Verification: a × b is orthogonal to both inputs, so both dots are 0 (zero within floating-point rounding).
+    const check = (v: V3) => {
+      const d = dot3(c, v);
+      return Math.abs(d) <= 1e-9 * magnitude * norm3(v) ? '0' : roundStrAuto(d);
+    };
 
     return [
       {
@@ -118,19 +108,19 @@ const crossProductConfig: CalculatorConfig = {
       {
         id: 'unitVector',
         label: 'Unit Vector (direction)',
-        value: unitVector !== 'undefined (zero vector)' ? `(${unitVector})` : unitVector,
+        value: unitVector,
         color: 'neutral' as const,
       },
       {
         id: 'verification',
         label: 'Verification (dot with a, dot with b)',
-        value: `${fmt(dotWithA)}, ${fmt(dotWithB)}`,
+        value: `${check(a)}, ${check(b)}`,
         color: 'neutral' as const,
       },
       {
         id: 'area',
         label: 'Area of Parallelogram',
-        value: fmt(area),
+        value: fmt(magnitude), // |a × b| = |a||b| sin θ is the parallelogram area
         highlight: true,
         color: 'positive' as const,
       },

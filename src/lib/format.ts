@@ -16,3 +16,13 @@ export const sigFig4 = (n: number) => n.toLocaleString(undefined, { maximumSigni
 export const money2dp = (n: number) =>
   n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 export const plainLocale = (n: number) => n.toLocaleString(undefined);
+
+/**
+ * n to `dp` decimals with trailing zeros trimmed, but a non-zero value smaller than 10^-dp keeps 6 significant
+ * digits ("3e-10") instead of collapsing to "0" (a 1e-9 m result is not zero). -0 prints as "0".
+ */
+export const roundStrAuto = (n: number, dp = 6): string => {
+  if (n === 0) return '0';
+  if (Math.abs(n) < 10 ** -dp) return Number(n.toPrecision(6)).toString();
+  return parseFloat(n.toFixed(dp)).toString();
+};

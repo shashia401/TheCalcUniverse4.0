@@ -1,5 +1,5 @@
 import { roundStr6 as fmt } from '../../../lib/format';
-export function calculate(shape: string, d1: number, d2: number, d3: number) {
+function compute(shape: string, d1: number, d2: number, d3: number) {
   const pi = Math.PI;
 
   if (shape === 'sphere') {
@@ -67,4 +67,10 @@ export function calculate(shape: string, d1: number, d2: number, d3: number) {
   }
 
   return [];
+}
+
+/** Same results, but an overflowing input (r³ past 1.8e308) yields [] instead of the text "Infinity". */
+export function calculate(shape: string, d1: number, d2: number, d3: number) {
+  const out = compute(shape, d1, d2, d3);
+  return out.some((r) => /Infinity|NaN/.test(r.value)) ? [] : out;
 }

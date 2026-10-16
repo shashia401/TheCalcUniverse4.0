@@ -1,72 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MatrixPanel from './MatrixPanel';
-import { roundStr8 as fmt } from '../../../lib/format';
-
-function parseMatrix(input: string, size: number): number[][] | null {
-  const rows = input.trim().split('\n').filter(r => r.trim());
-  if (rows.length !== size) return null;
-
-  const matrix: number[][] = [];
-  for (const row of rows) {
-    const nums = row.trim().split(/[,\s]+/).map(s => parseFloat(s.trim()));
-    if (nums.length !== size || nums.some(isNaN)) return null;
-    matrix.push(nums);
-  }
-  return matrix;
-}
-
-function determinant2x2(m: number[][]): number {
-  return m[0][0] * m[1][1] - m[0][1] * m[1][0];
-}
-
-function determinant3x3(m: number[][]): number {
-  return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
-       - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
-       + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
-}
-
-function minor(m: number[][], row: number, col: number): number[][] {
-  return m.filter((_, i) => i !== row).map(r => r.filter((_, j) => j !== col));
-}
-
-function determinant(m: number[][]): number {
-  const n = m.length;
-  if (n === 2) return determinant2x2(m);
-  if (n === 3) return determinant3x3(m);
-  // Laplace expansion for 4x4 and 5x5
-  let det = 0;
-  for (let j = 0; j < n; j++) {
-    det += (j % 2 === 0 ? 1 : -1) * m[0][j] * determinant(minor(m, 0, j));
-  }
-  return det;
-}
-
-function inverse(m: number[][]): number[][] | null {
-  const n = m.length;
-  const det = determinant(m);
-  if (Math.abs(det) < 1e-10) return null;
-
-  // For 2x2: [[d, -b], [-c, a]] / det
-  if (n === 2) {
-    return [
-      [m[1][1] / det, -m[0][1] / det],
-      [-m[1][0] / det, m[0][0] / det],
-    ];
-  }
-
-  // Cofactor method for n >= 3
-  const inv: number[][] = [];
-  for (let i = 0; i < n; i++) {
-    inv[i] = [];
-    for (let j = 0; j < n; j++) {
-      const minorMat = minor(m, j, i); // transposed (adjugate)
-      const cof = ((i + j) % 2 === 0 ? 1 : -1) * determinant(minorMat);
-      inv[i][j] = cof / det;
-    }
-  }
-  return inv;
-}
+import { type FMatrix, determinant, fmtApprox, fmtExact, inverse, parseMatrix, rref } from './matrixMath';
 
 const matrixConfig: CalculatorConfig = {
   inputs: [
@@ -90,6 +25,7 @@ const matrixConfig: CalculatorConfig = {
       options: [
         { label: 'Determinant', value: 'determinant' },
         { label: 'Inverse', value: 'inverse' },
+        { label: 'Rank and reduced row echelon form', value: 'rank' },
       ],
     },
     {
@@ -101,40 +37,53 @@ const matrixConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const size = parseInt(values.size);
+    const size = Number(values.size);
     const operation = values.operation || 'determinant';
     const raw = values.matrixA?.trim();
 
-    if (!raw || isNaN(size) || size < 2 || size > 5) return [];
+    if (!raw || !Number.isInteger(size) || size < 2 || size > 5) return [];
 
     const matrix = parseMatrix(raw, size);
     if (!matrix) return [];
 
+    const grid = (m: FMatrix, f: (x: FMatrix[number][number]) => string) => m.map((row) => row.map(f).join(' ')).join(' | ');
+    const common = [
+      { id: 'matrixSize', label: 'Matrix Size', value: `${size}×${size}` },
+      { id: '_matrixData', label: 'Matrix Data', value: JSON.stringify(matrix.map((r) => r.map(fmtExact))) },
+    ];
+
     if (operation === 'determinant') {
       const det = determinant(matrix);
-      if (!isFinite(det)) return [];
-      const detStr = Math.abs(det) < 1e-10 ? '0' : fmt(det);
       return [
-        { id: 'determinant', label: `det(A)`, value: detStr, highlight: true, color: 'positive' },
-        { id: 'matrixSize', label: 'Matrix Size', value: `${size}×${size}` },
-        { id: '_matrixData', label: 'Matrix Data', value: JSON.stringify(matrix) },
+        { id: 'determinant', label: `det(A)`, value: fmtExact(det), highlight: true, color: 'positive' },
+        { id: 'invertible', label: 'Invertible?', value: det.n === 0n ? 'No (singular)' : 'Yes' },
+        ...common,
       ];
     }
 
     if (operation === 'inverse') {
       const inv = inverse(matrix);
-      if (!inv) return [
-        { id: 'inverse', label: 'A⁻¹', value: 'Matrix is singular (det = 0). No inverse exists.', color: 'negative' },
-        { id: 'matrixSize', label: 'Matrix Size', value: `${size}×${size}` },
-        { id: '_matrixData', label: 'Matrix Data', value: JSON.stringify(matrix) },
-      ];
-
-      const invStr = inv.map(row => row.map(v => fmt(v)).join(' ')).join(' | ');
+      if (!inv)
+        return [
+          { id: 'inverse', label: 'A⁻¹', value: 'Matrix is singular (det = 0). No inverse exists.', color: 'negative' },
+          ...common,
+        ];
       return [
-        { id: 'inverse', label: 'A⁻¹', value: invStr, highlight: true, color: 'positive' },
-        { id: 'matrixSize', label: 'Matrix Size', value: `${size}×${size}` },
-        { id: '_matrixData', label: 'Matrix Data', value: JSON.stringify(matrix) },
-        { id: '_inverseData', label: 'Inverse Data', value: JSON.stringify(inv) },
+        { id: 'inverse', label: 'A⁻¹', value: grid(inv, fmtExact), highlight: true, color: 'positive' },
+        { id: 'inverseDecimal', label: 'A⁻¹ (6 decimals)', value: grid(inv, fmtApprox) },
+        ...common,
+        { id: '_inverseData', label: 'Inverse Data', value: JSON.stringify(inv.map((r) => r.map(fmtExact))) },
+      ];
+    }
+
+    if (operation === 'rank') {
+      const { matrix: R, rank } = rref(matrix);
+      return [
+        { id: 'rank', label: 'Rank', value: String(rank), highlight: true, color: 'positive' },
+        { id: 'nullity', label: 'Nullity (n − rank)', value: String(size - rank) },
+        { id: 'rref', label: 'Reduced row echelon form', value: grid(R, fmtExact) },
+        ...common,
+        { id: '_rrefData', label: 'RREF Data', value: JSON.stringify(R.map((r) => r.map(fmtExact))) },
       ];
     }
 
@@ -154,15 +103,15 @@ const matrixConfig: CalculatorConfig = {
     formulaDescription:
       'The determinant is a scalar value computed from a square matrix that indicates whether the matrix is invertible (det ≠ 0) or singular (det = 0). The inverse of a matrix A, denoted A⁻¹, satisfies A × A⁻¹ = I (the identity matrix). For a 2×2 matrix [[a, b], [c, d]], the determinant is ad − bc and the inverse is 1/(ad−bc) × [[d, −b], [−c, a]]. For larger matrices, the inverse is computed as the adjugate matrix divided by the determinant.',
     variables: [
-      { symbol: 'A', name: 'Matrix', description: 'An n×n square matrix of real numbers. Supported sizes: 2×2, 3×3, 4×4, and 5×5.' },
+      { symbol: 'A', name: 'Matrix', description: 'An n×n square matrix of decimal numbers (entries are read exactly, e.g. 0.1 is 1/10). Supported sizes: 2×2, 3×3, 4×4, and 5×5.' },
       { symbol: 'det(A)', name: 'Determinant', description: 'A scalar that encodes properties of the matrix. Zero means the matrix is singular (non-invertible).' },
       { symbol: 'A⁻¹', name: 'Inverse', description: 'The matrix that, when multiplied by A, gives the identity matrix. Exists only when det(A) ≠ 0.' },
     ],
     howToUse: [
       'Select the matrix size: 2×2, 3×3, 4×4, or 5×5.',
-      'Choose an operation: calculate the determinant, the inverse, or both.',
+      'Choose an operation: determinant, inverse, or rank with the reduced row echelon form.',
       'Enter matrix entries row by row. Use one line per row, separating numbers with spaces or commas.',
-      'View the result with step-by-step calculation showing each cofactor expansion or row operation.',
+      'Results are exact: integers and decimals are read as exact fractions, so the answer is a whole number or a fraction such as 1/3, with a 6-decimal rounding alongside for inverses.',
     ],
     explanation:
       'Matrix operations are fundamental to linear algebra and have applications in computer graphics (transformation matrices), physics (systems of linear equations), machine learning (weight matrices), and engineering (finite element analysis). The determinant of a 2×2 matrix is ad − bc. For larger matrices, the determinant is computed via Laplace expansion (also called cofactor expansion), where you expand along a row or column, computing signed minors recursively. For a 3×3 matrix, the Rule of Sarrus provides a visual shortcut. The inverse exists only when the determinant is non-zero — a matrix with zero determinant is called singular or degenerate, meaning its rows (or columns) are linearly dependent. A singular matrix represents a transformation that collapses space (maps multiple inputs to the same output), which is why it cannot be reversed.',

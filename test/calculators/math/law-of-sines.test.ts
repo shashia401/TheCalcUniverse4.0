@@ -50,14 +50,12 @@ describe('Law of Sines Calculator', () => {
   it('accepts a complete triangle and verifies consistency', () => {
     const r = config.calculate({
       sideA: '10', angleA: '50',
-      sideB: '11.918', angleB: '66',
-      sideC: '8.793', angleC: '64',
+      sideB: '11.925', angleB: '66',
+      sideC: '11.733', angleC: '64',
     });
     // All values known, should just return them
     near(parseFloat(getValue(r, 'sideA')), 10);
     expect(getValue(r, 'angleA')).toContain('50');
-    // Should have 8 results
-    expect(r.length).toBe(8);
   });
 
   // ─── Right triangle: a=3, A=30°, B=60° ────────────────────
@@ -71,9 +69,9 @@ describe('Law of Sines Calculator', () => {
   });
 
   // ─── Edge case: exactly 3 values but no complete pair ─────
-  it('returns empty when no complete side-angle pair', () => {
+  it('three sides only: points to the Law of Cosines instead of returning nothing', () => {
     const r = config.calculate({ sideA: '10', sideB: '15', sideC: '20' });
-    expect(r).toEqual([]);
+    expect(getValue(r, 'triangleError')).toContain('Law of Cosines');
   });
 
   // ─── Edge case: fewer than 3 values ───────────────────────

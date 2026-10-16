@@ -1,11 +1,12 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import InverseTrigPanel from './InverseTrigPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
 const fmt = (n: number): string => {
-  if (!isFinite(n)) return 'Infinity';
-  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-  return parseFloat(n.toFixed(8)).toString();
+  if (!Number.isFinite(n)) return 'Infinity';
+  if (n !== 0 && Math.abs(n) < 1e-4) return String(Number(n.toPrecision(6))); // 5.72958e-8, not 6e-8
+  return String(parseFloat(n.toFixed(8)));
 };
 
 const functionMeta: Record<string, { label: string; domain: string; domainCheck: (v: number) => boolean; rangeDeg: string; compute: (v: number) => number }> = {
@@ -34,6 +35,23 @@ const functionMeta: Record<string, { label: string; domain: string; domainCheck:
 
 const toDeg = (rad: number): number => rad * (180 / Math.PI);
 
+/** Exact angles (as multiples of pi) for the rational inputs whose inverse trig value is a standard angle. */
+const EXACT: Record<string, Record<string, string>> = {
+  arcsin: { '0': '0', '0.5': 'π/6', '-0.5': '-π/6', '1': 'π/2', '-1': '-π/2' },
+  arccos: { '1': '0', '0.5': 'π/3', '0': 'π/2', '-0.5': '2π/3', '-1': 'π' },
+  arctan: { '0': '0', '1': 'π/4', '-1': '-π/4' },
+};
+const EXACT_DEG: Record<string, number> = { '0': 0, 'π/6': 30, '-π/6': -30, 'π/2': 90, '-π/2': -90, 'π/3': 60, '2π/3': 120, 'π': 180, 'π/4': 45, '-π/4': -45 };
+
+/** All angles with the same trig value, as a general solution in degrees (k any integer). */
+function generalSolution(func: string, deg: number): string {
+  const d = fmt(deg);
+  const sup = fmt(180 - deg);
+  if (func === 'arcsin') return deg === 90 || deg === -90 ? `θ = ${d}° + 360°·k` : `θ = ${d}° + 360°·k  or  θ = ${sup}° + 360°·k`;
+  if (func === 'arccos') return deg === 0 || deg === 180 ? `θ = ${d}° + 360°·k` : `θ = ±${d}° + 360°·k`;
+  return `θ = ${d}° + 180°·k`;
+}
+
 const config: CalculatorConfig = {
   inputs: [
     {
@@ -59,9 +77,9 @@ const config: CalculatorConfig = {
   ],
   calculate: (values) => {
     const func = values.function || 'arcsin';
-    const value = parseFloat(values.value);
+    const value = parseNumberStrict(values.value);
 
-    if (isNaN(value)) return [];
+    if (!Number.isFinite(value)) return [];
 
     const meta = functionMeta[func];
     if (!meta) return [];
@@ -78,7 +96,9 @@ const config: CalculatorConfig = {
     }
 
     const radians = meta.compute(value);
-    const degrees = toDeg(radians);
+    const exactRad = EXACT[func]?.[String(value)];
+    // Standard angles are returned exactly (asin(0.5) in floating point is 30.000000000000004 deg).
+    const degrees = exactRad !== undefined ? EXACT_DEG[exactRad] ?? toDeg(radians) : toDeg(radians);
 
     return [
       {
@@ -101,6 +121,11 @@ const config: CalculatorConfig = {
         value: `${fmt(degrees)}° (${fmt(radians)} rad)`,
         color: 'neutral' as const,
       },
+      ...(exactRad !== undefined
+        ? [{ id: 'exactValue', label: 'Exact value', value: `${exactRad} rad = ${fmt(degrees)}°`, color: 'neutral' as const }]
+        : []),
+      { id: 'allSolutions', label: 'All solutions of the equation', value: generalSolution(func, degrees), color: 'neutral' as const },
+      { id: '_radians', label: 'radians (full precision)', value: String(radians) },
       {
         id: 'domainCheck',
         label: 'Domain',

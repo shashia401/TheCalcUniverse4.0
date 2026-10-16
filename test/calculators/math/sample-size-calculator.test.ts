@@ -51,7 +51,7 @@ describe('Sample size calculator — calculation', () => {
     const r = config.calculate({ population: '10000', confidence: '99', margin: '5' });
     expect(r.length).toBeGreaterThan(0);
     expect(parseInt(getValue(r, 'sampleSize'))).toBeGreaterThan(0);
-    expect(getValue(r, 'zScore')).toContain('2.576');
+    expect(getValue(r, 'zScore')).toContain('2.5758'); // exact quantile 2.575829
   });
 
   it('shows Z-score used', () => {

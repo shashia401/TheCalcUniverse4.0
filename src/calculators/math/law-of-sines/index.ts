@@ -1,182 +1,151 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import LawOfSinesPanel from './LawOfSinesPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import {
+  type AngleUnit,
+  type Tri,
+  angleToDeg,
+  classify,
+  area,
+  fmtAngle,
+  fmtNum8 as fmt,
+  solveAngleAngleSide,
+  solveSSA,
+  toRad,
+} from '../shared/triangle';
 
-const fmt = (n: number): string => {
-  if (!isFinite(n)) return 'Infinity';
-  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-  return parseFloat(n.toFixed(8)).toString();
+const V = ['A', 'B', 'C'] as const;
+type Vertex = (typeof V)[number];
+
+const rows = (t: Tri, unit: AngleUnit, suffix = '', tag = ''): CalculatorResult[] => {
+  const au = unit === 'rad' ? 'rad' : '°';
+  const k = suffix ? `${tag} ` : '';
+  return [
+    { id: `sideA${suffix}`, label: `${k}Side a`, value: fmt(t.a), highlight: !suffix, color: suffix ? 'neutral' : 'positive' },
+    { id: `angleA${suffix}`, label: `${k}Angle A`, value: fmtAngle(t.A, unit), unit: au, color: 'neutral' },
+    { id: `sideB${suffix}`, label: `${k}Side b`, value: fmt(t.b), color: 'neutral' },
+    { id: `angleB${suffix}`, label: `${k}Angle B`, value: fmtAngle(t.B, unit), unit: au, color: 'neutral' },
+    { id: `sideC${suffix}`, label: `${k}Side c`, value: fmt(t.c), color: 'neutral' },
+    { id: `angleC${suffix}`, label: `${k}Angle C`, value: fmtAngle(t.C, unit), unit: au, color: 'neutral' },
+  ];
 };
 
-const toRad = (d: number): number => d * (Math.PI / 180);
-const toDeg = (r: number): number => r * (180 / Math.PI);
+const R_OF = (t: Tri) => t.a / (2 * Math.sin(toRad(t.A))); // circumradius
 
 const config: CalculatorConfig = {
   inputs: [
     {
-      id: 'sideA',
-      label: 'Side a',
-      type: 'number',
-      placeholder: 'Side a',
-      helpText: 'Enter the length of side a (leave blank if unknown)',
+      id: 'angleUnit',
+      label: 'Angle unit',
+      type: 'select',
+      defaultValue: 'deg',
+      options: [
+        { label: 'Degrees (°)', value: 'deg' },
+        { label: 'Radians (rad)', value: 'rad' },
+      ],
+      helpText: 'Used for every angle you enter and for all angles in the results',
     },
-    {
-      id: 'angleA',
-      label: 'Angle A',
-      type: 'number',
-      placeholder: 'Angle A deg',
-      unit: '°',
-      helpText: 'Enter angle A in degrees (leave blank if unknown)',
-    },
-    {
-      id: 'sideB',
-      label: 'Side b',
-      type: 'number',
-      placeholder: 'Side b',
-      helpText: 'Enter the length of side b (leave blank if unknown)',
-    },
-    {
-      id: 'angleB',
-      label: 'Angle B',
-      type: 'number',
-      placeholder: 'Angle B deg',
-      unit: '°',
-      helpText: 'Enter angle B in degrees (leave blank if unknown)',
-    },
-    {
-      id: 'sideC',
-      label: 'Side c',
-      type: 'number',
-      placeholder: 'Side c',
-      helpText: 'Enter the length of side c (leave blank if unknown)',
-    },
-    {
-      id: 'angleC',
-      label: 'Angle C',
-      type: 'number',
-      placeholder: 'Angle C deg',
-      unit: '°',
-      helpText: 'Enter angle C in degrees (leave blank if unknown)',
-    },
+    { id: 'sideA', label: 'Side a', type: 'number', placeholder: 'Side a', helpText: 'Enter the length of side a (leave blank if unknown)' },
+    { id: 'angleA', label: 'Angle A', type: 'number', placeholder: 'Angle A', helpText: 'Enter angle A, opposite side a (leave blank if unknown)' },
+    { id: 'sideB', label: 'Side b', type: 'number', placeholder: 'Side b', helpText: 'Enter the length of side b (leave blank if unknown)' },
+    { id: 'angleB', label: 'Angle B', type: 'number', placeholder: 'Angle B', helpText: 'Enter angle B, opposite side b (leave blank if unknown)' },
+    { id: 'sideC', label: 'Side c', type: 'number', placeholder: 'Side c', helpText: 'Enter the length of side c (leave blank if unknown)' },
+    { id: 'angleC', label: 'Angle C', type: 'number', placeholder: 'Angle C', helpText: 'Enter angle C, opposite side c (leave blank if unknown)' },
   ],
   calculate: (values) => {
-    const sA = parseFloat(values.sideA);
-    const aA = parseFloat(values.angleA);
-    const sB = parseFloat(values.sideB);
-    const aB = parseFloat(values.angleB);
-    const sC = parseFloat(values.sideC);
-    const aC = parseFloat(values.angleC);
+    const unit: AngleUnit = values.angleUnit === 'rad' ? 'rad' : 'deg';
+    const blank = (s?: string) => (s ?? '').trim() === '';
+    const rawSides = [values.sideA, values.sideB, values.sideC];
+    const rawAngles = [values.angleA, values.angleB, values.angleC];
+    // Blank = unknown. Anything else must be a clean number (the old parseFloat read "30abc" as 30).
+    const sides = rawSides.map((s) => (blank(s) ? null : parseNumberStrict(s)));
+    const angles = rawAngles.map((s) => (blank(s) ? null : parseNumberStrict(s)));
+    if ([...sides, ...angles].some((v) => v !== null && !Number.isFinite(v))) return [];
 
-    const hA = !isNaN(sA);
-    const hAA = !isNaN(aA);
-    const hB = !isNaN(sB);
-    const hAB = !isNaN(aB);
-    const hC = !isNaN(sC);
-    const hAC = !isNaN(aC);
-
-    const totalKnown = [hA, hAA, hB, hAB, hC, hAC].filter(Boolean).length;
-    if (totalKnown < 3) return [];
-
-    const pairA = hA && hAA;
-    const pairB = hB && hAB;
-    const pairC = hC && hAC;
-    if (!pairA && !pairB && !pairC) return [];
-
-    let ratio: number;
-    if (pairA) {
-      ratio = sA / Math.sin(toRad(aA));
-    } else if (pairB) {
-      ratio = sB / Math.sin(toRad(aB));
-    } else {
-      ratio = sC / Math.sin(toRad(aC));
+    const nSides = sides.filter((v) => v !== null).length;
+    const nAngles = angles.filter((v) => v !== null).length;
+    if (nSides + nAngles < 3) return [];
+    if (sides.some((v) => v !== null && v <= 0)) return [];
+    const deg = angles.map((v) => (v === null ? null : angleToDeg(v, unit)));
+    if (deg.some((v) => v !== null && (v <= 0 || v >= 180))) {
+      return [{ id: 'triangleError', label: 'No such triangle', value: 'Every angle must be greater than 0 and less than 180° (π radians).', color: 'negative' }];
     }
+    const err = (m: string): CalculatorResult[] => [{ id: 'triangleError', label: 'No such triangle', value: m, color: 'negative' }];
+    const known = (i: number) => sides[i] !== null && deg[i] !== null; // a side together with its opposite angle
 
-    const R = ratio / 2;
+    let solutions: Tri[] = [];
 
-    let rA = hAA ? aA : NaN;
-    let rB = hAB ? aB : NaN;
-    let rC = hAC ? aC : NaN;
-    let rsA = hA ? sA : NaN;
-    let rsB = hB ? sB : NaN;
-    let rsC = hC ? sC : NaN;
-
-    // Iteratively fill missing values: angle sum, then sides, then asin angles
-    // Loop until no more values can be inferred
-    let changed = true;
-    while (changed) {
-      changed = false;
-
-      // Fill missing angle from sum of angles (if exactly 2 known)
-      const nAngles = [!isNaN(rA), !isNaN(rB), !isNaN(rC)].filter(Boolean).length;
-      if (nAngles === 2) {
-        if (isNaN(rA)) { rA = 180 - rB - rC; changed = true; }
-        else if (isNaN(rB)) { rB = 180 - rA - rC; changed = true; }
-        else if (isNaN(rC)) { rC = 180 - rA - rB; changed = true; }
+    if (nAngles >= 2) {
+      // ASA / AAS: the third angle follows from the angle sum.
+      if (nAngles === 3) {
+        const sum = deg[0]! + deg[1]! + deg[2]!;
+        if (Math.abs(sum - 180) > 1e-6) return err(`The three angles add up to ${fmt(sum)}°, not 180°.`);
       }
-
-      // Fill missing sides from ratio
-      if (isNaN(rsA) && !isNaN(rA)) { rsA = ratio * Math.sin(toRad(rA)); changed = true; }
-      if (isNaN(rsB) && !isNaN(rB)) { rsB = ratio * Math.sin(toRad(rB)); changed = true; }
-      if (isNaN(rsC) && !isNaN(rC)) { rsC = ratio * Math.sin(toRad(rC)); changed = true; }
-
-      // Fill missing angles from asin(side/ratio)
-      if (isNaN(rA) && !isNaN(rsA)) {
-        const a = toDeg(Math.asin(rsA / ratio));
-        rA = (a >= 0 && a <= 180) ? a : NaN;
-        if (!isNaN(rA)) changed = true;
-      }
-      if (isNaN(rB) && !isNaN(rsB)) {
-        const a = toDeg(Math.asin(rsB / ratio));
-        rB = (a >= 0 && a <= 180) ? a : NaN;
-        if (!isNaN(rB)) changed = true;
-      }
-      if (isNaN(rC) && !isNaN(rsC)) {
-        const a = toDeg(Math.asin(rsC / ratio));
-        rC = (a >= 0 && a <= 180) ? a : NaN;
-        if (!isNaN(rC)) changed = true;
-      }
-    }
-
-    // Handle ambiguous case: if an angle computed from asin is acute but the supplement
-    // (180 - angle) gives a better angle sum, use the supplement
-    if (!isNaN(rA) && !isNaN(rB) && !isNaN(rC)) {
-      // Check each angle: if supplement (180 - angle) gives a sum closer to 180, use it
-      for (const vertex of ['A', 'B', 'C'] as const) {
-        const angle = vertex === 'A' ? rA : vertex === 'B' ? rB : rC;
-        const origSum = rA + rB + rC;
-        const supplement = 180 - angle;
-        let newSum: number;
-        if (vertex === 'A') newSum = supplement + rB + rC;
-        else if (vertex === 'B') newSum = rA + supplement + rC;
-        else newSum = rA + rB + supplement;
-
-        if (Math.abs(newSum - 180) < Math.abs(origSum - 180) && supplement > 0) {
-          if (vertex === 'A') rA = supplement;
-          else if (vertex === 'B') rB = supplement;
-          else rC = supplement;
+      const given = V.filter((_, i) => deg[i] !== null).slice(0, 2); // the angle sum implies the third
+      const withAngle: { A?: number; B?: number; C?: number } = {};
+      for (const v of given) withAngle[v] = deg[V.indexOf(v)]!;
+      if (given.reduce((s, v) => s + withAngle[v]!, 0) >= 180) return err('Two angles of a triangle must add up to less than 180°.');
+      if (nSides === 0) return err('Add at least one side length: angles alone only determine the shape, not the size.');
+      const si = sides.findIndex((v) => v !== null);
+      const t = solveAngleAngleSide(withAngle, sides[si]!, V[si]);
+      if (!t) return err('These values do not form a triangle.');
+      // Every other side that was given must agree with the law of sines (within the rounding of typical inputs).
+      for (let i = 0; i < 3; i++) {
+        const g = sides[i];
+        const computed = i === 0 ? t.a : i === 1 ? t.b : t.c;
+        if (g !== null && Math.abs(g - computed) > 1e-3 * computed) {
+          return err(`The sides and angles you entered contradict each other: side ${'abc'[i]} should be ${fmt(computed)} for those angles.`);
         }
       }
+      solutions = [t];
+    } else if (nAngles === 1) {
+      const ai = deg.findIndex((v) => v !== null);
+      if (!known(ai)) {
+        return err('Law of sines needs the known angle to sit opposite a known side. Your side(s) and angle form SAS, which needs the Law of Cosines instead.');
+      }
+      const others = [0, 1, 2].filter((i) => i !== ai && sides[i] !== null);
+      if (others.length === 0) return [];
+      if (others.length === 2) return err('Three sides and one angle over-determine the triangle. Remove one value, or use the Law of Cosines calculator.');
+      const oi = others[0];
+      const res = solveSSA(sides[ai]!, deg[ai]!, sides[oi]!);
+      if (res.kind === 'none') return err(res.reason);
+      // Re-label the SSA triangles (s1 opposite the known angle; s2 opposite X) back to the user's A, B, C positions.
+      const third = [0, 1, 2].find((i) => i !== ai && i !== oi)!;
+      solutions = res.triangles.map((tt) => {
+        const out = { a: 0, b: 0, c: 0, A: 0, B: 0, C: 0 };
+        const setSide = (i: number, v: number) => (i === 0 ? (out.a = v) : i === 1 ? (out.b = v) : (out.c = v));
+        const setAng = (i: number, v: number) => (i === 0 ? (out.A = v) : i === 1 ? (out.B = v) : (out.C = v));
+        setSide(ai, tt.a);
+        setAng(ai, tt.A);
+        setSide(oi, tt.b);
+        setAng(oi, tt.B);
+        setSide(third, tt.c);
+        setAng(third, tt.C);
+        return out;
+      });
+    } else {
+      return err('With only sides known you need the Law of Cosines (SSS). The Law of Sines needs at least one angle.');
     }
 
-    // Validate
-    if (
-      isNaN(rA) || isNaN(rB) || isNaN(rC) ||
-      isNaN(rsA) || isNaN(rsB) || isNaN(rsC)
-    ) return [];
-
-    if (rA <= 0 || rB <= 0 || rC <= 0) return [];
-    if (Math.abs(rA + rB + rC - 180) > 0.01) return [];
-
-    return [
-      { id: 'sideA', label: 'Side a', value: fmt(rsA), highlight: true, color: 'positive' as const },
-      { id: 'angleA', label: 'Angle A', value: fmt(rA) + '°', unit: '°', color: 'neutral' as const },
-      { id: 'sideB', label: 'Side b', value: fmt(rsB), color: 'neutral' as const },
-      { id: 'angleB', label: 'Angle B', value: fmt(rB) + '°', unit: '°', color: 'neutral' as const },
-      { id: 'sideC', label: 'Side c', value: fmt(rsC), color: 'neutral' as const },
-      { id: 'angleC', label: 'Angle C', value: fmt(rC) + '°', unit: '°', color: 'neutral' as const },
-      { id: 'circumradius', label: 'Circumradius R', value: fmt(R), color: 'neutral' as const },
-      { id: 'ratio', label: 'Ratio (a/sin(A))', value: fmt(ratio), color: 'neutral' as const },
+    const t = solutions[0];
+    const out: CalculatorResult[] = [
+      ...rows(t, unit),
+      { id: 'circumradius', label: 'Circumradius R', value: fmt(R_OF(t)), color: 'neutral' },
+      { id: 'ratio', label: 'Ratio (a/sin(A))', value: fmt(t.a / Math.sin(toRad(t.A))), color: 'neutral' },
+      { id: 'triangleCount', label: 'Number of triangles', value: solutions.length === 2 ? '2 (ambiguous SSA case)' : '1', color: solutions.length === 2 ? 'negative' : 'neutral' },
+      { id: 'triangleType', label: 'Triangle type', value: `${classify(t).bySides} ${classify(t).byAngles}`, color: 'neutral' },
+      { id: 'area', label: 'Area', value: `${fmt(area(t))} sq units`, color: 'neutral' },
+      { id: '_triangle', label: 'triangle', value: JSON.stringify(t) },
     ];
+    if (solutions.length === 2) {
+      const t2 = solutions[1];
+      out.push(...rows(t2, unit, '2', 'Second triangle:'));
+      out.push({ id: 'circumradius2', label: 'Second triangle: circumradius R', value: fmt(R_OF(t2)), color: 'neutral' });
+      out.push({ id: 'area2', label: 'Second triangle: area', value: `${fmt(area(t2))} sq units`, color: 'neutral' });
+      out.push({ id: '_triangle2', label: 'triangle 2', value: JSON.stringify(t2) });
+    }
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -1,66 +1,13 @@
 import { createElement } from 'react';
-import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import StatisticsPanel from './StatisticsPanel';
+import { parseDataset, summarize, fmtDec, ignoredRow, type QuartileMethod } from '../../../utils/stats';
 
-// Decimal.js configured for 20 significant digits — used for all statistical
-// computations (mean, variance, standard deviation, quartiles) to avoid
-// floating-point drift that accumulates across multi-pass algorithms.
-Decimal.set({ precision: 20, rounding: Decimal.ROUND_HALF_UP });
-
-function parseData(input: string): Decimal[] {
-  const nums = input
-    .split(/[,;\s]+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 0)
-    .map(s => { try { return new Decimal(s); } catch { return null; } })
-    .filter((d): d is Decimal => d !== null && d.isFinite());
-  return nums;
-}
-
-function sorted(arr: Decimal[]): Decimal[] {
-  return [...arr].sort((a, b) => a.comparedTo(b));
-}
-
-function median(arr: Decimal[]): Decimal {
-  const n = arr.length;
-  if (n % 2 === 1) return arr[Math.floor(n / 2)];
-  return arr[n / 2 - 1].plus(arr[n / 2]).div(2);
-}
-
-function quartiles(data: Decimal[]): { q1: Decimal; q2: Decimal; q3: Decimal; iqr: Decimal } {
-  const s = sorted(data);
-  const n = s.length;
-
-  const q2 = median(s);
-  const lower = s.slice(0, Math.floor(n / 2));
-  const upper = s.slice(Math.ceil(n / 2));
-  const q1 = median(lower);
-  const q3 = median(upper);
-  const iqr = q3.minus(q1);
-
-  return { q1, q2, q3, iqr };
-}
-
-function outliers(data: Decimal[], q1: Decimal, q3: Decimal, iqr: Decimal): Decimal[] {
-  const lowerFence = q1.minus(new Decimal(1.5).times(iqr));
-  const upperFence = q3.plus(new Decimal(1.5).times(iqr));
-  return data.filter(d => d.lessThan(lowerFence) || d.greaterThan(upperFence));
-}
-
-function mean(arr: Decimal[]): Decimal {
-  if (arr.length === 0) return new Decimal(0);
-  return arr.reduce((s, v) => s.plus(v), new Decimal(0)).div(arr.length);
-}
-
-function stddev(arr: Decimal[], sample: boolean): Decimal {
-  const m = mean(arr);
-  const n = arr.length;
-  if (n < 2) return new Decimal(0);
-  const sumSq = arr.reduce((s, v) => s.plus(v.minus(m).pow(2)), new Decimal(0));
-  const divisor = sample ? n - 1 : n;
-  return sumSq.div(divisor).sqrt();
-}
+const QUARTILE_METHODS: Record<QuartileMethod, string> = {
+  halves: 'Median of halves (textbooks, TI-83/84)',
+  inclusive: 'Inclusive / linear (Excel QUARTILE.INC, R type 7, NumPy)',
+  exclusive: 'Exclusive (Excel QUARTILE.EXC, R type 6, Minitab)',
+};
 
 const statisticsConfig: CalculatorConfig = {
   inputs: [
@@ -83,29 +30,31 @@ const statisticsConfig: CalculatorConfig = {
         { label: 'Population (entire group)', value: 'population' },
       ],
     },
+    {
+      id: 'quartileMethod',
+      label: 'Quartile Method',
+      type: 'select',
+      options: (Object.keys(QUARTILE_METHODS) as QuartileMethod[]).map((k) => ({ label: QUARTILE_METHODS[k], value: k })),
+      helpText: 'Textbooks, Excel and R disagree on quartiles for small data sets; pick the convention your course or software uses.',
+    },
   ],
   calculate: (values) => {
-    const data = parseData(values.data || '');
+    const { values: data, ignored } = parseDataset(values.data);
     const isSample = values.type !== 'population';
+    const method: QuartileMethod = values.quartileMethod === 'inclusive' || values.quartileMethod === 'exclusive' ? values.quartileMethod : 'halves';
 
     if (data.length < 3) return [];
 
-    const s = sorted(data);
-    const n = data.length;
-    const q = quartiles(data);
-    const out = outliers(data, q.q1, q.q3, q.iqr);
-    const m = mean(data);
-    const sd = stddev(data, isSample);
-    const variance = sd.pow(2);
-
-    const fmt = (num: Decimal) => {
-      const str = num.toPrecision(8);
-      // Remove trailing zeros after decimal while preserving at least one digit
-      if (str.includes('.') || str.includes('e')) {
-        return parseFloat(str).toString();
-      }
-      return str;
-    };
+    // Exact decimal engine (src/utils/stats.ts); mean/SD/variance are exact, not rounded between steps.
+    const sum = summarize(data, method);
+    const s = sum.sorted;
+    const n = sum.n;
+    const q = { q1: sum.q1, q2: sum.median, q3: sum.q3, iqr: sum.iqr };
+    const out = sum.outliers;
+    const m = sum.mean;
+    const sd = isSample ? sum.sdSample! : sum.sdPop;
+    const variance = isSample ? sum.varianceSample! : sum.variancePop;
+    const fmt = (num: typeof m) => fmtDec(num, 8);
 
     return [
       {
@@ -192,13 +141,24 @@ const statisticsConfig: CalculatorConfig = {
       {
         id: 'fences',
         label: 'Fences (Lower, Upper)',
-        value: `[${fmt(q.q1.minus(new Decimal(1.5).times(q.iqr)))}, ${fmt(q.q3.plus(new Decimal(1.5).times(q.iqr)))}]`,
+        value: `[${fmt(sum.lowerFence)}, ${fmt(sum.upperFence)}]`,
         color: 'neutral' as const,
       },
+      ...ignoredRow(ignored),
       {
         id: '_boxPlotData',
         label: '',
-        value: JSON.stringify({ min: fmt(s[0]), q1: fmt(q.q1), median: fmt(q.q2), q3: fmt(q.q3), max: fmt(s[n - 1]), outliers: out.map(fmt) }),
+        value: JSON.stringify({
+          min: s[0].toNumber(),
+          q1: q.q1.toNumber(),
+          median: q.q2.toNumber(),
+          q3: q.q3.toNumber(),
+          max: s[n - 1].toNumber(),
+          mean: m.toNumber(),
+          whiskerLo: (s.find((d) => !out.includes(d)) ?? s[0]).toNumber(),
+          whiskerHi: ([...s].reverse().find((d) => !out.includes(d)) ?? s[n - 1]).toNumber(),
+          outliers: out.map((d) => d.toNumber()),
+        }),
       },
     ];
   },
@@ -270,7 +230,7 @@ const statisticsConfig: CalculatorConfig = {
       'The 1.5xIQR outlier rule assumes roughly symmetric data; for heavily skewed distributions (exponential, lognormal), consider using Grubbs test or the modified Z-score method instead.',
       'Do not use this tool to make causal inferences -- correlation analysis requires a different calculator. Outlier detection is a descriptive tool, not a test of causation.',
       'Do not use IQR-based outlier detection on time series data where outliers may be events rather than errors. Seasonal spikes, regime changes, and structural breaks are not "outliers" to be removed.',
-      'This calculator uses the Tukey method for computing quartiles; some textbooks and software packages (SAS, Minitab) use different quartile algorithms that may give slightly different Q1 and Q3 values for small datasets (n < 20).',
+      'Quartiles default to the median-of-halves method (the median is left out of both halves when n is odd; used by many textbooks and the TI-83/84). Excel, R, NumPy and Minitab use interpolation instead and give different Q1/Q3 for small data sets: for 85, 92, 78, 95, 88 the three methods in the Quartile Method menu give Q1 = 81.5 (halves), 85 (inclusive) and 81.5 (exclusive). Pick the one your course or software uses.',
     ],
     quickReference: [
       { label: 'Five-number summary', value: 'Min, Q1, Median, Q3, Max' },
@@ -279,8 +239,8 @@ const statisticsConfig: CalculatorConfig = {
       { label: 'Upper fence', value: 'Q3 + 1.5 x IQR' },
       { label: 'Sample SD', value: 'Divides by n-1 (Bessel correction)' },
       { label: 'Population SD', value: 'Divides by n (exact parameter)' },
-      { label: 'Mild outlier', value: '1.5 to 3 x IQR beyond fences' },
-      { label: 'Extreme outlier', value: 'More than 3 x IQR beyond fences' },
+      { label: 'Mild outlier', value: '1.5 to 3 x IQR beyond the quartiles' },
+      { label: 'Extreme outlier', value: 'More than 3 x IQR beyond the quartiles' },
     ],
     faqs: [
       {
@@ -297,7 +257,7 @@ const statisticsConfig: CalculatorConfig = {
       },
       {
         question: 'Why are there multiple methods for computing quartiles?',
-        answer: 'Different software packages and textbooks use slightly different algorithms for quartile calculation. The Tukey method (used here) computes Q1 as the median of the lower half and Q3 as the median of the upper half, excluding the overall median when n is odd. Excel uses a different interpolation method (QUARTILE.INC). R has 9 different quantile algorithms (types 1-9). For large datasets, the differences are negligible. For small datasets (n < 20), you may see small variations between tools.',
+        answer: 'Different software packages and textbooks use slightly different algorithms for quartile calculation. The default here (median of halves) computes Q1 as the median of the lower half and Q3 as the median of the upper half, excluding the overall median when n is odd. Excel QUARTILE.INC, R type 7 and NumPy interpolate at position (n−1)p; Excel QUARTILE.EXC, R type 6 and Minitab interpolate at (n+1)p. R has 9 quantile algorithms (types 1-9) in total, and you can choose among the three most common ones with the Quartile Method menu. For large datasets, the differences are negligible; for small datasets (n < 20) they can be visible.',
       },
       {
         question: 'Should I always remove outliers from my data?',

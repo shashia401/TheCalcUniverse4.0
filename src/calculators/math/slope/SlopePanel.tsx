@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
+import SvgLineChart from '../../../components/charts/SvgLineChart';
 
 interface Props {
   values: Record<string, string>;
@@ -13,6 +12,7 @@ export default function SlopePanel({ values, results }: Props) {
   const x2 = parseFloat(values.x2);
   const y2 = parseFloat(values.y2);
   if ([x1, y1, x2, y2].some(isNaN)) return null;
+  if (results.some((r) => r.id === 'error')) return null; // identical points: nothing to draw
 
   const slopeRow = results.find(r => r.id === 'slope');
   const siRow = results.find(r => r.id === 'slopeIntercept');
@@ -100,26 +100,13 @@ export default function SlopePanel({ values, results }: Props) {
     linePoints.push(`${cx(x1).toFixed(1)},${cy(maxY).toFixed(1)}`);
   }
 
-  // Recharts chart data
-  const rechartsData = useMemo(() => {
-    if (isVertical) {
-      return [
+  // Line plot data (a line is straight, so two end points are enough)
+  const plotPoints = isVertical
+    ? [
         { x: x1, y: minY },
         { x: x1, y: maxY },
-      ];
-    }
-    const bb = y1 - m * x1;
-    const xStart = Math.min(minX, maxX);
-    const xEnd = Math.max(minX, maxX);
-    const steps = 60;
-    const points: { x: number; y: number }[] = [];
-    for (let i = 0; i <= steps; i++) {
-      const x = parseFloat((xStart + (i / steps) * (xEnd - xStart)).toFixed(4));
-      const pointY = parseFloat((bb + m * x).toFixed(4));
-      points.push({ x, y: pointY });
-    }
-    return points;
-  }, [x1, y1, x2, y2, isVertical, m, minX, maxX, minY, maxY]);
+      ]
+    : [minX, maxX].map((x) => ({ x, y: y1 + m * (x - x1) }));
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -148,7 +135,7 @@ export default function SlopePanel({ values, results }: Props) {
               return (
                 <g key={`gx-${i}`}>
                   <line x1={svgX} y1={padding} x2={svgX} y2={svgH - padding} stroke="#f1f5f9" strokeWidth="1.5" />
-                  <text x={svgX} y={svgH - padding + 14} textAnchor="middle" className="text-[14px]" fill="#94a3b8">{x}</text>
+                  <text x={svgX} y={svgH - padding + 14} textAnchor="middle" className="text-[14px]" fill="#64748b">{x}</text>
                 </g>
               );
             })}
@@ -158,7 +145,7 @@ export default function SlopePanel({ values, results }: Props) {
               return (
                 <g key={`gy-${i}`}>
                   <line x1={padding} y1={svgY} x2={svgW - padding} y2={svgY} stroke="#f1f5f9" strokeWidth="1.5" />
-                  <text x={padding - 8} y={svgY + 3} textAnchor="end" className="text-[14px]" fill="#94a3b8">{y}</text>
+                  <text x={padding - 8} y={svgY + 3} textAnchor="end" className="text-[14px]" fill="#64748b">{y}</text>
                 </g>
               );
             })}
@@ -189,29 +176,22 @@ export default function SlopePanel({ values, results }: Props) {
           </svg>
         </div>
 
-        {/* Recharts line chart */}
-        {rechartsData.length > 1 && (
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
-              Interactive Line Plot
-            </p>
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={rechartsData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                <XAxis dataKey="x" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} type="number" domain={['auto', 'auto']} />
-                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={50} domain={['auto', 'auto']} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  formatter={(_: unknown) => [typeof _ === 'number' ? _.toFixed(4) : _, 'y'] as any}
-                />
-                <ReferenceLine y={0} stroke="#cbd5e1" strokeWidth={1} />
-                <ReferenceLine x={0} stroke="#cbd5e1" strokeWidth={1} />
-                <Line type="monotone" dataKey="y" stroke="#3b82f6" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
-                <ReferenceDot x={x1} y={y1} r={5} fill="#ef4444" stroke="#fff" strokeWidth={2} label={{ value: `(${x1}, ${y1})`, position: 'bottom', fontSize: 9, fill: '#ef4444' }} />
-                <ReferenceDot x={x2} y={y2} r={5} fill="#ef4444" stroke="#fff" strokeWidth={2} label={{ value: `(${x2}, ${y2})`, position: 'top', fontSize: 9, fill: '#ef4444' }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        {/* Line plot (shared SVG chart — no charting library) */}
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
+            Line Plot
+          </p>
+          <SvgLineChart
+            ariaLabel={`Line through (${x1}, ${y1}) and (${x2}, ${y2})`}
+            height={260}
+            series={[{ name: 'line', points: plotPoints, color: '#2563eb' }]}
+            refLines={[{ x: 0 }, { y: 0 }]}
+            dots={[
+              { x: x1, y: y1, label: `(${x1}, ${y1})`, color: '#dc2626' },
+              { x: x2, y: y2, label: `(${x2}, ${y2})`, color: '#dc2626' },
+            ]}
+          />
+        </div>
 
         {/* Equation forms */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">

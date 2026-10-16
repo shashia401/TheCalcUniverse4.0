@@ -43,9 +43,9 @@ describe('Integral calculator', () => {
     expect(r).toEqual([]);
   });
 
-  it('returns empty when a === b', () => {
+  it('a === b gives exactly 0 (empty interval)', () => {
     const r = config.calculate({ expression: 'x^2', lowerBound: '3', upperBound: '3', n: '100' });
-    expect(r).toEqual([]);
+    expect(getValue(r, 'result')).toBe('0');
   });
 
   it('returns empty for invalid expression', () => {

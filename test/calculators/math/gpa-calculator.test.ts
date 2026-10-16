@@ -23,8 +23,9 @@ describe('GPA Calculator', () => {
         { name: 'History', grade: 'A', credits: '3', weight: 'regular' },
       ]),
     });
+    // Additive AP/IB bonus: B+ 3.3 + 1.0 = 4.3, so (4.3 x 4 + 4.0 x 3) / 7 = 4.1714 (the old x1.1 multiplier gave 3.81).
     const gpa = parseNumber(getValue(r, 'gpa'));
-    near(gpa, 3.81, 0.05);
+    near(gpa, 4.17, 0.005);
   });
 
   it('calculates unweighted GPA', () => {
@@ -78,6 +79,6 @@ describe('GPA Calculator', () => {
     });
     const needed = parseNumber(getValue(r, 'neededGPA'));
     expect(needed).toBeGreaterThan(4.33);
-    expect(getValue(r, 'neededGrade')).toContain('impossible');
+    expect(getValue(r, 'neededGrade')).toContain('not enough');
   });
 });

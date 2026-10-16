@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
+import { normCdf } from '../../../utils/distributions';
 
 interface Props {
   values: Record<string, string>;
@@ -15,18 +16,12 @@ function normalPDF(x: number): number {
   return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
 }
 
-// Standard normal CDF (Abramowitz & Stegun approximation)
-function cdf(x: number): number {
-  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
-  const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
-  const sign = x < 0 ? -1 : 1;
-  const ax = Math.abs(x);
-  const t = 1 / (1 + p * ax);
-  const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-ax * ax);
-  return 0.5 * (1 + sign * y);
-}
+const cdf = normCdf;
 
 export default function ZScorePanel({ results }: Props) {
+  // Hooks first: nothing may return before every hook has run.
+  const [hoverInfo, setHoverInfo] = useState<{z: number; prob: number; x: number} | null>(null);
+
   const zRow = results.find(r => r.id === 'zscore');
   const probRow = results.find(r => r.id === 'probability');
   const pctRow = results.find(r => r.id === 'percentile');
@@ -37,11 +32,9 @@ export default function ZScorePanel({ results }: Props) {
   if (!zRow || !chartRow) return null;
 
   let chartData: ChartData = { z: 0, probability: 0.5 };
-  try { chartData = JSON.parse(chartRow.value); } catch {}
+  try { chartData = JSON.parse(chartRow.value); } catch { return null; }
 
   const z = chartData.z;
-
-  const [hoverInfo, setHoverInfo] = useState<{z: number; prob: number; x: number} | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     const svg = e.currentTarget;
@@ -121,11 +114,11 @@ export default function ZScorePanel({ results }: Props) {
       <div className="p-5 space-y-4">
         {/* Z-score card */}
         <div className={`rounded-xl border p-5 text-center ${z >= 0 ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'}`}>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Z-Score</p>
-          <p className={`text-3xl font-bold font-mono mt-1 ${z >= 0 ? 'text-blue-700' : 'text-red-600'}`}>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Z-Score</p>
+          <p className={`text-3xl font-bold font-mono mt-1 ${z >= 0 ? 'text-blue-700' : 'text-red-700'}`}>
             {z >= 0 && !zRow.value.startsWith('+') ? '+' : ''}{zRow.value}
           </p>
-          {formulaRow && <p className="text-xs font-mono text-slate-500 mt-1">{formulaRow.value}</p>}
+          {formulaRow && <p className="text-xs font-mono text-slate-600 mt-1">{formulaRow.value}</p>}
         </div>
 
         {/* SVG Bell Curve */}
@@ -145,7 +138,7 @@ export default function ZScorePanel({ results }: Props) {
             {/* Z-score vertical line */}
             <line x1={xScale(displayZ)} y1={yScale(0)} x2={xScale(displayZ)} y2={yScale(normalPDF(displayZ))} stroke="#ef4444" strokeWidth="2" strokeDasharray="5 3" />
             {/* Z-score label */}
-            <text x={xScale(displayZ)} y={yScale(0) + 16} textAnchor="middle" fill="#ef4444" fontSize="11" fontWeight="bold" className="text-[11px]">
+            <text x={xScale(displayZ)} y={yScale(0) + 16} textAnchor="middle" fill="#b91c1c" fontSize="11" fontWeight="bold" className="text-[11px]">
               Z={displayZLabel}
             </text>
             {/* X-axis ticks */}
@@ -159,7 +152,7 @@ export default function ZScorePanel({ results }: Props) {
             <text x={xScale(0)} y={yScale(0) - 8} textAnchor="middle" fill="#64748b" fontSize="9" className="text-[9px]">μ</text>
             {/* Percentile / probability on chart */}
             {z > xMin && z < xMax && (
-              <text x={Math.min(xScale(displayZ) - 20, xScale(xMax) - 60)} y={yScale(normalPDF(displayZ)) - 8} textAnchor="end" fill="#3b82f6" fontSize="9" className="text-[9px]">
+              <text x={Math.min(xScale(displayZ) - 20, xScale(xMax) - 60)} y={yScale(normalPDF(displayZ)) - 8} textAnchor="end" fill="#1d4ed8" fontSize="9" className="text-[9px]">
                 {pctRow?.value}
               </text>
             )}

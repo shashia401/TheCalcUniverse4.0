@@ -54,7 +54,7 @@ export default function HalfLifePanel({ values, results }: Props) {
 
   if (solveFor === 'remainingQuantity') {
     formulaParts.lines = [
-      `N(t) = N₀ × (½)^(t / t₁₂⁄₂)`,
+      `N(t) = N₀ × (½)^(t / t₁⁄₂)`,
       `N(t) = ${fmt(N0)} × (½)^(${fmt(t)} / ${fmt(t12)})`,
       `N(t) = ${fmt(N0)} × (½)^(${fmt(halfLivesElapsed)})`,
       `N(t) = ${fmt(N0)} × ${fmt(fractionRemaining)}`,
@@ -62,7 +62,7 @@ export default function HalfLifePanel({ values, results }: Props) {
     ];
   } else if (solveFor === 'initialQuantity') {
     formulaParts.lines = [
-      `N₀ = N(t) ÷ (½)^(t / t₁₂⁄₂)`,
+      `N₀ = N(t) ÷ (½)^(t / t₁⁄₂)`,
       `N₀ = ${fmt(Nt)} ÷ (½)^(${fmt(t)} / ${fmt(t12)})`,
       `N₀ = ${fmt(Nt)} ÷ (½)^(${fmt(halfLivesElapsed)})`,
       `N₀ = ${fmt(Nt)} ÷ ${fmt(fractionRemaining)}`,
@@ -73,18 +73,18 @@ export default function HalfLifePanel({ values, results }: Props) {
     const logRatio = Math.log(ratio);
     const ln2 = Math.LN2;
     formulaParts.lines = [
-      `t₁₂⁄₂ = t × ln(2) / ln(N₀ / N(t))`,
-      `t₁₂⁄₂ = ${fmt(t)} × ln(2) / ln(${fmt(N0)} / ${fmt(Nt)})`,
-      `t₁₂⁄₂ = ${fmt(t)} × ${fmt(ln2)} / ln(${fmt(ratio)})`,
-      `t₁₂⁄₂ = ${fmt(t)} × ${fmt(ln2)} / ${fmt(logRatio)}`,
-      `t₁₂⁄₂ = ${fmt(t12)}`,
+      `t₁⁄₂ = t × ln(2) / ln(N₀ / N(t))`,
+      `t₁⁄₂ = ${fmt(t)} × ln(2) / ln(${fmt(N0)} / ${fmt(Nt)})`,
+      `t₁⁄₂ = ${fmt(t)} × ${fmt(ln2)} / ln(${fmt(ratio)})`,
+      `t₁⁄₂ = ${fmt(t)} × ${fmt(ln2)} / ${fmt(logRatio)}`,
+      `t₁⁄₂ = ${fmt(t12)}`,
     ];
   } else if (solveFor === 'timeElapsed') {
     const ratio = N0 / Nt;
     const logRatio = Math.log(ratio);
     const ln2 = Math.LN2;
     formulaParts.lines = [
-      `t = t₁₂⁄₂ × ln(N₀ / N(t)) / ln(2)`,
+      `t = t₁⁄₂ × ln(N₀ / N(t)) / ln(2)`,
       `t = ${fmt(t12)} × ln(${fmt(N0)} / ${fmt(Nt)}) / ln(2)`,
       `t = ${fmt(t12)} × ln(${fmt(ratio)}) / ${fmt(ln2)}`,
       `t = ${fmt(t12)} × ${fmt(logRatio)} / ${fmt(ln2)}`,
@@ -214,7 +214,7 @@ export default function HalfLifePanel({ values, results }: Props) {
               <p className="text-sm font-bold text-slate-700 font-mono">{fmt(Nt)}</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-center">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">t₁₂⁄₂</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase">t₁⁄₂</p>
               <p className="text-sm font-bold text-slate-700 font-mono">{fmt(t12)}</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-center">

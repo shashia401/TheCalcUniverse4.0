@@ -1,38 +1,36 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RandomNumberPanel from './RandomNumberPanel';
+import { randomInt, randomDistinctInts, type RandomU32 } from '../../../utils/random';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { D, type Dec } from '../../../utils/stats';
 
-function generateRandomNumbers(min: number, max: number, count: number, decimals: number, unique: boolean): number[] {
-  const numbers: number[] = [];
-  const set = new Set<string>();
-  let attempts = 0;
-  const maxAttempts = count * 100;
+export interface RandomSpec {
+  /** Smallest / largest grid point (integers, in units of 10^-decimals). */
+  lo: number;
+  hi: number;
+  decimals: number;
+}
 
-  while (numbers.length < count && attempts < maxAttempts) {
-    attempts++;
-    let value: number;
-    const array = new Uint32Array(1);
-    crypto.getRandomValues(array);
-    const range = max - min;
+/**
+ * The integer grid of allowed values: every multiple of 10^-decimals inside [min, max]. Sampling that grid
+ * uniformly (instead of rounding a uniform float, which gave the two endpoints only half the probability of the
+ * others) makes every allowed value exactly equally likely. Returns null when no grid point fits or the range
+ * is too large to sample exactly (more than 2^53 values).
+ */
+export function gridFor(min: number, max: number, decimals: number): RandomSpec | null {
+  const scale = new D(10).pow(decimals);
+  const lo = new D(min).times(scale).ceil();
+  const hi = new D(max).times(scale).floor();
+  if (hi.lessThan(lo)) return null;
+  if (hi.minus(lo).plus(1).greaterThan(2 ** 53) || lo.abs().greaterThan(2 ** 53) || hi.abs().greaterThan(2 ** 53)) return null;
+  return { lo: lo.toNumber(), hi: hi.toNumber(), decimals };
+}
 
-    if (decimals === 0) {
-      value = min + (array[0] % (range + 1));
-    } else {
-      const factor = Math.pow(10, decimals);
-      value = min + (array[0] / 0xffffffff) * range;
-      value = Math.round(value * factor) / factor;
-    }
-
-    if (unique) {
-      const key = value.toFixed(decimals);
-      if (set.has(key)) continue;
-      set.add(key);
-    }
-
-    numbers.push(value);
-  }
-
-  return numbers;
+/** `count` values from the grid, unbiased (rejection sampling), with or without repeats. `source` is injectable for tests. */
+export function generateGridValues(spec: RandomSpec, count: number, unique: boolean, source?: RandomU32): number[] {
+  if (unique) return randomDistinctInts(spec.lo, spec.hi, count, source);
+  return Array.from({ length: count }, () => randomInt(spec.lo, spec.hi, source));
 }
 
 const randomNumberConfig: CalculatorConfig = {
@@ -91,35 +89,50 @@ const randomNumberConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const min = parseFloat(values.min);
-    const max = parseFloat(values.max);
-    const count = parseInt(values.count) || 1;
-    const decimals = parseInt(values.decimals) || 0;
+    const min = parseNumberStrict(values.min);
+    const max = parseNumberStrict(values.max);
+    const countRaw = (values.count ?? '').trim() === '' ? 1 : parseNumberStrict(values.count);
+    const decimals = (values.decimals ?? '').trim() === '' ? 0 : parseNumberStrict(values.decimals);
     const unique = values.unique === 'yes';
 
-    if ([min, max].some(isNaN) || min > max || count < 1) return [];
+    if ([min, max].some(isNaN) || min > max) return [];
+    if (!Number.isInteger(countRaw) || countRaw < 1) return [];
+    if (!Number.isInteger(decimals) || decimals < 0 || decimals > 5) return [];
 
-    const clampedCount = Math.min(count, 1000);
-    const numbers = generateRandomNumbers(min, max, clampedCount, decimals, unique);
-    if (!numbers.length) return [];
+    const count = Math.min(countRaw, 1000);
+    const spec = gridFor(min, max, decimals);
+    if (!spec) return [];
 
-    const fmt = (n: number) => {
-      if (decimals === 0 && Number.isInteger(n)) return n.toString();
-      return n.toFixed(decimals);
-    };
+    const size = spec.hi - spec.lo + 1;
+    if (unique && count > size) {
+      return [
+        {
+          id: 'warning',
+          label: 'Not enough distinct values',
+          value: `Only ${size.toLocaleString('en-US')} distinct value${size === 1 ? '' : 's'} exist between ${min} and ${max} with ${decimals} decimal place${decimals === 1 ? '' : 's'}, so ${count} unique numbers cannot be drawn. Lower the count, widen the range, or allow repeats.`,
+          color: 'negative',
+        },
+      ];
+    }
 
-    const sum = numbers.reduce((a, b) => a + b, 0);
-    const avg = sum / numbers.length;
-    const sorted = [...numbers].sort((a, b) => a - b);
+    // Scaled integers drawn uniformly; the decimal value is int / 10^decimals, summed exactly with decimal arithmetic.
+    const ints = generateGridValues(spec, count, unique);
+    const scale = new D(10).pow(decimals);
+    const dec = ints.map((v) => new D(v).div(scale));
+    const fmt = (n: Dec) => n.toFixed(decimals);
+
+    const sum = dec.reduce((a, b) => a.plus(b), new D(0));
+    const avg = sum.div(dec.length);
+    const sorted = [...dec].sort((a, b) => a.comparedTo(b));
     const genMin = sorted[0];
     const genMax = sorted[sorted.length - 1];
 
-    const numberList = numbers.map(n => fmt(n)).join(', ');
+    const numberList = dec.map(fmt).join(', ');
 
     return [
       {
         id: 'numberList',
-        label: `Generated Numbers (${numbers.length})`,
+        label: `Generated Numbers (${dec.length})`,
         value: numberList,
         highlight: true,
         color: 'positive',
@@ -133,7 +146,8 @@ const randomNumberConfig: CalculatorConfig = {
       {
         id: 'average',
         label: 'Average',
-        value: fmt(avg),
+        // Not rounded to the integer grid: the mean of integers is rarely an integer.
+        value: avg.toDecimalPlaces(Math.max(decimals, 2)).toFixed(),
         color: 'neutral',
       },
       {
@@ -151,7 +165,7 @@ const randomNumberConfig: CalculatorConfig = {
       {
         id: 'range',
         label: 'Range',
-        value: fmt(genMax - genMin),
+        value: fmt(genMax.minus(genMin)),
         color: 'neutral',
       },
     ];
@@ -166,7 +180,7 @@ const randomNumberConfig: CalculatorConfig = {
       'This calculator uses the Web Crypto API (crypto.getRandomValues) to generate cryptographically secure pseudo-random numbers. Unlike Math.random(), the Web Crypto API is designed for security-sensitive applications and provides uniformly distributed values with no predictable pattern.',
     variables: [
       { symbol: 'min', name: 'Minimum Value', description: 'The lower bound of the random range. Inclusive — the result can equal this value.' },
-      { symbol: 'max', name: 'Maximum Value', description: 'The upper bound of the random range. Inclusive for integers, exclusive for decimals. For example, range [1, 100] can produce 100 for integers but not for decimals.' },
+      { symbol: 'max', name: 'Maximum Value', description: 'The upper bound of the random range. Inclusive for both integers and decimals: every value on the grid between min and max (including both ends) is equally likely. For example, range [1, 100] can produce 100.' },
       { symbol: 'n', name: 'Count', description: 'How many random numbers to generate in a single batch. Maximum is 1000 per batch.' },
     ],
     howToUse: [
@@ -177,7 +191,7 @@ const randomNumberConfig: CalculatorConfig = {
       'View sum, average, min, and max of the generated numbers for statistical insight.',
     ],
     explanation:
-      'Random number generation is fundamental to simulations, statistical sampling, cryptography, gaming, and decision-making. This calculator uses cryptographically secure random number generation via the Web Crypto API (crypto.getRandomValues), which is suitable for most applications including security-sensitive ones. Unlike Math.random(), which uses a pseudo-random number generator (PRNG) seeded with the current time, the Web Crypto API draws entropy from the operating system\'s secure random source, making it unpredictable and suitable for cryptographic purposes. For integer generation, the range is uniformly sampled using modulo reduction of a 32-bit random value. For decimal values, a 32-bit random integer is mapped to the [0, 1) interval and scaled to your range. Note that true randomness includes occasional "patterns" and repeats — seeing three consecutive 7s in a sequence of random digits is not unusual and does not indicate a bug. True randomness is clumpy, which often surprises people who expect random numbers to appear evenly distributed.',
+      'Random number generation is fundamental to simulations, statistical sampling, cryptography, gaming, and decision-making. This calculator uses cryptographically secure random number generation via the Web Crypto API (crypto.getRandomValues), which is suitable for most applications including security-sensitive ones. Unlike Math.random(), which uses a pseudo-random number generator (PRNG) seeded with the current time, the Web Crypto API draws entropy from the operating system\'s secure random source, making it unpredictable and suitable for cryptographic purposes. Every result is a uniformly drawn integer on a grid of step 10^-d (d = decimal places): the calculator draws 32-bit values and discards any that fall in the incomplete last block (rejection sampling), so no value is even slightly favoured, and the endpoints min and max are exactly as likely as every other value. Note that true randomness includes occasional "patterns" and repeats — seeing three consecutive 7s in a sequence of random digits is not unusual and does not indicate a bug. True randomness is clumpy, which often surprises people who expect random numbers to appear evenly distributed.',
     quickReference: [
       { label: 'Dice roll (D6)', value: 'min=1, max=6, count=1, decimals=0' },
       { label: 'Coin flip (0 or 1)', value: 'min=0, max=1, count=1, decimals=0' },
@@ -221,11 +235,10 @@ const randomNumberConfig: CalculatorConfig = {
       'When generating random decimals between 0 and 1 for probability simulations, use min=0, max=1, decimals=4 or 5 for sufficient precision without unnecessary decimal clutter.',
       'If you need a random sample from a list of names or items, assign each item a number (1 to N), generate random unique numbers, and map the numbers back to the items. This works for jury selection, audit sampling, or randomized experiment group assignment.',
       'For random passwords or PINs, generate a batch of integers and concatenate them — for example, 4 random digits from 0-9 produces a 4-digit PIN for ATM cards or phone unlock codes.',
-      'The Web Crypto API uses operating system entropy (hardware interrupts, mouse movements, disk timing jitter) to seed its generator. For applications that need the highest possible entropy, refresh the browser page to draw fresh entropy from the OS before generating numbers.',
     ],
     limitations: [
       'Not suitable for generating cryptographic keys directly — dedicated key generation libraries handle key stretching, encoding, and FIPS 140-2 compliance that this tool does not. Use this for non-cryptographic entropy needs.',
-      'The uniqueness constraint cannot be satisfied when the requested count exceeds the available range (e.g., 10 unique integers from 1 to 5 is mathematically impossible). The generator will produce as many as it can within the collision-avoidance limit.',
+      'The uniqueness constraint cannot be satisfied when the requested count exceeds the available range (e.g., 10 unique integers from 1 to 5 is mathematically impossible). The calculator shows an explanatory message instead of silently returning fewer numbers.',
       'Maximum batch size is capped at 1000 numbers to maintain responsive UI performance. For larger datasets, generate multiple batches or use a dedicated statistical software package.',
       'Randomness quality depends on the browser\'s Web Crypto API implementation and the OS entropy pool. Older browsers or constrained environments (embedded systems, some mobile browsers) may have weaker entropy sources.',
       'This is a software-based CSPRNG, not a hardware random number generator (HRNG). For applications requiring quantum-level randomness (e.g., lottery systems with regulatory compliance, cryptographic key generation for certificate authorities), use dedicated hardware RNG devices.',
@@ -240,8 +253,8 @@ const randomNumberConfig: CalculatorConfig = {
         answer: 'No software algorithm can generate truly random numbers — they are all deterministic PRNGs seeded by entropy. The Web Crypto API uses entropy from the operating system (hardware interrupts, mouse movements, disk timing jitter, network packet arrival times) to seed its generator, making it practically unpredictable. For true randomness, you would need hardware based on quantum phenomena like radioactive decay or photon beam splitters.',
       },
       {
-        question: 'Why might I get fewer numbers than requested with unique mode?',
-        answer: 'If the range is smaller than the requested count, the generator cannot produce enough distinct values. For example, generating 10 unique integers between 1 and 5 is mathematically impossible — there are only 5 distinct values available. The generator will produce as many as it can within the collision-avoidance limit (100 attempts per requested number). If you receive fewer numbers than expected with unique mode, increase your range or decrease the count.',
+        question: 'Why do I get a "not enough distinct values" message in unique mode?',
+        answer: 'If the range holds fewer distinct values than the requested count, unique numbers are impossible. For example, 10 unique integers between 1 and 5 cannot exist — there are only 5 distinct values (and with 1 decimal place, between 0 and 1 there are only 11). Unique mode samples without replacement (a partial Fisher-Yates shuffle), so any request that fits the range always succeeds. Increase the range, add decimal places, or decrease the count.',
       },
       {
         question: 'What is the difference between pseudo-random and cryptographically secure random numbers?',
@@ -249,7 +262,7 @@ const randomNumberConfig: CalculatorConfig = {
       },
       {
         question: 'Why do I see repeating patterns in supposedly random numbers?',
-        answer: 'True randomness is "clumpy" — sequences like 7-7-7 or 1-2-3-4-5 occur naturally in random data more often than people expect. The human brain is pattern-seeking and perceives structure even in perfectly random sequences. This is called the clustering illusion. In fact, if you generated 100 random digits and saw NO repeats or apparent patterns, that would actually be suspicious — truly random sequences have about a 63% chance of containing at least one consecutive repeat within 100 trials. If your application truly needs to avoid any repeated values, use the "unique values only" option.',
+        answer: 'True randomness is "clumpy" — sequences like 7-7-7 or 1-2-3-4-5 occur naturally in random data more often than people expect. The human brain is pattern-seeking and perceives structure even in perfectly random sequences. This is called the clustering illusion. In fact, if you generated 100 random digits and saw NO repeats or apparent patterns, that would actually be suspicious — among 100 random digits the chance of at least one consecutive repeat is 1 − 0.9⁹⁹, about 99.997%. If your application truly needs to avoid any repeated values, use the "unique values only" option.',
       },
       {
         question: 'What practical applications use cryptographically secure random numbers?',

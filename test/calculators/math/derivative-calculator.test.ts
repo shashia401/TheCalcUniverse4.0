@@ -6,7 +6,7 @@ describe('Derivative Calculator', () => {
   describe('Power rule differentiation', () => {
     it('differentiates 3x^2', () => {
       const r = config.calculate({ expression: '3x^2' });
-      expect(getValue(r, 'derivative')).toBe('6x');
+      expect(getValue(r, 'derivative')).toBe('6*x');
     });
 
     it('differentiates 5x', () => {
@@ -26,12 +26,12 @@ describe('Derivative Calculator', () => {
 
     it('differentiates 4x^3', () => {
       const r = config.calculate({ expression: '4x^3' });
-      expect(getValue(r, 'derivative')).toBe('12x^2');
+      expect(getValue(r, 'derivative')).toBe('12*x^2');
     });
 
     it('differentiates -2x^3', () => {
       const r = config.calculate({ expression: '-2x^3' });
-      expect(getValue(r, 'derivative')).toBe('-6x^2');
+      expect(getValue(r, 'derivative')).toBe('-6*x^2');
     });
   });
 
@@ -39,30 +39,30 @@ describe('Derivative Calculator', () => {
     it('differentiates 3x^2 + 2x + 1', () => {
       const r = config.calculate({ expression: '3x^2 + 2x + 1' });
       // d/dx(3x^2)=6x, d/dx(2x)=2, d/dx(1)=0
-      expect(getValue(r, 'derivative')).toBe('6x+2');
+      expect(getValue(r, 'derivative')).toBe('6*x + 2');
     });
 
     it('differentiates x^3 - 4x^2 + 5x - 2', () => {
       const r = config.calculate({ expression: 'x^3 - 4x^2 + 5x - 2' });
       // d/dx(x^3)=3x^2, d/dx(-4x^2)=-8x, d/dx(5x)=5, d/dx(-2)=0
-      expect(getValue(r, 'derivative')).toBe('3x^2-8x+5');
+      expect(getValue(r, 'derivative')).toBe('3*x^2 - 8*x + 5');
     });
 
     it('differentiates x^5 + x^3 + x', () => {
       const r = config.calculate({ expression: 'x^5 + x^3 + x' });
-      expect(getValue(r, 'derivative')).toBe('5x^4+3x^2+1');
+      expect(getValue(r, 'derivative')).toBe('5*x^4 + 3*x^2 + 1');
     });
   });
 
   describe('Original polynomial display', () => {
     it('shows the original polynomial', () => {
       const r = config.calculate({ expression: '3x^2 + 2x + 1' });
-      expect(getValue(r, 'original')).toBe('3x^2+2x+1');
+      expect(getValue(r, 'original')).toBe('3*x^2 + 2*x + 1');
     });
 
     it('shows original with negative coefficients', () => {
       const r = config.calculate({ expression: 'x^3 - 4x^2 + 5x - 2' });
-      expect(getValue(r, 'original')).toBe('x^3-4x^2+5x-2');
+      expect(getValue(r, 'original')).toBe('x^3 - 4*x^2 + 5*x - 2');
     });
   });
 
@@ -114,12 +114,12 @@ describe('Derivative Calculator', () => {
 
     it('handles expression starting with minus', () => {
       const r = config.calculate({ expression: '-x^2' });
-      expect(getValue(r, 'derivative')).toBe('-2x');
+      expect(getValue(r, 'derivative')).toBe('-2*x');
     });
 
     it('handles expression with decimal coefficients', () => {
       const r = config.calculate({ expression: '1.5x^2' });
-      expect(getValue(r, 'derivative')).toBe('3x');
+      expect(getValue(r, 'derivative')).toBe('3*x');
     });
 
     it('handles x^1 as x', () => {

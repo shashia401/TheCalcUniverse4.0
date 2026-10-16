@@ -1,22 +1,28 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SlopePanel from './SlopePanel';
+import {
+  Frac,
+  addFrac,
+  divFrac,
+  fracToNumber,
+  gcdBig,
+  lcmBig,
+  mulFrac,
+  parseDecimalExact,
+  subFrac,
+} from '../../../utils/rational';
 
-function gcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) { [a, b] = [b, a % b]; }
-  return a;
+const absF = (f: Frac): Frac => ({ n: f.n < 0n ? -f.n : f.n, d: f.d });
+
+/** Four-decimal display, but keep significant digits for tiny values (5.67e-7 must not print as "0"). */
+function fmtNum(n: number): string {
+  if (Number.isInteger(n)) return n.toString();
+  return Math.abs(n) >= 1e-3 ? parseFloat(n.toFixed(4)).toString() : parseFloat(n.toPrecision(4)).toString();
 }
 
-function slopeAsFraction(dy: number, dx: number): string {
-  if (dx === 0) return 'undefined';
-  const g = gcd(Math.round(dy * 1e9), Math.round(dx * 1e9));
-  const num = Math.round(dy * 1e9) / g;
-  const den = Math.round(dx * 1e9) / g;
-  if (den < 0) return `${-num}/${-den}`;
-  return `${num}/${den}`;
-}
+/** Display an exact fraction: integers print in full (BigInt), others to 4 decimals. */
+const fmt = (f: Frac): string => (f.d === 1n ? f.n.toString() : fmtNum(fracToNumber(f)));
 
 const slopeConfig: CalculatorConfig = {
   inputs: [
@@ -86,79 +92,102 @@ const slopeConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const x1 = parseFloat(values.x1);
-    const y1 = parseFloat(values.y1);
-    const x2 = parseFloat(values.x2);
-    const y2 = parseFloat(values.y2);
+    // Exact decimal parse (0.1 is exactly 1/10, "5abc" is rejected). Slope, intercept and every equation
+    // are computed on exact fractions, so 0.1→0.4 / 0.2→0.5 is exactly 1 (not 0.9999999999999998).
+    const X1 = parseDecimalExact(values.x1);
+    const Y1 = parseDecimalExact(values.y1);
+    const X2 = parseDecimalExact(values.x2);
+    const Y2 = parseDecimalExact(values.y2);
+    if (!X1 || !Y1 || !X2 || !Y2) return [];
 
-    if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) return [];
+    const DX = subFrac(X2, X1);
+    const DY = subFrac(Y2, Y1);
 
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const m = dx !== 0 ? dy / dx : Infinity;
-    const b = dx !== 0 ? y1 - m * x1 : 0;
+    if (DX.n === 0n && DY.n === 0n) {
+      return [
+        {
+          id: 'error',
+          label: 'Error',
+          value: 'The two points are identical, so they do not define a line. Enter two different points.',
+          color: 'negative' as const,
+        },
+      ];
+    }
 
-    const fmt = (n: number) => {
-      if (Number.isInteger(n)) return n.toString();
-      return parseFloat(n.toFixed(4)).toString();
-    };
+    const isVertical = DX.n === 0n;
+    const M = isVertical ? null : divFrac(DY, DX); // exact slope
+    const B = M ? subFrac(Y1, mulFrac(M, X1)) : null; // exact y-intercept
+    const m = M ? fracToNumber(M) : Infinity;
 
-    const isVertical = dx === 0;
-    const direction = isVertical ? 'vertical' : m > 0 ? 'increasing (positive slope)' : m < 0 ? 'decreasing (negative slope)' : 'horizontal (zero slope)';
+    const direction = !M ? 'vertical' : M.n > 0n ? 'increasing (positive slope)' : M.n < 0n ? 'decreasing (negative slope)' : 'horizontal (zero slope)';
 
     const showCompact = values.outputFormat === 'compact';
     const angleUnit = values.angleDisplay || 'degrees';
-    const angle = Math.atan(m) * (angleUnit === 'degrees' ? 180 / Math.PI : 1);
-    const angleLabel = angleUnit === 'degrees' ? `${angle.toFixed(2)}°` : `${angle.toFixed(4)} rad`;
+    // A vertical line makes a 90° (π/2 rad) angle with the x-axis.
+    const angleRad = isVertical ? Math.PI / 2 : Math.atan(m);
+    const angleLabel = angleUnit === 'degrees' ? `${((angleRad * 180) / Math.PI).toFixed(2)}°` : `${angleRad.toFixed(4)} rad`;
 
     // Line equations
     let slopeIntercept = '';
     let pointSlope = '';
     let standardForm = '';
 
-    if (isVertical) {
-      slopeIntercept = `x = ${fmt(x1)} (vertical line)`;
-      pointSlope = `x = ${fmt(x1)}`;
-      standardForm = `x = ${fmt(x1)}`;
+    if (!M || !B) {
+      slopeIntercept = `x = ${fmt(X1)} (vertical line)`;
+      pointSlope = `x = ${fmt(X1)}`;
+      standardForm = `x = ${fmt(X1)}`;
     } else {
-      const mxStr = m === 0 ? '' : m === 1 ? 'x' : m === -1 ? '-x' : `${fmt(m)}x`;
-      const bStr = b > 0 ? ` + ${fmt(b)}` : b < 0 ? ` − ${fmt(Math.abs(b))}` : '';
-      slopeIntercept = `y = ${mxStr}${bStr}`;
+      const isOne = M.n === 1n && M.d === 1n;
+      const isMinusOne = M.n === -1n && M.d === 1n;
+      const mxStr = isOne ? 'x' : isMinusOne ? '-x' : `${fmt(M)}x`;
+      const bStr = B.n > 0n ? ` + ${fmt(B)}` : B.n < 0n ? ` − ${fmt(absF(B))}` : '';
+      // A horizontal line is just y = b (no "0x", no stray "+").
+      slopeIntercept = M.n === 0n ? `y = ${fmt(B)}` : `y = ${mxStr}${bStr}`;
 
-      const y1Str = y1 >= 0 ? `y − ${fmt(y1)}` : `y + ${fmt(Math.abs(y1))}`;
-      const x1Str = x1 >= 0 ? `(x − ${fmt(x1)})` : `(x + ${fmt(Math.abs(x1))})`;
-      pointSlope = `${y1Str} = ${m === 1 ? '' : m === -1 ? '−' : fmt(m)}${x1Str}`;
+      const y1Str = Y1.n >= 0n ? `y − ${fmt(Y1)}` : `y + ${fmt(absF(Y1))}`;
+      const x1Str = X1.n >= 0n ? `(x − ${fmt(X1)})` : `(x + ${fmt(absF(X1))})`;
+      pointSlope = M.n === 0n ? `${y1Str} = 0` : `${y1Str} = ${isOne ? '' : isMinusOne ? '−' : fmt(M)}${x1Str}`;
 
-      const A = -dy;
-      const B = dx;
-      const C = A * x1 + B * y1;
-      const g = gcd(Math.round(A * 1e6), gcd(Math.round(B * 1e6), Math.round(C * 1e6)));
-      const sA = Math.round(A * 1e6) / g;
-      const sB = Math.round(B * 1e6) / g;
-      const sC = Math.round(C * 1e6) / g;
-
-      const aStr = sA === 1 ? 'x' : sA === -1 ? '-x' : sA === 0 ? '' : `${fmt(sA)}x`;
-      const bSign = sB > 0 ? ' + ' : ' − ';
-      const sBStr = Math.abs(sB) === 1 ? 'y' : Math.abs(sB) === 0 ? '' : `${fmt(Math.abs(sB))}y`;
-      standardForm = `${aStr}${sB !== 0 ? bSign : ''}${sBStr}${sC >= 0 ? ' = ' : ' = −'}${fmt(Math.abs(sC))}`;
-      if (sA === 0 && sB === 0) standardForm = '0 = 0';
+      // Ax + By = C with A = −(y₂−y₁), B = x₂−x₁, C = A·x₁ + B·y₁, scaled to coprime integers
+      // and signed so that A > 0 (or A = 0 and B > 0) — the textbook standard form.
+      const A = { n: -DY.n, d: DY.d };
+      const C = addFrac(mulFrac(A, X1), mulFrac(DX, Y1));
+      const L = lcmBig(lcmBig(A.d, DX.d), C.d);
+      let ia = A.n * (L / A.d);
+      let ib = DX.n * (L / DX.d);
+      let ic = C.n * (L / C.d);
+      const g = gcdBig(gcdBig(ia, ib), ic) || 1n;
+      ia /= g;
+      ib /= g;
+      ic /= g;
+      if (ia < 0n || (ia === 0n && ib < 0n)) {
+        ia = -ia;
+        ib = -ib;
+        ic = -ic;
+      }
+      const abs = (v: bigint) => (v < 0n ? -v : v);
+      const term = (c: bigint, v: string) => (abs(c) === 1n ? v : `${abs(c)}${v}`);
+      let lhs = ia !== 0n ? term(ia, 'x') : '';
+      if (ib !== 0n) lhs += `${lhs ? (ib > 0n ? ' + ' : ' − ') : ''}${term(ib, 'y')}`;
+      standardForm = `${lhs} = ${ic < 0n ? '−' : ''}${abs(ic)}`;
     }
 
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const midX = (x1 + x2) / 2;
-    const midY = (y1 + y2) / 2;
+    const distance = Math.hypot(fracToNumber(DX), fracToNumber(DY));
+    const half = { n: 1n, d: 2n };
+    const midX = mulFrac(addFrac(X1, X2), half);
+    const midY = mulFrac(addFrac(Y1, Y2), half);
 
     const results: any[] = [
       {
         id: 'slope',
         label: 'Slope (m)',
-        value: isVertical ? 'Undefined (vertical)' : fmt(m),
+        value: !M ? 'Undefined (vertical)' : fmt(M),
         highlight: true,
-        color: isVertical ? 'negative' as const : m > 0 ? 'positive' as const : m < 0 ? 'negative' as const : 'neutral' as const,
+        color: !M ? 'negative' as const : M.n > 0n ? 'positive' as const : M.n < 0n ? 'negative' as const : 'neutral' as const,
       },
-      { id: 'slopeFraction', label: 'Slope as Fraction', value: isVertical ? 'undefined' : slopeAsFraction(dy, dx), color: 'neutral' as const },
+      { id: 'slopeFraction', label: 'Slope as Fraction', value: !M ? 'undefined' : `${M.n}/${M.d}`, color: 'neutral' as const },
       { id: 'direction', label: 'Direction', value: direction, color: 'neutral' as const },
-      { id: 'distance', label: 'Distance Between Points', value: fmt(distance), color: 'neutral' as const },
+      { id: 'distance', label: 'Distance Between Points', value: fmtNum(distance), color: 'neutral' as const },
     ];
 
     if (!showCompact) {
@@ -166,8 +195,8 @@ const slopeConfig: CalculatorConfig = {
         { id: 'slopeIntercept', label: 'Slope-Intercept Form', value: slopeIntercept, color: 'neutral' as const },
         { id: 'pointSlope', label: 'Point-Slope Form', value: pointSlope, color: 'neutral' as const },
         { id: 'standardForm', label: 'Standard Form', value: standardForm, color: 'neutral' as const },
-        { id: 'yIntercept', label: 'Y-Intercept', value: isVertical ? 'none' : `(0, ${fmt(b)})`, color: 'neutral' as const },
-        { id: 'angle', label: `Angle from Horizontal (${angleUnit === 'degrees' ? 'degrees' : 'radians'})`, value: isVertical ? '90°' : angleLabel, color: 'neutral' as const },
+        { id: 'yIntercept', label: 'Y-Intercept', value: B ? `(0, ${fmt(B)})` : X1.n === 0n ? 'every point (the line is the y-axis)' : 'none', color: 'neutral' as const },
+        { id: 'angle', label: `Angle from Horizontal (${angleUnit === 'degrees' ? 'degrees' : 'radians'})`, value: angleLabel, color: 'neutral' as const },
         { id: 'midpoint', label: 'Midpoint', value: `(${fmt(midX)}, ${fmt(midY)})`, color: 'neutral' as const },
       );
     }
@@ -203,7 +232,7 @@ const slopeConfig: CalculatorConfig = {
       'The midpoint and distance between the two points are calculated automatically for additional geometric insight.',
     ],
     explanation:
-      'The slope of a line measures its steepness and direction. A positive slope means the line rises from left to right; a negative slope means it falls. A zero slope is horizontal, and an undefined (infinite) slope is vertical. The concept of slope dates back to ancient Greek mathematics, where Euclid studied ratios of line segments around 300 BCE. The formal notation m for slope was popularized in the 18th century by mathematicians like Euler, though its exact origin is debated — some attribute it to the French word "monter" (to climb). Slope is fundamental to calculus (derivatives measure the slope of a curve at any point), physics (velocity = slope of a distance-time graph), economics (marginal cost = slope of the cost function), and countless real-world applications. Slope-intercept form (y = mx + b) is the most intuitive — m tells you the steepness and b tells you where the line crosses the y-axis. Point-slope form (y − y₁ = m(x − x₁)) is useful when you know a point and the slope. Standard form (Ax + By = C) is convenient for finding both intercepts quickly and for solving systems of linear equations. The calculator also computes the distance between the two points using the Pythagorean theorem: d = √((x₂ − x₁)² + (y₂ − y₁)²) and the midpoint coordinates. Real-world slope examples: a 6% road grade means the road rises 6 feet for every 100 feet of horizontal distance (slope = 0.06). In architecture, the Americans with Disabilities Act (ADA) limits wheelchair ramp slopes to 1:12 (about 8.3%). Roof pitches are expressed as rise over run (e.g., a 4/12 pitch means 4 inches of rise for every 12 inches of horizontal run).',
+      'The slope of a line measures its steepness and direction. A positive slope means the line rises from left to right; a negative slope means it falls. A zero slope is horizontal, and an undefined (infinite) slope is vertical. The letter m has been used for slope for centuries, but who introduced it is not known; a popular (unproven) guess is the French "monter", to climb. Slope is fundamental to calculus (derivatives measure the slope of a curve at any point), physics (velocity = slope of a distance-time graph), economics (marginal cost = slope of the cost function), and countless real-world applications. Slope-intercept form (y = mx + b) is the most intuitive — m tells you the steepness and b tells you where the line crosses the y-axis. Point-slope form (y − y₁ = m(x − x₁)) is useful when you know a point and the slope. Standard form (Ax + By = C) is convenient for finding both intercepts quickly and for solving systems of linear equations. The calculator also computes the distance between the two points using the Pythagorean theorem: d = √((x₂ − x₁)² + (y₂ − y₁)²) and the midpoint coordinates. Real-world slope examples: a 6% road grade means the road rises 6 feet for every 100 feet of horizontal distance (slope = 0.06). In architecture, the Americans with Disabilities Act (ADA) limits wheelchair ramp slopes to 1:12 (about 8.3%). Roof pitches are expressed as rise over run (e.g., a 4/12 pitch means 4 inches of rise for every 12 inches of horizontal run).',
     commonUses: [
       'Finding the slope of a roof to determine roofing material requirements and drainage design',
       'Calculating road grade for highway engineering — a 6% grade means the road rises 6 feet per 100 horizontal feet',
@@ -242,7 +271,8 @@ const slopeConfig: CalculatorConfig = {
     limitations: [
       'Works with exactly two points to define a single line. It does not find the line of best fit for three or more points — use linear regression (available in the statistics calculator) for scatter plot trend lines.',
       'Assumes Cartesian coordinates on a flat plane and does not account for Earth curvature. For geographic distances over 10 kilometers, the curvature of the Earth becomes significant — do not use this for surveying or long-distance navigation.',
-      'The simplified fraction form uses integer approximation with 1e9 precision. For extreme precision needs such as astronomical calculations, use a dedicated symbolic math tool or computer algebra system.',
+      'Coordinates are read as exact decimals and the slope, intercept and equations are computed exactly, so the fraction form is always in lowest terms. Only the distance and the angle use ordinary floating-point arithmetic (about 15 significant digits).',
+      'Two identical points do not define a line, so the calculator asks for two different points instead of returning a slope.',
       'Limited to 2D Cartesian line equations. Does not handle 3D lines, lines in polar coordinates, or parametric representations. For 3D geometry, use the distance calculator or a dedicated 3D math tool.',
       'Vertical lines through the same x-coordinate produce "undefined" slope and are not expressible in slope-intercept form (y = mx + b). The calculator handles this by displaying the vertical line equation x = constant.',
     ],
@@ -275,7 +305,7 @@ const slopeConfig: CalculatorConfig = {
       },
       {
         question: 'How is slope used in road design and construction?',
-        answer: 'Road grades are expressed as a percentage (slope × 100). A 6% grade means the road rises 6 feet for every 100 horizontal feet. Highway design standards typically limit grades to 6% on major highways and 12% on local roads. For drainage, roads are designed with a minimum 0.5% cross-slope to prevent water pooling.',
+        answer: 'Road grades are expressed as a percentage (slope × 100). A 6% grade means the road rises 6 feet for every 100 horizontal feet. Highway design standards typically limit grades to 6% on major highways and 12% on local roads. For drainage, paved roads are also given a small cross-slope (typically around 1.5–2%) so water runs off the surface.',
       },
       {
         question: 'What is the difference between slope and rate of change?',

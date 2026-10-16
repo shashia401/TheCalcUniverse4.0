@@ -13,15 +13,19 @@ describe('Confidence Interval calculator', () => {
     near(upper, 51.96, 0.1);
   });
 
-  it('calculates margin of error', () => {
-    const r = config.calculate({ sampleMean: '50', sampleSize: '100', stddev: '10', confidence: '95' });
-    expect(getValue(r, 'marginOfError')).toContain('±');
-    near(parseNumber(getValue(r, 'marginOfError')), 1.96, 0.01);
+  it('calculates margin of error (known sigma: z 1.96; sample s: t 1.9842 at df 99)', () => {
+    const z = config.calculate({ sampleMean: '50', sampleSize: '100', stddev: '10', confidence: '95', sdType: 'population' });
+    expect(getValue(z, 'marginOfError')).toContain('±');
+    near(parseNumber(getValue(z, 'marginOfError')), 1.96, 0.01);
+    const t = config.calculate({ sampleMean: '50', sampleSize: '100', stddev: '10', confidence: '95' });
+    near(parseNumber(getValue(t, 'marginOfError')), 1.984217, 1e-6);
   });
 
-  it('shows critical Z-value', () => {
-    const r = config.calculate({ sampleMean: '50', sampleSize: '100', stddev: '10', confidence: '95' });
-    expect(getValue(r, 'criticalValue')).toContain('1.96');
+  it('shows critical Z-value (known sigma) and critical t (sample s)', () => {
+    const z = config.calculate({ sampleMean: '50', sampleSize: '100', stddev: '10', confidence: '95', sdType: 'population' });
+    expect(getValue(z, 'criticalValue')).toContain('1.96');
+    const t = config.calculate({ sampleMean: '50', sampleSize: '100', stddev: '10', confidence: '95' });
+    expect(getValue(t, 'criticalValue')).toContain('1.9842');
   });
 
   it('shows standard error', () => {
@@ -57,8 +61,8 @@ describe('Confidence Interval calculator', () => {
     expect(r).toEqual([]);
   });
 
-  it('90% confidence uses Z=1.645', () => {
-    const r = config.calculate({ sampleMean: '50', sampleSize: '100', stddev: '10', confidence: '90' });
-    expect(getValue(r, 'criticalValue')).toContain('1.645');
+  it('90% confidence with known sigma uses Z=1.6449 (exact quantile 1.644854)', () => {
+    const r = config.calculate({ sampleMean: '50', sampleSize: '100', stddev: '10', confidence: '90', sdType: 'population' });
+    expect(getValue(r, 'criticalValue')).toContain('1.6449');
   });
 });

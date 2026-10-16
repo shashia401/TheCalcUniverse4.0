@@ -1,12 +1,26 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import LawOfCosinesPanel from './LawOfCosinesPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { type AngleUnit, type Tri, angleToDeg, classify, fmtAngle, fmtNum8 as fmt, area, solveSAS, solveSSS, toRad } from '../shared/triangle';
 
-const fmt = (n: number): string => {
-  if (!isFinite(n)) return 'Infinity';
-  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-  return parseFloat(n.toFixed(8)).toString();
+const triangleRows = (t: Tri, unit: AngleUnit, workSteps: string): CalculatorResult[] => {
+  const k = classify(t);
+  return [
+    { id: 'a', label: 'Side a', value: fmt(t.a), color: 'neutral' },
+    { id: 'b', label: 'Side b', value: fmt(t.b), color: 'neutral' },
+    { id: 'c', label: 'Side c', value: fmt(t.c), highlight: true, color: 'positive' },
+    { id: 'angleA', label: 'Angle A', value: fmtAngle(t.A, unit), unit: unit === 'rad' ? 'rad' : '°', color: 'neutral' },
+    { id: 'angleB', label: 'Angle B', value: fmtAngle(t.B, unit), unit: unit === 'rad' ? 'rad' : '°', color: 'neutral' },
+    { id: 'angleC', label: 'Angle C', value: fmtAngle(t.C, unit), unit: unit === 'rad' ? 'rad' : '°', color: 'neutral' },
+    { id: 'triangleType', label: 'Triangle type', value: `${k.bySides} ${k.byAngles}`, color: 'neutral' },
+    { id: 'area', label: 'Area', value: `${fmt(area(t))} sq units`, color: 'neutral' },
+    { id: 'steps', label: 'Work Steps', value: workSteps, color: 'neutral' },
+    { id: '_triangle', label: 'triangle', value: JSON.stringify(t) },
+  ];
 };
+
+const errorRow = (message: string): CalculatorResult[] => [{ id: 'triangleError', label: 'No such triangle', value: message, color: 'negative' }];
 
 const config: CalculatorConfig = {
   inputs: [
@@ -20,6 +34,17 @@ const config: CalculatorConfig = {
         { label: 'Angle (SAS)', value: 'sas' },
       ],
       helpText: 'Select SSS to find angles or SAS to find the third side',
+    },
+    {
+      id: 'angleUnit',
+      label: 'Angle unit',
+      type: 'select',
+      defaultValue: 'deg',
+      options: [
+        { label: 'Degrees (°)', value: 'deg' },
+        { label: 'Radians (rad)', value: 'rad' },
+      ],
+      helpText: 'Used for the angle you enter (SAS mode) and for every angle in the results',
     },
     {
       id: 'a',
@@ -51,83 +76,57 @@ const config: CalculatorConfig = {
       label: 'Angle C',
       type: 'number',
       placeholder: 'Angle C',
-      unit: '°',
       required: true,
       showWhen: (v) => v.mode === 'sas',
-      helpText: 'Enter angle C in degrees between sides a and b (SAS mode)',
+      helpText: 'Enter angle C between sides a and b (SAS mode), in the unit chosen above; it must be greater than 0 and less than 180° (π rad)',
     },
   ],
   calculate: (values) => {
     const mode = values.mode || 'sss';
-    const a = parseFloat(values.a);
-    const b = parseFloat(values.b);
-
-    if (isNaN(a) || isNaN(b)) return [];
+    const unit: AngleUnit = values.angleUnit === 'rad' ? 'rad' : 'deg';
+    const a = parseNumberStrict(values.a);
+    const b = parseNumberStrict(values.b);
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return [];
 
     if (mode === 'sss') {
-      const c = parseFloat(values.c);
-      if (isNaN(c)) return [];
-
-      // Check triangle inequality
-      if (a + b <= c || a + c <= b || b + c <= a) return [];
+      const c = parseNumberStrict(values.c);
+      if (!Number.isFinite(c)) return [];
       if (a <= 0 || b <= 0 || c <= 0) return [];
-
-      // Find angles using law of cosines
-      // cos(C) = (a² + b² - c²)/(2ab)
-      const cosC = (a * a + b * b - c * c) / (2 * a * b);
-      // cos(A) = (b² + c² - a²)/(2bc)
-      const cosA = (b * b + c * c - a * a) / (2 * b * c);
-      // cos(B) = (a² + c² - b²)/(2ac)
-      const cosB = (a * a + c * c - b * b) / (2 * a * c);
-
-      const angleC = toDeg(Math.acos(Math.max(-1, Math.min(1, cosC))));
-      const angleA = toDeg(Math.acos(Math.max(-1, Math.min(1, cosA))));
-      const angleB = toDeg(Math.acos(Math.max(-1, Math.min(1, cosB))));
-
-      return [
-        { id: 'a', label: 'Side a', value: fmt(a), color: 'neutral' as const },
-        { id: 'b', label: 'Side b', value: fmt(b), color: 'neutral' as const },
-        { id: 'c', label: 'Side c', value: fmt(c), highlight: true, color: 'positive' as const },
-        { id: 'angleA', label: 'Angle A', value: fmt(angleA) + '°', unit: '°', color: 'neutral' as const },
-        { id: 'angleB', label: 'Angle B', value: fmt(angleB) + '°', unit: '°', color: 'neutral' as const },
-        { id: 'angleC', label: 'Angle C', value: fmt(angleC) + '°', unit: '°', color: 'neutral' as const },
-        {
-          id: 'steps',
-          label: 'Work Steps',
-          value: `cos(C) = (a² + b² − c²)/(2ab) = (${fmt(a)}² + ${fmt(b)}² − ${fmt(c)}²)/(2 × ${fmt(a)} × ${fmt(b)}) = ${fmt(cosC)}\nC = cos⁻¹(${fmt(cosC)}) = ${fmt(angleC)}°\n\ncos(A) = (b² + c² − a²)/(2bc) = (${fmt(b)}² + ${fmt(c)}² − ${fmt(a)}²)/(2 × ${fmt(b)} × ${fmt(c)}) = ${fmt(cosA)}\nA = cos⁻¹(${fmt(cosA)}) = ${fmt(angleA)}°\n\ncos(B) = (a² + c² − b²)/(2ac) = (${fmt(a)}² + ${fmt(c)}² − ${fmt(b)}²)/(2 × ${fmt(a)} × ${fmt(c)}) = ${fmt(cosB)}\nB = cos⁻¹(${fmt(cosB)}) = ${fmt(angleB)}°\n\nCheck: A + B + C = ${fmt(angleA)}° + ${fmt(angleB)}° + ${fmt(angleC)}° = ${fmt(angleA + angleB + angleC)}°`,
-          color: 'neutral' as const,
-        },
-      ];
+      const t = solveSSS(a, b, c);
+      if (!t) return errorRow('These three lengths cannot form a triangle: each side must be shorter than the sum of the other two (equal to the sum would be a flat, degenerate triangle).');
+      const cosOf = (x: number, y: number, z: number) => (x * x + y * y - z * z) / (2 * x * y);
+      const step = (name: string, expr: string, x: number, y: number, z: number, ang: number) =>
+        `cos(${name}) = ${expr} = ${fmt(cosOf(x, y, z))}\n${name} = cos⁻¹(${fmt(cosOf(x, y, z))}) = ${fmtAngle(ang, unit)}`;
+      const steps = [
+        step('C', '(a² + b² − c²)/(2ab)', a, b, c, t.C),
+        step('A', '(b² + c² − a²)/(2bc)', b, c, a, t.A),
+        step('B', '(a² + c² − b²)/(2ac)', a, c, b, t.B),
+        `Check: A + B + C = ${fmt(t.A + t.B + t.C)}°`,
+        '(angles are computed with the numerically stable half-angle form, which gives the same values as cos⁻¹ above)',
+      ].join('\n\n');
+      return triangleRows(t, unit, steps);
     }
 
     if (mode === 'sas') {
-      const angleC = parseFloat(values.angleC);
-      if (isNaN(angleC)) return [];
-      if (a <= 0 || b <= 0 || angleC <= 0 || angleC >= 180) return [];
-
-      const radC = angleC * Math.PI / 180;
-      const cSquared = a * a + b * b - 2 * a * b * Math.cos(radC);
-      const c = Math.sqrt(cSquared);
-
-      // Find other angles using law of cosines
-      const cosA = (b * b + c * c - a * a) / (2 * b * c);
-      const angleA = toDeg(Math.acos(Math.max(-1, Math.min(1, cosA))));
-      const angleB = 180 - angleA - angleC;
-
-      return [
-        { id: 'a', label: 'Side a', value: fmt(a), color: 'neutral' as const },
-        { id: 'b', label: 'Side b', value: fmt(b), color: 'neutral' as const },
-        { id: 'c', label: 'Side c', value: fmt(c), highlight: true, color: 'positive' as const },
-        { id: 'angleA', label: 'Angle A', value: fmt(angleA) + '°', unit: '°', color: 'neutral' as const },
-        { id: 'angleB', label: 'Angle B', value: fmt(angleB) + '°', unit: '°', color: 'neutral' as const },
-        { id: 'angleC', label: 'Angle C', value: fmt(angleC) + '°', unit: '°', color: 'neutral' as const },
-        {
-          id: 'steps',
-          label: 'Work Steps',
-          value: `c² = a² + b² − 2ab·cos(C)\nc² = ${fmt(a)}² + ${fmt(b)}² − 2(${fmt(a)})(${fmt(b)})·cos(${fmt(angleC)}°)\nc² = ${fmt(a * a)} + ${fmt(b * b)} − ${fmt(2 * a * b)}·${fmt(Math.cos(radC))}\nc² = ${fmt(cSquared)}\nc = √(${fmt(cSquared)}) = ${fmt(c)}\n\ncos(A) = (b² + c² − a²)/(2bc)\ncos(A) = ${fmt(cosA)}\nA = cos⁻¹(${fmt(cosA)}) = ${fmt(angleA)}°\nB = 180° − A − C = ${fmt(angleB)}°`,
-          color: 'neutral' as const,
-        },
-      ];
+      const angleIn = parseNumberStrict(values.angleC);
+      if (!Number.isFinite(angleIn)) return [];
+      if (a <= 0 || b <= 0) return [];
+      const gamma = angleToDeg(angleIn, unit);
+      if (gamma <= 0 || gamma >= 180) return errorRow('The included angle must be greater than 0 and less than 180° (π radians).');
+      const t = solveSAS(a, b, gamma);
+      if (!t) return [];
+      const cosC = Math.abs(gamma - 90) < 1e-12 ? 0 : Math.cos(toRad(gamma)); // cos(90°) is exactly 0, not 6.1e-17
+      const steps = [
+        'c² = a² + b² − 2ab·cos(C)',
+        `c² = ${fmt(a)}² + ${fmt(b)}² − 2(${fmt(a)})(${fmt(b)})·cos(${fmtAngle(gamma, unit)})`,
+        `c² = ${fmt(a * a)} + ${fmt(b * b)} − ${fmt(2 * a * b)}·${fmt(cosC)} = ${fmt(t.c * t.c)}`,
+        `c = √${fmt(t.c * t.c)} = ${fmt(t.c)}`,
+        '',
+        `Angle A = atan2(a·sin C, b − a·cos C) = ${fmtAngle(t.A, unit)}`,
+        `Angle B = atan2(b·sin C, a − b·cos C) = ${fmtAngle(t.B, unit)}`,
+        `Check: A + B + C = ${fmt(t.A + t.B + t.C)}°`,
+      ].join('\n');
+      return triangleRows(t, unit, steps);
     }
 
     return [];
@@ -222,9 +221,5 @@ const config: CalculatorConfig = {
     ],
   },
 };
-
-function toDeg(rad: number): number {
-  return rad * (180 / Math.PI);
-}
 
 export default config;

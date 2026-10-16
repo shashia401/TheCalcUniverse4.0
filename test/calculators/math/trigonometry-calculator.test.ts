@@ -179,9 +179,10 @@ describe('Trigonometry Calculator', () => {
     expect(r.find((x) => x.id === 'error')).toBeDefined();
   });
 
-  it('cot value of 0 returns domain error', () => {
+  it('cot⁻¹(0) is valid → 90° (cot 90° = cos90°/sin90° = 0); no domain error', () => {
     const r = config.calculate({ mode: 'trig-to-angle', function: 'cot', trigValue: '0' });
-    expect(r.find((x) => x.id === 'error')).toBeDefined();
+    expect(r.find((x) => x.id === 'error')).toBeUndefined();
+    expect(r.find((x) => x.id === 'principalAngle')!.value).toContain('90');
   });
 
   // ─── Reciprocal inverse trig ─────────────────────────────

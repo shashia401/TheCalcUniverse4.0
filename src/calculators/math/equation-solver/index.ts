@@ -1,6 +1,23 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import EquationSolverPanel from './EquationSolverPanel';
+import { solveQuadratic, equationText, fmtF, fmtN } from '../quadratic/quadraticMath';
+import { polyString } from '../polynomial-calculator/polyMath';
+import { polyRoots, type Root } from '../shared/polyRoots';
+import { divFrac, fracToNumber, makeFrac, parseDecimalExact, type Frac } from '../../../utils/rational';
+
+const DEGREE: Record<string, number> = { linear: 1, quadratic: 2, cubic: 3, quartic: 4 };
+
+const fmtComplex = (re: number, im: number): string => {
+  const r = fmtN(re);
+  const m = fmtN(Math.abs(im));
+  const i = m === '1' ? 'i' : `${m}i`;
+  if (r === '0') return `${im < 0 ? '-' : ''}${i}`;
+  return `${r} ${im < 0 ? '-' : '+'} ${i}`;
+};
+
+const rootText = (re: number, im: number) => (im === 0 ? fmtN(re) : fmtComplex(re, im));
+const mult = (m: number) => (m === 1 ? '' : m === 2 ? ' (double root)' : m === 3 ? ' (triple root)' : ` (multiplicity ${m})`);
 
 const equationSolverConfig: CalculatorConfig = {
   inputs: [
@@ -11,6 +28,8 @@ const equationSolverConfig: CalculatorConfig = {
       options: [
         { label: 'Linear (ax + b = 0)', value: 'linear' },
         { label: 'Quadratic (ax² + bx + c = 0)', value: 'quadratic' },
+        { label: 'Cubic (ax³ + bx² + cx + d = 0)', value: 'cubic' },
+        { label: 'Quartic (ax⁴ + bx³ + cx² + dx + e = 0)', value: 'quartic' },
       ],
       required: true,
     },
@@ -21,7 +40,7 @@ const equationSolverConfig: CalculatorConfig = {
       placeholder: '2',
       step: 0.001,
       required: true,
-      helpText: 'For linear: a in ax + b = 0. For quadratic: a in ax² + bx + c = 0. Must be non-zero.',
+      helpText: 'The leading coefficient (of x, x², x³ or x⁴). If it is 0 the equation drops to a lower degree.',
     },
     {
       id: 'b',
@@ -30,7 +49,7 @@ const equationSolverConfig: CalculatorConfig = {
       placeholder: '-8',
       step: 0.001,
       required: true,
-      helpText: 'For linear: b in ax + b = 0. For quadratic: b in ax² + bx + c = 0.',
+      helpText: 'The next coefficient: the constant for linear, the x coefficient for quadratic, the x² coefficient for cubic.',
     },
     {
       id: 'c',
@@ -39,113 +58,153 @@ const equationSolverConfig: CalculatorConfig = {
       placeholder: '6',
       step: 0.001,
       required: true,
-      showWhen: (values) => values.equationType === 'quadratic',
-      helpText: 'The constant term c in ax² + bx + c = 0.',
+      showWhen: (values) => values.equationType !== 'linear',
+      helpText: 'The constant term for quadratic equations; the x coefficient for cubic and quartic.',
+    },
+    {
+      id: 'd',
+      label: 'Coefficient d',
+      type: 'number',
+      placeholder: '-1',
+      step: 0.001,
+      required: true,
+      showWhen: (values) => values.equationType === 'cubic' || values.equationType === 'quartic',
+      helpText: 'The constant term for cubic equations; the x coefficient for quartic.',
+    },
+    {
+      id: 'e',
+      label: 'Coefficient e',
+      type: 'number',
+      placeholder: '2',
+      step: 0.001,
+      required: true,
+      showWhen: (values) => values.equationType === 'quartic',
+      helpText: 'The constant term of the quartic.',
     },
   ],
 
   calculate: (values) => {
-    const equationType = values.equationType;
-    const a = parseFloat(values.a);
-    const b = parseFloat(values.b);
+    const type = values.equationType;
+    if (!type || !(type in DEGREE)) return [];
+    const degree = DEGREE[type];
+    const keys = ['a', 'b', 'c', 'd', 'e'].slice(0, degree + 1);
+    const coeffs = keys.map((k) => parseDecimalExact(values[k], 60));
+    if (coeffs.some((c) => c === null)) return [];
+    const cs = coeffs as Frac[];
+    const hide = (id: string, value: string): CalculatorResult => ({ id, label: id, value });
 
-    if (!equationType) return [];
-
-    if (equationType === 'linear') {
-      if (isNaN(a) || isNaN(b)) return [];
-      if (a === 0) return [];
-
-      const x = -b / a;
-      const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
-
+    // ── Linear: ax + b = 0 (exact) ──
+    if (type === 'linear') {
+      const [a, b] = cs;
+      const eq = `${polyString([a, b])} = 0`;
+      if (a.n === 0n) {
+        return b.n === 0n
+          ? [
+              { id: 'equation', label: 'Equation', value: '0 = 0', highlight: true, color: 'neutral' },
+              { id: 'nature', label: 'Nature', value: 'Infinitely many solutions (every x satisfies 0 = 0)', color: 'neutral' },
+            ]
+          : [
+              { id: 'equation', label: 'Equation', value: `${fmtF(b)} = 0`, highlight: true, color: 'neutral' },
+              { id: 'nature', label: 'Nature', value: 'No solution (a constant cannot equal 0)', color: 'negative' },
+            ];
+      }
+      const x = divFrac(makeFrac(-b.n, b.d), a);
       return [
-        {
-          id: 'equation',
-          label: 'Equation',
-          value: `${fmt(a)}x ${b >= 0 ? '+' : '-'} ${Math.abs(b)} = 0`,
-          highlight: true,
-          color: 'neutral' as const,
-        },
-        {
-          id: 'root1',
-          label: 'Solution (x)',
-          value: fmt(x),
-          highlight: true,
-          color: 'positive' as const,
-        },
-        {
-          id: 'nature',
-          label: 'Nature',
-          value: 'One real root (linear)',
-          color: 'neutral' as const,
-        },
+        { id: 'equation', label: 'Equation', value: eq, highlight: true, color: 'neutral' },
+        { id: 'root1', label: 'Solution (x)', value: fmtF(x), highlight: true, color: 'positive' },
+        { id: 'nature', label: 'Nature', value: 'One real root (linear)', color: 'neutral' },
+        hide('_kind', 'linear'),
+        hide('_realRoots', JSON.stringify([fracToNumber(x)])),
       ];
     }
 
-    if (equationType === 'quadratic') {
-      const c = parseFloat(values.c);
-      if (isNaN(a) || isNaN(b) || isNaN(c)) return [];
-      if (a === 0) return [];
-
-      const discriminant = b * b - 4 * a * c;
-      const fmt = (n: number) => parseFloat(n.toFixed(6)).toString();
-
-      const fmtComplex = (real: number, imag: number): string => {
-        const rStr = real === 0 ? '0' : fmt(real);
-        const iStr = imag === 1 ? '' : imag === -1 ? '-' : fmt(imag);
-        if (real === 0 && imag < 0) return `-${Math.abs(imag) === 1 ? '' : fmt(Math.abs(imag))}i`;
-        if (real === 0) return `${iStr}i`;
-        if (imag < 0) return `${rStr} - ${Math.abs(imag) === 1 ? '' : fmt(Math.abs(imag))}i`;
-        return `${rStr} + ${iStr}i`;
-      };
-
-      const bSign = b >= 0 ? '+' : '-';
-      const cSign = c >= 0 ? '+' : '-';
-      const equationStr = `${fmt(a)}x² ${bSign} ${Math.abs(b)}x ${cSign} ${Math.abs(c)} = 0`;
-
-      const results: Array<{ id: string; label: string; value: string; highlight?: boolean; color?: 'positive' | 'negative' | 'neutral' }> = [
-        {
-          id: 'equation',
-          label: 'Equation',
-          value: equationStr,
-          highlight: true,
-          color: 'neutral' as const,
-        },
+    // ── Quadratic: exact discriminant, stable roots ──
+    if (type === 'quadratic') {
+      const res = solveQuadratic(values.a, values.b, values.c);
+      if (res.kind === 'incomplete') return [];
+      if (res.kind === 'linear') {
+        return [
+          { id: 'equation', label: 'Equation', value: `${polyString(cs)} = 0`, highlight: true, color: 'neutral' },
+          { id: 'nature', label: 'Nature', value: res.message, color: 'neutral' },
+        ];
+      }
+      const q = res.q;
+      const out: CalculatorResult[] = [
+        { id: 'equation', label: 'Equation', value: equationText(q), highlight: true, color: 'neutral' },
         {
           id: 'discriminant',
           label: 'Discriminant (b² − 4ac)',
-          value: fmt(discriminant),
-          color: discriminant > 0 ? 'positive' as const : discriminant === 0 ? 'neutral' as const : 'negative' as const,
+          value: fmtF(q.disc),
+          color: q.kind === 'two-real' ? 'positive' : q.kind === 'repeated' ? 'neutral' : 'negative',
         },
       ];
-
-      if (discriminant > 0) {
-        const sqrtD = Math.sqrt(discriminant);
-        const root1 = (-b + sqrtD) / (2 * a);
-        const root2 = (-b - sqrtD) / (2 * a);
-        results.push({ id: 'root1', label: 'Root x₁', value: fmt(root1), color: 'positive' as const });
-        results.push({ id: 'root2', label: 'Root x₂', value: fmt(root2), color: 'positive' as const });
-        results.push({ id: 'nature', label: 'Nature', value: 'Two distinct real roots', color: 'positive' as const });
-      } else if (discriminant === 0) {
-        const root = -b / (2 * a);
-        results.push({ id: 'root1', label: 'Root (repeated)', value: fmt(root), color: 'neutral' as const });
-        results.push({ id: 'nature', label: 'Nature', value: 'One repeated real root', color: 'neutral' as const });
+      if (q.kind === 'two-real') {
+        out.push({ id: 'root1', label: 'Root x₁', value: q.exact ? fmtF(q.exact.x1) : fmtN(q.x1!), color: 'positive' });
+        out.push({ id: 'root2', label: 'Root x₂', value: q.exact ? fmtF(q.exact.x2) : fmtN(q.x2!), color: 'positive' });
+        out.push({ id: 'nature', label: 'Nature', value: 'Two distinct real roots', color: 'positive' });
+      } else if (q.kind === 'repeated') {
+        out.push({ id: 'root1', label: 'Root (repeated)', value: fmtF(q.exact!.x1), color: 'neutral' });
+        out.push({ id: 'nature', label: 'Nature', value: 'One repeated real root', color: 'neutral' });
       } else {
-        const realPart = -b / (2 * a);
-        const imagPart = Math.sqrt(-discriminant) / (2 * a);
-        results.push({ id: 'root1', label: 'Root x₁ (complex)', value: fmtComplex(realPart, imagPart), color: 'negative' as const });
-        results.push({ id: 'root2', label: 'Root x₂ (complex)', value: fmtComplex(realPart, -imagPart), color: 'negative' as const });
-        results.push({ id: 'nature', label: 'Nature', value: 'Two complex conjugate roots', color: 'negative' as const });
+        out.push({ id: 'root1', label: 'Root x₁ (complex)', value: fmtComplex(q.re!, q.im!), color: 'negative' });
+        out.push({ id: 'root2', label: 'Root x₂ (complex)', value: fmtComplex(q.re!, -q.im!), color: 'negative' });
+        out.push({ id: 'nature', label: 'Nature', value: 'Two complex conjugate roots', color: 'negative' });
       }
-
-      return results;
+      if (q.surd) out.push({ id: 'exactForm', label: 'Exact form', value: `x = ${q.surd}`, color: 'neutral' });
+      out.push(hide('_kind', q.kind));
+      out.push(hide('_realRoots', JSON.stringify(q.kind === 'complex' ? [] : q.kind === 'repeated' ? [q.x1] : [q.x1, q.x2])));
+      return out;
     }
 
-    return [];
+    // ── Cubic / quartic: exact square-free factorisation + Aberth iteration ──
+    const lead = cs[0];
+    if (lead.n === 0n) {
+      // Leading coefficient 0: report that the degree drops (the lower-degree equation is solved in its own mode).
+      return [
+        { id: 'equation', label: 'Equation', value: `${polyString(cs)} = 0`, highlight: true, color: 'neutral' },
+        { id: 'nature', label: 'Nature', value: `a = 0, so this is not a ${type} equation: choose a lower degree and enter the remaining coefficients.`, color: 'neutral' },
+      ];
+    }
+    if (cs.some((c) => !Number.isFinite(fracToNumber(c)))) return [];
+    const roots: Root[] = polyRoots(cs);
+    if (!roots.length) return [];
+
+    const out: CalculatorResult[] = [{ id: 'equation', label: 'Equation', value: `${polyString(cs)} = 0`, highlight: true, color: 'neutral' }];
+    let k = 0;
+    let reals = 0;
+    let complexPairs = 0;
+    let repeated = false;
+    const sub = (n: number) => '₀₁₂₃₄₅₆₇₈₉'[n] ?? String(n);
+    for (const r of roots) {
+      if (r.multiplicity > 1) repeated = true;
+      if (r.im === 0) {
+        reals += r.multiplicity;
+        k++;
+        out.push({ id: `root${k}`, label: `Root x${sub(k)}`, value: `${fmtN(r.re)}${mult(r.multiplicity)}`, color: 'positive' });
+      } else {
+        complexPairs += r.multiplicity;
+        k++;
+        out.push({ id: `root${k}`, label: `Root x${sub(k)} (complex)`, value: `${fmtComplex(r.re, r.im)}${mult(r.multiplicity)}`, color: 'negative' });
+        k++;
+        out.push({ id: `root${k}`, label: `Root x${sub(k)} (complex)`, value: `${fmtComplex(r.re, -r.im)}${mult(r.multiplicity)}`, color: 'negative' });
+      }
+    }
+    const natureParts = [
+      reals ? `${reals} real root${reals > 1 ? 's' : ''}${repeated ? ' (counted with multiplicity)' : ''}` : '',
+      complexPairs ? `${2 * complexPairs} complex root${'s'} (${complexPairs} conjugate pair${complexPairs > 1 ? 's' : ''})` : '',
+    ].filter(Boolean);
+    out.push({ id: 'nature', label: 'Nature', value: natureParts.join(' + '), color: complexPairs ? 'negative' : 'positive' });
+    out.push(hide('_kind', type));
+    out.push(hide('_realRoots', JSON.stringify(roots.filter((r) => r.im === 0).map((r) => r.re))));
+    return out;
+  },
+  extraPanel: (values, results) => {
+    if (!results.length) return null;
+    return createElement(EquationSolverPanel, { values, results });
   },
 
   educational: {
-    formula: 'Linear: x = −b/a | Quadratic: x = (−b ± √(b² − 4ac)) / 2a',
+    formula: 'Linear: x = −b/a | Quadratic: x = (−b ± √(b² − 4ac)) / 2a | Cubic and quartic: all real and complex roots (multiple roots detected exactly)',
     formulaDescription:
       'For linear equations in the form ax + b = 0, the solution is simply x = −b/a, representing the point where the line crosses the x-axis. For quadratic equations in the form ax² + bx + c = 0, the quadratic formula provides the universal solution. The discriminant (Δ = b² − 4ac) classifies the roots before computation: Δ > 0 yields two distinct real roots, Δ = 0 yields one repeated real root, and Δ < 0 yields two complex conjugate roots involving the imaginary unit i.',
     variables: [
@@ -155,10 +214,9 @@ const equationSolverConfig: CalculatorConfig = {
       { symbol: 'Discriminant (Δ)', name: 'b² − 4ac', description: 'The discriminant determines the nature and number of roots in a quadratic equation. A positive discriminant (Δ > 0) means two distinct real solutions, a zero discriminant (Δ = 0) means one repeated solution, and a negative discriminant (Δ < 0) means two complex conjugate solutions.' },
     ],
     howToUse: [
-      'Select the equation type — Linear (ax + b = 0) or Quadratic (ax² + bx + c = 0) — from the dropdown menu.',
-      'Enter the coefficient a (required). For linear equations this is the coefficient of x; for quadratics it is the coefficient of x². This value must be non-zero.',
-      'Enter coefficient b (required). For linear equations this is the constant term. For quadratics this is the coefficient of x.',
-      'For quadratic equations only, enter coefficient c — the constant term. This field appears automatically when Quadratic is selected.',
+      'Select the equation type — Linear (ax + b = 0), Quadratic (ax² + bx + c = 0), Cubic (ax³ + bx² + cx + d = 0) or Quartic (ax⁴ + bx³ + cx² + dx + e = 0) — from the dropdown menu.',
+      'Enter the coefficient a (required): the leading coefficient. If a = 0 the equation drops to a lower degree (a linear equation with a = 0 has no solution, or infinitely many when b = 0 as well).',
+      'Enter the remaining coefficients in order of decreasing power (b, then c, d, e as the chosen type needs). Fields appear automatically.',
       'The calculator displays the equation in standard form, the discriminant (for quadratics), the roots, and the nature of the roots — real distinct, real repeated, or complex conjugates.',
     ],
     quickReference: [
@@ -180,7 +238,7 @@ const equationSolverConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What happens if a = 0 in a quadratic equation?',
-        answer: 'If a = 0, the equation is no longer quadratic — it becomes linear (bx + c = 0). The quadratic formula would involve division by 2a = 0, which is undefined. The equation solver shows no results when a = 0 for either linear or quadratic equations, since a must be non-zero for the standard form to be valid.',
+        answer: 'If a = 0 the equation is no longer quadratic: it becomes linear (bx + c = 0), and the calculator says so and gives that linear solution. For a linear equation with a = 0, there is no solution when b is not 0 (the equation reads b = 0) and infinitely many solutions when b = 0 as well (0 = 0).',
       },
       {
         question: 'Can the quadratic formula solve all quadratic equations?',
@@ -188,7 +246,7 @@ const equationSolverConfig: CalculatorConfig = {
       },
       {
         question: 'How do I interpret complex roots?',
-        answer: 'Complex roots come in conjugate pairs: p + qi and p − qi. The real part p = −b/(2a) is the x-coordinate of the parabola\'s vertex. The imaginary part q = √(−Δ)/(2a) indicates how far the parabola sits above (or below) the x-axis. Complex roots mean the parabola never crosses the x-axis — it either stays entirely above (if a > 0) or entirely below (if a < 0).',
+        answer: 'Complex roots come in conjugate pairs: p + qi and p − qi. The real part p = −b/(2a) is the x-coordinate of the parabola\'s vertex. The imaginary part is q = √(−Δ)/(2|a|). Complex roots mean the parabola never crosses the x-axis — it either stays entirely above (if a > 0) or entirely below (if a < 0).',
       },
       {
         question: 'What is the geometric meaning of the discriminant?',
@@ -204,10 +262,6 @@ const equationSolverConfig: CalculatorConfig = {
       alt: 'Diagram comparing linear and quadratic equations showing how coefficients and discriminant determine the nature of roots',
       caption: 'Left: linear equation solution where x = -b/a gives one real root. Right: quadratic equation solution using the quadratic formula, with discriminant determining three possible root types.',
     },
-  },
-  extraPanel: (values, results) => {
-    if (!results.length) return null;
-    return createElement(EquationSolverPanel, { values, results });
   },
 };
 

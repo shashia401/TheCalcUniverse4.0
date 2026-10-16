@@ -28,7 +28,7 @@ export default function RandomNumberPanel({ results }: Props) {
       <div className="p-5 space-y-4">
         {/* Number Grid */}
         <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6">
-          <p className="text-sm text-slate-500 mb-3 text-center">Generated Values ({numbers.length})</p>
+          <p className="text-sm text-slate-700 mb-3 text-center">Generated Values ({numbers.length})</p>
           <div className="flex flex-wrap gap-2 justify-center">
             {numbers.map((num, i) => (
               <span key={`${num}-${i}`} className="inline-block px-3 py-1.5 bg-white rounded-lg border border-blue-200 text-sm font-mono font-bold text-blue-700 shadow-sm">
@@ -61,7 +61,7 @@ export default function RandomNumberPanel({ results }: Props) {
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Randomness Source</p>
           <p className="text-xs text-slate-600 leading-relaxed">
             Generated using <span className="font-mono font-bold text-slate-700">crypto.getRandomValues()</span> —
-            cryptographically secure pseudo-random numbers suitable for most applications including security-sensitive use cases.
+            cryptographically secure pseudo-random numbers, drawn with rejection sampling so every allowed value is exactly equally likely (no modulo bias).
           </p>
         </div>
       </div>

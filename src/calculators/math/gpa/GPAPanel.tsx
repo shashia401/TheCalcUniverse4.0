@@ -1,5 +1,6 @@
 import { CalculatorResult } from '../../../types/calculator';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
+import { GRADES, SCALES, type ScaleId } from './gradeScale';
 
 interface Props {
   values: Record<string, string>;
@@ -13,29 +14,34 @@ interface CourseRow {
   points: number;
 }
 
-function getGradeColor(grade: string): { bar: string; text: string } {
-  const gpaValues: Record<string, number> = {
-    'A+': 4.33, 'A': 4.0, 'A-': 3.67,
-    'B+': 3.33, 'B': 3.0, 'B-': 2.67,
-    'C+': 2.33, 'C': 2.0, 'C-': 1.67,
-    'D+': 1.33, 'D': 1.0, 'D-': 0.67,
-    'F': 0.0,
-  };
-  const gpa = gpaValues[grade] ?? 0;
-  if (gpa >= 3.0) return { bar: 'bg-green-500', text: 'text-green-700' };
-  if (gpa >= 2.0) return { bar: 'bg-yellow-500', text: 'text-yellow-700' };
-  if (gpa >= 1.0) return { bar: 'bg-orange-500', text: 'text-orange-700' };
-  return { bar: 'bg-red-500', text: 'text-red-700' };
+interface TargetData {
+  needed: number;
+  max: number;
+  impossible: boolean;
+  secured: boolean;
+  current: number;
+  target: number;
 }
+
+/** Colour bands by letter: A/B green, C yellow, D orange, F red (-700 shades for AA contrast on white). */
+function getGradeColor(grade: string): { bar: string; text: string } {
+  const letter = grade.charAt(0);
+  if (letter === 'A' || letter === 'B') return { bar: 'bg-green-600', text: 'text-green-800' };
+  if (letter === 'C') return { bar: 'bg-yellow-600', text: 'text-yellow-800' };
+  if (letter === 'D') return { bar: 'bg-orange-600', text: 'text-orange-800' };
+  return { bar: 'bg-red-600', text: 'text-red-800' };
+}
+
+const BAR_HEX: Record<string, string> = { A: '#15803d', B: '#15803d', C: '#a16207', D: '#c2410c', F: '#b91c1c' };
 
 function GradeBar({ grade, points, maxPoints }: { grade: string; points: number; maxPoints: number }) {
   const pct = maxPoints > 0 ? (points / maxPoints) * 100 : 0;
   return (
     <div className="flex items-center gap-2">
-      <span className="w-8 text-xs font-bold text-slate-600 text-right">{grade}</span>
-      <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+      <span className="w-8 text-xs font-bold text-slate-700 text-right">{grade}</span>
+      <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden" role="img" aria-label={`${grade}: ${parseFloat(points.toFixed(2))} grade points`}>
         <div
-          className={`h-full rounded-full transition-all duration-500 ${getGradeColor(grade).bar}`}
+          className={`h-full rounded-full ${getGradeColor(grade).bar}`}
           style={{ width: `${Math.min(pct, 100)}%` }}
         />
       </div>
@@ -52,6 +58,8 @@ export default function GPAPanel({ results }: Props) {
     const totalGradePoints = results.find((r) => r.id === 'totalGradePoints');
     const courseCount = results.find((r) => r.id === 'courseCount');
     const gpaDataRaw = results.find((r) => r.id === '_gpaData');
+    const scaleRaw = results.find((r) => r.id === '_scale')?.value;
+    const scale: ScaleId = scaleRaw === 'thirds' ? 'thirds' : 'standard';
 
     if (!gpa || !gpaDataRaw) return null;
 
@@ -59,7 +67,7 @@ export default function GPAPanel({ results }: Props) {
     try {
       courses = JSON.parse(gpaDataRaw.value);
     } catch {
-      // fallback
+      return null;
     }
 
     const maxPoints = Math.max(...courses.map((c) => c.points), 1);
@@ -76,43 +84,41 @@ export default function GPAPanel({ results }: Props) {
         <div className="p-5 space-y-5">
           {/* GPA Result Card */}
           <div className="rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-6 text-center">
-            <p className="text-sm text-slate-500 mb-2">{gpa.label}</p>
+            <p className="text-sm text-slate-700 mb-2">{gpa.label}</p>
             <p className="text-4xl font-bold text-green-700">{gpa.value}</p>
-            <div className="flex justify-center gap-6 mt-3 text-xs text-slate-500">
+            <div className="flex justify-center gap-6 mt-3 text-xs text-slate-700">
               <span>{courseCount?.label}: {courseCount?.value}</span>
               <span>{totalCredits?.label}: {totalCredits?.value}</span>
               <span>Points: {totalGradePoints?.value}</span>
             </div>
           </div>
 
-          {/* GPA by Course — Bar Chart */}
+          {/* Grade points by course */}
           {courses.length > 1 && (
             <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
-                Grade Points by Course
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-3">
+                Grade Points by Course (points × credits)
               </p>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={courses} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-                  <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={45} />
-                  <Tooltip
-                    contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                    formatter={(_: unknown) => [typeof _ === 'number' ? _.toFixed(2) : _, 'Grade Points'] as any}
-                  />
-                  <Line type="monotone" dataKey="points" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 4, fill: '#3b82f6', strokeWidth: 0 }} activeDot={{ r: 6, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }} />
-                </LineChart>
-              </ResponsiveContainer>
+              <SvgBarChart
+                ariaLabel={`Bar chart of weighted grade points for ${courses.length} courses`}
+                data={courses.map((c, i) => ({
+                  label: c.name || `#${i + 1}`,
+                  value: c.points,
+                  color: BAR_HEX[c.grade.charAt(0)] ?? '#1d4ed8',
+                }))}
+                format={(n) => `${parseFloat(n.toFixed(2))} pts`}
+              />
             </div>
           )}
 
           {/* Course Table */}
           {courses.length > 0 && (
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Course Breakdown</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-2">Course Breakdown</p>
               <div className="overflow-x-auto rounded-lg border border-slate-200" tabIndex={0} role="region" aria-label="Course breakdown table">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-slate-100 text-slate-600 font-bold uppercase tracking-wider">
+                    <tr className="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider">
                       <th scope="col" className="px-3 py-2 text-left">Course</th>
                       <th scope="col" className="px-3 py-2 text-center">Grade</th>
                       <th scope="col" className="px-3 py-2 text-center">Credits</th>
@@ -128,7 +134,7 @@ export default function GPAPanel({ results }: Props) {
                             {c.grade}
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-center text-slate-600">{c.credits}</td>
+                        <td className="px-3 py-2 text-center text-slate-700">{c.credits}</td>
                         <td className="px-3 py-2 text-center font-mono text-slate-700">{c.points.toFixed(2)}</td>
                       </tr>
                     ))}
@@ -141,7 +147,7 @@ export default function GPAPanel({ results }: Props) {
           {/* Color-coded Grade Bars */}
           {courses.length > 1 && (
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Grade Distribution</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-2">Grade Distribution</p>
               <div className="space-y-1.5">
                 {courses.map((c, i) => (
                   <GradeBar key={`item-${i}`} grade={c.grade} points={c.points} maxPoints={maxPoints} />
@@ -150,20 +156,18 @@ export default function GPAPanel({ results }: Props) {
             </div>
           )}
 
-          {/* GPA Scale Reference */}
+          {/* GPA Scale Reference — driven by the selected scale, so it always matches the math */}
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">GPA Scale Reference</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">
+              GPA Scale Reference ({scale === 'thirds' ? 'thirds' : 'standard'})
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px]">
-              {[['4.33', 'A+', 'bg-green-500'], ['4.0', 'A', 'bg-green-500'], ['3.67', 'A-', 'bg-green-500'],
-                ['3.33', 'B+', 'bg-green-400'], ['3.0', 'B', 'bg-green-400'], ['2.67', 'B-', 'bg-yellow-500'],
-                ['2.33', 'C+', 'bg-yellow-500'], ['2.0', 'C', 'bg-yellow-500'], ['1.67', 'C-', 'bg-orange-500'],
-                ['1.33', 'D+', 'bg-orange-500'], ['1.0', 'D', 'bg-orange-500'], ['0.67', 'D-', 'bg-red-400'],
-                ['0.0', 'F', 'bg-red-500']].map(([gpaVal, letter, color]) => (
+              {[...GRADES].reverse().map((letter) => (
                 <div key={letter} className="flex items-center gap-1.5 p-1.5 bg-white rounded border border-slate-200">
-                  <span className={`w-2 h-2 rounded-full ${color}`} />
-                  <span className="font-bold text-slate-600">{letter}</span>
-                  <span className="text-slate-500">=</span>
-                  <span className="text-slate-500">{gpaVal}</span>
+                  <span className={`w-2 h-2 rounded-full ${getGradeColor(letter).bar}`} />
+                  <span className="font-bold text-slate-700">{letter}</span>
+                  <span className="text-slate-600">=</span>
+                  <span className="text-slate-700">{SCALES[scale][letter]}</span>
                 </div>
               ))}
             </div>
@@ -178,21 +182,22 @@ export default function GPAPanel({ results }: Props) {
   const neededGrade = results.find((r) => r.id === 'neededGrade');
   const currentGpa = results.find((r) => r.id === 'currentGpa');
   const targetGpa = results.find((r) => r.id === 'targetGpa');
-
-  if (!neededGPA || !neededGrade) return null;
-
-  const neededGPAVal = parseFloat(neededGPA.value);
-  const currentGPAVal = currentGpa ? parseFloat(currentGpa.value) : 0;
-  const targetGPAVal = targetGpa ? parseFloat(targetGpa.value) : 0;
   const totalCreditsResult = results.find((r) => r.id === 'totalCredits');
-  const impossible = neededGPAVal > 4.33;
+  const raw = results.find((r) => r.id === '_targetData');
 
-  // Progress from current to target
-  const progressBase = Math.max(currentGPAVal, 0);
-  const progressTarget = Math.max(targetGPAVal, 0);
+  if (!neededGPA || !neededGrade || !raw) return null;
+  let t: TargetData;
+  try {
+    t = JSON.parse(raw.value) as TargetData;
+  } catch {
+    return null;
+  }
+  const impossible = t.impossible;
+
+  // Progress from current to target on a 0-5 bar
   const progressMax = 5.0;
-  const currentPct = (progressBase / progressMax) * 100;
-  const targetPct = (progressTarget / progressMax) * 100;
+  const currentPct = (Math.max(t.current, 0) / progressMax) * 100;
+  const targetPct = (Math.max(t.target, 0) / progressMax) * 100;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -210,11 +215,11 @@ export default function GPAPanel({ results }: Props) {
             ? 'from-red-50 to-rose-50 border-red-200'
             : 'from-blue-50 to-indigo-50 border-blue-200'
         }`}>
-          <p className="text-sm text-slate-500 mb-2">GPA Needed Per Course</p>
-          <p className={`text-4xl font-bold ${impossible ? 'text-red-600' : 'text-blue-700'}`}>
+          <p className="text-sm text-slate-700 mb-2">GPA Needed Per Course</p>
+          <p className={`text-4xl font-bold ${impossible ? 'text-red-700' : 'text-blue-700'}`}>
             {neededGPA.value}
           </p>
-          <p className="text-sm mt-2 text-slate-600">
+          <p className="text-sm mt-2 text-slate-700">
             Grade per course: <span className="font-bold">{neededGrade.value}</span>
           </p>
         </div>
@@ -222,9 +227,9 @@ export default function GPAPanel({ results }: Props) {
         {/* Impossible Warning */}
         {impossible && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4">
-            <p className="text-xs font-bold text-red-600 mb-1">Target Not Reachable</p>
-            <p className="text-sm text-red-700">
-              The required GPA of {neededGPA.value} exceeds the maximum possible (4.33). Consider
+            <p className="text-xs font-bold text-red-700 mb-1">Target Not Reachable</p>
+            <p className="text-sm text-red-800">
+              The required GPA of {neededGPA.value} exceeds the maximum possible on this scale ({t.max.toFixed(2)}). Consider
               taking additional credits (e.g., summer courses or extra AP classes) to increase your
               remaining credits and improve your chances.
             </p>
@@ -234,16 +239,17 @@ export default function GPAPanel({ results }: Props) {
         {/* Progress Bar */}
         {currentGpa && targetGpa && (
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-2">
               GPA Progress: {currentGpa.value} → {targetGpa.value}
             </p>
-            <div className="relative h-4 bg-slate-100 rounded-full overflow-hidden">
+            <div className="relative h-4 bg-slate-100 rounded-full overflow-hidden" role="img"
+              aria-label={`Current GPA ${currentGpa.value}, target GPA ${targetGpa.value}, on a scale to 5.0`}>
               <div
-                className="absolute h-full bg-blue-400 rounded-full transition-all"
+                className="absolute h-full bg-blue-400 rounded-full"
                 style={{ width: `${Math.min(currentPct, 100)}%` }}
               />
               <div
-                className="absolute h-full bg-blue-600 rounded-full transition-all opacity-60"
+                className="absolute h-full bg-blue-600 rounded-full opacity-60"
                 style={{
                   width: `${Math.min(targetPct, 100)}%`,
                   clipPath: `inset(0 ${100 - Math.min(targetPct, 100)}% 0 ${Math.min(currentPct, 100)}%)`,
@@ -255,7 +261,7 @@ export default function GPAPanel({ results }: Props) {
                 style={{ left: `${Math.min(targetPct, 100)}%` }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+            <div className="flex justify-between text-[10px] text-slate-600 mt-1">
               <span>Current: {currentGpa.value}</span>
               <span>Target: {targetGpa.value}</span>
               <span>Max: 5.0</span>
@@ -265,28 +271,28 @@ export default function GPAPanel({ results }: Props) {
 
         {/* Summary */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Summary</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">Summary</p>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <span className="text-slate-500">Current GPA</span>
+              <span className="text-slate-600">Current GPA</span>
               <p className="font-bold text-slate-700">{currentGpa?.value}</p>
             </div>
             <div>
-              <span className="text-slate-500">Target GPA</span>
+              <span className="text-slate-600">Target GPA</span>
               <p className="font-bold text-slate-700">{targetGpa?.value}</p>
             </div>
             <div>
-              <span className="text-slate-500">GPA Needed</span>
-              <p className={`font-bold ${impossible ? 'text-red-600' : 'text-blue-700'}`}>
+              <span className="text-slate-600">GPA Needed</span>
+              <p className={`font-bold ${impossible ? 'text-red-700' : 'text-blue-700'}`}>
                 {neededGPA.value}
               </p>
             </div>
             <div>
-              <span className="text-slate-500">Grade Needed</span>
+              <span className="text-slate-600">Grade Needed</span>
               <p className="font-bold text-slate-700">{neededGrade.value}</p>
             </div>
             <div className="col-span-2">
-              <span className="text-slate-500">Credits</span>
+              <span className="text-slate-600">Credits</span>
               <p className="font-bold text-slate-700">{totalCreditsResult?.value}</p>
             </div>
           </div>

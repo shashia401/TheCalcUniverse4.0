@@ -1,61 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import DescriptiveStatsPanel from './DescriptiveStatsPanel';
-
-function parseValues(input: string): number[] {
-  if (!input || !input.trim()) return [];
-  return input
-    .trim()
-    .split(/[\s,;]+/)
-    .map((s) => parseFloat(s))
-    .filter((v) => !isNaN(v));
-}
-
-function median(sorted: number[]): number {
-  const n = sorted.length;
-  if (n === 0) return 0;
-  const mid = Math.floor(n / 2);
-  if (n % 2 === 0) {
-    return (sorted[mid - 1] + sorted[mid]) / 2;
-  }
-  return sorted[mid];
-}
-
-function quartiles(sorted: number[]): { q1: number; q2: number; q3: number } {
-  const n = sorted.length;
-  const q2 = median(sorted);
-
-  const lowerHalf = sorted.slice(0, Math.floor(n / 2));
-  const upperHalf = sorted.slice(Math.ceil(n / 2));
-
-  const q1 = median(lowerHalf);
-  const q3 = median(upperHalf);
-
-  return { q1, q2, q3 };
-}
-
-function findMode(sorted: number[]): number[] {
-  if (sorted.length === 0) return [];
-
-  const freq: Map<number, number> = new Map();
-  for (const v of sorted) {
-    freq.set(v, (freq.get(v) ?? 0) + 1);
-  }
-
-  let maxFreq = 0;
-  for (const f of freq.values()) {
-    if (f > maxFreq) maxFreq = f;
-  }
-
-  if (maxFreq <= 1) return [];
-
-  const modes: number[] = [];
-  for (const [val, f] of freq) {
-    if (f === maxFreq) modes.push(val);
-  }
-
-  return modes.sort((a, b) => a - b);
-}
+import { parseDataset, summarize, fmtDec, ignoredRow } from '../../../utils/stats';
 
 const descriptiveStatsConfig: CalculatorConfig = {
   inputs: [
@@ -65,98 +11,62 @@ const descriptiveStatsConfig: CalculatorConfig = {
       type: 'textarea',
       placeholder: 'Enter numbers: 1, 2, 3, 4, 5, 6, 7',
       required: true,
-      helpText: 'Enter your dataset numbers separated by commas, spaces, or semicolons',
+      helpText: 'Enter your dataset numbers separated by commas, spaces, semicolons, or line breaks',
+    },
+    {
+      id: 'type',
+      label: 'Data Type',
+      type: 'select',
+      options: [
+        { label: 'Sample (divide by n − 1)', value: 'sample' },
+        { label: 'Population (divide by n)', value: 'population' },
+      ],
+      helpText: 'Sample is the usual choice; use Population only if your data is the entire group.',
     },
   ],
   calculate: (values) => {
-    const data = parseValues(values.data ?? '');
-
+    const { values: data, ignored } = parseDataset(values.data);
     if (data.length < 2) return [];
 
-    const n = data.length;
-    const sorted = [...data].sort((a, b) => a - b);
-    const sum = data.reduce((a, b) => a + b, 0);
-    const mean = sum / n;
-    const med = median(sorted);
-    const mode = findMode(sorted);
-    const min = sorted[0];
-    const max = sorted[n - 1];
-    const range = max - min;
+    const isSample = values.type !== 'population';
+    // Shared exact-decimal engine (src/utils/stats.ts); quartiles = median of halves, median excluded when n is odd.
+    const s = summarize(data);
+    const variance = isSample ? s.varianceSample! : s.variancePop;
+    const stdDev = isSample ? s.sdSample! : s.sdPop;
+    const [varSym, sdSym] = isSample ? ['s²', 's'] : ['σ²', 'σ'];
+    const fmt = (d: typeof s.mean) => fmtDec(d);
 
-    const variance =
-      data.reduce((acc, v) => acc + (v - mean) * (v - mean), 0) / n;
-    const stdDev = Math.sqrt(variance);
-
-    const { q1, q3 } = quartiles(sorted);
-    const iqr = q3 - q1;
-
-    const fmt = (val: number): string => {
-      if (Number.isInteger(val) && Math.abs(val) < 1e15) return val.toString();
-      return parseFloat(val.toFixed(6)).toString();
-    };
-
-    const results = [
-      {
-        id: 'count',
-        label: 'Count (n) / Sum',
-        value: `${n} / ${fmt(sum)}`,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'mean',
-        label: 'Mean (Average)',
-        value: fmt(mean),
-        highlight: true,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'median',
-        label: 'Median',
-        value: fmt(med),
-        highlight: true,
-        color: 'neutral' as const,
-      },
+    return [
+      { id: 'count', label: 'Count (n) / Sum', value: `${s.n} / ${fmtDec(s.sum, 20)}`, color: 'neutral' as const },
+      { id: 'mean', label: 'Mean (Average)', value: fmt(s.mean), highlight: true, color: 'neutral' as const },
+      { id: 'median', label: 'Median', value: fmt(s.median), highlight: true, color: 'neutral' as const },
       {
         id: 'mode',
         label: 'Mode',
-        value: mode.length > 0 ? mode.map(fmt).join(', ') : 'No mode (all values appear once)',
+        value: s.modes.length > 0 ? s.modes.map(fmt).join(', ') : 'No mode (all values appear once)',
         color: 'neutral' as const,
       },
-      {
-        id: 'range',
-        label: 'Range',
-        value: fmt(range),
-        color: 'neutral' as const,
-      },
+      { id: 'range', label: 'Range', value: fmt(s.range), color: 'neutral' as const },
       {
         id: 'variance',
-        label: 'Variance (σ²) / Std Dev (σ)',
+        label: `Variance (${varSym}) / Std Dev (${sdSym})`,
         value: `${fmt(variance)} / ${fmt(stdDev)}`,
         highlight: true,
         color: 'neutral' as const,
       },
-      {
-        id: 'minmax',
-        label: 'Min / Max',
-        value: `${fmt(min)} / ${fmt(max)}`,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'quartiles',
-        label: 'Q1 / Q3 / IQR',
-        value: `${fmt(q1)} / ${fmt(q3)} / ${fmt(iqr)}`,
-        color: 'neutral' as const,
-      },
+      { id: 'minmax', label: 'Min / Max', value: `${fmt(s.min)} / ${fmt(s.max)}`, color: 'neutral' as const },
+      { id: 'quartiles', label: 'Q1 / Q3 / IQR', value: `${fmt(s.q1)} / ${fmt(s.q3)} / ${fmt(s.iqr)}`, color: 'neutral' as const },
+      ...ignoredRow(ignored),
+      // Exact numbers for the panel's skew indicator (the panel never parses the formatted strings above).
+      { id: '_data', label: '', value: JSON.stringify({ mean: s.mean.toNumber(), median: s.median.toNumber(), sd: stdDev.toNumber() }) },
     ];
-
-    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(DescriptiveStatsPanel, { values, results });
   },
   educational: {
-    formula: 'x̄ = ∑x / n,  Median = middle value (sorted),  σ² = ∑(x − x̄)² / n',
+    formula: 'x̄ = ∑x / n,  Median = middle value (sorted),  s² = ∑(x − x̄)² / (n − 1)  (population: σ² = ∑(x − x̄)² / n)',
     formulaDescription:
       'Descriptive statistics summarize a dataset using measures of central tendency (mean, median, mode) and measures of dispersion (range, variance, standard deviation, IQR). The mean is the arithmetic average, the median is the middle value when sorted, the mode is the most frequent value, the variance measures the average squared deviation from the mean, the standard deviation is its square root, and quartiles divide the sorted data into four equal parts.',
     variables: [
@@ -171,12 +81,12 @@ const descriptiveStatsConfig: CalculatorConfig = {
         description: 'The arithmetic average of all values, calculated by dividing the sum of all values by the count.',
       },
       {
-        symbol: 'σ²',
+        symbol: 's² (σ²)',
         name: 'Variance',
-        description: 'The average of the squared differences from the mean. Measures the spread of the data distribution.',
+        description: 'The sum of the squared differences from the mean divided by n − 1 (sample, s²) or by n (population, σ²). Measures the spread of the data distribution.',
       },
       {
-        symbol: 'σ',
+        symbol: 's (σ)',
         name: 'Standard Deviation',
         description: 'The square root of the variance. Expressed in the same units as the original data for interpretability.',
       },
@@ -215,7 +125,7 @@ const descriptiveStatsConfig: CalculatorConfig = {
     faqs: [
       {
         question: 'What is the difference between population and sample variance?',
-        answer: 'Population variance divides by n (the total number of observations) and is used when you have data for the entire population. Sample variance divides by n − 1 (Bessel\'s correction) and is used when your data is a sample from a larger population. This calculator computes population variance, as specified for the task.',
+        answer: 'Population variance divides by n (the total number of observations) and is used when you have data for the entire population. Sample variance divides by n − 1 (Bessel\'s correction) and is used when your data is a sample from a larger population. Choose which one to use with the Data Type menu; Sample (n − 1) is the default because most data sets are samples.',
       },
       {
         question: 'When should I use the median instead of the mean?',

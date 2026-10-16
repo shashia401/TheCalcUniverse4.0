@@ -1,24 +1,11 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ZScorePanel from './ZScorePanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { normCdf, normSf } from '../../../utils/distributions';
 
-function cdf(x: number): number {
-  // Standard normal CDF via the Abramowitz & Stegun 7.1.26 erf approximation:
-  // Φ(x) = 0.5 * (1 + erf(x / √2)). The erf approximation itself operates on
-  // x/√2, not x directly — same formula as math/p-value's normalCDF().
-  const a1 = 0.254829592;
-  const a2 = -0.284496736;
-  const a3 = 1.421413741;
-  const a4 = -1.453152027;
-  const a5 = 1.061405429;
-  const p = 0.3275911;
-
-  const sign = x < 0 ? -1 : 1;
-  x = Math.abs(x) / Math.sqrt(2);
-  const t = 1 / (1 + p * x);
-  const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-  return 0.5 * (1 + sign * y);
-}
+/** Significant-digit formatting that never collapses a tiny tail probability to "0" (6-decimal rounding did). */
+const sig = (n: number, digits = 10): string => String(parseFloat(n.toPrecision(digits)));
 
 const zScoreConfig: CalculatorConfig = {
   inputs: [
@@ -52,16 +39,19 @@ const zScoreConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const x = parseFloat(values.rawScore);
-    const mu = parseFloat(values.mean);
-    const sigma = parseFloat(values.stddev);
+    const x = parseNumberStrict(values.rawScore);
+    const mu = parseNumberStrict(values.mean);
+    const sigma = parseNumberStrict(values.stddev);
 
     if ([x, mu, sigma].some(isNaN) || sigma <= 0) return [];
 
     const z = (x - mu) / sigma;
-    const probability = cdf(z);
+    if (!Number.isFinite(z)) return [];
+    // Exact tails (src/utils/distributions.ts): the A&S erf approximation was only good to ~1.5e-7 and
+    // 1 − Φ(z) lost every digit past z ≈ 5 (z = 8 showed "0%" instead of 6.2e-14 %).
+    const probability = normCdf(z);
     const percentile = probability * 100;
-    const aboveProbability = (1 - probability) * 100;
+    const aboveProbability = normSf(z) * 100;
 
     const fmt = (n: number) => {
       if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
@@ -85,19 +75,19 @@ const zScoreConfig: CalculatorConfig = {
       {
         id: 'probability',
         label: 'Cumulative Probability P(Z ≤ z)',
-        value: fmt(probability),
+        value: sig(probability),
         color: 'neutral' as const,
       },
       {
         id: 'percentile',
-        label: 'Percentile Rank',
-        value: `${fmt(percentile)}%`,
+        label: 'Percentile Rank (if normally distributed)',
+        value: `${sig(percentile)}%`,
         color: 'neutral' as const,
       },
       {
         id: 'aboveProb',
         label: 'P(Z > z) — Above This Score',
-        value: `${fmt(aboveProbability)}%`,
+        value: `${sig(aboveProbability)}%`,
         color: 'neutral' as const,
       },
       {
@@ -158,7 +148,7 @@ const zScoreConfig: CalculatorConfig = {
       },
       {
         question: 'How do I calculate the probability from a Z-score?',
-        answer: 'The cumulative probability P(Z ≤ z) is the area under the standard normal curve to the left of your Z-score. It represents the proportion of the population that scores at or below your value. The calculator uses a numerical approximation (Abramowitz & Stegun formula) to compute this with high accuracy.',
+        answer: 'The cumulative probability P(Z ≤ z) is the area under the standard normal curve to the left of your Z-score. It represents the proportion of the population that scores at or below your value. The calculator evaluates the normal distribution with an incomplete-gamma series and continued fraction (accurate to roughly 14 significant digits, checked against SciPy), and computes the upper tail P(Z > z) directly so extreme z-scores such as z = 8 (6.2 × 10⁻¹⁴ % above) are not rounded to zero. Percentiles assume the data is approximately normally distributed.',
       },
     ],
     citations: [

@@ -60,11 +60,22 @@ describe('Probability Calculator', () => {
   });
 
   // ── Edge cases ─────────────────────────────────────────────────────
-  it('caps union at 1 for mutually exclusive events exceeding 100%', () => {
+  it('REGRESSION: mutually exclusive P(A)+P(B) > 1 is impossible: one error row, no fabricated "capped" results', () => {
     const r = config.calculate({ pa: '0.7', pb: '0.6', type: 'Mutually Exclusive' });
-    near(parseNumber(getValue(r, 'pOrB')), 1);
-    const warning = r.find(x => x.id === 'warning');
-    expect(warning).toBeTruthy();
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('warning');
+    expect(r[0].value).toContain('1.3');
+  });
+
+  it('mutually exclusive with P(A)+P(B) exactly 1 is allowed (0.7 + 0.3, no float-drift false alarm)', () => {
+    const r = config.calculate({ pa: '0.7', pb: '0.3', type: 'Mutually Exclusive' });
+    expect(getValue(r, 'pOrB')).toBe('1');
+  });
+
+  it('conditional probability is undefined (not 0) when the condition has probability 0', () => {
+    const r = config.calculate({ pa: '0.4', pb: '0', type: 'Independent' });
+    expect(getValue(r, 'pAGivenB')).toBe('Undefined (condition has probability 0)');
+    expect(getValue(r, 'pBGivenA')).toBe('0');
   });
 
   it('handles zero probability event A', () => {

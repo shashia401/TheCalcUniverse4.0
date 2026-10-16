@@ -1,14 +1,16 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import CorrelationPanel from './CorrelationPanel';
+import { parseDataset, pearson, spearman, fmtDec, ignoredRow, sumOf, D, type Dec } from '../../../utils/stats';
+import { tTwoTail } from '../../../utils/distributions';
 
-function parseValues(input: string): number[] {
-  if (!input || !input.trim()) return [];
-  return input
-    .trim()
-    .split(/[\s,;]+/)
-    .map((s) => parseFloat(s))
-    .filter((v) => !isNaN(v));
+/** Conventional |r| bands (Evans 1996); classified on the 4-decimal value that is displayed. */
+function strengthOf(absR: number): string {
+  if (absR >= 0.8) return 'Very strong';
+  if (absR >= 0.6) return 'Strong';
+  if (absR >= 0.4) return 'Moderate';
+  if (absR >= 0.2) return 'Weak';
+  return 'Very weak';
 }
 
 const correlationConfig: CalculatorConfig = {
@@ -27,79 +29,85 @@ const correlationConfig: CalculatorConfig = {
       type: 'textarea',
       placeholder: 'Y values: 2, 4, 5, 4, 5',
       required: true,
-      helpText: 'Enter Y values separated by commas, spaces, or semicolons',
+      helpText: 'Enter Y values separated by commas, spaces, or semicolons. You need the same number of Y values as X values (at least 3 pairs).',
     },
   ],
   calculate: (values) => {
-    const xVals = parseValues(values.xValues ?? '');
-    const yVals = parseValues(values.yValues ?? '');
+    const xs = parseDataset(values.xValues);
+    const ys = parseDataset(values.yValues);
+    const xVals = xs.values;
+    const yVals = ys.values;
 
     if (xVals.length < 3 || yVals.length < 3) return [];
     if (xVals.length !== yVals.length) return [];
 
     const n = xVals.length;
+    // Exact two-pass decimal arithmetic (src/utils/stats.ts): the old n*Σxy − Σx*Σy shortcut cancels
+    // catastrophically for data with a large common offset.
+    const c = pearson(xVals, yVals);
+    const ignored = [...xs.ignored, ...ys.ignored];
+    const fmt4 = (d: Dec) => fmtDec(d.toDecimalPlaces(4), 12);
 
-    const sumX = xVals.reduce((a, b) => a + b, 0);
-    const sumY = yVals.reduce((a, b) => a + b, 0);
-    const sumXY = xVals.reduce((acc, x, i) => acc + x * yVals[i], 0);
-    const sumX2 = xVals.reduce((acc, x) => acc + x * x, 0);
-    const sumY2 = yVals.reduce((acc, y) => acc + y * y, 0);
+    // Sample covariance (n-1), like Excel COVARIANCE.S / numpy.cov; the population value is shown too.
+    const covSample = c.sxy.div(n - 1);
+    const covPop = c.sxy.div(n);
 
-    const numerator = n * sumXY - sumX * sumY;
-    const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-
-    let r = 0;
-    if (denominator !== 0) {
-      r = numerator / denominator;
+    if (!c.r) {
+      // Zero variance in X or Y: r = 0/0 is undefined (not 0).
+      return [
+        {
+          id: 'r',
+          label: 'Pearson Correlation Coefficient (r)',
+          value: 'Undefined',
+          highlight: true,
+          color: 'negative' as const,
+          warning: 'One of the variables is constant (all values equal), so its standard deviation is 0 and r is undefined.',
+        },
+        { id: 'meanX', label: 'Mean of X', value: fmtDec(c.meanX), color: 'neutral' as const },
+        { id: 'meanY', label: 'Mean of Y', value: fmtDec(c.meanY), color: 'neutral' as const },
+        { id: 'n', label: 'Sample Size (n)', value: String(n), color: 'neutral' as const },
+        ...ignoredRow(ignored),
+      ];
     }
 
-    // Clamp to [-1, 1]
-    r = Math.max(-1, Math.min(1, r));
+    const r = c.r;
+    const rNum = r.toNumber();
+    const rSquared = r.times(r);
+    // Classify the 4-decimal value that is shown, so 0.79996 (displayed 0.8) is "Very strong", not "Strong".
+    const absShown = r.abs().toDecimalPlaces(4).toNumber();
+    const strength = strengthOf(absShown);
+    const direction = rNum >= 0 ? 'Positive' : 'Negative';
 
-    const rSquared = r * r;
-    const absR = Math.abs(r);
+    // Significance: t = r sqrt((n-2)/(1-r^2)), df = n-2, two-tailed (exact p = 0 only for |r| = 1).
+    const df = n - 2;
+    const t = Math.abs(rNum) >= 1 ? Infinity : (rNum * Math.sqrt(df)) / Math.sqrt(1 - rNum * rNum);
+    const p = tTwoTail(t, df);
+    const rho = spearman(xVals, yVals);
 
-    let strength: string;
-    if (absR >= 0.8) {
-      strength = 'Very strong';
-    } else if (absR >= 0.6) {
-      strength = 'Strong';
-    } else if (absR >= 0.4) {
-      strength = 'Moderate';
-    } else if (absR >= 0.2) {
-      strength = 'Weak';
-    } else {
-      strength = 'Very weak';
-    }
+    const slope = c.sxx.isZero() ? null : c.sxy.div(c.sxx);
+    const intercept = slope ? c.meanY.minus(slope.times(c.meanX)) : null;
 
-    const direction = r >= 0 ? 'Positive' : 'Negative';
+    const sumX = sumOf(xVals);
+    const sumY = sumOf(yVals);
+    const sumXY = xVals.reduce((acc, x, i) => acc.plus(x.times(yVals[i])), new D(0));
+    const sumX2 = xVals.reduce((acc, x) => acc.plus(x.times(x)), new D(0));
+    const sumY2 = yVals.reduce((acc, y) => acc.plus(y.times(y)), new D(0));
+    const f = (d: Dec) => fmtDec(d, 20);
 
-    const meanX = sumX / n;
-    const meanY = sumY / n;
-
-    const covariance = xVals.reduce((acc, x, i) => acc + (x - meanX) * (yVals[i] - meanY), 0) / n;
-
-    const fmt = (val: number): string => {
-      if (Number.isInteger(val) && Math.abs(val) < 1e15) return val.toString();
-      return parseFloat(val.toFixed(4)).toString();
-    };
-
-    const fmtFull = (val: number): string => {
-      return parseFloat(val.toFixed(10)).toString();
-    };
+    const pText = p < 0.0001 ? '< 0.0001' : p.toFixed(4);
 
     return [
       {
         id: 'r',
         label: 'Pearson Correlation Coefficient (r)',
-        value: fmt(r),
+        value: fmt4(r),
         highlight: true,
-        color: r >= 0 ? ('positive' as const) : ('negative' as const),
+        color: rNum >= 0 ? ('positive' as const) : ('negative' as const),
       },
       {
         id: 'rSquared',
         label: 'Coefficient of Determination (r²)',
-        value: fmt(rSquared),
+        value: fmt4(rSquared),
         color: 'neutral' as const,
       },
       {
@@ -115,23 +123,55 @@ const correlationConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
       {
+        id: 'pValue',
+        label: `p-value (two-tailed t-test, df = ${df})`,
+        value: pText,
+        color: p < 0.05 ? ('positive' as const) : ('neutral' as const),
+        interpretation:
+          p < 0.05
+            ? `p ${p < 0.0001 ? '< 0.0001' : '= ' + pText} is below 0.05: the correlation is statistically significant at the 5% level.`
+            : `p = ${pText} is not below 0.05: with n = ${n} this correlation is not statistically significant at the 5% level.`,
+      },
+      {
+        id: 'spearman',
+        label: 'Spearman Rank Correlation (ρ, ties averaged)',
+        value: rho ? fmt4(rho) : 'Undefined',
+        color: 'neutral' as const,
+      },
+      {
         id: 'meanX',
         label: 'Mean of X',
-        value: fmtFull(meanX),
+        value: fmtDec(c.meanX),
         color: 'neutral' as const,
       },
       {
         id: 'meanY',
         label: 'Mean of Y',
-        value: fmtFull(meanY),
+        value: fmtDec(c.meanY),
         color: 'neutral' as const,
       },
       {
         id: 'covariance',
-        label: 'Covariance',
-        value: fmtFull(covariance),
+        label: 'Covariance (sample, n − 1)',
+        value: fmtDec(covSample),
         color: 'neutral' as const,
       },
+      {
+        id: 'covariancePop',
+        label: 'Covariance (population, n)',
+        value: fmtDec(covPop),
+        color: 'neutral' as const,
+      },
+      ...(slope && intercept
+        ? [
+            {
+              id: 'regression',
+              label: 'Least-Squares Line (y = a + bx)',
+              value: `y = ${fmtDec(intercept, 14)} ${slope.isNegative() ? '−' : '+'} ${fmtDec(slope.abs(), 14)}x`,
+              color: 'neutral' as const,
+            },
+          ]
+        : []),
       {
         id: 'n',
         label: 'Sample Size (n)',
@@ -141,9 +181,11 @@ const correlationConfig: CalculatorConfig = {
       {
         id: 'formula',
         label: 'Formula Applied',
-        value: `r = (${n}×${sumXY} − ${sumX}×${sumY}) / √((${n}×${sumX2} − ${sumX}²)(${n}×${sumY2} − ${sumY}²)) = ${fmt(r)}`,
+        value: `r = (${n}×${f(sumXY)} − ${f(sumX)}×${f(sumY)}) / √((${n}×${f(sumX2)} − ${f(sumX)}²)(${n}×${f(sumY2)} − ${f(sumY)}²)) = ${fmt4(r)}`,
         color: 'neutral' as const,
       },
+      ...ignoredRow(ignored),
+      { id: '_data', label: '', value: JSON.stringify({ r: rNum, r2: rSquared.toNumber(), rho: rho ? rho.toNumber() : null, p, n }) },
     ];
   },
   extraPanel: (values, results) => {
@@ -184,7 +226,7 @@ const correlationConfig: CalculatorConfig = {
     howToUse: [
       'Enter paired X and Y values in the two text areas, separating numbers by commas, semicolons, spaces, or line breaks.',
       'Each dataset must contain at least 3 values, and both datasets must have the same number of values.',
-      'The calculator computes the Pearson correlation coefficient r, along with r², covariance, and the means of both variables.',
+      'The calculator computes the Pearson correlation coefficient r, along with r², a two-tailed p-value (t-test with n − 2 degrees of freedom), the Spearman rank correlation (ties averaged), sample covariance, the least-squares line, and the means of both variables.',
       'Read the strength (Very strong, Strong, Moderate, Weak, or Very weak) and direction (Positive or Negative) of the relationship.',
       'Use the formula breakdown to verify each step of the calculation for learning or teaching purposes.',
     ],
@@ -223,7 +265,7 @@ const correlationConfig: CalculatorConfig = {
       },
       {
         question: 'What is the difference between Pearson and Spearman correlation?',
-        answer: 'Pearson correlation measures linear relationships and requires continuous, normally distributed data. Spearman correlation is a rank-based measure that captures monotonic relationships (linear or nonlinear) and works with ordinal data or data that violates normality assumptions. Spearman is less sensitive to outliers than Pearson.',
+        answer: 'Pearson correlation measures linear relationships between continuous variables (its p-value assumes roughly bivariate-normal data). Spearman correlation is a rank-based measure that captures monotonic relationships (linear or nonlinear) and works with ordinal data or data that violates normality assumptions. Spearman is less sensitive to outliers than Pearson.',
       },
       {
         question: 'Can r be greater than 1 or less than −1?',

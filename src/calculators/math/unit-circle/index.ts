@@ -1,23 +1,13 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import UnitCirclePanel from './UnitCirclePanel';
-
-const DEG = Math.PI / 180;
-
-function toRadians(degrees: number): number {
-  return degrees * DEG;
-}
+// Exact degree reduction, special-angle values and π-fractions are shared with the trigonometry calculator.
+import { DEG, parseDegrees, piFraction, reduceDegrees, referenceAngle, trigAt } from '../trigonometry-calculator/trigMath';
+import { fracToNumber, gcdBig } from '../../../utils/rational';
 
 function round(value: number, decimals: number = 6): number {
   const factor = Math.pow(10, decimals);
   return Math.round(value * factor) / factor;
-}
-
-function normalizeAngle(angle: number): number {
-  // Normalize to 0-360 range
-  let normalized = angle % 360;
-  if (normalized < 0) normalized += 360;
-  return normalized;
 }
 
 function getQuadrant(angle: number): string {
@@ -32,57 +22,20 @@ function getQuadrant(angle: number): string {
   return 'I';
 }
 
-function getReferenceAngle(angle: number): number {
-  // For angles on axes, reference angle is 0 or 90 depending
-  if (angle % 90 === 0 && angle % 180 !== 0) return 90;
-  if (angle % 180 === 0) return 0;
-
-  // For quadrant angles, find acute angle to x-axis
-  if (angle > 0 && angle < 180) {
-    if (angle <= 90) return angle;
-    return 180 - angle;
+/**
+ * Radians for a normalised angle: an exact π-fraction when the angle is a whole number of degrees
+ * (10° = π/18, 100° = 5π/9, 30° = π/6), otherwise a decimal. The old matcher accepted anything within
+ * 0.001π (about 0.18°) of a fraction, so 30.1° was displayed as "π/6".
+ */
+function radiansToString(normDeg: number): string {
+  const known = piFraction(normDeg);
+  if (known) return known;
+  if (Number.isInteger(normDeg)) {
+    const g = Number(gcdBig(BigInt(normDeg), 180n));
+    const num = normDeg / g;
+    return `${num === 1 ? '' : num}π/${180 / g}`;
   }
-  if (angle > 180 && angle < 360) {
-    if (angle <= 270) return angle - 180;
-    return 360 - angle;
-  }
-  return angle;
-}
-
-function radiansToString(radians: number): string {
-  // Try to express as a fraction of pi
-  const piRatio = radians / Math.PI;
-
-  // Common fractions
-  const fractions: Record<string, number> = {
-    'π/6': 1 / 6,
-    'π/4': 1 / 4,
-    'π/3': 1 / 3,
-    'π/2': 1 / 2,
-    '2π/3': 2 / 3,
-    '3π/4': 3 / 4,
-    '5π/6': 5 / 6,
-    'π': 1,
-    '7π/6': 7 / 6,
-    '5π/4': 5 / 4,
-    '4π/3': 4 / 3,
-    '3π/2': 3 / 2,
-    '5π/3': 5 / 3,
-    '7π/4': 7 / 4,
-    '11π/6': 11 / 6,
-    '2π': 2,
-    '0': 0,
-  };
-
-  // Check if it matches a common fraction
-  for (const [fraction, value] of Object.entries(fractions)) {
-    if (Math.abs(piRatio - value) < 0.001) {
-      return fraction;
-    }
-  }
-
-  // Fall back to decimal
-  return `${round(radians, 4)} rad`;
+  return `${round(normDeg * DEG, 4)} rad`;
 }
 
 const config: CalculatorConfig = {
@@ -99,42 +52,25 @@ const config: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const angleInput = parseFloat(values.angle);
-    if (isNaN(angleInput)) return [];
+    // Decimal degrees are read as exact fractions and reduced mod 360 exactly: 720.3° is 0.3° (not
+    // 0.2999999999999545°), and "undefined" only happens at the true multiples of 90°, never near them.
+    const exactDeg = parseDegrees(values.angle);
+    if (!exactDeg) return [];
 
-    const normalized = normalizeAngle(angleInput);
-    const rad = toRadians(normalized);
-    const sinVal = round(Math.sin(rad), 8);
-    const cosVal = round(Math.cos(rad), 8);
-    const tanValRaw = Math.tan(rad);
+    let normalized = fracToNumber(reduceDegrees(exactDeg));
+    if (normalized >= 360) normalized = 0; // e.g. -1e-20° is just below 360° but rounds to 360 as a double
+    const t = trigAt(normalized);
 
-    // Check for undefined tan (cos near 0)
-    const tanVal = Math.abs(Math.cos(rad)) < 1e-10 ? NaN : round(tanValRaw, 8);
+    const sinVal = round(t.sin, 8);
+    const cosVal = round(t.cos, 8);
+    // Reciprocals come from the unrounded values (1/rounded-sin is wrong for tiny sin).
+    const show = (v: number | null): string => (v === null ? 'Undefined' : round(v, 8).toString());
 
     const quadrant = getQuadrant(normalized);
-    const refAngle = getReferenceAngle(normalized);
-    const radStr = radiansToString(rad);
-    const refAngleStr = round(refAngle, 2).toString();
+    const radStr = radiansToString(normalized);
+    const refAngleStr = round(referenceAngle(normalized), 2).toString();
 
-    // Coordinate on unit circle
-    const coordX = cosVal;
-    const coordY = sinVal;
-
-    // Reciprocal functions
-    const cscVal = Math.abs(sinVal) < 1e-10 ? 'Undefined' : round(1 / sinVal, 8).toString();
-    const secVal = Math.abs(cosVal) < 1e-10 ? 'Undefined' : round(1 / cosVal, 8).toString();
-
-    // Adjust cot for when tan is 0 or cos/sin special cases
-    let cotValue: string;
-    if (Math.abs(Math.cos(rad)) < 1e-10) {
-      cotValue = '0';
-    } else if (Math.abs(Math.sin(rad)) < 1e-10) {
-      cotValue = 'Undefined';
-    } else {
-      cotValue = round(1 / tanValRaw, 8).toString();
-    }
-
-    return [
+    const results: CalculatorResult[] = [
       {
         id: 'normalizedAngle',
         label: 'Angle (Normalized)',
@@ -150,18 +86,18 @@ const config: CalculatorConfig = {
       {
         id: 'coordinates',
         label: 'Coordinates (cos θ, sin θ)',
-        value: `(${coordX}, ${coordY})`,
+        value: `(${cosVal}, ${sinVal})`,
         highlight: true,
       },
       {
         id: 'trig',
         label: 'sin(θ)  |  cos(θ)  |  tan(θ)',
-        value: `${sinVal}  |  ${cosVal}  |  ${isNaN(tanVal) ? 'Undefined' : tanVal}`,
+        value: `${sinVal}  |  ${cosVal}  |  ${show(t.tan)}`,
       },
       {
         id: 'reciprocal',
         label: 'csc(θ)  |  sec(θ)  |  cot(θ)',
-        value: `${cscVal}  |  ${secVal}  |  ${cotValue}`,
+        value: `${show(t.csc)}  |  ${show(t.sec)}  |  ${show(t.cot)}`,
       },
       {
         id: 'quadrant',
@@ -174,6 +110,17 @@ const config: CalculatorConfig = {
         value: `${refAngleStr}°`,
       },
     ];
+
+    // Exact radical forms for the special angles (multiples of 15°), e.g. 60° → sin = √3/2.
+    if (t.exact) {
+      results.splice(3, 0, {
+        id: 'exact',
+        label: 'Exact values',
+        value: `sin = ${t.exact.sin}, cos = ${t.exact.cos}, tan = ${t.exact.tan ?? 'not defined'}`,
+      });
+    }
+
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -241,37 +188,37 @@ const config: CalculatorConfig = {
         '<line x1="60" y1="210" x2="500" y2="210" stroke="var(--svg-cbd5e1)" stroke-width="1.5"/>' +
         '<!-- Unit circle -->' +
         '<circle cx="280" cy="210" r="120" fill="none" stroke="var(--svg-3b82f6)" stroke-width="2" opacity="0.3"/>' +
-        '<!-- Angle arc -->' +
-        '<path d="M 280,210 L 340,210 A 60,60 0 0,1 318.2,261.2" fill="none" stroke="var(--svg-8b5cf6)" stroke-width="2.5"/>' +
-        '<text x="305" y="235" font-family="system-ui,sans-serif" font-size="14" fill="var(--svg-8b5cf6)" font-weight="700">θ</text>' +
+        '<!-- Angle arc: θ = 35° measured counter-clockwise from the +x axis; P lies on the r = 120 circle -->' +
+        '<path d="M 320,210 A 40,40 0 0,0 312.8,187.1" fill="none" stroke="var(--svg-8b5cf6)" stroke-width="2.5"/>' +
+        '<text x="327" y="199" font-family="system-ui,sans-serif" font-size="14" fill="var(--svg-8b5cf6)" font-weight="700">θ</text>' +
         '<!-- Radius line -->' +
-        '<line x1="280" y1="210" x2="340" y2="261.2" stroke="var(--svg-8b5cf6)" stroke-width="2"/>' +
+        '<line x1="280" y1="210" x2="378.3" y2="141.2" stroke="var(--svg-8b5cf6)" stroke-width="2"/>' +
         '<!-- Point on circle -->' +
-        '<circle cx="340" cy="261.2" r="5" fill="var(--svg-ef4444)"/>' +
-        '<text x="345" y="275" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-ef4444)" font-weight="700">P = (cos θ, sin θ)</text>' +
+        '<circle cx="378.3" cy="141.2" r="5" fill="var(--svg-ef4444)"/>' +
+        '<text x="386" y="138" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-ef4444)" font-weight="700">P = (cos θ, sin θ)</text>' +
         '<!-- Vertical line (sin) -->' +
-        '<line x1="340" y1="210" x2="340" y2="261.2" stroke="var(--svg-22c55e)" stroke-width="2" stroke-dasharray="4,2"/>' +
-        '<text x="348" y="238" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-22c55e)" font-weight="600">sin θ</text>' +
-        '<!-- Horizontal line (cos) -->' +
-        '<line x1="280" y1="261.2" x2="340" y2="261.2" stroke="var(--svg-eab308)" stroke-width="2" stroke-dasharray="4,2"/>' +
-        '<text x="300" y="275" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-eab308)" font-weight="600">cos θ</text>' +
+        '<line x1="378.3" y1="210" x2="378.3" y2="141.2" stroke="var(--svg-22c55e)" stroke-width="2" stroke-dasharray="4,2"/>' +
+        '<text x="384" y="182" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-22c55e)" font-weight="600">sin θ</text>' +
+        '<!-- Horizontal line (cos) along the x-axis -->' +
+        '<line x1="280" y1="210" x2="378.3" y2="210" stroke="var(--svg-eab308)" stroke-width="2" stroke-dasharray="4,2"/>' +
+        '<text x="316" y="226" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-eab308)" font-weight="600">cos θ</text>' +
         '<!-- Quadrant labels -->' +
-        '<text x="340" y="130" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-64748b)" font-weight="700">Quadrant II</text>' +
-        '<text x="400" y="145" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">( − , + )</text>' +
-        '<text x="170" y="130" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-64748b)" font-weight="700">Quadrant I</text>' +
-        '<text x="150" y="145" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">( + , + )</text>' +
-        '<text x="170" y="300" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-64748b)" font-weight="700">Quadrant III</text>' +
-        '<text x="155" y="315" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">( − , − )</text>' +
-        '<text x="340" y="300" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-64748b)" font-weight="700">Quadrant IV</text>' +
-        '<text x="370" y="315" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">( + , − )</text>' +
+        '<text x="420" y="100" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-64748b)" font-weight="700">Quadrant I</text>' +
+        '<text x="420" y="115" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">( + , + )</text>' +
+        '<text x="40" y="100" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-64748b)" font-weight="700">Quadrant II</text>' +
+        '<text x="40" y="115" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">( − , + )</text>' +
+        '<text x="40" y="320" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-64748b)" font-weight="700">Quadrant III</text>' +
+        '<text x="40" y="335" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">( − , − )</text>' +
+        '<text x="420" y="320" font-family="system-ui,sans-serif" font-size="13" fill="var(--svg-64748b)" font-weight="700">Quadrant IV</text>' +
+        '<text x="420" y="335" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">( + , − )</text>' +
         '<!-- Axis labels -->' +
-        '<text x="285" y="85" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">y (sin)</text>' +
-        '<text x="490" y="214" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">x (cos)</text>' +
+        '<text x="287" y="72" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">y (sin)</text>' +
+        '<text x="490" y="206" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-64748b)">x (cos)</text>' +
         '<!-- Key angle points -->' +
-        '<text x="390" y="214" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-3b82f6)">0° (1,0)</text>' +
-        '<text x="281" y="85" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-3b82f6)">90° (0,1)</text>' +
-        '<text x="155" y="214" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-3b82f6)">180° (−1,0)</text>' +
-        '<text x="260" y="338" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-3b82f6)">270° (0,−1)</text>' +
+        '<text x="404" y="226" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-3b82f6)">0° (1,0)</text>' +
+        '<text x="288" y="104" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-3b82f6)">90° (0,1)</text>' +
+        '<text x="96" y="226" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-3b82f6)">180° (−1,0)</text>' +
+        '<text x="288" y="326" font-family="system-ui,sans-serif" font-size="10" fill="var(--svg-3b82f6)">270° (0,−1)</text>' +
         '<!-- Bottom note -->' +
         '<text x="280" y="370" font-family="system-ui,sans-serif" font-size="11" fill="var(--svg-64748b)" text-anchor="middle">sin²θ + cos²θ = 1  |  Reference angle is the acute angle between terminal side and x-axis</text>' +
         '</svg>',
@@ -306,14 +253,14 @@ const config: CalculatorConfig = {
       {
         scenario: 'A physics student needs to find the horizontal and vertical components of a 50 N force applied at a 30-degree angle above the horizontal for a free-body diagram.',
         inputs: { angle: '30' },
-        result: 'Coordinates (0.866025, 0.5); Quadrant I; Reference angle 30°; tan(30°) = 0.57735',
-        insight: 'At 30 degrees (pi/6 radians), the unit circle gives coordinates (cos30, sin30) = (0.866025, 0.5). In quadrant I, both trig functions are positive. The force components are Fx = 50 * cos30 = 43.3 N (horizontal) and Fy = 50 * sin30 = 25 N (vertical). The reference angle is 30 degrees. The tangent is sin30/cos30 = 0.5/0.866 = 0.577 = tan30.',
+        result: 'Coordinates (0.8660254, 0.5); Quadrant I; Reference angle 30°; tan(30°) = 0.57735027',
+        insight: 'At 30 degrees (pi/6 radians), the unit circle gives coordinates (cos30, sin30) = (0.8660254, 0.5), exactly (√3/2, 1/2). In quadrant I, both trig functions are positive. The force components are Fx = 50 * cos30 = 43.3 N (horizontal) and Fy = 50 * sin30 = 25 N (vertical). The reference angle is 30 degrees. The tangent is sin30/cos30 = 0.5/0.866 = 0.577 = tan30.',
       },
       {
         scenario: 'An engineering student analyzes the position of a robotic arm joint at 225 degrees and needs to determine the Cartesian coordinates of the endpoint, which lies on a circle of radius 1 meter.',
         inputs: { angle: '225' },
-        result: 'Coordinates (-0.707107, -0.707107); Quadrant III; Reference angle 45°; tan(225°) = 1',
-        insight: 'The angle 225 degrees is in Quadrant III (180-270 degrees), where both x and y are negative. The reference angle is 225 - 180 = 45 degrees. Using the unit circle: cos225 = -cos45 = -0.707107, sin225 = -sin45 = -0.707107. Both coordinates are negative and equal in magnitude, placing the endpoint at (-0.707, -0.707) meters. The tangent is sin/cos = (-0.707)/(-0.707) = 1, consistent with the 45-degree reference angle.',
+        result: 'Coordinates (-0.70710678, -0.70710678); Quadrant III; Reference angle 45°; tan(225°) = 1',
+        insight: 'The angle 225 degrees is in Quadrant III (180-270 degrees), where both x and y are negative. The reference angle is 225 - 180 = 45 degrees. Using the unit circle: cos225 = -cos45 = -0.70710678, sin225 = -sin45 = -0.70710678. Both coordinates are negative and equal in magnitude, placing the endpoint at (-0.707, -0.707) meters. The tangent is sin/cos = (-0.707)/(-0.707) = 1, consistent with the 45-degree reference angle.',
       },
     ],
     proTips: [
@@ -324,10 +271,10 @@ const config: CalculatorConfig = {
       'To see the periodic nature of trig functions, enter angle values that differ by multiples of 360 (like 30, 390, 750) and observe that the coordinates repeat exactly.',
     ],
     limitations: [
-      'The calculator uses decimal approximations for most trig values, not exact symbolic forms. For angles where exact values exist (like sin45 = sqrt(2)/2), the display shows the decimal equivalent (0.707107) rather than the radical form.',
+      'Multiples of 15° also show their exact radical forms (for example sin 45° = √2/2); the main coordinate and trig rows are decimals rounded to 8 places. Other angles have no simple radical form, so only the decimals are shown.',
       'Very large angles are normalized to the 0-360 degree range, so entering 1000 degrees produces the same results as 280 degrees. This is mathematically correct but may be surprising if you expect raw input preservation.',
-      'The floating-point representation may produce small rounding errors for extreme values; for example, sin(180) may display as a very small number (like 1.2e-16) rather than exactly zero due to IEEE 754 double-precision limits.',
-      'Reciprocal functions near their asymptotes can produce very large or imprecise values due to floating-point division by numbers close to zero. When sin or cos is exactly zero (to machine precision), the reciprocal is reported as "Undefined."',
+      'Decimal degrees are read exactly (720.3° is 0.3°), but sin, cos and tan of a non-special angle are floating-point values rounded to 8 decimal places, so the last digit can differ from an exact symbolic answer.',
+      'Reciprocal functions are reported as "Undefined" only at the exact angles where the divisor is zero (csc and cot at 0° and 180°, sec at 90° and 270°; tan is undefined at 90° and 270°). A value like 89.999° is not undefined: sec and tan are simply very large.',
     ],
     citations: [
       { source: 'Khan Academy - Unit Circle', url: 'https://www.khanacademy.org/math/algebra2/x2ec2f6f830c9fb89:trig/x2ec2f6f830c9fb89:unit-circle/v/unit-circle-definition-of-trig-functions-1' },

@@ -1,48 +1,30 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
-import { safeEval } from '../shared/safeEval';
 import LimitPanel from './LimitPanel';
+import { CasError, type Node, evalNode, parse } from '../shared/cas';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { type SideLimit, limitToString, sideLimit } from './limitMath';
 
-// ─── Safe expression evaluator (supports trig, sqrt, pi, e) ──────────────────
-
-function evaluateLimitExpr(expr: string, xVal: number): number {
-  try {
-    return safeEval(expr, { x: xVal });
-  } catch {
-    return NaN;
+const sideText = (s: SideLimit): string => {
+  switch (s.kind) {
+    case 'value': return limitToString(s.value, s.error);
+    case 'infinity': return s.sign > 0 ? '∞' : '-∞';
+    case 'oscillates': return 'Does not exist (no convergence)';
+    case 'undefined': return 'Undefined (f has no values on this side)';
   }
-}
+};
 
-// ─── Numerical limit computation ─────────────────────────────────────────────
+// Sample table kept for display: f at a few distances from the point.
+const TABLE_H = [0.1, 0.01, 0.001, 0.0001, 0.00001];
 
-const APPROACH_STEPS = [0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001];
-
-interface ApproachPoint {
-  x: number;
-  fx: number;
-}
-
-function sampleSide(expr: string, target: number, sign: -1 | 1): ApproachPoint[] {
-  const points: ApproachPoint[] = [];
-  for (const step of APPROACH_STEPS) {
-    const x = target + sign * step;
-    const fx = evaluateLimitExpr(expr, x);
-    if (!isNaN(fx) && isFinite(fx)) {
-      points.push({ x, fx });
-    }
-  }
-  return points;
-}
-
-function fmtApproachTable(points: ApproachPoint[], label: string): string {
-  if (points.length === 0) return `${label}: (no data)`;
-  const rows = points.map(
-    (p) => `f(${p.x.toFixed(8).replace(/\.?0+$/, '')}) = ${p.fx.toFixed(6)}`,
-  );
+function approachTable(f: (x: number) => number, a: number, sign: -1 | 1, label: string): string {
+  const rows = TABLE_H.map((h) => {
+    const x = a + sign * h;
+    const y = f(x);
+    return `f(${Number(x.toPrecision(10))}) = ${Number.isFinite(y) ? Number(y.toPrecision(7)) : 'undefined'}`;
+  });
   return `${label}: ${rows.join('  →  ')}`;
 }
-
-// ─── Config ──────────────────────────────────────────────────────────────────
 
 const limitConfig: CalculatorConfig = {
   inputs: [
@@ -52,7 +34,8 @@ const limitConfig: CalculatorConfig = {
       type: 'text',
       placeholder: 'e.g. (x^2-1)/(x-1) or sin(x)/x',
       required: true,
-      helpText: 'Enter an expression in terms of x. Supports ^ for powers, sin(), cos(), tan(), sqrt(), pi, and e (Euler\'s number). Example: (x^2-4)/(x-2) or sin(pi*x)/(x)',
+      helpText:
+        "Use x as the variable. Supports + - * / ^, implicit products (3x, 2(x+1)), sin cos tan asin acos atan sinh cosh tanh exp ln log (base 10) sqrt abs, and the constants pi and e (Euler's number). Example: (x^2-4)/(x-2) or sin(pi*x)/x.",
     },
     {
       id: 'approachValue',
@@ -61,7 +44,7 @@ const limitConfig: CalculatorConfig = {
       placeholder: 'x approaches...',
       step: 0.1,
       required: true,
-      helpText: 'The value that x approaches. The limit is evaluated near this point.',
+      helpText: 'The finite value that x approaches. The limit is estimated numerically near this point.',
     },
     {
       id: 'direction',
@@ -79,115 +62,102 @@ const limitConfig: CalculatorConfig = {
 
   calculate: (values) => {
     const expr = (values.expression || '').trim();
-    const target = parseFloat(values.approachValue);
+    const target = parseNumberStrict(values.approachValue);
     const direction = values.direction || 'both';
+    if (!expr || !Number.isFinite(target)) return [];
 
-    // Validate inputs
-    if (!expr || isNaN(target)) return [];
-
-    // Validate expression evaluates at a near point
-    const sanityCheck = evaluateLimitExpr(expr, target + 0.01);
-    if (isNaN(sanityCheck) && isNaN(evaluateLimitExpr(expr, target - 0.01))) {
-      return [];
+    let tree: Node;
+    try {
+      tree = parse(expr);
+    } catch (e) {
+      if (e instanceof CasError) return [];
+      throw e;
     }
+    const f = (x: number) => evalNode(tree, x);
 
-    // Compute approach values
-    const leftPoints = sampleSide(expr, target, -1);
-    const rightPoints = sampleSide(expr, target, 1);
+    const left = direction === 'right' ? null : sideLimit(f, target, -1);
+    const right = direction === 'left' ? null : sideLimit(f, target, 1);
 
-    const leftLimit = leftPoints.length > 0 ? leftPoints[leftPoints.length - 1].fx : NaN;
-    const rightLimit = rightPoints.length > 0 ? rightPoints[rightPoints.length - 1].fx : NaN;
-
-    let limit: number;
-    let isContinuous = false;
-
-    switch (direction) {
-      case 'left':
-        limit = leftLimit;
-        break;
-      case 'right':
-        limit = rightLimit;
-        break;
-      default: {
-        // Both sides
-        if (!isNaN(leftLimit) && !isNaN(rightLimit)) {
-          limit = (leftLimit + rightLimit) / 2;
-          isContinuous = Math.abs(leftLimit - rightLimit) < 0.0001;
-        } else if (!isNaN(leftLimit)) {
-          limit = leftLimit;
-        } else {
-          limit = rightLimit;
-        }
-        break;
+    // Combine into the headline limit.
+    let limitText: string;
+    let exists = false;
+    let finiteValue: number | null = null;
+    let finiteErr = 0;
+    const one = left ?? right!;
+    if (direction !== 'both') {
+      limitText = sideText(one);
+      exists = one.kind === 'value' || one.kind === 'infinity';
+      if (one.kind === 'value') {
+        finiteValue = one.value;
+        finiteErr = one.error;
       }
+    } else if (left!.kind === 'value' && right!.kind === 'value') {
+      const tol = 1e-6 * Math.max(1, Math.abs(left!.value), Math.abs(right!.value)) + 10 * (left!.error + right!.error);
+      if (Math.abs(left!.value - right!.value) <= tol) {
+        finiteValue = (left!.value + right!.value) / 2;
+        finiteErr = Math.max(left!.error, right!.error, Math.abs(left!.value - right!.value));
+        limitText = limitToString(finiteValue, finiteErr);
+        exists = true;
+      } else {
+        limitText = 'Does not exist (left ≠ right)';
+      }
+    } else if (left!.kind === 'infinity' && right!.kind === 'infinity') {
+      if (left!.sign === right!.sign) {
+        limitText = left!.sign > 0 ? '∞' : '-∞';
+        exists = true;
+      } else {
+        limitText = 'Does not exist (the sides go to opposite infinities)';
+      }
+    } else if (left!.kind === 'undefined' || right!.kind === 'undefined') {
+      limitText = 'Does not exist (f is not defined on both sides of the point)';
+    } else {
+      limitText = 'Does not exist';
     }
 
-    if (isNaN(limit)) return [];
-
-    const fmt = (n: number): string => {
-      if (!isFinite(n)) return n > 0 ? '∞' : '-∞';
-      if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-      return parseFloat(n.toPrecision(10)).toString();
-    };
-
+    const fa = f(target);
     const results: CalculatorResult[] = [
       {
         id: 'limit',
-        label: `lim f(x) as x → ${fmt(target)}`,
-        value: fmt(limit),
+        label: `lim f(x) as x → ${Number(target.toPrecision(10))}${direction === 'left' ? '⁻' : direction === 'right' ? '⁺' : ''}`,
+        value: limitText,
         highlight: true,
-        color: 'positive',
+        color: exists ? 'positive' : 'negative',
       },
     ];
-
-    if (direction !== 'left' && !isNaN(leftLimit)) {
-      results.push({
-        id: 'leftLimit',
-        label: 'Left-hand limit',
-        value: fmt(leftLimit),
-        color: 'neutral',
-      });
-    }
-
-    if (direction !== 'right' && !isNaN(rightLimit)) {
-      results.push({
-        id: 'rightLimit',
-        label: 'Right-hand limit',
-        value: fmt(rightLimit),
-        color: 'neutral',
-      });
+    // For a one-sided request the headline row already is that side's limit.
+    if (direction === 'both') {
+      results.push({ id: 'leftLimit', label: 'Left-hand limit', value: sideText(left!), color: 'neutral' });
+      results.push({ id: 'rightLimit', label: 'Right-hand limit', value: sideText(right!), color: 'neutral' });
     }
 
     if (direction === 'both') {
       results.push({
         id: 'isContinuous',
-        label: 'Limit exists / Function continuous',
-        value: isContinuous ? 'Yes (left ≈ right)' : 'No (left ≠ right)',
-        color: isContinuous ? 'positive' : 'negative',
-      });
-    }
-
-    // Approach table
-    let tableStr = '';
-    if (direction === 'both' || direction === 'left') {
-      tableStr += fmtApproachTable(leftPoints, `x → ${fmt(target)}⁻`);
-    }
-    if (direction === 'both') {
-      tableStr += ' | ';
-    }
-    if (direction === 'both' || direction === 'right') {
-      tableStr += fmtApproachTable(rightPoints, `x → ${fmt(target)}⁺`);
-    }
-
-    if (tableStr) {
-      results.push({
-        id: 'approachTable',
-        label: 'Approach values',
-        value: tableStr,
+        label: 'Continuous at this point?',
+        value:
+          finiteValue === null
+            ? exists
+              ? 'No (the limit is infinite)'
+              : 'No (the limit does not exist)'
+            : !Number.isFinite(fa)
+              ? 'No (the limit exists but f is undefined here: removable discontinuity)'
+              : Math.abs(fa - finiteValue) <= 1e-6 * Math.max(1, Math.abs(fa)) + 10 * finiteErr
+                ? 'Yes (limit = f(a))'
+                : 'No (limit ≠ f(a))',
         color: 'neutral',
       });
     }
+    results.push({
+      id: 'valueAtPoint',
+      label: 'f(a) at the point itself',
+      value: Number.isFinite(fa) ? String(Number(fa.toPrecision(10))) : 'Undefined',
+      color: 'neutral',
+    });
 
+    const table: string[] = [];
+    if (direction !== 'right') table.push(approachTable(f, target, -1, `x → ${Number(target.toPrecision(10))}⁻`));
+    if (direction !== 'left') table.push(approachTable(f, target, 1, `x → ${Number(target.toPrecision(10))}⁺`));
+    results.push({ id: 'approachTable', label: 'Approach values', value: table.join(' | '), color: 'neutral' });
     return results;
   },
 
@@ -215,15 +185,14 @@ const limitConfig: CalculatorConfig = {
       'Enter a function f(x) using x as the variable. Use ^ for powers, sin(), cos(), tan(), sqrt(), pi for π, and e for Euler\'s number (≈ 2.71828).',
       'Enter the approach value a — the number that x gets close to. This can be any real number.',
       'Select the direction: "Both sides" checks agreement from left and right; "Left" only approaches from below; "Right" only approaches from above.',
-      'The calculator evaluates f(x) at points increasingly close to a (steps: 0.1, 0.01, ..., 10⁻⁸), showing the approach sequence in the results.',
-      'For "Both sides", the result also reports whether the limit exists (left ≈ right) and thus whether the function is continuous at a.',
+      'The calculator samples f at x = a ± 0.1, 0.05, 0.025, ... (down to about 10⁻⁸ from a) and extrapolates the sequence to the limit (Richardson and Aitken extrapolation), so cancellation near the point does not distort the answer. A short table of f near a is shown as well.',
+      'For "Both sides", the limit exists only when the left and right limits agree (two equal finite values, or both ∞ / both −∞). The result also reports whether f is continuous at a (limit = f(a)).',
     ],
 
     quickReference: [
       { label: 'lim(x→0) sin(x)/x', value: '1' },
       { label: 'lim(x→2) (x²−4)/(x−2)', value: '4' },
       { label: 'lim(x→0) (cos(x)−1)/x', value: '0' },
-      { label: 'lim(x→∞) 1/x', value: '0 (numerical: approaches 0)' },
     ],
 
     commonUses: [
@@ -256,7 +225,7 @@ const limitConfig: CalculatorConfig = {
       },
       {
         question: 'How accurate is this numerical limit calculator?',
-        answer: 'The calculator evaluates at step sizes down to 10⁻⁸ from the target. For well-behaved functions, the computed limit should match the true limit to at least 6 decimal places. However, functions that oscillate rapidly near the approach point (like sin(1/x) near 0) or have very steep slopes may require special analytical techniques beyond numerical sampling.',
+        answer: 'It is a numerical estimate, not a symbolic proof. The sample sequence is extrapolated to the limit and the answer is rounded to 10 significant digits (and snapped to 0 or a whole number when it is within the estimated error), so smooth functions are usually accurate to 7+ digits. Limits that diverge are reported as ∞ or −∞, and functions that do not settle (like sin(1/x) near 0) are reported as not existing. Functions with very sharp features closer than 0.1 to the point may need a symbolic technique.',
       },
       {
         question: 'What do the approach table values tell me?',

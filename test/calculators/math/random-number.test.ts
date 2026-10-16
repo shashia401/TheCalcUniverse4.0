@@ -68,10 +68,9 @@ describe('Random Number Generator', () => {
     expect(range).toBe(maxVal - minVal);
   });
 
-  it('count=0 defaults to 1 number (|| 1 safety)', () => {
-    const r = config.calculate({ min: '1', max: '100', count: '0', decimals: '0', unique: 'no' });
-    const list = getValue(r, 'numberList');
-    expect(list.split(', ')).toHaveLength(1);
+  it('count=0 asks for at least one number (returns [] instead of silently inventing one)', () => {
+    expect(config.calculate({ min: '1', max: '100', count: '0', decimals: '0', unique: 'no' })).toEqual([]);
+    expect(getValue(config.calculate({ min: '1', max: '100', count: '', decimals: '0', unique: 'no' }), 'numberList').split(', ')).toHaveLength(1);
   });
 
   it('generates values with negative range', () => {
@@ -111,9 +110,9 @@ describe('Random Number Generator', () => {
   it('lists contain less than or equal count with unique constraint on small range', () => {
     // Range is 5 (1-5), requesting 10 unique — mathematically impossible
     const r = config.calculate({ min: '1', max: '5', count: '10', decimals: '0', unique: 'yes' });
-    const list = getValue(r, 'numberList');
-    const values = list.split(', ');
-    expect(values.length).toBeLessThanOrEqual(5);
+    // Now an explicit message, never a silently short list.
+    expect(r.find((x) => x.id === 'numberList')).toBeUndefined();
+    expect(getValue(r, 'warning')).toContain('Only 5 distinct values');
   });
 
   it('all values with unique mode are distinct', () => {

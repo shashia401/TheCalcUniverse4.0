@@ -50,24 +50,24 @@ export default function ProbabilityPanel({ values, results }: Props) {
         {/* Results Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 text-center">
-            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">P(A)</p>
+            <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">P(A)</p>
             <p className="text-xl font-bold text-blue-700 mt-1">{paRow.value}</p>
-            <p className="text-[10px] text-blue-400 mt-0.5">{fmtPct(pa)}</p>
+            <p className="text-[10px] text-blue-700 mt-0.5">{fmtPct(pa)}</p>
           </div>
           <div className="rounded-xl bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 p-4 text-center">
-            <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">P(B)</p>
+            <p className="text-[10px] font-bold text-red-700 uppercase tracking-wider">P(B)</p>
             <p className="text-xl font-bold text-red-700 mt-1">{pbRow.value}</p>
-            <p className="text-[10px] text-red-400 mt-0.5">{fmtPct(pb)}</p>
+            <p className="text-[10px] text-red-700 mt-0.5">{fmtPct(pb)}</p>
           </div>
           <div className="rounded-xl bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 p-4 text-center">
-            <p className="text-[10px] font-bold text-purple-500 uppercase tracking-wider">P(A &cap; B)</p>
+            <p className="text-[10px] font-bold text-purple-700 uppercase tracking-wider">P(A &cap; B)</p>
             <p className="text-xl font-bold text-purple-700 mt-1">{pAndBRow.value}</p>
-            <p className="text-[10px] text-purple-400 mt-0.5">{fmtPct(isNaN(parseFloat(pAndBRow.value)) ? 0 : parseFloat(pAndBRow.value))}</p>
+            <p className="text-[10px] text-purple-700 mt-0.5">{fmtPct(isNaN(parseFloat(pAndBRow.value)) ? 0 : parseFloat(pAndBRow.value))}</p>
           </div>
           <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-4 text-center">
-            <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">P(A &cup; B)</p>
+            <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">P(A &cup; B)</p>
             <p className="text-xl font-bold text-emerald-700 mt-1">{pOrBRow.value}</p>
-            <p className="text-[10px] text-emerald-400 mt-0.5">{fmtPct(isNaN(parseFloat(pOrBRow.value)) ? 0 : parseFloat(pOrBRow.value))}</p>
+            <p className="text-[10px] text-emerald-700 mt-0.5">{fmtPct(isNaN(parseFloat(pOrBRow.value)) ? 0 : parseFloat(pOrBRow.value))}</p>
           </div>
         </div>
 
@@ -82,9 +82,9 @@ export default function ProbabilityPanel({ values, results }: Props) {
             <p className="text-base font-bold text-slate-700 mt-1">{pNotBRow?.value} <span className="text-xs font-normal text-slate-500">({fmtPct(1 - pb)})</span></p>
           </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">P(A|B) &mdash; A given B</p>
-            <p className="text-base font-bold text-amber-700 mt-1">{pAGivenBRow?.value} <span className="text-xs font-normal text-amber-500">({fmtPct(isNaN(parseFloat(pAGivenBRow?.value || '0')) ? 0 : parseFloat(pAGivenBRow?.value || '0'))})</span></p>
-            <p className="text-[9px] text-amber-500 mt-0.5">
+            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">P(A|B) &mdash; A given B</p>
+            <p className="text-base font-bold text-amber-700 mt-1">{pAGivenBRow?.value} <span className="text-xs font-normal text-amber-700">({fmtPct(isNaN(parseFloat(pAGivenBRow?.value || '0')) ? 0 : parseFloat(pAGivenBRow?.value || '0'))})</span></p>
+            <p className="text-[9px] text-amber-700 mt-0.5">
               {isMutuallyExclusive
                 ? 'Mutually exclusive: A and B cannot co-occur'
                 : 'Independent: P(A|B) = P(A)'}
@@ -278,7 +278,7 @@ export default function ProbabilityPanel({ values, results }: Props) {
           </div>
 
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-amber-500 uppercase">P(A|B) &mdash; Conditional</p>
+            <p className="text-[10px] font-bold text-amber-700 uppercase">P(A|B) &mdash; Conditional</p>
             <p className="text-xs font-mono text-amber-700 mt-1">
               {isMutuallyExclusive
                 ? `Mutually exclusive: P(A|B) = 0 (A and B cannot co-occur)`

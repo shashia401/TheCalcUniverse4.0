@@ -1,70 +1,19 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import TrianglePanel from './TrianglePanel';
-
-function toRad(deg: number): number {
-  return (deg * Math.PI) / 180;
-}
-
-function toDeg(rad: number): number {
-  return (rad * 180) / Math.PI;
-}
-
-interface TriangleData {
-  a: number; sideA: number; angleA: number;
-  b: number; sideB: number; angleB: number;
-  c: number; sideC: number; angleC: number;
-}
-
-function solveSSS(a: number, b: number, c: number): TriangleData | null {
-  if (a + b <= c || a + c <= b || b + c <= a) return null;
-  if (a <= 0 || b <= 0 || c <= 0) return null;
-
-  const angleA = toDeg(Math.acos((b * b + c * c - a * a) / (2 * b * c)));
-  const angleB = toDeg(Math.acos((a * a + c * c - b * b) / (2 * a * c)));
-  const angleC = 180 - angleA - angleB;
-
-  return {
-    a, sideA: a, angleA: Math.round(angleA * 100) / 100,
-    b, sideB: b, angleB: Math.round(angleB * 100) / 100,
-    c, sideC: c, angleC: Math.round(angleC * 100) / 100,
-  };
-}
-
-function solveSAS(sideB: number, angleA: number, sideC: number): TriangleData | null {
-  if (sideB <= 0 || sideC <= 0 || angleA <= 0 || angleA >= 180) return null;
-
-  const radA = toRad(angleA);
-  // Law of cosines: a² = b² + c² - 2bc·cos(A)
-  const a = Math.sqrt(sideB * sideB + sideC * sideC - 2 * sideB * sideC * Math.cos(radA));
-  const angleB = toDeg(Math.acos((a * a + sideC * sideC - sideB * sideB) / (2 * a * sideC)));
-  const angleC = 180 - angleA - angleB;
-
-  return {
-    a, sideA: Math.round(a * 100) / 100, angleA: Math.round(angleA * 100) / 100,
-    b: sideB, sideB, angleB: Math.round(angleB * 100) / 100,
-    c: sideC, sideC, angleC: Math.round(angleC * 100) / 100,
-  };
-}
-
-function solveASA(angleA: number, sideC: number, angleB: number): TriangleData | null {
-  if (sideC <= 0 || angleA <= 0 || angleB <= 0 || angleA + angleB >= 180) return null;
-
-  const angleC = 180 - angleA - angleB;
-  const radA = toRad(angleA);
-  const radB = toRad(angleB);
-  const radC = toRad(angleC);
-
-  // Law of sines: a / sin(A) = b / sin(B) = c / sin(C)
-  const a = (sideC * Math.sin(radA)) / Math.sin(radC);
-  const b = (sideC * Math.sin(radB)) / Math.sin(radC);
-
-  return {
-    a: Math.round(a * 100) / 100, sideA: Math.round(a * 100) / 100, angleA: Math.round(angleA * 100) / 100,
-    b: Math.round(b * 100) / 100, sideB: Math.round(b * 100) / 100, angleB: Math.round(angleB * 100) / 100,
-    c: sideC, sideC, angleC: Math.round(angleC * 100) / 100,
-  };
-}
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import {
+  type AngleUnit,
+  type Tri,
+  angleToDeg,
+  area,
+  classify,
+  fmtAngle,
+  fmtNum8 as fmt,
+  solveAngleAngleSide,
+  solveSAS,
+  solveSSS,
+} from '../shared/triangle';
 
 const triangleConfig: CalculatorConfig = {
   inputs: [
@@ -77,7 +26,19 @@ const triangleConfig: CalculatorConfig = {
         { label: 'Three Sides (SSS)', value: 'sss' },
         { label: 'Two Sides & Included Angle (SAS)', value: 'sas' },
         { label: 'Two Angles & Included Side (ASA)', value: 'asa' },
+        { label: 'Two Angles & a Non-included Side (AAS)', value: 'aas' },
       ],
+    },
+    {
+      id: 'angleUnit',
+      label: 'Angle unit',
+      type: 'select',
+      defaultValue: 'deg',
+      options: [
+        { label: 'Degrees (°)', value: 'deg' },
+        { label: 'Radians (rad)', value: 'rad' },
+      ],
+      helpText: 'Used for the angles you enter and for every angle in the results',
     },
     // SSS inputs
     { id: 'sideA', label: 'Side a (opposite A)', type: 'number', placeholder: '5', step: 0.01, required: true, helpText: 'Length of side a', showWhen: (v) => v.mode === 'sss' },
@@ -85,83 +46,63 @@ const triangleConfig: CalculatorConfig = {
     { id: 'sideC', label: 'Side c (opposite C)', type: 'number', placeholder: '7', step: 0.01, required: true, helpText: 'Length of side c', showWhen: (v) => v.mode === 'sss' },
     // SAS inputs
     { id: 'sasSideB', label: 'Side b', type: 'number', placeholder: '6', step: 0.01, required: true, helpText: 'Length of side b', showWhen: (v) => v.mode === 'sas' },
-    { id: 'sasAngleA', label: 'Angle A (included)', type: 'number', placeholder: '45', step: 0.1, required: true, helpText: 'Angle between sides b and c (degrees)', showWhen: (v) => v.mode === 'sas' },
+    { id: 'sasAngleA', label: 'Angle A (included)', type: 'number', placeholder: '45', step: 0.1, required: true, helpText: 'Angle between sides b and c, greater than 0 and less than 180° (π rad)', showWhen: (v) => v.mode === 'sas' },
     { id: 'sasSideC', label: 'Side c', type: 'number', placeholder: '7', step: 0.01, required: true, helpText: 'Length of side c', showWhen: (v) => v.mode === 'sas' },
     // ASA inputs
-    { id: 'asaAngleA', label: 'Angle A', type: 'number', placeholder: '45', step: 0.1, required: true, helpText: 'Angle at vertex A (degrees)', showWhen: (v) => v.mode === 'asa' },
+    { id: 'asaAngleA', label: 'Angle A', type: 'number', placeholder: '45', step: 0.1, required: true, helpText: 'Angle at vertex A', showWhen: (v) => v.mode === 'asa' },
     { id: 'asaSideC', label: 'Side c (included)', type: 'number', placeholder: '7', step: 0.01, required: true, helpText: 'Side between angles A and B', showWhen: (v) => v.mode === 'asa' },
-    { id: 'asaAngleB', label: 'Angle B', type: 'number', placeholder: '60', step: 0.1, required: true, helpText: 'Angle at vertex B (degrees)', showWhen: (v) => v.mode === 'asa' },
+    { id: 'asaAngleB', label: 'Angle B', type: 'number', placeholder: '60', step: 0.1, required: true, helpText: 'Angle at vertex B', showWhen: (v) => v.mode === 'asa' },
+    // AAS inputs
+    { id: 'aasAngleA', label: 'Angle A', type: 'number', placeholder: '30', step: 0.1, required: true, helpText: 'Angle at vertex A', showWhen: (v) => v.mode === 'aas' },
+    { id: 'aasAngleB', label: 'Angle B', type: 'number', placeholder: '70', step: 0.1, required: true, helpText: 'Angle at vertex B', showWhen: (v) => v.mode === 'aas' },
+    { id: 'aasSideA', label: 'Side a (opposite A)', type: 'number', placeholder: '10', step: 0.01, required: true, helpText: 'Side opposite angle A', showWhen: (v) => v.mode === 'aas' },
   ],
   calculate: (values) => {
     const mode = values.mode || 'sss';
-    const fmt = (n: number) => {
-      if (Number.isInteger(n)) return n.toString();
-      return n.toFixed(2).replace(/\.?0+$/, '');
-    };
+    const unit: AngleUnit = values.angleUnit === 'rad' ? 'rad' : 'deg';
+    const n = (k: string) => parseNumberStrict(values[k]);
+    const ang = (k: string) => angleToDeg(n(k), unit);
+    const bad = (m: string): CalculatorResult[] => [{ id: 'triangleError', label: 'No such triangle', value: m, color: 'negative' }];
 
-    let triangle: TriangleData | null = null;
-
+    let t: Tri | null = null;
     if (mode === 'sss') {
-      const a = parseFloat(values.sideA);
-      const b = parseFloat(values.sideB);
-      const c = parseFloat(values.sideC);
-      if ([a, b, c].some(isNaN)) return [];
-      triangle = solveSSS(a, b, c);
+      const [a, b, c] = [n('sideA'), n('sideB'), n('sideC')];
+      if (![a, b, c].every(Number.isFinite) || a <= 0 || b <= 0 || c <= 0) return [];
+      t = solveSSS(a, b, c);
+      if (!t) return bad('These three lengths cannot form a triangle: each side must be shorter than the sum of the other two.');
     } else if (mode === 'sas') {
-      const b = parseFloat(values.sasSideB);
-      const angleA = parseFloat(values.sasAngleA);
-      const c = parseFloat(values.sasSideC);
-      if ([b, angleA, c].some(isNaN)) return [];
-      triangle = solveSAS(b, angleA, c);
+      const [b, A, c] = [n('sasSideB'), ang('sasAngleA'), n('sasSideC')];
+      if (![b, A, c].every(Number.isFinite) || b <= 0 || c <= 0) return [];
+      if (A <= 0 || A >= 180) return bad('The included angle must be greater than 0 and less than 180° (π radians).');
+      const s = solveSAS(b, c, A); // x = b, y = c, included angle = A
+      if (s) t = { a: s.c, b: s.a, c: s.b, A: s.C, B: s.A, C: s.B };
     } else if (mode === 'asa') {
-      const angleA = parseFloat(values.asaAngleA);
-      const c = parseFloat(values.asaSideC);
-      const angleB = parseFloat(values.asaAngleB);
-      if ([angleA, c, angleB].some(isNaN)) return [];
-      triangle = solveASA(angleA, c, angleB);
+      const [A, c, B] = [ang('asaAngleA'), n('asaSideC'), ang('asaAngleB')];
+      if (![A, c, B].every(Number.isFinite) || c <= 0) return [];
+      if (A <= 0 || B <= 0 || A + B >= 180) return bad('Both angles must be positive and add up to less than 180° (π radians).');
+      t = solveAngleAngleSide({ A, B }, c, 'C');
+    } else if (mode === 'aas') {
+      const [A, B, a] = [ang('aasAngleA'), ang('aasAngleB'), n('aasSideA')];
+      if (![A, B, a].every(Number.isFinite) || a <= 0) return [];
+      if (A <= 0 || B <= 0 || A + B >= 180) return bad('Both angles must be positive and add up to less than 180° (π radians).');
+      t = solveAngleAngleSide({ A, B }, a, 'A');
     }
+    if (!t) return [];
 
-    if (!triangle) return [];
-
-    const results: CalculatorResult[] = [
-      { id: 'triangleType', label: 'Triangle Type', value: '', color: 'positive' as const, highlight: true },
-      { id: 'angleA', label: 'Angle A', value: `${fmt(triangle.angleA)}°`, color: 'neutral' as const },
-      { id: 'angleB', label: 'Angle B', value: `${fmt(triangle.angleB)}°`, color: 'neutral' as const },
-      { id: 'angleC', label: 'Angle C', value: `${fmt(triangle.angleC)}°`, color: 'neutral' as const },
-      { id: 'sideALabel', label: 'Side a', value: fmt(triangle.sideA), color: 'neutral' as const },
-      { id: 'sideBLabel', label: 'Side b', value: fmt(triangle.sideB), color: 'neutral' as const },
-      { id: 'sideCLabel', label: 'Side c', value: fmt(triangle.sideC), color: 'neutral' as const },
+    const k = classify(t);
+    const au = unit === 'rad' ? 'rad' : '°';
+    return [
+      { id: 'triangleType', label: 'Triangle Type', value: `${k.bySides} ${k.byAngles}`, color: 'positive', highlight: true },
+      { id: 'angleA', label: 'Angle A', value: fmtAngle(t.A, unit), unit: au, color: 'neutral' },
+      { id: 'angleB', label: 'Angle B', value: fmtAngle(t.B, unit), unit: au, color: 'neutral' },
+      { id: 'angleC', label: 'Angle C', value: fmtAngle(t.C, unit), unit: au, color: 'neutral' },
+      { id: 'sideALabel', label: 'Side a', value: fmt(t.a), color: 'neutral' },
+      { id: 'sideBLabel', label: 'Side b', value: fmt(t.b), color: 'neutral' },
+      { id: 'sideCLabel', label: 'Side c', value: fmt(t.c), color: 'neutral' },
+      { id: 'perimeter', label: 'Perimeter', value: fmt(t.a + t.b + t.c), color: 'neutral' },
+      { id: 'area', label: 'Area', value: `${fmt(area(t))} sq units`, color: 'neutral' },
+      { id: '_triangle', label: 'triangle', value: JSON.stringify(t) },
     ];
-
-    // Classify triangle
-    const sides = [triangle.sideA, triangle.sideB, triangle.sideC].sort((a, b) => a - b);
-    let typeName: string;
-    if (Math.abs(sides[0] - sides[2]) < 0.01) {
-      typeName = 'Equilateral';
-    } else if (Math.abs(sides[0] - sides[1]) < 0.01 || Math.abs(sides[1] - sides[2]) < 0.01) {
-      typeName = 'Isosceles';
-    } else {
-      typeName = 'Scalene';
-    }
-
-    const angles = [triangle.angleA, triangle.angleB, triangle.angleC];
-    if (angles.some(a => a > 90.01)) {
-      typeName += ' Obtuse';
-    } else if (angles.some(a => Math.abs(a - 90) < 0.01)) {
-      typeName += ' Right';
-    } else {
-      typeName += ' Acute';
-    }
-
-    results[0] = { ...results[0], value: typeName, color: 'positive' };
-
-    // Area (Heron's formula)
-    const s = (triangle.sideA + triangle.sideB + triangle.sideC) / 2;
-    const area = Math.sqrt(s * (s - triangle.sideA) * (s - triangle.sideB) * (s - triangle.sideC));
-    results.push({ id: 'perimeter', label: 'Perimeter', value: fmt(triangle.sideA + triangle.sideB + triangle.sideC), color: 'neutral' });
-    results.push({ id: 'area', label: 'Area', value: `${fmt(area)} sq units`, color: 'neutral' });
-
-    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -196,7 +137,7 @@ const triangleConfig: CalculatorConfig = {
     variables: [
       { symbol: 'a, b, c', name: 'Side Lengths', description: 'The three sides of the triangle. Side a is opposite angle A, side b is opposite angle B, and side c is opposite angle C.' },
       { symbol: 'A, B, C', name: 'Interior Angles', description: 'The three interior angles of the triangle, always summing to exactly 180° in Euclidean geometry.' },
-      { symbol: 'Area', name: 'Area', description: 'Computed via Heron\'s formula: √(s(s−a)(s−b)(s−c)) where s = (a+b+c)/2 is the semi-perimeter.' },
+      { symbol: 'Area', name: 'Area', description: 'Computed as ½·b·c·sin A from the solved triangle, which equals Heron\'s formula √(s(s−a)(s−b)(s−c)) but stays accurate for thin triangles.' },
     ],
     howToUse: [
       'Select the input mode that matches the information you have: SSS (three side lengths), SAS (two sides plus the angle between them), or ASA (two angles plus the side between them).',

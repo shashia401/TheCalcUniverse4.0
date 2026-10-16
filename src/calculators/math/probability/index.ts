@@ -1,11 +1,11 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ProbabilityPanel from './ProbabilityPanel';
-import Decimal from 'decimal.js';
+import { D, type Dec } from '../../../utils/stats';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
-// Decimal.js ensures precision when computing joint probabilities (products)
-// and complementary probabilities (1 - p) for values near 0 or 1 where
-// native IEEE 754 double-precision can lose significant digits.
+// Exact decimal arithmetic (private Decimal clone from utils/stats) for the joint, union and complement
+// probabilities, so values like 0.1 + 0.2 never drift in the last digits.
 
 const probabilityConfig: CalculatorConfig = {
   inputs: [
@@ -45,136 +45,107 @@ const probabilityConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const pa = parseFloat(values.pa);
-    const pb = parseFloat(values.pb);
-    const eventType = values.type || 'Independent';
+    const paN = parseNumberStrict(values.pa);
+    const pbN = parseNumberStrict(values.pb);
+    const eventType = values.type === 'Mutually Exclusive' ? 'Mutually Exclusive' : 'Independent';
 
     // Validate: must be valid numbers between 0 and 1
-    if (isNaN(pa) || isNaN(pb)) return [];
-    if (pa < 0 || pa > 1 || pb < 0 || pb > 1) return [];
+    if (isNaN(paN) || isNaN(pbN)) return [];
+    if (paN < 0 || paN > 1 || pbN < 0 || pbN > 1) return [];
 
     const isMutuallyExclusive = eventType === 'Mutually Exclusive';
 
-    // P(A and B) — use Decimal for precision when needed
-    let pAndB: number;
-    if (isMutuallyExclusive) {
-      pAndB = 0;
-    } else {
-      // Use Decimal for high-precision multiplication of close-to-zero probabilities
-      try {
-        pAndB = new Decimal(pa).mul(pb).toNumber();
-      } catch {
-        pAndB = pa * pb;
-      }
+    // Exact decimal arithmetic (0.1 + 0.2 style float drift would otherwise leak into P(A∪B) and the >1 test).
+    const A = new D(paN);
+    const B = new D(pbN);
+
+    // Mutually exclusive events cannot overlap, so P(A) + P(B) > 1 is impossible (union would exceed 100%).
+    if (isMutuallyExclusive && A.plus(B).greaterThan(1)) {
+      return [
+        {
+          id: 'warning',
+          label: 'Impossible: mutually exclusive events',
+          value: `P(A) + P(B) = ${A.plus(B).toFixed()} is greater than 1. Mutually exclusive events cannot overlap, so their probabilities cannot add to more than 1. Lower P(A) or P(B), or choose Independent.`,
+          color: 'negative',
+        },
+      ];
     }
 
-    // P(A or B)
-    const exceedsOne = isMutuallyExclusive && pa + pb > 1;
-    let pOrB: number;
-    if (isMutuallyExclusive) {
-      pOrB = Math.min(pa + pb, 1);
-    } else {
-      // P(A or B) = P(A) + P(B) - P(A and B)
-      pOrB = pa + pb - pAndB;
-    }
+    const AND = isMutuallyExclusive ? new D(0) : A.times(B); // P(A∩B)
+    const OR = A.plus(B).minus(AND); // addition rule; never needs a cap now that impossible input is rejected
+    const NOT_A = new D(1).minus(A);
+    const NOT_B = new D(1).minus(B);
 
-    // P(not A)
-    const pNotA = 1 - pa;
+    // Conditional probabilities: P(A|B) = P(A∩B) / P(B), undefined when the condition has probability 0.
+    const condText = (joint: Dec, given: Dec) => (given.isZero() ? 'Undefined (condition has probability 0)' : fmt(joint.div(given)));
 
-    // P(not B)
-    const pNotB = 1 - pb;
+    const fmt = (n: Dec) => n.toDecimalPlaces(8).toFixed();
 
-    // P(A|B) — conditional probability
-    let pAGivenB: number;
-    if (isMutuallyExclusive) {
-      pAGivenB = 0; // If B occurs, A cannot occur (mutually exclusive)
-    } else if (pb === 0) {
-      pAGivenB = 0; // Cannot condition on an impossible event
-    } else {
-      // For independent events, P(A|B) = P(A)
-      // In general, P(A|B) = P(A∩B) / P(B) = (P(A) × P(B)) / P(B) = P(A)
-      pAGivenB = pa;
-    }
-
-    // P(B|A) — conditional probability of B given A
-    let pBGivenA: number;
-    if (isMutuallyExclusive) {
-      pBGivenA = 0;
-    } else if (pa === 0) {
-      pBGivenA = 0;
-    } else {
-      pBGivenA = pb; // For independent: P(B|A) = P(B)
-    }
-
-    const fmt = (n: number) => {
-      return parseFloat(n.toFixed(8)).toString();
-    };
-
-    const pct = (n: number) => {
-      return (n * 100).toFixed(1) + '%';
+    const pct = (n: Dec) => {
+      return n.times(100).toFixed(1) + '%';
     };
 
     const results: CalculatorResult[] = [
       {
         id: 'pa',
         label: 'P(A)',
-        value: fmt(pa),
+        value: fmt(A),
         color: 'neutral',
       },
       {
         id: 'pb',
         label: 'P(B)',
-        value: fmt(pb),
+        value: fmt(B),
         color: 'neutral',
       },
       {
         id: 'pAndB',
         label: 'P(A ∩ B) — Probability of A and B',
-        value: fmt(pAndB),
+        value: fmt(AND),
         highlight: true,
         color: 'positive',
       },
       {
         id: 'pOrB',
         label: 'P(A ∪ B) — Probability of A or B',
-        value: fmt(pOrB),
+        value: fmt(OR),
         highlight: true,
         color: 'positive',
       },
       {
         id: 'pNotA',
         label: 'P(¬A) — Probability of Not A',
-        value: fmt(pNotA),
+        value: fmt(NOT_A),
         color: 'neutral',
       },
       {
         id: 'pNotB',
         label: 'P(¬B) — Probability of Not B',
-        value: fmt(pNotB),
+        value: fmt(NOT_B),
         color: 'neutral',
       },
       {
         id: 'pAGivenB',
         label: 'P(A|B) — Conditional Probability of A given B',
-        value: fmt(pAGivenB),
+        value: condText(AND, B),
         color: 'positive',
       },
       {
         id: 'pBGivenA',
         label: 'P(B|A) — Conditional Probability of B given A',
-        value: fmt(pBGivenA),
+        value: condText(AND, A),
         color: 'positive',
       },
       {
         id: 'paPct',
         label: 'P(A) as %',
-        value: pct(pa),
+        value: pct(A),
         color: 'neutral',
       },
       {
         id: 'pbPct',
         label: 'P(B) as %',
-        value: pct(pb),
+        value: pct(B),
         color: 'neutral',
       },
       {
@@ -184,15 +155,6 @@ const probabilityConfig: CalculatorConfig = {
         color: 'neutral',
       },
     ];
-
-    if (exceedsOne) {
-      results.push({
-        id: 'warning',
-        label: 'Warning: Mutually exclusive events',
-        value: `P(A) + P(B) = ${(pa + pb).toFixed(4)} exceeds 1. These events cannot sum to more than 100% probability. The union probability has been capped at 1.`,
-        color: 'negative',
-      });
-    }
 
     return results;
   },
@@ -218,7 +180,7 @@ const probabilityConfig: CalculatorConfig = {
       'Enter P(B), the probability of event B, also as a decimal between 0 and 1.',
       'Select whether the events are Independent (do not affect each other, like two coin flips) or Mutually Exclusive (cannot happen together, like rolling a 1 and a 6 on a single die).',
       'Review all computed probabilities: P(A∩B), P(A∪B), P(¬A), P(¬B), P(A|B), and P(B|A). Each is displayed as both a decimal and a percentage.',
-      'If mutually exclusive events sum to more than 1, a warning appears — this is mathematically impossible for a proper probability distribution.',
+      'If mutually exclusive events sum to more than 1, the calculator shows an error instead of results — that combination is mathematically impossible. If a conditional probability would divide by a zero-probability event it is shown as undefined.',
     ],
     explanation:
       'Probability theory is the foundation of statistics, data science, risk assessment, machine learning, and decision-making under uncertainty. Two fundamental concepts govern how events interact: independence and mutual exclusivity. Independent events have no influence on each other — flipping a coin twice yields independent outcomes; knowing the first flip was heads tells you nothing about the second. Mutually exclusive events cannot happen simultaneously — drawing a single card cannot be both a heart and a spade. The addition rule P(A∪B) = P(A) + P(B) − P(A∩B) is one of the most important formulas in probability; the subtraction of P(A∩B) corrects for double-counting the overlap region where both events occur. Conditional probability P(A|B) measures how the occurrence of B updates our belief about A — this is the foundation of Bayes\' theorem, which underlies modern spam filters, medical diagnosis, recommendation systems, and the entire field of Bayesian statistics. The complement rule P(¬A) = 1 − P(A) is deceptively simple but incredibly powerful: sometimes it is much easier to calculate the probability of something NOT happening and subtract from 1. These concepts are essential in medical testing (sensitivity, specificity, false positive rates), quality control (defect probabilities in manufacturing), financial risk modeling (value at risk, default probabilities), weather forecasting (probability of precipitation), A/B testing (statistical significance of experimental results), and game theory (optimal strategies in poker, blackjack, and other games of chance).',

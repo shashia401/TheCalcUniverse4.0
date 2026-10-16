@@ -38,11 +38,11 @@ describe('Triangle Calculator', () => {
     const r = config.calculate({ mode: 'sss', sideA: '3', sideB: '4', sideC: '5' });
     near(parseFloat(getValue(r, 'area')), 6);
     near(parseFloat(getValue(r, 'perimeter')), 12);
-  });
 
-  it('returns empty for invalid triangle (violates triangle inequality)', () => {
+  });
+  it('explains an invalid triangle (violates triangle inequality) instead of returning nothing', () => {
     const r = config.calculate({ mode: 'sss', sideA: '1', sideB: '1', sideC: '10' });
-    expect(r).toEqual([]);
+    expect(getValue(r, 'triangleError')).toContain('cannot form a triangle');
   });
 
   it('returns empty for NaN inputs', () => {

@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig, EducationalContent } from '../../../types/calculator';
 import VolumeSurfacePanel from './VolumeSurfacePanel';
 import { calculate } from './shared';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 import { sphereDiagram, cubeDiagram, cylinderDiagram, coneDiagram, boxDiagram, pyramidDiagram } from './diagrams';
 
 const sphereEdu: EducationalContent = {
@@ -187,7 +188,8 @@ const volumeSurfaceConfig: CalculatorConfig = {
       helpText: 'Box only: height',
     },
   ],
-  calculate: (values) => calculate(values.shape || 'sphere', parseFloat(values.dim1), parseFloat(values.dim2), parseFloat(values.dim3)),
+  calculate: (values) =>
+    calculate(values.shape || 'sphere', parseNumberStrict(values.dim1), parseNumberStrict(values.dim2), parseNumberStrict(values.dim3)),
   educational: sphereEdu,
   extraPanel: (values, results) => results.length ? createElement(VolumeSurfacePanel, { values, results }) : null,
 };

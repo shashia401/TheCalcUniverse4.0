@@ -9,10 +9,15 @@ describe('grade-calculator', () => {
     near(parseNumber(getValue(r, 'neededGrade')), 110, 0.1);
   });
 
-  it('returns 0 needed when current exceeds desired', () => {
-    const r = config.calculate({ currentGrade: '95', desiredGrade: '90', examWeight: '20' });
+  it('returns 0 needed only when even a 0% final secures the target (95 current, 70 desired, 20% weight: 0.8*95 = 76 >= 70)', () => {
+    const r = config.calculate({ currentGrade: '95', desiredGrade: '70', examWeight: '20' });
     near(parseNumber(getValue(r, 'neededGrade')), 0);
-    expect(getValue(r, 'status')).toContain('already achieved');
+    expect(getValue(r, 'status')).toContain('secured');
+  });
+
+  it('current above desired does NOT mean 0 needed: 95 current, 90 desired, 20% weight needs 70% (regression)', () => {
+    const r = config.calculate({ currentGrade: '95', desiredGrade: '90', examWeight: '20' });
+    near(parseNumber(getValue(r, 'neededGrade')), 70);
   });
 
   it('handles standard scenario: Current 82%, Target 80%, Weight 25%', () => {

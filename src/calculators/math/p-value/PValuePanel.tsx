@@ -5,14 +5,20 @@ interface Props {
   results: CalculatorResult[];
 }
 
+const STAT_NAME: Record<string, string> = { z: 'Z', t: 'T', chisq: 'χ²', f: 'F' };
+const TEST_NAME: Record<string, string> = { z: 'Z-test', t: 'T-test', chisq: 'Chi-square test', f: 'F-test' };
+
 export default function PValuePanel({ values, results }: Props) {
   if (results.length === 0) return null;
 
-  const pValue = results.find(r => r.id === 'pValue')?.value || '';
-  const significant = results.find(r => r.id === 'significant')?.value === 'Yes';
-  const conclusion = results.find(r => r.id === 'conclusion')?.value || '';
-  const alpha = results.find(r => r.id === 'alpha')?.value || '';
-  const testStat = results.find(r => r.id === 'testStatistic')?.value || '';
+  const get = (id: string) => results.find(r => r.id === id)?.value || '';
+  const pValue = get('pValue');
+  const significant = get('significant') === 'Yes';
+  const conclusion = get('conclusion');
+  const alpha = get('alpha');
+  const testStat = get('testStatistic');
+  const critical = get('criticalValue');
+  const testType = values.testType && STAT_NAME[values.testType] ? values.testType : 'z';
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -26,10 +32,10 @@ export default function PValuePanel({ values, results }: Props) {
       <div className="p-5 space-y-4">
         {/* p-value display */}
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-5 text-center">
-          <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">p-value</p>
+          <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-1">p-value</p>
           <p className="text-3xl font-bold font-mono text-emerald-700">{pValue}</p>
-          <p className="text-xs text-emerald-500 mt-1">
-            {values.testType === 'z' ? 'Z' : 'T'}-statistic = {testStat} &nbsp;|&nbsp; α = {alpha}
+          <p className="text-xs text-emerald-700 mt-1">
+            {STAT_NAME[testType]}-statistic = {testStat} &nbsp;|&nbsp; α = {alpha}
           </p>
         </div>
 
@@ -40,12 +46,12 @@ export default function PValuePanel({ values, results }: Props) {
             : 'border-amber-200 bg-amber-50'
         }`}>
           <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${
-            significant ? 'text-emerald-500' : 'text-amber-500'
+            significant ? 'text-emerald-700' : 'text-amber-800'
           }`}>
             {significant ? '✓ Statistically Significant' : '○ Not Statistically Significant'}
           </p>
           <p className={`text-sm font-medium ${
-            significant ? 'text-emerald-700' : 'text-amber-700'
+            significant ? 'text-emerald-800' : 'text-amber-900'
           }`}>
             {conclusion}
           </p>
@@ -53,30 +59,34 @@ export default function PValuePanel({ values, results }: Props) {
 
         {/* Decision guide */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Decision Rule</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">Decision Rule</p>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="bg-white rounded-lg border border-slate-200 p-3 text-center">
-              <p className="text-slate-500 mb-1">If p &lt; α</p>
-              <p className="font-bold text-emerald-600">Reject H₀</p>
-              <p className="text-slate-500">Statistically significant</p>
+              <p className="text-slate-600 mb-1">If p &lt; α</p>
+              <p className="font-bold text-emerald-700">Reject H₀</p>
+              <p className="text-slate-600">Statistically significant</p>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-3 text-center">
-              <p className="text-slate-500 mb-1">If p ≥ α</p>
-              <p className="font-bold text-amber-600">Fail to Reject H₀</p>
-              <p className="text-slate-500">Not statistically significant</p>
+              <p className="text-slate-600 mb-1">If p ≥ α</p>
+              <p className="font-bold text-amber-800">Fail to Reject H₀</p>
+              <p className="text-slate-600">Not statistically significant</p>
             </div>
           </div>
         </div>
 
         {/* Details grid */}
-        <div className="grid grid-cols-2 gap-2 text-xs text-center">
+        <div className="grid grid-cols-3 gap-2 text-xs text-center">
           <div className="p-2 bg-white rounded border border-slate-200">
-            <p className="text-slate-500">Test Direction</p>
-            <p className="font-bold text-slate-700">{values.tails === 'one' ? 'One-tailed' : 'Two-tailed'}</p>
+            <p className="text-slate-600">Test Direction</p>
+            <p className="font-bold text-slate-700">{get('tails') || '—'}</p>
           </div>
           <div className="p-2 bg-white rounded border border-slate-200">
-            <p className="text-slate-500">Test Type</p>
-            <p className="font-bold text-slate-700">{values.testType === 'z' ? 'Z-test' : 'T-test'}</p>
+            <p className="text-slate-600">Test Type</p>
+            <p className="font-bold text-slate-700">{TEST_NAME[testType]}</p>
+          </div>
+          <div className="p-2 bg-white rounded border border-slate-200">
+            <p className="text-slate-600">Critical Value</p>
+            <p className="font-bold text-slate-700">{critical || '—'}</p>
           </div>
         </div>
       </div>

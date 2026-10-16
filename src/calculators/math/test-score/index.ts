@@ -1,6 +1,8 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import TestScorePanel from './TestScorePanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { finalExamNeeded, fmtPct } from '../../../utils/finalGrade';
 
 const testScoreConfig: CalculatorConfig = {
   inputs: [
@@ -39,44 +41,32 @@ const testScoreConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const current = parseFloat(values.currentGrade);
-    const desired = parseFloat(values.desiredGrade);
-    const weight = parseFloat(values.examWeight);
+    const current = parseNumberStrict(values.currentGrade);
+    const desired = parseNumberStrict(values.desiredGrade);
+    const weight = parseNumberStrict(values.examWeight);
 
-    if (isNaN(current) || isNaN(desired) || isNaN(weight) || weight <= 0) return [];
+    // One shared formula (src/utils/finalGrade.ts) for this calculator and the grade calculator.
+    const exam = finalExamNeeded(current, desired, weight);
+    if (!exam) return [];
+    const { needed } = exam;
 
-    if (weight >= 100) {
-      return [{
-        id: 'needed',
-        label: 'Grade Needed on Final',
-        value: `${desired.toFixed(1)}%`,
-        highlight: true,
-        color: desired >= current ? 'positive' as const : 'negative' as const,
-      }];
-    }
-
-    const currentWeight = 100 - weight;
-    const needed = (desired - current * (currentWeight / 100)) / (weight / 100);
-
-    const fmt = (n: number) => n.toFixed(1) + '%';
-
-    const results = [
+    const results: CalculatorResult[] = [
       {
         id: 'needed',
         label: 'Grade Needed on Final',
-        value: fmt(Math.min(needed, 100)),
+        value: fmtPct(needed),
         highlight: true,
-        color: needed <= 100 ? (needed <= current ? 'positive' as const : 'neutral' as const) : 'negative' as const,
+        color: exam.status === 'impossible' ? 'negative' : needed <= current ? 'positive' : 'neutral',
       },
     ];
 
-    if (needed > 100) {
+    if (exam.status === 'impossible') {
       results.push({
         id: 'impossible',
         label: 'Target Not Reachable',
-        value: `Even scoring 100% on the final (${fmt(100 * weight / 100 + current * currentWeight / 100)} total)`,
+        value: `Even scoring 100% on the final gives only ${fmtPct(exam.ceiling)} overall`,
         highlight: true,
-        color: 'negative' as const,
+        color: 'negative',
       });
     } else if (needed > 95) {
       results.push({
@@ -84,28 +74,39 @@ const testScoreConfig: CalculatorConfig = {
         label: 'Warning',
         value: 'You need near-perfect score — consider adjusting your target',
         highlight: true,
-        color: 'negative' as const,
+        color: 'negative',
       });
-    } else if (needed < 0) {
+    } else if (exam.status === 'secured') {
       results.push({
         id: 'note',
         label: 'Note',
         value: 'You already have the desired grade — no studying needed!',
         highlight: false,
-        color: 'positive' as const,
+        color: 'positive',
       });
     }
 
-    if (needed <= 100) {
-      const totalGrade = needed * (weight / 100) + current * (currentWeight / 100);
+    if (exam.status === 'reachable') {
+      // Scoring exactly `needed` lands exactly on the target by construction.
       results.push({
         id: 'projected',
         label: 'Projected Overall Grade',
-        value: fmt(totalGrade),
+        value: fmtPct(desired),
         highlight: false,
-        color: 'neutral' as const,
+        color: 'neutral',
       });
     }
+    results.push({
+      id: 'bestPossible',
+      label: 'Best Possible Overall Grade (100% on final)',
+      value: fmtPct(exam.ceiling),
+      color: 'neutral',
+    });
+    results.push({
+      id: '_examData',
+      label: '',
+      value: JSON.stringify({ needed, status: exam.status, ceiling: exam.ceiling, desired }),
+    });
 
     return results;
   },

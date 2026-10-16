@@ -1,58 +1,41 @@
 import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { safeEval } from '../shared/safeEval';
+import SvgLineChart from '../../../components/charts/SvgLineChart';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { CasError, derivativeOrder, evalNode, parse } from '../shared/cas';
+import { plotSamples } from '../shared/plotSamples';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-function polyToEval(expr: string): string {
-  // Insert * between a digit and x: "3x^2" → "3*x^2"
-  return expr.replace(/(\d)(x)/g, '$1*$2');
-}
-
 export default function DerivativePanel({ values, results }: Props) {
   const expr = (values.expression || '').trim();
-  if (!expr) return null;
-
+  const order = Math.min(4, Math.max(1, Number(values.order) || 1));
+  const xv = parseNumberStrict(values.xValue);
   const derivativeResult = results.find((r) => r.id === 'derivative');
   const originalResult = results.find((r) => r.id === 'original');
 
-  if (!derivativeResult || !originalResult) return null;
-
-  const chartData = useMemo(() => {
-    const xVal = values.xValue ? parseFloat(values.xValue) : 0;
-    const range = Math.max(Math.abs(xVal) + 5, 5);
-    const xMin = -range;
-    const xMax = range;
-    const steps = 80;
-
-    const evalExpr = polyToEval(expr);
-    const evalDeriv = polyToEval(derivativeResult.value);
-    const data: { x: number; f: number | null; fPrime: number | null }[] = [];
-
-    for (let i = 0; i <= steps; i++) {
-      const x = parseFloat((xMin + (i / steps) * (xMax - xMin)).toFixed(4));
-      let fVal: number | null = null;
-      let fPrimeVal: number | null = null;
-      try {
-        fVal = safeEval(evalExpr, { x });
-      } catch {
-        /* ignore */
-      }
-      try {
-        fPrimeVal = safeEval(evalDeriv, { x });
-      } catch {
-        /* ignore */
-      }
-      data.push({ x, f: fVal, fPrime: fPrimeVal });
+  // Evaluate the parsed expression trees (no re-parsing of the printed result strings).
+  const series = useMemo(() => {
+    if (!expr) return null;
+    try {
+      const f = parse(expr);
+      const d = derivativeOrder(f, order);
+      const range = Math.max(Math.abs(Number.isFinite(xv) ? xv : 0) + 5, 5);
+      return {
+        f: plotSamples((x) => evalNode(f, x), -range, range),
+        d: plotSamples((x) => evalNode(d, x), -range, range),
+      };
+    } catch (e) {
+      if (e instanceof CasError) return null;
+      throw e;
     }
-    return data;
-  }, [expr, derivativeResult.value, values.xValue]);
+  }, [expr, order, xv]);
 
-  const hasValidData = chartData.some((d) => d.f !== null && d.fPrime !== null);
+  if (!expr || !derivativeResult || !originalResult) return null;
+  const dLabel = `f${"'".repeat(order)}(x)`;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -66,50 +49,38 @@ export default function DerivativePanel({ values, results }: Props) {
       </div>
 
       <div className="p-5 space-y-4">
-        {hasValidData && (
+        {series && series.f.length > 1 && (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
-              f(x) vs f&prime;(x)
-            </p>
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                <XAxis dataKey="x" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} type="number" domain={['auto', 'auto']} />
-                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={50} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  formatter={((_: unknown, name: string) => {
-                    const label = name === 'f' ? 'f(x)' : "f'(x)";
-                    return [typeof _ === 'number' ? _.toFixed(4) : _, label];
-                  }) as any}
-                />
-                <ReferenceLine y={0} stroke="#cbd5e1" strokeWidth={1} />
-                <ReferenceLine x={0} stroke="#cbd5e1" strokeWidth={1} />
-                <Line type="monotone" dataKey="f" stroke="#3b82f6" strokeWidth={2.5} dot={false} name="f" activeDot={{ r: 4 }} />
-                <Line type="monotone" dataKey="fPrime" stroke="#ef4444" strokeWidth={2} dot={false} name="fPrime" strokeDasharray="4 2" activeDot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
-            <div className="flex items-center justify-center gap-6 mt-2 text-xs">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">f(x) vs {dLabel}</p>
+            <SvgLineChart
+              height={280}
+              ariaLabel={`Graph of f(x) = ${originalResult.value} (solid blue) and its derivative ${dLabel} = ${derivativeResult.value} (dashed red)`}
+              series={[
+                { name: 'f(x)', color: '#2563eb', points: series.f },
+                { name: dLabel, color: '#dc2626', dashed: true, points: series.d },
+              ]}
+              refLines={[{ x: 0, color: '#cbd5e1', dashed: false }, { y: 0, color: '#cbd5e1', dashed: false }]}
+            />
+            <div className="flex items-center justify-center gap-6 mt-2 text-xs text-slate-600">
               <span className="flex items-center gap-1.5">
-                <span className="w-4 h-0.5 bg-blue-500 inline-block" />
-                <span className="text-slate-500">f(x)</span>
+                <span className="w-4 h-0.5 bg-blue-600 inline-block" />f(x)
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-4 h-0.5 bg-red-500 inline-block" style={{ borderTop: '2px dashed #ef4444', height: 0 }} />
-                <span className="text-slate-500">f&prime;(x) derivative</span>
+                <span className="w-4 inline-block" style={{ borderTop: '2px dashed #dc2626', height: 0 }} />
+                {dLabel} derivative
               </span>
             </div>
           </div>
         )}
 
-        {/* Result cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-blue-500 uppercase">f(x)</p>
-            <p className="text-sm font-mono font-bold text-blue-700 mt-0.5 break-all">{originalResult.value}</p>
+            <p className="text-[10px] font-bold text-blue-800 uppercase">f(x)</p>
+            <p className="text-sm font-mono font-bold text-blue-800 mt-0.5 break-all">{originalResult.value}</p>
           </div>
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-red-500 uppercase">f&prime;(x)</p>
-            <p className="text-sm font-mono font-bold text-red-700 mt-0.5 break-all">{derivativeResult.value}</p>
+            <p className="text-[10px] font-bold text-red-800 uppercase">{dLabel}</p>
+            <p className="text-sm font-mono font-bold text-red-800 mt-0.5 break-all">{derivativeResult.value}</p>
           </div>
         </div>
       </div>

@@ -1,89 +1,42 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
-import { safeEval } from '../shared/safeEval';
 import IntegralPanel from './IntegralPanel';
+import { CasError, type Node, evalNode, parse } from '../shared/cas';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
-// ─── Safe expression evaluator ───────────────────────────────────────────────
+const MAX_N = 100000;
 
-function evaluateIntegrand(expr: string, xVal: number): number {
-  try {
-    return safeEval(expr, { x: xVal });
-  } catch {
-    return NaN;
-  }
-}
+// ─── Composite rules on a pre-parsed expression (parse once, evaluate n+1 times) ──────
 
-// ─── Simpson's 1/3 rule ─────────────────────────────────────────────────────
-
-function simpsonRule(
-  expr: string,
-  a: number,
-  b: number,
-  n: number,
-): { result: number; workSteps: string[] } {
-  const workSteps: string[] = [];
+/** Simpson's 1/3 rule on [a, b] with an even n; null when f is not finite at a node. */
+function simpson(f: (x: number) => number, a: number, b: number, n: number) {
   const h = (b - a) / n;
-
-  workSteps.push(`Step size: h = (b − a) / n = (${b.toFixed(4)} − ${a.toFixed(4)}) / ${n} = ${h.toFixed(6)}`);
-
-  const fA = evaluateIntegrand(expr, a);
-  const fB = evaluateIntegrand(expr, b);
-  if (isNaN(fA) || isNaN(fB)) return { result: NaN, workSteps: [] };
-
-  let sumEven = 0;
-  let sumOdd = 0;
-
+  const fA = f(a);
+  const fB = f(b);
+  if (!Number.isFinite(fA) || !Number.isFinite(fB)) return null;
+  let odd = 0;
+  let even = 0;
   for (let i = 1; i < n; i++) {
-    const x = a + i * h;
-    const fx = evaluateIntegrand(expr, x);
-    if (isNaN(fx) || !isFinite(fx)) {
-      return { result: NaN, workSteps: [] };
-    }
-    if (i % 2 === 0) {
-      sumEven += fx;
-    } else {
-      sumOdd += fx;
-    }
+    const fx = f(a + i * h);
+    if (!Number.isFinite(fx)) return null;
+    if (i % 2 === 0) even += fx;
+    else odd += fx;
   }
-
-  const result = (h / 3) * (fA + fB + 4 * sumOdd + 2 * sumEven);
-
-  workSteps.push(`f(a) = f(${a.toFixed(4)}) = ${fA.toFixed(6)}`);
-  workSteps.push(`f(b) = f(${b.toFixed(4)}) = ${fB.toFixed(6)}`);
-  workSteps.push(`Sum of odd-indexed f(x) (coefficient 4): ${sumOdd.toFixed(6)}`);
-  workSteps.push(`Sum of even-indexed f(x) (coefficient 2): ${sumEven.toFixed(6)}`);
-  workSteps.push(
-    `S = (${h.toFixed(6)} / 3) × [${fA.toFixed(6)} + ${fB.toFixed(6)} + 4×${sumOdd.toFixed(6)} + 2×${sumEven.toFixed(6)}]`,
-  );
-  workSteps.push(`S = ${result.toFixed(6)}`);
-
-  return { result, workSteps };
+  return { value: (h / 3) * (fA + fB + 4 * odd + 2 * even), h, fA, fB, odd, even };
 }
 
-// ─── Trapezoidal rule (for comparison) ──────────────────────────────────────
-
-function trapezoidalRule(expr: string, a: number, b: number, n: number): number {
+function trapezoid(f: (x: number) => number, a: number, b: number, n: number): number | null {
   const h = (b - a) / n;
-  const fA = evaluateIntegrand(expr, a);
-  const fB = evaluateIntegrand(expr, b);
-  if (isNaN(fA) || isNaN(fB)) return NaN;
-
-  let sum = (fA + fB) / 2;
-  for (let i = 1; i < n; i++) {
-    const fx = evaluateIntegrand(expr, a + i * h);
-    if (isNaN(fx) || !isFinite(fx)) return NaN;
-    sum += fx;
-  }
-  return h * sum;
+  let sum = (f(a) + f(b)) / 2;
+  for (let i = 1; i < n; i++) sum += f(a + i * h);
+  return Number.isFinite(sum) ? h * sum : null;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function fmt(n: number): string {
-  if (!isFinite(n)) return n > 0 ? '∞' : '-∞';
+const fmt = (n: number): string => {
+  if (Object.is(n, -0) || n === 0) return '0';
   if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-  return parseFloat(n.toPrecision(10)).toString();
-}
+  return String(Number(n.toPrecision(10)));
+};
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -95,7 +48,8 @@ const integralConfig: CalculatorConfig = {
       type: 'text',
       placeholder: 'e.g. x^2 or 3x+2',
       required: true,
-      helpText: 'Enter an expression in terms of x. Use ^ for powers, * for multiplication, / for division. Example: x^2 - 4*x + 3',
+      helpText:
+        'Use x as the variable. Supports + - * / ^, implicit products (3x, 2(x+1)), sin cos tan asin acos atan sinh cosh tanh exp ln log (base 10) sqrt abs, and the constants pi and e. Example: x^2 - 4*x + 3 or sin(x)*e^(-x).',
     },
     {
       id: 'lowerBound',
@@ -122,37 +76,76 @@ const integralConfig: CalculatorConfig = {
       placeholder: '100',
       step: 2,
       min: 2,
-      helpText: 'Number of subintervals. Higher values give more accurate results. Must be even for Simpson\'s rule (odd values are auto-incremented).',
+      max: MAX_N,
+      helpText: `Number of subintervals (2 to ${MAX_N}). Higher values give more accurate results. Must be even for Simpson's rule (odd values are auto-incremented).`,
     },
   ],
 
   calculate: (values) => {
     const expr = (values.expression || '').trim();
-    const a = parseFloat(values.lowerBound);
-    const b = parseFloat(values.upperBound);
-    const rawN = parseInt(values.n, 10);
-    const n = !isNaN(rawN) && rawN >= 2 ? rawN : 100;
+    const a = parseNumberStrict(values.lowerBound);
+    const b = parseNumberStrict(values.upperBound);
+    if (!expr || !Number.isFinite(a) || !Number.isFinite(b)) return [];
 
-    // Validate required inputs
-    if (!expr || isNaN(a) || isNaN(b) || a === b) return [];
-
-    // Validate expression at a sample point
-    const midpoint = (a + b) / 2;
-    if (isNaN(evaluateIntegrand(expr, midpoint)) || !isFinite(evaluateIntegrand(expr, midpoint))) return [];
-
-    // Ensure n is even for Simpson's rule
+    // n: blank -> 100; otherwise a whole number >= 2 (text like "50abc" is rejected, not truncated).
+    const rawN = (values.n ?? '').trim();
+    let n = 100;
+    if (rawN !== '') {
+      const parsed = parseNumberStrict(rawN);
+      if (!Number.isInteger(parsed) || parsed < 2) n = 100;
+      else n = Math.min(parsed, MAX_N);
+    }
     const actualN = n % 2 === 0 ? n : n + 1;
-    const sign = a < b ? 1 : -1;
+
+    let tree: Node;
+    try {
+      tree = parse(expr);
+    } catch (e) {
+      if (e instanceof CasError) return [];
+      throw e;
+    }
+    const f = (x: number) => evalNode(tree, x);
+
     const lo = Math.min(a, b);
     const hi = Math.max(a, b);
+    const sign = a < b ? 1 : -1;
 
-    const simpson = simpsonRule(expr, lo, hi, actualN);
-    if (isNaN(simpson.result)) return [];
+    // Empty interval: the integral is exactly 0 (checked only for a valid expression).
+    if (a === b) {
+      return [
+        { id: 'result', label: `∫ ${expr} dx`, value: '0', highlight: true, color: 'positive' },
+        { id: 'method', label: 'Method', value: 'Empty interval (a = b)', color: 'neutral' },
+      ];
+    }
 
-    const trap = trapezoidalRule(expr, lo, hi, actualN);
+    const s = simpson(f, lo, hi, actualN);
+    if (!s) return [];
+    const trap = trapezoid(f, lo, hi, actualN);
+    if (trap === null) return [];
+    // Error estimate from Simpson at 2n and 4n: the observed convergence order p = log2(|S2n - Sn| / |S4n - S2n|)
+    // (4 for smooth f, lower near endpoint singularities like sqrt(x)) gives err(Sn) ~ |S2n - Sn| * 2^p / (2^p - 1).
+    const s2 = simpson(f, lo, hi, 2 * actualN);
+    const s4 = simpson(f, lo, hi, 4 * actualN);
+    let errEst = NaN;
+    if (s2 && s4) {
+      const d1 = Math.abs(s2.value - s.value);
+      const d2 = Math.abs(s4.value - s2.value);
+      const p = d1 > 0 && d2 > 0 ? Math.min(6, Math.max(1, Math.log2(d1 / d2))) : 4;
+      errEst = (d1 * 2 ** p) / (2 ** p - 1);
+    }
 
-    const signedSimpson = simpson.result * sign;
+    const signedSimpson = s.value * sign;
     const signedTrap = trap * sign;
+    if (!Number.isFinite(signedSimpson) || !Number.isFinite(signedTrap)) return [];
+
+    const workSteps = [
+      `Step size: h = (b − a) / n = (${fmt(hi)} − ${fmt(lo)}) / ${actualN} = ${fmt(s.h)}`,
+      `f(a) = ${fmt(s.fA)}, f(b) = ${fmt(s.fB)}`,
+      `Sum of odd-indexed f(x) (coefficient 4): ${fmt(s.odd)}`,
+      `Sum of even-indexed f(x) (coefficient 2): ${fmt(s.even)}`,
+      `S = (h / 3) × [f(a) + f(b) + 4×odd + 2×even] = ${fmt(s.value)}`,
+    ];
+    if (sign < 0) workSteps.push('Bounds were reversed (a > b), so the sign is flipped: ∫ₐᵇ = −∫ᵇₐ');
 
     return [
       {
@@ -186,10 +179,13 @@ const integralConfig: CalculatorConfig = {
         value: `~${fmt(Math.abs(signedSimpson - signedTrap))}`,
         color: 'neutral',
       },
+      ...(Number.isFinite(errEst)
+        ? [{ id: 'errorEstimate', label: 'Estimated error (Simpson)', value: `~${errEst < 1e-15 ? '0' : errEst.toExponential(1)}`, color: 'neutral' as const }]
+        : []),
       {
         id: 'work',
         label: 'Step-by-Step Work',
-        value: simpson.workSteps.join(' | '),
+        value: workSteps.join(' | '),
         color: 'neutral',
       },
     ];
@@ -216,10 +212,10 @@ const integralConfig: CalculatorConfig = {
     ],
 
     howToUse: [
-      'Enter the function f(x) using x as the variable. Use ^ for powers (e.g., x^2 for x squared), * for explicit multiplication, and parentheses for grouping (e.g., (x^2 + 1) / (x - 1)).',
+      'Enter the function f(x) using x as the variable. Use ^ for powers (e.g., x^2 for x squared), parentheses for grouping (e.g., (x^2 + 1) / (x - 1)); products such as 3x or 2(x+1) may omit the * sign.',
       'Enter the lower bound a and upper bound b to define the integration interval. The calculator automatically sorts a and b so lower ≤ upper.',
       'Optionally adjust the number of subdivisions n (default 100). Use higher values (e.g., 500–1000) for greater accuracy, especially for oscillatory functions.',
-      'The result shows the approximate integral using Simpson\'s rule, along with the trapezoidal rule result for comparison. A small discrepancy between the two methods indicates high confidence in the result.',
+      'The result shows the approximate integral using Simpson\'s rule, along with the trapezoidal rule result for comparison and an estimated error (from the change when n is doubled). A small discrepancy between the methods indicates high confidence in the result.',
       'The step-by-step work panel breaks down the computation: step size h, endpoint values, sums of odd/even terms, and the final Simpson formula application.',
     ],
 
@@ -252,7 +248,7 @@ const integralConfig: CalculatorConfig = {
       },
       {
         question: 'What does the method discrepancy tell me?',
-        answer: 'The discrepancy between Simpson and trapezoidal results gives a rough error estimate. If the two methods agree closely (discrepancy < 0.001), you can have high confidence. A large discrepancy suggests the function has high curvature or irregularities — try increasing n or breaking the interval at points of rapid change.',
+        answer: 'The trapezoidal rule converges more slowly than Simpson\'s rule, so the discrepancy mostly measures the trapezoidal error. If the two agree closely you can be confident; a large discrepancy suggests high curvature or irregularities. For Simpson\'s own accuracy use the "Estimated error" row (the change when n is doubled and quadrupled, scaled by the observed convergence order). Increase n or split the interval at points of rapid change.',
       },
       {
         question: 'What happens if my function has a singularity inside the interval?',
@@ -260,7 +256,7 @@ const integralConfig: CalculatorConfig = {
       },
       {
         question: 'Can I integrate exponential or trigonometric functions?',
-        answer: 'Yes — the basic expression parser supports standard arithmetic operators (+, -, *, /, ^) and parentheses. For example, you can integrate e^x by entering e^x if your expression uses Euler\'s number... wait, the basic parser does not support the constant "e" or "sin"/"cos". For those, see the Limit Calculator which supports trigonometric and exponential functions.',
+        answer: 'Yes. Trigonometric (sin, cos, tan and inverses), hyperbolic, exponential (e^x, a^x), logarithmic (ln, log base 10), sqrt and abs are all supported, along with the constants pi and e, e.g. sin(x)*e^(-x) or 1/(1+x^2). The calculator is numerical: it gives a decimal value, not an antiderivative.',
       },
     ],
 

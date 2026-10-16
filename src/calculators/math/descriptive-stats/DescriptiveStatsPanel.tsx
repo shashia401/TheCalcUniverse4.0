@@ -5,12 +5,8 @@ interface Props {
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.-]+/);
-  return m ? parseFloat(m[0]) : 0;
-}
-
 export default function DescriptiveStatsPanel({ results }: Props) {
+  const raw = results.find(r => r.id === '_data');
   const count = results.find(r => r.id === 'count');
   const mean = results.find(r => r.id === 'mean');
   const median = results.find(r => r.id === 'median');
@@ -20,10 +16,18 @@ export default function DescriptiveStatsPanel({ results }: Props) {
   const quartiles = results.find(r => r.id === 'quartiles');
   const variance = results.find(r => r.id === 'variance');
 
-  if (!mean || !median) return null;
+  if (!mean || !median || !raw) return null;
 
-  const meanVal = parseNum(mean.value);
-  const medianVal = parseNum(median.value);
+  let meanVal = 0;
+  let medianVal = 0;
+  let sd = 0;
+  try {
+    ({ mean: meanVal, median: medianVal, sd } = JSON.parse(raw.value) as { mean: number; median: number; sd: number });
+  } catch {
+    return null;
+  }
+  // Mean-median gap in standard deviations (Pearson's second skewness coefficient / 3): within 0.1 SD reads as symmetric.
+  const gap = sd > 0 ? (meanVal - medianVal) / sd : 0;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -56,9 +60,9 @@ export default function DescriptiveStatsPanel({ results }: Props) {
           <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-[10px] text-slate-500 uppercase tracking-wide font-semibold">Distribution Shape</p>
             <p className="text-sm text-slate-700 mt-0.5">
-              {Math.abs(meanVal - medianVal) < 0.01 * Math.abs(meanVal || 1)
-                ? 'Approximately symmetric'
-                : meanVal > medianVal
+              {Math.abs(gap) < 0.1
+                ? 'Approximately symmetric (mean within 0.1 SD of the median)'
+                : gap > 0
                   ? 'Right-skewed (positive skew)'
                   : 'Left-skewed (negative skew)'}
             </p>
@@ -66,7 +70,7 @@ export default function DescriptiveStatsPanel({ results }: Props) {
         )}
 
         {count && (
-          <p className="mt-3 text-xs text-slate-400 text-center">
+          <p className="mt-3 text-xs text-slate-600 text-center">
             Count / Sum: {count.value}
           </p>
         )}

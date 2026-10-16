@@ -28,13 +28,13 @@ describe('Grade calculator (Final Exam)', () => {
     expect(needed?.color).toBe('neutral');
   });
 
-  it('95% current, 90% desired, 20% weight → already achieved', () => {
+  it('95% current, 70% desired, 20% weight → already secured (0.8 x 95 = 76 >= 70)', () => {
     const r = config.calculate({
       currentGrade: '95',
-      desiredGrade: '90',
+      desiredGrade: '70',
       examWeight: '20',
     });
-    expect(getValue(r, 'status')).toBe("You've already achieved your target!");
+    expect(getValue(r, 'status')).toContain("You've already secured your target");
     expect(getValue(r, 'neededGrade')).toBe('0%');
     const needed = r.find((x) => x.id === 'neededGrade');
     expect(needed?.color).toBe('positive');
@@ -93,7 +93,7 @@ describe('Grade calculator (Final Exam)', () => {
     });
     // needed = (82 - 80*(1-0.5)) / 0.5 = (82 - 40) / 0.5 = 42/0.5 = 84
     // 84 > 80 = current, so not "easily achievable"
-    expect(getValue(r, 'status')).toBe('You need 84.0% on the final exam.');
+    expect(getValue(r, 'status')).toBe('You need 84% on the final exam.');
   });
 
   it('includes gradeData JSON in results', () => {

@@ -1,116 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import PolynomialPanel from './PolynomialPanel';
-
-function toSuperscript(n: number): string {
-  const map: Record<string, string> = {
-    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-    '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-  };
-  return n.toString().split('').map((d) => map[d] || d).join('');
-}
-
-function formatCoeff(coeff: number, power: number, isFirst: boolean): string {
-  if (coeff === 0) return '';
-  let result = '';
-  if (isFirst) {
-    if (coeff < 0) result += '-';
-  } else {
-    result += coeff > 0 ? ' + ' : ' − ';
-  }
-  const absC = Math.abs(coeff);
-  if (power === 0) {
-    result += absC;
-  } else if (absC === 1) {
-    result += 'x';
-  } else {
-    result += `${absC}x`;
-  }
-  if (power > 1) {
-    result += toSuperscript(power);
-  }
-  return result;
-}
-
-function buildPolyString(coeffs: number[]): string {
-  let result = '';
-  for (let i = 0; i < coeffs.length; i++) {
-    const power = coeffs.length - 1 - i;
-    result += formatCoeff(coeffs[i], power, result === '');
-  }
-  return result || '0';
-}
-
-function evaluateHorner(coeffs: number[], x: number): number {
-  let result = coeffs[0];
-  for (let i = 1; i < coeffs.length; i++) {
-    result = result * x + coeffs[i];
-  }
-  return result;
-}
-
-function buildWork(coeffs: number[], x: number): { steps: string[]; result: number } {
-  const fmt = (n: number) => parseFloat(n.toFixed(10)).toString();
-  const steps: string[] = [];
-  const degree = coeffs.length - 1;
-
-  // Direct substitution
-  const terms: string[] = [];
-  for (let i = 0; i < coeffs.length; i++) {
-    const power = degree - i;
-    if (coeffs[i] === 0) continue;
-    const sign = i === 0 ? (coeffs[i] < 0 ? '-' : '') : (coeffs[i] > 0 ? ' + ' : ' − ');
-    const absCoeff = Math.abs(coeffs[i]);
-    let termStr: string;
-    if (power === 0) {
-      termStr = `${absCoeff}`;
-    } else if (absCoeff === 1) {
-      termStr = power > 1 ? `x${toSuperscript(power)}` : 'x';
-    } else {
-      termStr = power > 1 ? `${absCoeff}x${toSuperscript(power)}` : `${absCoeff}x`;
-    }
-    terms.push(`${sign}${termStr}`);
-  }
-  const polyStr = terms.join('');
-
-  steps.push(`P(${fmt(x)}) =${polyStr}`);
-
-  // Substitute
-  const subTerms: string[] = [];
-  for (let i = 0; i < coeffs.length; i++) {
-    const power = degree - i;
-    if (coeffs[i] === 0) continue;
-    const sign = subTerms.length === 0 && coeffs[i] >= 0 ? '' : (coeffs[i] > 0 ? ' + ' : ' − ');
-    const absCoeff = Math.abs(coeffs[i]);
-    let subStr: string;
-    if (power === 0) {
-      subStr = `${absCoeff}`;
-    } else if (power === 1) {
-      subStr = `${absCoeff} × ${fmt(x)}`;
-    } else {
-      subStr = `${absCoeff} × ${fmt(x)}${toSuperscript(power)}`;
-    }
-    subTerms.push(`${sign}${subStr}`);
-  }
-  steps.push(`  =${subTerms.join('')}`);
-
-  // Values
-  const valTerms: string[] = [];
-  for (let i = 0; i < coeffs.length; i++) {
-    const power = degree - i;
-    const termValue = coeffs[i] * Math.pow(x, power);
-    if (coeffs[i] === 0) continue;
-    const sign = valTerms.length === 0 && termValue >= 0 ? '' : (termValue >= 0 ? ' + ' : ' − ');
-    valTerms.push(`${sign}${fmt(Math.abs(termValue))}`);
-  }
-  steps.push(`  =${valTerms.join('')}`);
-
-  // Final compute using Horner for accuracy
-  const result = evaluateHorner(coeffs, x);
-  steps.push(`  = ${fmt(result)}`);
-
-  return { steps, result };
-}
+import { derivativeCoeffs, evalHorner, fmtFrac, MAX_COEFFS, parseCoeffs, parseX, polyString, powFrac, superscript } from './polyMath';
+import { makeFrac, mulFrac } from '../../../utils/rational';
 
 const polynomialConfig: CalculatorConfig = {
   inputs: [
@@ -120,7 +12,7 @@ const polynomialConfig: CalculatorConfig = {
       type: 'text',
       placeholder: 'e.g. 1, -3, 2 for x²-3x+2',
       required: true,
-      helpText: 'Enter coefficients separated by commas, from highest degree to constant term',
+      helpText: `Enter coefficients separated by commas, from highest degree to constant term (up to ${MAX_COEFFS}). Include zeros for missing powers.`,
     },
     {
       id: 'x',
@@ -132,70 +24,40 @@ const polynomialConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const raw = values.coefficients?.trim();
-    const x = parseFloat(values.x);
+    const coeffs = parseCoeffs(values.coefficients);
+    const x = parseX(values.x);
+    if (!coeffs || !x) return [];
 
-    if (!raw || isNaN(x)) return [];
+    const n = coeffs.length - 1;
+    const isZero = coeffs.length === 1 && coeffs[0].n === 0n;
+    const result = evalHorner(coeffs, x);
+    const xs = fmtFrac(x);
 
-    // Parse coefficients
-    const parts = raw.split(',').map((s) => s.trim()).filter(Boolean);
-    if (parts.length === 0) return [];
-
-    const coeffs: number[] = [];
-    for (const p of parts) {
-      const n = parseFloat(p);
-      if (isNaN(n)) return [];
-      coeffs.push(n);
-    }
-
-    if (coeffs.length === 0) return [];
-    const degree = coeffs.length - 1;
-
-    // Build polynomial string
-    const polyString = buildPolyString(coeffs);
-
-    // Build work
-    const { steps, result } = buildWork(coeffs, x);
-    const fmt = (n: number) => parseFloat(n.toFixed(10)).toString();
+    // Substitution steps, all exact (no floating-point rounding anywhere).
+    const nz = coeffs.map((a, i) => ({ a, power: n - i })).filter((t) => t.a.n !== 0n);
+    const signed = (txt: string, neg: boolean, first: boolean) => (first ? (neg ? '-' : '') : neg ? ' − ' : ' + ') + txt;
+    const abs = (a: (typeof coeffs)[number]) => fmtFrac(makeFrac(a.n < 0n ? -a.n : a.n, a.d));
+    const line1 = nz.map((t, i) => signed(t.power === 0 ? abs(t.a) : `${t.a.n === 1n && t.a.d === 1n || t.a.n === -1n && t.a.d === 1n ? '' : abs(t.a)}x${t.power > 1 ? superscript(t.power) : ''}`, t.a.n < 0n, i === 0)).join('');
+    const line2 = nz.map((t, i) => signed(t.power === 0 ? abs(t.a) : `${abs(t.a)} × ${xs}${t.power > 1 ? superscript(t.power) : ''}`, t.a.n < 0n, i === 0)).join('');
+    const termVals = nz.map((t) => mulFrac(t.a, powFrac(x, t.power)));
+    const line3 = termVals.map((v, i) => signed(fmtFrac(makeFrac(v.n < 0n ? -v.n : v.n, v.d)), v.n < 0n, i === 0)).join('');
+    const steps = [`P(${xs}) =${line1 || ' 0'}`, `  =${line2 || ' 0'}`, `  =${line3 || ' 0'}`, `  = ${fmtFrac(result)}`];
 
     const results: CalculatorResult[] = [
-      {
-        id: 'polynomial',
-        label: 'Polynomial',
-        value: polyString,
-        highlight: true,
-        color: 'neutral',
-      },
-      {
-        id: 'degree',
-        label: 'Degree',
-        value: degree.toString(),
-        color: 'neutral',
-      },
-      {
-        id: 'evaluated',
-        label: `P(${fmt(x)})`,
-        value: fmt(result),
-        highlight: true,
-        color: 'positive',
-      },
-      {
-        id: 'work',
-        label: 'Substitution Steps',
-        value: steps.join('\n'),
-      },
+      { id: 'polynomial', label: 'Polynomial', value: polyString(coeffs), highlight: true, color: 'neutral' },
+      { id: 'degree', label: 'Degree', value: isZero ? '0 (zero polynomial)' : n.toString(), color: 'neutral' },
+      { id: 'evaluated', label: `P(${xs})`, value: fmtFrac(result), highlight: true, color: 'positive' },
+      { id: 'work', label: 'Substitution Steps', value: steps.join('\n') },
     ];
-
-    // Add info about leading coefficient
-    if (degree > 0) {
+    if (n > 0) {
+      results.push({ id: 'leadingCoeff', label: 'Leading Coefficient', value: fmtFrac(coeffs[0]), color: 'neutral' });
       results.push({
-        id: 'leadingCoeff',
-        label: 'Leading Coefficient',
-        value: fmt(coeffs[0]),
+        id: 'derivativeValue',
+        label: `P'(${xs}) (slope at x)`,
+        value: fmtFrac(evalHorner(derivativeCoeffs(coeffs), x)),
         color: 'neutral',
       });
     }
-
     return results;
   },
   extraPanel: (values, results) => {

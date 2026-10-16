@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import VectorCalculatorPanel from './VectorCalculatorPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { roundStr6, roundStrAuto } from '../../../lib/format';
+import { allFinite, angleDeg3, cross3, dot3, norm3, type V3 } from '../../../utils/vector';
 
 const vectorConfig: CalculatorConfig = {
   inputs: [
@@ -30,7 +33,7 @@ const vectorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '0',
       step: 0.1,
-      helpText: 'Z-component of the first vector (leave as 0 for 2D)',
+      helpText: 'Z-component of the first vector (leave blank for 2D)',
     },
     {
       id: 'v2x',
@@ -58,67 +61,45 @@ const vectorConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '0',
       step: 0.1,
-      helpText: 'Z-component of the second vector (leave as 0 for 2D)',
+      helpText: 'Z-component of the second vector (leave blank for 2D)',
     },
   ],
   calculate: (values) => {
-    const v1x = parseFloat(values.v1x);
-    const v1y = parseFloat(values.v1y);
-    const v1z = parseFloat(values.v1z || '0') || 0;
-    const v2x = parseFloat(values.v2x);
-    const v2y = parseFloat(values.v2y);
-    const v2z = parseFloat(values.v2z || '0') || 0;
+    const n = (k: string) => parseNumberStrict(values[k]);
+    // z is optional (blank means 2D); anything else that is not a number is rejected.
+    const z = (k: string) => ((values[k] ?? '').trim() === '' ? 0 : n(k));
+    const a: V3 = [n('v1x'), n('v1y'), z('v1z')];
+    const b: V3 = [n('v2x'), n('v2y'), z('v2z')];
+    if (!allFinite(...a, ...b)) return [];
 
-    if ([v1x, v1y, v2x, v2y].some(isNaN)) return [];
+    const fmt = roundStrAuto;
+    // 3D when either z field was filled in; otherwise show 2D vectors.
+    const is3D = (values.v1z ?? '').trim() !== '' || (values.v2z ?? '').trim() !== '';
+    const show = (v: V3) => `(${(is3D ? v : v.slice(0, 2)).map((x) => fmt(x)).join(', ')})`;
 
-    const fmt = (n: number) => {
-      if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-      return parseFloat(n.toFixed(6)).toString();
-    };
+    const sum = a.map((x, i) => x + b[i]) as V3;
+    const diff = a.map((x, i) => x - b[i]) as V3;
+    const mag1 = norm3(a);
+    const mag2 = norm3(b);
+    const dot = dot3(a, b);
+    const cross = cross3(a, b);
+    if (!allFinite(...sum, ...diff, mag1, mag2, dot, ...cross)) return [];
 
-    const is3D = values.v1z !== '' || values.v2z !== '';
-
-    // Addition
-    const sumX = v1x + v2x;
-    const sumY = v1y + v2y;
-    const sumZ = v1z + v2z;
-
-    // Subtraction
-    const diffX = v1x - v2x;
-    const diffY = v1y - v2y;
-    const diffZ = v1z - v2z;
-
-    // Magnitudes
-    const mag1 = Math.sqrt(v1x * v1x + v1y * v1y + v1z * v1z);
-    const mag2 = Math.sqrt(v2x * v2x + v2y * v2y + v2z * v2z);
-
-    // Dot product
-    const dot = v1x * v2x + v1y * v2y + v1z * v2z;
-
-    // Cross product (3D)
-    const crossX = v1y * v2z - v1z * v2y;
-    const crossY = v1z * v2x - v1x * v2z;
-    const crossZ = v1x * v2y - v1y * v2x;
-
-    // Angle between vectors
-    let angleDeg = 0;
-    if (mag1 > 0 && mag2 > 0) {
-      const cosTheta = dot / (mag1 * mag2);
-      angleDeg = Math.acos(Math.max(-1, Math.min(1, cosTheta))) * (180 / Math.PI);
-    }
+    const angle = angleDeg3(a, b);
+    const unit = (v: V3, m: number) => (m > 0 ? show(v.map((x) => x / m) as V3) : 'Undefined (zero vector)');
 
     return [
       {
         id: 'sum',
         label: `Sum (v₁ + v₂)`,
-        value: is3D ? `(${fmt(sumX)}, ${fmt(sumY)}, ${fmt(sumZ)})` : `(${fmt(sumX)}, ${fmt(sumY)})`,
+        value: show(sum),
         highlight: true,
         color: 'positive' as const,
       },
       {
         id: 'difference',
         label: `Difference (v₁ − v₂)`,
-        value: is3D ? `(${fmt(diffX)}, ${fmt(diffY)}, ${fmt(diffZ)})` : `(${fmt(diffX)}, ${fmt(diffY)})`,
+        value: show(diff),
         color: 'neutral' as const,
       },
       {
@@ -142,15 +123,18 @@ const vectorConfig: CalculatorConfig = {
       {
         id: 'crossProduct',
         label: 'Cross Product (v₁ × v₂)',
-        value: is3D ? `(${fmt(crossX)}, ${fmt(crossY)}, ${fmt(crossZ)})` : `(0, 0, ${fmt(crossZ)})`,
+        // 2D inputs are vectors in the xy-plane, so the cross product points along z: (0, 0, v₁x·v₂y − v₁y·v₂x).
+        value: `(${cross.map((x) => fmt(x)).join(', ')})`,
         color: 'neutral' as const,
       },
       {
         id: 'angleDeg',
         label: 'Angle Between',
-        value: `${fmt(angleDeg)}°`,
+        value: angle === null ? 'Undefined (a zero vector has no direction)' : `${roundStrAuto(angle)}°`,
         color: 'positive' as const,
       },
+      { id: 'unit1', label: 'Unit vector of v₁', value: unit(a, mag1), color: 'neutral' as const },
+      { id: 'unit2', label: 'Unit vector of v₂', value: unit(b, mag2), color: 'neutral' as const },
     ];
   },
   extraPanel: (values, results) => {
@@ -174,10 +158,10 @@ const vectorConfig: CalculatorConfig = {
       { symbol: 'a × b', name: 'Cross Product', description: 'The vector product: a 3D vector perpendicular to both a and b. Magnitude equals area of parallelogram.' },
     ],
     howToUse: [
-      'Enter the x, y, and z components of both vectors. For 2D vectors, leave the z components as 0.',
+      'Enter the x, y, and z components of both vectors. For 2D vectors, leave the z components blank.',
       'The calculator computes addition, subtraction, magnitudes, dot product, cross product, and the angle between vectors.',
       'Review the results: addition and subtraction show component-wise results; the angle shows how aligned the vectors are.',
-      'Vectors with z = 0 are treated as 2D vectors, but cross product results will still be displayed in 3D format.',
+      'If both z fields are blank the vectors are treated as 2D and sums, differences and unit vectors show two components; the cross product always has three, (0, 0, z), because it points out of the plane.',
     ],
     quickReference: [
       { label: 'Addition', value: 'v₁ + v₂ = (x₁+x₂, y₁+y₂, z₁+z₂)' },
@@ -201,7 +185,7 @@ const vectorConfig: CalculatorConfig = {
       },
       {
         question: 'Can I use this calculator for 2D vectors?',
-        answer: 'Yes! Simply leave the z-components as 0 (the default). The calculator will display 2D results for addition and subtraction, though the cross product is inherently a 3D operation. For 2D vectors, the cross product magnitude equals |v₁x·v₂y − v₁y·v₂x|, which represents the signed area of the parallelogram.',
+        answer: 'Yes! Simply leave the z-components blank. The calculator will display 2D results for addition and subtraction, though the cross product is inherently a 3D operation. For 2D vectors the cross product is (0, 0, v₁x·v₂y − v₁y·v₂x): its z-component is the signed area of the parallelogram, and the absolute value is the unsigned area.',
       },
       {
         question: 'What does a dot product of zero mean?',

@@ -1,34 +1,60 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PValuePanel from './PValuePanel';
-import Decimal from 'decimal.js';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { normSf, normCdf, normQuantile, tTwoTail, tSf, tCdf, tCritical, chiSqSf, chiSqCdf, chiSqCritical, fSf, fCdf, fCritical } from '../../../utils/distributions';
 
-// Decimal.js is used for precision in the tail-probability computation
-// (near-zero p-values) where IEEE 754 can lose significant digits.
-// The CDF approximations use native Math for speed; Decimal provides
-// verification on the final p-value rounding.
+type TestType = 'z' | 't' | 'chisq' | 'f';
+type Tails = 'one' | 'left' | 'two';
 
-// Abramowitz & Stegun approximation for standard normal CDF
-function normalCDF(x: number): number {
-  const a1 = 0.254829592;
-  const a2 = -0.284496736;
-  const a3 = 1.421413741;
-  const a4 = -1.453152027;
-  const a5 = 1.061405429;
-  const p = 0.3275911;
-  const sign = x < 0 ? -1 : 1;
-  x = Math.abs(x) / Math.sqrt(2);
-  const t = 1 / (1 + p * x);
-  const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-  return 0.5 * (1 + sign * y);
+/**
+ * p-value for the observed statistic. 'one' = upper (right) tail, 'left' = lower tail, 'two' = both tails.
+ * Tails are evaluated directly (never 1 - cdf), so p keeps full precision down to ~1e-300.
+ * Two-tailed for the asymmetric chi-square and F distributions is 2 x the smaller tail (capped at 1),
+ * the usual convention (e.g. a two-sided variance test).
+ */
+function pValueOf(test: TestType, stat: number, df1: number, df2: number, tails: Tails): number {
+  let right: number;
+  let left: number;
+  if (test === 'z') {
+    if (tails === 'two') return Math.min(1, 2 * normSf(Math.abs(stat)));
+    right = normSf(stat);
+    left = normCdf(stat);
+  } else if (test === 't') {
+    if (tails === 'two') return tTwoTail(stat, df1);
+    right = tSf(stat, df1);
+    left = tCdf(stat, df1);
+  } else if (test === 'chisq') {
+    right = chiSqSf(stat, df1);
+    left = chiSqCdf(stat, df1);
+  } else {
+    right = fSf(stat, df1, df2);
+    left = fCdf(stat, df1, df2);
+  }
+  if (tails === 'two') return Math.min(1, 2 * Math.min(left, right));
+  return tails === 'left' ? left : right;
 }
 
-function pValueFromZ(z: number, tails: 'one' | 'two'): number {
-  const prob = normalCDF(z);
-  if (tails === 'two') {
-    return 2 * Math.min(prob, 1 - prob);
+/** Critical value(s) for the chosen alpha, as a display string (3 decimals). */
+function criticalOf(test: TestType, alpha: number, df1: number, df2: number, tails: Tails): string {
+  const f3 = (x: number) => (Number.isFinite(x) ? x.toFixed(3) : '—');
+  if (test === 'z') {
+    const c = normQuantile(1 - (tails === 'two' ? alpha / 2 : alpha));
+    return tails === 'two' ? `±${f3(c)}` : tails === 'left' ? `−${f3(c)}` : f3(c);
   }
-  return 1 - prob;
+  if (test === 't') {
+    const c = tCritical(tails === 'two' ? alpha : 2 * alpha, df1);
+    return tails === 'two' ? `±${f3(c)}` : tails === 'left' ? `−${f3(c)}` : f3(c);
+  }
+  const upper = (a: number) => (test === 'chisq' ? chiSqCritical(a, df1) : fCritical(a, df1, df2));
+  if (tails === 'two') return `[${f3(upper(1 - alpha / 2))}, ${f3(upper(alpha / 2))}]`;
+  return tails === 'left' ? f3(upper(1 - alpha)) : f3(upper(alpha));
+}
+
+/** 6 significant digits; exponent form below 1e-4 so tiny p-values never display as 0. */
+function fmtP(p: number): string {
+  if (p === 0) return '< 1e-300';
+  return p >= 1e-4 ? String(parseFloat(p.toPrecision(6))) : p.toExponential(5);
 }
 
 function getInterpretation(p: number, alpha: number): { significant: boolean; text: string; strength: string } {
@@ -44,88 +70,14 @@ function getInterpretation(p: number, alpha: number): { significant: boolean; te
     return {
       significant: true,
       strength,
-      text: `Since p = ${p.toFixed(6)} < α = ${alpha}, the results are statistically significant. You can reject the null hypothesis. ${strength}.`,
+      text: `Since p = ${fmtP(p)} < α = ${alpha}, the results are statistically significant. You can reject the null hypothesis. ${strength}.`,
     };
   }
   return {
     significant: false,
     strength,
-    text: `Since p = ${p.toFixed(6)} ≥ α = ${alpha}, the results are not statistically significant. You fail to reject the null hypothesis. ${strength}.`,
+    text: `Since p = ${fmtP(p)} ≥ α = ${alpha}, the results are not statistically significant. You fail to reject the null hypothesis. ${strength}.`,
   };
-}
-
-// Student's t-distribution CDF approximation (best-effort for df > 0)
-function tCDF(t: number, df: number): number {
-  // For large df, approximate with normal
-  if (df > 100) return normalCDF(t);
-
-  // Use regularized incomplete beta function approximation
-  const x = df / (df + t * t);
-  if (t >= 0) {
-    return 1 - 0.5 * regularizedIncompleteBeta(df / 2, 0.5, x);
-  }
-  return 0.5 * regularizedIncompleteBeta(df / 2, 0.5, x);
-}
-
-// Regularized incomplete beta function I_x(a,b) using continued fraction
-function regularizedIncompleteBeta(a: number, b: number, x: number): number {
-  if (x < 0 || x > 1) return 0;
-  if (x === 0 || x === 1) return x;
-
-  // Symmetry transformation for better convergence when x is large
-  if (x > (a + 1) / (a + b + 2)) {
-    return 1 - regularizedIncompleteBeta(b, a, 1 - x);
-  }
-
-  // Lanczos approximation for log-Gamma (9-term, g=7)
-  const logGamma = (z: number): number => {
-    if (z < 0.5) {
-      return Math.log(Math.PI / Math.sin(Math.PI * z)) - logGamma(1 - z);
-    }
-    const zz = z - 1;
-    const c = [
-      0.99999999999980993,
-      676.5203681218851,
-      -1259.1392167224028,
-      771.32342877765313,
-      -176.61502916214059,
-      12.507343278686905,
-      -0.13857109526572012,
-      9.9843695780195716e-6,
-      1.5056327351493116e-7,
-    ];
-    let sum = c[0];
-    for (let i = 1; i < 9; i++) {
-      sum += c[i] / (zz + i);
-    }
-    const t = zz + 7.5;
-    return 0.5 * Math.log(2 * Math.PI) + (zz + 0.5) * Math.log(t) - t + Math.log(sum);
-  };
-
-  const logBeta = logGamma(a) + logGamma(b) - logGamma(a + b);
-
-  // Front factor: x^a * (1-x)^b / (a * B(a,b)) in log space
-  const logFront = a * Math.log(x) + b * Math.log(1 - x) - Math.log(a) - logBeta;
-  if (logFront < -745) return 0; // underflow threshold
-
-  const front = Math.exp(logFront);
-
-  const MAX_ITER = 200;
-  let f = 0;
-
-  for (let m = MAX_ITER; m >= 1; m--) {
-    let d: number;
-    if (m % 2 === 0) {
-      const j = m / 2;
-      d = (j * (b - j) * x) / ((a + 2 * j - 1) * (a + 2 * j));
-    } else {
-      const j = (m - 1) / 2;
-      d = -((a + j) * (a + b + j) * x) / ((a + 2 * j) * (a + 2 * j + 1));
-    }
-    f = d / (1 + f);
-  }
-
-  return front / (1 + f);
 }
 
 const pValueConfig: CalculatorConfig = {
@@ -138,26 +90,40 @@ const pValueConfig: CalculatorConfig = {
       options: [
         { label: 'Z-test (from Z-score)', value: 'z' },
         { label: 'T-test (from T-score)', value: 't' },
+        { label: 'Chi-square test (χ² statistic)', value: 'chisq' },
+        { label: 'F-test (F statistic, ANOVA / variance ratio)', value: 'f' },
       ],
     },
     {
       id: 'score',
-      label: 'Test Statistic (Z or T)',
+      label: 'Test Statistic (Z, T, χ² or F)',
       type: 'number',
       placeholder: '2.13',
       step: 0.001,
       inputMode: 'decimal',
-      helpText: 'The calculated Z-score (population SD known) or T-score (sample SD estimate). Positive values indicate the sample mean is above the null hypothesis value.',
+      helpText: 'The calculated Z-score (population SD known), T-score (sample SD estimate), χ² or F statistic. Z and T may be negative; χ² and F cannot.',
     },
     {
       id: 'df',
-      label: 'Degrees of Freedom (df)',
+      label: 'Degrees of Freedom (df, or numerator df for F)',
       type: 'number',
       placeholder: '30',
       min: 1,
-      step: 1,
-      inputMode: 'numeric',
-      helpText: 'Required for t-test only. Typically n − 1 for a single sample, or (n₁ + n₂ − 2) for a two-sample t-test. Higher df makes the t-distribution approach the normal distribution.',
+      step: 0.01,
+      inputMode: 'decimal',
+      showWhen: (v) => v.testType === 't' || v.testType === 'chisq' || v.testType === 'f',
+      helpText: 'Required for t, χ² and F tests. t-test: n − 1 (one sample) or n₁ + n₂ − 2 (pooled two-sample); fractional df from Welch-Satterthwaite is accepted. χ² test: (rows − 1)(columns − 1) or categories − 1.',
+    },
+    {
+      id: 'df2',
+      label: 'Denominator Degrees of Freedom (df₂)',
+      type: 'number',
+      placeholder: '20',
+      min: 1,
+      step: 0.01,
+      inputMode: 'decimal',
+      showWhen: (v) => v.testType === 'f',
+      helpText: 'F test only: the denominator (error) degrees of freedom, e.g. N − k in a one-way ANOVA.',
     },
     {
       id: 'alpha',
@@ -176,70 +142,59 @@ const pValueConfig: CalculatorConfig = {
       type: 'select',
       required: true,
       options: [
-        { label: 'One-tailed (directional hypothesis)', value: 'one' },
+        { label: 'One-tailed, upper (H₁: statistic is larger)', value: 'one' },
+        { label: 'One-tailed, lower (H₁: statistic is smaller)', value: 'left' },
         { label: 'Two-tailed (non-directional hypothesis)', value: 'two' },
       ],
     },
   ],
   calculate: (values) => {
-    const testType = values.testType || 'z';
-    const score = parseFloat(values.score);
-    const df = parseInt(values.df);
-    const alpha = parseFloat(values.alpha);
-    const tails = (values.tails || 'two') as 'one' | 'two';
+    const testType: TestType = values.testType === 't' || values.testType === 'chisq' || values.testType === 'f' ? values.testType : 'z';
+    const score = parseNumberStrict(values.score);
+    const df = parseNumberStrict(values.df);
+    const df2 = parseNumberStrict(values.df2);
+    const alpha = parseNumberStrict(values.alpha);
+    const tails: Tails = values.tails === 'one' || values.tails === 'left' ? values.tails : 'two';
 
     if (isNaN(score) || isNaN(alpha) || alpha <= 0 || alpha >= 1) return [];
-    if (testType === 't' && (isNaN(df) || df < 1)) return [];
+    if (testType !== 'z' && (isNaN(df) || df < 1)) return [];
+    if (testType === 'f' && (isNaN(df2) || df2 < 1)) return [];
+    if ((testType === 'chisq' || testType === 'f') && score < 0) return [];
 
-    let p: number;
-    if (testType === 'z') {
-      p = pValueFromZ(score, tails);
-    } else {
-      const prob = tCDF(score, df);
-      p = tails === 'two' ? 2 * Math.min(prob, 1 - prob) : 1 - prob;
-    }
-
-    // Clamp p-value to [0, 1]
-    p = Math.max(0, Math.min(1, p));
-
-    // Use Decimal for precise rounding of the p-value
-    let pDisplay: string;
-    try {
-      pDisplay = new Decimal(p).toPrecision(6);
-    } catch {
-      pDisplay = p.toFixed(6);
-    }
+    // Exact tails from src/utils/distributions.ts (verified against scipy.stats to ~1e-12 relative).
+    const p = Math.max(0, Math.min(1, pValueOf(testType, score, df, df2, tails)));
+    if (Number.isNaN(p)) return [];
+    const pDisplay = fmtP(p);
 
     const interpretation = getInterpretation(p, alpha);
 
     // Confidence level
-    const confidenceLevel = `${((1 - alpha) * 100).toFixed(0)}%`;
+    const confidenceLevel = `${parseFloat(((1 - alpha) * 100).toFixed(2))}%`;
 
-    // Critical value approximation (for common alpha levels)
-    const getCriticalValue = (a: number, tailType: 'one' | 'two'): string => {
-      const zCrit: Record<string, Record<string, number>> = {
-        '0.01': { one: 2.326, two: 2.576 },
-        '0.05': { one: 1.645, two: 1.960 },
-        '0.10': { one: 1.282, two: 1.645 },
-      };
-      const crit = zCrit[alpha.toString()]?.[tailType];
-      return crit ? crit.toFixed(3) : 'varies by test';
-    };
-
-    const criticalValue = getCriticalValue(alpha, tails);
+    // Exact critical value(s) for this alpha / tails / distribution (the old table only covered z).
+    const criticalValue = criticalOf(testType, alpha, df, df2, tails);
+    const distLabel =
+      testType === 'z'
+        ? 'Standard Normal (Z)'
+        : testType === 't'
+          ? `Student's t (df = ${df})`
+          : testType === 'chisq'
+            ? `Chi-square (df = ${df})`
+            : `F (df₁ = ${df}, df₂ = ${df2})`;
+    const tailLabel = tails === 'two' ? 'Two-tailed (non-directional)' : tails === 'left' ? 'One-tailed, lower' : 'One-tailed, upper';
 
     const results = [
       { id: 'pValue', label: 'p-value', value: pDisplay, highlight: true, color: (p < alpha ? 'positive' : 'neutral') as 'positive' | 'neutral' },
       { id: 'alpha', label: 'Significance Level (α)', value: alpha.toString(), color: 'neutral' as const },
       { id: 'confidence', label: 'Confidence Level', value: confidenceLevel, color: 'neutral' as const },
-      { id: 'criticalValue', label: `Critical Value (${tails === 'one' ? 'one' : 'two'}-tailed)`, value: criticalValue, color: 'neutral' as const },
+      { id: 'criticalValue', label: `Critical Value (${tails === 'two' ? 'two' : 'one'}-tailed)`, value: criticalValue, color: 'neutral' as const },
       { id: 'significant', label: 'Statistically Significant?', value: interpretation.significant ? 'Yes' : 'No', color: (interpretation.significant ? 'positive' : 'negative') as 'positive' | 'negative' },
       { id: 'action', label: 'Action', value: interpretation.significant ? 'Reject the null hypothesis H₀' : 'Fail to reject the null hypothesis H₀', color: (interpretation.significant ? 'positive' : 'neutral') as 'positive' | 'neutral' },
       { id: 'strength', label: 'Evidence Strength', value: interpretation.strength, color: (interpretation.significant ? 'positive' : 'neutral') as 'positive' | 'neutral' },
       { id: 'conclusion', label: 'Conclusion', value: interpretation.text, color: (interpretation.significant ? 'positive' : 'neutral') as 'positive' | 'neutral' },
       { id: 'testStatistic', label: 'Test Statistic', value: score.toString(), color: 'neutral' as const },
-      { id: 'testType', label: 'Test Distribution', value: testType === 'z' ? 'Standard Normal (Z)' : `Student\'s t (df = ${df || '?'})`, color: 'neutral' as const },
-      { id: 'tails', label: 'Test Direction', value: tails === 'one' ? 'One-tailed (directional)' : 'Two-tailed (non-directional)', color: 'neutral' as const },
+      { id: 'testType', label: 'Test Distribution', value: distLabel, color: 'neutral' as const },
+      { id: 'tails', label: 'Test Direction', value: tailLabel, color: 'neutral' as const },
     ];
 
     return results;
@@ -265,17 +220,17 @@ const pValueConfig: CalculatorConfig = {
       { symbol: 'df', name: 'Degrees of Freedom', description: 'A parameter of the t-distribution controlling its shape. Typically n − 1 for a single sample t-test. As df → ∞, the t-distribution converges to the standard normal distribution. For df > 30, the normal approximation is reasonable.' },
     ],
     howToUse: [
-      'Select Z-test or T-test based on your data. Use Z when the population standard deviation is known or the sample size is large (n > 30). Use T when the standard deviation is estimated from the sample.',
+      'Select Z-test, T-test, chi-square or F-test based on the statistic you computed. Use Z when the population standard deviation is known or the sample size is large (n > 30). Use T when the standard deviation is estimated from the sample.',
       'Enter the test statistic (Z-score or T-score). For Z-tests, typical values between -4 and +4 are common; values beyond ±6 indicate extremely strong evidence.',
-      'For T-tests, enter the degrees of freedom (df). For a single sample, df = n − 1. For a two-sample test with equal variances, df = n₁ + n₂ − 2.',
+      'For T-tests, enter the degrees of freedom (df). For a single sample, df = n − 1. For a two-sample test with equal variances, df = n₁ + n₂ − 2. Chi-square tests need one df; F tests need numerator and denominator df (for a one-way ANOVA with k groups and N observations: k − 1 and N − k). Chi-square and F tests are normally read from the upper tail.',
       'Choose your significance level α: 0.05 is standard for most research fields; 0.01 is used in medical and safety-critical contexts where false positives are costly; 0.10 is for exploratory or preliminary research.',
       'Select the test direction: one-tailed if your hypothesis predicts a specific direction (e.g., "the new drug lowers blood pressure"), two-tailed if it only predicts a difference (e.g., "the drug changes blood pressure"). Two-tailed is more conservative and is the default in most scientific publications.',
       'Interpret the results: the calculator provides the p-value, the evidence strength category, a plain-English conclusion, and the critical value for your chosen α.',
     ],
     explanation:
-      'The p-value approach to hypothesis testing, developed by Ronald Fisher in the 1920s and later integrated with the Neyman-Pearson framework, is the dominant paradigm for statistical inference across scientific research. A p-value less than the chosen significance level α indicates that the observed result would be unlikely under the null hypothesis — suggesting the effect is real rather than due to random chance. However, the p-value is one of the most widely misunderstood concepts in statistics. A common but incorrect interpretation is that the p-value is the probability that the null hypothesis is true — it is NOT. It is the probability of observing data at least as extreme as yours IF the null hypothesis were true: P(data | H₀), not P(H₀ | data). Also, statistical significance does NOT imply practical significance: with a very large sample size, even a trivially small effect can achieve p < 0.05. Always consider the effect size (Cohen\'s d, r², or confidence intervals) alongside the p-value. The American Statistical Association\'s 2016 statement on p-values emphasized these points and recommended reporting effect sizes and confidence intervals alongside p-values. The calculator computes p-values using the Abramowitz and Stegun approximation for the normal CDF and a regularized incomplete beta function for the t-distribution, providing accuracy to approximately 6 decimal places.',
+      'The p-value approach to hypothesis testing, developed by Ronald Fisher in the 1920s and later integrated with the Neyman-Pearson framework, is the dominant paradigm for statistical inference across scientific research. A p-value less than the chosen significance level α indicates that the observed result would be unlikely under the null hypothesis — suggesting the effect is real rather than due to random chance. However, the p-value is one of the most widely misunderstood concepts in statistics. A common but incorrect interpretation is that the p-value is the probability that the null hypothesis is true — it is NOT. It is the probability of observing data at least as extreme as yours IF the null hypothesis were true: P(data | H₀), not P(H₀ | data). Also, statistical significance does NOT imply practical significance: with a very large sample size, even a trivially small effect can achieve p < 0.05. Always consider the effect size (Cohen\'s d, r², or confidence intervals) alongside the p-value. The American Statistical Association\'s 2016 statement on p-values emphasized these points and recommended reporting effect sizes and confidence intervals alongside p-values. The calculator evaluates the normal, Student t, chi-square and F distributions with the regularized incomplete gamma and beta functions (series and continued fractions), computing each tail directly rather than as 1 − CDF, so p-values agree with SciPy to about 12 significant digits even in the extreme tail (for example Z = 10 gives p = 1.5 × 10⁻²³ two-tailed).',
     commonUses: [
-      'Medical and pharmaceutical research: comparing treatment vs. placebo groups in randomized controlled trials, with p < 0.05 typically required for FDA drug approval',
+      'Medical and pharmaceutical research: comparing treatment vs. placebo groups in randomized controlled trials, where p < 0.05 is the conventional significance threshold (regulators also look at effect size and replication)',
       'A/B testing for websites and apps: comparing conversion rates between two versions of a landing page to determine if design changes significantly improve user behavior',
       'Quality control in manufacturing: testing whether a production batch meets specifications by comparing the sample mean to the target value',
       'Psychology and social sciences: testing hypotheses about human behavior using surveys and experiments — the replication crisis has led to calls for lower α thresholds (e.g., 0.005)',
@@ -293,13 +248,13 @@ const pValueConfig: CalculatorConfig = {
         scenario: 'An education researcher wants to know if a new teaching method improves test scores. A class of 25 students is taught with the new method and their mean score is 78 (SD = 10). The traditional method has a known mean of 75. Is the improvement significant? Use a one-tailed t-test at α = 0.05 with df = 24.',
         inputs: { testType: 't', score: '1.5', df: '24', alpha: '0.05', tails: 'one' },
         result: 'p ≈ 0.073. Not significant at α = 0.05 — fail to reject H₀. The improvement could be due to random variation; consider increasing sample size.',
-        insight: 'T = (78 − 75) / (10/√25) = 3 / 2 = 1.5. The one-tailed p-value for T=1.5 with df=24 is approximately 0.073. Since p ≥ 0.05, the result is NOT statistically significant at the 5% level. The improvement could be due to random variation. The researcher might consider increasing the sample size — with 25 students, the test has limited power to detect small effects. If the same T-score were observed with df=100, the p-value would drop below 0.05, illustrating how larger samples provide more statistical power.',
+        insight: 'T = (78 − 75) / (10/√25) = 3 / 2 = 1.5. The one-tailed p-value for T=1.5 with df=24 is approximately 0.073. Since p ≥ 0.05, the result is NOT statistically significant at the 5% level. The improvement could be due to random variation. The researcher might consider increasing the sample size — with 25 students, the test has limited power to detect small effects. Note that the same T-score of 1.5 with df = 100 still gives p ≈ 0.068, so a bigger sample only helps when it also produces a larger T-score (a bigger sample shrinks the standard error s/√n, which is what raises T for a real effect).',
       },
       {
-        scenario: 'A data scientist runs an A/B test on a website\'s checkout button. Variant A (original, blue button) had 1,000 visitors and 50 purchases (5.0% conversion). Variant B (new, green button) had 1,000 visitors and 65 purchases (6.5% conversion). The Z-score for the difference in proportions is approximately 1.46. Is the green button significantly better at α = 0.05, two-tailed?',
-        inputs: { testType: 'z', score: '1.46', alpha: '0.05', tails: 'two' },
-        result: 'p ≈ 0.144. Not significant at α = 0.05 — fail to reject H₀. Despite the 1.5pp improvement, the sample size is insufficient to rule out chance. Run the test longer.',
-        insight: 'The two-tailed p-value is approximately 0.144. Since p ≥ 0.05, the difference is NOT statistically significant at the 5% level. Despite the 1.5 percentage point improvement in observed conversion rate, the sample size is insufficient to rule out chance. The data scientist should either run the test longer to collect more data or accept that the current evidence is suggestive but not conclusive. This illustrates why A/B test calculators usually require minimum sample sizes before declaring a winner.',
+        scenario: 'A data scientist runs an A/B test on a website\'s checkout button. Variant A (original, blue button) had 1,000 visitors and 50 purchases (5.0% conversion). Variant B (new, green button) had 1,000 visitors and 65 purchases (6.5% conversion). The pooled two-proportion Z-score for the difference is (0.065 − 0.050) / √(0.0575 × 0.9425 × 2/1000) ≈ 1.44. Is the green button significantly better at α = 0.05, two-tailed?',
+        inputs: { testType: 'z', score: '1.44', alpha: '0.05', tails: 'two' },
+        result: 'p ≈ 0.150. Not significant at α = 0.05 — fail to reject H₀. Despite the 1.5pp improvement, the sample size is insufficient to rule out chance. Run the test longer.',
+        insight: 'The two-tailed p-value is approximately 0.150. Since p ≥ 0.05, the difference is NOT statistically significant at the 5% level. Despite the 1.5 percentage point improvement in observed conversion rate, the sample size is insufficient to rule out chance. The data scientist should either run the test longer to collect more data or accept that the current evidence is suggestive but not conclusive. This illustrates why A/B test calculators usually require minimum sample sizes before declaring a winner.',
       },
     ],
     proTips: [
@@ -309,11 +264,11 @@ const pValueConfig: CalculatorConfig = {
       'When in doubt, use a two-tailed test. One-tailed tests should only be used when you have a strong directional hypothesis with a theoretical basis — and you genuinely would not care about an effect in the opposite direction.',
     ],
     limitations: [
-      'For extreme Z-scores (|Z| > 8), the p-value may be reported as 0 or 1 due to floating-point precision limits — the effect is overwhelmingly significant or non-significant and the exact p-value is not meaningful.',
-      'The t-distribution approximation becomes less accurate for very small degrees of freedom (df < 3) and very large T-scores.',
+      'p-values below about 1e-300 underflow and are shown as "< 1e-300"; such results are overwhelming evidence and the exact value is not meaningful.',
+      'For chi-square and F tests the two-tailed p-value is 2 × the smaller tail (capped at 1), the usual convention for variance tests; most chi-square and ANOVA tests use the upper (right) tail only.',
       'This calculator does NOT compute the test statistic from raw data — you must compute the Z-score or T-score yourself using the appropriate formula.',
       'It does not compute confidence intervals, effect sizes, or perform power analysis.',
-      'Do not use for non-parametric tests (Mann-Whitney, Wilcoxon, Kruskal-Wallis), F-tests (ANOVA), chi-square tests, or multiple comparisons without correction (Bonferroni, Holm, Benjamini-Hochberg).',
+      'Do not use for non-parametric tests (Mann-Whitney, Wilcoxon, Kruskal-Wallis) unless you already have a Z, t, χ² or F statistic for them, or for multiple comparisons without correction (Bonferroni, Holm, Benjamini-Hochberg).',
     ],
     quickReference: [
       { label: 'p < α', value: 'Reject H₀ — result is statistically significant' },
@@ -334,7 +289,7 @@ const pValueConfig: CalculatorConfig = {
       },
       {
         question: 'What is the difference between one-tailed and two-tailed tests?',
-        answer: 'A one-tailed test checks for an effect in one specific direction only (e.g., "the new drug LOWERS blood pressure"). A two-tailed test checks for an effect in either direction (e.g., "the new drug CHANGES blood pressure"). The two-tailed p-value is always twice the one-tailed p-value for the same test statistic, making it more conservative (harder to reject H₀). Two-tailed tests are the standard in most scientific publications because they do not assume you know the direction of the effect in advance. Only use a one-tailed test when you have a strong theoretical reason to predict the direction AND you genuinely would not care about a finding in the opposite direction.',
+        answer: 'A one-tailed test checks for an effect in one specific direction only (e.g., "the new drug LOWERS blood pressure"). A two-tailed test checks for an effect in either direction (e.g., "the new drug CHANGES blood pressure"). For the symmetric Z and t distributions, when the statistic falls in the predicted direction, the two-tailed p-value is exactly twice the one-tailed p-value, making it more conservative (harder to reject H₀). Two-tailed tests are the standard in most scientific publications because they do not assume you know the direction of the effect in advance. Only use a one-tailed test when you have a strong theoretical reason to predict the direction AND you genuinely would not care about a finding in the opposite direction.',
       },
       {
         question: 'What significance level (α) should I use for my research?',
@@ -357,7 +312,8 @@ const pValueConfig: CalculatorConfig = {
       { source: 'NIST/SEMATECH - Engineering Statistics Handbook: Hypothesis Testing', url: 'https://www.itl.nist.gov/div898/handbook/eda/section3/eda35.htm' },
       { source: 'Wikipedia - P-value', url: 'https://en.wikipedia.org/wiki/P-value' },
       { source: 'American Statistical Association - Statement on p-Values (2016)', url: 'https://www.tandfonline.com/doi/full/10.1080/00031305.2016.1154108' },
-      { source: 'Abramowitz & Stegun - Handbook of Mathematical Functions (Normal CDF approximation)', url: 'https://en.wikipedia.org/wiki/Error_function#Numerical_approximations' },
+      { source: 'Wikipedia - Incomplete gamma function (chi-square and normal tails)', url: 'https://en.wikipedia.org/wiki/Incomplete_gamma_function' },
+      { source: 'Wikipedia - Beta function, incomplete beta (t and F tails)', url: 'https://en.wikipedia.org/wiki/Beta_function#Incomplete_beta_function' },
     ],
   },
 };

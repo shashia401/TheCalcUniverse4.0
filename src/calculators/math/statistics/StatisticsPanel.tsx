@@ -11,6 +11,10 @@ interface BoxData {
   median: number;
   q3: number;
   max: number;
+  mean: number;
+  /** Tukey whisker ends: the most extreme values that are not outliers. */
+  whiskerLo: number;
+  whiskerHi: number;
   outliers: number[];
 }
 
@@ -24,10 +28,10 @@ export default function StatisticsPanel({ results }: Props) {
 
   if (!boxPlotRow) return null;
 
-  let data: BoxData = { min: 0, q1: 0, median: 0, q3: 0, max: 0, outliers: [] };
+  let data: BoxData = { min: 0, q1: 0, median: 0, q3: 0, max: 0, mean: 0, whiskerLo: 0, whiskerHi: 0, outliers: [] };
   try { data = JSON.parse(boxPlotRow.value); } catch { return null; }
 
-  const { min, q1, median: q2, q3, max, outliers } = data;
+  const { min, q1, median: q2, q3, max, mean, outliers, whiskerLo, whiskerHi } = data;
   const dataRange = max - min || 1;
   const padding = dataRange * 0.1;
   const plotMin = min - padding;
@@ -59,32 +63,34 @@ export default function StatisticsPanel({ results }: Props) {
         {/* SVG Box Plot */}
         <div className="flex justify-center">
           <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} className="max-w-full h-auto" style={{ maxWidth: 450 }} role="img" aria-label="Box plot chart showing min, Q1, median, Q3, and max">
-            {/* Whisker line (min to q1) */}
-            <line x1={scale(min)} y1={yCenter} x2={scale(q1)} y2={yCenter} stroke="#64748b" strokeWidth="2" />
-            {/* Whisker line (q3 to max) */}
-            <line x1={scale(q3)} y1={yCenter} x2={scale(max)} y2={yCenter} stroke="#64748b" strokeWidth="2" />
+            {/* Whisker line (lowest non-outlier to q1) */}
+            <line x1={scale(whiskerLo)} y1={yCenter} x2={scale(q1)} y2={yCenter} stroke="#64748b" strokeWidth="2" />
+            {/* Whisker line (q3 to highest non-outlier) */}
+            <line x1={scale(q3)} y1={yCenter} x2={scale(whiskerHi)} y2={yCenter} stroke="#64748b" strokeWidth="2" />
             {/* Whisker ends */}
-            <line x1={scale(min)} y1={yCenter - 12} x2={scale(min)} y2={yCenter + 12} stroke="#64748b" strokeWidth="2" />
-            <line x1={scale(max)} y1={yCenter - 12} x2={scale(max)} y2={yCenter + 12} stroke="#64748b" strokeWidth="2" />
+            <line x1={scale(whiskerLo)} y1={yCenter - 12} x2={scale(whiskerLo)} y2={yCenter + 12} stroke="#64748b" strokeWidth="2" />
+            <line x1={scale(whiskerHi)} y1={yCenter - 12} x2={scale(whiskerHi)} y2={yCenter + 12} stroke="#64748b" strokeWidth="2" />
             {/* Box (q1 to q3) */}
             <rect x={scale(q1)} y={yCenter - boxH / 2} width={scale(q3) - scale(q1)} height={boxH} fill="rgba(59,130,246,0.15)" stroke="#3b82f6" strokeWidth="2" rx="2" />
             {/* Median line */}
             <line x1={scale(q2)} y1={yCenter - boxH / 2} x2={scale(q2)} y2={yCenter + boxH / 2} stroke="#ef4444" strokeWidth="2.5" />
             {/* Mean diamond */}
-            {meanRow && (
-              <polygon
-                points={`${scale(parseFloat(meanRow.value))},${yCenter - boxH / 2 - 8} ${scale(parseFloat(meanRow.value)) + 6},${yCenter - boxH / 2 - 3} ${scale(parseFloat(meanRow.value))},${yCenter - boxH / 2 + 2} ${scale(parseFloat(meanRow.value)) - 6},${yCenter - boxH / 2 - 3}`}
-                fill="#8b5cf6"
-              />
-            )}
+            <polygon
+              points={`${scale(mean)},${yCenter - boxH / 2 - 8} ${scale(mean) + 6},${yCenter - boxH / 2 - 3} ${scale(mean)},${yCenter - boxH / 2 + 2} ${scale(mean) - 6},${yCenter - boxH / 2 - 3}`}
+              fill="#6d28d9"
+            >
+              <title>{`Mean: ${fmt(mean)}`}</title>
+            </polygon>
             {/* Outlier points */}
             {outliers.map((v, i) => (
-              <circle key={`item-${i}`} cx={scale(v)} cy={yCenter} r="4" fill="#ef4444" stroke="white" strokeWidth="1.5" />
+              <circle key={`item-${i}`} cx={scale(v)} cy={yCenter} r="4" fill="#b91c1c" stroke="white" strokeWidth="1.5">
+                <title>{`Outlier: ${fmt(v)}`}</title>
+              </circle>
             ))}
             {/* Labels */}
             <text x={scale(min)} y={yCenter + boxH / 2 + 18} textAnchor="middle" fill="#64748b" fontSize="9" className="text-[9px]">{fmt(min)}</text>
             <text x={scale(q1)} y={yCenter + boxH / 2 + 18} textAnchor="middle" fill="#64748b" fontSize="9" className="text-[9px]">Q₁={fmt(q1)}</text>
-            <text x={scale(q2)} y={yCenter - boxH / 2 - 10} textAnchor="middle" fill="#ef4444" fontSize="10" fontWeight="bold" className="text-[10px]">M={fmt(q2)}</text>
+            <text x={scale(q2)} y={yCenter - boxH / 2 - 10} textAnchor="middle" fill="#b91c1c" fontSize="10" fontWeight="bold" className="text-[10px]">M={fmt(q2)}</text>
             <text x={scale(q3)} y={yCenter + boxH / 2 + 18} textAnchor="middle" fill="#64748b" fontSize="9" className="text-[9px]">Q₃={fmt(q3)}</text>
             <text x={scale(max)} y={yCenter + boxH / 2 + 18} textAnchor="middle" fill="#64748b" fontSize="9" className="text-[9px]">{fmt(max)}</text>
           </svg>
@@ -93,11 +99,11 @@ export default function StatisticsPanel({ results }: Props) {
         {/* Outlier warning */}
         {outliers.length > 0 && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-red-700 mb-1">
               {outliers.length} Outlier{outliers.length > 1 ? 's' : ''} Detected
             </p>
             <p className="text-sm font-mono text-red-700 font-bold">{outlierRow?.value}</p>
-            <p className="text-xs text-red-600 mt-1">
+            <p className="text-xs text-red-700 mt-1">
               Values outside Q1 − 1.5×IQR or Q3 + 1.5×IQR are considered statistical outliers and plotted as individual points on the box plot.
             </p>
           </div>

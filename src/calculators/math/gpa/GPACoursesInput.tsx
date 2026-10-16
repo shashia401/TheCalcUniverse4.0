@@ -94,6 +94,7 @@ export default function GPACoursesInput({ id, value, onChange, errors }: Props) 
               <input
                 type="text"
                 placeholder="Course name"
+                aria-label={`Course ${i + 1} name`}
                 value={row.name}
                 onChange={(e) => updateRow(i, 'name', e.target.value)}
                 className={`${baseInput} ${baseBorder} px-2.5 py-2 text-xs`}
@@ -107,7 +108,7 @@ export default function GPACoursesInput({ id, value, onChange, errors }: Props) 
                 value={row.grade}
                 onChange={(e) => updateRow(i, 'grade', e.target.value)}
                 className={`${baseInput} ${baseBorder} px-2 py-2 text-xs`}
-                aria-label="Grade"
+                aria-label={`Course ${i + 1} grade`}
                 required
               >
                 <option value="">Grade *</option>
@@ -123,6 +124,7 @@ export default function GPACoursesInput({ id, value, onChange, errors }: Props) 
                 type="text"
                 inputMode="decimal"
                 placeholder="Credits *"
+                aria-label={`Course ${i + 1} credits`}
                 value={row.credits}
                 onChange={(e) => updateRow(i, 'credits', e.target.value)}
                 className={`${baseInput} ${baseBorder} px-2 py-2 text-xs`}
@@ -137,7 +139,7 @@ export default function GPACoursesInput({ id, value, onChange, errors }: Props) 
                 value={row.weight}
                 onChange={(e) => updateRow(i, 'weight', e.target.value)}
                 className={`${baseInput} ${baseBorder} px-2 py-2 text-xs`}
-                aria-label="Weight"
+                aria-label={`Course ${i + 1} weight`}
               >
                 {WEIGHT_OPTIONS.map((w) => (
                   <option key={w.value} value={w.value}>{w.label}</option>
@@ -150,8 +152,8 @@ export default function GPACoursesInput({ id, value, onChange, errors }: Props) 
               type="button"
               onClick={() => removeRow(i)}
               disabled={courses.length <= 1}
-              className="flex-shrink-0 self-center sm:self-start p-2 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              aria-label="Remove course"
+              className="flex-shrink-0 self-center sm:self-start p-2 rounded-md text-slate-600 hover:text-red-700 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              aria-label={`Remove course ${i + 1}`}
               title="Remove course"
             >
               <Trash2 size={14} />
@@ -170,7 +172,7 @@ export default function GPACoursesInput({ id, value, onChange, errors }: Props) 
       </button>
 
       {errors?.[id] && (
-        <p id={`${id}-error`} className="text-xs text-red-500" role="alert">{errors[id]}</p>
+        <p id={`${id}-error`} className="text-xs text-red-700" role="alert">{errors[id]}</p>
       )}
       {!errors?.[id] && <div className="min-h-[1.25rem]" />}
     </fieldset>

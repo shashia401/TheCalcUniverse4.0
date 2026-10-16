@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import GradePanel from './GradePanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { finalExamNeeded, fmtPct } from '../../../utils/finalGrade';
 
 const gradeConfig: CalculatorConfig = {
   inputs: [
@@ -39,45 +41,26 @@ const gradeConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const currentGrade = parseFloat(values.currentGrade);
-    const desiredGrade = parseFloat(values.desiredGrade);
-    const examWeight = parseFloat(values.examWeight);
+    const currentGrade = parseNumberStrict(values.currentGrade);
+    const desiredGrade = parseNumberStrict(values.desiredGrade);
+    const examWeight = parseNumberStrict(values.examWeight);
 
-    if (
-      isNaN(currentGrade) ||
-      isNaN(desiredGrade) ||
-      isNaN(examWeight) ||
-      examWeight <= 0 ||
-      currentGrade < 0 ||
-      desiredGrade <= 0
-    ) {
-      return [];
-    }
-
-    // If the student has already reached their target, no exam effort needed.
-    let needed: number;
-    if (currentGrade >= desiredGrade) {
-      needed = 0;
-    } else {
-      needed =
-        (desiredGrade - currentGrade * (1 - examWeight / 100)) /
-        (examWeight / 100);
-    }
-
-    // Round to 2 decimal places
-    needed = Math.round(needed * 100) / 100;
+    // One shared formula (src/utils/finalGrade.ts) for this calculator and test-score-calculator.
+    const exam = finalExamNeeded(currentGrade, desiredGrade, examWeight);
+    if (!exam) return [];
+    const { needed, status: examStatus } = exam;
 
     let status: string;
     let color: 'positive' | 'negative' | 'neutral';
 
-    if (needed <= 0) {
-      status = "You've already achieved your target!";
+    if (examStatus === 'secured') {
+      status = `You've already secured your target: even 0% on the final leaves you at ${fmtPct(exam.floor)}.`;
       color = 'positive';
-    } else if (needed <= currentGrade) {
+    } else if (examStatus === 'reachable' && needed <= currentGrade) {
       status = 'Easily achievable. Study as planned.';
       color = 'positive';
-    } else if (needed <= 100) {
-      status = `You need ${needed.toFixed(1)}% on the final exam.`;
+    } else if (examStatus === 'reachable') {
+      status = `You need ${fmtPct(needed)} on the final exam.`;
       color = 'neutral';
     } else {
       status = 'Likely impossible without extra credit.';
@@ -88,17 +71,12 @@ const gradeConfig: CalculatorConfig = {
       {
         id: 'neededGrade',
         label: 'Grade Needed on Final',
-        value:
-          needed <= 0
-            ? '0%'
-            : needed > 100
-              ? `${needed.toFixed(1)}%`
-              : `${needed.toFixed(1)}%`,
+        value: examStatus === 'secured' ? '0%' : fmtPct(needed),
         highlight: true,
         color,
         warning:
-          needed > 100
-            ? `A ${desiredGrade}% target isn't reachable: you'd need ${needed.toFixed(1)}% on the final (over 100%). Consider extra credit or a lower target.`
+          examStatus === 'impossible'
+            ? `A ${desiredGrade}% target isn't reachable: you'd need ${fmtPct(needed)} on the final (over 100%); even a perfect final only gets you to ${fmtPct(exam.ceiling)}. Consider extra credit or a lower target.`
             : undefined,
       },
       {
@@ -129,6 +107,9 @@ const gradeConfig: CalculatorConfig = {
           desiredGrade,
           examWeight,
           needed,
+          status: examStatus,
+          floor: exam.floor,
+          ceiling: exam.ceiling,
         }),
       },
     ];
@@ -174,12 +155,12 @@ const gradeConfig: CalculatorConfig = {
       {
         question: 'How does the final exam affect my grade?',
         answer:
-          'The final exam contributes a percentage of your overall grade equal to its weight. If the final is worth 20% of your grade, then the other 80% is determined by your current work. This means a strong current grade reduces the pressure on the final, but a low current grade means the final carries more weight in determining your outcome. For example, with a current grade of 85% and a final worth 20%, even scoring 100% on the final can only raise your grade to 88%. Conversely, a current grade of 60% would require a 90% on a 40%-weight final to reach a C (70%).',
+          'The final exam contributes a percentage of your overall grade equal to its weight. If the final is worth 20% of your grade, then the other 80% is determined by your current work. This means a strong current grade reduces the pressure on the final, but a low current grade means the final carries more weight in determining your outcome. For example, with a current grade of 85% and a final worth 20%, even scoring 100% on the final can only raise your grade to 88%. Conversely, a current grade of 60% would require an 85% on a 40%-weight final to reach a C (70%), because (70 − 60 × 0.6) / 0.4 = 85.',
       },
       {
         question: 'What if the needed grade is over 100%?',
         answer:
-          'A needed grade above 100% means it is mathematically impossible to reach your target with just the final exam. You may want to ask your instructor about extra credit opportunities, curve adjustments, or dropping the lowest assignment. Consider whether a slightly lower target grade is acceptable — even small changes can make a big difference. For example, aiming for a B+ (87%) instead of an A- (90%) might reduce the required final exam score by 15 percentage points.',
+          'A needed grade above 100% means it is mathematically impossible to reach your target with just the final exam. You may want to ask your instructor about extra credit opportunities, curve adjustments, or dropping the lowest assignment. Consider whether a slightly lower target grade is acceptable — even small changes can make a big difference. For example, aiming for a B+ (87%) instead of an A- (90%) reduces the required final exam score by 3 / 0.20 = 15 percentage points when the final is worth 20%.',
       },
       {
         question: 'What if the needed grade is negative?',

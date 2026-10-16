@@ -1,23 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import AveragePanel from './AveragePanel';
-
-function parseData(input: string): number[] {
-  // Strip $, %, commas (thousands separators), spaces, line breaks
-  const cleaned = input
-    .replace(/[$%]/g, '')
-    .replace(/,(\d{3})\b/g, '$1')   // only strip commas before exactly 3 digits (thousands separators)
-    .replace(/[,\s]+/g, ' ')    // normalize all whitespace + commas to single space
-    .trim();
-  if (!cleaned) return [];
-  const parts = cleaned.split(/\s+/);
-  const nums: number[] = [];
-  for (const p of parts) {
-    const n = parseFloat(p);
-    if (!isNaN(n) && isFinite(n)) nums.push(n);
-  }
-  return nums;
-}
+import { parseDataset, summarize, fmtDec, ignoredRow } from '../../../utils/stats';
 
 const averageConfig: CalculatorConfig = {
   inputs: [
@@ -32,33 +16,23 @@ const averageConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    // Decimal.js for precision — all statistical computations use high-precision arithmetic
-    const raw = values.data?.trim() || '';
-    if (!raw) return [];
-
-    const data = parseData(raw);
+    // Shared exact-decimal engine (src/utils/stats.ts): 0.1 + 0.2 sums to 0.3, no float drift.
+    const { values: data, ignored } = parseDataset(values.data);
     if (data.length < 1) return [];
 
-    const count = data.length;
-    const sum = data.reduce((s, n) => s + n, 0);
-    const mean = sum / count;
-    const sorted = [...data].sort((a, b) => a - b);
-    const median = count % 2 === 0
-      ? (sorted[count / 2 - 1] + sorted[count / 2]) / 2
-      : sorted[Math.floor(count / 2)];
-    const min = sorted[0];
-    const max = sorted[count - 1];
-    const range = max - min;
+    const s = summarize(data);
 
     return [
-      { id: 'mean', label: 'Mean (Average)', value: mean.toFixed(4), highlight: true, color: 'positive' },
-      { id: 'count', label: 'Count', value: count.toString() },
-      { id: 'sum', label: 'Sum', value: sum.toString() },
-      { id: 'median', label: 'Median', value: median.toFixed(4) },
-      { id: 'min', label: 'Minimum', value: min.toString() },
-      { id: 'max', label: 'Maximum', value: max.toString() },
-      { id: 'range', label: 'Range (Max − Min)', value: range.toFixed(4) },
-      { id: 'dataStr', label: 'Data String', value: data.join(', ') },
+      { id: 'mean', label: 'Mean (Average)', value: fmtDec(s.mean), highlight: true, color: 'positive' },
+      { id: 'count', label: 'Count', value: String(s.n) },
+      { id: 'sum', label: 'Sum', value: fmtDec(s.sum, 20) },
+      { id: 'median', label: 'Median', value: fmtDec(s.median) },
+      { id: 'min', label: 'Minimum', value: fmtDec(s.min) },
+      { id: 'max', label: 'Maximum', value: fmtDec(s.max) },
+      { id: 'range', label: 'Range (Max − Min)', value: fmtDec(s.range) },
+      ...ignoredRow(ignored),
+      // Full-precision values in input order, for the panel's chart (the panel never re-parses formatted strings).
+      { id: '_data', label: '', value: JSON.stringify({ values: data.map((d) => d.toNumber()), mean: s.mean.toNumber(), median: s.median.toNumber() }) },
     ];
   },
   extraPanel: (values, results) => {
@@ -105,7 +79,7 @@ const averageConfig: CalculatorConfig = {
       {
         scenario: "Hannah runs a coffee shop in Portland, Oregon. Her daily revenue last week was $1,240, $980, $1,150, $1,320, $1,090, $2,410 (Saturday), and $890 (Sunday). She needs the weekly average for her bookkeeping and wants to know if weekends distort the average.",
         inputs: { data: '1240, 980, 1150, 1320, 1090, 2410, 890' },
-        result: 'Mean = 1297.1429, Median = 1150, Sum = 9080, Range = 1520',
+        result: 'Mean = 1297.142857, Median = 1150, Sum = 9080, Range = 1520',
         insight: 'The mean daily revenue is $1,297.14 and the median is $1,150. The $2,410 Saturday skews the mean upward by about $147 (13%) above the median. Hannah should report both averages to her accountant: mean for total weekly revenue ($9,080 / 7 = $1,297) and median for typical daily baseline ($1,150).',
       },
     ],
@@ -118,7 +92,7 @@ const averageConfig: CalculatorConfig = {
     ],
     limitations: [
       'This calculator computes the arithmetic mean only. It does not compute the geometric mean (for growth rates and compound returns), harmonic mean (for rates and ratios), weighted mean (when values have different importance), trimmed mean (excluding outliers by percentile), or the mode (most frequent value).',
-      'The parser strips currency symbols ($, %) and thousands-separator commas (US/UK style), but European-style number formatting (e.g., 1.234,56 where comma is a decimal) and scientific notation (1.23e4) are not supported.',
+      'The parser strips currency symbols ($, %) and thousands-separator commas (US/UK style), but European-style number formatting (e.g., 1.234,56 where the comma is a decimal) is not supported; scientific notation such as 1.23e4 is. A tight group such as 100,200,300 (no spaces, every group exactly three digits) is read as the single number 100200300; put a space after each comma to enter three separate values. Anything that is not a number is listed under "Ignored" instead of being silently dropped.',
       'For datasets with extreme outliers, the mean and median together only give a partial picture. Consider using a box plot, interquartile range, or standard deviation for a more complete analysis of data spread.',
       'Do not use the arithmetic mean for averaging percentages with different bases (use weighted mean), averaging rates like speed or fuel efficiency (use harmonic mean), or for highly skewed financial data like income or home prices (use median or geometric mean).',
     ],
@@ -147,7 +121,7 @@ const averageConfig: CalculatorConfig = {
       },
       {
         question: 'Why does my mean look wrong when averaging percentages?',
-        answer: 'This is a common statistical pitfall known as Simpson\'s Paradox. You cannot simply average percentages that come from different-sized groups. For example, if Store A has a 10% conversion rate (1 sale from 10 visitors) and Store B has 50% (500 sales from 1,000 visitors), the naive average is 30%, but the true combined rate is 501/1010 = 49.6%. Always compute percentages from their raw counts, not by averaging the percentages themselves.',
+        answer: 'This is a common weighted-average mistake (closely related to Simpson\'s paradox). You cannot simply average percentages that come from different-sized groups. For example, if Store A has a 10% conversion rate (1 sale from 10 visitors) and Store B has 50% (500 sales from 1,000 visitors), the naive average is 30%, but the true combined rate is 501/1010 = 49.6%. Always compute percentages from their raw counts, not by averaging the percentages themselves.',
       },
       {
         question: 'What is the range and why does it matter?',

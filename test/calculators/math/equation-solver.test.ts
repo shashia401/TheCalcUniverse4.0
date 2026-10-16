@@ -21,9 +21,9 @@ describe('Equation Solver', () => {
     near(parseNumber(getValue(r, 'root1')), 2);
   });
 
-  it('returns empty for linear when a = 0', () => {
+  it('linear with a = 0 and b != 0 reports no solution (instead of an empty result)', () => {
     const r = config.calculate({ equationType: 'linear', a: '0', b: '5' });
-    expect(r).toEqual([]);
+    expect(getValue(r, 'nature')).toMatch(/^No solution/);
   });
 
   it('returns empty for linear when NaN a', () => {
@@ -63,9 +63,9 @@ describe('Equation Solver', () => {
     expect(root2).toContain('-');
   });
 
-  it('returns empty when quadratic a = 0', () => {
+  it('quadratic with a = 0 is reported as the linear equation 2x + 3 = 0 (x = -1.5)', () => {
     const r = config.calculate({ equationType: 'quadratic', a: '0', b: '2', c: '3' });
-    expect(r).toEqual([]);
+    expect(getValue(r, 'nature')).toContain('-1.5');
   });
 
   it('returns empty for missing equation type', () => {

@@ -26,6 +26,7 @@ const DIE_COLORS: Record<string, { bg: string; border: string; text: string; fil
   '10': { bg: '#f3e8ff', border: '#a855f7', text: '#6b21a8', fill: '#c084fc' },
   '12': { bg: '#fed7aa', border: '#f97316', text: '#9a3412', fill: '#fdba74' },
   '20': { bg: '#cffafe', border: '#06b6d4', text: '#155e75', fill: '#67e8f9' },
+  '100': { bg: '#fef9c3', border: '#ca8a04', text: '#713f12', fill: '#fde047' },
 };
 
 // ── Single die SVG component ────────────────────────────────────────────
@@ -41,7 +42,7 @@ function DieFace({ value, sides }: { value: number; sides: number }) {
       viewBox="0 0 60 60"
       className="block"
       role="img"
-      aria-label={'Dice face showing ' + sides + ' sides with dot pattern'}
+      aria-label={`D${sides} showing ${value}`}
     >
       {isD6 ? (
         <>
@@ -121,14 +122,15 @@ export default function DicePanel({ results }: Props) {
 
   if (!total || !rollsResult || !rollData) return null;
 
+  // Structured data from calculate() — nothing is re-parsed out of display strings.
   let rolls: number[];
   try {
-    rolls = JSON.parse(rollData.value);
+    rolls = JSON.parse(rollData.value) as number[];
   } catch {
     return null;
   }
-
-  const sides = parseInt(countResult?.value?.match(/D(\d+)/)?.[1] || '6');
+  const sides = Number(results.find(r => r.id === '_sides')?.value);
+  if (!Array.isArray(rolls) || !Number.isFinite(sides)) return null;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -160,16 +162,16 @@ export default function DicePanel({ results }: Props) {
 
         {/* ── Total Card ────────────────────────────────────────────────── */}
         <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 p-5 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-indigo-700 mb-1">
             Total Roll
           </p>
           <p className="text-4xl sm:text-5xl font-black text-indigo-900">
             {total.value}
           </p>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-700 mt-1">
             {countResult?.value}
             {modifierResult && modifierResult.value !== '+0' && (
-              <span className="text-indigo-600 font-semibold"> {modifierResult.value}</span>
+              <span className="text-indigo-700 font-semibold"> {modifierResult.value}</span>
             )}
           </p>
         </div>

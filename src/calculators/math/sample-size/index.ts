@@ -1,12 +1,10 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SampleSizePanel from './SampleSizePanel';
+import { cochranSampleSize } from './cochran';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
-const Z_SCORES: Record<string, number> = {
-  '90': 1.645,
-  '95': 1.96,
-  '99': 2.576,
-};
+const CONFIDENCE_LABELS: Record<string, string> = { '90': '90%', '95': '95%', '99': '99%' };
 
 const sampleSizeConfig: CalculatorConfig = {
   inputs: [
@@ -42,59 +40,79 @@ const sampleSizeConfig: CalculatorConfig = {
       required: true,
       helpText: 'The acceptable margin of error in percentage points',
     },
+    {
+      id: 'proportion',
+      label: 'Expected Proportion (%)',
+      type: 'number',
+      placeholder: '50',
+      step: 1,
+      min: 1,
+      max: 99,
+      helpText: 'Your best guess of the share answering "yes". Leave at 50 if unknown: it gives the largest (safest) sample size.',
+    },
   ],
   calculate: (values) => {
-    const N = parseInt(values.population) || 0;
+    const N = parseNumberStrict(values.population);
     const confidence = values.confidence || '95';
-    const marginRaw = parseFloat(values.margin);
+    const marginRaw = parseNumberStrict(values.margin);
     if (isNaN(marginRaw) || marginRaw <= 0) return [];
     const E = marginRaw / 100;
+    // Blank proportion means the conservative 50%; anything else must be a valid 1-99%.
+    const propRaw = (values.proportion ?? '').trim() === '' ? 50 : parseNumberStrict(values.proportion);
 
-    if (N <= 0 || E <= 0 || E >= 1) return [];
-    if (!Z_SCORES[confidence]) return [];
+    if (!Number.isInteger(N) || N <= 0 || E <= 0 || E >= 1) return [];
+    if (!CONFIDENCE_LABELS[confidence]) return [];
+    if (isNaN(propRaw) || propRaw <= 0 || propRaw >= 100) return [];
 
-    const Z = Z_SCORES[confidence];
-    const p = 0.5; // conservative estimate for maximum variability
-
-    // Infinite population sample size
-    const nInfinite = (Z * Z * p * (1 - p)) / (E * E);
-
-    // Finite population correction
-    const n = Math.ceil(nInfinite / (1 + (nInfinite - 1) / N));
-
-    const confidenceLabel = confidence === '90' ? '90%' : confidence === '95' ? '95%' : '99%';
+    // Cochran's formula with finite population correction (see ./cochran.ts); exact Z, not 1.645 / 1.96 / 2.576.
+    const c = cochranSampleSize(N, Number(confidence), E, propRaw / 100);
+    const { n, z: Z } = c;
+    const confidenceLabel = CONFIDENCE_LABELS[confidence];
+    const marginText = `${parseFloat(marginRaw.toFixed(4))}%`;
+    const fmtInt = (x: number) => x.toLocaleString('en-US');
 
     return [
       {
         id: 'sampleSize',
-        label: `Recommended Sample Size (${confidenceLabel} CL, ${values.margin || '5'}% MOE)`,
-        value: n.toLocaleString(),
+        label: `Recommended Sample Size (${confidenceLabel} CL, ${marginText} MOE)`,
+        value: fmtInt(n),
         highlight: true,
         color: n <= 100 ? 'positive' as const : n <= 1000 ? 'neutral' as const : 'negative' as const,
       },
       {
         id: 'responseRate',
-        label: 'Target Responses Needed',
-        value: n.toLocaleString(),
+        label: 'Target Completed Responses',
+        value: fmtInt(n),
+        color: 'neutral' as const,
+      },
+      {
+        id: 'infiniteSize',
+        label: 'Infinite-Population Size (n₀, before correction)',
+        value: fmtInt(c.n0Ceil),
         color: 'neutral' as const,
       },
       {
         id: 'marginSize',
         label: 'Margin of Error',
-        value: `${values.margin || '5'}%`,
+        value: marginText,
         color: 'neutral' as const,
       },
       {
         id: 'zScore',
         label: 'Z-Score Used',
-        value: `${Z} (${confidenceLabel} confidence)`,
+        value: `${Z.toFixed(4)} (${confidenceLabel} confidence, p = ${parseFloat(propRaw.toFixed(2))}%)`,
         color: 'neutral' as const,
       },
       {
         id: 'populationInfo',
         label: 'Population',
-        value: `${N.toLocaleString()} (${N < 1000 ? 'small' : N < 100000 ? 'medium' : 'large'} population)`,
+        value: `${fmtInt(N)} (${N < 1000 ? 'small' : N < 100000 ? 'medium' : 'large'} population)`,
         color: 'neutral' as const,
+      },
+      {
+        id: '_data',
+        label: '',
+        value: JSON.stringify({ N, z: Z, p: propRaw / 100, E, confidence: Number(confidence), n0: c.n0, n }),
       },
     ];
   },
@@ -112,7 +130,7 @@ const sampleSizeConfig: CalculatorConfig = {
     formulaDescription:
       'The sample size formula determines how many survey responses are needed for statistically significant results. Z is the Z-score for your confidence level (1.96 for 95%), p is the estimated proportion (0.5 is most conservative), E is the margin of error, and N is the population size. The finite population correction adjusts the sample size when the population is small.',
     variables: [
-      { symbol: 'Z', name: 'Z-Score', description: '1.645 for 90% confidence, 1.96 for 95%, 2.576 for 99%. Higher confidence levels require larger Z-scores and larger samples.' },
+      { symbol: 'Z', name: 'Z-Score', description: 'Exact two-sided normal quantile: 1.6449 for 90% confidence, 1.9600 for 95%, 2.5758 for 99% (rounded tables use 1.645, 1.96 and 2.576, which can differ by one respondent). Higher confidence levels require larger Z-scores and larger samples.' },
       { symbol: 'p', name: 'Proportion', description: 'Estimated response proportion. 0.5 = 50% (most conservative estimate, gives the largest sample size). If you know the approximate proportion, use it.' },
       { symbol: 'E', name: 'Margin of Error', description: 'The acceptable error range, e.g., 0.05 for ±5%. Smaller margins require larger sample sizes.' },
       { symbol: 'N', name: 'Population Size', description: 'Total size of the group being studied. For very large populations (>100,000), the infinite population formula dominates.' },
@@ -145,7 +163,7 @@ const sampleSizeConfig: CalculatorConfig = {
       },
       {
         question: 'How does confidence level affect sample size?',
-        answer: 'Higher confidence levels require larger samples. A 99% confidence level (Z=2.576) requires about 77% more respondents than 95% (Z=1.96) for the same margin of error. Most research uses 95% as the standard because 99% often requires prohibitively large samples for marginal gain in certainty.',
+        answer: 'Higher confidence levels require larger samples. A 99% confidence level (Z=2.576) requires about 73% more respondents than 95% (Z=1.96) for the same margin of error, because the sample size scales with Z² and (2.5758 / 1.9600)² = 1.727. Most research uses 95% as the standard because 99% often requires prohibitively large samples for marginal gain in certainty.',
       },
       {
         question: 'Can I calculate sample size for different types of studies?',
@@ -160,27 +178,27 @@ const sampleSizeConfig: CalculatorConfig = {
       {
         scenario: 'A market researcher wants to survey customers of a regional bank with 50,000 account holders. They want 95% confidence with a ±5% margin of error.',
         inputs: { population: '50000', confidence: '95', margin: '5' },
-        result: 'Recommended sample size: approximately 381 respondents.',
-        insight: 'This is the standard sample size for most market research. Notice that even for 50,000 people, only 381 responses are needed — the sample size does not need to scale proportionally with the population.',
+        result: 'Recommended sample size: 382 respondents (n₀ = 384.15, corrected to 381.22, rounded up).',
+        insight: 'This is the standard sample size for most market research. Notice that even for 50,000 people, only 382 responses are needed — the sample size does not need to scale proportionally with the population.',
       },
       {
         scenario: 'A UX researcher is testing a prototype with a small user base of 200 enterprise customers and wants 95% confidence with ±5% margin.',
         inputs: { population: '200', confidence: '95', margin: '5' },
-        result: 'Recommended sample size: approximately 132 respondents.',
+        result: 'Recommended sample size: 132 respondents (n₀ = 384.15, corrected to 131.75, rounded up).',
         insight: 'With a small population, the finite population correction significantly reduces the required sample size. However, 132 out of 200 is a 66% response rate — this may require incentives or mandatory participation to achieve.',
       },
       {
         scenario: 'A political pollster wants to survey voters in a city of 500,000 with 99% confidence and a ±3% margin of error.',
         inputs: { population: '500000', confidence: '99', margin: '3' },
-        result: 'Recommended sample size: approximately 1,849 respondents.',
-        insight: 'The jump from 95% to 99% confidence nearly triples the required sample. This level of rigor is typical for published academic research and high-stakes polling, but the cost of reaching 1,849 respondents must be weighed against the marginal increase in certainty.',
+        result: 'Recommended sample size: 1,837 respondents (n₀ = 1,843.03, corrected to 1,836.26, rounded up).',
+        insight: 'The jump from 95% to 99% confidence raises the required sample from 1,065 to 1,837, about 72% more. This level of rigor is typical for published academic research and high-stakes polling, but the cost of reaching 1,837 respondents must be weighed against the marginal increase in certainty.',
       },
     ],
     proTips: [
       'Always plan for non-response: divide your target sample size by your expected response rate to get the number of invitations to send.',
       'Use p=0.5 (the default) when you have no prior knowledge — it gives the largest and most conservative sample size estimate.',
       'For populations over 100,000, the infinite population formula dominates — increasing the population further has almost no effect on sample size.',
-      'If budget is tight, increase the margin of error from 5% to 8% — the required sample size drops dramatically (from 385 to 150 at 95% confidence).',
+      'If budget is tight, increase the margin of error from 5% to 8% — the required sample size drops dramatically (from 385 to 151 at 95% confidence and a large population).',
     ],
     limitations: [
       'This calculator assumes simple random sampling. Stratified, cluster, or convenience sampling methods require different formulas.',
@@ -196,11 +214,11 @@ const sampleSizeConfig: CalculatorConfig = {
     ],
     quickReference: [
       { label: '95% CL, ±5% margin, large pop.', value: '385 respondents' },
-      { label: '95% CL, ±3% margin, large pop.', value: '1,067 respondents' },
-      { label: '99% CL, ±5% margin, large pop.', value: '666 respondents' },
+      { label: '95% CL, ±3% margin, large pop.', value: '1,068 respondents' },
+      { label: '99% CL, ±5% margin, large pop.', value: '664 respondents' },
       { label: '90% CL, ±5% margin, large pop.', value: '271 respondents' },
       { label: 'Z-score for 95%', value: '1.96' },
-      { label: 'Z-score for 99%', value: '2.576' },
+      { label: 'Z-score for 99%', value: '2.5758' },
       { label: 'Most conservative p', value: '0.5 (50%)' },
     ],
     citations: [

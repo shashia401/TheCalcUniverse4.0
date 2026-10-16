@@ -16,11 +16,11 @@ interface DifferentialEntry {
 }
 
 function getCategory(index: number): { label: string; color: string; bg: string } {
-  if (index <= 0) return { label: 'Scratch', color: 'text-yellow-700', bg: 'bg-yellow-50 border-yellow-200' };
-  if (index <= 5) return { label: 'Pro', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' };
+  if (index <= 0) return { label: 'Scratch or better', color: 'text-yellow-700', bg: 'bg-yellow-50 border-yellow-200' };
+  if (index <= 5) return { label: 'Excellent', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' };
   if (index <= 15) return { label: 'Good', color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200' };
   if (index <= 25) return { label: 'Average', color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' };
-  return { label: 'High', color: 'text-red-700', bg: 'bg-red-50 border-red-200' };
+  return { label: 'Developing', color: 'text-red-700', bg: 'bg-red-50 border-red-200' };
 }
 
 export default function GolfPanel({ results }: Props) {
@@ -29,10 +29,12 @@ export default function GolfPanel({ results }: Props) {
   const roundsUsed = getValue(results, 'roundsUsed');
   const averageDifferential = getValue(results, 'averageDifferential');
   const courseHandicap = getValue(results, 'courseHandicap');
+  const adjustment = getValue(results, 'adjustment');
 
   if (!handicapIndex) return null;
 
-  const index = parseFloat(handicapIndex);
+  // Plus handicaps (better than scratch) are shown as "+1.2" and mean an index of −1.2.
+  const index = handicapIndex.startsWith('+') ? -parseFloat(handicapIndex.slice(1)) : parseFloat(handicapIndex);
   const category = getCategory(index);
   const diffs: DifferentialEntry[] = (() => {
     try { return JSON.parse(differentialsRaw); } catch { return []; }
@@ -67,7 +69,7 @@ export default function GolfPanel({ results }: Props) {
           <span className={`text-sm font-bold ${category.color}`}>
             {category.label} Handicap
           </span>
-          <span className={`text-xs ${category.color} opacity-70`}>
+          <span className={`text-xs ${category.color}`}>
             Course Handicap: {courseHandicap}
           </span>
         </div>
@@ -110,7 +112,7 @@ export default function GolfPanel({ results }: Props) {
                     <td className="px-4 py-2 text-slate-600">{d.rating}</td>
                     <td className="px-4 py-2 text-slate-600">{d.slope}</td>
                     <td className={`px-4 py-2 text-right font-medium ${d.used ? 'text-emerald-700' : 'text-slate-500'}`}>
-                      {d.differential.toFixed(2)}
+                      {d.differential.toFixed(1)}
                     </td>
                     <td className="px-4 py-2 text-center">
                       {d.used ? (
@@ -142,7 +144,7 @@ export default function GolfPanel({ results }: Props) {
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center mt-0.5">1</span>
             <div>
               <p className="text-xs font-semibold text-slate-700">Score Differential</p>
-              <p className="text-xs text-slate-500 mt-0.5">Each round: (Score - Course Rating) &times; 113 &divide; Slope Rating</p>
+              <p className="text-xs text-slate-500 mt-0.5">Each round: (Score − Course Rating − PCC) × 113 ÷ Slope Rating, rounded to 1 decimal</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -162,8 +164,10 @@ export default function GolfPanel({ results }: Props) {
           <div className="flex items-start gap-3">
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center mt-0.5">4</span>
             <div>
-              <p className="text-xs font-semibold text-slate-700">Apply Factor</p>
-              <p className="text-xs text-slate-500 mt-0.5">Multiply by 0.96 and round to 1 decimal: {handicapIndex}</p>
+              <p className="text-xs font-semibold text-slate-700">Adjust and Round</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {adjustment ? `Add the ${adjustment} adjustment for fewer than 20 scores, then round` : 'No adjustment needed; round'} to 1 decimal: {handicapIndex}
+              </p>
             </div>
           </div>
         </div>
@@ -181,6 +185,7 @@ export default function GolfPanel({ results }: Props) {
                 key={d.round}
                 className={`flex-1 ${d.used ? 'bg-emerald-400' : 'bg-slate-200'}`}
                 title={`Round ${d.round}: ${d.differential.toFixed(1)} (${d.used ? 'Used' : 'Not used'})`}
+                aria-label={`Round ${d.round}: differential ${d.differential.toFixed(1)}, ${d.used ? 'used' : 'not used'}`}
               />
             ))}
           </div>

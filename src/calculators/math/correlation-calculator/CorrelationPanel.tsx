@@ -5,26 +5,34 @@ interface Props {
   results: CalculatorResult[];
 }
 
-function parseNum(s: string): number {
-  const m = s.replace(/,/g, '').match(/[\d.-]+/);
-  return m ? parseFloat(m[0]) : 0;
+interface CorrData {
+  r: number;
+  r2: number;
+  rho: number | null;
+  p: number;
+  n: number;
 }
 
 export default function CorrelationPanel({ results }: Props) {
-  const r = results.find(r => r.id === 'r');
-  const rSquared = results.find(r => r.id === 'rSquared');
-  const strength = results.find(r => r.id === 'strength');
-  const direction = results.find(r => r.id === 'direction');
-  const n = results.find(r => r.id === 'n');
+  const r = results.find(x => x.id === 'r');
+  const raw = results.find(x => x.id === '_data');
+  const strength = results.find(x => x.id === 'strength');
+  const direction = results.find(x => x.id === 'direction');
+  const n = results.find(x => x.id === 'n');
+  const pRow = results.find(x => x.id === 'pValue');
+  const spearman = results.find(x => x.id === 'spearman');
 
-  if (!r || !rSquared) return null;
+  // No _data row means r was undefined (a constant variable): the result list already explains why.
+  if (!r || !raw) return null;
+  let data: CorrData;
+  try {
+    data = JSON.parse(raw.value) as CorrData;
+  } catch {
+    return null;
+  }
 
-  const rVal = parseNum(r.value);
-  const r2Val = parseNum(rSquared.value);
-  const absR = Math.abs(rVal);
-
-  // Determine position on the -1 to +1 scale
-  const pos = ((rVal + 1) / 2) * 100; // 0 to 100%
+  // Position on the -1 to +1 scale, 0 to 100%
+  const pos = ((data.r + 1) / 2) * 100;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -41,16 +49,20 @@ export default function CorrelationPanel({ results }: Props) {
             <span className="text-xs font-semibold text-slate-600">Correlation (r)</span>
             <span className="text-sm font-bold text-slate-700">{r.value}</span>
           </div>
-          <div className="relative h-5 bg-gradient-to-r from-red-500 via-slate-200 to-emerald-500 rounded-full overflow-hidden">
+          <div
+            className="relative h-5 bg-gradient-to-r from-red-500 via-slate-200 to-emerald-500 rounded-full overflow-hidden"
+            role="img"
+            aria-label={`Correlation r = ${r.value} on a scale from -1 to +1`}
+          >
             <div
-              className="absolute top-0 w-0.5 h-full bg-white shadow-sm"
+              className="absolute top-0 w-0.5 h-full bg-slate-900 shadow-sm"
               style={{ left: `calc(${pos}% - 1px)` }}
             />
           </div>
           <div className="flex justify-between mt-0.5">
-            <span className="text-[10px] text-slate-400">-1</span>
-            <span className="text-[10px] text-slate-400">0</span>
-            <span className="text-[10px] text-slate-400">+1</span>
+            <span className="text-[10px] text-slate-600">-1</span>
+            <span className="text-[10px] text-slate-600">0</span>
+            <span className="text-[10px] text-slate-600">+1</span>
           </div>
         </div>
 
@@ -58,30 +70,30 @@ export default function CorrelationPanel({ results }: Props) {
         <div>
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-semibold text-slate-600">r² (Coefficient of Determination)</span>
-            <span className="text-xs font-bold text-slate-700">{rSquared.value}</span>
+            <span className="text-xs font-bold text-slate-700">{parseFloat((data.r2 * 100).toFixed(2))}% of Y&apos;s variance explained</span>
           </div>
-          <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-3 bg-slate-100 rounded-full overflow-hidden" role="img" aria-label={`r squared ${parseFloat(data.r2.toFixed(4))}`}>
             <div
-              className="h-full rounded-full bg-indigo-500 transition-all"
-              style={{ width: `${r2Val * 100}%` }}
+              className="h-full rounded-full bg-indigo-600"
+              style={{ width: `${Math.min(100, Math.max(0, data.r2 * 100))}%` }}
             />
           </div>
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wide">Strength</p>
-            <p className="text-sm font-bold text-slate-700 mt-0.5">{strength?.value ?? '-'}</p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wide">Direction</p>
-            <p className="text-sm font-bold text-slate-700 mt-0.5">{direction?.value ?? '-'}</p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wide">n</p>
-            <p className="text-sm font-bold text-slate-700 mt-0.5">{n?.value ?? '-'}</p>
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {[
+            ['Strength', strength?.value],
+            ['Direction', direction?.value],
+            ['p-value', pRow?.value],
+            ['Spearman ρ', spearman?.value],
+            ['n', n?.value],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center">
+              <p className="text-[10px] text-slate-600 uppercase tracking-wide">{label}</p>
+              <p className="text-sm font-bold text-slate-700 mt-0.5">{value ?? '-'}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

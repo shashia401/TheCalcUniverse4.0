@@ -1,15 +1,14 @@
-import { useMemo } from 'react';
 import { CalculatorResult } from '../../../types/calculator';
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, Legend,
-} from 'recharts';
+import SvgBarChart from '../../../components/charts/SvgBarChart';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { cross3, type V3 } from '../../../utils/vector';
 
 interface Props {
   values: Record<string, string>;
   results: CalculatorResult[];
 }
 
-const COMPONENT_COLORS = ['#3b82f6', '#10b981', '#8b5cf6'];
+const COMPONENT_COLORS = ['#2563eb', '#059669', '#7c3aed'];
 
 export default function CrossProductPanel({ values, results }: Props) {
   const crossProduct = results.find(r => r.id === 'crossProduct');
@@ -45,7 +44,7 @@ export default function CrossProductPanel({ values, results }: Props) {
             <p className="text-xl font-bold text-slate-700 font-mono mt-0.5">{magnitude.value}</p>
           </div>
           <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-center">
-            <p className="text-[10px] font-bold text-green-600 uppercase">{area.label}</p>
+            <p className="text-[10px] font-bold text-green-800 uppercase">{area.label}</p>
             <p className="text-xl font-bold text-green-700 font-mono mt-0.5">{area.value}</p>
           </div>
         </div>
@@ -61,51 +60,30 @@ export default function CrossProductPanel({ values, results }: Props) {
         {/* Verification */}
         {verification && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-            <p className="text-[10px] font-bold text-amber-600 uppercase mb-1">{verification.label}</p>
+            <p className="text-[10px] font-bold text-amber-800 uppercase mb-1">{verification.label}</p>
             <p className="text-sm font-mono text-amber-700 break-all">{verification.value}</p>
-            <p className="text-[10px] text-amber-500 mt-1">Values should be near zero if cross product is correct (orthogonal to both inputs)</p>
+            <p className="text-[10px] text-amber-800 mt-1">Values should be near zero if cross product is correct (orthogonal to both inputs)</p>
           </div>
         )}
 
         {/* Component bar chart */}
         {(() => {
-          const v1x = parseFloat(values.v1x);
-          const v1y = parseFloat(values.v1y);
-          const v1z = parseFloat(values.v1z);
-          const v2x = parseFloat(values.v2x);
-          const v2y = parseFloat(values.v2y);
-          const v2z = parseFloat(values.v2z);
-          if ([v1x, v1y, v1z, v2x, v2y, v2z].some(isNaN)) return null;
-          const crossX = v1y * v2z - v1z * v2y;
-          const crossY = v1z * v2x - v1x * v2z;
-          const crossZ = v1x * v2y - v1y * v2x;
-          const barData = [
-            { name: 'a', x: v1x, y: v1y, z: v1z },
-            { name: 'b', x: v2x, y: v2y, z: v2z },
-            { name: 'a × b', x: crossX, y: crossY, z: crossZ },
-          ];
+          const a: V3 = [parseNumberStrict(values.v1x), parseNumberStrict(values.v1y), parseNumberStrict(values.v1z)];
+          const b: V3 = [parseNumberStrict(values.v2x), parseNumberStrict(values.v2y), parseNumberStrict(values.v2z)];
+          if ([...a, ...b].some((x) => !Number.isFinite(x))) return null;
+          const c = cross3(a, b);
+          const data = ([['a', a], ['b', b], ['a × b', c]] as [string, V3][]).flatMap(([name, v]) =>
+            v.map((value, i) => ({ label: `${name} ${'xyz'[i]}`, value, color: COMPONENT_COLORS[i] })),
+          );
           return (
             <div className="rounded-xl border border-slate-200 bg-white p-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Vector Components</p>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={barData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={50} />
-                  <Tooltip
-                    contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  />
-                  <Legend
-                    verticalAlign="bottom"
-                    height={24}
-                    iconType="rect"
-                    formatter={(value: string) => <span style={{ color: '#64748b', fontSize: 11, fontWeight: 600 }}>{value}</span>}
-                  />
-                  <Bar dataKey="x" name="X" fill="#3b82f6" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="y" name="Y" fill="#10b981" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="z" name="Z" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <SvgBarChart data={data} height={200} ariaLabel="Bar chart of the x, y and z components of vector a, vector b and the cross product a × b" />
+              <p className="mt-2 text-xs text-slate-600">
+                <span className="font-semibold" style={{ color: COMPONENT_COLORS[0] }}>Blue = x</span>,{' '}
+                <span className="font-semibold" style={{ color: '#047857' }}>green = y</span>,{' '}
+                <span className="font-semibold" style={{ color: COMPONENT_COLORS[2] }}>purple = z</span>
+              </p>
             </div>
           );
         })()}

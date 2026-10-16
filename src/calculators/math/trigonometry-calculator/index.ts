@@ -1,26 +1,48 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import TrigPanel from './TrigPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { type TrigValues, degreesFromRadians, parseDegrees, piFraction, reduceDegrees, referenceAngle, toFloat, trigAt } from './trigMath';
 
-const DEG = Math.PI / 180;
-const RAD = 180 / Math.PI;
+type Unit = 'deg' | 'rad';
 
-function toRadians(degrees: number): number {
-  return degrees * DEG;
-}
+/** Value text: 8 decimals, but tiny non-zero values keep 6 significant digits instead of rounding to 0. */
+const fmt = (v: number): string => {
+  if (v === 0) return '0';
+  if (Math.abs(v) < 1e-4) return String(Number(v.toPrecision(6)));
+  return String(parseFloat(v.toFixed(8)));
+};
+const UNDEF = (what: string) => `Undefined (${what})`;
 
-function toDegrees(radians: number): number {
-  return radians * RAD;
-}
+const angleText = (deg: number, unit: Unit): string => {
+  const d = Math.abs(deg) < 1e-9 ? 0 : deg;
+  const degTxt = `${fmt(d)}°`;
+  const radTxt = `${fmt((d * Math.PI) / 180)} rad`;
+  return unit === 'rad' ? radTxt : degTxt;
+};
 
-function round(value: number, decimals: number = 6): number {
-  const factor = Math.pow(10, decimals);
-  return Math.round(value * factor) / factor;
-}
 
-function formatAngle(value: number): string {
-  const rounded = round(value, 2);
-  return `${rounded}°`;
+/** Result rows for "trig value -> angle". `deg` is the principal value in degrees. */
+function trigToAngleRows(func: string, deg: number, v: number, unit: Unit, label = `${func}⁻¹(`): CalculatorResult[] {
+  const mod = (x: number) => ((x % 360) + 360) % 360;
+  const alpha = deg;
+  const family = func === 'sin' || func === 'csc' ? [alpha, 180 - alpha] : func === 'cos' || func === 'sec' ? [alpha, -alpha] : [alpha, alpha + 180];
+  const norm = family.map(mod).map((x) => (Math.abs(x - 360) < 1e-9 ? 0 : x)).sort((a, b) => a - b);
+  const uniq = norm.filter((x, i) => i === 0 || Math.abs(x - norm[i - 1]) > 1e-9);
+  const exact = piFraction(deg);
+  const rows: CalculatorResult[] = [
+    { id: 'principalAngle', label: `${label}${v}) = Principal Angle`, value: angleText(deg, unit), highlight: true, color: 'positive' },
+    { id: 'referenceAngle', label: 'Reference Angle', value: angleText(referenceAngle(mod(deg)), unit) },
+    { id: 'functionUsed', label: 'Inverse Function', value: `θ = ${func}⁻¹(${v})` },
+  ];
+  if (exact !== null) rows.push({ id: 'exactValue', label: 'Exact value', value: `${exact === '0' ? '0' : exact} rad = ${fmt(deg)}°` });
+  rows.push({
+    id: 'allAngles',
+    label: 'All angles in one turn',
+    value: `θ = ${uniq.map((x) => angleText(x, unit)).join(' or ')}  (0° ≤ θ < 360°)`,
+  });
+  rows.push({ id: '_angleDeg', label: 'angle', value: String(mod(deg)) });
+  return rows;
 }
 
 const config: CalculatorConfig = {
@@ -36,13 +58,23 @@ const config: CalculatorConfig = {
       helpText: 'Choose to get trig values from an angle or vice versa',
     },
     {
+      id: 'angleUnit',
+      label: 'Angle unit',
+      type: 'select',
+      defaultValue: 'deg',
+      options: [
+        { label: 'Degrees (°)', value: 'deg' },
+        { label: 'Radians (rad)', value: 'rad' },
+      ],
+      helpText: 'Unit of the angle you enter (angle → trig) or of the angle in the answer (trig → angle)',
+    },
+    {
       id: 'angle',
       label: 'Angle',
       type: 'number',
       placeholder: 'Enter angle',
-      unit: 'degrees',
       showWhen: (v) => v.mode === 'angle-to-trig',
-      helpText: 'Enter the angle in degrees to compute trig values',
+      helpText: 'Enter the angle in the unit chosen above. Any size and sign is fine (e.g. -45, 750).',
     },
     {
       id: 'function',
@@ -70,178 +102,102 @@ const config: CalculatorConfig = {
   ],
   calculate: (values) => {
     const mode = values.mode;
-
+    const unit: Unit = values.angleUnit === 'rad' ? 'rad' : 'deg';
     if (!mode) return [];
 
     if (mode === 'angle-to-trig') {
-      const angleVal = parseFloat(values.angle);
-      if (isNaN(angleVal)) return [];
+      const raw = parseNumberStrict(values.angle);
+      if (!Number.isFinite(raw)) return [];
 
-      const rad = toRadians(angleVal);
-      const sinVal = Math.sin(rad);
-      const cosVal = Math.cos(rad);
-      const tanVal = Math.tan(rad);
+      // Degrees are reduced modulo 360 exactly; radians go through floating point (snapped to special angles).
+      let normDeg: number;
+      let shownDeg: number;
+      if (unit === 'deg') {
+        const exact = parseDegrees(values.angle);
+        if (!exact) return [];
+        normDeg = toFloat(reduceDegrees(exact));
+        shownDeg = raw;
+      } else {
+        shownDeg = degreesFromRadians(raw);
+        normDeg = ((shownDeg % 360) + 360) % 360;
+        if (!Number.isFinite(shownDeg)) return [];
+      }
+      const t: TrigValues = trigAt(normDeg);
 
-      const results: CalculatorResult[] = [
-        {
-          id: 'sin',
-          label: 'sin(θ)',
-          value: round(sinVal, 8).toString(),
-          highlight: true,
-          color: sinVal >= 0 ? 'positive' : 'negative',
-        },
-        {
-          id: 'cos',
-          label: 'cos(θ)',
-          value: round(cosVal, 8).toString(),
-        },
-        {
-          id: 'tan',
-          label: 'tan(θ)',
-          value: round(tanVal, 8).toString(),
-        },
-        {
-          id: 'csc',
-          label: 'csc(θ) = 1/sin(θ)',
-          value: round(1 / sinVal, 8).toString(),
-        },
-        {
-          id: 'sec',
-          label: 'sec(θ) = 1/cos(θ)',
-          value: round(1 / cosVal, 8).toString(),
-        },
-        {
-          id: 'cot',
-          label: 'cot(θ) = 1/tan(θ)',
-          value: round(1 / tanVal, 8).toString(),
-        },
+      const row = (id: string, label: string, v: number | null, why: string, extra: Partial<CalculatorResult> = {}): CalculatorResult =>
+        v === null ? { id, label, value: UNDEF(why) } : { id, label, value: fmt(v), ...extra };
+
+      const out: CalculatorResult[] = [
+        row('sin', 'sin(θ)', t.sin, '', { highlight: true, color: t.sin >= 0 ? 'positive' : 'negative' }),
+        row('cos', 'cos(θ)', t.cos, ''),
+        row('tan', 'tan(θ)', t.tan, 'cos = 0'),
+        row('csc', 'csc(θ) = 1/sin(θ)', t.csc, 'sin = 0'),
+        row('sec', 'sec(θ) = 1/cos(θ)', t.sec, 'cos = 0'),
+        row('cot', 'cot(θ) = 1/tan(θ)', t.cot, 'sin = 0'),
+        { id: 'quadrant', label: 'Quadrant', value: t.quadrant },
+        { id: 'referenceAngle', label: 'Reference angle', value: angleText(t.refDeg, unit) },
+        { id: 'normalizedAngle', label: 'Coterminal angle in [0°, 360°)', value: angleText(t.normDeg, unit) },
       ];
-
-      // Handle domain errors for reciprocal functions
-      if (Math.abs(sinVal) < 1e-10) {
-        results[3] = { id: 'csc', label: 'csc(θ) = 1/sin(θ)', value: 'Undefined (sin = 0)' };
+      // cot has an exact meaning at tan = 0? No: cot(90°) = 0 (cos/sin), tan(90°) undefined.
+      if (t.exact) {
+        out.push({
+          id: 'exactValues',
+          label: 'Exact values',
+          value: `sin = ${t.exact.sin}, cos = ${t.exact.cos}, tan = ${t.exact.tan ?? 'not defined'}`,
+        });
       }
-      if (Math.abs(cosVal) < 1e-10) {
-        results[4] = { id: 'sec', label: 'sec(θ) = 1/cos(θ)', value: 'Undefined (cos = 0)' };
-      }
-      // cot is undefined when tan = 0 (at 0°, 180°, etc.) because 1/0 is division by zero
-      if (Math.abs(tanVal) < 1e-10) {
-        results[5] = { id: 'cot', label: 'cot(θ) = 1/tan(θ)', value: 'Undefined (tan = 0)' };
-      }
-
-      return results;
+      out.push({ id: '_angleDeg', label: 'angle', value: String(shownDeg) });
+      return out;
     }
 
     if (mode === 'trig-to-angle') {
       const func = values.function;
-      const trigVal = parseFloat(values.trigValue);
+      const v = parseNumberStrict(values.trigValue);
+      if (!func || !Number.isFinite(v)) return [];
+      const err = (m: string): CalculatorResult[] => [{ id: 'error', label: 'Domain Error', value: m, color: 'negative' }];
 
-      if (!func || isNaN(trigVal)) return [];
-
-      let principalAngle: number;
-      let principalAngleLabel: string;
-      let referenceAngle: number;
-      let error: string | null = null;
-
+      let rad: number;
+      let label: string;
       switch (func) {
         case 'sin':
-          if (trigVal < -1 || trigVal > 1) {
-            error = 'sin value must be in [-1, 1]';
-            return [
-              { id: 'error', label: 'Domain Error', value: error, color: 'negative' as const },
-            ];
-          }
-          principalAngle = toDegrees(Math.asin(trigVal));
-          principalAngleLabel = 'sin⁻¹(';
-          referenceAngle = principalAngle >= 0 ? principalAngle : -principalAngle;
+          if (v < -1 || v > 1) return err('sin value must be in [-1, 1]');
+          [rad, label] = [Math.asin(v), 'sin⁻¹('];
           break;
         case 'cos':
-          if (trigVal < -1 || trigVal > 1) {
-            error = 'cos value must be in [-1, 1]';
-            return [
-              { id: 'error', label: 'Domain Error', value: error, color: 'negative' as const },
-            ];
-          }
-          principalAngle = toDegrees(Math.acos(trigVal));
-          principalAngleLabel = 'cos⁻¹(';
-          referenceAngle = principalAngle >= 0 ? principalAngle : -principalAngle;
+          if (v < -1 || v > 1) return err('cos value must be in [-1, 1]');
+          [rad, label] = [Math.acos(v), 'cos⁻¹('];
           break;
         case 'tan':
-          principalAngle = toDegrees(Math.atan(trigVal));
-          principalAngleLabel = 'tan⁻¹(';
-          referenceAngle = principalAngle >= 0 ? principalAngle : -principalAngle;
+          [rad, label] = [Math.atan(v), 'tan⁻¹('];
           break;
         case 'csc':
-          if (trigVal === 0 || Math.abs(trigVal) < 1e-10) {
-            return [
-              { id: 'error', label: 'Domain Error', value: 'csc value cannot be 0', color: 'negative' as const },
-            ];
-          }
-          if (Math.abs(trigVal) < 1) {
-            return [
-              { id: 'error', label: 'Domain Error', value: '|csc| must be ≥ 1 (since sin = 1/csc)', color: 'negative' as const },
-            ];
-          }
-          principalAngle = toDegrees(Math.asin(1 / trigVal));
-          principalAngleLabel = 'csc⁻¹(';
-          referenceAngle = principalAngle >= 0 ? principalAngle : -principalAngle;
+          if (v === 0) return err('csc value cannot be 0');
+          if (Math.abs(v) < 1) return err('|csc| must be ≥ 1 (since sin = 1/csc)');
+          [rad, label] = [Math.asin(1 / v), 'csc⁻¹('];
           break;
         case 'sec':
-          if (trigVal === 0 || Math.abs(trigVal) < 1e-10) {
-            return [
-              { id: 'error', label: 'Domain Error', value: 'sec value cannot be 0', color: 'negative' as const },
-            ];
-          }
-          if (Math.abs(trigVal) < 1) {
-            return [
-              { id: 'error', label: 'Domain Error', value: '|sec| must be ≥ 1 (since cos = 1/sec)', color: 'negative' as const },
-            ];
-          }
-          principalAngle = toDegrees(Math.acos(1 / trigVal));
-          principalAngleLabel = 'sec⁻¹(';
-          referenceAngle = principalAngle >= 0 ? principalAngle : -principalAngle;
+          if (v === 0) return err('sec value cannot be 0');
+          if (Math.abs(v) < 1) return err('|sec| must be ≥ 1 (since cos = 1/sec)');
+          [rad, label] = [Math.acos(1 / v), 'sec⁻¹('];
           break;
         case 'cot':
-          if (trigVal === 0 || Math.abs(trigVal) < 1e-10) {
-            return [
-              { id: 'error', label: 'Domain Error', value: 'cot value cannot be 0 (would correspond to tan = ∞)', color: 'negative' as const },
-            ];
-          }
-          principalAngle = toDegrees(Math.atan(1 / trigVal));
-          principalAngleLabel = 'cot⁻¹(';
-          referenceAngle = principalAngle >= 0 ? principalAngle : -principalAngle;
+          if (v === 0) return [
+            // cot x = 0 is solvable (x = 90°): cot⁻¹(0) = 90° with the (−90°, 90°] convention; atan(1/0) = atan(∞).
+            ...trigToAngleRows('cot', 90, v, unit),
+          ];
+          [rad, label] = [Math.atan(1 / v), 'cot⁻¹('];
           break;
         default:
           return [];
       }
-
-      const angleDisplay = formatAngle(principalAngle);
-      const refDisplay = formatAngle(referenceAngle);
-
-      return [
-        {
-          id: 'principalAngle',
-          label: `${principalAngleLabel}${trigVal}) = Principal Angle`,
-          value: angleDisplay,
-          highlight: true,
-          color: 'positive',
-        },
-        {
-          id: 'referenceAngle',
-          label: 'Reference Angle',
-          value: refDisplay,
-        },
-        {
-          id: 'functionUsed',
-          label: 'Inverse Function',
-          value: func === 'csc' || func === 'sec' || func === 'cot'
-            ? `θ = ${func}⁻¹(${trigVal})`
-            : `θ = ${func}⁻¹(${trigVal})`,
-        },
-      ];
+      return trigToAngleRows(func, degreesFromRadians(rad), v, unit, label);
     }
 
     return [];
+  },
+  extraPanel: (values, results) => {
+    if (!results.length) return null;
+    return createElement(TrigPanel, { values, results });
   },
   educational: {
     formula:
@@ -252,7 +208,7 @@ const config: CalculatorConfig = {
       {
         symbol: 'θ',
         name: 'Angle (theta)',
-        description: 'The angle measured in degrees from the positive x-axis. In this calculator, all angles are in degrees and are converted to radians internally for computation.',
+        description: 'The angle measured from the positive x-axis, in degrees or radians (choose the unit). Degree input is reduced modulo 360° exactly, so 750° behaves as 30° and multiples of 15° give exact radical values.',
       },
       {
         symbol: 'sinθ, cosθ, tanθ',
@@ -340,7 +296,7 @@ const config: CalculatorConfig = {
     faqs: [
       {
         question: 'What is the difference between the principal angle and the reference angle?',
-        answer: 'The principal angle is the angle returned by the inverse trigonometric function (arcsin, arccos, arctan), which has a restricted range to ensure a unique result. For arcsin and arctan, the principal angle is in [-90°, 90°]; for arccos, it is in [0°, 180°]. The reference angle is the acute angle (between 0° and 90°) that the terminal side of the angle makes with the x-axis. It is always non-negative and always between 0° and 90°. For example, if the principal angle is -30°, the reference angle is 30°. The reference angle is useful because the absolute values of trigonometric functions for any angle equal those of its reference angle, with only the sign depending on the quadrant.',
+        answer: 'The principal angle is the angle returned by the inverse trigonometric function (arcsin, arccos, arctan), which has a restricted range to ensure a unique result. For arcsin and arctan, the principal angle is in [-90°, 90°]; for arccos, it is in [0°, 180°]. The reference angle is the acute angle (between 0° and 90°) that the terminal side of the angle makes with the x-axis. It is always non-negative and always between 0° and 90°. For example, if the principal angle is -30°, the reference angle is 30°; for cos⁻¹(-0.5) = 120° the reference angle is 60° (180° − 120°), not 120°. The reference angle is useful because the absolute values of trigonometric functions for any angle equal those of its reference angle, with only the sign depending on the quadrant.',
       },
       {
         question: 'Why do sin and cos only accept values between -1 and 1, while tan accepts any real number?',
@@ -363,10 +319,6 @@ const config: CalculatorConfig = {
       { source: 'Khan Academy - Trigonometry', url: 'https://www.khanacademy.org/math/trigonometry' },
       { source: 'Wolfram MathWorld - Trigonometric Functions', url: 'https://mathworld.wolfram.com/TrigonometricFunctions.html' },
     ],
-  },
-  extraPanel: (values, results) => {
-    if (!results.length) return null;
-    return createElement(TrigPanel, { values, results });
   },
 };
 

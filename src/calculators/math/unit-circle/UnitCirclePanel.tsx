@@ -37,7 +37,7 @@ export default function UnitCirclePanel({ results }: Props) {
   const cosEndY = CY - R * Math.sin(rad);
 
   // Labels
-  const angleLabel = `${angleDeg.toFixed(0)}°`;
+  const angleLabel = angle.value; // exact normalized angle, e.g. "30.5°" (was rounded to a whole degree)
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60 overflow-hidden">
@@ -51,19 +51,19 @@ export default function UnitCirclePanel({ results }: Props) {
       <div className="p-5">
         <div className="flex flex-col items-center">
           {/* SVG Unit Circle */}
-          <svg viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} className="w-48 h-48" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} className="w-48 h-48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label={`Unit circle with the point at ${angle.value}, coordinates ${coords?.value ?? ''}`}>
             {/* Circle */}
             <circle cx={CX} cy={CY} r={R} fill="none" stroke="#e2e8f0" strokeWidth={1.5} />
             {/* Axes */}
             <line x1={CX - R - 10} y1={CY} x2={CX + R + 10} y2={CY} stroke="#cbd5e1" strokeWidth={1} />
             <line x1={CX} y1={CY - R - 10} x2={CX} y2={CY + R + 10} stroke="#cbd5e1" strokeWidth={1} />
             {/* Axis labels */}
-            <text x={CX + R + 12} y={CY + 4} fontSize={9} fill="#94a3b8" textAnchor="start">x</text>
-            <text x={CX + 4} y={CY - R - 5} fontSize={9} fill="#94a3b8" textAnchor="start">y</text>
+            <text x={CX + R + 12} y={CY + 4} fontSize={9} fill="#64748b" textAnchor="start">x</text>
+            <text x={CX + 4} y={CY - R - 5} fontSize={9} fill="#64748b" textAnchor="start">y</text>
 
             {/* Arc */}
             <path
-              d={`M ${CX + R} ${CY} A ${R} ${R} 0 ${angleDeg > 180 ? 1 : 0} 1 ${px} ${py}`}
+              d={`M ${CX + R} ${CY} A ${R} ${R} 0 ${angleDeg > 180 ? 1 : 0} 0 ${px} ${py}`}
               fill="none"
               stroke="#8b5cf6"
               strokeWidth={1.5}
@@ -75,14 +75,14 @@ export default function UnitCirclePanel({ results }: Props) {
             <circle cx={px} cy={py} r={3.5} fill="#ef4444" />
             {/* Cosine line (horizontal from origin to point x) */}
             <line x1={CX} y1={py} x2={px} y2={py} stroke="#eab308" strokeWidth={1.5} strokeDasharray="3,2" />
-            <text x={(CX + px) / 2} y={py + 12} fontSize={7} fill="#eab308" textAnchor="middle">cos</text>
+            <text x={(CX + px) / 2} y={py + 12} fontSize={9} fill="#a16207" textAnchor="middle">cos</text>
             {/* Sine line (vertical from point x to point) */}
             <line x1={px} y1={CY} x2={px} y2={py} stroke="#22c55e" strokeWidth={1.5} strokeDasharray="3,2" />
-            <text x={px + 10} y={(CY + py) / 2 + 2} fontSize={7} fill="#22c55e" textAnchor="start">sin</text>
+            <text x={px + 10} y={(CY + py) / 2 + 2} fontSize={9} fill="#15803d" textAnchor="start">sin</text>
             {/* Angle label */}
             <text x={CX + 25} y={CY - 12} fontSize={10} fill="#8b5cf6" fontWeight="bold">{angleLabel}</text>
             {/* Coordinate label */}
-            <text x={px + 8} y={py - 5} fontSize={7} fill="#ef4444">{`(${((CX - R) / R * Math.cos(rad) + 1).toFixed(3)})`}</text>
+            <text x={px > CX ? px - 6 : px + 6} y={py - 8} fontSize={9} fill="#b91c1c" textAnchor={px > CX ? 'end' : 'start'}>{coords?.value}</text>
           </svg>
 
           {/* Info cards */}

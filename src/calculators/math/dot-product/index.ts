@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import DotProductPanel from './DotProductPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { roundStr6, roundStrAuto } from '../../../lib/format';
+import { allFinite, angleDeg3, dot3, norm3, type V3 } from '../../../utils/vector';
 
 const dotProductConfig: CalculatorConfig = {
   inputs: [
@@ -30,7 +33,7 @@ const dotProductConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '0',
       step: 0.1,
-      helpText: 'Third component of vector a (leave as 0 for 2D)',
+      helpText: 'Third component of vector a (leave blank for 2D)',
     },
     {
       id: 'v2x',
@@ -58,48 +61,35 @@ const dotProductConfig: CalculatorConfig = {
       type: 'number',
       placeholder: '0',
       step: 0.1,
-      helpText: 'Third component of vector b (leave as 0 for 2D)',
+      helpText: 'Third component of vector b (leave blank for 2D)',
     },
   ],
   calculate: (values) => {
-    const v1x = parseFloat(values.v1x);
-    const v1y = parseFloat(values.v1y);
-    const v1z = parseFloat(values.v1z || '0') || 0;
-    const v2x = parseFloat(values.v2x);
-    const v2y = parseFloat(values.v2y);
-    const v2z = parseFloat(values.v2z || '0') || 0;
+    const n = (k: string) => parseNumberStrict(values[k]);
+    // z is optional (blank means 2D); anything else that is not a number is rejected.
+    const z = (k: string) => ((values[k] ?? '').trim() === '' ? 0 : n(k));
+    const a: V3 = [n('v1x'), n('v1y'), z('v1z')];
+    const b: V3 = [n('v2x'), n('v2y'), z('v2z')];
+    if (!allFinite(...a, ...b)) return [];
 
-    if ([v1x, v1y, v2x, v2y].some(isNaN)) return [];
-
-    const fmt = (n: number) => {
-      if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-      return parseFloat(n.toFixed(6)).toString();
-    };
-
+    const fmt = roundStrAuto;
     // Dot product: a·b = a₁b₁ + a₂b₂ + a₃b₃
-    const dot = v1x * v2x + v1y * v2y + v1z * v2z;
+    const dot = dot3(a, b);
+    const mag1 = norm3(a);
+    const mag2 = norm3(b);
+    if (!allFinite(dot, mag1, mag2)) return [];
 
-    // Magnitudes
-    const mag1 = Math.sqrt(v1x * v1x + v1y * v1y + v1z * v1z);
-    const mag2 = Math.sqrt(v2x * v2x + v2y * v2y + v2z * v2z);
+    // cos θ from the unit vectors (no overflow); the angle comes from atan2, which stays exact near 0° and 180°.
+    const angle = angleDeg3(a, b);
+    const cosTheta = angle === null ? null : Math.max(-1, Math.min(1, dot3(a.map((x) => x / mag1) as V3, b.map((x) => x / mag2) as V3)));
+    const undef = 'Undefined (a zero vector has no direction)';
 
-    // Angle between
-    let angleDeg = 0;
-    let cosTheta = 0;
-    if (mag1 > 0 && mag2 > 0) {
-      cosTheta = dot / (mag1 * mag2);
-      cosTheta = Math.max(-1, Math.min(1, cosTheta));
-      angleDeg = Math.acos(cosTheta) * (180 / Math.PI);
-    }
+    // Orthogonal when the dot product vanishes relative to |a||b| (an absolute 1e-10 test is scale-dependent).
+    const orthogonal = Math.abs(dot) <= 1e-12 * mag1 * mag2 ? 'Yes' : 'No';
 
-    // Orthogonal check
-    const orthogonal = Math.abs(dot) < 1e-10 ? 'Yes' : 'No';
-
-    // Scalar projection of a onto b: a·b / |b|
-    let projection = 0;
-    if (mag2 > 0) {
-      projection = dot / mag2;
-    }
+    // Scalar projection of a onto b: a·b / |b|; vector projection: (a·b / |b|²) b
+    const projection = mag2 > 0 ? dot / mag2 : null;
+    const vecProj = mag2 > 0 ? (b.map((x) => (x / mag2) * (dot / mag2)) as V3) : null;
 
     return [
       {
@@ -124,13 +114,13 @@ const dotProductConfig: CalculatorConfig = {
       {
         id: 'angleDeg',
         label: 'Angle Between',
-        value: `${fmt(angleDeg)}°`,
+        value: angle === null ? undef : `${roundStrAuto(angle)}°`,
         color: 'positive' as const,
       },
       {
         id: 'cosTheta',
         label: 'cos θ',
-        value: fmt(cosTheta),
+        value: cosTheta === null ? undef : roundStr6(cosTheta),
         color: 'neutral' as const,
       },
       {
@@ -142,7 +132,13 @@ const dotProductConfig: CalculatorConfig = {
       {
         id: 'projection',
         label: 'Scalar Projection of a onto b',
-        value: fmt(projection),
+        value: projection === null ? 'Undefined (b is the zero vector)' : fmt(projection),
+        color: 'neutral' as const,
+      },
+      {
+        id: 'vectorProjection',
+        label: 'Vector Projection of a onto b',
+        value: vecProj === null ? 'Undefined (b is the zero vector)' : `(${vecProj.map((x) => fmt(x)).join(', ')})`,
         color: 'neutral' as const,
       },
     ];

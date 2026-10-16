@@ -308,7 +308,7 @@ export const mathCalculators: CalculatorEntry[] = [
     subCategory: 'Algebra',
     seoKeywords: ['half-life calculator', 'radioactive decay calculator', 'half life formula', 'exponential decay', 'nuclear decay calculator', 'carbon dating calculator', 'Nt = N0 * (1/2)^(t/t1/2)', 'decay constant', 'drug half-life calculator', 'pharmacokinetics calculator', 'radioactive dating'],
     schema: 'both',
-    mathSolverExpression: 'N(t) = N₀ · (½)^(t / t₁₂⁄₂)',
+    mathSolverExpression: 'N(t) = N₀ · (½)^(t / t₁⁄₂)',
     lastVerified: '2026-05-18',
     relatedIds: ['exponent-calculator', 'log-calculator', 'scientific-calculator', 'probability-calculator', 'molarity-calculator'],
     relatedPosts: ['fractions-math-guide', 'probability-math-guide'],

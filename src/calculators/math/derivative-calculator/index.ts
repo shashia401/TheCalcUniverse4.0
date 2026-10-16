@@ -1,235 +1,70 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import DerivativePanel from './DerivativePanel';
+import { CasError, type Node, derivativeOrder, evalNode, hasVar, parse, show, simplify } from '../shared/cas';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
-/**
- * Interface representing a parsed polynomial term:
- * coefficient * x^exponent
- * e.g. "3x^2" → { coeff: 3, exp: 2 }
- *      "5x"   → { coeff: 5, exp: 1 }
- *      "7"    → { coeff: 7, exp: 0 }
- */
-interface Term {
-  coeff: number;
-  exp: number;
-}
-
-/**
- * Format a term as a string for display.
- * Handles special formatting for exponent 0, 1, and > 1.
- */
-function formatTerm(coeff: number, exp: number, isFirst: boolean): string {
-  if (coeff === 0) return '';
-
-  const sign = coeff < 0 ? '-' : (isFirst ? '' : '+');
-  const absCoeff = Math.abs(coeff);
-
-  if (exp === 0) {
-    return `${sign}${absCoeff}`;
-  }
-  if (exp === 1) {
-    if (absCoeff === 1) return `${sign}x`;
-    return `${sign}${absCoeff}x`;
-  }
-  if (absCoeff === 1) return `${sign}x^${exp}`;
-  return `${sign}${absCoeff}x^${exp}`;
-}
-
-/**
- * Format a polynomial from an array of terms (sorted descending by exponent).
- */
-function formatPolynomial(terms: Term[], showZero = false): string {
-  const filtered = terms.filter((t) => t.coeff !== 0 || showZero);
-  if (filtered.length === 0) return '0';
-
-  let result = '';
-  for (let i = 0; i < filtered.length; i++) {
-    const { coeff, exp } = filtered[i];
-    result += formatTerm(coeff, exp, i === 0);
-  }
-  return result || '0';
-}
-
-/**
- * Parse a polynomial expression string like "3x^2 + 2x + 1" into an array
- * of Term objects.
- *
- * Supported formats:
- *   - Standard: 3x^2, 2x, 5
- *   - Implicit coefficient 1: x^3, x
- *   - Negative: -x^2, -3x
- *   - Decimal coefficients: 1.5x^2
- */
-function parsePolynomial(expr: string): Term[] | null {
-  // Remove all whitespace
-  const cleaned = expr.replace(/\s+/g, '');
-
-  if (!cleaned) return null;
-
-  // Insert a '+' before leading '-' if present to make splitting consistent
-  // e.g. "-3x^2+2x+1" → "0-3x^2+2x+1" so the split works uniformly
-  const normalized = cleaned.startsWith('-') ? '0' + cleaned : cleaned;
-
-  // Split on + or - but keep the delimiters
-  // Regex: match optional sign followed by term parts
-  const termPattern = /[+-]?\d*\.?\d*x?(?:\^\d+)?/g;
-  const parts = normalized.match(termPattern);
-
-  if (!parts) return null;
-
-  const terms: Term[] = [];
-
-  for (const part of parts) {
-    if (!part || part === '+' || part === '-') continue;
-
-    const trimmedPart = part; // already cleaned
-
-    // Determine sign
-    let sign = 1;
-    let body = trimmedPart;
-    if (body.startsWith('-')) {
-      sign = -1;
-      body = body.slice(1);
-    } else if (body.startsWith('+')) {
-      body = body.slice(1);
+/** Plain-language list of the differentiation rules the expression needs (shown as the "steps"). */
+function rulesUsed(n: Node, out = new Set<string>()): Set<string> {
+  switch (n.t) {
+    case 'add':
+      out.add('sum rule');
+      n.a.forEach((m) => rulesUsed(m, out));
+      break;
+    case 'mul': {
+      const dep = n.a.filter(hasVar);
+      const isDiv = n.a.some((m) => m.t === 'pow' && hasVar(m.b) && m.e.t === 'num' && m.e.v < 0);
+      if (isDiv && dep.length > 1) out.add('quotient rule');
+      else if (dep.length > 1) out.add('product rule');
+      else if (dep.length === 1) out.add('constant multiple rule');
+      n.a.forEach((m) => rulesUsed(m, out));
+      break;
     }
-
-    if (!body) continue;
-
-    // Check if this is a variable term (contains 'x') or constant
-    if (body.includes('x')) {
-      const xIndex = body.indexOf('x');
-
-      // Extract coefficient (everything before 'x')
-      const coeffStr = body.slice(0, xIndex);
-      let exponent = 1; // default if no ^
-
-      // Extract exponent if present (after '^')
-      if (body.includes('^')) {
-        const expStr = body.slice(body.indexOf('^') + 1);
-        const parsedExp = parseInt(expStr, 10);
-        if (isNaN(parsedExp) || parsedExp < 0) return null;
-        exponent = parsedExp;
+    case 'pow':
+      if (hasVar(n.e)) out.add('exponential/logarithmic differentiation (u^v)');
+      else if (n.b.t === 'var') out.add('power rule');
+      else if (hasVar(n.b)) {
+        out.add('power rule');
+        out.add('chain rule');
       }
-
-      // If coefficient string is empty or just '.', it's implicitly 1 or -1
-      let coefficient: number;
-      if (coeffStr === '' || coeffStr === '.') {
-        coefficient = 1;
-      } else {
-        coefficient = parseFloat(coeffStr);
-        if (isNaN(coefficient)) return null;
-      }
-
-      terms.push({ coeff: sign * coefficient, exp: exponent });
-    } else {
-      // Constant term
-      const constant = parseFloat(body);
-      if (isNaN(constant)) return null;
-      terms.push({ coeff: sign * constant, exp: 0 });
-    }
+      rulesUsed(n.b, out);
+      rulesUsed(n.e, out);
+      break;
+    case 'fn':
+      out.add(`${n.name} rule`);
+      if (n.arg.t !== 'var') out.add('chain rule');
+      rulesUsed(n.arg, out);
+      break;
+    default:
   }
-
-  if (terms.length === 0) return null;
-
-  // Combine like terms (same exponent)
-  const combined = new Map<number, number>();
-  for (const t of terms) {
-    combined.set(t.exp, (combined.get(t.exp) || 0) + t.coeff);
-  }
-
-  // Convert back to array sorted descending by exponent
-  const result: Term[] = [];
-  for (const [exp, coeff] of combined) {
-    result.push({ coeff, exp });
-  }
-  result.sort((a, b) => b.exp - a.exp);
-
-  return result;
+  return out;
 }
 
-/**
- * Differentiate a polynomial using the power rule:
- * d/dx(ax^n) = a*n*x^(n-1)
- * - If n = 1, derivative is constant a
- * - If n = 0, derivative is 0
- * - Special case: if term is "x", treat as 1*x^1
- */
-function differentiate(terms: Term[]): Term[] {
-  const result: Term[] = [];
-
-  for (const { coeff, exp } of terms) {
-    if (exp === 0) continue; // constant differentiates to 0 (dropped)
-
-    const newCoeff = coeff * exp;
-    const newExp = exp - 1;
-
-    // If n became 0, it's a constant (x^0 = 1) — keep it
-    // If coefficient happens to be 0, skip it
-    if (newCoeff === 0) continue;
-
-    result.push({ coeff: newCoeff, exp: newExp });
-  }
-
-  // Sort descending by exponent
-  result.sort((a, b) => b.exp - a.exp);
-
-  return result;
-}
-
-/**
- * Generate step-by-step explanation for differentiating each term.
- */
-function generateSteps(terms: Term[]): string {
-  const steps: string[] = [];
-
-  for (const { coeff, exp } of terms) {
-    if (exp === 0) {
-      steps.push(`d/dx(${formatTerm(coeff, 0, true)}) = 0 (constant rule)`);
-    } else if (exp === 1) {
-      if (coeff === 1) {
-        steps.push(`d/dx(x) = 1 (power rule: exponent becomes 0, coefficient = 1)`);
-      } else {
-        steps.push(`d/dx(${formatTerm(coeff, 1, true)}) = ${coeff} (power rule: drop the x)`);
-      }
-    } else {
-      const newCoeff = coeff * exp;
-      const newExp = exp - 1;
-      if (newExp === 0) {
-        steps.push(
-          `d/dx(${formatTerm(coeff, exp, true)}) = ${newCoeff} (power rule: ${coeff}×${exp}×x^0 = ${newCoeff})`
-        );
-      } else {
-        steps.push(
-          `d/dx(${formatTerm(coeff, exp, true)}) = ${formatTerm(newCoeff, newExp, true)} (power rule: ${coeff}×${exp}×x^${newExp})`
-        );
-      }
-    }
-  }
-
-  return steps.join('\n');
-}
-
-/**
- * Evaluate a polynomial at a given x value.
- */
-function evaluatePolynomial(terms: Term[], x: number): number {
-  let result = 0;
-  for (const { coeff, exp } of terms) {
-    result += coeff * Math.pow(x, exp);
-  }
-  return result;
-}
+const numStr = (v: number): string => String(Number(v.toPrecision(12)));
+const primes = (k: number) => `f${"'".repeat(k)}(x)`;
 
 const derivativeConfig: CalculatorConfig = {
   inputs: [
     {
       id: 'expression',
-      label: 'Polynomial Expression f(x)',
+      label: 'Function f(x)',
       type: 'text',
-      placeholder: 'e.g. 3x^2 + 2x + 1',
+      placeholder: 'e.g. 3x^2 + 2x + 1 or x^2*sin(x)',
       required: true,
-      helpText: 'Enter a polynomial in standard form. Use ^ for exponents: 3x^2 + 2x + 1 or x^3 - 4x^2 + 5x - 2.',
+      helpText:
+        'Use x as the variable. Supports + - * / ^, implicit products (3x, 2(x+1)), sin cos tan asin acos atan sinh cosh tanh exp ln log (base 10) sqrt abs, and the constants pi and e. Example: x^3 - 4x^2 + 5x - 2 or e^(-x^2).',
+    },
+    {
+      id: 'order',
+      label: 'Derivative order',
+      type: 'select',
+      defaultValue: '1',
+      options: [
+        { label: "First derivative f'(x)", value: '1' },
+        { label: "Second derivative f''(x)", value: '2' },
+        { label: "Third derivative f'''(x)", value: '3' },
+        { label: 'Fourth derivative', value: '4' },
+      ],
     },
     {
       id: 'xValue',
@@ -243,66 +78,49 @@ const derivativeConfig: CalculatorConfig = {
 
   calculate: (values) => {
     const expression = (values.expression || '').trim();
-    const xValueRaw = values.xValue || '';
-
     if (!expression) return [];
+    const order = Math.min(4, Math.max(1, Number(values.order) || 1));
 
-    // Parse the polynomial
-    const terms = parsePolynomial(expression);
-    if (!terms || terms.length === 0) return [];
-
-    // Format the original polynomial
-    const original = formatPolynomial(terms);
-
-    // Differentiate
-    const derivativeTerms = differentiate(terms);
-    if (derivativeTerms.length === 0) {
-      // If all terms were constants, derivative is 0
-      const derivative = '0';
-      const steps = generateSteps(terms);
-
-      const results: CalculatorResult[] = [
-        { id: 'derivative', label: "f'(x)", value: derivative, highlight: true, color: 'positive' },
-        { id: 'original', label: 'f(x)', value: original },
-        { id: 'steps', label: 'Step-by-Step', value: steps || 'All terms were constants, derivative is 0.' },
-      ];
-
-      // Evaluate at x if provided
-      if (xValueRaw) {
-        const xVal = parseFloat(xValueRaw);
-        if (!isNaN(xVal)) {
-          results.push({ id: 'evaluated', label: `f'(${xVal})`, value: '0' });
-        }
-      }
-
-      return results;
+    let tree: Node;
+    let d: Node;
+    try {
+      tree = parse(expression);
+      d = derivativeOrder(tree, order);
+    } catch (e) {
+      if (e instanceof CasError) return [];
+      throw e;
     }
-
-    const derivative = formatPolynomial(derivativeTerms);
-    const steps = generateSteps(terms);
 
     const results: CalculatorResult[] = [
-      { id: 'derivative', label: "f'(x)", value: derivative, highlight: true, color: 'positive' },
-      { id: 'original', label: 'f(x)', value: original },
-      { id: 'steps', label: 'Step-by-Step', value: steps },
+      { id: 'derivative', label: primes(order), value: show(d), highlight: true, color: 'positive' },
+      { id: 'original', label: 'f(x)', value: show(simplify(tree)) },
     ];
 
-    // Evaluate at x if provided
-    if (xValueRaw) {
-      const xVal = parseFloat(xValueRaw);
-      if (!isNaN(xVal)) {
-        const evaluated = evaluatePolynomial(derivativeTerms, xVal);
-        results.push({ id: 'evaluated', label: `f'(${xVal})`, value: evaluated.toString() });
+    // Step-by-step: rules needed, then each successive derivative.
+    const rules = [...rulesUsed(simplify(tree))];
+    const steps = [`Rules used: ${rules.length ? rules.join(', ') : 'constant rule (f is constant)'}`];
+    for (let k = 1; k <= order; k++) steps.push(`${primes(k)} = ${show(derivativeOrder(tree, k))}`);
+    results.push({ id: 'steps', label: 'Step-by-Step', value: steps.join('\n') });
+
+    if ((values.xValue ?? '').trim() !== '') {
+      const xv = parseNumberStrict(values.xValue);
+      if (Number.isFinite(xv)) {
+        // f itself must be defined at x (1/x -> -1 at x = -1 would otherwise be reported for ln(x), which has no value there).
+        const y = Number.isFinite(evalNode(tree, xv)) ? evalNode(d, xv) : NaN;
+        results.push({
+          id: 'evaluated',
+          label: primes(order).replace('(x)', `(${numStr(xv)})`),
+          value: Number.isFinite(y) ? numStr(y) : 'Undefined at this x (outside the domain or no finite slope)',
+        });
       }
     }
-
     return results;
   },
 
   educational: {
-    formula: "f'(x) = d/dx(ax^n) = a · n · x^{n-1}",
+    formula: "f'(x) = d/dx(a·x^n) = a·n·x^(n−1);  (uv)' = u'v + uv';  (u/v)' = (u'v − uv')/v²;  (f∘g)' = f'(g)·g'",
     formulaDescription:
-      'The power rule is one of the most fundamental differentiation rules in calculus. It states that the derivative of a term ax^n is a·n·x^(n-1), where a is any real coefficient and n is any real exponent. This calculator implements the power rule for polynomials with real number coefficients and integer exponents, handling terms like 3x^2 (becomes 6x^1 = 6x), 5x (becomes 5), and constants (become 0). The derivative of a sum is the sum of the derivatives, so each term is differentiated independently.',
+      'The derivative is computed exactly (symbolically), not numerically. The sum, constant-multiple, power, product, quotient and chain rules are applied together with the standard derivatives of sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, e^u, ln and log10, sqrt and abs. For polynomials this reduces to the power rule: the derivative of a·x^n is a·n·x^(n−1). The result is then simplified (like terms and powers are combined). Higher orders repeat the process.',
     variables: [
       {
         symbol: 'a',
@@ -326,8 +144,8 @@ const derivativeConfig: CalculatorConfig = {
       },
     ],
     howToUse: [
-      'Enter a polynomial expression in standard form using the caret symbol (^) for exponents. Examples: "3x^2 + 2x + 1" for a quadratic, "x^3 - 4x^2 + 5x - 2" for a cubic, or "5x" for a linear term.',
-      'The calculator differentiates each term using the power rule: multiply the coefficient by the exponent, then decrease the exponent by one. Constants (terms without x) differentiate to zero and are dropped.',
+      'Enter f(x) using x as the variable and ^ for powers. Examples: "3x^2 + 2x + 1", "x^2*sin(x)", "(x^2+1)/(x-3)", "e^(-x^2)", "ln(x^2+1)". Products like 3x and 2(x+1) may omit the * sign.',
+      'The calculator differentiates with the sum, constant-multiple, product, quotient, power and chain rules plus the derivatives of trigonometric, exponential and logarithmic functions, then simplifies the result. Choose the derivative order (1 to 4) to repeat the process.',
       'Review the step-by-step breakdown to see exactly how each term was differentiated. Each step shows the original term, the power rule applied, and the result.',
       'Optionally enter a numeric x-value to evaluate the derivative at that point. This gives you the slope of the tangent line to the original function at that x-coordinate.',
       'The result shows the derivative function f\'(x), the original function f(x) for reference, the step-by-step work, and the evaluated value if an x-value was provided.',
@@ -346,7 +164,7 @@ const derivativeConfig: CalculatorConfig = {
       'Curve sketching and analysis — determining where a function is increasing or decreasing (first derivative test), finding inflection points (second derivative test), and understanding the shape and behavior of graphs.',
     ],
     explanation:
-      'The derivative is one of the two central concepts in calculus (the other being integration). It measures the instantaneous rate of change of a function with respect to its variable. The power rule — d/dx(x^n) = n·x^(n-1) — is the first differentiation rule most students learn, and it handles polynomials efficiently. For a term like 3x^4, the derivative is 3·4·x^(4-1) = 12x^3. The coefficient (3) carries through, the exponent (4) drops down as a multiplier, and the new exponent is one less (3). This works for any real number exponent, though this calculator focuses on integer exponents. The derivative of a sum is the sum of the derivatives, so we can differentiate term by term. The constant rule states that the derivative of a constant is zero — constants do not change, so their rate of change is zero. Geometrically, the derivative at a point gives the slope of the tangent line to the curve at that point. If f\'(x) > 0, the function is increasing (going up) at x. If f\'(x) < 0, the function is decreasing (going down). If f\'(x) = 0, the function has a horizontal tangent, which may indicate a local maximum, local minimum, or saddle point (inflection). The second derivative, f"\'(x), measures the rate of change of the rate of change — it tells us about concavity. If f"\'(x) > 0, the graph is concave up (like a cup, holding water). If f"\'(x) < 0, it is concave down (like a frown). The power rule is the foundation for polynomial calculus. Combined with the product rule, quotient rule, chain rule, and trigonometric/exponential rules, it enables differentiation of almost any function encountered in applied mathematics.',
+      'The derivative is one of the two central concepts in calculus (the other being integration). It measures the instantaneous rate of change of a function with respect to its variable. The power rule — d/dx(x^n) = n·x^(n-1) — is the first differentiation rule most students learn, and it handles polynomials efficiently. For a term like 3x^4, the derivative is 3·4·x^(4-1) = 12x^3. The coefficient (3) carries through, the exponent (4) drops down as a multiplier, and the new exponent is one less (3). This works for any real exponent, including fractions and negatives (x^(1/2), x^(-3)). The derivative of a sum is the sum of the derivatives, so we can differentiate term by term. The constant rule states that the derivative of a constant is zero — constants do not change, so their rate of change is zero. Geometrically, the derivative at a point gives the slope of the tangent line to the curve at that point. If f\'(x) > 0, the function is increasing (going up) at x. If f\'(x) < 0, the function is decreasing (going down). If f\'(x) = 0, the function has a horizontal tangent, which may indicate a local maximum, local minimum, or saddle point (inflection). The second derivative, f"\'(x), measures the rate of change of the rate of change — it tells us about concavity. If f"\'(x) > 0, the graph is concave up (like a cup, holding water). If f"\'(x) < 0, it is concave down (like a frown). The power rule is the foundation for polynomial calculus. Combined with the product rule, quotient rule, chain rule, and trigonometric/exponential rules (all implemented here), it enables differentiation of almost any function encountered in applied mathematics.',
     diagram: {
       svg: '<svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto">' +
         '<text x="300" y="22" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="var(--svg-1e293b)" text-anchor="middle">Geometric Meaning of the Derivative — Slope of the Tangent Line</text>' +
@@ -376,7 +194,7 @@ const derivativeConfig: CalculatorConfig = {
       },
       {
         question: 'Can this calculator handle more complex functions like trigonometry or exponentials?',
-        answer: 'This calculator implements the power rule for standard polynomial forms only. It can handle terms like 3x^2, -5x^3, 7, and 2x. It does not support trigonometric functions (sin, cos, tan), exponential functions (e^x), logarithmic functions, product rule, quotient rule, chain rule, or implicit differentiation. For those, you would need a full Computer Algebra System (CAS) like Wolfram Alpha or SymPy. This calculator is designed to be educational and practical for introductory calculus students working with polynomials.',
+        answer: 'Yes. Trigonometric (sin, cos, tan and inverses), hyperbolic, exponential (e^x, a^x), logarithmic (ln, log base 10), sqrt, abs, products, quotients, powers and compositions are all supported, e.g. x^2*sin(x), (x^2+1)/(x-3), e^(-x^2), x^x. The answer is a closed-form expression, checked against SymPy. Implicit differentiation, partial derivatives and piecewise functions are not supported.',
       },
       {
         question: 'Why do constants differentiate to zero?',
@@ -388,7 +206,7 @@ const derivativeConfig: CalculatorConfig = {
       },
       {
         question: 'Can I use this for implicit differentiation or partial derivatives?',
-        answer: 'No, this calculator handles explicit differentiation of polynomials in a single variable x using the power rule. Implicit differentiation (where y is defined implicitly by an equation like x^2 + y^2 = 25) and partial derivatives (where a function has multiple variables like f(x, y, z)) require more advanced techniques. The power rule only applies directly when you have an explicit function f(x) = polynomial in x. However, the underlying principle — multiply by the exponent and reduce by one — is the same in both cases.',
+        answer: 'No. This calculator differentiates explicit functions of a single variable x. Implicit differentiation (where y is defined implicitly by an equation like x^2 + y^2 = 25) and partial derivatives (functions of several variables) require other techniques.',
       },
     ],
     citations: [
