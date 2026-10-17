@@ -95,7 +95,7 @@ describe('Gas Mileage calculator', () => {
     // Annual = $0.1167 * 12000 = $1400
     const annualVal = getValue(r, 'annualCost');
     expect(annualVal).toContain('12,000');
-    near(parseNumber(getValue(r, 'annualCostNumeric')), 1400, 15);
+    near(parseNumber(getValue(r, '_annualCostNumeric')), 1400, 15);
   });
 
   it('calculates cost per 100 miles', () => {

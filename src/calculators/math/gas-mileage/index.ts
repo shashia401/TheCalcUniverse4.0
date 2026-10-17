@@ -1,18 +1,20 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import GasMileagePanel from './GasMileagePanel';
+import Decimal from 'decimal.js';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { KM_PER_MILE, L_PER_US_GAL, MPG_TO_L100KM } from '../../automotive/mpg-calculator/mpgMath';
 
-function fmtCurrency(amount: number, currency: string): string {
+/** Money, half-up to `dp` places (cents by default; per-mile costs show a tenth of a cent more). */
+function fmtCurrency(amount: Decimal, currency: string, dp = 2): string {
   const symbols: Record<string, string> = { USD: '$', EUR: '€', GBP: '£' };
   const sym = symbols[currency] || '$';
-  return `${sym}${amount.toFixed(2)}`;
+  const [whole, frac] = amount.toDecimalPlaces(dp, Decimal.ROUND_HALF_UP).toFixed(dp).split('.');
+  return `${sym}${whole.replace(/\B(?=(\d{3})+$)/g, ',')}${frac ? `.${frac}` : ''}`;
 }
 
-const MPG_CONV = 235.215;
-const MI_PER_KM = 0.621371;
-const GAL_PER_L = 0.264172;
-const L_PER_GAL = 3.78541;
-const IMPERIAL_FACTOR = 1.20095;
+const IMPERIAL_GAL_L = 4.54609; // UK gallon, exact by definition
+const IMPERIAL_FACTOR = IMPERIAL_GAL_L / L_PER_US_GAL; // MPG(imperial) / MPG(US) = 1.20095...
 
 const gasMileageConfig: CalculatorConfig = {
   inputs: [
@@ -111,33 +113,35 @@ const gasMileageConfig: CalculatorConfig = {
     const distanceUnit = values.distanceUnit || 'mi';
     const fuelUnit = values.fuelUnit || 'gal';
     const priceCurrency = values.priceCurrency || 'USD';
-    const fuelAdded = parseFloat(values.fuelAdded);
-    const pricePerUnit = parseFloat(values.pricePerUnit);
+    const fuelAdded = parseNumberStrict(values.fuelAdded);
+    // Blank price = no cost analysis; a typed price must be a real number.
+    const priceRaw = (values.pricePerUnit ?? '').trim();
+    const pricePerUnit = priceRaw === '' ? NaN : parseNumberStrict(priceRaw);
 
-    if (isNaN(fuelAdded) || fuelAdded <= 0) return [];
+    if (isNaN(fuelAdded) || fuelAdded <= 0 || fuelAdded > 1e6) return [];
 
     let distanceRaw = 0;
     if (mode === 'odometer') {
-      const start = parseFloat(values.odometerStart);
-      const end = parseFloat(values.odometerEnd);
+      const start = parseNumberStrict(values.odometerStart);
+      const end = parseNumberStrict(values.odometerEnd);
       if (isNaN(start) || isNaN(end)) return [];
       distanceRaw = end - start;
     } else {
-      const trip = parseFloat(values.tripDistance);
+      const trip = parseNumberStrict(values.tripDistance);
       if (isNaN(trip)) return [];
       distanceRaw = trip;
     }
 
-    if (distanceRaw <= 0) return [];
+    if (distanceRaw <= 0 || distanceRaw > 1e7) return [];
 
     const distanceDisplayUnit = distanceUnit === 'mi' ? 'miles' : 'km';
     const distanceDisplay = `${distanceRaw.toFixed(1)} ${distanceDisplayUnit}`;
 
-    const miles = distanceUnit === 'km' ? distanceRaw * MI_PER_KM : distanceRaw;
-    const gallons = fuelUnit === 'L' ? fuelAdded * GAL_PER_L : fuelAdded;
+    const miles = distanceUnit === 'km' ? distanceRaw / KM_PER_MILE : distanceRaw;
+    const gallons = fuelUnit === 'L' ? fuelAdded / L_PER_US_GAL : fuelAdded;
 
     const mpg = miles / gallons;
-    const l100km = MPG_CONV / mpg;
+    const l100km = MPG_TO_L100KM / mpg;
 
     const fuelDisplay = fuelUnit === 'gal'
       ? `${fuelAdded.toFixed(2)} gallons`
@@ -193,16 +197,16 @@ const gasMileageConfig: CalculatorConfig = {
     });
 
     if (!isNaN(pricePerUnit) && pricePerUnit > 0) {
-      const pricePerGallon = fuelUnit === 'L' ? pricePerUnit * L_PER_GAL : pricePerUnit;
-      const costPerMile = distanceRaw > 0 ? (gallons * pricePerGallon) / miles : 0;
-      const costPer100 = costPerMile * 100;
-      const annualMiles = 12000;
-      const annualCost = costPerMile * annualMiles;
+      // The price is per the chosen fuel unit, so the trip cost is just fuel x price (no unit conversion).
+      const tripCost = new Decimal(fuelAdded).times(pricePerUnit);
+      const costPerMile = tripCost.div(new Decimal(distanceRaw).div(distanceUnit === 'km' ? KM_PER_MILE : 1));
+      const costPer100 = costPerMile.times(100);
+      const annualCost = costPerMile.times(12000);
 
       results.push({
         id: 'costPerMile',
         label: 'Cost Per Mile',
-        value: `${fmtCurrency(costPerMile, priceCurrency)}/mile`,
+        value: `${fmtCurrency(costPerMile, priceCurrency, 3)}/mile`,
       });
 
       results.push({
@@ -217,9 +221,9 @@ const gasMileageConfig: CalculatorConfig = {
         value: `At 12,000 mi/year: ${fmtCurrency(annualCost, priceCurrency)}`,
       });
       results.push({
-        id: 'annualCostNumeric',
-        label: 'Annual Fuel Cost (raw)',
-        value: String(annualCost),
+        id: '_annualCostNumeric',
+        label: '',
+        value: annualCost.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toFixed(2),
       });
     }
 
@@ -230,7 +234,7 @@ const gasMileageConfig: CalculatorConfig = {
     return createElement(GasMileagePanel, { values, results });
   },
   educational: {
-    formula: 'MPG = Miles ÷ Gallons | L/100km = 235.215 ÷ MPG',
+    formula: 'MPG = Miles ÷ Gallons | L/100km = 235.2146 ÷ MPG',
     formulaDescription:
       'Fuel economy measures how efficiently a vehicle uses fuel. MPG (miles per gallon) is the US standard. L/100km (liters per 100 kilometers) is used internationally. Lower L/100km means better efficiency.',
     variables: [
@@ -247,9 +251,9 @@ const gasMileageConfig: CalculatorConfig = {
       'Review your fuel economy, costs, and efficiency rating.',
     ],
     explanation:
-      'Fuel economy is calculated by dividing the distance traveled by the fuel consumed. For accurate results, fill your tank completely, reset your trip odometer, drive normally, then fill up again at the same pump. Use the exact gallons pumped and miles driven. To convert between MPG and L/100km: L/100km = 235.215 ÷ MPG. The imperial gallon (UK/Canada) is 1.201 times larger than the US gallon, so MPG(Imp) = MPG(US) × 1.201. Practical example: you drive 320 miles between fill-ups and pump 12.5 gallons. Your fuel economy is 320 / 12.5 = 25.6 MPG. In L/100km: 235.215 / 25.6 = 9.2 L/100km. In Imperial MPG: 25.6 × 1.201 = 30.7 MPG Imp. At $3.50/gallon, your cost per mile is (12.5 × $3.50) / 320 = $0.137/mile, your annual fuel cost at 12,000 miles/year would be $1,644. Edge cases: for accurate MPG tracking, always use the same pump and fill to the same automatic shutoff point — different pumps may shut off at different levels. Temperature affects fuel density: gasoline pumped on a hot day contains less energy per gallon because it expands. A 20°F temperature difference can change actual fuel volume by about 1%. For hybrid vehicles, MPG calculations can be misleading because the electric motor assists at low speeds, making short trips appear very efficient while highway MPG may be lower. For plug-in hybrids, MPGe (miles per gallon equivalent) is used: 1 gallon of gasoline = 33.7 kWh of electricity. If a PHEV travels 30 miles on electric (using 10 kWh) and 30 miles on gas (using 1 gallon), the effective MPGe = 60 / (10/33.7 + 1) = 60 / 1.297 = 46.3 MPGe. For EVs, efficiency is measured in miles per kWh (typically 3-4 mi/kWh for modern EVs) or kWh/100 miles.',
+      'Fuel economy is calculated by dividing the distance traveled by the fuel consumed. For accurate results, fill your tank completely, reset your trip odometer, drive normally, then fill up again at the same pump. Use the exact gallons pumped and miles driven. To convert between MPG and L/100km: L/100km = 235.2146 ÷ MPG. The imperial gallon (UK/Canada) is 1.201 times larger than the US gallon, so MPG(Imp) = MPG(US) × 1.201. Practical example: you drive 320 miles between fill-ups and pump 12.5 gallons. Your fuel economy is 320 / 12.5 = 25.6 MPG. In L/100km: 235.2146 / 25.6 = 9.2 L/100km. In Imperial MPG: 25.6 × 1.201 = 30.7 MPG Imp. At $3.50/gallon, your cost per mile is (12.5 × $3.50) / 320 = $0.137/mile, your annual fuel cost at 12,000 miles/year would be $1,641. Edge cases: for accurate MPG tracking, always use the same pump and fill to the same automatic shutoff point — different pumps may shut off at different levels. Temperature affects fuel density: gasoline pumped on a hot day contains less energy per gallon because it expands. A 20°F temperature difference can change actual fuel volume by about 1%. For hybrid vehicles, MPG calculations can be misleading because the electric motor assists at low speeds, making short trips appear very efficient while highway MPG may be lower. For plug-in hybrids, MPGe (miles per gallon equivalent) is used: 1 gallon of gasoline = 33.7 kWh of electricity. If a PHEV travels 30 miles on electric (using 10 kWh) and 30 miles on gas (using 1 gallon), the effective MPGe = 60 / (10/33.7 + 1) = 60 / 1.297 = 46.3 MPGe. For EVs, efficiency is measured in miles per kWh (typically 3-4 mi/kWh for modern EVs) or kWh/100 miles.',
     diagram: {
-      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><defs><marker id="ab" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--svg-3b82f6)"/></marker></defs><rect x="40" y="25" width="100" height="60" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="2" rx="8"/><text x="90" y="50" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="10" font-weight="bold">Distance</text><text x="90" y="65" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="11">320 miles</text><line x1="140" y1="55" x2="180" y2="55" stroke="var(--svg-3b82f6)" stroke-width="2"/><text x="160" y="48" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="10">&amp;divide;</text><rect x="180" y="25" width="100" height="60" fill="var(--svg-fef3c7)" stroke="var(--svg-ef4444)" stroke-width="2" rx="8"/><text x="230" y="50" text-anchor="middle" fill="var(--svg-991b1b)" font-size="10" font-weight="bold">Fuel</text><text x="230" y="65" text-anchor="middle" fill="var(--svg-991b1b)" font-size="11">12.5 gal</text><rect x="70" y="100" width="180" height="40" fill="var(--svg-d1fae5)" stroke="var(--svg-059669)" stroke-width="2" rx="8"/><text x="160" y="117" text-anchor="middle" fill="var(--svg-065f46)" font-size="12" font-weight="bold">25.6 MPG</text><text x="160" y="132" text-anchor="middle" fill="var(--svg-065f46)" font-size="10">320 mi &amp;divide; 12.5 gal</text><line x1="90" y1="140" x2="90" y2="155" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><line x1="230" y1="140" x2="230" y2="155" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><text x="160" y="170" text-anchor="middle" fill="var(--svg-6b7280)" font-size="10">L/100km = 235.215 &amp;divide; 25.6 = 9.2</text><text x="160" y="185" text-anchor="middle" fill="var(--svg-6b7280)" font-size="10">Cost: (12.5 &amp;times; $3.50) &amp;divide; 320 = $0.137/mi</text></svg>',
+      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><defs><marker id="ab" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--svg-3b82f6)"/></marker></defs><rect x="40" y="25" width="100" height="60" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="2" rx="8"/><text x="90" y="50" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="10" font-weight="bold">Distance</text><text x="90" y="65" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="11">320 miles</text><line x1="140" y1="55" x2="180" y2="55" stroke="var(--svg-3b82f6)" stroke-width="2"/><text x="160" y="48" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="10">&amp;divide;</text><rect x="180" y="25" width="100" height="60" fill="var(--svg-fef3c7)" stroke="var(--svg-ef4444)" stroke-width="2" rx="8"/><text x="230" y="50" text-anchor="middle" fill="var(--svg-991b1b)" font-size="10" font-weight="bold">Fuel</text><text x="230" y="65" text-anchor="middle" fill="var(--svg-991b1b)" font-size="11">12.5 gal</text><rect x="70" y="100" width="180" height="40" fill="var(--svg-d1fae5)" stroke="var(--svg-059669)" stroke-width="2" rx="8"/><text x="160" y="117" text-anchor="middle" fill="var(--svg-065f46)" font-size="12" font-weight="bold">25.6 MPG</text><text x="160" y="132" text-anchor="middle" fill="var(--svg-065f46)" font-size="10">320 mi &amp;divide; 12.5 gal</text><line x1="90" y1="140" x2="90" y2="155" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><line x1="230" y1="140" x2="230" y2="155" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><text x="160" y="170" text-anchor="middle" fill="var(--svg-6b7280)" font-size="10">L/100km = 235.2146 &amp;divide; 25.6 = 9.2</text><text x="160" y="185" text-anchor="middle" fill="var(--svg-6b7280)" font-size="10">Cost: (12.5 &amp;times; $3.50) &amp;divide; 320 = $0.137/mi</text></svg>',
       alt: 'Fuel economy calculation showing distance divided by fuel used equals MPG',
       caption: 'Fuel economy is calculated by dividing the distance traveled by the fuel consumed.',
     },
@@ -268,7 +272,7 @@ const gasMileageConfig: CalculatorConfig = {
       },
       {
         question: 'How do I convert MPG to L/100km?',
-        answer: 'Divide 235.215 by the MPG value. For example, 30 MPG = 235.215 ÷ 30 = 7.84 L/100km. The calculator shows both units automatically.',
+        answer: 'Divide 235.2146 by the MPG value. For example, 30 MPG = 235.2146 ÷ 30 = 7.84 L/100km. The calculator shows both units automatically.',
       },
       {
         question: 'How do I track fuel economy for a plug-in hybrid (PHEV) accurately?',

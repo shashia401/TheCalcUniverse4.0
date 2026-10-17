@@ -1,6 +1,12 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import EngineHPPanel from './EngineHPPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+
+// 1 mechanical horsepower = 33,000 ft-lbf/min = 745.69987 W, so HP = torque(lb-ft) x rpm / (33,000 / 2pi) and kW = Nm x rpm / (60,000 / 2pi).
+const LBFT_RPM_PER_HP = 33000 / (2 * Math.PI); // 5252.113...
+const NM_RPM_PER_KW = 60000 / (2 * Math.PI); // 9549.297...
+const KW_PER_HP = 0.74569987158227;
 
 const getPowerCategory = (hp: number): string => {
   if (hp >= 700) return 'Hypercar';
@@ -57,8 +63,8 @@ const engineHPConfig: CalculatorConfig = {
   calculate: (values) => {
     const unitSystem = values.unitSystem || 'imperial';
     const showExplanation = values.showExplanation || 'yes';
-    const torqueRaw = parseFloat(values.torque);
-    const rpmRaw = parseFloat(values.rpm);
+    const torqueRaw = parseNumberStrict(values.torque);
+    const rpmRaw = parseNumberStrict(values.rpm);
 
     if (isNaN(torqueRaw) || isNaN(rpmRaw)) return [];
     if (torqueRaw <= 0 || rpmRaw <= 0) return [];
@@ -69,8 +75,8 @@ const engineHPConfig: CalculatorConfig = {
     if (unitSystem === 'metric') {
       const nm = torqueRaw;
       const rpm = rpmRaw;
-      const kw = (nm * rpm) / 9549;
-      const hp = kw * 1.341;
+      const kw = (nm * rpm) / NM_RPM_PER_KW;
+      const hp = kw / KW_PER_HP;
       const cat = getPowerCategory(hp);
 
       const results = [
@@ -91,7 +97,7 @@ const engineHPConfig: CalculatorConfig = {
         results.push({
           id: 'magicConstant5252',
           label: 'About the Constants',
-          value: 'Metric uses 9549 (instead of 5252) because: HP (metric) = (Nm × RPM) / 9549. The constant 9549 = 60 / (2π) × 1000, converting rotational speed and torque units to power in kW.',
+          value: 'Metric uses 9549 (instead of 5252) because kW = (Nm × RPM) / 9549.3. The constant is 60,000 / (2π): power = torque × angular speed, with RPM converted to radians per second and watts to kilowatts. Horsepower is then kW ÷ 0.7457.',
           color: 'neutral' as const,
         });
       }
@@ -102,8 +108,8 @@ const engineHPConfig: CalculatorConfig = {
     // Imperial
     const torque = torqueRaw;
     const rpm = rpmRaw;
-    const hp = (torque * rpm) / 5252;
-    const kw = hp / 1.341;
+    const hp = (torque * rpm) / LBFT_RPM_PER_HP;
+    const kw = hp * KW_PER_HP;
     const cat = getPowerCategory(hp);
 
     const results = [

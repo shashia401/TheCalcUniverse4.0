@@ -64,8 +64,8 @@ export default function ElectricityPanel({ results }: Props) {
   else if (applianceValue.includes('Central AC')) tipKey = 'central-ac';
   else if (applianceValue.includes('LED Bulb')) tipKey = 'led-bulb';
   else if (applianceValue.includes('Incandescent')) tipKey = 'incandescent-bulb';
-  else if (applianceValue.includes('Refrigerator')) tipKey = 'refrigerator';
   else if (applianceValue.includes('Old Refrigerator')) tipKey = 'old-refrigerator';
+  else if (applianceValue.includes('Refrigerator')) tipKey = 'refrigerator';
   else if (applianceValue.includes('Gaming PC')) tipKey = 'gaming-pc';
   else if (applianceValue.includes('Laptop')) tipKey = 'laptop';
   else if (applianceValue.includes('LED TV')) tipKey = 'tv';

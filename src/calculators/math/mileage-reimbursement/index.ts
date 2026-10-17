@@ -1,20 +1,26 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MileagePanel from './MileagePanel';
+import Decimal from 'decimal.js';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
-function fmtCurrency(n: number): string {
-  const abs = Math.abs(n);
-  if (Number.isInteger(abs)) return `$${abs.toFixed(0)}`;
-  return `$${abs.toFixed(2)}`;
+/** Exact dollars (half-up to the cent); whole-dollar amounts print without ".00". */
+function fmtCurrency(n: Decimal): string {
+  const d = n.abs().toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
+  return `$${d.isInteger() ? d.toFixed(0) : d.toFixed(2)}`;
 }
 
-const RATES: Record<string, Record<string, number>> = {
-  // The IRS raised the 2026 rates mid-year (Announcement 2026-11 modifying
-  // Notice 2026-10) due to rising fuel costs: business 72.5c -> 76c and
-  // medical/moving 20.5c -> 23.5c, effective July 1, 2026. These are the
-  // current, in-effect rates; charitable is fixed by statute at 14c.
-  '2026': { business: 0.76, medical: 0.235, charitable: 0.14 },
-  '2025': { business: 0.70, medical: 0.21, charitable: 0.14 },
+/** IRS rates go to a tenth of a cent (72.5, 23.5 cents): "$0.725", "$0.76". */
+const fmtRate = (r: Decimal): string => `$${r.toFixed(3).replace(/0$/, '')}`;
+
+// Rates in dollars per mile. 2026 changed mid-year, so it has two periods (the miles driven on each side of
+// July 1 use different rates). Source: irs.gov/tax-professionals/standard-mileage-rates -
+// 2026 Jan 1-Jun 30: IR-2025-128; 2026 Jul 1-Dec 31: IR-2026-29; 2025: IR-2024-312.
+// The "2026" value keeps meaning "current rates" so saved links still work.
+const RATES: Record<string, Record<string, string>> = {
+  '2026': { business: '0.76', medical: '0.235', charitable: '0.14' },
+  '2026h1': { business: '0.725', medical: '0.205', charitable: '0.14' },
+  '2025': { business: '0.70', medical: '0.21', charitable: '0.14' },
 };
 
 const RATE_LABELS: Record<string, string> = {
@@ -23,16 +29,23 @@ const RATE_LABELS: Record<string, string> = {
   charitable: 'Charitable',
 };
 
+const PERIOD_LABELS: Record<string, string> = {
+  '2026': '2026 (Jul 1 - Dec 31)',
+  '2026h1': '2026 (Jan 1 - Jun 30)',
+  '2025': '2025',
+};
+
 const IRS_CITATIONS: Record<string, string> = {
-  '2026': 'IRS Notice 2025-XX (Standard Mileage Rates for 2026)',
-  '2025': 'IRS Notice 2024-XX (Standard Mileage Rates for 2025)',
+  '2026': 'IRS IR-2026-29 (standard mileage rates from July 1, 2026)',
+  '2026h1': 'IRS IR-2025-128 (standard mileage rates for 2026, Jan 1 - Jun 30)',
+  '2025': 'IRS IR-2024-312 (standard mileage rates for 2025)',
 };
 
 const mileageConfig: CalculatorConfig = {
   inputs: [
     {
       id: 'miles',
-      label: 'Total Business Miles',
+      label: 'Total Miles',
       type: 'number',
       min: 0,
       step: 0.1,
@@ -43,19 +56,21 @@ const mileageConfig: CalculatorConfig = {
       label: 'Mileage Type',
       type: 'select',
       options: [
-        { label: 'Business ($0.76/mi)', value: 'business' },
-        { label: 'Medical / Moving ($0.235/mi)', value: 'medical' },
-        { label: 'Charitable ($0.14/mi)', value: 'charitable' },
+        { label: 'Business', value: 'business' },
+        { label: 'Medical / Moving', value: 'medical' },
+        { label: 'Charitable', value: 'charitable' },
       ],
     },
     {
       id: 'year',
-      label: 'Tax Year',
+      label: 'Tax Year / Period',
       type: 'select',
       options: [
-        { label: '2026', value: '2026' },
+        { label: '2026 - Jul 1 to Dec 31', value: '2026' },
+        { label: '2026 - Jan 1 to Jun 30', value: '2026h1' },
         { label: '2025', value: '2025' },
       ],
+      helpText: 'The 2026 rates changed on July 1: use the period the miles were driven in',
     },
     {
       id: 'additionalExpenses',
@@ -68,19 +83,25 @@ const mileageConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const miles = parseFloat(values.miles);
+    const milesNum = parseNumberStrict(values.miles);
     const mileageType = values.mileageType || 'business';
     const year = values.year || '2026';
-    const additionalStr = values.additionalExpenses || '0';
 
-    if (isNaN(miles) || miles < 0) return [];
+    if (isNaN(milesNum) || milesNum < 0 || milesNum > 1e9) return [];
+    const rateStr = RATES[year]?.[mileageType];
+    if (!rateStr) return [];
 
-    const rate = RATES[year]?.[mileageType] ?? 0.76;
-    const mileageAmount = miles * rate;
-    const additionalExpenses = parseFloat(additionalStr);
-    const hasAdditional = !isNaN(additionalExpenses) && additionalExpenses > 0;
+    // Blank expenses = none; anything typed must be a valid non-negative amount.
+    const extraRaw = (values.additionalExpenses ?? '').trim();
+    const extraNum = extraRaw === '' ? 0 : parseNumberStrict(extraRaw);
+    if (isNaN(extraNum) || extraNum < 0 || extraNum > 1e9) return [];
 
-    const reimbursement = mileageAmount + (hasAdditional ? additionalExpenses : 0);
+    const rate = new Decimal(rateStr);
+    const mileageAmount = new Decimal(milesNum).times(rate);
+    const additionalExpenses = new Decimal(extraNum);
+    const hasAdditional = additionalExpenses.gt(0);
+
+    const reimbursement = mileageAmount.plus(additionalExpenses);
 
     const results: Array<{
       id: string;
@@ -104,8 +125,9 @@ const mileageConfig: CalculatorConfig = {
       {
         id: 'rateUsed',
         label: 'Rate Used',
-        value: fmtCurrency(rate) + '/mi',
+        value: fmtRate(rate) + '/mi',
       },
+      { id: 'year', label: 'Tax Year / Period', value: PERIOD_LABELS[year] ?? year },
     ];
 
     if (hasAdditional) {
@@ -119,13 +141,12 @@ const mileageConfig: CalculatorConfig = {
     results.push({
       id: 'irsNote',
       label: 'IRS Reference',
-      value: `${IRS_CITATIONS[year] || IRS_CITATIONS['2026']} — ${RATE_LABELS[mileageType]} rate: ${fmtCurrency(rate)}/mile`,
+      value: `${IRS_CITATIONS[year]} - ${RATE_LABELS[mileageType]} rate: ${fmtRate(rate)}/mile`,
     });
 
     // Tax savings for business use (self-employed)
     if (mileageType === 'business') {
-      const marginalRate = 0.30;
-      const taxSavings = reimbursement * marginalRate;
+      const taxSavings = reimbursement.times('0.30');
       results.push({
         id: 'taxSavings',
         label: 'Estimated Tax Savings',
@@ -173,12 +194,12 @@ const mileageConfig: CalculatorConfig = {
       'Read your total reimbursement and estimated tax savings.',
     ],
     explanation:
-      'The IRS standard mileage rate simplifies vehicle expense deduction. Instead of tracking actual costs (gas, repairs, insurance, depreciation), you multiply your business miles by the IRS rate. For 2026, the business rate is $0.76 per mile (raised mid-year from $0.725 by IRS Announcement 2026-11 due to rising fuel costs). Self-employed individuals can deduct this on Schedule C, reducing their taxable income. Practical example: a real estate agent drives 15,000 business miles in 2026. The mileage deduction is 15,000 × $0.76 = $11,400. If they also paid $200 in tolls and $150 in parking, the total deduction is $11,750. At a 30% marginal tax rate, this saves approximately $3,525 in taxes. Edge cases: for rideshare drivers (Uber, Lyft), the distinction between personal and business miles is critical — only miles driven while the app is on and you are actively working count as business miles. Miles driven to the first pickup location are not deductible as business miles (they are commuting miles). If you use the standard mileage rate in the first year of vehicle ownership, you cannot switch to actual expenses in later years. For a vehicle leased for business use, you must use the standard mileage rate for the entire lease period. Medical mileage includes trips for medical care, dental visits, and pharmacy runs — but the 7.5% of AGI floor for medical expenses applies. Charitable mileage is only deductible if you itemize deductions on Schedule A. For mixed-use vehicles (personal and business), keep a detailed mileage log showing date, purpose, starting and ending odometer readings for each business trip.',
+      'The IRS standard mileage rate simplifies vehicle expense deduction. Instead of tracking actual costs (gas, repairs, insurance, depreciation), you multiply your business miles by the IRS rate. For 2026 the IRS changed the rates mid-year: miles driven January 1 - June 30 use $0.725 (business) and $0.205 (medical/moving), miles driven from July 1 use $0.76 and $0.235 (IR-2025-128 and IR-2026-29); charitable stays $0.14. Run the calculator once per period and add the results. Self-employed individuals can deduct this on Schedule C, reducing their taxable income. Practical example: a real estate agent drives 8,000 business miles January - June and 7,000 July - December 2026. The mileage deduction is 8,000 × $0.725 + 7,000 × $0.76 = $5,800 + $5,320 = $11,120. If they also paid $200 in tolls and $150 in parking, the total deduction is $11,470. At a 30% marginal tax rate, this saves approximately $3,441 in taxes. Edge cases: for rideshare drivers (Uber, Lyft), the distinction between personal and business miles is critical — only miles driven while the app is on and you are actively working count as business miles. Miles driven to the first pickup location are not deductible as business miles (they are commuting miles). If you use the standard mileage rate in the first year of vehicle ownership, you cannot switch to actual expenses in later years. For a vehicle leased for business use, you must use the standard mileage rate for the entire lease period. Medical mileage includes trips for medical care, dental visits, and pharmacy runs — but the 7.5% of AGI floor for medical expenses applies. Charitable mileage is only deductible if you itemize deductions on Schedule A. Medical mileage is an itemized deduction only to the extent total medical expenses exceed 7.5% of AGI, and moving mileage is deductible only for active-duty military under a permanent change of station. For mixed-use vehicles (personal and business), keep a detailed mileage log showing date, purpose, starting and ending odometer readings for each business trip.',
     faqs: [
       {
         question: 'What is the standard mileage rate for 2026?',
         answer:
-          'The 2026 IRS standard mileage rate for business use is $0.76 per mile (raised mid-year from $0.725 effective July 1, 2026). The medical/moving rate is $0.235 per mile, and the charitable rate is $0.14 per mile.',
+          'For miles driven from July 1, 2026 the IRS business rate is $0.76 per mile (medical/moving $0.235). For January 1 - June 30, 2026 it was $0.725 (medical/moving $0.205). The charitable rate is $0.14 per mile all year. Pick the matching period in the calculator.',
       },
       {
         question: 'Can I use both actual expenses and standard mileage?',

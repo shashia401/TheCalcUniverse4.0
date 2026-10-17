@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult, SelectOption } from '../../../types/calculator';
 import ElectricityPanel from './ElectricityPanel';
+import Decimal from 'decimal.js';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
 // ─── Appliance Presets ───────────────────────────────────────────────────────
 
@@ -64,7 +66,8 @@ function findComparisonPreset(wattage: number, hoursPerDay: number): string {
       bestKey = key;
     }
   }
-  if (bestKey && APPLIANCE_PRESETS[bestKey]) {
+  // Only compare when a preset is genuinely close (within 25% of the daily energy), not the "nearest" of a bad lot.
+  if (bestKey && APPLIANCE_PRESETS[bestKey] && bestDiff <= 0.25 * dailyWh) {
     return `Roughly equivalent to running a ${APPLIANCE_PRESETS[bestKey].label} for ${hoursPerDay} hrs/day`;
   }
   return '';
@@ -125,35 +128,33 @@ const electricityCostConfig: CalculatorConfig = {
     },
   ],
   calculate: (values): CalculatorResult[] => {
-    // Determine wattage from preset or custom
-    let wattage = parseFloat(values.wattage);
+    // Wattage comes from the preset only when the field is left blank; a typed value must be valid.
     const presetKey = values.preset || '';
     const preset = presetKey ? APPLIANCE_PRESETS[presetKey] : null;
+    const wattageRaw = (values.wattage ?? '').trim();
+    const wattage = wattageRaw === '' && preset ? preset.watts : parseNumberStrict(wattageRaw);
 
-    if (preset && (isNaN(wattage) || wattage <= 0)) {
-      wattage = preset.watts;
-    }
-
-    const hoursPerDay = parseFloat(values.hoursPerDay);
-    const days = parseInt(values.days || '30', 10);
-    const costPerKwh = parseFloat(values.costPerKwh);
-    const applianceCount = parseInt(values.applianceCount || '1', 10);
+    const hoursPerDay = parseNumberStrict(values.hoursPerDay);
+    const days = parseNumberStrict(values.days || '30');
+    const costPerKwh = parseNumberStrict(values.costPerKwh);
+    const countRaw = (values.applianceCount ?? '').trim();
+    const count = countRaw === '' ? 1 : parseNumberStrict(countRaw);
 
     // Validate inputs
-    if (isNaN(wattage) || wattage <= 0) return [];
-    if (isNaN(hoursPerDay) || hoursPerDay <= 0) return [];
-    if (isNaN(days) || days <= 0) return [];
-    if (isNaN(costPerKwh) || costPerKwh < 0) return [];
+    if (isNaN(wattage) || wattage <= 0 || wattage > 1e7) return [];
+    if (isNaN(hoursPerDay) || hoursPerDay <= 0 || hoursPerDay > 24) return [];
+    if (!Number.isInteger(days) || days <= 0 || days > 3650) return [];
+    if (isNaN(costPerKwh) || costPerKwh < 0 || costPerKwh > 1e4) return [];
+    if (!Number.isInteger(count) || count < 1 || count > 1e6) return [];
 
-    const count = isNaN(applianceCount) || applianceCount < 1 ? 1 : applianceCount;
-
-    // Core calculations
-    const kWhPerDay = (wattage * hoursPerDay) / 1000;
-    const kWhPerPeriod = kWhPerDay * days;
-    const totalCost = kWhPerPeriod * costPerKwh * count;
-    const costPerDay = kWhPerDay * costPerKwh * count;
-    const costPerMonth = kWhPerDay * 30 * costPerKwh * count;
-    const costPerYear = kWhPerDay * 365 * costPerKwh * count;
+    // Core calculations (exact decimals, so cents round half-up instead of drifting with float error)
+    const kWhPerDay = new Decimal(wattage).times(hoursPerDay).div(1000).times(count);
+    const kWhPerPeriod = kWhPerDay.times(days);
+    const rate = new Decimal(costPerKwh);
+    const totalCost = kWhPerPeriod.times(rate);
+    const costPerDay = kWhPerDay.times(rate);
+    const costPerMonth = costPerDay.times(30);
+    const costPerYear = costPerDay.times(365);
 
     // Appliance label
     const applianceLabel = preset
@@ -163,25 +164,23 @@ const electricityCostConfig: CalculatorConfig = {
     // Comparison note
     const comparisonNote = findComparisonPreset(wattage, hoursPerDay);
 
-    // Format helpers
-    const fmtCurrency = (n: number): string => {
-      if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
-      if (n >= 1_000) return `$${(n / 1_000).toFixed(2)}K`;
-      if (n >= 1) return `$${n.toFixed(2)}`;
-      if (n >= 0.01) return `$${n.toFixed(2)}`;
-      return `$${n.toFixed(4)}`;
+    // Format helpers: full amounts with thousands separators (the old "$1.23K" shorthand threw away cents).
+    const group = (whole: string): string => whole.replace(/\B(?=(\d{3})+$)/g, ',');
+    const fmtCurrency = (n: Decimal): string => {
+      const dp = n.gte(0.01) || n.isZero() ? 2 : 4;
+      const [whole, frac] = n.toDecimalPlaces(dp, Decimal.ROUND_HALF_UP).toFixed(dp).split('.');
+      return `$${group(whole)}.${frac}`;
     };
 
-    const fmtKwh = (n: number): string => {
-      if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M kWh`;
-      if (n >= 1_000) return `${(n / 1_000).toFixed(2)}K kWh`;
-      return `${parseFloat(n.toFixed(2))} kWh`;
+    const fmtKwh = (n: Decimal): string => {
+      const [whole, frac] = n.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toFixed(2).split('.');
+      return `${group(whole)}${frac === '00' ? '' : `.${frac.replace(/0$/, '')}`} kWh`;
     };
 
-    return [
+    const results: CalculatorResult[] = [
       {
         id: 'costPerPeriod',
-        label: `Energy Cost (${PERIOD_LABELS[String(days)] || 'Period'})`,
+        label: `Energy Cost (${PERIOD_LABELS[String(days)] || `${days} days`})`,
         value: fmtCurrency(totalCost),
         highlight: true,
         color: 'positive',
@@ -189,12 +188,12 @@ const electricityCostConfig: CalculatorConfig = {
       {
         id: 'kwhUsed',
         label: 'Energy Used',
-        value: fmtKwh(kWhPerPeriod * count),
+        value: fmtKwh(kWhPerPeriod),
       },
       {
         id: 'kwhPerDay',
         label: 'Daily Usage',
-        value: fmtKwh(kWhPerDay * count),
+        value: fmtKwh(kWhPerDay),
       },
       {
         id: 'costPerDay',
@@ -217,12 +216,9 @@ const electricityCostConfig: CalculatorConfig = {
         label: 'Appliance',
         value: applianceLabel,
       },
-      {
-        id: 'equivalentNote',
-        label: 'Comparison',
-        value: comparisonNote,
-      },
     ];
+    if (comparisonNote) results.push({ id: 'equivalentNote', label: 'Comparison', value: comparisonNote });
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -245,7 +241,7 @@ const electricityCostConfig: CalculatorConfig = {
       'Set the number of identical appliances (e.g., 10 LED bulbs).',
     ],
     explanation:
-      'Electricity is billed per kilowatt-hour (kWh), which represents 1,000 watts used for one hour. This calculator converts appliance wattage to kilowatt-hours, multiplies by your local electricity rate, and projects costs over daily, monthly, and yearly periods. Understanding appliance energy costs helps you identify energy-saving opportunities and manage your electric bill. Practical example: a gaming PC drawing 500W used for 6 hours per day. Daily consumption: (500 × 6) / 1000 = 3 kWh. At $0.14/kWh, daily cost = $0.42, monthly cost (30 days) = $12.60, yearly cost = $153.30. Compare with an LED TV (120W) used 6 hours: 0.72 kWh/day, $0.10/day, $3.02/month, $36.74/year. The gaming PC costs over 4 times more to run. Edge cases: for appliances with variable power draw, such as refrigerators and air conditioners that cycle on and off, the nameplate wattage overestimates actual consumption — a refrigerator rated at 700W typically runs only about 30% of the time, averaging 210W. Use a plug-in power meter (like a Kill-A-Watt) for accurate measurements. For electric vehicle charging at Level 2 (7,000W for 4 hours), consumption is 28 kWh/day, costing $3.92/day, $117.60/month, $1,430.80/year. Time-of-use billing can significantly affect costs — charging overnight at off-peak rates (potentially $0.08/kWh) versus peak rates ($0.30/kWh) can cut EV charging costs by 70%. For standby power (vampire power), devices like cable boxes, game consoles, and phone chargers draw 1-10W continuously — 10 such devices at 5W each, 24/7, costs about $0.50/month at average rates, or $6/year in wasted energy.',
+      'Electricity is billed per kilowatt-hour (kWh), which represents 1,000 watts used for one hour. This calculator converts appliance wattage to kilowatt-hours, multiplies by your local electricity rate, and projects costs over daily, monthly, and yearly periods. Understanding appliance energy costs helps you identify energy-saving opportunities and manage your electric bill. Practical example: a gaming PC drawing 500W used for 6 hours per day. Daily consumption: (500 × 6) / 1000 = 3 kWh. At $0.14/kWh, daily cost = $0.42, monthly cost (30 days) = $12.60, yearly cost = $153.30. Compare with an LED TV (120W) used 6 hours: 0.72 kWh/day, $0.10/day, $3.02/month, $36.79/year. The gaming PC costs over 4 times more to run. Edge cases: for appliances with variable power draw, such as refrigerators and air conditioners that cycle on and off, the nameplate wattage overestimates actual consumption — a refrigerator rated at 700W typically runs only about 30% of the time, averaging 210W. Use a plug-in power meter (like a Kill-A-Watt) for accurate measurements. For electric vehicle charging at Level 2 (7,000W for 4 hours), consumption is 28 kWh/day, costing $3.92/day, $117.60/month, $1,430.80/year. Time-of-use billing can significantly affect costs — charging overnight at off-peak rates (potentially $0.08/kWh) versus peak rates ($0.30/kWh) can cut EV charging costs by 70%. For standby power (vampire power), devices like cable boxes, game consoles, and phone chargers draw 1-10W continuously — 10 such devices at 5W each, 24/7, use 1.2 kWh a day, which costs about $5/month at average rates, or $61/year in wasted energy.',
     diagram: {
       svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect x="20" y="50" width="60" height="60" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="2" rx="8"/><text x="50" y="78" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="10" font-weight="bold">Appliance</text><text x="50" y="91" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="9">1500 W</text><line x1="80" y1="80" x2="120" y2="80" stroke="var(--svg-3b82f6)" stroke-width="2" marker-end="url(#ab)"/><defs><marker id="ab" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--svg-3b82f6)"/></marker></defs><rect x="120" y="40" width="70" height="80" fill="var(--svg-fef3c7)" stroke="var(--svg-ef4444)" stroke-width="2" rx="5"/><text x="155" y="70" text-anchor="middle" fill="var(--svg-ef4444)" font-size="12" font-weight="bold">kWh</text><text x="155" y="85" text-anchor="middle" fill="var(--svg-ef4444)" font-size="11">Meter</text><text x="155" y="100" text-anchor="middle" fill="var(--svg-991b1b)" font-size="9">(W &amp;times; h)</text><text x="155" y="112" text-anchor="middle" fill="var(--svg-991b1b)" font-size="9">/ 1000</text><line x1="190" y1="80" x2="230" y2="80" stroke="var(--svg-ef4444)" stroke-width="2"/><rect x="230" y="45" width="70" height="70" fill="var(--svg-d1fae5)" stroke="var(--svg-059669)" stroke-width="2" rx="8"/><text x="265" y="78" text-anchor="middle" fill="var(--svg-065f46)" font-size="11" font-weight="bold">Cost</text><text x="265" y="93" text-anchor="middle" fill="var(--svg-065f46)" font-size="9">$ Price</text><text x="265" y="105" text-anchor="middle" fill="var(--svg-065f46)" font-size="8">kWh &amp;times; rate</text><text x="160" y="155" text-anchor="middle" fill="var(--svg-4b5563)" font-size="10">Cost = (Watts &amp;times; Hours) / 1000 &amp;times; $/kWh</text><rect x="50" y="165" width="220" height="22" fill="var(--svg-e5e7eb)" rx="4"/><text x="160" y="180" text-anchor="middle" fill="var(--svg-374151)" font-size="10">500 W &amp;times; 6 h/day &amp;divide; 1000 = 3 kWh/day</text></svg>',
       alt: 'Flow diagram showing appliance power converted to kilowatt-hours and then to cost',
@@ -286,7 +282,7 @@ const electricityCostConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Wikipedia', title: 'Electricity Pricing', url: 'https://en.wikipedia.org/wiki/Electricity_pricing' },
-      { source: 'Wolfram MathWorld', title: 'Electricity Cost', url: 'https://mathworld.wolfram.com/' },
+      { source: 'U.S. Energy Information Administration', title: 'Electric Power Monthly - Average Price of Electricity', url: 'https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_5_6_a' },
     ],
   },
 };

@@ -202,8 +202,8 @@ describe('Fuel Cost calculator', () => {
       vehicleType: 'diesel',
       roundTrips: '1',
     });
-    // 100/25 = 4 gal × 22.5 lbs/gal = 90.0 lbs
-    near(parseNumber(getValue(r, 'co2Emissions')), 90.0, 0.1);
+    // 100/25 = 4 gal × 22.44 lbs/gal (EPA: 10,180 g CO2 per gallon of diesel) = 89.8 lbs
+    near(parseNumber(getValue(r, 'co2Emissions')), 89.8, 0.1);
   });
 
   it('handles price per liter — $0.92/L', () => {

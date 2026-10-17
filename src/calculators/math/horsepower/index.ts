@@ -1,6 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import HorsepowerPanel from './HorsepowerPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
 const DRIVETRAIN_LOSS: Record<string, number> = {
   fwd: 15,
@@ -73,78 +74,49 @@ const horsepowerConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const weight = parseFloat(values.vehicleWeight);
+    const weight = parseNumberStrict(values.vehicleWeight);
     const mode = values.mode || 'both';
     const drivetrain = values.drivetrain || 'rwd';
-    const et = parseFloat(values.quarterMileET);
-    const speed = parseFloat(values.trapSpeed);
+    const et = parseNumberStrict(values.quarterMileET);
+    const speed = parseNumberStrict(values.trapSpeed);
 
     if (isNaN(weight) || weight <= 0) return [];
 
+    const needEt = mode === 'et' || mode === 'both';
+    const needSpeed = mode === 'speed' || mode === 'both';
+    if (needEt && (isNaN(et) || et <= 0)) return [];
+    if (needSpeed && (isNaN(speed) || speed <= 0)) return [];
+
+    // Outside these ranges the cubic formulas give nonsense (ET 0.1 s "makes" a billion horsepower), so say so.
+    const range = (id: string, message: string) => [{ id, label: 'Check your numbers', value: message, color: 'negative' as const }];
+    if (weight < 200 || weight > 100_000) return range('error', 'Vehicle weight should be between 200 and 100,000 lbs.');
+    if (needEt && (et < 3 || et > 60)) return range('error', 'A quarter-mile time should be between 3 and 60 seconds.');
+    if (needSpeed && (speed < 20 || speed > 350)) return range('error', 'A quarter-mile trap speed should be between 20 and 350 mph.');
+
     const lossPct = DRIVETRAIN_LOSS[drivetrain] ?? 18;
     const lossFactor = 1 - lossPct / 100;
-
     const fmtHP = (n: number) => `${n.toFixed(1)} HP`;
 
-    // Calculate based on mode
-    if (mode === 'et') {
-      if (isNaN(et) || et <= 0) return [];
+    const hpFromET = needEt ? weight / Math.pow(et / 5.825, 3) : NaN;
+    const hpFromSpeed = needSpeed ? weight * Math.pow(speed / 234, 3) : NaN;
+    const estimatedHP = mode === 'et' ? hpFromET : mode === 'speed' ? hpFromSpeed : (hpFromET + hpFromSpeed) / 2;
+    const method = mode === 'et' ? 'ET-based' : mode === 'speed' ? 'Speed-based' : 'Average of both';
 
-      const hpFromET = weight / Math.pow(et / 5.825, 3);
-      const estimatedHP = hpFromET;
-      const whp = estimatedHP * lossFactor;
-      const ptW = weight / estimatedHP;
-      const cat = powerCategory(estimatedHP, weight);
-
-      return [
-        { id: 'estimatedHP', label: 'Estimated Horsepower', value: fmtHP(estimatedHP), highlight: true, color: 'positive' as const },
-        { id: 'crankHP', label: 'Crank (BHP)', value: fmtHP(estimatedHP), color: 'neutral' as const },
-        { id: 'wheelHP', label: 'Wheel HP (WHP)', value: fmtHP(whp), color: 'neutral' as const },
-        { id: 'powerToWeight', label: 'Power-to-Weight', value: `${ptW.toFixed(1)} lbs/hp`, color: 'neutral' as const },
-        { id: 'method', label: 'Method', value: 'ET-based', color: 'neutral' as const },
-        { id: 'powerCategory', label: 'Performance Tier', value: cat, color: 'positive' as const },
-      ];
-    }
-
-    if (mode === 'speed') {
-      if (isNaN(speed) || speed <= 0) return [];
-
-      const hpFromSpeed = weight * Math.pow(speed / 234, 3);
-      const estimatedHP = hpFromSpeed;
-      const whp = estimatedHP * lossFactor;
-      const ptW = weight / estimatedHP;
-      const cat = powerCategory(estimatedHP, weight);
-
-      return [
-        { id: 'estimatedHP', label: 'Estimated Horsepower', value: fmtHP(estimatedHP), highlight: true, color: 'positive' as const },
-        { id: 'crankHP', label: 'Crank (BHP)', value: fmtHP(estimatedHP), color: 'neutral' as const },
-        { id: 'wheelHP', label: 'Wheel HP (WHP)', value: fmtHP(whp), color: 'neutral' as const },
-        { id: 'powerToWeight', label: 'Power-to-Weight', value: `${ptW.toFixed(1)} lbs/hp`, color: 'neutral' as const },
-        { id: 'method', label: 'Method', value: 'Speed-based', color: 'neutral' as const },
-        { id: 'powerCategory', label: 'Performance Tier', value: cat, color: 'positive' as const },
-      ];
-    }
-
-    // Both mode
-    if (isNaN(et) || et <= 0 || isNaN(speed) || speed <= 0) return [];
-
-    const hpFromET = weight / Math.pow(et / 5.825, 3);
-    const hpFromSpeed = weight * Math.pow(speed / 234, 3);
-    const estimatedHP = (hpFromET + hpFromSpeed) / 2;
-    const whp = estimatedHP * lossFactor;
-    const ptW = weight / estimatedHP;
-    const cat = powerCategory(estimatedHP, weight);
-
-    return [
+    const results: CalculatorResult[] = [
       { id: 'estimatedHP', label: 'Estimated Horsepower', value: fmtHP(estimatedHP), highlight: true, color: 'positive' as const },
       { id: 'crankHP', label: 'Crank (BHP)', value: fmtHP(estimatedHP), color: 'neutral' as const },
-      { id: 'wheelHP', label: 'Wheel HP (WHP)', value: fmtHP(whp), color: 'neutral' as const },
-      { id: 'powerToWeight', label: 'Power-to-Weight', value: `${ptW.toFixed(1)} lbs/hp`, color: 'neutral' as const },
-      { id: 'method', label: 'Method', value: 'Average of both', color: 'neutral' as const },
-      { id: 'hpFromET', label: 'HP from ET', value: fmtHP(hpFromET), color: 'neutral' as const },
-      { id: 'hpFromSpeed', label: 'HP from Speed', value: fmtHP(hpFromSpeed), color: 'neutral' as const },
-      { id: 'powerCategory', label: 'Performance Tier', value: cat, color: 'positive' as const },
+      { id: 'wheelHP', label: 'Wheel HP (WHP)', value: fmtHP(estimatedHP * lossFactor), color: 'neutral' as const },
+      { id: 'powerToWeight', label: 'Power-to-Weight', value: `${(weight / estimatedHP).toFixed(1)} lbs/hp`, color: 'neutral' as const },
+      { id: 'method', label: 'Method', value: method, color: 'neutral' as const },
     ];
+    if (mode === 'both') {
+      results.push(
+        { id: 'hpFromET', label: 'HP from ET', value: fmtHP(hpFromET), color: 'neutral' as const },
+        { id: 'hpFromSpeed', label: 'HP from Speed', value: fmtHP(hpFromSpeed), color: 'neutral' as const },
+      );
+    }
+    results.push({ id: 'powerCategory', label: 'Performance Tier', value: powerCategory(estimatedHP, weight), color: 'positive' as const });
+    return results;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
@@ -173,7 +145,7 @@ const horsepowerConfig: CalculatorConfig = {
       'Review estimated crank and wheel horsepower, power-to-weight ratio, and performance tier.',
     ],
     explanation:
-      'The Hale formula correlates drag strip performance with engine power. ET-based calculation uses the time to complete 1,320 feet; speed-based uses the vehicle velocity at the finish line. The 5.825 constant in the ET formula represents the cubic root relationship between time and power, while 234 in the speed formula accounts for aerodynamic and rolling resistance at high speed. Averaging both methods cancels out individual errors: ET can be affected by traction off the line, while speed is affected by aerodynamic drag and gearing. Practical example: a 3,500 lb car runs a 13.0-second quarter-mile at 108 mph. Using both modes: HP from ET = 3,500 / (13.0 / 5.825)³ = 3,500 / (2.232)³ = 3,500 / 11.12 = 314.7 HP. HP from speed = 3,500 × (108 / 234)³ = 3,500 × (0.462)³ = 3,500 × 0.0984 = 344.4 HP. Average = (314.7 + 344.4) / 2 = 329.6 HP at the crank. With an RWD drivetrain (18% loss), wheel HP = 329.6 × 0.82 = 270.3 WHP. Power-to-weight = 3,500 / 329.6 = 10.6 lbs/HP (Performance category). Edge cases: for high-horsepower cars running on drag radials with excellent traction, the ET method can overestimate power because the car hooks up better than the formula assumes — the Hale formula was calibrated for street tires. For AWD cars, the ET method is more accurate than speed because AWD launches are more consistent, but the speed method may under-read because AWD drivetrain losses are higher (25%). For very high altitudes (e.g., Denver at 5,280 ft), air density is about 17% lower than sea level, which reduces naturally aspirated engine power by about 3-4% per 1,000 ft. The Hale formula does not correct for altitude. For turbocharged cars, altitude has minimal effect on power since the turbo compresses air to a set boost level regardless of ambient density. For electric vehicles, the Hale formula does not apply because EVs have a fundamentally different power delivery (constant torque, no shifting, no clutch dump launches). Hybrid powertrains with instant torque fill also deviate from the formula assumptions.',
+      'The Hale formula correlates drag strip performance with engine power. ET-based calculation uses the time to complete 1,320 feet; speed-based uses the vehicle velocity at the finish line. The 5.825 constant in the ET formula represents the cubic root relationship between time and power, while 234 in the speed formula accounts for aerodynamic and rolling resistance at high speed. Averaging both methods cancels out individual errors: ET can be affected by traction off the line, while speed is affected by aerodynamic drag and gearing. Practical example: a 3,500 lb car runs a 13.0-second quarter-mile at 108 mph. Using both modes: HP from ET = 3,500 / (13.0 / 5.825)³ = 3,500 / (2.2318)³ = 3,500 / 11.116 = 314.9 HP. HP from speed = 3,500 × (108 / 234)³ = 3,500 × (0.4615)³ = 3,500 × 0.09832 = 344.1 HP. Average = (314.9 + 344.1) / 2 = 329.5 HP at the crank. With an RWD drivetrain (18% loss), wheel HP = 329.5 × 0.82 = 270.2 WHP. Power-to-weight = 3,500 / 329.5 = 10.6 lbs/HP (Average tier; under 10 lbs/HP is Performance). Edge cases: for high-horsepower cars running on drag radials with excellent traction, the ET method can overestimate power because the car hooks up better than the formula assumes — the Hale formula was calibrated for street tires. For AWD cars, the ET method is more accurate than speed because AWD launches are more consistent, but the speed method may under-read because AWD drivetrain losses are higher (25%). For very high altitudes (e.g., Denver at 5,280 ft), air density is about 17% lower than sea level, which reduces naturally aspirated engine power by about 3-4% per 1,000 ft. The Hale formula does not correct for altitude. For turbocharged cars, altitude has minimal effect on power since the turbo compresses air to a set boost level regardless of ambient density. For electric vehicles, the Hale formula does not apply because EVs have a fundamentally different power delivery (constant torque, no shifting, no clutch dump launches). Hybrid powertrains with instant torque fill also deviate from the formula assumptions.',
     faqs: [
       {
         question: 'Which is more accurate: ET-based or speed-based?',
