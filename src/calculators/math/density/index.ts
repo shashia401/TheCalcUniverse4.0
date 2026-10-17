@@ -1,41 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import DensityPanel from './DensityPanel';
-
-const massToKg = (v: number, u: string): number => {
-  switch (u) {
-    case 'g': return v / 1000;
-    case 'kg': return v;
-    case 'lb': return v * 0.45359237;
-    default: return v;
-  }
-};
-
-const volumeToM3 = (v: number, u: string): number => {
-  switch (u) {
-    case 'mL': return v / 1e6;
-    case 'L': return v / 1000;
-    case 'cm3': return v / 1e6;
-    case 'm3': return v;
-    case 'ft3': return v * 0.0283168;
-    default: return v;
-  }
-};
-
-const densityToKgm3 = (v: number, u: string): number => {
-  switch (u) {
-    case 'g/cm3': return v * 1000;
-    case 'kg/m3': return v;
-    case 'lbs/ft3': return v * 16.0185;
-    default: return v;
-  }
-};
-
-const fmt = (n: number): string => {
-  if (!isFinite(n)) return 'Infinity';
-  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-  return parseFloat(n.toFixed(8)).toString();
-};
+import { FT3_M3, LBFT3_KGM3, LB_KG, densityToKgm3, fmtNum as fmt, massToKg, nonNegative, volumeToM3 } from '../../../utils/massDensity';
 
 const densityConfig: CalculatorConfig = {
   inputs: [
@@ -130,15 +96,15 @@ const densityConfig: CalculatorConfig = {
     const mode = values.mode || 'calcDensity';
 
     if (mode === 'calcDensity') {
-      const mass = parseFloat(values.mass);
-      const volume = parseFloat(values.volume);
+      const mass = nonNegative(values.mass);
+      const volume = nonNegative(values.volume);
       if (isNaN(mass) || isNaN(volume) || volume === 0) return [];
 
       const massKg = massToKg(mass, values.massUnit || 'kg');
       const volM3 = volumeToM3(volume, values.volumeUnit || 'm3');
       const densityKgm3 = massKg / volM3;
       const densityGcm3 = densityKgm3 / 1000;
-      const densityLbsft3 = densityKgm3 / 16.0185;
+      const densityLbsft3 = densityKgm3 / LBFT3_KGM3;
 
       return [
         {
@@ -176,15 +142,15 @@ const densityConfig: CalculatorConfig = {
     }
 
     if (mode === 'calcMass') {
-      const density = parseFloat(values.density);
-      const volume = parseFloat(values.volume);
+      const density = nonNegative(values.density);
+      const volume = nonNegative(values.volume);
       if (isNaN(density) || isNaN(volume)) return [];
 
       const densityKgm3 = densityToKgm3(density, values.densityUnit || 'kg/m3');
       const volM3 = volumeToM3(volume, values.volumeUnit || 'm3');
       const massKg = densityKgm3 * volM3;
       const massG = massKg * 1000;
-      const massLb = massKg / 0.45359237;
+      const massLb = massKg / LB_KG;
 
       return [
         {
@@ -222,8 +188,8 @@ const densityConfig: CalculatorConfig = {
     }
 
     if (mode === 'calcVolume') {
-      const mass = parseFloat(values.mass);
-      const density = parseFloat(values.density);
+      const mass = nonNegative(values.mass);
+      const density = nonNegative(values.density);
       if (isNaN(mass) || isNaN(density) || density === 0) return [];
 
       const massKg = massToKg(mass, values.massUnit || 'kg');
@@ -231,7 +197,7 @@ const densityConfig: CalculatorConfig = {
       const volM3 = massKg / densityKgm3;
       const volL = volM3 * 1000;
       const volMl = volM3 * 1e6;
-      const volFt3 = volM3 / 0.0283168;
+      const volFt3 = volM3 / FT3_M3;
 
       return [
         {

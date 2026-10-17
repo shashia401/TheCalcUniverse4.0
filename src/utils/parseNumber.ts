@@ -8,3 +8,9 @@ export function parseNumberStrict(raw: string | undefined): number {
   const n = Number(s);
   return Number.isFinite(n) ? n : NaN;
 }
+
+/** Strict parse that also rejects negatives and absurdly large values (NaN); callers check divisors for 0. */
+export function parseNonNegative(raw: string | undefined, max = 1e18): number {
+  const n = parseNumberStrict(raw);
+  return n >= 0 && n <= max ? n : NaN;
+}

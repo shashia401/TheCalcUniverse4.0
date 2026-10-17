@@ -1,15 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WeightPanel from './WeightPanel';
-
-const massToKg = (v: number, u: string): number => {
-  switch (u) {
-    case 'g': return v / 1000;
-    case 'kg': return v;
-    case 'lb': return v * 0.45359237;
-    default: return v;
-  }
-};
+import { LB_KG, fmtNum as fmt, massToKg, nonNegative } from '../../../utils/massDensity';
 
 const PLANET_GRAVITY: Record<string, number> = {
   Earth: 9.81,
@@ -27,12 +19,6 @@ const GRAVITY_OPTIONS = [
   { label: 'Sun (274 m/s²)', value: 'Sun' },
   { label: 'Custom', value: 'custom' },
 ];
-
-const fmt = (n: number): string => {
-  if (!isFinite(n)) return 'Infinity';
-  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-  return parseFloat(n.toFixed(8)).toString();
-};
 
 const weightConfig: CalculatorConfig = {
   inputs: [
@@ -110,7 +96,7 @@ const weightConfig: CalculatorConfig = {
     const getGravity = (): number => {
       const sel = values.gravitySelect || 'Earth';
       if (sel === 'custom') {
-        const g = parseFloat(values.gravityCustom);
+        const g = nonNegative(values.gravityCustom);
         return isNaN(g) ? 0 : g;
       }
       return PLANET_GRAVITY[sel] || 0;
@@ -119,7 +105,7 @@ const weightConfig: CalculatorConfig = {
     const getGravityLabel = (): string => {
       const sel = values.gravitySelect || 'Earth';
       if (sel === 'custom') {
-        const g = parseFloat(values.gravityCustom);
+        const g = nonNegative(values.gravityCustom);
         return `${isNaN(g) ? 0 : g} m/s²`;
       }
       const g = PLANET_GRAVITY[sel];
@@ -142,13 +128,13 @@ const weightConfig: CalculatorConfig = {
     };
 
     if (mode === 'calcWeight') {
-      const mass = parseFloat(values.mass);
+      const mass = nonNegative(values.mass);
       const g = getGravity();
       if (isNaN(mass) || g === 0) return [];
 
       const massKg = massToKg(mass, values.massUnit || 'kg');
       const weightN = massKg * g;
-      const weightLbf = weightN * 0.224809;
+      const weightLbf = weightN / (LB_KG * 9.80665);
 
       const results: Array<{ id: string; label: string; value: string; color?: string; highlight?: boolean }> = [
         {
@@ -216,13 +202,13 @@ const weightConfig: CalculatorConfig = {
     }
 
     if (mode === 'calcMass') {
-      const weight = parseFloat(values.weight);
+      const weight = nonNegative(values.weight);
       const g = getGravity();
       if (isNaN(weight) || g === 0) return [];
 
       const massKg = weight / g;
       const massG = massKg * 1000;
-      const massLb = massKg / 0.45359237;
+      const massLb = massKg / LB_KG;
 
       return [
         {
@@ -246,8 +232,8 @@ const weightConfig: CalculatorConfig = {
     }
 
     if (mode === 'calcGravity') {
-      const weight = parseFloat(values.weight);
-      const mass = parseFloat(values.mass);
+      const weight = nonNegative(values.weight);
+      const mass = nonNegative(values.mass);
       if (isNaN(weight) || isNaN(mass)) return [];
 
       const massKg = massToKg(mass, values.massUnit || 'kg');

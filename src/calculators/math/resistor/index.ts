@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ResistorPanel from './ResistorPanel';
+import Decimal from 'decimal.js';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
 // ─── Color-band lookup tables ─────────────────────────────────────────────────
 
@@ -14,23 +16,25 @@ const COLOR_DIGITS: Record<number, string> = {
   5: 'Green', 6: 'Blue', 7: 'Violet', 8: 'Gray', 9: 'White',
 };
 
+/** Multiplier band colour -> power of ten. */
 const MULTIPLIER_COLORS: Record<string, number> = {
-  Black: 1, Brown: 10, Red: 100, Orange: 1000, Yellow: 10000,
-  Green: 100000, Blue: 1000000, Violet: 10000000, Gold: 0.1, Silver: 0.01,
+  Black: 0, Brown: 1, Red: 2, Orange: 3, Yellow: 4,
+  Green: 5, Blue: 6, Violet: 7, Gray: 8, White: 9, Gold: -1, Silver: -2,
 };
 
 const MULTIPLIER_EXP: Record<number, string> = {
   [-2]: 'Silver', [-1]: 'Gold', 0: 'Black', 1: 'Brown', 2: 'Red',
-  3: 'Orange', 4: 'Yellow', 5: 'Green', 6: 'Blue', 7: 'Violet',
+  3: 'Orange', 4: 'Yellow', 5: 'Green', 6: 'Blue', 7: 'Violet', 8: 'Gray', 9: 'White',
 };
 
 const TOLERANCE_COLORS: Record<string, number> = {
+  'Gray (±0.05%)': 0.05, 'Violet (±0.1%)': 0.1, 'Blue (±0.25%)': 0.25, 'Green (±0.5%)': 0.5,
   'Brown (±1%)': 1, 'Red (±2%)': 2, 'Gold (±5%)': 5,
   'Silver (±10%)': 10, 'None (±20%)': 20,
 };
 
 const TEMP_CO_COLORS: Record<string, number> = {
-  'Brown (100)': 100, 'Red (50)': 50, 'Orange (15)': 15,
+  'Black (250)': 250, 'Brown (100)': 100, 'Red (50)': 50, 'Orange (15)': 15,
   'Yellow (25)': 25, 'Green (20)': 20, 'Blue (10)': 10,
   'Violet (5)': 5, 'Gray (1)': 1,
 };
@@ -50,8 +54,8 @@ function formatResistance(ohms: number): string {
   return `${(ohms * 1000).toFixed(2)} mΩ`;
 }
 
-function formatOhms(ohms: number): string {
-  return `${ohms} Ω`;
+function formatOhms(ohms: Decimal): string {
+  return `${ohms.toFixed()} Ω`;
 }
 
 // ─── Forward: colors -> resistance ────────────────────────────────────────────
@@ -101,9 +105,10 @@ function forwardCalculate(values: Record<string, string>) {
     }
   }
 
-  const resistance = sigFigs * m;
-  const minRes = resistance * (1 - tPct / 100);
-  const maxRes = resistance * (1 + tPct / 100);
+  const exact = new Decimal(sigFigs).times(new Decimal(10).pow(m));
+  const resistance = exact.toNumber();
+  const minRes = exact.times(new Decimal(100).minus(tPct)).div(100).toNumber();
+  const maxRes = exact.times(new Decimal(100).plus(tPct)).div(100).toNumber();
   const tolLabel = `±${tPct}%`;
 
   const results = [
@@ -137,7 +142,7 @@ function forwardCalculate(values: Record<string, string>) {
     {
       id: 'ohmicValue',
       label: 'Numeric Value',
-      value: formatOhms(resistance),
+      value: formatOhms(exact),
     },
   ];
 
@@ -164,25 +169,42 @@ function reverseCalculate(values: Record<string, string>) {
   const bandCount = values.reverseBands || '4';
 
   if (!ohmsStr || ohmsStr.trim() === '') return [];
-  const ohms = parseFloat(ohmsStr);
+  const ohms = parseNumberStrict(ohmsStr);
   if (isNaN(ohms) || ohms <= 0) return [];
 
   const is4Band = bandCount === '4';
   const series = is4Band ? E12 : E24;
+  const sigDigits = is4Band ? 2 : 3;
+  // The multiplier band runs from Silver (10^-2) to White (10^9), so the smallest and largest readable values are
+  // (series start) x 10^(sigDigits-1-2) and (series end) x 10^(9+sigDigits-1).
+  const minExp = sigDigits - 1 - 2;
+  const maxExp = 9 + sigDigits - 1;
+  const lowest = Math.pow(10, minExp);
+  const highest = series[series.length - 1] * Math.pow(10, maxExp);
+  if (ohms < lowest * 0.95 || ohms > highest * 1.05) {
+    return [
+      {
+        id: 'error',
+        label: 'Out of range',
+        value: `A ${bandCount}-band resistor covers about ${formatResistance(lowest)} to ${formatResistance(highest)}.`,
+        color: 'negative' as const,
+      },
+    ];
+  }
 
-  // Generate all standard values across relevant orders of magnitude
+  // Nearest standard value by ratio (the series is geometric, so distance is measured as a ratio, not in ohms).
   let closestVal = 0;
-  let closestDiff = Infinity;
+  let closestRatio = Infinity;
   let closestBase = 0;
   let closestExp = 0;
 
-  for (let exp = -2; exp <= 7; exp++) {
+  for (let exp = minExp; exp <= maxExp; exp++) {
     const mult = Math.pow(10, exp);
     for (const base of series) {
       const candidate = base * mult;
-      const diff = Math.abs(ohms - candidate);
-      if (diff < closestDiff) {
-        closestDiff = diff;
+      const ratio = Math.abs(Math.log(ohms / candidate));
+      if (ratio < closestRatio) {
+        closestRatio = ratio;
         closestVal = candidate;
         closestBase = base;
         closestExp = exp;
@@ -191,44 +213,21 @@ function reverseCalculate(values: Record<string, string>) {
   }
 
   // Extract digits and multiplier from the closest standard value
-  let digits: number[];
-  let multExp: number;
+  const sigFigs = Math.round(closestBase * Math.pow(10, sigDigits - 1));
+  const digits = String(sigFigs).split('').map(Number);
+  const multExp = closestExp - (sigDigits - 1);
 
-  if (is4Band) {
-    // 2 significant digits: closestBase is 1-10, *10 gives 10-99
-    // multiplier exponent needs shift of 1: 47 * 10^(3-1) = 47 * 100 = 4700
-    const sigFigs2 = Math.round(closestBase * 10);
-    digits = [Math.floor(sigFigs2 / 10), sigFigs2 % 10];
-    multExp = closestExp - 1;
-  } else {
-    // 3 significant digits: closestBase * 100 gives 100-999
-    // multiplier exponent needs shift of 2: 100 * 10^(4-2) = 100 * 100 = 10000
-    const sigFigs3 = Math.round(closestBase * 100);
-    digits = [
-      Math.floor(sigFigs3 / 100),
-      Math.floor((sigFigs3 % 100) / 10),
-      sigFigs3 % 10,
-    ];
-    multExp = closestExp - 2;
-  }
-
-  // Map to colors
-  const bandColors: string[] = [];
-  for (const d of digits) {
-    bandColors.push(COLOR_DIGITS[d] || '');
-  }
+  const bandColors: string[] = digits.map((d) => COLOR_DIGITS[d] || '');
   bandColors.push(MULTIPLIER_EXP[multExp] || '');
 
-  if (!is4Band) {
-    bandColors.push('Gold'); // tolerance for 5-band
-  }
+  // E12 parts are normally +/-10 % (Silver), E24 parts +/-5 % (Gold); the old output had no tolerance band for 4-band.
+  const tolerancePct = is4Band ? 10 : 5;
+  bandColors.push(is4Band ? 'Silver' : 'Gold');
 
   const eSeriesLabel = is4Band ? 'E12' : 'E24';
-  const baseDisplay = is4Band
-    ? (closestBase * 10).toFixed(0)
-    : (closestBase * 100).toFixed(0);
+  const offPct = (Math.abs(closestVal - ohms) / ohms) * 100;
 
-  return [
+  const results = [
     {
       id: 'resistorValue',
       label: 'Target Value',
@@ -249,9 +248,22 @@ function reverseCalculate(values: Record<string, string>) {
     {
       id: 'closestStandard',
       label: 'E-series Match',
-      value: `${eSeriesLabel} series: ${baseDisplay} (${formatResistance(closestVal)})`,
+      value: `${eSeriesLabel} series: ${sigFigs} (${formatResistance(closestVal)})`,
+    },
+    {
+      id: 'tolerance',
+      label: 'Tolerance',
+      value: `±${tolerancePct}%`,
     },
   ];
+  if (offPct > 0.05) {
+    results.push({
+      id: 'standardOffset',
+      label: 'Difference from Target',
+      value: `${formatResistance(closestVal)} is ${offPct.toFixed(1)}% ${closestVal > ohms ? 'above' : 'below'} your value`,
+    });
+  }
+  return results;
 }
 
 // ─── Config ────────────────────────────────────────────────────────────────────
@@ -290,11 +302,17 @@ const multiplierOptions = [
   { label: 'Green (x100k)', value: 'Green' },
   { label: 'Blue (x1M)', value: 'Blue' },
   { label: 'Violet (x10M)', value: 'Violet' },
+  { label: 'Gray (x100M)', value: 'Gray' },
+  { label: 'White (x1G)', value: 'White' },
   { label: 'Gold (x0.1)', value: 'Gold' },
   { label: 'Silver (x0.01)', value: 'Silver' },
 ];
 
 const toleranceOptions = [
+  { label: 'Gray (±0.05%)', value: 'Gray (±0.05%)' },
+  { label: 'Violet (±0.1%)', value: 'Violet (±0.1%)' },
+  { label: 'Blue (±0.25%)', value: 'Blue (±0.25%)' },
+  { label: 'Green (±0.5%)', value: 'Green (±0.5%)' },
   { label: 'Brown (±1%)', value: 'Brown (±1%)' },
   { label: 'Red (±2%)', value: 'Red (±2%)' },
   { label: 'Gold (±5%)', value: 'Gold (±5%)' },
@@ -303,6 +321,7 @@ const toleranceOptions = [
 ];
 
 const tempCoOptions = [
+  { label: 'Black (250)', value: 'Black (250)' },
   { label: 'Brown (100)', value: 'Brown (100)' },
   { label: 'Red (50)', value: 'Red (50)' },
   { label: 'Orange (15)', value: 'Orange (15)' },
@@ -467,7 +486,7 @@ const resistorConfig: CalculatorConfig = {
       { label: 'Brown-Black-Black-Red-Brown', value: '10 kΩ ±1% (5-band)' },
       { label: 'Blue-Gray-Black-Orange-Brown', value: '680 kΩ ±1% (5-band)' },
       { label: 'Brown-Black-Black-Gold', value: '10 Ω ±5% (4-band)' },
-      { label: 'Green-Blue-Black-Silver', value: '5.6 Ω ±10% (4-band)' },
+      { label: 'Green-Blue-Gold-Silver', value: '5.6 Ω ±10% (4-band)' },
       { label: 'SMD marking "103"', value: '10 kΩ (10 × 10³)' },
       { label: 'SMD marking "4R7"', value: '4.7 Ω (R = decimal point)' },
       { label: 'Zero-ohm jumper', value: 'Single black band ≈ 0 Ω' },

@@ -101,7 +101,7 @@ export default function HeightPanel({ results }: Props) {
                   <div className="absolute top-0 left-0 w-2 h-0.5 bg-amber-300" />
                   <div className="absolute bottom-0 left-0 w-2 h-0.5 bg-amber-300" />
                   <div className="absolute top-1/2 -translate-y-1/2 left-1 -translate-x-1/2 text-[10px] font-medium text-amber-500 whitespace-nowrap">
-                    ±2"
+                    ±8.5 cm
                   </div>
                 </div>
                 <div
@@ -149,8 +149,11 @@ export default function HeightPanel({ results }: Props) {
           <div className="flex justify-between mt-2 text-xs text-slate-500">
             <span>{heightRange.split(' to ')[0]}</span>
             <span className="font-bold text-emerald-700">Predicted</span>
-            <span>{heightRange.split(' to ')[1]}</span>
+            <span>{(heightRange.split(' to ')[1] ?? '').split(' (')[0]}</span>
           </div>
+          <p className="mt-2 text-center text-xs text-slate-500">
+            About 95% of children finish within this range ({(/\(([^)]+)\)$/.exec(heightRange)?.[1]) ?? ''})
+          </p>
         </div>
       </div>
 

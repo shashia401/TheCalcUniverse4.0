@@ -3,7 +3,7 @@ import config from '../../../src/calculators/math/height';
 import { getValue, parseNumber, near } from '../../helpers';
 
 describe('height calculator', () => {
-  it('Male: mother 5\'4" (64"), father 5\'10" (70") → predicted 73.5" = 6\'1.5"', () => {
+  it('Male: mother 5\'4" (64"), father 5\'10" (70") → Tanner (M + F + 13 cm) / 2 = 176.7 cm = 5\'9.6"', () => {
     const r = config.calculate({
       motherFeet: '5',
       motherInches: '4',
@@ -12,14 +12,14 @@ describe('height calculator', () => {
       childGender: 'male',
     });
     const predicted = getValue(r, 'predictedHeight');
-    // Mid-parental: (64 + 70 + 13) / 2 = 73.5" = 6'1.5"
-    expect(predicted).toContain("6'1.5");
+    // (162.56 + 177.8 + 13) / 2 = 176.68 cm = 69.56" = 5'9.6"  (the 13 is centimetres, not inches)
+    expect(predicted).toContain("5'9.6");
     expect(predicted).toContain('cm');
     const cm = parseNumber(getValue(r, 'predictedCm'));
-    near(cm, 73.5 * 2.54);
+    near(cm, 176.7, 0.05);
   });
 
-  it('Female: mother 5\'4" (64"), father 5\'10" (70") → predicted 60.5" = 5\'0.5"', () => {
+  it('Female: mother 5\'4" (64"), father 5\'10" (70") → (M + F - 13 cm) / 2 = 163.7 cm = 5\'4.4"', () => {
     const r = config.calculate({
       motherFeet: '5',
       motherInches: '4',
@@ -28,14 +28,14 @@ describe('height calculator', () => {
       childGender: 'female',
     });
     const predicted = getValue(r, 'predictedHeight');
-    // Mid-parental: (64 + 70 - 13) / 2 = 60.5" = 5'0.5"
-    expect(predicted).toContain("5'0.5");
+    // (162.56 + 177.8 - 13) / 2 = 163.68 cm = 64.44" = 5'4.4"
+    expect(predicted).toContain("5'4.4");
     expect(predicted).toContain('cm');
     const cm = parseNumber(getValue(r, 'predictedCm'));
-    near(cm, 60.5 * 2.54);
+    near(cm, 163.7, 0.05);
   });
 
-  it('range is ±2 inches', () => {
+  it('range is ±8.5 cm (about ±3.3 inches)', () => {
     const r = config.calculate({
       motherFeet: '5',
       motherInches: '4',
@@ -44,9 +44,10 @@ describe('height calculator', () => {
       childGender: 'male',
     });
     const range = getValue(r, 'heightRange');
-    // Predicted 73.5", range: 71.5" to 75.5"
-    expect(range).toContain("5'11");
-    expect(range).toContain("6'3");
+    // 176.68 cm ± 8.5 = 168.2 to 185.2 cm = 5'6.2" to 6'0.9"
+    expect(range).toContain("5'6.2");
+    expect(range).toContain("6'0.9");
+    expect(range).toContain('168.2-185.2 cm');
   });
 
   it('missing mother height returns empty', () => {
@@ -136,7 +137,7 @@ describe('height calculator', () => {
       childGender: 'male',
     });
     const mp = parseNumber(getValue(r, 'midParental'));
-    near(mp, 73.5);
+    near(mp, 69.6, 0.05); // 176.68 cm = 69.56"
   });
 
   it('Female: short parents — mother 4\'10" father 5\'2"', () => {
@@ -147,9 +148,9 @@ describe('height calculator', () => {
       fatherInches: '2',
       childGender: 'female',
     });
-    // Mother: 58", Father: 62". Girl: (58+62-13)/2 = 53.5" = 4'5.5"
+    // Mother: 58", Father: 62" = 304.8 cm. Girl: (304.8 - 13) / 2 = 145.9 cm = 57.44" = 4'9.4"
     const predicted = getValue(r, 'predictedHeight');
-    expect(predicted).toContain("4'5");
+    expect(predicted).toContain("4'9.4");
   });
 
   it('Male: very tall parents — mother 6\'0" father 6\'6"', () => {
@@ -160,9 +161,9 @@ describe('height calculator', () => {
       fatherInches: '6',
       childGender: 'male',
     });
-    // Mother: 72", Father: 78". Boy: (72+78+13)/2 = 81.5" = 6'9.5"
+    // Mother: 72", Father: 78" = 381 cm. Boy: (381 + 13) / 2 = 197 cm = 77.56" = 6'5.6"
     const predicted = getValue(r, 'predictedHeight');
-    expect(predicted).toContain("6'9");
+    expect(predicted).toContain("6'5.6");
   });
 
   it('range values are correct for male child', () => {

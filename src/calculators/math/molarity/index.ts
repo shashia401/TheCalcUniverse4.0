@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import type { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import MolarityPanel from './MolarityPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
+import { molarMassOfFormula } from '../molecular-weight';
 
 // ─── Compound Database ─────────────────────────────────────────────────────────
 
@@ -59,6 +61,10 @@ function lookupCompound(raw: string): { formula: string; molarMass: number } | n
   const upNormVal = COMPOUND_DB[upNorm];
   if (upNormVal !== undefined) return { formula: upNorm, molarMass: upNormVal };
 
+  // Not in the short list above: work it out from the formula (any element, brackets, hydrates such as CuSO4·5H2O).
+  const computed = molarMassOfFormula(stripped);
+  if (computed !== null) return { formula: stripped, molarMass: computed };
+
   return null;
 }
 
@@ -76,9 +82,17 @@ function volumeToLiters(volume: number, unit: string): number {
 
 function parseNum(s: string | undefined): number | null {
   if (s === undefined || s === '') return null;
-  const n = parseFloat(s);
-  return isNaN(n) || n < 0 ? null : n;
+  const n = parseNumberStrict(s);
+  return isNaN(n) || n < 0 || n > 1e12 ? null : n;
 }
+
+// Fixed decimals, but a tiny non-zero value (a 0.00001 M solution) keeps 4 significant digits instead of printing 0.0000.
+
+function fixedOrSig(n: number, dp: number): string {
+  return n !== 0 && Math.abs(n) < 10 ** -dp ? n.toPrecision(4) : n.toFixed(dp);
+}
+const f4 = (n: number): string => fixedOrSig(n, 4);
+const f6 = (n: number): string => fixedOrSig(n, 6);
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 
@@ -148,10 +162,9 @@ const molarityConfig: CalculatorConfig = {
       id: 'molarMass',
       label: 'Molar Mass (g/mol)',
       type: 'number',
-      placeholder: 'e.g., 58.44 for NaCl',
-      defaultValue: '58.44',
+      placeholder: 'Leave blank to use the compound above',
       inputMode: 'decimal',
-      helpText: 'Enter the molar mass in g/mol or use the compound lookup',
+      helpText: 'Leave blank to use the compound (any formula, e.g. NaCl, H2SO4, CuSO4·5H2O); type a value in g/mol to override it',
     },
   ],
 
@@ -182,15 +195,15 @@ const molarityConfig: CalculatorConfig = {
       const M = moles / volume;
 
       const results: CalculatorResult[] = [
-        { id: 'molarityResult', label: 'Molarity (M)', value: M.toFixed(4), unit: 'mol/L', highlight: true, color: 'positive' },
-        { id: 'moles', label: 'Moles of Solute', value: moles.toFixed(6), unit: 'mol' },
-        { id: 'massUsed', label: 'Mass of Solute', value: mass.toFixed(4), unit: 'g' },
-        { id: 'volumeUsed', label: 'Volume of Solution', value: (volume >= 1 ? volume.toFixed(3) : volume.toFixed(6)), unit: 'L' },
-        { id: 'molarMassUsed', label: 'Molar Mass', value: molarMass.toFixed(4), unit: 'g/mol' },
+        { id: 'molarityResult', label: 'Molarity (M)', value: f4(M), unit: 'mol/L', highlight: true, color: 'positive' },
+        { id: 'moles', label: 'Moles of Solute', value: f6(moles), unit: 'mol' },
+        { id: 'massUsed', label: 'Mass of Solute', value: f4(mass), unit: 'g' },
+        { id: 'volumeUsed', label: 'Volume of Solution', value: (volume >= 1 ? volume.toFixed(3) : f6(volume)), unit: 'L' },
+        { id: 'molarMassUsed', label: 'Molar Mass', value: f4(molarMass), unit: 'g/mol' },
         { id: 'formulaUsed', label: 'Formula Used', value: 'M = n / V = (m / MM) / V' },
         { id: '_stepByStep', label: 'Step-by-Step', value: JSON.stringify([
-          `n = m / MM = ${mass.toFixed(4)} g / ${molarMass.toFixed(4)} g/mol = ${moles.toFixed(6)} mol`,
-          `M = n / V = ${moles.toFixed(6)} mol / ${volume.toFixed(6)} L = ${M.toFixed(4)} mol/L`,
+          `n = m / MM = ${f4(mass)} g / ${f4(molarMass)} g/mol = ${f6(moles)} mol`,
+          `M = n / V = ${f6(moles)} mol / ${f6(volume)} L = ${f4(M)} mol/L`,
         ]) },
         { id: 'compoundSource', label: 'Compound Source', value: found ? `"${found.formula}" (MM = ${found.molarMass} g/mol)` : '' },
       ];
@@ -206,15 +219,15 @@ const molarityConfig: CalculatorConfig = {
       const massCalc = moles * molarMass;
 
       const results: CalculatorResult[] = [
-        { id: 'massResult', label: 'Mass of Solute', value: massCalc.toFixed(4), unit: 'g', highlight: true, color: 'positive' },
-        { id: 'moles', label: 'Moles of Solute', value: moles.toFixed(6), unit: 'mol' },
-        { id: 'molarityUsed', label: 'Molarity', value: molarityRaw.toFixed(4), unit: 'mol/L' },
-        { id: 'volumeUsed', label: 'Volume of Solution', value: (volume >= 1 ? volume.toFixed(3) : volume.toFixed(6)), unit: 'L' },
-        { id: 'molarMassUsed', label: 'Molar Mass', value: molarMass.toFixed(4), unit: 'g/mol' },
+        { id: 'massResult', label: 'Mass of Solute', value: f4(massCalc), unit: 'g', highlight: true, color: 'positive' },
+        { id: 'moles', label: 'Moles of Solute', value: f6(moles), unit: 'mol' },
+        { id: 'molarityUsed', label: 'Molarity', value: f4(molarityRaw), unit: 'mol/L' },
+        { id: 'volumeUsed', label: 'Volume of Solution', value: (volume >= 1 ? volume.toFixed(3) : f6(volume)), unit: 'L' },
+        { id: 'molarMassUsed', label: 'Molar Mass', value: f4(molarMass), unit: 'g/mol' },
         { id: 'formulaUsed', label: 'Formula Used', value: 'm = M × V × MM' },
         { id: '_stepByStep', label: 'Step-by-Step', value: JSON.stringify([
-          `n = M × V = ${molarityRaw.toFixed(4)} mol/L × ${volume.toFixed(6)} L = ${moles.toFixed(6)} mol`,
-          `m = n × MM = ${moles.toFixed(6)} mol × ${molarMass.toFixed(4)} g/mol = ${massCalc.toFixed(4)} g`,
+          `n = M × V = ${f4(molarityRaw)} mol/L × ${f6(volume)} L = ${f6(moles)} mol`,
+          `m = n × MM = ${f6(moles)} mol × ${f4(molarMass)} g/mol = ${f4(massCalc)} g`,
         ]) },
         { id: 'compoundSource', label: 'Compound Source', value: found ? `"${found.formula}" (MM = ${found.molarMass} g/mol)` : '' },
       ];
@@ -230,15 +243,15 @@ const molarityConfig: CalculatorConfig = {
       const volumeCalc = moles / molarityRaw;
 
       const results: CalculatorResult[] = [
-        { id: 'volumeResult', label: 'Volume of Solution', value: (volumeCalc >= 1 ? volumeCalc.toFixed(3) : volumeCalc.toFixed(6)), unit: 'L', highlight: true, color: 'positive' },
-        { id: 'moles', label: 'Moles of Solute', value: moles.toFixed(6), unit: 'mol' },
-        { id: 'massUsed', label: 'Mass of Solute', value: mass.toFixed(4), unit: 'g' },
-        { id: 'molarityUsed', label: 'Molarity', value: molarityRaw.toFixed(4), unit: 'mol/L' },
-        { id: 'molarMassUsed', label: 'Molar Mass', value: molarMass.toFixed(4), unit: 'g/mol' },
+        { id: 'volumeResult', label: 'Volume of Solution', value: (volumeCalc >= 1 ? volumeCalc.toFixed(3) : f6(volumeCalc)), unit: 'L', highlight: true, color: 'positive' },
+        { id: 'moles', label: 'Moles of Solute', value: f6(moles), unit: 'mol' },
+        { id: 'massUsed', label: 'Mass of Solute', value: f4(mass), unit: 'g' },
+        { id: 'molarityUsed', label: 'Molarity', value: f4(molarityRaw), unit: 'mol/L' },
+        { id: 'molarMassUsed', label: 'Molar Mass', value: f4(molarMass), unit: 'g/mol' },
         { id: 'formulaUsed', label: 'Formula Used', value: 'V = n / M = (m / MM) / M' },
         { id: '_stepByStep', label: 'Step-by-Step', value: JSON.stringify([
-          `n = m / MM = ${mass.toFixed(4)} g / ${molarMass.toFixed(4)} g/mol = ${moles.toFixed(6)} mol`,
-          `V = n / M = ${moles.toFixed(6)} mol / ${molarityRaw.toFixed(4)} mol/L = ${volumeCalc.toFixed(6)} L`,
+          `n = m / MM = ${f4(mass)} g / ${f4(molarMass)} g/mol = ${f6(moles)} mol`,
+          `V = n / M = ${f6(moles)} mol / ${f4(molarityRaw)} mol/L = ${f6(volumeCalc)} L`,
         ]) },
         { id: 'compoundSource', label: 'Compound Source', value: found ? `"${found.formula}" (MM = ${found.molarMass} g/mol)` : '' },
       ];
@@ -276,7 +289,7 @@ const molarityConfig: CalculatorConfig = {
       'Select the appropriate volume unit (L, mL, or µL).',
       'Results will show the calculated value, moles, step-by-step solution, and formulas used.',
     ],
-    explanation: 'Molarity is one of the most common units of concentration in chemistry, developed during the 19th century as chemistry matured into a quantitative science. The concept of the mole was formalized by the German chemist Wilhelm Ostwald in 1894, though the underlying principle was proposed by Amadeo Avogadro in 1811 — that equal volumes of gases at the same temperature and pressure contain equal numbers of molecules. A 1 M (1 molar) solution contains 1 mole of solute dissolved in enough solvent to make 1 liter of solution. The mole is a counting unit representing Avogadroʼs number (6.022 × 10²³) of particles. To prepare a solution of known molarity, measure the required mass of solute and dilute to the desired volume. Practical example: to prepare 500 mL of 0.1 M NaCl solution. First, find the molar mass of NaCl: 58.44 g/mol. The moles needed = 0.1 M × 0.5 L = 0.05 mol. The mass needed = 0.05 × 58.44 = 2.922 g. Weigh 2.922 g of NaCl, dissolve in about 400 mL of distilled water, then dilute to exactly 500 mL in a volumetric flask. The resulting solution contains 0.1 moles of NaCl per liter. Edge cases: molarity is temperature-dependent because the volume of the solution changes with temperature. A solution that is 0.1000 M at 20°C becomes approximately 0.0995 M at 30°C due to thermal expansion. For precise analytical work, solutions should be used at the temperature at which they were prepared. For very dilute solutions (below 0.001 M), the assumption that the solute volume is negligible becomes less accurate, and molality (moles per kg of solvent) may be preferred. For concentrated solutions (above 1 M), the volume change upon mixing can be significant — for example, mixing 50 mL of water with 50 mL of ethanol yields only about 97 mL of solution, not 100 mL. For acids and bases, always add acid to water (not water to acid) when diluting concentrated solutions, especially for sulfuric acid which generates significant heat upon dilution.',
+    explanation: 'Molarity is one of the most common units of concentration in chemistry, developed during the 19th century as chemistry matured into a quantitative science. The concept of the mole was formalized by the German chemist Wilhelm Ostwald in 1894, though the underlying principle was proposed by Amadeo Avogadro in 1811 — that equal volumes of gases at the same temperature and pressure contain equal numbers of molecules. A 1 M (1 molar) solution contains 1 mole of solute dissolved in enough solvent to make 1 liter of solution. The mole is a counting unit representing Avogadroʼs number (6.022 × 10²³) of particles. To prepare a solution of known molarity, measure the required mass of solute and dilute to the desired volume. Practical example: to prepare 500 mL of 0.1 M NaCl solution. First, find the molar mass of NaCl: 58.44 g/mol. The moles needed = 0.1 M × 0.5 L = 0.05 mol. The mass needed = 0.05 × 58.44 = 2.922 g. Weigh 2.922 g of NaCl, dissolve in about 400 mL of distilled water, then dilute to exactly 500 mL in a volumetric flask. The resulting solution contains 0.1 moles of NaCl per liter. Edge cases: molarity is temperature-dependent because the volume of the solution changes with temperature. A solution that is 0.1000 M at 20°C becomes approximately 0.0997 M at 30°C due to thermal expansion. For precise analytical work, solutions should be used at the temperature at which they were prepared. For very dilute solutions (below 0.001 M), the assumption that the solute volume is negligible becomes less accurate, and molality (moles per kg of solvent) may be preferred. For concentrated solutions (above 1 M), the volume change upon mixing can be significant — for example, mixing 50 mL of water with 50 mL of ethanol yields only about 97 mL of solution, not 100 mL. For acids and bases, always add acid to water (not water to acid) when diluting concentrated solutions, especially for sulfuric acid which generates significant heat upon dilution.',
     faqs: [
       {
         question: 'What is the difference between molarity and molality?',
@@ -292,7 +305,7 @@ const molarityConfig: CalculatorConfig = {
       },
       {
         question: 'How do I handle hydrated compounds when calculating molarity?',
-        answer: 'Hydrated compounds contain water molecules bound in their crystal structure, and this water adds to the molar mass. For example, copper sulfate pentahydrate is CuSO4·5H2O with a molar mass of 249.69 g/mol (not 159.61 g/mol for anhydrous CuSO4). When preparing a solution from a hydrated salt, you MUST use the hydrated molar mass if the salt is in its hydrated form. Our compound database lists anhydrous molar masses — for hydrates, manually enter the correct molar mass or use the Molecular Weight Calculator first. Example: to make 1 L of 0.1 M CuSO4 from the pentahydrate, you need 0.1 mol × 249.69 g/mol = 24.969 g of CuSO4·5H2O.',
+        answer: 'Hydrated compounds contain water molecules bound in their crystal structure, and this water adds to the molar mass. For example, copper sulfate pentahydrate is CuSO4·5H2O with a molar mass of 249.68 g/mol (not 159.61 g/mol for anhydrous CuSO4). When preparing a solution from a hydrated salt, you MUST use the hydrated molar mass if the salt is in its hydrated form. Type the hydrate in the Compound box as CuSO4·5H2O (or CuSO4.5H2O) and the calculator adds the water for you; typing just CuSO4 gives the anhydrous mass. Example: to make 1 L of 0.1 M CuSO4 from the pentahydrate, you need 0.1 mol × 249.68 g/mol = 24.968 g of CuSO4·5H2O.',
       },
       {
         question: 'What safety precautions should I take when preparing solutions?',

@@ -1,11 +1,17 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SpeedPanel from './SpeedPanel';
+import { parseNonNegative } from '../../../utils/parseNumber';
+
+// Exact by definition: 1 mi = 1609.344 m, 1 nmi = 1852 m, 1 mph = 0.44704 m/s, 1 knot = 1852/3600 m/s.
+const MPH_MS = 0.44704;
+const KNOT_MS = 1852 / 3600;
 
 const distanceToM = (v: number, u: string): number => {
   switch (u) {
     case 'mi': return v * 1609.344;
     case 'km': return v * 1000;
+    case 'nmi': return v * 1852;
     case 'm': return v;
     case 'ft': return v * 0.3048;
     default: return v;
@@ -68,6 +74,7 @@ const speedConfig: CalculatorConfig = {
       options: [
         { label: 'mi', value: 'mi' },
         { label: 'km', value: 'km' },
+        { label: 'nmi (nautical miles)', value: 'nmi' },
         { label: 'm', value: 'm' },
         { label: 'ft', value: 'ft' },
       ],
@@ -144,6 +151,7 @@ const speedConfig: CalculatorConfig = {
       options: [
         { label: 'mi', value: 'mi' },
         { label: 'km', value: 'km' },
+        { label: 'nmi (nautical miles)', value: 'nmi' },
         { label: 'm', value: 'm' },
         { label: 'ft', value: 'ft' },
       ],
@@ -157,10 +165,10 @@ const speedConfig: CalculatorConfig = {
     // Convert input speed to m/s
     const speedToMs = (v: number, u: string): number => {
       switch (u) {
-        case 'mph': return v / 2.23694;
+        case 'mph': return v * MPH_MS;
         case 'kmh': return v / 3.6;
         case 'ms': return v;
-        case 'knots': return v / 1.94384;
+        case 'knots': return v * KNOT_MS;
         default: return v;
       }
     };
@@ -186,8 +194,8 @@ const speedConfig: CalculatorConfig = {
     };
 
     if (mode === 'calcSpeed') {
-      const distance = parseFloat(values.distance);
-      const time = parseFloat(values.time);
+      const distance = parseNonNegative(values.distance);
+      const time = parseNonNegative(values.time);
       if (isNaN(distance) || isNaN(time) || time === 0) return [];
 
       const distM = distanceToM(distance, values.distanceUnit || 'mi');
@@ -195,10 +203,10 @@ const speedConfig: CalculatorConfig = {
       const speedMs = distM / timeS;
 
       // Compute all speed units
-      const mph = speedMs * 2.23694;
+      const mph = speedMs / MPH_MS;
       const kmh = speedMs * 3.6;
       const ms = speedMs;
-      const knots = speedMs * 1.94384;
+      const knots = speedMs / KNOT_MS;
 
       // Pace calculations
       const paceMinMile = 60 / mph;
@@ -251,8 +259,8 @@ const speedConfig: CalculatorConfig = {
     }
 
     if (mode === 'calcDistance') {
-      const speed = parseFloat(values.speed);
-      const time = parseFloat(values.time);
+      const speed = parseNonNegative(values.speed);
+      const time = parseNonNegative(values.time);
       if (isNaN(speed) || isNaN(time)) return [];
 
       const speedMs = speedToMs(speed, values.speedUnit || 'mph');
@@ -264,6 +272,7 @@ const speedConfig: CalculatorConfig = {
       switch (outputUnit) {
         case 'mi': distOut = distM / 1609.344; break;
         case 'km': distOut = distM / 1000; break;
+        case 'nmi': distOut = distM / 1852; break;
         case 'm': distOut = distM; break;
         case 'ft': distOut = distM / 0.3048; break;
         default: distOut = distM;
@@ -288,8 +297,8 @@ const speedConfig: CalculatorConfig = {
     }
 
     if (mode === 'calcTime') {
-      const distance = parseFloat(values.distance);
-      const speed = parseFloat(values.speed);
+      const distance = parseNonNegative(values.distance);
+      const speed = parseNonNegative(values.speed);
       if (isNaN(distance) || isNaN(speed) || speed === 0) return [];
 
       const distM = distanceToM(distance, values.distanceUnit || 'mi');
@@ -354,13 +363,13 @@ const speedConfig: CalculatorConfig = {
       {
         scenario: 'Sarah is training for her first marathon and wants to know what pace she needs to maintain to finish in under 4 hours. A marathon is 26.2 miles. What average speed and pace does she need?',
         inputs: { mode: 'calcSpeed', distance: '26.2', distanceUnit: 'mi', time: '4', timeUnit: 'hr' },
-        result: 'Speed = 6.55 mph (10.541 km/h, 4.712 m/s, 5.693 knots). Pace = 9:10 min/mile (5:42 min/km). Sarah needs to maintain 6.55 mph to finish a 26.2-mile marathon in exactly 4 hours.',
+        result: 'Speed = 6.55 mph (10.541 km/h, 2.928 m/s, 5.692 knots). Pace = 9:10 min/mile (5:42 min/km). Sarah needs to maintain 6.55 mph to finish a 26.2-mile marathon in exactly 4 hours.',
         insight: 'Required speed: 6.55 mph. Pace: approximately 9:10 min/mile. Sarah should target a 9:00-9:10 min/mile pace to finish just under 4 hours (approximately 3:59:30). Most marathon training plans recommend running your long runs 30-90 seconds per mile slower than goal pace, so her training long runs should be at 10:00-10:40 min/mile. The pace required (9:10) is achievable for a dedicated amateur runner with 16-20 weeks of training.',
       },
       {
         scenario: 'Captain Rodriguez is navigating a cargo ship from Los Angeles to Honolulu, a distance of 2,225 nautical miles. The ship cruises at 18 knots. Weather forecasts show a 2-knot head current for the first 500 miles. How long will the total voyage take?',
-        inputs: { mode: 'calcTime', distance: '2225', distanceUnit: 'mi', speed: '18', speedUnit: 'knots', timeResultUnit: 'hr' },
-        result: 'Time = 123.611111 hours (approximately 5.15 days or 5 days 3 hours 40 minutes). At 18 knots, the ship covers 2,225 nautical miles in about 123.6 hours. With head current, total time increases to ~127 hours.',
+        inputs: { mode: 'calcTime', distance: '2225', distanceUnit: 'nmi', speed: '18', speedUnit: 'knots', timeResultUnit: 'hr' },
+        result: 'Time = 123.611111 hours (approximately 5.15 days, or 5 days 3 hours 37 minutes). At 18 knots, the ship covers 2,225 nautical miles in about 123.6 hours. With head current, total time increases to ~127 hours.',
         insight: 'At 18 knots (18 nautical miles per hour), 2,225 nautical miles takes about 123.6 hours (5.15 days) in ideal conditions. However, with the head current: first 500 miles at effective 16 knots = 31.25 hours; remaining 1,725 miles at 18 knots = 95.8 hours; total ≈ 127.1 hours (5.3 days). The head current adds about 3.5 hours. Captains use speed-time-distance calculations for fuel planning, ETA communication, and crew shift scheduling.',
       },
       {

@@ -12,9 +12,9 @@ describe('Height Calculator (Mid-Parental Height)', () => {
     });
     const predicted = r.find((x) => x.id === 'predictedHeight');
     expect(predicted).toBeTruthy();
-    // Mother 64", Father 70" -> (64+70+13)/2 = 73.5" = 6'1.5"
-    expect(predicted!.value).toContain("6'");
-    expect(predicted!.value).toContain('1.5');
+    // Mother 64", Father 70" -> (162.56 + 177.8 + 13 cm) / 2 = 176.7 cm = 5'9.6"
+    expect(predicted!.value).toContain("5'");
+    expect(predicted!.value).toContain('9.6');
   });
 
   it('predicts girl height correctly', () => {
@@ -27,9 +27,9 @@ describe('Height Calculator (Mid-Parental Height)', () => {
     });
     const predicted = r.find((x) => x.id === 'predictedHeight');
     expect(predicted).toBeTruthy();
-    // Mother 64", Father 70" -> (64+70-13)/2 = 60.5" = 5'0.5"
+    // Mother 64", Father 70" -> (162.56 + 177.8 - 13 cm) / 2 = 163.7 cm = 5'4.4"
     expect(predicted!.value).toContain("5'");
-    expect(predicted!.value).toContain('0.5');
+    expect(predicted!.value).toContain('4.4');
   });
 
   it('shows predicted height in cm', () => {

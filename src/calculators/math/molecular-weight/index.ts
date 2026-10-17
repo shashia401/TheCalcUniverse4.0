@@ -2,7 +2,9 @@ import { createElement } from 'react';
 import type { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import MolecularWeightPanel from './MolecularWeightPanel';
 
-// ─── Atomic Weights (Top 42 elements) ──────────────────────────────────────────
+// ─── Atomic Weights (all 118 elements) ─────────────────────────────────────────
+// Conventional atomic weights (IUPAC / CIAAW), 3 decimals. Elements with no stable isotope (Tc, Pm, Po and everything
+// after Bi except Th, Pa, U) use the mass number of their longest-lived isotope.
 
 const ATOMIC_WEIGHTS: Record<string, number> = {
   H: 1.008, He: 4.003, Li: 6.941, Be: 9.012, B: 10.81,
@@ -11,9 +13,24 @@ const ATOMIC_WEIGHTS: Record<string, number> = {
   S: 32.065, Cl: 35.453, Ar: 39.948, K: 39.098, Ca: 40.078,
   Sc: 44.956, Ti: 47.867, V: 50.942, Cr: 51.996, Mn: 54.938,
   Fe: 55.845, Co: 58.933, Ni: 58.693, Cu: 63.546, Zn: 65.380,
-  Br: 79.904, Rb: 85.468, Sr: 87.620, Ag: 107.868, Cd: 112.411,
-  I: 126.904, Cs: 132.905, Ba: 137.327, Pt: 195.078, Au: 196.967,
-  Hg: 200.592, Pb: 207.200,
+  Ga: 69.723, Ge: 72.630, As: 74.922, Se: 78.971, Br: 79.904,
+  Kr: 83.798, Rb: 85.468, Sr: 87.620, Y: 88.906, Zr: 91.224,
+  Nb: 92.906, Mo: 95.950, Tc: 98, Ru: 101.07, Rh: 102.906,
+  Pd: 106.42, Ag: 107.868, Cd: 112.411, In: 114.818, Sn: 118.710,
+  Sb: 121.760, Te: 127.60, I: 126.904, Xe: 131.293, Cs: 132.905,
+  Ba: 137.327, La: 138.905, Ce: 140.116, Pr: 140.908, Nd: 144.242,
+  Pm: 145, Sm: 150.36, Eu: 151.964, Gd: 157.25, Tb: 158.925,
+  Dy: 162.500, Ho: 164.930, Er: 167.259, Tm: 168.934, Yb: 173.045,
+  Lu: 174.967, Hf: 178.486, Ta: 180.948, W: 183.84, Re: 186.207,
+  Os: 190.23, Ir: 192.217, Pt: 195.078, Au: 196.967, Hg: 200.592,
+  Tl: 204.383, Pb: 207.200, Bi: 208.980, Po: 209, At: 210,
+  Rn: 222, Fr: 223, Ra: 226, Ac: 227, Th: 232.038,
+  Pa: 231.036, U: 238.029, Np: 237, Pu: 244, Am: 243,
+  Cm: 247, Bk: 247, Cf: 251, Es: 252, Fm: 257,
+  Md: 258, No: 259, Lr: 266, Rf: 267, Db: 268,
+  Sg: 269, Bh: 270, Hs: 277, Mt: 278, Ds: 281,
+  Rg: 282, Cn: 285, Nh: 286, Fl: 289, Mc: 290,
+  Lv: 293, Ts: 294, Og: 294,
 };
 
 // ─── Subscript Normalization ───────────────────────────────────────────────────
@@ -27,6 +44,10 @@ function normSub(s: string): string {
   return s.replace(/[₀₁₂₃₄₅₆₇₈₉]/g, (ch) => SUB_MAP[ch] || ch);
 }
 
+const toSub = (s: string): string => s.replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[Number(d)]);
+
+const MAX_COUNT = 1_000_000;
+
 // ─── Element Parsing ───────────────────────────────────────────────────────────
 
 interface ElementCount {
@@ -36,65 +57,58 @@ interface ElementCount {
 
 interface ParseResult {
   elements: ElementCount[];
+  /** Number of H2O in a hydrate (0 when the extra units are something else, e.g. alum's Al2(SO4)3). */
   hydrateCount: number;
+  /** "5 H₂O", "24 H₂O"... every part after the first "·". */
+  units: string;
 }
 
 /**
  * Parse a chemical formula string.
- * Handles: element symbols, subscript numbers, parentheses, hydrates.
- * Accepts both regular digits and Unicode subscript digits.
- *
- * Hydrate support:
- *   CuSO4·5H2O  — middle-dot separator
- *   CuSO4.5H2O  — dot separator (dot followed by number + H2O)
- *   CuSO4 + 5H2O — plus sign separator
+ * Handles element symbols, subscripts (digits or Unicode), nested ( [ { brackets, and hydrates / adducts:
+ *   CuSO4·5H2O   CuSO4.5H2O   CuSO4 + 5H2O   K2SO4·Al2(SO4)3·24H2O
+ * Each part after the first may start with a count.
  */
-function parseFormula(raw: string): ParseResult {
+function parseFormula(raw: string): ParseResult | null {
   const s = normSub(raw).replace(/\s/g, '');
-  if (!s) return { elements: [], hydrateCount: 0 };
+  if (!s) return null;
 
+  const parts = s
+    .replace(/\.(?=\d*[A-Z([{])/g, '·')
+    .replace(/\+(?=\d*[A-Z([{])/g, '·')
+    .split(/[·•*]/);
+
+  const total: ElementCount[] = [];
+  const units: string[] = [];
   let hydrateCount = 0;
-  let formulaPart = s;
+  let allWater = parts.length > 1;
 
-  // Check for · (middle-dot) separator — most common hydrate notation
-  const middleDotIdx = s.indexOf('·');
-  if (middleDotIdx >= 0) {
-    const before = s.slice(0, middleDotIdx);
-    const after = s.slice(middleDotIdx + 1);
-    const hMatch = after.match(/^(\d+)\s*(H2O)?/i);
-    if (hMatch) {
-      hydrateCount = parseInt(hMatch[1], 10);
-      formulaPart = before;
+  for (let p = 0; p < parts.length; p++) {
+    const m = /^(\d*)(.*)$/.exec(parts[p])!;
+    let coefficient = 1;
+    if (m[1] !== '') {
+      if (p === 0) return null; // the main formula has no leading count
+      coefficient = parseInt(m[1], 10);
+      if (coefficient < 1 || coefficient > MAX_COUNT) return null;
     }
-  } else {
-    // Check for . followed by a number and H2O (dot hydrate notation)
-    const dotHydrate = s.match(/\.(\d+)\s*(H2O)/i);
-    if (dotHydrate && dotHydrate.index !== undefined) {
-      hydrateCount = parseInt(dotHydrate[1], 10);
-      formulaPart = s.slice(0, dotHydrate.index);
-    } else {
-      // Check for + separator (e.g., CuSO4+5H2O)
-      const plusParts = s.split('+');
-      if (plusParts.length > 1) {
-        const lastPart = plusParts[plusParts.length - 1];
-        const wMatch = lastPart.match(/^(\d+)\s*(H2O)/i);
-        if (wMatch) {
-          hydrateCount = parseInt(wMatch[1], 10);
-          formulaPart = plusParts.slice(0, -1).join('+');
-        }
-      }
+    const elements = parseElements(m[2]);
+    if (!elements) return null;
+    for (const el of elements) el.count *= coefficient;
+    mergeElements(total, elements);
+
+    if (p > 0) {
+      units.push(`${coefficient} ${toSub(m[2])}`);
+      if (m[2] === 'H2O') hydrateCount += coefficient;
+      else allWater = false;
     }
   }
 
-  const elements = parseElements(formulaPart);
-  if (!elements) return { elements: [], hydrateCount: 0 };
-
-  return { elements, hydrateCount };
+  return { elements: total, hydrateCount: allWater ? hydrateCount : 0, units: units.join(' + ') };
 }
 
 /**
  * Tokenize and parse a formula string into element counts.
- * Uses a stack-based approach for parentheses.
+ * Uses a stack-based approach for parentheses; repeated elements (CH3COOH) are merged.
  */
 function parseElements(s: string): ElementCount[] | null {
   if (!s) return null;
@@ -108,27 +122,20 @@ function parseElements(s: string): ElementCount[] | null {
     const ch = s[i];
 
     if (ch === '(' || ch === '[' || ch === '{') {
-      // Push a new context
       stack.push({ elements: current });
       current = [];
       i++;
     } else if (ch === ')' || ch === ']' || ch === '}') {
-      // Pop context and apply multiplier
       if (stack.length === 0) return null;
 
-      // Read the number after the closing bracket
       const numStart = i + 1;
       let numEnd = numStart;
-      while (numEnd < s.length && /[0-9.]/.test(s[numEnd])) numEnd++;
+      while (numEnd < s.length && /[0-9]/.test(s[numEnd])) numEnd++;
       const multiplier = numStart < numEnd ? parseInt(s.slice(numStart, numEnd), 10) : 1;
-      if (isNaN(multiplier) || multiplier < 1) return null;
+      if (isNaN(multiplier) || multiplier < 1 || multiplier > MAX_COUNT) return null;
 
-      // Multiply all elements in current by multiplier
-      for (const el of current) {
-        el.count *= multiplier;
-      }
+      for (const el of current) el.count *= multiplier;
 
-      // Merge into parent context
       const parent = stack.pop()!;
       mergeElements(parent.elements, current);
       current = parent.elements;
@@ -141,23 +148,20 @@ function parseElements(s: string): ElementCount[] | null {
       while (i < s.length && /[a-z]/.test(s[i])) i++;
       const element = s.slice(elStart, i);
 
-      // Validate element exists in our table
-      if (!ATOMIC_WEIGHTS[element]) return null;
+      if (!Object.prototype.hasOwnProperty.call(ATOMIC_WEIGHTS, element)) return null;
 
-      // Read subscript count
       const numStart = i;
       while (i < s.length && /[0-9]/.test(s[i])) i++;
       const numStr = s.slice(numStart, i);
       const count = numStr ? parseInt(numStr, 10) : 1;
-      if (isNaN(count) || count < 1) return null;
+      if (isNaN(count) || count < 1 || count > MAX_COUNT) return null;
 
-      current.push({ element, count });
+      mergeElements(current, [{ element, count }]);
     } else {
       return null;
     }
   }
 
-  // If we have unclosed brackets, invalid
   if (stack.length > 0) return null;
 
   return elements;
@@ -197,57 +201,17 @@ function calcMolecularWeight(formula: string): {
   const parsed = parseFormula(formula.trim());
   if (!parsed || parsed.elements.length === 0) return null;
 
-  // Calculate total weight from elements
   let totalWeight = 0;
   let totalAtoms = 0;
   const breakdown: ElementBreakdown[] = [];
 
   for (const { element, count } of parsed.elements) {
-    const mass = ATOMIC_WEIGHTS[element];
-    const elementMass = mass * count;
+    const elementMass = ATOMIC_WEIGHTS[element] * count;
     totalWeight += elementMass;
     totalAtoms += count;
     breakdown.push({ element, count, mass: elementMass, percentage: 0 });
   }
 
-  // Add hydrate water (H2O = 18.015 g/mol) as separate breakdown entries
-  if (parsed.hydrateCount > 0) {
-    const hMass = 1.008 * 2 * parsed.hydrateCount;
-    const oMass = 15.999 * parsed.hydrateCount;
-    const waterWeight = hMass + oMass;
-    totalWeight += waterWeight;
-    totalAtoms += 3 * parsed.hydrateCount; // 2 H + 1 O per water
-
-    // Add H from hydrate
-    const existingH = breakdown.find((b) => b.element === 'H');
-    if (existingH) {
-      existingH.count += 2 * parsed.hydrateCount;
-      existingH.mass += hMass;
-    } else {
-      breakdown.push({
-        element: 'H',
-        count: 2 * parsed.hydrateCount,
-        mass: hMass,
-        percentage: 0,
-      });
-    }
-
-    // Add O from hydrate
-    const existingO = breakdown.find((b) => b.element === 'O');
-    if (existingO) {
-      existingO.count += parsed.hydrateCount;
-      existingO.mass += oMass;
-    } else {
-      breakdown.push({
-        element: 'O',
-        count: parsed.hydrateCount,
-        mass: oMass,
-        percentage: 0,
-      });
-    }
-  }
-
-  // Calculate percentages
   for (const b of breakdown) {
     b.percentage = totalWeight > 0 ? (b.mass / totalWeight) * 100 : 0;
   }
@@ -257,9 +221,7 @@ function calcMolecularWeight(formula: string): {
     totalAtoms,
     breakdown,
     formulaDisplay: formula.trim(),
-    formulaUnits: parsed.hydrateCount > 0
-      ? `${parsed.hydrateCount} H₂O`
-      : '',
+    formulaUnits: parsed.units,
     hydrateCount: parsed.hydrateCount,
   };
 }
@@ -342,12 +304,12 @@ const molecularWeightConfig: CalculatorConfig = {
       'Unicode subscripts (H₂O) and normal digits (H2O) are both supported.',
       'The calculator shows molecular weight, element breakdown, and mass percentages.',
     ],
-    explanation: 'Molecular weight (or molecular mass) is the sum of the atomic masses of all atoms in a molecule, representing one of the fundamental concepts in chemistry that bridges the atomic and macroscopic worlds. The systematic determination of atomic weights began with John Dalton in 1803, who published the first table of atomic weights, and was significantly refined by the Swedish chemist Jöns Jacob Berzelius in the early 19th century. It is used to convert between mass and moles of a substance, prepare solutions of specific concentration, and determine the composition of chemical compounds. Atomic weights are based on the weighted average of naturally occurring isotopes of each element. Practical example: calculating the molecular weight of glucose (C₆H₁₂O₆). Carbon: 6 × 12.011 = 72.066, Hydrogen: 12 × 1.008 = 12.096, Oxygen: 6 × 15.999 = 95.994. Total = 72.066 + 12.096 + 95.994 = 180.156 g/mol. This means 180.156 grams of glucose contains exactly one mole (6.022 × 10²³ molecules) of glucose. Edge cases: hydrated compounds like copper sulfate pentahydrate (CuSO₄·5H₂O) include water molecules in the crystal structure. The molecular weight must account for the five water molecules: CuSO₄ = 159.609 g/mol, plus 5 × H₂O (5 × 18.015 = 90.075 g/mol) = 249.684 g/mol total. For polymers like polyethylene (C₂H₄)ₙ, the molecular weight varies with chain length (n), so an average molecular weight is reported. For compounds with isotopes like deuterated water (D₂O), use the atomic weight of deuterium (2.014) instead of protium (1.008).',
+    explanation: 'Molecular weight (or molecular mass) is the sum of the atomic masses of all atoms in a molecule, representing one of the fundamental concepts in chemistry that bridges the atomic and macroscopic worlds. The systematic determination of atomic weights began with John Dalton in 1803, who published the first table of atomic weights, and was significantly refined by the Swedish chemist Jöns Jacob Berzelius in the early 19th century. It is used to convert between mass and moles of a substance, prepare solutions of specific concentration, and determine the composition of chemical compounds. Atomic weights are based on the weighted average of naturally occurring isotopes of each element. Practical example: calculating the molecular weight of glucose (C₆H₁₂O₆). Carbon: 6 × 12.011 = 72.066, Hydrogen: 12 × 1.008 = 12.096, Oxygen: 6 × 15.999 = 95.994. Total = 72.066 + 12.096 + 95.994 = 180.156 g/mol. This means 180.156 grams of glucose contains exactly one mole (6.022 × 10²³ molecules) of glucose. Edge cases: hydrated compounds like copper sulfate pentahydrate (CuSO₄·5H₂O) include water molecules in the crystal structure. The molecular weight must account for the five water molecules: CuSO₄ = 159.607 g/mol, plus 5 × H₂O (5 × 18.015 = 90.075 g/mol) = 249.682 g/mol total. For polymers like polyethylene (C₂H₄)ₙ, the molecular weight varies with chain length (n), so an average molecular weight is reported. For compounds with isotopes like deuterated water (D₂O), use the atomic weight of deuterium (2.014) instead of protium (1.008).',
     limitations: [
       'This calculator uses standard IUPAC atomic weights which are weighted averages of naturally occurring isotopes. For mass spectrometry applications requiring exact isotopic masses (monoisotopic mass), use specialized tools.',
-      'The elemental database includes 42 common elements; exotic or synthetic elements beyond atomic number 82 (Pb) are limited to Au, Hg, Pt.',
-      'The formula parser does not support nested brackets more than one level deep — complex coordination compounds may need to be broken into separate calculations.',
-      'Do not use this calculator for polymers where the molecular weight is an average distribution, for biochemical macromolecules like proteins and DNA sequences, for mass spectrometry where exact isotopic masses are required, or for compounds containing elements not in the database (elements 83+ except those listed).',
+      'All 118 elements are included. Elements with no stable isotope (Tc, Pm, Po and most elements after Bi, except Th, Pa and U) use the mass number of their longest-lived isotope, so treat those results as approximate.',
+      'Formulas are read exactly as typed and are case-sensitive (Co is cobalt, CO is carbon monoxide). Charges and isotope labels such as D or 13C are not understood; use H and C, or work out those masses by hand.',
+      'Do not use this calculator for polymers where the molecular weight is an average distribution, for biochemical macromolecules like proteins and DNA sequences, for mass spectrometry where exact isotopic masses are required, or when the formula contains anything other than element symbols, counts, brackets and hydrate separators.',
     ],
     faqs: [
       {
@@ -364,15 +326,15 @@ const molecularWeightConfig: CalculatorConfig = {
       },
       {
         question: 'How do I write formulas with parentheses for polyatomic groups?',
-        answer: 'Parentheses group atoms together and apply a multiplication factor. For example, Mg(OH)2 means one Mg atom plus two OH groups (2 O atoms and 2 H atoms total). Ca(NO3)2 means one Ca plus two NO3 groups (2 N atoms, 6 O atoms). The calculator supports single-level parentheses — the subscript after the closing parenthesis multiplies all atoms inside. For nested parentheses like (NH4)2SO4, the formula should be written with separate groups since the parser handles one level of grouping within each bracket pair.',
+        answer: 'Parentheses group atoms together and apply a multiplication factor. For example, Mg(OH)2 means one Mg atom plus two OH groups (2 O atoms and 2 H atoms total). Ca(NO3)2 means one Ca plus two NO3 groups (2 N atoms, 6 O atoms). The subscript after the closing bracket multiplies everything inside, and groups can be nested to any depth with ( ), [ ] or { }: (NH4)2SO4 has 2 N, 8 H, 1 S and 4 O, and Fe4[Fe(CN)6]3 is read correctly.',
       },
       {
         question: 'How do I enter hydrated compounds?',
-        answer: 'Hydrated compounds contain water molecules in their crystal structure. Use the middle-dot (·) separator for the standard notation: CuSO4·5H2O (copper sulfate pentahydrate). The calculator also supports period notation (CuSO4.5H2O) and plus notation (CuSO4+5H2O). The hydrate water is automatically parsed and its mass (18.015 g/mol per water molecule) is added to the total molecular weight. The resulting element breakdown will show the additional hydrogen and oxygen atoms from the water of crystallization separately.',
+        answer: 'Hydrated compounds contain water molecules in their crystal structure. Use the middle-dot (·) separator for the standard notation: CuSO4·5H2O (copper sulfate pentahydrate). The calculator also supports period notation (CuSO4.5H2O) and plus notation (CuSO4+5H2O). The hydrate water is automatically parsed and its mass (18.015 g/mol per water molecule) is added to the total molecular weight, and its hydrogen and oxygen are counted in the element breakdown. Double salts work too: K2SO4·Al2(SO4)3·24H2O (alum) is read as three parts, each with its own count.',
       },
       {
         question: 'Can this calculator handle organic compounds and pharmaceuticals?',
-        answer: 'Yes, the calculator handles any chemical formula using elements from the 42-element database, which covers all elements commonly found in organic compounds (H, C, N, O, F, P, S, Cl, Br, I). Common pharmaceuticals like ibuprofen (C13H18O2, MW = 206.29 g/mol), aspirin (C9H8O4, MW = 180.16 g/mol), and acetaminophen (C8H9NO2, MW = 151.16 g/mol) can be calculated directly. For very large molecules, enter the formula carefully — a single misplaced digit or letter changes the result.',
+        answer: 'Yes, the calculator handles any chemical formula using any of the 118 elements, which includes everything commonly found in organic compounds (H, C, N, O, F, P, S, Cl, Br, I). Common pharmaceuticals like ibuprofen (C13H18O2, MW = 206.29 g/mol), aspirin (C9H8O4, MW = 180.16 g/mol), and acetaminophen (C8H9NO2, MW = 151.16 g/mol) can be calculated directly. For very large molecules, enter the formula carefully — a single misplaced digit or letter changes the result.',
       },
       {
         question: 'What are the historical origins of atomic weight determination?',
@@ -385,5 +347,10 @@ const molecularWeightConfig: CalculatorConfig = {
     ],
   },
 };
+
+/** Molar mass (g/mol) of any formula this calculator can read, or null. Used by the molarity calculator's compound lookup. */
+export function molarMassOfFormula(formula: string): number | null {
+  return calcMolecularWeight(formula)?.molecularWeight ?? null;
+}
 
 export default molecularWeightConfig;
