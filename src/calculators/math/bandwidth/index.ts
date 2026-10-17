@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import type { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BandwidthPanel from './bandwidthPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
 const FILE_UNIT_TO_MBIT: Record<string, number> = {
   MB: 8,
@@ -16,9 +17,13 @@ const FILE_UNIT_TO_BYTES: Record<string, number> = {
 
 export function formatTime(totalSeconds: number): string {
   if (totalSeconds < 0) return '0s';
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = Math.round(totalSeconds % 60);
+  // Round to whole seconds FIRST: rounding only the remainder printed 119.6 s as "1m 60s".
+  const whole = Math.round(totalSeconds);
+  const days = Math.floor(whole / 86400);
+  const hours = Math.floor((whole % 86400) / 3600);
+  const minutes = Math.floor((whole % 3600) / 60);
+  const seconds = whole % 60;
+  if (days > 0) return `${days}d ${hours}h ${minutes}m ${seconds}s`;
   if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
   if (minutes > 0) return `${minutes}m ${seconds}s`;
   return `${seconds}s`;
@@ -27,13 +32,13 @@ export function formatTime(totalSeconds: number): string {
 export function calculate(
   values: Record<string, unknown>
 ): CalculatorResult[] {
-  const fileSize = Number(values.fileSize);
+  const fileSize = parseNumberStrict(String(values.fileSize ?? ''));
   const fileSizeUnit = String(values.fileSizeUnit || 'MB');
-  const connectionSpeed = Number(values.connectionSpeed);
+  const connectionSpeed = parseNumberStrict(String(values.connectionSpeed ?? ''));
   const speedUnit = String(values.speedUnit || 'Mbps');
   const tcpOverhead = String(values.tcpOverhead || 'No');
 
-  if (!fileSize || fileSize <= 0 || !connectionSpeed || connectionSpeed <= 0) {
+  if (!(fileSize > 0) || !(connectionSpeed > 0) || fileSize > 1e12 || connectionSpeed > 1e9) {
     return [];
   }
 
@@ -120,7 +125,7 @@ const bandwidthConfig: CalculatorConfig = {
       'The calculator shows both bits (Mbps) and bytes (MB/s) for clarity.',
       'Review the effective speed to account for real-world protocol overhead.',
     ],
-    explanation: 'Bandwidth (data transfer rate) is the amount of data that can be transmitted over a connection in a given time. File sizes are typically measured in bytes (MB, GB), while connection speeds are measured in bits per second (Mbps). Since 1 byte = 8 bits, you divide the speed by 8 to get the theoretical byte transfer rate. TCP protocol overhead adds approximately 10% reduction in effective throughput. Practical example: downloading a 25 GB game on a 100 Mbps connection. File size in megabits: 25 × 8000 = 200,000 Mb. Without overhead: transfer time = 200,000 / 100 = 2,000 seconds (33.3 minutes). With 10% TCP overhead, effective speed is 90 Mbps, so transfer time = 200,000 / 90 = 2,222 seconds (37 minutes). Edge cases: on Wi-Fi connections, actual throughput is typically 40-60% of the rated speed due to interference, distance from the router, and competing networks. A-rated 300 Mbps Wi-Fi connection might deliver only 120-180 Mbps in practice. For cloud uploads, the provider often throttles speeds or imposes data caps. For streaming, the required bandwidth varies: Netflix 4K needs about 25 Mbps, Zoom HD calls need about 3-4 Mbps, and online gaming needs only about 3-10 Mbps but requires low latency. When multiple devices share the same connection, the available bandwidth is divided among them, so transfer times increase proportionally.',
+    explanation: 'Bandwidth (data transfer rate) is the amount of data that can be transmitted over a connection in a given time. File sizes are typically measured in bytes (MB, GB), while connection speeds are measured in bits per second (Mbps). Since 1 byte = 8 bits, you divide the speed by 8 to get the theoretical byte transfer rate. TCP/IP protocol overhead typically costs 5-10% of throughput (about 5% on Ethernet; the 10% option is a cautious planning figure). Sizes use decimal units (1 GB = 1,000,000,000 bytes), as file sizes and ISPs do. Practical example: downloading a 25 GB game on a 100 Mbps connection. File size in megabits: 25 × 8000 = 200,000 Mb. Without overhead: transfer time = 200,000 / 100 = 2,000 seconds (33.3 minutes). With 10% TCP overhead, effective speed is 90 Mbps, so transfer time = 200,000 / 90 = 2,222 seconds (37 minutes). Edge cases: on Wi-Fi connections, actual throughput is typically 40-60% of the rated speed due to interference, distance from the router, and competing networks. A 300 Mbps-rated Wi-Fi connection might deliver only 120-180 Mbps in practice. For cloud uploads, the provider often throttles speeds or imposes data caps. For streaming, the required bandwidth varies: Netflix 4K needs about 25 Mbps, Zoom HD calls need about 3-4 Mbps, and online gaming needs only about 3-10 Mbps but requires low latency. When multiple devices share the same connection, the available bandwidth is divided among them, so transfer times increase proportionally.',
     faqs: [
       {
         question: 'What is the difference between Mbps and MB/s?',
@@ -128,7 +133,7 @@ const bandwidthConfig: CalculatorConfig = {
       },
       {
         question: 'Why does TCP overhead matter?',
-        answer: 'TCP (Transmission Control Protocol) adds headers, acknowledgments, and retransmissions that consume about 10% of available bandwidth. This means a 100 Mbps connection effectively delivers ~90 Mbps of actual data throughput.',
+        answer: 'TCP/IP headers, acknowledgments and retransmissions use up part of the link: roughly 5% on a clean Ethernet connection and up to 10% or more on a lossy or high-latency one. The calculator\'s 10% option is a cautious figure, so a 100 Mbps connection is treated as delivering ~90 Mbps of file data.',
       },
       {
         question: 'How does latency affect transfer time?',
@@ -142,7 +147,7 @@ const bandwidthConfig: CalculatorConfig = {
     },
     citations: [
       { source: 'Wikipedia', title: 'Bandwidth (Computing)', url: 'https://en.wikipedia.org/wiki/Bandwidth_(computing)' },
-      { source: 'Wolfram MathWorld', title: 'Bandwidth', url: 'https://mathworld.wolfram.com/Bandwidth.html' },
+      { source: 'Wikipedia', title: 'Data-rate units', url: 'https://en.wikipedia.org/wiki/Data-rate_units' },
     ],
   },
 };

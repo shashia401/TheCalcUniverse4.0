@@ -69,7 +69,7 @@ function maskToDottedDecimal(mask: number): string {
 
 /** Determine the IP class from the first octet. */
 function getIPClass(firstOctet: number): string {
-  if (firstOctet >= 1 && firstOctet <= 126) return 'A';
+  if (firstOctet >= 0 && firstOctet <= 127) return 'A';
   if (firstOctet >= 128 && firstOctet <= 191) return 'B';
   if (firstOctet >= 192 && firstOctet <= 223) return 'C';
   if (firstOctet >= 224 && firstOctet <= 239) return 'D';
@@ -77,15 +77,41 @@ function getIPClass(firstOctet: number): string {
   return 'Unknown';
 }
 
-/** Determine the IP type (Private, Public, Loopback, Link-Local). */
+/** Determine the IP type from the special-purpose ranges (RFC 1918, 6598, 5737, 2544, 3927, 5771, 1112, 6890). */
 function getIPType(octets: number[]): string {
-  const [o1, o2] = octets;
+  const [o1, o2, o3] = octets;
+  if (o1 === 0) return 'Unspecified (this network)';
   if (o1 === 10) return 'Private';
   if (o1 === 127) return 'Loopback';
   if (o1 === 169 && o2 === 254) return 'Link-Local';
   if (o1 === 172 && o2 >= 16 && o2 <= 31) return 'Private';
   if (o1 === 192 && o2 === 168) return 'Private';
+  if (o1 === 100 && o2 >= 64 && o2 <= 127) return 'Shared (carrier-grade NAT)';
+  if (o1 === 192 && o2 === 0 && o3 === 2) return 'Documentation';
+  if (o1 === 198 && o2 === 51 && o3 === 100) return 'Documentation';
+  if (o1 === 203 && o2 === 0 && o3 === 113) return 'Documentation';
+  if (o1 === 198 && (o2 === 18 || o2 === 19)) return 'Benchmarking';
+  if (o1 >= 224 && o1 <= 239) return 'Multicast';
+  if (o1 === 255 && o2 === 255 && o3 === 255 && octets[3] === 255) return 'Limited broadcast';
+  if (o1 >= 240) return 'Reserved';
   return 'Public';
+}
+
+/**
+ * Prefix length from "24", "/24" or a dotted mask such as "255.255.255.0" (which must be contiguous 1-bits).
+ * Returns null when it is not one of those.
+ */
+function parsePrefix(raw: string): number | null {
+  const s = raw.trim();
+  if (/^\/?\d{1,2}$/.test(s)) {
+    const n = parseInt(s.replace('/', ''), 10);
+    return n >= 0 && n <= 32 ? n : null;
+  }
+  const octets = parseIP(s);
+  if (!octets) return null;
+  const mask = ipToNumber(octets);
+  for (let n = 0; n <= 32; n++) if (cidrToMask(n) === mask) return n;
+  return null;
 }
 
 /** Format an IP address in binary dotted notation (each octet is 8 bits). */
@@ -98,8 +124,15 @@ function ipToBinary(octets: number[]): string {
 // ─── Calculate function ──────────────────────────────────────────────────────────
 
 function calculate(values: Record<string, string>): CalculatorResult[] {
-  const ipStr = (values.ipAddress || '').trim();
-  const cidrStr = (values.cidr || '').trim();
+  let ipStr = (values.ipAddress || '').trim();
+  let cidrStr = (values.cidr || '').trim();
+
+  // "192.168.1.0/24" typed into the address box also works when the prefix box is empty.
+  if (ipStr.includes('/')) {
+    const [addr, pre] = ipStr.split('/');
+    ipStr = addr.trim();
+    if (!cidrStr) cidrStr = (pre ?? '').trim();
+  }
 
   if (!ipStr) return [];
   if (!cidrStr) return [];
@@ -107,8 +140,9 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
   const octets = parseIP(ipStr);
   if (!octets) return [];
 
-  const cidr = parseInt(cidrStr, 10);
-  if (isNaN(cidr) || cidr < 0 || cidr > 32) return [];
+  // Whole numbers only ("24", "/24" or a contiguous dotted mask); "24.5" or "24abc" used to be read as 24.
+  const cidr = parsePrefix(cidrStr);
+  if (cidr === null) return [];
 
   const ipNum = ipToNumber(octets);
   const mask = cidrToMask(cidr);
@@ -172,6 +206,16 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
       id: 'subnetMask',
       label: 'Subnet Mask',
       value: maskToDottedDecimal(mask),
+    },
+    {
+      id: 'wildcardMask',
+      label: 'Wildcard Mask',
+      value: maskToDottedDecimal(~mask >>> 0),
+    },
+    {
+      id: 'totalAddresses',
+      label: 'Total Addresses',
+      value: Math.pow(2, 32 - cidr).toLocaleString('en-US'),
     },
     {
       id: 'cidrNotation',
@@ -262,7 +306,7 @@ const ipSubnetConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Enter an IPv4 address in dotted decimal format (e.g., 192.168.1.0).',
-      'Enter the CIDR prefix as a number from 0 to 32 (e.g., 24 for a /24 network).',
+      'Enter the CIDR prefix as a number from 0 to 32 (e.g., 24 for a /24 network). A dotted mask such as 255.255.255.0 also works, and so does typing 192.168.1.0/24 straight into the address box.',
       'View the complete subnet breakdown including network address, subnet mask in both formats, usable host range, broadcast address, and total hosts.',
     ],
     explanation:

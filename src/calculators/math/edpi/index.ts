@@ -1,14 +1,22 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import EdpiPanel from './EdpiPanel';
+import { parseNonNegative } from '../../../utils/parseNumber';
 
-const GAME_MULTIPLIERS: Record<string, number> = {
-  'CS:GO': 1,
-  Valorant: 0.314,
-  Overwatch: 1,
-  'Apex Legends': 1,
-  'Rainbow Six Siege': 1,
+// Degrees turned per mouse count at in-game sensitivity 1.0 (the game's "yaw"). Everything else follows from it:
+// cm/360 = 360 x 2.54 / (DPI x sens x yaw), and two sensitivities feel identical when DPI x sens x yaw matches.
+const GAME_YAW: Record<string, number> = {
+  'CS:GO': 0.022,
+  Valorant: 0.07,
+  Overwatch: 0.0066,
+  'Apex Legends': 0.022,
+  'Rainbow Six Siege': 0.00572957795,
 };
+
+/** Sensitivity scale relative to CS:GO = 1 (Valorant = 0.3143, Overwatch = 3.333, R6 = 3.840). */
+const GAME_MULTIPLIERS: Record<string, number> = Object.fromEntries(
+  Object.entries(GAME_YAW).map(([game, yaw]) => [game, GAME_YAW['CS:GO'] / yaw]),
+);
 
 const edpiConfig: CalculatorConfig = {
   inputs: [
@@ -62,8 +70,8 @@ const edpiConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const dpi = parseFloat(values.mouseDpi);
-    const sens = parseFloat(values.sensitivity);
+    const dpi = parseNonNegative(values.mouseDpi, 1e6);
+    const sens = parseNonNegative(values.sensitivity, 1e6);
     const currentGame = values.currentGame || 'CS:GO';
     const targetGame = values.targetGame || '';
 
@@ -72,9 +80,10 @@ const edpiConfig: CalculatorConfig = {
     const currentMult = GAME_MULTIPLIERS[currentGame] || 1;
     const edpi = dpi * sens;
 
-    // 360° distance: approximate degrees per cm of mouse movement
-    // Source engine formula: cm/360 = (360 * 2.54) / (DPI * sens * 0.022)
-    const cmPer360 = (360 * 2.54) / (dpi * sens * 0.022);
+    // Distance for a full turn, using THIS game's yaw (the old code used the CS value 0.022 for every game, which
+    // overstated Valorant's cm/360 by 3.2x and understated Overwatch's by 3.3x).
+    const yaw = GAME_YAW[currentGame] ?? GAME_YAW['CS:GO'];
+    const cmPer360 = (360 * 2.54) / (dpi * sens * yaw);
     const degPerCm = cmPer360 > 0 ? 360 / cmPer360 : 0;
 
     // Typical pro-player eDPI bands per game (sensitivity scales differ per engine)
@@ -93,6 +102,7 @@ const edpiConfig: CalculatorConfig = {
         id: 'edpi', label: 'Effective DPI (eDPI)', value: Math.round(edpi).toString(), highlight: true, color: 'positive' as const,
         interpretation: `An eDPI of ${Math.round(edpi)} in ${currentGame} means a full 360° turn takes ${cmPer360.toFixed(1)} cm of mouse movement. That is ${band === 'within' ? `inside the typical pro range for ${currentGame} (${proLo}–${proHi})` : band === 'below' ? `below the typical ${currentGame} pro range (${proLo}–${proHi}) — slower, more precise "arm aiming" that needs desk space` : `above the typical ${currentGame} pro range (${proLo}–${proHi}) — fast wrist aiming that can cost micro-adjustment precision`}. If your aim feels ${band === 'above' ? 'twitchy, try lowering sensitivity ~10–20% and retraining for a week' : 'fine, don’t chase pro settings — consistency beats copying'}.`,
       },
+      { id: 'cmPer360', label: `Distance per 360° (${currentGame})`, value: `${cmPer360.toFixed(1)} cm (${(cmPer360 / 2.54).toFixed(1)} in)`, color: 'neutral' as const },
       { id: 'mouseDpi', label: 'Mouse DPI', value: dpi.toString() },
       { id: 'sensitivity', label: `Sensitivity (${currentGame})`, value: sens.toString() },
       {
@@ -154,7 +164,7 @@ const edpiConfig: CalculatorConfig = {
       'Use the eDPI value to match sensitivity across different games and settings.',
     ],
     explanation:
-      'eDPI (Effective Dots Per Inch) is the universal standard for comparing mouse sensitivity across different games and DPI settings. By multiplying your mouse DPI by your in-game sensitivity, you get a single number that represents your true cursor speed. Two players with the same eDPI will have the same muscle memory, even if one uses 400 DPI at 4 sensitivity (eDPI = 1600) and the other uses 800 DPI at 2 sensitivity (eDPI = 1600). Cross-game conversion adjusts for the different sensitivity scales each game uses. For example, Valorant uses a more sensitive scale than CS:GO, so a Valorant sensitivity of 0.314 feels equivalent to a CS:GO sensitivity of 1.0. Practical example: if you play CS:GO at 800 DPI with 2.5 sensitivity, your eDPI is 800 × 2.5 = 2000. Dividing by the Valorant multiplier instead of multiplying by it gives 2.5 / 0.314 = 7.96 sensitivity — implausibly high, a sign the formula is inverted. The correct conversion multiplies by the target game\'s multiplier and divides by the current game\'s: Valorant sensitivity = (CS:GO sens × Valorant multiplier) / CS:GO multiplier = (2.5 × 0.314) / 1 = 0.785. So your Valorant equivalent is 800 DPI at 0.785 sensitivity. Edge cases: raw input vs. mouse acceleration — this calculator assumes raw input with no acceleration. If Windows pointer speed is not at the default (6/11), or if "Enhance pointer precision" is enabled, the effective sensitivity changes unpredictably. For games with separate ADS (aim down sights) sensitivity multipliers, the eDPI changes when scoped. For tracking-heavy games like Overwatch and Apex, a slightly lower eDPI (1200-1600) is common for precise tracking, while for flick-heavy games like Valorant and CS:GO, a higher eDPI (1600-2400) is more typical. Pro players generally range from 400 eDPI (very low, arm aimers) to 3200 eDPI (high, wrist aimers).',
+      'eDPI (Effective Dots Per Inch) is the universal standard for comparing mouse sensitivity across different games and DPI settings. By multiplying your mouse DPI by your in-game sensitivity, you get a single number that represents your true cursor speed. Two players with the same eDPI will have the same muscle memory, even if one uses 400 DPI at 4 sensitivity (eDPI = 1600) and the other uses 800 DPI at 2 sensitivity (eDPI = 1600). Cross-game conversion adjusts for the different sensitivity scales each game uses. For example, Valorant uses a more sensitive scale than CS:GO, so a Valorant sensitivity of 0.314 feels equivalent to a CS:GO sensitivity of 1.0. Practical example: if you play CS:GO at 800 DPI with 2.5 sensitivity, your eDPI is 800 × 2.5 = 2000. Dividing by the Valorant multiplier instead of multiplying by it gives 2.5 / 0.314 = 7.96 sensitivity — implausibly high, a sign the formula is inverted. The correct conversion multiplies by the target game\'s multiplier and divides by the current game\'s: Valorant sensitivity = (CS:GO sens × Valorant multiplier) / CS:GO multiplier = (2.5 × 0.3143) / 1 = 0.786. So your Valorant equivalent is 800 DPI at 0.786 sensitivity. Edge cases: raw input vs. mouse acceleration — this calculator assumes raw input with no acceleration. If Windows pointer speed is not at the default (6/11), or if "Enhance pointer precision" is enabled, the effective sensitivity changes unpredictably. For games with separate ADS (aim down sights) sensitivity multipliers, the eDPI changes when scoped. For tracking-heavy games like Overwatch and Apex, a slightly lower eDPI (1200-1600) is common for precise tracking, while for flick-heavy games like Valorant and CS:GO, a higher eDPI (1600-2400) is more typical. Pro players generally range from 400 eDPI (very low, arm aimers) to 3200 eDPI (high, wrist aimers).',
     faqs: [
       {
         question: 'Why does eDPI matter for muscle memory?',
@@ -181,7 +191,7 @@ const edpiConfig: CalculatorConfig = {
         answer: 'For games not in the built-in list, you can use the 360-degree turn method. First, measure how many inches or centimeters your mouse moves to perform a full 360-degree turn in your current game at your current settings. In the new game, adjust the sensitivity until a mouse movement of the same distance produces exactly one 360-degree turn. Most Source engine games (Counter-Strike, Team Fortress, Left 4 Dead) use the same sensitivity scale, so the same numeric value gives the same cm/360. Unreal Engine games generally use a different scale and may need the sensitivity multiplied by a conversion factor. For games without raw input support, ensure your Windows mouse settings are consistent (default pointer speed at 6/11, enhance pointer precision disabled). Using a uniform cm/360 measurement across all games is the most reliable method for maintaining consistency. You can verify your cm/360 using online tools by entering your DPI and game sensitivity. For Battle Royale games (Apex, Fortnite, PUBG), consider that ADS (aim down sights) sensitivity is often set separately and should be matched as well.',
       },
     ],
-    formulaSource: 'The cm/360 formula derives from the Source engine sensitivity model (0.022°/count yaw), the de facto standard for FPS sensitivity math. Game multipliers are the community-established conversion constants (e.g., Valorant = 0.314 × CS).',
+    formulaSource: 'The cm/360 formula uses each game\'s yaw constant, the degrees turned per mouse count at sensitivity 1: 0.022 for CS and Apex (Source engine), 0.07 for Valorant, 0.0066 for Overwatch and 0.00573 for Rainbow Six Siege. Game multipliers are the ratios of those constants to CS\'s 0.022 (Valorant 0.3143, Overwatch 3.333, Rainbow Six Siege 3.840).',
     quickReference: [
       { label: 'CS2 / CS:GO pro range', value: '600–1200 eDPI' },
       { label: 'Valorant pro range', value: '150–350 eDPI' },
@@ -190,12 +200,15 @@ const edpiConfig: CalculatorConfig = {
       { label: '400 DPI × 2.0 sens', value: '800 eDPI' },
       { label: 'CS → Valorant sens', value: 'multiply by 0.314' },
       { label: 'Valorant → CS sens', value: 'multiply by 3.18' },
+      { label: 'CS → Overwatch sens', value: 'multiply by 3.33' },
+      { label: 'CS → Apex sens', value: 'same number (both 0.022)' },
+      { label: 'CS → Rainbow Six sens', value: 'multiply by 3.84' },
     ],
     workedExamples: [
       {
         scenario: 'A CS2 player at 800 DPI, 1.1 sensitivity switches to Valorant',
         inputs: { mouseDpi: '800', sensitivity: '1.1', currentGame: 'CS:GO', targetGame: 'Valorant' },
-        result: 'eDPI 880 → Valorant sensitivity 0.3454',
+        result: 'eDPI 880 → Valorant sensitivity 0.3457',
         insight: 'Multiplying CS sensitivity by 0.314 preserves your exact cm/360 (≈47 cm), so years of muscle memory transfer instantly instead of rebuilding from scratch.',
       },
       {
@@ -208,7 +221,7 @@ const edpiConfig: CalculatorConfig = {
         scenario: 'An Overwatch player at 800 DPI, 6.0 sensitivity wonders if they are an outlier',
         inputs: { mouseDpi: '800', sensitivity: '6.0', currentGame: 'Overwatch' },
         result: 'eDPI 4800 — mid pro range for Overwatch',
-        insight: 'Overwatch sensitivity numbers run ~10× larger than CS for the same physical speed — comparing raw eDPI across games is meaningless without the game multiplier.',
+        insight: 'Overwatch sensitivity numbers run about 3.3× larger than CS for the same physical speed (its yaw is 0.0066 against 0.022 for CS) — comparing raw eDPI across games is meaningless without the game multiplier. Here 800 DPI × 6.0 turns a full circle in about 28.9 cm.',
       },
     ],
     proTips: [
@@ -220,7 +233,7 @@ const edpiConfig: CalculatorConfig = {
     ],
     limitations: [
       'Game multipliers assume default FOV and raw input; some games scale sensitivity with FOV, which changes the effective feel even at identical cm/360.',
-      'The cm/360 formula uses the Source-engine 0.022 yaw constant — exact for CS/Valorant/Apex, approximate for engines with different yaw values.',
+      'cm/360 uses each game\'s published yaw constant (CS and Apex 0.022, Valorant 0.07, Overwatch 0.0066, Rainbow Six Siege 0.00573); other games are not covered, and some scale yaw with FOV.',
       'Console and controller sensitivities use entirely different (aim-acceleration) systems and cannot be converted with eDPI.',
       'Pro ranges shown are descriptive statistics, not recommendations — comfortable and consistent beats copying any specific player.',
     ],

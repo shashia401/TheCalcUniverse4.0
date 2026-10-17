@@ -130,18 +130,21 @@ const characterTokenConfig: CalculatorConfig = {
     // Cost estimate (using GPT-4o pricing)
     const estimatedCost = ((estimatedTokens / 1000) * INPUT_PRICE_PER_1K);
 
+    // Round to whole seconds BEFORE splitting into units. The old code rounded the minutes up and then added the
+    // seconds as well (1.6 min printed as "2 min 36 sec") and could print "1m 60s".
     const formatReadTime = (minutes: number): string => {
-      if (minutes < 1) return `${Math.round(minutes * 60)} seconds`;
-      if (minutes < 60) return `${Math.round(minutes)} min ${Math.round((minutes % 1) * 60)} sec`;
-      const hrs = Math.floor(minutes / 60);
-      const mins = Math.round(minutes % 60);
-      return `${hrs}h ${mins}m`;
+      const totalSec = Math.round(minutes * 60);
+      if (totalSec < 60) return `${totalSec} seconds`;
+      if (totalSec < 3600) return `${Math.floor(totalSec / 60)} min ${totalSec % 60} sec`;
+      const totalMin = Math.round(totalSec / 60);
+      return `${Math.floor(totalMin / 60)}h ${totalMin % 60}m`;
     };
 
     const formatGenTime = (sec: number): string => {
       if (sec < 1) return `${(sec * 1000).toFixed(0)} ms`;
-      if (sec < 60) return `${sec.toFixed(1)} seconds`;
-      return `${Math.floor(sec / 60)}m ${Math.round(sec % 60)}s`;
+      if (sec < 59.95) return `${sec.toFixed(1)} seconds`;
+      const whole = Math.round(sec);
+      return `${Math.floor(whole / 60)}m ${whole % 60}s`;
     };
 
     const fmtCost = (n: number): string => {
@@ -171,7 +174,7 @@ const characterTokenConfig: CalculatorConfig = {
   educational: {
     formula: 'Tokens ≈ Characters × Ratio (depends on tokenizer) | OpenAI cl100k_base: ~0.25 tokens/char for English',
     formulaDescription:
-      'Tokens are the basic processing units that large language models (LLMs) use. Unlike characters, tokens represent chunks of text — in English, one token is roughly 4 characters or 0.75 words on average. Different models use different tokenizers (cl100k_base for GPT-4/GPT-4o, Claude uses its own custom tokenizer, Llama 3 uses a BPE tokenizer similar to GPT-4 with modifications). Token count is the fundamental metric for API costs, context window capacity, and processing speed.',
+      'Tokens are the basic processing units that large language models (LLMs) use. Unlike characters, tokens represent chunks of text — in English, one token is roughly 4 characters or 0.75 words on average. Different models use different tokenizers (cl100k_base for GPT-4/GPT-4o, Claude uses its own custom tokenizer, Llama 3 uses a BPE tokenizer similar to GPT-4 with modifications). Token count is the fundamental metric for API costs, context window capacity, and processing speed. The numbers here are estimates from character and word patterns, not the models\' real tokenizers, and can be 10-25% off (more for code and non-English text); use the provider\'s own tokenizer for billing-critical counts.',
     variables: [
       { symbol: 'Token, Tokenizer', name: 'Token & Tokenizer', description: 'The atomic text unit a model processes (≈0.75 words). Tokenizers split text into tokens, and different models use different tokenizers with varying vocabulary sizes.' },
       { symbol: 'Context Window', name: 'Context Window', description: 'The maximum number of tokens a model can accept in a single request, including both input prompt and generated output. GPT-4o: 128K, Claude 3.5 Sonnet: 200K tokens.' },
@@ -179,11 +182,11 @@ const characterTokenConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Paste or type the text you want to analyze into the input field.',
-      'Select the tokenizer that matches your target model (OpenAI cl100k_base, OpenAI r50k_base, Claude, or Llama 3).',
+      'Select the tokenizer that matches your target model (OpenAI cl100k_base, Claude, Llama 3, or a general estimate).',
       'View the estimated token count, character count, word count, and token-to-character ratio.',
       'Check the token/character ratio — a lower ratio means the tokenizer handles your text more efficiently.',
       'Review the estimated read time and generation time for planning API usage.',
-      'The context window gauge shows how much of a typical 128K context window your text consumes.',
+      'The cost line uses GPT-4o\'s input price of $2.50 per million tokens as a yardstick; check your provider\'s current price list for the real figure.',
     ],
     explanation:
       'Token counting is essential for working with LLMs because API pricing, context window limits, and rate limits are all based on tokens, not characters or words. A token is not the same as a character or a word — in English, one token averages about 4 characters or 0.75 words. Different tokenizers produce different counts for the same text: the cl100k_base tokenizer (used by GPT-4 and GPT-4o) is optimized for English text and code, Claude uses its own tokenizer that may produce slightly different counts, and Llama 3 uses a similar BPE (Byte Pair Encoding) tokenizer. Non-English languages, especially CJK (Chinese, Japanese, Korean), typically require more tokens per character because the tokenizer vocabulary is dominated by common English word fragments. Always select the correct tokenizer type for your target model to get accurate cost projections and ensure your prompt fits within the model\'s context window. As a rule of thumb, 1000 tokens ≈ 750 English words, and this ratio helps with quick estimation when building prompts and managing API budgets.',

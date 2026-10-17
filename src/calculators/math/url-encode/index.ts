@@ -12,11 +12,22 @@ export function calculate(
     return [];
   }
 
-  const originalChars = inputText.length;
+  // Count characters (code points), not UTF-16 units: an emoji is one character, not two.
+  const originalChars = Array.from(inputText).length;
 
   if (mode === 'Encode') {
-    const normalized = inputText.normalize('NFC');
-    const encoded = encodeURIComponent(normalized);
+    // The text is encoded exactly as typed (the old NFC normalisation silently changed accented text typed
+    // in decomposed form). encodeURIComponent throws on an unpaired surrogate, so report that instead of crashing.
+    let encoded: string;
+    try {
+      encoded = encodeURIComponent(inputText);
+    } catch {
+      return [
+        { id: 'Output', label: 'Output', value: '[Cannot encode: the text contains an unpaired surrogate, which is not valid Unicode]' },
+        { id: 'Original Character Count', label: 'Original Character Count', value: String(originalChars) },
+        { id: 'Mode', label: 'Mode', value: 'Encode' },
+      ];
+    }
     return [
       { id: 'Output', label: 'Output', value: encoded },
       { id: 'Original Character Count', label: 'Original Character Count', value: String(originalChars) },
@@ -31,7 +42,7 @@ export function calculate(
       return [
         { id: 'Output', label: 'Output', value: decoded },
         { id: 'Original Character Count', label: 'Original Character Count', value: String(originalChars) },
-        { id: 'Decoded Character Count', label: 'Decoded Character Count', value: String(decoded.length) },
+        { id: 'Decoded Character Count', label: 'Decoded Character Count', value: String(Array.from(decoded).length) },
         { id: 'Mode', label: 'Mode', value: 'Decode' },
       ];
     } catch {
@@ -73,12 +84,12 @@ const urlEncodeConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Select Encode mode to convert special characters to percent-encoding for use in URL query parameters or path segments.',
-      'Select Decode mode to convert percent-encoded strings back to plain readable text, for example when debugging encoded URLs.',
+      'Select Decode mode to convert percent-encoded strings back to plain readable text, for example when debugging encoded URLs (a + stays a plus; only %20 becomes a space here).',
       'The encoding map shows which characters in your input were encoded and what their hex codes are.',
       'Character counts show how encoding affects the length — strings with many special characters can grow significantly.',
     ],
     explanation:
-      'URL encoding (percent-encoding) replaces unsafe ASCII characters in URLs with a % followed by their two-digit hexadecimal code. For example, a space becomes %20, an ampersand (&) becomes %26, and a hash (#) becomes %23. Only alphanumeric characters (A-Z, a-z, 0-9) and the unreserved characters (- _ . ~) remain unencoded. Reserved characters like ?, /, :, @, &, =, +, $, and # must be encoded when they appear in data rather than as URL syntax delimiters. Without percent-encoding, special characters in query parameters would break URL parsing: if a search query contains "&", the server would misinterpret it as a parameter separator, so encoding it as %26 solves this problem. Modern browsers automatically encode certain characters in the address bar, but when constructing URLs programmatically in JavaScript, encodeURIComponent() encodes query parameter values safely while encodeURI() preserves structural characters like slashes.',
+      'URL encoding (percent-encoding) replaces unsafe ASCII characters in URLs with a % followed by their two-digit hexadecimal code. For example, a space becomes %20, an ampersand (&) becomes %26, and a hash (#) becomes %23. Only alphanumeric characters (A-Z, a-z, 0-9) and the unreserved characters (- _ . ~) must remain unencoded; JavaScript\'s encodeURIComponent(), which this tool uses, also leaves ! \' ( ) * as they are, even though RFC 3986 reserves them. Reserved characters like ?, /, :, @, &, =, +, $, and # must be encoded when they appear in data rather than as URL syntax delimiters. Without percent-encoding, special characters in query parameters would break URL parsing: if a search query contains "&", the server would misinterpret it as a parameter separator, so encoding it as %26 solves this problem. Modern browsers automatically encode certain characters in the address bar, but when constructing URLs programmatically in JavaScript, encodeURIComponent() encodes query parameter values safely while encodeURI() preserves structural characters like slashes.',
     faqs: [
       {
         question: 'Why do spaces in URLs become %20?',
@@ -86,7 +97,7 @@ const urlEncodeConfig: CalculatorConfig = {
       },
       {
         question: 'What characters need URL encoding?',
-        answer: 'All characters except A-Z, a-z, 0-9, and - _ . ~ need encoding in URLs. This includes spaces, punctuation marks (quotes, brackets, commas), and special characters like & ? # % = that have structural meaning in URLs. If a query parameter value contains an &, it must be encoded as %26 or the server will interpret it as the start of a new parameter, causing data corruption.',
+        answer: 'All characters except A-Z, a-z, 0-9, and - _ . ~ need encoding in URLs (this tool follows JavaScript\'s encodeURIComponent, which also leaves ! \' ( ) * unchanged; encode those by hand where a strict RFC 3986 encoder is required, e.g. when signing requests). This includes spaces, punctuation marks (quotes, brackets, commas), and special characters like & ? # % = that have structural meaning in URLs. If a query parameter value contains an &, it must be encoded as %26 or the server will interpret it as the start of a new parameter, causing data corruption.',
       },
       {
         question: 'What is the difference between encodeURI() and encodeURIComponent()?',

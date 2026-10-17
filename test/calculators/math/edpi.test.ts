@@ -25,15 +25,14 @@ describe('eDPI Calculator', () => {
 
   it('converts sensitivity from Valorant to CS:GO', () => {
     const r = config.calculate({ mouseDpi: '800', sensitivity: '0.5', currentGame: 'Valorant', targetGame: 'CS:GO' });
-    // Valorant mult = 0.314, CS:GO mult = 1
-    // targetSens = (0.5 * 1) / 0.314 = 1.592
-    near(parseNumber(getValue(r, 'targetSensitivity')), 0.5 / 0.314, 0.001);
+    // Valorant yaw 0.07, CS:GO yaw 0.022: targetSens = 0.5 * 0.07 / 0.022 = 1.5909
+    near(parseNumber(getValue(r, 'targetSensitivity')), (0.5 * 0.07) / 0.022, 0.0001);
   });
 
   it('converts between other games (Overwatch to Apex)', () => {
     const r = config.calculate({ mouseDpi: '800', sensitivity: '5', currentGame: 'Overwatch', targetGame: 'Apex Legends' });
-    // Both have multiplier 1, so targetSens should equal source sens
-    near(parseNumber(getValue(r, 'targetSensitivity')), 5, 0.001);
+    // Overwatch yaw 0.0066, Apex yaw 0.022: 5 * 0.0066 / 0.022 = 1.5 (the old multiplier of 1 for both gave 5)
+    near(parseNumber(getValue(r, 'targetSensitivity')), 1.5, 0.0001);
   });
 
   it('skips conversion when no target game is selected', () => {

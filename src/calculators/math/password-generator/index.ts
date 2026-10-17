@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PasswordPanel from './PasswordPanel';
+import { parseNumberStrict } from '../../../utils/parseNumber';
 
 // ── Character sets ──────────────────────────────────────────────────────
 
@@ -8,12 +9,13 @@ const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
 const NUMBERS = '0123456789';
 const SYMBOLS = '!@#$%^&*()_+-=[]{}|;:,.<>?~';
+const SYMBOLS_NO_AMBIG = SYMBOLS.replace('|', ''); // | looks like I, l and 1
 
 const UPPERCASE_NO_AMBIG = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // removed I, O
 const LOWERCASE_NO_AMBIG = 'abcdefghjkmnpqrstuvwxyz'; // removed l, o
 const NUMBERS_NO_AMBIG = '23456789'; // removed 0, 1
 
-// ── Word list for passphrase mode (~200 common English words) ───────────
+// ── Word list for passphrase mode (common English words, de-duplicated below) ──
 
 const WORD_LIST = [
   'apple', 'arrow', 'autumn', 'bacon', 'badger', 'balance', 'bamboo',
@@ -93,19 +95,22 @@ const WORD_LIST = [
   'zircon', 'zodiac', 'zombie', 'zone', 'zoom',
 ];
 
+// Entropy is counted per DISTINCT word, so a repeated entry can never inflate it.
+const WORDS = Array.from(new Set(WORD_LIST));
+
 // ── Helpers ─────────────────────────────────────────────────────────────
 
 function getRandomInt(max: number): number {
   const array = new Uint32Array(1);
-  // Rejection sampling to avoid modulo bias
-  const maxUint = 4294967295;
-  const remainder = maxUint % max;
-  const threshold = maxUint - remainder;
+  // Rejection sampling to avoid modulo bias: accept only the largest multiple of `max` that fits in 2^32 values
+  // (the old threshold accepted one value too many, so residue 0 was fractionally more likely).
+  const range = 4294967296;
+  const limit = range - (range % max);
   let result: number;
   do {
     crypto.getRandomValues(array);
     result = array[0];
-  } while (result > threshold);
+  } while (result >= limit);
   return result % max;
 }
 
@@ -129,7 +134,7 @@ function getCharSets(
   if (includeUpper) sets.push(avoidAmbiguous ? UPPERCASE_NO_AMBIG : UPPERCASE);
   if (includeLower) sets.push(avoidAmbiguous ? LOWERCASE_NO_AMBIG : LOWERCASE);
   if (includeNumbers) sets.push(avoidAmbiguous ? NUMBERS_NO_AMBIG : NUMBERS);
-  if (includeSymbols) sets.push(SYMBOLS);
+  if (includeSymbols) sets.push(avoidAmbiguous ? SYMBOLS_NO_AMBIG : SYMBOLS);
   return sets;
 }
 
@@ -139,6 +144,17 @@ function getCharsetSize(charSets: string[]): number {
 
 function generateRandomPassword(length: number, charSets: string[]): string {
   const charset = charSets.join('');
+
+  // Draw every position uniformly from the whole charset and keep the first draw that uses every selected type.
+  // That makes the result uniform over all valid passwords, so calculateEntropy() below is exact (inserting one
+  // forced character per type and shuffling is slightly non-uniform).
+  for (let attempt = 0; attempt < 500; attempt++) {
+    let candidate = '';
+    for (let i = 0; i < length; i++) candidate += charset[getRandomInt(charset.length)];
+    if (charSets.every((set) => set.split('').some((c) => candidate.includes(c)))) return candidate;
+  }
+
+  // Practically unreachable fallback (tiny length with many types): force one character per type, then shuffle.
   const password: string[] = [];
 
   // Ensure at least one character from each selected set
@@ -164,7 +180,7 @@ function generatePassphrase(length: number): string {
   const words: string[] = [];
 
   for (let i = 0; i < wordCount; i++) {
-    const word = WORD_LIST[getRandomInt(WORD_LIST.length)];
+    const word = WORDS[getRandomInt(WORDS.length)];
     words.push(word.charAt(0).toUpperCase() + word.slice(1));
   }
 
@@ -172,18 +188,36 @@ function generatePassphrase(length: number): string {
   return words.join('-') + number;
 }
 
-// A dictionary-attack model: each word is drawn from a ~200-word list
+// A dictionary-attack model: each word is drawn from the (de-duplicated) word list
 // (not the 26/52/62/89-symbol charset the "random string" mode uses), plus
 // a trailing 3-digit number (1000 possibilities). Using length × log2(charset
 // size) here — as if the passphrase were random per-character — dramatically
 // overstates its real entropy (e.g. ~149 bits instead of the true ~33 bits).
 function calculatePassphraseEntropy(length: number): number {
   const wordCount = passphraseWordCount(length);
-  return wordCount * Math.log2(WORD_LIST.length) + Math.log2(1000);
+  return wordCount * Math.log2(WORDS.length) + Math.log2(1000);
 }
 
-function calculateEntropy(length: number, charsetSize: number): number {
-  return length * Math.log2(charsetSize);
+/**
+ * log2 of the number of length-L strings that use every selected character type at least once (inclusion-exclusion).
+ * The generator is uniform over exactly those strings, so this is its true entropy; the plain L x log2(S) overstated
+ * it, by almost 4 bits at length 4 with four types.
+ */
+function calculateEntropy(length: number, charsetSize: number, charSets: string[]): number {
+  const m = charSets.length;
+  let valid = 0;
+  for (let mask = 0; mask < 1 << m; mask++) {
+    let excluded = 0;
+    let bits = 0;
+    for (let i = 0; i < m; i++) {
+      if (mask & (1 << i)) {
+        excluded += charSets[i].length;
+        bits++;
+      }
+    }
+    valid += (bits % 2 ? -1 : 1) * Math.pow(charsetSize - excluded, length);
+  }
+  return valid > 0 ? Math.log2(valid) : length * Math.log2(charsetSize);
 }
 
 function classifyStrength(entropy: number): string {
@@ -295,7 +329,10 @@ const passwordGeneratorConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const length = parseInt(values.length) || 16;
+    // Blank = 16; anything typed must be a whole number (it is then clamped to 4-128 for random strings).
+    const lengthRaw = (values.length ?? '').trim();
+    const length = lengthRaw === '' ? 16 : parseNumberStrict(lengthRaw);
+    if (!Number.isInteger(length) || length < 1 || length > 10000) return [];
     const includeUpper = values.includeUppercase !== 'no';
     const includeLower = values.includeLowercase !== 'no';
     const includeNums = values.includeNumbers !== 'no';
@@ -323,7 +360,7 @@ const passwordGeneratorConfig: CalculatorConfig = {
       const clampedLength = Math.max(4, Math.min(128, length));
       password = generateRandomPassword(clampedLength, charSets);
       actualLength = clampedLength;
-      entropy = calculateEntropy(actualLength, charsetSize);
+      entropy = calculateEntropy(actualLength, charsetSize, charSets);
     }
 
     const strength = classifyStrength(entropy);
@@ -361,7 +398,7 @@ const passwordGeneratorConfig: CalculatorConfig = {
         ? {
             id: 'charset',
             label: 'Word List Size',
-            value: String(WORD_LIST.length),
+            value: String(WORDS.length),
           }
         : {
             id: 'charset',
@@ -408,7 +445,7 @@ const passwordGeneratorConfig: CalculatorConfig = {
       'Review the calculated entropy (bits) and estimated time-to-crack to decide if the password is strong enough.',
     ],
     explanation:
-      'Password strength is measured in bits of entropy. A password with N bits of entropy requires roughly 2^N guesses to crack via brute force. Modern password-cracking hardware — including GPU clusters and purpose-built ASICs — can attempt billions of guesses per second against unsalted, unhashed passwords, and millions per second against properly hashed passwords using algorithms like bcrypt, argon2, or PBKDF2. This is why we recommend passwords with at least 80 bits of entropy for important accounts like email and banking. Using a mix of character types (uppercase, lowercase, digits, symbols) dramatically increases the character set size S from 26 (lowercase only) to 95+ (all types). Increasing length L has a multiplicative effect on total entropy. For memorability, passphrases composed of 4-6 random words from a large dictionary offer 44-66 bits of entropy depending on word count, which is comparable to a moderately strong random string but significantly easier to remember and type. For maximum security, a long random string of 16+ characters is still the gold standard.',
+      'Password strength is measured in bits of entropy. A password with N bits of entropy requires roughly 2^N guesses to crack via brute force. Modern password-cracking hardware — including GPU clusters and purpose-built ASICs — can attempt billions of guesses per second against unsalted, unhashed passwords, and millions per second against properly hashed passwords using algorithms like bcrypt, argon2, or PBKDF2. This is why we recommend passwords with at least 80 bits of entropy for important accounts like email and banking. Using a mix of character types (uppercase, lowercase, digits, symbols) dramatically increases the character set size S from 26 (lowercase only) to 95+ (all types). Increasing length L has a multiplicative effect on total entropy. For memorability, passphrases composed of 4-6 random words offer about 44-66 bits of entropy from a 2,048-word list or 52-78 bits from a 7,776-word list (the built-in list here is shorter, so its figure is shown in the results), comparable to a moderately strong random string but significantly easier to remember and type. For maximum security, a long random string of 16+ characters is still the gold standard.',
     faqs: [
       {
         question: 'What is entropy and why does it matter?',
