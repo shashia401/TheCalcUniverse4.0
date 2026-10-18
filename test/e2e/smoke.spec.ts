@@ -20,7 +20,8 @@ test.describe('static content invariants', () => {
     await page.context().route('**/*.js', (route) => route.abort());
     await page.goto('/blog/apr-vs-interest-rate-difference/');
     await expect(page.locator('h1')).toBeVisible();
-    await expect(page.getByText('Interest Rate vs APR: The Simple Difference')).toBeVisible();
+    // the post's own title (src/blog/posts-meta.json), present with JS blocked = it is in the static HTML
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('APR vs Interest Rate');
   });
 });
 
@@ -91,7 +92,8 @@ test.describe('calculator island', () => {
     // Open a link that encodes a specific loan scenario
     await page.goto('/finance/loan-calculator/?loanAmount=40000&interestRate=7&loanTerm=6&termUnit=years');
     await page.locator('#loanAmount').waitFor({ timeout: 15_000 });
-    await expect(page.locator('#loanAmount')).toHaveValue('40000');
+    // currency fields show thousands separators as you type, so the seeded 40000 reads "40,000"
+    await expect(page.locator('#loanAmount')).toHaveValue('40,000');
     await expect(page.locator('#interestRate')).toHaveValue('7');
     // the calc ran on the SEEDED scenario (6-year term), not the 5-year default
     await expect(page.getByText(/6 years × 12 = 72 monthly payments/)).toBeVisible();
@@ -121,7 +123,7 @@ test.describe('navigation and chrome', () => {
     await page.goto('/');
     await page.getByRole('link', { name: 'Finance', exact: true }).first().click();
     await expect(page).toHaveURL(/\/finance\/$/);
-    await expect(page.locator('h1')).toContainText('Finance');
+    await expect(page.locator('h1')).toContainText('Financial Calculators');
   });
 
   test('theme toggle switches dark mode and persists', async ({ page }) => {
@@ -146,7 +148,8 @@ test.describe('navigation and chrome', () => {
     // the embedded BMI calc hydrates and computes without leaving the page
     const heightInput = page.locator('#main-content input').first();
     await heightInput.waitFor({ timeout: 15_000 });
-    await expect(page.getByText('Try it now')).toBeVisible();
+    // the "Live — BMI Calculator, no sign-up" badge sits above the embedded calculator
+    await expect(page.getByText(/no sign-up/).first()).toBeVisible();
   });
 
   test('unknown URL serves the 404 page', async ({ page }) => {

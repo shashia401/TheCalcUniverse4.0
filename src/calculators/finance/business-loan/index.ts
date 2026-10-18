@@ -127,7 +127,7 @@ const businessLoanConfig: CalculatorConfig = {
     const totalCostIncFees = totalPaid + originationFeeAmount;
 
     const fmt = (num: number) =>
-      new Decimal(num).toFixed(2);
+      new Decimal(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
     // Build amortization schedule
     type AmortRow = {

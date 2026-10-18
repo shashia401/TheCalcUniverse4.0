@@ -109,11 +109,12 @@ const dueDateConfig: CalculatorConfig = {
       ? 'Pregnancy has not started yet'
       : 'Past estimated due date';
 
+    const dayWord = (n: number) => `${n} day${n === 1 ? '' : 's'}`;
     const daysRemainingLabel = daysUntilDue > 0
-      ? `${daysUntilDue} days to go`
+      ? `${dayWord(daysUntilDue)} to go`
       : daysUntilDue === 0
       ? 'Due today!'
-      : `${Math.abs(daysUntilDue)} days past due`;
+      : `${dayWord(Math.abs(daysUntilDue))} past due`;
 
     return [
       {
@@ -122,7 +123,7 @@ const dueDateConfig: CalculatorConfig = {
         value: fmtDate(dueDate),
         highlight: true,
         color: 'positive' as const,
-        interpretation: `This is a 40-week estimate from your last period (Naegele's rule) — only about 1 in 20 babies actually arrive on the exact date. Full term is anywhere from 37 to 42 weeks, so treat it as the middle of a window, not a deadline. An early ultrasound dating scan is more precise.`,
+        interpretation: `This is a 40-week estimate from your last period (Naegele's rule) — only about 1 in 20 babies actually arrive on the exact date. A baby is considered term anywhere from 37 to 42 weeks (39 to 40 weeks 6 days is "full term"), so treat the date as the middle of a window, not a deadline. An early ultrasound dating scan is more precise.`,
       },
       {
         id: 'gestationalAge',
@@ -133,8 +134,9 @@ const dueDateConfig: CalculatorConfig = {
       {
         id: 'progress',
         label: `Pregnancy Progress (${progressPct.toFixed(0)}% of 40 weeks)`,
+        // "N days to go" already says it; the old extra "· N days remain" repeated it (and went negative past the date).
         value: isPregnant
-          ? `${daysRemainingLabel} · ${Math.round(280 - totalDaysPreg)} days remain`
+          ? daysRemainingLabel
           : daysUntilDue > 0
           ? `${daysRemainingLabel} before pregnancy begins`
           : daysRemainingLabel,

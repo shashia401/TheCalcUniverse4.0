@@ -91,7 +91,7 @@ const depreciationConfig: CalculatorConfig = {
 
     // Use Decimal.js for precise monetary calculations
     const fmt = (n: number) =>
-      new Decimal(n).toFixed(2);
+      new Decimal(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
     type ScheduleRow = {
       year: number;
