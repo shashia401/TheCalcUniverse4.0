@@ -75,7 +75,7 @@ describe('net-worth', () => {
       creditCardDebt: '5000',
     });
     near(parseMoney(getValue(r, 'netWorth')), -105000);
-    near(parseNumber(getValue(r, 'debtToAsset')), 100);
+    expect(getValue(r, 'debtToAsset')).toBe('N/A (no assets)'); // was 100 (undefined ratio shown as 100%)
   });
 
   it('computes debt-to-asset ratio correctly at boundary', () => {

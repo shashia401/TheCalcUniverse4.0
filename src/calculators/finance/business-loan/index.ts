@@ -225,11 +225,11 @@ const businessLoanConfig: CalculatorConfig = {
     diagram: {
       svg: businessLoanSvg,
       alt: 'DSCR calculation diagram showing monthly income bar versus loan payment bar with the DSCR ratio and scale interpretation',
-      caption: 'Lenders require DSCR of 1.25+ — it measures how many times your income covers the debt payment',
+      caption: 'Many lenders want a DSCR of 1.25+ — it measures how many times your income covers the debt payment',
     },
     formulaDescription:
       'The standard loan amortization formula calculates your fixed monthly payment. M = monthly payment, P = principal loan amount, r = monthly interest rate (annual rate divided by 12), n = total number of monthly payments. Origination fees reduce the actual cash you receive while you still repay the full principal — this means your true cost of capital (effective APR) is always higher than the stated interest rate when fees are present. This calculator uses decimal.js high-precision arithmetic for all monetary calculations.',
-    formulaSource: 'Standard loan amortization formula (PMT formula) used by CFPB, SBA, and all major commercial lenders. SBA maximum rates and lending terms per sba.gov 7(a) terms and conditions; minimum DSCR per SBA Procedural Notice 5000-846607 (SOP 50 10 series).',
+    formulaSource: 'Standard loan amortization formula (PMT formula) used by CFPB, SBA, and all major commercial lenders. SBA maximum rates and lending terms per sba.gov 7(a) terms and conditions; minimum DSCR per SBA SOP 50 10 8.1 (effective October 1, 2026): 1.15 on a historical and/or projected basis for 7(a) loans generally, 1.10 for 7(a) Small Loans that are not changes of ownership, and 1.25 for initial acquisitions, owner buyouts and ESOP/cooperative deals (Appendix 15).',
     variables: [
       {
         symbol: 'M',
@@ -296,18 +296,18 @@ const businessLoanConfig: CalculatorConfig = {
     ],
     quickReference: [
       { label: 'SBA 7(a) Max Variable Rate', value: 'Base + 3.0% to 6.5% (by loan size)' },
-      { label: 'Minimum DSCR (SBA 7(a))', value: '1.15 (many banks want 1.25+)' },
+      { label: 'SBA 7(a) DSCR floor (SOP 50 10 8.1)', value: '1.10 small loans / 1.15 standard / 1.25 acquisitions (many banks want 1.25+)' },
       { label: 'Typical Origination Fee', value: '1-5% of loan amount' },
       { label: 'SBA Guaranty Fee', value: 'Set yearly by SBA, on guaranteed portion' },
       { label: 'Typical Bank Term', value: '1-10 years' },
     ],
     explanation:
-      'DSCR (Debt Service Coverage Ratio) is the single most important number that lenders evaluate when considering a business loan application. A DSCR of 1.25 means your business earns $1.25 for every $1.00 of debt payment — a common bank benchmark (the SBA minimum is 1.15). A higher DSCR signals stronger cash flow and increases your negotiating power for better rates. Origination fees, while often overlooked, reduce your effective cash received and increase your true cost of capital. A 2% origination fee on a 5-year $250,000 loan at 8.5% raises your effective APR to about 9.4% (roughly 0.9 percentage points higher), even though the stated rate stays the same.',
+      'DSCR (Debt Service Coverage Ratio) is the single most important number that lenders evaluate when considering a business loan application. A DSCR of 1.25 means your business earns $1.25 for every $1.00 of debt payment — a common bank benchmark (SBA 7(a) floors under SOP 50 10 8.1 are 1.15 for most loans, 1.10 for 7(a) Small Loans, and 1.25 for business acquisitions and owner buyouts). A higher DSCR signals stronger cash flow and increases your negotiating power for better rates. Origination fees, while often overlooked, reduce your effective cash received and increase your true cost of capital. A 2% origination fee on a 5-year $250,000 loan at 8.5% raises your effective APR to about 9.4% (roughly 0.9 percentage points higher), even though the stated rate stays the same.',
     faqs: [
       {
         question: 'What DSCR do most lenders require for a business loan?',
         answer:
-          'SBA 7(a) requires a minimum DSCR of 1.15, and most traditional banks look for 1.25 or higher, meaning your net operating income must be at least 25% higher than your proposed monthly debt payments. Some lenders may accept a DSCR as low as 1.15 for otherwise strong borrowers with good credit and collateral. Online lenders may be more flexible on DSCR but typically charge higher rates. A DSCR above 1.50 significantly improves your negotiating position for better terms.',
+          'Under SBA SOP 50 10 8.1 (effective October 1, 2026) the 7(a) minimum depends on the loan: 1.15 on a historical and/or projected basis for most 7(a) loans (plus 1:1 on a global basis), 1.10 for 7(a) Small Loans that are not changes of ownership, and 1.25 for initial acquisitions, owner buyouts and ESOP/cooperative deals. Individual lenders can require more, and most traditional banks look for 1.25 or higher, meaning your net operating income must be at least 25% higher than your proposed monthly debt payments. Some lenders may accept a lower DSCR for otherwise strong borrowers with good credit and collateral, but never below the SBA floor on an SBA loan. Online lenders may be more flexible on DSCR but typically charge higher rates. A DSCR above 1.50 significantly improves your negotiating position for better terms.',
       },
       {
         question: 'How does an origination fee affect my true cost of borrowing?',

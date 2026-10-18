@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WindChillPanel from './WindChillPanel';
 import { roundStrD as fmt } from '../../../lib/format';
-import { cToF, fToC, frostbiteZone, isFrostbiteDanger, kmhToMph, windChillF } from './windChillMath';
+import { cToF, fToC, frostbiteZone, inEcRange, isFrostbiteDanger, KMH_PER_MPH, kmhToMph, windChillC, windChillF } from './windChillMath';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 
 const windChillConfig: CalculatorConfig = {
@@ -26,7 +26,7 @@ const windChillConfig: CalculatorConfig = {
       ],
       defaultValue: 'F',
       required: true,
-      helpText: 'Select the temperature unit',
+      helpText: 'Select the temperature unit. °C uses the Environment Canada formula (reported only at 0 °C or colder with wind of 5 km/h or more); °F uses the NWS formula (defined at 50°F or colder with wind above 3 mph).',
     },
     {
       id: 'windSpeed',
@@ -59,12 +59,24 @@ const windChillConfig: CalculatorConfig = {
 
     if ([temp, ws].some(isNaN) || ws < 0) return [];
 
-    // Convert everything to °F and mph for the formula
-    const Tf = tempUnit === 'C' ? cToF(temp) : temp;
-    const Vmph = speedUnit === 'kmh' ? kmhToMph(ws) : ws;
-
-    const wcF = windChillF(Tf, Vmph);
-    const wcC = fToC(wcF);
+    // Celsius input uses Environment Canada's metric formula (T in °C, V in km/h) and its reporting range; Fahrenheit input
+    // uses the NWS formula (°F, mph). Each is applied directly, with no round trip through the other unit system.
+    const metric = tempUnit === 'C';
+    let Tf: number, Vmph: number, wcF: number, wcC: number;
+    let outOfRange = false;
+    if (metric) {
+      const Vkmh = speedUnit === 'kmh' ? ws : ws * KMH_PER_MPH;
+      outOfRange = !inEcRange(temp, Vkmh);
+      wcC = windChillC(temp, Vkmh);
+      wcF = cToF(wcC);
+      Tf = cToF(temp);
+      Vmph = kmhToMph(Vkmh);
+    } else {
+      Tf = temp;
+      Vmph = speedUnit === 'kmh' ? kmhToMph(ws) : ws;
+      wcF = windChillF(Tf, Vmph);
+      wcC = fToC(wcF);
+    }
     const frostbite = frostbiteZone(wcC).risk;
     const danger = isFrostbiteDanger(wcC);
 
@@ -75,6 +87,7 @@ const windChillConfig: CalculatorConfig = {
         value: `${fmt(wcF)}°F / ${fmt(wcC)}°C`,
         highlight: true,
         color: danger ? 'negative' as const : 'positive' as const,
+        ...(outOfRange ? { interpretation: 'Environment Canada reports a wind chill only when the air is 0 °C or colder and the wind is 5 km/h or faster. Outside that range it does not show a wind chill, so this calculator shows the air temperature.' } : {}),
       },
       {
         id: 'windChillF',
@@ -127,14 +140,14 @@ const windChillConfig: CalculatorConfig = {
     return createElement(WindChillPanel, { values, results });
   },
   educational: {
-    formula: 'WindChill = 35.74 + 0.6215T − 35.75(V^0.16) + 0.4275T(V^0.16)',
+    formula: 'US (°F, mph): WindChill = 35.74 + 0.6215T − 35.75(V^0.16) + 0.4275T(V^0.16) | Canada (°C, km/h): WindChill = 13.12 + 0.6215T − 11.37(V^0.16) + 0.3965T(V^0.16)',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="var(--svg-333333)">Wind Chill Factor</text><text x="220" y="52" text-anchor="middle" font-size="12" fill="var(--svg-666666)">Wind accelerates heat loss from exposed skin</text><line x1="50" y1="280" x2="400" y2="280" stroke="var(--svg-999999)" stroke-width="1.5"/><text x="410" y="284" font-size="12" fill="var(--svg-666666)">Wind Speed</text><line x1="80" y1="280" x2="80" y2="50" stroke="var(--svg-999999)" stroke-width="1.5"/><text x="86" y="48" font-size="12" fill="var(--svg-666666)">&deg;F</text><path d="M80,60 C120,65 160,75 200,90 C240,105 280,125 320,150 C360,175 390,200 400,220" fill="none" stroke="var(--svg-3b82f6)" stroke-width="2" stroke-linecap="round"/><text x="120" y="65" text-anchor="middle" font-size="10" fill="var(--svg-3b82f6)">Calm</text><path d="M80,70 C120,90 160,115 200,140 C240,165 280,185 320,205 C360,220 390,235 400,245" fill="none" stroke="var(--svg-ef4444)" stroke-width="2" stroke-dasharray="5,3"/><text x="140" y="105" text-anchor="middle" font-size="10" fill="var(--svg-ef4444)">Windy</text><path d="M80,85 C120,120 160,155 200,185 C240,210 280,230 320,245 C360,255 390,260 400,265" fill="none" stroke="var(--svg-22c55e)" stroke-width="2" stroke-dasharray="3,4"/><text x="160" y="150" text-anchor="middle" font-size="10" fill="var(--svg-22c55e)">Very Windy</text><text x="80" y="62" text-anchor="end" font-size="11" font-weight="bold" fill="var(--svg-666666)">40&deg;F</text><text x="80" y="130" text-anchor="end" font-size="11" font-weight="bold" fill="var(--svg-666666)">20&deg;F</text><text x="80" y="200" text-anchor="end" font-size="11" font-weight="bold" fill="var(--svg-666666)">0&deg;F</text><text x="80" y="270" text-anchor="end" font-size="11" font-weight="bold" fill="var(--svg-666666)">-20&deg;F</text><text x="220" y="325" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-8b5cf6)">Wind Chill = f(T, V) &nbsp;|&nbsp; Higher wind = colder feeling</text></svg>',
       alt: 'Chart showing three curves for calm, windy, and very windy conditions showing how wind speed lowers the effective temperature',
       caption: 'Wind chill measures how cold it feels when wind is combined with cold air temperature',
     },
     formulaDescription:
-      'The National Weather Service (NWS) wind chill formula calculates how cold it feels when wind is combined with cold air. Wind accelerates heat loss from exposed skin, making the air feel significantly colder than the actual temperature. The formula is defined only when the temperature is at or below 50°F and the wind speed is above 3 mph.',
+      'The National Weather Service (NWS) wind chill formula calculates how cold it feels when wind is combined with cold air. Wind accelerates heat loss from exposed skin, making the air feel significantly colder than the actual temperature. The US formula is defined only when the temperature is at or below 50°F and the wind speed is above 3 mph. For °C input this calculator uses the Environment Canada form of the same index (13.12 + 0.6215T − 11.37V^0.16 + 0.3965TV^0.16, T in °C, V in km/h) and, like Environment Canada, shows a wind chill only at 0 °C or colder with wind of 5 km/h or more; otherwise it shows the air temperature.',
     variables: [
       { symbol: 'T', name: 'Air Temperature', description: 'The actual air temperature in degrees Fahrenheit.' },
       { symbol: 'V', name: 'Wind Speed', description: 'The wind speed in miles per hour at 33 feet (standard anemometer height).' },
@@ -143,7 +156,7 @@ const windChillConfig: CalculatorConfig = {
     howToUse: [
       'Enter the current air temperature and select the unit (°F or °C).',
       'Enter the wind speed and select the unit (mph or km/h).',
-      'The calculator applies the NWS wind chill formula and shows the feels-like temperature.',
+      'The calculator applies the NWS formula for °F input or the Environment Canada formula for °C input and shows the feels-like temperature.',
       'Review the frostbite risk category and safety recommendations.',
     ],
     explanation:

@@ -4,6 +4,7 @@ import htmlMinifier from '../../../src/calculators/devtools/html-minifier';
 import { minifyCss, minifyHtml, minifyJs } from '../../../src/calculators/devtools/html-minifier/minify';
 import windChill from '../../../src/calculators/math/wind-chill';
 import golf from '../../../src/calculators/math/golf-handicap';
+import { whsTable } from '../../../src/calculators/math/golf-handicap/whs';
 import { byteCapacity, encodeQr, type Ecl } from '../../../src/utils/qrcode';
 
 const val = (r: { id: string; value: string }[], id: string) => r.find((x) => x.id === id)?.value;
@@ -213,23 +214,47 @@ describe('wind-chill-calculator', () => {
     expect(val(r, 'frostbiteRisk')).toBe('High risk (frostbite possible in 10 to 30 minutes)');
   });
 
-  it('metric input agrees with the metric formula within 0.1 C (coefficients are rounded differently)', () => {
-    const metric = (T: number, V: number) => 13.12 + 0.6215 * T - 11.37 * V ** 0.16 + 0.3965 * T * V ** 0.16;
+  // Changed from the first audit: metric input used to be converted to F/mph and run through the NWS formula (0.02-0.05 C away
+  // from the official metric formula); it now uses 13.12 + 0.6215T - 11.37 V^0.16 + 0.3965 T V^0.16 directly.
+  it('Celsius input uses the Environment Canada metric formula exactly (Python values)', () => {
     const cases: [number, number, number][] = [
       [-20, 30, -32.568044],
       [-10, 20, -17.860584],
       [-40, 60, -64.166618],
+      [-30, 20, -43.097306],
     ];
     for (const [T, V, expected] of cases) {
-      expect(metric(T, V)).toBeCloseTo(expected, 5);
       const c = chart(run(String(T), 'C', String(V), 'kmh')).windChillC as number;
-      expect(Math.abs(c - expected)).toBeLessThan(0.1);
+      expect(c).toBeCloseTo(expected, 5);
     }
-    expect(val(run('-20', 'C', '30', 'kmh'), 'windChill')).toBe('-26.6°F / -32.5°C');
+    expect(val(run('-20', 'C', '30', 'kmh'), 'windChill')).toBe('-26.6°F / -32.6°C'); // was -32.5 via the imperial round trip
   });
 
-  it('24.14016 km/h is exactly 15 mph, so units give the same wind chill', () => {
-    expect(chart(run('0', 'F', '15', 'mph')).windChillF).toBeCloseTo(chart(run('-17.777777777777779', 'C', '24.14016', 'kmh')).windChillF, 9);
+  it("Environment Canada's own worked examples to the whole degree: -15/20 -> -24, -20/30 -> -33, -30/40 -> -48 (canada.ca wind chill page)", () => {
+    const whole = (T: string, V: string) => Math.round(chart(run(T, 'C', V, 'kmh')).windChillC as number);
+    expect(whole('-15', '20')).toBe(-24); // -24.17
+    expect(whole('-20', '30')).toBe(-33); // -32.57
+    expect(whole('-30', '40')).toBe(-48); // -47.50 (rounds away from zero as Environment Canada prints it)
+  });
+
+  it('metric path respects the Environment Canada range: reported at 0 C or colder and wind of 5 km/h or more, else the air temperature', () => {
+    expect(chart(run('0', 'C', '5', 'kmh')).windChillC).toBeCloseTo(-1.589424, 5); // both limits inclusive
+    const warm = run('0.5', 'C', '30', 'kmh');
+    expect(chart(warm).windChillC).toBe(0.5);
+    expect(warm.find((x) => x.id === 'windChill')).toHaveProperty('interpretation');
+    expect(chart(run('-10', 'C', '4.9', 'kmh')).windChillC).toBe(-10);
+    expect(run('-10', 'C', '20', 'kmh').find((x) => x.id === 'windChill')).not.toHaveProperty('interpretation');
+  });
+
+  it('Celsius with mph wind converts the wind to km/h and still uses the metric formula: -10 C at 10 mph (16.09344 km/h) = -17.014 C', () => {
+    expect(chart(run('-10', 'C', '10', 'mph')).windChillC).toBeCloseTo(-17.014252, 5);
+  });
+
+  it('Fahrenheit input still uses the NWS formula, so the two systems agree to within 0.1 C on the same weather', () => {
+    const imperial = chart(run('0', 'F', '15', 'mph')).windChillF as number;
+    const metric = chart(run('-17.777777777777779', 'C', '24.14016', 'kmh')).windChillF as number;
+    expect(Math.abs(imperial - metric)).toBeLessThan(0.1);
+    expect(Math.abs(imperial - metric)).toBeGreaterThan(0); // they are different published fits, not the same function
   });
 
   it('outside the formula (above 50 F, or wind of 3 mph or less) the air temperature is returned', () => {
@@ -281,6 +306,17 @@ describe('golf-handicap-calculator', () => {
     expect(val(idx(text.split('\n').slice(0, 3).join('\n')), 'handicapIndex')).toBe('8.9'); // 10.9 - 2.0
     expect(val(idx(text), 'handicapIndex')).toBe('5.5'); // 6.5 - 1.0
     expect(val(idx(text.split('\n').slice(0, 3).join('\n')), 'adjustment')).toBe('−2.0');
+  });
+
+  // Rule 5.2a verified against the primary text: 2024 Rules of Handicapping (USGA / R&A), USGA-published PDF p.54, and the Malta
+  // Golf Association copy of the same Rules. Both list rows 3..20 identically as transcribed here.
+  it('Rule 5.2a table, every row, as printed in the 2024 Rules of Handicapping', () => {
+    const rows: [number, number, number][] = [
+      [3, 1, -2], [4, 1, -1], [5, 1, 0], [6, 2, -1], [7, 2, 0], [8, 2, 0], [9, 3, 0], [10, 3, 0], [11, 3, 0],
+      [12, 4, 0], [13, 4, 0], [14, 4, 0], [15, 5, 0], [16, 5, 0], [17, 6, 0], [18, 6, 0], [19, 7, 0], [20, 8, 0],
+    ];
+    for (const [n, count, adjustment] of rows) expect(whsTable(n), `${n} scores`).toEqual({ count, adjustment });
+    expect(whsTable(2)).toBeNull();
   });
 
   it('fewer than 3 scores gives no index', () => {

@@ -101,6 +101,7 @@ const refinanceConfig: CalculatorConfig = {
     const netInterestSaved = interestSaved - closingCosts;
 
     const fmt = (n: number) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const horizonYears = Number((c.horizonMonths / 12).toFixed(1));
 
     // Recommendation
     let recommendation: string;
@@ -115,8 +116,14 @@ const refinanceConfig: CalculatorConfig = {
         recColor = 'negative';
       }
     } else if (plannedStay >= breakEvenMonths && rateLower) {
-      recommendation = 'Yes — Refinance now';
-      recColor = 'positive';
+      if (netInterestSaved > 0) {
+        recommendation = 'Yes — Refinance now';
+        recColor = 'positive';
+      } else {
+        // Payment falls and break-even is reached, but the longer term costs at least as much interest as it saves.
+        recommendation = 'Lower payment, but no lifetime interest saving — refinance only if a lower monthly payment is your goal';
+        recColor = 'neutral';
+      }
     } else if (paysOffBeforeBreakEven) {
       recommendation = `Wait — break-even (${breakEvenMonths}mo) exceeds your stay (${plannedStay}mo)`;
       recColor = 'negative';
@@ -132,7 +139,7 @@ const refinanceConfig: CalculatorConfig = {
         value: recommendation,
         highlight: true,
         color: recColor,
-        interpretation: `Refinancing carries upfront closing costs, so it only pays off if you keep the loan past the break-even point (${breakEvenMonths < Infinity ? `about ${breakEvenMonths} months here` : 'a lower payment never pays them back at these numbers'}). ${monthlySavings > 0 ? `The lower payment helps, but resetting to a fresh 30-year term can still raise total interest even at a lower rate.` : rateLower ? `Your payment goes up because the term is shorter; the benefit comes from interest saved, not cash flow.` : `Your new rate isn't lower, so there's nothing to recover.`}`,
+        interpretation: `Refinancing carries upfront closing costs, so it only pays off if you keep the loan past the break-even point (${breakEvenMonths < Infinity ? `about ${breakEvenMonths} months here` : 'a lower payment never pays them back at these numbers'}). ${monthlySavings > 0 ? (netInterestSaved > 0 ? `The lower payment helps; compare lifetime interest on both loans below, because a longer new term can still raise total interest even at a lower rate.` : `The lower payment comes from spreading the debt over a longer period: lifetime interest on the new loan is ${fmt(c.newTotalInterest)} versus ${fmt(c.oldTotalInterest)} on the current loan (${fmt(-netInterestSaved)} ${netInterestSaved < 0 ? 'more' : 'with no saving'} after closing costs). That can still be the right trade if freeing up monthly cash is the goal, but it is not a saving.`) : rateLower ? `Your payment goes up because the term is shorter; the benefit comes from interest saved, not cash flow.` : `Your new rate isn't lower, so there's nothing to recover.`}`,
       },
       {
         id: 'monthlySavings',
@@ -163,6 +170,18 @@ const refinanceConfig: CalculatorConfig = {
         label: 'Total Interest Saved (Full Term, before closing costs)',
         value: interestSaved > 0 ? fmt(interestSaved) : 'No savings',
         color: interestSaved > 0 ? 'positive' as const : 'negative' as const,
+      },
+      {
+        id: 'lifetimeInterest',
+        label: 'Lifetime Interest: Current Loan vs New Loan',
+        value: `${fmt(c.oldTotalInterest)} vs ${fmt(c.newTotalInterest)}`,
+        color: c.newTotalInterest <= c.oldTotalInterest ? 'positive' as const : 'negative' as const,
+      },
+      {
+        id: 'sameHorizonInterest',
+        label: `Like-for-Like: Interest Over the Next ${horizonYears} Years (Current vs New)`,
+        value: `${fmt(c.oldTotalInterest)} vs ${fmt(c.newInterestOverHorizon)}${c.newBalanceAtHorizon > 0 ? `, with ${fmt(c.newBalanceAtHorizon)} still owed on the new loan` : ''}`,
+        color: c.newBalanceAtHorizon === 0 && c.newInterestOverHorizon <= c.oldTotalInterest ? 'positive' as const : 'neutral' as const,
       },
       {
         id: 'netBenefit',
@@ -232,7 +251,7 @@ quickReference: [
 proTips: [
       'Get a Loan Estimate from at least 3 lenders — closing costs can vary by thousands of dollars for the same rate. Use the break-even with each lender\'s actual fees, not estimates.',
       'A "no-cost refinance" rolls closing costs into the rate (you pay a slightly higher rate in exchange for zero upfront costs). If you might move within 2-3 years, a no-cost refi eliminates break-even risk entirely — but you pay more if you stay long-term.',
-      'When refinancing from a 30-year with 25 years left into a new 30-year, calculate the total interest over the SAME 25-year horizon (by adding extra principal to the new loan schedule) for a fair comparison. The calculator shows lifetime totals which include the extra 5 years.',
+      'When refinancing from a 30-year with 25 years left into a new 30-year, compare interest over the SAME 25-year horizon for a fair comparison. The calculator shows both the lifetime totals (which include the extra 5 years) and a like-for-like line: interest paid on the new loan over the months the old loan had left, plus the balance still owed then.',
       'If your credit score has improved significantly since your original mortgage, you may qualify for a much better rate than the average. Check your credit before shopping — a large improvement can mean a meaningfully lower rate.',
     ],
 workedExamples: [

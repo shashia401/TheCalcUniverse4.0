@@ -332,7 +332,7 @@ const depreciationConfig: CalculatorConfig = {
     ],
     proTips: [
       'For tax purposes, use MACRS (IRS default accelerated system) rather than GAAP Straight-Line — MACRS front-loads deductions without requiring you to justify a shorter lifespan.',
-      'Section 179 expensing lets you deduct up to $2,500,000 of qualified asset purchases in the year placed in service (2025 limit under the One Big Beautiful Bill Act, reduced dollar-for-dollar once purchases exceed $4,000,000), bypassing depreciation entirely for qualifying businesses.',
+      'Section 179 expensing lets you deduct up to $2,500,000 of qualified asset purchases in the year placed in service (tax years beginning in 2025, as raised by section 70306 of the One Big Beautiful Bill Act; reduced dollar-for-dollar once Section 179 property placed in service exceeds $4,000,000; for tax years beginning in 2026 the inflation-adjusted figures are $2,560,000 and $4,090,000 per Rev. Proc. 2025-32), bypassing depreciation entirely for qualifying businesses.',
       'Keep separate depreciation schedules for book (financial reporting) and tax — using SL for shareholders and accelerated for the IRS is both legal and common.',
       'For vehicles, the luxury auto depreciation limits cap annual deductions regardless of method — be aware of these caps when buying high-cost company vehicles.',
     ],
@@ -346,7 +346,8 @@ const depreciationConfig: CalculatorConfig = {
       { label: 'SL Formula', value: '(Cost − Salvage) / Life' },
       { label: 'DDB Rate', value: '2 × (1 / Life)' },
       { label: 'MACRS Default', value: '200% DB for 3-, 5-, 7- and 10-year property' },
-      { label: 'Section 179 Limit (2025)', value: '$2,500,000 (phase-out above $4,000,000)' },
+      { label: 'Section 179 Limit (tax year 2025)', value: '$2,500,000 (phase-out above $4,000,000)' },
+      { label: 'Section 179 Limit (tax year 2026)', value: '$2,560,000 (phase-out above $4,090,000)' },
       { label: 'Bonus Depreciation (acquired after Jan. 19, 2025)', value: '100% of qualified assets' },
     ],
     explanation:
@@ -380,7 +381,7 @@ const depreciationConfig: CalculatorConfig = {
     ],
     citations: [
       { source: 'Internal Revenue Service (Publication 946)', url: 'https://www.irs.gov/publications/p946' },
-      { source: 'IRS Revenue Procedure 2025-32 (Section 179 limits as amended by the OBBBA)', url: 'https://www.irs.gov/pub/irs-drop/rp-25-32.pdf' },
+      { source: 'IRS Revenue Procedure 2025-32 (sections 2.10 and 3.02: OBBBA section 179 limits of $2,500,000 and $4,000,000 for tax years beginning in 2025; section 4.24: $2,560,000 and $4,090,000 for tax years beginning in 2026)', url: 'https://www.irs.gov/pub/irs-drop/rp-25-32.pdf' },
       { source: 'Investopedia — Depreciation Methods', url: 'https://www.investopedia.com/terms/d/depreciation.asp' },
     ],
   },

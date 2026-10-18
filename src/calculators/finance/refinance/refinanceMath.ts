@@ -20,6 +20,12 @@ export interface RefiCalc {
   interestSaved: number;
   /** Payment savings over the planned stay minus closing costs. */
   netOverStay: number;
+  /** Like-for-like horizon: the months left on the current loan. */
+  horizonMonths: number;
+  /** Interest paid on the new loan during the first `horizonMonths` months (compare with oldTotalInterest). */
+  newInterestOverHorizon: number;
+  /** Balance still owed on the new loan at the end of that horizon (0 if the new loan is no longer than the old one). */
+  newBalanceAtHorizon: number;
 }
 
 /** Single source of truth for the refinance maths, shared by calculate() and the panel. */
@@ -42,12 +48,26 @@ export function computeRefi(values: Record<string, string>): RefiCalc | null {
   const oldTotalInterest = oldPayment * currentTerm - currentBalance;
   const newTotalInterest = newPayment * newTerm - currentBalance;
 
+  // Same horizon as the old loan: interest paid on the new loan over the months the old loan had left,
+  // plus whatever principal is still owed then.
+  const horizonMonths = currentTerm;
+  const rm = newRate / 12;
+  let bal = currentBalance;
+  let newInterestOverHorizon = 0;
+  for (let m = 1; m <= Math.min(horizonMonths, newTerm); m++) {
+    const interest = bal * rm;
+    newInterestOverHorizon += interest;
+    bal = bal + interest - newPayment;
+  }
+  const newBalanceAtHorizon = bal < 0.005 ? 0 : bal;
+
   return {
     currentBalance, currentRate, newRate, currentTerm, newTerm, closingCosts, plannedStay,
     oldPayment, newPayment, monthlySavings, breakEvenMonths,
     oldTotalInterest, newTotalInterest,
     interestSaved: oldTotalInterest - newTotalInterest,
     netOverStay: monthlySavings * plannedStay - closingCosts,
+    horizonMonths, newInterestOverHorizon, newBalanceAtHorizon,
   };
 }
 

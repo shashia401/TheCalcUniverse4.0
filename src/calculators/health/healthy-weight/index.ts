@@ -263,7 +263,7 @@ const healthyWeightConfig: CalculatorConfig = {
       },
       {
         question: 'How do I determine my frame size?',
-        answer: 'Frame size is estimated from wrist circumference or elbow breadth relative to height. Wrap your thumb and middle finger around your opposite wrist — if they overlap, you have a small frame; if they touch, medium; if they do not touch, large. Alternatively, measure your wrist circumference: small (< 6.25" for women, < 6.5" for men), medium (6.25–6.75" women, 6.5–7.5" men), large (> 6.75" women, > 7.5" men). Height-adjusted elbow breadth measurements (using a caliper) are the most accurate method. Frame size shifts where within the healthy BMI range your target weight falls — small frames tend toward the lower end, large frames toward the upper end.',
+        answer: 'Frame size is estimated from wrist circumference compared with height. MedlinePlus (US National Library of Medicine) gives this wrist-size chart. Women under 5 ft 2 in: small under 5.5 in, medium 5.5 to 5.75 in, large over 5.75 in. Women 5 ft 2 in to 5 ft 5 in: small under 6 in, medium 6 to 6.25 in, large over 6.25 in. Women over 5 ft 5 in: small under 6.25 in, medium 6.25 to 6.5 in, large over 6.5 in. Men over 5 ft 5 in: small 5.5 to 6.5 in, medium 6.5 to 7.5 in, large over 7.5 in. Other methods exist, such as elbow breadth measured with calipers. Frame size here only shifts where within the healthy BMI range your target weight falls: small frames toward the lower end, large frames toward the upper end.',
       },
     ],
     commonUses: [
@@ -275,6 +275,7 @@ const healthyWeightConfig: CalculatorConfig = {
   
     citations: [
       { source: 'CDC - Healthy Weight', url: 'https://www.cdc.gov/healthyweight/' },
+      { source: 'MedlinePlus - Calculating body frame size', url: 'https://www.medlineplus.gov/ency/imagepages/17182.htm' },
       { source: 'NIH - NHLBI Obesity Guidelines', url: 'https://www.nhlbi.nih.gov/health/overweight-and-obesity' },
     ],
   },

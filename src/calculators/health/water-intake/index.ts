@@ -136,8 +136,8 @@ const waterIntakeConfig: CalculatorConfig = {
       'Daily water intake is estimated at 0.5 oz per pound of body weight as a baseline, adjusted upward for physical activity and environmental heat. The 0.5 oz per pound baseline and the activity and climate add-ons are common rules of thumb rather than a published standard; for comparison, the US National Academies adequate total water intake is about 3.7 L (men) and 2.7 L (women) per day, about 20% of which comes from food. Individual needs vary significantly, so this provides a starting point for personal hydration planning.',
     variables: [
       { symbol: 'Base', name: 'Weight-Based Baseline', description: '0.5 oz of water per pound of body weight (or ~33 mL per kg). A 170 lb person needs ~85 oz (2.5 L) at baseline.' },
-      { symbol: 'Activity Add', name: 'Activity Adjustment', description: 'Additional 8-32 oz based on exercise intensity and duration. A 60-minute run in warm weather can require 24+ oz of additional water.' },
-      { symbol: 'Climate Add', name: 'Environment Adjustment', description: 'Additional 16-24 oz in hot or high-altitude environments. High altitude increases respiratory water loss and urination, raising total needs.' },
+      { symbol: 'Activity Add', name: 'Activity Adjustment', description: 'Adds 0, 8, 16, 24 or 32 oz for sedentary, light, moderate, active and athlete levels. These add-ons are rules of thumb chosen for this calculator, not published values.' },
+      { symbol: 'Climate Add', name: 'Environment Adjustment', description: 'Adds 16 oz (hot or high altitude) or 24 oz (extreme heat). These add-ons are rules of thumb chosen for this calculator, not published values; heat and altitude do raise fluid losses.' },
     ],
     howToUse: [
       'Enter your body weight and select the unit (lbs or kg).',

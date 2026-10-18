@@ -12,6 +12,7 @@ import k401 from '../../../src/calculators/finance/401k';
 import mortgagePayoff from '../../../src/calculators/finance/mortgage-payoff';
 import mortgageComparison from '../../../src/calculators/finance/mortgage-comparison';
 import newYorkMortgage from '../../../src/calculators/finance/new-york-mortgage-calculator';
+import { MRT_REGIONS } from '../../../src/calculators/finance/new-york-mortgage-calculator';
 
 // Finance audit batch A. Every expected value below was computed independently of the calculator code
 // (Python 3 with decimal / closed-form formulas, 50-digit precision) from the published definition,
@@ -128,6 +129,14 @@ describe('canadian-mortgage-calculator audit', () => {
     expect(val(z, 'totalInterest')).toBe('$0.00');
     expect(val(canadianMortgage.calculate({ ...base, downPayment: '10000' }), 'error')).toContain('Minimum: $50,000.00');
   });
+
+  // Source: City of Toronto MLTT rates page (council passed Dec 17, 2025; new rates take effect Apr 1, 2026) for 1-2 single-family
+  // residences: 0.5/1/1.5/2% to $2M, 2.5% $2M-$3M, then 4.40% $3-4M, 5.45% $4-5M, 6.5% $5-10M, 7.55% $10-20M, 8.6% above.
+  // $5M: Toronto 275+1,950+2,250+32,000+25,000+44,000+54,500 = 159,975; Ontario 111,475 (2.5% above $2M); total 271,450.
+  it('Toronto $5M purchase uses the graduated high-value municipal rates: LTT $271,450', () => {
+    const r = canadianMortgage.calculate({ ...base, price: '5000000', downPayment: '1000000', municipality: 'Toronto' });
+    expect(val(r, 'lttTotal')).toBe('$271,450.00');
+  });
 });
 
 describe('marriage-tax-calculator audit', () => {
@@ -228,6 +237,19 @@ describe('asset-depreciation-calculator audit', () => {
     expect(val(one, 'firstYearDepreciation')).toBe('$9,000.00');
     expect(assetDepreciation.calculate({ assetCost: '1000', salvageValue: '1000', usefulLife: '5', depreciationMethod: 'sl' })).toEqual([]);
   });
+
+  // Source: IRS Rev. Proc. 2025-32 sections 2.10/3.02 (OBBBA s.70306: $2,500,000 / $4,000,000 for tax years beginning in 2025)
+  // and section 4.24 ($2,560,000 / $4,090,000 for tax years beginning in 2026).
+  it('Section 179 limits are labelled by tax year with the Rev. Proc. 2025-32 section references', () => {
+    const e = assetDepreciation.educational!;
+    const qr = e.quickReference!;
+    expect(qr.find((x) => x.label === 'Section 179 Limit (tax year 2025)')?.value).toBe('$2,500,000 (phase-out above $4,000,000)');
+    expect(qr.find((x) => x.label === 'Section 179 Limit (tax year 2026)')?.value).toBe('$2,560,000 (phase-out above $4,090,000)');
+    const cite = e.citations!.find((c) => c.url.includes('rp-25-32'))!;
+    expect(cite.source).toContain('tax years beginning in 2025');
+    expect(cite.source).toContain('tax years beginning in 2026');
+    expect(JSON.stringify(e.howToUse) + JSON.stringify(e.proTips)).toContain('tax years beginning in 2025');
+  });
 });
 
 describe('business-loan-calculator audit', () => {
@@ -258,6 +280,20 @@ describe('business-loan-calculator audit', () => {
     expect(val(r, 'monthlyPayment')).toBe('$8,333.33');
     expect(val(r, 'totalInterest')).toBe('$0.00');
     expect(val(r, 'dscrResult')).toBeUndefined();
+  });
+
+  // Source: SBA SOP 50 10 8.1 (effective Oct 1, 2026): 7(a) DSC >= 1.15 historical and/or projected plus 1:1 global;
+  // 7(a) Small Loans (not changes of ownership) >= 1.10; Appendix 15 initial acquisition / owner buyout / ESOP >= 1.25.
+  it('DSCR text states the SBA SOP 50 10 8.1 floors (1.10 / 1.15 / 1.25), not a single 1.15 minimum', () => {
+    const e = businessLoan.educational!;
+    const text = JSON.stringify([e.quickReference, e.faqs, e.explanation, e.formulaSource, e.diagram?.caption]);
+    expect(text).toContain('SOP 50 10 8.1');
+    expect(text).toContain('1.10');
+    expect(text).toContain('1.25');
+    expect(text).not.toContain('5000-846607');
+    expect(text).not.toContain('the SBA minimum is 1.15');
+    expect(text).not.toContain('SBA 7(a) requires a minimum DSCR of 1.15');
+    expect(text).not.toContain('Lenders require DSCR of 1.25+');
   });
 });
 
@@ -338,7 +374,7 @@ describe('annuity-payout-calculator audit', () => {
   it('how long: $400k at 6% paying $3,000/mo lasts 220.27 months = 18 years 4 months', () => {
     const r = annuityPayout.calculate({ ...a, solveFor: 'duration', principal: '400000', annualReturn: '6', payoutAmount: '3000', inflationAdjust: 'nominal', desiredYears: '' });
     expect(val(r, 'duration')).toBe('18 years and 4 months');
-    expect(val(r, 'totalPayout')).toBe('$660,814');
+    expect(val(r, 'totalPayout')).toBe('$660,815'); // exact ledger total $660,815.40 (was $660,814 from the fractional-period shortcut)
   });
   it('annual payouts of $20k from $300k at 4% last 23.36 years (23 years 4 months)', () => {
     const r = annuityPayout.calculate({ ...a, solveFor: 'duration', principal: '300000', annualReturn: '4', payoutFrequency: 'annually', payoutAmount: '20000', inflationAdjust: 'nominal', desiredYears: '' });
@@ -350,6 +386,20 @@ describe('annuity-payout-calculator audit', () => {
     const z = annuityPayout.calculate({ ...a, solveFor: 'duration', principal: '100000', annualReturn: '0', payoutAmount: '1000', inflationAdjust: 'nominal', desiredYears: '' });
     expect(val(z, 'duration')).toBe('8 years and 4 months');
     expect(val(annuityPayout.calculate({ ...a, annualReturn: '0', principal: '120000', desiredYears: '20', inflationAdjust: 'nominal' }), 'pmt')).toBe('$500.00/mo');
+  });
+
+  // Oracle: python Decimal month-by-month ledger. Whole payments, then a final payment = remaining balance plus one period of interest.
+  it('annual mode is exact: $300k at 4%, $20k/yr = 23 full payments + final $7,339.17 = $467,339.17 (the old fractional-period total was $467,248.38)', () => {
+    const r = annuityPayout.calculate({ ...a, solveFor: 'duration', principal: '300000', annualReturn: '4', payoutFrequency: 'annually', payoutAmount: '20000', inflationAdjust: 'nominal', desiredYears: '' });
+    expect(val(r, 'totalPayout')).toBe('$467,339');
+    expect((r as { id: string; interpretation?: string }[]).find((x) => x.id === 'totalPayout')?.interpretation)
+      .toBe('Includes 23 full payments of $20,000.00 plus a final payment of $7,339.17 (remaining balance with one period of interest).');
+    expect(val(r, 'interest')).toBe('$167,339');
+  });
+  it('monthly mode is exact too: $400k at 6%, $3,000/mo = 220 full payments + final $815.40 = $660,815.40', () => {
+    const r = annuityPayout.calculate({ ...a, solveFor: 'duration', principal: '400000', annualReturn: '6', payoutAmount: '3000', inflationAdjust: 'nominal', desiredYears: '' });
+    expect(val(r, 'totalPayout')).toBe('$660,815');
+    expect((r as { id: string; interpretation?: string }[]).find((x) => x.id === 'totalPayout')?.interpretation).toContain('final payment of $815.40');
   });
 });
 
@@ -488,5 +538,15 @@ describe('new-york-mortgage-calculator audit', () => {
     expect(val(r, 'monthlyPayment')).toBe('$2,666.67');
     expect(val(r, 'totalInterest')).toBe('$0');
     expect(val(r, 'recordingTax')).toBe('$3,840.00');
+  });
+
+  // Source: NYS Form MT-15 (rev. 1/25) page 4 rate tables, per $100: Table 1 (MCTD) $1.05, Table 2 (upstate, no local tax) $1.00,
+  // Table 4 (NYC) $2.05 / $2.175 (1-3 family or condo >= $500,000), Table 5 Westchester/Rockland $1.30. Verified, unchanged.
+  it('recording-tax region totals match the MT-15 rate tables', () => {
+    expect(MRT_REGIONS.nyc.total(499999)).toBe(0.0205);
+    expect(MRT_REGIONS.nyc.total(500000)).toBe(0.02175);
+    expect(MRT_REGIONS.mctd.total(1)).toBe(0.0105);
+    expect(MRT_REGIONS.westchester.total(1)).toBe(0.013);
+    expect(MRT_REGIONS.upstate.total(1)).toBe(0.01);
   });
 });

@@ -293,6 +293,26 @@ describe('audit H: fat-intake (IOM AMDR 20-35 %, AHA saturated <= 6 %, 9 kcal/g)
   it('blank calories gives no result', () => {
     expect(fatIntake.calculate({ unit: 'metric', weight: '70', goal: 'maintain', calories: '' })).toEqual([]);
   });
+  // New: body weight was required but never used. It now gives fat per kg, computed from the displayed grams.
+  it('fat per kg: 70 kg, 2,200 kcal maintenance 61/86/73 g -> 0.87 - 1.23 g/kg, target 1.04 g/kg (grams / kg)', () => {
+    const r = fatIntake.calculate({ unit: 'metric', weight: '70', goal: 'maintain', calories: '2200' });
+    expect(val(r, 'fatPerKg')).toBe('0.87 – 1.23 g/kg/day (target 1.04 g/kg at 70 kg)');
+  });
+  it('fat per kg converts pounds exactly: 154 lb = 69.85 kg (1 lb = 0.45359237 kg); 154 lb with 2,200 kcal keto 159/196/177 g -> 2.28 - 2.81, target 2.53', () => {
+    const r = fatIntake.calculate({ unit: 'imperial', weight: '154', goal: 'keto', calories: '2200' });
+    expect(val(r, 'fatPerKg')).toBe('2.28 – 2.81 g/kg/day (target 2.53 g/kg at 69.9 kg)');
+  });
+  it('weight changes only the per-kg row, never the gram totals', () => {
+    const a = fatIntake.calculate({ unit: 'metric', weight: '50', goal: 'maintain', calories: '2200' });
+    const b = fatIntake.calculate({ unit: 'metric', weight: '120', goal: 'maintain', calories: '2200' });
+    expect(a.filter((x) => x.id !== 'fatPerKg')).toEqual(b.filter((x) => x.id !== 'fatPerKg'));
+    expect(val(a, 'fatPerKg')).not.toBe(val(b, 'fatPerKg'));
+  });
+  it('help text no longer presents the goal percentages as published guidelines and says what weight is for', () => {
+    const help = (id: string) => (fatIntake.inputs.find((i) => i.id === id)?.helpText ?? '');
+    expect(help('weight')).toContain('Used only to show your fat target per kilogram');
+    expect(help('goal')).toContain('conventional planning ranges');
+  });
 });
 
 describe('audit H: body-type (ratio shapes; WHO 2008 WHR 0.85 F / 0.90 M)', () => {
@@ -320,6 +340,14 @@ describe('audit H: body-type (ratio shapes; WHO 2008 WHR 0.85 F / 0.90 M)', () =
     expect(String(val(bodyType.calculate({ unit: 'metric', bust: '90', waist: '85', hip: '100' }), 'whrHealthRisk'))).toContain('if female');
     expect(val(bodyType.calculate({ unit: 'imperial', bust: '38', waist: '35', hip: '39' }), 'waistHipRatio')).toBe('0.90'); // 0.8974 displays as 0.90 but is below the cut-off
     expect(String(val(bodyType.calculate({ unit: 'imperial', bust: '38', waist: '35', hip: '39' }), 'whrHealthRisk'))).toContain('if female');
+  });
+  // Changed: the waist input said "narrowest part of your natural waistline"; the WHO WHR thresholds assume the WHO 2008 site.
+  it('waist input follows the WHO 2008 protocol: midpoint between last palpable rib and iliac crest, not the narrowest point', () => {
+    const waist = bodyType.inputs.find((i) => i.id === 'waist')!;
+    expect(waist.label).toContain('midway between lowest rib and hip bone');
+    expect(waist.helpText).toContain('midpoint between the lower margin of the last palpable rib and the top of the hip bone (iliac crest)');
+    expect(waist.helpText).not.toContain('narrowest part of your natural waistline');
+    expect(bodyType.inputs.find((i) => i.id === 'hip')!.helpText).toContain('widest part of the buttocks');
   });
   it('inverted triangle needs bust > hip by 5 in (12.7 cm); blank gives nothing', () => {
     expect(val(bodyType.calculate({ unit: 'imperial', bust: '42', waist: '30', hip: '33' }), 'bodyShape')).toBe('Inverted Triangle');
@@ -548,5 +576,33 @@ describe('audit H: trigonometry-calculator (exact special angles)', () => {
     expect(inv('sec', '0')[0].id).toBe('error');
     expect(inv('sin', '')).toEqual([]);
     expect(val(inv('cot', '0'), 'principalAngle')).toBe('90°');
+  });
+});
+
+describe('audit H follow-up: source notes only claim what was verified', () => {
+  it('frame-size FAQ quotes the MedlinePlus wrist chart, not the old unsourced cut-offs or the finger test', () => {
+    const faq = (healthyWeight.educational.faqs ?? []).find((f) => f.question === 'How do I determine my frame size?')!.answer;
+    expect(faq).toContain('MedlinePlus');
+    expect(faq).toContain('Women over 5 ft 5 in: small under 6.25 in, medium 6.25 to 6.5 in, large over 6.5 in');
+    expect(faq).not.toContain('6.75');
+    expect(faq).not.toContain('overlap');
+  });
+  it('protein: Morton 2018 break point 1.62 g/kg/day (95% CI 1.03 to 2.20); endurance 1.4-1.8 is a planning range inside ISSN 1.4-2.0', () => {
+    const text = JSON.stringify(protein.educational);
+    expect(text).toContain('1.62 g/kg/day, 95% confidence interval 1.03 to 2.20');
+    expect(text).toContain('planning range chosen for this calculator');
+    expect(text).toContain('1.4–2.0 g/kg that the ISSN position stand gives');
+    expect(text).not.toContain('evidence-based range');
+  });
+  it('carbohydrate: g/kg goal ranges are called planning ranges, not guideline values', () => {
+    const text = JSON.stringify(carbohydrate.educational);
+    expect(text).toContain('conventional planning ranges chosen for this calculator');
+    expect(text).not.toContain('sports-nutrition guidelines cite 8–12');
+    expect(text).not.toContain('need 7–12 g/kg');
+  });
+  it('water: activity and climate add-ons are called rules of thumb; the 24+ oz running claim is gone', () => {
+    const text = JSON.stringify(waterIntake.educational);
+    expect(text).toContain('rules of thumb chosen for this calculator, not published values');
+    expect(text).not.toContain('24+ oz');
   });
 });

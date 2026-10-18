@@ -25,14 +25,14 @@ const fatIntakeConfig: CalculatorConfig = {
       max: 1500,
       step: 0.1,
       required: true,
-      helpText: 'Pounds (lbs) for Imperial — Kilograms (kg) for Metric',
+      helpText: 'Pounds (lbs) for Imperial — Kilograms (kg) for Metric. Used only to show your fat target per kilogram of body weight; the gram totals come from your calorie target.',
     },
     {
       id: 'goal',
       label: 'Dietary Goal',
       type: 'select',
       required: true,
-      helpText: 'Your goal determines the recommended fat percentage range',
+      helpText: 'Your goal sets the percentage of calories from fat. Only the 20–35% total-fat range (Institute of Medicine) is a published recommendation; the narrower goal ranges and the ketogenic range are conventional planning ranges, not guideline values.',
       options: [
         { label: 'Weight Loss (20–25% calories from fat)', value: 'loss' },
         { label: 'Maintenance / General Health (25–35%)', value: 'maintain' },
@@ -58,6 +58,8 @@ const fatIntakeConfig: CalculatorConfig = {
     const goal = values.goal || 'maintain';
 
     if ([weight, calories].some(isNaN) || weight <= 0 || calories <= 0) return [];
+
+    const weightKg = values.unit === 'metric' ? weight : weight * 0.45359237; // 1 lb = 0.45359237 kg exactly
 
     // Fat percentage ranges by goal
     const fatPctRange: Record<string, { low: number; high: number }> = {
@@ -104,6 +106,13 @@ const fatIntakeConfig: CalculatorConfig = {
         id: 'totalFatTarget',
         label: 'Recommended Fat Target',
         value: `${fmt(midG)} g/day`,
+        color: 'neutral',
+      },
+      {
+        id: 'fatPerKg',
+        label: 'Fat per kg of Body Weight',
+        // Computed from the grams shown above, so it can be checked by hand: grams divided by body weight in kg.
+        value: `${(totalLowG / weightKg).toFixed(2)} – ${(totalHighG / weightKg).toFixed(2)} g/kg/day (target ${(midG / weightKg).toFixed(2)} g/kg at ${+weightKg.toFixed(1)} kg)`,
         color: 'neutral',
       },
       {
@@ -160,7 +169,7 @@ const fatIntakeConfig: CalculatorConfig = {
       { symbol: 'Omega-3', name: 'Omega-3 Fatty Acids', description: 'Essential fats with anti-inflammatory properties. EPA and DHA from fish are the most beneficial; ALA from plant sources requires conversion. The IOM acceptable range for total omega-3 (mostly ALA) is 0.6–1.2% of daily calories; up to about 10% of that can come preformed as EPA and DHA.' },
     ],
     howToUse: [
-      'Enter your body weight and daily calorie target (use a TDEE calculator to find maintenance calories).',
+      'Enter your body weight and daily calorie target (use a TDEE calculator to find maintenance calories). Body weight is used only to express the fat total per kilogram.',
       'Select your dietary goal — the fat percentage range adjusts accordingly.',
       'Review the total fat range and the saturated/mono/poly breakdown.',
       'Use the saturated fat limit as a daily ceiling, not a target.',

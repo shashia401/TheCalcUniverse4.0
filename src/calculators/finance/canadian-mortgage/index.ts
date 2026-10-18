@@ -53,7 +53,7 @@ const LAND_TRANSFER_TAXES: Record<string, LTTData> = {
   'nova-scotia': { description: 'Deed transfer tax is set by each municipality (typically 0.5%–1.5%). Estimate uses Halifax and many other municipalities at 1.5%; check your municipality.', provincial: [{ min: 0, max: Infinity, rate: 0.015 }] },
   'new-brunswick': { description: 'Flat 1% of the purchase price.', provincial: [{ min: 0, max: Infinity, rate: 0.01 }] },
   ontario: {
-    description: '0.5% on first $55K, 1% on $55K–$250K, 1.5% on $250K–$400K, 2% on $400K–$2M, 2.5% above $2M. First-time buyers get up to $4,000 rebate. Toronto adds a municipal tax (up to $4,475 first-time buyer refund).',
+    description: '0.5% on first $55K, 1% on $55K–$250K, 1.5% on $250K–$400K, 2% on $400K–$2M, 2.5% above $2M. First-time buyers get up to $4,000 rebate. Toronto adds a municipal tax (up to $4,475 first-time buyer refund); for homes with one or two single-family residences, Toronto municipal rate rises on the part of the price above $3M (4.40% to 8.60%, graduated) from April 1, 2026, as adopted by City Council on December 17, 2025 (City of Toronto MLTT rates page). These upper-band rates are applied to every Toronto purchase here, so a multi-unit property over $3M may be taxed differently.',
     provincial: [
       { min: 0, max: 55000, rate: 0.005 },
       { min: 55000, max: 250000, rate: 0.01 },

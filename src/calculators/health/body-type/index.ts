@@ -53,7 +53,7 @@ const bodyTypeConfig: CalculatorConfig = {
     },
     {
       id: 'waist',
-      label: 'Waist Circumference',
+      label: 'Waist Circumference (midway between lowest rib and hip bone)',
       type: 'number',
       placeholder: '30',
       min: 15,
@@ -61,7 +61,7 @@ const bodyTypeConfig: CalculatorConfig = {
       step: 0.25,
       required: true,
       inputMode: 'decimal',
-      helpText: 'Measure at the narrowest part of your natural waistline.',
+      helpText: 'WHO protocol (2008): standing upright, tape level with the floor, at the midpoint between the lower margin of the last palpable rib and the top of the hip bone (iliac crest), at the end of a normal breath out. This is not necessarily the narrowest point of your waist, and the WHO waist-hip ratio thresholds assume this site.',
     },
     {
       id: 'hip',
@@ -73,7 +73,7 @@ const bodyTypeConfig: CalculatorConfig = {
       step: 0.25,
       required: true,
       inputMode: 'decimal',
-      helpText: 'Measure at the fullest part of the hips/glutes.',
+      helpText: 'WHO protocol (2008): around the widest part of the buttocks, tape level with the floor.',
     },
   ],
   calculate: (values) => {
@@ -146,7 +146,7 @@ const bodyTypeConfig: CalculatorConfig = {
   },
   educational: {
     formula: 'WHR = Waist ÷ Hip | Shape based on Bust:Waist:Hip ratios | Somatotypes: Ectomorph, Mesomorph, Endomorph',
-    formulaSource: 'WHR risk thresholds: WHO, "Waist Circumference and Waist–Hip Ratio: Report of a WHO Expert Consultation", Geneva, 8–11 December 2008 (substantially increased metabolic risk at WHR ≥ 0.90 for men and ≥ 0.85 for women). The bust/waist/hip shape categories are a fashion-industry convention, not a clinical standard; the 15% waist-definition and 5 in (12.7 cm) bust–hip rules are this calculator\'s own.',
+    formulaSource: 'WHR risk thresholds: WHO, "Waist Circumference and Waist–Hip Ratio: Report of a WHO Expert Consultation", Geneva, 8–11 December 2008 (substantially increased metabolic risk at WHR ≥ 0.90 for men and ≥ 0.85 for women). Waist and hip should be measured as in section 5.2 of that report (waist midway between the last palpable rib and the iliac crest; hip at the largest circumference of the buttocks), because the thresholds assume that protocol. The bust/waist/hip shape categories are a fashion-industry convention, not a clinical standard; the 15% waist-definition and 5 in (12.7 cm) bust–hip rules are this calculator\'s own.',
     diagram: {
       svg: '<svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto"><text x="220" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-333333)">Three Body Types (Somatotypes)</text><path d="M75,40 L60,80 L55,120 L60,170 L70,210 L80,240 L100,240 L110,210 L120,170 L125,120 L120,80 L105,40" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="2"/><text x="90" y="280" text-anchor="middle" font-size="11" fill="var(--svg-3b82f6)" font-weight="bold">Ectomorph</text><path d="M200,40 L185,80 L178,130 L180,180 L188,220 L198,250 L242,250 L252,220 L260,180 L262,130 L255,80 L240,40" fill="var(--svg-dbeafe)" stroke="var(--svg-22c55e)" stroke-width="2"/><text x="220" y="280" text-anchor="middle" font-size="11" fill="var(--svg-22c55e)" font-weight="bold">Mesomorph</text><path d="M325,40 L308,90 L302,140 L312,200 L325,240 L338,260 L362,260 L375,240 L388,200 L398,140 L392,90 L375,40" fill="var(--svg-dbeafe)" stroke="var(--svg-f59e0b)" stroke-width="2"/><text x="350" y="280" text-anchor="middle" font-size="11" fill="var(--svg-f59e0b)" font-weight="bold">Endomorph</text></svg>',
       alt: 'Three body type silhouettes: lean ectomorph, muscular mesomorph, and soft endomorph',
@@ -173,8 +173,8 @@ const bodyTypeConfig: CalculatorConfig = {
     ],
     howToUse: [
       'Measure your bust/chest at the fullest point with a soft measuring tape.',
-      'Measure your waist at the narrowest point (typically above the belly button).',
-      'Measure your hips at the widest point across the glutes.',
+      'Measure your waist midway between the lower edge of your last palpable rib and the top of your hip bone (iliac crest), standing upright, at the end of a normal breath out (WHO 2008 protocol). This is not always the narrowest point.',
+      'Measure your hips around the widest part of the buttocks, with the tape level with the floor.',
       'Select your unit system and enter all three measurements.',
       'Review your body shape classification, WHR, and the somatotype explanation below.',
     ],
@@ -195,7 +195,7 @@ const bodyTypeConfig: CalculatorConfig = {
       },
       {
         question: 'How do I measure my body accurately for this calculator?',
-        answer: 'Use a flexible fabric measuring tape (not a metal tape measure). For bust, measure across the fullest part of your chest while wearing a well-fitting bra, keeping the tape parallel to the floor. For waist, find your natural waist by bending to one side — the crease that forms is your natural waistline. Measure at this narrowest point after exhaling normally (don\'t suck in your stomach). For hips, stand with feet together and measure around the widest part of your hips and glutes. Take each measurement at least twice and use the average. For consistency, measure at the same time of day (morning is best, before eating) and wear minimal clothing. The tape should be snug but not compressing your skin — you should be able to slip one finger under it.',
+        answer: 'Use a flexible fabric measuring tape (not a metal tape measure). For bust, measure across the fullest part of your chest while wearing a well-fitting bra, keeping the tape parallel to the floor. For waist, follow the WHO protocol: stand upright with feet close together, arms relaxed at your sides and weight evenly distributed, find the lower margin of your last palpable rib and the top of your hip bone (iliac crest), and measure around the point midway between them with the tape level with the floor, at the end of a normal breath out (do not suck in your stomach). This is not necessarily the narrowest point of your waist. For hips, measure around the widest part of the buttocks, tape level with the floor. The tape should be snug but not compressing the skin. WHO recommends measuring twice and averaging if the two readings are within 1 cm (about 0.4 in); if they differ by more, measure again. For consistency, measure at the same time of day and wear minimal clothing.',
       },
       {
         question: 'Why is WHR more predictive of health risk than BMI?',

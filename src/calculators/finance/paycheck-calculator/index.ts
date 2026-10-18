@@ -203,6 +203,16 @@ const paycheckConfig: CalculatorConfig = {
       });
     }
 
+    if (c.retirementClamped) {
+      results.push({
+        id: 'deferralLimited',
+        label: 'Retirement Deferral Limited',
+        value: `$${fmt(c.retirement)}/yr applied (you entered $${fmt(c.retirementRequested)})`,
+        color: 'negative' as const,
+        interpretation: 'A deferral cannot be larger than the pay left after the payroll taxes (FICA and any income tax) owed on that pay, so the amount was reduced until net pay is zero. Check the amount you entered.',
+      });
+    }
+
     return results;
   },
 
@@ -262,6 +272,9 @@ const paycheckConfig: CalculatorConfig = {
       'Pre-tax deductions save you at your marginal rate, not your effective rate. In the 22% bracket every dollar deferred to a 401(k) saves 22 cents of federal income tax (FICA is still owed); every dollar of payroll health premium, HSA or FSA also saves 7.65 cents of FICA, nearly 30 cents in total.',
     ],
     limitations: [
+      'Method: this is an annualised estimate, not IRS Publication 15-T per-period withholding. Annual federal tax is computed from annual wages, the standard deduction and the 2026 brackets, then divided by the number of pay periods; it does not apply the Pub. 15-T percentage-method or wage-bracket tables, W-4 Step 2-4 adjustments, or per-period rounding, so a paycheck stub can differ.',
+      'A retirement deferral larger than the pay that can fund it is reduced automatically (shown in the results) so net pay is never negative.',
+      'Pennsylvania taxes 401(k) deferrals (they are not excluded from PA taxable compensation per the PA Department of Revenue), so for Pennsylvania the state tax is computed on wages before retirement deferrals; payroll health premiums under a Section 125 plan are excluded, but dependent-care contributions are not. Other state schedules are applied to wages after deferrals and have not been individually verified for deferral treatment.',
       'When not to use: do not rely on this calculator for exact tax filing amounts — use your employer payroll system or the IRS Tax Withholding Estimator for official withholding figures.',
       `State income tax applies each state's ${STATE_INCOME_TAX_YEAR} rate schedule and standard deduction to your wages. State personal exemptions, credits, standard-deduction phase-outs, and state payroll taxes (CA/NJ/NY disability insurance, WA Paid Family Leave) are not included, and head-of-household uses the single schedule, so real withholding can differ.`,
       'This calculator does not account for local/city income taxes (e.g., New York City, Philadelphia, Maryland counties, and certain Ohio cities impose additional local income taxes).',

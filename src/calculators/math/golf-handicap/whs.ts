@@ -17,6 +17,10 @@
  *                17–18             6             0
  *                19                7             0
  *                20                8             0
+ *            The table was checked row by row against the primary text, Rule 5.2a of the 2024 Rules of Handicapping
+ *            (USGA / R&A, USGA-published PDF as hosted by SCGA, p.54), and against the Malta Golf Association copy of the
+ *            Rules (R&A territory). Rows 3 to 20 agree in both. The Malta copy also lists 1 and 2 scores at -2.0; the USGA
+ *            copy starts at 3, and this calculator requires 3 scores (54 holes).
  *  Rule 6.1  Course Handicap = Handicap Index × (Slope / 113) + (Course Rating − Par), rounded to a whole number
  *            (0.5 rounds up, so −1.5 becomes −1).
  *  Rule 6.2  Playing Handicap = Course Handicap × Handicap Allowance (e.g. 95% individual stroke play, 100% individual

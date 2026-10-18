@@ -125,7 +125,8 @@ const netWorthConfig: CalculatorConfig = {
     if (totalAssets === 0 && totalLiabilities === 0) return [];
 
     const netWorth = totalAssets - totalLiabilities;
-    const debtToAssetRatio = totalAssets > 0 ? (totalLiabilities / totalAssets) * 100 : 100;
+    // Undefined when there are no assets (division by zero): show N/A rather than a made-up 100%
+    const debtToAssetRatio = totalAssets > 0 ? (totalLiabilities / totalAssets) * 100 : null;
 
     const fmt = (n: number) =>
       Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -140,7 +141,7 @@ const netWorthConfig: CalculatorConfig = {
         highlight: true,
         color: netWorth >= 0 ? 'positive' : 'negative',
         interpretation: netWorth >= 0
-          ? `This is a snapshot, not a score — a young household with student debt often has negative net worth despite a strong trajectory. Debt-to-asset ratio here is ${debtToAssetRatio.toFixed(0)}%; the trend over time (tracked quarterly or annually) matters more than any single number.`
+          ? `This is a snapshot, not a score — a young household with student debt often has negative net worth despite a strong trajectory. Debt-to-asset ratio here is ${debtToAssetRatio === null ? 'not defined (no assets entered)' : `${debtToAssetRatio.toFixed(0)}%`}; the trend over time (tracked quarterly or annually) matters more than any single number.`
           : `A negative reading is common early in adulthood or after a major purchase — it's not a red flag on its own. What matters is the trend: track this every few months and watch whether debt is shrinking relative to assets.`,
       },
       {
@@ -158,8 +159,8 @@ const netWorthConfig: CalculatorConfig = {
       {
         id: 'debtToAsset',
         label: 'Debt-to-Asset Ratio',
-        value: `${debtToAssetRatio.toFixed(1)}%`,
-        color: debtToAssetRatio > 50 ? 'negative' : 'neutral',
+        value: debtToAssetRatio === null ? 'N/A (no assets)' : `${debtToAssetRatio.toFixed(1)}%`,
+        color: debtToAssetRatio !== null && debtToAssetRatio > 50 ? 'negative' : 'neutral',
       },
     ];
   },

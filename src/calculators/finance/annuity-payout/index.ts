@@ -158,6 +158,7 @@ const annuityPayoutConfig: CalculatorConfig = {
       let months: number;
       let totalPaid: number;
       let totalInterest: number;
+      let finalPaymentNote = '';
 
       if (rPeriod === 0) {
         months = principal / payoutAmount;
@@ -180,8 +181,14 @@ const annuityPayoutConfig: CalculatorConfig = {
         const num = pD;
         const den = pD.minus(new Decimal(principal).times(rPeriod));
         months = Decimal.ln(num.div(den)).div(Decimal.ln(new Decimal(1).plus(rPeriod))).toNumber();
-        totalPaid = new Decimal(payoutAmount).times(months).toNumber();
+        // Exact total: whole payments, then one final payment = remaining balance plus one period of interest
+        const full = Math.floor(months);
+        const g = new Decimal(1).plus(rD);
+        const balance = new Decimal(principal).times(g.pow(full)).minus(pD.times(g.pow(full).minus(1)).div(rD));
+        const finalPmt = Decimal.max(balance, 0).times(g);
+        totalPaid = pD.times(full).plus(finalPmt).toNumber();
         totalInterest = new Decimal(totalPaid).minus(principal).toNumber();
+        finalPaymentNote = `Includes ${full} full payments of $${fmtD(payoutAmount)} plus a final payment of $${fmtD(finalPmt.toNumber())} (remaining balance with one period of interest).`;
       }
 
       // Round once to whole months so "4 years and 12 months" can never appear
@@ -196,7 +203,7 @@ const annuityPayoutConfig: CalculatorConfig = {
       results.push(
         { id: 'duration', label: 'Your Money Will Last', value: durationStr, highlight: true, color: 'positive' as const },
         { id: 'pmt', label: `Fixed ${frequency === 'monthly' ? 'Monthly' : 'Annual'} Payout`, value: `$${fmtD(payoutAmount)}${freqLabel}`, color: 'neutral' as const },
-        { id: 'totalPayout', label: 'Total Amount You Will Receive', value: fmtK(totalPaid), color: 'positive' as const },
+        { id: 'totalPayout', label: 'Total Amount You Will Receive', value: fmtK(totalPaid), color: 'positive' as const, interpretation: finalPaymentNote || undefined },
         { id: 'principal', label: 'Your Original Principal', value: fmtK(principal), color: 'neutral' as const },
         { id: 'interest', label: 'Interest Earned During Payout', value: totalInterest > 0 ? fmtK(totalInterest) : '$0', color: totalInterest > 0 ? 'positive' as const : 'neutral' as const },
       );

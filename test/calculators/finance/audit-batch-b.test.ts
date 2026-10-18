@@ -56,6 +56,14 @@ describe('california-mortgage-calculator audit', () => {
     expect(run({ homePrice: '500000', downPayment: '500000', interestRate: '6', loanTerm: '30' })).toEqual([]);
     expect(run({ homePrice: '', downPayment: '', interestRate: '6', loanTerm: '30' })).toEqual([]);
   });
+
+  it('diagram and text carry no unsourced Texas/Florida rates or medians', () => {
+    const e = caMortgage.educational!;
+    const text = JSON.stringify([e.diagram, e.faqs, e.workedExamples]);
+    expect(text).not.toMatch(/1\.80%|0\.90%|\$350K|\$400K|1\.4-1\.8%|\$9,000-\$11,700|TX:|FL:/);
+    expect(e.diagram!.svg).toContain('Base tax capped at 1% of assessed value');
+    expect(e.diagram!.svg).toContain('see C.A.R.');
+  });
 });
 
 describe('retirement audit', () => {
@@ -529,5 +537,15 @@ describe('net-worth-calculator audit', () => {
   it('blank and non-numeric fields return nothing', () => {
     expect(netWorth.calculate({ cash: '', mortgage: '' })).toEqual([]);
     expect(netWorth.calculate({ cash: 'abc', mortgage: '' })).toEqual([]);
+  });
+
+  it('no assets: debt-to-asset ratio is undefined and shows "N/A (no assets)" in a neutral colour (not 100.0%)', () => {
+    const r = netWorth.calculate({ mortgage: '5000' }) as { id: string; value: string; color: string; interpretation?: string }[];
+    const d = r.find((x) => x.id === 'debtToAsset')!;
+    expect(d.value).toBe('N/A (no assets)');
+    expect(d.color).toBe('neutral');
+    expect(r.find((x) => x.id === 'netWorth')!.value).toBe('-$5,000.00');
+    // a tiny asset base still gives a real ratio
+    expect(val(netWorth.calculate({ cash: '1000', mortgage: '5000' }), 'debtToAsset')).toBe('500.0%');
   });
 });

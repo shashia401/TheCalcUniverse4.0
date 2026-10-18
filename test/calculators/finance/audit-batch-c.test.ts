@@ -514,6 +514,33 @@ describe('paycheck-calculator audit (2026 federal rules)', () => {
     expect(paycheck.calculate({ payMode: 'salary', annualSalary: '', payFrequency: 'biweekly', filingStatus: 'single', state: 'TX' })).toEqual([]);
     expect(paycheck.calculate({ payMode: 'hourly', hourlyWage: '20', hoursPerWeek: '', payFrequency: 'weekly', filingStatus: 'single', state: 'TX' })).toEqual([]);
   });
+
+  // Oracle: python Decimal. $80,000 single, PA, bi-weekly, $10,000 401(k): fed on 70,000-16,100 = $6,570; FICA 7.65% of 80,000 = $6,120;
+  // PA 3.07% of 80,000 (deferral NOT excluded) = $2,456; net 80,000-6,570-6,120-2,456-10,000 = $54,854 = $2,109.77/check.
+  // PA Dept. of Revenue, PA Personal Income Tax Guide (Gross Compensation): contributions to an IRC 401 plan are not excludable from PA-taxable compensation.
+  it('Pennsylvania taxes 401(k) deferrals: PA tax is 3.07% of wages before the deferral ($2,456, not $2,149), net $2,109.77 bi-weekly', () => {
+    const r = paycheck.calculate({ payMode: 'salary', annualSalary: '80000', payFrequency: 'biweekly', filingStatus: 'single', state: 'PA', retirementContributions: '10000' });
+    expect(val(r, 'netAnnual')).toBe('$54,854.00');
+    expect(val(r, 'statePerPaycheck')).toBe('$94.46');
+    expect(val(r, 'netPaycheck')).toBe('$2,109.77');
+  });
+  it('a deferral at or above pay is limited so net pay is never negative (TX: $50,000 pay, $60,000 deferral -> $46,175 applied, net $0)', () => {
+    const r = paycheck.calculate({ payMode: 'salary', annualSalary: '50000', payFrequency: 'biweekly', filingStatus: 'single', state: 'TX', retirementContributions: '60000' });
+    expect(val(r, 'netAnnual')).toBe('$0.00');
+    expect(val(r, 'netPaycheck')).toBe('$0.00');
+    expect(val(r, 'deferralLimited')).toBe('$46,175.00/yr applied (you entered $60,000.00)');
+    expect(val(r, 'deductions')).toBe('$1,775.96'); // 46,175 / 26
+  });
+  it('same limit in Pennsylvania uses PA tax on the full wages: applied deferral 50,000 - 3,825 FICA - 1,535 PA = $44,640', () => {
+    const r = paycheck.calculate({ payMode: 'salary', annualSalary: '50000', payFrequency: 'biweekly', filingStatus: 'single', state: 'PA', retirementContributions: '50000' });
+    expect(val(r, 'deferralLimited')).toBe('$44,640.00/yr applied (you entered $50,000.00)');
+    expect(val(r, 'netAnnual')).toBe('$0.00');
+  });
+  it('a normal deferral is not flagged, and the limitations text says the method is annualised, not Pub 15-T', () => {
+    const r = paycheck.calculate({ payMode: 'salary', annualSalary: '75000', payFrequency: 'biweekly', filingStatus: 'single', state: 'TX', retirementContributions: '5000' });
+    expect(val(r, 'deferralLimited')).toBeUndefined();
+    expect(paycheck.educational!.limitations!.join(' ')).toContain('annualised estimate, not IRS Publication 15-T per-period withholding');
+  });
 });
 
 describe('refinance-calculator audit', () => {
@@ -575,6 +602,28 @@ describe('refinance-calculator audit', () => {
   it('rejects a zero balance and a sub-month term', () => {
     expect(refinance.calculate({ ...sarah, currentBalance: '0' })).toEqual([]);
     expect(refinance.calculate({ ...sarah, newTerm: '0' })).toEqual([]);
+  });
+
+  // Oracle: python Decimal month-by-month ledger, $200k, 7%/240 months -> 6.5%/360 months, no closing costs:
+  // old interest $172,143.49; new lifetime interest $255,088.98 (+$82,945.49); first 240 months of the new loan pay $214,723.22 of interest
+  // and $111,330.57 is still owed at that point.
+  it('payment falls but lifetime interest rises: never "Yes", shows both lifetime and like-for-like interest', () => {
+    const r = refinance.calculate({ currentBalance: '200000', currentRate: '7', currentTerm: '240', newRate: '6.5', newTerm: '360', closingCosts: '0', plannedStay: '24' });
+    expect(val(r, 'recommendation')).toBe('Lower payment, but no lifetime interest saving — refinance only if a lower monthly payment is your goal');
+    expect(val(r, 'lifetimeInterest')).toBe('$172,143 vs $255,089');
+    expect(val(r, 'sameHorizonInterest')).toBe('$172,143 vs $214,723, with $111,331 still owed on the new loan');
+    const rec = (r as { id: string; interpretation?: string; color?: string }[]).find((x) => x.id === 'recommendation')!;
+    expect(rec.color).toBe('neutral');
+    expect(rec.interpretation).toContain('$255,089 versus $172,143');
+    expect(rec.interpretation).toContain('$82,945 more after closing costs');
+  });
+  it('a refinance that also saves interest after closing costs is still "Yes — Refinance now"; like-for-like line shows the balance still owed', () => {
+    // Oracle (python Decimal): $250k 7.5%/300 -> 6%/360: old interest $304,243.38, new first 300 months $277,193.11, balance $77,530.22 still owed.
+    const r = refinance.calculate({ currentBalance: '250000', currentRate: '7.5', currentTerm: '300', newRate: '6', newTerm: '360', closingCosts: '6000', plannedStay: '60' });
+    expect(val(r, 'recommendation')).toBe('Yes — Refinance now');
+    expect(val(r, 'sameHorizonInterest')).toBe('$304,243 vs $277,193, with $77,530 still owed on the new loan');
+    const same = refinance.calculate({ currentBalance: '300000', currentRate: '6.5', currentTerm: '240', newRate: '5.75', newTerm: '180', closingCosts: '5500', plannedStay: '120' });
+    expect(val(same, 'sameHorizonInterest')).toMatch(/^\$\d{2,3},\d{3} vs \$\d{2,3},\d{3}$/);
   });
 });
 

@@ -21,7 +21,7 @@ export default function NetWorthPanel({ results }: Props) {
   const netWorth = parseVal(nwRes.value);
   const totalAssets = parseVal(assetsRes.value);
   const totalLiabilities = parseVal(liabilitiesRes.value);
-  const debtToAsset = dtaRes ? parseVal(dtaRes.value) : (totalAssets > 0 ? (totalLiabilities / totalAssets) * 100 : 100);
+  const debtToAsset = totalAssets > 0 ? (dtaRes ? parseVal(dtaRes.value) : (totalLiabilities / totalAssets) * 100) : null;
 
   const isPositive = netWorth >= 0;
   const fmtD = (n: number) =>
@@ -91,18 +91,18 @@ export default function NetWorthPanel({ results }: Props) {
         <div className="rounded-xl bg-slate-50 border border-slate-200 px-5 py-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-600">Debt-to-Asset Ratio</span>
-            <span className={`text-sm font-black ${debtToAsset > 50 ? 'text-red-700' : 'text-emerald-700'}`}>
-              {debtToAsset.toFixed(1)}%
+            <span className={`text-sm font-black ${debtToAsset === null ? 'text-slate-600' : debtToAsset > 50 ? 'text-red-700' : 'text-emerald-700'}`}>
+              {debtToAsset === null ? 'N/A (no assets)' : `${debtToAsset.toFixed(1)}%`}
             </span>
           </div>
           <div className="mt-2 h-2 bg-slate-200 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full ${debtToAsset > 50 ? 'bg-red-600' : 'bg-emerald-600'}`}
-              style={{ width: `${Math.min(debtToAsset, 100)}%` }}
+              className={`h-full rounded-full ${debtToAsset === null ? 'bg-slate-400' : debtToAsset > 50 ? 'bg-red-600' : 'bg-emerald-600'}`}
+              style={{ width: `${debtToAsset === null ? 0 : Math.min(debtToAsset, 100)}%` }}
             />
           </div>
           <p className="text-[10px] text-slate-600 mt-1">
-            {debtToAsset <= 20 ? 'Excellent — very low debt' : debtToAsset <= 50 ? 'Healthy — manageable debt level' : 'Elevated — consider reducing debt'}
+            {debtToAsset === null ? 'Ratio is undefined without assets' : debtToAsset <= 20 ? 'Excellent — very low debt' : debtToAsset <= 50 ? 'Healthy — manageable debt level' : 'Elevated — consider reducing debt'}
           </p>
         </div>
       </div>
