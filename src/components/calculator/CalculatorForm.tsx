@@ -464,6 +464,19 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   return (
     <>
     <div ref={cardRef} data-calc-ready={config ? 'true' : 'false'} className="bg-[var(--surface-card)] border border-[var(--border-warm)] rounded-2xl p-6 md:p-8">
+      {/* Phones and tablets: the answer is in view before the first input. On desktop the result panel
+          sits beside the inputs instead, so this strip is hidden there. Decorative duplicate of the panel's
+          headline, hidden from assistive tech so it is not announced twice. */}
+      {!compact && (() => {
+        const lead = visibleResults.find((r) => r.highlight) ?? visibleResults[0];
+        if (!lead || lead.value.includes('\n')) return null;
+        return (
+          <div aria-hidden="true" className="mb-5 flex items-baseline justify-between gap-3 rounded-xl bg-[var(--brand-default)] px-4 py-3 text-white lg:hidden">
+            <span className="min-w-0 text-xs font-semibold uppercase tracking-wide">{lead.label}</span>
+            <span className="shrink-0 text-2xl font-bold">{money(lead.value)}{lead.unit ? ` ${lead.unit}` : ''}</span>
+          </div>
+        );
+      })()}
       <div className={compact ? undefined : 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:items-start lg:gap-8'}>
       <div className="min-w-0">
       {/* Variant/shape tabs — switch which set of inputs (and formula) applies.

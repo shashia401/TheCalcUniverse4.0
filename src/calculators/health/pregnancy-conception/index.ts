@@ -393,7 +393,7 @@ const conceptionConfig: CalculatorConfig = {
       },
       {
         question: 'Can I get pregnant from intercourse outside the fertile window?',
-        answer: 'No. Without a viable egg present, pregnancy cannot occur. Sperm survive up to 5 days in fertile cervical mucus, so intercourse up to 5 days before ovulation can result in pregnancy. After ovulation, the egg survives only 12–24 hours.',
+        answer: 'Pregnancy cannot occur without a viable egg, but the dates here are calendar estimates and ovulation can occur days earlier or later than predicted, so a day outside the estimated window is not guaranteed to be safe. Sperm survive up to 5 days in fertile cervical mucus, so intercourse up to 5 days before ovulation can result in pregnancy. After ovulation, the egg survives only 12–24 hours. This calculator is not a contraception method.',
       },
       {
         question: "How do I know if I'm ovulating?",

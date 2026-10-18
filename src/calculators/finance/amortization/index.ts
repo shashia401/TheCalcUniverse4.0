@@ -249,7 +249,7 @@ const amortizationConfig: CalculatorConfig = {
           id: 'newTerm',
           label: 'New Payoff Term with Extra Payments',
           value: newTermYears > 0
-            ? `${newTermYears} yr${newTermYears !== 1 ? 's' : ''} ${newTermMonths > 0 ? `${newTermMonths} mo` : ''}`
+            ? `${newTermYears} yr${newTermYears !== 1 ? 's' : ''}${newTermMonths > 0 ? ` ${newTermMonths} mo` : ''}`
             : `${newMonths} months`,
           color: 'positive' as const,
         },

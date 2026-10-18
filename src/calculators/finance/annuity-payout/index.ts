@@ -268,7 +268,7 @@ const annuityPayoutConfig: CalculatorConfig = {
       {
         scenario: 'You have $500,000 in retirement savings and want it to last 30 years with a 5% annual return. How much can you withdraw monthly?',
         inputs: { solveFor: 'payout', principal: '500000', annualReturn: '5', payoutFrequency: 'monthly', desiredYears: '30', inflationAdjust: 'adjusted' },
-        result: 'Monthly payout: $2,684.11/month. Inflation-adjusted: $1,093.05/month in today\'s dollars.',
+        result: 'Monthly payout: $2,684.11/month. Final-year payout in today\'s dollars (3% inflation): $1,105.82/month.',
         insight: 'The $2,684/month nominal payout sounds comfortable, but after 3% annual inflation over 30 years, it is worth only about $1,106/month in today\'s purchasing power. This is the "inflation trap" of fixed annuities — your check stays the same while prices rise. This is exactly why the 4% Rule includes an annual inflation adjustment: start at $1,667/month ($500K x 4% / 12) and increase by inflation each year.',
       },
       {

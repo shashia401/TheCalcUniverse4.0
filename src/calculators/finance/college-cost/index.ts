@@ -202,7 +202,7 @@ const collegeCostConfig: CalculatorConfig = {
       }
     }
 
-    const fmt = (n: number) => new Decimal(n).toFixed(2);
+    const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtLarge = (n: number) => {
       if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
       return `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;

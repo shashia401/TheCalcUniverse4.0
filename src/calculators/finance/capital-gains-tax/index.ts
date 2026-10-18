@@ -215,7 +215,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
         {
           id: 'gainLoss',
           label: 'Capital Gain / Loss',
-          value: `$${gain.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+          value: `${gain < 0 ? '-' : ''}$${Math.abs(gain).toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
           highlight: true,
           color: 'negative',
         },

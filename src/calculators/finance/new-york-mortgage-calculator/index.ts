@@ -224,7 +224,7 @@ const nyMortgageConfig: CalculatorConfig = {
       'Enter the New York home price — use $500,000 as a starting point for statewide median.',
       'Enter your down payment. First-time buyers can explore SONYMA (State of New York Mortgage Agency) programs.',
       'Select your loan term. 30-year fixed is most common in New York.',
-      'Enter the property tax rate. NY averages ~1.6% but varies from 0.8% (NYC) to 2.5% (upstate).',
+      'Enter the property tax rate. NY averages ~1.3% (Tax Foundation) but varies from under 1% in NYC to over 2.4% in some upstate counties.',
       'Select your STAR eligibility status to see estimated annual property tax savings.',
       'Review the results — remember New York also has state income tax (unlike Texas), which affects your overall housing budget.',
     ],

@@ -259,8 +259,9 @@ const rentalPropertyConfig: CalculatorConfig = {
       {
         id: 'dscr',
         label: 'Debt Service Coverage Ratio',
-        value: `${dscr.toFixed(2)}x`,
-        color: dscr >= 1.25 ? 'positive' : dscr >= 1.0 ? 'neutral' : 'negative',
+        // No loan means no debt service: a ratio is undefined, not "0.00x" (which reads as unable to pay).
+        value: annualDebtService > 0 ? `${dscr.toFixed(2)}x` : 'N/A (no loan)',
+        color: annualDebtService <= 0 ? 'neutral' : dscr >= 1.25 ? 'positive' : dscr >= 1.0 ? 'neutral' : 'negative',
       },
       {
         id: 'grm',

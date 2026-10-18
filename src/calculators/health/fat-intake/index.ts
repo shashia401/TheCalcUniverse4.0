@@ -133,7 +133,7 @@ const fatIntakeConfig: CalculatorConfig = {
       {
         id: 'fatCalories',
         label: 'Calories from Fat',
-        value: `${fmt(midG * 9)} kcal/day (${Math.round(midPct * 100)}% of ${fmt(calories)} kcal)`,
+        value: `${fmt(midG * 9)} kcal/day (${+(midPct * 100).toFixed(1)}% of ${fmt(calories)} kcal)`,
         color: 'neutral',
       },
     ];

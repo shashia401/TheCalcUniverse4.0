@@ -141,7 +141,7 @@ const paybackPeriodConfig: CalculatorConfig = {
       },
       {
         id: 'profitIndex',
-        label: projectLife > 0 ? 'Profitability Index' : 'Annual Cash Yield (cash flow ÷ investment)',
+        label: projectLife > 0 ? (useDiscounted ? 'Profitability Index' : 'Return Multiple (undiscounted cash ÷ investment)') : 'Annual Cash Yield (cash flow ÷ investment)',
         value: projectLife > 0 ? `${profitIndex.toFixed(2)}x` : `${(annualCashFlow / initialInvestment * 100).toFixed(1)}%`,
         color: profitIndex >= 1 ? 'positive' : 'negative',
       },

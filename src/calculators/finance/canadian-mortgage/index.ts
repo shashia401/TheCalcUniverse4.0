@@ -293,7 +293,8 @@ const canadianMortgageConfig: CalculatorConfig = {
     if (ltv > 0.80) {
       // Since Dec. 15, 2024 insured 30-year amortizations are allowed for first-time buyers and buyers of new builds
       if (years > 25 && values.firstTimeBuyer !== 'yes') return [{ id: 'error', label: 'CMHC Error', value: 'CMHC-insured mortgages (<20% down) are capped at 25-year amortization, except for first-time buyers (select "Yes" above) and buyers of new builds.', color: 'negative' as const, highlight: true }];
-      cmhcRate = cmhcPremiumRate(ltv);
+      // CMHC adds a 0.20% premium surcharge when the amortization is longer than 25 years
+      cmhcRate = cmhcPremiumRate(ltv) + (years > 25 ? 0.002 : 0);
       cmhcPremium = baseLoan * cmhcRate;
       principal = baseLoan + cmhcPremium;
     }
@@ -464,7 +465,7 @@ const canadianMortgageConfig: CalculatorConfig = {
       },
       {
         question: 'When is CMHC insurance required?',
-        answer: 'When down payment < 20%. Premiums range from 2.8% (15–19.99% down) to 4.0% (5–9.99% down). The premium is added to the mortgage principal — no lump-sum payment required. CMHC protects the lender, not you.',
+        answer: 'When down payment < 20%. Premiums range from 2.8% (15–19.99% down) to 4.0% (5–9.99% down), plus a 0.20% surcharge when the amortization is longer than 25 years. The premium is added to the mortgage principal — no lump-sum payment required. CMHC protects the lender, not you.',
       },
     ],
     citations: [

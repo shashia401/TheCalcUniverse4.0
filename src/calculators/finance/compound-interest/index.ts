@@ -2,6 +2,11 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import CompoundInterestPanel from './CompoundInterestPanel';
 
+// The monthly-contribution field only exists on the "With Contributions" tab; a value typed there must not
+// keep inflating the answer after the user switches back to "Standard" (the field is hidden, not cleared).
+const contribution = (v: Record<string, string>) =>
+  v.shape === 'standard' ? 0 : parseFloat(v.monthlyContribution) || 0;
+
 const compoundInterestSvg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto">
   <rect width="320" height="200" fill="var(--svg-f8fafc)" rx="6"/>
   <text x="160" y="18" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-1e293b)" font-family="system-ui,sans-serif">Compound vs Simple Interest</text>
@@ -92,7 +97,7 @@ const compoundInterestConfig: CalculatorConfig = {
   ],
   explainSteps: (values) => {
     const P = parseFloat(values.principal) || 0;
-    const monthly = parseFloat(values.monthlyContribution) || 0;
+    const monthly = contribution(values);
     const r = parseFloat(values.rate) / 100;
     const t = parseFloat(values.years);
     const n = parseFloat(values.compoundFrequency || '12');
@@ -155,7 +160,7 @@ const compoundInterestConfig: CalculatorConfig = {
   },
   calculate: (values) => {
     const P = parseFloat(values.principal) || 0;
-    const monthly = parseFloat(values.monthlyContribution) || 0;
+    const monthly = contribution(values);
     const r = parseFloat(values.rate) / 100;
     const t = parseFloat(values.years);
     const n = parseFloat(values.compoundFrequency || '12');
@@ -222,7 +227,7 @@ const compoundInterestConfig: CalculatorConfig = {
   },
   extraPanel: (values, results) => {
     const P = parseFloat(values.principal) || 0;
-    const monthly = parseFloat(values.monthlyContribution) || 0;
+    const monthly = contribution(values);
     const r = parseFloat(values.rate) / 100;
     const variance = parseFloat(values.rateVariance) / 100 || 0;
     const t = parseFloat(values.years);

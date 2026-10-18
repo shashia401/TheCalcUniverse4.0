@@ -348,7 +348,7 @@ const macroConfig: CalculatorConfig = {
       'Meal planning — design daily eating plans that hit precise gram targets for protein, carbs, and fat based on your body and goals',
       'Body recomposition — adjust macros to lose fat while preserving or building muscle by setting a calorie deficit with high protein',
       'Athletic performance — optimize carb intake around training sessions for energy and protein timing for recovery',
-      'Medical nutrition — manage conditions like diabetes (low-carb), kidney disease (protein restriction), or metabolic syndrome with targeted macro splits',
+      'Diet planning to discuss with a dietitian — if you have diabetes, kidney disease, or another condition that changes macro needs, use the splits here only as a starting point for that conversation (this calculator does not restrict protein or tailor carbohydrate for any medical condition)',
       'Flexible dieting ("If It Fits Your Macros") — track daily intake against targets without eliminating any food groups, improving long-term diet adherence',
     ],
     

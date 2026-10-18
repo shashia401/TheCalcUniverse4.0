@@ -123,7 +123,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
         {
           id: 'termInfo',
           label: 'Loan Term',
-          value: `${n} payments (${(n / 12).toFixed(1)} years)`,
+          value: `${n} payment${n !== 1 ? 's' : ''} (${(n / 12).toFixed(1)} years)`,
           color: 'neutral' as const,
         },
         {
@@ -244,7 +244,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
         {
           id: 'totalPayments',
           label: 'Total Number of Payments',
-          value: `${nRounded} payments (the last one may be smaller)`,
+          value: `${nRounded} payment${nRounded !== 1 ? 's' : ''} (the last one may be smaller)`,
           color: 'neutral' as const,
         },
         {
@@ -307,7 +307,7 @@ const paymentCalculatorConfig: CalculatorConfig = {
       'Credit card debt analysis: see how long it takes to pay off revolving credit card debt at minimum payments, and compare the impact of increasing your payment to a fixed amount each month.',
     ],
     explanation:
-      'This is the "solve for X" loan calculator. Most people know their budget (monthly payment) and want to know how large a loan they can afford. Others know the loan amount and want to find out how long it will take to pay it off at their current payment. All three calculations use the same amortization equation, just rearranged algebraically. The minimum payment warning shows the point at which your payment only covers interest and the balance never decreases — a critical threshold to understand, especially for credit card debt where minimum payments are often set just above this level. Understanding the relationship between these three variables — loan amount, payment, and term — is the foundation of smart borrowing. A $50 increase in monthly payment on a $25,000 loan at 7% APR ($495 to $545) shortens the term from 60 months to 54 months and saves about $520 in total interest.',
+      'This is the "solve for X" loan calculator. Most people know their budget (monthly payment) and want to know how large a loan they can afford. Others know the loan amount and want to find out how long it will take to pay it off at their current payment. All three calculations use the same amortization equation, just rearranged algebraically. The minimum payment warning shows the point at which your payment only covers interest and the balance never decreases — a critical threshold to understand, especially for credit card debt where minimum payments are often set just above this level. Understanding the relationship between these three variables — loan amount, payment, and term — is the foundation of smart borrowing. A $50 increase in monthly payment on a $25,000 loan at 7% APR ($495.03 to $545) shortens the term from 60 months to 54 months and saves about $520 in total interest.',
     faqs: [
       {
         question: 'How much can I afford to borrow at $500/month?',

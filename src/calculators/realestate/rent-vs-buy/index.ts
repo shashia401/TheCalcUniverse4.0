@@ -166,8 +166,11 @@ const rentVsBuyConfig: CalculatorConfig = {
     const closingCosts = params.homePrice * params.closingCostsPct;
     const loanAmount = params.homePrice * (1 - params.downPaymentPct);
     const monthlyMortgage = monthlyPayment(loanAmount, params.mortgageRate, 360);
+    // Year-1 monthly cost: P&I + tax + maintenance + insurance, plus PMI when the down payment is under 20%
+    // (the same PMI the net-cost model charges).
+    const monthlyPmi = params.downPaymentPct < 0.2 ? (loanAmount * params.pmiRate) / 12 : 0;
     const monthlyOwnership =
-      monthlyMortgage + (params.homePrice * (params.propertyTaxRate + params.maintenancePct + params.homeInsurancePct)) / 12;
+      monthlyMortgage + monthlyPmi + (params.homePrice * (params.propertyTaxRate + params.maintenancePct + params.homeInsurancePct)) / 12;
 
     const futureHomeValue = at.homeValue;
     const homeEquity = at.equity;
@@ -180,6 +183,8 @@ const rentVsBuyConfig: CalculatorConfig = {
       n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
     const buyWins = netBuyCost < netRentCost;
+    // Net cost can be negative (the renter's investment growth exceeds rent paid): keep the sign before the $.
+    const money = (n: number) => `${n < 0 ? '-' : ''}$${fmt(Math.abs(n))}`;
 
     const breakEvenLabel = breakEvenYear
       ? `Break-even at year ${breakEvenYear}`
@@ -190,7 +195,7 @@ const rentVsBuyConfig: CalculatorConfig = {
         id: 'breakEven',
         label: breakEvenLabel,
         value: breakEvenYear
-          ? `Buy if staying > ${breakEvenYear} ${breakEvenYear === 1 ? 'year' : 'years'}`
+          ? `Buy if staying ${breakEvenYear} ${breakEvenYear === 1 ? 'year' : 'years'} or more`
           : 'Renting is cheaper long-term at these inputs',
         interpretation: breakEvenYear
           ? `Buying's upfront costs (down payment, closing) need time to be offset by building equity instead of paying rent — sell before this point and you likely come out behind after transaction costs. This assumes steady rent and home-price growth; a hot rental market or slow appreciation shifts the break-even.`
@@ -207,13 +212,13 @@ const rentVsBuyConfig: CalculatorConfig = {
       {
         id: 'netBuyCost',
         label: `Net Cost to Buy (${years} yrs)`,
-        value: `$${fmt(netBuyCost)}`,
+        value: money(netBuyCost),
         color: 'neutral' as const,
       },
       {
         id: 'netRentCost',
         label: `Net Cost to Rent (${years} yrs)`,
-        value: `$${fmt(netRentCost)}`,
+        value: money(netRentCost),
         color: 'neutral' as const,
       },
       {
@@ -267,7 +272,7 @@ const rentVsBuyConfig: CalculatorConfig = {
       'Set closing costs (default 3%), annual property tax rate, and maintenance percentage. If unsure, keep the defaults which reflect national averages for typical single-family homes.',
       'Enter your current monthly rent, expected annual rent increase percentage, and renter\'s insurance premium. Rent increases compound year over year just like investment returns.',
       'Adjust the "Years You Plan to Stay" slider from 1 to 30 years and watch how the break-even indicator shifts. This is the most sensitive input in the model.',
-      'Compare the Net Cost to Buy versus Net Cost to Rent results. Buying wins over longer horizons of 7+ years; renting wins decisively for stays under 3-4 years.',
+      'Compare the Net Cost to Buy versus Net Cost to Rent results. Buying usually needs a longer stay to win and renting wins for short stays; how long depends mostly on the price-to-rent ratio, appreciation and the 7% investment return credited to renting, so read the break-even year the calculator gives you rather than a rule of thumb.',
       'If your break-even year is close to your planned stay length, try small adjustments to each input to test how sensitive the result is to your assumptions.',
     ],
     explanation:

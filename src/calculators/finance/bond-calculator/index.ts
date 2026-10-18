@@ -103,11 +103,15 @@ const bondCalculatorConfig: CalculatorConfig = {
     if (isNaN(faceValue) || isNaN(couponRate) || isNaN(marketPrice) || isNaN(yearsToMaturity)) return [];
     if (faceValue <= 0 || marketPrice <= 0 || yearsToMaturity <= 0) return [];
 
-    const ytm = calcYTM(faceValue, couponRate, marketPrice, yearsToMaturity, frequency);
+    // Cash flows only exist on whole coupon dates, so years x payments-per-year is rounded to a whole
+    // number of periods (e.g. 2.5 years of annual coupons is priced as 3 coupons).
+    const periods = Math.max(1, Math.round(yearsToMaturity * frequency));
+    const termYears = periods / frequency;
+    const ytm = calcYTM(faceValue, couponRate, marketPrice, termYears, frequency);
     const currentYield = ((faceValue * couponRate / 100) / marketPrice) * 100;
     const annualCoupon = faceValue * (couponRate / 100);
     const couponPaymentPerPeriod = annualCoupon / frequency;
-    const totalCoupons = couponPaymentPerPeriod * yearsToMaturity * frequency;
+    const totalCoupons = couponPaymentPerPeriod * periods;
     const capitalGainLoss = faceValue - marketPrice;
     const totalReturn = totalCoupons + capitalGainLoss;
 
@@ -129,7 +133,7 @@ const bondCalculatorConfig: CalculatorConfig = {
         value: fmtPct(ytm),
         highlight: true,
         interpretation: `YTM is the total return if you hold to maturity and reinvest every coupon at this same rate — that reinvestment assumption is the weak link, since real rates move. The bond is trading at a ${isDiscount ? 'discount' : isPremium ? 'premium' : 'par'} to face value, which is${isDiscount ? " why YTM runs above the coupon rate" : isPremium ? " why YTM runs below the coupon rate" : ' consistent with YTM matching the coupon rate'}.`,
-        color: ytm > couponRate ? 'positive' as const : ytm < couponRate ? 'negative' as const : 'neutral' as const,
+        color: isDiscount ? 'positive' as const : isPremium ? 'negative' as const : 'neutral' as const,
       },
       {
         id: 'currentYield',
@@ -175,9 +179,9 @@ const bondCalculatorConfig: CalculatorConfig = {
       {
         id: 'ytmVsCoupon',
         label: 'YTM vs. Coupon Rate',
-        value: ytm > couponRate
+        value: isDiscount
           ? `YTM (${fmtPct(ytm)}) > Coupon (${fmtPct(couponRate)}) — Discount bond confirms higher effective yield`
-          : ytm < couponRate
+          : isPremium
             ? `YTM (${fmtPct(ytm)}) < Coupon (${fmtPct(couponRate)}) — Premium bond confirms lower effective yield`
             : 'Equal — Bond trading at par value',
         color: 'neutral' as const,
@@ -198,7 +202,7 @@ const bondCalculatorConfig: CalculatorConfig = {
       caption: 'Bonds pay fixed coupon income over time plus return of face value at maturity — YTM accounts for both income and capital gain or loss',
     },
     formulaDescription:
-      'The Yield to Maturity is the internal rate of return (IRR) of all future cash flows discounted back to the current price. There is no closed-form algebraic solution — it requires iterative numerical methods. This calculator uses binary search until the discounted cash flows match the market price to within $0.0001. It assumes you buy on a coupon date, so accrued interest is ignored, and the yield is quoted on a bond-equivalent basis (periodic yield × payments per year).',
+      'The Yield to Maturity is the internal rate of return (IRR) of all future cash flows discounted back to the current price. There is no closed-form algebraic solution — it requires iterative numerical methods. This calculator uses binary search until the discounted cash flows match the market price to within $0.0001. It assumes you buy on a coupon date, so accrued interest is ignored, years to maturity multiplied by payments per year is rounded to a whole number of coupon periods, and the yield is quoted on a bond-equivalent basis (periodic yield × payments per year).',
     variables: [
       { symbol: 'YTM', name: 'Yield to Maturity', description: 'The annualized total return if you buy the bond at the current market price and hold it until maturity, assuming all coupons are reinvested at the same YTM rate. This is the single most important metric for bond comparison — it accounts for the coupon income, capital gain or loss, and time value of money.' },
       { symbol: 'Current Yield', name: 'Current Yield', description: 'Annual coupon payment divided by current market price. A simpler but less accurate measure than YTM — it ignores the capital gain/loss at maturity. A $1,000 bond at a 5% coupon rate trading at $950 has a current yield of $50/$950 = 5.26%, but a higher YTM that also captures the $50 capital gain at maturity.' },

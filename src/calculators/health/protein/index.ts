@@ -115,7 +115,7 @@ const proteinConfig: CalculatorConfig = {
         value: `${fmt(dailyMin)}–${fmt(dailyMax)} g/day · ${fmt(calFromProtein)} kcal`,
         highlight: true,
         color: 'positive',
-        interpretation: `The low end maintains muscle; the high end supports building it. Your body uses only about ${maxPerMeal}g per meal for muscle synthesis, so spreading intake across ~${mealsOptimal} meals beats one large dose. Protein also blunts hunger, which helps most on a calorie deficit.`,
+        interpretation: `The low end maintains muscle; the high end supports building it. A dose of about ${maxPerMeal} g (0.4 g/kg) per meal is enough to maximally stimulate muscle protein synthesis, so spreading intake across ~${mealsOptimal} meals is a sensible pattern (protein above that still counts toward your daily total). Protein also blunts hunger, which helps most on a calorie deficit.`,
       },
       {
         id: 'dailyTarget',
@@ -173,7 +173,7 @@ const proteinConfig: CalculatorConfig = {
       caption: 'Protein needs are 1.6-2.2 g/kg per day for active individuals; spread across 3-5 meals',
     },
     formulaDescription:
-      'For active people the evidence-based range of 1.6–2.2 g/kg per day comes from the ISSN, ACSM, and international sports nutrition consensus statements; for people who are mostly sedentary the recommended dietary allowance is 0.8 g/kg, which is the floor of the Maintain range here. Higher intakes within the range support muscle gain and preservation during calorie deficits. The body has a per-meal ceiling for muscle protein synthesis (MPS) of approximately 0.4 g/kg.',
+      'For active people, the International Society of Sports Nutrition (2017) recommends 1.4–2.0 g/kg per day, and the Morton et al. 2018 meta-analysis (Br J Sports Med 52:376) found muscle-gain benefits levelling off at about 1.6 g/kg per day, with 2.2 g/kg at the top of its confidence interval; the 1.6–2.2 g/kg range used here is drawn from that analysis, and the endurance range of 1.4–1.8 g/kg is a conventional range rather than a quoted guideline. For people who are mostly sedentary the recommended dietary allowance is 0.8 g/kg, which is the floor of the Maintain range here. Higher intakes within the range support muscle gain and preservation during calorie deficits. The body has a per-meal ceiling for muscle protein synthesis (MPS) of approximately 0.4 g/kg.',
     variables: [
       { symbol: 'MPS', name: 'Muscle Protein Synthesis', description: 'The biological process of building new muscle tissue. Stimulated by resistance training and dietary protein. Has a per-meal ceiling of ~0.4 g/kg.' },
       { symbol: 'Leucine', name: 'Leucine Threshold', description: 'The amino acid trigger for MPS. A meal needs ~2–3g of leucine (found in ~25–30g of quality protein) to maximally stimulate MPS.' },

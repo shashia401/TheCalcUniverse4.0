@@ -109,7 +109,7 @@ describe('capital-gains-tax', () => {
       filingStatus: 'Single',
       stateTaxRate: '0',
     });
-    expect(getValue(r, 'gainLoss')).toContain('-5,000');
+    expect(getValue(r, 'gainLoss')).toContain('-$5,000');
     expect(getValue(r, 'gainLoss')).toContain('-');
   });
 

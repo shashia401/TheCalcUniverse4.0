@@ -215,7 +215,7 @@ const k401Config: CalculatorConfig = {
       {
         id: 'returnsPct',
         label: 'Compounding Returns as % of Total Balance',
-        value: `${((growthReturns / balanceNum) * 100).toFixed(1)}%`,
+        value: `${balanceNum > 0 ? ((growthReturns / balanceNum) * 100).toFixed(1) : '0.0'}%`,
         color: 'positive' as const,
       },
       {
