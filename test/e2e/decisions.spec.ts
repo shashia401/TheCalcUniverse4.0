@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // The "Can I afford this house?" decision tool, against the built site.
 const URL = '/decisions/can-i-afford-a-house/';
-const ready = (page: import('@playwright/test').Page) => page.locator('[data-hd-ready="true"]').waitFor({ timeout: 15_000 });
+const ready = (page: import('@playwright/test').Page) => page.locator('[data-decision-ready="true"]').waitFor({ timeout: 15_000 });
 
 test.describe('decision tool: can I afford this house', () => {
   test('ships the default verdict and numbers in the static HTML (no JavaScript)', async ({ page }) => {
@@ -68,5 +68,20 @@ test.describe('decision tool: can I afford this house', () => {
     await ready(page);
     await page.waitForLoadState('networkidle');
     expect(errors).toEqual([]);
+  });
+});
+
+test.describe('decision tools index and navigation', () => {
+  test('the index lists the tools and the header links to it', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Decisions' }).click();
+    await expect(page).toHaveURL(/\/decisions\/$/);
+    await expect(page.locator('h1')).toContainText('Decision tools');
+    await expect(page.getByRole('link', { name: /Can I afford this house\?/ }).first()).toBeVisible();
+  });
+
+  test('a related calculator links to its decision tool', async ({ page }) => {
+    await page.goto('/finance/house-affordability-calculator/');
+    await expect(page.getByRole('link', { name: /Can I afford this house\?/ }).first()).toHaveAttribute('href', '/decisions/can-i-afford-a-house/');
   });
 });

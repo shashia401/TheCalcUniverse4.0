@@ -442,7 +442,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           className={
             compact
               ? 'border-t border-[var(--border-warm)] pt-5'
-              : 'mt-6 border-t border-[var(--border-warm)] pt-5 lg:mt-0 lg:rounded-xl lg:border lg:bg-[var(--surface-bg)] lg:p-5'
+              : 'mt-6 border-t border-[var(--border-warm)] pt-5 lg:sticky lg:top-24 lg:mt-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:rounded-xl lg:border lg:bg-[var(--surface-bg)] lg:p-5'
           }
           aria-live="polite"
           aria-atomic="false"

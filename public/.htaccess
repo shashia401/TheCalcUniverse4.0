@@ -6,6 +6,9 @@
 # llms.txt specifically since it's served as bare text/plain.
 AddDefaultCharset UTF-8
 
+# Never generate a directory listing (its column-sort links are the ?ND / ?SA / ?MA URLs Google found)
+Options -Indexes
+
 # Custom 404 page
 ErrorDocument 404 /404.html
 
@@ -27,6 +30,14 @@ ErrorDocument 404 /404.html
   RewriteRule ^ https://thecalcuniverse.com%{REQUEST_URI} [R=301,L]
 
   RewriteRule ^sitemap\.xml$ /sitemap-index.xml [L]
+
+  # Query strings Google crawled from older builds that are not real pages: the host's directory-listing sort
+  # links (?ND ?NA ?MA ?MD ?SA ?SD ?DA ?DD) and the unfilled "?expression={...}" template. 301 to the clean URL
+  # so they consolidate into the page itself instead of piling up as duplicates. Real calculator links carry
+  # named parameters (?loanAmount=...), which never match these two shapes.
+  RewriteCond %{QUERY_STRING} ^[NMSD][AD]$ [OR]
+  RewriteCond %{QUERY_STRING} ^expression=(%7B|\{) [NC]
+  RewriteRule ^(.*)$ /$1? [R=301,L]
 
   # Retired duplicate blog posts: 301 straight to the stronger page, with or without the
   # legacy /en/ prefix (so /en/blog/<old> is one hop, not two).

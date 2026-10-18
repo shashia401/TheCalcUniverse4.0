@@ -16,6 +16,7 @@ import { getBlogPostBySlug } from '../../../lib/blog';
 import { buildCalculatorSchemas } from '../../../lib/jsonld';
 import { buildInitialForm } from '../../../lib/initialForm';
 import { auditedOn, formatDate } from '../../../lib/verification';
+import { decisionToolFor } from '../../../data/decisionTools';
 import { SITE_NAME, BASE_URL } from '../../../config/constants';
 
 export async function getStaticPaths() {
@@ -96,8 +97,8 @@ const sampleHighlight = sampleResults.find((r) => r.highlight) ?? sampleResults[
 // The form itself, at its default values, rendered into the static HTML (null for the few calculators
 // with custom React inputs, which keep the placeholder).
 const initialForm = buildInitialForm(config);
-// The four calculators that are steps of the "Can I afford this house?" decision tool link to it.
-const homeBuyingIds = new Set(['house-affordability-calculator', 'home-affordability-calculator', 'dti-ratio-calculator', 'closing-costs-calculator', 'home-rent-vs-buy-calculator', 'rent-vs-buy-calculator']);
+// A calculator that is a step of a decision tool links to it (src/data/decisionTools.ts).
+const decisionTool = decisionToolFor(entry.id);
 // When an audit test last pinned this calculator to an outside source (undefined = not audited yet).
 const checkedOn = auditedOn(entry.id);
 const canonicalUrl = `${BASE_URL}/${entry.categorySlug}/${entry.id}/`;
@@ -168,13 +169,13 @@ const tocItems = [
           {/* The only hydrated island on the page */}
           <CalculatorForm client:load calculatorId={entry.id} initial={initialForm} />
 
-          {homeBuyingIds.has(entry.id) && (
+          {decisionTool && (
             <a
-              href="/decisions/can-i-afford-a-house/"
+              href={`/decisions/${decisionTool.slug}/`}
               class="mt-4 flex items-center justify-between gap-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] px-4 py-3 text-sm transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-80"
             >
-              <span class="text-[var(--surface-text-secondary)]"><strong class="text-[var(--surface-text)]">Buying a home?</strong> See affordability, debt-to-income, closing costs and rent versus buy answered together.</span>
-              <span class="shrink-0 font-semibold text-[var(--brand-ink)]">Can I afford this house? →</span>
+              <span class="text-[var(--surface-text-secondary)]"><strong class="text-[var(--surface-text)]">Making a decision?</strong> {decisionTool.blurb}</span>
+              <span class="shrink-0 font-semibold text-[var(--brand-ink)]">{decisionTool.title} →</span>
             </a>
           )}
 

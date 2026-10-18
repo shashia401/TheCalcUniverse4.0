@@ -13,6 +13,7 @@ import { FlaskConical, FileText, ShieldCheck, Lock } from 'lucide-react';
 import { SITE_NAME, BASE_URL } from '../config/constants';
 import { organizationSchema } from '../lib/jsonld';
 import { verification } from '../lib/verification';
+import { decisionTools } from '../data/decisionTools';
 
 const categories = getCategories().filter((cat) => cat.count > 0);
 const total = calculatorRegistry.length;
@@ -159,19 +160,28 @@ const schemas = [
         </ul>
       </section>
 
-      {/* ── Decision tool ────────────────────────────────────────────── */}
-      <section aria-label="Decision tool" class="py-4">
-        <a
-          href="/decisions/can-i-afford-a-house/"
-          class="group flex flex-col gap-3 rounded-2xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-6 shadow-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--brand-default)] hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-default)] active:translate-y-0 motion-reduce:transform-none sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div class="max-w-2xl">
-            <p class="text-xs font-semibold uppercase tracking-wide text-[var(--surface-text-muted)]">Decision tool</p>
-            <h2 class="mt-1 text-xl font-bold text-[var(--surface-text)]">Can I afford this house?</h2>
-            <p class="mt-1 text-[var(--surface-text-secondary)]">One set of numbers, four answers: your monthly payment, debt-to-income, the cash to close, and whether buying beats renting. Save scenarios and share a link.</p>
-          </div>
-          <span class="shrink-0 rounded-lg bg-[var(--brand-default)] px-5 py-2.5 text-sm font-semibold text-white transition-colors group-hover:bg-[var(--brand-hover)]">Check a house →</span>
-        </a>
+      {/* ── Decision tools ───────────────────────────────────────────── */}
+      <section aria-label="Decision tools" class="py-4">
+        <div class="mb-3 flex items-baseline justify-between gap-4">
+          <h2 class="text-xl font-bold text-[var(--surface-text)]">Decision tools</h2>
+          <a href="/decisions/" class="text-sm font-medium text-[var(--brand-ink)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-80">All decision tools →</a>
+        </div>
+        <ul class="grid gap-4 list-none p-0 md:grid-cols-2 lg:grid-cols-3">
+          {decisionTools.map((t) => (
+            <li>
+              <a
+                href={`/decisions/${t.slug}/`}
+                class="group flex h-full flex-col justify-between gap-4 rounded-2xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-5 shadow-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--brand-default)] hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-default)] active:translate-y-0 motion-reduce:transform-none"
+              >
+                <div>
+                  <h3 class="text-lg font-bold text-[var(--surface-text)]">{t.title}</h3>
+                  <p class="mt-1 text-sm text-[var(--surface-text-secondary)]">{t.blurb}</p>
+                </div>
+                <span class="self-start text-sm font-semibold text-[var(--brand-ink)] group-hover:underline">{t.cta} →</span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* ── Categories ───────────────────────────────────────────────── */}
