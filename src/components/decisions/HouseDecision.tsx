@@ -5,6 +5,7 @@
 // SSR: the server renders the default scenario, so the page ships real numbers in its HTML. After
 // hydration the URL query (a shared link) and saved scenarios are applied.
 import { useEffect, useMemo, useState } from 'react';
+import { GroupedNumberInput } from '../calculator/GroupedNumberInput';
 import {
   evaluateHouse,
   fmtMoney,
@@ -87,7 +88,7 @@ const VERDICT: Record<Verdict, { title: string; line: string; box: string; badge
 };
 
 const inputCls =
-  'w-full rounded-lg border border-[var(--border-warm)] bg-[var(--surface-bg)] px-3 py-2 text-sm text-[var(--surface-text)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-default)] focus:border-[var(--brand-default)]';
+  'min-h-[44px] w-full rounded-lg border border-[var(--border-warm)] bg-[var(--surface-bg)] px-3 py-2 text-base sm:text-sm text-[var(--surface-text)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-default)] focus:border-[var(--brand-default)]';
 const btnPrimary =
   'rounded-lg bg-[var(--brand-default)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] active:bg-[var(--brand-active)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-default)]';
 const btnGhost =
@@ -201,15 +202,26 @@ export default function HouseDecision() {
                     <label htmlFor={`hd-${f.key}`} className="mb-1 block text-sm font-medium text-[var(--surface-text)]">{f.label}</label>
                     <div className="flex items-center gap-2">
                       {f.prefix && <span className="text-sm text-[var(--surface-text-muted)]" aria-hidden="true">{f.prefix}</span>}
-                      <input
-                        id={`hd-${f.key}`}
-                        type="text"
-                        inputMode="decimal"
-                        value={raw[f.key]}
-                        onChange={(e) => set(f.key, e.target.value)}
-                        aria-invalid={bad || undefined}
-                        className={inputCls}
-                      />
+                      {f.prefix === '$' ? (
+                        <GroupedNumberInput
+                          id={`hd-${f.key}`}
+                          rawValue={raw[f.key]}
+                          prefix="$"
+                          inputMode="decimal"
+                          className={inputCls}
+                          onRawChange={(v) => set(f.key, v)}
+                        />
+                      ) : (
+                        <input
+                          id={`hd-${f.key}`}
+                          type="text"
+                          inputMode="decimal"
+                          value={raw[f.key]}
+                          onChange={(e) => set(f.key, e.target.value)}
+                          aria-invalid={bad || undefined}
+                          className={inputCls}
+                        />
+                      )}
                     </div>
                     {f.suffix && <p className="mt-1 text-tiny text-[var(--surface-text-muted)]">{f.suffix}</p>}
                     {f.help && <p className="text-tiny text-[var(--surface-text-muted)]">{f.help}</p>}

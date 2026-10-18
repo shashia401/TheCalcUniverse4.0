@@ -27,16 +27,17 @@ crawled in August under the old client-rendered site, so the verdict predates th
 - [x] B5 Public corrections log at /corrections/ (30 entries, each traceable to a commit; footer and methodology link to it). Add new entries to `src/data/corrections.ts`
 - [ ] B6 Calculator page structure and added value over competitors (from the owner's four action items):
   - [x] B6a Result placement: desktop result panel beside the inputs (B2); phones and tablets get a slim answer strip above the first input. Verify on a real phone width after deploy
-  - [ ] B6b Tile layout: inputs, result, related tools in a tidy responsive card grid, less clutter on desktop and mobile
+  - [x] B6b (first pass) Explanations are collapsible: the formula card stays open, Worked Examples / FAQs / Sources open, the rest collapsed (`<details>`, still in the HTML). Inputs are 44px tall with 16px text on phones; trust chips are 14px. Still open: related-tools tile grid, spacing and type scale pass
   - [ ] B6c Clear explanation right under the tool: formula, variables, and the step-by-step logic with the visitor's own numbers
   - [ ] B6d Differentiation that competitors lack: live step-by-step solutions (only 12 of 350 calculators have `explainSteps`; do the top 40 by search demand first, one category per agent), real-world worked examples (198 of 350 have them), reference tables, edge-case comparisons. Each addition must be correct by the same audit standard as the numbers
-- [ ] B7 Replace the generic graph-paper hero with a distinctive one
+- [ ] B7 Replace the generic graph-paper hero with a distinctive one (also recolour its amber eyebrow; amber is one highlight per view)
+- [ ] B9 Mobile: confirm the answer strip, 44px inputs and the collapsed sections on a real phone after deploy
 
 ## C. Decision tools (the traffic strategy)
 
-- [ ] C1 "Can I afford this house?" flow: affordability, DTI, closing costs, rent vs buy, numbers carried between steps
-- [ ] C2 Saved and comparable scenarios, one shareable link for the whole flow
-- [ ] C3 Repeat the pattern for other high-intent questions (car, loan, retirement)
+- [x] C1 "Can I afford this house?" at /decisions/can-i-afford-a-house/: one form, four linked answers (budget, DTI, cash to close, rent vs buy) and a verdict; engine in `src/lib/houseDecision.ts` reuses the audited pieces (12 unit tests vs independent Python values, 6 e2e tests). Deep links carry the inputs into the full calculators; the four home-buying calculators and the homepage link back to it
+- [x] C2 Up to four saved scenarios side by side (kept in the browser), and a link that carries every input
+- [ ] C3 Repeat the pattern for other high-intent questions ("Can I afford this car?", "Should I refinance?", "Am I saving enough to retire?"); copy `houseDecision.ts` + `HouseDecision.tsx`, reuse the audited calculators. Also: add the decision tools to the header/footer and to the sitemap-driven category pages
 - [ ] C4 API/MCP (post-launch, per ROADMAP.md)
 
 ## D. Quality

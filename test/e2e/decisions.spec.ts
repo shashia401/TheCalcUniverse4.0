@@ -31,8 +31,8 @@ test.describe('decision tool: can I afford this house', () => {
   test('a shared link seeds every input', async ({ page }) => {
     await page.goto(URL + '?income=150000&price=500000&down=25&rate=6');
     await ready(page);
-    await expect(page.locator('#hd-income')).toHaveValue('150000');
-    await expect(page.locator('#hd-price')).toHaveValue('500000');
+    await expect(page.locator('#hd-income')).toHaveValue('150,000');
+    await expect(page.locator('#hd-price')).toHaveValue('500,000');
     await expect(page.locator('#hd-downPct')).toHaveValue('25');
     await expect(page.locator('#hd-rate')).toHaveValue('6');
   });

@@ -96,6 +96,8 @@ const sampleHighlight = sampleResults.find((r) => r.highlight) ?? sampleResults[
 // The form itself, at its default values, rendered into the static HTML (null for the few calculators
 // with custom React inputs, which keep the placeholder).
 const initialForm = buildInitialForm(config);
+// The four calculators that are steps of the "Can I afford this house?" decision tool link to it.
+const homeBuyingIds = new Set(['house-affordability-calculator', 'home-affordability-calculator', 'dti-ratio-calculator', 'closing-costs-calculator', 'home-rent-vs-buy-calculator', 'rent-vs-buy-calculator']);
 // When an audit test last pinned this calculator to an outside source (undefined = not audited yet).
 const checkedOn = auditedOn(entry.id);
 const canonicalUrl = `${BASE_URL}/${entry.categorySlug}/${entry.id}/`;
@@ -136,23 +138,23 @@ const tocItems = [
       {/* Trust signals — only verifiable facts. We do NOT show a "reviewed by
           [expert]" badge unless a real, named review happened; instead we link
           to how every formula is tested + sourced. */}
-      <div class="flex flex-wrap items-center gap-2 mb-6 text-tiny">
-        <a href="/methodology/" class="inline-flex items-center gap-1.5 rounded-full border border-accent-emerald-400/50 bg-accent-emerald-50 px-2.5 py-1 font-medium text-accent-emerald-700 transition-colors hover:border-accent-emerald-500 dark:border-emerald-800/60 dark:bg-emerald-950/30 dark:text-emerald-400">
+      <div class="flex flex-wrap items-center gap-2 mb-6 text-sm">
+        <a href="/methodology/" class="inline-flex items-center gap-1.5 rounded-full border border-accent-emerald-400/50 bg-accent-emerald-50 px-3 py-1.5 font-medium text-accent-emerald-700 transition-colors hover:border-accent-emerald-500 dark:border-emerald-800/60 dark:bg-emerald-950/30 dark:text-emerald-400">
           ✓ Tested formula &amp; cited sources
         </a>
         {checkedOn ? (
-          <a href="/corrections/" class="inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-2.5 py-1 font-medium text-[var(--surface-text-muted)] transition-colors hover:border-[var(--brand-default)] hover:text-[var(--brand-ink)]">
+          <a href="/corrections/" class="inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-3 py-1.5 font-medium text-[var(--surface-text-muted)] transition-colors hover:border-[var(--brand-default)] hover:text-[var(--brand-ink)]">
             Checked against independent sources · {formatDate(checkedOn)}
           </a>
         ) : (
           entry.lastVerified && (
-            <span class="inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-2.5 py-1 font-medium text-[var(--surface-text-muted)]">
+            <span class="inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-3 py-1.5 font-medium text-[var(--surface-text-muted)]">
               Formula reviewed {formatDate(entry.lastVerified)}
             </span>
           )
         )}
-        <span class="inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-2.5 py-1 font-medium text-[var(--surface-text-muted)]">
-          Runs in your browser — inputs never sent anywhere
+        <span class="inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--surface-card)] px-3 py-1.5 font-medium text-[var(--surface-text-muted)]">
+          Private: runs in your browser
         </span>
       </div>
 
@@ -165,6 +167,16 @@ const tocItems = [
         <div class="min-w-0">
           {/* The only hydrated island on the page */}
           <CalculatorForm client:load calculatorId={entry.id} initial={initialForm} />
+
+          {homeBuyingIds.has(entry.id) && (
+            <a
+              href="/decisions/can-i-afford-a-house/"
+              class="mt-4 flex items-center justify-between gap-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] px-4 py-3 text-sm transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-80"
+            >
+              <span class="text-[var(--surface-text-secondary)]"><strong class="text-[var(--surface-text)]">Buying a home?</strong> See affordability, debt-to-income, closing costs and rent versus buy answered together.</span>
+              <span class="shrink-0 font-semibold text-[var(--brand-ink)]">Can I afford this house? →</span>
+            </a>
+          )}
 
           {/* Static sample result for the few calculators whose form can't be rendered into the
               HTML (custom React inputs, so no initialForm). Everywhere else the form itself

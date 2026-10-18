@@ -3,7 +3,12 @@
 // scripts/check-svg-safety.mjs in CI), how-to, quick reference, common uses,
 // explanation, worked examples, FAQs, pro tips, limitations, citations.
 // A student should be able to learn the method from this page alone.
+//
+// Layout: the formula card (the proof) is always visible. Every other section is a native <details>:
+// scannable instead of a wall of text, still in the HTML for crawlers, and it works without JavaScript.
+// Examples, FAQs and Sources start open because the page's contents links point at them.
 
+import type { ReactNode } from 'react';
 import type { EducationalContent } from '../../types/calculator';
 import { splitIntoParagraphs } from '../../utils/paragraphSplit';
 
@@ -20,9 +25,34 @@ interface Props {
 
 const card = 'bg-[var(--surface-card)] border border-[var(--border-warm)] rounded-xl p-6';
 
+function Section({ title, id, open, children }: { title: string; id?: string; open?: boolean; children: ReactNode }) {
+  return (
+    <details id={id} open={open || undefined} className={`${card} group scroll-mt-20`}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--brand-default)] [&::-webkit-details-marker]:hidden">
+        <h2 className="text-lg font-bold">{title}</h2>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="shrink-0 text-[var(--surface-text-muted)] transition-transform duration-200 group-open:rotate-180"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </summary>
+      <div className="mt-4">{children}</div>
+    </details>
+  );
+}
+
 export default function EducationalSection({ content, calculatorTitle, customInputIds }: Props) {
   return (
-    <div className="space-y-8 text-[var(--surface-text)]">
+    <div className="space-y-4 text-[var(--surface-text)]">
 
       {/* Formula + variables: the heart of "see the work" */}
       {content.formula && (
@@ -83,70 +113,9 @@ export default function EducationalSection({ content, calculatorTitle, customInp
         </figure>
       )}
 
-      {/* How to use */}
-      {content.howToUse && content.howToUse.length > 0 && (
-        <div className={card}>
-          <h2 className="text-lg font-bold mb-4">How to Use</h2>
-          <ol className="space-y-2 list-decimal list-inside">
-            {content.howToUse.map((step, i) => (
-              <li key={i} className="text-[var(--surface-text-secondary)]">{step}</li>
-            ))}
-          </ol>
-        </div>
-      )}
-
-      {/* Quick reference table */}
-      {content.quickReference && content.quickReference.length > 0 && (
-        <div className={card}>
-          <h2 className="text-lg font-bold mb-4">Quick Reference</h2>
-          <div className="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]" tabIndex={0} role="region" aria-label="Quick reference table">
-            <table className="w-full text-sm">
-              <tbody>
-                {content.quickReference.map((row) => (
-                  <tr key={row.label} className="border-b border-[var(--border-warm)] last:border-b-0">
-                    <td className="py-2 pr-4 font-mono font-medium">{row.label}</td>
-                    <td className="py-2 font-mono text-[var(--surface-text-secondary)]">{row.value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Common uses */}
-      {content.commonUses && content.commonUses.length > 0 && (
-        <div className={card}>
-          <h2 className="text-lg font-bold mb-3">Common Uses</h2>
-          <ul className="space-y-2">
-            {content.commonUses.map((use, i) => (
-              <li key={i} className="text-[var(--surface-text-secondary)] flex gap-2">
-                <span className="text-[var(--brand-ink)]">•</span>
-                {use}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Long-form explanation */}
-      {content.explanation && (
-        <div className={card}>
-          <h2 className="text-lg font-bold mb-3">Understanding the Result</h2>
-          <div className="space-y-3">
-            {splitIntoParagraphs(content.explanation).map((para, i) => (
-              <p key={i} className="text-[var(--surface-text-secondary)] whitespace-pre-line leading-relaxed">
-                {para}
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Worked examples: the "show the substitution" moment */}
       {content.workedExamples && content.workedExamples.length > 0 && (
-        <div className={card} id="examples">
-          <h2 className="text-lg font-bold mb-4">Worked Examples</h2>
+        <Section title="Worked Examples" id="examples" open>
           <div className="space-y-6">
             {content.workedExamples.map((ex, i) => (
               <div key={i} className="border-l-4 border-[var(--brand-default)] pl-4">
@@ -164,13 +133,54 @@ export default function EducationalSection({ content, calculatorTitle, customInp
               </div>
             ))}
           </div>
-        </div>
+        </Section>
+      )}
+
+      {/* Long-form explanation */}
+      {content.explanation && (
+        <Section title="Understanding the Result">
+          <div className="space-y-3">
+            {splitIntoParagraphs(content.explanation).map((para, i) => (
+              <p key={i} className="text-[var(--surface-text-secondary)] whitespace-pre-line leading-relaxed">
+                {para}
+              </p>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* How to use */}
+      {content.howToUse && content.howToUse.length > 0 && (
+        <Section title="How to Use">
+          <ol className="space-y-2 list-decimal list-inside">
+            {content.howToUse.map((step, i) => (
+              <li key={i} className="text-[var(--surface-text-secondary)]">{step}</li>
+            ))}
+          </ol>
+        </Section>
+      )}
+
+      {/* Quick reference table */}
+      {content.quickReference && content.quickReference.length > 0 && (
+        <Section title="Quick Reference">
+          <div className="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]" tabIndex={0} role="region" aria-label="Quick reference table">
+            <table className="w-full text-sm">
+              <tbody>
+                {content.quickReference.map((row) => (
+                  <tr key={row.label} className="border-b border-[var(--border-warm)] last:border-b-0">
+                    <td className="py-2 pr-4 font-mono font-medium">{row.label}</td>
+                    <td className="py-2 font-mono text-[var(--surface-text-secondary)]">{row.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Section>
       )}
 
       {/* FAQs */}
       {content.faqs && content.faqs.length > 0 && (
-        <div className={card} id="faqs">
-          <h2 className="text-lg font-bold mb-4">Frequently Asked Questions</h2>
+        <Section title="Frequently Asked Questions" id="faqs" open>
           <dl className="space-y-4">
             {content.faqs.map((faq, i) => (
               <div key={i}>
@@ -179,13 +189,26 @@ export default function EducationalSection({ content, calculatorTitle, customInp
               </div>
             ))}
           </dl>
-        </div>
+        </Section>
+      )}
+
+      {/* Common uses */}
+      {content.commonUses && content.commonUses.length > 0 && (
+        <Section title="Common Uses">
+          <ul className="space-y-2">
+            {content.commonUses.map((use, i) => (
+              <li key={i} className="text-[var(--surface-text-secondary)] flex gap-2">
+                <span className="text-[var(--brand-ink)]">•</span>
+                {use}
+              </li>
+            ))}
+          </ul>
+        </Section>
       )}
 
       {/* Pro tips */}
       {content.proTips && content.proTips.length > 0 && (
-        <div className={card}>
-          <h2 className="text-lg font-bold mb-3">Pro Tips</h2>
+        <Section title="Pro Tips">
           <ul className="space-y-2">
             {content.proTips.map((tip, i) => (
               <li key={i} className="text-[var(--surface-text-secondary)] flex gap-2">
@@ -194,13 +217,12 @@ export default function EducationalSection({ content, calculatorTitle, customInp
               </li>
             ))}
           </ul>
-        </div>
+        </Section>
       )}
 
       {/* Limitations */}
       {content.limitations && content.limitations.length > 0 && (
-        <div className={card}>
-          <h2 className="text-lg font-bold mb-3">Limitations to Know</h2>
+        <Section title="Limitations to Know">
           <ul className="space-y-2">
             {content.limitations.map((lim, i) => (
               <li key={i} className="text-[var(--surface-text-secondary)] flex gap-2">
@@ -209,13 +231,12 @@ export default function EducationalSection({ content, calculatorTitle, customInp
               </li>
             ))}
           </ul>
-        </div>
+        </Section>
       )}
 
       {/* Citations */}
       {content.citations && content.citations.length > 0 && (
-        <div className={card} id="sources">
-          <h2 className="text-lg font-bold mb-3">Sources</h2>
+        <Section title="Sources" id="sources" open>
           <ul className="space-y-1.5 text-sm">
             {content.citations.map((c, i) => (
               <li key={i}>
@@ -230,7 +251,7 @@ export default function EducationalSection({ content, calculatorTitle, customInp
               </li>
             ))}
           </ul>
-        </div>
+        </Section>
       )}
 
     </div>
