@@ -86,9 +86,13 @@ test.describe('full-site structural audit', () => {
         findings.push(`${route}: horizontal overflow (${overflow}px wider than viewport)`);
       }
 
+      // Hydration proof: the island sets data-calc-ready="true" once the live calculator has loaded. Some
+      // calculators legitimately show no result until you type (empty-state panel), so "Results" text alone
+      // is not a reliable signal; either one counts.
+      const hydrated = (await page.locator('[data-calc-ready="true"]').count()) > 0;
       const hasResults = await page.getByText('Results', { exact: false }).first().isVisible().catch(() => false);
-      if (!hasResults) {
-        findings.push(`${route}: no "Results" section detected (hydration may have failed)`);
+      if (!hydrated && !hasResults) {
+        findings.push(`${route}: calculator did not hydrate (no data-calc-ready marker and no "Results" text)`);
       }
 
       if (consoleErrors.length) {
