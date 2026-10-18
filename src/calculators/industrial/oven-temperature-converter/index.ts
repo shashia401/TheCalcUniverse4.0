@@ -1,5 +1,5 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import OvenTempPanel from './OvenTempPanel';
 import { closestGasMark, cToF, fToC, gasMarkToTemps } from '../../../utils/ovenTemp';
 
@@ -14,6 +14,68 @@ function getOvenTerm(celsius: number): string {
   const row = closestGasMark(celsius);
   if (row) return `${row.description} oven (nearest gas mark: ${row.celsius}°C / ${row.fahrenheit}°F)`;
   return celsius < 110 ? 'Below typical oven temperature range' : 'Above typical oven temperature range (very hot)';
+}
+
+interface OvenConversion {
+  val: number;
+  from: string;
+  celsius: number;
+  fahrenheit: number;
+  /** True when the input was a gas mark that fell between two table rows (so the temperatures are interpolated). */
+  interpolated: boolean;
+  gasMarkLabel: string;
+  description: string;
+  resultValue: string;
+}
+
+/** One pure conversion shared by calculate() and explainSteps(), so the steps can never disagree with the result. */
+function convertOven(values: Record<string, string>): OvenConversion | null {
+  const val = parseFloat(values.value);
+  const from = values.from || 'c';
+  const to = values.to || 'f';
+
+  if (isNaN(val)) return null;
+
+  let celsius: number;
+  let fahrenheit: number;
+  let interpolated = false;
+
+  // Convert input to celsius and fahrenheit
+  if (from === 'c') {
+    celsius = val;
+    fahrenheit = cToF(celsius);
+  } else if (from === 'f') {
+    fahrenheit = val;
+    celsius = fToC(fahrenheit);
+  } else if (from === 'gas') {
+    const temps = gasMarkToTemps(val);
+    if (!temps) return null;
+    celsius = temps.celsius;
+    fahrenheit = temps.fahrenheit;
+    interpolated = !temps.exact;
+  } else {
+    return null;
+  }
+
+  // Determine gas mark for display
+  const gasMarkLabel = celsiusToGasMarkLabel(celsius);
+
+  // Determine oven term
+  const description = getOvenTerm(celsius);
+
+  // Build the result label based on target unit
+  let resultValue: string;
+  if (to === 'c') {
+    resultValue = `${val}°${from === 'gas' ? 'Gas Mark' : from.toUpperCase()} = ${celsius.toFixed(1)}°C`;
+  } else if (to === 'f') {
+    resultValue = `${val}°${from === 'gas' ? 'Gas Mark' : from.toUpperCase()} = ${fahrenheit.toFixed(1)}°F`;
+  } else if (to === 'gas') {
+    resultValue = `${val}°${from === 'gas' ? 'Gas Mark' : from.toUpperCase()} = ${gasMarkLabel}`;
+  } else {
+    resultValue = `${celsius.toFixed(1)}°C`;
+  }
+
+  return { val, from, celsius, fahrenheit, interpolated, gasMarkLabel, description, resultValue };
 }
 
 const config: CalculatorConfig = {
@@ -50,49 +112,9 @@ const config: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const val = parseFloat(values.value);
-    const from = values.from || 'c';
-    const to = values.to || 'f';
-
-    if (isNaN(val)) return [];
-
-    let celsius: number;
-    let fahrenheit: number;
-    let gasMarkLabel: string;
-
-    // Convert input to celsius and fahrenheit
-    if (from === 'c') {
-      celsius = val;
-      fahrenheit = cToF(celsius);
-    } else if (from === 'f') {
-      fahrenheit = val;
-      celsius = fToC(fahrenheit);
-    } else if (from === 'gas') {
-      const temps = gasMarkToTemps(val);
-      if (!temps) return [];
-      celsius = temps.celsius;
-      fahrenheit = temps.fahrenheit;
-    } else {
-      return [];
-    }
-
-    // Determine gas mark for display
-    gasMarkLabel = celsiusToGasMarkLabel(celsius);
-
-    // Determine oven term
-    const description = getOvenTerm(celsius);
-
-    // Build the result label based on target unit
-    let resultValue: string;
-    if (to === 'c') {
-      resultValue = `${val}°${from === 'gas' ? 'Gas Mark' : from.toUpperCase()} = ${celsius.toFixed(1)}°C`;
-    } else if (to === 'f') {
-      resultValue = `${val}°${from === 'gas' ? 'Gas Mark' : from.toUpperCase()} = ${fahrenheit.toFixed(1)}°F`;
-    } else if (to === 'gas') {
-      resultValue = `${val}°${from === 'gas' ? 'Gas Mark' : from.toUpperCase()} = ${gasMarkLabel}`;
-    } else {
-      resultValue = `${celsius.toFixed(1)}°C`;
-    }
+    const k = convertOven(values);
+    if (!k) return [];
+    const { celsius, fahrenheit, gasMarkLabel, description, resultValue } = k;
 
     return [
       {
@@ -123,6 +145,27 @@ const config: CalculatorConfig = {
         value: description,
       },
     ];
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const k = convertOven(values);
+    if (!k) return [];
+    const { val, from, celsius, fahrenheit } = k;
+    const steps: ExplainStep[] = [];
+    if (from === 'c') {
+      steps.push({ label: 'Work out °F from °C', expr: `°F = °C × 9/5 + 32 = ${val < 0 ? `(${val})` : val} × 9/5 + 32 = ${fahrenheit.toFixed(1)} °F` });
+    } else if (from === 'f') {
+      steps.push({ label: 'Work out °C from °F', expr: `°C = (°F − 32) × 5/9 = (${val} − 32) × 5/9 = ${celsius.toFixed(1)} °C` });
+    } else {
+      steps.push({
+        label: k.interpolated ? 'Interpolate Gas Mark ' + val + ' between table rows' : 'Look up Gas Mark ' + val + ' in the table',
+        expr: `Gas Mark ${val} = ${celsius} °C = ${fahrenheit} °F`,
+        note: 'The Gas Mark table uses rounded kitchen figures, not an exact conversion of the Fahrenheit column.',
+      });
+    }
+    if ((values.to || 'f') === 'gas') {
+      steps.push({ label: 'Find the nearest Gas Mark', expr: `${celsius.toFixed(1)} °C is closest to ${k.gasMarkLabel}`, note: 'Nearest row of the table by Celsius; a tie goes to the cooler mark.' });
+    }
+    return [...steps, { label: 'Result', expr: k.resultValue }];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

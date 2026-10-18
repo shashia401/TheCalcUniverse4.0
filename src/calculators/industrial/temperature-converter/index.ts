@@ -1,4 +1,5 @@
 import { createConverter, type UnitDef } from '../unit-converter';
+import type { ExplainStep } from '../../../types/calculator';
 import { formatQty, type ConversionOutcome } from '../../../utils/unitConvert';
 
 // Base unit: kelvin. Celsius and Fahrenheit are affine (offset + scale); Rankine is a pure scale of kelvin.
@@ -133,8 +134,35 @@ const EDUCATIONAL = {
   ],
 };
 
+/** Direct formula per pair [formula, substitution of x]. All are algebraically identical to the via-kelvin route used by calculate(). */
+const PAIR: Record<string, [string, (x: string) => string]> = {
+  cf: ['°F = °C × 9/5 + 32', (x) => `${x} × 9/5 + 32`],
+  fc: ['°C = (°F − 32) × 5/9', (x) => `(${x} − 32) × 5/9`],
+  ck: ['K = °C + 273.15', (x) => `${x} + 273.15`],
+  kc: ['°C = K − 273.15', (x) => `${x} − 273.15`],
+  fk: ['K = (°F + 459.67) × 5/9', (x) => `(${x} + 459.67) × 5/9`],
+  kf: ['°F = K × 9/5 − 459.67', (x) => `${x} × 9/5 − 459.67`],
+  cr: ['°R = (°C + 273.15) × 9/5', (x) => `(${x} + 273.15) × 9/5`],
+  rc: ['°C = °R × 5/9 − 273.15', (x) => `${x} × 5/9 − 273.15`],
+  fr: ['°R = °F + 459.67', (x) => `${x} + 459.67`],
+  rf: ['°F = °R − 459.67', (x) => `${x} − 459.67`],
+  kr: ['°R = K × 9/5', (x) => `${x} × 9/5`],
+  rk: ['K = °R × 5/9', (x) => `${x} × 5/9`],
+};
+
+function temperatureSteps(o: ConversionOutcome): ExplainStep[] {
+  const x = formatQty(o.input);
+  if (o.from.value === o.to.value) return [{ label: 'Same scale', expr: `${x} ${o.from.shortLabel} is already in ${o.to.shortLabel}, so nothing changes` }];
+  const [formula, sub] = PAIR[o.from.value + o.to.value];
+  return [
+    { label: `Use the ${o.from.shortLabel} to ${o.to.shortLabel} formula`, expr: formula },
+    { label: 'Put in your number', expr: `${sub(o.input < 0 ? `(${x})` : x)} = ${formatQty(o.result)} ${o.to.shortLabel}` },
+  ];
+}
+
 export default createConverter({
   units: UNITS,
+  steps: temperatureSteps,
   label: 'Temperature Conversion',
   quantity: 'temperature',
   defaultFrom: 'c',

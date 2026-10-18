@@ -1,8 +1,8 @@
 import { createElement } from 'react';
-import type { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import type { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import { formatQty, parseQty } from '../../../utils/unitConvert';
 import HardnessPanel from './HardnessPanel';
-import { fromHV, scaleRange, toHV, type HardnessScaleId } from './hardnessTable';
+import { TENSILE_PER_HV, fromHV, scaleRange, toHV, type HardnessScaleId } from './hardnessTable';
 
 // Hardness conversion is empirical and material dependent. This tool interpolates ASTM E140-12b Table 1
 // (non-austenitic steels) linearly between printed rows and never extrapolates outside the table.
@@ -112,6 +112,29 @@ const hardnessConfig: CalculatorConfig = {
       });
     }
     return results;
+  },
+  explainSteps: (values) => {
+    const c = convertHardness(values.fromValue, values.fromUnit?.trim());
+    if (!c || c.hv === null) return [];
+    const q = formatQty;
+    const pivot: ExplainStep =
+      c.from.value === 'hv'
+        ? { label: 'Vickers (HV) is the pivot scale', expr: `HV ${q(c.value)} needs no lookup`, note: 'Hardness scales have no exact formula, so every conversion goes through HV.' }
+        : c.from.value === 'nmm2'
+          ? { label: 'Estimate HV from tensile strength', expr: `HV = ${q(c.value)} N/mm² ÷ ${TENSILE_PER_HV} = ${q(c.hv)}`, note: 'Rule of thumb for steel (Rm ≈ 3.2 × HV), not part of ASTM E140.' }
+          : {
+              label: `Look up ${c.from.shortLabel} ${q(c.value)} in the table to get HV`,
+              expr: `${c.from.shortLabel} ${q(c.value)} → HV ${q(c.hv)}`,
+              note: 'Approximate, not an exact formula: linear interpolation between neighbouring rows of ASTM E140-12b Table 1 (non-austenitic steel); rows sharing the same value have their HV averaged.',
+            };
+    return [
+      pivot,
+      {
+        label: `Read the other scales at HV ${q(c.hv)}`,
+        expr: `${q(c.value)} ${c.from.shortLabel} ` + c.equivalents.map((e) => `≈ ${q(e.value)} ${e.scale.shortLabel}`).join(' · '),
+        note: 'Same table, same interpolation, rounded to the decimals shown (0.1 for Rockwell, whole numbers otherwise). Valid for carbon, alloy and tool steel only.',
+      },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.some((r) => r.id === 'result')) return null;

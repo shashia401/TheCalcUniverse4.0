@@ -1,7 +1,8 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import CBMPanel from './CBMPanel';
-import { CONTAINER_CBM, computeCbm, formatCbm } from './cbm';
+import { CONTAINER_CBM, UNIT_TO_M, computeCbm, formatCbm } from './cbm';
+import { formatQty } from '../../../utils/unitConvert';
 
 const cbmConfig: CalculatorConfig = {
   inputs: [
@@ -134,6 +135,31 @@ const cbmConfig: CalculatorConfig = {
     });
 
     return results;
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const c = computeCbm(values);
+    if (!c) return [];
+    const q = formatQty;
+    const toM = UNIT_TO_M[c.unit];
+    const billedOn = c.chargeableWeight > c.actualWeight ? 'dimensional' : 'actual';
+    return [
+      {
+        label: 'Volume of one package in metres',
+        expr: `${q(c.length * toM)} m × ${q(c.width * toM)} m × ${q(c.height * toM)} m = ${q(c.perPackageCbm)} m³`,
+        note: c.unit === 'm' ? undefined : `Each side is first converted from ${c.unit} to metres (${c.length} ${c.unit} = ${q(c.length * toM)} m).`,
+      },
+      { label: 'Total CBM', expr: `${q(c.perPackageCbm)} m³ × ${c.packages} package${c.packages > 1 ? 's' : ''} = ${formatCbm(c.cbm)} CBM` },
+      {
+        label: 'Dimensional (volumetric) weight',
+        expr: `${q(c.cbm)} m³ × 1,000,000 cm³/m³ ÷ ${q(c.divisor)} cm³/kg = ${c.dimWeight.toFixed(2)} kg`,
+        note: `Divisor for ${c.dimLabel}.`,
+      },
+      {
+        label: 'Chargeable weight',
+        expr: `max(actual ${c.actualWeight.toFixed(2)} kg, dimensional ${c.dimWeight.toFixed(2)} kg) = ${c.chargeableWeight.toFixed(2)} kg`,
+        note: `The carrier bills the greater of the two, here the ${billedOn} weight.`,
+      },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

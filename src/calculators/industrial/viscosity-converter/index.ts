@@ -1,5 +1,6 @@
-import { createConverter, type UnitDef } from '../unit-converter';
-import { convertUnits, findUnit, formatQty, parseQty } from '../../../utils/unitConvert';
+import { createConverter, fmtNum, type UnitDef } from '../unit-converter';
+import type { ExplainStep } from '../../../types/calculator';
+import { convertUnits, findUnit, formatQty, parseQty, type ConversionOutcome } from '../../../utils/unitConvert';
 
 // Dynamic viscosity (base Pa·s) and kinematic viscosity (base m²/s). Converting between the two needs the fluid
 // density: kinematic = dynamic / density.
@@ -102,8 +103,36 @@ const EDUCATIONAL = {
   ],
 };
 
+const baseOf = (u: UnitDef) => (isKinematic(u.value) ? 'm²/s' : 'Pa·s');
+
+/** Dynamic <-> kinematic needs the density step; same-type conversions use the plain factor steps (return null). */
+function viscositySteps(o: ConversionOutcome, values: Record<string, string>): ExplainStep[] | null {
+  if (isKinematic(o.from.value) === isKinematic(o.to.value)) return null;
+  const rho = parseQty(values.density);
+  if (rho === null) return null;
+  const q = formatQty;
+  const b1 = o.input * o.from.factor;
+  const k = isKinematic(o.from.value);
+  const b2 = k ? b1 * rho : b1 / rho;
+  const steps: ExplainStep[] = [];
+  if (o.from.factor !== 1) {
+    steps.push({ label: 'Convert to the base unit', expr: `${q(o.input)} ${o.from.shortLabel} × ${fmtNum(o.from.factor)} ${baseOf(o.from)}/${o.from.shortLabel} = ${q(b1)} ${baseOf(o.from)}` });
+  }
+  steps.push(
+    k
+      ? { label: 'Kinematic to dynamic with the density', expr: `μ = ν × ρ = ${q(b1)} m²/s × ${q(rho)} kg/m³ = ${q(b2)} Pa·s`, note: 'Dynamic viscosity (Pa·s) equals kinematic viscosity (m²/s) times density (kg/m³).' }
+      : { label: 'Dynamic to kinematic with the density', expr: `ν = μ ÷ ρ = ${q(b1)} Pa·s ÷ ${q(rho)} kg/m³ = ${q(b2)} m²/s`, note: 'Kinematic viscosity (m²/s) equals dynamic viscosity (Pa·s) divided by density (kg/m³).' },
+  );
+  if (o.to.factor !== 1) {
+    steps.push({ label: 'Convert to the target unit', expr: `${q(b2)} ${baseOf(o.to)} ÷ ${fmtNum(o.to.factor)} ${baseOf(o.to)}/${o.to.shortLabel} = ${q(o.result)} ${o.to.shortLabel}` });
+  }
+  return steps;
+}
+
 export default createConverter({
   units: UNITS,
+  baseUnit: baseOf,
+  steps: viscositySteps,
   label: 'Viscosity Conversion',
   quantity: 'viscosity',
   defaultFrom: 'pas',

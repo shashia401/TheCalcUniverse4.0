@@ -26,6 +26,8 @@ export interface CbmResult {
   actualWeight: number;
   chargeableWeight: number;
   dimLabel: string;
+  /** Volumetric divisor, cm³ per kg */
+  divisor: number;
   containers20: number;
   containers40: number;
 }
@@ -68,6 +70,7 @@ export function computeCbm(values: Record<string, string>): CbmResult | null {
     actualWeight,
     chargeableWeight,
     dimLabel: mode.label,
+    divisor: mode.divisor,
     containers20: Math.ceil(cbm / CONTAINER_CBM.ft20),
     containers40: Math.ceil(cbm / CONTAINER_CBM.ft40),
   };

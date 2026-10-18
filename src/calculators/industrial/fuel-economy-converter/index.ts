@@ -1,5 +1,6 @@
-import { createConverter, type UnitDef } from '../unit-converter';
-import { GAL_UK_L, GAL_US_L, MI_M, formatQty } from '../../../utils/unitConvert';
+import { createConverter, fmtNum, type UnitDef } from '../unit-converter';
+import type { ExplainStep } from '../../../types/calculator';
+import { GAL_UK_L, GAL_US_L, MI_M, formatQty, toBase, fromBase, type ConversionOutcome } from '../../../utils/unitConvert';
 
 // Base unit: litres per 100 km. mpg and km/L are reciprocals of it, so they use toBase/fromBase (no linear factor exists).
 // Constant for "miles per gallon": 100 km * (gallon in L) / (mile in km) = 100 * 3.785411784 / 1.609344 = 235.2145833 (US),
@@ -107,8 +108,42 @@ const EDUCATIONAL = {
   ],
 };
 
+const isBase = (u: UnitDef) => u.value === 'l100km';
+/** Where the reciprocal constant K in "L/100km = K / x" comes from (exact, from the defining values of the mile and the gallons). */
+const KNOTE: Record<string, string> = {
+  usmpg: `K = 100 km × ${fmtNum(GAL_US_L, 10)} L per US gallon ÷ ${fmtNum(KM_PER_MI, 10)} km per mile`,
+  ukmpg: `K = 100 km × ${fmtNum(GAL_UK_L, 10)} L per UK gallon ÷ ${fmtNum(KM_PER_MI, 10)} km per mile`,
+  kml: 'K = 100 km, because L/100km = 100 km ÷ (km per L)',
+};
+
+function fuelSteps(o: ConversionOutcome): ExplainStep[] {
+  const q = formatQty;
+  const base = toBase(o.from, o.input);
+  const steps: ExplainStep[] = [];
+  if (!isBase(o.from)) {
+    steps.push(
+      o.from.toBase
+        ? { label: 'Convert to L/100km (the base unit)', expr: `L/100km = ${fmtNum(o.from.toBase(1), 10)} ÷ ${q(o.input)} ${o.from.shortLabel} = ${q(base)} L/100km`, note: KNOTE[o.from.value] }
+        : { label: 'Convert to L/100km (the base unit)', expr: `${q(o.input)} ${o.from.shortLabel} × ${fmtNum(o.from.factor, 10)} = ${q(base)} L/100km`, note: `Factor = ${fmtNum(o.from.value === 'usgal100mi' ? GAL_US_L : GAL_UK_L, 10)} L per gallon ÷ ${fmtNum(KM_PER_MI, 10)} km per mile` },
+    );
+  }
+  if (!isBase(o.to)) {
+    const rounded = Number(q(base).replace(/,/g, '')) !== Number(base.toPrecision(15));
+    steps.push({
+      label: 'Convert to the target unit',
+      expr: o.to.toBase
+        ? `${o.to.shortLabel} = ${fmtNum(o.to.toBase(1), 10)} ÷ ${q(base)} L/100km = ${q(fromBase(o.to, base))}`
+        : `${q(base)} L/100km ÷ ${fmtNum(o.to.factor, 10)} = ${q(fromBase(o.to, base))} ${o.to.shortLabel}`,
+      ...(o.to.toBase ? { note: KNOTE[o.to.value] } : {}),
+      ...(rounded && !o.to.toBase ? { note: 'Intermediate figures are shown to 8 significant digits; the result uses the full-precision value.' } : {}),
+    });
+  }
+  return steps;
+}
+
 export default createConverter({
   units: UNITS,
+  steps: fuelSteps,
   label: 'Fuel Economy',
   quantity: 'fuel economy',
   defaultFrom: 'usmpg',

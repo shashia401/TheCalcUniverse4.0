@@ -183,6 +183,7 @@ export default createConverter({
   defaultFrom: 'v',
   defaultTo: 'kv',
   errorLabel: 'Incompatible Units',
+  baseUnit: (u) => UNITS.find((x) => x.factor === 1 && categoryOf(x) === categoryOf(u))?.shortLabel ?? 'base unit',
   // Voltage, current, resistance, ... are not interconvertible by a factor: only same-category pairs are valid.
   compute: (values, units) => {
     const o = runConversion(values.value, units, values.from || 'v', values.to || 'kv');

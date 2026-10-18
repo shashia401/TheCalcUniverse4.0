@@ -1,6 +1,6 @@
 import { createElement } from 'react';
 import type { CalculatorConfig, CalculatorResult, EducationalContent, ExplainStep, InputField } from '../../types/calculator';
-import { formatQty, runConversion, type ConversionOutcome, type UnitDef } from '../../utils/unitConvert';
+import { formatQty, runConversion, toBase, type ConversionOutcome, type UnitDef } from '../../utils/unitConvert';
 import ConverterPanel from './ConverterPanel';
 
 export type { UnitDef } from '../../utils/unitConvert';
@@ -38,7 +38,23 @@ export interface ConverterOptions {
   /** Initial value in the value field (default '1'). */
   defaultValue?: string;
   errorLabel?: string;
+  /** Name of the base unit a given unit is scaled against (default: the first unit with factor 1). */
+  baseUnit?: (u: UnitDef) => string;
+  /**
+   * Custom worked steps shown before the final "Result" step (offset / reciprocal / density-dependent conversions).
+   * Return null to fall back to the plain factor steps.
+   */
+  steps?: (o: ConversionOutcome, values: Record<string, string>) => ExplainStep[] | null;
 }
+
+/** Factor / constant at up to `digits` significant digits, so the printed multiplication really reproduces the result. */
+export function fmtNum(n: number, digits = 15): string {
+  const c = Number(n.toPrecision(digits));
+  const a = Math.abs(c);
+  return a >= 1e-4 && a < 1e15 ? c.toLocaleString('en-US', { maximumSignificantDigits: digits }) : c.toExponential().replace('e+', 'e');
+}
+
+const isBaseUnit = (u: UnitDef) => !u.toBase && u.factor === 1;
 
 const defaultFormula = (o: ConversionOutcome) =>
   o.note ??
@@ -120,10 +136,29 @@ export function createConverter(opts: ConverterOptions): CalculatorConfig {
     explainSteps: (values): ExplainStep[] => {
       const o = resolve(values);
       if (o === null || typeof o === 'string') return [];
-      return [
-        { label: 'Convert to the base unit', expr: `${formatQty(o.input)} ${o.from.shortLabel} → ${formatQty(o.from.toBase ? o.from.toBase(o.input) : o.input * o.from.factor)} (base unit)` },
-        { label: 'Convert to the target unit', expr: `= ${formatQty(o.result)} ${o.to.shortLabel}` },
-      ];
+      const q = formatQty;
+      const result: ExplainStep = { label: 'Result', expr: `${q(o.input)} ${o.from.shortLabel} = ${q(o.result)} ${o.to.shortLabel}` };
+      const custom = opts.steps?.(o, values);
+      if (custom) return [...custom, result];
+      // Plain linear converter: value x factor-to-base, then / factor-of-target.
+      const bu = (opts.baseUnit ?? (() => units.find(isBaseUnit)?.shortLabel ?? 'base unit'))(o.from);
+      const base = toBase(o.from, o.input);
+      const steps: ExplainStep[] = [];
+      if (!isBaseUnit(o.from)) {
+        steps.push({
+          label: 'Convert to the base unit',
+          expr: `${q(o.input)} ${o.from.shortLabel} × ${fmtNum(o.from.factor)} ${bu}/${o.from.shortLabel} = ${q(base)} ${bu}`,
+        });
+      }
+      if (!isBaseUnit(o.to)) {
+        const shown = Number(q(base).replace(/,/g, '')) !== Number(base.toPrecision(15));
+        steps.push({
+          label: 'Convert to the target unit',
+          expr: `${q(base)} ${bu} ÷ ${fmtNum(o.to.factor)} ${bu}/${o.to.shortLabel} = ${q(o.result)} ${o.to.shortLabel}`,
+          ...(shown ? { note: 'Intermediate figures are shown to 8 significant digits; the result uses the full-precision value.' } : {}),
+        });
+      }
+      return [...steps, result];
     },
     extraPanel: (values, results) => {
       if (!results.some((r) => r.id === 'result')) return null;
