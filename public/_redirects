@@ -11,6 +11,27 @@
 /math/love-calculator/ /everyday/love-calculator/ 301
 /math/dice-roller/ /everyday/dice-roller/ 301
 
+# Moved between categories in the 4.0 rebuild (the /en/ forms are listed too so they take one hop).
+/math/percentage-calculator /everyday/percentage-calculator/ 301
+/math/percentage-calculator/ /everyday/percentage-calculator/ 301
+/en/math/percentage-calculator /everyday/percentage-calculator/ 301
+/en/math/percentage-calculator/ /everyday/percentage-calculator/ 301
+/industrial/concrete-slab-calculator /diy/concrete-slab-calculator/ 301
+/industrial/concrete-slab-calculator/ /diy/concrete-slab-calculator/ 301
+/en/industrial/concrete-slab-calculator /diy/concrete-slab-calculator/ 301
+/en/industrial/concrete-slab-calculator/ /diy/concrete-slab-calculator/ 301
+/en/math/love-calculator /everyday/love-calculator/ 301
+/en/math/love-calculator/ /everyday/love-calculator/ 301
+/en/math/dice-roller /everyday/dice-roller/ 301
+/en/math/dice-roller/ /everyday/dice-roller/ 301
+/en/methodology/math/love-calculator /everyday/love-calculator/ 301
+/en/methodology/math/love-calculator/ /everyday/love-calculator/ 301
+/en/methodology/math/dice-roller /everyday/dice-roller/ 301
+/en/methodology/math/dice-roller/ /everyday/dice-roller/ 301
+
+# Old comparison pages: nearest surviving content is the category listing (non-/en/ form too).
+/compare/:category/* /:category/ 301
+
 # Retired duplicate blog posts: 301 to the stronger page on the same topic.
 /blog/healthy-weight-for-height-BMI/ /blog/healthy-weight-for-height-bmi/ 301
 /blog/fixed-vs-variable-rate-mortgage/ /blog/arm-vs-fixed-rate-mortgage/ 301
@@ -37,6 +58,13 @@
 # Retired index-style pages
 /en/calculators / 301
 /en/calculators/ / 301
+/calculators / 301
+/calculators/ / 301
+
+# Old author page; the editorial team is described on /about/. (/report/ and /bookmarks/
+# had no replacement: they stay 404 here, and are served 410 by the Apache .htaccess.)
+/authors/thecalcuniverse-editorial /about/ 301
+/authors/thecalcuniverse-editorial/ /about/ 301
 
 # Everything else keeps its path, minus the /en/ prefix
 /en / 301

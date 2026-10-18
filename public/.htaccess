@@ -28,30 +28,51 @@ ErrorDocument 404 /404.html
 
   RewriteRule ^sitemap\.xml$ /sitemap-index.xml [L]
 
+  # Retired duplicate blog posts: 301 straight to the stronger page, with or without the
+  # legacy /en/ prefix (so /en/blog/<old> is one hop, not two).
+  RewriteRule ^(?:en/)?blog/healthy-weight-for-height-BMI/?$ /blog/healthy-weight-for-height-bmi/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/fixed-vs-variable-rate-mortgage/?$ /blog/arm-vs-fixed-rate-mortgage/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/credit-card-debt-payoff-guide/?$ /blog/debt-payoff-snowball-vs-avalanche/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/can-you-improve-gfr-naturally/?$ /blog/can-you-improve-your-gfr-science-based-strategies/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/race-free-egfr-2021-why-it-changed/?$ /blog/race-free-egfr-2021-explained/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/what-is-gfr-kidney-function/?$ /blog/what-is-gfr-glomerular-filtration-rate/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/bmi-guide-health/?$ /blog/bmi-limitations-what-it-really-means/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/ckd-epi-vs-mdrd-gfr-formula-comparison/?$ /blog/ckd-epi-vs-mdrd-gfr-formulas-comparison/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/kidney-friendly-diet-ckd/?$ /blog/kidney-friendly-diet-for-ckd/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/mortgage-refinance-vs-payoff/?$ /blog/refinance-vs-prepayment-which-saves-more/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/investment-calculator-guide/?$ /blog/investment-growth-projecting-portfolio/ [R=301,L]
+  RewriteRule ^(?:en/)?blog/investment-growth-calculator-guide/?$ /blog/investment-growth-projecting-portfolio/ [R=301,L]
+
+  # Pages removed or moved in the 4.0 rebuild (an optional /en/ prefix is covered above so
+  # none of these takes two hops; /en/methodology/ pages follow the same targets).
+  # Moved between categories (also reachable as /en/<path> and /en/methodology/<cat>/<id>).
+  RewriteRule ^(?:en/(?:methodology/)?)?math/(love-calculator|dice-roller)/?$ /everyday/$1/ [R=301,L]
+  RewriteRule ^(?:en/(?:methodology/)?)?math/percentage-calculator/?$ /everyday/percentage-calculator/ [R=301,L]
+  RewriteRule ^(?:en/(?:methodology/)?)?industrial/concrete-slab-calculator/?$ /diy/concrete-slab-calculator/ [R=301,L]
+  RewriteRule ^calculators/?$ / [R=301,L]
+  RewriteRule ^(?:en/)?authors/thecalcuniverse-editorial/?$ /about/ [R=301,L]
+  # No replacement exists for these: say so (410) instead of redirecting to the
+  # homepage, which Google reads as a soft 404. The /data/ pages were never linked.
+  RewriteRule ^(?:en/)?(report|bookmarks)/?$ - [G,L]
+  RewriteRule ^(?:en/)?[^/]+/[^/.]+/data/?$ - [G,L]
+
   # Legacy /en/ locale-prefixed URLs — no i18n route exists (see
   # src/lib/blog.ts normalizeInternalPath, which already strips this prefix
   # from newly generated links) so every /en/* path 404s. Google still has
   # hundreds of /en/* URLs indexed from a prior site version and real
   # searchers are clicking through to the dead page. 301 to the canonical
   # unprefixed route, preserving the rest of the path and query string.
+  # Mirrors public/_redirects (Cloudflare). Order matters: most specific first,
+  # and every rule lands on the FINAL url in one hop (trailing slash included),
+  # so Google never follows a chain.
+  RewriteRule ^en/methodology/([^/]+)/([^/]+)/?$ /$1/$2/ [R=301,L]
+  RewriteRule ^(?:en/)?compare/([^/]+)/.*$ /$1/ [R=301,L]
+  RewriteRule ^en/calculators/?$ / [R=301,L]
   RewriteRule ^en/?$ / [R=301,L]
+  # /en/<path> with no trailing slash and no file extension: add the slash here
+  # instead of letting the directory redirect add a second hop.
+  RewriteRule ^en/([^.]*[^/.])$ /$1/ [R=301,L,QSA]
   RewriteRule ^en/(.*)$ /$1 [R=301,L,QSA]
-
-  # Retired duplicate blog posts: 301 to the stronger page on the same topic.
-  RewriteRule ^blog/healthy-weight-for-height-BMI/?$ /blog/healthy-weight-for-height-bmi/ [R=301,L]
-  RewriteRule ^blog/fixed-vs-variable-rate-mortgage/?$ /blog/arm-vs-fixed-rate-mortgage/ [R=301,L]
-  RewriteRule ^blog/credit-card-debt-payoff-guide/?$ /blog/debt-payoff-snowball-vs-avalanche/ [R=301,L]
-  RewriteRule ^blog/can-you-improve-gfr-naturally/?$ /blog/can-you-improve-your-gfr-science-based-strategies/ [R=301,L]
-
-  # Retired duplicate blog posts: 301 to the stronger page on the same topic.
-  RewriteRule ^blog/race-free-egfr-2021-why-it-changed/?$ /blog/race-free-egfr-2021-explained/ [R=301,L]
-  RewriteRule ^blog/what-is-gfr-kidney-function/?$ /blog/what-is-gfr-glomerular-filtration-rate/ [R=301,L]
-  RewriteRule ^blog/bmi-guide-health/?$ /blog/bmi-limitations-what-it-really-means/ [R=301,L]
-  RewriteRule ^blog/ckd-epi-vs-mdrd-gfr-formula-comparison/?$ /blog/ckd-epi-vs-mdrd-gfr-formulas-comparison/ [R=301,L]
-  RewriteRule ^blog/kidney-friendly-diet-ckd/?$ /blog/kidney-friendly-diet-for-ckd/ [R=301,L]
-  RewriteRule ^blog/mortgage-refinance-vs-payoff/?$ /blog/refinance-vs-prepayment-which-saves-more/ [R=301,L]
-  RewriteRule ^blog/investment-calculator-guide/?$ /blog/investment-growth-projecting-portfolio/ [R=301,L]
-  RewriteRule ^blog/investment-growth-calculator-guide/?$ /blog/investment-growth-projecting-portfolio/ [R=301,L]
 
   # Legacy flat calculator slugs (pre-category-nesting URLs, no known inbound
   # backlinks per Semrush audit) — single-hop 301 to the canonical nested route.
