@@ -18,6 +18,14 @@ export interface Correction {
 export const corrections: Correction[] = [
   {
     date: "2026-10-18",
+    calculator: { id: "california-mortgage-calculator", category: "finance", title: "California Mortgage Calculator" },
+    summary: "The default property-tax rate, its help text and both worked examples used the roughly 0.77% statewide average. A new California buyer is assessed at the purchase price, so the tax is the 1% Proposition 13 base rate plus local voter-approved levies, a little above 1%. The statewide average (about 0.7%) reflects long-time owners with low assessed values. The default is now 1.1%.",
+    before: "$650,000 home: $417 a month ($5,005 a year) in property tax",
+    after: "$650,000 home: $596 a month ($7,150 a year) at 1.1%",
+    howVerified: "1% base rate from Proposition 13; statewide average from Census ACS estimates as compiled at taxbycounty.com (0.714% for 2019-2023). Both worked examples recomputed with Python Decimal and pinned in test/calculators/finance/audit-batch-b.test.ts.",
+  },
+  {
+    date: "2026-10-18",
     calculator: { id: "business-loan-calculator", category: "finance", title: "Business Loan Calculator" },
     summary: "The page said the SBA 7(a) minimum debt service coverage ratio is 1.15. The SBA’s current rules (SOP 50 10 8.1) set different floors by loan type, so the page now states all three and says individual lenders can require more.",
     before: "SBA 7(a) minimum DSCR: 1.15",

@@ -43,7 +43,7 @@ crawled in August under the old client-rendered site, so the verdict predates th
 - [x] C1 "Can I afford this house?" at /decisions/can-i-afford-a-house/: one form, four linked answers and a verdict; engine `src/lib/houseDecision.ts` reuses the audited pieces (12 unit tests vs independent Python values, 6 e2e tests); deep links carry the inputs into the full calculators; the home-buying calculators and the homepage link back
 - [x] C2 Up to four saved scenarios side by side (kept in the browser), and a link that carries every input
 - [x] C3a Generic engine (`src/lib/decisionEngine.ts`, `DecisionTool.tsx`) + shared list (`src/data/decisionTools.ts`) drive /decisions/, the homepage band, header and footer links and the banner on related calculators; tools: house, car (25 unit tests), refinance (18), each with e2e (23 decision e2e pass)
-- [ ] C3b "Am I saving enough to retire?": agent building it; add to `decisionTools.ts` when its page exists
+- [x] C3b "Am I saving enough to retire?" (32 unit tests vs a month-by-month Python oracle, 8 e2e); four decision tools now, 31 decision e2e pass
 - [ ] C4 API/MCP (post-launch, per ROADMAP.md)
 
 ## D. Quality

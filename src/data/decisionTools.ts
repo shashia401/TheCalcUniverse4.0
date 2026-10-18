@@ -50,6 +50,20 @@ export const decisionTools: DecisionToolInfo[] = [
     calculatorIds: ['refinance-calculator', 'mortgage-payoff-calculator'],
     cta: 'Check a refinance',
   },
+  {
+    slug: 'am-i-saving-enough-to-retire',
+    title: 'Am I saving enough to retire?',
+    blurb: 'What you will have, what you need, the gap and the monthly fix, in today’s dollars.',
+    calculatorIds: [
+      'retirement-calculator',
+      '401k-calculator',
+      'social-security-calculator',
+      'annuity-payout-calculator',
+      'fire-calculator',
+      'pension-calculator',
+    ],
+    cta: 'Check my retirement',
+  },
 ];
 
 export const decisionToolFor = (calculatorId: string): DecisionToolInfo | undefined =>

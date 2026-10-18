@@ -1,0 +1,122 @@
+---
+// "Am I saving enough to retire?" — a decision tool: one form, four linked answers (what you will have, what you
+// need, the gap and the monthly fix, how long it lasts), a plain verdict, a shareable link and saved scenarios.
+// The island renders the default scenario on the server, so this page ships real numbers in its HTML.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import RetirementDecision from '../../../components/decisions/RetirementDecision';
+import { RETIREMENT_ASSUMPTIONS as A } from '../../../lib/retirementDecision';
+import { BASE_URL, SITE_NAME } from '../../../config/constants';
+
+const path = '/decisions/am-i-saving-enough-to-retire/';
+const title = 'Am I Saving Enough to Retire? Free Decision Calculator';
+const description =
+  'Enter your age, savings and planned spending. Get one verdict, the nest egg you need, the gap, the monthly fix and how long the money lasts, in today’s dollars.';
+
+const faqs = [
+  {
+    q: 'What decides “on track”, “close, but short” and “not on track”?',
+    a: `The tool divides the balance you are projected to have at retirement by the nest egg your plan needs. ${A.comfortablePct}% or more is on track, from ${A.tightPct}% up to just under ${A.comfortablePct}% is close but short, and below ${A.tightPct}% is not on track. These cut-offs are guidelines this tool chooses, not rules from a regulator, and a projection is not a prediction: a different return, a different retirement age or a different spending level moves the answer.`,
+  },
+  {
+    q: `What is the ${A.ruleOfThumbPct}% rule, and what are its limits?`,
+    a: `It is a rule of thumb: withdraw ${A.ruleOfThumbPct}% of your savings in the first year of retirement, raise the amount with inflation each year, and the money has historically lasted about 30 years in the periods studied. Dividing your yearly need by ${A.ruleOfThumbPct}% gives 25 times that need. It was built around a roughly 30-year retirement, so it can be too generous for someone retiring in their 40s or 50s and too cautious for someone planning a shorter retirement. It also ignores what you do in a bad market. This tool shows the ${A.ruleOfThumbPct}% figure as a cross-check only; its own nest egg number is worked out for the exact number of years between your retirement age and the age you plan to.`,
+  },
+  {
+    q: 'Why are the results in today’s dollars?',
+    a: 'A balance of $1,000,000 in 30 years will buy much less than $1,000,000 does now, so a headline nominal figure is easy to misread. The tool removes inflation from both the growth and the spending: it uses the real return, which is (1 + return) ÷ (1 + inflation) − 1, and compares your savings to a spending target stated in today’s dollars. That way “$70,000 a year” means the lifestyle $70,000 buys today, whenever you retire. Your monthly saving is also held level in today’s dollars, which means it rises with inflation in the year-by-year amounts you would actually deposit.',
+  },
+  {
+    q: 'What does this tool leave out?',
+    a: 'Taxes: the spending figure is before tax, so withdrawals from traditional accounts need to cover the tax as well. Fees on your investments. Sequence-of-returns risk: poor markets early in retirement hurt far more than the same markets later, and the tool uses a steady return, so real outcomes are wider than one number. Healthcare and long-term-care shocks, which can be large. Spending that changes with age. A Social Security or pension amount that starts later than your retirement age, or does not fully keep pace with inflation. Home equity, part-time work and one-off windfalls. Treat the result as a first check, then test it against pessimistic returns and higher spending.',
+  },
+  {
+    q: 'Where do the starting numbers and returns come from?',
+    a: 'They are examples chosen to illustrate the tool: age 35, retiring at 67, planning to 95, $60,000 saved, $800 a month, 6.5% before retirement and 4.5% during it, 2.5% inflation, $70,000 of yearly spending and $24,000 of yearly Social Security or pension. They are not predictions and not a forecast of any market. Nobody knows future returns, so use your own assumptions and, to see how fragile the answer is, try lower returns and higher inflation and save each version to compare.',
+  },
+  {
+    q: 'Is my information sent anywhere, and is this financial advice?',
+    a: 'Nothing is sent. Everything is calculated in your browser, saved scenarios stay in this browser’s local storage, and “Copy link” puts your numbers in the web address so you can share or bookmark them. This is an estimate built on stated assumptions, not financial, tax or investment advice. A licensed adviser who knows your whole situation can tell you more than a general tool can.',
+  },
+];
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Decision tools', item: `${BASE_URL}/decisions/` },
+      { '@type': 'ListItem', position: 3, name: 'Am I saving enough to retire?', item: `${BASE_URL}${path}` },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Am I Saving Enough to Retire? Decision Calculator',
+    url: `${BASE_URL}${path}`,
+    description,
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Any',
+    isAccessibleForFree: true,
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: BASE_URL },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<BaseLayout title={title} description={description} canonicalPath={path} schemas={schemas}>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-8">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-ink)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <a href="/decisions/" class="text-[var(--brand-ink)] hover:underline">Decision tools</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>Am I saving enough to retire?</span>
+      </nav>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-[var(--surface-text)] mb-2">Am I saving enough to retire?</h1>
+      <p class="text-[var(--surface-text-secondary)] mb-8 max-w-2xl">
+        One set of numbers, four answers: what your savings could be worth when you retire, the nest egg your spending needs, the gap and the extra monthly saving that closes it, and how long the money lasts if you change nothing. Everything is in today’s dollars. The starting numbers are examples, not predictions, and no market return is stated as fact: the returns are inputs you choose.
+      </p>
+
+      <RetirementDecision client:load />
+
+      <section aria-label="How this works" class="mt-14 max-w-3xl">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-3">How the verdict is decided</h2>
+        <p class="mb-3 text-[var(--surface-text-secondary)]">
+          The tool compares two numbers at your retirement age: the balance you are projected to have, and the nest egg your plan needs. The nest egg is the amount that pays your yearly spending, minus any Social Security or pension, every month from retirement to the age you plan to, with whatever is left still earning the retirement return. The funded ratio is the first number divided by the second.
+        </p>
+        <ul class="space-y-2 text-[var(--surface-text-secondary)] list-disc pl-5">
+          <li><strong class="text-[var(--surface-text)]">On track</strong>: funded {A.comfortablePct}% or more. The reasons list shows the surplus.</li>
+          <li><strong class="text-[var(--surface-text)]">Close, but short</strong>: funded {A.tightPct}% up to just under {A.comfortablePct}%. The tool shows the shortfall, the extra monthly saving that closes it and the age the money would run out.</li>
+          <li><strong class="text-[var(--surface-text)]">Not on track</strong>: funded below {A.tightPct}%. The gap is large enough that saving more, retiring later or spending less will probably all be needed.</li>
+        </ul>
+        <p class="mt-4 text-sm text-[var(--surface-text-muted)]">
+          Assumptions: all figures are in today’s dollars; returns are entered before inflation and converted to real returns, (1 + return) ÷ (1 + inflation) − 1, treated as effective annual rates; your monthly saving is level in today’s dollars and added at the end of each month; withdrawals are taken at the start of each month; Social Security or pension starts at your retirement age and keeps pace with inflation; your spending is before tax and stays level in real terms; the return is steady, with no market ups and downs, taxes or fees. The {A.comfortablePct}% and {A.tightPct}% cut-offs are guidelines this tool chooses, not predictions. Our <a class="text-[var(--brand-ink)] underline" href="/finance/retirement-calculator/">retirement calculator</a> keeps deposits level in the dollars of the day and compounds the nominal rate monthly, so its inflation-adjusted figure is a little lower than this tool’s.
+          For related questions see the <a class="text-[var(--brand-ink)] underline" href="/finance/401k-calculator/">401(k) calculator</a>,
+          <a class="text-[var(--brand-ink)] underline" href="/finance/social-security-calculator/">Social Security calculator</a>,
+          <a class="text-[var(--brand-ink)] underline" href="/finance/annuity-payout-calculator/">annuity payout calculator</a> and
+          <a class="text-[var(--brand-ink)] underline" href="/finance/fire-calculator/">FIRE calculator</a>.
+          See <a class="text-[var(--brand-ink)] underline" href="/methodology/">how we test and verify</a> and the public <a class="text-[var(--brand-ink)] underline" href="/corrections/">corrections log</a>.
+        </p>
+      </section>
+
+      <section aria-label="Frequently asked questions" class="mt-12 max-w-3xl">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-4">Frequently asked questions</h2>
+        <div class="divide-y divide-[var(--border-warm)] rounded-2xl border border-[var(--border-warm)] bg-[var(--surface-card)]">
+          {faqs.map((f) => (
+            <details class="group p-5">
+              <summary class="cursor-pointer list-none font-semibold text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]">{f.q}</summary>
+              <p class="mt-2 text-[var(--surface-text-secondary)]">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    </div>
+  </main>
+</BaseLayout>
