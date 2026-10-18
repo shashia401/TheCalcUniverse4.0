@@ -48,8 +48,13 @@ export function minifyHtml(code: string): string {
     kept.push(m);
     return `\x00${kept.length - 1}\x00`;
   });
-  // comments, except IE conditional comments (<!--[if ...]> and <!--<![endif]-->)
-  src = src.replace(/<!--(?!\[if\b|<!\[endif\])[\s\S]*?-->/g, '');
+  // Comments are removed, except IE conditional comments, which are kept whole: the hidden form
+  // "<!--[if IE]> ... <![endif]-->" and the revealed form "<!--[if !IE]><!--> ... <!--<![endif]-->". The revealed start
+  // is listed first so its "<!-->" cannot be mistaken for the start of an ordinary comment that swallows the content.
+  src = src.replace(
+    /<!--\[if\b[^\]]*\]><!-->|<!--\[if\b[\s\S]*?<!\[endif\]-->|<!--<!\[endif\]-->|<!---?>|<!--[\s\S]*?-->/g,
+    (m) => (m.startsWith('<!--[if') || m === '<!--<![endif]-->' ? m : ''),
+  );
 
   const tokens: { tag: boolean; s: string }[] = [];
   let last = 0;

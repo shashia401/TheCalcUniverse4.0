@@ -33,7 +33,8 @@ test.describe('calculator island', () => {
     await page.fill('#loanAmount', '25000');
     await page.fill('#interestRate', '6.5');
     await page.fill('#loanTerm', '5');
-    await expect(page.getByText('$489.15').first()).toBeVisible({ timeout: 5_000 });
+    // the phone-only answer strip also says $489.15 but is hidden on desktop: look at visible matches only
+    await expect(page.getByText('$489.15').locator('visible=true').first()).toBeVisible({ timeout: 5_000 });
   });
 
   test('live walkthrough shows the solution with the user numbers', async ({ page }) => {

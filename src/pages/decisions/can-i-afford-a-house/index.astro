@@ -1,0 +1,116 @@
+---
+// "Can I afford this house?" — the first decision tool: one form, four linked answers (budget,
+// debt-to-income, cash to close, rent vs buy), a plain verdict, a shareable link and saved scenarios.
+// The island renders the default scenario on the server, so this page ships real numbers in its HTML.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import HouseDecision from '../../../components/decisions/HouseDecision';
+import { HOUSE_ASSUMPTIONS as A } from '../../../lib/houseDecision';
+import { BASE_URL, SITE_NAME } from '../../../config/constants';
+
+const path = '/decisions/can-i-afford-a-house/';
+const title = 'Can I Afford This House? Free Decision Calculator';
+const description =
+  'Enter your income, debts, savings and the house. Get one verdict plus your monthly payment, debt-to-income, cash to close and rent-versus-buy break-even. Save and compare scenarios.';
+
+const faqs = [
+  {
+    q: 'What does “afford” mean here?',
+    a: `It means the purchase fits standard lender guidelines: housing no more than about ${A.frontLimit}% of gross monthly income, and housing plus all other debt no more than about ${A.backLimit}%. Many lenders approve up to 43% with strong credit or savings, so the tool calls anything above 36% “tight” and anything above 43% “over budget”.`,
+  },
+  {
+    q: 'How much cash do I need?',
+    a: `The down payment, plus estimated closing costs, plus ${A.reserveMonths} months of housing payments kept in reserve. Closing costs here use national-average assumptions; your lender’s Loan Estimate is the only binding figure. The ${A.reserveMonths}-month reserve is this tool’s assumption, not a universal lender rule.`,
+  },
+  {
+    q: 'Why does a small down payment cost more each month?',
+    a: `Below 20% down, lenders usually require mortgage insurance. The tool adds ${A.pmiPct}% of the loan per year until the down payment reaches 20%. Your actual rate depends on credit score and loan type.`,
+  },
+  {
+    q: 'How does the rent-versus-buy answer work?',
+    a: `It compares the total cost of buying and of renting year by year, using the same simulation as the rent-versus-buy calculator. Buying includes mortgage payments, property tax, insurance, ${A.maintenancePct}% a year for maintenance and ${A.sellingCostsPct}% to sell, with the home growing ${A.appreciationPct}% a year. Renting assumes rent rises ${A.rentIncreasePct}% a year and the cash you did not spend on the house earns ${A.investReturnPct}% a year.`,
+  },
+  {
+    q: 'Is my information sent anywhere?',
+    a: 'No. Everything is calculated in your browser. Saved scenarios stay in this browser’s local storage, and the “Copy link” button puts your numbers in the web address so you can share or bookmark them.',
+  },
+  {
+    q: 'Is this financial advice?',
+    a: 'No. It is an estimate built on stated assumptions, and a lender, a housing counsellor or an advisor can see details that no calculator can. Treat the verdict as a reason to look closer, not a decision.',
+  },
+];
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Can I afford this house?', item: `${BASE_URL}${path}` },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Can I Afford This House? Decision Calculator',
+    url: `${BASE_URL}${path}`,
+    description,
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Any',
+    isAccessibleForFree: true,
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: BASE_URL },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<BaseLayout title={title} description={description} canonicalPath={path} schemas={schemas}>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-8">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-ink)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>Can I afford this house?</span>
+      </nav>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-[var(--surface-text)] mb-2">Can I afford this house?</h1>
+      <p class="text-[var(--surface-text-secondary)] mb-8 max-w-2xl">
+        One set of numbers, four answers: your monthly payment, what lenders will see in your debt, the cash you need to close, and whether buying beats renting. Change anything and every answer updates.
+      </p>
+
+      <HouseDecision client:load />
+
+      <section aria-label="How this works" class="mt-14 max-w-3xl">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-3">How the verdict is decided</h2>
+        <ul class="space-y-2 text-[var(--surface-text-secondary)] list-disc pl-5">
+          <li><strong class="text-[var(--surface-text)]">Within your budget</strong>: the price is at most 90% of the most you can afford, housing is under {A.frontLimit}% of income, all debt is under {A.backLimit}%, and your cash covers the down payment, closing costs and {A.reserveMonths} months of reserves.</li>
+          <li><strong class="text-[var(--surface-text)]">Possible, but tight</strong>: you are inside the lender’s ceiling (43% total debt, price at or under the maximum) but at least one guideline above is stretched or you are short on cash.</li>
+          <li><strong class="text-[var(--surface-text)]">Over budget</strong>: the price is above the maximum the {A.frontLimit}/{A.backLimit} limits allow, or total debt is above 43%.</li>
+        </ul>
+        <p class="mt-4 text-sm text-[var(--surface-text-muted)]">
+          The calculations reuse the same tested pieces as our
+          <a class="text-[var(--brand-ink)] underline" href="/finance/house-affordability-calculator/">affordability</a>,
+          <a class="text-[var(--brand-ink)] underline" href="/finance/dti-ratio-calculator/">debt-to-income</a>,
+          <a class="text-[var(--brand-ink)] underline" href="/finance/closing-costs-calculator/">closing-cost</a> and
+          <a class="text-[var(--brand-ink)] underline" href="/finance/home-rent-vs-buy-calculator/">rent-versus-buy</a> calculators, so the numbers match those pages.
+          See <a class="text-[var(--brand-ink)] underline" href="/methodology/">how we test and verify</a> and the public <a class="text-[var(--brand-ink)] underline" href="/corrections/">corrections log</a>.
+        </p>
+      </section>
+
+      <section aria-label="Frequently asked questions" class="mt-12 max-w-3xl">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-4">Frequently asked questions</h2>
+        <div class="divide-y divide-[var(--border-warm)] rounded-2xl border border-[var(--border-warm)] bg-[var(--surface-card)]">
+          {faqs.map((f) => (
+            <details class="group p-5">
+              <summary class="cursor-pointer list-none font-semibold text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]">{f.q}</summary>
+              <p class="mt-2 text-[var(--surface-text-secondary)]">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    </div>
+  </main>
+</BaseLayout>

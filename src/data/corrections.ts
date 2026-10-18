@@ -18,6 +18,22 @@ export interface Correction {
 export const corrections: Correction[] = [
   {
     date: "2026-10-18",
+    calculator: { id: "html-minifier", category: "devtools", title: "HTML Minifier" },
+    summary: "A revealed IE conditional comment was mangled. The sequence <!--[if !IE]><!--> started an ordinary comment that swallowed the content that followed and left an unclosed comment. The empty comments <!-->, <!---> and <!----> are also now removed correctly.",
+    before: "<!--[if !IE]><!--><p>x</p><!--<![endif]--> became <!--[if !IE]>",
+    after: "The input is returned unchanged",
+    howVerified: "Hand-written inputs covering pre, textarea, script and style content, attribute quoting, CSS and JS strings; pinned in the audit test test/calculators/devtools/audit-batch-d.test.ts.",
+  },
+  {
+    date: "2026-10-18",
+    calculator: { id: "html-minifier", category: "devtools", title: "HTML Minifier" },
+    summary: "The limitations text said the minifier does not preserve textarea, code or script content, and the sizes were described as bytes. It preserves pre, textarea, script and style content (code and CSS white-space:pre areas are collapsed), and it counts characters.",
+    before: "\"does not preserve <textarea>, <code>, or <script>\"; sizes in \"bytes\"",
+    after: "pre, textarea, script and style are preserved; sizes in characters",
+    howVerified: "The counts in the worked examples (241 to 185 and 247 to 155 characters) were hand-counted; pinned in the audit test test/calculators/devtools/audit-batch-d.test.ts.",
+  },
+  {
+    date: "2026-10-18",
     calculator: { id: "canadian-mortgage-calculator", category: "finance", title: "Canadian Mortgage Calculator" },
     summary: "The CMHC insurance premium for a 30-year amortization left out the 0.20% surcharge CMHC adds for amortizations longer than 25 years.",
     before: "90% loan-to-value, 30-year amortization: 3.10% premium ($20,925), payment $3,818.60",
