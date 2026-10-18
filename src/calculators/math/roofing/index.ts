@@ -1,6 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RoofingPanel from './RoofingPanel';
+import Decimal from 'decimal.js';
+import { parseNonNegative } from '../../../utils/parseNumber';
 
 const PITCH_MULTIPLIERS: Record<string, number> = {
   '0': 1.000,
@@ -76,17 +78,27 @@ const roofingConfig: CalculatorConfig = {
         { label: '15% (complex)', value: '15' },
       ],
     },
+    {
+      id: 'pricePerSquare',
+      label: 'Price per Square ($, optional)',
+      type: 'number',
+      placeholder: 'e.g., 120',
+      min: 0,
+      step: 1,
+      helpText: 'Shingle price per roofing square (100 sq ft) for a material cost estimate',
+    },
   ],
   calculate: (values) => {
-    const length = parseFloat(values.length);
-    const width = parseFloat(values.width);
+    const length = parseNonNegative(values.length, 10000);
+    const width = parseNonNegative(values.width, 10000);
     const pitch = values.pitch || '6';
-    const overhangRaw = parseFloat(values.overhang);
-    const overhang = !isNaN(overhangRaw) ? overhangRaw : 1;
+    const overhangText = (values.overhang ?? '').trim();
+    const overhang = overhangText === '' ? 1 : parseNonNegative(overhangText, 10);
     const roofType = values.roofType || 'gable';
-    const wastePct = parseFloat(values.wasteFactor || '10') / 100;
+    const wasteText = (values.wasteFactor ?? '').trim();
+    const wastePct = (wasteText === '' ? 10 : parseNonNegative(wasteText, 100)) / 100;
 
-    if ([length, width].some(isNaN) || length <= 0 || width <= 0) return [];
+    if ([length, width, overhang, wastePct].some(isNaN) || length <= 0 || width <= 0) return [];
 
     const pitchMulti = PITCH_MULTIPLIERS[pitch] ?? 1.118;
 
@@ -94,68 +106,95 @@ const roofingConfig: CalculatorConfig = {
     const effW = width + 2 * overhang;
     const footprintArea = effL * effW;
 
+    // Surface area of a roof with one pitch everywhere is the footprint times the slope factor, gable or hip.
+    // The 5% hip allowance (and the waste factor) are extra material for cuts, not extra area.
     const hipFactor = roofType === 'hip' ? 0.05 : 0;
-    const roofArea = footprintArea * pitchMulti * (1.0 + wastePct + hipFactor);
+    const surfaceArea = footprintArea * pitchMulti;
+    const roofArea = surfaceArea * (1.0 + wastePct + hipFactor);
     const squares = Math.ceil(roofArea / 100);
     const bundles = squares * 3;
 
-    const ridgeLength = roofType === 'gable' ? effL : (effL > effW ? effL : effW);
+    // Ridge cap run. Gable: the ridge, as long as the roof. Hip: a SHORT ridge (length minus width) plus four hips,
+    // each running from a corner to the ridge end over the slope (the old code used the full length for a hip roof).
+    const longSide = Math.max(effL, effW);
+    const shortSide = Math.min(effL, effW);
+    let ridgeLength: number;
+    if (roofType === 'gable') {
+      ridgeLength = effL;
+    } else {
+      const rise = (shortSide / 2) * (Number(pitch) / 12);
+      const hipRun = Math.sqrt(2 * (shortSide / 2) ** 2 + rise ** 2);
+      ridgeLength = longSide - shortSide + 4 * hipRun;
+    }
     const feltRolls = Math.ceil(roofArea / 400);
     const nailsLbs = squares * 2;
 
     const fmt = (n: number) => parseFloat(n.toFixed(1)).toString();
 
-    const results = [
+    const results: CalculatorResult[] = [
       {
         id: 'roofArea',
-        label: 'Total Roof Area',
+        label: 'Roof Area to Order (incl. waste)',
         value: `${fmt(roofArea)} sq ft`,
         highlight: true,
-        color: 'positive' as const,
+        color: 'positive',
+      },
+      {
+        id: 'surfaceArea',
+        label: 'Roof Surface Area (no waste)',
+        value: `${fmt(surfaceArea)} sq ft`,
+        color: 'neutral',
       },
       {
         id: 'squares',
         label: 'Roofing Squares Needed',
         value: `${squares} squares`,
-        color: 'neutral' as const,
+        color: 'neutral',
       },
       {
         id: 'bundles',
         label: 'Shingle Bundles Needed',
         value: `${bundles} bundles`,
-        color: 'neutral' as const,
+        color: 'neutral',
       },
       {
         id: 'footprintArea',
         label: 'Footprint Area',
         value: `${fmt(footprintArea)} sq ft`,
-        color: 'neutral' as const,
+        color: 'neutral',
       },
       {
         id: 'pitchMultiplier',
         label: 'Pitch Multiplier',
         value: `${pitchMulti}`,
-        color: 'neutral' as const,
-      },
-      {
-        id: 'estimatedCost',
-        label: 'Est. Material Cost',
-        value: 'Enter price per square for estimate',
-        color: 'neutral' as const,
-      },
-      {
-        id: '_materialsList',
-        label: 'Materials List',
-        value: JSON.stringify({
-          squares,
-          bundles,
-          feltRolls,
-          nailsLbs,
-          ridgeLength: fmt(ridgeLength),
-        }),
-        color: 'neutral' as const,
+        color: 'neutral',
       },
     ];
+
+    const priceText = (values.pricePerSquare ?? '').trim();
+    const price = priceText === '' ? NaN : parseNonNegative(priceText, 1e6);
+    if (!isNaN(price) && price > 0) {
+      const cost = new Decimal(squares).times(price).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber();
+      results.push({
+        id: 'estimatedCost',
+        label: 'Est. Shingle Cost',
+        value: `$${cost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        color: 'positive',
+      });
+    }
+
+    results.push({
+      id: '_materialsList',
+      label: 'Materials List',
+      value: JSON.stringify({
+        squares,
+        bundles,
+        feltRolls,
+        nailsLbs,
+        ridgeLength: fmt(ridgeLength),
+      }),
+      color: 'neutral',
+    });
 
     return results;
   },
@@ -164,7 +203,7 @@ const roofingConfig: CalculatorConfig = {
     return createElement(RoofingPanel, { values, results });
   },
   educational: {
-    formula: 'Roof Area = Footprint Area x Pitch Multiplier x (1 + Waste) x (1 + Hip Factor)',
+    formula: 'Roof Area = Footprint Area x Pitch Multiplier x (1 + Waste + Hip Factor)',
     diagram: {
       svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect x="25" y="15" width="270" height="170" fill="rgba(59,130,246,0.05)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="6"/><text x="160" y="37" text-anchor="middle" fill="var(--svg-3b82f6)" font-family="Arial,sans-serif" font-size="12" font-weight="bold">Roof Pitch Cross-Section</text><!-- House walls --><rect x="70" y="100" width="180" height="70" fill="rgba(59,130,246,0.1)" stroke="var(--svg-3b82f6)" stroke-width="1.5" rx="3"/><text x="160" y="145" text-anchor="middle" fill="var(--svg-3b82f6)" font-family="Arial,sans-serif" font-size="18" font-weight="bold">House</text><!-- Roof --><polygon points="50,100 160,30 270,100" fill="none" stroke="var(--svg-ef4444)" stroke-width="2.5" stroke-linejoin="round"/><!-- Rafter line --><line x1="160" y1="100" x2="160" y2="160" stroke="var(--svg-3b82f6)" stroke-width="1" stroke-dasharray="4,3"/><!-- Rise and Run labels --><line x1="160" y1="30" x2="160" y2="100" stroke="var(--svg-ef4444)" stroke-width="1.5"/><text x="165" y="68" fill="var(--svg-ef4444)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">Rise</text><line x1="160" y1="100" x2="270" y2="100" stroke="var(--svg-ef4444)" stroke-width="1.5"/><text x="215" y="96" fill="var(--svg-ef4444)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">Run</text><text x="160" y="190" text-anchor="middle" fill="var(--svg-3b82f6)" font-family="Arial,sans-serif" font-size="10">Pitch = Rise / Run (e.g., 6/12) = 26.6 deg</text></svg>',
       alt: 'House roof cross-section showing pitch as rise over run with labeled dimensions',
@@ -192,7 +231,7 @@ const roofingConfig: CalculatorConfig = {
       },
       {
         question: 'How many shingle bundles per square?',
-        answer: 'Standard 3-tab architectural shingles come 3 bundles per square. Each bundle covers approximately 33.3 sq ft. Always round up to the nearest bundle.',
+        answer: 'Most 3-tab and architectural shingles come 3 bundles per square. Each bundle covers approximately 33.3 sq ft. Always round up to the nearest bundle.',
       },
       {
         question: 'How do I calculate roofing for a complex roof with valleys and dormers?',

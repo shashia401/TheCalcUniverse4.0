@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import BraSizePanel from './BraSizePanel';
+import { parseNonNegative } from '../../../utils/parseNumber';
 
 const cupLetters = [
   'AA', 'A', 'B', 'C', 'D', 'DD', 'DDD', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
@@ -16,14 +17,9 @@ function getBandSize(underbustSnug: number, unit: string): number {
   // Convert to inches if in cm
   const bandInches = unit === 'cm' ? underbustSnug / 2.54 : underbustSnug;
 
-  // Round to nearest even number
-  let band = Math.round(bandInches / 2) * 2;
-
-  // Special cases for very small ribcages
-  if (bandInches < 24) band = 24;
-  else if (bandInches < 27) band = 26;
-
-  return band;
+  // Nearest even number, never below 24. (The old "special cases" jumped from 24 to 26 at exactly 24.0 inches
+  // and gave 24.4 inches a 26 band.)
+  return Math.max(24, Math.round(bandInches / 2) * 2);
 }
 
 interface SisterSize {
@@ -70,7 +66,7 @@ const braSizeCalculatorConfig: CalculatorConfig = {
       label: 'Underbust (Loose)',
       type: 'number',
       min: 20,
-      max: 60,
+      max: 160,
       step: 0.1,
       helpText: 'Loose measurement around ribcage, just below bust',
     },
@@ -79,7 +75,7 @@ const braSizeCalculatorConfig: CalculatorConfig = {
       label: 'Underbust (Snug)',
       type: 'number',
       min: 20,
-      max: 60,
+      max: 160,
       step: 0.1,
       helpText: 'Snug but not tight',
     },
@@ -88,7 +84,7 @@ const braSizeCalculatorConfig: CalculatorConfig = {
       label: 'Underbust (Tight)',
       type: 'number',
       min: 20,
-      max: 60,
+      max: 160,
       step: 0.1,
       helpText: 'Tight, exhaled — as tight as possible',
     },
@@ -97,7 +93,7 @@ const braSizeCalculatorConfig: CalculatorConfig = {
       label: 'Bust (Standing)',
       type: 'number',
       min: 20,
-      max: 70,
+      max: 180,
       step: 0.1,
       helpText: 'Around fullest part while standing',
     },
@@ -106,7 +102,7 @@ const braSizeCalculatorConfig: CalculatorConfig = {
       label: 'Bust (Leaning)',
       type: 'number',
       min: 20,
-      max: 70,
+      max: 180,
       step: 0.1,
       helpText: 'Leaning forward 90°, bust parallel to floor',
     },
@@ -115,30 +111,43 @@ const braSizeCalculatorConfig: CalculatorConfig = {
       label: 'Bust (Lying Down)',
       type: 'number',
       min: 20,
-      max: 70,
+      max: 180,
       step: 0.1,
       helpText: 'Lying on your back',
     },
   ],
   calculate: (values) => {
     const unit = values.unit || 'in';
-    const underbustSnug = parseFloat(values.underbustSnug);
-    const bustStanding = parseFloat(values.bustStanding);
+    const underbustSnug = parseNonNegative(values.underbustSnug, 500);
+    const bustStanding = parseNonNegative(values.bustStanding, 500);
 
     if (isNaN(underbustSnug) || isNaN(bustStanding)) {
       return [];
     }
+    // An optional bust measurement that is typed must be a real number; blank just means "not measured".
+    const optional = (raw: string | undefined): number => ((raw ?? '').trim() === '' ? NaN : parseNonNegative(raw, 500));
+    if (['bustLeaning', 'bustLying'].some((k) => (values[k] ?? '').trim() !== '' && isNaN(optional(values[k])))) return [];
 
     // Convert all measurements to inches for calculations
     const toInches = (v: number): number => (unit === 'cm' ? v / 2.54 : v);
     const snugInches = toInches(underbustSnug);
+    if (snugInches < 20 || snugInches > 60 || toInches(bustStanding) < 20 || toInches(bustStanding) > 70) {
+      return [
+        {
+          id: 'error',
+          label: 'Check your measurements',
+          value: unit === 'cm' ? 'Underbust should be 51-152 cm and bust 51-178 cm.' : 'Underbust should be 20-60 inches and bust 20-70 inches.',
+          color: 'negative' as const,
+        },
+      ];
+    }
 
     // Band size
     const band = getBandSize(underbustSnug, unit);
 
     // Bust average
-    const bustLeaning = parseFloat(values.bustLeaning);
-    const bustLying = parseFloat(values.bustLying);
+    const bustLeaning = optional(values.bustLeaning);
+    const bustLying = optional(values.bustLying);
 
     let bustTotal = bustStanding;
     let bustCount = 1;
@@ -212,9 +221,9 @@ const braSizeCalculatorConfig: CalculatorConfig = {
   },
   educational: {
     formula:
-      'Band = Round(Snug Underbust) to nearest even | Cup = Bust Average − Band',
+      'Band = Snug Underbust rounded to the nearest even number | Cup = Bust Average − Snug Underbust (1 inch = A)',
     formulaDescription:
-      'Modern bra sizing uses multiple bust measurements (standing, leaning, and lying) for greater accuracy, recognizing that breast tissue distributes differently in each position. The band size is the snug underbust measurement rounded to the nearest even number. The cup size is the difference between the average of the three bust measurements and the band measurement, mapped to cup letters (1 inch = A, 2 inches = B, 3 inches = C, etc.). Sister sizes provide alternative band/cup combinations that hold the same volume.',
+      'Modern bra sizing uses multiple bust measurements (standing, leaning, and lying) for greater accuracy, recognizing that breast tissue distributes differently in each position. The band size is the snug underbust measurement rounded to the nearest even number. The cup size is the difference between the average of the three bust measurements and the snug underbust measurement, mapped to cup letters (1 inch = A, 2 inches = B, 3 inches = C, etc.). Sister sizes provide alternative band/cup combinations that hold the same volume.',
     variables: [
       {
         symbol: 'Band, Cup',
@@ -262,7 +271,7 @@ const braSizeCalculatorConfig: CalculatorConfig = {
       { source: 'ASTM D5585 - Standard Table of Body Measurements for Adult Female Misses Figure Type', url: 'https://www.astm.org/d5585_d5585m-21.html' },
     ],
     diagram: {
-      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-333333)">Bra Size Calculation</text><rect x="15" y="30" width="290" height="80" rx="6" fill="var(--svg-f8fafc)" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="160" y="50" text-anchor="middle" font-size="11" fill="var(--svg-555555)" font-weight="bold">Band = Snug Underbust → nearest even</text><text x="160" y="66" text-anchor="middle" font-size="11" fill="var(--svg-555555)" font-weight="bold">Cup = Avg Bust − Band</text><text x="160" y="98" text-anchor="middle" font-size="9" fill="var(--svg-888888)">1" = A  |  2" = B  |  3" = C  |  4" = D  |  5" = DD  |  6" = DDD</text><rect x="15" y="118" width="290" height="72" rx="6" fill="var(--svg-fff5f5)" stroke="var(--svg-ef4444)" stroke-width="1"/><text x="160" y="140" text-anchor="middle" font-size="11" fill="var(--svg-555555)" font-weight="bold">Sister Sizes (same cup volume)</text><rect x="30" y="152" width="75" height="24" rx="4" fill="var(--svg-3b82f6)" opacity="0.7"/><text x="67" y="168" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">32D ↓</text><rect x="122" y="152" width="75" height="24" rx="4" fill="var(--svg-ef4444)"/><text x="159" y="168" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">34C ★</text><rect x="214" y="152" width="75" height="24" rx="4" fill="var(--svg-3b82f6)" opacity="0.7"/><text x="251" y="168" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">36B ↑</text><text x="160" y="193" text-anchor="middle" font-size="9" fill="var(--svg-888888)">Sister sizes: ±2 band, ∓1 cup (same approximate volume)</text></svg>',
+      svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-333333)">Bra Size Calculation</text><rect x="15" y="30" width="290" height="80" rx="6" fill="var(--svg-f8fafc)" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="160" y="50" text-anchor="middle" font-size="11" fill="var(--svg-555555)" font-weight="bold">Band = Snug Underbust → nearest even</text><text x="160" y="66" text-anchor="middle" font-size="11" fill="var(--svg-555555)" font-weight="bold">Cup = Avg Bust − Snug Underbust</text><text x="160" y="98" text-anchor="middle" font-size="9" fill="var(--svg-888888)">1" = A  |  2" = B  |  3" = C  |  4" = D  |  5" = DD  |  6" = DDD</text><rect x="15" y="118" width="290" height="72" rx="6" fill="var(--svg-fff5f5)" stroke="var(--svg-ef4444)" stroke-width="1"/><text x="160" y="140" text-anchor="middle" font-size="11" fill="var(--svg-555555)" font-weight="bold">Sister Sizes (same cup volume)</text><rect x="30" y="152" width="75" height="24" rx="4" fill="var(--svg-3b82f6)" opacity="0.7"/><text x="67" y="168" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">32D ↓</text><rect x="122" y="152" width="75" height="24" rx="4" fill="var(--svg-ef4444)"/><text x="159" y="168" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">34C ★</text><rect x="214" y="152" width="75" height="24" rx="4" fill="var(--svg-3b82f6)" opacity="0.7"/><text x="251" y="168" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">36B ↑</text><text x="160" y="193" text-anchor="middle" font-size="9" fill="var(--svg-888888)">Sister sizes: ±2 band, ∓1 cup (same approximate volume)</text></svg>',
       alt: 'Bra size diagram showing band and cup calculation with sister sizes',
       caption: 'Modern bra sizing uses the snug underbust for band and average of 3 bust measurements for cup, plus sister sizes.',
     },

@@ -15,7 +15,7 @@ describe('GDP calculator', () => {
     expect(r.length).toBeGreaterThan(0);
     // NX = 2.5T - 3.2T = -0.7T
     // GDP = 17.5T + 4.2T + 3.8T + (-0.7T) = 24.8T
-    near(parseNumber(getValue(r, 'gdpNumeric')), 24800000000000, 1e9);
+    near(parseNumber(getValue(r, '_gdpNumeric')), 24800000000000, 1e9);
     expect(getValue(r, 'gdp')).toContain('trillion');
     expect(getValue(r, 'gdpType')).toBe('Nominal GDP');
   });
@@ -33,7 +33,7 @@ describe('GDP calculator', () => {
     expect(r.length).toBeGreaterThan(0);
     // Nominal GDP = 24.8T
     // Real GDP = 24.8T / (125/100) = 19.84T
-    near(parseNumber(getValue(r, 'gdpNumeric')), 19840000000000, 1e9);
+    near(parseNumber(getValue(r, '_gdpNumeric')), 19840000000000, 1e9);
     expect(getValue(r, 'gdpType')).toBe('Real GDP');
     expect(getValue(r, 'deflatorNote')).toBeTruthy();
     expect(getValue(r, 'deflatorNote')).toContain('125.0');
@@ -50,7 +50,7 @@ describe('GDP calculator', () => {
     });
     // NX = 1T - 3T = -2T
     // GDP = 10T + 2T + 1.5T + (-2T) = 11.5T
-    near(parseNumber(getValue(r, 'gdpNumeric')), 11500000000000, 1e9);
+    near(parseNumber(getValue(r, '_gdpNumeric')), 11500000000000, 1e9);
     expect(getValue(r, 'netExports')).toContain('-');
   });
 
@@ -64,7 +64,7 @@ describe('GDP calculator', () => {
     });
     // NX = 3T - 1T = 2T
     // GDP = 10T + 2T + 1.5T + 2T = 15.5T
-    near(parseNumber(getValue(r, 'gdpNumeric')), 15500000000000, 1e9);
+    near(parseNumber(getValue(r, '_gdpNumeric')), 15500000000000, 1e9);
     expect(getValue(r, 'netExports')).not.toContain('-');
   });
 
@@ -197,6 +197,6 @@ describe('GDP calculator', () => {
       imports: '1000000000000',
     });
     expect(getValue(r, 'netExports')).toContain('$');
-    near(parseNumber(getValue(r, 'netExportsNumeric')), 2000000000000, 1e9);
+    near(parseNumber(getValue(r, '_netExportsNumeric')), 2000000000000, 1e9);
   });
 });

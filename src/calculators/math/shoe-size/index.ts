@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ShoeSizePanel from './ShoeSizePanel';
+import { parseNonNegative } from '../../../utils/parseNumber';
 
 // ── Conversion Tables ──────────────────────────────────────────────────────
 
@@ -161,7 +162,7 @@ const shoeSizeConfig: CalculatorConfig = {
     const gender = values.gender || 'M';
 
     // Validate
-    const size = parseFloat(sizeStr);
+    const size = parseNonNegative(sizeStr, 1000);
     if (isNaN(size) || size <= 0) return [];
 
     // Select the appropriate table
@@ -172,7 +173,7 @@ const shoeSizeConfig: CalculatorConfig = {
     // Determine which table to use for lookup
     if (fromRegion === 'us_w') {
       table = WOMENS;
-      genderLabel = useMen ? "Men's Sizing" : "Women's Sizing";
+      genderLabel = "Women's Sizing"; // it was labelled "Men's" whenever Gender stayed on its default
     } else if (fromRegion === 'us_m') {
       table = MENS;
       genderLabel = "Men's Sizing";
@@ -191,6 +192,20 @@ const shoeSizeConfig: CalculatorConfig = {
       jp: 'jp',
     };
     const key = keyMap[fromRegion] || 'us';
+
+    // Only a little beyond the chart is a fair extrapolation; further out the "conversion" would be invented.
+    const chartValues = table.map((r) => r[key]);
+    const slack = key === 'eu' || key === 'jp' ? 2 : 1;
+    if (size < Math.min(...chartValues) - slack || size > Math.max(...chartValues) + slack) {
+      return [
+        {
+          id: 'error',
+          label: 'Size out of range',
+          value: `This chart covers ${fmt(Math.min(...chartValues))} to ${fmt(Math.max(...chartValues))} for the selected system.`,
+          color: 'negative' as const,
+        },
+      ];
+    }
 
     const row = lookup(table, key, size);
     if (!row) return [];

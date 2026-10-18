@@ -233,16 +233,16 @@ export default function StairPanel({ results }: Props) {
         {/* Quick Reference */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
-            IBC Reference
+            Code Reference
           </p>
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <div className="text-center p-2 bg-white rounded border border-slate-200">
               <p className="font-bold text-slate-700">Max Riser</p>
-              <p className="text-slate-500">7.75"</p>
+              <p className="text-slate-500">7.75" house (IRC) · 7" commercial (IBC)</p>
             </div>
             <div className="text-center p-2 bg-white rounded border border-slate-200">
               <p className="font-bold text-slate-700">Min Tread</p>
-              <p className="text-slate-500">10"</p>
+              <p className="text-slate-500">10" house (IRC) · 11" commercial (IBC)</p>
             </div>
           </div>
         </div>

@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import GdpPanel from './GdpPanel';
+import Decimal from 'decimal.js';
+import { parseNonNegative } from '../../../utils/parseNumber';
 
 function fmtLargeCurrency(n: number): string {
   const abs = Math.abs(n);
@@ -8,7 +10,7 @@ function fmtLargeCurrency(n: number): string {
   if (abs >= 1e12) return `${prefix}${(abs / 1e12).toFixed(2)} trillion`;
   if (abs >= 1e9) return `${prefix}${(abs / 1e9).toFixed(2)} billion`;
   if (abs >= 1e6) return `${prefix}${(abs / 1e6).toFixed(2)} million`;
-  return `${prefix}${abs.toFixed(2)}`;
+  return `${prefix}${abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function fmtPct(n: number): string {
@@ -82,25 +84,28 @@ const gdpConfig: CalculatorConfig = {
   ],
   calculate: (values) => {
     const mode = values.mode || 'nominal';
-    const C = parseFloat(values.consumption);
-    const I = parseFloat(values.investment);
-    const G = parseFloat(values.governmentSpending);
-    const X = parseFloat(values.exports);
-    const M = parseFloat(values.imports);
+    const C = parseNonNegative(values.consumption, 1e18);
+    const I = parseNonNegative(values.investment, 1e18);
+    const G = parseNonNegative(values.governmentSpending, 1e18);
+    const X = parseNonNegative(values.exports, 1e18);
+    const M = parseNonNegative(values.imports, 1e18);
 
     if (isNaN(C) || isNaN(I) || isNaN(G) || isNaN(X) || isNaN(M)) return [];
 
-    const netExports = X - M;
-    const nominalGDP = C + I + G + netExports;
+    // Exact decimal sums: trillions plus cents is beyond what a double can add without noise.
+    const netExportsExact = new Decimal(X).minus(M);
+    const nominalExact = new Decimal(C).plus(I).plus(G).plus(netExportsExact);
+    const netExports = netExportsExact.toNumber();
+    const nominalGDP = nominalExact.toNumber();
 
     let gdpValue = nominalGDP;
     let gdpLabel = 'Nominal GDP';
     let deflatorNote = '';
 
     if (mode === 'real') {
-      const deflator = parseFloat(values.gdpDeflator);
+      const deflator = parseNonNegative(values.gdpDeflator, 1e6);
       if (isNaN(deflator) || deflator <= 0) return [];
-      gdpValue = nominalGDP / (deflator / 100);
+      gdpValue = nominalExact.div(new Decimal(deflator).div(100)).toNumber();
       gdpLabel = 'Real GDP';
       deflatorNote = `Adjusted for inflation. Nominal GDP: ${fmtLargeCurrency(nominalGDP)} | Deflator: ${deflator.toFixed(1)} | Real GDP: ${fmtLargeCurrency(gdpValue)}`;
     }
@@ -125,9 +130,9 @@ const gdpConfig: CalculatorConfig = {
         color: 'positive',
       },
       {
-        id: 'gdpNumeric',
-        label: 'GDP (raw)',
-        value: String(gdpValue),
+        id: '_gdpNumeric',
+        label: '',
+        value: new Decimal(gdpValue).toFixed(),
       },
       {
         id: 'gdpFormula',
@@ -167,9 +172,9 @@ const gdpConfig: CalculatorConfig = {
         value: fmtLargeCurrency(netExports),
       },
       {
-        id: 'netExportsNumeric',
-        label: 'Net Exports (raw)',
-        value: String(netExports),
+        id: '_netExportsNumeric',
+        label: '',
+        value: new Decimal(netExports).toFixed(),
       },
       {
         id: 'gdpType',
@@ -216,7 +221,7 @@ const gdpConfig: CalculatorConfig = {
       'Review the GDP breakdown, component shares, and inflation-adjusted values.',
     ],
     explanation:
-      'GDP is the broadest measure of economic output. The expenditure approach (GDP = C + I + G + NX) breaks down who is spending in the economy. Consumption is typically 60-70% of GDP in developed economies. Investment includes business equipment, structures, and residential construction. Government spending covers all levels of government. Net exports can be positive (trade surplus) or negative (trade deficit). Using the GDP deflator converts nominal GDP to real GDP, removing the effects of inflation. Practical example: the United States GDP for 2023 in trillions of dollars: Consumption (C) = $18.6T, Investment (I) = $4.8T, Government Spending (G) = $4.7T, Exports (X) = $3.1T, Imports (M) = $3.8T. Net Exports = $3.1T - $3.8T = -$0.7T (trade deficit). Nominal GDP = $18.6 + $4.8 + $4.7 + (-$0.7) = $27.4T. With a GDP deflator of 123.4, Real GDP = $27.4 / (123.4/100) = $22.2T in constant base-year dollars. Consumption share = 67.9%, Investment = 17.5%, Government = 17.2%, Net Exports = -2.6%. Edge cases: GDP does not account for non-market transactions like unpaid household labor, volunteer work, or the underground economy, which the Bureau of Economic Analysis estimates at about 10-15% of true economic output. GDP also does not subtract environmental damage or resource depletion — cutting down a forest and selling the timber adds to GDP, but the loss of the forest\'s ecosystem services is not subtracted. For countries with large informal economies (e.g., India, Nigeria), official GDP figures may significantly understate actual economic activity. GDP per capita is a better measure of average living standards than total GDP, but it still does not capture income inequality. The United Nations Human Development Index (HDI) is a more comprehensive measure that includes GDP, education, and life expectancy.',
+      'GDP is the broadest measure of economic output. The expenditure approach (GDP = C + I + G + NX) breaks down who is spending in the economy. Consumption is typically 60-70% of GDP in developed economies. Investment includes business equipment, structures, and residential construction. Government spending covers all levels of government. Net exports can be positive (trade surplus) or negative (trade deficit). Using the GDP deflator converts nominal GDP to real GDP, removing the effects of inflation. Practical example: the United States GDP for 2023 in trillions of dollars: Consumption (C) = $18.6T, Investment (I) = $4.8T, Government Spending (G) = $4.7T, Exports (X) = $3.1T, Imports (M) = $3.8T. Net Exports = $3.1T - $3.8T = -$0.7T (trade deficit). Nominal GDP = $18.6 + $4.8 + $4.7 + (-$0.7) = $27.4T. With a GDP deflator of 123.4, Real GDP = $27.4 / (123.4/100) = $22.2T in constant base-year dollars. Consumption share = 67.9%, Investment = 17.5%, Government = 17.2%, Net Exports = -2.6%. Edge cases: GDP does not account for non-market transactions like unpaid household labor, volunteer work, or the underground economy, which are estimated to add somewhere around 5-15% to output in many economies (published estimates vary widely). GDP also does not subtract environmental damage or resource depletion — cutting down a forest and selling the timber adds to GDP, but the loss of the forest\'s ecosystem services is not subtracted. For countries with large informal economies (e.g., India, Nigeria), official GDP figures may significantly understate actual economic activity. GDP per capita is a better measure of average living standards than total GDP, but it still does not capture income inequality. The United Nations Human Development Index (HDI) is a more comprehensive measure that includes GDP, education, and life expectancy.',
     faqs: [
       {
         question: 'What is the difference between Nominal and Real GDP?',

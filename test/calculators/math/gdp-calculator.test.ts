@@ -14,7 +14,7 @@ describe('gdp-calculator', () => {
     });
     // GDP = C + I + G + (X - M) = 10T + 3T + 3T + (2T - 2.5T) = 15.5T - 0.5T = 15T
     expect(getValue(r, 'gdpType')).toBe('Nominal GDP');
-    expect(parseNumber(getValue(r, 'gdpNumeric'))).toBeGreaterThan(1e12);
+    expect(parseNumber(getValue(r, '_gdpNumeric'))).toBeGreaterThan(1e12);
   });
 
   it('computes real GDP with deflator', () => {
@@ -29,8 +29,8 @@ describe('gdp-calculator', () => {
     });
     expect(getValue(r, 'gdpType')).toBe('Real GDP');
     // Nominal = 15.5T - 0.5T = 15T. Real = 15T / 1.25 = 12T
-    const realGdp = parseNumber(getValue(r, 'gdpNumeric'));
-    expect(realGdp).toBeLessThan(parseNumber(getValue(r, 'gdpNumeric')) * 1.5);
+    const realGdp = parseNumber(getValue(r, '_gdpNumeric'));
+    expect(realGdp).toBeLessThan(parseNumber(getValue(r, '_gdpNumeric')) * 1.5);
   });
 
   it('shows component shares that sum approximately to 100%', () => {
@@ -60,7 +60,7 @@ describe('gdp-calculator', () => {
       exports: '1000000000000',
       imports: '3000000000000',
     });
-    const netExports = parseNumber(getValue(r, 'netExportsNumeric'));
+    const netExports = parseNumber(getValue(r, '_netExportsNumeric'));
     expect(netExports).toBeLessThan(0);
   });
 

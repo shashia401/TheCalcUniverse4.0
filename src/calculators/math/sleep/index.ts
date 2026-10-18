@@ -1,38 +1,17 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SleepPanel from './SleepPanel';
+import { parseClockTime } from '../../../utils/clockTime';
 
 interface TimeResult {
   hours: number;
   minutes: number;
 }
 
+// The shared clock parser also accepts "6 AM" and "6am" (the local copy needed minutes and a space-optional AM/PM).
 function parseTime(input: string): TimeResult | null {
-  const trimmed = input.trim().toUpperCase();
-  if (!trimmed) return null;
-
-  // Try 12-hour format: "6:30 AM" or "6:30 PM"
-  const match12 = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/.exec(trimmed);
-  if (match12) {
-    let hours = parseInt(match12[1], 10);
-    const minutes = parseInt(match12[2], 10);
-    const meridian = match12[3];
-    if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59) return null;
-    if (meridian === 'PM' && hours !== 12) hours += 12;
-    if (meridian === 'AM' && hours === 12) hours = 0;
-    return { hours, minutes };
-  }
-
-  // Try 24-hour format: "06:30" or "23:00"
-  const match24 = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
-  if (match24) {
-    const hours = parseInt(match24[1], 10);
-    const minutes = parseInt(match24[2], 10);
-    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
-    return { hours, minutes };
-  }
-
-  return null;
+  const minutes = parseClockTime(input);
+  return minutes === null ? null : { hours: Math.floor(minutes / 60), minutes: minutes % 60 };
 }
 
 function toMinutes(t: TimeResult): number {
@@ -205,7 +184,7 @@ const sleepConfig: CalculatorConfig = {
       'The recommended option is highlighted — typically 5-6 complete cycles.',
     ],
     explanation:
-      'Sleep cycles are approximately 90 minutes long, and waking at the end of a cycle leaves you feeling more rested. This calculator adds 14 minutes for falling asleep, then works backward (or forward) from your desired time, offering 4 options with 3-6 complete cycles. The 5-6 cycle option is recommended for most adults. Practical example: if you need to wake up at 6:30 AM, working backward: 6 cycles = 9 hours of sleep + 14 min fall-asleep = 9:14 before wake time, so bedtime = 9:16 PM. 5 cycles = 7.5 hours + 14 min = 7:44 before, so bedtime = 10:46 PM. 4 cycles = 6 hours + 14 min = 6:14 before, so bedtime = 12:16 AM. The 5-cycle option at 10:46 PM is typically the best balance. Edge cases: if you take medication that affects sleep architecture (such as antidepressants which suppress REM sleep), your cycle length may differ from 90 minutes. People with sleep disorders like sleep apnea experience disrupted cycles and may not benefit from cycle-based timing. For shift workers, the body\'s circadian rhythm is often misaligned with the desired sleep schedule, making it harder to fall asleep at the calculated time — consider blackout curtains and consistent sleep hygiene. For polyphasic sleep schedules (multiple short naps per day), cycle-based timing does not apply because the sleep architecture differs significantly from monophasic sleep.',
+      'Sleep cycles are approximately 90 minutes long, and waking at the end of a cycle leaves you feeling more rested (a popular planning rule of thumb: real cycles vary between about 70 and 120 minutes from person to person and from night to night). This calculator adds 14 minutes for falling asleep, then works backward (or forward) from your desired time, offering 4 options with 3-6 complete cycles. The 5-6 cycle option is recommended for most adults. Practical example: if you need to wake up at 6:30 AM, working backward: 6 cycles = 9 hours of sleep + 14 min fall-asleep = 9:14 before wake time, so bedtime = 9:16 PM. 5 cycles = 7.5 hours + 14 min = 7:44 before, so bedtime = 10:46 PM. 4 cycles = 6 hours + 14 min = 6:14 before, so bedtime = 12:16 AM. The 5-cycle option at 10:46 PM is typically the best balance. Edge cases: if you take medication that affects sleep architecture (such as antidepressants which suppress REM sleep), your cycle length may differ from 90 minutes. People with sleep disorders like sleep apnea experience disrupted cycles and may not benefit from cycle-based timing. For shift workers, the body\'s circadian rhythm is often misaligned with the desired sleep schedule, making it harder to fall asleep at the calculated time — consider blackout curtains and consistent sleep hygiene. For polyphasic sleep schedules (multiple short naps per day), cycle-based timing does not apply because the sleep architecture differs significantly from monophasic sleep.',
     faqs: [
       {
         question: 'What happens if I wake up in the middle of a cycle?',

@@ -1,6 +1,12 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import GravelPanel from './GravelPanel';
+import Decimal from 'decimal.js';
+import { parseNonNegative } from '../../../utils/parseNumber';
+
+/** Dollars with thousands separators, half-up to the cent (the old toFixed(2) on floats printed "12345.67"). */
+const money = (n: Decimal): string =>
+  `$${n.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const MATERIAL_DENSITIES: Record<string, number> = {
   'pea-gravel': 2700,
@@ -75,9 +81,9 @@ const config: CalculatorConfig = {
       return [];
     }
 
-    const length = parseFloat(values.length);
-    const width = parseFloat(values.width);
-    const depth = parseFloat(values.depth);
+    const length = parseNonNegative(values.length, 1e6);
+    const width = parseNonNegative(values.width, 1e6);
+    const depth = parseNonNegative(values.depth, 1e4);
 
     if (isNaN(length) || isNaN(width) || isNaN(depth)) {
       return [];
@@ -120,8 +126,8 @@ const config: CalculatorConfig = {
       },
     ];
 
-    const pricePerYard = values.pricePerYard ? parseFloat(values.pricePerYard) : undefined;
-    const pricePerTon = values.pricePerTon ? parseFloat(values.pricePerTon) : undefined;
+    const pricePerYard = values.pricePerYard ? parseNonNegative(values.pricePerYard, 1e7) : undefined;
+    const pricePerTon = values.pricePerTon ? parseNonNegative(values.pricePerTon, 1e7) : undefined;
 
     if (
       pricePerYard !== undefined &&
@@ -131,7 +137,7 @@ const config: CalculatorConfig = {
       results.push({
         id: 'cost-per-yard',
         label: 'Estimated Cost (per yard)',
-        value: `$${fmt2(cubicYards * pricePerYard)}`,
+        value: money(new Decimal(cubicYards).times(pricePerYard)),
         color: 'positive',
       });
     }
@@ -144,7 +150,7 @@ const config: CalculatorConfig = {
       results.push({
         id: 'cost-per-ton',
         label: 'Estimated Cost (per ton)',
-        value: `$${fmt2(tons * pricePerTon)}`,
+        value: money(new Decimal(tons).times(pricePerTon)),
         color: 'positive',
       });
     }

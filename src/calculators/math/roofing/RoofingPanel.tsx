@@ -134,7 +134,7 @@ export default function RoofingPanel({ values, results }: Props) {
               { label: 'Shingle Bundles', value: `${mats.bundles} bundles (${mats.squares} squares)` },
               { label: 'Felt Paper Rolls', value: `${mats.feltRolls} rolls (covers ~400 sq ft each)` },
               { label: 'Roofing Nails', value: `~${mats.nailsLbs} lbs (2 lbs per square)` },
-              { label: 'Ridge Length', value: `${mats.ridgeLength} ft` },
+              { label: 'Ridge Cap Length (ridge + hips)', value: `${mats.ridgeLength} ft` },
             ].map((item) => (
               <div key={item.label} className="flex justify-between items-center px-4 py-3">
                 <span className="text-sm font-medium text-slate-700">{item.label}</span>
