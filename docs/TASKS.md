@@ -4,7 +4,7 @@ Updated as each item completes. `[x]` = done and verified, `[ ]` = open, `[owner
 Last checked: 2026-10-18. Order: indexing first (traffic), then the page, then decision tools.
 
 Verified state: 10,904 unit tests pass, `tsc` clean, all 343 calculators pinned by audit tests, full Playwright
-suite (incl. the 343-page sweep) green on the previous build; the run for the new hero is in progress.
+suite (incl. the 343-page sweep) green on the current build (commit `4bab3e7`).
 
 ## A. Indexing and SEO
 
@@ -29,7 +29,7 @@ crawled in August under the old client-rendered site, so the verdict predates th
 - [x] B3 One brand blue `#1967D2` across CSS tokens and the Tailwind `brand` scale; 4 dead colour schemes removed; trust chips enlarged to 14px. (Legacy token names `--accent-rust`, `--accent-deep-teal`, `--teal-light` still exist but now follow the brand; rename if they cause confusion)
 - [x] B4 Trust figures generated from audits (`src/data/verification.json`, via `node scripts/verification-stats.mjs --tests <n>`): homepage, /about/, /methodology/, per-calculator chip. Re-run after every audit
 - [x] B5 Public corrections log at /corrections/ (56 entries, each traceable to a commit). Add new ones to `src/data/corrections.ts`
-- [x] B7 New homepage hero: light graph paper, "Calculators that show their work" with the single amber highlighter, and a live worked loan solution with a circled answer (`HeroWorksheet.tsx`). Dark/mobile checked. **Committed locally (`d959d7f`), not yet pushed: waiting for the full Playwright run**
+- [x] B7 New homepage hero: light graph paper, "Calculators that show their work" with the single amber highlighter, and a live worked loan solution with a circled answer (`HeroWorksheet.tsx`). Dark/mobile checked. Pushed (`d959d7f`); full 343-page sweep clean.
 - [ ] B6 Calculator page structure and value over competitors:
   - [x] B6a Answer placement: desktop panel beside inputs; phones get an answer strip above the first input
   - [x] B6b First pass: collapsible explanations (formula card, examples, FAQs, sources open), 44px inputs, 14px chips. **Open:** related-tools tile grid, spacing and type-scale pass
