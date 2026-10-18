@@ -30,6 +30,26 @@ export const decisionTools: DecisionToolInfo[] = [
     ],
     cta: 'Check a house',
   },
+  {
+    slug: 'can-i-afford-a-car',
+    title: 'Can I afford this car?',
+    blurb: 'The real monthly cost, the 20/4/10 guideline, your debt-to-income and the cash you need at signing.',
+    calculatorIds: [
+      'auto-loan-calculator',
+      'auto-lease-calculator',
+      'lease-vs-buy-calculator',
+      'cash-back-vs-low-interest-calculator',
+      'vehicle-depreciation-calculator',
+    ],
+    cta: 'Check a car',
+  },
+  {
+    slug: 'should-i-refinance',
+    title: 'Should I refinance my mortgage?',
+    blurb: 'Monthly saving, break-even, the cost over your stay and lifetime interest, compared like for like.',
+    calculatorIds: ['refinance-calculator', 'mortgage-payoff-calculator'],
+    cta: 'Check a refinance',
+  },
 ];
 
 export const decisionToolFor = (calculatorId: string): DecisionToolInfo | undefined =>

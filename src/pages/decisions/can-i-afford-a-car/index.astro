@@ -1,0 +1,122 @@
+---
+// "Can I afford this car?" — a decision tool: one form, four linked answers (loan cost, the 20/4/10 check,
+// debt-to-income, cash at signing and total cost), a plain verdict, a shareable link and saved scenarios.
+// The island renders the default scenario on the server, so this page ships real numbers in its HTML.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import CarDecision from '../../../components/decisions/CarDecision';
+import { CAR_ASSUMPTIONS as A } from '../../../lib/carDecision';
+import { BASE_URL, SITE_NAME } from '../../../config/constants';
+
+const path = '/decisions/can-i-afford-a-car/';
+const title = 'Can I Afford This Car? Free Decision Calculator';
+const description =
+  'Enter your income, debts, savings and the car. Get one verdict plus the loan payment, all-in monthly cost, a 20/4/10 check, debt-to-income and cash at signing.';
+
+const faqs = [
+  {
+    q: 'What is the 20/4/10 rule?',
+    a: `It is a rule of thumb from personal-finance writing: put at least ${A.downMinPct}% down, finance for no more than ${A.termMaxMonths / 12} years (${A.termMaxMonths} months), and keep total transportation cost under ${A.costGuidePct}% of your gross income. It is not a lender rule and no bank applies it; this tool uses it as a yardstick for what is comfortable, not for what you can be approved for.`,
+  },
+  {
+    q: 'What counts as “all-in” monthly cost?',
+    a: 'The loan payment, plus the insurance and the fuel and maintenance you enter. Parking, tolls, registration renewals and repairs beyond routine maintenance are not included unless you add them to the running-cost field.',
+  },
+  {
+    q: 'How are the down payment, trade-in and sales tax treated?',
+    a: 'The cash down payment is a percentage of the price. Your trade-in is entered separately and counts toward the 20% test alongside the cash. Sales tax and fees are charged on the full price and paid in cash at signing, so they add to the cash you need but not to the loan. Many states reduce the tax by your trade-in value, so this is a cautious estimate; use your state’s rules and the dealer’s itemised quote for the real figure.',
+  },
+  {
+    q: 'Why is the debt-to-income ceiling 43%?',
+    a: `Lenders compare your monthly debt payments, including rent or a mortgage, with your gross monthly income. A ${A.dtiCeilingPct}% total is a commonly cited ceiling in mortgage lending, and car lenders often look at similar ratios, but each lender sets its own limits and weighs credit score and income stability. Treat it as a warning level, not an approval line.`,
+  },
+  {
+    q: 'What decides “over budget” and “tight”?',
+    a: `Over budget means you are short on cash at signing, the all-in cost is above ${A.costCeilingPct}% of gross income, or debt-to-income with the car is above ${A.dtiCeilingPct}%. Tight means none of those, but at least one 20/4/10 test fails. The ${A.costCeilingPct}% ceiling is this tool’s own cut-off, chosen as 1.5 times the guideline; it is a judgement call, not an industry standard.`,
+  },
+  {
+    q: 'Is my information sent anywhere, and is this financial advice?',
+    a: 'Nothing is sent. Everything is calculated in your browser, saved scenarios stay in this browser’s local storage, and “Copy link” puts your numbers in the web address so you can share or bookmark them. This is an estimate built on stated assumptions, not financial advice. Your lender’s quote and your own budget are the final word.',
+  },
+];
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Decision tools', item: `${BASE_URL}/decisions/` },
+      { '@type': 'ListItem', position: 3, name: 'Can I afford this car?', item: `${BASE_URL}${path}` },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Can I Afford This Car? Decision Calculator',
+    url: `${BASE_URL}${path}`,
+    description,
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Any',
+    isAccessibleForFree: true,
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: BASE_URL },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<BaseLayout title={title} description={description} canonicalPath={path} schemas={schemas}>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-8">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-ink)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <a href="/decisions/" class="text-[var(--brand-ink)] hover:underline">Decision tools</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>Can I afford this car?</span>
+      </nav>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-[var(--surface-text)] mb-2">Can I afford this car?</h1>
+      <p class="text-[var(--surface-text-secondary)] mb-8 max-w-2xl">
+        One set of numbers, four answers: what the loan costs, whether the deal passes the 20/4/10 rule of thumb, what lenders will see in your debt, and the cash you need at signing. Change anything and every answer updates. The starting numbers are an example, not a market quote.
+      </p>
+
+      <CarDecision client:load />
+
+      <section aria-label="How this works" class="mt-14 max-w-3xl">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-3">How the verdict is decided</h2>
+        <p class="mb-3 text-[var(--surface-text-secondary)]">
+          The yardstick is the 20/4/10 rule of thumb: at least {A.downMinPct}% down (cash plus trade-in), a loan of at most {A.termMaxMonths} months, and total transportation cost (loan payment, insurance, fuel and maintenance) under {A.costGuidePct}% of gross income. It is a guideline from personal-finance writing, not a lender rule.
+        </p>
+        <ul class="space-y-2 text-[var(--surface-text-secondary)] list-disc pl-5">
+          <li><strong class="text-[var(--surface-text)]">Within your budget</strong>: all three 20/4/10 tests pass, debt-to-income with the car is at most {A.dtiCeilingPct}%, and your cash covers the down payment plus sales tax and fees.</li>
+          <li><strong class="text-[var(--surface-text)]">Possible, but tight</strong>: you clear the {A.costCeilingPct}% cost ceiling, the {A.dtiCeilingPct}% debt ceiling and the cash test, but at least one 20/4/10 test fails. The reasons list says which one, with your numbers.</li>
+          <li><strong class="text-[var(--surface-text)]">Over budget</strong>: you are short on cash at signing, the all-in cost is above {A.costCeilingPct}% of gross income, or debt-to-income with the car is above {A.dtiCeilingPct}%.</li>
+        </ul>
+        <p class="mt-4 text-sm text-[var(--surface-text-muted)]">
+          Assumptions: sales tax and fees are charged on the full price and paid in cash at signing; the loan is a fixed-rate loan with equal monthly payments; the {A.dtiCeilingPct}% and {A.costCeilingPct}% limits are cut-offs this tool chooses, not rules every lender applies. The payment uses the same formula as our
+          <a class="text-[var(--brand-ink)] underline" href="/automotive/auto-loan-calculator/">auto loan calculator</a>.
+          For related questions see the <a class="text-[var(--brand-ink)] underline" href="/finance/dti-ratio-calculator/">debt-to-income calculator</a>,
+          <a class="text-[var(--brand-ink)] underline" href="/automotive/lease-vs-buy-calculator/">lease versus buy</a> and
+          <a class="text-[var(--brand-ink)] underline" href="/automotive/vehicle-depreciation-calculator/">vehicle depreciation</a>.
+          See <a class="text-[var(--brand-ink)] underline" href="/methodology/">how we test and verify</a> and the public <a class="text-[var(--brand-ink)] underline" href="/corrections/">corrections log</a>.
+        </p>
+      </section>
+
+      <section aria-label="Frequently asked questions" class="mt-12 max-w-3xl">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-4">Frequently asked questions</h2>
+        <div class="divide-y divide-[var(--border-warm)] rounded-2xl border border-[var(--border-warm)] bg-[var(--surface-card)]">
+          {faqs.map((f) => (
+            <details class="group p-5">
+              <summary class="cursor-pointer list-none font-semibold text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]">{f.q}</summary>
+              <p class="mt-2 text-[var(--surface-text-secondary)]">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    </div>
+  </main>
+</BaseLayout>

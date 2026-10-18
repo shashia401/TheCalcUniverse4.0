@@ -1,0 +1,136 @@
+---
+// "Should I refinance?" — a decision tool: one form, four linked answers (payment, break-even, cost over
+// your stay, lifetime interest), a plain verdict, a shareable link and saved scenarios.
+// The island renders the default scenario on the server, so this page ships real numbers in its HTML.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import RefinanceDecision from '../../../components/decisions/RefinanceDecision';
+import { REFINANCE_ASSUMPTIONS as A } from '../../../lib/refinanceDecision';
+import { BASE_URL, SITE_NAME } from '../../../config/constants';
+
+const path = '/decisions/should-i-refinance/';
+const title = 'Should I Refinance? Free Decision Calculator';
+const description =
+  'Enter your current loan, the new quote, closing costs and how long you will stay. Get one verdict plus your new payment, break-even, cost over your stay and lifetime interest. Save and compare scenarios.';
+
+const faqs = [
+  {
+    q: 'What does “worth refinancing” mean here?',
+    a: `Three tests, in this order. First, over the years you plan to stay, is the total cost of the new loan lower than keeping the one you have, closing costs included? If not, the verdict is “Not worth it at these numbers”. If yes, is the break-even within ${A.breakEvenShare}% of your stay, and is the interest you would pay if you kept the loan to the end no higher? If both hold it is “Worth refinancing”; if either fails it is “Worth a closer look”. These thresholds are guidelines, not lender rules.`,
+  },
+  {
+    q: 'What is a “no-cost” refinance, and is it really free?',
+    a: 'A no-cost refinance means you do not pay the fees at closing. The lender covers them in exchange for a higher rate, or the fees are added to the loan balance. Either way the cost has moved, not gone. To test one here, enter the higher rate as the new rate and 0 as the cost to refinance; if the fees were added to the loan, add them to the current balance. Then compare it with a quote where you pay the fees.',
+  },
+  {
+    q: 'Should I count points as part of the cost?',
+    a: 'Yes. Points paid at closing are part of the total cost to refinance, so include them with the other fees. Paying points usually buys a lower rate, so run the tool twice, once with points and the lower rate and once without, and compare the two on the same stay. The longer you will keep the loan, the more a lower rate is worth.',
+  },
+  {
+    q: 'Why can a lower payment still cost me more?',
+    a: 'Resetting the term. If you have 20 years left and refinance into a new 30-year loan, the payment falls because it is spread over more years, but you also pay interest for 10 extra years. For example, $200,000 at 7% with 20 years left, refinanced to 6.5% over 30 years, lowers the payment by about $286 a month yet adds about $82,945 of interest if both loans run to the end. The tool shows both views side by side: the cost over your stay, and the interest to payoff. A fairer test of a rate drop is to keep roughly the same number of years left.',
+  },
+  {
+    q: 'How is the cost over my stay worked out?',
+    a: 'For each path it adds up the payments you make during your stay, the balance you still owe at the end of it, and (for refinancing) the closing costs, then subtracts any cash you took out. The home is worth the same either way, so owing less at the end counts as equity gained. The difference between the two totals is what refinancing saves or costs you. Closing costs are assumed to be paid in cash rather than rolled into the loan, and taxes, insurance, mortgage insurance and the tax effect of interest are left out because they do not change with the refinance.',
+  },
+  {
+    q: 'When is waiting better than refinancing?',
+    a: 'When you may move before the break-even month; when the rate drop is small compared with the fees; when you are far into a short loan, where most of each payment is already principal; or when you expect to need a different loan soon. Waiting is also reasonable if the quote only works with a longer term and you care about total interest. If rates fall further you can run the numbers again, since refinancing is not a one-time chance.',
+  },
+];
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Decision tools', item: `${BASE_URL}/decisions/` },
+      { '@type': 'ListItem', position: 3, name: 'Should I refinance?', item: `${BASE_URL}${path}` },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Should I Refinance? Decision Calculator',
+    url: `${BASE_URL}${path}`,
+    description,
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Any',
+    isAccessibleForFree: true,
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: BASE_URL },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<BaseLayout title={title} description={description} canonicalPath={path} schemas={schemas}>
+  <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
+    <div class="max-w-[1200px] mx-auto px-4 md:px-10 py-8">
+      <nav aria-label="Breadcrumb" class="text-sm text-[var(--surface-text-muted)] mb-6">
+        <a href="/" class="text-[var(--brand-ink)] hover:underline">Home</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <a href="/decisions/" class="text-[var(--brand-ink)] hover:underline">Decision tools</a>
+        <span class="mx-2" aria-hidden="true">›</span>
+        <span>Should I refinance?</span>
+      </nav>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-[var(--surface-text)] mb-2">Should I refinance my mortgage?</h1>
+      <p class="text-[var(--surface-text-secondary)] mb-8 max-w-2xl">
+        Put in your current loan and the quote you were given. You get four linked answers: your new payment, when the closing costs are repaid, what each path costs over the years you will stay, and what happens to total interest if you keep either loan to the end. The starting numbers are examples, not today’s rates.
+      </p>
+
+      <RefinanceDecision client:load />
+
+      <section aria-label="How this works" class="mt-14 max-w-3xl">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-3">How the verdict is decided</h2>
+        <ul class="space-y-2 text-[var(--surface-text-secondary)] list-disc pl-5">
+          <li><strong class="text-[var(--surface-text)]">Worth refinancing</strong>: over your stay the new loan costs less, the break-even month falls within {A.breakEvenShare}% of your stay, and total interest to payoff is not higher than on the loan you have.</li>
+          <li><strong class="text-[var(--surface-text)]">Worth a closer look</strong>: it still costs less over your stay, but the break-even uses more than {A.breakEvenShare}% of it (or the payment saving alone never repays the costs), or you would pay more interest by the end, which is typical when the term is reset to longer.</li>
+          <li><strong class="text-[var(--surface-text)]">Not worth it at these numbers</strong>: over your stay the new loan costs the same or more than keeping the one you have.</li>
+        </ul>
+
+        <h3 class="text-lg font-bold text-[var(--surface-text)] mt-8 mb-2">The formulas</h3>
+        <ul class="space-y-2 text-[var(--surface-text-secondary)] list-disc pl-5">
+          <li><strong class="text-[var(--surface-text)]">Payment</strong> = loan × r ÷ (1 − (1 + r)<sup>−n</sup>), with r the rate divided by 12 and n the months. The current payment is worked out from your balance, rate and time left. The new loan is your balance plus any cash out.</li>
+          <li><strong class="text-[var(--surface-text)]">Break-even</strong> = cost to refinance ÷ monthly saving, rounded up to a whole month. It is shown only when the payment falls.</li>
+          <li><strong class="text-[var(--surface-text)]">Net cost over your stay</strong> = payments made during the stay + balance still owed at the end + cost to refinance (refinancing only) − cash out (refinancing only). The cheaper path is the one with the lower total.</li>
+          <li><strong class="text-[var(--surface-text)]">Interest to payoff</strong> = payment × months − amount borrowed, for the rest of the current loan and for the whole new loan.</li>
+        </ul>
+
+        <h3 class="text-lg font-bold text-[var(--surface-text)] mt-8 mb-2">Assumptions</h3>
+        <ul class="space-y-2 text-[var(--surface-text-secondary)] list-disc pl-5">
+          <li>Fixed-rate loans with equal monthly payments; time left and loan terms are rounded to whole months.</li>
+          <li>The cost to refinance is paid in cash at closing, not added to the loan. Cash out is added to the new loan and counted as money you receive.</li>
+          <li>Taxes, insurance, mortgage insurance and escrow are left out, since they do not depend on which loan you hold. The tax effect of mortgage interest is also ignored.</li>
+          <li>Both paths are compared over the same stay, and you are assumed to sell or pay off the loan at the end. Prepayment penalties on the current loan, if any, belong in the cost to refinance.</li>
+          <li>With cash out, the payment goes up by design, so the verdict rests on net cost and total interest rather than on the payment saving.</li>
+          <li>The default numbers are examples. Enter the rate and fees from your own quote.</li>
+        </ul>
+
+        <p class="mt-4 text-sm text-[var(--surface-text-muted)]">
+          Payments, break-even and interest use the same method as our
+          <a class="text-[var(--brand-ink)] underline" href="/finance/refinance-calculator/">refinance calculator</a>, so the numbers match that page.
+          See <a class="text-[var(--brand-ink)] underline" href="/methodology/">how we test and verify</a> and the public <a class="text-[var(--brand-ink)] underline" href="/corrections/">corrections log</a>.
+          This is an estimate, not financial advice; your lender’s Loan Estimate is the only binding figure.
+        </p>
+      </section>
+
+      <section aria-label="Frequently asked questions" class="mt-12 max-w-3xl">
+        <h2 class="text-xl font-bold text-[var(--surface-text)] mb-4">Frequently asked questions</h2>
+        <div class="divide-y divide-[var(--border-warm)] rounded-2xl border border-[var(--border-warm)] bg-[var(--surface-card)]">
+          {faqs.map((f) => (
+            <details class="group p-5">
+              <summary class="cursor-pointer list-none font-semibold text-[var(--surface-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]">{f.q}</summary>
+              <p class="mt-2 text-[var(--surface-text-secondary)]">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    </div>
+  </main>
+</BaseLayout>
