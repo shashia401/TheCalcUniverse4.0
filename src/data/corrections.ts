@@ -1,0 +1,250 @@
+// Public corrections log (rendered at /corrections/).
+// Every entry is traceable to a commit in the repository history; `before` / `after`
+// are included only when the code diff or its regression test shows the exact values.
+// Newest first. Add new corrections at the top. `calculator` is looked up in the
+// registry at render time: the link is built from the registry, and entries whose id
+// is no longer registered are shown without a link.
+
+export interface Correction {
+  /** YYYY-MM-DD, the date the fix was committed. */
+  date: string;
+  calculator?: { id: string; category: string; title: string };
+  summary: string;
+  before?: string;
+  after?: string;
+  howVerified: string;
+}
+
+export const corrections: Correction[] = [
+  {
+    date: '2026-10-18',
+    calculator: { id: 'business-loan-calculator', category: 'finance', title: 'Business Loan Calculator' },
+    summary: 'Dollar amounts of $1,000 or more were shown without thousands separators.',
+    before: '$5129.13 monthly payment, $57747.97 total interest',
+    after: '$5,129.13 monthly payment, $57,747.97 total interest',
+    howVerified: 'The calculator’s test now asserts the formatted output, and the full unit suite passes.',
+  },
+  {
+    date: '2026-10-18',
+    calculator: { id: 'asset-depreciation-calculator', category: 'finance', title: 'Asset Depreciation Calculator' },
+    summary: 'Dollar amounts of $1,000 or more were shown without thousands separators.',
+    howVerified: 'The money formatter was changed to group digits, and the full unit suite passes.',
+  },
+  {
+    date: '2026-10-18',
+    calculator: { id: 'due-date-calculator', category: 'health', title: 'Due Date Calculator' },
+    summary: 'The countdown said “1 days to go” instead of “1 day to go”. It also repeated the same count in a second line, which went negative once the due date had passed. The repeat was removed.',
+    before: '1 days to go',
+    after: '1 day to go',
+    howVerified: 'Singular and plural are now handled by one helper, and the full unit suite passes. Independent values for 21 health calculators are pinned in an audit test.',
+  },
+  {
+    date: '2026-10-18',
+    calculator: { id: 'due-date-calculator', category: 'health', title: 'Due Date Calculator' },
+    summary: 'The explanation called 37 to 42 weeks “full term”. A baby is considered term from 37 to 42 weeks, and “full term” is 39 weeks to 40 weeks 6 days. The wording now says so.',
+    before: 'Full term is anywhere from 37 to 42 weeks.',
+    after: 'A baby is considered term anywhere from 37 to 42 weeks (39 to 40 weeks 6 days is “full term”).',
+    howVerified: 'The corrected wording is in the calculator text, and the full unit suite passes.',
+  },
+  {
+    date: '2026-10-17',
+    calculator: { id: 'height-calculator', category: 'math', title: 'Height Predictor' },
+    summary: 'The mid-parental (Tanner) formula added 13 inches instead of 13 centimetres, so every prediction came out about 4 inches too tall. The likely-range text was also wrong. It now uses ±8.5 cm, about 95%.',
+    before: 'Mother 5′4″, father 5′10″: son predicted at 6′1.5″',
+    after: 'Same parents: son 5′9.6″ (176.7 cm), daughter 5′4.4″ (163.7 cm)',
+    howVerified: 'The formula is (mother + father ± 13 cm) ÷ 2. Expected values in the audit test were derived independently of the code.',
+  },
+  {
+    date: '2026-10-17',
+    calculator: { id: 'edpi-calculator', category: 'everyday', title: 'eDPI Calculator' },
+    summary: 'The cm/360 figure used the Counter-Strike yaw value for every game, and Overwatch and Rainbow Six had a conversion multiplier of 1. Every game now uses its own yaw, so cross-game conversions keep the same physical mouse distance.',
+    before: 'Valorant at sensitivity 0.35: 148 cm per 360°',
+    after: 'Valorant at sensitivity 0.35: 46.7 cm (18.4 in) per 360°',
+    howVerified: 'The audit test checks the yaw values (0.022 CS, 0.07 Valorant, 0.0066 Overwatch, 0.00573 Rainbow Six). It also checks that converting to another game and back returns the original sensitivity.',
+  },
+  {
+    date: '2026-10-17',
+    calculator: { id: 'roofing-calculator', category: 'diy', title: 'Roofing Calculator' },
+    summary: 'On a hip roof the ridge cap length used the full building length. A hip roof has a short ridge plus four hips, which is much more material.',
+    before: 'Hip roof, 42 × 32 ft building: 42 ft of ridge cap',
+    after: 'Hip roof, 42 × 32 ft building: 106 ft (10 ft ridge + four 24 ft hips)',
+    howVerified: 'Hand calculation: each hip is √(16² + 16² + 8²) = 24 ft. A regression test pins 106.',
+  },
+  {
+    date: '2026-10-17',
+    calculator: { id: 'password-generator', category: 'engineering', title: 'Password Generator' },
+    summary: 'The entropy figure was computed as length × log₂(character set size), which overstates it. The generator is now uniform over valid passwords, so the entropy shown is the exact log₂ of the number of possible passwords. The random-integer routine also accepted one value too many, which slightly biased the output.',
+    before: 'Length 4: 25.9 bits',
+    after: 'Length 4: 22.1 bits',
+    howVerified: 'Entropy is checked in the audit test against an independent count of valid passwords.',
+  },
+  {
+    date: '2026-10-17',
+    calculator: { id: 'bandwidth-calculator', category: 'engineering', title: 'Bandwidth Calculator' },
+    summary: 'A transfer time just under two minutes was printed with an impossible seconds value.',
+    before: '119.6 seconds shown as “1m 60s”',
+    after: '119.6 seconds shown as “2m 0s”',
+    howVerified: 'A regression test pins the formatter output.',
+  },
+  {
+    date: '2026-10-17',
+    calculator: { id: 'molarity-calculator', category: 'math', title: 'Molarity Calculator' },
+    summary: 'A leftover default molar mass (58.44, sodium chloride) overrode whatever compound was typed, so every compound was calculated as if it were NaCl. The compound field now sets the molar mass.',
+    before: 'H₂SO₄ was calculated with a molar mass of 58.44 g/mol',
+    after: 'H₂SO₄ uses 98.0800 g/mol; 9.808 g in 1 L gives 0.1000 M',
+    howVerified: 'The audit test checks the molar mass used and the resulting molarity, with expected values worked out by hand.',
+  },
+  {
+    date: '2026-10-15',
+    calculator: { id: 'golf-handicap-calculator', category: 'everyday', title: 'Golf Handicap Calculator' },
+    summary: 'The calculator still applied the 0.96 multiplier from the pre-2020 USGA system. It now follows the World Handicap System (Rules 5.1, 5.2 and 6.1). That means no 0.96 factor, a three-score minimum with the WHS adjustments for 3, 4 and 6 scores, an optional Playing Conditions Calculation, and plus-handicap formatting. The explanatory text was corrected to match.',
+    before: 'Index = Avg(Lowest 8 of 20) × 0.96',
+    after: 'Index = average of the best differentials, rounded to one decimal, with no 0.96 factor',
+    howVerified: 'WHS arithmetic now lives in its own module with its own tests. Every fix has a regression test with independently derived values.',
+  },
+  {
+    date: '2026-10-15',
+    calculator: { id: 'slope-calculator', category: 'math', title: 'Slope Calculator' },
+    summary: 'Slope used floating-point arithmetic, so simple decimal inputs gave results like 0.9999999999999998. Horizontal lines produced malformed equations, identical points produced a “vertical line”, and radians mode still showed 90°. It now uses exact rational arithmetic.',
+    before: 'Horizontal line through (0, 3) and (4, 3): “y =  + 3”',
+    after: 'Horizontal line through (0, 3) and (4, 3): “y = 3”. Points (0.1, 0.2) and (0.4, 0.5) give a slope of exactly 1.',
+    howVerified: 'Expected values were derived independently with exact fraction arithmetic in Python and pinned in an audit test.',
+  },
+  {
+    date: '2026-10-15',
+    calculator: { id: 'unit-circle', category: 'math', title: 'Unit Circle Calculator' },
+    summary: 'The radian display matched any angle within about 0.18° of a common fraction, so 30.1° was shown as π/6. Radians are now exact π-fractions only for whole-degree angles, and angles are reduced exactly.',
+    before: '30.1° displayed as π/6',
+    after: '30.1° displayed as 0.5253 rad',
+    howVerified: 'A regression test covers this case alongside exact values for special angles.',
+  },
+  {
+    date: '2026-10-14',
+    calculator: { id: 'scientific-calculator', category: 'math', title: 'Scientific Calculator' },
+    summary: 'The expression parser bound a leading minus sign tighter than the exponent, so -2^2 was read as (-2)². The true minus sign on the keypad (U+2212) was rejected, so keypad subtraction failed. Factorials such as 1000000000! could hang the page. These were fixed in the shared evaluator.',
+    before: '-2^2 returned 4',
+    after: '-2^2 returns -4; 2^3^2 returns 512; 9 − 4 returns 5',
+    howVerified: 'The audit test checks precedence against Python (for example -2**2 == -4), plus factorial limits and degree-mode trig values.',
+  },
+  {
+    date: '2026-10-13',
+    calculator: { id: 'factorial-calculator', category: 'math', title: 'Factorial Calculator' },
+    summary: 'Factorials were computed with floating-point numbers, so digits beyond the 15th or so were wrong. The calculator now uses exact integers and accepts values up to 1000!.',
+    before: '25! shown as 15,511,210,043,330,986,000,000,000',
+    after: '25! shown as 15,511,210,043,330,985,984,000,000',
+    howVerified: 'The audit test pins exact values (25!, all 307 digits of 170!, the 2,568 digits of 1000!). The Fibonacci calculator got the same fix: F(100) was printed as 354224848179262000000 and is now 354224848179261915075.',
+  },
+  {
+    date: '2026-10-13',
+    calculator: { id: 'qr-code-generator', category: 'devtools', title: 'QR Code Generator' },
+    summary: 'The text you typed was sent to a third-party image service (api.qrserver.com) to draw the QR code. That contradicted our claim that calculations stay in your browser. The QR code is now generated locally with no network request.',
+    howVerified: 'The new encoder (versions 1 to 40, error-correction levels L, M, Q and H) is tested against an independent decoder.',
+  },
+  {
+    date: '2026-10-11',
+    summary: 'A sweep of all 343 calculators with blank, zero, minimum and maximum inputs found that very large typed or linked values could freeze the browser tab, and that 15 calculators could show NaN or Infinity. The form now shows a range message outside each field’s declared limits, and the 15 calculators were fixed individually.',
+    howVerified: 'Each of the 15 calculators has a regression test.',
+  },
+  {
+    date: '2026-10-03',
+    calculator: { id: 'age-calculator', category: 'everyday', title: 'Age Calculator' },
+    summary: 'The years, months and days breakdown could show a negative number of days when the birth day was later than the length of the previous month (for example 31 January measured to 1 March). Total days were also off by one across daylight-saving changes.',
+    howVerified: 'A regression test covers the month-end case, and total days are now counted in UTC.',
+  },
+  {
+    date: '2026-10-03',
+    calculator: { id: 'fha-loan-calculator', category: 'finance', title: 'FHA Loan Calculator' },
+    summary: 'The annual mortgage insurance premium used the 30-year rate for 15-year loans. It now follows the full HUD Mortgagee Letter 2023-05 schedule, which depends on loan term, loan amount against the conforming limit, and loan-to-value. A related earlier fix (2026-09-27) corrected the 0.55% rate tier to apply only below 5% down.',
+    before: '15-year loans charged 0.50% to 0.55% a year',
+    after: '15-year loans charged 0.15% to 0.40% a year (higher above the conforming limit)',
+    howVerified: 'Rates were checked against HUD ML 2023-05, and each tier has a regression test.',
+  },
+  {
+    date: '2026-09-27',
+    calculator: { id: 'tax-calculator', category: 'finance', title: 'Tax Calculator' },
+    summary: 'The shared tax data file was labelled 2026 but held 2025 figures: brackets, standard deductions, Social Security wage base and IRA limits. Several calculators import this file, so all of them were affected. The 2026 values were checked against IRS and SSA publications.',
+    before: 'Single 10% bracket ended at $11,925; Social Security wage base $176,100',
+    after: 'Single 10% bracket ends at $12,400; Social Security wage base $184,500',
+    howVerified: 'Figures were compared with IRS.gov and the SSA announcement. The worked examples, FAQs and tests were recomputed.',
+  },
+  {
+    date: '2026-09-27',
+    calculator: { id: 'self-employment-tax-calculator', category: 'finance', title: 'Self-Employment Tax Calculator' },
+    summary: 'The Social Security wage base was the 2025 figure but was labelled as 2026, which understated the tax for high earners. The constant and every text reference were updated and the worked example recomputed.',
+    before: 'Wage base $176,100; worked example SECA tax $21,077.07',
+    after: 'Wage base $184,500; worked example SECA tax $22,118.67 (effective rate 12.29%)',
+    howVerified: 'Wage base checked against the SSA announcement. The tests were updated to the recomputed values.',
+  },
+  {
+    date: '2026-09-27',
+    calculator: { id: 'estate-tax-calculator', category: 'finance', title: 'Estate Tax Calculator' },
+    summary: 'The calculator used the earlier federal exemption of $13.99 million per person. The 2026 exemption is $15 million per individual ($30 million for a married couple). The constant and about ten places in the text were updated.',
+    before: '$13.99M exemption',
+    after: '$15M exemption',
+    howVerified: 'Checked against published coverage of the 2025 law. Four existing tests that hardcoded the old amounts were updated, and two regression tests were added.',
+  },
+  {
+    date: '2026-09-27',
+    calculator: { id: 'student-loan-calculator', category: 'finance', title: 'Student Loan Calculator' },
+    summary: 'A worked example understated the extra cost of interest capitalization by about 40%.',
+    before: 'additional $258 in interest',
+    after: 'additional $416 in interest',
+    howVerified: 'Total interest with and without capitalization was compared, which gives $416.43.',
+  },
+  {
+    date: '2026-09-27',
+    calculator: { id: 'repayment-calculator', category: 'finance', title: 'Repayment Calculator' },
+    summary: 'The text said $25 extra a month on a $25,000 loan at 7% over 5 years saves over $1,000 in interest. The calculator’s own extra-payment loop gives about $60.',
+    before: 'saves over $1,000 in interest',
+    after: 'saves about $60 in interest and shaves 3 months off the term',
+    howVerified: 'Re-simulated with the calculator’s own extra-payment loop, which gives $60.09.',
+  },
+  {
+    date: '2026-09-27',
+    calculator: { id: 'protein-calculator', category: 'health', title: 'Protein Calculator' },
+    summary: 'The chicken-breast equivalent divided the daily protein target by 31 g instead of 26 g per 3 oz serving, which understated the servings needed. The salmon figure was also labelled in ounces when it counted servings.',
+    before: 'chicken breasts = target ÷ 31',
+    after: 'chicken breasts (3 oz) = target ÷ 26',
+    howVerified: 'The 26 g per 3 oz figure matches USDA data and the file’s own comment. A regression test was added.',
+  },
+  {
+    date: '2026-09-27',
+    calculator: { id: 'yarn-yardage-calculator', category: 'everyday', title: 'Yarn Yardage Calculator' },
+    summary: 'In custom-project mode your own gauge was applied twice, so a non-standard gauge badly undercounted the yardage.',
+    before: 'Custom 50 × 60 in, 10 stitches per 4 in: 120 yards',
+    after: 'Same inputs: 480 yards',
+    howVerified: 'The area formula gives (50 × 60) ÷ (2.5 × 3) × 1.2 = 480. This matches the page’s own worked example and is pinned in a regression test.',
+  },
+  {
+    date: '2026-09-27',
+    calculator: { id: 'html-minifier', category: 'devtools', title: 'HTML Minifier' },
+    summary: 'The CSS minifier deleted all whitespace instead of collapsing it. That corrupted values and changed selectors.',
+    before: 'box-shadow: 0 2px 4px rgba(…) became “02px4pxrgba(…)”; “.header .logo” became “.header.logo”',
+    after: '.header{box-shadow:0 2px 4px rgba(0,0,0,0.1)} and .header .logo{width:120px}',
+    howVerified: 'Two regression tests pin the exact minified output.',
+  },
+  {
+    date: '2026-09-26',
+    calculator: { id: 'z-score-calculator', category: 'math', title: 'Z-Score Calculator' },
+    summary: 'The normal distribution function skipped the division by √2 required by the Abramowitz and Stegun erf approximation, so the probability was wrong for every z other than 0.',
+    before: 'Φ(1.96) = 0.9972',
+    after: 'Φ(1.96) = 0.975',
+    howVerified: 'The textbook anchor value Φ(1.96) = 0.975 was derived by hand (0.975018) and is pinned in a regression test.',
+  },
+  {
+    date: '2026-09-26',
+    calculator: { id: 'mortgage-amortization-calculator', category: 'finance', title: 'Mortgage Amortization Calculator' },
+    summary: 'The payoff date was always shown one month too late, because the first payment falls in the start month, not one month after it.',
+    before: 'One payment starting March 2024: payoff shown as Apr 2024',
+    after: 'Payoff shown as Mar 2024',
+    howVerified: 'Hand simulation: a 30-year loan starting January 2024 ends in December 2053, not January 2054. A regression test pins the one-payment case.',
+  },
+  {
+    date: '2026-09-26',
+    calculator: { id: 'hardness-converter', category: 'industrial', title: 'Hardness Converter' },
+    summary: 'The Rockwell C and Rockwell B to Vickers conversions used polynomials that did not match the published tables, giving results about 3 to 10 times too high. They were replaced with interpolation over the ASTM E140 table.',
+    before: 'HRC 50 converted to HV 1537.5; HRC 60 to HV 1939.1',
+    after: 'HRC 50 converts to HV 513; HRC 60 to HV 697',
+    howVerified: 'Values were checked against the ASTM E140 conversion table and an independent source. Regression tests pin them.',
+  },
+];

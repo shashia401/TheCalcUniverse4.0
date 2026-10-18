@@ -16,8 +16,9 @@ const C = 2 * Math.PI * R;
 
 export default function MiniDonut({ donut }: Props) {
   const titleId = useId();
-  const { segments, centerLabel, formatValue, caption } = donut;
-  const fmt = formatValue ?? ((n: number) => String(Math.round(n)));
+  const { segments, centerLabel, formatValue, formatted, caption } = donut;
+  const fmt =
+    formatValue ?? ((n: number) => formatted?.[String(n)] ?? String(Math.round(n)));
 
   const total = segments.reduce((sum, s) => sum + Math.max(0, s.value), 0);
   if (total <= 0) return null;
@@ -37,7 +38,7 @@ export default function MiniDonut({ donut }: Props) {
   });
 
   return (
-    <figure className="flex flex-col sm:flex-row items-center gap-5 m-0">
+    <figure className="flex flex-col items-center gap-4 m-0">
       <svg
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         width={SIZE}
@@ -96,7 +97,7 @@ export default function MiniDonut({ donut }: Props) {
         )}
       </svg>
 
-      <figcaption className="min-w-0">
+      <figcaption className="min-w-0 w-full">
         <ul className="space-y-2 list-none p-0 m-0">
           {arcs.map((a, i) => (
             <li key={i} className="flex items-center gap-2 text-sm">

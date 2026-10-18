@@ -8,10 +8,12 @@ interface Props {
   gauge: CalcGauge;
 }
 
-const W = 640;
-const H = 104;
+// 420 wide: this renders ~300px wide in the result panel, so the text below is sized for that scale
+// (at the old 640 it shrank to ~6px).
+const W = 420;
+const H = 108;
 const PAD = 12;
-const BAR_Y = 46;
+const BAR_Y = 48;
 const BAR_H = 22;
 const PLOT_W = W - PAD * 2;
 
@@ -35,15 +37,17 @@ export default function MiniGauge({ gauge }: Props) {
   // Boundary tick values (start + each band top), de-duplicated
   const ticks = [min, ...bands.map((b) => b.to)];
 
-  // Keep the marker label inside the viewport
-  const labelX = Math.min(W - PAD - 70, Math.max(PAD + 70, markerX));
+  // Keep the marker label inside the drawing: centre it on the marker, then clamp by its estimated width
+  // (about 0.58em per character in this bold face).
+  const labelW = (valueLabel?.length ?? 0) * 16 * 0.58;
+  const labelX = Math.min(W - PAD - labelW, Math.max(PAD, markerX - labelW / 2));
 
   return (
     <figure className="m-0">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={valueLabel ?? caption ?? 'Result scale'}>
         {/* marker label + downward pointer */}
         {valueLabel && (
-          <text x={labelX} y={18} textAnchor="middle" fontSize="14" fontWeight="700" fill="var(--surface-text)">
+          <text x={labelX} y={18} textAnchor="start" fontSize="16" fontWeight="700" fill="var(--surface-text)">
             {valueLabel}
           </text>
         )}
@@ -68,8 +72,8 @@ export default function MiniGauge({ gauge }: Props) {
 
         {/* band labels (only where the segment is wide enough) */}
         {segments.map((s, i) => (
-          s.w > 52 ? (
-            <text key={`l${i}`} x={s.mid} y={BAR_Y + BAR_H + 15} textAnchor="middle" fontSize="11" fontWeight="600" fill="var(--surface-text-secondary)">
+          s.w > 64 ? (
+            <text key={`l${i}`} x={s.mid} y={BAR_Y + BAR_H + 15} textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--surface-text-secondary)">
               {s.label}
             </text>
           ) : null
@@ -82,7 +86,7 @@ export default function MiniGauge({ gauge }: Props) {
             x={xOf(t)}
             y={BAR_Y - 6}
             textAnchor={i === 0 ? 'start' : i === ticks.length - 1 ? 'end' : 'middle'}
-            fontSize="10"
+            fontSize="12"
             fill="var(--surface-text-muted)"
           >
             {t}

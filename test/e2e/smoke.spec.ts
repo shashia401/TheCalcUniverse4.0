@@ -29,7 +29,7 @@ test.describe('calculator island', () => {
   test('loan calculator computes on input', async ({ page }) => {
     await page.goto('/finance/loan-calculator/');
     // island is client:visible — scroll it into view and wait for hydration
-    await page.locator('#loanAmount').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.fill('#loanAmount', '25000');
     await page.fill('#interestRate', '6.5');
     await page.fill('#loanTerm', '5');
@@ -38,7 +38,7 @@ test.describe('calculator island', () => {
 
   test('live walkthrough shows the solution with the user numbers', async ({ page }) => {
     await page.goto('/finance/loan-calculator/');
-    await page.locator('#loanAmount').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.fill('#loanAmount', '25000');
     await page.fill('#interestRate', '6.5');
     await page.fill('#loanTerm', '5');
@@ -50,7 +50,7 @@ test.describe('calculator island', () => {
 
   test('Living Answer: dragging a slider changes the result live', async ({ page }) => {
     await page.goto('/finance/loan-calculator/');
-    await page.locator('#loanAmount').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.fill('#loanAmount', '25000');
     await page.fill('#interestRate', '6.5');
     await page.fill('#loanTerm', '5');
@@ -66,7 +66,7 @@ test.describe('calculator island', () => {
 
   test('Living Answer: story chart renders on a flat calculator', async ({ page }) => {
     await page.goto('/finance/home-equity-loan-calculator/');
-    await page.locator('#homeValue').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.fill('#homeValue', '400000');
     await page.fill('#currentMortgage', '250000');
     await page.fill('#desiredLoan', '50000');
@@ -79,7 +79,7 @@ test.describe('calculator island', () => {
 
   test('BMI gold-standard: live gauge + personalized interpretation', async ({ page }) => {
     await page.goto('/health/bmi-calculator/');
-    await page.locator('#weight').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     // defaults (170 lb, 5ft10) → BMI ~24.4, Normal
     await expect(page.getByText(/Your BMI: \d/)).toBeVisible();
     await expect(page.getByText(/Maintaining is the goal/i)).toBeVisible();
@@ -91,7 +91,7 @@ test.describe('calculator island', () => {
   test('shareable scenario URL seeds the calculator', async ({ page }) => {
     // Open a link that encodes a specific loan scenario
     await page.goto('/finance/loan-calculator/?loanAmount=40000&interestRate=7&loanTerm=6&termUnit=years');
-    await page.locator('#loanAmount').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     // currency fields show thousands separators as you type, so the seeded 40000 reads "40,000"
     await expect(page.locator('#loanAmount')).toHaveValue('40,000');
     await expect(page.locator('#interestRate')).toHaveValue('7');

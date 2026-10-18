@@ -36,40 +36,41 @@
     --surface-header: rgba(240,245,250,0.88);
     --surface-hero-start: #0f1a2e;
     --surface-hero-end: #0a1220;
-    --brand-default: #0e7490;
-    --brand-hover: #155e75;
-    --brand-active: #164e63;
-    /* Brand color for TEXT/links. Same as --brand-default in light mode (passes
-       AA on white); lightened in dark mode where the dark teal fails contrast.
-       Kept separate so button/badge backgrounds (bg-brand-default) stay dark
-       enough for white text. Tracks the active theme's brand by default. */
-    --brand-ink: var(--brand-default);
+    /* One brand blue (chosen for contrast: white text on it is 5.4:1, where Google's #1A73E8
+       is only 4.5:1 on white and fails on the #f0f5fa page background). */
+    --brand-default: #1967d2;
+    --brand-hover: #1558b0;
+    --brand-active: #0f4a94;
+    /* Brand color for TEXT/links: a step darker than the fill (6.9:1 on white); lightened in
+       dark mode. Kept separate so button/badge backgrounds stay light enough to read as blue. */
+    --brand-ink: #1558b0;
+    /* Amber is the single highlight per view — never links, buttons or results. */
     --accent-amber: #f59e0b;
-    --accent-rust: #0e7490;
-    --accent-deep-teal: #155e75;
-    --amber-light: #dbeafe;
+    --accent-rust: #1967d2; /* legacy name: the wordmark's second half; follows the brand */
+    --accent-deep-teal: #1558b0; /* legacy name; follows the brand */
+    --amber-light: #fef3c7;
     --bg-cream: #f0f6fc;
-    --teal-light: #ccfbf1;
-    --rust-light: #cffafe;
-    --blue-light: #dbeafe;
+    --teal-light: #e8f0fe; /* legacy names: now the brand tint */
+    --rust-light: #e8f0fe;
+    --blue-light: #e8f0fe;
     --text-primary: #1a2634;
     --text-secondary: #5a6b7c;
     --border-warm: #d6e0ea;
-    --shadow-warm: rgba(37,99,235,0.08);
+    --shadow-warm: rgba(25,103,210,0.08);
     --grain-opacity: 0.035;
     --footer-bg: #0f1a2e;
     --transition: 0.35s cubic-bezier(0.4,0,0.2,1);
     --bg-warm: #f0f5fa;
     --bg-warm-2: #e8f0f8;
     --card-bg: #ffffff;
-    --brand-600: #0e7490;
+    --brand-600: #1967d2;
     --accent-teal: #0d9488;
-    --calc-header-from: #0e7490;
-    --calc-header-to: #155e75;
-    --brand-shadow-sm: rgba(8,145,178,0.15);
-    --brand-shadow: rgba(8,145,178,0.25);
-    --brand-shadow-lg: rgba(8,145,178,0.3);
-    --brand-shadow-glow: rgba(8,145,178,0.15);
+    --calc-header-from: #1967d2;
+    --calc-header-to: #1558b0;
+    --brand-shadow-sm: rgba(25,103,210,0.15);
+    --brand-shadow: rgba(25,103,210,0.25);
+    --brand-shadow-lg: rgba(25,103,210,0.3);
+    --brand-shadow-glow: rgba(25,103,210,0.15);
     --font: 'Figtree', system-ui, -apple-system, sans-serif;
     --heading-warm: #2d2a24;
     --body-text-warm: #6b6560;
@@ -85,8 +86,8 @@
     --surface-text-muted: #99a7bc; /* was #8090a4 (4.41:1) — now AA on dark cards */
     --surface-muted: #b0c0d4;
     --surface-muted-lighter: #99a7bc;
-    /* Lighter teal for text/links in dark mode (dark #0e7490 failed AA on dark) */
-    --brand-ink: #38b2cd;
+    /* Light blue for text/links in dark mode: 6.8:1 and up on the dark surfaces */
+    --brand-ink: #8ab4f8;
     --surface-header: rgba(15,26,46,0.90);
     --surface-hero-start: #0a1220;
     --surface-hero-end: #060c18;
@@ -95,99 +96,15 @@
     --border-warm: #2a3a54;
     --shadow-warm: rgba(0,0,0,0.25);
     --grain-opacity: 0.05;
-    --amber-light: #1a2844;
+    --amber-light: #33280f;
     --bg-cream: #162238;
-    --teal-light: #0a2a3a;
-    --rust-light: #0a2a3a;
+    --teal-light: #12274a;
+    --rust-light: #12274a;
     --blue-light: #243b5e;
     --accent-amber: #fbbf24;
-    --accent-rust: #22d3ee;
-    --calc-header-from: #0e7490;
-    --calc-header-to: #155e75;
-  }
-
-  /* Color schemes */
-  html.color-warm {
-    --accent-deep-teal: #0d9488;
-    --surface-bg: #faf7f2; --surface-body: #f0ebe3; --surface-card: #ffffff; --surface-border: #e8e0d6;
-    --surface-text: #2d2a24; --text-primary: #2d2a24; --text-secondary: #6b6560; --text-muted: #736c64;
-    --border-warm: #e8e0d6; --shadow-warm: rgba(180,140,100,0.12); --accent-amber: #f59e0b; --accent-rust: #ea580c;
-    --amber-light: #fef3c7; --teal-light: #ccfbf1; --rust-light: #ffedd5; --blue-light: #dbeafe;
-    --brand-default: #ea580c; --brand-hover: #f59e0b; --brand-active: #c2410c;
-    --surface-text-secondary: #6b6560; --surface-text-muted: #736c64;
-    --brand-shadow-sm: rgba(234,88,12,0.15); --brand-shadow: rgba(234,88,12,0.25);
-    --brand-shadow-lg: rgba(234,88,12,0.3); --brand-shadow-glow: rgba(234,88,12,0.15);
-    --calc-header-from: #f59e0b; --calc-header-to: #d97706;
-  }
-  html.dark.color-warm {
-    --surface-bg: #1a1a2e; --surface-body: #16162a; --surface-card: #222240; --surface-border: #3a3850;
-    --surface-text: #f0ede8; --text-primary: #f0ede8; --text-secondary: #b8b2aa; --border-warm: #3a3850;
-    --card-bg: #2a2a4a; --amber-light: #3a3020; --teal-light: #1a3a38; --rust-light: #3a2820; --blue-light: #283c56;
-    --accent-amber: #fbbf24; --accent-rust: #fb923c;
-    --brand-default: #ea580c; --brand-hover: #f59e0b; --brand-active: #c2410c;
-    --brand-shadow-sm: rgba(234,88,12,0.15); --brand-shadow: rgba(234,88,12,0.25);
-    --brand-shadow-lg: rgba(234,88,12,0.3); --brand-shadow-glow: rgba(234,88,12,0.15);
-    --calc-header-from: #f59e0b; --calc-header-to: #b45309;
-  }
-  html.color-ocean {
-    --surface-bg: #f0f5fa; --surface-body: #e8f0f8; --surface-card: #ffffff; --surface-border: #d6e0ea;
-    --surface-text: #1a2634; --surface-text-secondary: #5a6b7c; --surface-text-muted: #6b7d8e;
-    --text-primary: #1a2634; --text-secondary: #5a6b7c; --border-warm: #d6e0ea;
-    --shadow-warm: rgba(37,99,235,0.08); --accent-amber: #f59e0b; --accent-rust: #0e7490;
-    --amber-light: #dbeafe; --teal-light: #ccfbf1; --rust-light: #cffafe; --blue-light: #dbeafe;
-    --accent-deep-teal: #155e75;
-    --brand-shadow-sm: rgba(8,145,178,0.15); --brand-shadow: rgba(8,145,178,0.25);
-    --brand-shadow-lg: rgba(8,145,178,0.3); --brand-shadow-glow: rgba(8,145,178,0.15);
-    --calc-header-from: #0e7490; --calc-header-to: #155e75;
-  }
-  html.dark.color-ocean {
-    --surface-bg: #0f1a2e; --surface-body: #0d1628; --surface-card: #1a2a44; --surface-border: #2a3a54;
-    --surface-text: #e8eef4; --text-primary: #e8eef4; --text-secondary: #a0b0c4; --border-warm: #2a3a54;
-    --card-bg: #1e3050; --amber-light: #1a2844; --teal-light: #0a2a3a; --rust-light: #0a2a3a; --blue-light: #243b5e;
-    --accent-amber: #fbbf24; --accent-rust: #22d3ee;
-    --brand-shadow-sm: rgba(8,145,178,0.15); --brand-shadow: rgba(8,145,178,0.25);
-    --brand-shadow-lg: rgba(8,145,178,0.3); --brand-shadow-glow: rgba(8,145,178,0.15);
-    --calc-header-from: #0e7490; --calc-header-to: #155e75;
-  }
-  html.color-forest {
-    --accent-deep-teal: #059669;
-    --surface-bg: #f2f5ee; --surface-body: #e8ede0; --surface-card: #ffffff; --surface-border: #d6e0ce;
-    --surface-text: #1a2e1a; --text-primary: #1a2e1a; --text-secondary: #5a7a5a; --text-muted: #6a7a5a;
-    --border-warm: #d6e0ce; --shadow-warm: rgba(60,100,60,0.10); --accent-amber: #d97706; --accent-rust: #65a30d;
-    --amber-light: #fef3c7; --teal-light: #d1fae5; --rust-light: #ecfccb; --blue-light: #dbeafe;
-    --brand-default: #65a30d; --brand-hover: #4d7c0f; --brand-active: #3f6212;
-    --brand-shadow-sm: rgba(101,163,13,0.15); --brand-shadow: rgba(101,163,13,0.25);
-    --brand-shadow-lg: rgba(101,163,13,0.3); --brand-shadow-glow: rgba(101,163,13,0.15);
-    --calc-header-from: #65a30d; --calc-header-to: #4d7c0f;
-  }
-  html.dark.color-forest {
-    --surface-bg: #0a1a0a; --surface-body: #081608; --surface-card: #142814; --surface-border: #1a3a20;
-    --text-primary: #e0eedc; --text-secondary: #8aaa88; --card-bg: #183018; --amber-light: #2a3a1a;
-    --teal-light: #0a2a1a; --rust-light: #1a2a0a; --blue-light: #253e3e; --accent-amber: #fbbf24; --accent-rust: #a3e635;
-    --brand-default: #65a30d; --brand-hover: #4d7c0f; --brand-active: #3f6212;
-    --brand-shadow-sm: rgba(101,163,13,0.15); --brand-shadow: rgba(101,163,13,0.25);
-    --brand-shadow-lg: rgba(101,163,13,0.3); --brand-shadow-glow: rgba(101,163,13,0.15);
-    --calc-header-from: #4d7c0f; --calc-header-to: #3f6212;
-  }
-  html.color-midnight {
-    --accent-deep-teal: #0e7490;
-    --surface-bg: #f4f0f8; --surface-body: #ece6f4; --surface-card: #ffffff; --surface-border: #dcd0e8;
-    --surface-text: #2a1a3e; --text-primary: #2a1a3e; --text-secondary: #6a5a7e; --text-muted: #7a6a8e;
-    --border-warm: #dcd0e8; --shadow-warm: rgba(120,60,200,0.10); --accent-amber: #f59e0b; --accent-rust: #8b5cf6;
-    --amber-light: #fef3c7; --teal-light: #cffafe; --rust-light: #ede9fe; --blue-light: #e0e7ff;
-    --brand-default: #8b5cf6; --brand-hover: #7c3aed; --brand-active: #6d28d9;
-    --brand-shadow-sm: rgba(139,92,246,0.15); --brand-shadow: rgba(139,92,246,0.25);
-    --brand-shadow-lg: rgba(139,92,246,0.3); --brand-shadow-glow: rgba(139,92,246,0.15);
-    --calc-header-from: #7c3aed; --calc-header-to: #5b21b6;
-  }
-  html.dark.color-midnight {
-    --surface-bg: #1a0a2e; --surface-body: #160828; --surface-card: #28184a; --surface-border: #3a2860;
-    --text-primary: #e8dff0; --text-secondary: #a090b8; --card-bg: #2e1c54; --amber-light: #2a1a38;
-    --teal-light: #0a2840; --rust-light: #1a1a3a; --blue-light: #262650; --accent-amber: #fbbf24; --accent-rust: #a78bfa;
-    --brand-default: #8b5cf6; --brand-hover: #7c3aed; --brand-active: #6d28d9;
-    --brand-shadow-sm: rgba(139,92,246,0.15); --brand-shadow: rgba(139,92,246,0.25);
-    --brand-shadow-lg: rgba(139,92,246,0.3); --brand-shadow-glow: rgba(139,92,246,0.15);
-    --calc-header-from: #6d28d9; --calc-header-to: #4c1d95;
+    --accent-rust: #8ab4f8;
+    --calc-header-from: #1967d2;
+    --calc-header-to: #1558b0;
   }
 
   *, *::before, *::after {

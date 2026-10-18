@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 test.describe('live walkthrough — explainSteps', () => {
   test('bmi calculator substitutes the height conversion', async ({ page }) => {
     await page.goto('/health/bmi-calculator/');
-    await page.locator('#weight').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.selectOption('#unit', 'imperial');
     await page.fill('#weight', '170');
     await page.fill('#heightFt', '5');
@@ -19,7 +19,7 @@ test.describe('live walkthrough — explainSteps', () => {
 
   test('tdee calculator substitutes the metric conversion', async ({ page }) => {
     await page.goto('/health/tdee-calculator/');
-    await page.locator('#age').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.selectOption('#unit', 'imperial');
     await page.selectOption('#sex', 'male');
     await page.selectOption('#activityLevel', '1.55');
@@ -35,7 +35,7 @@ test.describe('live walkthrough — explainSteps', () => {
 
   test('calorie calculator substitutes the Mifflin-St Jeor BMR', async ({ page }) => {
     await page.goto('/health/calorie-calculator/');
-    await page.locator('#age').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.selectOption('#unit', 'metric');
     await page.selectOption('#gender', 'male');
     await page.selectOption('#activityLevel', '1.55');
@@ -50,7 +50,7 @@ test.describe('live walkthrough — explainSteps', () => {
 
   test('compound interest substitutes the periodic rate', async ({ page }) => {
     await page.goto('/finance/compound-interest-calculator/');
-    await page.locator('#principal').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.fill('#principal', '10000');
     await page.fill('#rate', '7');
     await page.fill('#years', '10');
@@ -63,7 +63,7 @@ test.describe('live walkthrough — explainSteps', () => {
 
   test('mortgage amortization substitutes the loan amount', async ({ page }) => {
     await page.goto('/finance/mortgage-amortization-calculator/');
-    await page.locator('#homePrice').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.fill('#homePrice', '400000');
     await page.fill('#downPayment', '80000');
     await page.selectOption('#loanTerm', '30');
@@ -76,7 +76,7 @@ test.describe('live walkthrough — explainSteps', () => {
 
   test('amortization calculator substitutes the payment count', async ({ page }) => {
     await page.goto('/finance/amortization-calculator/');
-    await page.locator('#loanAmount').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.fill('#loanAmount', '250000');
     await page.fill('#interestRate', '6.5');
     await page.selectOption('#termUnit', 'years');
@@ -89,7 +89,7 @@ test.describe('live walkthrough — explainSteps', () => {
 
   test('personal loan substitutes the monthly rate', async ({ page }) => {
     await page.goto('/finance/personal-loan-calculator/');
-    await page.locator('#loanAmount').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.fill('#loanAmount', '20000');
     await page.selectOption('#loanTerm', '60');
     await page.fill('#interestRate', '11.5');
@@ -100,7 +100,7 @@ test.describe('live walkthrough — explainSteps', () => {
 
   test('percentage calculator substitutes the percent-of steps', async ({ page }) => {
     await page.goto('/everyday/percentage-calculator/');
-    await page.locator('#x').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.selectOption('#mode', 'of');
     await page.fill('#x', '15');
     await page.fill('#y', '200');
@@ -110,7 +110,7 @@ test.describe('live walkthrough — explainSteps', () => {
 
   test('age calculator substitutes the exact age', async ({ page }) => {
     await page.goto('/everyday/age-calculator/');
-    await page.locator('#birthDate').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.fill('#birthDate', '1990-03-15');
     await page.fill('#toDate', '2020-03-15');
     // Scope to the walkthrough — the same exact age also renders in the result card.
@@ -121,7 +121,7 @@ test.describe('live walkthrough — explainSteps', () => {
 
   test('fraction calculator substitutes the LCM', async ({ page }) => {
     await page.goto('/math/fraction-calculator/');
-    await page.locator('#aNum').waitFor({ timeout: 15_000 });
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
     await page.selectOption('#mode', 'add');
     await page.fill('#aNum', '3');
     await page.fill('#aDen', '4');

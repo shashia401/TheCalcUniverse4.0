@@ -164,6 +164,11 @@ export interface CalcDonut {
   /** Small label under the center total, e.g. "total cost" */
   centerLabel?: string;
   formatValue?: (n: number) => string;
+  /**
+   * Build-time snapshot of formatValue's output, keyed by String(value), for the server-rendered form
+   * (functions can't cross the island boundary). Used only when formatValue is absent.
+   */
+  formatted?: Record<string, string>;
   caption?: string;
 }
 

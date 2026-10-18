@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { calculatorRegistry, getCategories } from '../../lib/registry';
 import { blogPosts } from '../../lib/blog';
 import { SITE_NAME, BASE_URL } from '../../config/constants';
+import { verification } from '../../lib/verification';
 
 const total = calculatorRegistry.length;
 const categories = getCategories().filter((c) => c.count > 0);
@@ -45,7 +46,7 @@ const breadcrumb = {
           <p class="text-xs text-[var(--surface-text-muted)] mt-1">in-depth guides</p>
         </div>
         <div class="rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] p-4 text-center">
-          <p class="text-2xl font-black text-[var(--brand-ink)]">7,700+</p>
+          <p class="text-2xl font-black text-[var(--brand-ink)]">{verification.testCountLabel}</p>
           <p class="text-xs text-[var(--surface-text-muted)] mt-1">automated tests</p>
         </div>
       </div>

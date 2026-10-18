@@ -9,6 +9,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes } fro
 import { createPortal } from 'react-dom';
 import type { CalculatorConfig, CalculatorResult, ExplainStep, InputField } from '../../types/calculator';
 import { getCalculatorById } from '../../calculators/registry/index';
+import { rangeErrors, seedDefaults, type InitialForm } from '../../lib/initialForm';
 import MiniAreaChart from './MiniAreaChart';
 import MiniDonut from './MiniDonut';
 import MiniGauge from './MiniGauge';
@@ -47,31 +48,6 @@ const sanitizeNumeric = (s: string): string => {
     cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
   }
   return (negative ? '-' : '') + cleaned;
-};
-
-// Out-of-range guard. `calculate()` runs on every keystroke, so a typed or
-// deep-linked value far outside an input's declared min/max (e.g. 1e12 years)
-// could freeze the tab in a long loop or produce NaN/Infinity. Blank and
-// non-numeric text are left to each calculator's own "incomplete input" handling.
-const rangeErrors = (inputs: InputField[], vals: Record<string, string>): Record<string, string> => {
-  const errs: Record<string, string> = {};
-  for (const i of inputs) {
-    if (i.type !== 'number' && i.type !== 'percentage') continue;
-    if (i.showWhen && !i.showWhen(vals)) continue;
-    const raw = (vals[i.id] ?? '').replace(/,/g, '').trim();
-    if (raw === '') continue;
-    const n = Number(raw);
-    if (!Number.isFinite(n)) continue;
-    if ((i.min !== undefined && n < i.min) || (i.max !== undefined && n > i.max)) {
-      errs[i.id] =
-        i.min !== undefined && i.max !== undefined
-          ? `Enter a value between ${i.min.toLocaleString()} and ${i.max.toLocaleString()}.`
-          : i.max !== undefined
-            ? `Enter a value of ${i.max.toLocaleString()} or less.`
-            : `Enter a value of ${i.min!.toLocaleString()} or more.`;
-    }
-  }
-  return errs;
 };
 
 // A plain rAF-timed cursor restore races React's own re-render of a controlled
@@ -156,6 +132,11 @@ interface Props {
    * not sex/age), keeping the card short. showWhen still applies on top of this.
    */
   visibleInputIds?: string[];
+  /**
+   * Build-time snapshot of the form (inputs, default values, default results) so the server-rendered
+   * HTML already contains the real calculator. Plain data only; see src/lib/initialForm.ts.
+   */
+  initial?: InitialForm | null;
 }
 
 const fieldClasses =
@@ -170,22 +151,25 @@ const resultColorClasses: Record<string, string> = {
 const actionBtnCls =
   'text-xs font-medium text-[var(--brand-ink)] rounded px-2 py-1 transition-colors hover:bg-[var(--surface-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-70';
 
-export default function CalculatorForm({ calculatorId, compact = false, visibleInputIds }: Props) {
+export default function CalculatorForm({ calculatorId, compact = false, visibleInputIds, initial }: Props) {
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [catSlug, setCatSlug] = useState('');
-  const [values, setValues] = useState<Record<string, string>>({});
+  const [values, setValues] = useState<Record<string, string>>(initial?.values ?? {});
   const [showSticky, setShowSticky] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   // Saved scenarios for side-by-side comparison (e.g. loan A vs loan B). Local
   // to the session; no backend. Capped so the table stays readable.
   const [scenarios, setScenarios] = useState<{ id: number; results: CalculatorResult[] }[]>([]);
   const scenarioId = useRef(0);
+  // What the visitor typed before the live calculator finished loading (the form is in the HTML from the
+  // first paint, so fast typists can beat the script); merged into the values once it arrives.
+  const typedEarly = useRef<Record<string, string>>({});
   const addScenario = () => {
     if (!visibleResults.length) return;
     setScenarios((prev) => [...prev, { id: ++scenarioId.current, results: visibleResults.map((r) => ({ ...r })) }].slice(-4));
   };
   const removeScenario = (id: number) => setScenarios((prev) => prev.filter((s) => s.id !== id));
-  const [results, setResults] = useState<CalculatorResult[]>([]);
+  const [results, setResults] = useState<CalculatorResult[]>(initial?.results ?? []);
   // Calculators pass internal-only data to their extraPanel via a result with an
   // id prefixed "_" (e.g. `_caData`, `_chartData`) — never meant to render as a
   // visible card. Every user-facing consumer (grid, copy, CSV, share, compare)
@@ -196,9 +180,10 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   // Currency: symbol swap only (no FX conversion — the numbers are the same, a UK
   // user just wants £ not $). Persists across calcs via localStorage.
   // ponytail: symbol swap on "$" strings; add real FX only if users ask to convert.
-  const [cur, setCur] = useState(() => {
-    try { return localStorage.getItem('currency') || '$'; } catch { return '$'; }
-  });
+  const [cur, setCur] = useState('$');
+  useEffect(() => {
+    try { setCur(localStorage.getItem('currency') || '$'); } catch { /* storage blocked: keep $ */ }
+  }, []);
   const money = (s: string) => (cur === '$' || !s?.includes('$') ? s : s.replaceAll('$', cur));
 
   // Reflect the current inputs in the URL query string so a scenario is shareable.
@@ -287,24 +272,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
       // form matches the crawlable example: explicit defaultValue → first select
       // option → a number parsed from a numeric placeholder. Text/textarea inputs
       // (e.g. "paste your JSON") stay empty.
-      const defaults: Record<string, string> = {};
-      for (const input of cfg.inputs) {
-        if (input.defaultValue !== undefined && input.defaultValue !== '') {
-          defaults[input.id] = String(input.defaultValue);
-        } else if (input.type === 'select' && input.options?.length) {
-          defaults[input.id] = input.options[0].value;
-        } else if ((input.type === 'number' || input.type === 'percentage') && input.placeholder) {
-          const m = input.placeholder.replace(/,/g, '').match(/-?\d+\.?\d*/);
-          defaults[input.id] = m ? m[0] : '';
-        } else if ((input.type === 'text' || input.type === 'textarea') && input.placeholder) {
-          // Seed a sample data list from placeholders like "Enter numbers: 1, 2, 3"
-          // (stats/vector calcs) — but NOT paste prompts ("Paste your JSON here").
-          const list = input.placeholder.match(/-?\d[\d\s,.\-]*\d/);
-          defaults[input.id] = list && (list[0].match(/\d+/g)?.length ?? 0) >= 2 ? list[0].trim() : '';
-        } else {
-          defaults[input.id] = '';
-        }
-      }
+      const defaults = seedDefaults(cfg.inputs);
       // Overlay a shared scenario from the URL (?loanAmount=25000&…) onto defaults.
       let seeded = defaults;
       if (typeof window !== 'undefined' && window.location.search) {
@@ -316,6 +284,8 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
         });
         if (Object.keys(fromUrl).length) seeded = { ...defaults, ...fromUrl };
       }
+      seeded = { ...seeded, ...typedEarly.current };
+      typedEarly.current = {};
       setConfig(cfg);
       setValues(seeded);
       try {
@@ -351,7 +321,21 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     return () => window.removeEventListener('scroll', onScroll);
   }, [compact]);
 
-  if (!config) {
+  // Until the live config arrives (the island hydrates, then loads the calculator's chunk), render from
+  // the build-time snapshot: same markup as the server's, inputs inert (see handleChange).
+  const view: CalculatorConfig | null =
+    config ??
+    (initial
+      ? ({
+          inputs: initial.inputs,
+          calculate: () => initial.results,
+          gauge: initial.gauge ? () => initial.gauge : undefined,
+          donut: initial.donut ? () => initial.donut : undefined,
+          shapeTabs: initial.shapeTabs,
+        } as unknown as CalculatorConfig)
+      : null);
+
+  if (!view) {
     // Reserve close to the real form's height so the skeleton→form swap on
     // hydration doesn't cause a layout shift (CWV/CLS). Most calculator forms
     // render 500–650px; min-h keeps the reserve without capping tall ones.
@@ -359,6 +343,12 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
   }
 
   const handleChange = (id: string, value: string) => {
+    if (!config) {
+      // Live calculator not loaded yet: keep what was typed and apply it on arrival.
+      typedEarly.current[id] = value;
+      setValues((prev) => ({ ...prev, [id]: value }));
+      return;
+    }
     const next = { ...values, [id]: value };
     setValues(next);
     try {
@@ -369,20 +359,20 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     syncUrl(config, next);
   };
 
-  const visibleInputs = config.inputs.filter(
+  const visibleInputs = view.inputs.filter(
     (input) =>
       (!visibleInputIds || visibleInputIds.includes(input.id)) &&
       (!input.showWhen || input.showWhen(values))
   );
 
-  const fieldErrors = rangeErrors(config.inputs, values);
+  const fieldErrors = rangeErrors(view.inputs, values);
 
   // Deep-link to the full calculator page, carrying the current inputs so the
   // hero scenario continues seamlessly on the dedicated page. Same whitelist +
   // 64-char cap as syncUrl; trailingSlash:'always' means the slash precedes '?'.
   const fullBreakdownHref = () => {
     const params = new URLSearchParams();
-    for (const input of config.inputs) {
+    for (const input of view.inputs) {
       const v = values[input.id];
       if (v !== undefined && v !== '') params.set(input.id, String(v).slice(0, 64));
     }
@@ -467,18 +457,20 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     );
   };
 
-  const activeShape = values.shape || config.shapeTabs?.[0]?.value;
+  const activeShape = values.shape || view.shapeTabs?.[0]?.value;
   const stickyResult = visibleResults.find((r) => r.highlight) ?? visibleResults[0];
   const isMoney = visibleResults.some((r) => r.value.includes('$'));
 
   return (
     <>
-    <div ref={cardRef} className="bg-[var(--surface-card)] border border-[var(--border-warm)] rounded-2xl p-6 md:p-8">
+    <div ref={cardRef} data-calc-ready={config ? 'true' : 'false'} className="bg-[var(--surface-card)] border border-[var(--border-warm)] rounded-2xl p-6 md:p-8">
+      <div className={compact ? undefined : 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:items-start lg:gap-8'}>
+      <div className="min-w-0">
       {/* Variant/shape tabs — switch which set of inputs (and formula) applies.
           Writes to values.shape, which each calc's inputs read via showWhen. */}
-      {config.shapeTabs && config.shapeTabs.length > 0 && (
+      {view.shapeTabs && view.shapeTabs.length > 0 && (
         <div role="tablist" aria-label="Options" className="mb-5 flex flex-wrap gap-1.5">
-          {config.shapeTabs.map((tab) => {
+          {view.shapeTabs.map((tab) => {
             const active = activeShape === tab.value;
             return (
               <button
@@ -499,7 +491,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           })}
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div className={`grid grid-cols-1 gap-4 mb-6 ${compact ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:mb-0 lg:grid-cols-1'}`}>
         {visibleInputs.map((input) => (
           <div key={input.id}>
             <label
@@ -533,9 +525,18 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           </div>
         ))}
       </div>
+      </div>
 
       {visibleResults.length > 0 && (
-        <div className="border-t border-[var(--border-warm)] pt-5" aria-live="polite" aria-atomic="false">
+        <div
+          className={
+            compact
+              ? 'border-t border-[var(--border-warm)] pt-5'
+              : 'mt-6 border-t border-[var(--border-warm)] pt-5 lg:mt-0 lg:rounded-xl lg:border lg:bg-[var(--surface-bg)] lg:p-5'
+          }
+          aria-live="polite"
+          aria-atomic="false"
+        >
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h2 className="text-sm font-semibold text-[var(--surface-text-muted)] uppercase tracking-wide">
               Results
@@ -598,6 +599,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                 ))}
             </div>
           )}
+          {compact ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Compact hero embed shows only the two headline results (e.g. BMI
                 Prime + BMI Score); the full breakdown lives on the calc page. */}
@@ -621,12 +623,59 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
               </div>
             ))}
           </div>
+          ) : (
+            (() => {
+              const hero = visibleResults.find((r) => r.highlight) ?? visibleResults[0];
+              const rest = visibleResults.filter((r) => r !== hero);
+              const multiline = (v: string) => v.includes('\n');
+              return (
+                <div>
+                  <div className="rounded-xl bg-[var(--brand-default)] p-5 text-white">
+                    <p className="text-xs font-semibold uppercase tracking-wide">{hero.label}</p>
+                    <p
+                      className={`mt-1 break-words [overflow-wrap:anywhere] ${
+                        multiline(hero.value) ? 'whitespace-pre-line text-base font-medium leading-relaxed' : 'text-4xl font-bold tracking-tight'
+                      }`}
+                    >
+                      {money(hero.value)}
+                      {hero.unit && <span className="ml-1 text-base font-normal">{hero.unit}</span>}
+                    </p>
+                    {hero.interpretation && <p className="mt-2 text-sm leading-snug">{money(hero.interpretation)}</p>}
+                  </div>
+                  {rest.length > 0 && (
+                    <dl className="mt-2 divide-y divide-[var(--border-warm)]">
+                      {rest.map((r) => (
+                        <div key={r.id} className="py-2.5">
+                          <div className={multiline(r.value) ? '' : 'flex items-baseline justify-between gap-4'}>
+                            <dt className="text-sm text-[var(--surface-text-secondary)]">{r.label}</dt>
+                            <dd
+                              className={`${
+                                multiline(r.value)
+                                  ? 'mt-1 whitespace-pre-line break-words text-sm leading-relaxed'
+                                  : r.value.length <= 18
+                                    ? 'shrink-0 whitespace-nowrap text-right text-base font-semibold'
+                                    : 'break-words text-right text-base font-semibold [overflow-wrap:anywhere]'
+                              } ${r.color ? resultColorClasses[r.color] ?? '' : ''}`}
+                            >
+                              {money(r.value)}
+                              {r.unit && <span className="ml-1 text-sm font-normal opacity-75">{r.unit}</span>}
+                            </dd>
+                          </div>
+                          {r.interpretation && <p className="mt-0.5 text-xs text-[var(--surface-text-muted)]">{money(r.interpretation)}</p>}
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                </div>
+              );
+            })()
+          )}
 
           {/* Living Answer gauge — "where you fall" on the scale, at a glance. */}
-          {config.gauge && (() => {
+          {view.gauge && (() => {
             let g;
             try {
-              g = config.gauge(values);
+              g = view.gauge(values);
             } catch {
               g = null;
             }
@@ -640,10 +689,10 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
 
           {/* Living Answer donut — the actual result split, at a glance.
               Compact, so it shows even alongside an extraPanel. */}
-          {config.donut && (() => {
+          {view.donut && (() => {
             let d;
             try {
-              d = config.donut(values);
+              d = view.donut(values);
             } catch {
               d = null;
             }
@@ -658,10 +707,10 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           {/* Living Answer chart — redraws as inputs/sliders change.
               Suppressed when the calc ships its own extraPanel visualization,
               so rich calcs (loan, compound) don't get a duplicate chart. */}
-          {config.chart && !config.extraPanel && (() => {
+          {view.chart && !view.extraPanel && (() => {
             let data;
             try {
-              data = config.chart(values);
+              data = view.chart(values);
             } catch {
               data = null;
             }
@@ -679,6 +728,12 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           })()}
         </div>
       )}
+      {!compact && visibleResults.length === 0 && (
+        <div className="mt-6 rounded-xl border border-dashed border-[var(--border-warm)] p-5 text-sm text-[var(--surface-text-secondary)] lg:mt-0">
+          Fill in the inputs to see your result here.
+        </div>
+      )}
+      </div>
 
       {/* Compact hero: carry these inputs to the full page for the detailed breakdown */}
       {compact && catSlug && (
@@ -748,10 +803,10 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
       )}
 
       {/* Live worked solution — the user's own numbers, step by step */}
-      {!compact && config.explainSteps && results.length > 0 && (() => {
+      {!compact && view.explainSteps && results.length > 0 && (() => {
         let steps: ExplainStep[];
         try {
-          steps = config.explainSteps(values);
+          steps = view.explainSteps(values);
         } catch {
           steps = [];
         }
@@ -786,8 +841,8 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
         );
       })()}
 
-      {!compact && config.extraPanel && (
-        <div className="mt-6">{config.extraPanel(values, results)}</div>
+      {!compact && view.extraPanel && (
+        <div className="mt-6">{view.extraPanel(values, results)}</div>
       )}
     </div>
 
