@@ -5,7 +5,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CategoryIcon from '../components/CategoryIcon.astro';
 import SearchBox from '../components/SearchBox';
-import CalculatorForm from '../components/calculator/CalculatorForm';
+import HeroWorksheet from '../components/home/HeroWorksheet';
 import { getCategories, calculatorRegistry, getCalculatorById } from '../lib/registry';
 import { accentFor } from '../lib/categoryAccent';
 import { blogPosts } from '../lib/blog';
@@ -45,7 +45,6 @@ const quickPicks = ['bmi-calculator', 'loan-calculator', 'percentage-calculator'
   .map((id) => getCalculatorById(id))
   .filter((e) => e !== undefined);
 
-const demo = getCalculatorById('bmi-calculator');
 
 const latestPosts = [...blogPosts]
   .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
@@ -92,91 +91,45 @@ const schemas = [
   schemas={schemas}
 >
   <main id="main-content" class="min-h-screen bg-[var(--surface-bg)]">
-    {/* ── Hero: search-first ─────────────────────────────────────────── */}
-    <section class="hero-grid relative overflow-hidden">
-      <div class="max-w-[1200px] mx-auto px-4 md:px-10 pt-14 pb-12 lg:pt-20 lg:pb-16 relative">
-        <div class="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+    {/* ── Hero: the promise, demonstrated ──────────────────────────────
+        Left: the pitch and the one primary action (search). Right: a real worked solution the
+        visitor can edit (HeroWorksheet). Amber appears once on the page: the highlighter behind
+        "show their work". */}
+    <section class="hero-grid relative overflow-hidden border-b border-[var(--border-warm)]">
+      <div class="max-w-[1200px] mx-auto px-4 md:px-10 pt-14 pb-14 lg:pt-20 lg:pb-20 relative">
+        <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 
-          {/* LEFT — the pitch + the primary action */}
           <div class="hero-rise">
-            <p class="text-tiny font-bold uppercase tracking-[0.22em] text-accent-amber-400/90 mb-4">
-              {total} calculators · every answer shows its formula
-            </p>
-            <h1 class="hero-title text-white mb-5">
-              Free Calculators That<br />
-              <span class="relative inline-block">
-                <span class="text-accent-amber-400">Show Their Work.</span>
-                {/* Signature: a hand-marked underline — the thesis, drawn by hand */}
-                <svg class="scribble" viewBox="0 0 260 18" fill="none" aria-hidden="true" preserveAspectRatio="none">
-                  <path d="M4 12 C60 4, 120 4, 176 9 C210 12, 236 9, 256 6" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
-                </svg>
-              </span>
+            <h1 class="hero-title text-[var(--surface-text)] mb-5">
+              Calculators that <span class="hero-mark">show their work</span>.
             </h1>
-            <p class="text-base md:text-lg text-slate-300 leading-relaxed max-w-xl mb-7">
-              A tested program runs every calculation — and the formula, the steps, and the source sit right on the page. So you can trust the number, not just take it.
+            <p class="text-base md:text-lg text-[var(--surface-text-secondary)] leading-relaxed max-w-xl mb-7">
+              Every answer comes with the formula, the steps and the source, so you can check the number instead of just trusting it.
             </p>
 
-            {/* THE primary action */}
             <SearchBox client:idle index={searchIndex} hero />
 
-            {/* quick picks */}
-            <div class="mt-4 flex flex-wrap items-center gap-2">
-              <span class="text-xs text-white/50">Popular:</span>
+            <p class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--surface-text-muted)]">
+              <span>Popular:</span>
               {quickPicks.map((c) => (
                 <a
                   href={`/${c!.categorySlug}/${c!.id}/`}
-                  class="rounded-full border border-white/20 px-3 py-1 text-xs font-medium text-white/85 transition-colors hover:border-white/50 hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-amber-400"
+                  class="font-medium text-[var(--brand-ink)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-80"
                 >
                   {c!.shortTitle ?? c!.title}
                 </a>
               ))}
-            </div>
+            </p>
 
-            {/* proof, not slogans */}
-            <dl class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 max-w-lg">
-              <div>
-                <dt class="text-xs text-slate-400">independently checked</dt>
-                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">{verification.auditedCount}<span class="text-sm font-normal text-slate-400"> of {verification.totalCalculators}</span></dd>
-                <dd class="sr-only">calculators checked against independent sources, plus {verification.testCountLabel} automated tests</dd>
-              </div>
-              <div>
-                <dt class="text-xs text-slate-400">categories</dt>
-                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">{categories.length}</dd>
-              </div>
-              <div>
-                <dt class="text-xs text-slate-400">in-depth guides</dt>
-                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">{blogPosts.length}</dd>
-              </div>
-              <div>
-                <dt class="text-xs text-slate-400">no account · private</dt>
-                <dd class="font-mono text-2xl font-bold text-white leading-none mb-1">$0</dd>
-              </div>
-            </dl>
+            <p class="mt-8 max-w-xl text-sm text-[var(--surface-text-secondary)]">
+              <strong class="font-semibold text-[var(--surface-text)]">{verification.auditedCount} of {verification.totalCalculators}</strong> calculators checked against independent sources,
+              {verification.testCountLabel} automated tests. Free, private, no account.
+            </p>
           </div>
 
-          {/* RIGHT — a real, working calculator, worked out on graph paper */}
-          {demo && (
-            <div class="hero-rise hero-rise-2 relative lg:pt-1">
-              <p class="mb-3 text-sm font-semibold text-white">
-                <span class="live-badge"><span class="live-dot" aria-hidden="true"></span>Live</span>
-                <span class="text-slate-400"> — {demo.shortTitle ?? demo.title}, no sign-up</span>
-              </p>
-              {/* Hero tool is above the fold. client:idle (not client:load) hydrates
-                  once the main thread is idle — after LCP — so the interactive BMI
-                  island doesn't block first paint (homepage LCP was ~3.5s on client:load).
-                  Still reliable (unlike client:visible, whose IntersectionObserver is
-                  flaky for a display:contents island at the top of the page).
-                  visibleInputIds: BMI Score only needs weight + height (sex/age don't
-                  change it), so the hero card stays short and glanceable. The in-card
-                  CTA deep-links to the full page carrying whatever was entered here. */}
-              <CalculatorForm
-                client:idle
-                calculatorId={demo.id}
-                compact
-                visibleInputIds={['unit', 'weight', 'heightFt', 'heightIn', 'heightCm']}
-              />
-            </div>
-          )}
+          <div class="hero-rise hero-rise-2">
+            <HeroWorksheet client:load />
+          </div>
         </div>
       </div>
     </section>
@@ -315,62 +268,34 @@ const schemas = [
 </BaseLayout>
 
 <style>
+  /* Graph paper: faint blue grid on the page colour, fading out at the bottom edge */
   .hero-grid {
-    background:
-      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(160deg, var(--surface-hero-start, #0f1a2e) 0%, var(--surface-hero-end, #0a1220) 100%);
-    background-size: 32px 32px, 32px 32px, 100% 100%;
+    background-color: var(--surface-bg);
+    background-image:
+      linear-gradient(rgba(25, 103, 210, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(25, 103, 210, 0.07) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  :global(html.dark) .hero-grid {
+    background-image:
+      linear-gradient(rgba(138, 180, 248, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(138, 180, 248, 0.06) 1px, transparent 1px);
   }
 
-  /* Type scale — the hero is the one big typographic moment */
+  /* Type scale: the hero is the one big typographic moment */
   .hero-title {
     font-size: clamp(2.25rem, 5.2vw, 3.75rem);
     font-weight: 800;
     letter-spacing: -0.02em;
-    line-height: 1.04;
+    line-height: 1.06;
   }
 
-  /* Signature — a hand-marked underline under the thesis word */
-  .scribble {
-    position: absolute;
-    left: -2%;
-    bottom: -0.28em;
-    width: 104%;
-    height: 0.4em;
-    color: #f59e0b;
-    opacity: 0.95;
-    stroke-dasharray: 300;
-    stroke-dashoffset: 300;
-    animation: scribble-in 0.7s ease 0.5s forwards;
-  }
-  @keyframes scribble-in {
-    to { stroke-dashoffset: 0; }
-  }
-
-  /* Live badge on the calculator card */
-  .live-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #f59e0b;
-  }
-  .live-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 9999px;
-    background: #f59e0b;
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
-    animation: live-pulse 2s ease-out infinite;
-  }
-  @keyframes live-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.55); }
-    70% { box-shadow: 0 0 0 7px rgba(245, 158, 11, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  /* The single amber on the page: a highlighter pass behind the thesis */
+  .hero-mark {
+    background-image: linear-gradient(transparent 58%, rgba(245, 158, 11, 0.5) 58%, rgba(245, 158, 11, 0.5) 92%, transparent 92%);
+    padding: 0 0.08em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 
   /* Load-in: quiet fade + rise, once */
@@ -384,8 +309,6 @@ const schemas = [
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero-rise, .scribble, .live-dot { animation: none; }
-    .scribble { stroke-dashoffset: 0; }
-    .hero-rise { opacity: 1; transform: none; }
+    .hero-rise { animation: none; opacity: 1; transform: none; }
   }
 </style>

@@ -1,7 +1,7 @@
 // Search island. Receives a slim, serializable index built at build time — it does
 // NOT import the registry (that would drag ~350 KB into the client bundle).
 // Two looks: default (light /search/ page) and `hero` (floating dropdown on the
-// dark homepage hero).
+// homepage hero).
 
 import { useMemo, useState } from 'react';
 
@@ -49,7 +49,7 @@ export default function SearchBox({ index, hero = false }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           aria-label={`Search ${index.length} calculators`}
-          className="w-full rounded-xl border border-white/25 bg-white/10 px-5 py-4 text-base text-white placeholder-white/55 backdrop-blur transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-amber-400 focus:border-white/50"
+          className="min-h-[52px] w-full rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] px-5 py-3.5 text-base text-[var(--surface-text)] placeholder:text-[var(--surface-text-muted)] shadow-card transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-default)] focus:border-[var(--brand-default)]"
         />
         {showResults && (
           <div className="absolute z-30 mt-2 w-full rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-elevation-3 overflow-hidden">

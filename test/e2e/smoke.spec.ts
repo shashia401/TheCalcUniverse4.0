@@ -144,13 +144,16 @@ test.describe('navigation and chrome', () => {
     await expect(result).toBeVisible();
   });
 
-  test('homepage embeds a working calculator', async ({ page }) => {
+  test('homepage hero is a live worked example', async ({ page }) => {
     await page.goto('/');
-    // the embedded BMI calc hydrates and computes without leaving the page
-    const heightInput = page.locator('#main-content input').first();
-    await heightInput.waitFor({ timeout: 15_000 });
-    // the "Live — BMI Calculator, no sign-up" badge sits above the embedded calculator
-    await expect(page.getByText(/no sign-up/).first()).toBeVisible();
+    // in the static HTML: $25,000 at 6.5% for 5 years = $489.15 a month
+    await expect(page.getByText('$489.15').first()).toBeVisible();
+    // editing a number recomputes the steps and the circled answer (25,000 at 7% = $495.03)
+    await expect(async () => {
+      await page.fill('#hero-rate', '7');
+      await expect(page.getByText('$495.03').first()).toBeVisible({ timeout: 1000 });
+    }).toPass({ timeout: 15_000 });
+    await expect(page.getByRole('link', { name: /Open the full Loan Calculator/ })).toHaveAttribute('href', /interestRate=7/);
   });
 
   test('unknown URL serves the 404 page', async ({ page }) => {
