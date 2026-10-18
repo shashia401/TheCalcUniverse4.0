@@ -220,6 +220,70 @@ const bodyFatConfig: CalculatorConfig = {
       caption: `U.S. Navy body-fat categories for ${isMale ? 'men' : 'women'}. The marker shows where your result lands.`,
     };
   },
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        const results = bodyFatConfig.calculate(values);
+        if (!results.length) return [];
+        const unit = values.unit || 'imperial';
+        const isMale = (values.sex || 'male') === 'male';
+        const heightCm = cmFromInput(values, unit);
+        const toCm = (v: number) => (unit === 'imperial' ? v * 2.54 : v);
+        const neck = parseFloat(values.neck);
+        const abdomen = parseFloat(values.abdomen);
+        const waist = parseFloat(values.waist);
+        const hip = parseFloat(values.hip);
+        const r2 = (n: number) => parseFloat(n.toFixed(2)).toString();
+
+        const h = heightCm / CM_PER_INCH;
+        const d = isMale
+          ? (toCm(abdomen) - toCm(neck)) / CM_PER_INCH
+          : (toCm(waist) + toCm(hip) - toCm(neck)) / CM_PER_INCH;
+        const logD = Math.log10(d);
+        const logH = Math.log10(h);
+        const raw = isMale
+          ? 86.01 * logD - 70.041 * logH + 36.76
+          : 163.205 * logD - 97.684 * logH - 78.387;
+        const clamped = Math.max(2, Math.min(raw, 70));
+        const pctText = results[0].value;
+
+        const heightExpr = unit === 'imperial'
+          ? `${parseFloat(values.heightFt) || 0} ft ${parseFloat(values.heightIn) || 0} in = ${r2(h)} in`
+          : `${r2(heightCm)} cm ÷ 2.54 = ${r2(h)} in`;
+        const unitWord = unit === 'imperial' ? 'in' : 'cm';
+        const circ = isMale
+          ? `${abdomen} − ${neck}`
+          : `${waist} + ${hip} − ${neck}`;
+        const circExpr = unit === 'imperial'
+          ? `${circ} = ${r2(d)} in`
+          : `(${circ}) ${unitWord} ÷ 2.54 = ${r2(d)} in`;
+
+        return [
+          {
+            label: 'Convert your height to inches',
+            expr: heightExpr,
+            note: 'The published Navy coefficients are for inches, so everything is converted first.',
+          },
+          {
+            label: isMale ? 'Abdomen minus neck' : 'Waist plus hip minus neck',
+            expr: circExpr,
+          },
+          {
+            label: 'Take base-10 logarithms',
+            expr: `log10(${r2(d)}) = ${logD.toFixed(4)} · log10(${r2(h)}) = ${logH.toFixed(4)}`,
+          },
+          {
+            label: `U.S. Navy equation (${isMale ? 'men' : 'women'})`,
+            expr: (isMale
+              ? `86.010 × ${logD.toFixed(4)} − 70.041 × ${logH.toFixed(4)} + 36.76`
+              : `163.205 × ${logD.toFixed(4)} − 97.684 × ${logH.toFixed(4)} − 78.387`)
+              + (clamped === raw ? ` = ${pctText}` : ` = ${raw.toFixed(1)}% → kept within 2%–70% = ${pctText}`),
+            note: 'The Navy tape method is an estimate — best for tracking change over time, less precise than a DEXA scan for any single reading.',
+          },
+        ];
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const unit = values.unit || 'imperial';
     const sex = values.sex || 'male';

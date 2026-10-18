@@ -110,6 +110,66 @@ const healthyWeightConfig: CalculatorConfig = {
       helpText: 'Based on wrist circumference or elbow breadth. Medium is the default.',
     },
   ],
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        const results = healthyWeightConfig.calculate(values);
+        if (!results.length) return [];
+        const unit = values.unit || 'imperial';
+        const val = (id: string) => results.find((r) => r.id === id)!.value;
+        const weight = parseFloat(values.weight);
+        const frameSize = values.frameSize || 'medium';
+
+        let weightKg: number;
+        let heightCm: number;
+        let heightExpr: string;
+        let weightExpr: string;
+        if (unit === 'imperial') {
+          const ft = parseFloat(values.heightFt) || 0;
+          const inches = parseFloat(values.heightIn) || 0;
+          heightCm = (ft * 12 + inches) * 2.54;
+          weightKg = weight * 0.45359237;
+          heightExpr = `(${ft} ft × 12 + ${inches} in) × 2.54 ÷ 100 = ${(heightCm / 100).toFixed(3)} m`;
+          weightExpr = `${weight} lb × 0.45359237 = ${weightKg.toFixed(1)} kg`;
+        } else {
+          heightCm = parseFloat(values.heightCm) || 0;
+          weightKg = weight;
+          heightExpr = `${heightCm} cm ÷ 100 = ${(heightCm / 100).toFixed(3)} m`;
+          weightExpr = `${weightKg.toFixed(1)} kg`;
+        }
+        const heightM = heightCm / 100;
+        const sq = heightM * heightM;
+        const bmi = Math.round((weightKg / sq) * 10) / 10;
+        const category = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal weight' : bmi < 30 ? 'Overweight' : 'Obese';
+        const lowKg = 18.5 * sq;
+        const highKg = 24.9 * sq;
+        const frameMid = ({ small: 0.45, medium: 0.5, large: 0.55 } as Record<string, number>)[frameSize] ?? 0.5;
+        const targetKg = lowKg + (highKg - lowKg) * frameMid;
+        // Imperial results are whole pounds, so show the kg working and then the displayed figure.
+        const tail = (kg: number) => (unit === 'imperial' ? `${kg.toFixed(1)} kg` : '');
+
+        return [
+          { label: 'Convert your height to meters', expr: heightExpr },
+          { label: 'Square your height', expr: `${heightM.toFixed(3)} m × ${heightM.toFixed(3)} m = ${sq.toFixed(3)} m²` },
+          {
+            label: 'Your current BMI',
+            expr: `${weightExpr} ÷ ${sq.toFixed(3)} m² = ${bmi.toFixed(1)} (${category})`,
+            note: 'BMI is rounded to one decimal before it is classified.',
+          },
+          {
+            label: 'Healthy weight range (BMI 18.5–24.9)',
+            expr: `18.5 × ${sq.toFixed(3)} = ${lowKg.toFixed(1)} kg · 24.9 × ${sq.toFixed(3)} = ${highKg.toFixed(1)} kg → ${val('healthyWeightRange')}`,
+            note: "This range comes from BMI alone, which doesn't account for muscle mass, bone density, or frame size.",
+          },
+          {
+            label: `Frame-adjusted target (${frameSize} frame)`,
+            expr: `${lowKg.toFixed(1)} + (${highKg.toFixed(1)} − ${lowKg.toFixed(1)}) × ${frameMid} = ${tail(targetKg)}${tail(targetKg) ? ' → ' : ''}${val('adjustedTarget')}`,
+            note: 'The frame factor places your target inside the BMI range: small 0.45, medium 0.5, large 0.55.',
+          },
+        ];
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const unit = values.unit || 'imperial';
     const sex = values.sex || 'male';

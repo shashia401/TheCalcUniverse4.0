@@ -84,6 +84,50 @@ const heartRateZonesConfig: CalculatorConfig = {
       ],
     },
   ],
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        if (!heartRateZonesConfig.calculate(values).length) return [];
+        const age = parseFloat(values.age);
+        const rhrInput = parseFloat(values.restingHR);
+        const maxHR = 220 - age;
+        const hasRHR = !isNaN(rhrInput) && rhrInput > 0 && values.restingHR !== '';
+        const karvonen = (values.method || 'karvonen') === 'karvonen';
+        const rhr = hasRHR ? rhrInput : 60;
+        const hrr = maxHR - rhr;
+        const hrrShown = Math.round(hrr * 10) / 10;
+        const edge = (p: number) => Math.round(karvonen ? p * hrr + rhr : p * maxHR);
+        const pct = (p: number) => (p * 100).toFixed(0);
+        const z2 = ZONES[1];
+
+        const steps: { label: string; expr: string; note?: string }[] = [
+          {
+            label: 'Estimate your maximum heart rate',
+            expr: `220 − ${age} = ${maxHR} bpm`,
+            note: 'The 220 − age rule is a population average — your true max can run 10-15 bpm either way.',
+          },
+        ];
+        if (karvonen) {
+          steps.push({
+            label: hasRHR ? 'Heart rate reserve (max minus resting)' : 'Heart rate reserve (assuming a resting rate of 60 bpm)',
+            expr: `${maxHR} − ${rhr} = ${hrrShown} bpm`,
+          });
+        }
+        steps.push({
+          label: 'Work out one zone (Zone 2)',
+          expr: karvonen
+            ? `Zone 2 (${pct(z2.low)}–${pct(z2.high)}% HRR): ${z2.low} × ${hrrShown} + ${rhr} = ${edge(z2.low)} · ${z2.high} × ${hrrShown} + ${rhr} = ${edge(z2.high)} → ${edge(z2.low)}–${edge(z2.high)} bpm`
+            : `Zone 2 (${pct(z2.low)}–${pct(z2.high)}% max HR): ${z2.low} × ${maxHR} = ${edge(z2.low)} · ${z2.high} × ${maxHR} = ${edge(z2.high)} → ${edge(z2.low)}–${edge(z2.high)} bpm`,
+        });
+        steps.push({
+          label: 'All five zones',
+          expr: `${ZONES.map((z) => `Z${z.num} ${edge(z.low)}–${edge(z.high)}`).join(' · ')} bpm`,
+          note: 'Treat the zones as guides, not hard limits.',
+        });
+        return steps;
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const age = parseFloat(values.age);
     const rhrInput = parseFloat(values.restingHR);

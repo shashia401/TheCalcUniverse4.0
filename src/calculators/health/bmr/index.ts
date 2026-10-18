@@ -116,6 +116,79 @@ const bmrConfig: CalculatorConfig = {
       helpText: 'Required for Katch-McArdle. Optional for comparison.',
     },
   ],
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        // Validation + the displayed number come from calculate() itself, so the last step can never drift from the result.
+        const results = bmrConfig.calculate(values);
+        if (!results.length) return [];
+        const unit = values.unit || 'imperial';
+        const formula = values.formula || 'mifflin';
+        const sex = values.sex || 'male';
+        const age = parseFloat(values.age);
+        const bodyFatPct = parseFloat(values.bodyFatPct);
+        const input = parseFloat(values.weight);
+        const n1 = (n: number) => n.toFixed(1);
+        const steps: { label: string; expr: string; note?: string }[] = [];
+
+        let weightKg: number;
+        let heightCm: number;
+        if (unit === 'imperial') {
+          const ft = parseFloat(values.heightFt) || 0;
+          const inches = parseFloat(values.heightIn) || 0;
+          weightKg = input * 0.45359237;
+          heightCm = (ft * 12 + inches) * 2.54;
+          steps.push({
+            label: 'Convert to kilograms and centimeters',
+            expr: `${input} lb × 0.45359237 = ${n1(weightKg)} kg · (${ft} ft × 12 + ${inches} in) × 2.54 = ${n1(heightCm)} cm`,
+            note: 'The BMR equations are defined in kilograms and centimeters.',
+          });
+        } else {
+          weightKg = input;
+          heightCm = parseFloat(values.heightCm) || 0;
+          steps.push({ label: 'Your measurements', expr: `${n1(weightKg)} kg · ${n1(heightCm)} cm` });
+        }
+        const W = n1(weightKg);
+        const H = n1(heightCm);
+        const bmr = results[0].value;
+
+        if (formula === 'katch') {
+          const lean = weightKg * (1 - bodyFatPct / 100);
+          steps.push({
+            label: 'Find lean body mass from your body fat %',
+            expr: `${W} kg × (1 − ${bodyFatPct}/100) = ${n1(lean)} kg`,
+            note: 'Lean body mass is your weight minus fat mass.',
+          });
+          steps.push({ label: 'Substitute into the Katch-McArdle equation', expr: `370 + 21.6 × ${n1(lean)}` });
+          steps.push({ label: 'Add it up', expr: `370 + ${n1(21.6 * lean)} = ${bmr}` });
+        } else if (formula === 'harris') {
+          const male = sex === 'male';
+          const [k, cw, ch, ca] = male ? ['88.362', '13.397', '4.799', '5.677'] : ['447.593', '9.247', '3.098', '4.330'];
+          steps.push({
+            label: `Substitute into the Harris-Benedict equation (${sex})`,
+            expr: `${k} + ${cw} × ${W} + ${ch} × ${H} − ${ca} × ${age}`,
+          });
+          steps.push({
+            label: 'Add it up',
+            expr: `${k} + ${n1(parseFloat(cw) * weightKg)} + ${n1(parseFloat(ch) * heightCm)} − ${n1(parseFloat(ca) * age)} = ${bmr}`,
+          });
+        } else {
+          const k = sex === 'male' ? '+ 5' : '− 161';
+          steps.push({
+            label: `Substitute into the Mifflin-St Jeor equation (${sex})`,
+            expr: `10 × ${W} + 6.25 × ${H} − 5 × ${age} ${k}`,
+            note: 'The +5 / −161 term is the sex-specific constant.',
+          });
+          steps.push({
+            label: 'Add it up',
+            expr: `${n1(10 * weightKg)} + ${n1(6.25 * heightCm)} − ${n1(5 * age)} ${k} = ${bmr}`,
+            note: 'BMR is an estimate of what you burn at complete rest, not a calorie target.',
+          });
+        }
+        return steps;
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const unit = values.unit || 'imperial';
     const formula = values.formula || 'mifflin';

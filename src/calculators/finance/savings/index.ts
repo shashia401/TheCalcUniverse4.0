@@ -1,6 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import SavingsPanel from './SavingsPanel';
+import { fvAnnuity, fvLumpSum } from '../../../utils/financial';
 import { finalBalance as fvBalance, monthlyForGoal, monthlyRateFromApy, wholeMonths } from './savingsMath';
 
 const savingsConfig: CalculatorConfig = {
@@ -88,6 +89,86 @@ const savingsConfig: CalculatorConfig = {
       helpText: 'Top high-yield savings accounts pay up to about 4.5% APY in late 2026; the FDIC national average savings rate is 0.37%.',
     },
   ],
+  explainSteps: (values) => {
+    const solveFor = values.solveFor || 'balance';
+    const P = parseFloat(values.initialDeposit) || 0;
+    const monthlyContrib = parseFloat(values.monthlyContribution) || 0;
+    const goal = parseFloat(values.savingsGoal) || 0;
+    const timePeriod = parseFloat(values.timePeriod);
+    const timeUnit = values.timeUnit || 'years';
+    const apy = parseFloat(values.apy) / 100;
+    if (isNaN(timePeriod) || isNaN(apy) || timePeriod <= 0) return [];
+
+    const months = wholeMonths(timePeriod, timeUnit);
+    const i = monthlyRateFromApy(apy);
+    const growth = Math.pow(1 + i, months);
+    const fmtD = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtK = (n: number) =>
+      n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+
+    const rateStep = {
+      label: 'Convert the APY to a monthly rate',
+      expr: `i = (1 + ${(apy * 100).toFixed(2)}%)^(1/12) − 1 = ${(i * 100).toFixed(4)}% = ${i.toFixed(6)}`,
+      note: 'APY already includes compounding, so we take the 12th root instead of dividing by 12.',
+    };
+    const monthsStep = {
+      label: 'Count the months',
+      expr: `n = ${timeUnit === 'years' ? `${timePeriod} years × 12 = ` : ''}${months} months`,
+    };
+
+    if (solveFor === 'balance') {
+      const finalBalance = fvBalance(P, monthlyContrib, apy, months);
+      if (!(finalBalance > 0)) return [];
+      const lumpPart = fvLumpSum(P, i, months);
+      const steps: ExplainStep[] = [rateStep, monthsStep];
+      if (P > 0) {
+        steps.push({
+          label: 'Grow your starting deposit',
+          expr: `$${fmtD(P)} × (1 + ${i.toFixed(6)})^${months} = $${fmtD(lumpPart)}`,
+        });
+      }
+      if (monthlyContrib > 0) {
+        steps.push({
+          label: 'Grow your monthly deposits',
+          expr: i === 0
+            ? `$${fmtD(monthlyContrib)} × ${months} = $${fmtD(fvAnnuity(monthlyContrib, i, months))}`
+            : `$${fmtD(monthlyContrib)} × [((1 + ${i.toFixed(6)})^${months} − 1) ÷ ${i.toFixed(6)}] = $${fmtD(fvAnnuity(monthlyContrib, i, months))}`,
+          note: 'Each deposit lands at the end of its month, so it earns interest only on the months that follow.',
+        });
+      }
+      steps.push({
+        label: 'Add the pieces for your final balance',
+        expr: `${[P > 0 ? `$${fmtD(lumpPart)}` : '', monthlyContrib > 0 ? `$${fmtD(fvAnnuity(monthlyContrib, i, months))}` : ''].filter(Boolean).join(' + ')} = ${fmtK(finalBalance)}`,
+      });
+      return steps;
+    }
+
+    if (goal <= 0) return [];
+    const futureP = P * growth;
+    const remaining = goal - futureP;
+    if (remaining <= 0) return [];
+    const needed = monthlyForGoal(P, goal, apy, months);
+    return [
+      rateStep,
+      monthsStep,
+      {
+        label: 'Grow what you already have',
+        expr: `$${fmtD(P)} × (1 + ${i.toFixed(6)})^${months} = $${fmtD(futureP)}`,
+      },
+      {
+        label: 'Find the gap left to fill',
+        expr: `${fmtK(goal)} goal − $${fmtD(futureP)} = $${fmtD(remaining)}`,
+      },
+      {
+        label: 'Work out the monthly deposit that closes the gap',
+        expr: i === 0
+          ? `$${fmtD(remaining)} ÷ ${months} = $${fmtD(needed)}/mo`
+          : `$${fmtD(remaining)} × ${i.toFixed(6)} ÷ ((1 + ${i.toFixed(6)})^${months} − 1) = $${fmtD(needed)}/mo`,
+        note: 'The deposits themselves earn interest, so this is less than the gap divided by the months.',
+      },
+    ];
+  },
   calculate: (values) => {
     const solveFor = values.solveFor || 'balance';
     const P = parseFloat(values.initialDeposit) || 0;

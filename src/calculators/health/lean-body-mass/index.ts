@@ -74,6 +74,73 @@ const leanBodyMassConfig: CalculatorConfig = {
       showWhen: (v) => v.unit === 'metric',
     },
   ],
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        const results = leanBodyMassConfig.calculate(values);
+        if (!results.length) return [];
+        const unit = values.unit || 'imperial';
+        const male = (values.sex || 'male') === 'male';
+        const val = (id: string) => results.find((r) => r.id === id)!.value;
+        const n1 = (n: number) => n.toFixed(1);
+        const input = parseFloat(values.weight);
+
+        let weightKg: number;
+        let heightCm: number;
+        let convert: string;
+        if (unit === 'imperial') {
+          const ft = parseFloat(values.heightFt) || 0;
+          const inches = parseFloat(values.heightIn) || 0;
+          weightKg = input * 0.45359237;
+          heightCm = (ft * 12 + inches) * 2.54;
+          convert = `${input} lb × 0.45359237 = ${n1(weightKg)} kg · (${ft} ft × 12 + ${inches} in) × 2.54 = ${n1(heightCm)} cm`;
+        } else {
+          weightKg = input;
+          heightCm = parseFloat(values.heightCm) || 0;
+          convert = `${n1(weightKg)} kg · ${n1(heightCm)} cm`;
+        }
+        const W = n1(weightKg);
+        const H = n1(heightCm);
+
+        const boer = male ? 0.407 * weightKg + 0.267 * heightCm - 19.2 : 0.252 * weightKg + 0.473 * heightCm - 48.3;
+        const james = male
+          ? 1.1 * weightKg - 128 * (weightKg / heightCm) ** 2
+          : 1.07 * weightKg - 148 * (weightKg / heightCm) ** 2;
+        const hume = male
+          ? 0.3281 * weightKg + 0.33929 * heightCm - 29.5336
+          : 0.29569 * weightKg + 0.41813 * heightCm - 43.2933;
+        const clamp = (n: number) => Math.min(Math.max(n, 0), weightKg);
+        const [b, j, h] = [boer, james, hume].map(clamp);
+        const avg = (b + j + h) / 3;
+        // Imperial results are in lbs, so show the kg working and then the displayed figure.
+        const tail = (kg: number, id: string) => (unit === 'imperial' ? `${n1(kg)} kg = ${val(id)}` : val(id));
+        const clampNote = (raw: number, v: number) => (raw !== v ? ` (limited to ${n1(v)} kg)` : '');
+        const ratio = (weightKg / heightCm).toFixed(4);
+
+        return [
+          { label: 'Convert to kilograms and centimeters', expr: convert },
+          {
+            label: 'Boer (1984)',
+            expr: `${male ? '0.407' : '0.252'} × ${W} + ${male ? '0.267' : '0.473'} × ${H} − ${male ? '19.2' : '48.3'} = ${tail(b, 'boer')}${clampNote(boer, b)}`,
+          },
+          {
+            label: 'James (1976)',
+            expr: `${male ? '1.1' : '1.07'} × ${W} − ${male ? 128 : 148} × (${W} ÷ ${H})² = ${male ? '1.1' : '1.07'} × ${W} − ${male ? 128 : 148} × ${ratio}² = ${tail(j, 'james')}${clampNote(james, j)}`,
+            note: weightKg / (heightCm / 100) ** 2 >= 35 ? 'At a BMI this high the James formula is unreliable (its squared term makes it fall as weight rises), so lean on Boer and Hume.' : undefined,
+          },
+          {
+            label: 'Hume (1966)',
+            expr: `${male ? '0.32810' : '0.29569'} × ${W} + ${male ? '0.33929' : '0.41813'} × ${H} − ${male ? '29.5336' : '43.2933'} = ${tail(h, 'hume')}${clampNote(hume, h)}`,
+          },
+          {
+            label: 'Average the three formulas',
+            expr: `(${n1(b)} + ${n1(j)} + ${n1(h)}) ÷ 3 = ${tail(avg, 'avgLBM')}`,
+            note: 'Lean body mass is everything that is not fat: muscle, bone, organs and water.',
+          },
+        ];
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const unit = values.unit || 'imperial';
     const sex = values.sex || 'male';

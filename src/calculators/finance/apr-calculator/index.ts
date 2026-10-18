@@ -98,6 +98,71 @@ const aprCalculatorConfig: CalculatorConfig = {
     },
   ],
 
+  explainSteps: (values) => {
+    const loanAmount = parseFloat(values.loanAmount);
+    const nominalRate = parseFloat(values.nominalRate);
+    const loanTermValue = parseFloat(values.loanTermValue);
+    const loanTermUnit = values.loanTermUnit || 'years';
+    const upfrontFees = parseFloat(values.upfrontFees) || 0;
+
+    if (isNaN(loanAmount) || loanAmount <= 0) return [];
+    if (isNaN(nominalRate) || nominalRate < 0) return [];
+    if (isNaN(loanTermValue) || loanTermValue <= 0) return [];
+    if (loanAmount - upfrontFees <= 0) return [];
+
+    const termMonths = loanTermUnit === 'years' ? loanTermValue * 12 : loanTermValue;
+    const r = nominalRate / 100 / 12;
+    const monthlyPayment = pmt(loanAmount, r, termMonths);
+    const netCash = loanAmount - upfrontFees;
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const growth = Math.pow(1 + r, termMonths);
+    const steps = [
+      {
+        label: 'Convert the quoted rate to a monthly rate',
+        expr: `r = ${nominalRate}% ÷ 12 = ${(r * 100).toFixed(4)}% per month`,
+      },
+      {
+        label: 'Count the payments',
+        expr: `n = ${loanTermUnit === 'years' ? `${loanTermValue} years × 12 = ` : ''}${termMonths} monthly payments`,
+      },
+      {
+        label: 'Work out the monthly payment on the full loan',
+        expr: r === 0
+          ? `M = $${fmt(loanAmount)} ÷ ${termMonths} = $${fmt(monthlyPayment)}`
+          : `M = $${fmt(loanAmount)} × (${r.toFixed(6)} × ${growth.toFixed(4)}) ÷ (${growth.toFixed(4)} − 1) = $${fmt(monthlyPayment)}`,
+        note: 'Lenders set this payment from the full loan amount, before any fees are taken out.',
+      },
+    ];
+
+    if (upfrontFees === 0) {
+      steps.push({
+        label: 'No upfront fees, so APR equals the quoted rate',
+        expr: `APR = ${nominalRate.toFixed(3)}%`,
+      });
+      return steps;
+    }
+
+    const aprAnnual = calcAPR(netCash, monthlyPayment, termMonths) * 100;
+    steps.push(
+      {
+        label: 'Subtract the fees to find the cash you really receive',
+        expr: `$${fmt(loanAmount)} − $${fmt(upfrontFees)} = $${fmt(netCash)}`,
+        note: 'You repay the full loan amount but only get this much in hand.',
+      },
+      {
+        label: 'Find the monthly rate that makes those payments equal the cash received',
+        expr: `$${fmt(netCash)} = $${fmt(monthlyPayment)} × [1 − (1 + a)^−${termMonths}] ÷ a  →  a = ${(aprAnnual / 12).toFixed(5)}% per month`,
+        note: 'There is no direct formula for a, so it is found by repeated refinement until the payments fit the cash received.',
+      },
+      {
+        label: 'Annualize it',
+        expr: `APR = ${(aprAnnual / 12).toFixed(5)}% × 12 = ${aprAnnual.toFixed(3)}%`,
+      },
+    );
+    return steps;
+  },
   calculate: (values) => {
     const loanAmount = parseFloat(values.loanAmount);
     const nominalRate = parseFloat(values.nominalRate);

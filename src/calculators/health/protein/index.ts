@@ -60,6 +60,46 @@ const proteinConfig: CalculatorConfig = {
       helpText: 'Used to fine-tune your target within the evidence-based range.',
     },
   ],
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        if (!proteinConfig.calculate(values).length) return [];
+        const unit = values.unit || 'imperial';
+        const weight = parseFloat(values.weight);
+        const ranges = GOAL_RANGES[values.goal || 'maintain'] ?? GOAL_RANGES.maintain;
+        const adjust = ({ none: 0, light: 0.1, moderate: 0.3, heavy: 0.5 } as Record<string, number>)[values.trainingFrequency || 'moderate'] ?? 0.3;
+        const weightKg = unit === 'imperial' ? weight * 0.45359237 : weight;
+        const kg = weightKg.toFixed(2);
+        const gPerKg = ranges.minG + (ranges.maxG - ranges.minG) * (0.3 + adjust * 0.4);
+        const target = Math.round(weightKg * Math.min(Math.max(gPerKg, ranges.minG), ranges.maxG));
+        const span = parseFloat((ranges.maxG - ranges.minG).toFixed(2));
+        return [
+          {
+            label: 'Convert your weight to kilograms',
+            expr: unit === 'imperial' ? `${weight} lb × 0.45359237 = ${kg} kg` : `${weight} kg`,
+          },
+          {
+            label: 'Daily range for your goal',
+            expr: `${kg} kg × ${ranges.minG} = ${fmt(Math.round(weightKg * ranges.minG))} g · ${kg} kg × ${ranges.maxG} = ${fmt(Math.round(weightKg * ranges.maxG))} g`,
+            note: 'The low end maintains muscle; the high end supports building it.',
+          },
+          {
+            label: 'Place yourself in that range using training frequency',
+            expr: `${ranges.minG} + ${span} × (0.3 + ${adjust} × 0.4) = ${gPerKg.toFixed(2)} g/kg`,
+          },
+          {
+            label: 'Your daily protein target',
+            expr: `${kg} kg × ${gPerKg.toFixed(2)} g/kg ≈ ${fmt(target)} g/day`,
+          },
+          {
+            label: 'Calories from that protein',
+            expr: `${fmt(target)} g × 4 kcal/g = ${fmt(target * 4)} kcal`,
+            note: 'Protein provides 4 kcal per gram.',
+          },
+        ];
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const unit = values.unit || 'imperial';
     const weight = parseFloat(values.weight);

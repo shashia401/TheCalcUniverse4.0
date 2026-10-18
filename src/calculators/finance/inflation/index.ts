@@ -45,6 +45,46 @@ const inflationConfig: CalculatorConfig = {
       helpText: 'The year to adjust the amount to, showing inflation impact over time.',
     },
   ],
+  explainSteps: (values) => {
+    const amount = parseFloat(values.amount);
+    const startYear = parseInt(values.startYear || String(1980));
+    const endYear = parseInt(values.endYear || String(currentYear));
+
+    if (isNaN(amount) || amount <= 0) return [];
+    if (!CPI_DATA[startYear] || !CPI_DATA[endYear]) return [];
+
+    const cpiStart = CPI_DATA[startYear];
+    const cpiEnd = CPI_DATA[endYear];
+    const ratio = cpiEnd / cpiStart;
+    const adjustedAmount = (amount / cpiStart) * cpiEnd;
+    const cumulativeRate = ((cpiEnd - cpiStart) / cpiStart) * 100;
+    const money = (n: number) =>
+      n.toLocaleString(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const partialYear = [startYear, endYear].find((y) => PARTIAL_YEARS[y]);
+
+    return [
+      {
+        label: 'Look up the Consumer Price Index for both years',
+        expr: `CPI ${startYear} = ${cpiStart.toFixed(1)};  CPI ${endYear} = ${cpiEnd.toFixed(1)}`,
+        note: partialYear
+          ? `${partialYear} is the ${PARTIAL_YEARS[partialYear]} so far, not a full year.`
+          : 'CPI-U annual averages from the Bureau of Labor Statistics.',
+      },
+      {
+        label: 'Compare the price levels',
+        expr: `${cpiEnd.toFixed(1)} ÷ ${cpiStart.toFixed(1)} = ${ratio.toFixed(6)}`,
+        note: 'Prices in the later year are this many times the earlier year\'s.',
+      },
+      {
+        label: 'Scale your amount by that ratio',
+        expr: `${money(amount)} × ${ratio.toFixed(6)} = ${money(adjustedAmount)}`,
+      },
+      {
+        label: 'Express the change in prices as a percentage',
+        expr: `(${cpiEnd.toFixed(1)} − ${cpiStart.toFixed(1)}) ÷ ${cpiStart.toFixed(1)} × 100 = ${cumulativeRate >= 0 ? '+' : ''}${cumulativeRate.toFixed(2)}%`,
+      },
+    ];
+  },
   calculate: (values) => {
     const amount = parseFloat(values.amount);
     const startYear = parseInt(values.startYear || String(1980));

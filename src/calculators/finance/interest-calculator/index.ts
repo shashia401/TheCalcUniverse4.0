@@ -76,8 +76,71 @@ const interestCalculatorConfig: CalculatorConfig = {
       helpText: 'Compound interest only — how often interest is applied to the balance',
     },
   ],
-  calculate: (values) => {
+  explainSteps: (values) => {
     const P = parseFloat(values.principal);
+    const annualRate = parseFloat(values.interestRate) / 100;
+    const timeUnit = values.timeUnit || 'years';
+    const timePeriod = parseFloat(values.timePeriod);
+    const interestType = values.interestType || 'simple';
+    const n = parseFloat(values.compoundFrequency || '12');
+
+    if ([P, annualRate, timePeriod].some(isNaN) || P <= 0 || timePeriod <= 0) return [];
+    const calc = computeInterest({ principal: P, annualRate, timeUnit, timePeriod, interestType, n });
+    if (!calc.finite) return [];
+
+    const { t, totalAmount, totalInterest } = calc;
+    const money = (x: number) => x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const num = (x: number, dp = 6) => parseFloat(x.toFixed(dp)).toString();
+    const pct = annualRate * 100;
+
+    const timeStep = {
+      label: 'Express the time in years',
+      expr: timeUnit === 'months'
+        ? `t = ${timePeriod} months ÷ 12 = ${num(t)} years`
+        : timeUnit === 'days'
+          ? `t = ${timePeriod} days ÷ 365 = ${num(t)} years`
+          : `t = ${timePeriod} years`,
+      note: timeUnit === 'days' ? 'Days are counted on a 365-day year.' : undefined,
+    };
+
+    if (!calc.compound) {
+      return [
+        timeStep,
+        {
+          label: 'Multiply principal × rate × time',
+          expr: `I = $${money(P)} × ${num(pct, 4)}% × ${num(t)} = $${money(totalInterest)}`,
+          note: 'Simple interest is only ever charged on the original principal.',
+        },
+        {
+          label: 'Add the interest to the principal',
+          expr: `A = $${money(P)} + $${money(totalInterest)} = $${money(totalAmount)}`,
+        },
+      ];
+    }
+
+    return [
+      timeStep,
+      {
+        label: 'Find the rate for one compounding period',
+        expr: `r ÷ n = ${num(pct, 4)}% ÷ ${n} = ${num(pct / n, 6)}%`,
+      },
+      {
+        label: 'Count the compounding periods',
+        expr: `n × t = ${n} × ${num(t)} = ${num(n * t, 4)}`,
+      },
+      {
+        label: 'Grow the principal',
+        expr: `A = $${money(P)} × (1 + ${num(annualRate / n, 8)})^${num(n * t, 4)} = $${money(totalAmount)}`,
+        note: 'Each period, interest is charged on the principal plus all interest added so far.',
+      },
+      {
+        label: 'Subtract the principal to find the interest',
+        expr: `I = $${money(totalAmount)} − $${money(P)} = $${money(totalInterest)}`,
+      },
+    ];
+  },
+  calculate: (values) => {
+    const P =parseFloat(values.principal);
     const annualRate = parseFloat(values.interestRate) / 100;
     const timeUnit = values.timeUnit || 'years';
     const timePeriod = parseFloat(values.timePeriod);

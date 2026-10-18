@@ -59,6 +59,45 @@ const presentValueConfig: CalculatorConfig = {
     },
   ],
 
+  explainSteps: (values) => {
+    const futureValue = parseFloat(values.futureValue);
+    const periods = parseFloat(values.periods);
+    const discountRate = parseFloat(values.discountRate);
+    const m = parseInt(values.compoundingFrequency || '1', 10);
+
+    if ([futureValue, periods, discountRate].some(isNaN) || !(m > 0)) return [];
+    if (futureValue <= 0 || periods <= 0 || discountRate < 0) return [];
+
+    const rPerPeriod = new Decimal(discountRate).div(100).div(m);
+    const totalPeriods = m * periods;
+    const factor = new Decimal(1).plus(rPerPeriod).pow(totalPeriods);
+    const presentValue = new Decimal(futureValue).div(factor);
+    if (!presentValue.isFinite()) return [];
+
+    const fmt = (n: number) =>
+      new Decimal(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+    return [
+      {
+        label: 'Find the discount rate for one compounding period',
+        expr: `r = ${discountRate}% ÷ ${m} = ${rPerPeriod.times(100).toFixed(4)}% = ${rPerPeriod.toFixed(6)}`,
+      },
+      {
+        label: 'Count the compounding periods',
+        expr: `N = ${m} × ${periods} years = ${totalPeriods}`,
+      },
+      {
+        label: 'Work out how much $1 would grow over that time',
+        expr: `(1 + r)^N = (1 + ${rPerPeriod.toFixed(6)})^${totalPeriods} = ${factor.toFixed(6)}`,
+        note: 'This is the growth factor: money today is worth this many times more by the end.',
+      },
+      {
+        label: 'Divide the future value by the growth factor',
+        expr: `PV = $${fmt(futureValue)} ÷ ${factor.toFixed(6)} = $${fmt(presentValue.toNumber())}`,
+        note: 'The factor is shown rounded; the calculator divides by its unrounded value.',
+      },
+    ];
+  },
   calculate: (values) => {
     const futureValue = parseFloat(values.futureValue);
     const periods = parseFloat(values.periods);

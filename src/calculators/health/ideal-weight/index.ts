@@ -75,6 +75,62 @@ const idealWeightConfig: CalculatorConfig = {
       helpText: 'For comparison with ideal weight targets. Not required.',
     },
   ],
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        const results = idealWeightConfig.calculate(values);
+        if (!results.length) return [];
+        const unit = values.unit || 'imperial';
+        const male = (values.sex || 'male') === 'male';
+        const val = (id: string) => results.find((r) => r.id === id)!.value;
+        const r2 = (n: number) => parseFloat(n.toFixed(2)).toString();
+        // "73.0 kg → 161 lbs" for imperial; metric results are already in kg.
+        const tail = (kg: number, id: string) => (unit === 'imperial' ? `${kg.toFixed(1)} kg → ${val(id)}` : val(id));
+
+        let totalInches: number;
+        let heightExpr: string;
+        if (unit === 'imperial') {
+          const ft = parseFloat(values.heightFt) || 0;
+          const inches = parseFloat(values.heightIn) || 0;
+          totalInches = ft * 12 + inches;
+          heightExpr = `${ft} ft ${inches} in = ${r2(totalInches)} in`;
+        } else {
+          const cm = parseFloat(values.heightCm) || 0;
+          totalInches = cm / 2.54;
+          heightExpr = `${cm} cm ÷ 2.54 = ${r2(totalInches)} in`;
+        }
+        const over = Math.max(0, totalInches - 60);
+        const o = r2(over);
+
+        const devineKg = (male ? 50 : 45.5) + 2.3 * over;
+        const robinsonKg = male ? 52 + 1.9 * over : 49 + 1.7 * over;
+        const millerKg = male ? 56.2 + 1.41 * over : 53.1 + 1.36 * over;
+        const hamwiLbs = male ? 106 + 6 * over : 100 + 5 * over;
+        const hamwiKg = hamwiLbs * 0.45359237;
+        const avgKg = (devineKg + robinsonKg + millerKg + hamwiKg) / 4;
+
+        return [
+          {
+            label: 'Find your inches over 5 feet',
+            expr: `${heightExpr} → max(0, ${r2(totalInches)} − 60) = ${o} in`,
+            note: totalInches < 60 ? 'The four formulas are defined for heights of 5 ft and above; below that they are held at their 5 ft value.' : undefined,
+          },
+          { label: 'Devine (1974)', expr: `${male ? 50 : 45.5} + 2.3 × ${o} = ${tail(devineKg, 'devine')}` },
+          { label: 'Robinson (1983)', expr: `${male ? '52 + 1.9' : '49 + 1.7'} × ${o} = ${tail(robinsonKg, 'robinson')}` },
+          { label: 'Miller (1983)', expr: `${male ? '56.2 + 1.41' : '53.1 + 1.36'} × ${o} = ${tail(millerKg, 'miller')}` },
+          {
+            label: 'Hamwi (1964, in pounds)',
+            expr: `${male ? '106 + 6' : '100 + 5'} × ${o} = ${hamwiLbs.toFixed(1)} lb × 0.45359237 = ${tail(hamwiKg, 'hamwi')}`,
+          },
+          {
+            label: 'Average the four formulas',
+            expr: `(${devineKg.toFixed(1)} + ${robinsonKg.toFixed(1)} + ${millerKg.toFixed(1)} + ${hamwiKg.toFixed(1)}) ÷ 4 = ${tail(avgKg, 'avgIdeal')}`,
+            note: 'These formulas use height and sex only — not muscle or frame — so treat the average as a rough anchor.',
+          },
+        ];
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const unit = values.unit || 'imperial';
     const sex = values.sex || 'male';

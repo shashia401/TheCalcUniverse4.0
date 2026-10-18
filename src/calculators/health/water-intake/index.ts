@@ -54,6 +54,40 @@ const waterIntakeConfig: CalculatorConfig = {
       ],
     },
   ],
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        if (!waterIntakeConfig.calculate(values).length) return [];
+        const weight = parseFloat(values.weight);
+        const unit = values.unit || 'lbs';
+        const activityAdd = ({ sedentary: 0, light: 8, moderate: 16, active: 24, athlete: 32 } as Record<string, number>)[values.activityLevel || 'sedentary'] ?? 0;
+        const climateAdd = ({ normal: 0, hot: 16, extreme: 24, altitude: 16 } as Record<string, number>)[values.climate || 'normal'] ?? 0;
+        const weightLbs = unit === 'lbs' ? weight : weight / 0.45359237;
+        const baseOz = weightLbs * 0.5;
+        const totalOz = baseOz + activityAdd + climateAdd;
+        const totalLiters = totalOz * 0.0295735;
+        return [
+          {
+            label: 'Express your weight in pounds',
+            expr: unit === 'lbs' ? `${weight} lb` : `${weight} kg ÷ 0.45359237 = ${weightLbs.toFixed(1)} lb`,
+          },
+          {
+            label: 'Start from half an ounce per pound',
+            expr: `${weightLbs.toFixed(1)} lb × 0.5 = ${fmt(baseOz)} oz`,
+          },
+          {
+            label: 'Add your activity and climate allowances',
+            expr: `${fmt(baseOz)} + ${activityAdd} (activity) + ${climateAdd} (climate) = ${fmt(totalOz)} oz`,
+          },
+          {
+            label: 'Convert ounces to liters',
+            expr: `${fmt(totalOz)} oz × 0.0295735 = ${fmt(totalLiters)} liters`,
+            note: "About 20% of daily fluid comes from food, so you don't need to drink every ounce.",
+          },
+        ];
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const weight = parseFloat(values.weight);
     const unit = values.unit || 'lbs';

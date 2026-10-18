@@ -1,7 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import SipPanel from './SipPanel';
 import { sipFutureValue, sipYearly } from './sipMath';
+import { fvAnnuity, fvLumpSum } from '../../../utils/financial';
 
 function fmt(n: number): string {
   const abs = Math.abs(n);
@@ -69,6 +70,60 @@ const sipConfig: CalculatorConfig = {
       slider: { min: 1, max: 40, step: 1 },
     },
   ],
+  explainSteps: (values) => {
+    const lumpsum = values.shape === 'sip' ? 0 : parseFloat(values.lumpsum) || 0;
+    const monthly = values.shape === 'lumpsum' ? 0 : parseFloat(values.monthlyInvestment) || 0;
+    const rate = parseFloat(values.expectedReturn) / 100;
+    const t = parseFloat(values.timePeriod);
+
+    if ((monthly <= 0 && lumpsum <= 0) || isNaN(rate) || isNaN(t) || t <= 0) return [];
+    const months = Math.round(t * 12);
+    if (months < 1) return [];
+
+    const i = rate / 12;
+    const growth = Math.pow(1 + i, months);
+    const lumpPart = fvLumpSum(lumpsum, i, months);
+    const sipPart = fvAnnuity(monthly, i, months) * (1 + i);
+    const fv = sipFutureValue(lumpsum, monthly, rate, months);
+    if (!Number.isFinite(fv)) return [];
+
+    const full = (n: number) =>
+      `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Convert the annual return to a monthly rate',
+        expr: `i = ${(rate * 100).toFixed(2)}% ÷ 12 = ${(i * 100).toFixed(4)}% = ${i.toFixed(6)}`,
+      },
+      {
+        label: 'Count the months',
+        expr: `n = ${t} years × 12 = ${months} months`,
+      },
+      {
+        label: 'Grow ₹1 for n months of compounding',
+        expr: `(1 + i)ⁿ = (1 + ${i.toFixed(6)})^${months} = ${growth.toFixed(4)}`,
+      },
+    ];
+    if (lumpsum > 0) {
+      steps.push({
+        label: 'Grow the lump sum',
+        expr: `${full(lumpsum)} × ${growth.toFixed(4)} = ${full(lumpPart)}`,
+      });
+    }
+    if (monthly > 0) {
+      steps.push({
+        label: 'Grow the monthly instalments',
+        expr: i === 0
+          ? `${full(monthly)} × ${months} = ${full(sipPart)}`
+          : `${full(monthly)} × [((1 + i)ⁿ − 1) ÷ i] × (1 + i) = ${full(monthly)} × [(${growth.toFixed(4)} − 1) ÷ ${i.toFixed(6)}] × ${(1 + i).toFixed(6)} = ${full(sipPart)}`,
+        note: 'Instalments are made at the start of each month, so each one earns a full extra month of growth (the × (1 + i) factor).',
+      });
+    }
+    steps.push({
+      label: 'Add the pieces for your total value',
+      expr: `${[lumpsum > 0 ? full(lumpPart) : '', monthly > 0 ? full(sipPart) : ''].filter(Boolean).join(' + ')} = ${full(fv)}${fmt(fv) !== full(fv) ? `  (${fmt(fv)})` : ''}`,
+    });
+    return steps;
+  },
   calculate: (values) => {
     // Hidden tab fields keep their old text, so honour the active tab (undefined = both, for direct callers).
     const lumpsum = values.shape === 'sip' ? 0 : parseFloat(values.lumpsum) || 0;

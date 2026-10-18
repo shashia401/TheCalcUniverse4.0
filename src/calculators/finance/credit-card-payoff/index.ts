@@ -114,6 +114,73 @@ const creditCardPayoffConfig: CalculatorConfig = {
       showWhen: (v) => v.payoffMode === 'bydate',
     },
   ],
+  explainSteps: (values) => {
+    const balance = parseFloat(values.balance);
+    const apr = parseFloat(values.apr) / 100;
+    const payoffMode = values.payoffMode || 'fixed';
+    const monthlyPayment = parseFloat(values.monthlyPayment) || 0;
+    const targetMonths = parseFloat(values.targetMonths) || 0;
+
+    if (isNaN(balance) || isNaN(apr) || balance <= 0) return [];
+
+    const r = apr / 12;
+    const rateStep = {
+      label: 'Convert the APR to a monthly rate',
+      expr: `r = ${(apr * 100).toFixed(2)}% ÷ 12 = ${(r * 100).toFixed(4)}% per month`,
+      note: 'Card interest is charged monthly on whatever balance is still owed.',
+    };
+
+    if (payoffMode === 'bydate') {
+      if (targetMonths <= 0) return [];
+      const growth = Math.pow(1 + r, targetMonths);
+      const required = r === 0 ? balance / targetMonths : (balance * (r * growth)) / (growth - 1);
+      if (!Number.isFinite(required)) return [];
+      const sim = simulatePayoff(balance, apr, required, r);
+      return [
+        rateStep,
+        {
+          label: 'Grow $1 over your target number of months',
+          expr: `(1 + r)^n = (1 + ${r.toFixed(6)})^${targetMonths} = ${growth.toFixed(4)}`,
+        },
+        {
+          label: 'Solve for the payment that clears the balance on time',
+          expr: r === 0
+            ? `M = $${fmtD(balance)} ÷ ${targetMonths} = $${fmtD(required)}/mo`
+            : `M = $${fmtD(balance)} × (${r.toFixed(6)} × ${growth.toFixed(4)}) ÷ (${growth.toFixed(4)} − 1) = $${fmtD(required)}/mo`,
+        },
+        {
+          label: 'Add up the interest you pay along the way',
+          expr: `Σ (balance each month × ${r.toFixed(6)}) = $${fmtD(sim.totalInterest)}  (total paid $${fmtD(sim.totalPaid)})`,
+        },
+      ];
+    }
+
+    if (monthlyPayment <= 0) return [];
+    const firstInterest = balance * r;
+    if (monthlyPayment <= firstInterest) return [];
+
+    const sim = simulatePayoff(balance, apr, monthlyPayment, r);
+    const rawMonths = r === 0 ? balance / monthlyPayment : -Math.log(1 - (balance * r) / monthlyPayment) / Math.log(1 + r);
+    return [
+      rateStep,
+      {
+        label: 'See how the first payment is split',
+        expr: `Interest: $${fmtD(balance)} × ${r.toFixed(6)} = $${fmtD(firstInterest)};  principal: $${fmtD(monthlyPayment)} − $${fmtD(firstInterest)} = $${fmtD(monthlyPayment - firstInterest)}`,
+        note: 'Only the principal part shrinks your debt, and that part grows each month as the interest charge falls.',
+      },
+      {
+        label: 'Count the payments needed',
+        expr: r === 0
+          ? `n = $${fmtD(balance)} ÷ $${fmtD(monthlyPayment)} = ${rawMonths.toFixed(2)} → ${sim.months} payments (${Math.floor(sim.months / 12)}yr ${sim.months % 12}mo)`
+          : `n = −ln(1 − $${fmtD(balance)} × ${r.toFixed(6)} ÷ $${fmtD(monthlyPayment)}) ÷ ln(1 + ${r.toFixed(6)}) = ${rawMonths.toFixed(2)} → ${sim.months} payments (${Math.floor(sim.months / 12)}yr ${sim.months % 12}mo)`,
+        note: 'The final payment can be smaller than the rest, because it only needs to cover what is left.',
+      },
+      {
+        label: 'Add up the interest you pay along the way',
+        expr: `Σ (balance each month × ${r.toFixed(6)}) = $${fmtD(sim.totalInterest)}  (total paid $${fmtD(sim.totalPaid)})`,
+      },
+    ];
+  },
   calculate: (values) => {
     const balance = parseFloat(values.balance);
     const apr = parseFloat(values.apr) / 100;

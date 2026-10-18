@@ -43,6 +43,41 @@ const roiConfig: CalculatorConfig = {
       helpText: 'How long you held the investment (in years). Enter this to see the annualized ROI — the true per-year return.',
     },
   ],
+  explainSteps: (values) => {
+    const invested = parseFloat(values.amountInvested);
+    const returned = parseFloat(values.amountReturned);
+    const years = parseFloat(values.years) || 0;
+    if (isNaN(invested) || isNaN(returned) || invested <= 0 || returned < 0) return [];
+
+    const { netProfit, totalRoiPct, multiplier, annualizedPct } = computeRoi(invested, returned, years);
+    const fmt = (n: number) =>
+      Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const sign = (n: number) => (n >= 0 ? '+' : '-');
+
+    const steps = [
+      {
+        label: netProfit >= 0 ? 'Work out the net profit' : 'Work out the net loss',
+        expr: `$${fmt(returned)} − $${fmt(invested)} = ${sign(netProfit)}$${fmt(netProfit)}`,
+      },
+      {
+        label: 'Divide by what you put in',
+        expr: `${sign(netProfit)}$${fmt(netProfit)} ÷ $${fmt(invested)} × 100 = ${sign(totalRoiPct)}${Math.abs(totalRoiPct).toFixed(2)}%`,
+        note: 'Dividing by the amount invested makes returns comparable across investments of any size.',
+      },
+      {
+        label: 'Express it as a multiple of your money',
+        expr: `$${fmt(returned)} ÷ $${fmt(invested)} = ${multiplier.toFixed(2)}x`,
+      },
+    ];
+    if (years > 0) {
+      steps.push({
+        label: 'Annualize it over the holding period',
+        expr: `(${multiplier.toFixed(4)})^(1 ÷ ${years}) − 1 = ${sign(annualizedPct)}${Math.abs(annualizedPct).toFixed(2)}% per year`,
+        note: 'Annualizing spreads the gain evenly across the years, so a long hold and a short hold can be compared.',
+      });
+    }
+    return steps;
+  },
   calculate: (values) => {
     const invested = parseFloat(values.amountInvested);
     const returned = parseFloat(values.amountReturned);

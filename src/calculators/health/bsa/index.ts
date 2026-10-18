@@ -65,6 +65,59 @@ const bsaConfig: CalculatorConfig = {
       helpText: 'Metric only',
     },
   ],
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        const results = bsaConfig.calculate(values);
+        if (!results.length) return [];
+        const unit = values.unit || 'imperial';
+        const val = (id: string) => results.find((r) => r.id === id)!.value;
+        const input = parseFloat(values.weight);
+
+        let weightKg: number;
+        let heightCm: number;
+        let convert: string;
+        if (unit === 'imperial') {
+          const ft = parseFloat(values.heightFt) || 0;
+          const inches = parseFloat(values.heightIn) || 0;
+          weightKg = input * 0.45359237;
+          heightCm = (ft * 12 + inches) * 2.54;
+          convert = `${input} lb × 0.45359237 = ${weightKg.toFixed(2)} kg · (${ft} ft × 12 + ${inches} in) × 2.54 = ${heightCm.toFixed(1)} cm`;
+        } else {
+          weightKg = input;
+          heightCm = parseFloat(values.heightCm) || 0;
+          convert = `${weightKg.toFixed(2)} kg · ${heightCm.toFixed(1)} cm`;
+        }
+        const W = weightKg.toFixed(2);
+        const H = heightCm.toFixed(1);
+
+        const mosteller = Math.sqrt((heightCm * weightKg) / 3600);
+        const dubois = 0.007184 * Math.pow(weightKg, 0.425) * Math.pow(heightCm, 0.725);
+        const haycock = 0.024265 * Math.pow(weightKg, 0.5378) * Math.pow(heightCm, 0.3964);
+
+        return [
+          { label: 'Convert to kilograms and centimeters', expr: convert },
+          {
+            label: 'Mosteller',
+            expr: `√(${H} × ${W} ÷ 3600) = √${((heightCm * weightKg) / 3600).toFixed(4)} = ${val('bsaMosteller')}`,
+          },
+          {
+            label: 'Du Bois',
+            expr: `0.007184 × ${W}^0.425 × ${H}^0.725 = 0.007184 × ${Math.pow(weightKg, 0.425).toFixed(3)} × ${Math.pow(heightCm, 0.725).toFixed(3)} = ${val('bsaDubois')}`,
+          },
+          {
+            label: 'Haycock',
+            expr: `0.024265 × ${W}^0.5378 × ${H}^0.3964 = 0.024265 × ${Math.pow(weightKg, 0.5378).toFixed(3)} × ${Math.pow(heightCm, 0.3964).toFixed(3)} = ${val('bsaHaycock')}`,
+          },
+          {
+            label: 'Average the three formulas',
+            expr: `(${mosteller.toFixed(4)} + ${dubois.toFixed(4)} + ${haycock.toFixed(4)}) ÷ 3 = ${val('avgBsa')}`,
+            note: 'Educational reference only. Medication doses must come from a clinician using verified measurements.',
+          },
+        ];
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const unit = values.unit || 'imperial';
 

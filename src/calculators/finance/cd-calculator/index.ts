@@ -110,6 +110,74 @@ const cdConfig: CalculatorConfig = {
     },
   ],
 
+  explainSteps: (values) => {
+    const deposit = parseFloat(values.initialDeposit);
+    const termUnit = values.termUnit || 'months';
+    const termRaw = parseFloat(values.termLength);
+    const apyRaw = parseFloat(values.apy);
+    const apy = apyRaw / 100;
+    const additionalDeposit = parseFloat(values.additionalDeposit) || 0;
+
+    if (isNaN(deposit) || isNaN(termRaw) || isNaN(apyRaw) || deposit <= 0 || termRaw <= 0 || apyRaw < 0 || additionalDeposit < 0) return [];
+
+    const years = termUnit === 'months' ? termRaw / 12 : termRaw;
+    const totalMonths = Math.round(years * 12);
+    const monthlyRate = Math.pow(1 + apy, 1 / 12) - 1;
+    const growth = Math.pow(1 + apy, years);
+    const initialPart = deposit * growth;
+    const extraPart = additionalDeposit > 0
+      ? monthlyRate > 0
+        ? additionalDeposit * ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate)
+        : additionalDeposit * totalMonths
+      : 0;
+    const balance = initialPart + extraPart;
+    if (!Number.isFinite(balance)) return [];
+
+    const fmtD = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtLarge = (n: number) =>
+      n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+
+    const steps = [
+      {
+        label: 'Express the term in years',
+        expr: termUnit === 'months'
+          ? `t = ${termRaw} months ÷ 12 = ${parseFloat(years.toFixed(4))} ${years === 1 ? 'year' : 'years'}`
+          : `t = ${termRaw} ${termRaw === 1 ? 'year' : 'years'}`,
+      },
+      {
+        label: 'Grow $1 at the APY for that long',
+        expr: `(1 + ${apyRaw}%)^${parseFloat(years.toFixed(4))} = ${growth.toFixed(6)}`,
+        note: 'APY is already the effective yearly rate, so how often the bank compounds does not change this result.',
+      },
+      {
+        label: 'Grow your deposit',
+        expr: additionalDeposit > 0
+          ? `$${fmtD(deposit)} × ${growth.toFixed(6)} = $${fmtD(initialPart)}`
+          : `$${fmtD(deposit)} × ${growth.toFixed(6)} = ${fmtLarge(balance)}`,
+      },
+    ];
+    if (additionalDeposit > 0) {
+      steps.push(
+        {
+          label: 'Convert the APY to a monthly rate',
+          expr: `i = (1 + ${apyRaw}%)^(1/12) − 1 = ${(monthlyRate * 100).toFixed(4)}% = ${monthlyRate.toFixed(6)}`,
+        },
+        {
+          label: 'Grow your monthly deposits',
+          expr: monthlyRate > 0
+            ? `$${fmtD(additionalDeposit)} × [((1 + ${monthlyRate.toFixed(6)})^${totalMonths} − 1) ÷ ${monthlyRate.toFixed(6)}] = $${fmtD(extraPart)}`
+            : `$${fmtD(additionalDeposit)} × ${totalMonths} = $${fmtD(extraPart)}`,
+          note: 'One deposit is made at the end of each month, whatever the compounding frequency.',
+        },
+        {
+          label: 'Add the pieces for the balance at maturity',
+          expr: `$${fmtD(initialPart)} + $${fmtD(extraPart)} = ${fmtLarge(balance)}`,
+        },
+      );
+    }
+    return steps;
+  },
   calculate: (values) => {
     const deposit = parseFloat(values.initialDeposit);
     const termUnit = values.termUnit || 'months';

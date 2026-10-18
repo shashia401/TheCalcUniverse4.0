@@ -55,6 +55,52 @@ const oneRepMaxConfig: CalculatorConfig = {
       ],
     },
   ],
+  explainSteps: (values) => {
+    // Guard: a runaway input (e.g. 1e999) must never print NaN/Infinity in a worked solution.
+    const steps = (() => {
+        const results = oneRepMaxConfig.calculate(values);
+        if (!results.length) return [];
+        const weight = parseFloat(values.weight);
+        const reps = Math.round(parseFloat(values.reps));
+        const formula = values.formula || 'epley';
+        const u = values.unit === 'kg' ? 'kg' : 'lbs';
+        const c = Math.min(reps, 15);
+        const w = fmt(weight);
+
+        let name: string;
+        let working: string;
+        let raw: number;
+        if (formula === 'brzycki') {
+          name = 'Brzycki';
+          raw = (weight * 36) / (37 - c);
+          working = `${w} × 36 ÷ (37 − ${c}) = ${w} × 36 ÷ ${37 - c} = ${raw.toFixed(2)} ${u}`;
+        } else if (formula === 'lombardi') {
+          name = 'Lombardi';
+          raw = weight * Math.pow(c, 0.1);
+          working = `${w} × ${c}^0.10 = ${w} × ${Math.pow(c, 0.1).toFixed(4)} = ${raw.toFixed(2)} ${u}`;
+        } else {
+          name = 'Epley';
+          raw = c === 1 ? weight : weight * (1 + c / 30);
+          working = c === 1
+            ? `1 rep: the weight lifted is the 1RM = ${w} ${u}`
+            : `${w} × (1 + ${c} ÷ 30) = ${w} × ${(1 + c / 30).toFixed(4)} = ${raw.toFixed(2)} ${u}`;
+        }
+        return [
+          {
+            label: 'Your set',
+            expr: `${w} ${u} × ${c} reps`,
+            note: reps > 15 ? 'The calculator caps the rep count at 15.' : undefined,
+          },
+          { label: `Apply the ${name} formula`, expr: working },
+          {
+            label: 'Round to a whole number',
+            expr: `${raw.toFixed(2)} → ${results[0].value}`,
+            note: 'Estimates are most accurate at 5 reps or fewer; never attempt a true max without a spotter and a full warm-up.',
+          },
+        ];
+    })();
+    return steps.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : steps;
+  },
   calculate: (values) => {
     const weight = parseFloat(values.weight);
     const reps = Math.round(parseFloat(values.reps)); // reps are whole numbers

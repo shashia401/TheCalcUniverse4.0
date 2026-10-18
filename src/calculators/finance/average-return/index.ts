@@ -61,6 +61,69 @@ const averageReturnConfig: CalculatorConfig = {
     },
   ],
 
+  explainSteps: (values) => {
+    const mode = values.inputMode || 'simple';
+    const fmtPct = (n: number) => `${(n * 100).toFixed(2)}%`;
+
+    if (mode === 'simple') {
+      const clean = (v: string) => String(v).replace(/[$,]/g, '');
+      const start = parseFloat(clean(values.startingValue));
+      const end = parseFloat(clean(values.endingValue));
+      const years = parseFloat(clean(values.years));
+      if (isNaN(start) || isNaN(end) || isNaN(years) || start <= 0 || end <= 0 || years <= 0) return [];
+
+      const simpleReturn = (end - start) / start;
+      return [
+        {
+          label: 'Work out the total return',
+          expr: `($${fmt(end)} − $${fmt(start)}) ÷ $${fmt(start)} = ${fmtPct(simpleReturn)}`,
+        },
+        {
+          label: 'Spread it evenly over the years (simple average)',
+          expr: `${fmtPct(simpleReturn)} ÷ ${years} = ${fmtPct(simpleReturn / years)} per year`,
+          note: 'This ignores compounding, so it is not the rate that actually turns the start value into the end value.',
+        },
+        {
+          label: 'Find the growth multiple',
+          expr: `$${fmt(end)} ÷ $${fmt(start)} = ${(end / start).toFixed(4)}x`,
+        },
+        {
+          label: 'Take the root to find the compound annual growth rate (CAGR)',
+          expr: `(${(end / start).toFixed(4)})^(1 ÷ ${years}) − 1 = ${fmtPct(cagr(start, end, years))}`,
+          note: 'Growing by this rate every year, compounded, turns the starting value into the ending value.',
+        },
+      ];
+    }
+
+    const returns = (values.returnsInput || '').split(',').map((s) => parseFloat(s.trim())).filter((n) => !isNaN(n));
+    if (returns.length < 2) return [];
+    if (returns.some((n) => n < -100)) return [];
+
+    const returnsDecimal = returns.map((r) => r / 100);
+    const cumulativeGrowth = returnsDecimal.reduce((acc, r) => acc * (1 + r), 1);
+    const shown = returns.slice(0, 5).map((r) => `(1 ${r < 0 ? '−' : '+'} ${Math.abs(r / 100).toFixed(2)})`);
+    return [
+      {
+        label: 'Take the simple (arithmetic) average',
+        expr: `(${returns.slice(0, 5).map((r, k) => (k === 0 ? `${r}%` : `${r < 0 ? '−' : '+'} ${Math.abs(r)}%`)).join(' ')}${returns.length > 5 ? ' + …' : ''}) ÷ ${returns.length} = ${fmtPct(arithmeticAverage(returnsDecimal))}`,
+      },
+      {
+        label: 'Multiply the growth factors of every year',
+        expr: `${shown.join(' × ')}${returns.length > 5 ? ' × …' : ''} = ${cumulativeGrowth.toFixed(4)}`,
+        note: 'Each year grows on the previous year\'s result, so the factors multiply instead of adding.',
+      },
+      {
+        label: 'Find the total cumulative return',
+        expr: `${cumulativeGrowth.toFixed(4)} − 1 = ${fmtPct(cumulativeGrowth - 1)}`,
+      },
+      {
+        label: 'Take the root to find the compound annual growth rate (CAGR)',
+        expr: `(${cumulativeGrowth.toFixed(4)})^(1 ÷ ${returns.length}) − 1 = ${fmtPct(Math.pow(cumulativeGrowth, 1 / returns.length) - 1)}`,
+        note: 'Whenever returns differ from year to year, the CAGR comes out below the simple average.',
+      },
+    ];
+  },
+
   calculate: (values) => {
     const mode = values.inputMode || 'simple';
 
