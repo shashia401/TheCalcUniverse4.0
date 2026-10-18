@@ -549,3 +549,34 @@ describe('net-worth-calculator audit', () => {
     expect(val(netWorth.calculate({ cash: '1000', mortgage: '5000' }), 'debtToAsset')).toBe('500.0%');
   });
 });
+
+describe('california-mortgage-calculator: the worked examples print what the calculator computes (1.1% tax)', () => {
+  // A new California buyer is assessed at the purchase price: the 1% Prop 13 base plus local levies, not the ~0.7% statewide
+  // average (which reflects long-time owners). Oracle: python Decimal, P&I annuity; tax = price x 1.1% / 12; PMI 0.5% of loan / 12.
+  const out = (v: Record<string, string>, id: string) => (caMortgage.calculate(v) as { id: string; value: string }[]).find((x) => x.id === id)?.value;
+  const ex = caMortgage.educational!.workedExamples!;
+
+  it('Garcia, $650k, 20% down, 6.9%: P&I $3,424.72 + tax $595.83 = $4,020.55 a month, $7,150 a year', () => {
+    const v = { homePrice: '650000', downPayment: '130000', interestRate: '6.9', loanTerm: '30', propertyTaxRate: '1.1' };
+    expect(out(v, 'monthlyPayment')).toBe('$3,424.72');
+    expect(out(v, 'totalMonthly')).toBe('$4,020.55');
+    expect(out(v, 'propertyTaxNote')).toBe('$7,150/yr');
+    expect(ex[0].inputs).toEqual(v);
+    for (const n of ['$3,425', '$596', '$4,021', '$7,150']) expect(ex[0].result).toContain(n);
+  });
+
+  it('Los Angeles condo, $750k, 5% down, 7.25%: tax $687.50 and PMI $296.88 on top of $4,860.51', () => {
+    const v = { homePrice: '750000', downPayment: '37500', interestRate: '7.25', loanTerm: '30', propertyTaxRate: '1.1' };
+    expect(out(v, 'monthlyPayment')).toBe('$4,860.51');
+    expect(out(v, 'propertyTaxNote')).toBe('$8,250/yr');
+    expect(out(v, 'totalMonthly')).toBe('$5,844.88');
+    expect(ex[1].inputs).toEqual(v);
+    for (const n of ['$4,861', '$688', '$297', '$5,845', '$70,139']) expect(ex[1].result).toContain(n);
+  });
+
+  it('the default tax rate is 1.1%, not the long-time-owner average', () => {
+    const field = caMortgage.inputs.find((i) => i.id === 'propertyTaxRate')!;
+    expect(field.placeholder).toBe('1.1');
+    expect(field.helpText).toContain('1% Prop 13 base rate');
+  });
+});

@@ -58,12 +58,12 @@ const caMortgageConfig: CalculatorConfig = {
       id: 'propertyTaxRate',
       label: 'Property Tax Rate',
       type: 'percentage',
-      placeholder: '0.77',
+      placeholder: '1.1',
       inputMode: 'numeric',
       min: 0,
       max: 3,
       step: 0.1,
-      helpText: 'CA average is ~0.77% — limited by Prop 13 (assessed value locked at purchase)',
+      helpText: 'A new buyer is taxed on the purchase price: the 1% Prop 13 base rate plus local voter-approved levies, so most areas land a little above 1%. Check the rate for your address with the county. (The statewide average of about 0.7% reflects long-time owners with low assessed values.)',
     },
   ],
   calculate: (values) => {
@@ -120,7 +120,7 @@ const caMortgageConfig: CalculatorConfig = {
   educational: {
     formula: 'M = P × [r(1+r)^n] / [(1+r)^n - 1]',
     formulaDescription:
-      'Standard monthly mortgage payment formula. California has relatively low property taxes (~0.77% effective rate) thanks to Proposition 13, but home prices are the highest in the nation. State income tax (1-13.3%) also affects overall affordability. The calculator estimates property tax as your tax rate times the purchase price (include any Mello-Roos by raising the rate), and adds an estimated PMI of 0.5% of the loan per year when the down payment is below 20%.',
+      'Standard monthly mortgage payment formula. California’s statewide average effective property tax rate is about 0.7% because Proposition 13 limits how fast assessed values can grow, but a new buyer is assessed at the purchase price, so budget roughly 1% plus local levies. Home prices are among the highest in the nation. State income tax (1-13.3%) also affects overall affordability. The calculator estimates property tax as your tax rate times the purchase price (include any Mello-Roos by raising the rate), and adds an estimated PMI of 0.5% of the loan per year when the down payment is below 20%.',
     formulaSource: 'Standard mortgage amortization formula per CFPB mortgage disclosure requirements. Prop 13 tax rates based on California State Board of Equalization published data.',
     diagram: {
       svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-333333)">Prop 13: How It Works</text><rect x="20" y="35" width="280" height="22" rx="4" fill="var(--svg-3b82f6)" opacity="0.8"/><text x="160" y="49" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Base tax capped at 1% of assessed value</text><rect x="20" y="63" width="280" height="22" rx="4" fill="var(--svg-3b82f6)" opacity="0.6"/><text x="160" y="77" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Assessed value rises at most 2% per year</text><rect x="20" y="91" width="280" height="22" rx="4" fill="var(--svg-ef4444)" opacity="0.8"/><text x="160" y="105" text-anchor="middle" font-size="9" fill="var(--svg-ffffff)">Resets to purchase price when you buy</text><line x1="20" y1="122" x2="300" y2="122" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="160" y="140" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-555555)">Statewide median price: see C.A.R.</text><rect x="15" y="163" width="290" height="30" rx="5" fill="var(--svg-f0f9ff)" stroke="var(--svg-dddddd)" stroke-width="1"/><text x="160" y="178" text-anchor="middle" font-size="9" fill="var(--svg-555555)">Voter-approved bonds and Mello-Roos</text><text x="160" y="190" text-anchor="middle" font-size="9" fill="var(--svg-555555)">assessments are charged on top of the 1%</text></svg>',
@@ -137,7 +137,7 @@ const caMortgageConfig: CalculatorConfig = {
       'Enter the California home price — use $750,000 as a starting point.',
       'Enter your down payment. CalHFA MyHome offers up to 3.5% (FHA loans) or 3% (conventional loans) in assistance for qualifying first-time buyers.',
       'Select your loan term. 30-year fixed is standard in California.',
-      'Enter the property tax rate. The default 0.77% reflects Prop 13 limits — check if your area has Mello-Roos.',
+      'Enter the property tax rate. The default 1.1% is the 1% Prop 13 base rate plus an allowance for local levies; check the rate for your address with the county, and raise it if your area has Mello-Roos.',
       'Review the results — California has both property tax and state income tax (up to 13.3%), unlike Texas or Florida.',
     ],
     commonUses: [
@@ -148,15 +148,15 @@ const caMortgageConfig: CalculatorConfig = {
     workedExamples: [
       {
         scenario: 'The Garcia family in Sacramento buys a $650,000 home with 20% down at 6.9% on a 30-year fixed mortgage. Their community has no Mello-Roos.',
-        inputs: { homePrice: '650000', downPayment: '130000', interestRate: '6.9', loanTerm: '30', propertyTaxRate: '0.77' },
-        result: 'Monthly P&I is $3,425, plus $417 in property taxes for a total of $3,842/month. With 20% down, no PMI. Annual property tax under Prop 13 is approximately $5,000.',
-        insight: 'Monthly P&I is $3,425, plus $417 in property taxes for a total of $3,842/month. With 20% down, no PMI. Their property taxes are only ~$5,000/year thanks to Prop 13 — and the assessed value can grow by no more than 2% a year.',
+        inputs: { homePrice: '650000', downPayment: '130000', interestRate: '6.9', loanTerm: '30', propertyTaxRate: '1.1' },
+        result: 'Monthly P&I is $3,425, plus $596 in property taxes for a total of $4,021/month. With 20% down, no PMI. Annual property tax is approximately $7,150 (the 1% Prop 13 rate plus an assumed 0.1% for local levies).',
+        insight: 'Monthly P&I is $3,425, plus $596 in property taxes for a total of $4,021/month. With 20% down, no PMI. Their property tax is about $7,150 a year because a new buyer is assessed at the purchase price; from then on Prop 13 — and the assessed value can grow by no more than 2% a year.',
       },
       {
         scenario: 'A first-time buyer in Los Angeles uses CalHFA MyHome assistance (3.5%) toward a $750,000 condo with only 5% down.',
-        inputs: { homePrice: '750000', downPayment: '37500', interestRate: '7.25', loanTerm: '30', propertyTaxRate: '0.85' },
-        result: 'Monthly P&I is $4,861, plus $531 property tax and $297 PMI = $5,689/month. With only 5% down, PMI adds $3,563/year until equity reaches 20%. Total annual housing cost is approximately $68,264.',
-        insight: 'Monthly P&I is $4,861, plus $531 property tax and $297 PMI = $5,689/month. The PMI adds $3,563/year until equity reaches 20%. With CalHFA assistance, the effective down payment is $63,750 (8.5%). Saving aggressively to refinance out of PMI once they have 20% equity could save $3,500+/year.',
+        inputs: { homePrice: '750000', downPayment: '37500', interestRate: '7.25', loanTerm: '30', propertyTaxRate: '1.1' },
+        result: 'Monthly P&I is $4,861, plus $688 property tax and $297 PMI = $5,845/month. With only 5% down, PMI adds $3,563/year until equity reaches 20%. Total annual housing cost is approximately $70,139.',
+        insight: 'Monthly P&I is $4,861, plus $688 property tax and $297 PMI = $5,845/month. The PMI adds $3,563/year until equity reaches 20%. With CalHFA assistance, the effective down payment is $63,750 (8.5%). Saving aggressively to refinance out of PMI once they have 20% equity could save $3,500+/year.',
       },
     ],
     proTips: [
@@ -178,7 +178,7 @@ const caMortgageConfig: CalculatorConfig = {
       { label: 'CalHFA MyHome Max', value: '3.5% of price (FHA) / 3% (conventional)' },
     ],
     explanation:
-      'The California housing market is defined by the highest home prices in the continental US and a unique property tax system governed by Proposition 13. Passed by voters in 1978 as a taxpayer revolt against rapidly rising assessments, Prop 13 caps property tax at 1 percent of assessed value (plus local voter-approved bonds) and limits annual assessment increases to 2 percent. This means two identical homes in the same neighborhood can have dramatically different tax bills depending on when they were last sold — the welcome neighbor effect. For new homebuyers, the effective property tax rate is typically around 0.77 to 1.1 percent of the purchase price. However, some communities add Mello-Roos special taxes for schools and infrastructure, which can increase the effective rate by 0.5 to 2 percent. California also has a progressive state income tax of 1 to 13.3 percent. First-time homebuyers can access CalHFA programs offering down payment assistance and competitive rates. High housing costs mean many California buyers opt for larger down payments or look to smaller and more affordable markets in the Central Valley and Inland Empire.',
+      'The California housing market is defined by the highest home prices in the continental US and a unique property tax system governed by Proposition 13. Passed by voters in 1978 as a taxpayer revolt against rapidly rising assessments, Prop 13 caps property tax at 1 percent of assessed value (plus local voter-approved bonds) and limits annual assessment increases to 2 percent. This means two identical homes in the same neighborhood can have dramatically different tax bills depending on when they were last sold — the welcome neighbor effect. For new homebuyers, the property tax is the 1 percent base rate on the purchase price plus local voter-approved levies, so the effective rate is typically a little above 1 percent. However, some communities add Mello-Roos special taxes for schools and infrastructure, which can increase the effective rate by 0.5 to 2 percent. California also has a progressive state income tax of 1 to 13.3 percent. First-time homebuyers can access CalHFA programs offering down payment assistance and competitive rates. High housing costs mean many California buyers opt for larger down payments or look to smaller and more affordable markets in the Central Valley and Inland Empire.',
     faqs: [
       { question: 'How does Proposition 13 affect new homebuyers?', answer: 'Prop 13 limits property tax to 1% of the purchase price (plus local bonds) and caps increases at 2%/year. For a new buyer, your tax is based on your purchase price — so you pay ~1% of what you paid. Prop 13 limits the rate and the yearly growth, but it does not cap what you pay for the home itself.' },
       { question: 'What is Mello-Roos?', answer: 'A Mello-Roos is an additional property tax assessment in some California communities to fund new schools, roads, utilities, or public facilities. It is NOT covered by Prop 13 protections and can add 0.5-2% to your annual tax rate. Always check if a home is in a Mello-Roos district before making an offer.' },

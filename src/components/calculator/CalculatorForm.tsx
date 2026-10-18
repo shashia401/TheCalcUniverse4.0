@@ -18,18 +18,6 @@ import MiniGauge from './MiniGauge';
 interface Props {
   calculatorId: string;
   /**
-   * Compact embed (e.g. the homepage hero): keeps inputs + results + gauge/donut
-   * but hides the long "how we got this" steps and the extra panel, so the card
-   * stays hero-sized. The full treatment lives on the calculator's own page.
-   */
-  compact?: boolean;
-  /**
-   * Restrict which inputs render (by id). Used by the compact hero to show only
-   * the fields that affect the headline result (e.g. BMI needs weight + height,
-   * not sex/age), keeping the card short. showWhen still applies on top of this.
-   */
-  visibleInputIds?: string[];
-  /**
    * Build-time snapshot of the form (inputs, default values, default results) so the server-rendered
    * HTML already contains the real calculator. Plain data only; see src/lib/initialForm.ts.
    */
@@ -48,9 +36,8 @@ const resultColorClasses: Record<string, string> = {
 const actionBtnCls =
   'text-xs font-medium text-[var(--brand-ink)] rounded px-2 py-1 transition-colors hover:bg-[var(--surface-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)] active:opacity-70';
 
-export default function CalculatorForm({ calculatorId, compact = false, visibleInputIds, initial }: Props) {
+export default function CalculatorForm({ calculatorId, initial }: Props) {
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
-  const [catSlug, setCatSlug] = useState('');
   const [values, setValues] = useState<Record<string, string>>(initial?.values ?? {});
   const [showSticky, setShowSticky] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -161,7 +148,6 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     let cancelled = false;
     const entry = getCalculatorById(calculatorId);
     if (!entry) return;
-    setCatSlug(entry.categorySlug);
     entry.loader().then(({ default: cfg }) => {
       if (cancelled) return;
       // Seed initial values so the form shows a real answer on load. Mirrors the
@@ -204,9 +190,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
 
   // Sticky result bar — appears once the calculator card has scrolled above the
   // viewport, keeping the headline answer + a jump back to the inputs in view.
-  // Full page only (not the compact hero embed).
   useEffect(() => {
-    if (compact) return;
     const onScroll = () => {
       const el = cardRef.current;
       if (!el) return;
@@ -216,7 +200,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
-  }, [compact]);
+  }, []);
 
   // Until the live config arrives (the island hydrates, then loads the calculator's chunk), render from
   // the build-time snapshot: same markup as the server's, inputs inert (see handleChange).
@@ -256,26 +240,9 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     syncUrl(config, next);
   };
 
-  const visibleInputs = view.inputs.filter(
-    (input) =>
-      (!visibleInputIds || visibleInputIds.includes(input.id)) &&
-      (!input.showWhen || input.showWhen(values))
-  );
+  const visibleInputs = view.inputs.filter((input) => !input.showWhen || input.showWhen(values));
 
   const fieldErrors = rangeErrors(view.inputs, values);
-
-  // Deep-link to the full calculator page, carrying the current inputs so the
-  // hero scenario continues seamlessly on the dedicated page. Same whitelist +
-  // 64-char cap as syncUrl; trailingSlash:'always' means the slash precedes '?'.
-  const fullBreakdownHref = () => {
-    const params = new URLSearchParams();
-    for (const input of view.inputs) {
-      const v = values[input.id];
-      if (v !== undefined && v !== '') params.set(input.id, String(v).slice(0, 64));
-    }
-    const qs = params.toString();
-    return `/${catSlug}/${calculatorId}/${qs ? `?${qs}` : ''}`;
-  };
 
   const renderField = (input: InputField) => {
     if (input.type === 'custom' && input.component) {
@@ -364,7 +331,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
       {/* Phones and tablets: the answer is in view before the first input. On desktop the result panel
           sits beside the inputs instead, so this strip is hidden there. Decorative duplicate of the panel's
           headline, hidden from assistive tech so it is not announced twice. */}
-      {!compact && (() => {
+      {(() => {
         const lead = visibleResults.find((r) => r.highlight) ?? visibleResults[0];
         if (!lead || lead.value.includes('\n')) return null;
         return (
@@ -374,7 +341,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           </div>
         );
       })()}
-      <div className={compact ? undefined : 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:items-start lg:gap-8'}>
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:items-start lg:gap-8">
       <div className="min-w-0">
       {/* Variant/shape tabs — switch which set of inputs (and formula) applies.
           Writes to values.shape, which each calc's inputs read via showWhen. */}
@@ -401,7 +368,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           })}
         </div>
       )}
-      <div className={`grid grid-cols-1 gap-4 mb-6 ${compact ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:mb-0 lg:grid-cols-1'}`}>
+      <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:mb-0 lg:grid-cols-1">
         {visibleInputs.map((input) => (
           <div key={input.id}>
             <label
@@ -439,11 +406,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
 
       {visibleResults.length > 0 && (
         <div
-          className={
-            compact
-              ? 'border-t border-[var(--border-warm)] pt-5'
-              : 'mt-6 border-t border-[var(--border-warm)] pt-5 lg:sticky lg:top-24 lg:mt-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:rounded-xl lg:border lg:bg-[var(--surface-bg)] lg:p-5'
-          }
+          className="mt-6 border-t border-[var(--border-warm)] pt-5 lg:sticky lg:top-24 lg:mt-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:rounded-xl lg:border lg:bg-[var(--surface-bg)] lg:p-5"
           aria-live="polite"
           aria-atomic="false"
         >
@@ -451,7 +414,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
             <h2 className="text-sm font-semibold text-[var(--surface-text-muted)] uppercase tracking-wide">
               Results
             </h2>
-            {!compact && (
+            {(
               <div className="flex flex-wrap items-center gap-1 print:hidden">
                 <button type="button" onClick={copyLink} title="Copy a link to this exact scenario" className={actionBtnCls}>
                   {linkCopied ? 'Link copied ✓' : 'Copy link'}
@@ -491,7 +454,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
               </div>
             )}
           </div>
-          {!compact && results.some((r) => r.warning) && (
+          {results.some((r) => r.warning) && (
             <div className="mb-3 space-y-2">
               {results
                 .filter((r) => r.warning)
@@ -509,32 +472,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                 ))}
             </div>
           )}
-          {compact ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Compact hero embed shows only the two headline results (e.g. BMI
-                Prime + BMI Score); the full breakdown lives on the calc page. */}
-            {(compact ? visibleResults.slice(0, 2) : visibleResults).map((r) => (
-              <div
-                key={r.id}
-                className={`rounded-xl p-4 ${
-                  r.highlight
-                    ? 'bg-[var(--brand-default)] text-white'
-                    : 'bg-[var(--surface-bg)] border border-[var(--border-warm)]'
-                }`}
-              >
-                <p className={`text-xs font-medium mb-0.5 ${r.highlight ? 'text-white/90' : 'text-[var(--surface-text-muted)]'}`}>{r.label}</p>
-                <p className={`break-words [overflow-wrap:anywhere] ${r.value.includes('\n') ? 'text-sm font-medium whitespace-pre-line leading-relaxed' : 'text-xl font-bold'} ${!r.highlight && r.color ? resultColorClasses[r.color] ?? '' : ''}`}>
-                  {money(r.value)}
-                  {r.unit && <span className={`ml-1 text-sm font-normal ${r.highlight ? 'text-white/90' : 'opacity-75'}`}>{r.unit}</span>}
-                </p>
-                {!compact && r.interpretation && (
-                  <p className={`text-xs mt-1 ${r.highlight ? 'text-white/90' : 'text-[var(--surface-text-secondary)]'}`}>{money(r.interpretation)}</p>
-                )}
-              </div>
-            ))}
-          </div>
-          ) : (
-            (() => {
+          {(() => {
               const hero = visibleResults.find((r) => r.highlight) ?? visibleResults[0];
               const rest = visibleResults.filter((r) => r !== hero);
               const multiline = (v: string) => v.includes('\n');
@@ -578,8 +516,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
                   )}
                 </div>
               );
-            })()
-          )}
+          })()}
 
           {/* Living Answer gauge — "where you fall" on the scale, at a glance. */}
           {view.gauge && (() => {
@@ -638,26 +575,15 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
           })()}
         </div>
       )}
-      {!compact && visibleResults.length === 0 && (
+      {visibleResults.length === 0 && (
         <div className="mt-6 rounded-xl border border-dashed border-[var(--border-warm)] p-5 text-sm text-[var(--surface-text-secondary)] lg:mt-0">
           Fill in the inputs to see your result here.
         </div>
       )}
       </div>
 
-      {/* Compact hero: carry these inputs to the full page for the detailed breakdown */}
-      {compact && catSlug && (
-        <a
-          href={fullBreakdownHref()}
-          className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-[var(--brand-default)] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-default)] active:opacity-90"
-        >
-          See the full breakdown with your numbers
-          <span aria-hidden="true">→</span>
-        </a>
-      )}
-
       {/* Compare saved scenarios side by side (e.g. loan A vs loan B) */}
-      {!compact && scenarios.length > 0 && (
+      {scenarios.length > 0 && (
         <div className="mt-6 border-t border-[var(--border-warm)] pt-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--surface-text-muted)]">
@@ -713,7 +639,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
       )}
 
       {/* Live worked solution — the user's own numbers, step by step */}
-      {!compact && view.explainSteps && results.length > 0 && (() => {
+      {view.explainSteps && results.length > 0 && (() => {
         let steps: ExplainStep[];
         try {
           steps = view.explainSteps(values);
@@ -751,7 +677,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
         );
       })()}
 
-      {!compact && view.extraPanel && (
+      {view.extraPanel && (
         <div className="mt-6">{view.extraPanel(values, results)}</div>
       )}
     </div>
@@ -759,7 +685,7 @@ export default function CalculatorForm({ calculatorId, compact = false, visibleI
     {/* Sticky result bar — keeps the headline answer in view after you scroll
         past the calculator, with a jump back to the inputs. Portaled to <body>
         so an ancestor's transform/contain can't break position:fixed. */}
-    {!compact && showSticky && stickyResult && typeof document !== 'undefined' &&
+    {showSticky && stickyResult && typeof document !== 'undefined' &&
       createPortal(
         <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--border-warm)] bg-[var(--surface-card)] px-4 py-3 shadow-card-hover print:hidden">
           <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4">

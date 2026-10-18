@@ -18,7 +18,7 @@ crawled in August under the old client-rendered site, so the verdict predates th
 - [x] A3 Calculator form and its default answer are in the static HTML (same change as B1)
 - [ ] A4 After deploy: request indexing for the top ~20 calculators and the new /decisions/ page, then monitor 2-3 weeks
 - [owner] A5 Click "Validate Fix" only after the fixes are deployed and every URL in the bucket is a 200 page
-- [ ] A6 (low) Find what appends `?ND`, `?MA`, `?SA` to URLs; harmless while canonicals hold
+- [x] A6 `?ND ?NA ?MA ?MD ?SA ?SD` are the host's directory-listing sort links (57 of the exported URLs) and `?expression={...}` is an unfilled template from an older build (22; the current build emits none). `.htaccess` now has `Options -Indexes` and 301s both shapes to the clean URL (79 of the 81 query URLs; real `?loanAmount=...` links untouched). Verify on the live host after deploy
 - [owner] A7 Cutover checklist in `DEPLOYMENT.md` (submit `sitemap-index.xml`, check `robots.txt`, `llms.txt`)
 - [ ] A8 After deploy: re-run the redirect checks against the live host (`/math/love-calculator/`, `/en/methodology/finance/loan-calculator/`, `/report/` should be 301, 301, 410) and compare indexed-page counts weekly
 
@@ -35,14 +35,15 @@ crawled in August under the old client-rendered site, so the verdict predates th
   - [x] B6b First pass: collapsible explanations (formula card, examples, FAQs, sources open), 44px inputs, 14px chips. **Open:** related-tools tile grid, spacing and type-scale pass
   - [ ] B6c Formula, variables and the step-by-step logic with the visitor's own numbers on EVERY calculator (today only the 12 with `explainSteps` show live steps)
   - [ ] B6d Differentiation competitors lack: `explainSteps` for the top ~40 calculators by search demand (one category per agent; 12 of 350 have it), worked examples (204 of 350 have them), reference tables, edge-case comparisons. Each must meet the audit standard
-- [ ] B8 Decide what to do with `compact` mode in `CalculatorForm` (no longer used by the hero; remove if nothing else needs it)
+- [x] B8 Removed the unused `compact` / `visibleInputIds` mode from `CalculatorForm` (dead since the new hero); typecheck and the e2e suites pass
 - [ ] B9 Mobile: confirm the answer strip, 44px inputs and collapsed sections on a real phone after deploy
 
 ## C. Decision tools (the traffic strategy)
 
 - [x] C1 "Can I afford this house?" at /decisions/can-i-afford-a-house/: one form, four linked answers and a verdict; engine `src/lib/houseDecision.ts` reuses the audited pieces (12 unit tests vs independent Python values, 6 e2e tests); deep links carry the inputs into the full calculators; the home-buying calculators and the homepage link back
 - [x] C2 Up to four saved scenarios side by side (kept in the browser), and a link that carries every input
-- [ ] C3 More decision tools in the same pattern: "Can I afford this car?", "Should I refinance?", "Am I saving enough to retire?". Also add decision tools to the header/footer navigation
+- [x] C3a Generic engine (`src/lib/decisionEngine.ts`, `DecisionTool.tsx`) + shared list (`src/data/decisionTools.ts`) drive /decisions/, the homepage band, header and footer links and the banner on related calculators; tools: house, car (25 unit tests), refinance (18), each with e2e (23 decision e2e pass)
+- [ ] C3b "Am I saving enough to retire?": agent building it; add to `decisionTools.ts` when its page exists
 - [ ] C4 API/MCP (post-launch, per ROADMAP.md)
 
 ## D. Quality
