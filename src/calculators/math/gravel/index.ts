@@ -1,5 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { roundStr4 } from '../../../lib/format';
 import GravelPanel from './GravelPanel';
 import Decimal from 'decimal.js';
 import { parseNonNegative } from '../../../utils/parseNumber';
@@ -156,6 +158,28 @@ const config: CalculatorConfig = {
     }
 
     return results;
+  },
+
+  explainSteps: (values) => {
+    const rows = config.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const length = parseNonNegative(values.length, 1e6);
+    const width = parseNonNegative(values.width, 1e6);
+    const depth = parseNonNegative(values.depth, 1e4);
+    const density = MATERIAL_DENSITIES[values.material];
+    const feet3 = (length * width * depth) / 12;
+    const yards = (length * width * depth) / 324;
+    const steps = [
+      { label: 'Volume in cubic feet = length × width × depth (in feet)', expr: `${length} × ${width} × (${depth} ÷ 12) = ${roundStr4(feet3)} ft³`, note: 'Depth is entered in inches, so divide by 12 to get feet.' },
+      { label: 'Convert to cubic yards (27 ft³ in a yard)', expr: `${roundStr4(feet3)} ÷ 27 = ${resultValue(rows, 'cubic-yards')}` },
+      { label: 'Weight = cubic yards × material weight per yard ÷ 2,000 lb', expr: `${roundStr4(yards)} × ${density.toLocaleString('en-US')} lb/yd³ ÷ 2,000 = ${resultValue(rows, 'tons')}`, note: 'Material weights are typical figures; check your supplier for the exact product.' },
+      { label: 'Weed barrier = the area covered', expr: `${length} × ${width} = ${resultValue(rows, 'weed-barrier')}` },
+    ];
+    const byYard = resultValue(rows, 'cost-per-yard');
+    if (byYard) steps.push({ label: 'Cost by the yard', expr: `${roundStr4(yards)} yd³ × $${values.pricePerYard} = ${byYard}` });
+    const byTon = resultValue(rows, 'cost-per-ton');
+    if (byTon) steps.push({ label: 'Cost by the ton', expr: `${resultValue(rows, 'tons')?.replace(' tons', '')} tons × $${values.pricePerTon} = ${byTon}`, note: 'The weight shown is rounded to 2 decimals; the price uses the unrounded weight.' });
+    return steps;
   },
 
   educational: {

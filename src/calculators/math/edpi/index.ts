@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import EdpiPanel from './EdpiPanel';
 import { parseNonNegative } from '../../../utils/parseNumber';
 
@@ -137,6 +138,39 @@ const edpiConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = edpiConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const dpi = parseNonNegative(values.mouseDpi, 1e6);
+    const sens = parseNonNegative(values.sensitivity, 1e6);
+    const game = values.currentGame || 'CS:GO';
+    const target = values.targetGame || '';
+    const yaw = GAME_YAW[game] ?? GAME_YAW['CS:GO'];
+    const raw = String(parseFloat((dpi * sens).toPrecision(12)));
+    const edpi = resultValue(rows, 'edpi')!;
+    const f4 = (n: number) => String(parseFloat(n.toFixed(4)));
+    const steps = [
+      {
+        label: 'eDPI = mouse DPI × in-game sensitivity',
+        expr: `${dpi} × ${sens} = ${raw}${raw === edpi ? '' : ` → ${edpi}`}`,
+        ...(raw === edpi ? {} : { note: 'The answer is rounded to a whole number.' }),
+      },
+      {
+        label: `Mouse travel for a full 360° turn in ${game}`,
+        expr: `360 × 2.54 ÷ (${dpi} × ${sens} × ${yaw}) = ${resultValue(rows, 'cmPer360')}`,
+        note: `${yaw} is how many degrees ${game} turns per mouse count at sensitivity 1.`,
+      },
+      { label: 'Turn speed', expr: `360° ÷ cm per turn = ${resultValue(rows, 'currentSensitivity360')}` },
+    ];
+    if (target && target !== game) {
+      steps.push({
+        label: `Match the same feel in ${target}`,
+        expr: `${sens} × ${f4(GAME_MULTIPLIERS[target])} ÷ ${f4(GAME_MULTIPLIERS[game])} = ${resultValue(rows, 'targetSensitivity')}`,
+        note: 'Each multiplier compares the game yaw with CS:GO (0.022 ÷ yaw).',
+      });
+    }
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

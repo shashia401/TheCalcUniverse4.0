@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import HeightPanel from './HeightPanel';
 import { parseNonNegative } from '../../../utils/parseNumber';
 
@@ -147,6 +148,25 @@ const heightCalculatorConfig: CalculatorConfig = {
         label: "Father's Height",
         value: inchesToFeetInches(totalFatherInches),
       },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = heightCalculatorConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const mother = parseNonNegative(values.motherFeet) * 12 + parseNonNegative(values.motherInches);
+    const father = parseNonNegative(values.fatherFeet) * 12 + parseNonNegative(values.fatherInches);
+    const male = values.childGender === 'male';
+    const parentsCm = parseFloat(((mother + father) * CM_PER_INCH).toFixed(4));
+    const cm = resultValue(rows, 'predictedCm')!;
+    return [
+      { label: 'Add both parents’ heights in inches and convert to centimetres', expr: `(${mother} + ${father}) in × ${CM_PER_INCH} = ${parentsCm} cm` },
+      {
+        label: `${male ? 'Add' : 'Subtract'} ${GENDER_GAP_CM} cm for a ${male ? 'boy' : 'girl'}, then take half`,
+        expr: `(${parentsCm} ${male ? '+' : '−'} ${GENDER_GAP_CM}) ÷ 2 = ${cm} cm`,
+        note: 'This is Tanner’s mid-parental height; 13 cm is the average gap between men and women.',
+      },
+      { label: 'Convert back to inches and feet', expr: `${cm} cm ÷ ${CM_PER_INCH} = ${resultValue(rows, 'midParental')} in = ${resultValue(rows, 'predictedHeight')}` },
+      { label: `Allow ±${RANGE_CM} cm for the expected range`, expr: `${cm} cm ± ${RANGE_CM} cm → ${resultValue(rows, 'heightRange')}`, note: 'About 95% of children finish within this range.' },
     ];
   },
   extraPanel: (values, results) => {

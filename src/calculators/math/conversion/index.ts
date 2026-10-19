@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { fToC } from '../../../utils/temperature';
 import ConversionPanel from './ConversionPanel';
 import { CUP_L, FLOZ_L, FT3_L, FT_M, GAL_US_L, IN_M, LB_KG, MI_M, PT_L, QT_L, SECONDS_PER_HOUR, TBSP_L, TSP_L, YD_M } from '../../../utils/unitConvert';
 import { parseNumberStrict } from '../../../utils/parseNumber';
@@ -183,6 +185,9 @@ const CONVERSION_CITATIONS: { source: string; url: string }[] = [
 ];
 
 // ─── Labels ──────────────────────────────────────────────────────────────────
+
+/** The unit each category's conversion factors are measured against. */
+const BASE_UNIT: Record<string, string> = { weight: 'g', length: 'm', volume: 'L', data: 'B', speed: 'm/s', area: 'm²' };
 
 const CATEGORY_LABELS: Record<string, string> = {
   weight: 'Weight & Mass',
@@ -400,6 +405,55 @@ const conversionConfig: CalculatorConfig = {
     ];
     if (category === 'currency') rows.push({ id: 'rateNote', label: 'Rates', value: CURRENCY_NOTE });
     return rows;
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const rows = conversionConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const category = (values.category || '').trim();
+    if (category === 'currency') return []; // the static indicative rates are not a fact to teach with
+    const from = (values[`fromUnit_${category}`] || '').trim();
+    const to = (values[`toUnit_${category}`] || '').trim();
+    const v = parseNumberStrict(values.fromValue);
+    const fl = UNIT_LABELS[from] || from;
+    const tl = UNIT_LABELS[to] || to;
+    const n8 = (x: number) => roundStrAuto(x, 8);
+    const steps: ExplainStep[] = [];
+    const answer = resultValue(rows, 'result')!;
+
+    if (category === 'temperature') {
+      if (from === to) return [{ label: 'Same unit', expr: `${n8(v)} ${fl} = ${answer}`, note: 'Nothing to convert.' }];
+      const c = from === 'celsius' ? v : from === 'fahrenheit' ? fToC(v) : v - 273.15;
+      if (from !== 'celsius') {
+        steps.push({
+          label: 'Convert to Celsius first',
+          expr: from === 'fahrenheit' ? `(${n8(v)} − 32) × 5 ÷ 9 = ${n8(c)} °C` : `${n8(v)} − 273.15 = ${n8(c)} °C`,
+        });
+      }
+      if (to !== 'celsius') {
+        steps.push({
+          label: `Convert Celsius to ${tl}`,
+          expr: to === 'fahrenheit' ? `${n8(c)} × 9 ÷ 5 + 32 = ${answer}` : `${n8(c)} + 273.15 = ${answer}`,
+        });
+      }
+      return steps;
+    }
+
+    const factors = FACTORS[category];
+    const ff = factors[from];
+    const tf = factors[to];
+    const bu = BASE_UNIT[category];
+    const f = (x: number) => String(parseFloat(x.toPrecision(10)));
+    const base = v * ff;
+    if (ff !== 1) steps.push({ label: `Convert to the base unit (${bu})`, expr: `${n8(v)} ${fl} × ${f(ff)} ${bu}/${fl} = ${n8(base)} ${bu}` });
+    if (tf !== 1) {
+      steps.push({
+        label: `Convert from ${bu} to ${tl}`,
+        expr: `${n8(base)} ${bu} ÷ ${f(tf)} ${bu}/${tl} = ${answer}`,
+        note: 'Intermediate figures are shown to 8 decimals; the answer uses the full-precision value.',
+      });
+    }
+    if (steps.length === 0) steps.push({ label: 'Same unit', expr: `${n8(v)} ${fl} = ${answer}`, note: 'Nothing to convert.' });
+    return steps;
   },
   extraPanel: (_values, results) => {
     if (!results.length) return null;

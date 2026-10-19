@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult, SelectOption } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import ElectricityPanel from './ElectricityPanel';
 import Decimal from 'decimal.js';
 import { parseNumberStrict } from '../../../utils/parseNumber';
@@ -73,6 +74,30 @@ function findComparisonPreset(wattage: number, hoursPerDay: number): string {
   return '';
 }
 
+// ─── Inputs ──────────────────────────────────────────────────────────────────
+
+/** Validated numbers shared by calculate() and explainSteps(); null when anything is missing or out of range. */
+function resolveInputs(values: Record<string, string>) {
+  // Wattage comes from the preset only when the field is left blank; a typed value must be valid.
+  const presetKey = values.preset || '';
+  const preset = presetKey ? APPLIANCE_PRESETS[presetKey] : null;
+  const wattageRaw = (values.wattage ?? '').trim();
+  const wattage = wattageRaw === '' && preset ? preset.watts : parseNumberStrict(wattageRaw);
+
+  const hoursPerDay = parseNumberStrict(values.hoursPerDay);
+  const days = parseNumberStrict(values.days || '30');
+  const costPerKwh = parseNumberStrict(values.costPerKwh);
+  const countRaw = (values.applianceCount ?? '').trim();
+  const count = countRaw === '' ? 1 : parseNumberStrict(countRaw);
+
+  if (isNaN(wattage) || wattage <= 0 || wattage > 1e7) return null;
+  if (isNaN(hoursPerDay) || hoursPerDay <= 0 || hoursPerDay > 24) return null;
+  if (!Number.isInteger(days) || days <= 0 || days > 3650) return null;
+  if (isNaN(costPerKwh) || costPerKwh < 0 || costPerKwh > 1e4) return null;
+  if (!Number.isInteger(count) || count < 1 || count > 1e6) return null;
+  return { preset, wattage, hoursPerDay, days, costPerKwh, count };
+}
+
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const electricityCostConfig: CalculatorConfig = {
@@ -128,24 +153,9 @@ const electricityCostConfig: CalculatorConfig = {
     },
   ],
   calculate: (values): CalculatorResult[] => {
-    // Wattage comes from the preset only when the field is left blank; a typed value must be valid.
-    const presetKey = values.preset || '';
-    const preset = presetKey ? APPLIANCE_PRESETS[presetKey] : null;
-    const wattageRaw = (values.wattage ?? '').trim();
-    const wattage = wattageRaw === '' && preset ? preset.watts : parseNumberStrict(wattageRaw);
-
-    const hoursPerDay = parseNumberStrict(values.hoursPerDay);
-    const days = parseNumberStrict(values.days || '30');
-    const costPerKwh = parseNumberStrict(values.costPerKwh);
-    const countRaw = (values.applianceCount ?? '').trim();
-    const count = countRaw === '' ? 1 : parseNumberStrict(countRaw);
-
-    // Validate inputs
-    if (isNaN(wattage) || wattage <= 0 || wattage > 1e7) return [];
-    if (isNaN(hoursPerDay) || hoursPerDay <= 0 || hoursPerDay > 24) return [];
-    if (!Number.isInteger(days) || days <= 0 || days > 3650) return [];
-    if (isNaN(costPerKwh) || costPerKwh < 0 || costPerKwh > 1e4) return [];
-    if (!Number.isInteger(count) || count < 1 || count > 1e6) return [];
+    const inputs = resolveInputs(values);
+    if (!inputs) return [];
+    const { preset, wattage, hoursPerDay, days, costPerKwh, count } = inputs;
 
     // Core calculations (exact decimals, so cents round half-up instead of drifting with float error)
     const kWhPerDay = new Decimal(wattage).times(hoursPerDay).div(1000).times(count);
@@ -219,6 +229,23 @@ const electricityCostConfig: CalculatorConfig = {
     ];
     if (comparisonNote) results.push({ id: 'equivalentNote', label: 'Comparison', value: comparisonNote });
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = electricityCostConfig.calculate(values);
+    const inputs = resolveInputs(values);
+    if (!hasAnswer(rows) || !inputs) return [];
+    const { wattage, hoursPerDay, days, costPerKwh, count } = inputs;
+    const get = (id: string) => resultValue(rows, id)!;
+    return [
+      {
+        label: 'Daily energy = watts × hours ÷ 1,000',
+        expr: `${wattage} W × ${hoursPerDay} h ÷ 1,000${count > 1 ? ` × ${count} appliances` : ''} = ${get('kwhPerDay')}`,
+        note: 'A kilowatt-hour (kWh) is 1,000 watts running for one hour.',
+      },
+      { label: `Energy over ${days} day${days === 1 ? '' : 's'}`, expr: `${get('kwhPerDay')} × ${days} = ${get('kwhUsed')}` },
+      { label: 'Cost = energy × your rate', expr: `${get('kwhUsed')} × $${costPerKwh}/kWh = ${get('costPerPeriod')}` },
+      { label: 'Project it over a full year = energy per day × 365 × rate', expr: `${get('kwhPerDay')} × 365 × $${costPerKwh}/kWh = ${get('costPerYear')}` },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

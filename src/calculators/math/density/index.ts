@@ -1,5 +1,6 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import DensityPanel from './DensityPanel';
 import { FT3_M3, LBFT3_KGM3, LB_KG, densityToKgm3, fmtNum as fmt, massToKg, nonNegative, volumeToM3 } from '../../../utils/massDensity';
 
@@ -241,6 +242,26 @@ const densityConfig: CalculatorConfig = {
     }
 
     return [];
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const rows = densityConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const mode = values.mode || 'calcDensity';
+    const steps: ExplainStep[] = [];
+    // Everything is worked in SI units (kg, m³, kg/m³); show each conversion the calculator made.
+    const convert = (what: string, raw: string | undefined, unit: string, si: (v: number, u: string) => number, siUnit: string) => {
+      if (unit === siUnit.replace('³', '3')) return;
+      const v = nonNegative(raw);
+      steps.push({ label: `Convert the ${what} to ${siUnit}`, expr: `${fmt(v)} ${unit} = ${fmt(si(v, unit))} ${siUnit}` });
+    };
+    if (mode !== 'calcMass') convert('mass', values.mass, values.massUnit || 'kg', massToKg, 'kg');
+    if (mode !== 'calcVolume') convert('volume', values.volume, values.volumeUnit || 'm3', volumeToM3, 'm³');
+    if (mode !== 'calcDensity') convert('density', values.density, values.densityUnit || 'kg/m3', densityToKgm3, 'kg/m³');
+    const formula = resultValue(rows, 'formula')!;
+    steps.push({ label: `Apply ${formula}`, expr: resultValue(rows, 'steps')! });
+    const others = rows.filter((r) => !['result', 'formula', 'steps'].includes(r.id)).map((r) => r.value);
+    steps.push({ label: 'Show it in other units', expr: [resultValue(rows, 'result'), ...others].join(' = ') });
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

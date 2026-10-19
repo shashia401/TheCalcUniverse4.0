@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import BasicCalcPanel from './BasicCalcPanel';
 import { evaluateDisplay } from './basicCalcMath';
 
@@ -16,6 +17,18 @@ const basicCalcConfig: CalculatorConfig = {
     return [
       { id: 'result', label: 'Result', value: out.text, highlight: true, color: 'positive' as const },
       { id: 'expression', label: 'Expression', value: expr },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = basicCalcConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    return [
+      { label: 'Read the expression', expr: (values.expression ?? '').trim() },
+      {
+        label: 'Work it out in order: brackets, then × and ÷, then + and −',
+        expr: `= ${resultValue(rows, 'result')}`,
+        note: 'The answer is shown to 15 significant digits, which hides binary rounding noise such as 0.1 + 0.2.',
+      },
     ];
   },
   extraPanel: () => {

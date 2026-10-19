@@ -1,9 +1,32 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import FactoringPanel from './FactoringPanel';
 import { analyzeQuadratic } from './quadratic';
 
 const COEFF_LIMIT = 1e12;
+
+/** Turn the analysis' "Step N: ..." lines (plus their indented detail lines) into label / expression steps. */
+function stepsFromLines(lines: string[]): ExplainStep[] {
+  const blocks: { text: string; detail: string[] }[] = [];
+  for (const line of lines) {
+    const m = /^Step \d+: (.*)$/.exec(line);
+    if (m) blocks.push({ text: m[1], detail: [] });
+    else if (blocks.length) blocks[blocks.length - 1].detail.push(line.trim());
+  }
+  return blocks.map(({ text, detail }) => {
+    const tail = detail.reduce((acc, d) => (acc === '' ? d : `${acc}${acc.endsWith(':') ? ' ' : ';  '}${d}`), '');
+    const ac = /^Multiply a × c = (.*)$/.exec(text);
+    if (ac) return { label: 'Multiply a by c', expr: `a × c = ${ac[1]}` };
+    const pq = /^Find two numbers p and q such that p \+ q = b = (\S+) and p × q = a × c = (\S+)$/.exec(text);
+    if (pq) return { label: 'Find two numbers p and q that add to b and multiply to a × c', expr: `p + q = ${pq[1]},  p × q = ${pq[2]};  ${tail}` };
+    const sep = /( — |: )/.exec(text);
+    if (sep && sep.index > 0) {
+      const rest = text.slice(sep.index + sep[0].length);
+      return { label: text.slice(0, sep.index), expr: tail ? `${rest};  ${tail}` : rest };
+    }
+    return { label: text, expr: tail || text };
+  });
+}
 
 const factoringConfig: CalculatorConfig = {
   inputs: [
@@ -67,6 +90,10 @@ const factoringConfig: CalculatorConfig = {
 
     results.push({ id: 'steps', label: 'Step-by-Step Solution', value: q.steps.join('\n') });
     return results;
+  },
+  explainSteps: (values) => {
+    const q = analyzeQuadratic(values);
+    return q ? stepsFromLines(q.steps) : [];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

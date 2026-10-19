@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { roundStr6 } from '../../../lib/format';
 import HalfLifePanel from './HalfLifePanel';
 
 const halfLifeConfig: CalculatorConfig = {
@@ -135,6 +137,42 @@ const halfLifeConfig: CalculatorConfig = {
         color: 'neutral',
       },
     ];
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const rows = halfLifeConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id)!;
+    const [N0, Nt, H, T, n] = [g('initialQuantity'), g('remainingQuantity'), g('halfLife'), g('timeElapsed'), g('halfLives')];
+    const count: ExplainStep = { label: 'Count the half-lives = time ÷ half-life', expr: `${T} ÷ ${H} = ${n}` };
+    const ratio = roundStr6(parseFloat(N0) / parseFloat(Nt));
+    const ln = roundStr6(Math.log(parseFloat(N0) / parseFloat(Nt)));
+    const ratioStep: ExplainStep = { label: 'Compare the start with the end = N₀ ÷ Nₜ', expr: `${N0} ÷ ${Nt} = ${ratio}` };
+    switch (values.solveFor) {
+      case 'remainingQuantity':
+        return [
+          count,
+          { label: 'Halve the starting amount that many times: Nₜ = N₀ × (½)^n', expr: `${N0} × (½)^${n} = ${Nt}` },
+          { label: 'As a share of the start', expr: `${Nt} ÷ ${N0} = ${g('percentRemaining')}` },
+        ];
+      case 'initialQuantity':
+        return [
+          count,
+          { label: 'Undo the halving: N₀ = Nₜ ÷ (½)^n', expr: `${Nt} ÷ (½)^${n} = ${N0}` },
+        ];
+      case 'halfLife':
+        return [
+          ratioStep,
+          { label: 'Half-life = time × ln 2 ÷ ln(N₀ ÷ Nₜ)', expr: `${T} × 0.693147 ÷ ln(${ratio}) = ${T} × 0.693147 ÷ ${ln} = ${H}` },
+        ];
+      case 'timeElapsed':
+        return [
+          ratioStep,
+          { label: 'Time = half-life × ln(N₀ ÷ Nₜ) ÷ ln 2', expr: `${H} × ln(${ratio}) ÷ 0.693147 = ${H} × ${ln} ÷ 0.693147 = ${T}` },
+          { label: 'In half-lives', expr: `${T} ÷ ${H} = ${n}` },
+        ];
+      default:
+        return [];
+    }
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

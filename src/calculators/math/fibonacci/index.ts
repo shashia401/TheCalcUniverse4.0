@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import FibonacciPanel from './FibonacciPanel';
 import { fibonacciSequenceBig } from '../../../utils/bigMath';
 import { parseIntegerStrict } from '../../../utils/rational';
@@ -51,6 +52,33 @@ const fibonacciConfig: CalculatorConfig = {
       { id: 'sum', label: `Sum of First ${n} Terms`, value: seqSum.toString() },
       { id: 'binetApproximation', label: `Binet's Formula Approximation`, value: binetApproximation(n) },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = fibonacciConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const seq = resultValue(rows, 'sequence')!.split(', ');
+    const n = seq.length;
+    const nth = resultValue(rows, 'nthTerm')!;
+    const sum = resultValue(rows, 'sum')!;
+    const steps = [
+      {
+        label: 'Start with F(1) = 1 and F(2) = 1, then keep adding the last two terms',
+        expr: seq.slice(0, 10).join(', ') + (n > 10 ? ', …' : ''),
+      },
+      n >= 3
+        ? { label: `Each term is the sum of the two before it, so F(${n}) = F(${n - 1}) + F(${n - 2})`, expr: `F(${n}) = ${seq[n - 2]} + ${seq[n - 3]} = ${nth}` }
+        : { label: `The first two terms are both 1`, expr: `F(${n}) = ${nth}` },
+      {
+        label: "Cross-check with Binet's formula",
+        expr: `F(${n}) = round(φ^${n} ÷ √5) = ${resultValue(rows, 'binetApproximation')}`,
+        note: 'φ = (1 + √5) ÷ 2 ≈ 1.618. It is evaluated in high precision, so even F(100) comes out exact.',
+      },
+      {
+        label: `The first ${n} terms always add up to F(${n + 2}) − 1`,
+        expr: `${sum} = ${BigInt(sum) + 1n} − 1`,
+      },
+    ];
+    return steps;
   },
   educational: {
     formula: 'F(n) = F(n-1) + F(n-2)',

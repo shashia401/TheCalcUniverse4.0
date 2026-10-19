@@ -13,10 +13,22 @@ export { cToF, fToC };
  *    RH < 13 % and 80 <= T <= 112 F: subtract ((13 - RH) / 4) * sqrt((17 - |T - 95|) / 17)
  *    RH > 85 % and 80 <= T <= 87 F: add ((RH - 85) / 10) * ((87 - T) / 5)
  */
-export function heatIndexF(T: number, RH: number): number {
+export interface HeatIndexParts {
+  hi: number;
+  /** Steadman's simple value */
+  simple: number;
+  method: 'simple' | 'regression';
+  /** The Rothfusz regression value before the adjustments (equals `simple` when the simple formula is used) */
+  regression: number;
+  /** Added by the low-humidity / high-humidity corrections (0 when neither applies) */
+  adjustment: number;
+}
+
+/** The pieces of the NWS calculation (see heatIndexF), so a worked solution can show which branch ran. */
+export function heatIndexParts(T: number, RH: number): HeatIndexParts {
   const simple = 0.5 * (T + 61.0 + (T - 68.0) * 1.2 + RH * 0.094);
-  if ((simple + T) / 2 < 80) return simple;
-  let hi =
+  if ((simple + T) / 2 < 80) return { hi: simple, simple, method: 'simple', regression: simple, adjustment: 0 };
+  const regression =
     -42.379 +
     2.04901523 * T +
     10.14333127 * RH -
@@ -26,9 +38,14 @@ export function heatIndexF(T: number, RH: number): number {
     0.00122874 * T * T * RH +
     0.00085282 * T * RH * RH -
     0.00000199 * T * T * RH * RH;
-  if (RH < 13 && T >= 80 && T <= 112) hi -= ((13 - RH) / 4) * Math.sqrt((17 - Math.abs(T - 95)) / 17);
-  else if (RH > 85 && T >= 80 && T <= 87) hi += ((RH - 85) / 10) * ((87 - T) / 5);
-  return hi;
+  let adjustment = 0;
+  if (RH < 13 && T >= 80 && T <= 112) adjustment = -(((13 - RH) / 4) * Math.sqrt((17 - Math.abs(T - 95)) / 17));
+  else if (RH > 85 && T >= 80 && T <= 87) adjustment = ((RH - 85) / 10) * ((87 - T) / 5);
+  return { hi: regression + adjustment, simple, method: 'regression', regression, adjustment };
+}
+
+export function heatIndexF(T: number, RH: number): number {
+  return heatIndexParts(T, RH).hi;
 }
 
 export interface HeatTier {

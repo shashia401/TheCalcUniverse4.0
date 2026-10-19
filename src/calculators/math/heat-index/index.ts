@@ -1,8 +1,9 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import HeatIndexPanel from './HeatIndexPanel';
-import { roundStrD as fmt } from '../../../lib/format';
-import { heatIndexF, heatRecommendations as getSafetyRecommendations, heatTier as getDangerTier } from '../../../utils/heatIndex';
+import { roundStrD as fmt, roundStr2 } from '../../../lib/format';
+import { heatIndexParts, heatIndexF, heatRecommendations as getSafetyRecommendations, heatTier as getDangerTier } from '../../../utils/heatIndex';
 
 const heatIndexConfig: CalculatorConfig = {
   inputs: [
@@ -89,6 +90,39 @@ const heatIndexConfig: CalculatorConfig = {
         }),
       },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = heatIndexConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const T = parseFloat(values.temperature);
+    const RH = parseFloat(values.humidity);
+    const p = heatIndexParts(T, RH);
+    const avg = (p.simple + T) / 2;
+    const steps: ExplainStep[] = [
+      {
+        label: "Start with Steadman's simple formula",
+        expr: `HI = ½ × [T + 61 + 1.2 × (T − 68) + 0.094 × RH] = ½ × [${fmt(T)} + 61 + 1.2 × (${fmt(T)} − 68) + 0.094 × ${fmt(RH)}] = ${roundStr2(p.simple)}°F`,
+      },
+      {
+        label: 'Average it with the air temperature to choose the method',
+        expr: `(${roundStr2(p.simple)} + ${fmt(T)}) ÷ 2 = ${roundStr2(avg)}°F ${p.method === 'simple' ? 'is below 80°F, so the simple value stands' : 'is 80°F or more, so the full regression is needed'}`,
+      },
+    ];
+    if (p.method === 'regression') {
+      steps.push({
+        label: 'Apply the NWS (Rothfusz) regression',
+        expr: `HI = ${roundStr2(p.regression)}°F`,
+        note: 'HI = −42.379 + 2.04901523 T + 10.14333127 RH − 0.22475541 T·RH − 0.00683783 T² − 0.05481717 RH² + 0.00122874 T²·RH + 0.00085282 T·RH² − 0.00000199 T²·RH²',
+      });
+      if (p.adjustment !== 0) {
+        steps.push({
+          label: p.adjustment < 0 ? 'Correct for very dry air (RH under 13%)' : 'Correct for very humid air (RH over 85%)',
+          expr: `${roundStr2(p.regression)} ${p.adjustment < 0 ? '−' : '+'} ${roundStr2(Math.abs(p.adjustment))} = ${roundStr2(p.hi)}°F`,
+        });
+      }
+    }
+    steps.push({ label: 'Read the danger tier', expr: `${resultValue(rows, 'heatIndex')} → ${resultValue(rows, 'dangerTier')}` });
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

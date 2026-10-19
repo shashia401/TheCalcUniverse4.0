@@ -1,7 +1,11 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import BaseConverterPanel from './BaseConverterPanel';
 import { MAX_FRACTION_DIGITS, MAX_INPUT_DIGITS, convertBase, decimalText } from './baseMath';
+
+const SUPERSCRIPT = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+const sup = (n: number): string => `${n < 0 ? '⁻' : ''}${String(Math.abs(n)).replace(/\d/g, (d) => SUPERSCRIPT[Number(d)])}`;
+const digitVal = (ch: string): number => parseInt(ch, 36);
 
 const baseConverterConfig: CalculatorConfig = {
   inputs: [
@@ -61,6 +65,57 @@ const baseConverterConfig: CalculatorConfig = {
       });
     }
     return rows;
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const out = convertBase(values);
+    if (out.kind !== 'ok') return [];
+    const { from, to, parsed, out: converted } = out;
+    const m = /^([+-]?)([0-9A-Z]*)(?:\.([0-9A-Z]*))?$/.exec((values.input ?? '').trim().toUpperCase());
+    if (!m) return [];
+    const [, sign, intDigits, fracDigits = ''] = m;
+    const dec = decimalText(parsed.value);
+    const steps: ExplainStep[] = [];
+
+    if (from !== 10) {
+      const terms: string[] = [];
+      [...intDigits].forEach((ch, i) => digitVal(ch) && terms.push(`${digitVal(ch)}×${from}${sup(intDigits.length - 1 - i)}`));
+      [...fracDigits].forEach((ch, i) => digitVal(ch) && terms.push(`${digitVal(ch)}×${from}${sup(-(i + 1))}`));
+      const expansion = terms.length === 0 ? '0' : terms.length > 12 ? `${intDigits.length + fracDigits.length} digits, each × ${from}^position` : terms.join(' + ');
+      steps.push({
+        label: `Multiply each digit by its place value (base ${from})`,
+        expr: `${sign === '-' ? '−' : ''}${terms.length > 1 && sign ? `(${expansion})` : expansion} = ${dec}`,
+        ...(/[A-Z]/.test(intDigits + fracDigits) ? { note: 'Letters count as digits: A = 10, B = 11, and so on up to Z = 35.' } : {}),
+      });
+    }
+
+    if (to !== 10) {
+      const whole = (parsed.value.n < 0n ? -parsed.value.n : parsed.value.n) / parsed.value.d;
+      if (whole > 0n) {
+        const chain: string[] = [];
+        let q = whole;
+        const b = BigInt(to);
+        while (q > 0n && chain.length <= 12) {
+          const r = q % b;
+          chain.push(`${q} ÷ ${to} = ${q / b} r ${Number(r).toString(36).toUpperCase()}`);
+          q /= b;
+        }
+        steps.push({
+          label: `Divide the whole part by ${to}, keeping each remainder`,
+          expr: q > 0n ? `${whole.toString().length}-digit number: repeat the division until the quotient reaches 0` : chain.join('  |  '),
+          note: 'Read the remainders from the last one back to the first.',
+        });
+      }
+      if (parsed.fractionDigits > 0 && converted.text.includes('.')) {
+        steps.push({
+          label: `Convert the fraction: multiply by ${to} and keep the whole part, again and again`,
+          expr: `.${converted.text.split('.')[1]}`,
+          ...(converted.truncated ? { note: `This fraction never ends in base ${to}, so it is cut (not rounded) after ${MAX_FRACTION_DIGITS} digits.` } : {}),
+        });
+      }
+    }
+
+    steps.push({ label: `Write the answer in base ${to}`, expr: `${(values.input ?? '').trim().toUpperCase()} (base ${from}) = ${converted.text} (base ${to})` });
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

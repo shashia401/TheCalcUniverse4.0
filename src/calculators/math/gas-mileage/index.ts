@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { roundStr6 } from '../../../lib/format';
 import GasMileagePanel from './GasMileagePanel';
 import Decimal from 'decimal.js';
 import { parseNumberStrict } from '../../../utils/parseNumber';
@@ -15,6 +17,42 @@ function fmtCurrency(amount: Decimal, currency: string, dp = 2): string {
 
 const IMPERIAL_GAL_L = 4.54609; // UK gallon, exact by definition
 const IMPERIAL_FACTOR = IMPERIAL_GAL_L / L_PER_US_GAL; // MPG(imperial) / MPG(US) = 1.20095...
+
+/** Validated trip numbers shared by calculate() and explainSteps(); null when anything is missing or out of range. */
+function resolve(values: Record<string, string>) {
+  const mode = values.mode || 'odometer';
+  const distanceUnit = values.distanceUnit || 'mi';
+  const fuelUnit = values.fuelUnit || 'gal';
+  const priceCurrency = values.priceCurrency || 'USD';
+  const fuelAdded = parseNumberStrict(values.fuelAdded);
+  // Blank price = no cost analysis; a typed price must be a real number.
+  const priceRaw = (values.pricePerUnit ?? '').trim();
+  const pricePerUnit = priceRaw === '' ? NaN : parseNumberStrict(priceRaw);
+
+  if (isNaN(fuelAdded) || fuelAdded <= 0 || fuelAdded > 1e6) return null;
+
+  let distanceRaw = 0;
+  let odometer: { start: number; end: number } | null = null;
+  if (mode === 'odometer') {
+    const start = parseNumberStrict(values.odometerStart);
+    const end = parseNumberStrict(values.odometerEnd);
+    if (isNaN(start) || isNaN(end)) return null;
+    odometer = { start, end };
+    distanceRaw = end - start;
+  } else {
+    const trip = parseNumberStrict(values.tripDistance);
+    if (isNaN(trip)) return null;
+    distanceRaw = trip;
+  }
+
+  if (distanceRaw <= 0 || distanceRaw > 1e7) return null;
+
+  const miles = distanceUnit === 'km' ? distanceRaw / KM_PER_MILE : distanceRaw;
+  const gallons = fuelUnit === 'L' ? fuelAdded / L_PER_US_GAL : fuelAdded;
+  const mpg = miles / gallons;
+  const l100km = MPG_TO_L100KM / mpg;
+  return { distanceUnit, fuelUnit, priceCurrency, fuelAdded, pricePerUnit, distanceRaw, odometer, miles, gallons, mpg, l100km };
+}
 
 const gasMileageConfig: CalculatorConfig = {
   inputs: [
@@ -109,39 +147,12 @@ const gasMileageConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const mode = values.mode || 'odometer';
-    const distanceUnit = values.distanceUnit || 'mi';
-    const fuelUnit = values.fuelUnit || 'gal';
-    const priceCurrency = values.priceCurrency || 'USD';
-    const fuelAdded = parseNumberStrict(values.fuelAdded);
-    // Blank price = no cost analysis; a typed price must be a real number.
-    const priceRaw = (values.pricePerUnit ?? '').trim();
-    const pricePerUnit = priceRaw === '' ? NaN : parseNumberStrict(priceRaw);
-
-    if (isNaN(fuelAdded) || fuelAdded <= 0 || fuelAdded > 1e6) return [];
-
-    let distanceRaw = 0;
-    if (mode === 'odometer') {
-      const start = parseNumberStrict(values.odometerStart);
-      const end = parseNumberStrict(values.odometerEnd);
-      if (isNaN(start) || isNaN(end)) return [];
-      distanceRaw = end - start;
-    } else {
-      const trip = parseNumberStrict(values.tripDistance);
-      if (isNaN(trip)) return [];
-      distanceRaw = trip;
-    }
-
-    if (distanceRaw <= 0 || distanceRaw > 1e7) return [];
+    const trip = resolve(values);
+    if (!trip) return [];
+    const { distanceUnit, fuelUnit, priceCurrency, fuelAdded, pricePerUnit, distanceRaw, mpg, l100km } = trip;
 
     const distanceDisplayUnit = distanceUnit === 'mi' ? 'miles' : 'km';
     const distanceDisplay = `${distanceRaw.toFixed(1)} ${distanceDisplayUnit}`;
-
-    const miles = distanceUnit === 'km' ? distanceRaw / KM_PER_MILE : distanceRaw;
-    const gallons = fuelUnit === 'L' ? fuelAdded / L_PER_US_GAL : fuelAdded;
-
-    const mpg = miles / gallons;
-    const l100km = MPG_TO_L100KM / mpg;
 
     const fuelDisplay = fuelUnit === 'gal'
       ? `${fuelAdded.toFixed(2)} gallons`
@@ -228,6 +239,33 @@ const gasMileageConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const rows = gasMileageConfig.calculate(values);
+    const t = resolve(values);
+    if (!hasAnswer(rows) || !t) return [];
+    const km = t.distanceUnit === 'km';
+    const steps: ExplainStep[] = [];
+    if (t.odometer) {
+      steps.push({ label: 'Distance driven = current reading − previous reading', expr: `${roundStr6(t.odometer.end)} − ${roundStr6(t.odometer.start)} = ${roundStr6(t.distanceRaw)} ${km ? 'km' : 'mi'}` });
+    }
+    if (km) steps.push({ label: 'Convert kilometres to miles', expr: `${roundStr6(t.distanceRaw)} km ÷ ${KM_PER_MILE} = ${roundStr6(t.miles)} mi` });
+    if (t.fuelUnit === 'L') steps.push({ label: 'Convert litres to US gallons', expr: `${roundStr6(t.fuelAdded)} L ÷ ${L_PER_US_GAL} = ${roundStr6(t.gallons)} gal` });
+    steps.push({ label: 'Miles per gallon = miles ÷ gallons', expr: `${roundStr6(t.miles)} ÷ ${roundStr6(t.gallons)} = ${resultValue(rows, 'mpg')}` });
+    steps.push({
+      label: 'Litres per 100 km = 235.215 ÷ MPG',
+      expr: `${MPG_TO_L100KM.toFixed(3)} ÷ ${roundStr6(t.mpg)} = ${resultValue(rows, 'l100km')}`,
+      note: 'Lower L/100 km is better; higher MPG is better.',
+    });
+    if (resultValue(rows, 'costPerMile')) {
+      steps.push({
+        label: 'Cost per mile = fuel × price ÷ miles',
+        expr: `${roundStr6(t.fuelAdded)} × ${roundStr6(t.pricePerUnit)} ÷ ${roundStr6(t.miles)} = ${resultValue(rows, 'costPerMile')}`,
+        note: 'The price is per the fuel unit you chose, so no unit conversion is needed.',
+      });
+      steps.push({ label: 'Scale to a year', expr: resultValue(rows, 'annualCost')!, note: '12,000 miles a year is an assumed typical figure, not your own mileage.' });
+    }
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

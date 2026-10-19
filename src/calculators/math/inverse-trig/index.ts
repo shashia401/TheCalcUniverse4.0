@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import InverseTrigPanel from './InverseTrigPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 
@@ -132,6 +133,24 @@ const config: CalculatorConfig = {
         value: `${meta.label}(${fmt(value)}) — value ${fmt(value)} is in ${meta.domain}. Principal value lies in ${meta.rangeDeg}.`,
         color: 'neutral' as const,
       },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = config.calculate(values);
+    if (!hasAnswer(rows) || rows.some((r) => r.id === 'domainError')) return [];
+    const func = values.function || 'arcsin';
+    const meta = functionMeta[func];
+    const value = parseNumberStrict(values.value);
+    const exact = resultValue(rows, 'exactValue');
+    return [
+      { label: 'Check the value is allowed', expr: `${meta.label}(${fmt(value)}) needs a value in ${meta.domain}`, note: `The answer is always in ${meta.rangeDeg}.` },
+      {
+        label: `Find the angle whose ${meta.label.slice(3)} is ${fmt(value)}`,
+        expr: `${meta.label}(${fmt(value)}) = ${exact ? exact.split(' = ')[0] : `${resultValue(rows, 'radians')} rad`}`,
+        ...(exact ? { note: 'This is one of the standard angles, so the exact form is known.' } : {}),
+      },
+      { label: 'Convert radians to degrees (× 180 ÷ π)', expr: `${resultValue(rows, 'radians')} × 180 ÷ π = ${resultValue(rows, 'degrees')}` },
+      { label: 'All angles with the same value', expr: resultValue(rows, 'allSolutions')!, note: 'k is any whole number: adding full turns (or half turns for tan) gives the same value.' },
     ];
   },
   extraPanel: (values, results) => {

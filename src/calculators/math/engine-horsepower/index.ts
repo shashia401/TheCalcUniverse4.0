@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import EngineHPPanel from './EngineHPPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 
@@ -136,6 +137,27 @@ const engineHPConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = engineHPConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const torque = parseNumberStrict(values.torque);
+    const rpm = parseNumberStrict(values.rpm);
+    const hp = resultValue(rows, 'horsepower')!;
+    const kw = resultValue(rows, 'powerKW')!;
+    const category = { label: 'Power category', expr: resultValue(rows, 'powerCategory')! };
+    if (values.unitSystem === 'metric') {
+      return [
+        { label: 'Power in kW = torque (Nm) × rpm ÷ 9,549.3', expr: `${torque} × ${rpm} ÷ ${NM_RPM_PER_KW.toFixed(2)} = ${kw}`, note: '9,549.3 is 60,000 ÷ 2π: it turns rpm into radians per second and watts into kilowatts.' },
+        { label: 'Convert kW to horsepower (1 HP = 0.7457 kW)', expr: `${kw} ÷ ${KW_PER_HP.toFixed(4)} = ${hp}` },
+        category,
+      ];
+    }
+    return [
+      { label: 'Horsepower = torque (lb-ft) × rpm ÷ 5,252', expr: `${torque} × ${rpm} ÷ ${LBFT_RPM_PER_HP.toFixed(2)} = ${hp}`, note: '5,252 is 33,000 ÷ 2π: it comes from the definition of one horsepower.' },
+      { label: 'Convert to kilowatts (1 HP = 0.7457 kW)', expr: `${hp} × ${KW_PER_HP.toFixed(4)} = ${kw}` },
+      category,
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

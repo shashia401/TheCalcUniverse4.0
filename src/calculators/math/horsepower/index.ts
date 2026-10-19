@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import HorsepowerPanel from './HorsepowerPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 
@@ -8,6 +9,10 @@ const DRIVETRAIN_LOSS: Record<string, number> = {
   rwd: 18,
   awd: 25,
 };
+
+// Drag-strip rules of thumb (Hale / Fox): HP = weight / (ET / 5.825)^3 and HP = weight x (trap mph / 234)^3.
+const ET_CONSTANT = 5.825;
+const SPEED_CONSTANT = 234;
 
 const powerCategory = (hp: number, weight: number): string => {
   const ratio = weight / hp;
@@ -97,8 +102,8 @@ const horsepowerConfig: CalculatorConfig = {
     const lossFactor = 1 - lossPct / 100;
     const fmtHP = (n: number) => `${n.toFixed(1)} HP`;
 
-    const hpFromET = needEt ? weight / Math.pow(et / 5.825, 3) : NaN;
-    const hpFromSpeed = needSpeed ? weight * Math.pow(speed / 234, 3) : NaN;
+    const hpFromET = needEt ? weight / Math.pow(et / ET_CONSTANT, 3) : NaN;
+    const hpFromSpeed = needSpeed ? weight * Math.pow(speed / SPEED_CONSTANT, 3) : NaN;
     const estimatedHP = mode === 'et' ? hpFromET : mode === 'speed' ? hpFromSpeed : (hpFromET + hpFromSpeed) / 2;
     const method = mode === 'et' ? 'ET-based' : mode === 'speed' ? 'Speed-based' : 'Average of both';
 
@@ -117,6 +122,33 @@ const horsepowerConfig: CalculatorConfig = {
     }
     results.push({ id: 'powerCategory', label: 'Performance Tier', value: powerCategory(estimatedHP, weight), color: 'positive' as const });
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = horsepowerConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const weight = parseNumberStrict(values.vehicleWeight);
+    const mode = values.mode || 'both';
+    const loss = DRIVETRAIN_LOSS[values.drivetrain || 'rwd'] ?? 18;
+    const hp = resultValue(rows, 'estimatedHP')!;
+    const steps = [];
+    if (mode !== 'speed') {
+      steps.push({
+        label: `From the quarter-mile time: HP = weight ÷ (ET ÷ ${ET_CONSTANT})³`,
+        expr: `${weight} ÷ (${parseNumberStrict(values.quarterMileET)} ÷ ${ET_CONSTANT})³ = ${resultValue(rows, mode === 'both' ? 'hpFromET' : 'estimatedHP')}`,
+      });
+    }
+    if (mode !== 'et') {
+      steps.push({
+        label: `From the trap speed: HP = weight × (speed ÷ ${SPEED_CONSTANT})³`,
+        expr: `${weight} × (${parseNumberStrict(values.trapSpeed)} ÷ ${SPEED_CONSTANT})³ = ${resultValue(rows, mode === 'both' ? 'hpFromSpeed' : 'estimatedHP')}`,
+      });
+    }
+    if (mode === 'both') {
+      steps.push({ label: 'Average the two estimates', expr: `(${resultValue(rows, 'hpFromET')} + ${resultValue(rows, 'hpFromSpeed')}) ÷ 2 = ${hp}`, note: 'Two independent readings of the same run are more reliable than one.' });
+    }
+    steps.push({ label: `Take off the ${loss}% drivetrain loss to get wheel horsepower`, expr: `${hp} × (1 − ${loss}%) = ${resultValue(rows, 'wheelHP')}` });
+    steps.push({ label: 'Power-to-weight = weight ÷ horsepower', expr: `${weight} ÷ ${hp} = ${resultValue(rows, 'powerToWeight')}` });
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

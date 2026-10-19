@@ -1,5 +1,6 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import BinaryHexPanel from './BinaryHexPanel';
 
 // ─── Base helpers ───────────────────────────────────────────────────────────
@@ -304,6 +305,64 @@ const binaryHexConfig: CalculatorConfig = {
     if (mode === 'Convert') return doConvert(values);
     if (mode === 'Calculate') return doCalculate(values);
     return [];
+  },
+
+  // ─── Worked solution (reads the calculator's own result rows) ──
+  explainSteps: (values): ExplainStep[] => {
+    const rows = binaryHexConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const get = (id: string) => resultValue(rows, id) ?? '';
+    const steps: ExplainStep[] = [];
+
+    if (values.mode === 'Convert') {
+      const fromBase = BASE_MAP[values.fromBase];
+      const toBase = BASE_MAP[values.toBase];
+      const dec = get('resultDecimal');
+      if (fromBase !== 10) {
+        const formula = get('formulaString');
+        steps.push({
+          label: `Multiply each digit by its place value (base ${fromBase})`,
+          expr: formula.length > 160 ? `Σ digit × ${fromBase}^position = ${dec}` : formula,
+        });
+      }
+      if (toBase !== 10) {
+        let q = BigInt(dec) < 0n ? -BigInt(dec) : BigInt(dec);
+        const b = BigInt(toBase);
+        const chain: string[] = [];
+        while (q > 0n && chain.length <= 12) {
+          chain.push(`${q} ÷ ${toBase} = ${q / b} r ${digitChar(Number(q % b))}`);
+          q /= b;
+        }
+        if (chain.length) {
+          steps.push({
+            label: `Divide by ${toBase}, keeping each remainder`,
+            expr: q > 0n ? 'Long number: repeat the division until the quotient reaches 0' : chain.join('  |  '),
+            note: 'Read the remainders from the last one back to the first.',
+          });
+        }
+      }
+      steps.push({
+        label: `Write the answer in ${values.toBase === 'Hex' ? 'hexadecimal' : values.toBase.toLowerCase()}`,
+        expr: `${get('inputDisplay')} (${values.fromBase}) = ${get('convertedResult')} (${values.toBase})`,
+      });
+      const twos = rows.find((r) => r.id === 'resultBinaryWidth');
+      if (twos) steps.push({ label: `Show it at the chosen width (${twos.label})`, expr: twos.value });
+      return steps;
+    }
+
+    // Calculate mode
+    const lines = get('stepDetail').split('\n').map((l) => l.trim()).filter(Boolean);
+    const isRule = (l: string) => /^─+$/.test(l);
+    const detail = lines.some(isRule) ? lines.map((l) => (isRule(l) ? '=' : l)).join(' ') : lines.join('  |  ');
+    steps.push({ label: `Set up the operation (values in ${values.base === 'Hex' ? 'hexadecimal' : values.base.toLowerCase()})`, expr: get('operationDisplay') });
+    steps.push({ label: 'Work it out', expr: detail });
+    const flags = get('flags').replace(/⚠️\s*/g, '');
+    steps.push({
+      label: 'Result',
+      expr: `${rows.find((r) => r.id === 'calcResult')!.label} = ${get('calcResult')}`,
+      ...(flags ? { note: flags } : {}),
+    });
+    return steps;
   },
 
   // ─── Extra Panel ──

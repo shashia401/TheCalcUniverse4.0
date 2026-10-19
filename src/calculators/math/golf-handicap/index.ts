@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import GolfPanel from './GolfPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 // World Handicap System arithmetic (Rules 5.1, 5.2, 6.1) lives in whs.ts so it is tested on its own.
@@ -30,6 +31,29 @@ function parseRounds(text: string): RoundData[] {
     rounds.push({ score, rating, slope, pcc });
   }
   return rounds;
+}
+
+/** The chosen number of most recent rounds, their score differentials and the resulting Handicap Index (null index below 3 scores). */
+function readRounds(values: Record<string, string>) {
+  const parsedMax = parseInt(values.numRounds || '20', 10);
+  const maxRounds = Number.isNaN(parsedMax) ? 20 : parsedMax;
+
+  const allRounds = parseRounds(values.rounds || '');
+  if (allRounds.length === 0) return null;
+
+  // Most recent first; only the chosen number of rounds (never more than the WHS 20) are considered.
+  const rounds = allRounds.slice(0, maxRounds);
+  const diffs = rounds.map((r) => scoreDifferential(r.score, r.rating, r.slope, r.pcc));
+  return { rounds, diffs, hi: handicapIndex(diffs) };
+}
+
+/** The optional course to play; null unless slope, rating and par are all given and sensible. */
+function readCourse(values: Record<string, string>) {
+  const slope = parseNumberStrict(values.courseSlope);
+  const rating = parseNumberStrict(values.courseRating);
+  const par = parseNumberStrict(values.coursePar);
+  const ok = !isNaN(slope) && !isNaN(rating) && !isNaN(par) && slope >= 55 && slope <= 155 && rating > 0 && par > 0;
+  return ok ? { slope, rating, par } : null;
 }
 
 const golfConfig: CalculatorConfig = {
@@ -81,16 +105,9 @@ const golfConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const parsedMax = parseInt(values.numRounds || '20', 10);
-    const maxRounds = Number.isNaN(parsedMax) ? 20 : parsedMax;
-
-    const allRounds = parseRounds(values.rounds || '');
-    if (allRounds.length === 0) return [];
-
-    // Most recent first; only the chosen number of rounds (never more than the WHS 20) are considered.
-    const rounds = allRounds.slice(0, maxRounds);
-    const diffs = rounds.map((r) => scoreDifferential(r.score, r.rating, r.slope, r.pcc));
-    const hi = handicapIndex(diffs);
+    const read = readRounds(values);
+    if (!read) return [];
+    const { rounds, diffs, hi } = read;
 
     if (!hi) {
       return [
@@ -108,11 +125,9 @@ const golfConfig: CalculatorConfig = {
 
     // Course Handicap (WHS Rule 6.1) for the course to be played, when its slope, rating and par are all given;
     // otherwise for a neutral course (slope 113, course rating = par), which is just the index rounded.
-    const cSlope = parseNumberStrict(values.courseSlope);
-    const cRating = parseNumberStrict(values.courseRating);
-    const cPar = parseNumberStrict(values.coursePar);
-    const haveCourse = !isNaN(cSlope) && !isNaN(cRating) && !isNaN(cPar) && cSlope >= 55 && cSlope <= 155 && cRating > 0 && cPar > 0;
-    const ch = haveCourse ? courseHandicap(hi.index, cSlope, cRating, cPar) : courseHandicap(hi.index, 113, 0, 0);
+    const course = readCourse(values);
+    const haveCourse = course !== null;
+    const ch = course ? courseHandicap(hi.index, course.slope, course.rating, course.par) : courseHandicap(hi.index, 113, 0, 0);
 
     const results: CalculatorResult[] = [
       {
@@ -163,6 +178,45 @@ const golfConfig: CalculatorConfig = {
     });
 
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = golfConfig.calculate(values);
+    const read = readRounds(values);
+    if (!hasAnswer(rows) || !read || !read.hi || !resultValue(rows, 'handicapIndex')) return [];
+    const { rounds, diffs, hi } = read;
+    const shown = rounds
+      .slice(0, 6)
+      .map((r, i) => `#${i + 1}: (113 ÷ ${r.slope}) × (${r.score} − ${r.rating}${r.pcc ? ` − ${r.pcc}` : ''}) = ${diffs[i]}`);
+    const used = hi.usedIndices.map((i) => diffs[i]);
+    const index = resultValue(rows, 'handicapIndex')!;
+    const course = readCourse(values);
+    return [
+      {
+        label: 'Score differential of each round = (113 ÷ slope) × (score − course rating − PCC)',
+        expr: shown.join('  |  ') + (rounds.length > 6 ? `  |  … ${rounds.length - 6} more rounds` : ''),
+        note: 'Each differential is rounded to one decimal place. PCC is the Playing Conditions Calculation (0 unless you entered one).',
+      },
+      {
+        label: `Pick the ${hi.count} lowest of your ${hi.scoresUsed} differential${hi.scoresUsed === 1 ? '' : 's'}`,
+        expr: used.join(', '),
+        note: 'The World Handicap System counts only your best rounds: 1 of 3, 2 of 6, 3 of 9, up to 8 of 20.',
+      },
+      {
+        label: hi.adjustment ? 'Average them, then apply the small-sample adjustment' : 'Average them',
+        expr: `(${used.join(' + ')}) ÷ ${hi.count} = ${hi.average}${hi.adjustment ? `  ${hi.adjustment < 0 ? '−' : '+'} ${Math.abs(hi.adjustment)}` : ''} → Handicap Index ${index}`,
+      },
+      course
+        ? {
+            label: 'Course Handicap = Index × (slope ÷ 113) + (course rating − par)',
+            expr: `${index} × (${course.slope} ÷ 113) + (${course.rating} − ${course.par}) = ${resultValue(rows, 'courseHandicap')}`,
+            note: 'Rounded to a whole number.',
+          }
+        : {
+            label: 'Course Handicap for a neutral course (slope 113, rating = par)',
+            expr: `${index} rounds to ${resultValue(rows, 'courseHandicap')}`,
+            note: 'Enter a course slope, rating and par above to see the handicap for that course.',
+          },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

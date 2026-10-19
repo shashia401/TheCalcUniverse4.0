@@ -1,7 +1,9 @@
 import { createElement } from 'react';
-import type { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import type { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import BandwidthPanel from './bandwidthPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { roundStr6 } from '../../../lib/format';
 
 const FILE_UNIT_TO_MBIT: Record<string, number> = {
   MB: 8,
@@ -108,6 +110,32 @@ const bandwidthConfig: CalculatorConfig = {
 
   calculate: (values): CalculatorResult[] => calculate(values),
 
+  explainSteps: (values) => {
+    const rows = calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const unit = String(values.fileSizeUnit || 'MB');
+    const size = roundStr6(parseNumberStrict(String(values.fileSize)));
+    const speed = roundStr6(parseNumberStrict(String(values.connectionSpeed)));
+    const mbits = resultValue(rows, 'File Size (Mbits)')!;
+    const mbps = resultValue(rows, 'Connection Speed (Mbps)')!;
+    const eff = resultValue(rows, 'Effective Speed (Mbps)')!;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Convert the file size to megabits',
+        expr: `${size} ${unit} × ${FILE_UNIT_TO_MBIT[unit]} Mbit/${unit} = ${mbits} Mbit`,
+        note: 'One byte is 8 bits, and this uses decimal units (1 GB = 1,000 MB).',
+      },
+    ];
+    if (values.speedUnit === 'Gbps') steps.push({ label: 'Convert the speed to Mbps', expr: `${speed} Gbps × 1,000 = ${mbps} Mbps` });
+    if (values.tcpOverhead === 'Yes') {
+      steps.push({ label: 'Take off the TCP overhead', expr: `${mbps} Mbps × (1 − 10%) = ${eff} Mbps`, note: 'Protocol headers and retransmissions use up part of the line.' });
+    }
+    steps.push({
+      label: 'Divide the size by the speed',
+      expr: `${mbits} Mbit ÷ ${eff} Mbps = ${resultValue(rows, 'Transfer Time (seconds)')} s = ${resultValue(rows, 'Transfer Time')}`,
+    });
+    return steps;
+  },
   extraPanel: (values, results) => createElement(BandwidthPanel, { values, results }),
 
   educational: {

@@ -3,6 +3,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import ConfidenceIntervalPanel from './ConfidenceIntervalPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { normQuantile, tCritical } from '../../../utils/distributions';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { roundStr6 } from '../../../lib/format';
 
 /** Confidence level -> two-sided alpha. Critical values are computed exactly (1.6449, 1.9600, 2.5758), not from rounded tables. */
 const LEVELS: Record<string, { label: string; alpha: number }> = {
@@ -150,6 +152,27 @@ const confidenceIntervalConfig: CalculatorConfig = {
       },
       // Exact numbers for the panel (it never parses the formatted strings above).
       { id: '_data', label: '', value: JSON.stringify({ mean: sampleMean, lower, upper, moe, crit, useT }) },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = confidenceIntervalConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const useT = values.sdType !== 'population';
+    const n = parseNumberStrict(values.sampleSize);
+    const sd = roundStr6(parseNumberStrict(values.stddev));
+    const mean = roundStr6(parseNumberStrict(values.sampleMean));
+    const crit = rows.find((r) => r.id === 'criticalValue')!;
+    const se = resultValue(rows, 'standardError')!;
+    const moe = resultValue(rows, 'marginOfError')!.replace('±', '');
+    return [
+      { label: `Standard error = ${useT ? 's' : 'σ'} ÷ √n`, expr: `${sd} ÷ √${n} = ${se}` },
+      {
+        label: `Look up the ${useT ? 't' : 'z'} critical value`,
+        expr: `${crit.label} = ${crit.value}`,
+        note: useT ? 'The standard deviation was estimated from the sample, so Student t (df = n − 1) is used rather than z.' : 'The population standard deviation is known, so the normal z value applies.',
+      },
+      { label: 'Margin of error = critical value × standard error', expr: `${crit.value.split(' ')[0]} × ${se} = ${moe}` },
+      { label: 'Interval = mean ± margin of error', expr: `${mean} ± ${moe} = ${resultValue(rows, 'confidenceInterval')}` },
     ];
   },
   extraPanel: (values, results) => {

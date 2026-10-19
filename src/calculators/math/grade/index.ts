@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import GradePanel from './GradePanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { finalExamNeeded, fmtPct } from '../../../utils/finalGrade';
@@ -111,6 +112,29 @@ const gradeConfig: CalculatorConfig = {
           floor: exam.floor,
           ceiling: exam.ceiling,
         }),
+      },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = gradeConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const current = parseNumberStrict(values.currentGrade);
+    const desired = parseNumberStrict(values.desiredGrade);
+    const weight = parseNumberStrict(values.examWeight);
+    const exam = finalExamNeeded(current, desired, weight);
+    if (!exam) return [];
+    const toGo = parseFloat((desired - exam.floor).toFixed(2));
+    return [
+      {
+        label: 'Points you already bank = current grade × (100% − exam weight)',
+        expr: `${current}% × (100% − ${weight}%) = ${fmtPct(exam.floor)}`,
+        note: `If you scored 0% on the final you would finish on ${fmtPct(exam.floor)}.`,
+      },
+      { label: 'Points still needed = desired grade − points banked', expr: `${desired}% − ${fmtPct(exam.floor)} = ${fmtPct(toGo)}` },
+      {
+        label: 'Score needed on the final = points still needed ÷ exam weight',
+        expr: `${fmtPct(toGo)} ÷ ${weight}% = ${fmtPct(exam.needed)}`,
+        note: exam.status === 'impossible' ? `Over 100%: even a perfect final only reaches ${fmtPct(exam.ceiling)}.` : exam.status === 'secured' ? 'Zero or below: you have already reached your target.' : resultValue(rows, 'status'),
       },
     ];
   },

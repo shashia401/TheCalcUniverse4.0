@@ -3,6 +3,7 @@ import { createElement } from 'react';
 import CorrelationPanel from './CorrelationPanel';
 import { parseDataset, pearson, spearman, fmtDec, ignoredRow, sumOf, D, type Dec } from '../../../utils/stats';
 import { tTwoTail } from '../../../utils/distributions';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 /** Conventional |r| bands (Evans 1996); classified on the 4-decimal value that is displayed. */
 function strengthOf(absR: number): string {
@@ -186,6 +187,33 @@ const correlationConfig: CalculatorConfig = {
       },
       ...ignoredRow(ignored),
       { id: '_data', label: '', value: JSON.stringify({ r: rNum, r2: rSquared.toNumber(), rho: rho ? rho.toNumber() : null, p, n }) },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = correlationConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const r = resultValue(rows, 'r');
+    if (!r || r === 'Undefined') return []; // a constant variable: r = 0/0 has no worked solution
+    const c = pearson(parseDataset(values.xValues).values, parseDataset(values.yValues).values);
+    const f = (d: Dec) => fmtDec(d, 10);
+    const p = rows.find((row) => row.id === 'pValue')!;
+    return [
+      { label: 'Find the mean of each variable', expr: `x̄ = ${resultValue(rows, 'meanX')},  ȳ = ${resultValue(rows, 'meanY')}  (n = ${resultValue(rows, 'n')})` },
+      {
+        label: 'Add up how X and Y vary, alone and together',
+        expr: `Sxy = Σ(x − x̄)(y − ȳ) = ${f(c.sxy)},  Sxx = Σ(x − x̄)² = ${f(c.sxx)},  Syy = Σ(y − ȳ)² = ${f(c.syy)}`,
+      },
+      {
+        label: 'Divide: r = Sxy ÷ √(Sxx × Syy)',
+        expr: `r = ${f(c.sxy)} ÷ √(${f(c.sxx)} × ${f(c.syy)}) = ${r}`,
+        note: `${resultValue(rows, 'strength')}, ${resultValue(rows, 'direction')?.toLowerCase()} relationship.`,
+      },
+      { label: 'Square it to get r²', expr: `r² = ${resultValue(rows, 'rSquared')}`, note: 'The share of the ups and downs in Y that a straight line on X accounts for.' },
+      {
+        label: 'Test whether r could be chance (t-test, df = n − 2)',
+        expr: `${p.label} = ${p.value}`,
+        ...(p.interpretation ? { note: p.interpretation } : {}),
+      },
     ];
   },
   extraPanel: (values, results) => {

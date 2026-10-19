@@ -1,5 +1,6 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import GdpPanel from './GdpPanel';
 import Decimal from 'decimal.js';
 import { parseNonNegative } from '../../../utils/parseNumber';
@@ -192,6 +193,37 @@ const gdpConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = gdpConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const C = parseNonNegative(values.consumption, 1e18);
+    const I = parseNonNegative(values.investment, 1e18);
+    const G = parseNonNegative(values.governmentSpending, 1e18);
+    const X = parseNonNegative(values.exports, 1e18);
+    const M = parseNonNegative(values.imports, 1e18);
+    const nominal = new Decimal(C).plus(I).plus(G).plus(new Decimal(X).minus(M)).toNumber();
+    const net = resultValue(rows, 'netExports')!;
+    const steps: ExplainStep[] = [
+      { label: 'Net exports = exports − imports', expr: `${fmtLargeCurrency(X)} − ${fmtLargeCurrency(M)} = ${net}` },
+      {
+        label: 'Add the four parts of spending: GDP = C + I + G + (X − M)',
+        expr: `${fmtLargeCurrency(C)} + ${fmtLargeCurrency(I)} + ${fmtLargeCurrency(G)} + (${net}) = ${fmtLargeCurrency(nominal)}`,
+      },
+    ];
+    if (values.mode === 'real') {
+      const deflator = parseNonNegative(values.gdpDeflator, 1e6);
+      steps.push({
+        label: 'Adjust for prices: real GDP = nominal GDP ÷ (deflator ÷ 100)',
+        expr: `${fmtLargeCurrency(nominal)} ÷ (${deflator} ÷ 100) = ${resultValue(rows, 'gdp')}`,
+        note: 'A deflator above 100 means prices have risen since the base year, so real GDP is smaller than nominal.',
+      });
+    }
+    steps.push({
+      label: "Each part's share of nominal GDP",
+      expr: `Consumption ${resultValue(rows, 'consumptionShare')},  investment ${resultValue(rows, 'investmentShare')},  government ${resultValue(rows, 'governmentShare')},  net exports ${resultValue(rows, 'netExportShare')}`,
+    });
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

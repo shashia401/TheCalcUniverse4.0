@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import FactorPanel from './FactorPanel';
 import {
   MAX_FACTOR_INPUT,
@@ -63,11 +64,33 @@ const factorConfig: CalculatorConfig = {
         id: 'sum',
         label: 'Sum of Factors',
         value: total.toString(),
-        interpretation: `The proper factors (all except ${n} itself) add up to ${properSum}, so ${n} is a ${kind} number.`,
+        interpretation: `The proper factors (all except ${n} itself) add up to ${properSum}, so ${n} is ${kind === 'abundant' ? 'an' : 'a'} ${kind} number.`,
       },
       { id: 'isPrime', label: 'Prime?', value: factors.length === 2 ? 'Yes' : 'No' },
       { id: '_pairsData', label: 'Pairs Data', value: JSON.stringify(shownPairs) },
     ];
+  },
+  explainSteps: (values) => {
+    const parsed = parsePositiveSafeInt(values.number);
+    const rows = factorConfig.calculate(values);
+    if (parsed.kind !== 'ok' || !hasAnswer(rows)) return [];
+    const n = parsed.n;
+    const primes = factorize(n);
+    const steps = [{ label: 'Break the number into prime factors', expr: `${n} = ${resultValue(rows, 'primeFactorization')}` }];
+    if (primes.length) {
+      steps.push({
+        label: 'Count the factors: add 1 to each exponent, then multiply',
+        expr: `${primes.map(([, e]) => `(${e} + 1)`).join(' × ')} = ${resultValue(rows, 'count')}`,
+      });
+    }
+    const pairs = (resultValue(rows, 'factorPairs') ?? '').split(' | ');
+    steps.push({
+      label: 'Pair the factors up so each pair multiplies to the number',
+      expr: pairs.slice(0, 8).join(',  ') + (pairs.length > 8 ? ',  …' : ''),
+    });
+    const sum = rows.find((r) => r.id === 'sum')!;
+    steps.push({ label: 'Add all the factors', expr: `Sum of factors = ${sum.value}`, ...(sum.interpretation ? { note: sum.interpretation } : {}) });
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

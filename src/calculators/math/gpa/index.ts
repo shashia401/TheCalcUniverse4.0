@@ -1,5 +1,6 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import GPAPanel from './GPAPanel';
 import GPACoursesInput from './GPACoursesInput';
 
@@ -14,7 +15,7 @@ import { D, type Dec } from '../../../utils/stats';
  * Rows left completely blank (no grade and no credits, the form starts with two) are skipped; a half-filled row
  * (grade without credits or vice versa) makes the whole list incomplete. Returns null if invalid or empty.
  */
-function parseCourses(raw: string, scale: ScaleId): CourseInput[] | null {
+export function parseCourses(raw: string, scale: ScaleId): CourseInput[] | null {
   let rows: Array<Record<string, unknown>>;
 
   // Try JSON first
@@ -266,6 +267,51 @@ const gpaConfig: CalculatorConfig = {
         id: '_targetData',
         label: '',
         value: JSON.stringify({ needed: need.needed.toNumber(), max, impossible: need.impossible, secured: need.secured, current: currentGPA, target: targetGPA }),
+      },
+    ];
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const rows = gpaConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const scale: ScaleId = values.scale === 'thirds' ? 'thirds' : 'standard';
+
+    if ((values.mode || 'calculate') === 'calculate') {
+      const courses = parseCourses(values.courses?.trim() || '', scale);
+      const result = courses && calcGpa(courses, scale);
+      if (!result) return [];
+      const lines = result.rows.slice(0, 8).map((r) => `${r.grade}: ${new D(r.points).div(r.credits).toString()} points × ${r.credits} credits = ${r.points}`);
+      const gpa = rows.find((r) => r.id === 'gpa')!;
+      return [
+        {
+          label: 'Turn each grade into grade points and multiply by its credits',
+          expr: lines.join('  |  ') + (result.rows.length > 8 ? `  |  … ${result.rows.length - 8} more courses` : ''),
+          note: values.scale === 'thirds' ? 'This uses the thirds scale (A+ = 4.33, A− = 3.67 …).' : 'This uses the standard scale (A = 4.0, A− = 3.7, B+ = 3.3 …). Honors and AP/IB add 0.5 and 1.0 to a passing grade.',
+        },
+        { label: 'Add up the grade points and the credits', expr: `Grade points = ${resultValue(rows, 'totalGradePoints')},  credits = ${resultValue(rows, 'totalCredits')}` },
+        {
+          label: 'GPA = total grade points ÷ total credits',
+          expr: `${resultValue(rows, 'totalGradePoints')} ÷ ${resultValue(rows, 'totalCredits')} = ${gpa.value}`,
+          ...(gpa.label === 'Weighted GPA' ? { note: `Without the honors / AP bonus the GPA is ${resultValue(rows, 'unweightedGpa')}.` } : {}),
+        },
+      ];
+    }
+
+    const current = parseNumberStrict(values.currentGPA);
+    const done = parseNumberStrict(values.creditsCompleted);
+    const target = parseNumberStrict(values.targetGPA);
+    const left = parseNumberStrict(values.remainingCredits);
+    const need = neededGpa(current, done, target, left, scale);
+    const total = new D(done).plus(left);
+    const goal = new D(target).times(total);
+    const banked = new D(current).times(done);
+    const grade = resultValue(rows, 'neededGrade')!;
+    return [
+      { label: 'Grade points you need in total = target GPA × all credits', expr: `${target} × (${done} + ${left}) = ${goal.toString()}` },
+      { label: 'Subtract the grade points you already have = current GPA × credits done', expr: `${goal.toString()} − ${current} × ${done} = ${goal.minus(banked).toString()} points still to earn` },
+      {
+        label: 'Divide by the credits you have left',
+        expr: `${goal.minus(banked).toString()} ÷ ${left} = ${need.needed.toDecimalPlaces(2, D.ROUND_HALF_UP).toFixed(2)}`,
+        note: need.impossible ? grade : need.secured ? 'Your target is already secured.' : `The lowest grade per course that gets you there is ${grade}.`,
       },
     ];
   },

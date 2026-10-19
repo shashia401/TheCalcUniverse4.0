@@ -1,16 +1,19 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import DewPointPanel from './DewPointPanel';
-import { roundStrD as fmt } from '../../../lib/format';
+import { roundStrD as fmt, roundStr4 } from '../../../lib/format';
 import { ABSOLUTE_ZERO_F, cToF, fToC } from '../../../utils/temperature';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 
 /** Magnus-Tetens dew point (°C) for air at `Tc` °C and `RH` % (0 < RH <= 100). Constants as in the page's formula. */
+const MAGNUS_A = 17.27;
+const MAGNUS_B = 237.7;
+/** The Magnus term gamma = aT/(b+T) + ln(RH/100); the dew point is b*gamma/(a-gamma). */
+const magnusGamma = (Tc: number, RH: number): number => (MAGNUS_A * Tc) / (MAGNUS_B + Tc) + Math.log(RH / 100);
 function dewPoint(Tc: number, RH: number): number {
-  const a = 17.27;
-  const b = 237.7;
-  const gamma = (a * Tc) / (b + Tc) + Math.log(RH / 100);
-  return (b * gamma) / (a - gamma);
+  const gamma = magnusGamma(Tc, RH);
+  return (MAGNUS_B * gamma) / (MAGNUS_A - gamma);
 }
 
 function getComfortLevel(dpF: number): { label: string; description: string } {
@@ -122,6 +125,26 @@ const dewPointConfig: CalculatorConfig = {
           comfortDescription: comfort.description,
         }),
       },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = dewPointConfig.calculate(values);
+    if (!hasAnswer(rows) || !resultValue(rows, 'dewPointC')) return [];
+    const Tf = parseNumberStrict(values.temperature);
+    const RH = parseNumberStrict(values.humidity);
+    const Tc = fToC(Tf);
+    const g = magnusGamma(Tc, RH);
+    const dpC = resultValue(rows, 'dewPointC')!;
+    return [
+      { label: 'Convert the temperature to °C', expr: `T = (${fmt(Tf)} − 32) × 5 ÷ 9 = ${roundStr4(Tc)}°C` },
+      {
+        label: 'Work out the Magnus term γ',
+        expr: `γ = ${MAGNUS_A} × ${roundStr4(Tc)} ÷ (${MAGNUS_B} + ${roundStr4(Tc)}) + ln(${fmt(RH)} ÷ 100) = ${roundStr4(g)}`,
+        note: 'Relative humidity enters through its natural logarithm.',
+      },
+      { label: 'Dew point in °C = b × γ ÷ (a − γ)', expr: `${MAGNUS_B} × ${roundStr4(g)} ÷ (${MAGNUS_A} − ${roundStr4(g)}) = ${dpC}` },
+      { label: 'Convert the dew point back to °F', expr: `${dpC} × 9 ÷ 5 + 32 = ${resultValue(rows, 'dewPointF')}` },
+      { label: 'Read the comfort level', expr: `${resultValue(rows, 'dewPointF')} → ${resultValue(rows, 'comfortLevel')}` },
     ];
   },
   extraPanel: (values, results) => {

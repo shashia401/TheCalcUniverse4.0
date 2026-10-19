@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import quadraticConfig from '../quadratic';
 import EquationSolverPanel from './EquationSolverPanel';
 import { solveQuadratic, equationText, fmtF, fmtN } from '../quadratic/quadraticMath';
 import { polyString } from '../polynomial-calculator/polyMath';
@@ -197,6 +199,34 @@ const equationSolverConfig: CalculatorConfig = {
     out.push(hide('_kind', type));
     out.push(hide('_realRoots', JSON.stringify(roots.filter((r) => r.im === 0).map((r) => r.re))));
     return out;
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const rows = equationSolverConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const type = values.equationType;
+    if (type === 'quadratic') return quadraticConfig.explainSteps?.(values) ?? [];
+    if (type === 'linear') {
+      const root = resultValue(rows, 'root1');
+      const a = parseDecimalExact(values.a, 60);
+      const b = parseDecimalExact(values.b, 60);
+      if (!root || !a || !b) return [];
+      const negB = fmtF(makeFrac(-b.n, b.d));
+      return [
+        { label: 'Move the constant to the other side', expr: `${polyString([a, b])} = 0  →  ${fmtF(a)}x = ${negB}` },
+        { label: 'Divide both sides by the coefficient of x', expr: `x = ${negB} ÷ ${fmtF(a)} = ${root}` },
+      ];
+    }
+    const roots = rows.filter((r) => /^root\d+$/.test(r.id)).map((r) => `${r.label.replace(/^Root /, '')} = ${r.value}`);
+    if (!roots.length) return [];
+    return [
+      { label: 'Write the equation in standard form', expr: resultValue(rows, 'equation')! },
+      {
+        label: 'Split off repeated roots, then find every root numerically',
+        expr: roots.join(',  '),
+        note: 'There is no short closed formula for most cubics and quartics in practice, so an iterative method homes in on all roots together.',
+      },
+      { label: `A ${type} equation has ${type === 'cubic' ? 3 : 4} roots in all, counting repeats and complex ones`, expr: resultValue(rows, 'nature')! },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

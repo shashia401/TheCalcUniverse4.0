@@ -1,4 +1,5 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import BigNumberPanel from './BigNumberPanel';
 import { createElement } from 'react';
 
@@ -137,6 +138,34 @@ const bigNumberConfig: CalculatorConfig = {
     }
 
     return output;
+  },
+  explainSteps: (values) => {
+    const rows = bigNumberConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const a = BigInt(values.a!.trim());
+    const b = BigInt(values.b!.trim());
+    const op = values.op || 'add';
+    const out = bigIntOperation(a, b, op);
+    if (!out.ok) return [];
+    const labels: Record<string, string> = {
+      add: 'Add the two numbers',
+      subtract: 'Subtract the second from the first',
+      multiply: 'Multiply the two numbers',
+      divide: 'Divide, dropping the fraction (truncated toward zero)',
+      power: 'Raise the first number to the power of the second',
+    };
+    const steps = [
+      { label: 'Read the two whole numbers', expr: `Value 1 = ${short(a)}  and  Value 2 = ${short(b)}` },
+      { label: labels[op], expr: out.step },
+    ];
+    if (op === 'divide') {
+      steps.push({
+        label: 'Check: quotient × divisor + remainder gives back the first number',
+        expr: `${short(out.result)} × ${short(b)} + ${short(out.remainder ?? 0n)} = ${short(out.result * b + (out.remainder ?? 0n))}`,
+      });
+    }
+    steps.push({ label: 'Count the digits of the answer', expr: `${resultValue(rows, 'digitCount')} digits` });
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length || results[0].id === 'error') return null;

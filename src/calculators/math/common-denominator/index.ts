@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import CommonDenomPanel from './CommonDenomPanel';
 import { gcdBig, lcmBig } from '../../../utils/rational';
 
@@ -63,7 +64,7 @@ const commonDenomConfig: CalculatorConfig = {
     const dp = parseList(values.denominators);
     if (np.kind === 'blank' || dp.kind === 'blank' || np.kind === 'garbage' || dp.kind === 'garbage') return [];
     if (np.kind === 'decimal' || dp.kind === 'decimal') return err('Enter whole numbers only (no decimals): multiply numerator and denominator by a power of 10 first.');
-    if (np.kind === 'long' || dp.kind === 'long') return err(`Too many or too long entries (up to{MAX_ENTRIES} fractions of ${MAX_DIGITS} digits each).`);
+    if (np.kind === 'long' || dp.kind === 'long') return err(`Too many or too long entries (up to ${MAX_ENTRIES} fractions of ${MAX_DIGITS} digits each).`);
     let numerators = np.list;
     const denominators = dp.list;
     // Broadcast single numerator across multiple denominators (e.g. 3/4 and 3/6)
@@ -108,6 +109,22 @@ const commonDenomConfig: CalculatorConfig = {
     ];
   },
 
+  explainSteps: (values) => {
+    const rows = commonDenomConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const work = (resultValue(rows, 'work') ?? '').split(' | ').map((w) => w.replace(/^[^:]+: /, ''));
+    const steps = work.map((detail, i) => ({
+      label: i === 0 ? 'List the denominators' : i === work.length - 1 ? 'The LCD is the LCM of all the denominators' : 'Combine two denominators into their LCM',
+      expr: detail,
+    }));
+    const conv = JSON.parse(resultValue(rows, '_convertedFractions') ?? '[]') as { numerator: number | string; denominator: number | string; originalNumerator: number | string; originalDenominator: number | string; multiplier: number | string }[];
+    const shown = conv.slice(0, 8).map((c) => `${c.originalNumerator}/${c.originalDenominator} = ${c.numerator}/${c.denominator} (× ${c.multiplier})`);
+    steps.push({
+      label: 'Rewrite each fraction over the LCD (multiply top and bottom by LCD ÷ its denominator)',
+      expr: shown.join('  |  ') + (conv.length > 8 ? `  |  … ${conv.length - 8} more` : ''),
+    });
+    return steps;
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(CommonDenomPanel, { values, results });

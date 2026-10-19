@@ -1,5 +1,6 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import FuelCostPanel from './FuelCostPanel';
 import Decimal from 'decimal.js';
 import { parseNumberStrict } from '../../../utils/parseNumber';
@@ -12,6 +13,77 @@ const CO2_DIESEL = 22.44;
 const MAX_INPUT = 1e9;
 const dollars = (n: Decimal): string => `$${n.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toFixed(2)}`;
 const fixed1 = (n: Decimal): string => n.toDecimalPlaces(1, Decimal.ROUND_HALF_UP).toFixed(1);
+
+/** Validated trip plan shared by calculate() and explainSteps(); null when anything is missing or out of range. */
+function plan(values: Record<string, string>) {
+  const distanceUnit = values.distanceUnit || 'mi';
+  const efficiencyUnit = values.efficiencyUnit || 'mpg';
+  const priceUnit = values.priceUnit || 'gallon';
+  const vehicleType = values.vehicleType || 'gas';
+
+  const distance = parseNumberStrict(values.distance);
+  const fuelEfficiency = parseNumberStrict(values.fuelEfficiency);
+  const fuelPrice = parseNumberStrict(values.fuelPrice);
+  const evEfficiency = parseNumberStrict(values.evEfficiency);
+  const evRange = parseNumberStrict(values.evRange);
+  const electricityRate = parseNumberStrict(values.electricityRate);
+  // Blank = one trip; anything typed must be a whole number of trips.
+  const tripsRaw = (values.roundTrips ?? '').trim();
+  const roundTrips = tripsRaw === '' ? 1 : parseNumberStrict(tripsRaw);
+
+  const bad = (n: number, strict = false) => isNaN(n) || (strict ? n <= 0 : n < 0) || n > MAX_INPUT;
+  if (bad(distance)) return null;
+  if (!Number.isInteger(roundTrips) || roundTrips < 1 || roundTrips > 1e6) return null;
+
+  const burnsFuel = vehicleType === 'gas' || vehicleType === 'diesel' || vehicleType === 'phev';
+  const usesElectricity = vehicleType === 'ev' || vehicleType === 'phev';
+  if (burnsFuel && (bad(fuelEfficiency, true) || bad(fuelPrice))) return null;
+  if (usesElectricity && (bad(evEfficiency, true) || bad(electricityRate))) return null;
+  if (vehicleType === 'phev' && bad(evRange)) return null;
+
+  const trips = new Decimal(roundTrips);
+  const distanceMi = distanceUnit === 'km' ? new Decimal(distance).div(KM_PER_MILE) : new Decimal(distance);
+
+  // Everything below works per single trip in US gallons / miles / kWh, then scales by the number of trips.
+  let mpg = new Decimal(0);
+  if (burnsFuel) {
+    if (efficiencyUnit === 'l100') mpg = new Decimal(MPG_TO_L100KM).div(fuelEfficiency);
+    else if (efficiencyUnit === 'kml') mpg = new Decimal(fuelEfficiency).times(L_PER_US_GAL).div(KM_PER_MILE);
+    else mpg = new Decimal(fuelEfficiency);
+  }
+  const gasPrice = burnsFuel ? new Decimal(fuelPrice) : new Decimal(0);
+  const pricePerGallon = priceUnit === 'liter' ? gasPrice.times(L_PER_US_GAL) : gasPrice;
+  const kwhPrice = usesElectricity ? new Decimal(electricityRate) : new Decimal(0);
+
+  let gasGal = new Decimal(0);
+  let evKwh = new Decimal(0);
+  let evMiles = new Decimal(0);
+  if (vehicleType === 'gas' || vehicleType === 'diesel') {
+    gasGal = distanceMi.div(mpg);
+  } else if (vehicleType === 'ev') {
+    evMiles = distanceMi;
+    evKwh = distanceMi.div(evEfficiency);
+  } else {
+    // PHEV: the battery covers the first `evRange` miles of every trip, the engine the rest.
+    evMiles = Decimal.min(distanceMi, evRange);
+    evKwh = evMiles.div(evEfficiency);
+    gasGal = distanceMi.minus(evMiles).div(mpg);
+  }
+
+  const tripCost = gasGal.times(pricePerGallon).plus(evKwh.times(kwhPrice));
+  const totalCost = tripCost.times(trips);
+  const totalGal = gasGal.times(trips);
+  const totalKwh = evKwh.times(trips);
+  const co2Lbs = totalGal.times(vehicleType === 'diesel' ? CO2_DIESEL : CO2_GAS);
+  const totalMiles = distanceMi.times(trips);
+  const costPerMile = totalMiles.gt(0) ? totalCost.div(totalMiles) : new Decimal(0);
+
+  return {
+    distanceUnit, efficiencyUnit, priceUnit, vehicleType, distance, fuelEfficiency, fuelPrice, evEfficiency, evRange, electricityRate,
+    roundTrips, distanceMi, mpg, pricePerGallon, gasGal, evKwh, evMiles, burnsFuel, usesElectricity,
+    tripCost, totalCost, totalGal, totalKwh, co2Lbs, totalMiles, costPerMile,
+  };
+}
 
 const fuelCostConfig: CalculatorConfig = {
   inputs: [
@@ -119,63 +191,9 @@ const fuelCostConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const distanceUnit = values.distanceUnit || 'mi';
-    const efficiencyUnit = values.efficiencyUnit || 'mpg';
-    const priceUnit = values.priceUnit || 'gallon';
-    const vehicleType = values.vehicleType || 'gas';
-
-    const distance = parseNumberStrict(values.distance);
-    const fuelEfficiency = parseNumberStrict(values.fuelEfficiency);
-    const fuelPrice = parseNumberStrict(values.fuelPrice);
-    const evEfficiency = parseNumberStrict(values.evEfficiency);
-    const evRange = parseNumberStrict(values.evRange);
-    const electricityRate = parseNumberStrict(values.electricityRate);
-    // Blank = one trip; anything typed must be a whole number of trips.
-    const tripsRaw = (values.roundTrips ?? '').trim();
-    const roundTrips = tripsRaw === '' ? 1 : parseNumberStrict(tripsRaw);
-
-    const bad = (n: number, strict = false) => isNaN(n) || (strict ? n <= 0 : n < 0) || n > MAX_INPUT;
-    if (bad(distance)) return [];
-    if (!Number.isInteger(roundTrips) || roundTrips < 1 || roundTrips > 1e6) return [];
-
-    const burnsFuel = vehicleType === 'gas' || vehicleType === 'diesel' || vehicleType === 'phev';
-    const usesElectricity = vehicleType === 'ev' || vehicleType === 'phev';
-    if (burnsFuel && (bad(fuelEfficiency, true) || bad(fuelPrice))) return [];
-    if (usesElectricity && (bad(evEfficiency, true) || bad(electricityRate))) return [];
-    if (vehicleType === 'phev' && bad(evRange)) return [];
-
-    const trips = new Decimal(roundTrips);
-    const distanceMi = distanceUnit === 'km' ? new Decimal(distance).div(KM_PER_MILE) : new Decimal(distance);
-
-    // Everything below works per single trip in US gallons / miles / kWh, then scales by the number of trips.
-    let mpg = new Decimal(0);
-    if (burnsFuel) {
-      if (efficiencyUnit === 'l100') mpg = new Decimal(MPG_TO_L100KM).div(fuelEfficiency);
-      else if (efficiencyUnit === 'kml') mpg = new Decimal(fuelEfficiency).times(L_PER_US_GAL).div(KM_PER_MILE);
-      else mpg = new Decimal(fuelEfficiency);
-    }
-    const gasPrice = burnsFuel ? new Decimal(fuelPrice) : new Decimal(0);
-    const pricePerGallon = priceUnit === 'liter' ? gasPrice.times(L_PER_US_GAL) : gasPrice;
-    const kwhPrice = usesElectricity ? new Decimal(electricityRate) : new Decimal(0);
-
-    let gasGal = new Decimal(0);
-    let evKwh = new Decimal(0);
-    if (vehicleType === 'gas' || vehicleType === 'diesel') {
-      gasGal = distanceMi.div(mpg);
-    } else if (vehicleType === 'ev') {
-      evKwh = distanceMi.div(evEfficiency);
-    } else {
-      // PHEV: the battery covers the first `evRange` miles of every trip, the engine the rest.
-      const evMiles = Decimal.min(distanceMi, evRange);
-      evKwh = evMiles.div(evEfficiency);
-      gasGal = distanceMi.minus(evMiles).div(mpg);
-    }
-
-    const tripCost = gasGal.times(pricePerGallon).plus(evKwh.times(kwhPrice));
-    const totalCost = tripCost.times(trips);
-    const totalGal = gasGal.times(trips);
-    const totalKwh = evKwh.times(trips);
-    const co2Lbs = totalGal.times(vehicleType === 'diesel' ? CO2_DIESEL : CO2_GAS);
+    const trip = plan(values);
+    if (!trip) return [];
+    const { priceUnit, vehicleType, roundTrips, usesElectricity, tripCost, totalCost, totalGal, totalKwh, co2Lbs, costPerMile } = trip;
 
     const fuelParts: string[] = [];
     if (totalGal.gt(0) || !usesElectricity) {
@@ -183,9 +201,6 @@ const fuelCostConfig: CalculatorConfig = {
     }
     if (usesElectricity && (totalKwh.gt(0) || fuelParts.length === 0)) fuelParts.push(`${fixed1(totalKwh)} kWh`);
     const fuelNeededValue = fuelParts.join(' + ');
-
-    const totalMiles = distanceMi.times(trips);
-    const costPerMile = totalMiles.gt(0) ? totalCost.div(totalMiles) : new Decimal(0);
 
     return [
       {
@@ -221,6 +236,39 @@ const fuelCostConfig: CalculatorConfig = {
         value: String(roundTrips),
       },
     ];
+  },
+  explainSteps: (values): ExplainStep[] => {
+    const rows = fuelCostConfig.calculate(values);
+    const t = plan(values);
+    if (!hasAnswer(rows) || !t) return [];
+    const d = (x: Decimal.Value) => new Decimal(x).toDecimalPlaces(6).toString();
+    const money = (x: Decimal) => dollars(x);
+    const steps: ExplainStep[] = [];
+    if (t.distanceUnit === 'km') steps.push({ label: 'Convert kilometres to miles', expr: `${d(t.distance)} km ÷ ${KM_PER_MILE} = ${d(t.distanceMi)} mi` });
+    if (t.burnsFuel) {
+      if (t.efficiencyUnit === 'l100') steps.push({ label: 'Convert L/100 km to MPG', expr: `${MPG_TO_L100KM.toFixed(3)} ÷ ${d(t.fuelEfficiency)} = ${d(t.mpg)} MPG` });
+      if (t.efficiencyUnit === 'kml') steps.push({ label: 'Convert km/L to MPG', expr: `${d(t.fuelEfficiency)} × ${L_PER_US_GAL} ÷ ${KM_PER_MILE} = ${d(t.mpg)} MPG` });
+      if (t.priceUnit === 'liter') steps.push({ label: 'Convert the price per litre to per gallon', expr: `${d(t.fuelPrice)} × ${L_PER_US_GAL} = ${money(t.pricePerGallon)} per gallon` });
+    }
+    if (t.vehicleType === 'phev') {
+      steps.push({
+        label: 'Split the trip: battery first, then engine',
+        expr: `${d(t.evMiles)} mi electric (limited by the ${d(t.evRange)} mi range), ${d(t.distanceMi.minus(t.evMiles))} mi on fuel`,
+      });
+    }
+    if (t.usesElectricity) {
+      steps.push({ label: 'Electricity used = electric miles ÷ miles per kWh', expr: `${d(t.evMiles)} ÷ ${d(t.evEfficiency)} = ${d(t.evKwh)} kWh`, note: `Priced at $${d(t.electricityRate)} per kWh.` });
+    }
+    if (t.burnsFuel) {
+      steps.push({ label: 'Fuel used = fuel miles ÷ MPG', expr: `${d(t.distanceMi.minus(t.evMiles))} ÷ ${d(t.mpg)} = ${d(t.gasGal)} gal`, note: `Priced at ${money(t.pricePerGallon)} per gallon.` });
+    }
+    const parts: string[] = [];
+    if (t.burnsFuel) parts.push(`${d(t.gasGal)} gal × ${money(t.pricePerGallon)}`);
+    if (t.usesElectricity) parts.push(`${d(t.evKwh)} kWh × $${d(t.electricityRate)}`);
+    steps.push({ label: 'Cost of one trip = fuel used × price', expr: `${parts.join(' + ')} = ${money(t.tripCost)}` });
+    if (t.roundTrips > 1) steps.push({ label: 'Multiply by the number of trips', expr: `${money(t.tripCost)} × ${t.roundTrips} = ${resultValue(rows, 'totalCost')}` });
+    steps.push({ label: 'Total fuel cost', expr: `${resultValue(rows, 'totalCost')} (${resultValue(rows, 'fuelNeeded')}, ${resultValue(rows, 'costPerMile')} per mile)` });
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
