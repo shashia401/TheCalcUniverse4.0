@@ -225,10 +225,12 @@ const tocItems = [
                   <li>
                     <a
                       href={`/${r!.categorySlug}/${r!.id}/`}
-                      class="block h-full p-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-colors hover:border-[var(--brand-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
+                      class="group flex h-full flex-col gap-1 p-4 rounded-xl border border-[var(--border-warm)] bg-[var(--surface-card)] shadow-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--brand-default)] hover:shadow-card-hover active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
                     >
-                      <p class="font-semibold text-sm text-[var(--surface-text)]">{r!.shortTitle ?? r!.title}</p>
-                      <p class="text-xs text-[var(--surface-text-secondary)] mt-1 leading-relaxed">{r!.description.slice(0, 110)}{r!.description.length > 110 ? '…' : ''}</p>
+                      <p class="text-xs font-semibold uppercase tracking-wide text-[var(--surface-text-muted)]">{r!.category}</p>
+                      <p class="font-semibold text-base text-[var(--surface-text)]">{r!.shortTitle ?? r!.title}</p>
+                      <p class="line-clamp-2 text-sm text-[var(--surface-text-secondary)] leading-relaxed">{r!.description}</p>
+                      <span class="mt-auto pt-2 text-sm font-semibold text-[var(--brand-ink)] group-hover:underline">Open calculator →</span>
                     </a>
                   </li>
                 ))}
