@@ -50,22 +50,14 @@ crawled in August under the old client-rendered site, so the verdict predates th
 ## D. Quality
 
 - [x] D1 All 343 calculators pinned by audit tests against independent oracles (was 285); ~45 defects fixed, all public in /corrections/
-- [ ] D3 Audit follow-ups: flagged but unverified or needing a product decision (none changed automatically)
-  - business-loan: the "SBA 7(a) minimum DSCR 1.15" claim may be out of date (SBA lists 1.10 for small loans; reported 1.25 for acquisitions from Oct 2026)
-  - asset-depreciation: Section 179 cites Rev. Proc. 2025-32 for the 2025 limit, but that procedure covers 2026 ($2.5M is right for 2025); fix the citation
-  - new-york-mortgage: local recording-tax components (NYC 1.00% / 1.125%, upstate 1.00%) unconfirmed against Form MT-15
-  - canadian-mortgage: Toronto high-value land-transfer rates come from a Dec 2025 council motion; confirm they were adopted before Apr 2026
-  - california-mortgage: the diagram's Texas/Florida tax rates and medians have no source
-  - annuity-payout (annual mode): the final partial payment is treated as a fractional period, so the total can be off by about $90 on $300k
-  - net-worth: shows 100% debt-to-asset when assets are 0 (the ratio is undefined)
-  - paycheck: annualised standard-deduction method, not Pub 15-T per-period withholding; Pennsylvania taxes 401(k) deferrals but the calculator subtracts them; state schedules in `src/utils/stateTax.ts` unverified; a deferral equal to the whole salary gives negative net pay
-  - refinance: says "Yes, refinance now" even when resetting to a 30-year term raises lifetime interest (200k at 7%/20y to 6.5%/30y is +$82,945)
-  - fat-intake: requires body weight but never uses it
-  - body-type: asks for the narrowest waist; WHO waist-hip thresholds assume the midpoint between lowest rib and iliac crest
-  - macro-point: coefficients look like the published WW SmartPoints formula while the page says "similar in structure"; owner decision on wording
-  - wind-chill: the metric path applies the imperial formula after conversion (differs 0.02-0.05 °C); the Environment Canada validity range (T <= 0 °C, V > 5 km/h) is not what the page uses
-  - golf-handicap: table rows 4, 5, 7-8 and 20 of WHS Rule 5.2a rest on secondary sources (usga.org blocked automated fetches)
-  - health source notes still unverified: frame-size cut-offs, endurance protein 1.4-1.8, carbohydrate goal ranges, fat-intake goal percentages, water add-ons, Morton 2018 upper interval
+- [x] D3 Audit follow-ups resolved (15 corrections + California + quadratic, all public in /corrections/): SBA DSCR floors, Section 179 by tax year, Toronto LTT, California unsourced figures and the 0.77% default, annuity final payment, net-worth ratio, paycheck PA/clamp/method, refinance wording, fat-intake, body-type (WHO protocol), wind chill (metric formula and range), golf table (confirmed in two copies), health source notes (softened to what is verified). NY recording tax was verified and needed no change.
+- [ ] D3b Residual items that need your decision or a source I could not reach:
+  - macro-point: its coefficients look like the published WW SmartPoints formula while the page says "similar in structure"; wording is your call
+  - paycheck: state income-tax schedules in `src/utils/stateTax.ts` are not verified (only Pennsylvania was); HSA treatment in PA unconfirmed; the method is an annualised estimate (stated on the page)
+  - wind-chill: Environment Canada's page prints no formula; the metric formula is the standard joint 2001 one from secondary sources
+  - refinance: the calculator's own "Wait" recommendation can disagree with the decision tool in the cash-out case (the tool shows net advantage; both state their basis)
+  - retirement: the decision tool works in today's dollars and the retirement calculator in nominal dollars, so their inflation-adjusted figures differ slightly (the page says so)
+  - skipped on purpose: bac (safety-sensitive estimate), mortgage-payoff steps (depends on today's date)
 - [ ] D4 Before each deploy: re-run `node scripts/verification-stats.mjs --tests <n>` and the full Playwright sweep
 
 ## Done (earlier)
