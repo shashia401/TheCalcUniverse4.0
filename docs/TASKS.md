@@ -65,3 +65,12 @@ crawled in August under the old client-rendered site, so the verdict predates th
 - [x] Math audit batches 1-5; health, industrial, finance, ecommerce, engineering, devtools audits
 - [x] The original 5 Playwright failures (4 stale expectations, 1 real 353px overflow on the cookie banner page)
 - [x] Brand colour chosen by research: blue `#1967D2` (white text 5.37:1; `#1A73E8` is 4.51:1 on white and fails on the `#f0f5fa` page background), hover `#1558B0`, active `#0F4A94`, link ink `#1558B0` (6.87:1), tint `#E8F0FE`, dark-mode link ink `#8AB4F8`. Evidence is modest (one ~200-person study favouring blue for finance sites; nothing separates teal from blue), so contrast drove the choice. Amber stays a single highlight per view
+
+## E. From the live Search Console performance data (28 days to 2026-10-19: 122 clicks, 44,079 impressions, CTR 0.28%, avg position 13.6)
+
+- [ ] E1 Title and description rewrite for pages that rank on page 1 but get almost no clicks: `/math/lcm-calculator/` (9.3k impressions, position 9, 2 clicks; the ranking URL was the old `/en/` one, now 301), `/math/fraction-calculator/` (7.0k, pos 14.6), `/everyday/study-time-calculator/` (4.3k, pos 6.8), `/math/rounding-calculator/` (3.0k, pos 6.4), `/everyday/edpi-calculator/` (2.7k). Titles lead with jargon ("GCD Method", "Number Line"); lead with the searched phrase and the promise (steps, examples). Re-check CTR 3 weeks later
+- [ ] E2 Watch the `/en/` to root consolidation: 3 of the top 30 pages by impressions were still `/en/` URLs (lcm, dice-roller, height-calculator `?expression={math_expression}`). Position fell from ~11 to ~24 on 16-18 Oct, before the deploy; compare weekly
+- [ ] E3 Homepage ranks for "calculator" at position 32.8 (1,113 impressions, 2 clicks). Decide whether to target a broader head term
+- [ ] E4 The traffic is not from finance: the converting pages are math/everyday niche tools (big-number 4.6% CTR, edpi, mars-time). Finance and the decision tools have almost no impressions yet; this is the evidence for A4 (request indexing) mattering most for them
+- [x] E5 Many long "queries" (`+nist gold density 19.32 g/cm3`, `+mdn bigint ...`, `+mifflin st jeor ... source`) are AI research agents citing us at positions 2-9, not people. Not an error; it confirms the AI-channel strategy (sources and facts on the page are being read)
+- [ ] E6 No Google Analytics data was available; only Search Console is connected. Add GA4 (or Cloudflare analytics) if you want on-site behaviour (bounce, tool use)
