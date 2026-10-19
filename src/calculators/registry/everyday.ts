@@ -236,7 +236,7 @@ export const everydayCalculators: CalculatorEntry[] = [
   },
   {
     id: 'study-time-calculator',
-    title: 'Study Time Calculator — Plan Your Exam Prep Schedule',
+    title: 'Study Time Calculator: How Many Hours to Study for an Exam',
     shortTitle: 'Study Time',
     description: 'Calculate how many study hours you need based on material volume and deadline. Plan your weekly schedule and avoid last-minute cramming.',
     category: 'Everyday',

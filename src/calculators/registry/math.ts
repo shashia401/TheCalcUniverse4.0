@@ -332,9 +332,9 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'lcm-calculator',
-    title: 'LCM Calculator — Least Common Multiple (GCD Method)',
+    title: 'LCM Calculator: Least Common Multiple of Any Numbers',
     shortTitle: 'LCM Calculator',
-    description: 'Find the Least Common Multiple of two or more numbers using both the efficient GCD-based formula and the prime factorization method side by side.',
+    description: 'Find the least common multiple (LCM) of two or more numbers. See it worked out two ways, by prime factorization and by GCD, with examples.',
     category: 'Mathematics',
     categorySlug: 'math',
     subCategory: 'Number Theory',
@@ -597,7 +597,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'rounding-calculator',
-    title: 'Rounding Calculator — Any Place Value + Number Line',
+    title: 'Rounding Calculator: Round to Any Decimal or Place Value',
     shortTitle: 'Rounding Calculator',
     description: 'Round numbers to the nearest million, thousand, hundred, ten, unit, tenth, hundredth, thousandth, or ten-thousandth. Free, instant, and accurate.',
     category: 'Mathematics',
