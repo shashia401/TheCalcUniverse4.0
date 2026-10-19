@@ -27,10 +27,10 @@ describe('Resistor Calculator', () => {
         multiplier: 'Red',
         tolerance: 'Gold (±5%)',
       });
-      // 4700 * 0.95 = 4465 -> 4465/1000 = 4.465 -> toFixed(2) = 4.46 kΩ
-      // 4700 * 1.05 = 4935 -> 4935/1000 = 4.935 -> toFixed(2) = 4.93 kΩ
-      expect(getValue(r, 'minResistance')).toBe('4.46 kΩ');
-      expect(getValue(r, 'maxResistance')).toBe('4.93 kΩ');
+      // 4700 * 0.95 = 4465 -> 4.465 kΩ exactly -> rounds half up to 4.47 kΩ
+      // 4700 * 1.05 = 4935 -> 4.935 kΩ exactly -> rounds half up to 4.94 kΩ
+      expect(getValue(r, 'minResistance')).toBe('4.47 kΩ');
+      expect(getValue(r, 'maxResistance')).toBe('4.94 kΩ');
     });
 
     it('decodes brown-black-red-gold as 1000 ohms 5%', () => {

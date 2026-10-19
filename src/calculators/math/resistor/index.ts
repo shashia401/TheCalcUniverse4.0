@@ -48,11 +48,14 @@ const E24 = [1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0,
 
 // ─── Format helpers ────────────────────────────────────────────────────────────
 
+// Round half up on the decimal digits. toFixed rounds the binary float, so 4.465 came out as "4.46".
+const fixed2 = (x: number): string => Number(`${Math.round(Number(`${x}e2`))}e-2`).toFixed(2);
+
 function formatResistance(ohms: number): string {
-  if (ohms >= 1_000_000) return `${(ohms / 1_000_000).toFixed(2)} MΩ`;
-  if (ohms >= 1_000) return `${(ohms / 1_000).toFixed(2)} kΩ`;
-  if (ohms >= 1) return `${ohms.toFixed(2)} Ω`;
-  return `${(ohms * 1000).toFixed(2)} mΩ`;
+  if (ohms >= 1_000_000) return `${fixed2(ohms / 1_000_000)} MΩ`;
+  if (ohms >= 1_000) return `${fixed2(ohms / 1_000)} kΩ`;
+  if (ohms >= 1) return `${fixed2(ohms)} Ω`;
+  return `${fixed2(ohms * 1000)} mΩ`;
 }
 
 function formatOhms(ohms: Decimal): string {

@@ -1069,3 +1069,12 @@ describe('day-of-week', () => {
     expect(steps(dayOfWeek, { month: '', day: '4', year: '2024' })).toEqual([]);
   });
 });
+
+describe('resistor tolerance limits round half up', () => {
+  it('4.7 kOhm +/-5% shows 4.47 and 4.94 kOhm (exact limits 4.465 and 4.935)', () => {
+    const rows = resistor.calculate({ mode: 'forward', bands: '4', band1: 'Yellow', band2: 'Violet', multiplier: 'Red', tolerance: 'Gold (±5%)' });
+    const text = JSON.stringify(rows);
+    expect(text).toContain('4.47 kΩ');
+    expect(text).toContain('4.94 kΩ');
+  });
+});

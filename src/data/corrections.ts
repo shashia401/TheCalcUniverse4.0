@@ -17,6 +17,14 @@ export interface Correction {
 
 export const corrections: Correction[] = [
   {
+    date: "2026-10-19",
+    calculator: { id: "resistor", category: "math", title: "Resistor Calculator" },
+    summary: "The minimum and maximum values rounded the stored binary number instead of the decimal digits, so exact halves went the wrong way: a 4.7 kΩ resistor at ±5% showed 4.46 and 4.93 kΩ instead of 4.47 and 4.94 kΩ. Values now round half up.",
+    before: "4.7 kΩ ±5%: min 4.46 kΩ, max 4.93 kΩ",
+    after: "min 4.47 kΩ, max 4.94 kΩ (exact limits 4.465 and 4.935)",
+    howVerified: "Exact limits 4700 × 0.95 = 4465 Ω and 4700 × 1.05 = 4935 Ω checked by hand; pinned in test/calculators/math/resistor.test.ts and explain-steps-4.test.ts.",
+  },
+  {
     date: "2026-10-18",
     calculator: { id: "quadratic-equation-calculator", category: "math", title: "Quadratic Equation Calculator" },
     summary: "Extremely large or small coefficients could freeze the page or raise an error. The exact square-root routine started from a floating-point estimate and then stepped to the answer one integer at a time, which does not finish when the estimate is off by many digits. It now uses an exact integer Newton iteration.",
