@@ -3,6 +3,9 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import LCMPanel from './LCMPanel';
 import { LCM_MAX_COUNT, analyzeLcm, parseLcmInput } from './lcmMath';
 
+// Pairs people look up most; the answers come from the calculator's own helper, never typed in by hand.
+const COMMON_PAIRS: Array<[number, number]> = [[4, 6], [6, 8], [8, 12], [9, 12], [12, 18], [15, 20], [14, 21], [18, 24], [20, 30], [24, 36]];
+
 const lcmConfig: CalculatorConfig = {
   inputs: [
     {
@@ -84,6 +87,7 @@ const lcmConfig: CalculatorConfig = {
       { label: 'Co-prime numbers', value: 'LCM(a,b) = a × b (e.g. 7 and 8 → 56)' },
       { label: 'Multiple relationship', value: 'LCM(a,b) = a if b divides a evenly' },
       { label: 'Common denominator', value: 'LCM of denominators for fraction addition' },
+      ...COMMON_PAIRS.map(([a, b]) => ({ label: `LCM(${a}, ${b})`, value: analyzeLcm([BigInt(a), BigInt(b)]).lcm.toString() })),
     ],
     diagram: {
       svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="18" text-anchor="middle" fill="var(--svg-374151)" font-size="11" font-weight="bold">LCM(12, 18) = 36</text><text x="50" y="38" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="10">Multiples of 12:</text><text x="30" y="55" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="11">12</text><text x="65" y="55" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="11">24</text><rect x="85" y="44" width="30" height="20" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="2" rx="4"/><text x="100" y="58" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="11" font-weight="bold">36</text><text x="135" y="55" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">48</text><text x="170" y="55" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">60</text><text x="50" y="78" text-anchor="middle" fill="var(--svg-ef4444)" font-size="10">Multiples of 18:</text><text x="30" y="95" text-anchor="middle" fill="var(--svg-ef4444)" font-size="11">18</text><rect x="50" y="84" width="30" height="20" fill="var(--svg-fecaca)" stroke="var(--svg-ef4444)" stroke-width="2" rx="4"/><text x="65" y="98" text-anchor="middle" fill="var(--svg-991b1b)" font-size="11" font-weight="bold">36</text><text x="105" y="95" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">54</text><text x="140" y="95" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">72</text><text x="175" y="95" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">90</text><text x="160" y="125" text-anchor="middle" fill="var(--svg-059669)" font-size="11" font-weight="bold">36 is the smallest common multiple</text><rect x="20" y="138" width="280" height="50" fill="var(--svg-f3f4f6)" stroke="var(--svg-d1d5db)" stroke-width="1" rx="6"/><text x="160" y="155" text-anchor="middle" fill="var(--svg-374151)" font-size="10">Prime Factorization:</text><text x="160" y="172" text-anchor="middle" fill="var(--svg-374151)" font-size="10">12 = 2&sup2; &times; 3, 18 = 2 &times; 3&sup2;</text><text x="160" y="186" text-anchor="middle" fill="var(--svg-374151)" font-size="10">LCM = 2&sup2; &times; 3&sup2; = 4 &times; 9 = 36</text></svg>',
@@ -146,6 +150,22 @@ const lcmConfig: CalculatorConfig = {
       {
         question: 'How does the prime factorization method work for LCM?',
         answer: 'Write each number as a product of primes with exponents. Then, for each distinct prime factor, take the LARGEST exponent that appears in any factorization — this is the key difference from GCF, which takes the smallest exponent. For 12 = 2²×3 and 18 = 2×3², we take 2² and 3², giving LCM = 4×9 = 36.',
+      },
+      {
+        question: 'Is the lowest common multiple the same as the least common multiple?',
+        answer: 'Yes. "Lowest common multiple", "least common multiple" and "smallest common multiple" all mean the same number, abbreviated LCM. Searches for "least common factor" or "least common divisor" usually mean the LCM or the greatest common factor (GCF): the smallest common factor of any two whole numbers is always 1, so it is never the answer people want.',
+      },
+      {
+        question: 'How do I find the LCM on a calculator?',
+        answer: 'Most basic and scientific calculators have no LCM key. Enter your numbers in the box above, or work it out as a × b ÷ GCD(a, b). Many graphing calculators, such as the TI-84 Plus, have an lcm( function under MATH, then NUM.',
+      },
+      {
+        question: 'What is the division (ladder) method for LCM?',
+        answer: 'Write the numbers in a row. Divide by any prime that divides at least one of them, bring down the numbers it does not divide, and repeat until every number is 1. The LCM is the product of all the divisors. For 12 and 18: divide by 2 (6 and 9), by 2 again (3 and 9), by 3 (1 and 3), then by 3 (1 and 1). The divisors 2 × 2 × 3 × 3 give 36.',
+      },
+      {
+        question: 'What is the LCM of 12 and 18?',
+        answer: 'It is 36. 12 = 2² × 3 and 18 = 2 × 3², so the LCM takes the highest power of each prime, 2² × 3² = 36. Check with the GCD: 12 × 18 ÷ GCD(12, 18) = 216 ÷ 6 = 36.',
       },
     ],
     citations: [

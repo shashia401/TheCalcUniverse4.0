@@ -332,7 +332,7 @@ export const mathCalculators: CalculatorEntry[] = [
   },
   {
     id: 'lcm-calculator',
-    title: 'LCM Calculator: Least Common Multiple of Any Numbers',
+    title: 'LCM Calculator: Least Common Multiple with Steps',
     shortTitle: 'LCM Calculator',
     description: 'Find the least common multiple (LCM) of two or more numbers. See it worked out two ways, by prime factorization and by GCD, with examples.',
     category: 'Mathematics',
