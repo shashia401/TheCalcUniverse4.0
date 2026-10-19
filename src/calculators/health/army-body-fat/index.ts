@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ArmyBodyFatPanel from './ArmyBodyFatPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 // AR 600-9 (28 June 2013), Appendix B, Table B-2: maximum allowable % body fat by age group.
 const MAX_BF_TABLE: { ageMax: number; label: string; male: number; female: number }[] = [
@@ -234,6 +235,52 @@ const armyBodyFatConfig: CalculatorConfig = {
         color: 'neutral',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const results = armyBodyFatConfig.calculate(values);
+    if (!results.length) return [];
+    const val = (id: string) => results.find((x) => x.id === id)?.value ?? '';
+    const isMale = (values.sex || 'male') === 'male';
+    const age = parseFloat(values.age);
+    const heightIn = parseFloat(values.heightInches);
+    const neckIn = parseFloat(values.neck);
+    const waistIn = parseFloat(values.waist);
+    const hipIn = parseFloat(values.hip);
+    const neck = roundUpHalf(neckIn);
+    const waist = roundDownHalf(waistIn);
+    const hip = roundDownHalf(hipIn);
+    const height = Math.round(heightIn * 2) / 2;
+    const pct = parseFloat(val('bodyFatArmy'));
+    const circ = isMale ? waist - neck : waist + hip - neck;
+    const l1 = Math.log10(circ);
+    const l2 = Math.log10(height);
+    const rawPct = isMale ? 86.01 * l1 - 70.041 * l2 + 36.76 : 163.205 * l1 - 97.684 * l2 - 78.387;
+    const clamped = Math.abs(rawPct - pct) > 0.05 ? ` → limited to ${val('bodyFatArmy')} (results are kept between 2% and 70%)` : '';
+
+    return finiteSteps([
+      {
+        label: 'Round the measurements the Army way',
+        expr: `neck ${neckIn} → ${neck} in (up) · ${isMale ? 'abdomen' : 'waist'} ${waistIn} → ${waist} in (down)${isMale ? '' : ` · hip ${hipIn} → ${hip} in (down)`} · height ${heightIn} → ${height} in`,
+        note: 'AR 600-9 rounds the neck up and the abdomen, waist and hip down to the nearest half inch.',
+      },
+      {
+        label: 'Take the logarithms',
+        expr: isMale
+          ? `log10(${waist} − ${neck}) = log10(${circ}) = ${l1.toFixed(4)} · log10(${height}) = ${l2.toFixed(4)}`
+          : `log10(${waist} + ${hip} − ${neck}) = log10(${circ}) = ${l1.toFixed(4)} · log10(${height}) = ${l2.toFixed(4)}`,
+      },
+      {
+        label: `Substitute into the ${isMale ? 'male' : 'female'} equation`,
+        expr: isMale
+          ? `86.010 × ${l1.toFixed(4)} − 70.041 × ${l2.toFixed(4)} + 36.76 = ${rawPct.toFixed(1)}%${clamped}`
+          : `163.205 × ${l1.toFixed(4)} − 97.684 × ${l2.toFixed(4)} − 78.387 = ${rawPct.toFixed(1)}%${clamped}`,
+      },
+      {
+        label: 'Round to a whole percent and compare',
+        expr: `${val('bodyFatArmy')} → ${val('officialBodyFat')} official · maximum for age ${age.toFixed(0)} = ${val('maxAllowedBf')} → ${val('passFail')}`,
+        note: 'The official whole-percent value is what the calculator compares with the AR 600-9 maximum for your age group.',
+      },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

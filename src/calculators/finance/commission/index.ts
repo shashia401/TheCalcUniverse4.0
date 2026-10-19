@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import CommissionPanel from './CommissionPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 // ─── Commission Table Generator ────────────────────────────────────────
 function generateCommissionTable(sale: number, effectiveRate: number): string {
@@ -371,6 +372,56 @@ const commissionConfig: CalculatorConfig = {
     { source: 'IRS Publication 15', url: 'https://www.irs.gov/publications/p15' },
     { source: 'Investopedia', url: 'https://www.investopedia.com/terms/c/commission.asp' },
   ],
+  },
+  explainSteps: (values) => {
+    const results = commissionConfig.calculate(values);
+    if (!results.length || results[0].id !== 'net') return [];
+    const val = (id: string) => results.find((x) => x.id === id)?.value ?? '';
+    const structure = values.structure || 'flat';
+    const sale = parseFloat(values.saleAmount);
+    const baseSalary = parseFloat(values.baseSalary) || 0;
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const net = val('net');
+    const steps: { label: string; expr: string; note?: string }[] = [];
+
+    if (structure === 'flat') {
+      const rate = parseFloat(values.flatRate);
+      const dec = +(rate / 100).toFixed(8);
+      steps.push({ label: 'Turn the rate into a decimal', expr: `${rate}% ÷ 100 = ${dec}` });
+      steps.push({ label: 'Multiply by the sale', expr: `$${fmt(sale)} × ${dec} = ${net}` });
+      steps.push({ label: 'Check it as a share of the sale', expr: `${net} ÷ $${fmt(sale)} = ${rate.toFixed(2)}%` });
+    } else if (structure === 'tiered') {
+      const rows = results.filter((x) => /^tier\d+$/.test(x.id));
+      const parts: string[] = [];
+      for (const row of rows) {
+        steps.push({ label: row.label, expr: row.value, note: row.value.includes('no Tier') ? 'No rate was entered for this band, so it earns nothing.' : undefined });
+        const m = row.value.match(/= \$([\d,]+\.\d{2})/);
+        if (m) parts.push(`$${m[1]}`);
+      }
+      if (rows.length > 1) steps.push({ label: 'Add the tiers', expr: `${parts.join(' + ')} = ${net}` });
+      steps.push({
+        label: 'Blended effective rate',
+        expr: `${net} ÷ $${fmt(sale)} = ${val('effective')}`,
+        note: 'Each rate applies only to the slice of the sale inside its tier.',
+      });
+    } else {
+      const reGross = parseFloat(values.reGrossPct);
+      const split = parseFloat(values.reAgentSplitPct);
+      const franchise = parseFloat(values.reFranchisePct) || 0;
+      const total = sale * (reGross / 100);
+      const side = total / 2;
+      const fee = side * (franchise / 100);
+      const after = side - fee;
+      steps.push({ label: 'Total commission paid by the seller', expr: `$${fmt(sale)} × ${reGross}% = $${fmt(total)}` });
+      steps.push({ label: 'Your side of the deal', expr: `$${fmt(total)} ÷ 2 = $${fmt(side)}`, note: 'The calculator splits the total evenly between the two sides.' });
+      steps.push({ label: 'Take out the franchise / royalty fee', expr: `$${fmt(side)} − $${fmt(side)} × ${franchise}% = $${fmt(after)}` });
+      steps.push({ label: 'Apply your split', expr: `$${fmt(after)} × ${split}% = ${net}` });
+    }
+    if (baseSalary > 0) {
+      steps.push({ label: 'Add your base salary', expr: `$${fmt(baseSalary)} + ${net} = ${val('totalComp')} total annual compensation` });
+    }
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

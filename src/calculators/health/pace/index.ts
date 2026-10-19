@@ -2,6 +2,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import PacePanel from './PacePanel';
 import { fixed2 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const KM_PER_MI = 1.609344;
 
@@ -254,6 +255,79 @@ const paceConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const results = paceConfig.calculate(values);
+    if (!results.length) return [];
+    const val = (id: string) => results.find((x) => x.id === id)?.value ?? '';
+    const isMiles = (values.distanceUnit || 'miles') === 'miles';
+    const unit = isMiles ? 'mi' : 'km';
+    const key = values.distance || '5';
+    const calcMode = values.calcMode || 'pace';
+    const hours = parseFloat(values.hours) || 0;
+    const minutes = parseFloat(values.minutes) || 0;
+    const seconds = parseFloat(values.seconds) || 0;
+    const paceMin = parseFloat(values.paceMinutes) || 0;
+    const paceSec = parseFloat(values.paceSeconds) || 0;
+    const timeSec = hours * 3600 + minutes * 60 + seconds;
+    const paceTotal = paceMin * 60 + paceSec;
+    const s1 = (x: number) => +x.toFixed(1);
+
+    const timeStep = {
+      label: 'Convert your time to seconds',
+      expr: `${hours} h × 3600 + ${minutes} min × 60 + ${seconds} s = ${s1(timeSec)} s`,
+    };
+    const paceStep = {
+      label: 'Convert your pace to seconds',
+      expr: `${paceMin} min × 60 + ${paceSec} s = ${s1(paceTotal)} s per ${unit}`,
+    };
+
+    if (calcMode === 'distance') {
+      return finiteSteps([
+        timeStep,
+        paceStep,
+        {
+          label: 'Divide the time by the pace',
+          expr: `${s1(timeSec)} s ÷ ${s1(paceTotal)} s per ${unit} = ${val('distance')}`,
+          note: 'Distance is how many pace-lengths fit into the total time.',
+        },
+      ]);
+    }
+
+    let dist: number;
+    let distExpr: string;
+    if (key === 'custom') {
+      dist = parseFloat(values.customDistance);
+      distExpr = `Custom distance = ${+dist.toFixed(3)} ${unit}`;
+    } else {
+      const km = PRESET_KM[key] ?? parseFloat(key);
+      dist = isMiles ? km / KM_PER_MI : km;
+      distExpr = isMiles ? `${+km.toFixed(4)} km ÷ ${KM_PER_MI} = ${dist.toFixed(3)} mi` : `${+km.toFixed(4)} km`;
+    }
+    const distStep = {
+      label: `Distance in ${isMiles ? 'miles' : 'kilometers'}`,
+      expr: distExpr,
+      note: 'Race distances such as 5K are fixed in kilometers, whichever unit you pick.',
+    };
+
+    if (calcMode === 'time') {
+      return finiteSteps([
+        distStep,
+        paceStep,
+        {
+          label: 'Multiply distance by pace',
+          expr: `${dist.toFixed(3)} ${unit} × ${s1(paceTotal)} s per ${unit} = ${s1(dist * paceTotal)} s = ${val('totalTime')}`,
+        },
+      ]);
+    }
+    return finiteSteps([
+      distStep,
+      timeStep,
+      {
+        label: 'Divide the time by the distance',
+        expr: `${s1(timeSec)} s ÷ ${dist.toFixed(3)} ${unit} = ${s1(timeSec / dist)} s per ${unit} = ${val('pace')}`,
+      },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

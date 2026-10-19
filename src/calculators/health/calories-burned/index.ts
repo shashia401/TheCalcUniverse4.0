@@ -2,6 +2,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import CaloriesBurnedPanel from './CaloriesBurnedPanel';
 import { ACTIVITIES } from './activities';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const caloriesBurnedConfig: CalculatorConfig = {
   inputs: [
@@ -108,6 +109,35 @@ const caloriesBurnedConfig: CalculatorConfig = {
         color: 'neutral',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const results = caloriesBurnedConfig.calculate(values);
+    if (!results.length) return [];
+    const unit = values.unit || 'imperial';
+    const weight = parseFloat(values.weight);
+    const durationMin = parseFloat(values.duration);
+    const weightKg = unit === 'imperial' ? weight * 0.45359237 : weight;
+    const activity = ACTIVITIES.flatMap((cat) => cat.items).find((a) => a.id === (values.activity || 'run_6mph'));
+    if (!activity) return [];
+    const hours = durationMin / 60;
+    const label = results.find((x) => x.id === 'activityLabel')?.value ?? activity.label;
+    return finiteSteps([
+      {
+        label: 'Convert your weight to kilograms',
+        expr: unit === 'imperial' ? `${weight} lb × 0.45359237 = ${weightKg.toFixed(1)} kg` : `${weightKg.toFixed(1)} kg`,
+        note: 'The MET formula works in kilograms.',
+      },
+      { label: 'Convert minutes to hours', expr: `${durationMin} min ÷ 60 = ${hours.toFixed(2)} hr` },
+      {
+        label: 'Look up the activity MET value',
+        expr: `${label} = ${activity.met.toFixed(1)} METs`,
+        note: 'MET values come from the Compendium of Physical Activities.',
+      },
+      {
+        label: 'Multiply MET × weight × time',
+        expr: `${activity.met} × ${weightKg.toFixed(1)} kg × ${hours.toFixed(2)} hr = ${results[0].value}`,
+      },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

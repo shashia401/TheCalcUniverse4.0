@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MilestonesPanel from './MilestonesPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const fmtDate = (d: Date) =>
   d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -179,6 +180,42 @@ const dueDateConfig: CalculatorConfig = {
         color: 'positive' as const,
       },
     ];
+  },
+  explainSteps: (values) => {
+    const results = dueDateConfig.calculate(values);
+    if (!results.length) return [];
+    const method = values.method || 'lmp';
+    const cycleLength = parseFloat(values.cycleLength) || 28;
+    const [yy, mm, dd] = values.date.trim().split('-').map(Number);
+    const inputDate = new Date(yy, mm - 1, dd);
+    const back = method === 'lmp' ? 0 : method === 'conception' ? 14 : method === 'ivf3' ? 17 : 19;
+    const lmpDate = addDays(inputDate, -back);
+    const cycleOffset = method === 'lmp' ? cycleLength - 28 : 0;
+    const totalDays = 280 + cycleOffset;
+
+    const startStep =
+      method === 'lmp'
+        ? { label: 'Start from your last menstrual period', expr: `LMP = ${fmtShort(inputDate)}` }
+        : {
+            label: 'Convert to the matching last-period date',
+            expr: `${fmtShort(inputDate)} − ${back} days = ${fmtShort(lmpDate)}`,
+            note:
+              method === 'conception'
+                ? 'The calculator counts conception as 14 days after the last period.'
+                : `The calculator adds 14 days plus the embryo's age (${back - 14} days) to find the matching last-period date.`,
+          };
+    return finiteSteps([
+      startStep,
+      {
+        label: method === 'lmp' ? 'Length of pregnancy to count' : 'Length of pregnancy to count (40 weeks)',
+        expr:
+          method === 'lmp'
+            ? `280 days + (${cycleLength}-day cycle − 28) = 280 + ${cycleOffset} = ${totalDays} days`
+            : '280 days = 40 weeks',
+        note: method === 'lmp' ? "Naegele's rule counts 280 days from the last period; a cycle longer or shorter than 28 days shifts the date." : 'The cycle-length field only adjusts the last-period method.',
+      },
+      { label: 'Add the days to get the due date', expr: `${fmtShort(lmpDate)} + ${totalDays} days = ${results[0].value}` },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

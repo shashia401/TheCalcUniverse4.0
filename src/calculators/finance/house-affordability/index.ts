@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import HouseAffordabilityPanel from './HouseAffordabilityPanel';
 import { solveAffordability, parseDtiLimit, DEFAULT_PROPERTY_TAX_PCT, DEFAULT_INSURANCE_ANNUAL } from '../../../utils/affordability';
+import { affordabilitySteps } from '../../../utils/affordabilitySteps';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const houseAffordabilitySvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="14" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">House Affordability: DTI Approach</text><g transform="translate(15,22)"><rect x="10" y="5" width="280" height="24" rx="4" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><text x="150" y="21" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-1e40af)">Monthly Income: $8,333</text><line x1="150" y1="29" x2="150" y2="36" stroke="var(--svg-64748b)" stroke-width="1.2"/><rect x="10" y="36" width="100" height="22" rx="4" fill="var(--svg-22c55e)"/><text x="60" y="51" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Front cap: $2,333</text><text x="60" y="64" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">28% Front-End DTI</text><rect x="120" y="36" width="70" height="22" rx="4" fill="var(--svg-f59e0b)"/><text x="155" y="51" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Back cap: $2,500</text><text x="155" y="64" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">36% less $500 debts</text><text x="200" y="51" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--svg-64748b)">&rarr;</text><rect x="215" y="36" width="75" height="22" rx="4" fill="var(--svg-8b5cf6)"/><text x="252" y="51" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Housing: $2,333</text><rect x="10" y="75" width="280" height="40" rx="6" fill="var(--svg-f1f5f9)"/><text x="150" y="90" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">PITI = P&amp;I + Taxes + Insurance</text><rect x="25" y="96" width="72" height="14" rx="3" fill="var(--svg-3b82f6)"/><text x="61" y="106" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">P&amp;I ~$1,887</text><rect x="105" y="96" width="55" height="14" rx="3" fill="var(--svg-f59e0b)"/><text x="132" y="106" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">Tax ~$322</text><rect x="168" y="96" width="55" height="14" rx="3" fill="var(--svg-ef4444)"/><text x="195" y="106" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-ffffff)">Ins ~$125</text><text x="248" y="106" font-size="8" font-weight="bold" fill="var(--svg-22c55e)">Max: $351K</text><rect x="10" y="122" width="280" height="34" rx="6" fill="var(--svg-fef3c7)" stroke="var(--svg-f59e0b)" stroke-width="0.5"/><text x="150" y="138" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-b45309)">The 28/36 Rule</text><text x="80" y="152" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Housing cost &le; 28% of income</text><text x="235" y="152" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">All debts &le; 36% of income</text><rect x="10" y="164" width="280" height="26" rx="6" fill="var(--svg-f1f5f9)"/><text x="150" y="178" text-anchor="middle" font-size="7" fill="var(--svg-475569)">Housing = lower of (Income x 28%) and (Income x 36% - Debts)</text><text x="150" y="189" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Solve for price: loan + down payment, tax grows with price</text></svg>';
 
@@ -207,6 +209,33 @@ const houseAffordabilityConfig: CalculatorConfig = {
         color: sol.backEndRatio <= 36.05 ? 'positive' as const : 'neutral' as const,
       },
     ];
+  },
+  explainSteps: (values) => {
+    const annualIncome = parseFloat(values.annualIncome);
+    const interestRate = parseFloat(values.interestRate) / 100;
+    const loanTermYears = parseFloat(values.loanTerm || '30');
+    const limitRaw = values.dtiLimit === 'custom' ? values.customDti : values.dtiLimit || '36';
+    const { front, back } = parseDtiLimit(limitRaw);
+    if ([annualIncome, interestRate, loanTermYears].some(isNaN) || annualIncome <= 0 || (values.dtiLimit === 'custom' && !(parseFloat(values.customDti) > 0))) return [];
+    const taxPct = parseFloat(values.propertyTax);
+    const insurance = parseFloat(values.homeInsurance);
+    const input = {
+      annualIncome,
+      monthlyDebts: parseFloat(values.monthlyDebts) || 0,
+      downPayment: parseFloat(values.downPayment) || 0,
+      annualRate: interestRate,
+      years: loanTermYears,
+      propertyTaxRate: (isNaN(taxPct) ? DEFAULT_PROPERTY_TAX_PCT : taxPct) / 100,
+      insuranceAnnual: isNaN(insurance) ? DEFAULT_INSURANCE_ANNUAL : insurance,
+      frontPct: front / 100,
+      backPct: back / 100,
+      pmiRate: (parseFloat(values.pmiRate) || 0) / 100,
+    };
+    const sol = solveAffordability(input);
+    if (!sol) return [];
+    const fmtK = (n: number) =>
+      n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    return finiteSteps(affordabilitySteps(input, sol, fmtK));
   },
   extraPanel: (values, results) => {
     const annualIncome = parseFloat(values.annualIncome);

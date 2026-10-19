@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RentAffordabilityPanel from './RentAffordabilityPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 /** Shared by calculate() and the panel. Returns null for incomplete input. */
 function rentCalc(values: Record<string, string>) {
@@ -148,6 +149,40 @@ const rentAffordabilityConfig: CalculatorConfig = {
         color: meets40x ? 'positive' as const : 'negative' as const,
       },
     ];
+  },
+  explainSteps: (values) => {
+    const c = rentCalc(values);
+    if (!c) return [];
+    const { monthlyIncome, maxRent, monthlyDebts } = c;
+    const fmtD = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const grossIncome = parseFloat(values.grossIncome);
+    const frequency = values.incomeFrequency || 'annual';
+    const rule = values.rentRule || '30';
+    const pctOf = (rule === 'custom' ? (isNaN(parseFloat(values.customPct)) ? 30 : parseFloat(values.customPct)) : rule === '25' ? 25 : 30);
+
+    const incomeExpr =
+      frequency === 'monthly'
+        ? `Monthly gross income = $${fmtD(monthlyIncome)}`
+        : frequency === 'hourly'
+          ? `$${fmtD(grossIncome)}/hr × 40 hrs × 52 weeks ÷ 12 = $${fmtD(monthlyIncome)}`
+          : `$${fmtD(grossIncome)} ÷ 12 = $${fmtD(monthlyIncome)}`;
+    const rentExpr =
+      rule === '40x'
+        ? `$${fmtD(monthlyIncome)} × 12 ÷ 40 = $${fmtD(maxRent)}`
+        : `$${fmtD(monthlyIncome)} × ${+pctOf.toFixed(2)}% = $${fmtD(maxRent)}`;
+    return finiteSteps([
+      { label: 'Monthly gross income', expr: incomeExpr },
+      {
+        label: 'Maximum rent under your rule',
+        expr: rentExpr,
+        note: rule === '40x' ? 'Landlords using the 40x rule want annual income of at least 40 times the monthly rent.' : undefined,
+      },
+      {
+        label: 'What is left after rent and debts',
+        expr: `$${fmtD(monthlyIncome)} − $${fmtD(maxRent)} rent − $${fmtD(monthlyDebts)} debts = $${fmtD(Math.max(0, monthlyIncome - maxRent - monthlyDebts))}/mo`,
+      },
+    ]);
   },
   extraPanel: (values, results) => {
     const c = rentCalc(values);

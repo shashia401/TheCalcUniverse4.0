@@ -3,6 +3,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import HomeAffordabilityPanel from './HomeAffordabilityPanel';
 
 import { solveAffordability, parseDtiLimit, DEFAULT_PROPERTY_TAX_PCT, DEFAULT_INSURANCE_ANNUAL } from '../../../utils/affordability';
+import { affordabilitySteps } from '../../../utils/affordabilitySteps';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const homeAffordabilityConfig: CalculatorConfig = {
   inputs: [
@@ -193,6 +195,31 @@ const homeAffordabilityConfig: CalculatorConfig = {
         color: sol.downPaymentPct >= 20 ? 'positive' : 'negative',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const annualIncome = parseFloat(values.annualIncome);
+    const annualRate = parseFloat(values.interestRate) / 100;
+    if (isNaN(annualIncome) || isNaN(annualRate) || annualIncome <= 0) return [];
+    const taxPct = parseFloat(values.propertyTax);
+    const insurance = parseFloat(values.homeInsurance);
+    const { front: frontPct, back: backPct } = parseDtiLimit(values.dtiLimit);
+    const input = {
+      annualIncome,
+      monthlyDebts: parseFloat(values.monthlyDebts) || 0,
+      downPayment: parseFloat(values.downPayment) || 0,
+      annualRate,
+      years: parseFloat(values.loanTerm || '30'),
+      propertyTaxRate: (isNaN(taxPct) ? DEFAULT_PROPERTY_TAX_PCT : taxPct) / 100,
+      insuranceAnnual: isNaN(insurance) ? DEFAULT_INSURANCE_ANNUAL : insurance,
+      frontPct: frontPct / 100,
+      backPct: backPct / 100,
+      pmiRate: (parseFloat(values.pmiRate) || 0) / 100,
+    };
+    const sol = solveAffordability(input);
+    if (!sol) return [];
+    return finiteSteps(
+      affordabilitySteps(input, sol, (n) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`)
+    );
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

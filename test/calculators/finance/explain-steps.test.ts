@@ -11,6 +11,16 @@ import creditCard from '../../../src/calculators/finance/credit-card-payoff';
 import sip from '../../../src/calculators/finance/sip-calculator';
 import averageReturn from '../../../src/calculators/finance/average-return';
 import inflation from '../../../src/calculators/finance/inflation';
+import paymentCalc from '../../../src/calculators/finance/payment-calculator';
+import repayment from '../../../src/calculators/finance/repayment';
+import boatLoan from '../../../src/calculators/finance/boat-loan';
+import businessLoan from '../../../src/calculators/finance/business-loan';
+import homeAff from '../../../src/calculators/finance/home-affordability';
+import houseAff from '../../../src/calculators/finance/house-affordability';
+import rentAff from '../../../src/calculators/finance/rent-affordability';
+import depreciation from '../../../src/calculators/finance/asset-depreciation';
+import percentOff from '../../../src/calculators/finance/percent-off';
+import commission from '../../../src/calculators/finance/commission';
 
 // Oracle: every pinned number below was computed independently in Python's
 // decimal module (60-digit precision, `python -I`), not by re-running the
@@ -59,7 +69,7 @@ describe('explainSteps — finance batch', () => {
         ['0.003274'],
         ['n = 18 months'],
         ['= $5,552.92'],
-        ['$5,552.92 = $5,553'],
+        ['$5,552.92 (shown as $5,553)'],
       ]);
       expect(steps(savings, v).at(-1)!.expr).toContain(resultValue(savings, v, 'finalBalance'));
     });
@@ -427,6 +437,285 @@ describe('explainSteps — finance batch', () => {
       expect(steps(inflation, blank(inflation))).toEqual([]);
       expect(steps(inflation, { amount: '0', startYear: '1980', endYear: '2000' })).toEqual([]);
       expect(steps(inflation, { amount: '100', startYear: '1800', endYear: '2000' })).toEqual([]);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Batch 2: payment, repayment, boat, business loan; affordability; depreciation;
+// percent-off; commission. Oracle: Python `decimal` (60 digits, python -I). The
+// affordability price is solved by bisection on the payment constraint, not by the
+// closed form the calculator uses; the payoff months with extra payments come from
+// a month-by-month Decimal simulation.
+// ---------------------------------------------------------------------------
+
+/** No step may ever print NaN / Infinity / undefined, whatever the input. */
+const printsClean = (c: CalculatorConfig, v: Record<string, string>) =>
+  JSON.stringify(steps(c, v)).match(/NaN|Infinity|∞|undefined/) === null;
+
+describe('explainSteps — finance batch 2', () => {
+  describe('payment-calculator', () => {
+    const pay = { solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'years', loanTerm: '5' };
+    it('payment mode: pins intermediates and ends on the displayed numbers', () => {
+      expectSteps(paymentCalc, pay, [
+        ['r = 7% ÷ 12', '0.005833'],
+        ['n = 5 years × 12 = 60 monthly payments'],
+        ['= 1.4176'],
+        ['$25,000.00 ×', '= $495.03'],
+        ['$495.03 × 60 = $29,701.80', '(interest: $4,701.80)'],
+      ]);
+      expect(resultValue(paymentCalc, pay, 'payment')).toBe('$495.03');
+      expect(resultValue(paymentCalc, pay, 'totalInterest')).toBe('$4,701.80');
+    });
+    it('loan-amount mode', () => {
+      const v = { solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '7', termUnit: 'years', loanTerm: '5' };
+      expectSteps(paymentCalc, v, [['0.005833'], ['n = 5 years × 12 = 60'], ['= 50.5020'], ['P = $500.00 × 50.5020 = $25,251.00']]);
+      expect(steps(paymentCalc, v).at(-1)!.expr).toContain(resultValue(paymentCalc, v, 'loanAmount'));
+    });
+    it('term mode', () => {
+      const v = { solveFor: 'term', loanAmount: '25000', monthlyPayment: '600', interestRate: '7' };
+      expectSteps(paymentCalc, v, [['0.005833'], ['$25,000.00 × 0.005833 = $145.83'], ['= 47.88'], ['⌈47.88⌉ = 48 payments = 4 years']]);
+      expect(steps(paymentCalc, v).at(-1)!.expr).toContain(resultValue(paymentCalc, v, 'term'));
+    });
+    it('0% rate divides evenly', () => {
+      const v = { solveFor: 'payment', loanAmount: '1200', interestRate: '0', termUnit: 'months', loanTerm: '12' };
+      expectSteps(paymentCalc, v, [['0.000000'], ['n = 12 monthly payments'], ['M = $1,200.00 ÷ 12 = $100.00/month'], ['$100.00 × 12 = $1,200.00']]);
+    });
+    it('returns [] for blank, invalid, or an impossible payment', () => {
+      expect(steps(paymentCalc, blank(paymentCalc))).toEqual([]);
+      expect(steps(paymentCalc, { ...pay, loanTerm: '0' })).toEqual([]);
+      expect(steps(paymentCalc, { solveFor: 'term', loanAmount: '25000', monthlyPayment: '100', interestRate: '7' })).toEqual([]);
+      expect(printsClean(paymentCalc, { ...pay, loanAmount: '1e999' })).toBe(true);
+    });
+  });
+
+  describe('repayment', () => {
+    const base = { loanAmount: '25000', interestRate: '7.5', termUnit: 'years', loanTerm: '5', extraPayment: '' };
+    it('pins the payment and total (no extra)', () => {
+      expectSteps(repayment, base, [
+        ['r = 7.5% ÷ 12', '0.006250'],
+        ['n = 5 years × 12 = 60'],
+        ['= 1.4533'],
+        ['= $500.95'],
+        ['$500.95 × 60 = $30,057', 'interest $5,057'],
+      ]);
+      expect(resultValue(repayment, base, 'monthlyPayment')).toBe('$500.95');
+    });
+    it('extra payment: simulated payoff and interest saved', () => {
+      const v = { ...base, extraPayment: '100' };
+      const out = steps(repayment, v);
+      expect(out).toHaveLength(6);
+      expect(out[5].expr).toContain('$500.95 + $100.00 = $600.95/month');
+      expect(out[5].expr).toContain('49 payments');
+      expect(out[5].expr).toContain('interest saved $1,014');
+      expect(out[5].expr).toContain(resultValue(repayment, v, 'interestSaved'));
+    });
+    it('returns [] for blank / invalid input', () => {
+      expect(steps(repayment, blank(repayment))).toEqual([]);
+      expect(steps(repayment, { ...base, loanAmount: '0' })).toEqual([]);
+      expect(printsClean(repayment, { ...base, loanAmount: '1e999' })).toBe(true);
+    });
+  });
+
+  describe('boat-loan', () => {
+    const base = { boatPrice: '50000', downPayment: '10000', loanTerm: '180', interestRate: '8', monthlyMaintenance: '300' };
+    it('pins the payment, interest and true monthly cost', () => {
+      expectSteps(boatLoan, base, [
+        ['$50,000.00 − $10,000.00 down = $40,000.00'],
+        ['r = 8% ÷ 12', '0.006667'],
+        ['^180 = 3.3069'],
+        ['$40,000.00 ×', '= $382.26'],
+        ['$382.26 × 180 − $40,000.00 = $28,806.95'],
+        ['$382.26 + $300.00 = $682.26'],
+      ]);
+      expect(resultValue(boatLoan, base, 'trueMonthly')).toBe('$682.26');
+      expect(steps(boatLoan, base).at(-1)!.expr).toContain(resultValue(boatLoan, base, 'trueMonthly'));
+    });
+    it('without maintenance the last step is the interest line', () => {
+      const v = { ...base, monthlyMaintenance: '' };
+      const out = steps(boatLoan, v);
+      expect(out).toHaveLength(5);
+      expect(out.at(-1)!.expr).toContain(resultValue(boatLoan, v, 'totalInterest'));
+    });
+    it('returns [] for blank, a down payment above the price, or junk', () => {
+      expect(steps(boatLoan, blank(boatLoan))).toEqual([]);
+      expect(steps(boatLoan, { ...base, downPayment: '60000' })).toEqual([]);
+      expect(printsClean(boatLoan, { ...base, boatPrice: '1e999' })).toBe(true);
+    });
+  });
+
+  describe('business-loan', () => {
+    const base = { loanAmount: '250000', loanTermMonths: '60', interestRate: '8.5', originationFee: '2', monthlyNOI: '8500' };
+    it('pins payment, DSCR and total cost', () => {
+      expectSteps(businessLoan, base, [
+        ['r = 8.5% ÷ 12', '0.007083'],
+        ['= 0.6547'],
+        ['= $5,129.13'],
+        ['$8,500.00 NOI ÷ $5,129.13 payment = 1.66'],
+        ['$5,129.13 × 60 = $307,747.97', 'interest $57,747.97', '+ $5,000.00 fee = $312,747.97'],
+      ]);
+      expect(resultValue(businessLoan, base, 'monthlyPayment')).toBe('$5,129.13');
+      expect(steps(businessLoan, base).at(-1)!.expr).toContain(resultValue(businessLoan, base, 'totalCost'));
+    });
+    it('0% rate, no fee and no NOI', () => {
+      const v = { loanAmount: '100000', loanTermMonths: '36', interestRate: '0', originationFee: '', monthlyNOI: '' };
+      expectSteps(businessLoan, v, [['r = 0%'], ['M = $100,000.00 ÷ 36 = $2,777.78'], ['$2,777.78 × 36 = $100,000.00']]);
+    });
+    it('returns [] for blank / invalid input', () => {
+      expect(steps(businessLoan, blank(businessLoan))).toEqual([]);
+      expect(steps(businessLoan, { ...base, loanAmount: '-5' })).toEqual([]);
+      expect(printsClean(businessLoan, { ...base, loanAmount: '1e999' })).toBe(true);
+    });
+  });
+
+  describe('home-affordability and house-affordability', () => {
+    const home = { annualIncome: '100000', monthlyDebts: '500', downPayment: '60000', interestRate: '6.75', loanTerm: '30', propertyTax: '1.2', homeInsurance: '1500', pmiRate: '', dtiLimit: '28/36' };
+    it('home: 28/36 arithmetic and the solved price (bisection oracle: $346,981)', () => {
+      expectSteps(homeAff, home, [
+        ['$100,000.00 ÷ 12 = $8,333.33'],
+        ['$8,333.33 × 28% = $2,333.33', '$8,333.33 × 36% − $500.00 debts = $2,500.00'],
+        ['min($2,333.33, $2,500.00) = $2,333.33', '− $125.00 insurance = $2,208.33'],
+        ['k = r(1+r)ⁿ', '0.00648598', 'n = 360', 't = 1.2% ÷ 12 = 0.00100000'],
+        ['P = ($2,208.33 + $60,000.00 × 0.00648598) ÷ (0.00648598 + 0.00100000) = $346,981'],
+      ]);
+      expect(steps(homeAff, home).at(-1)!.expr).toContain(resultValue(homeAff, home, 'maxHomePrice'));
+    });
+    it('home with PMI uses k + PMI (oracle $288,420)', () => {
+      const v = { ...home, downPayment: '20000', pmiRate: '0.8' };
+      const out = steps(homeAff, v);
+      expect(out[2].expr).toContain('(and PMI)');
+      expect(out[4].expr).toContain('0.00715265');
+      expect(out[4].expr).toContain('$288,420');
+      expect(out[4].expr).toContain(resultValue(homeAff, v, 'maxHomePrice'));
+    });
+    it('house: same engine, its own $ formatter and DTI select', () => {
+      const v = { annualIncome: '100000', monthlyDebts: '500', downPayment: '60000', dtiLimit: '36', interestRate: '6.75', loanTerm: '30', propertyTax: '1.2', homeInsurance: '1500', pmiRate: '' };
+      const out = steps(houseAff, v);
+      expect(out).toHaveLength(5);
+      expect(out[4].expr).toContain('= $346,981');
+      expect(out.at(-1)!.expr).toContain(resultValue(houseAff, v, 'maxHomePrice'));
+    });
+    it('returns [] when debts leave no room, or input is blank', () => {
+      expect(steps(homeAff, { ...home, monthlyDebts: '5000' })).toEqual([]);
+      expect(steps(homeAff, blank(homeAff))).toEqual([]);
+      expect(steps(houseAff, blank(houseAff))).toEqual([]);
+      expect(printsClean(homeAff, { ...home, annualIncome: '1e999' })).toBe(true);
+    });
+  });
+
+  describe('rent-affordability', () => {
+    it('30% rule on annual income', () => {
+      const v = { grossIncome: '75000', incomeFrequency: 'annual', monthlyDebts: '350', rentRule: '30' };
+      expectSteps(rentAff, v, [
+        ['$75,000.00 ÷ 12 = $6,250.00'],
+        ['$6,250.00 × 30% = $1,875.00'],
+        ['$6,250.00 − $1,875.00 rent − $350.00 debts = $4,025.00/mo'],
+      ]);
+      expect(steps(rentAff, v)[1].expr).toContain(resultValue(rentAff, v, 'maxRent'));
+    });
+    it('40x rule on an hourly wage', () => {
+      const v = { grossIncome: '30', incomeFrequency: 'hourly', monthlyDebts: '0', rentRule: '40x' };
+      expectSteps(rentAff, v, [
+        ['$30.00/hr × 40 hrs × 52 weeks ÷ 12 = $5,200.00'],
+        ['$5,200.00 × 12 ÷ 40 = $1,560.00'],
+        ['= $3,640.00/mo'],
+      ]);
+    });
+    it('returns [] for blank / zero income', () => {
+      expect(steps(rentAff, blank(rentAff))).toEqual([]);
+      expect(steps(rentAff, { grossIncome: '0', incomeFrequency: 'annual', rentRule: '30' })).toEqual([]);
+      expect(printsClean(rentAff, { grossIncome: '1e999', incomeFrequency: 'annual', rentRule: '30' })).toBe(true);
+    });
+  });
+
+  describe('asset-depreciation', () => {
+    const base = { assetCost: '50000', salvageValue: '5000', usefulLife: '5' };
+    it('straight-line', () => {
+      const v = { ...base, depreciationMethod: 'sl' };
+      expectSteps(depreciation, v, [['$50,000.00 cost − $5,000.00 salvage = $45,000.00'], ['$45,000.00 ÷ 5 years = $9,000.00 per year'], ['$50,000.00 − $9,000.00 = $41,000.00']]);
+      expect(steps(depreciation, v).at(-1)!.expr).toContain(resultValue(depreciation, v, 'firstYearDepreciation'));
+    });
+    it('double declining balance', () => {
+      const v = { ...base, depreciationMethod: 'ddb' };
+      expectSteps(depreciation, v, [
+        ['= $45,000.00'],
+        ['rate = 2 ÷ 5 = 40%'],
+        ['$50,000.00 × 40% = $20,000.00', '($50,000.00 − $5,000.00) ÷ 5 = $9,000.00'],
+        ['Year 1 expense = $20,000.00', '= $30,000.00'],
+      ]);
+      expect(steps(depreciation, v).at(-1)!.expr).toContain(resultValue(depreciation, v, 'firstYearDepreciation'));
+    });
+    it("sum-of-the-years' digits", () => {
+      const v = { ...base, depreciationMethod: 'syd' };
+      expectSteps(depreciation, v, [['= $45,000.00'], ['SYD sum = 5 × 6 ÷ 2 = 15'], ['Fraction = 5 ÷ 15'], ['$45,000.00 × 5/15 = $15,000.00']]);
+      expect(steps(depreciation, v).at(-1)!.expr).toContain(resultValue(depreciation, v, 'firstYearDepreciation'));
+    });
+    it('returns [] when salvage is not below cost, or input is blank', () => {
+      expect(steps(depreciation, blank(depreciation))).toEqual([]);
+      expect(steps(depreciation, { ...base, salvageValue: '50000', depreciationMethod: 'sl' })).toEqual([]);
+      expect(printsClean(depreciation, { ...base, assetCost: '1e999', depreciationMethod: 'ddb' })).toBe(true);
+    });
+  });
+
+  describe('percent-off', () => {
+    const base = { price: '120', discount1: '20', discount2: '15', tax: '8.25' };
+    it('stacked discounts plus tax', () => {
+      expectSteps(percentOff, base, [
+        ['$120.00 × (1 − 20/100) = $96.00'],
+        ['$96.00 × (1 − 15/100) = $81.60'],
+        ['$120.00 − $81.60 = $38.40 = 32.00% off'],
+        ['$81.60 + $81.60 × 8.25% = $88.33'],
+      ]);
+      expect(resultValue(percentOff, base, 'final')).toBe('$88.33');
+    });
+    it('single discount, no tax', () => {
+      const v = { price: '120', discount1: '25', discount2: '', tax: '' };
+      expectSteps(percentOff, v, [['$120.00 × (1 − 25/100) = $90.00'], ['$30.00 = 25.00% off'], ['$90.00 (no sales tax entered) = $90.00']]);
+    });
+    it('returns [] for blank or out-of-range input', () => {
+      expect(steps(percentOff, blank(percentOff))).toEqual([]);
+      expect(steps(percentOff, { ...base, discount1: '150' })).toEqual([]);
+      expect(printsClean(percentOff, { ...base, price: '1e999' })).toBe(true);
+    });
+  });
+
+  describe('commission', () => {
+    it('flat rate with a base salary', () => {
+      const v = { structure: 'flat', saleAmount: '250000', baseSalary: '40000', flatRate: '10' };
+      expectSteps(commission, v, [
+        ['10% ÷ 100 = 0.1'],
+        ['$250,000.00 × 0.1 = $25,000.00'],
+        ['$25,000.00 ÷ $250,000.00 = 10.00%'],
+        ['$40,000.00 + $25,000.00 = $65,000.00'],
+      ]);
+      expect(steps(commission, v)[1].expr).toContain(resultValue(commission, v, 'net'));
+    });
+    it('tiered: one step per tier, then the blended rate', () => {
+      const v = { structure: 'tiered', saleAmount: '200000', tier1Limit: '50000', tier1Rate: '5', tier2Limit: '150000', tier2Rate: '8', tier3Rate: '12', baseSalary: '' };
+      expectSteps(commission, v, [
+        ['$50,000.00 × 5% = $2,500.00'],
+        ['$100,000.00 × 8% = $8,000.00'],
+        ['$50,000.00 × 12% = $6,000.00'],
+        ['$2,500.00 + $8,000.00 + $6,000.00 = $16,500.00'],
+        ['$16,500.00 ÷ $200,000.00 = 8.25%'],
+      ]);
+      expect(steps(commission, v).at(-1)!.expr).toContain(resultValue(commission, v, 'net'));
+    });
+    it('real-estate split', () => {
+      const v = { structure: 'realestate', saleAmount: '400000', reGrossPct: '6', reAgentSplitPct: '60', reFranchisePct: '6', baseSalary: '' };
+      expectSteps(commission, v, [
+        ['$400,000.00 × 6% = $24,000.00'],
+        ['$24,000.00 ÷ 2 = $12,000.00'],
+        ['$12,000.00 − $12,000.00 × 6% = $11,280.00'],
+        ['$11,280.00 × 60% = $6,768.00'],
+      ]);
+      expect(steps(commission, v).at(-1)!.expr).toContain(resultValue(commission, v, 'net'));
+    });
+    it('returns [] for blank / invalid configuration', () => {
+      expect(steps(commission, blank(commission))).toEqual([]);
+      expect(steps(commission, { structure: 'flat', saleAmount: '1000', flatRate: '150' })).toEqual([]);
+      expect(steps(commission, { structure: 'tiered', saleAmount: '1000', tier1Limit: '500', tier1Rate: '5', tier2Limit: '300', tier2Rate: '8' })).toEqual([]);
+      expect(printsClean(commission, { structure: 'flat', saleAmount: '1e999', flatRate: '10' })).toBe(true);
     });
   });
 });

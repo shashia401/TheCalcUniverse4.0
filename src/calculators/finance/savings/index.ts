@@ -137,9 +137,11 @@ const savingsConfig: CalculatorConfig = {
           note: 'Each deposit lands at the end of its month, so it earns interest only on the months that follow.',
         });
       }
+      const pieces = [P > 0 ? `$${fmtD(lumpPart)}` : '', monthlyContrib > 0 ? `$${fmtD(fvAnnuity(monthlyContrib, i, months))}` : ''].filter(Boolean);
+      const shownAs = fmtK(finalBalance) === `$${fmtD(finalBalance)}` ? '' : ` (shown as ${fmtK(finalBalance)})`;
       steps.push({
         label: 'Add the pieces for your final balance',
-        expr: `${[P > 0 ? `$${fmtD(lumpPart)}` : '', monthlyContrib > 0 ? `$${fmtD(fvAnnuity(monthlyContrib, i, months))}` : ''].filter(Boolean).join(' + ')} = ${fmtK(finalBalance)}`,
+        expr: pieces.length > 1 ? `${pieces.join(' + ')} = $${fmtD(finalBalance)}${shownAs}` : `$${fmtD(finalBalance)}${shownAs}`,
       });
       return steps;
     }

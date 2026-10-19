@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
 import DepreciationPanel from './DepreciationPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const DEPRECIATION_FORMULA = '(Cost − Salvage) / Useful Life | (2 / Useful Life) × Beginning Book Value | (Remaining Life / SYD Sum) × (Cost − Salvage)';
 
@@ -262,6 +263,58 @@ const depreciationConfig: CalculatorConfig = {
     ];
   },
 
+  explainSteps: (values) => {
+    const results = depreciationConfig.calculate(values);
+    if (!results.length) return [];
+    const sched = results.find((x) => x.id === '_schedule');
+    if (!sched) return [];
+    const first = (JSON.parse(sched.value) as { depreciationExpense: number; endingValue: number }[])[0];
+    if (!first || !Number.isFinite(first.depreciationExpense) || !Number.isFinite(first.endingValue)) return [];
+    const cost = parseFloat(values.assetCost);
+    const salvage = parseFloat(values.salvageValue) || 0;
+    const life = parseInt(values.usefulLife, 10);
+    const method = values.depreciationMethod || 'sl';
+    const base = cost - salvage;
+    const fmt = (n: number) => new Decimal(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const yr1 = `$${fmt(first.depreciationExpense)}`;
+    const steps: { label: string; expr: string; note?: string }[] = [
+      {
+        label: 'Find the amount that can be depreciated',
+        expr: `$${fmt(cost)} cost − $${fmt(salvage)} salvage = $${fmt(base)}`,
+        note: 'The asset is never depreciated below its salvage value.',
+      },
+    ];
+    if (method === 'sl') {
+      steps.push({ label: 'Spread it evenly over the useful life', expr: `$${fmt(base)} ÷ ${life} years = ${yr1} per year` });
+      steps.push({
+        label: 'Year 1 expense and book value',
+        expr: `Year 1 expense = ${yr1} · book value = $${fmt(cost)} − ${yr1} = $${fmt(first.endingValue)}`,
+      });
+    } else if (method === 'ddb') {
+      const rate = 2 / life;
+      const ddb = cost * rate;
+      const sl = (cost - salvage) / life;
+      steps.push({
+        label: 'Double the straight-line rate',
+        expr: `rate = 2 ÷ ${life} = ${+(rate * 100).toFixed(2)}% of the book value each year`,
+      });
+      steps.push({
+        label: 'Compare with straight-line on what is left',
+        expr: `Declining balance: $${fmt(cost)} × ${+(rate * 100).toFixed(2)}% = $${fmt(ddb)} · Straight-line: ($${fmt(cost)} − $${fmt(salvage)}) ÷ ${life} = $${fmt(sl)}`,
+        note: 'Each year the calculator uses the larger of the two, never going below salvage value.',
+      });
+      steps.push({
+        label: 'Year 1 expense and book value',
+        expr: `Year 1 expense = ${yr1} · book value = $${fmt(cost)} − ${yr1} = $${fmt(first.endingValue)}`,
+      });
+    } else {
+      const sum = (life * (life + 1)) / 2;
+      steps.push({ label: 'Add up the digits of the useful life', expr: `SYD sum = ${life} × ${life + 1} ÷ 2 = ${sum}` });
+      steps.push({ label: 'Year 1 uses the full remaining life', expr: `Fraction = ${life} ÷ ${sum}` });
+      steps.push({ label: 'Year 1 depreciation', expr: `$${fmt(base)} × ${life}/${sum} = ${yr1}` });
+    }
+    return finiteSteps(steps);
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(DepreciationPanel, { values, results });

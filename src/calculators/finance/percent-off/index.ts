@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import PercentOffPanel from './PercentOffPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const percentOffConfig: CalculatorConfig = {
   inputs: [
@@ -122,6 +123,42 @@ const percentOffConfig: CalculatorConfig = {
     return results;
   },
 
+  explainSteps: (values) => {
+    const results = percentOffConfig.calculate(values);
+    if (!results.length || results[0].id === 'err') return [];
+    const val = (id: string) => results.find((x) => x.id === id)?.value ?? '';
+    const price = parseFloat(values.price);
+    const d1 = parseFloat(values.discount1);
+    const d2 = parseFloat(values.discount2);
+    const tax = parseFloat(values.tax) || 0;
+    const stacked = !isNaN(d2) && d2 > 0;
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const afterFirst = price * (1 - d1 / 100);
+    const afterSecond = stacked ? afterFirst * (1 - d2 / 100) : afterFirst;
+
+    const steps: { label: string; expr: string; note?: string }[] = [
+      { label: 'Take off the first discount', expr: `$${fmt(price)} × (1 − ${d1}/100) = $${fmt(afterFirst)}` },
+    ];
+    if (stacked) {
+      steps.push({
+        label: 'Take the stacked discount off the new price',
+        expr: `$${fmt(afterFirst)} × (1 − ${d2}/100) = $${fmt(afterSecond)}`,
+        note: 'The second percentage applies to the already-reduced price, not the original, so the two do not simply add.',
+      });
+    }
+    steps.push({
+      label: 'How much you saved',
+      expr: `$${fmt(price)} − $${fmt(afterSecond)} = $${fmt(price - afterSecond)} = ${val('effective')} off`,
+    });
+    steps.push({
+      label: tax > 0 ? 'Add sales tax for the final price' : 'Final price',
+      expr: tax > 0
+        ? `$${fmt(afterSecond)} + $${fmt(afterSecond)} × ${tax}% = ${val('final')}`
+        : `$${fmt(afterSecond)} (no sales tax entered) = ${val('final')}`,
+    });
+    return finiteSteps(steps);
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(PercentOffPanel, { values, results });

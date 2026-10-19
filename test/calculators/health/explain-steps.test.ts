@@ -10,6 +10,12 @@ import bsa from '../../../src/calculators/health/bsa';
 import waterIntake from '../../../src/calculators/health/water-intake';
 import bodyFat from '../../../src/calculators/health/body-fat';
 import healthyWeight from '../../../src/calculators/health/healthy-weight';
+import pace from '../../../src/calculators/health/pace';
+import caloriesBurned from '../../../src/calculators/health/calories-burned';
+import dueDate from '../../../src/calculators/health/due-date';
+import gfr from '../../../src/calculators/health/gfr';
+import armyBodyFat from '../../../src/calculators/health/army-body-fat';
+import overweight from '../../../src/calculators/health/overweight';
 import { buildDemoValues, getValue } from '../../helpers';
 
 // Intermediate numbers below were computed independently with Python's decimal module (60-digit precision,
@@ -366,5 +372,199 @@ describe('healthy-weight explainSteps', () => {
     expect(steps(healthyWeight, { ...v, waist: '' })).toEqual([]);
     expect(steps(healthyWeight, { ...v, weight: '' })).toEqual([]);
     expect(steps(healthyWeight, { ...v, heightCm: '' })).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Batch 2: pace, calories-burned, due-date, gfr, army-body-fat, overweight.
+// Oracle: Python `decimal` (60 digits, ROUND_HALF_UP, python -I) and `datetime`
+// for the due dates.
+// ---------------------------------------------------------------------------
+
+const printsClean = (c: CalculatorConfig, v: V) => JSON.stringify(steps(c, v)).match(/NaN|Infinity|∞|undefined/) === null;
+const resultVal = (c: CalculatorConfig, v: V, id: string) => getValue(c.calculate(v), id);
+
+describe('pace explainSteps', () => {
+  const base = { distanceUnit: 'miles', distance: '5', hours: '0', minutes: '30', seconds: '0', calcMode: 'pace', customDistance: '', paceMinutes: '', paceSeconds: '' };
+  it('pace mode: a 5K in miles (5 km / 1.609344 = 3.107 mi)', () => {
+    const e = exprs(pace, base);
+    expect(e).toHaveLength(3);
+    expect(e[0]).toBe('5 km ÷ 1.609344 = 3.107 mi');
+    expect(e[1]).toBe('0 h × 3600 + 30 min × 60 + 0 s = 1800 s');
+    expect(e[2]).toBe('1800 s ÷ 3.107 mi = 579.4 s per mi = 9:39 /mi');
+    expect(e[2]).toContain(resultVal(pace, base, 'pace'));
+  });
+  it('time mode in km', () => {
+    const v = { ...base, distanceUnit: 'km', distance: '10', calcMode: 'time', hours: '', minutes: '', paceMinutes: '5', paceSeconds: '30' };
+    const e = exprs(pace, v);
+    expect(e[1]).toBe('5 min × 60 + 30 s = 330 s per km');
+    expect(e[2]).toBe('10.000 km × 330 s per km = 3300 s = 55:00');
+    expect(e[2]).toContain(resultVal(pace, v, 'totalTime'));
+  });
+  it('distance mode', () => {
+    const v = { ...base, distance: 'custom', hours: '1', minutes: '0', calcMode: 'distance', paceMinutes: '8', paceSeconds: '30' };
+    const e = exprs(pace, v);
+    expect(e[0]).toBe('1 h × 3600 + 0 min × 60 + 0 s = 3600 s');
+    expect(e[2]).toBe('3600 s ÷ 510 s per mi = 7.06 mi');
+    expect(e[2]).toContain(resultVal(pace, v, 'distance'));
+  });
+  it('invalid: no time, custom distance missing, negative pace', () => {
+    expect(steps(pace, { ...base, minutes: '0' })).toEqual([]);
+    expect(steps(pace, { ...base, distance: 'custom' })).toEqual([]);
+    expect(steps(pace, { ...base, calcMode: 'time', paceMinutes: '-3' })).toEqual([]);
+    expect(steps(pace, {})).toEqual([]);
+    expect(printsClean(pace, { ...base, minutes: '1e999' })).toBe(true);
+  });
+});
+
+describe('calories-burned explainSteps', () => {
+  const base = { unit: 'imperial', weight: '170', activity: 'run_6mph', duration: '30' };
+  it('MET x kg x hours (9.8 x 77.1 x 0.5 = 378 kcal)', () => {
+    const e = exprs(caloriesBurned, base);
+    expect(e).toHaveLength(4);
+    expect(e[0]).toBe('170 lb × 0.45359237 = 77.1 kg');
+    expect(e[1]).toBe('30 min ÷ 60 = 0.50 hr');
+    expect(e[2]).toContain('= 9.8 METs');
+    expect(e[3]).toBe('9.8 × 77.1 kg × 0.50 hr = 378 kcal');
+    expect(e[3]).toContain(resultVal(caloriesBurned, base, 'caloriesBurned'));
+  });
+  it('metric weight needs no conversion', () => {
+    expect(exprs(caloriesBurned, { ...base, unit: 'metric', weight: '70' })[0]).toBe('70.0 kg');
+  });
+  it('invalid: blank weight or duration, unknown activity', () => {
+    expect(steps(caloriesBurned, { ...base, weight: '' })).toEqual([]);
+    expect(steps(caloriesBurned, { ...base, duration: '0' })).toEqual([]);
+    expect(steps(caloriesBurned, { ...base, activity: 'nope' })).toEqual([]);
+    expect(printsClean(caloriesBurned, { ...base, weight: '1e999' })).toBe(true);
+  });
+});
+
+describe('due-date explainSteps', () => {
+  it('LMP with a 30-day cycle: 2025-06-15 + 282 days = Tuesday, March 24, 2026', () => {
+    const v = { method: 'lmp', date: '2025-06-15', cycleLength: '30' };
+    const e = exprs(dueDate, v);
+    expect(e).toEqual([
+      'LMP = June 15, 2025',
+      '280 days + (30-day cycle − 28) = 280 + 2 = 282 days',
+      'June 15, 2025 + 282 days = Tuesday, March 24, 2026',
+    ]);
+    expect(e[2]).toContain(resultVal(dueDate, v, 'dueDate'));
+  });
+  it('standard 28-day cycle: +280 days = Sunday, March 22, 2026', () => {
+    const v = { method: 'lmp', date: '2025-06-15', cycleLength: '28' };
+    expect(exprs(dueDate, v)[2]).toBe('June 15, 2025 + 280 days = Sunday, March 22, 2026');
+  });
+  it('IVF day-5 transfer: transfer - 19 days = 2025-05-27, due 2026-03-03', () => {
+    const v = { method: 'ivf', date: '2025-06-15', cycleLength: '35' };
+    const e = exprs(dueDate, v);
+    expect(e[0]).toBe('June 15, 2025 − 19 days = May 27, 2025');
+    expect(e[1]).toBe('280 days = 40 weeks');
+    expect(e[2]).toBe('May 27, 2025 + 280 days = Tuesday, March 3, 2026');
+    expect(e[2]).toContain(resultVal(dueDate, v, 'dueDate'));
+  });
+  it('conception and day-3 transfer', () => {
+    expect(exprs(dueDate, { method: 'conception', date: '2025-06-15', cycleLength: '' })[0]).toBe('June 15, 2025 − 14 days = June 1, 2025');
+    expect(exprs(dueDate, { method: 'ivf3', date: '2025-06-15', cycleLength: '' })[2]).toBe('May 29, 2025 + 280 days = Thursday, March 5, 2026');
+  });
+  it('invalid: blank, malformed, or calendar-impossible dates', () => {
+    expect(steps(dueDate, { method: 'lmp', date: '', cycleLength: '28' })).toEqual([]);
+    expect(steps(dueDate, { method: 'lmp', date: '15/06/2025', cycleLength: '28' })).toEqual([]);
+    expect(steps(dueDate, { method: 'lmp', date: '2025-02-31', cycleLength: '28' })).toEqual([]);
+    expect(steps(dueDate, {})).toEqual([]);
+  });
+});
+
+describe('gfr explainSteps', () => {
+  it('male, 50, 1.0 mg/dL: eGFR 91.7', () => {
+    const v = { sex: 'male', age: '50', creatinine: '1.0', creatinineUnit: 'mgdl' };
+    const e = exprs(gfr, v);
+    expect(e).toHaveLength(5);
+    expect(e[1]).toContain('1.000 ÷ 0.9 = 1.1111');
+    expect(e[2]).toBe('min(1.1111, 1)^-0.302 = 1.00000 · max(1.1111, 1)^−1.200 = 0.88123');
+    expect(e[3]).toBe('0.9938^50 = 0.73274');
+    expect(e[4]).toContain('142 × 1.00000 × 0.88123 × 0.73274 = 91.7 mL/min/1.73m²');
+    expect(e[4]).toContain(resultVal(gfr, v, 'egfr'));
+    expect(e[4]).toContain(resultVal(gfr, v, 'ckdStage'));
+  });
+  it('female, 60, 70 umol/L: converts units and applies 1.012', () => {
+    const v = { sex: 'female', age: '60', creatinine: '70', creatinineUnit: 'umol' };
+    const e = exprs(gfr, v);
+    expect(e[0]).toBe('70 μmol/L ÷ 88.4 = 0.792 mg/dL');
+    expect(e[1]).toContain('0.792 ÷ 0.7 = 1.1312');
+    expect(e[2]).toBe('min(1.1312, 1)^-0.241 = 1.00000 · max(1.1312, 1)^−1.200 = 0.86247');
+    expect(e[3]).toBe('0.9938^60 = 0.68856');
+    expect(e[4]).toContain('× 1.012 = 85.3 mL/min/1.73m²');
+    expect(e[4]).toContain(resultVal(gfr, v, 'egfr'));
+  });
+  it('invalid: blank, non-physiologic creatinine, minor', () => {
+    const v = { sex: 'male', age: '50', creatinine: '1.0', creatinineUnit: 'mgdl' };
+    expect(steps(gfr, { ...v, creatinine: '' })).toEqual([]);
+    expect(steps(gfr, { ...v, creatinine: '50' })).toEqual([]);
+    expect(steps(gfr, { ...v, age: '12' })).toEqual([]);
+    expect(steps(gfr, {})).toEqual([]);
+    expect(printsClean(gfr, { ...v, creatinine: '1e999' })).toBe(true);
+  });
+});
+
+describe('army-body-fat explainSteps', () => {
+  it('male: logs 1.2672 and 1.8451 give 16.5% (official 17%, max 22%)', () => {
+    const v = { sex: 'male', age: '25', heightInches: '70', weight: '180', neck: '15.5', waist: '34', hip: '' };
+    const e = exprs(armyBodyFat, v);
+    expect(e).toHaveLength(4);
+    expect(e[0]).toContain('neck 15.5 → 15.5 in (up)');
+    expect(e[1]).toBe('log10(34 − 15.5) = log10(18.5) = 1.2672 · log10(70) = 1.8451');
+    expect(e[2]).toBe('86.010 × 1.2672 − 70.041 × 1.8451 + 36.76 = 16.5%');
+    expect(e[3]).toContain('16.5% → 17% official');
+    expect(e[3]).toContain('maximum for age 25 = 22%');
+    expect(e[3]).toContain(resultVal(armyBodyFat, v, 'passFail'));
+    expect(e[2]).toContain(resultVal(armyBodyFat, v, 'bodyFatArmy'));
+  });
+  it('rounds neck up and waist down to half inches', () => {
+    const v = { sex: 'male', age: '25', heightInches: '70', weight: '180', neck: '15.3', waist: '34.7', hip: '' };
+    expect(exprs(armyBodyFat, v)[0]).toContain('neck 15.3 → 15.5 in (up)');
+    expect(exprs(armyBodyFat, v)[0]).toContain('abdomen 34.7 → 34.5 in (down)');
+  });
+  it('female: log10(30 + 38 − 13) gives 28.6%', () => {
+    const v = { sex: 'female', age: '30', heightInches: '65', weight: '150', neck: '13', waist: '30', hip: '38' };
+    const e = exprs(armyBodyFat, v);
+    expect(e[1]).toBe('log10(30 + 38 − 13) = log10(55) = 1.7404 · log10(65) = 1.8129');
+    expect(e[2]).toBe('163.205 × 1.7404 − 97.684 × 1.8129 − 78.387 = 28.6%');
+    expect(e[3]).toContain('28.6% → 29% official');
+    expect(e[3]).toContain('maximum for age 30 = 34%');
+  });
+  it('invalid: missing waist, hip for women, neck larger than waist', () => {
+    const m = { sex: 'male', age: '25', heightInches: '70', weight: '180', neck: '15.5', waist: '34', hip: '' };
+    expect(steps(armyBodyFat, { ...m, waist: '' })).toEqual([]);
+    expect(steps(armyBodyFat, { ...m, sex: 'female' })).toEqual([]);
+    expect(steps(armyBodyFat, { ...m, neck: '40' })).toEqual([]);
+    expect(steps(armyBodyFat, {})).toEqual([]);
+    expect(printsClean(armyBodyFat, { ...m, waist: '1e999' })).toBe(true);
+  });
+});
+
+describe('overweight explainSteps', () => {
+  const base = { unit: 'imperial', sex: 'male', age: '40', weight: '200', heightFt: '5', heightIn: '10', heightCm: '', waist: '38' };
+  it('imperial male: BMI 28.7, WHtR 0.54, waist 38 in', () => {
+    const e = exprs(overweight, base);
+    expect(e).toHaveLength(4);
+    expect(e[0]).toBe('200 lb × 0.45359237 = 90.7 kg · (5 ft × 12 + 10 in) × 2.54 = 177.8 cm · 38 in × 2.54 = 96.5 cm');
+    expect(e[1]).toBe(`90.7 kg ÷ (1.778 m)² = ${resultVal(overweight, base, 'bmiScore')}`);
+    expect(e[1]).toContain('28.7 — Overweight');
+    expect(e[2]).toBe(`96.5 cm ÷ 177.8 cm = ${resultVal(overweight, base, 'whtr')}`);
+    expect(e[2]).toContain('0.54');
+    expect(e[3]).toBe('38.0 in − 40 in = -2.0 in → at or below the threshold');
+  });
+  it('metric female above the 88 cm threshold', () => {
+    const v = { unit: 'metric', sex: 'female', age: '35', weight: '70', heightFt: '', heightIn: '', heightCm: '165', waist: '92' };
+    const e = exprs(overweight, v);
+    expect(e[3]).toBe('92.0 cm − 88 cm = 4.0 cm → above the threshold');
+    expect(e[1]).toContain(resultVal(overweight, v, 'bmiScore'));
+  });
+  it('invalid: blank waist, weight or height', () => {
+    expect(steps(overweight, { ...base, waist: '' })).toEqual([]);
+    expect(steps(overweight, { ...base, weight: '' })).toEqual([]);
+    expect(steps(overweight, { ...base, heightFt: '0', heightIn: '0' })).toEqual([]);
+    expect(steps(overweight, {})).toEqual([]);
+    expect(printsClean(overweight, { ...base, weight: '1e999' })).toBe(true);
   });
 });

@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PaymentCalcPanel from './PaymentCalcPanel';
 import { pmt } from '../../../utils/financial';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 /** Longest payoff the calculator will describe: 50 years of monthly payments. */
 const MAX_TERM_MONTHS = 600;
@@ -271,6 +272,106 @@ const paymentCalculatorConfig: CalculatorConfig = {
     }
 
     return [];
+  },
+  explainSteps: (values) => {
+    const results = paymentCalculatorConfig.calculate(values);
+    if (!results.length || results[0].id === 'error') return [];
+    const solveFor = values.solveFor || 'payment';
+    const annualRate = parseFloat(values.interestRate) / 100;
+    const r = annualRate / 12;
+    const termUnit = values.termUnit || 'years';
+    const termRaw = parseFloat(values.loanTerm);
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const rateStep = {
+      label: 'Convert the APR to a monthly rate',
+      expr: `r = ${+(annualRate * 100).toFixed(4)}% ÷ 12 = ${(r * 100).toFixed(4)}% = ${r.toFixed(6)}`,
+      note: 'Interest is charged monthly, so the APR is split into 12 parts.',
+    };
+    const monthsStep = (n: number) => ({
+      label: 'Count the payments',
+      expr: `n = ${termUnit === 'years' ? `${termRaw} years × 12 = ` : ''}${n} monthly payments`,
+    });
+    const zero = Math.abs(r) < 1e-10;
+
+    if (solveFor === 'payment') {
+      const P = parseFloat(values.loanAmount);
+      const n = termUnit === 'years' ? Math.round(termRaw * 12) : Math.round(termRaw);
+      const M = pmt(P, r, n);
+      const totalPaid = M * n;
+      const total = {
+        label: 'Total cost over the life of the loan',
+        expr: `$${fmt(M)} × ${n} = $${fmt(totalPaid)}  (interest: $${fmt(totalPaid - P)})`,
+      };
+      if (zero) {
+        return finiteSteps([
+          rateStep,
+          monthsStep(n),
+          { label: 'No interest, so divide the loan evenly', expr: `M = $${fmt(P)} ÷ ${n} = $${fmt(M)}/month` },
+          total,
+        ]);
+      }
+      const growth = Math.pow(1 + r, n);
+      return finiteSteps([
+        rateStep,
+        monthsStep(n),
+        {
+          label: 'Grow $1 for n months of compounding',
+          expr: `(1 + r)ⁿ = (1 + ${r.toFixed(6)})^${n} = ${growth.toFixed(4)}`,
+        },
+        {
+          label: 'Apply the amortization formula',
+          expr: `M = $${fmt(P)} × (${r.toFixed(6)} × ${growth.toFixed(4)}) ÷ (${growth.toFixed(4)} − 1) = $${fmt(M)}`,
+          note: 'The one payment that pays the interest and retires the balance exactly at the last month.',
+        },
+        total,
+      ]);
+    }
+
+    if (solveFor === 'loanAmount') {
+      const M = parseFloat(values.monthlyPayment);
+      const n = termUnit === 'years' ? Math.round(termRaw * 12) : Math.round(termRaw);
+      const P = pvOfPayments(M, r, n);
+      const factor = zero ? n : (1 - Math.pow(1 + r, -n)) / r;
+      return finiteSteps([
+        rateStep,
+        monthsStep(n),
+        {
+          label: 'What $1 a month for n months can repay',
+          expr: zero
+            ? `factor = n = ${n}`
+            : `factor = (1 − (1 + ${r.toFixed(6)})^−${n}) ÷ ${r.toFixed(6)} = ${factor.toFixed(4)}`,
+          note: 'This reverses the payment formula: the loan is the present value of all your payments.',
+        },
+        { label: 'Multiply by your payment', expr: `P = $${fmt(M)} × ${factor.toFixed(4)} = $${fmt(P)}` },
+      ]);
+    }
+
+    // solveFor === 'term'
+    const P = parseFloat(values.loanAmount);
+    const M = parseFloat(values.monthlyPayment);
+    const nExact = zero ? P / M : -Math.log(1 - (r * P) / M) / Math.log(1 + r);
+    const nRounded = Math.max(1, Math.ceil(nExact - 1e-9));
+    const steps: { label: string; expr: string; note?: string }[] = [rateStep];
+    if (zero) {
+      steps.push({ label: 'No interest, so divide the loan by the payment', expr: `n = $${fmt(P)} ÷ $${fmt(M)} = ${nExact.toFixed(2)} payments` });
+    } else {
+      steps.push({
+        label: 'Interest charged in the first month',
+        expr: `$${fmt(P)} × ${r.toFixed(6)} = $${fmt(P * r)}`,
+        note: 'The payment must be larger than this or the balance never shrinks.',
+      });
+      steps.push({
+        label: 'Solve for the number of payments',
+        expr: `n = −ln(1 − ${r.toFixed(6)} × $${fmt(P)} ÷ $${fmt(M)}) ÷ ln(1 + ${r.toFixed(6)}) = ${nExact.toFixed(2)}`,
+      });
+    }
+    steps.push({
+      label: 'Round up to whole payments',
+      expr: `⌈${nExact.toFixed(2)}⌉ = ${nRounded} payments = ${results[0].value}`,
+      note: 'The last payment may be smaller than the others.',
+    });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

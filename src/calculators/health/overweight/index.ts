@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import OverweightPanel from './OverweightPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const overweightConfig: CalculatorConfig = {
   inputs: [
@@ -226,6 +227,56 @@ const overweightConfig: CalculatorConfig = {
         color: 'neutral',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const results = overweightConfig.calculate(values);
+    if (!results.length) return [];
+    const val = (id: string) => results.find((x) => x.id === id)?.value ?? '';
+    const imperial = (values.unit || 'imperial') === 'imperial';
+    const sex = values.sex || 'male';
+    const n1 = (x: number) => x.toFixed(1);
+    let weightKg: number;
+    let heightCm: number;
+    let waistCm: number;
+    let convExpr: string;
+    if (imperial) {
+      const wLb = parseFloat(values.weight);
+      const ft = parseFloat(values.heightFt) || 0;
+      const inches = parseFloat(values.heightIn) || 0;
+      const wIn = parseFloat(values.waist);
+      weightKg = wLb * 0.45359237;
+      heightCm = (ft * 12 + inches) * 2.54;
+      waistCm = wIn * 2.54;
+      convExpr = `${wLb} lb × 0.45359237 = ${n1(weightKg)} kg · (${ft} ft × 12 + ${inches} in) × 2.54 = ${n1(heightCm)} cm · ${wIn} in × 2.54 = ${n1(waistCm)} cm`;
+    } else {
+      weightKg = parseFloat(values.weight);
+      heightCm = parseFloat(values.heightCm) || 0;
+      waistCm = parseFloat(values.waist);
+      convExpr = `${n1(weightKg)} kg · ${n1(heightCm)} cm height · ${n1(waistCm)} cm waist`;
+    }
+    const heightM = heightCm / 100;
+    const waistNative = imperial ? waistCm / 2.54 : waistCm;
+    const threshold = imperial ? (sex === 'male' ? 40 : 35) : sex === 'male' ? 102 : 88;
+    const u = imperial ? 'in' : 'cm';
+    const excess = waistNative - threshold;
+    return finiteSteps([
+      { label: imperial ? 'Convert to kilograms and centimeters' : 'Your measurements', expr: convExpr },
+      {
+        label: 'Body mass index',
+        expr: `${n1(weightKg)} kg ÷ (${heightM.toFixed(3)} m)² = ${val('bmiScore')}`,
+        note: 'BMI is weight in kilograms divided by height in meters squared.',
+      },
+      {
+        label: 'Waist-to-height ratio',
+        expr: `${n1(waistCm)} cm ÷ ${n1(heightCm)} cm = ${val('whtr')}`,
+        note: 'The ratio is rounded to 2 decimals before it is classified.',
+      },
+      {
+        label: 'Compare your waist with the metabolic-syndrome threshold',
+        expr: `${n1(waistNative)} ${u} − ${threshold} ${u} = ${n1(excess)} ${u} → ${excess > 0 ? 'above' : 'at or below'} the threshold`,
+        note: 'The thresholds are the NCEP ATP III values the calculator uses: 40 in / 102 cm for men and 35 in / 88 cm for women.',
+      },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

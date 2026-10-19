@@ -1,6 +1,7 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import GFRPanel from './GFRPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const gfrConfig: CalculatorConfig = {
   inputs: [
@@ -129,6 +130,42 @@ const gfrConfig: CalculatorConfig = {
         color: 'negative',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const results = gfrConfig.calculate(values);
+    if (!results.length) return [];
+    const female = (values.sex || 'male') === 'female';
+    const age = parseFloat(values.age);
+    const isUmol = (values.creatinineUnit || 'mgdl') === 'umol';
+    const raw = parseFloat(values.creatinine);
+    const scr = isUmol ? raw / 88.4 : raw;
+    const kappa = female ? 0.7 : 0.9;
+    const alpha = female ? -0.241 : -0.302;
+    const ratio = scr / kappa;
+    const a = Math.pow(Math.min(ratio, 1), alpha);
+    const b = Math.pow(Math.max(ratio, 1), -1.2);
+    const c = Math.pow(0.9938, age);
+    const stage = results.find((x) => x.id === 'ckdStage')?.value ?? '';
+    return finiteSteps([
+      {
+        label: 'Put creatinine in mg/dL',
+        expr: isUmol ? `${raw} μmol/L ÷ 88.4 = ${scr.toFixed(3)} mg/dL` : `${raw} mg/dL (already in the right unit)`,
+      },
+      {
+        label: 'Compare it with the sex-specific constant',
+        expr: `Scr ÷ κ = ${scr.toFixed(3)} ÷ ${kappa} = ${ratio.toFixed(4)}  (κ = ${kappa}, α = ${alpha} for ${female ? 'female' : 'male'})`,
+        note: 'The 2021 CKD-EPI equation uses different constants for men and women.',
+      },
+      {
+        label: 'Raise it to the CKD-EPI powers',
+        expr: `min(${ratio.toFixed(4)}, 1)^${alpha} = ${a.toFixed(5)} · max(${ratio.toFixed(4)}, 1)^−1.200 = ${b.toFixed(5)}`,
+      },
+      { label: 'Apply the age factor', expr: `0.9938^${age} = ${c.toFixed(5)}` },
+      {
+        label: 'Multiply everything together',
+        expr: `142 × ${a.toFixed(5)} × ${b.toFixed(5)} × ${c.toFixed(5)}${female ? ' × 1.012' : ''} = ${results[0].value} → ${stage}`,
+      },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RepaymentPanel from './RepaymentPanel';
 import { pmt } from '../../../utils/financial';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 /** Longest term modelled: 50 years of monthly payments. */
 const MAX_MONTHS = 600;
@@ -139,6 +140,59 @@ const repaymentConfig: CalculatorConfig = {
     return results;
   },
 
+  explainSteps: (values) => {
+    const results = repaymentConfig.calculate(values);
+    if (!results.length) return [];
+    const val = (id: string) => results.find((x) => x.id === id)?.value ?? '';
+    const principal = parseFloat(values.loanAmount);
+    const annualRate = parseFloat(values.interestRate) / 100;
+    const termUnit = values.termUnit || 'years';
+    const termRaw = parseFloat(values.loanTerm);
+    const extraPayment = parseFloat(values.extraPayment) || 0;
+    const months = termUnit === 'years' ? Math.round(termRaw * 12) : Math.round(termRaw);
+    const r = annualRate / 12;
+    const M = pmt(principal, r, months);
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const zero = Math.abs(r) < 1e-10;
+    const growth = Math.pow(1 + r, months);
+
+    const steps: { label: string; expr: string; note?: string }[] = [
+      {
+        label: 'Convert the APR to a monthly rate',
+        expr: `r = ${+(annualRate * 100).toFixed(4)}% ÷ 12 = ${(r * 100).toFixed(4)}% = ${r.toFixed(6)}`,
+      },
+      {
+        label: 'Count the payments',
+        expr: `n = ${termUnit === 'years' ? `${termRaw} years × 12 = ` : ''}${months} monthly payments`,
+      },
+    ];
+    if (zero) {
+      steps.push({ label: 'No interest, so divide the loan evenly', expr: `M = $${fmt(principal)} ÷ ${months} = $${fmt(M)}` });
+    } else {
+      steps.push({
+        label: 'Grow $1 for n months of compounding',
+        expr: `(1 + r)ⁿ = (1 + ${r.toFixed(6)})^${months} = ${growth.toFixed(4)}`,
+      });
+      steps.push({
+        label: 'Apply the amortization formula',
+        expr: `M = $${fmt(principal)} × (${r.toFixed(6)} × ${growth.toFixed(4)}) ÷ (${growth.toFixed(4)} − 1) = $${fmt(M)}`,
+        note: 'The one payment that pays the interest and retires the balance exactly at the last month.',
+      });
+    }
+    steps.push({
+      label: 'Total cost over the life of the loan',
+      expr: `$${fmt(M)} × ${months} = ${val('totalCost')} total · interest ${val('totalInterest')}`,
+    });
+    if (extraPayment > 0) {
+      steps.push({
+        label: 'Add your extra payment',
+        expr: `$${fmt(M)} + $${fmt(extraPayment)} = ${val('monthlyWithExtra')}/month → paid off in ${val('newPayoffTime')} · interest saved ${val('interestSaved')}`,
+        note: 'The extra goes straight to principal, so the balance falls faster and later months accrue less interest.',
+      });
+    }
+    return finiteSteps(steps);
+  },
   extraPanel: (values, results) => {
     const principal = parseFloat(values.loanAmount);
     const annualRate = parseFloat(values.interestRate) / 100;

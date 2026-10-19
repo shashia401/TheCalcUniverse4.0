@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BusinessLoanPanel from './BusinessLoanPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 function getDSCRInterpretation(dscr: number): { label: string; color: 'positive' | 'negative' | 'neutral' } {
   if (dscr >= 1.5) return { label: 'Strong — Most lenders will approve', color: 'positive' };
@@ -215,6 +216,56 @@ const businessLoanConfig: CalculatorConfig = {
     return results;
   },
 
+  explainSteps: (values) => {
+    const results = businessLoanConfig.calculate(values);
+    if (!results.length) return [];
+    const val = (id: string) => results.find((x) => x.id === id)?.value ?? '';
+    const loanAmount = parseFloat(values.loanAmount);
+    const n = parseInt(values.loanTermMonths, 10) || 60;
+    const annualRate = parseFloat(values.interestRate);
+    const feePct = parseFloat(values.originationFee) || 0;
+    const monthlyNOI = parseFloat(values.monthlyNOI);
+    const r = annualRate / 100 / 12;
+    const fmt = (x: number) => new Decimal(x).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const payment = val('monthlyPayment');
+    const paymentNum = r === 0
+      ? loanAmount / n
+      : new Decimal(loanAmount).mul(r).div(new Decimal(1).sub(new Decimal(1).add(r).pow(-n))).toNumber();
+
+    const steps: { label: string; expr: string; note?: string }[] = [
+      {
+        label: 'Convert the annual rate to a monthly rate',
+        expr: `r = ${+annualRate.toFixed(4)}% ÷ 12 = ${(r * 100).toFixed(4)}% = ${r.toFixed(6)}`,
+      },
+    ];
+    if (r === 0) {
+      steps.push({ label: 'No interest, so divide the loan evenly', expr: `M = $${fmt(loanAmount)} ÷ ${n} = ${payment}` });
+    } else {
+      const disc = Math.pow(1 + r, -n);
+      steps.push({
+        label: `Discount factor over ${n} months`,
+        expr: `(1 + r)^−n = (1 + ${r.toFixed(6)})^−${n} = ${disc.toFixed(4)}`,
+      });
+      steps.push({
+        label: 'Apply the amortization formula',
+        expr: `M = $${fmt(loanAmount)} × ${r.toFixed(6)} ÷ (1 − ${disc.toFixed(4)}) = ${payment}`,
+        note: 'The one payment that pays the interest and retires the balance exactly at the last month.',
+      });
+    }
+    if (!isNaN(monthlyNOI) && monthlyNOI > 0) {
+      steps.push({
+        label: 'Debt service coverage ratio (DSCR)',
+        expr: `DSCR = $${fmt(monthlyNOI)} NOI ÷ ${payment} payment = ${val('dscrResult')}`,
+        note: 'DSCR is your monthly operating income divided by the loan payment.',
+      });
+    }
+    const feeAmt = new Decimal(loanAmount).mul(feePct / 100).toNumber();
+    steps.push({
+      label: feeAmt > 0 ? 'Total cost: payments plus the origination fee' : 'Total cost of the loan',
+      expr: `${payment} × ${n} = $${fmt(paymentNum * n)} paid (interest ${val('totalInterest')})${feeAmt > 0 ? ` + $${fmt(feeAmt)} fee = ${val('totalCost')}` : ''}`,
+    });
+    return finiteSteps(steps);
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(BusinessLoanPanel, { values, results });

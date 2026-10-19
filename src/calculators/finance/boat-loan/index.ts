@@ -2,6 +2,7 @@ import { createElement, useMemo } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { pmt, buildSchedule } from '../../../utils/financial';
+import { finiteSteps } from '../../../utils/explainGuard';
 import { TrendingDown } from 'lucide-react';
 
 // ─── Extra visualization panel ───────────────────────────────────────────────
@@ -187,6 +188,54 @@ const boatLoanConfig: CalculatorConfig = {
     ];
   },
 
+  explainSteps: (values) => {
+    const results = boatLoanConfig.calculate(values);
+    if (!results.length) return [];
+    const val = (id: string) => results.find((x) => x.id === id)?.value ?? '';
+    const price = parseFloat(values.boatPrice);
+    const down = parseFloat(values.downPayment) || 0;
+    const n = parseFloat(values.loanTerm);
+    const annualRate = parseFloat(values.interestRate) / 100;
+    const maint = parseFloat(values.monthlyMaintenance) || 0;
+    const r = annualRate / 12;
+    const loan = price - down;
+    const fmt = (x: number) =>
+      x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const steps: { label: string; expr: string; note?: string }[] = [
+      { label: 'Amount you finance', expr: `$${fmt(price)} − $${fmt(down)} down = $${fmt(loan)}` },
+      {
+        label: 'Convert the APR to a monthly rate',
+        expr: `r = ${+(annualRate * 100).toFixed(4)}% ÷ 12 = ${(r * 100).toFixed(4)}% = ${r.toFixed(6)}`,
+      },
+    ];
+    if (r === 0) {
+      steps.push({ label: 'No interest, so divide the loan evenly', expr: `M = $${fmt(loan)} ÷ ${n} = ${val('monthlyPayment')}` });
+    } else {
+      const growth = Math.pow(1 + r, n);
+      steps.push({
+        label: 'Grow $1 for n months of compounding',
+        expr: `(1 + r)ⁿ = (1 + ${r.toFixed(6)})^${n} = ${growth.toFixed(4)}`,
+      });
+      steps.push({
+        label: 'Apply the amortization formula',
+        expr: `M = $${fmt(loan)} × (${r.toFixed(6)} × ${growth.toFixed(4)}) ÷ (${growth.toFixed(4)} − 1) = ${val('monthlyPayment')}`,
+        note: 'The one payment that pays the interest and retires the balance exactly at the last month.',
+      });
+    }
+    steps.push({
+      label: 'Total interest over the loan',
+      expr: `${val('monthlyPayment')} × ${n} − $${fmt(loan)} = ${val('totalInterest')}`,
+    });
+    if (maint > 0) {
+      steps.push({
+        label: 'Add maintenance and storage',
+        expr: `${val('monthlyPayment')} + $${fmt(maint)} = ${val('trueMonthly')} true monthly cost`,
+        note: 'Maintenance and storage are not part of the loan; they are your own estimate.',
+      });
+    }
+    return finiteSteps(steps);
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(BoatLoanPanel, { values, results });
