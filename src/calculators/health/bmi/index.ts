@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import BMIPanel from './BMIPanel';
+import { healthyWeightRangeKg, healthyRangeRows } from './weightRanges';
 
 const bmiConfig: CalculatorConfig = {
   inputs: [
@@ -244,8 +245,7 @@ const bmiConfig: CalculatorConfig = {
     const isUnderFiveFeet = totalInchesForFormula < 60;
     const idealWeightLbs = idealWeightKg / 0.45359237;
 
-    const normalLowKg = 18.5 * heightM * heightM;
-    const normalHighKg = 24.9 * heightM * heightM;
+    const { low: normalLowKg, high: normalHighKg } = healthyWeightRangeKg(heightM);
     const normalLowLbs = normalLowKg / 0.45359237;
     const normalHighLbs = normalHighKg / 0.45359237;
 
@@ -414,6 +414,7 @@ const bmiConfig: CalculatorConfig = {
       { label: 'Obese (Class III)', value: 'BMI 40.0 and above' },
       { label: '5\'10" at 170 lbs', value: 'BMI ~24.4 (Normal)' },
       { label: '5\'5" at 150 lbs', value: 'BMI ~25.0 (Overweight threshold)' },
+      ...healthyRangeRows(),
     ],
     commonUses: [
       'Health screening — primary care visits use BMI as an initial metabolic health indicator alongside blood pressure and cholesterol panels',

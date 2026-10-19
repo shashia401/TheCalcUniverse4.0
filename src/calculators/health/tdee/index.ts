@@ -2,8 +2,9 @@ import { createElement, Fragment } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import CalorieMatrixPanel from './CalorieMatrixPanel';
 import TDEComparisonPanel from './TDEComparisonPanel';
+import { ACTIVITY_LEVELS, KG_PER_LB, activityRows, mifflinBmr } from './activityTable';
 
-const LB_TO_KG = 0.45359237;
+const LB_TO_KG = KG_PER_LB;
 
 /** Weight (kg) and height (cm) from either unit system; null when the inputs are incomplete. */
 function parseBody(values: Record<string, string>): { weightKg: number; heightCm: number } | null {
@@ -117,13 +118,7 @@ const tdeeConfig: CalculatorConfig = {
       type: 'select',
       required: true,
       helpText: 'How physically active you are on a typical week. Most people overestimate their activity level - when in doubt, choose the lower option.',
-      options: [
-        { label: 'Sedentary (desk job, little/no exercise)', value: '1.2' },
-        { label: 'Light Exercise (1–2 days/week)', value: '1.375' },
-        { label: 'Moderate Exercise (3–5 days/week)', value: '1.55' },
-        { label: 'Heavy Exercise (6–7 days/week)', value: '1.725' },
-        { label: 'Athlete / Physical Job (2× per day)', value: '1.9' },
-      ],
+      options: ACTIVITY_LEVELS.map(({ label, value }) => ({ label, value })),
     },
     {
       id: 'bodyFatPct',
@@ -176,9 +171,7 @@ const tdeeConfig: CalculatorConfig = {
         note: 'With body fat known, this formula is more accurate than Mifflin-St Jeor.',
       });
     } else {
-      bmr = sex === 'male'
-        ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
-        : 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+      bmr = mifflinBmr(sex, weightKg, heightCm, age);
       steps.push({
         label: `Mifflin-St Jeor BMR (${sex})`,
         expr: `10×${weightKg.toFixed(1)} + 6.25×${heightCm.toFixed(1)} − 5×${age} ${sex === 'male' ? '+ 5' : '− 161'} = ${fmt(bmr)} kcal/day`,
@@ -209,11 +202,10 @@ const tdeeConfig: CalculatorConfig = {
     // Always compute all BMR formulas for comparison
     let mifflinBMR: number, harrisBMR: number, katchBMR: number | null = null;
 
+    mifflinBMR = mifflinBmr(sex, weightKg, heightCm, age);
     if (sex === 'male') {
-      mifflinBMR = 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
       harrisBMR = 88.362 + 13.397 * weightKg + 4.799 * heightCm - 5.677 * age;
     } else {
-      mifflinBMR = 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
       harrisBMR = 447.593 + 9.247 * weightKg + 3.098 * heightCm - 4.330 * age;
     }
 
@@ -425,11 +417,7 @@ const tdeeConfig: CalculatorConfig = {
       },
     ],
     quickReference: [
-      { label: 'Sedentary (desk job)', value: 'TDEE × 1.2' },
-      { label: 'Light Exercise (1-2 days/wk)', value: 'TDEE × 1.375' },
-      { label: 'Moderate Exercise (3-5 days/wk)', value: 'TDEE × 1.55' },
-      { label: 'Heavy Exercise (6-7 days/wk)', value: 'TDEE × 1.725' },
-      { label: 'Athlete (2x/day)', value: 'TDEE × 1.9' },
+      ...activityRows(),
       { label: 'BMR as % of TDEE', value: '1 ÷ activity factor: about 83% (sedentary) down to 53% (athlete)' },
       { label: 'Protein Recommendation', value: '~1 g per lb of body weight' },
       { label: 'Safe Minimum (Women)', value: '1,200 kcal/day' },

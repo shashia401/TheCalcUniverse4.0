@@ -217,8 +217,8 @@ describe('Study Time Calculator', () => {
       expect(config.educational.diagram!.caption).toBeTruthy();
     });
 
-    it('has quickReference with 3 entries', () => {
-      expect(config.educational.quickReference).toHaveLength(3);
+    it('has quickReference with 3 multiplier rows + 4 hours-by-pace rows', () => {
+      expect(config.educational.quickReference).toHaveLength(7);
     });
 
     it('has commonUses with 3 items', () => {

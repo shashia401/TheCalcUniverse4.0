@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import AmortizationPanel from '../../../components/calculator/AmortizationPanel';
 import { pmt } from '../../../utils/financial';
+import { loanTermRows } from './termComparison';
 
 /** Longest term the calculator will model: 50 years of monthly payments. */
 const MAX_MONTHS = 600;
@@ -308,6 +309,7 @@ const loanCalculatorConfig: CalculatorConfig = {
       { symbol: 'Principal & Term', name: 'Loan Amount & Duration', description: 'The principal (P) is the total borrowed; the term (n) is the duration in months. A 5-year $20,000 loan has P=$20,000 and n=60. Together these determine the payment amount and total interest cost.' },
       { symbol: 'r', name: 'Monthly Rate', description: 'The annual interest rate divided by 12. This periodic rate is applied to the outstanding balance each month to calculate the interest portion of the payment.' },
     ],
+    quickReference: loanTermRows(),
     howToUse: [
       'Enter the loan amount, annual interest rate (APR), and choose between years or months for the term.',
       'Enter the term duration and review your monthly payment, total interest, and total cost.',

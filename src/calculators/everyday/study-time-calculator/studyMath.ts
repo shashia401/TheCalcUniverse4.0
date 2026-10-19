@@ -55,3 +55,22 @@ export function studyPlan(values: Record<string, string>): StudyPlan | null {
     sessionsPerWeek,
   };
 }
+
+/** Reading paces (pages/hour) shown in the reference table; 30 is the calculator's placeholder pace. */
+export const REFERENCE_PACES = [10, 20, 30, 40];
+
+/** Quick-reference rows: total study hours for 100 pages at each pace under each difficulty multiplier. */
+export function studyHoursRows(pages = 100, paces: number[] = REFERENCE_PACES): { label: string; value: string }[] {
+  return paces.map((pace) => ({
+    label: `${pages} pages at ${pace} pages/hour`,
+    value: Object.keys(DIFFICULTY_MULTIPLIERS)
+      .map((difficulty) => {
+        const plan = studyPlan({
+          totalPages: String(pages), pagesPerHour: String(pace), sessionsPerWeek: '5',
+          sessionLength: '60', daysUntilExam: '14', difficulty,
+        });
+        return `${difficulty} ${plan ? plan.adjustedHours.toFixed(2) : '–'} h`;
+      })
+      .join(' · '),
+  }));
+}

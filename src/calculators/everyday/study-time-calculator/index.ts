@@ -1,7 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import StudyTimePanel from './StudyTimePanel';
-import { studyPlan } from './studyMath';
+import { studyPlan, studyHoursRows } from './studyMath';
 
 const studyTimeConfig: CalculatorConfig = {
   inputs: [
@@ -121,6 +121,7 @@ const studyTimeConfig: CalculatorConfig = {
       { label: 'Easy Difficulty', value: '0.8x multiplier' },
       { label: 'Medium Difficulty', value: '1.0x multiplier' },
       { label: 'Hard Difficulty', value: '1.5x multiplier' },
+      ...studyHoursRows(),
     ],
     commonUses: [
       'Exam preparation — plan your study schedule leading up to final exams or standardized tests',

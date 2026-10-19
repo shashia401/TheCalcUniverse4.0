@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import CompoundInterestPanel from './CompoundInterestPanel';
+import { futureValue, growthRows } from './growth';
 
 // The monthly-contribution field only exists on the "With Contributions" tab; a value typed there must not
 // keep inflating the answer after the user switches back to "Standard" (the field is hidden, not cleared).
@@ -167,18 +168,7 @@ const compoundInterestConfig: CalculatorConfig = {
 
     if (isNaN(r) || isNaN(t) || t <= 0) return [];
 
-    const calcFV = (rate: number) => {
-      // Monthly deposits earn the monthly rate equivalent to the chosen compounding frequency
-      const mr = Math.pow(1 + rate / n, n / 12) - 1;
-      const months = t * 12;
-      const futureP = P * Math.pow(1 + rate / n, n * t);
-      const futurePMT = mr === 0
-        ? monthly * months
-        : monthly * ((Math.pow(1 + mr, months) - 1) / mr);
-      return futureP + futurePMT;
-    };
-
-    const fv = calcFV(r);
+    const fv = futureValue(P, monthly, r, n, t);
 
     const totalContributed = P + monthly * 12 * t;
     const interest = fv - totalContributed;
@@ -254,6 +244,7 @@ const compoundInterestConfig: CalculatorConfig = {
       { symbol: 'n', name: 'Compounding Frequency', description: 'How many times per year interest is compounded. Common choices include monthly (12), quarterly (4), semi-annually (2), and annually (1). The more frequent the compounding, the faster your money grows.' },
       { symbol: 't', name: 'Time', description: 'The total number of years the money is invested. Time is the single most powerful variable in compound interest — the longer your money grows, the more dramatic the exponential effect becomes.' },
     ],
+    quickReference: growthRows(),
     howToUse: [
       'Enter your initial investment amount — this is your starting principal.',
       'Add a monthly contribution to model regular investing (e.g., $500/month into a 401k or IRA).',
