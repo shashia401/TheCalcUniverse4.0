@@ -18,6 +18,14 @@ export interface Correction {
 export const corrections: Correction[] = [
   {
     date: "2026-10-18",
+    calculator: { id: "quadratic-equation-calculator", category: "math", title: "Quadratic Equation Calculator" },
+    summary: "Extremely large or small coefficients could freeze the page or raise an error. The exact square-root routine started from a floating-point estimate and then stepped to the answer one integer at a time, which does not finish when the estimate is off by many digits. It now uses an exact integer Newton iteration.",
+    before: "Coefficients near 1e-300 never finished; coefficients near 1e300 threw an error",
+    after: "Both return promptly; x² − 1e80 gives the exact roots ±1e40",
+    howVerified: "Expected values from Python math.isqrt; regression tests with time limits in test/calculators/math/quadratic-audit.test.ts.",
+  },
+  {
+    date: "2026-10-18",
     calculator: { id: "california-mortgage-calculator", category: "finance", title: "California Mortgage Calculator" },
     summary: "The default property-tax rate, its help text and both worked examples used the roughly 0.77% statewide average. A new California buyer is assessed at the purchase price, so the tax is the 1% Proposition 13 base rate plus local voter-approved levies, a little above 1%. The statewide average (about 0.7%) reflects long-time owners with low assessed values. The default is now 1.1%.",
     before: "$650,000 home: $417 a month ($5,005 a year) in property tax",

@@ -44,12 +44,17 @@ export type QuadResult =
   | { kind: 'linear'; message: string }
   | { kind: 'ok'; q: Quadratic };
 
+/** floor(sqrt(n)) by integer Newton iteration: exact for any size and about log2(n) steps. (A float estimate
+ *  walked to the root one step at a time is off by ~10^134 for coefficients near 1e-300 and never finishes;
+ *  Number(n) is Infinity, and BigInt(Infinity) throws, past 1e308.) */
 function bigSqrt(n: bigint): bigint {
   if (n < 2n) return n;
-  let x = BigInt(Math.floor(Math.sqrt(Number(n))));
-  while (x * x > n) x--;
-  while ((x + 1n) * (x + 1n) <= n) x++;
-  return x;
+  let x = 1n << BigInt((n.toString(2).length + 1) >> 1); // 2^ceil(bits/2) >= sqrt(n), so the sequence only decreases
+  for (;;) {
+    const y = (x + n / x) >> 1n;
+    if (y >= x) return x;
+    x = y;
+  }
 }
 
 /** Rational square root of a non-negative fraction when it exists. */

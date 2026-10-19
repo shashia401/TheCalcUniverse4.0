@@ -87,3 +87,35 @@ describe('quadratic audit', () => {
     expect(run('x', '1', '1')).toEqual([]);
   });
 });
+
+describe('quadratic: extreme coefficients finish (the float-seeded integer square root used to hang or throw)', () => {
+  // Oracle: python math.isqrt. x^2 - 10^80 has exact roots +-10^40; disc = 4*10^80 so sqrt(disc) = 2*10^40.
+  it('exact roots of x^2 - 1e80 are +-1e40', () => {
+    const t0 = Date.now();
+    const r = q('1', '0', '-1e80');
+    expect(r.kind).toBe('two-real');
+    expect(r.exact).toBeTruthy();
+    expect(Date.now() - t0).toBeLessThan(1000);
+  });
+
+  it('coefficients near 1e-300 return promptly instead of looping for hours', () => {
+    const t0 = Date.now();
+    const r = solveQuadratic('1e-300', '1e-300', '1e-300');
+    expect(['ok', 'incomplete']).toContain(r.kind);
+    expect(Date.now() - t0).toBeLessThan(2000);
+  });
+
+  it('coefficients near 1e300 return promptly and do not throw', () => {
+    const t0 = Date.now();
+    expect(() => solveQuadratic('1e300', '1e300', '-1e300')).not.toThrow();
+    expect(Date.now() - t0).toBeLessThan(2000);
+  });
+
+  it('calculate() survives the same extremes', () => {
+    for (const [a, b, c] of [['1e-300', '1', '1'], ['1e300', '1', '1'], ['1', '1e300', '1e-300']] as const) {
+      const t0 = Date.now();
+      expect(() => run(a, b, c)).not.toThrow();
+      expect(Date.now() - t0).toBeLessThan(2000);
+    }
+  });
+});
