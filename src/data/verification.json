@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-18",
-  "tests": 10904,
+  "generated": "2026-10-19",
+  "tests": 11520,
   "calculators": 343,
   "audited": {
     "401k-calculator": "2026-10-18",
@@ -252,7 +252,7 @@
     "protein-calculator": "2026-10-18",
     "pythagorean-theorem-calculator": "2026-10-14",
     "qr-code-generator": "2026-10-18",
-    "quadratic-equation-calculator": "2026-10-14",
+    "quadratic-equation-calculator": "2026-10-18",
     "random-number-generator": "2026-10-15",
     "rate-limit-calculator": "2026-10-12",
     "ratio-calculator": "2026-10-14",
