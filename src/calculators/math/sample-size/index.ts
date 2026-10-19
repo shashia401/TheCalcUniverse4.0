@@ -3,6 +3,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import SampleSizePanel from './SampleSizePanel';
 import { cochranSampleSize } from './cochran';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const CONFIDENCE_LABELS: Record<string, string> = { '90': '90%', '95': '95%', '99': '99%' };
 
@@ -113,6 +114,28 @@ const sampleSizeConfig: CalculatorConfig = {
         id: '_data',
         label: '',
         value: JSON.stringify({ N, z: Z, p: propRaw / 100, E, confidence: Number(confidence), n0: c.n0, n }),
+      },
+    ];
+  },
+  explainSteps: (values) => {
+    if (!hasAnswer(sampleSizeConfig.calculate(values))) return [];
+    const N = parseNumberStrict(values.population);
+    const confidence = values.confidence || '95';
+    const E = parseNumberStrict(values.margin) / 100;
+    const propRaw = (values.proportion ?? '').trim() === '' ? 50 : parseNumberStrict(values.proportion);
+    const p = propRaw / 100;
+    const c = cochranSampleSize(N, Number(confidence), E, p);
+    const t = (x: number) => parseFloat(x.toPrecision(10));
+    const n0 = c.n0.toFixed(2);
+    return [
+      { label: 'Z-score for the confidence level', expr: `Z = ${c.z.toFixed(4)}  (${confidence}% confidence)` },
+      {
+        label: 'Sample size for a very large population: n₀ = Z² × p × (1 − p) ÷ E²',
+        expr: `n₀ = ${c.z.toFixed(4)}² × ${t(p)} × ${t(1 - p)} ÷ ${t(E)}² = ${n0}  →  ${c.n0Ceil}`,
+      },
+      {
+        label: 'Correct for the finite population: n = n₀ ÷ (1 + (n₀ − 1) ÷ N)',
+        expr: `n = ${n0} ÷ (1 + (${n0} − 1) ÷ ${N}) = ${c.nFinite.toFixed(2)}  →  ${c.n} (rounded up)`,
       },
     ];
   },

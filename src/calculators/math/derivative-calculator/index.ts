@@ -3,6 +3,8 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import DerivativePanel from './DerivativePanel';
 import { CasError, type Node, derivativeOrder, evalNode, hasVar, parse, show, simplify } from '../shared/cas';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import type { ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 /** Plain-language list of the differentiation rules the expression needs (shown as the "steps"). */
 function rulesUsed(n: Node, out = new Set<string>()): Set<string> {
@@ -213,6 +215,18 @@ const derivativeConfig: CalculatorConfig = {
       { source: 'Wolfram MathWorld — Power Rule', url: 'https://mathworld.wolfram.com/PowerRule.html' },
       { source: 'Khan Academy — Derivative Rules', url: 'https://www.khanacademy.org/math/differential-calculus/dc-diff-intro/dc-basic-diff-rules/a/basic-differentiation-rules-review' },
     ],
+  },
+  explainSteps: (values) => {
+    const rows = derivativeConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const lines = (resultValue(rows, 'steps') ?? '').split('\n').filter(Boolean);
+    if (lines.length < 2) return [];
+    const [rules, ...ders] = lines;
+    const out: ExplainStep[] = [{ label: 'Pick the differentiation rules the function needs', expr: rules.replace(/^Rules used:\s*/, '') }];
+    ders.forEach((l, i) => out.push({ label: ders.length > 1 ? `Differentiate (derivative number ${i + 1})` : 'Differentiate', expr: l }));
+    const ev = rows.find((r) => r.id === 'evaluated');
+    if (ev) out.push({ label: 'Evaluate at the chosen x', expr: `${ev.label} = ${ev.value}` });
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

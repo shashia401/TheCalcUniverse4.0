@@ -3,6 +3,7 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RoofingPanel from './RoofingPanel';
 import Decimal from 'decimal.js';
 import { parseNonNegative } from '../../../utils/parseNumber';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const PITCH_MULTIPLIERS: Record<string, number> = {
   '0': 1.000,
@@ -197,6 +198,40 @@ const roofingConfig: CalculatorConfig = {
     });
 
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = roofingConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const length = parseNonNegative(values.length, 10000);
+    const width = parseNonNegative(values.width, 10000);
+    const overhangText = (values.overhang ?? '').trim();
+    const overhang = overhangText === '' ? 1 : parseNonNegative(overhangText, 10);
+    const wasteText = (values.wasteFactor ?? '').trim();
+    const waste = wasteText === '' ? 10 : parseNonNegative(wasteText, 100);
+    const hip = (values.roofType || 'gable') === 'hip' ? 5 : 0;
+    const n = (x: number) => parseFloat(x.toFixed(4)).toString();
+    const squares = g('squares');
+    const priceText = (values.pricePerSquare ?? '').trim();
+    const cost = g('estimatedCost');
+    return [
+      {
+        label: 'Add the eave overhang on every side to get the roof footprint',
+        expr: `(${n(length)} + 2×${n(overhang)}) × (${n(width)} + 2×${n(overhang)}) = ${n(length + 2 * overhang)} × ${n(width + 2 * overhang)} = ${g('footprintArea')}`,
+      },
+      {
+        label: 'Multiply by the pitch multiplier to get the sloped surface',
+        expr: `${g('footprintArea')} × ${g('pitchMultiplier')} = ${g('surfaceArea')}`,
+        note: `A ${values.pitch || '6'}/12 roof is longer along the slope than across the footprint.`,
+      },
+      {
+        label: hip ? 'Add the waste allowance plus 5% extra for hip cuts' : 'Add the waste allowance for cuts',
+        expr: `${g('surfaceArea')} × (1 + ${n(waste + hip)}%) = ${g('roofArea')}`,
+      },
+      { label: 'Convert to roofing squares (100 sq ft each), rounded up', expr: `${g('roofArea')} ÷ 100 → ${squares}` },
+      { label: 'Shingles are bought at 3 bundles per square', expr: `${squares} × 3 = ${g('bundles')}` },
+      ...(cost && priceText !== '' ? [{ label: 'Shingle cost: squares times the price per square', expr: `${parseInt(squares, 10)} × $${priceText} = ${cost}` }] : []),
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -4,6 +4,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import TimePanel from './TimePanel';
 import { parseClockTime, minutesBetween } from '../../../utils/clockTime';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 /* ------------------------------------------------------------------ */
 /*  Time calculator config                                            */
@@ -296,6 +297,28 @@ citations: [
 
    },
 
+  explainSteps: (values) => {
+    const rows = timeConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    let p: { startMinutes: number; endMinutes: number; breakMinutes: number; workingMinutes: number; overnight: boolean };
+    try {
+      p = JSON.parse(resultValue(rows, '_parts') ?? '');
+    } catch {
+      return [];
+    }
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const diff = p.workingMinutes + p.breakMinutes;
+    const gross = g('grossPay');
+    return [
+      { label: 'Convert both times to minutes after midnight', expr: `${g('startLabel')} = ${p.startMinutes} min,  ${g('endLabel')} = ${p.endMinutes} min` },
+      p.overnight
+        ? { label: 'The shift crosses midnight, so add 24 hours (1440 min) to the end time before subtracting', expr: `${p.endMinutes} + 1440 − ${p.startMinutes} = ${diff} min` }
+        : { label: 'Subtract the start from the end', expr: `${p.endMinutes} − ${p.startMinutes} = ${diff} min` },
+      ...(p.breakMinutes > 0 ? [{ label: 'Take off the unpaid break', expr: `${diff} − ${p.breakMinutes} = ${p.workingMinutes} min` }] : []),
+      { label: 'Convert to hours and minutes', expr: `${p.workingMinutes} min = ${g('standardTime')} = ${g('decimalTime')} decimal hours` },
+      ...(gross ? [{ label: 'Pay: hours times the hourly rate', expr: `${p.workingMinutes} ÷ 60 × ${g('hourlyRate')} = ${gross}` }] : []),
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(TimePanel, { values, results });  },

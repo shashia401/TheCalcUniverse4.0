@@ -110,6 +110,27 @@ const testScoreConfig: CalculatorConfig = {
 
     return results;
   },
+  explainSteps: (values) => {
+    const current = parseNumberStrict(values.currentGrade);
+    const desired = parseNumberStrict(values.desiredGrade);
+    const weight = parseNumberStrict(values.examWeight);
+    const exam = finalExamNeeded(current, desired, weight);
+    if (!exam) return [];
+    const t = (x: number) => parseFloat(x.toFixed(10));
+    const w = t(weight / 100);
+    const keep = t(1 - weight / 100);
+    const status =
+      exam.status === 'secured'
+        ? { label: 'You are already safe: even 0% on the final reaches the target', expr: `0% on the final gives ${fmtPct(exam.floor)} ≥ ${fmtPct(desired)}` }
+        : exam.status === 'impossible'
+          ? { label: 'The target is out of reach: even a perfect final falls short', expr: `100% on the final gives ${fmtPct(exam.ceiling)} < ${fmtPct(desired)}` }
+          : { label: 'The overall grade you can end with runs from this range', expr: `${fmtPct(exam.floor)} (0% on the final) to ${fmtPct(exam.ceiling)} (100% on the final)` };
+    return [
+      { label: 'The overall grade mixes the graded work with the final exam', expr: `${fmtPct(desired)} = ${fmtPct(current)} × ${keep} + final × ${w}` },
+      { label: 'Solve for the final exam score', expr: `final = (${fmtPct(desired)} − ${fmtPct(current)} × ${keep}) ÷ ${w} = ${fmtPct(exam.needed)}` },
+      status,
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(TestScorePanel, { values, results });

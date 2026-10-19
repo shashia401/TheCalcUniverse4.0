@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import type { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import MolecularWeightPanel from './MolecularWeightPanel';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // ─── Atomic Weights (all 118 elements) ─────────────────────────────────────────
 // Conventional atomic weights (IUPAC / CIAAW), 3 decimals. Elements with no stable isotope (Tc, Pm, Po and everything
@@ -279,6 +280,28 @@ const molecularWeightConfig: CalculatorConfig = {
     ];
   },
 
+  explainSteps: (values) => {
+    const rows = molecularWeightConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    let parts: { element: string; count: number; mass: number }[];
+    try {
+      parts = JSON.parse(resultValue(rows, '_elementBreakdown') ?? '[]');
+    } catch {
+      return [];
+    }
+    if (!Array.isArray(parts) || parts.length === 0) return [];
+    const w = (x: number) => x.toFixed(3);
+    const units = resultValue(rows, 'formulaUnits');
+    return [
+      {
+        label: 'Count the atoms of each element',
+        expr: parts.map((x) => `${x.element} × ${x.count}`).join(',  '),
+        ...(units ? { note: `Added parts: ${units}. Each is counted in full.` } : {}),
+      },
+      { label: 'Multiply each count by the atomic weight', expr: parts.map((x) => `${x.element}: ${x.count} × ${w(x.mass / x.count)} = ${w(x.mass)}`).join(';  ') },
+      { label: 'Add the contributions', expr: `${parts.map((x) => w(x.mass)).join(' + ')} = ${resultValue(rows, 'molecularWeight')} g/mol` },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(MolecularWeightPanel, { values, results });

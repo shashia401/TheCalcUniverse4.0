@@ -3,6 +3,7 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import TimeDurationPanel from './TimeDurationPanel';
 import { parseClockTime } from '../../../utils/clockTime';
 import { parseIsoDateUtc } from '../../../utils/isoDate';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 /* ------------------------------------------------------------------ */
 /*  Parse helpers                                                      */
@@ -189,6 +190,26 @@ const timeDurationConfig: CalculatorConfig = {
     return results;
   },
 
+  explainSteps: (values) => {
+    const rows = timeDurationConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const sd = parseIsoDateUtc(values.startDate);
+    const ed = parseIsoDateUtc(values.endDate);
+    const st = parseClockTime(values.startTime);
+    const et = parseClockTime(values.endTime);
+    if (sd === null || ed === null || st === null || et === null) return [];
+    const days = Math.round((ed - sd) / DAY_MS);
+    const dm = et - st;
+    const biz = g('businessDays');
+    return [
+      { label: 'Count the whole days between the dates, then the minutes between the clock times', expr: `${days} × 1440 ${dm < 0 ? '−' : '+'} ${Math.abs(dm)} = ${g('totalMinutes')} min` },
+      { label: 'Split the minutes into days, hours and minutes', expr: `${g('totalMinutes')} min = ${g('daysHoursMinutes')}` },
+      { label: 'Total in hours: divide the minutes by 60', expr: `${g('totalMinutes')} ÷ 60 = ${g('totalHours')} hours` },
+      { label: 'In weeks, days and hours', expr: g('weeksDaysHours') },
+      ...(biz ? [{ label: 'Business days: count Monday to Friday from the start date through the end date', expr: `${g('startDateTime').split(' ')[0]} … ${g('endDateTime').split(' ')[0]} = ${biz} weekdays` }] : []),
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(TimeDurationPanel, { values, results });

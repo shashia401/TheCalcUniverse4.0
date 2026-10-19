@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import LongDivisionPanel from './LongDivisionPanel';
 import { LD_MAX_DIGITS, parseLongDivision } from './longDivisionMath';
+import type { ExplainStep } from '../../../types/calculator';
 
 const longDivisionConfig: CalculatorConfig = {
   inputs: [
@@ -43,6 +44,32 @@ const longDivisionConfig: CalculatorConfig = {
           }]),
       { id: 'check', label: 'Check', value: `${r.quotient} × ${r.divisor} + ${r.remainder} = ${r.quotient * r.divisor + r.remainder}` },
     ];
+  },
+  explainSteps: (values) => {
+    const p = parseLongDivision(values.dividend, values.divisor);
+    if (p.kind !== 'ok') return [];
+    const r = p.result;
+    const d = r.divisor < 0n ? -r.divisor : r.divisor;
+    const shown = r.steps.slice(0, 8);
+    const work = shown.map((s) => `${s.partial} ÷ ${d} = ${s.qDigit} r ${s.remainder}`).join(' → ') + (r.steps.length > shown.length ? ' → …' : '');
+    const signed = r.dividend < 0n || r.divisor < 0n;
+    const out: ExplainStep[] = [
+      { label: 'Work through the digits left to right: divide, multiply, subtract, bring down the next digit', expr: work },
+      {
+        label: 'Read off the quotient and the remainder',
+        expr: `${r.dividend} ÷ ${r.divisor} = ${r.quotient} remainder ${r.remainder}`,
+        ...(signed ? { note: 'The digits are divided as positive numbers; the quotient is cut off toward zero and the remainder keeps the sign of the dividend.' } : {}),
+      },
+      { label: 'Check: quotient × divisor + remainder gives back the dividend', expr: `${r.quotient} × ${r.divisor} + ${r.remainder} = ${r.quotient * r.divisor + r.remainder}` },
+    ];
+    if (r.remainder !== 0n) {
+      out.push({
+        label: 'Keep dividing past the decimal point',
+        expr: `${r.dividend} ÷ ${r.divisor} = ${r.expansion}`,
+        note: r.terminates ? 'The remainder eventually reaches 0, so the decimal ends.' : r.truncated ? 'The repeating block is very long, so the expansion is cut off.' : 'The digits in brackets repeat forever.',
+      });
+    }
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

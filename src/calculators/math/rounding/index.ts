@@ -82,6 +82,22 @@ const roundingConfig: CalculatorConfig = {
       { id: 'explanation', label: 'Why', value: explanation },
     ];
   },
+  explainSteps: (values) => {
+    const out = roundExact(values.number, values.place || 'unit', (values.method || 'half-up') as RoundMethod, values.sigFigs);
+    if (out.kind !== 'ok') return [];
+    const r = out.r;
+    if (r.direction === 'exact') {
+      return [
+        { label: `Check the digits beyond the ${r.placeLabel}`, expr: r.explanation },
+        { label: 'Rounded value', expr: `${r.original} → ${r.rounded}` },
+      ];
+    }
+    return [
+      { label: `Find the two neighbours around the number for ${r.placeLabel}`, expr: `${r.lower} ≤ ${r.original} ≤ ${r.upper}` },
+      { label: `Apply the rule: ${METHOD_LABEL[r.method]}`, expr: r.explanation },
+      { label: 'Rounded value', expr: `${r.original} → ${r.rounded}` },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(RoundingPanel, { values, results });

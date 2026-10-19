@@ -2,6 +2,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import PhPanel from './PhPanel';
 import { classifyPh } from '../../engineering/ph-calculator/phMath';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // Boundaries mirror classifyPh() (shared) exactly — using a different
 // operator (<=) here previously put pH 3.00 in "Weak acid" (Strong acid
@@ -143,6 +144,34 @@ const config: CalculatorConfig = {
         value: hColor,
       },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = config.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const mode = values.mode || 'h-to-ph';
+    const pH = g('phValue');
+    const pOH = g('pohValue');
+    const h = g('hConcentration');
+    const sum = 'At 25 °C, pH + pOH = 14';
+    const first =
+      mode === 'h-to-ph'
+        ? [
+            { label: 'pH is the negative base-10 logarithm of the hydrogen ion concentration', expr: `pH = −log₁₀[H⁺] = −log₁₀(${(values.hconcentration ?? '').trim()}) = ${pH}` },
+            { label: sum, expr: `pOH = 14 − ${pH} = ${pOH}` },
+          ]
+        : mode === 'ph-to-h'
+          ? [
+              { label: 'Undo the logarithm: [H⁺] = 10 to the power of −pH', expr: `[H⁺] = 10^(−${pH}) = ${h} mol/L` },
+              { label: sum, expr: `pOH = 14 − ${pH} = ${pOH}` },
+            ]
+          : mode === 'poh-to-ph'
+            ? [
+                { label: sum, expr: `pH = 14 − ${pOH} = ${pH}` },
+                { label: 'Undo the logarithm: [H⁺] = 10 to the power of −pH', expr: `[H⁺] = 10^(−${pH}) = ${h} mol/L` },
+              ]
+            : [{ label: sum, expr: `pOH = 14 − ${pH} = ${pOH}` }];
+    return [...first, { label: 'Classify the solution by its pH', expr: `pH ${pH} → ${g('classification')} (indicator colour: ${g('hColor')})` }];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

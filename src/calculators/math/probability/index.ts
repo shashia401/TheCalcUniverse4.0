@@ -3,6 +3,7 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ProbabilityPanel from './ProbabilityPanel';
 import { D, type Dec } from '../../../utils/stats';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // Exact decimal arithmetic (private Decimal clone from utils/stats) for the joint, union and complement
 // probabilities, so values like 0.1 + 0.2 never drift in the last digits.
@@ -267,6 +268,23 @@ const probabilityConfig: CalculatorConfig = {
       { source: 'Wikipedia - Probability', url: 'https://en.wikipedia.org/wiki/Probability' },
       { source: 'Khan Academy - Probability', url: 'https://www.khanacademy.org/math/statistics-probability/probability-library' },
     ],
+  },
+  explainSteps: (values) => {
+    const rows = probabilityConfig.calculate(values);
+    if (!hasAnswer(rows) || rows.some((r) => r.id === 'warning')) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const exclusive = values.type === 'Mutually Exclusive';
+    return [
+      exclusive
+        ? { label: 'Mutually exclusive events cannot happen together', expr: `P(A ∩ B) = ${g('pAndB')}` }
+        : { label: 'Independent events: multiply the probabilities', expr: `P(A ∩ B) = P(A) × P(B) = ${g('pa')} × ${g('pb')} = ${g('pAndB')}` },
+      { label: 'Addition rule for "A or B"', expr: `P(A ∪ B) = P(A) + P(B) − P(A ∩ B) = ${g('pa')} + ${g('pb')} − ${g('pAndB')} = ${g('pOrB')}` },
+      { label: 'Complements: one minus the probability', expr: `P(¬A) = 1 − ${g('pa')} = ${g('pNotA')};  P(¬B) = 1 − ${g('pb')} = ${g('pNotB')}` },
+      {
+        label: 'Conditional probability: the joint probability divided by the condition',
+        expr: `P(A|B) = ${g('pAndB')} ÷ ${g('pb')} = ${g('pAGivenB')};  P(B|A) = ${g('pAndB')} ÷ ${g('pa')} = ${g('pBGivenA')}`,
+      },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

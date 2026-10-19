@@ -3,6 +3,8 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import DatePanel from './DatePanel';
 import { addDays, daysBetween, isLeapYear, parseIsoDate } from '../../../utils/dates';
 import { parseIntegerStrict } from '../../../utils/rational';
+import type { ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -177,6 +179,40 @@ const dateCalculatorConfig: CalculatorConfig = {
       });
     }
     return rows;
+  },
+  explainSteps: (values) => {
+    const rows = dateCalculatorConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const start = parseIsoDate(values.startDate);
+    const years = parseCount(values.years, LIMITS.years);
+    const months = parseCount(values.months, LIMITS.months);
+    const weeks = parseCount(values.weeks, LIMITS.weeks);
+    const days = parseCount(values.days, LIMITS.days);
+    if (!start || years === null || months === null || weeks === null || days === null) return [];
+    const sign = values.action === 'subtract' ? -1 : 1;
+    const business = values.businessDays === 'business';
+    const verb = sign === 1 ? 'Add' : 'Subtract';
+    const op = sign === 1 ? '+' : '−';
+    const unit = (n: number, u: string) => `${n} ${u}${n === 1 ? '' : 's'}`;
+    const ym = addMonthsClamped(start, sign * (years * 12 + months));
+    const dayCount = business ? weeks * 5 + days : weeks * 7 + days;
+    const out: ExplainStep[] = [{ label: 'Start date', expr: fmtDate(start) }];
+    if (years || months) {
+      out.push({
+        label: `${verb} the years and months on the calendar`,
+        expr: `${fmtDate(start)} ${op} ${[years && unit(years, 'year'), months && unit(months, 'month')].filter(Boolean).join(' ')} = ${fmtDate(ym.date)}`,
+        note: g('monthEndNote') || 'If the day does not exist in the new month it moves to that month’s last day.',
+      });
+    }
+    if (weeks || days) {
+      out.push({
+        label: business ? `${verb} the business days (a week counts as 5)` : `${verb} the weeks and days (a week is 7 days)`,
+        expr: `${fmtDate(ym.date)} ${op} ${unit(dayCount, business ? 'business day' : 'day')} = ${g('resultDate')}`,
+      });
+    }
+    out.push({ label: 'Result', expr: `${g('resultDate')} (${g('dayOfWeek')})`, note: `${g('daysAdded')} calendar days ${sign === 1 ? 'after' : 'before'} the start date.` });
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

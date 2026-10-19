@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MatrixPanel from './MatrixPanel';
 import { type FMatrix, determinant, fmtApprox, fmtExact, inverse, parseMatrix, rref } from './matrixMath';
+import { type Frac, makeFrac, mulFrac, subFrac } from '../../../utils/rational';
+import type { ExplainStep } from '../../../types/calculator';
 
 const matrixConfig: CalculatorConfig = {
   inputs: [
@@ -87,6 +89,86 @@ const matrixConfig: CalculatorConfig = {
       ];
     }
 
+    return [];
+  },
+  explainSteps: (values) => {
+    const size = Number(values.size);
+    const operation = values.operation || 'determinant';
+    const raw = values.matrixA?.trim();
+    if (!raw || !Number.isInteger(size) || size < 2 || size > 5) return [];
+    const m = parseMatrix(raw, size);
+    if (!m) return [];
+    const grid = (g: FMatrix, f: (x: Frac) => string = fmtExact) => g.map((row) => row.map(f).join(' ')).join(' | ');
+    const p = (f: Frac): string => {
+      const s = fmtExact(f);
+      return s.startsWith('-') ? `(${s})` : s;
+    };
+    const neg = (f: Frac): Frac => makeFrac(-f.n, f.d);
+    const det = determinant(m);
+    const out: ExplainStep[] = [];
+    if (operation === 'determinant') {
+      if (size === 2) {
+        const [[a, b], [c, d]] = m;
+        out.push({
+          label: 'Multiply the diagonals and subtract: det = a·d − b·c',
+          expr: `det(A) = ${p(a)}×${p(d)} − ${p(b)}×${p(c)} = ${p(mulFrac(a, d))} − ${p(mulFrac(b, c))} = ${fmtExact(det)}`,
+        });
+      } else if (size === 3) {
+        const [[a, b, c], [d, e, f], [g, h, i]] = m;
+        const m1 = subFrac(mulFrac(e, i), mulFrac(f, h));
+        const m2 = subFrac(mulFrac(d, i), mulFrac(f, g));
+        const m3 = subFrac(mulFrac(d, h), mulFrac(e, g));
+        out.push({
+          label: 'Work out the three 2×2 minors under the first row',
+          expr: `M₁ = e·i − f·h = ${fmtExact(m1)},  M₂ = d·i − f·g = ${fmtExact(m2)},  M₃ = d·h − e·g = ${fmtExact(m3)}`,
+        });
+        out.push({
+          label: 'Combine them along the first row with signs + − +',
+          expr: `det(A) = ${p(a)}×${p(m1)} − ${p(b)}×${p(m2)} + ${p(c)}×${p(m3)} = ${fmtExact(det)}`,
+        });
+      } else {
+        out.push({
+          label: 'Row-reduce to an upper-triangular matrix using exact fractions',
+          expr: `det(A) = ± (product of the diagonal pivots) = ${fmtExact(det)}`,
+          note: 'Swapping two rows flips the sign; adding a multiple of one row to another changes nothing.',
+        });
+      }
+      out.push({
+        label: 'A nonzero determinant means the matrix is invertible',
+        expr: det.n === 0n ? 'det(A) = 0, so A is singular (no inverse)' : `det(A) = ${fmtExact(det)} ≠ 0, so A is invertible`,
+      });
+      return out;
+    }
+    if (operation === 'inverse') {
+      out.push({ label: 'An inverse exists only when the determinant is not zero', expr: `det(A) = ${fmtExact(det)}` });
+      const inv = inverse(m);
+      if (!inv) {
+        out.push({ label: 'The matrix is singular', expr: 'det(A) = 0, so A has no inverse' });
+        return out;
+      }
+      const exact = grid(inv);
+      const approx = grid(inv, fmtApprox);
+      const rounded = approx !== exact ? { note: `Rounded to 6 decimals: ${approx}` } : {};
+      if (size === 2) {
+        const [[a, b], [c, d]] = m;
+        out.push({
+          label: 'Swap the diagonal entries, flip the signs of the other two, divide by the determinant',
+          expr: `A⁻¹ = 1/${p(det)} × [${fmtExact(d)} ${fmtExact(neg(b))} | ${fmtExact(neg(c))} ${fmtExact(a)}]`,
+        });
+        out.push({ label: 'Inverse matrix', expr: exact, ...rounded });
+      } else {
+        out.push({ label: 'Row-reduce [A | I] until the left side becomes the identity; the right side is then A⁻¹', expr: `A⁻¹ = ${exact}`, ...rounded });
+      }
+      return out;
+    }
+    if (operation === 'rank') {
+      const { matrix: R, rank } = rref(m);
+      return [
+        { label: 'Row-reduce to reduced row echelon form (exact fractions)', expr: grid(R) },
+        { label: 'Count the nonzero rows (the pivots): that is the rank', expr: `rank = ${rank}` },
+        { label: 'Nullity is the number of columns minus the rank', expr: `nullity = ${size} − ${rank} = ${size - rank}` },
+      ];
+    }
     return [];
   },
   extraPanel: (values, results) => {

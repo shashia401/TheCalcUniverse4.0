@@ -4,6 +4,7 @@ import TimeCardPanel from './TimeCardPanel';
 import Decimal from 'decimal.js';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { parseClockTime } from '../../../utils/clockTime';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
 
@@ -321,6 +322,34 @@ const timeCardConfig: CalculatorConfig = {
 
   calculate,
 
+  explainSteps: (values) => {
+    const rows = timeCardConfig.calculate(values);
+    if (!hasAnswer(rows) || !resultValue(rows, 'totalHours')) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    let days: { dayLabel: string; hours: number }[];
+    try {
+      days = JSON.parse(g('_dailyBreakdown'));
+    } catch {
+      return [];
+    }
+    if (!Array.isArray(days) || days.length === 0) return [];
+    const mins = days.map((d) => Math.round(d.hours * 60));
+    const hm = (m: number) => `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m`;
+    const total = mins.reduce((s, m) => s + m, 0);
+    const thr = values.overtimeThreshold || '40';
+    const rule = thr === '8' ? 'Hours over 8 in a single day are overtime' : thr === '0' ? 'No overtime rule: every hour is regular' : `Hours over ${thr} in the week are overtime`;
+    const pay = g('totalPay');
+    return [
+      {
+        label: 'Hours each day: end − start − unpaid break (a shift past midnight adds 24 hours)',
+        expr: days.map((d, i) => `${d.dayLabel} ${hm(mins[i])}`).join(' + '),
+        ...(g('skippedLines') ? { note: `Not counted: ${g('skippedLines')}` } : {}),
+      },
+      { label: 'Add the days', expr: `${total} min = ${hm(total)} = ${g('totalHours')}` },
+      { label: rule, expr: `Regular ${g('regularHours')} + overtime ${g('overtimeHours')}` },
+      ...(pay ? [{ label: `Pay: regular hours at the base rate plus overtime at ${values.overtimeRate || '1.5'}×`, expr: `${g('regularPay')} + ${g('overtimePay')} = ${pay}` }] : []),
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(TimeCardPanel, { values, results });

@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SleepPanel from './SleepPanel';
 import { parseClockTime } from '../../../utils/clockTime';
+import type { ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 interface TimeResult {
   hours: number;
@@ -151,6 +153,31 @@ const sleepConfig: CalculatorConfig = {
     }
 
     return [];
+  },
+  explainSteps: (values) => {
+    const rows = sleepConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    let options: { time: string; cycles: number; hours: number }[];
+    try {
+      options = JSON.parse(resultValue(rows, 'options') ?? '[]');
+    } catch {
+      return [];
+    }
+    const rec = options.find((o) => o.cycles === 5);
+    const wake = (values.mode || 'wake') === 'wake';
+    const anchor = parseTime(wake ? values.wakeupTime || '' : values.bedtime || '');
+    if (!rec || !anchor) return [];
+    const sleepMin = rec.cycles * CYCLE_MINUTES;
+    const total = sleepMin + FALL_ASLEEP_MINUTES;
+    const out: ExplainStep[] = [
+      { label: `Sleep runs in cycles of ${CYCLE_MINUTES} minutes; 5 complete cycles is the best balance`, expr: `${rec.cycles} × ${CYCLE_MINUTES} min = ${sleepMin} min (${rec.hours} hours)` },
+      { label: 'Add the time it takes to fall asleep', expr: `${sleepMin} + ${FALL_ASLEEP_MINUTES} = ${total} min` },
+      wake
+        ? { label: 'Count back from the wake-up time', expr: `${formatTime(anchor)} − ${total} min = ${rec.time}` }
+        : { label: 'Count forward from bedtime', expr: `${formatTime(anchor)} + ${total} min = ${rec.time}` },
+      { label: 'Other numbers of cycles', expr: options.map((o) => `${o.cycles} cycles (${o.hours} h): ${o.time}`).join(';  ') },
+    ];
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

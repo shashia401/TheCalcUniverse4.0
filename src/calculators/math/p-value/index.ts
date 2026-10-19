@@ -3,6 +3,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import PValuePanel from './PValuePanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { normSf, normCdf, normQuantile, tTwoTail, tSf, tCdf, tCritical, chiSqSf, chiSqCdf, chiSqCritical, fSf, fCdf, fCritical } from '../../../utils/distributions';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 type TestType = 'z' | 't' | 'chisq' | 'f';
 type Tails = 'one' | 'left' | 'two';
@@ -198,6 +199,26 @@ const pValueConfig: CalculatorConfig = {
     ];
 
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = pValueConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const tails = values.tails === 'one' || values.tails === 'left' ? values.tails : 'two';
+    const sig = g('significant') === 'Yes';
+    const tailLabel =
+      tails === 'one'
+        ? 'Upper tail: the chance of a statistic at least this large when H₀ is true'
+        : tails === 'left'
+          ? 'Lower tail: the chance of a statistic at most this small when H₀ is true'
+          : 'Two tails: double the smaller tail (a result at least this extreme in either direction)';
+    const critLabel = rows.find((r) => r.id === 'criticalValue')?.label ?? 'Critical value';
+    return [
+      { label: 'Identify the test and the statistic', expr: `${g('testType')};  statistic = ${g('testStatistic')};  ${g('tails')}` },
+      { label: tailLabel, expr: `p = ${g('pValue')}` },
+      { label: `Find the cut-off at the significance level α = ${g('alpha')}`, expr: `${critLabel} = ${g('criticalValue')}` },
+      { label: 'Compare p with α', expr: `p = ${g('pValue')} ${sig ? '<' : '≥'} α = ${g('alpha')}  →  ${g('action')}`, note: g('strength') },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

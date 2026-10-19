@@ -4,6 +4,7 @@ import UnitCirclePanel from './UnitCirclePanel';
 // Exact degree reduction, special-angle values and π-fractions are shared with the trigonometry calculator.
 import { DEG, parseDegrees, piFraction, reduceDegrees, referenceAngle, trigAt } from '../trigonometry-calculator/trigMath';
 import { fracToNumber, gcdBig } from '../../../utils/rational';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 function round(value: number, decimals: number = 6): number {
   const factor = Math.pow(10, decimals);
@@ -121,6 +122,19 @@ const config: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = config.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const exact = g('exact');
+    return [
+      { label: 'Reduce the angle to one full turn (0° up to 360°)', expr: `${(values.angle ?? '').trim()}° ≡ ${g('normalizedAngle')} = ${g('radians')}` },
+      { label: 'Find the quadrant and the reference angle', expr: `Quadrant: ${g('quadrant')};  reference angle: ${g('referenceAngle')}` },
+      { label: 'The point where the angle meets the unit circle is (cos θ, sin θ)', expr: g('coordinates') },
+      ...(exact ? [{ label: 'Exact values for this special angle', expr: exact }] : []),
+      { label: 'tan θ is sin θ ÷ cos θ; the reciprocals are 1 ÷ each', expr: `sin | cos | tan = ${g('trig')};  csc | sec | cot = ${g('reciprocal')}` },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

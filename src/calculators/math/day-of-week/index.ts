@@ -3,6 +3,7 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import DayOfWeekPanel from './DayOfWeekPanel';
 import { isLeapYear } from '../../../utils/dates';
 import { parseIntegerStrict } from '../../../utils/rational';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 /* ------------------------------------------------------------------ */
 /*  Zeller's Congruence                                                */
@@ -146,6 +147,18 @@ const dayOfWeekConfig: CalculatorConfig = {
     return rows;
   },
 
+  explainSteps: (values) => {
+    const rows = dayOfWeekConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const cal = g('calendarNote');
+    return [
+      { label: "Zeller's congruence turns a date into a weekday number", expr: g('zellersFormula'), note: 'January and February count as months 13 and 14 of the year before.' },
+      { label: 'Substitute the date', expr: g('zellersBreakdown') },
+      { label: 'Match the number to a weekday (0 = Saturday, 1 = Sunday, … 6 = Friday)', expr: g('zellersResult') },
+      { label: 'The date and its weekday', expr: g('formattedDate'), ...(cal ? { note: cal } : {}) },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(DayOfWeekPanel, { values, results });

@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import StairPanel from './StairPanel';
 import { parseNonNegative } from '../../../utils/parseNumber';
+import type { ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // Code limits. 7 3/4" riser / 10" tread are the RESIDENTIAL limits (IRC R311.7.5); the IBC (commercial) is stricter:
 // 7" riser / 11" tread. The old text called the residential numbers "IBC".
@@ -163,6 +165,29 @@ const stairConfig: CalculatorConfig = {
         value: stairData,
       },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = stairConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    let d: { numberOfRisers: number; numberOfTreads: number; totalRunIn: number };
+    try {
+      d = JSON.parse(resultValue(rows, '_stairData') ?? '');
+    } catch {
+      return [];
+    }
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const rise = parseNonNegative(values.totalRise, 1000);
+    const target = parseNonNegative(values.targetRiserHeight || '7', 1000);
+    const run = parseFloat(d.totalRunIn.toFixed(2));
+    const out: ExplainStep[] = [
+      { label: 'Divide the total rise by the riser height you want, rounding up', expr: `${rise} ÷ ${target} → ${d.numberOfRisers} risers` },
+      { label: 'Share the rise equally between the risers', expr: `${rise} ÷ ${d.numberOfRisers} = ${g('riserHeight')} per riser` },
+      { label: 'There is one less tread than risers; multiply by the tread depth', expr: `${d.numberOfTreads} × ${g('treadDepthResult')} = ${g('totalRun')}` },
+      { label: 'Stringer length from the rise and the run (Pythagoras)', expr: `√(${rise}² + ${run}²) = ${g('stringerLength')}` },
+    ];
+    if (d.numberOfTreads > 0) out.push({ label: 'Stair angle from the rise and the run', expr: `arctan(${rise} ÷ ${run}) = ${g('stringerAngle')}` });
+    out.push({ label: 'Comfort rule: twice the riser plus the tread', expr: `2 × ${g('riserHeight')} + ${g('treadDepthResult')} = ${g('comfortRule')}` });
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -3,6 +3,8 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import PolynomialPanel from './PolynomialPanel';
 import { derivativeCoeffs, evalHorner, fmtFrac, MAX_COEFFS, parseCoeffs, parseX, polyString, powFrac, superscript } from './polyMath';
 import { makeFrac, mulFrac } from '../../../utils/rational';
+import type { ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const polynomialConfig: CalculatorConfig = {
   inputs: [
@@ -59,6 +61,20 @@ const polynomialConfig: CalculatorConfig = {
       });
     }
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = polynomialConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const lines = (resultValue(rows, 'work') ?? '')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (lines.length < 4) return [];
+    const labels = ['Write the polynomial at that x', 'Substitute the value of x', 'Work out each power and product', 'Add the terms'];
+    const out: ExplainStep[] = lines.map((l, i) => ({ label: labels[i] ?? 'Next step', expr: l }));
+    const slope = rows.find((r) => r.id === 'derivativeValue');
+    if (slope) out.push({ label: 'Slope at that point: evaluate the derivative polynomial', expr: `${slope.label} = ${slope.value}` });
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RomanNumeralPanel from './RomanNumeralPanel';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const ROMAN_MAP: Array<{ value: number; symbol: string; notation: string }> = [
   { value: 1000, symbol: 'M', notation: 'M' },
@@ -249,6 +250,56 @@ const romanConfig: CalculatorConfig = {
       ];
     }
 
+    return [];
+  },
+  explainSteps: (values) => {
+    const rows = romanConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const mode = values.mode || 'toRoman';
+    if (mode === 'toRoman') {
+      let rem = parseFloat(values.number);
+      const n = rem;
+      const items: { count: number; value: number; symbol: string }[] = [];
+      for (const { value, symbol } of ROMAN_MAP) {
+        const count = Math.floor(rem / value);
+        if (count > 0) {
+          items.push({ count, value, symbol });
+          rem -= count * value;
+        }
+      }
+      return [
+        { label: 'Take the biggest Roman values that fit, working from the top down', expr: `${n} = ${items.map((i) => (i.count > 1 ? `${i.count}×${i.value}` : `${i.value}`)).join(' + ')}` },
+        {
+          label: 'Write the symbol for each part',
+          expr: items.map((i) => `${i.count > 1 ? `${i.count}×${i.value}` : i.value} → ${i.symbol.repeat(i.count)}`).join(',  '),
+          ...(items.some((i) => i.symbol.length > 1) ? { note: 'IV, IX, XL, XC, CD and CM are subtractive pairs: a smaller symbol before a larger one is subtracted.' } : {}),
+        },
+        { label: 'Join them', expr: `${items.map((i) => i.symbol.repeat(i.count)).join(' + ')} = ${g('romanResult')}` },
+      ];
+    }
+    if (mode === 'fromRoman') {
+      const chars = (values.romanInput || '').trim().toUpperCase().split('');
+      const vals = chars.map((c) => ROMAN_CHARS[c]);
+      const terms = vals.map((v, i) => (v < (vals[i + 1] ?? 0) ? -v : v));
+      const sum = terms.map((t, i) => (i === 0 ? (t < 0 ? `−${-t}` : `${t}`) : t < 0 ? `− ${-t}` : `+ ${t}`)).join(' ');
+      const note = rows.find((r) => r.id === 'validationNote');
+      return [
+        { label: 'Read the value of each symbol', expr: chars.map((c, i) => `${c} = ${vals[i]}`).join(', ') },
+        { label: 'Subtract a symbol that stands before a bigger one, add all the others', expr: `${sum} = ${g('arabicResult')}` },
+        ...(note ? [{ label: 'Check that it is written in standard form', expr: `${note.label}: ${note.value}` }] : []),
+      ];
+    }
+    if (mode === 'date') {
+      const year = parseInt(values.dateYear, 10);
+      const month = parseInt(values.dateMonth, 10);
+      const day = parseInt(values.dateDay, 10);
+      const dmy = (values.dateFormat || 'mdy') === 'dmy';
+      return [
+        { label: 'Convert the year, the month and the day to Roman numerals', expr: `${year} = ${toRoman(year)},  ${month} = ${toRoman(month)},  ${day} = ${toRoman(day)}` },
+        { label: `Join them with dots in ${dmy ? 'day.month.year' : 'month.day.year'} order`, expr: g('romanDate') },
+      ];
+    }
     return [];
   },
   extraPanel: (values, results) => {

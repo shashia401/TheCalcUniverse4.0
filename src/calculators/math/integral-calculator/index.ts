@@ -3,6 +3,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import IntegralPanel from './IntegralPanel';
 import { CasError, type Node, evalNode, parse } from '../shared/cas';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import type { ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const MAX_N = 100000;
 
@@ -264,6 +266,31 @@ const integralConfig: CalculatorConfig = {
       { source: 'Wikipedia — Simpson\'s Rule', url: 'https://en.wikipedia.org/wiki/Simpson%27s_rule' },
       { source: 'Wolfram MathWorld — Numerical Integration', url: 'https://mathworld.wolfram.com/NumericalIntegration.html' },
     ],
+  },
+  explainSteps: (values) => {
+    const rows = integralConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const work = resultValue(rows, 'work');
+    const res = rows.find((r) => r.id === 'result');
+    if (!res) return [];
+    if (!work) return [{ label: 'The lower and upper bounds are the same point, so there is no area', expr: `${res.label} = ${res.value}` }];
+    const labelFor = (l: string): string =>
+      /^Step size/.test(l) ? 'Step size: the interval cut into n equal slices'
+      : /^f\(a\)/.test(l) ? 'Function values at the two ends'
+      : /^Sum of odd/.test(l) ? 'Add the odd-numbered points (weight 4)'
+      : /^Sum of even/.test(l) ? 'Add the even-numbered interior points (weight 2)'
+      : /^S =/.test(l) ? "Combine them with Simpson's 1/3 rule"
+      : /^Bounds/.test(l) ? 'The bounds were reversed'
+      : 'Next step';
+    const trap = resultValue(rows, 'trapResult');
+    const err = resultValue(rows, 'errorEstimate');
+    const out: ExplainStep[] = work.split(' | ').map((l) => ({ label: labelFor(l), expr: l }));
+    out.push({
+      label: 'The integral',
+      expr: `${res.label} ≈ ${res.value}`,
+      note: `Numerical result. The trapezoid rule gives ${trap}${err ? `; estimated error ${err}` : ''}.`,
+    });
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

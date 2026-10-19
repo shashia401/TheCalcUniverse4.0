@@ -4,6 +4,7 @@ import VectorCalculatorPanel from './VectorCalculatorPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { roundStr6, roundStrAuto } from '../../../lib/format';
 import { allFinite, angleDeg3, cross3, dot3, norm3, type V3 } from '../../../utils/vector';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const vectorConfig: CalculatorConfig = {
   inputs: [
@@ -135,6 +136,31 @@ const vectorConfig: CalculatorConfig = {
       },
       { id: 'unit1', label: 'Unit vector of v₁', value: unit(a, mag1), color: 'neutral' as const },
       { id: 'unit2', label: 'Unit vector of v₂', value: unit(b, mag2), color: 'neutral' as const },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = vectorConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const n = (k: string) => parseNumberStrict(values[k]);
+    const z = (k: string) => ((values[k] ?? '').trim() === '' ? 0 : n(k));
+    const is3D = (values.v1z ?? '').trim() !== '' || (values.v2z ?? '').trim() !== '';
+    const dim = is3D ? 3 : 2;
+    const A = ([n('v1x'), n('v1y'), z('v1z')] as V3).slice(0, dim);
+    const B = ([n('v2x'), n('v2y'), z('v2z')] as V3).slice(0, dim);
+    const show = (v: number[]) => `(${v.map((x) => roundStrAuto(x)).join(', ')})`;
+    const p = (x: number) => (x < 0 ? `(${roundStrAuto(x)})` : roundStrAuto(x));
+    const sq = (v: number[]) => v.map((x) => `${p(x)}²`).join(' + ');
+    return [
+      { label: 'Add and subtract component by component', expr: `v₁ + v₂ = ${show(A)} + ${show(B)} = ${g('sum')};  v₁ − v₂ = ${g('difference')}` },
+      { label: 'Dot product: multiply matching components and add', expr: `v₁·v₂ = ${A.map((x, i) => `${p(x)}×${p(B[i])}`).join(' + ')} = ${g('dotProduct')}` },
+      { label: 'Magnitude: the square root of the sum of squares', expr: `|v₁| = √(${sq(A)}) = ${g('magnitude1')};  |v₂| = √(${sq(B)}) = ${g('magnitude2')}` },
+      { label: 'Angle between the vectors: arccos(dot ÷ (|v₁| × |v₂|))', expr: `θ = arccos(${g('dotProduct')} ÷ (${g('magnitude1')} × ${g('magnitude2')})) = ${g('angleDeg')}` },
+      {
+        label: 'Cross product',
+        expr: `v₁ × v₂ = ${g('crossProduct')}`,
+        ...(is3D ? {} : { note: 'Two-component vectors lie in the xy-plane, so their cross product points along z.' }),
+      },
     ];
   },
   extraPanel: (values, results) => {

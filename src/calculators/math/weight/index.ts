@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WeightPanel from './WeightPanel';
 import { LB_KG, fmtNum as fmt, massToKg, nonNegative } from '../../../utils/massDensity';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const PLANET_GRAVITY: Record<string, number> = {
   Earth: 9.81,
@@ -271,6 +272,17 @@ const weightConfig: CalculatorConfig = {
     }
 
     return [];
+  },
+  explainSteps: (values) => {
+    const rows = weightConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    return [
+      { label: 'Weight is mass times gravitational acceleration', expr: g('formula') },
+      ...(g('gravityUsed') ? [{ label: 'Gravitational acceleration used', expr: g('gravityUsed') }] : []),
+      { label: 'Convert the mass to kilograms, then substitute and solve', expr: g('steps') },
+      ...(g('weightLbf') ? [{ label: 'The same weight in pounds-force', expr: g('weightLbf') }] : []),
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -3,6 +3,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import MileagePanel from './MileagePanel';
 import Decimal from 'decimal.js';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 /** Exact dollars (half-up to the cent); whole-dollar amounts print without ".00". */
 function fmtCurrency(n: Decimal): string {
@@ -155,6 +156,23 @@ const mileageConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = mileageConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const miles = parseNumberStrict(values.miles);
+    const rate = g('rateUsed');
+    const extra = g('additionalAmount');
+    return [
+      {
+        label: `Look up the ${(RATE_LABELS[values.mileageType || 'business'] ?? '').toLowerCase()} rate for the chosen period`,
+        expr: `${g('year')}: ${rate}`,
+        note: 'The IRS publishes one rate per mile for each kind of use, and it can change part-way through a year.',
+      },
+      { label: 'Multiply the miles by the rate', expr: `${miles} mi × ${rate.replace('/mi', '')} = ${g('mileageAmount')}` },
+      ...(extra ? [{ label: 'Add the other expenses (tolls, parking)', expr: `${g('mileageAmount')} + ${extra} = ${g('reimbursement')}`, note: 'Rounded to the cent after adding.' }] : []),
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

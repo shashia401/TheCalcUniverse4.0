@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import NumberSequencePanel from './NumberSequencePanel';
 import { SEQ_MAX_NEXT, SEQ_MAX_TERMS, fmtTerm, parseSequence } from './sequenceMath';
+import type { ExplainStep } from '../../../types/calculator';
 
 const numberSequenceConfig: CalculatorConfig = {
   inputs: [
@@ -37,6 +38,22 @@ const numberSequenceConfig: CalculatorConfig = {
       ...(r ? [{ id: 'commonRatio' as const, label: 'Common Ratio (r)', value: fmtTerm(r), color: 'neutral' as const }] : []),
       { id: 'fullSequence', label: 'Extended Sequence', value: [...terms, ...next].map(fmtTerm).join(', '), color: 'neutral' },
     ];
+  },
+  explainSteps: (values) => {
+    const p = parseSequence(values.sequence, values.nextCount);
+    if (p.kind !== 'ok') return [];
+    const { type, next, steps: lines, formula } = p.analysis;
+    if (type === 'Unknown') return [];
+    const labels =
+      type === 'Arithmetic'
+        ? ['Subtract neighbouring terms to get the common difference', 'Confirm every gap is the same', 'Write the nth term from the first term and the difference']
+        : type === 'Geometric'
+          ? ['Divide neighbouring terms to get the common ratio', 'Confirm every ratio is the same', 'Write the nth term from the first term and the ratio']
+          : ['Test whether each term is the sum of the two before it', 'Confirm with the last terms'];
+    const out: ExplainStep[] = lines.map((expr, i) => ({ label: labels[i] ?? 'Check the pattern', expr }));
+    if (type !== 'Geometric') out.push({ label: type === 'Arithmetic' ? 'Simplify the nth-term formula' : 'State the rule', expr: formula });
+    out.push({ label: 'Continue the pattern for the next terms', expr: next.map(fmtTerm).join(', ') });
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

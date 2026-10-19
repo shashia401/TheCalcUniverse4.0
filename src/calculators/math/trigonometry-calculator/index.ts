@@ -3,6 +3,7 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import TrigPanel from './TrigPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { type TrigValues, degreesFromRadians, parseDegrees, piFraction, reduceDegrees, referenceAngle, toFloat, trigAt } from './trigMath';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 type Unit = 'deg' | 'rad';
 
@@ -193,6 +194,36 @@ const config: CalculatorConfig = {
       return trigToAngleRows(func, degreesFromRadians(rad), v, unit, label);
     }
 
+    return [];
+  },
+  explainSteps: (values) => {
+    const rows = config.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    if (values.mode === 'angle-to-trig') {
+      const exact = g('exactValues');
+      return [
+        { label: 'Reduce the angle to one turn (0° up to 360°)', expr: `${(values.angle ?? '').trim()}${values.angleUnit === 'rad' ? ' rad' : '°'} ≡ ${g('normalizedAngle')}` },
+        { label: 'Find the quadrant and the reference angle', expr: `${g('quadrant')};  reference angle = ${g('referenceAngle')}` },
+        { label: 'Read sin, cos and tan from the reference angle and the signs of the quadrant', expr: `sin = ${g('sin')},  cos = ${g('cos')},  tan = ${g('tan')}` },
+        { label: 'The reciprocal functions are 1 divided by those', expr: `csc = ${g('csc')},  sec = ${g('sec')},  cot = ${g('cot')}` },
+        ...(exact ? [{ label: 'Exact values for this special angle', expr: exact }] : []),
+      ];
+    }
+    if (values.mode === 'trig-to-angle') {
+      const reciprocal = ['csc', 'sec', 'cot'].includes(values.function);
+      const exact = g('exactValue');
+      return [
+        {
+          label: 'Apply the inverse function to get the principal angle',
+          expr: `${g('functionUsed')}  →  ${g('principalAngle')}`,
+          ...(reciprocal ? { note: 'csc, sec and cot are handled through their reciprocals (sin, cos, tan).' } : {}),
+        },
+        { label: 'Reference angle', expr: g('referenceAngle') },
+        { label: 'Other angles with the same value within one turn', expr: g('allAngles') },
+        ...(exact ? [{ label: 'Exact value', expr: exact }] : []),
+      ];
+    }
     return [];
   },
   extraPanel: (values, results) => {

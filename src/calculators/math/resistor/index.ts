@@ -3,6 +3,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import ResistorPanel from './ResistorPanel';
 import Decimal from 'decimal.js';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // ─── Color-band lookup tables ─────────────────────────────────────────────────
 
@@ -438,6 +439,34 @@ const resistorConfig: CalculatorConfig = {
       return reverseCalculate(values);
     }
     return forwardCalculate(values);
+  },
+  explainSteps: (values) => {
+    const rows = resistorConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    if ((values.mode || 'forward') === 'reverse') {
+      let bands: string[];
+      try {
+        bands = JSON.parse(g('_colorBands')) as string[];
+      } catch {
+        return [];
+      }
+      const off = g('standardOffset');
+      return [
+        { label: 'Pick the nearest standard value', expr: `${g('resistorValue')} → ${g('closestStandard')}`, ...(off ? { note: off } : {}) },
+        { label: 'Write the digits, the multiplier and the tolerance as colours', expr: bands.join(' – '), note: `The last band is the tolerance, ${g('tolerance')}.` },
+      ];
+    }
+    const colors = (values.bands || '4') === '4' ? [values.band1, values.band2] : [values.band1, values.band2, values.band3];
+    const digits = colors.map((c) => DIGIT_COLORS[c]);
+    const sig = Number(digits.join(''));
+    const temp = g('tempCoef');
+    return [
+      { label: 'Read the digit bands', expr: `${colors.map((c, i) => `${c} = ${digits[i]}`).join(',  ')}  →  ${sig}` },
+      { label: 'Apply the multiplier band', expr: `${sig} × 10^${MULTIPLIER_COLORS[values.multiplier]} (${values.multiplier}) = ${g('ohmicValue')}` },
+      { label: 'Apply the tolerance band', expr: `${g('tolerance')}  →  ${g('minResistance')} to ${g('maxResistance')}` },
+      ...(temp ? [{ label: 'Temperature coefficient (sixth band)', expr: temp }] : []),
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -3,6 +3,8 @@ import type { CalculatorConfig, CalculatorResult } from '../../../types/calculat
 import MolarityPanel from './MolarityPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { molarMassOfFormula } from '../molecular-weight';
+import type { ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // ─── Compound Database ─────────────────────────────────────────────────────────
 
@@ -262,6 +264,30 @@ const molarityConfig: CalculatorConfig = {
     return [];
   },
 
+  explainSteps: (values) => {
+    const rows = molarityConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    let lines: unknown;
+    try {
+      lines = JSON.parse(resultValue(rows, '_stepByStep') ?? '[]');
+    } catch {
+      return [];
+    }
+    if (!Array.isArray(lines) || lines.length < 2) return [];
+    const mode = values.mode || 'calcMolarity';
+    const labels =
+      mode === 'calcMass'
+        ? ['Moles needed: molarity × volume', 'Mass: moles × molar mass']
+        : mode === 'calcVolume'
+          ? ['Moles of solute: mass ÷ molar mass', 'Volume: moles ÷ molarity']
+          : ['Moles of solute: mass ÷ molar mass', 'Molarity: moles ÷ volume in litres'];
+    const out: ExplainStep[] = [];
+    const unit = values.volumeUnit || 'L';
+    const litres = resultValue(rows, 'volumeUsed');
+    if (mode !== 'calcVolume' && unit !== 'L' && litres) out.push({ label: 'Convert the volume to litres', expr: `${values.volume} ${unit} = ${litres} L` });
+    lines.forEach((l, i) => out.push({ label: labels[i] ?? 'Next step', expr: String(l) }));
+    return out;
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(MolarityPanel, { values, results });

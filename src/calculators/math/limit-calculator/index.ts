@@ -4,6 +4,8 @@ import LimitPanel from './LimitPanel';
 import { CasError, type Node, evalNode, parse } from '../shared/cas';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { type SideLimit, limitToString, sideLimit } from './limitMath';
+import type { ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const sideText = (s: SideLimit): string => {
   switch (s.kind) {
@@ -237,6 +239,21 @@ const limitConfig: CalculatorConfig = {
       { source: 'Wikipedia — Limit of a Function', url: 'https://en.wikipedia.org/wiki/Limit_of_a_function' },
       { source: 'Wolfram MathWorld — Limit', url: 'https://mathworld.wolfram.com/Limit.html' },
     ],
+  },
+  explainSteps: (values) => {
+    const rows = limitConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const lim = rows.find((r) => r.id === 'limit');
+    if (!lim) return [];
+    const out: ExplainStep[] = g('approachTable')
+      .split(' | ')
+      .filter(Boolean)
+      .map((l) => ({ label: l.includes('⁻:') ? 'Plug in values just below the point' : 'Plug in values just above the point', expr: l }));
+    if ((values.direction || 'both') === 'both') out.push({ label: 'Compare the two sides', expr: `left: ${g('leftLimit')};  right: ${g('rightLimit')}` });
+    out.push({ label: 'The limit', expr: `${lim.label} = ${lim.value}`, note: 'Found numerically, by sampling values closer and closer to the point.' });
+    out.push({ label: 'The value at the point itself', expr: `f(a) = ${g('valueAtPoint')}`, ...(g('isContinuous') ? { note: g('isContinuous') } : {}) });
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

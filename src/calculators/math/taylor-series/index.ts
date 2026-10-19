@@ -4,6 +4,7 @@ import TaylorSeriesPanel from './TaylorSeriesPanel';
 import { CasError, type Node, evalNode, parse, taylorCoefficients } from '../shared/cas';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { MAX_ORDER, evalTaylor, ratApprox } from './taylorFormat';
+import { resultValue } from '../../../utils/explainResults';
 
 const numStr = (v: number): string => String(Number(v.toPrecision(10)));
 
@@ -124,6 +125,25 @@ const taylorConfig: CalculatorConfig = {
       }
     }
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = taylorConfig.calculate(values);
+    if (rows.length === 0) return []; // not hasAnswer(): this calculator's 'error' row is the approximation error, not a failure
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const poly = g('approximation');
+    if (poly.startsWith('Not available')) return [];
+    const blank = (s?: string) => (s ?? '').trim() === '';
+    const a = blank(values.center) ? 0 : parseNumberStrict(values.center);
+    const order = blank(values.order) ? 5 : parseNumberStrict(values.order);
+    const n = Math.min(order, MAX_ORDER);
+    const base = a === 0 ? 'x' : a > 0 ? `(x − ${numStr(a)})` : `(x + ${numStr(-a)})`;
+    const ev = rows.find((r) => r.id === 'evaluation');
+    return [
+      { label: 'Each term is the k-th derivative at the centre divided by k!, times a power of the distance from the centre', expr: `P${n}(x) = Σ f⁽ᵏ⁾(${numStr(a)}) ÷ k! × ${base}ᵏ,  k = 0 … ${n}` },
+      { label: 'Keep the terms whose coefficient is not zero', expr: g('terms').split(' | ').join(',  '), note: `${g('numberOfTerms')} nonzero term${g('numberOfTerms') === '1' ? '' : 's'}` },
+      { label: 'Add them up', expr: `P${n}(x) = ${poly}` },
+      ...(ev ? [{ label: 'Plug in x and compare with the true value of the function', expr: `${ev.label} ${ev.value};  f = ${g('actual')};  |f − P| = ${g('error')}` }] : []),
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

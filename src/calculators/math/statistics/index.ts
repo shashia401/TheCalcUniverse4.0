@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import StatisticsPanel from './StatisticsPanel';
 import { parseDataset, summarize, fmtDec, ignoredRow, type QuartileMethod } from '../../../utils/stats';
+import type { ExplainStep } from '../../../types/calculator';
 
 const QUARTILE_METHODS: Record<QuartileMethod, string> = {
   halves: 'Median of halves (textbooks, TI-83/84)',
@@ -161,6 +162,38 @@ const statisticsConfig: CalculatorConfig = {
         }),
       },
     ];
+  },
+  explainSteps: (values) => {
+    const { values: data } = parseDataset(values.data);
+    if (data.length < 3) return [];
+    const isSample = values.type !== 'population';
+    const method: QuartileMethod = values.quartileMethod === 'inclusive' || values.quartileMethod === 'exclusive' ? values.quartileMethod : 'halves';
+    const s = summarize(data, method);
+    const f = (x: typeof s.mean) => fmtDec(x, 8);
+    const variance = isSample ? s.varianceSample! : s.variancePop;
+    const sd = isSample ? s.sdSample! : s.sdPop;
+    const [varSym, sdSym] = isSample ? ['s²', 's'] : ['σ²', 'σ'];
+    const divisor = isSample ? s.n - 1 : s.n;
+    const shown = s.sorted.slice(0, 12).map(f).join(', ');
+    const out: ExplainStep[] = [
+      { label: 'Sort the data from smallest to largest', expr: `${shown}${s.n > 12 ? ', …' : ''}  (n = ${s.n})` },
+      { label: 'Mean: sum ÷ count', expr: `x̄ = ${fmtDec(s.sum, 20)} ÷ ${s.n} = ${f(s.mean)}` },
+      { label: 'Add up the squared distances from the mean', expr: `Σ(x − x̄)² = ${fmtDec(s.ss, 20)}` },
+      {
+        label: isSample ? 'Variance and standard deviation: divide by n − 1 (sample)' : 'Variance and standard deviation: divide by n (population)',
+        expr: `${varSym} = ${fmtDec(s.ss, 20)} ÷ ${divisor} = ${f(variance)};  ${sdSym} = √${f(variance)} = ${f(sd)}`,
+      },
+      {
+        label: 'Median and quartiles',
+        expr: `Q1 = ${f(s.q1)},  median = ${f(s.median)},  Q3 = ${f(s.q3)},  IQR = Q3 − Q1 = ${f(s.iqr)}`,
+        note: QUARTILE_METHODS[method],
+      },
+      {
+        label: 'Outlier fences: 1.5 × IQR beyond the quartiles',
+        expr: `Lower = ${f(s.lowerFence)},  Upper = ${f(s.upperFence)};  outliers: ${s.outliers.length ? s.outliers.map(f).join(', ') : 'none'}`,
+      },
+    ];
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

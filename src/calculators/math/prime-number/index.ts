@@ -3,6 +3,8 @@ import { MAX_FACTOR_INPUT, parsePositiveSafeInt } from '../../../utils/numberThe
 import { analyzePrime } from './primeNumberMath';
 import { createElement } from 'react';
 import PrimeNumberPanel from './PrimeNumberPanel';
+import type { ExplainStep } from '../../../types/calculator';
+import { TRIAL_STEP_LIMIT } from './primeNumberMath';
 
 const primeNumberConfig: CalculatorConfig = {
   inputs: [
@@ -34,6 +36,34 @@ const primeNumberConfig: CalculatorConfig = {
       { id: 'divisorCount', label: 'Number of Divisors', value: divisorCount.toLocaleString('en-US') },
       { id: 'primalityCheck', label: 'Primality Check Steps', value: steps },
     ];
+  },
+  explainSteps: (values) => {
+    const pr = parsePositiveSafeInt(values.n);
+    if (pr.kind !== 'ok') return [];
+    const a = analyzePrime(pr.n);
+    const n = a.n;
+    if (n < 2) return [{ label: 'Apply the definition of a prime', expr: a.steps }];
+    const limit = Math.floor(Math.sqrt(n));
+    const out: ExplainStep[] = [];
+    if (n >= 4) {
+      out.push({
+        label: 'Only divisors up to the square root need testing',
+        expr: `√${n} ≈ ${Math.sqrt(n).toFixed(3)}, so test 2 up to ${limit}`,
+        ...(n > TRIAL_STEP_LIMIT ? { note: 'Very large numbers are checked with a faster test (Miller–Rabin) that gives the same answer.' } : {}),
+      });
+    }
+    if (a.prime) {
+      out.push({ label: 'Look for a divisor', expr: n >= 4 ? `No whole number from 2 to ${limit} divides ${n}, so ${n} is prime` : `${n} has no divisor other than 1 and itself, so it is prime` });
+      out.push({ label: 'Count the divisors', expr: `Only 1 and ${n}  →  2 divisors` });
+      return out;
+    }
+    const f = a.factors[0];
+    const groups = new Map<number, number>();
+    for (const x of a.factors) groups.set(x, (groups.get(x) ?? 0) + 1);
+    out.push({ label: 'Look for a divisor', expr: `${n} ÷ ${f} = ${n / f}, so ${n} is composite` });
+    out.push({ label: 'Break it into prime factors', expr: `${n} = ${[...groups].map(([q, e]) => (e > 1 ? `${q}^${e}` : `${q}`)).join(' × ')}` });
+    out.push({ label: 'Count the divisors: add 1 to each exponent and multiply', expr: `${[...groups.values()].map((e) => `(${e}+1)`).join(' × ')} = ${a.divisorCount}` });
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

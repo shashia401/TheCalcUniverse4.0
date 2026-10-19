@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SpeedPanel from './SpeedPanel';
 import { parseNonNegative } from '../../../utils/parseNumber';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // Exact by definition: 1 mi = 1609.344 m, 1 nmi = 1852 m, 1 mph = 0.44704 m/s, 1 knot = 1852/3600 m/s.
 const MPH_MS = 0.44704;
@@ -333,6 +334,19 @@ const speedConfig: CalculatorConfig = {
     }
 
     return [];
+  },
+  explainSteps: (values) => {
+    const rows = speedConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const paceMile = g('paceMile');
+    const paceKm = g('paceKm');
+    return [
+      { label: 'Use the speed, distance and time relationship', expr: g('formula') },
+      { label: 'Convert to metres and seconds, then solve', expr: g('steps'), note: 'Everything is converted to metres and seconds first, so mixed units (miles and minutes, say) work.' },
+      ...(g('speedKmh') ? [{ label: 'The same speed in other units', expr: `${g('speedKmh')} = ${g('speedMs')} = ${g('speedKnots')}` }] : []),
+      ...(paceMile ? [{ label: 'Pace is the time for one mile or one kilometre', expr: `${paceMile} min per mile${paceKm ? `, ${paceKm} min per km` : ''}` }] : []),
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -176,6 +176,38 @@ const tileConfig: CalculatorConfig = {
 
     return results;
   },
+  explainSteps: (values) => {
+    const roomL = parseFloat(values.areaLength);
+    const roomW = parseFloat(values.areaWidth);
+    const tileL = parseFloat(values.tileLength);
+    const tileW = parseFloat(values.tileWidth);
+    if ([roomL, roomW, tileL, tileW].some(isNaN) || roomL <= 0 || roomW <= 0 || tileL <= 0 || tileW <= 0) return [];
+    const layout = values.layout || 'grid';
+    const wasteOverride = parseFloat(values.wasteOverride);
+    const wastePct = !isNaN(wasteOverride) && wasteOverride >= 0 ? wasteOverride : LAYOUT_WASTE[layout] ?? 10;
+    const groutParsed = parseFloat(values.groutWidth);
+    const grout = Number.isFinite(groutParsed) ? groutParsed : DEFAULT_GROUT_IN;
+    const sqFtPerBox = parseFloat(values.sqFtPerBox);
+    const est = tileEstimate({
+      roomLengthFt: roomL,
+      roomWidthFt: roomW,
+      tileLengthIn: tileL,
+      tileWidthIn: tileW,
+      groutIn: grout,
+      wastePct,
+      sqFtPerBox: Number.isFinite(sqFtPerBox) ? sqFtPerBox : undefined,
+    });
+    const g = grout > 0 ? grout : 0;
+    const price = parseFloat(values.pricePerTile);
+    return [
+      { label: 'Room area', expr: `${roomL} ft × ${roomW} ft = ${fmt(est.roomSqFt)} sq ft` },
+      { label: 'Area each tile covers, grout joint included', expr: `(${tileL}" + ${g}") × (${tileW}" + ${g}") ÷ 144 = ${est.cellSqFt.toFixed(4)} sq ft` },
+      { label: 'Tiles to cover the floor', expr: `${fmt(est.roomSqFt)} ÷ ${est.cellSqFt.toFixed(4)} = ${est.baseTiles} tiles (rounded up)` },
+      { label: `Add the waste allowance for the ${layout} layout`, expr: `${est.baseTiles} × (1 + ${wastePct}%) = ${est.totalTiles} tiles (${est.wasteTiles} extra)` },
+      { label: 'Boxes to buy', expr: `${est.totalTiles} ÷ ${est.tilesPerBox} tiles per box = ${est.boxes} boxes (rounded up)`, note: 'Tiles per box assumes a typical carton coverage; check the figure on your carton.' },
+      ...(!isNaN(price) && price > 0 ? [{ label: 'Tile cost', expr: `${est.totalTiles} × $${price} = $${(est.totalTiles * price).toFixed(2)}` }] : []),
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(TilePanel, { values, results });

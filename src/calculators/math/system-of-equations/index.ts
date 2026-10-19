@@ -4,6 +4,7 @@ import SystemOfEquationsPanel from './SystemOfEquationsPanel';
 import { type Frac, divFrac, fracToFixed, fracToNumber, makeFrac, mulFrac, parseDecimalExact, subFrac } from '../../../utils/rational';
 import { fmtExact } from '../matrix/matrixMath';
 import { fmtFrac } from '../polynomial-calculator/polyMath';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // All arithmetic is exact (BigInt fractions): with floats, 0.1x + 0.2y = 0.3 / 0.3x + 0.6y = 0.9 had
 // D = 0.1·0.6 − 0.3·0.2 = 6.9e-18 ≠ 0 and reported a bogus unique solution (a dependent system).
@@ -262,6 +263,26 @@ const systemOfEquationsConfig: CalculatorConfig = {
       alt: 'Diagram of Cramer\'s rule for solving 2×2 systems of linear equations showing determinant calculations and the three possible cases',
       caption: 'Cramer\'s rule uses determinants D, Dx, and Dy to solve 2×2 linear systems. The sign of D determines if the solution is unique, infinite, or nonexistent, corresponding to intersecting, coincident, or parallel lines.',
     },
+  },
+  explainSteps: (values) => {
+    const rows = systemOfEquationsConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const lines = (resultValue(rows, 'steps') ?? '')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (lines.length < 4) return [];
+    const [, e1, e2, ...rest] = lines;
+    const label = (l: string): string =>
+      /^Determinant/.test(l) ? 'Determinant of the coefficients'
+      : /^Dx/.test(l) ? 'Replace the x-column with the constants (Dx)'
+      : /^Dy/.test(l) ? 'Replace the y-column with the constants (Dy)'
+      : /^D = 0/.test(l) ? 'D is zero, so there is no single answer'
+      : /^D = .*≠ 0/.test(l) ? 'A nonzero D means exactly one solution'
+      : /^x =/.test(l) ? 'Solve for x: Dx ÷ D'
+      : /^y =/.test(l) ? 'Solve for y: Dy ÷ D'
+      : 'Next step';
+    return [{ label: 'Write the two equations', expr: `${e1}   and   ${e2}` }, ...rest.map((l) => ({ label: label(l), expr: l }))];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

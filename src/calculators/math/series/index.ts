@@ -55,6 +55,25 @@ const seriesConfig: CalculatorConfig = {
         : []),
     ];
   },
+  explainSteps: (values) => {
+    const out = runSeries(values.start, values.end, values.expression);
+    if (out.kind !== 'ok') return [];
+    const { run } = out;
+    const shown = run.terms.slice(0, 5);
+    const more = run.count > shown.length;
+    const sum = shown.map((t, i) => (i === 0 ? fmtTermValue(t) : t < 0 ? `− ${fmtTermValue(-t)}` : `+ ${fmtTermValue(t)}`)).join(' ');
+    return [
+      {
+        label: `Plug each n from ${run.start} to ${run.end} into ${(values.expression ?? '').trim()}`,
+        expr: shown.map((t, i) => `f(${run.start + i}) = ${fmtTermValue(t)}`).join(',  ') + (more ? ',  …' : ''),
+      },
+      {
+        label: 'Add all the terms',
+        expr: `${sum}${more ? ' + …' : ''} = ${fmtTermValue(run.sum)}`,
+        note: `${run.count} term${run.count === 1 ? '' : 's'}${run.truncated ? `; only the first ${SERIES_MAX_TERMS.toLocaleString('en-US')} were added` : ''}`,
+      },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(SeriesPanel, { values, results });

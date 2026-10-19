@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import DayCounterPanel from './DayCounterPanel';
 import { addDays, calendarDiff, daysBetween, parseIsoDate } from '../../../utils/dates';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const MONDAY_EPOCH = new Date(1969, 11, 29); // a Monday: weekday counting is anchored here
 
@@ -105,6 +106,24 @@ const dayCounterConfig: CalculatorConfig = {
     return results;
   },
 
+  explainSteps: (values) => {
+    const rows = dayCounterConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const incl = values.includeEndDate === 'yes';
+    const total = g('totalDays');
+    const biz = g('businessDaysCount');
+    return [
+      {
+        label: incl ? 'Count the days from the start date to the end date, counting the end date too (+1)' : 'Count the days from the start date to the end date',
+        expr: `${values.startDate} → ${values.endDate}${incl ? ' + 1 day' : ''} = ${total} days`,
+      },
+      { label: 'The same span in calendar years, months and days', expr: g('formattedBreakdown') },
+      { label: 'In weeks: divide by 7', expr: `${total} ÷ 7 = ${g('totalWeeks')} weeks and ${Number(total) % 7} days` },
+      { label: 'In hours and minutes: multiply by 24 and by 1440', expr: `${total} × 24 = ${g('totalHours')} hours;  ${total} × 1440 = ${g('totalMinutes')} minutes` },
+      ...(biz ? [{ label: 'Business days: only Monday to Friday count', expr: `${biz} weekdays in that range` }] : []),
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(DayCounterPanel, { values, results });

@@ -4,6 +4,8 @@ import WindChillPanel from './WindChillPanel';
 import { roundStrD as fmt } from '../../../lib/format';
 import { cToF, fToC, frostbiteZone, inEcRange, isFrostbiteDanger, KMH_PER_MPH, kmhToMph, windChillC, windChillF } from './windChillMath';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import type { ExplainStep } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const windChillConfig: CalculatorConfig = {
   inputs: [
@@ -134,6 +136,41 @@ const windChillConfig: CalculatorConfig = {
         }),
       },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = windChillConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const temp = parseNumberStrict(values.temperature);
+    const ws = parseNumberStrict(values.windSpeed);
+    const metric = (values.tempUnit || 'F') === 'C';
+    const kmh = (values.speedUnit || 'mph') === 'kmh';
+    const t = (x: number) => (x < 0 ? `(${fmt(x, 2)})` : fmt(x, 2));
+    const out: ExplainStep[] = [];
+    if (metric) {
+      const V = kmh ? ws : ws * KMH_PER_MPH;
+      if (!kmh) out.push({ label: 'Convert the wind speed to km/h', expr: `${fmt(ws, 2)} mph × ${KMH_PER_MPH} = ${fmt(V, 2)} km/h` });
+      if (!inEcRange(temp, V)) {
+        out.push({ label: 'Outside the range where a wind chill is reported (air at 0 °C or colder, wind 5 km/h or faster)', expr: `Wind chill = air temperature = ${fmt(temp, 2)}°C` });
+      } else {
+        const v = Math.pow(V, 0.16);
+        out.push({ label: 'Raise the wind speed to the power 0.16', expr: `v = ${fmt(V, 2)}^0.16 = ${fmt(v, 4)}` });
+        out.push({ label: 'Environment Canada formula (°C and km/h)', expr: `WC = 13.12 + 0.6215×${t(temp)} − 11.37×${fmt(v, 4)} + 0.3965×${t(temp)}×${fmt(v, 4)} = ${g('windChillC')}` });
+      }
+    } else {
+      const V = kmh ? kmhToMph(ws) : ws;
+      if (kmh) out.push({ label: 'Convert the wind speed to mph', expr: `${fmt(ws, 2)} km/h ÷ ${KMH_PER_MPH} = ${fmt(V, 2)} mph` });
+      if (temp > 50 || V <= 3) {
+        out.push({ label: 'Outside the range of the formula (air at or below 50°F and wind above 3 mph)', expr: `Wind chill = air temperature = ${fmt(temp, 2)}°F` });
+      } else {
+        const v = Math.pow(V, 0.16);
+        out.push({ label: 'Raise the wind speed to the power 0.16', expr: `v = ${fmt(V, 2)}^0.16 = ${fmt(v, 4)}` });
+        out.push({ label: 'NWS wind chill formula (°F and mph)', expr: `WC = 35.74 + 0.6215×${t(temp)} − 35.75×${fmt(v, 4)} + 0.4275×${t(temp)}×${fmt(v, 4)} = ${g('windChillF')}` });
+      }
+    }
+    out.push({ label: 'The wind chill in both units', expr: `${g('windChillF')} = ${g('windChillC')}` });
+    out.push({ label: 'Frostbite risk for that wind chill', expr: g('frostbiteRisk') });
+    return out;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

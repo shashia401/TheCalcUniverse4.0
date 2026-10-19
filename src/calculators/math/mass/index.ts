@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MassPanel from './MassPanel';
 import { FT3_M3, LBFT3_KGM3, LB_KG, densityToKgm3, fmtNum as fmt, massToKg, nonNegative, volumeToM3 } from '../../../utils/massDensity';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const PLANET_GRAVITY: Record<string, number> = {
   Earth: 9.81,
@@ -211,6 +212,15 @@ const massConfig: CalculatorConfig = {
     }
 
     return [];
+  },
+  explainSteps: (values) => {
+    const rows = massConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    return [
+      { label: 'Mass, density and volume are linked by one formula', expr: g('formula') },
+      { label: 'Convert to kilograms, cubic metres and kg/m³, then substitute and solve', expr: g('steps'), note: 'Converting everything to SI units first lets you mix units (grams with litres, say).' },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
