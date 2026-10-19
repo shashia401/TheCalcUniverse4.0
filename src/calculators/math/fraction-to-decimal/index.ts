@@ -1,8 +1,9 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import FractionToDecimalPanel from './FractionToDecimalPanel';
 import { computeF2d, describeDecimal, nearestSimpleFraction, percentOf } from './f2dMath';
 import { subFrac } from '../../../utils/rational';
+import { resultValue } from '../../../utils/explainResults';
 
 // Exact BigInt rational arithmetic (src/utils/rational.ts): the decimal typed in "Decimal -> Fraction" is
 // read digit-for-digit (0.1 is exactly 1/10), and a fraction's decimal is produced by long division so the
@@ -120,6 +121,50 @@ const fractionToDecimalConfig: CalculatorConfig = {
     return rows;
   },
 
+  explainSteps: (values) => {
+    const out = computeF2d(values);
+    if (out.kind !== 'ok') return [];
+    const { mode, frac, improper } = out.comp;
+    const rows = fractionToDecimalConfig.calculate(values);
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const t = (k: string) => (values[k] ?? '').trim();
+
+    if (mode === 'dtof') {
+      const m = /^([+-]?)(\d*)(?:\.(\d*))?$/.exec(t('decimal'));
+      const digits = m?.[3] ?? '';
+      if (!m || digits.length === 0 || digits.length > 12) return [];
+      const sign = m[1] === '-' ? '-' : '';
+      const top = BigInt(m[2] + digits).toString();
+      const bottom = `1${'0'.repeat(digits.length)}`;
+      return [
+        { label: 'Write the digits over a power of 10 (one zero per decimal place)', expr: `${t('decimal')} = ${sign}${top}/${bottom}` },
+        { label: 'Divide top and bottom by their greatest common factor', expr: `${sign}${top}/${bottom} = ${frac.n}/${frac.d}` },
+        ...(g('mixedNumber') ? [{ label: 'As a mixed number', expr: `${frac.n}/${frac.d} = ${g('mixedNumber')}` }] : []),
+      ];
+    }
+
+    const steps: ExplainStep[] = [];
+    let top = t('numerator');
+    let bottom = t('denominator');
+    if (mode === 'mixed' && improper) {
+      const whole = t('wholeNumber') || '0';
+      const neg = whole.startsWith('-');
+      steps.push({
+        label: 'Convert the mixed number to an improper fraction',
+        expr: `${whole} ${top}/${bottom} = ${neg ? '−' : ''}(${whole.replace(/^[+-]/, '')} × ${bottom} + ${top}) ÷ ${bottom} = ${improper.n}/${improper.d}`,
+      });
+      top = improper.n.toString();
+      bottom = improper.d.toString();
+    }
+    const exact = g('exactDecimal') || g('decimal');
+    steps.push({
+      label: 'Divide the numerator by the denominator',
+      expr: `${top} ÷ ${bottom} = ${exact}`,
+      ...(g('decimalType') ? { note: `${g('decimalType')}.` } : {}),
+    });
+    steps.push({ label: 'Multiply by 100 for the percentage', expr: `${g('decimal')} × 100 = ${g('percentage')}` });
+    return steps;
+  },
   extraPanel: (values, results) => {
     if (!results.length || results[0].id === 'error') return null;
     return createElement(FractionToDecimalPanel, { values, results });

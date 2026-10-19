@@ -1,8 +1,10 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import CirclePanel from './CirclePanel';
 import { roundStrAuto } from '../../../lib/format';
 import { parseNumberStrict } from '../../../utils/parseNumber';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const fmt = (n: number) => roundStrAuto(n, 8);
 
@@ -118,6 +120,31 @@ const circleConfig: CalculatorConfig = {
     ];
 
     return results;
+  },
+  explainSteps: (values) => {
+    const rows = circleConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const [r, d, C, A] = ['radius', 'diameter', 'circumference', 'area'].map((id) => resultValue(rows, id));
+    if (!r || !d || !C || !A) return [];
+    const known = fmt(parseNumberStrict(values.value));
+    const first: Record<string, ExplainStep> = {
+      radius: { label: 'Start from the radius', expr: `r = ${r}` },
+      diameter: { label: 'Halve the diameter to get the radius', expr: `r = d ÷ 2 = ${known} ÷ 2 = ${r}` },
+      circumference: { label: 'Divide the circumference by 2π to get the radius', expr: `r = C ÷ (2π) = ${known} ÷ (2 × π) = ${r}` },
+      area: { label: 'Take the square root of the area ÷ π to get the radius', expr: `r = √(A ÷ π) = √(${known} ÷ π) = ${r}` },
+    };
+    const start = first[values.inputType || 'radius'];
+    if (!start) return [];
+    return finiteSteps([
+      start,
+      { label: 'Double the radius for the diameter', expr: `d = 2r = 2 × ${r} = ${d}` },
+      { label: 'Circumference: diameter times π', expr: `C = 2πr = 2 × π × ${r} = ${C}` },
+      {
+        label: 'Area: π times the radius squared',
+        expr: `A = πr² = π × ${r}² = ${A}`,
+        note: 'The radius shown is rounded to 8 decimal places; the calculator carries full precision, so the last digit can differ if you redo it by hand.',
+      },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

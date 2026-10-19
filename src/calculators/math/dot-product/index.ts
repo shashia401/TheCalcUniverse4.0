@@ -1,9 +1,10 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import DotProductPanel from './DotProductPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { roundStr6, roundStrAuto } from '../../../lib/format';
 import { allFinite, angleDeg3, dot3, norm3, type V3 } from '../../../utils/vector';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const dotProductConfig: CalculatorConfig = {
   inputs: [
@@ -142,6 +143,38 @@ const dotProductConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = dotProductConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const n = (k: string) => parseNumberStrict(values[k]);
+    const z = (k: string) => ((values[k] ?? '').trim() === '' ? 0 : n(k));
+    const a: V3 = [n('v1x'), n('v1y'), z('v1z')];
+    const b: V3 = [n('v2x'), n('v2y'), z('v2z')];
+    const dims = (values.v1z ?? '').trim() !== '' || (values.v2z ?? '').trim() !== '' ? 3 : 2;
+    const f = roundStrAuto;
+    const par = (x: number) => `(${f(x)})`;
+    const idx = [0, 1, 2].slice(0, dims);
+    const products = idx.map((i) => a[i] * b[i]);
+    const sumSq = (v: V3) => f(idx.reduce((s, i) => s + v[i] * v[i], 0));
+    const sq = (v: V3) => idx.map((i) => `${par(v[i])}²`).join(' + ');
+    const steps: ExplainStep[] = [
+      {
+        label: 'Multiply matching components and add',
+        expr: `a·b = ${idx.map((i) => `${par(a[i])}${par(b[i])}`).join(' + ')} = ${products.map((x) => f(x)).join(' + ')} = ${g('dotProduct')}`,
+        ...(g('orthogonal') === 'Yes' ? { note: 'The dot product is 0, so the vectors are perpendicular.' } : {}),
+      },
+      { label: 'Length of a', expr: `|a| = √(${sq(a)}) = √${sumSq(a)} = ${g('magnitude1')}` },
+      { label: 'Length of b', expr: `|b| = √(${sq(b)}) = √${sumSq(b)} = ${g('magnitude2')}` },
+    ];
+    if (!g('angleDeg').startsWith('Undefined')) {
+      steps.push({
+        label: 'Angle between them: cos θ = a·b ÷ (|a||b|)',
+        expr: `cos θ = ${g('dotProduct')} ÷ (${g('magnitude1')} × ${g('magnitude2')}) = ${g('cosTheta')}  →  θ = ${g('angleDeg')}`,
+      });
+    }
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -61,6 +61,29 @@ const descriptiveStatsConfig: CalculatorConfig = {
       { id: '_data', label: '', value: JSON.stringify({ mean: s.mean.toNumber(), median: s.median.toNumber(), sd: stdDev.toNumber() }) },
     ];
   },
+  explainSteps: (values) => {
+    const { values: data } = parseDataset(values.data);
+    if (data.length < 2) return [];
+    const isSample = values.type !== 'population';
+    const s = summarize(data);
+    const variance = isSample ? s.varianceSample! : s.variancePop;
+    const sd = isSample ? s.sdSample! : s.sdPop;
+    const [varSym, sdSym] = isSample ? ['s²', 's'] : ['σ²', 'σ'];
+    const divisor = isSample ? s.n - 1 : s.n;
+    return [
+      { label: 'Mean: sum ÷ count', expr: `x̄ = ${fmtDec(s.sum, 20)} ÷ ${s.n} = ${fmtDec(s.mean)}` },
+      { label: 'Add up the squared distances from the mean', expr: `Σ(x − x̄)² = ${fmtDec(s.ss, 20)}` },
+      {
+        label: isSample ? 'Variance: divide by n − 1 (sample)' : 'Variance: divide by n (population)',
+        expr: `${varSym} = ${fmtDec(s.ss, 20)} ÷ ${divisor} = ${fmtDec(variance)}`,
+      },
+      { label: 'Standard deviation: the square root of the variance', expr: `${sdSym} = √${fmtDec(variance)} = ${fmtDec(sd)}` },
+      {
+        label: 'Median and quartiles (median of each half of the sorted data)',
+        expr: `Median = ${fmtDec(s.median)},  Q1 = ${fmtDec(s.q1)},  Q3 = ${fmtDec(s.q3)},  IQR = Q3 − Q1 = ${fmtDec(s.iqr)}`,
+      },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(DescriptiveStatsPanel, { values, results });

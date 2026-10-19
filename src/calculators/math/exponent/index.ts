@@ -1,7 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import ExponentPanel from './ExponentPanel';
-import { analyzePower, ordinal, parseNumberStrict } from './exponentMath';
+import { analyzePower, asRatio, ordinal, parseNumberStrict } from './exponentMath';
+import { resultValue } from '../../../utils/explainResults';
 
 // Math.pow (IEEE 754 doubles, ~15-16 significant digits) does the arithmetic. exponentMath.ts handles the
 // cases it gets wrong or hides (0^negative, negative bases with fractional exponents); integer powers beyond
@@ -156,6 +157,60 @@ const exponentConfig: CalculatorConfig = {
     if (rootValue) rows.push({ id: 'inverse', label: 'Root b^(1/n)', value: rootValue, color: neutral });
     rows.push({ id: 'reciprocal', label: 'Reciprocal (1/result)', value: result !== 0 ? fmt(1 / result) : 'Undefined', color: neutral });
     return rows;
+  },
+  explainSteps: (values) => {
+    const base = parseNumberStrict(values.base);
+    const exp = parseNumberStrict(values.exponent);
+    if (Number.isNaN(base) || Number.isNaN(exp)) return [];
+    const p = analyzePower(base, exp);
+    if (p.kind !== 'real' || p.underflow) return []; // undefined / complex / overflow cases are explained by the result rows
+    const rows = exponentConfig.calculate(values);
+    const result = resultValue(rows, 'result');
+    if (!result) return [];
+    const b = operand(base);
+    const n = fmt(exp);
+    const given: ExplainStep = { label: 'Identify the base and the exponent', expr: `b = ${fmt(base)}, n = ${n}  →  ${b}^${n}` };
+    const sci = resultValue(rows, 'sciNotation');
+    const final: ExplainStep = { label: 'Evaluate', expr: `${b}^${n} = ${result}${sci ? ` ≈ ${sci}` : ''}` };
+
+    if (exp === 0) return [given, { label: 'Any non-zero number to the power 0 is 1', expr: `${b}^0 = 1` }];
+
+    if (Number.isInteger(exp)) {
+      const expanded = resultValue(rows, 'expandedForm');
+      const identity = resultValue(rows, 'exponentIdentity');
+      if (exp > 0 && expanded) {
+        return [
+          given,
+          { label: `Multiply the base by itself ${exp} time${exp === 1 ? '' : 's'}`, expr: expanded },
+          ...(identity ? [{ label: 'Check by splitting the power in half', expr: identity }] : []),
+        ];
+      }
+      if (exp < 0 && expanded) {
+        return [
+          given,
+          { label: 'A negative exponent means take the reciprocal', expr: `${b}^${exp} = 1 / ${b}^${-exp}` },
+          { label: 'Multiply out, then take the reciprocal', expr: expanded },
+        ];
+      }
+      return [
+        given,
+        exp > 0
+          ? { label: `Multiply the base by itself ${exp} times`, expr: `${b}^${exp} = ${b} × ${b} × … × ${b}  (${exp} factors)` }
+          : { label: 'A negative exponent means take the reciprocal', expr: `${b}^${exp} = 1 / ${b}^${-exp}` },
+        final,
+      ];
+    }
+
+    const ratio = asRatio(exp);
+    if (ratio) {
+      const root = ratio.q === 2 ? 'square root' : ratio.q === 3 ? 'cube root' : `${ordinal(ratio.q)} root`;
+      return [
+        given,
+        { label: 'A fractional exponent is a root combined with a power', expr: `${b}^(${ratio.p}/${ratio.q}) = (${root} of ${fmt(base)})^${ratio.p}` },
+        final,
+      ];
+    }
+    return [given, { label: 'For a decimal exponent, use the exponential–logarithm form', expr: `${b}^${n} = e^(${n} × ln ${b})` }, final];
   },
   extraPanel: (values, results) => {
     if (!results.length || results[0].id !== 'result') return null;

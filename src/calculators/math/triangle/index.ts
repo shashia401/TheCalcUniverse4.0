@@ -14,6 +14,7 @@ import {
   solveSAS,
   solveSSS,
 } from '../shared/triangle';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const triangleConfig: CalculatorConfig = {
   inputs: [
@@ -102,6 +103,30 @@ const triangleConfig: CalculatorConfig = {
       { id: 'perimeter', label: 'Perimeter', value: fmt(t.a + t.b + t.c), color: 'neutral' },
       { id: 'area', label: 'Area', value: `${fmt(area(t))} sq units`, color: 'neutral' },
       { id: '_triangle', label: 'triangle', value: JSON.stringify(t) },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = triangleConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const deg = values.angleUnit !== 'rad';
+    const ang = g; // the angle rows already carry their unit ("30°" / "0.5236 rad")
+    const straight = deg ? '180°' : 'π rad';
+    const how: Record<string, string> = {
+      sss: 'Law of Cosines: find each angle from the three sides',
+      sas: 'Law of Cosines for the third side, then the remaining angles',
+      asa: `Third angle = ${straight} − A − B, then the Law of Sines for the sides`,
+      aas: `Third angle = ${straight} − A − B, then the Law of Sines for the sides`,
+    };
+    return [
+      {
+        label: how[values.mode || 'sss'] ?? 'Solve for the unknown sides and angles',
+        expr: `a = ${g('sideALabel')},  b = ${g('sideBLabel')},  c = ${g('sideCLabel')};  A = ${ang('angleA')},  B = ${ang('angleB')},  C = ${ang('angleC')}`,
+      },
+      { label: 'Check: the angles add up to a straight angle', expr: `A + B + C = ${ang('angleA')} + ${ang('angleB')} + ${ang('angleC')} ≈ ${straight}` },
+      { label: 'Perimeter: add the three sides', expr: `P = a + b + c = ${g('sideALabel')} + ${g('sideBLabel')} + ${g('sideCLabel')} = ${g('perimeter')}` },
+      { label: 'Area: half the product of two sides and the angle between them', expr: `Area = ½ × b × c × sin A = ½ × ${g('sideBLabel')} × ${g('sideCLabel')} × sin(${ang('angleA')}) = ${g('area')}` },
+      { label: 'Classify the triangle', expr: g('triangleType') },
     ];
   },
   extraPanel: (values, results) => {

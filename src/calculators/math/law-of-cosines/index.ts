@@ -3,6 +3,8 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import LawOfCosinesPanel from './LawOfCosinesPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { type AngleUnit, type Tri, angleToDeg, classify, fmtAngle, fmtNum8 as fmt, area, solveSAS, solveSSS, toRad } from '../shared/triangle';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { roundStrAuto } from '../../../lib/format';
 
 const triangleRows = (t: Tri, unit: AngleUnit, workSteps: string): CalculatorResult[] => {
   const k = classify(t);
@@ -130,6 +132,36 @@ const config: CalculatorConfig = {
     }
 
     return [];
+  },
+  explainSteps: (values) => {
+    const rows = config.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const mode = values.mode || 'sss';
+    const deg = values.angleUnit !== 'rad';
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const ang = g; // the angle rows already carry their unit ("30°" / "0.5236 rad")
+    const f = roundStrAuto;
+    const [a, b] = [parseNumberStrict(values.a), parseNumberStrict(values.b)];
+    const check = {
+      label: 'Check: the three angles of a triangle add up to a straight angle',
+      expr: `A + B + C = ${ang('angleA')} + ${ang('angleB')} + ${ang('angleC')} ≈ ${deg ? '180°' : 'π rad'}`,
+    };
+    if (mode === 'sss') {
+      const c = parseNumberStrict(values.c);
+      return [
+        { label: 'Find angle C from the three sides', expr: `C = cos⁻¹((a² + b² − c²) ÷ 2ab) = cos⁻¹((${f(a * a)} + ${f(b * b)} − ${f(c * c)}) ÷ ${f(2 * a * b)}) = ${ang('angleC')}` },
+        { label: 'Find angle A the same way', expr: `A = cos⁻¹((b² + c² − a²) ÷ 2bc) = cos⁻¹((${f(b * b)} + ${f(c * c)} − ${f(a * a)}) ÷ ${f(2 * b * c)}) = ${ang('angleA')}` },
+        { label: 'Find angle B the same way', expr: `B = cos⁻¹((a² + c² − b²) ÷ 2ac) = cos⁻¹((${f(a * a)} + ${f(c * c)} − ${f(b * b)}) ÷ ${f(2 * a * c)}) = ${ang('angleB')}` },
+        check,
+      ];
+    }
+    const angleIn = `${f(parseNumberStrict(values.angleC))}${deg ? '°' : ' rad'}`;
+    return [
+      { label: 'Law of Cosines for the side opposite the known angle', expr: `c² = a² + b² − 2ab·cos(C) = ${f(a)}² + ${f(b)}² − 2(${f(a)})(${f(b)})·cos(${angleIn})` },
+      { label: 'Take the square root', expr: `c = √(a² + b² − 2ab·cos C) = ${g('c')}` },
+      { label: 'Find the other two angles', expr: `A = ${ang('angleA')},  B = ${ang('angleB')}` },
+      check,
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

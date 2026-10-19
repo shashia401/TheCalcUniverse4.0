@@ -58,6 +58,25 @@ const logConfig: CalculatorConfig = {
       },
     ];
   },
+  explainSteps: (values) => {
+    const r = computeLog(values.base, values.value);
+    if (r.kind !== 'ok') return [];
+    const { base, x, result, ln, exactExponent } = r;
+    const name = `log_${fmt(base)}(${fmt(x)})`;
+    const head = { label: 'Read the logarithm as a question', expr: `${name} = ?   means   ${fmt(base)}^? = ${fmt(x)}` };
+    if (exactExponent !== null) {
+      return [
+        head,
+        { label: 'Find the power that works', expr: `${fmt(base)}^${exactExponent} = ${fmt(x)}` },
+        { label: 'That power is the logarithm', expr: `${name} = ${exactExponent}` },
+      ];
+    }
+    return [
+      head,
+      { label: 'No whole-number power fits, so use the change-of-base rule (ln is the natural log)', expr: `${name} = ln(${fmt(x)}) ÷ ln(${fmt(base)}) = ${fmt(ln)} ÷ ${fmt(base.ln())}` },
+      { label: 'Divide', expr: `${name} = ${fmt(result)}` },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(LogPanel, { values, results });

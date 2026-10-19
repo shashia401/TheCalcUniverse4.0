@@ -1,9 +1,10 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import CrossProductPanel from './CrossProductPanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { roundStrAuto } from '../../../lib/format';
 import { allFinite, cross3, dot3, norm3, type V3 } from '../../../utils/vector';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const crossProductConfig: CalculatorConfig = {
   inputs: [
@@ -123,6 +124,33 @@ const crossProductConfig: CalculatorConfig = {
         value: fmt(magnitude), // |a × b| = |a||b| sin θ is the parallelogram area
         highlight: true,
         color: 'positive' as const,
+      },
+    ];
+  },
+  explainSteps: (values) => {
+    const rows = crossProductConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const n = (k: string) => parseNumberStrict(values[k]);
+    const a: V3 = [n('v1x'), n('v1y'), n('v1z')];
+    const b: V3 = [n('v2x'), n('v2y'), n('v2z')];
+    const c = cross3(a, b);
+    const f = roundStrAuto;
+    const p = (x: number) => `(${f(x)})`;
+    const comp: ExplainStep[] = [
+      { label: 'First component: a₂b₃ − a₃b₂', expr: `c₁ = ${p(a[1])}${p(b[2])} − ${p(a[2])}${p(b[1])} = ${f(c[0])}` },
+      { label: 'Second component: a₃b₁ − a₁b₃', expr: `c₂ = ${p(a[2])}${p(b[0])} − ${p(a[0])}${p(b[2])} = ${f(c[1])}` },
+      { label: 'Third component: a₁b₂ − a₂b₁', expr: `c₃ = ${p(a[0])}${p(b[1])} − ${p(a[1])}${p(b[0])} = ${f(c[2])}` },
+    ];
+    return [
+      ...comp,
+      {
+        label: 'Combine the components and measure the result',
+        expr: `a × b = ${g('crossProduct')},  |a × b| = ${g('magnitude')}`,
+        note:
+          g('magnitude') === '0'
+            ? 'The cross product is the zero vector, so a and b are parallel.'
+            : '|a × b| is also the area of the parallelogram the two vectors span.',
       },
     ];
   },

@@ -70,6 +70,40 @@ const scientificNotationConfig: CalculatorConfig = {
       { id: 'eNotation', label: 'E Notation', value: d.eNotation },
     ];
   },
+  explainSteps: (values) => {
+    if ((values.mode || 'toScientific') === 'toScientific') {
+      const r = toScientific(values.decimal);
+      // Zero has no scientific form worth showing; typed e-notation was not produced by moving a decimal point.
+      if (!r || r.coefficient === '0' || /[eE]/.test(r.original)) return [];
+      const move =
+        r.direction === 'none'
+          ? 'The point did not move, so the exponent is 0'
+          : `The point moved ${r.moves} place${r.moves === 1 ? '' : 's'} to the ${r.direction}  →  exponent = ${r.direction === 'left' ? '' : '−'}${r.moves}`;
+      return [
+        { label: 'Move the decimal point so one non-zero digit sits in front of it', expr: `${r.original}  →  ${r.coefficient}` },
+        {
+          label: 'Count the places moved; that is the exponent of 10',
+          expr: move,
+          note: 'Large numbers (point moves left) get a positive exponent; small numbers (point moves right) get a negative one.',
+        },
+        { label: 'Write coefficient × 10 to that power', expr: r.sci },
+      ];
+    }
+    const d = toDecimal(values.coefficient, values.exponent);
+    if (!d || d.plain === '0') return [];
+    const e = Number((values.exponent ?? '').trim());
+    const coef = (values.coefficient ?? '').trim();
+    return [
+      {
+        label: 'Read the exponent of 10 to see which way, and how far, to move the point',
+        expr:
+          e === 0
+            ? `${coef} × 10^0  →  no movement`
+            : `${coef} × 10^${e}  →  move the point ${Math.abs(e)} place${Math.abs(e) === 1 ? '' : 's'} to the ${e > 0 ? 'right' : 'left'}`,
+      },
+      { label: 'Move the point, filling any gaps with zeros', expr: `${coef} × 10^${e} = ${d.plain ?? `${d.eNotation} (too long to write out in full)`}` },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(ScientificNotationPanel, { values, results });

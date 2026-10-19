@@ -3,6 +3,7 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import FactorialPanel from './FactorialPanel';
 import { bigToScientific, factorialBig, factorialTrailingZeros, groupDigits } from '../../../utils/bigMath';
 import { parseIntegerStrict } from '../../../utils/rational';
+import { resultValue } from '../../../utils/explainResults';
 
 /** Largest n accepted: 1000! has 2,568 digits, still instant with exact BigInt arithmetic. */
 export const MAX_FACTORIAL_N = 1000;
@@ -51,6 +52,31 @@ const factorialConfig: CalculatorConfig = {
     ];
     if (digits > 15) rows.push({ id: 'scientific', label: 'Scientific Notation', value: bigToScientific(fact) });
     return rows;
+  },
+  explainSteps: (values) => {
+    const rows = factorialConfig.calculate(values);
+    if (!resultValue(rows, 'factorial')) return [];
+    const n = Number(parseIntegerStrict(values.n, 6));
+    if (n === 0) return [{ label: 'By definition', expr: '0! = 1', note: 'It is the empty product: multiplying no numbers at all gives 1.' }];
+    const list = n <= 6 ? Array.from({ length: n }, (_, i) => n - i).join(' × ') : `${n} × ${n - 1} × ${n - 2} × … × 2 × 1`;
+    const steps = [{ label: 'Multiply every whole number from n down to 1', expr: `${n}! = ${list}` }];
+    if (n <= 20) {
+      steps.push({ label: 'Multiply them out', expr: resultValue(rows, 'steps') ?? '' });
+    } else {
+      steps.push({
+        label: 'The product is too long to write in full, so here it is in scientific notation',
+        expr: `${n}! ≈ ${resultValue(rows, 'scientific')}  (${resultValue(rows, 'digitCount')} digits)`,
+      });
+    }
+    if (n >= 5) {
+      const terms: number[] = [];
+      for (let q = 5; q <= n; q *= 5) terms.push(Math.floor(n / q));
+      steps.push({
+        label: 'Count the trailing zeros: each one needs a factor of 5',
+        expr: `${terms.map((_, i) => `⌊${n}/${5 ** (i + 1)}⌋`).join(' + ')} = ${terms.join(' + ')} = ${resultValue(rows, 'trailingZeros')}`,
+      });
+    }
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

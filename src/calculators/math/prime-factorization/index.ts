@@ -29,6 +29,35 @@ const primeFactorizationConfig: CalculatorConfig = {
       { id: 'totalPrimes', label: 'Prime Factors (with multiplicity)', value: factors.reduce((sum, [, e]) => sum + e, 0).toString() },
     ];
   },
+  explainSteps: (values) => {
+    const p = parsePositiveSafeInt(values.number);
+    if (p.kind !== 'ok' || p.n < 2) return [];
+    const n = p.n;
+    const factors = factorize(n);
+    if (factors.length === 1 && factors[0][1] === 1) {
+      return [
+        { label: 'Look for a divisor other than 1 and the number itself', expr: `No smaller prime divides ${n} evenly` },
+        { label: 'So the number is prime', expr: `${n} = ${n}`, note: 'A prime number is its own prime factorization.' },
+      ];
+    }
+    const chain: string[] = [];
+    let rest = n;
+    for (const [q, e] of factors) {
+      for (let i = 0; i < e; i++) {
+        chain.push(`${rest} ÷ ${q} = ${rest / q}`);
+        rest /= q;
+      }
+    }
+    const shown = chain.length > 8 ? [...chain.slice(0, 4), '…', ...chain.slice(-2)] : chain;
+    return [
+      { label: 'Divide by the smallest prime that fits, again and again, until you reach 1', expr: shown.join(',  ') },
+      { label: 'Group the equal primes as powers', expr: `${n} = ${formatFactorization(factors)}` },
+      {
+        label: 'Check by multiplying back',
+        expr: `${factors.map(([q, e]) => (BigInt(q) ** BigInt(e)).toString()).join(' × ')} = ${n}`,
+      },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(PrimeFactorizationPanel, { values, results });

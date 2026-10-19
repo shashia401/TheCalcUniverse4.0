@@ -3,6 +3,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import DistancePanel from './DistancePanel';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { roundStrAuto } from '../../../lib/format';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const distanceConfig: CalculatorConfig = {
   inputs: [
@@ -251,6 +252,40 @@ const distanceConfig: CalculatorConfig = {
     }
 
     return [];
+  },
+  explainSteps: (values) => {
+    const rows = distanceConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const dist = resultValue(rows, 'distance');
+    if (!dist) return [];
+    const f = (n: number) => (Number.isInteger(n) && Math.abs(n) < 1e15 ? n.toString() : roundStrAuto(n, 6));
+    const br = (n: number) => (n < 0 ? `(${f(n)})` : f(n));
+    const num = (k: string) => parseNumberStrict(values[k]);
+    const mode = values.mode || '2d';
+    if (mode === '1d') {
+      const [x1, x2] = [num('x1_1d'), num('x2_1d')];
+      return [
+        { label: 'Subtract the two coordinates', expr: `x₂ − x₁ = ${f(x2)} − ${br(x1)} = ${f(x2 - x1)}` },
+        { label: 'Distance is never negative, so take the absolute value', expr: `d = |${f(x2 - x1)}| = ${dist}` },
+      ];
+    }
+    const axes = mode === '3d' ? (['x', 'y', 'z'] as const) : (['x', 'y'] as const);
+    const diffs = axes.map((ax) => {
+      const [p, q] = [num(`${ax}1`), num(`${ax}2`)];
+      return { ax, p, q, delta: q - p };
+    });
+    const sumSq = f(diffs.reduce((s, { delta }) => s + delta * delta, 0));
+    return [
+      {
+        label: 'Subtract the coordinates on each axis',
+        expr: diffs.map(({ ax, p, q, delta }) => `Δ${ax} = ${f(q)} − ${br(p)} = ${f(delta)}`).join(',  '),
+      },
+      {
+        label: 'Square each difference and add them',
+        expr: `${diffs.map(({ delta }) => `${br(delta)}²`).join(' + ')} = ${diffs.map(({ delta }) => f(delta * delta)).join(' + ')} = ${sumSq}`,
+      },
+      { label: 'Take the square root', expr: `d = √${sumSq} = ${dist}` },
+    ];
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

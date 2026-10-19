@@ -49,6 +49,23 @@ const commonFactorConfig: CalculatorConfig = {
       { id: '_commonData', label: 'Common Factors Data', value: JSON.stringify({ common: common.slice(0, 500), a, b }) },
     ];
   },
+  explainSteps: (values) => {
+    const pa = parsePositiveSafeInt(values.a);
+    const pb = parsePositiveSafeInt(values.b);
+    if (pa.kind !== 'ok' || pb.kind !== 'ok') return [];
+    const { a, b } = { a: pa.n, b: pb.n };
+    const { gcf, factorsA, factorsB, common } = analyzeCommonFactors(a, b);
+    return [
+      { label: `List every factor of ${a}`, expr: capList(factorsA, 24) },
+      { label: `List every factor of ${b}`, expr: capList(factorsB, 24) },
+      { label: 'Keep the factors that appear in both lists', expr: capList(common, 24) },
+      {
+        label: 'The largest of them is the greatest common factor',
+        expr: `GCF(${a}, ${b}) = ${gcf}`,
+        note: 'Every common factor of two numbers divides their GCF evenly.',
+      },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(CommonFactorPanel, { values, results });

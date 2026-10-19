@@ -1,7 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import NthRootPanel from './NthRootPanel';
 import { MAX_ROOT_INDEX, fmtRoot, parseNthRoot, radicalSymbol } from './nthRootMath';
+import { resultValue } from '../../../utils/explainResults';
 
 const nthRootConfig: CalculatorConfig = {
   inputs: [
@@ -37,6 +38,31 @@ const nthRootConfig: CalculatorConfig = {
       { id: 'exponentForm', label: 'Fractional Exponent', value: `${fmtRoot(x)}^(1/${n})` },
       ...(simplified ? [{ id: 'simplifiedRadical' as const, label: 'Simplified Radical', value: simplified, color: 'positive' as const }] : []),
     ];
+  },
+  explainSteps: (values) => {
+    const r = parseNthRoot(values.index, values.radicand);
+    if (r.kind !== 'ok' || r.n === 1) return [];
+    const { n, x, value, simplified } = r;
+    const rows = nthRootConfig.calculate(values);
+    const radical = resultValue(rows, 'radicalForm');
+    const power = resultValue(rows, 'exponentForm');
+    if (!radical || !power) return [];
+    const steps: ExplainStep[] = [{ label: 'Write the root as a radical, which is the same as a fractional exponent', expr: `${radical} = ${power}` }];
+    const perfect = Number.isInteger(value) && Number.isInteger(x) && BigInt(Math.abs(value)) ** BigInt(n) === BigInt(Math.abs(x));
+    if (perfect) {
+      steps.push({
+        label: `Find the number that, multiplied by itself ${n} times, gives ${fmtRoot(x)}`,
+        expr: `${value < 0 ? `(${fmtRoot(value)})` : fmtRoot(value)}^${n} = ${fmtRoot(x)}`,
+      });
+    } else if (simplified) {
+      steps.push({ label: 'Pull perfect powers out from under the radical', expr: `${radical} = ${simplified}` });
+    }
+    steps.push({
+      label: 'Decimal value',
+      expr: `${radical} = ${fmtRoot(value)}`,
+      ...(x < 0 ? { note: 'An odd root of a negative number keeps the negative sign.' } : {}),
+    });
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

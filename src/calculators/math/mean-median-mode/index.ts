@@ -55,6 +55,28 @@ const meanMedianModeConfig: CalculatorConfig = {
       },
     ];
   },
+  explainSteps: (values) => {
+    const { values: data } = parseDataset(values.data);
+    if (data.length < 2) return [];
+    const s = summarize(data);
+    const list = (xs: Dec[]) => (xs.length <= 10 ? xs.map((x) => fmtDec(x)).join(', ') : `${xs.slice(0, 4).map((x) => fmtDec(x)).join(', ')}, …, ${xs.slice(-2).map((x) => fmtDec(x)).join(', ')}`);
+    const mid = s.n % 2 === 0 ? [s.sorted[s.n / 2 - 1], s.sorted[s.n / 2]] : null;
+    return [
+      { label: 'Sort the values from smallest to largest', expr: list(s.sorted) },
+      { label: 'Mean: add the values, then divide by how many there are', expr: `${fmtDec(s.sum, 20)} ÷ ${s.n} = ${fmtDec(s.mean)}` },
+      mid
+        ? {
+            label: 'Median: n is even, so average the two middle values',
+            expr: `(${fmtDec(mid[0])} + ${fmtDec(mid[1])}) ÷ 2 = ${fmtDec(s.median)}`,
+            note: `They are values number ${s.n / 2} and ${s.n / 2 + 1} in the sorted list.`,
+          }
+        : { label: 'Median: n is odd, so take the middle value', expr: `value number ${(s.n + 1) / 2} of ${s.n} = ${fmtDec(s.median)}` },
+      s.modes.length
+        ? { label: 'Mode: the most frequent value(s)', expr: `${s.modes.map((m) => fmtDec(m)).join(', ')} (each appears ${s.modeCount} times)` }
+        : { label: 'Mode: the most frequent value', expr: 'No value repeats, so there is no mode' },
+      { label: 'Range: largest minus smallest', expr: `${fmtDec(s.max)} − ${s.min.isNegative() ? `(${fmtDec(s.min)})` : fmtDec(s.min)} = ${fmtDec(s.range)}` },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(MeanMedianModePanel, { values, results });

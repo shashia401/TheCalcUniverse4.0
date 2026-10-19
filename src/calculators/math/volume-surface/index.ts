@@ -1,9 +1,11 @@
 import { createElement } from 'react';
-import { CalculatorConfig, EducationalContent } from '../../../types/calculator';
+import { CalculatorConfig, EducationalContent, ExplainStep } from '../../../types/calculator';
 import VolumeSurfacePanel from './VolumeSurfacePanel';
 import { calculate } from './shared';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import { sphereDiagram, cubeDiagram, cylinderDiagram, coneDiagram, boxDiagram, pyramidDiagram } from './diagrams';
+import { roundStr6 } from '../../../lib/format';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const sphereEdu: EducationalContent = {
   formula: 'V = 4/3 × π × r³ | SA = 4 × π × r²',
@@ -191,6 +193,53 @@ const volumeSurfaceConfig: CalculatorConfig = {
   calculate: (values) =>
     calculate(values.shape || 'sphere', parseNumberStrict(values.dim1), parseNumberStrict(values.dim2), parseNumberStrict(values.dim3)),
   educational: sphereEdu,
+  explainSteps: (values) => {
+    const rows = volumeSurfaceConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const [d1, d2, d3] = ['dim1', 'dim2', 'dim3'].map((k) => roundStr6(parseNumberStrict(values[k])));
+    const step = (label: string, expr: string): ExplainStep => ({ label, expr });
+    switch (values.shape || 'sphere') {
+      case 'sphere':
+        return [
+          step('Volume of a sphere', `V = 4/3 × π × r³ = 4/3 × π × ${d1}³ = ${g('volume')}`),
+          step('Surface area of a sphere', `SA = 4 × π × r² = 4 × π × ${d1}² = ${g('surface')}`),
+          step('Diameter', `d = 2r = 2 × ${d1} = ${g('diameter')}`),
+        ];
+      case 'cube':
+        return [
+          step('Volume of a cube', `V = s³ = ${d1}³ = ${g('volume')}`),
+          step('Surface area: six equal square faces', `SA = 6s² = 6 × ${d1}² = ${g('surface')}`),
+          step('Space diagonal', `d = s√3 = ${d1} × √3 = ${g('diagonal')}`),
+        ];
+      case 'cylinder':
+        return [
+          step('Volume: base area times height', `V = πr²h = π × ${d1}² × ${d2} = ${g('volume')}`),
+          step('Lateral (curved) surface area', `2πrh = 2 × π × ${d1} × ${d2} = ${g('lateral')}`),
+          step('Total surface area: curved side plus two circular ends', `SA = 2πr² + 2πrh = 2 × π × ${d1}² + ${g('lateral')} = ${g('surface')}`),
+        ];
+      case 'cone':
+        return [
+          step('Slant height (Pythagorean theorem)', `s = √(r² + h²) = √(${d1}² + ${d2}²) = ${g('slant')}`),
+          step('Volume: one third of the matching cylinder', `V = ⅓πr²h = ⅓ × π × ${d1}² × ${d2} = ${g('volume')}`),
+          step('Total surface area: base plus curved side', `SA = πr² + πrs = π × ${d1}² + π × ${d1} × ${g('slant')} = ${g('surface')}`),
+        ];
+      case 'box':
+        return [
+          step('Volume of a box', `V = l × w × h = ${d1} × ${d2} × ${d3} = ${g('volume')}`),
+          step('Surface area: three pairs of faces', `SA = 2(lw + lh + wh) = 2 × (${d1}×${d2} + ${d1}×${d3} + ${d2}×${d3}) = ${g('surface')}`),
+          step('Space diagonal', `d = √(l² + w² + h²) = √(${d1}² + ${d2}² + ${d3}²) = ${g('diagonal')}`),
+        ];
+      case 'pyramid':
+        return [
+          step('Slant height of a face', `s = √((b/2)² + h²) = √((${d1}/2)² + ${d2}²) = ${g('slant')}`),
+          step('Volume: one third of the matching prism', `V = ⅓b²h = ⅓ × ${d1}² × ${d2} = ${g('volume')}`),
+          step('Total surface area: base plus four triangular faces', `SA = b² + 2bs = ${d1}² + 2 × ${d1} × ${g('slant')} = ${g('surface')}`),
+        ];
+      default:
+        return [];
+    }
+  },
   extraPanel: (values, results) => results.length ? createElement(VolumeSurfacePanel, { values, results }) : null,
 };
 

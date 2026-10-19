@@ -1,10 +1,12 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import AreaPanel from './AreaPanel';
 import { circleEdu, rectangleEdu, squareEdu, triangleEdu, trapezoidEdu, parallelogramEdu, hexagonEdu } from './educational';
 import { roundStrAuto } from '../../../lib/format';
 import { parseNumberStrict } from '../../../utils/parseNumber';
 import type { CalculatorResult } from '../../../types/calculator';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const fmt = (n: number) => (Number.isFinite(n) ? roundStrAuto(n, 6) : 'too large to display');
 const err = (value: string): CalculatorResult[] => [{ id: 'error', label: 'Error', value, color: 'negative' }];
@@ -309,6 +311,80 @@ const areaPerimeterConfig: CalculatorConfig = {
 
       { source: 'Archimedes — Measurement of a Circle (c. 250 BCE)', url: 'https://en.wikipedia.org/wiki/Area_of_a_circle' },
     ],
+  },
+  explainSteps: (values) => {
+    const rows = areaPerimeterConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const g = (id: string) => resultValue(rows, id) ?? '';
+    const v = (k: string) => fmt(pos(values[k]));
+    const area = g('area');
+    if (!area) return [];
+    let steps: ExplainStep[] = [];
+    switch (values.shape || 'circle') {
+      case 'circle':
+        steps = [
+          { label: 'Area of a circle', expr: `A = πr² = π × ${v('circleRadius')}² = ${area}` },
+          { label: 'Circumference (the perimeter of a circle)', expr: `C = 2πr = 2 × π × ${v('circleRadius')} = ${g('circumference')}` },
+          { label: 'Diameter', expr: `d = 2r = 2 × ${v('circleRadius')} = ${g('diameter')}` },
+        ];
+        break;
+      case 'rectangle':
+        if (g('rectArea')) {
+          const [l, w, R] = [v('rectLength'), v('rectWidth'), v('compRadius')];
+          steps = [
+            { label: 'Area of the rectangle', expr: `A = l × w = ${l} × ${w} = ${g('rectArea')}` },
+            { label: 'Area of the semicircle', expr: `A = ½πR² = ½ × π × ${R}² = ${g('semiArea')}` },
+            { label: 'Add the two areas', expr: `A = ${g('rectArea')} + ${g('semiArea')} = ${area}` },
+            {
+              label: 'Perimeter of the outline',
+              expr: `P = 2(l + w) − 2R + πR = 2(${l} + ${w}) − 2 × ${R} + π × ${R} = ${g('perimeter')}`,
+              note: 'The semicircle’s flat edge is inside the shape, so the outline loses 2R of rectangle edge and gains the curved half-circumference πR.',
+            },
+          ];
+        } else {
+          steps = [
+            { label: 'Area of a rectangle', expr: `A = l × w = ${v('rectLength')} × ${v('rectWidth')} = ${area}` },
+            { label: 'Perimeter of a rectangle', expr: `P = 2(l + w) = 2 × (${v('rectLength')} + ${v('rectWidth')}) = ${g('perimeter')}` },
+            { label: 'Diagonal (Pythagorean theorem)', expr: `d = √(l² + w²) = √(${v('rectLength')}² + ${v('rectWidth')}²) = ${g('diagonal')}` },
+          ];
+        }
+        break;
+      case 'square':
+        steps = [
+          { label: 'Area of a square', expr: `A = s² = ${v('squareSide')}² = ${area}` },
+          { label: 'Perimeter of a square', expr: `P = 4s = 4 × ${v('squareSide')} = ${g('perimeter')}` },
+          { label: 'Diagonal', expr: `d = s√2 = ${v('squareSide')} × √2 = ${g('diagonal')}` },
+        ];
+        break;
+      case 'triangle':
+        steps = [{ label: 'Area: half the base times the height', expr: `A = ½ × b × h = ½ × ${v('triBase')} × ${v('triHeight')} = ${area}` }];
+        if (g('perimeter')) {
+          steps.push({ label: 'Perimeter: add the three sides', expr: `P = b + a + c = ${v('triBase')} + ${v('triSide')} + ${v('triSide3')} = ${g('perimeter')}`, note: 'The height is not a side, so it is not part of the perimeter.' });
+        }
+        break;
+      case 'trapezoid':
+        steps = [
+          { label: 'Average the two parallel bases', expr: `m = (a + b) ÷ 2 = (${v('trapBase1')} + ${v('trapBase2')}) ÷ 2 = ${g('midsegment')}` },
+          { label: 'Multiply by the height', expr: `A = ½(a + b) × h = ½ × (${v('trapBase1')} + ${v('trapBase2')}) × ${v('trapHeight')} = ${area}` },
+        ];
+        break;
+      case 'parallelogram':
+        steps = [
+          { label: 'Area: base times the perpendicular height', expr: `A = b × h = ${v('paraBase')} × ${v('paraHeight')} = ${area}`, note: 'Use the straight-across height, not the sloping side.' },
+          { label: 'Perimeter: twice the base plus the sloping side', expr: `P = 2(b + a) = 2 × (${v('paraBase')} + ${v('paraSide')}) = ${g('perimeter')}` },
+        ];
+        break;
+      case 'hexagon':
+        steps = [
+          { label: 'Area of a regular hexagon', expr: `A = (3√3 ÷ 2) × s² = (3√3 ÷ 2) × ${v('hexSide')}² = ${area}` },
+          { label: 'Perimeter: six equal sides', expr: `P = 6s = 6 × ${v('hexSide')} = ${g('perimeter')}` },
+          { label: 'Apothem (centre to the middle of a side)', expr: `a = s√3 ÷ 2 = ${v('hexSide')} × √3 ÷ 2 = ${g('apothem')}` },
+        ];
+        break;
+      default:
+        return [];
+    }
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length || results[0].id === 'error') return null;
