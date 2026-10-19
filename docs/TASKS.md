@@ -20,7 +20,7 @@ crawled in August under the old client-rendered site, so the verdict predates th
 - [owner] A5 Click "Validate Fix" only after the fixes are deployed and every URL in the bucket is a 200 page
 - [x] A6 `?ND ?NA ?MA ?MD ?SA ?SD` are the host's directory-listing sort links (57 of the exported URLs) and `?expression={...}` is an unfilled template from an older build (22; the current build emits none). `.htaccess` now has `Options -Indexes` and 301s both shapes to the clean URL (79 of the 81 query URLs; real `?loanAmount=...` links untouched). Verify on the live host after deploy
 - [owner] A7 Cutover checklist in `DEPLOYMENT.md` (submit `sitemap-index.xml`, check `robots.txt`, `llms.txt`)
-- [ ] A8 After deploy: re-run the redirect checks against the live host (`/math/love-calculator/`, `/en/methodology/finance/loan-calculator/`, `/report/` should be 301, 301, 410) and compare indexed-page counts weekly
+- [x] A8 (2026-10-19: all redirects, 410, 404, sitemap 529, robots, canonical verified live; weekly indexed-count comparison continues) Re-run redirect checks against the live host (`/math/love-calculator/`, `/en/methodology/finance/loan-calculator/`, `/report/` should be 301, 301, 410) and compare indexed-page counts weekly
 
 ## B. Page and UI
 
