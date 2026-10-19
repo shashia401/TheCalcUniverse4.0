@@ -143,3 +143,33 @@ export function firstBuyingWinsYear(rows: RvbRow[]): number {
   const hit = rows.find((r) => r.netBuyCost < r.netRentCost);
   return hit ? hit.year : -1;
 }
+
+/**
+ * Finance-calculator form values -> model params + horizon (1..30 years), or null when the required
+ * inputs are blank/invalid. Shared by calculate() and explainSteps so both read the same numbers.
+ */
+export function rvbParamsFromFinanceValues(values: Record<string, string>): { params: RvbParams; years: number } | null {
+  const monthlyRent = parseFloat(values.monthlyRent);
+  const homePrice = parseFloat(values.homePrice);
+  const mortgageRate = parseFloat(values.mortgageRate) / 100;
+  if ([monthlyRent, homePrice, mortgageRate].some(isNaN) || homePrice <= 0 || monthlyRent <= 0) return null;
+  return {
+    years: Math.min(30, Math.max(1, Math.round(numOr(values.yearsToStay, 7)))),
+    params: {
+      monthlyRent,
+      rentIncrease: numOr(values.annualRentIncrease, 3) / 100,
+      rentersInsurance: numOr(values.rentersInsurance, 180),
+      homePrice,
+      downPaymentPct: Math.min(1, Math.max(0, numOr(values.downPaymentPct, 10) / 100)),
+      mortgageRate,
+      closingCostsPct: numOr(values.closingCostsPct, 3) / 100,
+      propertyTaxRate: numOr(values.propertyTaxRate, 1.2) / 100,
+      maintenancePct: numOr(values.maintenancePct, 1.5) / 100,
+      homeInsurancePct: numOr(values.homeInsurancePct, 0.5) / 100,
+      appreciation: numOr(values.homeAppreciationRate, 3) / 100,
+      sellingCostsPct: numOr(values.sellingCostsPct, 6) / 100,
+      pmiRate: numOr(values.pmiRate, 0.7) / 100,
+      investReturn: 0.07, // opportunity-cost rate
+    },
+  };
+}

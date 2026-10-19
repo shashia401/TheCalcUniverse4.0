@@ -1,7 +1,9 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import YouTubeRevenuePanel from './YouTubeRevenuePanel';
-import { NICHE_RANGES, DEFAULT_AD_RATE_PCT, DAYS_PER_YEAR, computeYouTube, nicheMidCpm } from './youtubeMath';
+import { NICHE_RANGES, DEFAULT_AD_RATE_PCT, DAYS_PER_YEAR, CREATOR_SHARE, computeYouTube, nicheMidCpm } from './youtubeMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const youtubeRevenueConfig: CalculatorConfig = {
   inputs: [
@@ -132,6 +134,32 @@ const youtubeRevenueConfig: CalculatorConfig = {
     return results;
   },
 
+  explainSteps: (values) => {
+    const dailyViews = parseFloat(values.dailyViews);
+    const nicheInfo = values.niche ? NICHE_RANGES[values.niche] : undefined;
+    const customCpm = values.cpm !== undefined && values.cpm !== '' ? parseFloat(values.cpm) : NaN;
+    const adRaw = values.adRate !== undefined && values.adRate !== '' ? parseFloat(values.adRate) : DEFAULT_AD_RATE_PCT;
+    if (!Number.isFinite(dailyViews) || dailyViews <= 0 || !nicheInfo) return [];
+    if (!Number.isFinite(adRaw) || adRaw < 0 || adRaw > 100) return [];
+    const ownCpm = Number.isFinite(customCpm) && customCpm > 0;
+    const cpm = ownCpm ? customCpm : nicheMidCpm(values.niche);
+    const f = computeYouTube(dailyViews, cpm, adRaw);
+    const m = (x: number) => `$${x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const n = (x: number) => x.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const rpm = `$${parseFloat(f.rpm.toFixed(4)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
+    const share = `${parseFloat((CREATOR_SHARE * 100).toFixed(2))}%`;
+    const ad = `${parseFloat(adRaw.toFixed(2))}%`;
+    const steps: ExplainStep[] = [
+      ownCpm
+        ? { label: 'CPM (your assumption)', expr: `${m(cpm)} per 1,000 ad views, as you entered it`, note: 'Not a published figure: real CPM varies with audience country, season and advertiser demand.' }
+        : { label: 'CPM (planning assumption)', expr: `${nicheInfo.label} planning range ${m(nicheInfo.min)} to ${m(nicheInfo.max)}, midpoint ${m(cpm)}`, note: 'You left CPM blank. This range is a rough assumption of this calculator, not a YouTube-published figure; enter your own CPM for a better estimate.' },
+      { label: 'RPM = share of views with an ad × CPM × creator share', expr: `${ad} × ${m(cpm)} × ${share} = ${rpm} per 1,000 views`, note: `The ${ad} of views showing an ad is your assumption (blank uses the calculator default); your real RPM is shown in YouTube Studio.` },
+      { label: 'Daily revenue = daily views ÷ 1,000 × RPM', expr: `${n(dailyViews)} ÷ 1,000 × ${rpm} = ${m(f.daily)}` },
+      { label: 'Yearly revenue = daily × days in a year', expr: `${m(f.daily)} × ${DAYS_PER_YEAR} = ${m(f.yearly)}` },
+      { label: 'Monthly revenue = yearly ÷ 12', expr: `${m(f.yearly)} ÷ 12 = ${m(f.monthly)}`, note: 'Ad revenue only; sponsorships, memberships and affiliate income are not included.' },
+    ];
+    return finiteSteps(steps);
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(YouTubeRevenuePanel, { values, results });

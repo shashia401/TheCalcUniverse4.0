@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SaaSltvCACPanel from './SaaSltvCACPanel';
-import { computeSaas } from './saasMath';
+import { computeSaas, MAX_LIFETIME_MONTHS } from './saasMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const saasLtvCacConfig: CalculatorConfig = {
   inputs: [
@@ -161,6 +163,33 @@ const saasLtvCacConfig: CalculatorConfig = {
       },
     ];
     return results;
+  },
+  explainSteps: (values) => {
+    const arpu = parseFloat(values.arpu);
+    const churnRate = parseFloat(values.monthlyChurnRate);
+    const marketingSpend = parseFloat(values.totalMarketingSpend);
+    const customers = parseFloat(values.newCustomersAcquired);
+    const grossMargin = values.grossMargin !== undefined && values.grossMargin !== '' ? parseFloat(values.grossMargin) : 80;
+    if (![arpu, churnRate, marketingSpend, customers, grossMargin].every(Number.isFinite) || arpu <= 0 || customers <= 0 || marketingSpend < 0 || churnRate < 0) return [];
+    const f = computeSaas(arpu, churnRate, marketingSpend, customers, grossMargin);
+    const m = (x: number) => `${x < 0 ? '-' : ''}$${Math.abs(x).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const n = (x: number) => x.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const mo = (x: number) => `${x.toFixed(1)} months`;
+    const marginText = `${parseFloat(grossMargin.toFixed(2))}%`;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Average customer lifetime = 1 ÷ monthly churn',
+        expr: f.lifetimeCapped
+          ? `${churnRate > 0 ? `1 ÷ ${parseFloat((churnRate / 100).toFixed(6))} would be longer than ${MAX_LIFETIME_MONTHS} months` : 'Churn is 0%'}, so lifetime is capped at ${mo(f.lifetimeMonths)}`
+          : `1 ÷ ${parseFloat((churnRate / 100).toFixed(6))} = ${mo(f.lifetimeMonths)}`,
+        note: `Lifetime is capped at ${MAX_LIFETIME_MONTHS} months (10 years) so a near-zero churn rate cannot give an unbounded LTV.`,
+      },
+      { label: 'LTV = ARPU × lifetime × gross margin', expr: `${m(arpu)} × ${f.lifetimeMonths.toFixed(1)} months × ${marginText} = ${m(f.ltv)}` },
+      { label: 'CAC = marketing spend ÷ new customers', expr: `${m(marketingSpend)} ÷ ${n(customers)} = ${m(f.cac)}` },
+    ];
+    if (Number.isFinite(f.ltvCacRatio)) steps.push({ label: 'LTV:CAC ratio', expr: `${m(f.ltv)} ÷ ${m(f.cac)} = ${f.ltvCacRatio.toFixed(2)}:1`, note: 'A lifetime projection: only as reliable as the churn and margin you entered.' });
+    if (Number.isFinite(f.paybackMonths)) steps.push({ label: 'CAC payback = CAC ÷ (ARPU × gross margin)', expr: `${m(f.cac)} ÷ (${m(arpu)} × ${marginText}) = ${mo(f.paybackMonths)}`, note: 'Months of gross profit from one customer needed to repay what it cost to win them.' });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

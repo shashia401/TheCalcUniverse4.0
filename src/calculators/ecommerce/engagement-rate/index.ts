@@ -2,6 +2,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import EngagementRatePanel from './EngagementRatePanel';
 import { computeEngagement } from './engagementMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const engagementRateConfig: CalculatorConfig = {
   inputs: [
@@ -146,6 +148,34 @@ const engagementRateConfig: CalculatorConfig = {
         color: 'neutral',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const platform = values.platform || 'instagram';
+    const followers = parseFloat(values.followers);
+    const likes = parseFloat(values.likes);
+    const comments = parseFloat(values.comments);
+    const shares = Math.max(0, parseFloat(values.shares) || 0);
+    const saves = Math.max(0, parseFloat(values.saves) || 0);
+    if (!Number.isFinite(followers) || followers <= 0) return [];
+    if (!Number.isFinite(likes) || likes < 0) return [];
+    if (!Number.isFinite(comments) || comments < 0) return [];
+    const { totalEngagements, ratePct } = computeEngagement(platform, followers, likes, comments, shares, saves);
+    const n = (x: number) => x.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const ignoreSaves = platform === 'x';
+    const parts = [`${n(likes)} likes`, `${n(comments)} comments`, `${n(shares)} shares`, ...(ignoreSaves ? [] : [`${n(saves)} saves`])];
+    const steps: ExplainStep[] = [
+      {
+        label: 'Add up the engagements',
+        expr: `${parts.join(' + ')} = ${n(totalEngagements)}`,
+        note: ignoreSaves ? 'X does not show public saves, so they are left out.' : undefined,
+      },
+      {
+        label: 'Engagement rate = engagements ÷ followers × 100',
+        expr: `${n(totalEngagements)} ÷ ${n(followers)} × 100 = ${(Math.round(ratePct * 100) / 100).toFixed(2)}%`,
+        note: 'Compare with accounts of a similar size and niche; what counts as good varies by platform.',
+      },
+    ];
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

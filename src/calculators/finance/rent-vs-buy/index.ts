@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import RentVsBuyPanel from './RentVsBuyPanel';
-import { numOr, simulateRentVsBuy, firstBuyingWinsYear, RvbParams } from './model';
+import { simulateRentVsBuy, firstBuyingWinsYear, rvbParamsFromFinanceValues } from './model';
+import { monthlyPayment } from './utils';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -170,28 +172,10 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
 
   calculate: (values) => {
     // Blank -> default; an explicit 0 is respected (0% appreciation, fixed rent, no PMI ...).
-    const monthlyRent = parseFloat(values.monthlyRent);
-    const homePrice = parseFloat(values.homePrice);
-    const mortgageRate = parseFloat(values.mortgageRate) / 100;
-    if ([monthlyRent, homePrice, mortgageRate].some(isNaN) || homePrice <= 0 || monthlyRent <= 0) return [];
-
-    const params: RvbParams = {
-      monthlyRent,
-      rentIncrease: numOr(values.annualRentIncrease, 3) / 100,
-      rentersInsurance: numOr(values.rentersInsurance, 180),
-      homePrice,
-      downPaymentPct: Math.min(1, Math.max(0, numOr(values.downPaymentPct, 10) / 100)),
-      mortgageRate,
-      closingCostsPct: numOr(values.closingCostsPct, 3) / 100,
-      propertyTaxRate: numOr(values.propertyTaxRate, 1.2) / 100,
-      maintenancePct: numOr(values.maintenancePct, 1.5) / 100,
-      homeInsurancePct: numOr(values.homeInsurancePct, 0.5) / 100,
-      appreciation: numOr(values.homeAppreciationRate, 3) / 100,
-      sellingCostsPct: numOr(values.sellingCostsPct, 6) / 100,
-      pmiRate: numOr(values.pmiRate, 0.7) / 100,
-      investReturn: 0.07, // opportunity-cost rate
-    };
-    const yearsToStay = Math.min(30, Math.max(1, Math.round(numOr(values.yearsToStay, 7))));
+    const parsed = rvbParamsFromFinanceValues(values);
+    if (!parsed) return [];
+    const { params, years: yearsToStay } = parsed;
+    const { monthlyRent, homePrice, mortgageRate } = params;
 
     const rows = simulateRentVsBuy(params);
     const downPayment = homePrice * params.downPaymentPct;
@@ -311,6 +295,45 @@ const rentVsBuyFinanceConfig: CalculatorConfig = {
         }),
       },
     ];
+  },
+
+  explainSteps: (values) => {
+    const parsed = rvbParamsFromFinanceValues(values);
+    if (!parsed) return [];
+    const { params: p, years } = parsed;
+    const rows = simulateRentVsBuy(p);
+    const at = rows[years - 1];
+    if (!at) return [];
+    const upfront = p.homePrice * (p.downPaymentPct + p.closingCostsPct);
+    const loanAmount = p.homePrice * (1 - p.downPaymentPct);
+    const mp = monthlyPayment(loanAmount, p.mortgageRate, 360);
+    const d = (n: number) => {
+      const r = Math.round(n);
+      return `${r < 0 ? '-' : ''}$${Math.abs(r).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    };
+    const pc = (x: number) => `${parseFloat((x * 100).toFixed(2))}%`;
+    const yl = (n: number) => `${n} ${n === 1 ? 'year' : 'years'}`;
+    const buyOutlay = upfront + at.mortgagePaid + at.taxPaid + at.insurancePaid + at.maintenancePaid + at.pmiPaid;
+    const buyWins = at.netBuyCost < at.netRentCost;
+    const diff = Math.abs(at.netRentCost - at.netBuyCost);
+    const be = firstBuyingWinsYear(rows);
+    const yr = (r: (typeof rows)[number]) => `year ${r.year}: buy ${d(r.netBuyCost)} vs rent ${d(r.netRentCost)}`;
+    const breakEvenExpr =
+      be === -1
+        ? `${yr(rows[29])}, and buying is never the cheaper option in any of the 30 simulated years`
+        : be === 1
+          ? `${yr(rows[0])}, so buying is already cheaper after the first year`
+          : `${yr(rows[be - 2])} (renting cheaper), then ${yr(rows[be - 1])} (buying cheaper), so the break-even is year ${be}`;
+    return finiteSteps([
+      { label: 'Cash needed to buy on day one', expr: `${d(p.homePrice)} × (${pc(p.downPaymentPct)} down + ${pc(p.closingCostsPct)} closing) = ${d(upfront)}` },
+      { label: 'Monthly mortgage payment (30-year fixed)', expr: `${d(loanAmount)} at ${pc(p.mortgageRate)} = ${d(mp)}/month` },
+      { label: `Home value and equity after ${yl(years)}`, expr: `${d(p.homePrice)} × (1 + ${pc(p.appreciation)})^${years} = ${d(at.homeValue)}; minus the remaining loan ${d(at.loanBalance)} = ${d(at.equity)} equity` },
+      { label: 'Net sale proceeds if you sold then', expr: `${d(at.homeValue)} × (1 − ${pc(p.sellingCostsPct)} selling costs) − ${d(at.loanBalance)} = ${d(at.saleProceeds)}` },
+      { label: `Net cost of buying over ${yl(years)}`, expr: `${d(upfront)} up front + ${d(at.mortgagePaid)} mortgage + ${d(at.taxPaid)} tax + ${d(at.insurancePaid)} insurance + ${d(at.maintenancePaid)} upkeep + ${d(at.pmiPaid)} PMI − ${d(at.saleProceeds)} proceeds = ${d(buyOutlay - at.saleProceeds)}` },
+      { label: `Net cost of renting over ${yl(years)}`, expr: `${d(at.rentOnly)} rent (rising ${pc(p.rentIncrease)} a year) + ${d(at.rentersInsurancePaid)} renters insurance − ${d(at.investmentGain)} growth on the ${d(upfront)} not spent (at ${pc(p.investReturn)}) = ${d(at.netRentCost)}` },
+      { label: `Compare at ${yl(years)}`, expr: `${d(at.netBuyCost)} (buy) vs ${d(at.netRentCost)} (rent): ${buyWins ? 'buying' : 'renting'} comes out ${d(diff)} cheaper` },
+      { label: 'Break-even year', expr: breakEvenExpr, note: 'Uses the shared rent-vs-buy model with its stated simplifications; the first year in which total net cost of buying drops below renting.' },
+    ]);
   },
 
   extraPanel: (values, results) => {
