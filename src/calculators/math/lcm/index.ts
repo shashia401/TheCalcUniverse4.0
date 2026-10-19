@@ -31,6 +31,30 @@ const lcmConfig: CalculatorConfig = {
       ...(nums.length > 2 ? [{ id: 'lcmSteps', label: 'Chained steps', value: steps.join(' | ') }] : []),
     ];
   },
+  explainSteps: (values) => {
+    const parsed = parseLcmInput(values.numbers);
+    if (parsed.kind !== 'ok') return [];
+    const { nums } = parsed;
+    const { gcd, steps } = analyzeLcm(nums);
+    const chain = steps.map((s) => s.replace(' / ', ' ÷ '));
+    const head = { label: 'Use LCM(a, b) = (a × b) ÷ GCD(a, b)', expr: `LCM(${nums.length > 6 ? `${nums.slice(0, 6).join(', ')}, …` : nums.join(', ')})` };
+    if (nums.length === 2) {
+      return [
+        head,
+        { label: 'Find the GCD', expr: `GCD(${nums[0]}, ${nums[1]}) = ${gcd}` },
+        { label: 'Multiply, then divide by the GCD', expr: chain[0] },
+      ];
+    }
+    const shown =
+      chain.length <= 4
+        ? chain.map((expr, i) => ({ label: `Combine ${i === 0 ? `${nums[0]} and ${nums[1]}` : `the result with ${nums[i + 1]}`}`, expr }))
+        : [
+            { label: `Combine ${nums[0]} and ${nums[1]}`, expr: chain[0] },
+            { label: 'Keep combining the remaining numbers the same way', expr: `… ${chain.length - 2} more pairwise steps …` },
+            { label: `Combine the result with ${nums[nums.length - 1]}`, expr: chain[chain.length - 1] },
+          ];
+    return [head, ...shown];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(LCMPanel, { values, results });

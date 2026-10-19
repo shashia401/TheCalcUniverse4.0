@@ -35,6 +35,22 @@ const averageConfig: CalculatorConfig = {
       { id: '_data', label: '', value: JSON.stringify({ values: data.map((d) => d.toNumber()), mean: s.mean.toNumber(), median: s.median.toNumber() }) },
     ];
   },
+  explainSteps: (values) => {
+    const { values: data } = parseDataset(values.data);
+    if (data.length < 1) return [];
+    const s = summarize(data);
+    const shown = data.map((d) => (d.isNegative() ? `(${fmtDec(d)})` : fmtDec(d)));
+    const terms = shown.length <= 8 ? shown.join(' + ') : `${shown.slice(0, 3).join(' + ')} + … + ${shown[shown.length - 1]}`;
+    return [
+      { label: 'Add up all the values', expr: `${terms} = ${fmtDec(s.sum, 20)}` },
+      { label: 'Count the values', expr: `n = ${s.n}` },
+      {
+        label: 'Divide the sum by the count',
+        expr: `${fmtDec(s.sum, 20)} ÷ ${s.n} = ${fmtDec(s.mean)}`,
+        note: 'The mean is pulled toward extreme values; compare it with the median to spot outliers.',
+      },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(AveragePanel, { values, results });

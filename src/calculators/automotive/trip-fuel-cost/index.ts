@@ -1,4 +1,4 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import { tripFuel } from './tripMath';
 import { createElement } from 'react';
 import TripFuelCostPanel from './TripFuelCostPanel';
@@ -112,6 +112,55 @@ const tripFuelCostConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(TripFuelCostPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const t = tripFuel(values);
+    if (!t || 'error' in t) return [];
+    if (![parseFloat(values.distance), parseFloat(values.fuelEfficiency), parseFloat(values.fuelPrice)].every(Number.isFinite)) return [];
+    if (![t.distanceMiles, t.distanceKm, t.fuelAmount, t.totalCost, t.costPerPerson, t.passengers].every(Number.isFinite)) return [];
+
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // three decimals on the fuel amount so that amount × price visibly matches the total
+    const fmt3 = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+    const distance = parseFloat(values.distance);
+    const efficiency = parseFloat(values.fuelEfficiency);
+    const price = parseFloat(values.fuelPrice);
+    const kmIn = values.distanceUnit === 'km';
+    const unit = t.metric ? 'liters' : 'gallons';
+
+    // Distance in the same system as the efficiency figure
+    const distStep: ExplainStep = t.metric
+      ? {
+          label: 'Put the distance in kilometers',
+          expr: kmIn ? `Distance = ${fmt(t.distanceKm)} km` : `${fmt(distance)} miles × 1.609344 = ${fmt(t.distanceKm)} km`,
+        }
+      : {
+          label: 'Put the distance in miles',
+          expr: kmIn ? `${fmt(distance)} km ÷ 1.609344 = ${fmt(t.distanceMiles)} miles` : `Distance = ${fmt(t.distanceMiles)} miles`,
+        };
+
+    return [
+      distStep,
+      {
+        label: `Work out the ${unit} of fuel needed`,
+        expr: t.metric
+          ? `${fmt(t.distanceKm)} km × ${efficiency} L/100km ÷ 100 = ${fmt3(t.fuelAmount)} liters`
+          : `${fmt(t.distanceMiles)} miles ÷ ${efficiency} MPG = ${fmt3(t.fuelAmount)} gallons`,
+        note: t.metric
+          ? 'With L/100km the fuel price is taken per liter.'
+          : 'With MPG the fuel price is taken per US gallon.',
+      },
+      {
+        label: 'Multiply by the fuel price',
+        expr: `${fmt3(t.fuelAmount)} ${unit} × $${fmt(price)} per ${t.metric ? 'liter' : 'gallon'} = $${fmt(t.totalCost)}`,
+      },
+      {
+        label: 'Split the cost between everyone in the vehicle',
+        expr: `$${fmt(t.totalCost)} ÷ ${t.passengers} ${t.passengers === 1 ? 'person' : 'people'} = $${fmt(t.costPerPerson)} each`,
+      },
+    ];
   },
   educational: {
     formula: 'Fuel Cost = (Distance ÷ MPG) × Price per Gallon  |  or  (Distance in km × L/100km ÷ 100) × Price per Liter',

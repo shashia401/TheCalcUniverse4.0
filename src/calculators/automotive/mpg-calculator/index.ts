@@ -1,8 +1,8 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import MPGPanel from './MPGPanel';
 import { fixed2 as fmt } from '../../../lib/format';
-import { mpgCalc } from './mpgMath';
+import { mpgCalc, MPG_TO_L100KM, PRACTICAL_TANK_FRACTION } from './mpgMath';
 
 const mpgCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -110,6 +110,57 @@ const mpgCalculatorConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(MPGPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const c = mpgCalc(values);
+    if (!c || c.error) return [];
+    if (![c.mpg, c.l100km, c.kpl, c.tripCost, c.gallons, c.costPerMile, c.range, c.usable].every((x) => x === undefined || Number.isFinite(x))) return [];
+    const factor = MPG_TO_L100KM.toFixed(4);
+    const unitsStep = (mpg: number, l100: number, kpl: number): ExplainStep => ({
+      label: 'Your result in every unit',
+      expr: `${fmt(mpg)} MPG = ${fmt(l100)} L/100km = ${fmt(kpl)} km/L`,
+    });
+
+    if (c.mode === 'mpg') {
+      const miles = parseFloat(values.milesDriven);
+      const gal = parseFloat(values.gallonsUsed);
+      return [
+        { label: 'Divide miles driven by gallons used', expr: `MPG = ${miles} miles ÷ ${gal} gallons = ${fmt(c.mpg!)} MPG` },
+        {
+          label: 'Convert to liters per 100 km',
+          expr: `L/100km = ${factor} ÷ ${fmt(c.mpg!)} = ${fmt(c.l100km!)} L/100km`,
+          note: `${factor} = 100 × 3.785411784 liters per US gallon ÷ 1.609344 km per mile.`,
+        },
+        { label: 'Convert to kilometers per liter', expr: `km/L = ${fmt(c.mpg!)} × 1.609344 ÷ 3.785411784 = ${fmt(c.kpl!)} km/L` },
+        unitsStep(c.mpg!, c.l100km!, c.kpl!),
+      ];
+    }
+    if (c.mode === 'tripcost') {
+      const miles = parseFloat(values.milesDriven);
+      const mpg = parseFloat(values.mpg);
+      const price = parseFloat(values.fuelPrice);
+      return [
+        { label: 'Gallons the trip needs', expr: `${miles} miles ÷ ${mpg} MPG = ${c.gallons!.toFixed(3)} gallons` },
+        { label: 'Multiply by the fuel price', expr: `${c.gallons!.toFixed(3)} gallons × $${fmt(price)}/gallon = $${fmt(c.tripCost!)}` },
+        { label: 'Spread it over the miles', expr: `$${fmt(c.tripCost!)} trip cost ÷ ${miles} miles = $${fmt(c.costPerMile!)}/mile` },
+      ];
+    }
+    if (c.mode === 'range') {
+      const tank = parseFloat(values.tankSize);
+      const mpg = parseFloat(values.mpg);
+      return [
+        { label: 'Multiply tank size by fuel economy', expr: `${tank} gallons × ${mpg} MPG = ${fmt(c.range!)} miles on a full tank` },
+        { label: 'Keep 10% of the tank in reserve', expr: `${tank} × 0.9 = ${fmt(tank * PRACTICAL_TANK_FRACTION)} gallons usable`, note: 'The practical range figure assumes you refuel with 10% of the tank left.' },
+        { label: 'Practical range', expr: `${fmt(tank * PRACTICAL_TANK_FRACTION)} gallons × ${mpg} MPG = ${fmt(c.usable!)} miles (full tank: ${fmt(c.range!)} miles)` },
+      ];
+    }
+    const mpg = parseFloat(values.mpg);
+    return [
+      { label: 'Build the conversion factor', expr: `100 × 3.785411784 L ÷ 1.609344 km = ${factor}`, note: 'One US gallon is 3.785411784 liters and one mile is 1.609344 km.' },
+      { label: 'Divide by your MPG', expr: `L/100km = ${factor} ÷ ${mpg} = ${fmt(c.l100km!)} L/100km` },
+      { label: 'Convert to kilometers per liter', expr: `km/L = ${mpg} × 1.609344 ÷ 3.785411784 = ${fmt(c.kpl!)} km/L` },
+      unitsStep(c.mpg!, c.l100km!, c.kpl!),
+    ];
   },
   educational: {
     formula: 'MPG = Miles Driven ÷ Gallons Used | L/100km = 235.215 ÷ MPG',

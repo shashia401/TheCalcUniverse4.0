@@ -1,7 +1,7 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import EtsyFeesPanel from './EtsyFeesPanel';
-import { computeEtsy } from './etsyMath';
+import { LISTING_FEE, OFFSITE_AD_RATES, PAYMENT_FIXED, PAYMENT_RATE, TRANSACTION_RATE, computeEtsy } from './etsyMath';
 
 const etsyFeesConfig: CalculatorConfig = {
   inputs: [
@@ -143,6 +143,61 @@ const etsyFeesConfig: CalculatorConfig = {
     return createElement(EtsyFeesPanel, { values, results });
   },
 
+  explainSteps: (values) => {
+    const itemPrice = parseFloat(values.itemPrice);
+    const shippingCharged = parseFloat(values.shippingCharged || '0');
+    const materialCost = parseFloat(values.materialCost || '0');
+    const shippingCost = parseFloat(values.shippingCost || '0');
+    if (![itemPrice, shippingCharged, materialCost, shippingCost].every(Number.isFinite) || itemPrice <= 0) return [];
+    if (shippingCharged < 0 || materialCost < 0 || shippingCost < 0) return [];
+
+    const f = computeEtsy(itemPrice, shippingCharged, materialCost, shippingCost, values.offsiteAds);
+    if (!f || ![f.totalSale, f.totalFees, f.netProfit, f.marginPct].every(Number.isFinite)) return [];
+
+    // same half-up-to-the-cent display as the results above
+    const fmt = (n: number) =>
+      (Math.round((n + (n < 0 ? -1e-9 : 1e-9)) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const $ = (n: number) => `$${fmt(n)}`;
+    const pct = (r: number) => `${parseFloat((r * 100).toFixed(2))}%`;
+    const ad = OFFSITE_AD_RATES[values.offsiteAds];
+
+    const steps: ExplainStep[] = [
+      { label: 'Add shipping to the item price', expr: `${$(itemPrice)} + ${$(shippingCharged)} = ${$(f.totalSale)} total sale` },
+      {
+        label: 'Transaction fee on the item and on shipping',
+        expr: `${$(itemPrice)} × ${pct(TRANSACTION_RATE)} = ${$(f.transactionFee)}; ${$(shippingCharged)} × ${pct(TRANSACTION_RATE)} = ${$(f.shippingFee)}`,
+        note: 'These are the fee rates built into this calculator; check Etsy\'s current fee schedule before you price, since Etsy can change it.',
+      },
+      {
+        label: 'Payment processing fee on the order total',
+        expr: `${$(f.totalSale)} × ${pct(PAYMENT_RATE)} + ${$(PAYMENT_FIXED)} = ${$(f.paymentFee)}`,
+      },
+    ];
+    if (ad && ad.rate > 0) {
+      steps.push({
+        label: 'Offsite Ads fee',
+        expr: `${$(f.totalSale)} × ${pct(ad.rate)} = ${$(f.offsiteAdsFee)}`,
+        note: 'The calculator charges this only because you answered Yes to Offsite Ads.',
+      });
+    }
+    const r2 = (n: number) => Math.round((n + (n < 0 ? -1e-9 : 1e-9)) * 100) / 100;
+    const handNet = r2(f.totalSale - materialCost - shippingCost - r2(f.totalFees));
+    const parts = [LISTING_FEE, f.transactionFee, f.shippingFee, f.paymentFee, ...(ad && ad.rate > 0 ? [f.offsiteAdsFee] : [])];
+    const shownSum = parts.reduce((a, x) => a + Math.round((x + 1e-9) * 100) / 100, 0);
+    steps.push(
+      {
+        label: 'Add up all the fees, including the listing fee',
+        expr: `${parts.map($).join(' + ')} = ${$(f.totalFees)}`,
+        note: Math.abs(shownSum - f.totalFees) > 0.0049 ? 'Each line is rounded to the cent for display, so the lines can add to a cent more or less than the total.' : undefined,
+      },
+      {
+        label: 'Subtract your costs and the fees from the sale',
+        expr: `${$(f.totalSale)} − ${$(materialCost)} materials − ${$(shippingCost)} postage − ${$(f.totalFees)} fees = ${$(f.netProfit)} (${(Math.round(f.marginPct * 10) / 10).toFixed(1)}% of the sale)`,
+        note: Math.abs(handNet - r2(f.netProfit)) > 0.0049 ? 'The fees above are rounded to the cent for display, so doing this subtraction by hand can land a cent away from the exact result.' : undefined,
+      },
+    );
+    return steps;
+  },
   educational: {
     formula: 'Net Profit = Price + Shipping Charged − Materials − Your Postage − (Listing + Transaction + Payment + Ads + Shipping Transaction Fees)',
     formulaSource: 'US fee rates as reported in 2026 fee guides (listing $0.20, transaction 6.5% of item + shipping, payment processing 3% + $0.25, Offsite Ads 12% / 15%). Etsy\'s own fee page could not be fetched automatically, so confirm current rates at etsy.com/legal/fees.',

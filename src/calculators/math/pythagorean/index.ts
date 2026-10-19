@@ -86,6 +86,29 @@ const pythagoreanConfig: CalculatorConfig = {
     if (!results.length) return null;
     return createElement(PythagoreanPanel, { values, results });
   },
+  explainSteps: (values) => {
+    const r = solveRightTriangle(values.mode, values.a, values.b, values.c);
+    if (r.kind !== 'ok') return [];
+    const { mode, a, b, c } = r.t;
+    if (mode === 'hypotenuse') {
+      return [
+        { label: 'Square each leg', expr: `a² + b² = ${fmt(a)}² + ${fmt(b)}² = ${fmt(a * a)} + ${fmt(b * b)}` },
+        { label: 'Add the squares', expr: `c² = ${fmt(a * a)} + ${fmt(b * b)} = ${fmt(a * a + b * b)}`, note: 'a² + b² = c² holds only in a right triangle.' },
+        { label: 'Take the square root', expr: `c = √${fmt(a * a + b * b)} = ${fmt(c)}` },
+      ];
+    }
+    const [miss, known, other] = mode === 'leg_a' ? (['a', 'b', a] as const) : (['b', 'a', b] as const);
+    const leg = mode === 'leg_a' ? b : a;
+    return [
+      {
+        label: `Rearrange for leg ${miss}`,
+        expr: `${miss}² = c² − ${known}² = ${fmt(c)}² − ${fmt(leg)}² = (${fmt(c)} − ${fmt(leg)})(${fmt(c)} + ${fmt(leg)})`,
+        note: 'Written as a product (difference of squares) so no precision is lost when c is close to the known leg.',
+      },
+      { label: 'Multiply it out', expr: `${miss}² = ${fmt(c - leg)} × ${fmt(c + leg)} = ${fmt((c - leg) * (c + leg))}` },
+      { label: 'Take the square root', expr: `${miss} = √${fmt((c - leg) * (c + leg))} = ${fmt(other)}` },
+    ];
+  },
   educational: {
     formula: 'a² + b² = c²  →  c = √(a² + b²),  a = √(c² − b²),  b = √(c² − a²)',
     formulaDescription:

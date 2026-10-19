@@ -1,4 +1,4 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import ROASPanel from './ROASPanel';
 import { computeRoas } from './roasMath';
@@ -112,6 +112,51 @@ const roasConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(ROASPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const adSpend = parseFloat(values.adSpend);
+    const revenue = parseFloat(values.revenue);
+    const grossMarginPct = parseFloat(values.grossMargin);
+    if (![adSpend, revenue].every(Number.isFinite) || adSpend <= 0 || revenue < 0) return [];
+
+    const orders = parseFloat(values.orders);
+    const f = computeRoas(adSpend, revenue, grossMarginPct, orders);
+    if (![f.roas, f.revenueMinusSpend].every(Number.isFinite)) return [];
+
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const $ = (n: number) => `$${fmt(n)}`;
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Divide revenue by ad spend',
+        expr: `ROAS = ${$(revenue)} ÷ ${$(adSpend)} = ${f.roas.toFixed(2)}x`,
+        note: 'ROAS is revenue, not profit: it does not subtract the cost of the goods you sold.',
+      },
+      {
+        label: 'Read it per dollar',
+        expr: `${f.roas.toFixed(2)}x means ${$(f.roas)} of revenue for every $1.00 spent on ads`,
+      },
+    ];
+    if (f.cpa !== null) {
+      steps.push({ label: 'Cost per order', expr: `${$(adSpend)} ÷ ${orders.toLocaleString()} orders = ${$(f.cpa)}` });
+    }
+    steps.push({ label: 'Revenue minus ad spend', expr: `${$(revenue)} − ${$(adSpend)} = ${$(f.revenueMinusSpend)}` });
+    if (f.breakEvenRoas !== null && f.profitAfterAds !== null && Number.isFinite(f.profitAfterAds)) {
+      const verdict = f.status === 'above' ? 'above break-even, so the ads cover their cost' : f.status === 'at' ? 'at break-even' : 'below break-even, so the ads do not cover their cost';
+      steps.push(
+        {
+          label: 'Find the break-even ROAS for your margin',
+          expr: `1 ÷ (${grossMarginPct}% ÷ 100) = ${f.breakEvenRoas.toFixed(2)}x; your ${f.roas.toFixed(2)}x is ${verdict}`,
+          note: 'At break-even ROAS the gross profit on the ad revenue exactly repays the ad spend.',
+        },
+        {
+          label: 'Gross profit after ad spend',
+          expr: `${$(revenue)} × ${grossMarginPct}% − ${$(adSpend)} = ${$(f.profitAfterAds)}`,
+        },
+      );
+    }
+    return steps;
   },
   educational: {
     formula: 'ROAS = Revenue from Ads ÷ Ad Spend | Break-Even ROAS = 1 ÷ Gross Margin %',

@@ -77,6 +77,29 @@ const standardDeviationConfig: CalculatorConfig = {
       },
     ];
   },
+  explainSteps: (values) => {
+    const { values: nums } = parseDataset(values.dataSet);
+    if (nums.length < 2) return [];
+    const s = summarize(nums);
+    const isSample = values.population !== 'population';
+    const variance = isSample ? s.varianceSample! : s.variancePop;
+    const stdDev = isSample ? s.sdSample! : s.sdPop;
+    const divisor = isSample ? s.n - 1 : s.n;
+    const dev = nums.map((v) => `(${fmtDec(v)} − ${fmtDec(s.mean)})²`);
+    const devText = dev.length <= 4 ? dev.join(' + ') : `${dev.slice(0, 2).join(' + ')} + … + ${dev[dev.length - 1]}`;
+    return [
+      { label: 'Find the mean', expr: `x̄ = ${fmtDec(s.sum, 20)} ÷ ${s.n} = ${fmtDec(s.mean)}` },
+      { label: 'Add the squared distances from the mean', expr: `${devText} = ${fmtDec(s.ss, 20)}` },
+      {
+        label: isSample ? 'Divide by n − 1 (sample)' : 'Divide by n (population)',
+        expr: `${fmtDec(s.ss, 20)} ÷ ${divisor} = ${fmtDec(variance)}`,
+        note: isSample
+          ? "Dividing by n − 1 (Bessel's correction) makes the sample variance an unbiased estimate of the population variance."
+          : 'Use n only when your data is the whole population, not a sample of it.',
+      },
+      { label: 'Take the square root', expr: `${isSample ? 's' : 'σ'} = √${fmtDec(variance)} = ${fmtDec(stdDev)}` },
+    ];
+  },
   educational: {
     formula: 'σ = √[Σ(xᵢ − μ)² / N] | s = √[Σ(xᵢ − x̄)² / (n−1)]',
     formulaDescription:

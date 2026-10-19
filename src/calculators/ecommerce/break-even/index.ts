@@ -1,4 +1,4 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import BreakEvenPanel from './BreakEvenPanel';
 import { computeBreakEven } from './breakEvenMath';
@@ -90,6 +90,44 @@ const breakEvenConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(BreakEvenPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const fixedCosts = parseFloat(values.fixedCosts);
+    const price = parseFloat(values.pricePerUnit);
+    const variableCost = parseFloat(values.variableCostPerUnit);
+    if (![fixedCosts, price, variableCost].every(Number.isFinite) || price <= 0 || fixedCosts < 0 || variableCost < 0) return [];
+
+    const be = computeBreakEven(fixedCosts, price, variableCost);
+    if (!be || ![be.units, be.revenue, be.contributionMargin, be.contributionMarginPct].every(Number.isFinite)) return [];
+
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const $ = (n: number) => `$${fmt(n)}`;
+
+    return [
+      {
+        label: 'Contribution margin per unit',
+        expr: `${$(price)} − ${$(variableCost)} = ${$(be.contributionMargin)}`,
+        note: 'Each sale keeps this much after its own variable cost, and it goes toward your fixed costs.',
+      },
+      {
+        label: 'Contribution margin as a share of price',
+        expr: `${$(be.contributionMargin)} ÷ ${$(price)} = ${be.contributionMarginPct.toFixed(1)}%`,
+      },
+      {
+        label: 'Units needed to cover the fixed costs',
+        expr: `${$(fixedCosts)} ÷ ${$(be.contributionMargin)} = ${fmt(be.units)} units`,
+      },
+      {
+        label: 'Break-even revenue',
+        expr: `${$(fixedCosts)} ÷ ${$(be.contributionMargin)} × ${$(price)} = ${$(be.revenue)}`,
+      },
+      {
+        label: 'Round up to whole units',
+        expr: `${fmt(be.units)} → ${be.unitsCeil.toLocaleString(undefined)} units`,
+        note: 'You cannot sell part of a unit, so the break-even figure is rounded up.',
+      },
+    ];
   },
   educational: {
     formula: 'Break-Even Units = Fixed Costs ÷ (Price per Unit − Variable Cost per Unit)',

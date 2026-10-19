@@ -1,8 +1,20 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import RatioPanel from './RatioPanel';
 import { fmtExact as fmt, parseSlot, ratioOf, solveProportion } from '../proportion-calculator/proportionMath';
 import { ASPECT_PRESETS, simplifyRatio } from './ratioMath';
+import { gcdBig, lcmBig, mulFrac } from '../../../utils/rational';
+
+/** A and B as exact fractions (a preset fills them when both are blank), or null when unusable. */
+function readPair(values: Record<string, string>) {
+  const preset = ASPECT_PRESETS[values.preset ?? ''];
+  const usePreset = !!preset && !(values.a ?? '').trim() && !(values.b ?? '').trim();
+  const sa = usePreset ? { n: BigInt(preset.a), d: 1n } : parseSlot(values.a);
+  const sb = usePreset ? { n: BigInt(preset.b), d: 1n } : parseSlot(values.b);
+  if (!sa || !sb || sa === 'bad' || sb === 'bad') return null;
+  if (sa.n <= 0n || sb.n <= 0n) return null;
+  return { sa, sb };
+}
 
 const ratioConfig: CalculatorConfig = {
   inputs: [
@@ -63,12 +75,9 @@ const ratioConfig: CalculatorConfig = {
   ],
   calculate: (values): CalculatorResult[] => {
     // A preset fills A : B when both are left blank (the preset field used to have no effect on the maths).
-    const preset = ASPECT_PRESETS[values.preset ?? ''];
-    const usePreset = !!preset && !(values.a ?? '').trim() && !(values.b ?? '').trim();
-    const sa = usePreset ? { n: BigInt(preset.a), d: 1n } : parseSlot(values.a);
-    const sb = usePreset ? { n: BigInt(preset.b), d: 1n } : parseSlot(values.b);
-    if (!sa || !sb || sa === 'bad' || sb === 'bad') return [];
-    if (sa.n <= 0n || sb.n <= 0n) return [];
+    const pair = readPair(values);
+    if (!pair) return [];
+    const { sa, sb } = pair;
 
     const [ra, rb] = simplifyRatio(sa, sb);
     const ratio = ratioOf(sa, sb);
@@ -108,6 +117,48 @@ const ratioConfig: CalculatorConfig = {
       { id: 'fraction', label: 'As Fraction', value: `${fmt(sa)} / ${fmt(sb)}`, color: 'neutral' },
       ...proportionRows,
     ];
+  },
+  explainSteps: (values) => {
+    const pair = readPair(values);
+    if (!pair) return [];
+    const { sa, sb } = pair;
+    const [ra, rb] = simplifyRatio(sa, sb);
+    const l = lcmBig(sa.d, sb.d);
+    const ia = sa.n * (l / sa.d);
+    const ib = sb.n * (l / sb.d);
+    const g = gcdBig(ia, ib) || 1n;
+    const steps: ExplainStep[] = [
+      { label: 'Write the ratio with whole numbers', expr: l === 1n ? `${ia} : ${ib}` : `${fmt(sa)} : ${fmt(sb)}  ×  ${l}  =  ${ia} : ${ib}` },
+      { label: 'Find the greatest common divisor', expr: `GCD(${ia}, ${ib}) = ${g}` },
+      {
+        label: 'Divide both sides by it',
+        expr: `${ia} ÷ ${g} : ${ib} ÷ ${g} = ${ra} : ${rb}`,
+        ...(g === 1n ? { note: 'A GCD of 1 means the ratio is already in lowest terms.' } : {}),
+      },
+    ];
+    const prop = solveProportion({ a: sa, b: sb, c: parseSlot(values.c), d: parseSlot(values.d) });
+    if (prop.kind === 'solved') {
+      const { c, d } = prop.full;
+      const m = prop.missing;
+      steps.push(
+        { label: 'Set up A : B = C : D as fractions', expr: `${fmt(sa)} / ${fmt(sb)} = ${m === 'c' ? 'C' : fmt(c)} / ${m === 'd' ? 'D' : fmt(d)}` },
+        {
+          label: `Cross-multiply and solve for ${m.toUpperCase()}`,
+          expr: m === 'd'
+            ? `D = (B × C) ÷ A = (${fmt(sb)} × ${fmt(c)}) ÷ ${fmt(sa)} = ${fmt(d)}`
+            : `C = (A × D) ÷ B = (${fmt(sa)} × ${fmt(d)}) ÷ ${fmt(sb)} = ${fmt(c)}`,
+        },
+      );
+    } else if (prop.kind === 'check') {
+      const { c, d } = prop.full;
+      const ad = fmt(mulFrac(sa, d));
+      const bc = fmt(mulFrac(sb, c));
+      steps.push(
+        { label: 'Cross-multiply to compare the two ratios', expr: `A × D = ${fmt(sa)} × ${fmt(d)} = ${ad}   and   B × C = ${fmt(sb)} × ${fmt(c)} = ${bc}` },
+        { label: 'Compare the cross products', expr: `${ad} ${prop.equal ? '=' : '≠'} ${bc}, so the ratios are ${prop.equal ? 'proportional' : 'not proportional'}` },
+      );
+    }
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

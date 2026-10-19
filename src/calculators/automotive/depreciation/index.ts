@@ -1,5 +1,5 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
-import { depreciation } from './depreciationMath';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { DEPRECIATION_RATES, TAIL_RATE, depreciation } from './depreciationMath';
 import { createElement } from 'react';
 import DepreciationPanel from './DepreciationPanel';
 
@@ -105,6 +105,64 @@ const depreciationConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(DepreciationPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    // the value model walks year by year, so refuse absurd ages instead of looping (the form caps both at 30)
+    if (!((parseFloat(values.vehicleAge) || 0) + parseFloat(values.yearsOwned) <= 1000)) return [];
+    const d = depreciation(values);
+    if (!d || ![d.valueNow, d.futureValue, d.totalDepreciation, d.depreciationPct, d.annual, d.monthly].every(Number.isFinite)) return [];
+
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    const rates = DEPRECIATION_RATES[d.type] ?? DEPRECIATION_RATES.average;
+    const rateOf = (y: number) => rates[y] ?? TAIL_RATE;
+    const years = (n: number) => `${n} ${n === 1 ? 'year' : 'years'}`;
+
+    // The multipliers valueAtAge() applies: (1 - rate) for each whole year, a fractional power for a part year.
+    const chain = (upTo: number): string => {
+      const parts: { f: string; count: number }[] = [];
+      for (let y = 0; y < Math.ceil(upTo); y++) {
+        const frac = Math.min(1, upTo - y);
+        const f = (1 - rateOf(y)).toFixed(2);
+        const last = parts[parts.length - 1];
+        if (frac === 1 && last && last.f === f && !last.f.includes('^')) last.count += 1;
+        else parts.push({ f: frac === 1 ? f : `${f}^${+frac.toFixed(4)}`, count: 1 });
+      }
+      return parts.map((p) => (p.count > 1 ? `${p.f}^${p.count}` : p.f)).join(' × ');
+    };
+
+    const endAge = d.age + d.yearsOwned;
+    const shown = Math.min(Math.ceil(endAge), 10);
+    const rateList = Array.from({ length: shown }, (_, y) => `Year ${y + 1}: ${Math.round(rateOf(y) * 100)}%`).join(' · ');
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Look up the yearly loss rate for each year of age',
+        expr: `${rateList}${Math.ceil(endAge) > 10 ? ` · then ${Math.round(TAIL_RATE * 100)}% a year` : ''}`,
+        note: 'These yearly rates are this calculator\'s own illustrative assumptions for the vehicle type you chose, not a quote from a pricing guide.',
+      },
+    ];
+    if (d.age > 0) {
+      steps.push({
+        label: `Value today at ${years(d.age)} old`,
+        expr: `$${fmt(d.newPrice)} × ${chain(d.age)} = $${fmt(d.valueNow)}`,
+      });
+    }
+    steps.push(
+      {
+        label: `Value after ${years(d.yearsOwned)} of ownership`,
+        expr: `$${fmt(d.newPrice)} × ${chain(endAge)} = $${fmt(d.futureValue)}`,
+      },
+      {
+        label: 'Subtract to find the total depreciation',
+        expr: `$${fmt(d.valueNow)} − $${fmt(d.futureValue)} = $${fmt(d.totalDepreciation)}; ÷ $${fmt(d.valueNow)} = ${d.depreciationPct.toFixed(1)}%`,
+      },
+      {
+        label: 'Spread it over the years and months you own it',
+        expr: `$${fmt(d.totalDepreciation)} total ÷ ${years(d.yearsOwned)} = $${fmt(d.annual)}/year, or $${fmt(d.monthly)}/month`,
+      },
+    );
+    return steps;
   },
   educational: {
     formula: 'Value after Year N = Previous Year Value × (1 − Annual Depreciation Rate)',

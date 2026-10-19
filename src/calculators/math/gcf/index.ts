@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import GCFPanel from './GCFPanel';
-import { analyzeGcf, fmtFactors } from './gcfMath';
+import { analyzeGcf, fmtFactors, type Factorization } from './gcfMath';
 import { MAX_FACTOR_INPUT, parsePositiveSafeInt } from '../../../utils/numberTheory';
 
 const gcfConfig: CalculatorConfig = {
@@ -43,6 +43,22 @@ const gcfConfig: CalculatorConfig = {
       { id: 'gcf', label: `GCF of ${a} and ${b}`, value: gcf.toString(), highlight: true, color: 'positive' },
       { id: 'euclidSteps', label: 'Euclidean Algorithm', value: euclidSteps.join(' | ') },
       { id: 'sharedFactors', label: 'Shared Prime Factors', value: fmtFactors(shared) || 'None (co-prime)' },
+    ];
+  },
+  explainSteps: (values) => {
+    const pa = parsePositiveSafeInt(values.a);
+    const pb = parsePositiveSafeInt(values.b);
+    if (pa.kind !== 'ok' || pb.kind !== 'ok') return [];
+    const { a, b, gcf, factorsA, factorsB, shared } = analyzeGcf(pa.n, pb.n);
+    const f = (x: Factorization) => fmtFactors(x) || '1';
+    return [
+      { label: 'Break each number into prime factors', expr: `${a} = ${f(factorsA)}  and  ${b} = ${f(factorsB)}` },
+      { label: 'Keep each shared prime at its lowest power', expr: shared.length ? fmtFactors(shared) : 'no prime appears in both numbers' },
+      {
+        label: 'Multiply them together',
+        expr: shared.length ? `${fmtFactors(shared)} = ${gcf}` : `No shared primes, so GCF = ${gcf}`,
+        ...(shared.length ? {} : { note: 'A GCF of 1 means the two numbers are co-prime.' }),
+      },
     ];
   },
   extraPanel: (values, results) => {

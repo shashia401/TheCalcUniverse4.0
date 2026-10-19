@@ -1,7 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ProportionPanel from './ProportionPanel';
-import { fmtExact as fmt, parseSlot, ratioOf, solveProportion } from './proportionMath';
+import { Frac, mulFrac } from '../../../utils/rational';
+import { fmtExact as fmt, parseSlot, ratioOf, solveProportion, type Slot } from './proportionMath';
 
 const proportionConfig: CalculatorConfig = {
   inputs: [
@@ -80,6 +81,27 @@ const proportionConfig: CalculatorConfig = {
     return createElement(ProportionPanel, { values, results });
   },
 
+  explainSteps: (values) => {
+    const out = solveProportion({ a: parseSlot(values.a), b: parseSlot(values.b), c: parseSlot(values.c), d: parseSlot(values.d) });
+    if (out.kind === 'incomplete' || out.kind === 'error') return [];
+    const { a, b, c, d } = out.full;
+    if (out.kind === 'solved') {
+      const m = out.missing;
+      const show = (k: Slot, f: Frac) => (k === m ? k : fmt(f));
+      return [
+        { label: 'Write the proportion', expr: `a/b = c/d  →  ${show('a', a)}/${show('b', b)} = ${show('c', c)}/${show('d', d)}` },
+        { label: 'Cross-multiply', expr: `a × d = b × c  →  ${show('a', a)} × ${show('d', d)} = ${show('b', b)} × ${show('c', c)}` },
+        { label: `Solve for ${m}`, expr: out.step.replace(' / ', ' ÷ '), note: 'Multiply the two numbers on the diagonal, then divide by the number opposite the unknown.' },
+      ];
+    }
+    const ad = fmt(mulFrac(a, d));
+    const bc = fmt(mulFrac(b, c));
+    return [
+      { label: 'Write both ratios', expr: `a/b = ${fmt(a)}/${fmt(b)}  and  c/d = ${fmt(c)}/${fmt(d)}` },
+      { label: 'Cross-multiply', expr: `a × d = ${fmt(a)} × ${fmt(d)} = ${ad}  and  b × c = ${fmt(b)} × ${fmt(c)} = ${bc}` },
+      { label: 'Compare the cross products', expr: `${ad} ${out.equal ? '=' : '≠'} ${bc}, so the two ratios are ${out.equal ? 'equal (a proportion)' : 'not equal'}` },
+    ];
+  },
   educational: {
     formula: 'a / b = c / d   →   a × d = b × c',
     diagram: {

@@ -203,6 +203,33 @@ const slopeConfig: CalculatorConfig = {
 
     return results;
   },
+  explainSteps: (values) => {
+    const X1 = parseDecimalExact(values.x1);
+    const Y1 = parseDecimalExact(values.y1);
+    const X2 = parseDecimalExact(values.x2);
+    const Y2 = parseDecimalExact(values.y2);
+    if (!X1 || !Y1 || !X2 || !Y2) return [];
+    const DX = subFrac(X2, X1);
+    const DY = subFrac(Y2, Y1);
+    if (DX.n === 0n && DY.n === 0n) return [];
+    const p = (f: Frac) => (f.n < 0n ? `(${fmt(f)})` : fmt(f));
+    const M = DX.n === 0n ? null : divFrac(DY, DX);
+    return [
+      { label: 'Find the rise (change in y)', expr: `y₂ − y₁ = ${fmt(Y2)} − ${p(Y1)} = ${fmt(DY)}` },
+      { label: 'Find the run (change in x)', expr: `x₂ − x₁ = ${fmt(X2)} − ${p(X1)} = ${fmt(DX)}` },
+      {
+        label: 'Divide the rise by the run',
+        expr: M ? `m = ${fmt(DY)} ÷ ${fmt(DX)} = ${fmt(M)}` : `m = ${fmt(DY)} ÷ 0 is undefined (vertical line)`,
+        note: !M
+          ? 'The run is 0, and you cannot divide by zero, so a vertical line has no slope.'
+          : M.n > 0n
+            ? 'A positive slope means the line rises as x increases.'
+            : M.n < 0n
+              ? 'A negative slope means the line falls as x increases.'
+              : 'A slope of 0 means the line is horizontal.',
+      },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(SlopePanel, { values, results });

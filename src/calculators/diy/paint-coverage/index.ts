@@ -1,7 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import PaintCoveragePanel from './PaintCoveragePanel';
-import { paint } from './paintMath';
+import { COVERAGE_SQFT_PER_GAL, DOOR_SQFT, WASTE, WINDOW_SQFT, paint } from './paintMath';
 import { fixed1 as fmt } from '../../../lib/format';
 
 const paintCoverageConfig: CalculatorConfig = {
@@ -109,6 +109,46 @@ const paintCoverageConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(PaintCoveragePanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const pt = paint(values);
+    if (!pt || ![pt.wallArea, pt.paintableArea, pt.gallonsRaw, pt.gallonsWithWaste].every(Number.isFinite)) return [];
+
+    const length = parseFloat(values.roomLength);
+    const width = parseFloat(values.roomWidth);
+    const height = parseFloat(values.ceilingHeight);
+    const doors = Math.max(0, parseFloat(values.doors) || 0);
+    const windows = Math.max(0, parseFloat(values.windows) || 0);
+    const openings = doors * DOOR_SQFT + windows * WINDOW_SQFT;
+
+    return [
+      {
+        label: 'Wall area (four walls, no ceiling)',
+        expr: `2 × (${length} + ${width}) × ${height} = ${fmt(pt.wallArea)} sq ft`,
+      },
+      {
+        label: 'Take out doors and windows',
+        expr: `${fmt(pt.wallArea)} − (${doors} × ${DOOR_SQFT} + ${windows} × ${WINDOW_SQFT}) = ${fmt(pt.wallArea)} − ${fmt(openings)} = ${fmt(pt.paintableArea)} sq ft`,
+        note: `The calculator counts ${DOOR_SQFT} sq ft per door and ${WINDOW_SQFT} sq ft per window.`,
+      },
+      {
+        label: 'Multiply by the number of coats',
+        expr: `${fmt(pt.paintableArea)} × ${pt.coats} ${pt.coats === 1 ? 'coat' : 'coats'} = ${fmt(pt.paintableArea * pt.coats)} sq ft to cover`,
+      },
+      {
+        label: 'Divide by how far a gallon goes',
+        expr: `${fmt(pt.paintableArea * pt.coats)} ÷ ${COVERAGE_SQFT_PER_GAL} sq ft per gallon = ${pt.gallonsRaw.toFixed(2)} gallons`,
+        note: 'The calculator assumes 350 sq ft per gallon; check the coverage printed on the can you plan to buy.',
+      },
+      {
+        label: `Add ${WASTE * 100}% for waste`,
+        expr: `${pt.gallonsRaw.toFixed(2)} × ${1 + WASTE} = ${fmt(pt.gallonsWithWaste)} gallons`,
+      },
+      {
+        label: 'Round up to whole gallon cans',
+        expr: `${fmt(pt.gallonsWithWaste)} gallons → ${pt.containers} gallon(s)`,
+      },
+    ];
   },
   educational: {
     formula: 'Gallons = (Paintable Area × Coats) ÷ 350 sq ft/gallon × 1.1 (waste)',

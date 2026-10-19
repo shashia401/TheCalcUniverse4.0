@@ -1,3 +1,5 @@
+import type { ExplainStep } from '../../../types/calculator';
+import { roundStr6 } from '../../../lib/format';
 /**
  * Margin / markup math shared by index.ts and MarginCalculatorPanel.tsx
  * (the panel must never re-parse formatted result strings).
@@ -75,3 +77,80 @@ export function solveMargin(values: Record<string, string>): MarginSolution | nu
 /** Markup that gives the same profit as a given margin, and vice versa (both in percent). */
 export const marginFromMarkup = (markupPct: number) => (markupPct / (100 + markupPct)) * 100;
 export const markupFromMargin = (marginPct: number) => (marginPct / (100 - marginPct)) * 100;
+
+const money2 = (n: number): string =>
+  `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/**
+ * The worked solution shown under the calculator, built from the same MarginSolution the results use
+ * (shared by margin-calculator and profit-margin). `fmtPct` formats percentages the way that page does.
+ * Returns [] for anything non-finite.
+ */
+export function marginExplain(sol: MarginSolution, fmtPct: (n: number) => string): ExplainStep[] {
+  const out = marginSteps(sol, fmtPct);
+  // a runaway input can overflow the formatted percentage; show nothing rather than "Infinity"
+  return out.some((s) => /NaN|Infinity/.test(s.expr)) ? [] : out;
+}
+
+function marginSteps(sol: MarginSolution, fmtPct: (n: number) => string): ExplainStep[] {
+  const { cost, revenue, profit, margin, markup, solveFor } = sol;
+  if (![cost, revenue, profit, margin].every(Number.isFinite) || (markup !== null && !Number.isFinite(markup))) return [];
+  const $ = money2;
+  const markupText = markup === null ? 'no markup (cost is zero)' : `${fmtPct(markup)} markup`;
+
+  const profitStep: ExplainStep = {
+    label: 'Subtract cost from the selling price',
+    expr: `${$(revenue)} − ${$(cost)} = ${$(profit)} profit`,
+  };
+  const markupStep = (comparison: boolean): ExplainStep =>
+    markup === null
+      ? { label: 'Markup needs a non-zero cost', expr: `${$(profit)} ÷ $0.00 is undefined, so no markup is shown` }
+      : {
+          label: comparison ? 'For comparison, the markup on the same profit' : 'Markup: profit as a share of cost',
+          expr: `${$(profit)} ÷ ${$(cost)} × 100 = ${fmtPct(markup)}`,
+          note: comparison ? 'Margin divides profit by the selling price and markup divides it by cost, so the same profit gives two different percentages.' : undefined,
+        };
+  const marginStep: ExplainStep = {
+    label: 'Margin: profit as a share of the selling price',
+    expr: `${$(profit)} ÷ ${$(revenue)} × 100 = ${fmtPct(margin)}`,
+  };
+
+  if (solveFor === 'margin') return [profitStep, markupStep(true), marginStep];
+  if (solveFor === 'markup') return [profitStep, marginStep, markupStep(false)];
+
+  // revenue / cost: solved from a margin or a markup target
+  const target = parseFloat(sol.solvedVia ?? '');
+  const viaMargin = (sol.solvedVia ?? '').endsWith('Margin');
+  if (!Number.isFinite(target)) return [];
+  const mult = viaMargin ? 1 - target / 100 : 1 + target / 100;
+  const multText = roundStr6(mult);
+  const multStep: ExplainStep = viaMargin
+    ? {
+        label: 'Turn the margin into a multiplier',
+        expr: `1 − ${target}/100 = ${multText}`,
+        note: 'A margin is a share of the selling price, so cost makes up (1 − margin) of that price.',
+      }
+    : {
+        label: 'Turn the markup into a multiplier',
+        expr: `1 + ${target}/100 = ${multText}`,
+        note: 'A markup is added on top of cost, so the selling price is cost × (1 + markup).',
+      };
+  const solveStep: ExplainStep =
+    solveFor === 'revenue'
+      ? {
+          label: 'Work out the selling price',
+          expr: viaMargin ? `${$(cost)} ÷ ${multText} = ${$(revenue)}` : `${$(cost)} × ${multText} = ${$(revenue)}`,
+        }
+      : {
+          label: 'Work out the cost',
+          expr: viaMargin ? `${$(revenue)} × ${multText} = ${$(cost)}` : `${$(revenue)} ÷ ${multText} = ${$(cost)}`,
+        };
+  return [
+    multStep,
+    solveStep,
+    {
+      label: 'Check the profit, margin and markup',
+      expr: `${$(revenue)} − ${$(cost)} = ${$(profit)} profit, a ${fmtPct(margin)} margin and ${markupText}`,
+    },
+  ];
+}

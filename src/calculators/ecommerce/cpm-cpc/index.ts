@@ -1,4 +1,4 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import CPMCPCPanel from './CPMCPCPanel';
 
@@ -199,6 +199,91 @@ const cpmCpcConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(CPMCPCPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const mode = values.mode || 'cpm-from-spend';
+    const adSpend = parseFloat(values.adSpend);
+    const impressions = parseFloat(values.impressions);
+    const clicks = parseFloat(values.clicks);
+    const targetCpm = parseFloat(values.targetCpm);
+    const desiredImpressions = parseFloat(values.desiredImpressions);
+
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtInt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    // per-impression costs are tiny, so keep up to 6 decimals
+    const fmtTiny = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+
+    if (mode === 'reverse-budget') {
+      if (!Number.isFinite(targetCpm) || targetCpm < 0 || !Number.isFinite(desiredImpressions) || desiredImpressions <= 0) return [];
+      const budget = (targetCpm * desiredImpressions) / 1000;
+      if (!Number.isFinite(budget)) return [];
+      return [
+        {
+          label: 'Count your impressions in thousands',
+          expr: `${fmtInt(desiredImpressions)} ÷ 1,000 = ${fmt(desiredImpressions / 1000)} thousand impressions`,
+          note: 'CPM is the price for every 1,000 impressions.',
+        },
+        {
+          label: 'Cost of a single impression at your target CPM',
+          expr: `$${fmt(targetCpm)} ÷ 1,000 = $${fmtTiny(targetCpm / 1000)} per impression`,
+        },
+        {
+          label: 'Multiply the thousands by the target CPM',
+          expr: `${fmt(desiredImpressions / 1000)} × $${fmt(targetCpm)} = $${fmt(budget)}`,
+        },
+      ];
+    }
+
+    if (!Number.isFinite(adSpend) || adSpend < 0) return [];
+    if (mode === 'cpm-from-spend' && (isNaN(impressions) || impressions <= 0)) return [];
+    if (mode === 'cpc-from-spend' && (isNaN(clicks) || clicks <= 0)) return [];
+    if (mode !== 'cpm-from-spend' && mode !== 'cpc-from-spend') return [];
+
+    const hasClicks = clicks > 0;
+    const hasImpressions = impressions > 0;
+    const cpm = hasImpressions ? (adSpend / impressions) * 1000 : null;
+    const cpc = hasClicks ? adSpend / clicks : null;
+    const ctr = hasClicks && hasImpressions ? (clicks / impressions) * 100 : null;
+    if (![cpm, cpc, ctr].every((x) => x === null || Number.isFinite(x))) return [];
+
+    const cpmSteps: ExplainStep[] = hasImpressions
+      ? [
+          { label: 'Cost of a single impression', expr: `$${fmt(adSpend)} ÷ ${fmtInt(impressions)} impressions = $${fmtTiny(adSpend / impressions)}` },
+          { label: 'Scale up to 1,000 impressions (CPM)', expr: `$${fmt(adSpend)} ÷ ${fmtInt(impressions)} × 1,000 = $${fmt(cpm!)}` },
+        ]
+      : [];
+    const cpcStep: ExplainStep[] = hasClicks
+      ? [{ label: 'Cost per click (CPC)', expr: `$${fmt(adSpend)} ÷ ${fmtInt(clicks)} clicks = $${fmt(cpc!)}` }]
+      : [];
+    const ctrStep: ExplainStep[] =
+      ctr !== null
+        ? [{
+            label: 'Click-through rate (CTR)',
+            expr: `${fmtInt(clicks)} clicks ÷ ${fmtInt(impressions)} impressions × 100 = ${ctr.toFixed(2)}%`,
+            note: clicks > impressions ? 'Clicks above impressions would mean a CTR over 100%, so check that both figures cover the same campaign and period.' : undefined,
+          }]
+        : [];
+    const summary: ExplainStep = {
+      label: 'Put it together',
+      expr: [
+        cpm !== null ? `CPM $${fmt(cpm)}` : '',
+        cpc !== null ? `CPC $${fmt(cpc)}` : '',
+        ctr !== null ? `CTR ${ctr.toFixed(2)}%` : '',
+        `total spend $${fmt(adSpend)}`,
+      ].filter(Boolean).join(' · '),
+    };
+
+    if (mode === 'cpm-from-spend') return [...cpmSteps, ...cpcStep, ...ctrStep, summary];
+    // cpc-from-spend: show the CPC first, then check it, then whatever the impressions add
+    return [
+      ...cpcStep,
+      { label: 'Check: clicks × CPC gives back the spend', expr: `${fmtInt(clicks)} clicks × $${fmt(cpc!)} ≈ $${fmt(adSpend)}` },
+      ...(hasImpressions ? [...cpmSteps.slice(1), ...ctrStep] : []),
+      summary,
+    ];
   },
   educational: {
     formula: 'CPM = Ad Spend ÷ Impressions × 1000 | CPC = Ad Spend ÷ Clicks | CTR = Clicks ÷ Impressions × 100 | Budget = Target CPM × Desired Impressions ÷ 1000',

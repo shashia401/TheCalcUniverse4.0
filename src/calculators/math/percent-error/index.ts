@@ -61,6 +61,22 @@ const percentErrorConfig: CalculatorConfig = {
       { id: 'formula', label: 'Formula Used', value: `δ = |(${fmt(aDec)} - ${fmt(eDec)}) / ${fmt(aDec)}| × 100%`, color: 'neutral' },
     ];
   },
+  explainSteps: (values) => {
+    const c = computePercentError(values.accepted, values.experimental);
+    if (c.kind !== 'ok') return [];
+    const { accepted: a, experimental: e, absoluteError, relativeError, percentError } = c;
+    const long = (d: typeof relativeError) => d.toSignificantDigits(8).toFixed();
+    const par = (d: typeof a) => (d.isNegative() ? `(${fmt(d)})` : fmt(d));
+    return [
+      {
+        label: 'Find the size of the error',
+        expr: `|vE − vA| = |${par(e)} − ${par(a)}| = ${long(absoluteError)}`,
+        note: 'The absolute value drops the sign, so an over- and an under-estimate of the same size give the same percent error.',
+      },
+      { label: 'Divide by the accepted value', expr: `${long(absoluteError)} ÷ |${fmt(a)}| = ${long(relativeError)}` },
+      { label: 'Multiply by 100 for a percentage', expr: `${long(relativeError)} × 100 = ${fmt(percentError)}%` },
+    ];
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(PercentErrorPanel, { values, results });

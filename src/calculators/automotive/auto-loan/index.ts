@@ -1,4 +1,4 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import { autoLoan } from './autoLoanMath';
 import { createElement } from 'react';
 import AutoLoanPanel from './AutoLoanPanel';
@@ -185,6 +185,62 @@ const autoLoanConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(AutoLoanPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const m = autoLoan(values);
+    if (!m || !(m.loanAmount > 0)) return [];
+    const r = parseFloat(values.interestRate) / 100 / 12;
+    const n = m.months;
+    const growth = Math.pow(1 + r, n);
+    if (![m.salesTax, m.outTheDoor, m.loanAmount, m.monthlyPayment, m.totalPaid, m.totalInterest, growth].every(Number.isFinite)) return [];
+
+    const fmt = (x: number) => x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const $ = (x: number) => `$${fmt(x)}`;
+    const credit = values.tradeInTaxCredit !== 'no';
+
+    const steps: ExplainStep[] = [
+      {
+        label: credit ? 'Find the taxable amount and sales tax' : 'Apply sales tax to the full price',
+        expr: credit
+          ? `Taxable = ${$(m.price)} − ${$(m.tradeInValue)} trade-in value = ${$(m.taxableAmount)}; tax = ${$(m.taxableAmount)} × ${m.taxPct}% = ${$(m.salesTax)}`
+          : `Taxable = ${$(m.price)} (no trade-in credit); tax = ${$(m.taxableAmount)} × ${m.taxPct}% = ${$(m.salesTax)}`,
+        note: 'Many states tax only the price after the trade-in value and a few tax the full price; the trade-in tax credit setting above chooses which rule is used here.',
+      },
+      {
+        label: 'Add tax and fees to get the out-the-door price',
+        expr: `${$(m.price)} + ${$(m.salesTax)} + ${$(m.fees)} = ${$(m.outTheDoor)}`,
+      },
+      {
+        label: 'Subtract your trade-in equity and down payment',
+        expr: m.netTradeIn >= 0
+          ? `${$(m.outTheDoor)} − ${$(m.netTradeIn)} (trade-in value ${$(m.tradeInValue)} − owed ${$(m.tradeInOwed)}) − ${$(m.down)} down = ${$(m.loanAmount)} financed`
+          : `${$(m.outTheDoor)} + ${$(m.negativeEquity)} negative equity (owed ${$(m.tradeInOwed)} − value ${$(m.tradeInValue)}) − ${$(m.down)} down = ${$(m.loanAmount)} financed`,
+        note: m.netTradeIn < 0 ? 'When you owe more than the trade-in is worth, the shortfall is added to the new loan.' : undefined,
+      },
+    ];
+
+    if (r === 0) {
+      steps.push({
+        label: 'No interest, so split the loan evenly',
+        expr: `M = ${$(m.loanAmount)} ÷ ${n} months = ${$(m.monthlyPayment)}/month`,
+      });
+    } else {
+      steps.push(
+        {
+          label: 'Convert the APR to a monthly rate and grow it over the term',
+          expr: `r = ${parseFloat(values.interestRate)}% ÷ 12 = ${(r * 100).toFixed(4)}% = ${r.toFixed(6)}; (1 + r)^${n} = ${growth.toFixed(4)}`,
+        },
+        {
+          label: 'Apply the loan payment formula',
+          expr: `M = ${$(m.loanAmount)} × [${r.toFixed(6)} × ${growth.toFixed(4)}] ÷ [${growth.toFixed(4)} − 1] = ${$(m.monthlyPayment)}/month`,
+        },
+      );
+    }
+    steps.push({
+      label: 'Total the payments to see the interest',
+      expr: `${$(m.monthlyPayment)} × ${n} payments ≈ ${$(m.totalPaid)}; minus ${$(m.loanAmount)} financed = ${$(m.totalInterest)} interest`,
+    });
+    return steps;
   },
   educational: {
     formula: 'M = P × [r(1+r)^n] / [(1+r)^n − 1] | Taxable = Price − Trade-In Value',

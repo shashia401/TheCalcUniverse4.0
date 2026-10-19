@@ -1,7 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import ConcreteSlabPanel from './ConcreteSlabPanel';
-import { concreteOrder, slabCuFt } from '../shared/concreteMath';
+import { BAG_60_CU_FT, BAG_80_CU_FT, concreteOrder, slabCuFt } from '../shared/concreteMath';
 import { fixed2 as fmt } from '../../../lib/format';
 
 const concreteSlabConfig: CalculatorConfig = {
@@ -103,6 +103,39 @@ const concreteSlabConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(ConcreteSlabPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const length = parseFloat(values.length);
+    const width = parseFloat(values.width);
+    const depthIn = parseFloat(values.depth || '4');
+    const wastePct = parseFloat(values.wastePct || '10');
+    if (![length, width, depthIn, wastePct].every(Number.isFinite) || length <= 0 || width <= 0 || depthIn <= 0 || wastePct < 0) return [];
+
+    const cubicFeet = slabCuFt(length, width, depthIn);
+    const order = concreteOrder(cubicFeet, wastePct);
+    if (![cubicFeet, order.totalCuFt, order.totalCuYd, order.bags60, order.bags80].every(Number.isFinite)) return [];
+
+    return [
+      {
+        label: 'Slab volume in cubic feet',
+        expr: `${length} ft × ${width} ft × (${depthIn} in ÷ 12) = ${fmt(cubicFeet)} cu ft`,
+        note: 'The thickness is divided by 12 to turn inches into feet.',
+      },
+      {
+        label: 'Add the waste allowance',
+        expr: `${fmt(cubicFeet)} × (1 + ${wastePct}%) = ${fmt(order.totalCuFt)} cu ft`,
+      },
+      {
+        label: 'Count the bags of mix',
+        expr: `${fmt(order.totalCuFt)} ÷ ${BAG_80_CU_FT} = ${order.bags80.toLocaleString(undefined)} bags (80 lb); ${fmt(order.totalCuFt)} ÷ ${BAG_60_CU_FT} = ${order.bags60.toLocaleString(undefined)} bags (60 lb)`,
+        note: 'Bag counts are rounded up and use the yield this calculator assumes per bag, so check the yield printed on your brand\'s bag.',
+      },
+      {
+        label: 'Convert to cubic yards for a ready-mix order',
+        expr: `${fmt(order.totalCuFt)} cu ft ÷ 27 = ${fmt(order.totalCuYd)} cu yd`,
+        note: 'One cubic yard is 3 ft × 3 ft × 3 ft = 27 cubic feet.',
+      },
+    ];
   },
   educational: {
     formula: 'Cubic Yards = (Length × Width × Thickness in ft) ÷ 27',

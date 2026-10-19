@@ -1,7 +1,7 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import MarginCalculatorPanel from './MarginCalculatorPanel';
-import { marginFromMarkup, solveMargin, type MarginSolution } from './marginMath';
+import { marginExplain, marginFromMarkup, solveMargin, type MarginSolution } from './marginMath';
 
 const marginCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -132,6 +132,12 @@ const marginCalculatorConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(MarginCalculatorPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const sol = solveMargin(values);
+    if (!sol) return [];
+    // same percentage format as the results above: up to 4 dp, trailing zeros trimmed
+    return marginExplain(sol, (n) => `${String(Math.round(n * 1e4) / 1e4 + 0)}%`);
   },
   educational: {
     formula:

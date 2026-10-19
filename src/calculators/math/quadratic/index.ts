@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import QuadraticPanel from './QuadraticPanel';
-import { fracToString } from '../../../utils/rational';
+import { Frac, fracToString, mulFrac } from '../../../utils/rational';
 import { equationText, factoredText, fmtF, fmtN, solveQuadratic } from './quadraticMath';
 
 const quadraticConfig: CalculatorConfig = {
@@ -71,6 +71,45 @@ const quadraticConfig: CalculatorConfig = {
     results.push({ id: 'vietaProduct', label: 'Product of Roots (Vieta)', value: fmtF(q.product), color: 'neutral' });
     if (q.kind !== 'complex') results.push({ id: 'factoredForm', label: 'Factored Form', value: factoredText(q), color: 'positive' });
     return results;
+  },
+  explainSteps: (values) => {
+    let r: ReturnType<typeof solveQuadratic>;
+    try {
+      r = solveQuadratic(values.a, values.b, values.c);
+    } catch {
+      return []; // solveQuadratic itself throws for ~1e300 coefficients (BigInt of Infinity)
+    }
+    if (r.kind !== 'ok') return [];
+    const { q } = r;
+    // Coefficients so large that a root overflows a double: there is no honest number to show.
+    if ([q.x1, q.x2, q.re, q.im].some((n) => n !== undefined && !Number.isFinite(n))) return [];
+    const p = (f: Frac) => (f.n < 0n ? `(${fmtF(f)})` : fmtF(f));
+    const neg = (f: Frac): Frac => ({ n: -f.n, d: f.d });
+    const b2 = mulFrac(q.b, q.b);
+    const fourAC = mulFrac(mulFrac({ n: 4n, d: 1n }, q.a), q.c);
+    const twoA = mulFrac({ n: 2n, d: 1n }, q.a);
+    const tail =
+      q.kind === 'two-real'
+        ? `x₁ = ${q.exact ? fmtF(q.exact.x1) : fmtN(q.x1!)}, x₂ = ${q.exact ? fmtF(q.exact.x2) : fmtN(q.x2!)}`
+        : q.kind === 'repeated'
+          ? `x = ${fmtF(q.vertexX)}`
+          : `x₁ = ${fmtN(q.re!)} + ${fmtN(q.im!)}i, x₂ = ${fmtN(q.re!)} − ${fmtN(q.im!)}i`;
+    return [
+      { label: 'Read off a, b and c', expr: `${equationText(q)}  →  a = ${fmtF(q.a)}, b = ${fmtF(q.b)}, c = ${fmtF(q.c)}` },
+      {
+        label: 'Compute the discriminant',
+        expr: `Δ = b² − 4ac = ${p(q.b)}² − 4(${fmtF(q.a)})(${fmtF(q.c)}) = ${fmtF(b2)} − ${p(fourAC)} = ${fmtF(q.disc)}`,
+        note: q.kind === 'two-real' ? 'Δ > 0 means two distinct real roots.' : q.kind === 'repeated' ? 'Δ = 0 means one repeated real root.' : 'Δ < 0 means no real roots: the parabola never crosses the x-axis.',
+      },
+      {
+        label: 'Put the numbers into the quadratic formula',
+        expr:
+          q.kind === 'repeated'
+            ? `x = −b ÷ 2a = ${fmtF(neg(q.b))} ÷ ${fmtF(twoA)}`
+            : `x = (−b ± √Δ) ÷ 2a = (${fmtF(neg(q.b))} ± √${p(q.disc)}) ÷ ${fmtF(twoA)}`,
+      },
+      { label: 'Solve for x', expr: tail },
+    ];
   },
   educational: {
     formula: 'x = (−b ± √(b² − 4ac)) / (2a)  |  Discriminant Δ = b² − 4ac  |  Vertex: (−b/2a, f(−b/2a))',

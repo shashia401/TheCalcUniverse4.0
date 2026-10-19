@@ -7,6 +7,11 @@ import { normCdf, normSf } from '../../../utils/distributions';
 /** Significant-digit formatting that never collapses a tiny tail probability to "0" (6-decimal rounding did). */
 const sig = (n: number, digits = 10): string => String(parseFloat(n.toPrecision(digits)));
 
+const fmt = (n: number) => {
+  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
+  return parseFloat(n.toFixed(6)).toString();
+};
+
 const zScoreConfig: CalculatorConfig = {
   inputs: [
     {
@@ -52,11 +57,6 @@ const zScoreConfig: CalculatorConfig = {
     const probability = normCdf(z);
     const percentile = probability * 100;
     const aboveProbability = normSf(z) * 100;
-
-    const fmt = (n: number) => {
-      if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
-      return parseFloat(n.toFixed(6)).toString();
-    };
 
     return [
       {
@@ -106,6 +106,29 @@ const zScoreConfig: CalculatorConfig = {
         id: '_chartData',
         label: '',
         value: JSON.stringify({ z, probability }),
+      },
+    ];
+  },
+  explainSteps: (values) => {
+    const x = parseNumberStrict(values.rawScore);
+    const mu = parseNumberStrict(values.mean);
+    const sigma = parseNumberStrict(values.stddev);
+    if ([x, mu, sigma].some(isNaN) || sigma <= 0) return [];
+    const z = (x - mu) / sigma;
+    if (!Number.isFinite(z)) return [];
+    const probability = normCdf(z);
+    const diff = x - mu;
+    return [
+      { label: 'Subtract the mean from the score', expr: `x − μ = ${fmt(x)} − ${mu < 0 ? `(${fmt(mu)})` : fmt(mu)} = ${fmt(diff)}` },
+      {
+        label: 'Divide by the standard deviation',
+        expr: `z = ${fmt(diff)} ÷ ${fmt(sigma)} = ${fmt(z)}`,
+        note: 'A z-score counts how many standard deviations the score sits above (+) or below (−) the mean.',
+      },
+      {
+        label: 'Convert the z-score to a percentile',
+        expr: `P(Z ≤ ${fmt(z)}) = ${sig(probability)}  →  ${sig(probability * 100)}%`,
+        note: 'This reading assumes the data follow a normal distribution.',
       },
     ];
   },

@@ -1,4 +1,4 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import PaymentFeesPanel from './PaymentFeesPanel';
 import { FEE_MAP, forwardFee, reverseInvoice } from './paymentMath';
@@ -87,6 +87,62 @@ const paymentFeesConfig: CalculatorConfig = {
     return createElement(PaymentFeesPanel, { values, results });
   },
 
+  explainSteps: (values) => {
+    const amount = parseFloat(values.invoiceAmount);
+    const feeInfo = FEE_MAP[values.platform || 'stripe-domestic'];
+    if (!feeInfo || !Number.isFinite(amount) || amount <= 0) return [];
+
+    const reverse = (values.reverseMode || 'no') === 'yes';
+    const p = reverse ? reverseInvoice(amount, feeInfo) : forwardFee(amount, feeInfo);
+    if (![p.charged, p.fee, p.net, p.effectivePct].every(Number.isFinite)) return [];
+
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt4 = (n: number) =>
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    const $ = (n: number) => `$${fmt(n)}`;
+    const ratePct = `${(feeInfo.rate * 100).toFixed(2)}%`;
+    const rateNote = `These are the ${feeInfo.label} rates built into this calculator; processors can change their pricing, so confirm it on their pricing page.`;
+    const rawFee = p.charged * feeInfo.rate + feeInfo.fixed;
+
+    const steps: ExplainStep[] = [];
+    if (reverse) {
+      steps.push({
+        label: 'Gross up your target for the percentage fee',
+        expr: `(${$(amount)} + ${$(feeInfo.fixed)}) ÷ (1 − ${feeInfo.rate}) = $${fmt4((amount + feeInfo.fixed) / (1 - feeInfo.rate))}`,
+        note: rateNote,
+      });
+      steps.push({
+        label: 'Settle on a whole-cent invoice that really nets your target',
+        expr: `Invoice ${$(p.charged)}`,
+        note: 'The calculator picks the smallest invoice, in whole cents, that still leaves you at least your target after the fee.',
+      });
+    } else {
+      steps.push({
+        label: 'Percentage part of the fee',
+        expr: `${$(p.charged)} × ${ratePct} = $${fmt4(p.charged * feeInfo.rate)}`,
+        note: rateNote,
+      });
+    }
+    steps.push(
+      {
+        label: reverse ? 'Fee charged on that invoice' : 'Add the fixed fee and round to the cent',
+        expr: reverse
+          ? `${$(p.charged)} × ${ratePct} + ${$(feeInfo.fixed)} = $${fmt4(rawFee)} → ${$(p.fee)}`
+          : `$${fmt4(p.charged * feeInfo.rate)} + ${$(feeInfo.fixed)} = $${fmt4(rawFee)} → ${$(p.fee)}`,
+      },
+      {
+        label: 'What the fee costs as a share of the sale',
+        expr: `${$(p.fee)} ÷ ${$(p.charged)} = ${p.effectivePct.toFixed(2)}%`,
+        note: 'The fixed fee is a bigger slice of a small sale than of a large one.',
+      },
+      {
+        label: 'Subtract the fee',
+        expr: `${$(p.charged)} − ${$(p.fee)} = ${$(p.net)} you receive`,
+      },
+    );
+    return steps;
+  },
   educational: {
     formula: 'Fee = Amount × Rate + Fixed Fee | Net = Amount − Fee',
     diagram: {

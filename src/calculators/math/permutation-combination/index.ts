@@ -72,6 +72,27 @@ const permCombConfig: CalculatorConfig = {
       ...cells.map((c, i) => ({ id: ids[i], label: c.label, value: c.value, color: 'neutral' as const })),
     ];
   },
+  explainSteps: (values) => {
+    const p = computePermComb(values.n, values.r, values.orderMatters, values.repetition);
+    if (p.kind !== 'ok') return [];
+    const { n, r, isPerm, repetition, formula, applied, cells } = p.result;
+    const plug = repetition
+      ? `n = ${n}, r = ${r}${isPerm ? '' : `  →  n + r − 1 = ${n + r - 1}`}`
+      : `n = ${n}, r = ${r}${r > n ? '' : `  →  n − r = ${n - r}`}`;
+    const steps = [
+      { label: 'Pick the formula', expr: formula, note: isPerm ? 'Order matters, so each different arrangement counts separately.' : 'Order does not matter, so arrangements of the same items count once.' },
+      { label: 'Plug in your numbers', expr: plug },
+    ];
+    if (cells.length === 3 && !repetition) {
+      const [nf, rf, df] = cells;
+      steps.push({
+        label: 'Work out the factorials',
+        expr: isPerm ? `${n}! = ${nf.value},  ${n - r}! = ${df.value}` : `${n}! = ${nf.value},  ${r}! = ${rf.value},  ${n - r}! = ${df.value}`,
+      });
+    }
+    steps.push({ label: 'Substitute and simplify', expr: applied });
+    return steps;
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(PermutationCombinationPanel, { values, results });

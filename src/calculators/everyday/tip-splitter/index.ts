@@ -3,6 +3,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import TipSplitterPanel from './TipSplitterPanel';
 import { splitBill } from './tipMath';
 
+const usd = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 const tipSplitterConfig: CalculatorConfig = {
   inputs: [
     {
@@ -60,7 +62,6 @@ const tipSplitterConfig: CalculatorConfig = {
   calculate: (values) => {
     const sp = splitBill(values);
     if (!sp) return [];
-    const usd = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const even = sp.highCount === 0;
 
     const results = [
@@ -82,6 +83,30 @@ const tipSplitterConfig: CalculatorConfig = {
       results.push({ id: 'shareSplit', label: 'Exact Split', value: `${sp.highCount} × ${usd(sp.highShare)} + ${sp.people - sp.highCount} × ${usd(sp.lowShare)}`, color: 'neutral' as const });
     }
     return results;
+  },
+  explainSteps: (values) => {
+    const sp = splitBill(values);
+    if (!sp) return [];
+    const pct = parseFloat(values.tipPercent || '18');
+    const base = sp.billCents - sp.taxCents;
+    const steps = [
+      sp.taxCents > 0
+        ? { label: 'Take the tax off the bill', expr: `${usd(sp.billCents)} − ${usd(sp.taxCents)} = ${usd(base)}`, note: 'The tip is figured on the pre-tax amount, because tax is not part of the service.' }
+        : { label: 'Start from the bill', expr: `${usd(base)}  (no tax entered, so the tip is on the whole bill)` },
+      { label: 'Work out the tip', expr: `${usd(base)} × ${pct}% = ${usd(sp.tipCents)}` },
+      { label: 'Add the tip to the bill', expr: `${usd(sp.billCents)} + ${usd(sp.tipCents)} = ${usd(sp.totalCents)}` },
+    ];
+    if (sp.people > 1) {
+      const even = sp.highCount === 0;
+      steps.push({
+        label: `Split between ${sp.people} people`,
+        expr: even
+          ? `${usd(sp.totalCents)} ÷ ${sp.people} = ${usd(sp.highShare)}`
+          : `${usd(sp.totalCents)} ÷ ${sp.people}: ${sp.highCount} ${sp.highCount === 1 ? 'pays' : 'pay'} ${usd(sp.highShare)}, ${sp.people - sp.highCount} ${sp.people - sp.highCount === 1 ? 'pays' : 'pay'} ${usd(sp.lowShare)}`,
+        ...(even ? {} : { note: 'The total does not divide evenly in cents, so the leftover cents go one each to the first people.' }),
+      });
+    }
+    return steps;
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

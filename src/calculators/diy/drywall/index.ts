@@ -1,7 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import DrywallPanel from './DrywallPanel';
-import { drywall } from './drywallMath';
+import { DOOR_SQFT, WASTE, WINDOW_SQFT, drywall } from './drywallMath';
 
 const drywallConfig: CalculatorConfig = {
   inputs: [
@@ -136,6 +136,42 @@ const drywallConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(DrywallPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const d = drywall(values);
+    if (!d || ![d.wallArea, d.ceilingArea, d.netArea, d.withWaste, d.compoundGal, d.tapeFt].every(Number.isFinite)) return [];
+
+    const length = parseFloat(values.length);
+    const width = parseFloat(values.width);
+    const height = parseFloat(values.height);
+    const doors = Math.max(0, parseFloat(values.doors) || 0);
+    const windows = Math.max(0, parseFloat(values.windows) || 0);
+    const n0 = (x: number) => x.toFixed(0);
+
+    return [
+      {
+        label: 'Wall area',
+        expr: `2 × (${length} + ${width}) × ${height} = ${n0(d.wallArea)} sq ft`,
+      },
+      {
+        label: d.ceilingArea > 0 ? 'Add the ceiling and subtract doors and windows' : 'Subtract doors and windows (walls only)',
+        expr: `${n0(d.wallArea)}${d.ceilingArea > 0 ? ` + ${length} × ${width} ceiling` : ''} − ${doors} × ${DOOR_SQFT} − ${windows} × ${WINDOW_SQFT} = ${n0(d.netArea)} sq ft net`,
+        note: `The calculator subtracts ${DOOR_SQFT} sq ft per door and ${WINDOW_SQFT} sq ft per window.`,
+      },
+      {
+        label: `Add ${WASTE * 100}% for waste`,
+        expr: `${n0(d.netArea)} × ${1 + WASTE} = ${n0(d.withWaste)} sq ft`,
+      },
+      {
+        label: 'Divide by the sheet size and round up',
+        expr: `${n0(d.withWaste)} ÷ ${d.sheetSqFt} sq ft per sheet = ${(d.withWaste / d.sheetSqFt).toFixed(1)} → ${d.sheets} sheets`,
+      },
+      {
+        label: 'Estimate screws, joint compound and tape',
+        expr: `${d.sheets} sheets · ${d.screws} screws · ${d.compoundGal.toFixed(1)} gallons joint compound · ${d.tapeRolls} roll${d.tapeRolls === 1 ? '' : 's'} of tape (${n0(d.tapeFt)} ft needed)`,
+        note: 'Screws, compound and tape use rule-of-thumb allowances per square foot of board, so treat them as estimates.',
+      },
+    ];
   },
   educational: {
     formula: 'Sheets = ceil((Net Wall Area x 1.10) / Sheet Area)  |  Wall Area = 2 x (L + W) x H',

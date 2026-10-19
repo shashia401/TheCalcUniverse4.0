@@ -1,5 +1,5 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
-import { solveMargin } from '../margin-calculator/marginMath';
+import { marginExplain, solveMargin } from '../margin-calculator/marginMath';
 import { createElement } from 'react';
 import ProfitMarginPanel from './ProfitMarginPanel';
 
@@ -101,6 +101,18 @@ const profitMarginConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(ProfitMarginPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const mode = values.mode || 'margin';
+    const sol = solveMargin(
+      mode === 'margin' || mode === 'markup'
+        ? { solveFor: mode, costInput: values.cost, revenueInput: values.revenue }
+        : mode === 'price_from_margin'
+          ? { solveFor: 'revenue', costInput: values.cost, marginInput: values.targetPct }
+          : { solveFor: 'revenue', costInput: values.cost, markupInput: values.targetPct },
+    );
+    if (!sol) return [];
+    return marginExplain(sol, (n) => `${n.toFixed(2)}%`);
   },
   educational: {
     formula: 'Margin % = (Revenue − Cost) ÷ Revenue × 100 | Markup % = (Revenue − Cost) ÷ Cost × 100',

@@ -10,7 +10,7 @@ export const DEPRECIATION_RATES: Record<VehicleType, number[]> = {
   truck: [0.15, 0.12, 0.10, 0.08, 0.07, 0.06, 0.05, 0.05, 0.04, 0.04],
   ev: [0.22, 0.18, 0.14, 0.12, 0.10, 0.08, 0.07, 0.06, 0.05, 0.05],
 };
-const TAIL_RATE = 0.05;
+export const TAIL_RATE = 0.05;
 
 /** Value at a (possibly fractional) age: whole years compound the table rates; a part year uses that year's rate pro rata. */
 export function valueAtAge(newPrice: number, type: VehicleType, age: number): number {
