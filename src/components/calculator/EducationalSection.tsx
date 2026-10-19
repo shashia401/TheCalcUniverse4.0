@@ -29,7 +29,7 @@ function Section({ title, id, open, children }: { title: string; id?: string; op
   return (
     <details id={id} open={open || undefined} className={`${card} group scroll-mt-20`}>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--brand-default)] [&::-webkit-details-marker]:hidden">
-        <h2 className="text-lg font-bold">{title}</h2>
+        <h2 className="text-xl font-bold tracking-tight">{title}</h2>
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
@@ -52,12 +52,12 @@ function Section({ title, id, open, children }: { title: string; id?: string; op
 
 export default function EducationalSection({ content, calculatorTitle, customInputIds }: Props) {
   return (
-    <div className="space-y-4 text-[var(--surface-text)]">
+    <div className="space-y-5 text-[var(--surface-text)]">
 
       {/* Formula + variables: the heart of "see the work" */}
       {content.formula && (
         <div className={card}>
-          <h2 className="text-lg font-bold mb-3">How {calculatorTitle} Works</h2>
+          <h2 className="text-xl font-bold tracking-tight mb-3">How {calculatorTitle} Works</h2>
           <p
             className="font-mono text-sm md:text-base bg-[var(--surface-bg)] border border-[var(--border-warm)] rounded-lg px-4 py-3 whitespace-pre-line overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-default)]"
             tabIndex={0}
@@ -89,7 +89,7 @@ export default function EducationalSection({ content, calculatorTitle, customInp
           )}
 
           {content.formulaSource && (
-            <p className="mt-4 text-xs text-[var(--surface-text-muted)] border-t border-[var(--border-warm)] pt-3">
+            <p className="mt-4 text-sm text-[var(--surface-text-muted)] border-t border-[var(--border-warm)] pt-3">
               <span className="font-semibold">Source:</span> {content.formulaSource}
             </p>
           )}
@@ -106,7 +106,7 @@ export default function EducationalSection({ content, calculatorTitle, customInp
             dangerouslySetInnerHTML={{ __html: content.diagram.svg }}
           />
           {content.diagram.caption && (
-            <figcaption className="mt-3 text-xs text-center text-[var(--surface-text-muted)]">
+            <figcaption className="mt-3 text-sm text-center text-[var(--surface-text-muted)]">
               {content.diagram.caption}
             </figcaption>
           )}
@@ -123,7 +123,7 @@ export default function EducationalSection({ content, calculatorTitle, customInp
                 {ex.inputs && Object.keys(ex.inputs).length > 0 && (() => {
                   const shown = Object.entries(ex.inputs).filter(([k]) => !customInputIds?.has(k));
                   return shown.length > 0 ? (
-                    <p className="font-mono text-xs text-[var(--surface-text-muted)] mb-1.5 break-words [overflow-wrap:anywhere]">
+                    <p className="font-mono text-sm text-[var(--surface-text-muted)] mb-1.5 break-words [overflow-wrap:anywhere]">
                       {shown.map(([k, v]) => `${k} = ${v}`).join('  ·  ')}
                     </p>
                   ) : null;

@@ -509,7 +509,7 @@ export default function CalculatorForm({ calculatorId, initial }: Props) {
                               {r.unit && <span className="ml-1 text-sm font-normal opacity-75">{r.unit}</span>}
                             </dd>
                           </div>
-                          {r.interpretation && <p className="mt-0.5 text-xs text-[var(--surface-text-muted)]">{money(r.interpretation)}</p>}
+                          {r.interpretation && <p className="mt-0.5 text-sm text-[var(--surface-text-muted)]">{money(r.interpretation)}</p>}
                         </div>
                       ))}
                     </dl>
@@ -652,7 +652,7 @@ export default function CalculatorForm({ calculatorId, initial }: Props) {
             <h2 className="text-sm font-semibold text-[var(--surface-text-muted)] mb-1 uppercase tracking-wide">
               How we got this — with your numbers
             </h2>
-            <p className="text-xs text-[var(--surface-text-muted)] mb-4">
+            <p className="text-sm text-[var(--surface-text-muted)] mb-4">
               The same steps you'd write out by hand.
             </p>
             <ol className="space-y-3">
@@ -667,7 +667,7 @@ export default function CalculatorForm({ calculatorId, initial }: Props) {
                       {step.expr}
                     </p>
                     {step.note && (
-                      <p className="text-xs text-[var(--surface-text-muted)] mt-0.5">{step.note}</p>
+                      <p className="text-sm text-[var(--surface-text-muted)] mt-0.5">{step.note}</p>
                     )}
                   </div>
                 </li>
