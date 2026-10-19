@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
-import { computeFba, isFbaCategory, type FbaCategory } from './fbaMath';
+import { computeFba, isFbaCategory, FBA_CATEGORY_LABELS, STORAGE_RATE_PER_CUFT, type FbaCategory } from './fbaMath';
 import AmazonFBAPanel from './AmazonFBAPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const amazonFbaConfig: CalculatorConfig = {
   inputs: [
@@ -136,6 +138,27 @@ const amazonFbaConfig: CalculatorConfig = {
       },
     );
     return results;
+  },
+  explainSteps: (values) => {
+    const price = parseFloat(values.sellingPrice);
+    const cost = parseFloat(values.productCost);
+    const weight = parseFloat(values.weight);
+    const volume = parseFloat(values.volume);
+    const category: FbaCategory = isFbaCategory(values.category) ? values.category : 'general';
+    if (![price, cost, weight].every(Number.isFinite) || price <= 0 || weight <= 0 || cost < 0) return [];
+    const f = computeFba(price, cost, weight, category, Number.isFinite(volume) ? volume : 0);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pc = (n: number) => `${parseFloat(n.toFixed(2))}%`;
+    const steps: ExplainStep[] = [
+      { label: 'Referral fee, Amazon\'s cut of the sale', expr: `${m(price)} × ${pc(f.referralPct)} (effective rate for ${FBA_CATEGORY_LABELS[category]}) = ${m(f.referral)}`, note: 'The rate depends on category and price band; there is a per-item minimum in most categories.' },
+    ];
+    if (f.closing > 0) steps.push({ label: 'Media closing fee', expr: `+ ${m(f.closing)} per item sold` });
+    steps.push({ label: 'FBA fulfillment fee (illustrative estimate)', expr: `${weight} lb → ${m(f.fulfillment)}`, note: 'This is a weight-only approximation. Amazon bills by size tier, dimensional weight and price band, so check its current rate card.' });
+    if (f.storage > 0) steps.push({ label: 'Monthly storage per unit', expr: `${volume} cu ft × ${m(STORAGE_RATE_PER_CUFT)} = ${m(f.storage)}`, note: 'Counted as one month of storage per unit.' });
+    steps.push({ label: 'Add up the fees', expr: `${m(f.referral)}${f.closing > 0 ? ` + ${m(f.closing)}` : ''} + ${m(f.fulfillment)}${f.storage > 0 ? ` + ${m(f.storage)}` : ''} = ${m(f.totalFees)}` });
+    steps.push({ label: 'Net profit per unit', expr: `${m(price)} − ${m(cost)} cost − ${m(f.totalFees)} fees = ${m(f.netProfit)}`, note: 'Advertising, returns and inbound shipping are not included.' });
+    steps.push({ label: 'Margin and return on cost', expr: `Margin = ${m(f.netProfit)} ÷ ${m(price)} = ${(Math.round(f.marginPct * 10) / 10).toFixed(1)}%${cost > 0 ? `; ROI = ${m(f.netProfit)} ÷ ${m(cost)} = ${(Math.round(f.roiPct * 10) / 10).toFixed(1)}%` : ''}` });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

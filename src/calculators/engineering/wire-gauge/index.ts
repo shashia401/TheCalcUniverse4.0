@@ -2,6 +2,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import WireGaugePanel from './WireGaugePanel';
 import { AMPACITY, AWG_SIZES, SMALL_CONDUCTOR_MAX_OCPD, conduitDerating, type Material } from './awgData';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const wireGaugeConfig: CalculatorConfig = {
   inputs: [
@@ -118,6 +120,36 @@ const wireGaugeConfig: CalculatorConfig = {
         color: derating < 1 ? 'neutral' : 'positive',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const current = parseFloat(values.current);
+    const material: Material = values.conductorMaterial === 'aluminum' ? 'aluminum' : 'copper';
+    const tempRating = values.insulationType || '75';
+    const numConductors = parseInt(values.numConductors || '1', 10);
+    const continuous = values.loadType === 'continuous';
+    if (!Number.isFinite(current) || current <= 0) return [];
+    const derating = conduitDerating(numConductors);
+    const designBase = continuous ? current * 1.25 : current;
+    const adjusted = designBase / derating;
+    const tableKey = material === 'aluminum' ? 'aluminum75' : (`copper${['60', '75', '90'].includes(tempRating) ? tempRating : '75'}` as 'copper60' | 'copper75' | 'copper90');
+    const table = AMPACITY[tableKey];
+    const small = SMALL_CONDUCTOR_MAX_OCPD[material];
+    const rows = AWG_SIZES.map((awg) => ({ awg, amps: table[awg] }));
+    const byAmps = rows.find((r) => r.amps !== undefined && r.amps >= adjusted);
+    const pick = rows.find((r) => r.amps !== undefined && r.amps >= adjusted && current <= (small[r.awg] ?? Infinity));
+    if (!pick || pick.amps === undefined || !byAmps) return [];
+    const col = material === 'aluminum' ? '75 °C aluminum' : `${tableKey.replace('copper', '')} °C copper`;
+    const f = (x: number) => String(parseFloat(x.toFixed(2)));
+    const steps: ExplainStep[] = [];
+    steps.push(continuous
+      ? { label: 'Continuous load: size for 125%', expr: `${f(current)} A × 1.25 = ${f(designBase)} A`, note: 'A load that runs 3 hours or more is sized at 125%.' }
+      : { label: 'Design current', expr: `${f(current)} A (not a continuous load, so no 125% uplift)` });
+    steps.push({ label: 'Adjust for the number of conductors in the conduit', expr: `${f(designBase)} A ÷ ${derating} = ${adjusted.toFixed(1)} A`, note: derating < 1 ? `${numConductors} conductors in one raceway use a ${f(derating * 100)}% factor.` : '1 to 3 conductors need no derating.' });
+    steps.push({ label: `Smallest wire whose ${col} ampacity covers it`, expr: `${byAmps.awg} AWG is rated ${byAmps.amps} A ≥ ${adjusted.toFixed(1)} A`, note: 'Ampacity comes from NEC Table 310.16 (30 °C ambient).' });
+    if (pick.awg !== byAmps.awg) {
+      steps.push({ label: 'Small-conductor overcurrent limit', expr: `${byAmps.awg} AWG ${material} is limited to ${small[byAmps.awg]} A of protection, below your ${f(current)} A, so step up to ${pick.awg} AWG (${pick.amps} A)`, note: 'NEC 240.4(D) caps the breaker size on the smallest conductors.' });
+    }
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

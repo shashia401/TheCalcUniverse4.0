@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import ConcretePanel from './ConcretePanel';
-import { concreteOrder, DEFAULT_CONCRETE_WASTE_PCT, slabCuFt, cylinderCuFt } from '../shared/concreteMath';
+import { concreteOrder, DEFAULT_CONCRETE_WASTE_PCT, slabCuFt, cylinderCuFt, CU_FT_PER_CU_YD, BAG_80_CU_FT, BAG_60_CU_FT } from '../shared/concreteMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
 
@@ -94,6 +96,9 @@ function buildResults(rawCubicFeet: number, wastage: number, shape: string): Cal
   ];
 }
 
+/** Run x width x riser x (steps + 1) / 2 cubic feet of solid stair. */
+const stairsCuFt = (runFt: number, widthFt: number, riserIn: number, steps: number) => runFt * widthFt * (riserIn / 12) * ((steps + 1) / 2);
+
 // ─── Calculate function ──────────────────────────────────────────────────────────
 
 function calculate(values: Record<string, string>): CalculatorResult[] {
@@ -137,7 +142,7 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
     }
     // Solid stair: tread k sits on a block k risers high, so the total is run x width x riser x (1+2+...+n)/n
     // = L x W x R x (n+1)/2 (a plain wedge would be n/2 and underestimates).
-    const cubicFeet = stairsLength * stairsWidth * (riserHeight / 12) * ((numSteps + 1) / 2);
+    const cubicFeet = stairsCuFt(stairsLength, stairsWidth, riserHeight, numSteps);
     return buildResults(cubicFeet, wastage, shape);
   }
 
@@ -264,6 +269,42 @@ const concreteConfig: CalculatorConfig = {
 
   calculate,
 
+  explainSteps: (values) => {
+    const shape = values.shape || 'slab';
+    const wasteParsed = parseInt(values.wastage ?? '', 10);
+    const wastage = Number.isFinite(wasteParsed) ? wasteParsed : DEFAULT_CONCRETE_WASTE_PCT;
+    const depth = parseDim(values.depth);
+    const f2 = (n: number) => n.toFixed(2);
+    let cubicFeet: number;
+    let first: ExplainStep;
+    if (shape === 'slab') {
+      const length = parseDim(values.length);
+      const width = parseDim(values.width);
+      if (!isValidPositive(length) || !isValidPositive(width) || !isValidPositive(depth)) return [];
+      cubicFeet = slabCuFt(length, width, depth);
+      first = { label: 'Slab volume in cubic feet', expr: `${length} ft × ${width} ft × (${depth} in ÷ 12) = ${f2(cubicFeet)} cu ft`, note: 'The thickness is divided by 12 to turn inches into feet.' };
+    } else if (shape === 'hole' || shape === 'column') {
+      const diameter = parseDim(values.diameter);
+      if (!isValidPositive(diameter) || !isValidPositive(depth)) return [];
+      cubicFeet = cylinderCuFt(diameter, depth);
+      first = { label: 'Cylinder volume in cubic feet', expr: `π × (${diameter} ft ÷ 2)² × (${depth} in ÷ 12) = ${f2(cubicFeet)} cu ft`, note: 'Volume of a round hole, footing or column: circle area times depth.' };
+    } else if (shape === 'stairs') {
+      const stairsLength = parseDim(values.stairsLength);
+      const stairsWidth = parseDim(values.stairsWidth);
+      const riserHeight = parseDim(values.riserHeight);
+      const numSteps = parseIntDim(values.numSteps);
+      if (!isValidPositive(stairsLength) || !isValidPositive(stairsWidth) || !isValidPositive(riserHeight) || !isValidPositive(numSteps)) return [];
+      cubicFeet = stairsCuFt(stairsLength, stairsWidth, riserHeight, numSteps);
+      first = { label: 'Solid stair volume in cubic feet', expr: `${stairsLength} ft × ${stairsWidth} ft × (${riserHeight} in ÷ 12) × (${numSteps} + 1) ÷ 2 = ${f2(cubicFeet)} cu ft`, note: 'Each tread sits on a block one riser higher than the last, so the average is (steps + 1) ÷ 2 risers tall.' };
+    } else return [];
+    const order = concreteOrder(cubicFeet, wastage);
+    return finiteSteps([
+      first,
+      { label: 'Add the waste allowance', expr: `${f2(cubicFeet)} × (1 + ${wastage}%) = ${f2(order.totalCuFt)} cu ft` },
+      { label: 'Convert to cubic yards for a ready-mix order', expr: `${f2(order.totalCuFt)} ÷ ${CU_FT_PER_CU_YD} = ${f2(order.totalCuYd)} cu yd`, note: 'One cubic yard is 3 ft × 3 ft × 3 ft = 27 cubic feet.' },
+      { label: 'Count the bags of mix', expr: `${f2(order.totalCuFt)} ÷ ${BAG_80_CU_FT} = ${order.bags80} bags (80 lb); ${f2(order.totalCuFt)} ÷ ${BAG_60_CU_FT} = ${order.bags60} bags (60 lb)`, note: 'Bag counts round up and use the yield this calculator assumes per bag; check your brand\'s bag.' },
+    ]);
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(ConcretePanel, { values, results });

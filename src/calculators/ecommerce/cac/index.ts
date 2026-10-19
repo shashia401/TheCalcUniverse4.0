@@ -1,6 +1,8 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import CACPanel from './CACPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const cacConfig: CalculatorConfig = {
   inputs: [
@@ -129,6 +131,32 @@ const cacConfig: CalculatorConfig = {
     });
 
     return results;
+  },
+  explainSteps: (values) => {
+    const spend = parseFloat(values.totalMarketingSpend);
+    const customers = parseFloat(values.newCustomers);
+    const ltv = parseFloat(values.ltv);
+    const aov = parseFloat(values.avgOrderValue);
+    const margin = parseFloat(values.grossMarginPct) / 100;
+    const ordersParsed = parseFloat(values.ordersPerMonth);
+    const ordersPerMonth = Number.isFinite(ordersParsed) && ordersParsed > 0 ? ordersParsed : 1;
+    if (!Number.isFinite(spend) || !Number.isFinite(customers) || customers <= 0 || spend < 0) return [];
+    const cac = spend / customers;
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const steps: ExplainStep[] = [
+      { label: 'Customer acquisition cost = spend ÷ new customers', expr: `${m(spend)} ÷ ${customers.toLocaleString(undefined)} = ${m(cac)}`, note: 'A blended average across every channel you counted in the spend.' },
+    ];
+    if (Number.isFinite(ltv) && ltv > 0 && cac > 0) {
+      const ratio = Math.round((ltv / cac) * 100) / 100;
+      steps.push({ label: 'LTV to CAC ratio', expr: `${m(ltv)} ÷ ${m(cac)} = ${ratio.toFixed(2)}x`, note: 'A common rule of thumb is 3x or more, so each customer returns well beyond what they cost to win.' });
+    }
+    if (Number.isFinite(aov) && Number.isFinite(margin) && aov > 0 && margin > 0) {
+      const monthly = aov * margin * ordersPerMonth;
+      const payback = Math.round((cac / monthly) * 10) / 10;
+      steps.push({ label: 'Gross profit per customer each month', expr: `${m(aov)} × ${parseFloat((margin * 100).toFixed(2))}% × ${ordersPerMonth} order${ordersPerMonth === 1 ? '' : 's'} = ${m(monthly)}` });
+      steps.push({ label: 'Payback period = CAC ÷ monthly gross profit', expr: `${m(cac)} ÷ ${m(monthly)} = ${payback.toFixed(1)} months`, note: 'How long a new customer takes to repay what you spent to acquire them.' });
+    }
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

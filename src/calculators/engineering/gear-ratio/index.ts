@@ -2,6 +2,8 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import GearRatioPanel from './GearRatioPanel';
 import { roundStr4 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const gearRatioConfig: CalculatorConfig = {
   inputs: [
@@ -122,6 +124,40 @@ const gearRatioConfig: CalculatorConfig = {
       ];
     }
 
+    return [];
+  },
+  explainSteps: (values) => {
+    const mode = values.mode || 'output';
+    const inputRPM = parseFloat(values.inputRPM);
+    const outputRPM = parseFloat(values.outputRPM);
+    const gearRatio = parseFloat(values.gearRatio);
+    const inputTorque = parseFloat(values.inputTorque);
+    const effPct = values.efficiency !== undefined && values.efficiency !== '' ? parseFloat(values.efficiency) : 95;
+    if (!Number.isFinite(effPct) || effPct <= 0 || effPct > 100) return [];
+    const efficiency = effPct / 100;
+    const torqueStep = (ratio: number): ExplainStep[] =>
+      Number.isFinite(inputTorque) && inputTorque > 0
+        ? [{ label: 'Output torque', expr: `T_out = ${fmt(inputTorque)} N·m × ${fmt(ratio)} × ${fmt(effPct)}% = ${fmt(inputTorque * ratio * efficiency)} N·m`, note: 'Torque scales up by the ratio; friction losses take off the efficiency.' }]
+        : [];
+    if (mode === 'output') {
+      if (!Number.isFinite(inputRPM) || !Number.isFinite(gearRatio) || gearRatio <= 0 || inputRPM < 0) return [];
+      return finiteSteps([
+        { label: 'Output speed = input speed ÷ ratio', expr: `${fmt(inputRPM)} RPM ÷ ${fmt(gearRatio)} = ${fmt(inputRPM / gearRatio)} RPM` },
+        ...torqueStep(gearRatio),
+      ]);
+    }
+    if (mode === 'ratio') {
+      if (!Number.isFinite(inputRPM) || !Number.isFinite(outputRPM) || outputRPM <= 0 || inputRPM <= 0) return [];
+      const ratio = inputRPM / outputRPM;
+      return finiteSteps([
+        { label: 'Gear ratio = input speed ÷ output speed', expr: `${fmt(inputRPM)} ÷ ${fmt(outputRPM)} = ${fmt(ratio)}:1`, note: 'Above 1:1 the output turns slower and with more torque.' },
+        ...torqueStep(ratio),
+      ]);
+    }
+    if (mode === 'input_rpm') {
+      if (!Number.isFinite(outputRPM) || !Number.isFinite(gearRatio) || gearRatio <= 0 || outputRPM < 0) return [];
+      return finiteSteps([{ label: 'Input speed = output speed × ratio', expr: `${fmt(outputRPM)} RPM × ${fmt(gearRatio)} = ${fmt(outputRPM * gearRatio)} RPM` }]);
+    }
     return [];
   },
   extraPanel: (values, results) => {

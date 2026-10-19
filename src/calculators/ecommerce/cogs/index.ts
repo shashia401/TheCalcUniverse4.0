@@ -2,6 +2,8 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { createElement } from 'react';
 import COGSPanel from './COGSPanel';
 import { computeCogs } from './cogsMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const cogsConfig: CalculatorConfig = {
   inputs: [
@@ -93,6 +95,24 @@ const cogsConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const beginInv = parseFloat(values.beginningInventory);
+    const purchases = parseFloat(values.purchases);
+    const endInv = parseFloat(values.endingInventory);
+    const revenue = parseFloat(values.revenue);
+    if (![beginInv, purchases, endInv].every(Number.isFinite) || beginInv < 0 || purchases < 0 || endInv < 0) return [];
+    const f = computeCogs(beginInv, purchases, endInv, revenue);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const steps: ExplainStep[] = [
+      { label: 'Goods available for sale', expr: `${m(beginInv)} beginning inventory + ${m(purchases)} purchases = ${m(f.goodsAvailable)}` },
+      { label: 'Subtract what is left at the end', expr: f.impossible ? `${m(f.goodsAvailable)} − ${m(endInv)} ending inventory is negative, so COGS is shown as $0.00` : `${m(f.goodsAvailable)} − ${m(endInv)} ending inventory = ${m(f.cogs)} cost of goods sold`, note: f.impossible ? 'Ending inventory cannot exceed goods available; re-check the three figures.' : 'COGS counts only direct product costs, not rent or marketing.' },
+    ];
+    if (f.grossProfit !== undefined) {
+      steps.push({ label: 'Gross profit', expr: `${m(revenue)} revenue − ${m(f.cogs)} COGS = ${m(f.grossProfit)}` });
+      steps.push({ label: 'Gross margin and COGS share', expr: `${m(f.grossProfit)} ÷ ${m(revenue)} = ${(Math.round(f.grossMarginPct! * 100) / 100).toFixed(2)}% margin; ${m(f.cogs)} ÷ ${m(revenue)} = ${f.cogsPct!.toFixed(2)}% of revenue` });
+    }
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -2,6 +2,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { leaseVsBuy } from './leaseVsBuyMath';
 import { createElement } from 'react';
 import LeaseVsBuyPanel from './LeaseVsBuyPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const leaseBuyConfig: CalculatorConfig = {
   inputs: [
@@ -159,6 +160,31 @@ const leaseBuyConfig: CalculatorConfig = {
         color: c.loanBalance > 0 ? 'negative' : 'neutral',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const c = leaseVsBuy(values);
+    if (!c) return [];
+    const f = (n: number) => `$${Math.round(n).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    const f2 = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const price = parseFloat(values.vehiclePrice);
+    const leasePayment = parseFloat(values.leasePayment);
+    const leaseDown = parseFloat(values.leaseDownPayment) || 0;
+    const buyDown = parseFloat(values.buyDownPayment) || 0;
+    const buyAPR = parseFloat(values.buyAPR);
+    const taxPct = parseFloat(values.salesTax) || 0;
+    const deprRaw = parseFloat(values.depreciationRate);
+    const deprPct = Number.isFinite(deprRaw) ? deprRaw : 15;
+    const k = Math.min(c.leaseTerm, c.buyTerm);
+    const diff = c.netBuyCost - c.totalLeaseCost;
+    return finiteSteps([
+      { label: 'Total cost of leasing', expr: `${f(leaseDown)} down + ${f2(leasePayment)} × ${c.leaseTerm} months × (1 + ${parseFloat(taxPct.toFixed(3))}% tax) = ${f(c.totalLeaseCost)}`, note: 'You hand the car back, so nothing is credited at the end.' },
+      { label: 'Amount borrowed to buy', expr: `${f(price)} × (1 + ${parseFloat(taxPct.toFixed(3))}%) − ${f(buyDown)} down = ${f(c.loanPrincipal)}`, note: 'Sales tax on the price is financed with the loan.' },
+      { label: 'Monthly loan payment', expr: `${f(c.loanPrincipal)} at ${parseFloat(buyAPR.toFixed(3))}% over ${c.buyTerm} months = ${f2(c.monthlyBuyPayment)}/month` },
+      { label: `Paid and still owed after ${k} months`, expr: `Paid ${f2(c.monthlyBuyPayment)} × ${k} = ${f(c.buyPaid)}; balance left = ${f(c.loanBalance)}` },
+      { label: `Car value after ${c.leaseTerm} months`, expr: `${f(price)} × (1 − ${parseFloat(deprPct.toFixed(3))}%)^(${c.leaseTerm} ÷ 12) = ${f(c.residualValue)}`, note: 'The yearly depreciation rate is your own assumption.' },
+      { label: 'Net cost of buying', expr: `${f(Math.min(buyDown, price * (1 + taxPct / 100)))} down + ${f(c.buyPaid)} paid + ${f(c.loanBalance)} owed − ${f(c.residualValue)} car value = ${f(c.netBuyCost)}` },
+      { label: 'Compare', expr: c.tie ? 'The two cost about the same.' : `${f(c.totalLeaseCost)} (lease) vs ${f(c.netBuyCost)} (buy): ${diff > 0 ? 'leasing' : 'buying'} is ${f(c.savings)} cheaper` },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

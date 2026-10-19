@@ -1,7 +1,9 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import MulchTopsoilPanel from './MulchTopsoilPanel';
-import { mulchVolume } from '../shared/mulchMath';
+import { mulchVolume, CU_FT_PER_CU_YD, MULCH_BUFFER_PCT } from '../shared/mulchMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const mulchTopsoilConfig: CalculatorConfig = {
   inputs: [
@@ -109,6 +111,21 @@ const mulchTopsoilConfig: CalculatorConfig = {
         color: 'neutral',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const length = parseFloat(values.length);
+    const width = parseFloat(values.width);
+    const depthIn = parseFloat(values.depth);
+    if ([length, width, depthIn].some(isNaN) || length <= 0 || width <= 0 || depthIn <= 0) return [];
+    const vol = mulchVolume(length * width, depthIn);
+    const f2 = (n: number) => n.toFixed(2);
+    return finiteSteps([
+      { label: 'Area', expr: `${length} ft × ${width} ft = ${(length * width).toFixed(0)} sq ft` },
+      { label: 'Volume in cubic feet', expr: `${(length * width).toFixed(0)} sq ft × (${depthIn} in ÷ 12) = ${vol.rawCuFt.toFixed(1)} cu ft`, note: 'The depth is divided by 12 to turn inches into feet.' },
+      { label: 'Convert to cubic yards', expr: `${vol.rawCuFt.toFixed(1)} ÷ ${CU_FT_PER_CU_YD} = ${f2(vol.rawCuYd)} cu yd` },
+      { label: `Add a ${MULCH_BUFFER_PCT}% buffer`, expr: `${f2(vol.rawCuYd)} × ${1 + MULCH_BUFFER_PCT / 100} = ${f2(vol.orderCuYd)} cu yd (${vol.orderCuFt.toFixed(1)} cu ft)`, note: 'Covers settling, uneven ground and spillage.' },
+      { label: 'Bags of 2 cu ft', expr: `${vol.orderCuFt.toFixed(1)} ÷ 2 = ${vol.bags2} bags (rounded up)`, note: 'Bag sizes vary by product, so check the cubic feet printed on the bag.' },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -2,6 +2,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import VoltageDropPanel from './VoltageDropPanel';
 import { OHMS_PER_KFT, voltageDropVolts, type Awg, type Material } from '../wire-gauge/awgData';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const voltageDropConfig: CalculatorConfig = {
   inputs: [
@@ -141,6 +142,29 @@ const voltageDropConfig: CalculatorConfig = {
         color: getDropColor(voltageDropPct),
       },
     ];
+  },
+  explainSteps: (values) => {
+    const sourceV = parseFloat(values.voltage);
+    const current = parseFloat(values.current);
+    const length = parseFloat(values.wireLength);
+    const gauge = values.wireGauge || '12';
+    const material = values.conductorMaterial || 'copper';
+    if (![sourceV, current, length].every(Number.isFinite) || sourceV <= 0 || current <= 0 || length <= 0) return [];
+    const mat: Material = material === 'aluminum' ? 'aluminum' : 'copper';
+    const resistancePer1000ft = OHMS_PER_KFT[mat][gauge as Awg] ?? (mat === 'aluminum' && gauge === '14' ? OHMS_PER_KFT.copper['14']! * (3.25 / 1.98) : undefined);
+    if (resistancePer1000ft === undefined) return [];
+    const wireResistance = (resistancePer1000ft / 1000) * length * 2;
+    const drop = voltageDropVolts(current, length, resistancePer1000ft, 'single');
+    const pct = (drop / sourceV) * 100;
+    const loss = current * current * wireResistance;
+    const rounded = Math.round(pct * 100) / 100;
+    return finiteSteps([
+      { label: 'Wire resistance per 1,000 ft', expr: `${gauge} AWG ${mat} = ${parseFloat(resistancePer1000ft.toPrecision(4))} Ω per 1,000 ft`, note: 'From NEC Chapter 9, Table 8 (stranded conductor at 75 °C).' },
+      { label: 'Resistance of the whole loop', expr: `(${parseFloat(resistancePer1000ft.toPrecision(4))} ÷ 1,000) × (${length} ft × 2) = ${wireResistance.toFixed(4)} Ω`, note: 'Current travels out and back, so the length counts twice.' },
+      { label: 'Voltage drop = current × resistance', expr: `${current} A × ${wireResistance.toFixed(4)} Ω = ${drop.toFixed(3)} V, which is ${drop.toFixed(3)} ÷ ${sourceV} = ${pct.toFixed(2)}%` },
+      { label: 'Voltage left at the load', expr: `${sourceV} V − ${drop.toFixed(3)} V = ${(sourceV - drop).toFixed(2)} V` },
+      { label: 'Power lost as heat in the wire', expr: `P = I² × R = ${current}² × ${wireResistance.toFixed(4)} = ${loss.toFixed(2)} W (${((loss / (sourceV * current)) * 100).toFixed(2)}% of total)`, note: rounded <= 3 ? 'Within the 3% branch-circuit recommendation.' : rounded <= 5 ? 'Over 3% but within the 5% feeder plus branch recommendation.' : 'Over the 5% recommendation, so use a larger wire.' },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

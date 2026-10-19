@@ -1,5 +1,6 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { sigFig4 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const froudeConfig: CalculatorConfig = {
   inputs: [
@@ -72,6 +73,21 @@ calculate: (values) => {
       { id: 'waveSpeed', label: 'Wave Celerity (√gL)', value: `${parseFloat(waveSpeed.toPrecision(4))} m/s`, color: 'neutral' },
       { id: 'formula', label: 'Formula Used', value: `Fr = ${v} / √(${g} × ${L})`, color: 'neutral' },
     ];
+  },
+
+  explainSteps: (values) => {
+    const v = parseFloat(values.velocity);
+    const g = parseFloat(values.gravity);
+    const L = parseFloat(values.characteristicLength);
+    if (![v, g, L].every(Number.isFinite) || v < 0 || g <= 0 || L <= 0) return [];
+    const waveSpeed = Math.sqrt(g * L);
+    const fr = Number((v / waveSpeed).toPrecision(4));
+    const regime = fr < 1 ? 'subcritical (tranquil)' : fr < 1.1 ? 'critical to slightly supercritical' : 'supercritical (rapid)';
+    return finiteSteps([
+      { label: 'Wave celerity: how fast a small surface wave travels', expr: `c = √(g × L) = √(${g} × ${L}) = ${parseFloat(waveSpeed.toPrecision(4))} m/s` },
+      { label: 'Froude number = flow velocity ÷ wave celerity', expr: `Fr = ${v} ÷ ${parseFloat(waveSpeed.toPrecision(4))} = ${fmt(fr)}` },
+      { label: 'Compare with 1', expr: `Fr ${fr < 1 ? '<' : fr < 1.1 ? '≈' : '>'} 1 → ${regime}`, note: 'Below 1 a wave can travel upstream; above 1 the flow outruns it.' },
+    ]);
   },
 
   extraPanel: (values, results) => {

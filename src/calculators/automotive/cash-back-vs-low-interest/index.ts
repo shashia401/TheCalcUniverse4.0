@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import { compareOffers } from './cashBackMath';
 import CashBackPanel from './CashBackPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const cashBackVsLowInterestConfig: CalculatorConfig = {
   inputs: [
@@ -134,6 +135,21 @@ const cashBackVsLowInterestConfig: CalculatorConfig = {
         color: !aWins && !tie ? 'positive' as const : 'neutral' as const,
       },
     ];
+  },
+  explainSteps: (values) => {
+    const c = compareOffers(values);
+    if (!c) return [];
+    const f = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const price = parseFloat(values.vehiclePrice);
+    const rebate = parseFloat(values.cashRebate) || 0;
+    const rate = (x: number) => `${parseFloat(x.toFixed(3))}%`;
+    return finiteSteps([
+      { label: 'Option A: take the rebate, finance at your own rate', expr: `Loan = ${f(price)} − ${f(c.downPayment)} down − ${f(rebate)} rebate = ${f(c.principalA)}` },
+      { label: 'Option A monthly payment', expr: `${f(c.principalA)} at ${rate(c.standardRate)} over ${c.n} months = ${f(c.monthlyA)}/month`, note: 'Standard loan payment formula.' },
+      { label: 'Option B: skip the rebate, take the promotional rate', expr: `Loan = ${f(price)} − ${f(c.downPayment)} down = ${f(c.principalB)}; at ${rate(c.promoRate)} over ${c.n} months = ${f(c.monthlyB)}/month` },
+      { label: 'Total paid under each option', expr: `A: ${f(c.monthlyA)} × ${c.n} + ${f(c.downPayment)} down${c.excessRebate > 0 ? ` − ${f(c.excessRebate)} rebate beyond the loan` : ''} = ${f(c.totalPaidA)}; B: ${f(c.monthlyB)} × ${c.n} + ${f(c.downPayment)} down = ${f(c.totalPaidB)}`, note: `Interest paid: A ${f(c.interestA)}, B ${f(c.interestB)}.` },
+      { label: 'Compare', expr: c.tie ? 'Both options cost the same.' : `${c.aWins ? 'Option A (cash back)' : 'Option B (low rate)'} is cheaper by ${f(c.savings)}` },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

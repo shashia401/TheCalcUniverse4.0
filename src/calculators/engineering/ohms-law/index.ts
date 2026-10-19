@@ -2,6 +2,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import OHMPanel from './OHMPanel';
 import { solvePair } from './ohmsMath';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const ohmsLawConfig: CalculatorConfig = {
   inputs: [
@@ -108,6 +109,54 @@ const ohmsLawConfig: CalculatorConfig = {
       ];
     }
 
+    return [];
+  },
+  explainSteps: (values) => {
+    const solveFor = values.solveFor || 'voltage';
+    const V = parseFloat(values.voltage);
+    const I = parseFloat(values.current);
+    const R = parseFloat(values.resistance);
+    const n = (x: number) => String(parseFloat(x.toFixed(6)));
+    if (solveFor === 'voltage') {
+      if (![R, I].every(Number.isFinite) || R < 0 || I < 0) return [];
+      const s = solvePair('I', I, 'R', R);
+      if (!s) return [];
+      return finiteSteps([
+        { label: 'Pick the formula for voltage', expr: 'V = I × R', note: 'Ohm\'s law: voltage is current times resistance.' },
+        { label: 'Substitute your values', expr: `V = ${n(I)} A × ${n(R)} Ω = ${n(s.V)} V` },
+        { label: 'Power dissipated', expr: `P = I² × R = (${n(I)})² × ${n(R)} = ${n(s.P)} W`, note: 'Check this against the wattage rating of the component.' },
+      ]);
+    }
+    if (solveFor === 'current') {
+      if (![V, R].every(Number.isFinite) || V < 0 || R <= 0) return [];
+      const s = solvePair('V', V, 'R', R);
+      if (!s) return [];
+      return finiteSteps([
+        { label: 'Pick the formula for current', expr: 'I = V ÷ R', note: 'Rearranged from V = I × R.' },
+        { label: 'Substitute your values', expr: `I = ${n(V)} V ÷ ${n(R)} Ω = ${n(s.I)} A` },
+        { label: 'Power dissipated', expr: `P = V² ÷ R = (${n(V)})² ÷ ${n(R)} = ${n(s.P)} W` },
+      ]);
+    }
+    if (solveFor === 'resistance') {
+      if (![V, I].every(Number.isFinite) || V < 0 || I <= 0) return [];
+      const s = solvePair('V', V, 'I', I);
+      if (!s) return [];
+      return finiteSteps([
+        { label: 'Pick the formula for resistance', expr: 'R = V ÷ I', note: 'Rearranged from V = I × R.' },
+        { label: 'Substitute your values', expr: `R = ${n(V)} V ÷ ${n(I)} A = ${n(s.R)} Ω` },
+        { label: 'Power dissipated', expr: `P = V × I = ${n(V)} × ${n(I)} = ${n(s.P)} W` },
+      ]);
+    }
+    if (solveFor === 'power') {
+      if (![V, I].every(Number.isFinite) || V < 0 || I < 0) return [];
+      const s = solvePair('V', V, 'I', I);
+      const steps = [
+        { label: 'Pick the formula for power', expr: 'P = V × I' },
+        { label: 'Substitute your values', expr: `P = ${n(V)} V × ${n(I)} A = ${n(V * I)} W` },
+      ];
+      if (s) steps.push({ label: 'Resistance of the load', expr: `R = V ÷ I = ${n(V)} ÷ ${n(I)} = ${n(s.R)} Ω` });
+      return finiteSteps(steps);
+    }
     return [];
   },
   extraPanel: (values, results) => {

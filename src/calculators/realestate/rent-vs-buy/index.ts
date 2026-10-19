@@ -4,6 +4,7 @@ import RentVsBuyPanel from './RentVsBuyPanel';
 import { simulateRentVsBuy, firstBuyingWinsYear } from '../../finance/rent-vs-buy/model';
 import { monthlyPayment } from '../../finance/rent-vs-buy/utils';
 import { rvbParamsFromValues } from './params';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const rentVsBuyConfig: CalculatorConfig = {
   inputs: [
@@ -248,6 +249,31 @@ const rentVsBuyConfig: CalculatorConfig = {
     ];
   },
 
+  explainSteps: (values) => {
+    const parsed = rvbParamsFromValues(values);
+    if (!parsed) return [];
+    const { params: p, years } = parsed;
+    const rows = simulateRentVsBuy(p);
+    const at = rows[years - 1];
+    if (!at) return [];
+    const upfront = p.homePrice * (p.downPaymentPct + p.closingCostsPct);
+    const loanAmount = p.homePrice * (1 - p.downPaymentPct);
+    const mp = monthlyPayment(loanAmount, p.mortgageRate, 360);
+    const d = (n: number) => `${n < 0 ? '-' : ''}$${Math.round(Math.abs(n)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    const pc = (x: number) => `${parseFloat((x * 100).toFixed(2))}%`;
+    const yl = `${years} ${years === 1 ? 'year' : 'years'}`;
+    const buyOutlay = upfront + at.mortgagePaid + at.taxPaid + at.insurancePaid + at.maintenancePaid + at.pmiPaid;
+    const diff = Math.abs(at.netRentCost - at.netBuyCost);
+    return finiteSteps([
+      { label: 'Cash needed to buy on day one', expr: `${d(p.homePrice)} × (${pc(p.downPaymentPct)} down + ${pc(p.closingCostsPct)} closing) = ${d(upfront)}` },
+      { label: 'Monthly mortgage payment (30-year fixed)', expr: `${d(loanAmount)} at ${pc(p.mortgageRate)} = ${d(mp)}/month` },
+      { label: `Home value and equity after ${yl}`, expr: `${d(p.homePrice)} × (1 + ${pc(p.appreciation)})^${years} = ${d(at.homeValue)}; minus the remaining loan ${d(at.loanBalance)} = ${d(at.equity)} equity` },
+      { label: 'Net sale proceeds if you sold then', expr: `${d(at.homeValue)} × (1 − ${pc(p.sellingCostsPct)} selling costs) − ${d(at.loanBalance)} = ${d(at.saleProceeds)}` },
+      { label: `Net cost of buying over ${yl}`, expr: `${d(upfront)} up front + ${d(at.mortgagePaid)} mortgage + ${d(at.taxPaid)} tax + ${d(at.insurancePaid)} insurance + ${d(at.maintenancePaid)} upkeep + ${d(at.pmiPaid)} PMI − ${d(at.saleProceeds)} proceeds = ${d(buyOutlay - at.saleProceeds)}` },
+      { label: `Net cost of renting over ${yl}`, expr: `${d(at.rentOnly)} rent (rising ${pc(p.rentIncrease)} a year) + ${d(at.rentersInsurancePaid)} renters insurance − ${d(at.investmentGain)} growth on the ${d(upfront)} not spent (at ${pc(p.investReturn)}) = ${d(at.netRentCost)}` },
+      { label: 'Compare', expr: `${d(at.netBuyCost)} (buy) vs ${d(at.netRentCost)} (rent): ${at.netBuyCost < at.netRentCost ? 'buying' : 'renting'} comes out ${d(diff)} cheaper`, note: 'Uses the shared rent-vs-buy model with its stated simplifications.' },
+    ]);
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(RentVsBuyPanel, { values, results });

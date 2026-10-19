@@ -12,6 +12,8 @@ const TILE_DIMS: Record<string, [number, number]> = {
   '9': [36, 36],
 };
 import { fixed1 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const tileFlooringConfig: CalculatorConfig = {
   inputs: [
@@ -146,6 +148,30 @@ const tileFlooringConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const length = parseFloat(values.roomLength);
+    const width = parseFloat(values.roomWidth);
+    const tileSqFt = parseFloat(values.tileSize || '1');
+    const wastePct = parseFloat(values.wastePercent || '10');
+    const price = parseFloat(values.pricePerSqFt);
+    const groutParsed = parseFloat(values.groutWidth);
+    const sqFtPerBox = parseFloat(values.sqFtPerBox);
+    if ([length, width, tileSqFt].some(isNaN) || length <= 0 || width <= 0 || tileSqFt <= 0) return [];
+    const dims = TILE_DIMS[values.tileSize || '1'] ?? [Math.sqrt(tileSqFt * 144), Math.sqrt(tileSqFt * 144)];
+    const grout = Number.isFinite(groutParsed) ? groutParsed : DEFAULT_GROUT_IN;
+    const est = tileEstimate({ roomLengthFt: length, roomWidthFt: width, tileLengthIn: dims[0], tileWidthIn: dims[1], groutIn: grout, wastePct, sqFtPerBox: Number.isFinite(sqFtPerBox) ? sqFtPerBox : undefined });
+    const totalSqFt = est.roomSqFt * (1 + wastePct / 100);
+    const g = grout > 0 ? grout : 0;
+    const steps: ExplainStep[] = [
+      { label: 'Room area', expr: `${length} ft × ${width} ft = ${fmt(est.roomSqFt)} sq ft` },
+      { label: 'Add the waste allowance', expr: `${fmt(est.roomSqFt)} × (1 + ${wastePct}%) = ${fmt(totalSqFt)} sq ft`, note: 'Extra covers cuts at the edges and the occasional broken tile.' },
+      { label: 'Area each tile covers, grout joint included', expr: `(${parseFloat(dims[0].toFixed(2))}" + ${g}") × (${parseFloat(dims[1].toFixed(2))}" + ${g}") ÷ 144 = ${est.cellSqFt.toFixed(4)} sq ft` },
+      { label: 'Individual tiles needed', expr: `${fmt(est.roomSqFt)} ÷ ${est.cellSqFt.toFixed(4)} = ${est.baseTiles} tiles; × (1 + ${wastePct}%) = ${est.totalTiles} tiles (rounded up)` },
+      { label: 'Boxes to buy', expr: `${est.totalTiles} ÷ ${est.tilesPerBox} tiles per box = ${est.boxes} boxes (rounded up)` },
+    ];
+    if (!isNaN(price) && price > 0) steps.push({ label: 'Estimated tile cost', expr: `${fmt(totalSqFt)} sq ft × $${price} = $${(totalSqFt * price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, note: 'Priced on the waste-adjusted square footage, not on whole boxes.' });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

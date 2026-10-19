@@ -2,6 +2,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import MTBFPanel from './MTBFPanel';
 import { HOURS_PER_YEAR, reliabilityPct } from './mtbfMath';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const mtbfConfig: CalculatorConfig = {
   inputs: [
@@ -107,6 +108,39 @@ const mtbfConfig: CalculatorConfig = {
       ];
     }
 
+    return [];
+  },
+  explainSteps: (values) => {
+    const mode = values.mode || 'mtbf';
+    const operatingHours = parseFloat(values.operatingHours);
+    const failures = parseFloat(values.numberOfFailures);
+    const mtbfKnown = parseFloat(values.mtbf);
+    const missionTime = parseFloat(values.missionTime);
+    const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    if (mode === 'mtbf') {
+      if (!Number.isFinite(operatingHours) || !Number.isFinite(failures) || failures <= 0 || operatingHours <= 0) return [];
+      const mtbf = operatingHours / failures;
+      return finiteSteps([
+        { label: 'MTBF = operating hours ÷ failures', expr: `${fmt(operatingHours)} h ÷ ${fmt(failures)} = ${fmt(mtbf)} hours` },
+        { label: 'Failure rate is the reciprocal', expr: `λ = 1 ÷ ${fmt(mtbf)} = ${(1 / mtbf).toExponential(4)} failures/hr` },
+        { label: 'Reliability over one year (8,760 h)', expr: `R = e^(−${HOURS_PER_YEAR} ÷ ${fmt(mtbf)}) = ${reliabilityPct(HOURS_PER_YEAR, mtbf).toFixed(2)}%`, note: 'Assumes a constant failure rate (the exponential model).' },
+      ]);
+    }
+    if (mode === 'reliability') {
+      if (!Number.isFinite(mtbfKnown) || !Number.isFinite(missionTime) || mtbfKnown <= 0 || missionTime < 0) return [];
+      const reliability = reliabilityPct(missionTime, mtbfKnown);
+      return finiteSteps([
+        { label: 'Failure rate', expr: `λ = 1 ÷ ${fmt(mtbfKnown)} = ${(1 / mtbfKnown).toExponential(4)} /hr` },
+        { label: 'Reliability at the mission time', expr: `R = e^(−${fmt(missionTime)} ÷ ${fmt(mtbfKnown)}) = ${reliability.toFixed(4)}%`, note: 'Assumes a constant failure rate (the exponential model).' },
+        { label: 'Probability of failing before then', expr: `100% − ${reliability.toFixed(4)}% = ${(100 - reliability).toFixed(4)}%` },
+      ]);
+    }
+    if (mode === 'failures') {
+      if (!Number.isFinite(mtbfKnown) || !Number.isFinite(missionTime) || mtbfKnown <= 0 || missionTime < 0) return [];
+      return finiteSteps([
+        { label: 'Expected failures = hours ÷ MTBF', expr: `${fmt(missionTime)} ÷ ${fmt(mtbfKnown)} = ${(missionTime / mtbfKnown).toFixed(2)}`, note: 'An average over many units or long periods, not a guarantee for one unit.' },
+      ]);
+    }
     return [];
   },
   extraPanel: (values, results) => {

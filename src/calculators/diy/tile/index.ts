@@ -3,6 +3,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import TilePanel from './TilePanel';
 import { tileEstimate, LAYOUT_WASTE, DEFAULT_GROUT_IN } from '../shared/tileMath';
 import { fixed1 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 
 const LAYOUT_NOTES: Record<string, string> = {
@@ -211,6 +213,31 @@ const tileConfig: CalculatorConfig = {
     ];
 
     return results;
+  },
+  explainSteps: (values) => {
+    const roomL = parseFloat(values.areaLength);
+    const roomW = parseFloat(values.areaWidth);
+    const tileL = parseFloat(values.tileLength);
+    const tileW = parseFloat(values.tileWidth);
+    const layout = values.layout || 'grid';
+    const price = parseFloat(values.pricePerTile);
+    const wasteOverride = parseFloat(values.wasteOverride);
+    if ([roomL, roomW, tileL, tileW].some(isNaN) || roomL <= 0 || roomW <= 0 || tileL <= 0 || tileW <= 0) return [];
+    const wastePct = !isNaN(wasteOverride) && wasteOverride >= 0 ? wasteOverride : LAYOUT_WASTE[layout] ?? 10;
+    const groutParsed = parseFloat(values.groutWidth);
+    const sqFtPerBox = parseFloat(values.sqFtPerBox);
+    const grout = Number.isFinite(groutParsed) ? groutParsed : DEFAULT_GROUT_IN;
+    const est = tileEstimate({ roomLengthFt: roomL, roomWidthFt: roomW, tileLengthIn: tileL, tileWidthIn: tileW, groutIn: grout, wastePct, sqFtPerBox: Number.isFinite(sqFtPerBox) ? sqFtPerBox : undefined });
+    const g = grout > 0 ? grout : 0;
+    const steps: ExplainStep[] = [
+      { label: 'Room area', expr: `${roomL} ft × ${roomW} ft = ${fmt(est.roomSqFt)} sq ft` },
+      { label: 'Area each tile covers, grout joint included', expr: `(${tileL}" + ${g}") × (${tileW}" + ${g}") ÷ 144 = ${est.cellSqFt.toFixed(4)} sq ft`, note: 'Each tile takes up its own size plus one grout joint; 144 sq in make a sq ft.' },
+      { label: 'Tiles to cover the room', expr: `${fmt(est.roomSqFt)} ÷ ${est.cellSqFt.toFixed(4)} = ${est.baseTiles} tiles (rounded up)` },
+      { label: 'Add the waste allowance for cuts and breakage', expr: `${est.baseTiles} × (1 + ${wastePct}%) = ${est.totalTiles} tiles (${est.wasteTiles} extra)`, note: `Layout "${layout}" uses a ${LAYOUT_WASTE[layout] ?? 10}% default unless you override it.` },
+      { label: 'Boxes to buy', expr: `${est.totalTiles} ÷ ${est.tilesPerBox} tiles per box = ${est.boxes} boxes (rounded up)`, note: 'Tiles per box comes from the carton coverage you entered, or a typical default.' },
+    ];
+    if (!isNaN(price) && price > 0) steps.push({ label: 'Cost of the tiles', expr: `${est.totalTiles} × $${price} = $${(est.totalTiles * price).toFixed(2)}` });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

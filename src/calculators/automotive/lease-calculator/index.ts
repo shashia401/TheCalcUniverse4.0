@@ -2,6 +2,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { lease } from './leaseMath';
 import { createElement } from 'react';
 import LeasePanel from './LeasePanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const leaseCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -198,6 +200,25 @@ const leaseCalculatorConfig: CalculatorConfig = {
     ];
   },
 
+  explainSteps: (values) => {
+    const l = lease(values);
+    if (!l) return [];
+    const f = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const acq = parseFloat(values.acquisitionFee) || 0;
+    const taxPct = parseFloat(values.salesTax) || 0;
+    const steps: ExplainStep[] = [
+      { label: 'Adjusted capitalized cost', expr: `${f(l.negotiatedPrice)} − ${f(l.downPayment)} down − ${f(l.tradeInValue)} trade-in + ${f(acq)} acquisition fee = ${f(l.adjustedCapCost)}`, note: 'The negotiated price (not MSRP) less what you put in up front, plus fees rolled into the lease.' },
+      { label: 'Residual value: what the car is worth at lease end', expr: `${f(l.msrp)} MSRP × ${parseFloat(l.residualValuePct.toFixed(2))}% = ${f(l.residualValue)}` },
+      ...(l.rateInputType === 'apr'
+        ? [{ label: 'Convert APR to a money factor', expr: `${parseFloat(l.apr.toFixed(4))}% ÷ 2400 = ${l.moneyFactor.toFixed(5)}`, note: 'Money factor × 2400 gives the equivalent APR.' }]
+        : [{ label: 'Money factor to equivalent APR', expr: `${l.moneyFactor.toFixed(5)} × 2400 = ${l.apr.toFixed(2)}%` }]),
+      { label: 'Monthly depreciation charge', expr: `(${f(l.adjustedCapCost)} − ${f(l.residualValue)}) ÷ ${l.leaseTerm} months = ${f(l.monthlyDepreciation)}`, note: 'You pay for the value the car loses during the lease.' },
+      { label: 'Monthly finance charge', expr: `(${f(l.adjustedCapCost)} + ${f(l.residualValue)}) × ${l.moneyFactor.toFixed(5)} = ${f(l.monthlyFinanceCharge)}`, note: 'Interest is charged on the average of the cap cost and the residual.' },
+      { label: 'Base payment plus sales tax', expr: `${f(l.monthlyDepreciation)} + ${f(l.monthlyFinanceCharge)} = ${f(l.baseMonthlyPayment)}; + ${parseFloat(taxPct.toFixed(3))}% tax (${f(l.monthlyTax)}) = ${f(l.totalMonthlyPayment)}/month` },
+      { label: 'Total cost of the lease', expr: `${f(l.totalMonthlyPayment)} × ${l.leaseTerm} + ${f(l.downPayment)} down + ${f(l.tradeInValue)} trade-in = ${f(l.totalLeaseCost)}` },
+    ];
+    return finiteSteps(steps);
+  },
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(LeasePanel, { values, results });

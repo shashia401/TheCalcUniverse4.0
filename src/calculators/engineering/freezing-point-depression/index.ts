@@ -1,5 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { sigFig4 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const fpDepressionConfig: CalculatorConfig = {
   inputs: [
@@ -118,6 +120,29 @@ calculate: (values) => {
       { id: 'formula', label: 'Formula Used', value: `ΔTf = ${kf} × ${fmt(molality)} × ${i} = ${fmt(deltaTf)}°C`, color: 'neutral' },
       { id: 'effectiveMolality', label: 'Effective Molality (m × i)', value: `${fmt(molality * i)} mol/kg`, color: 'neutral' },
     ];
+  },
+
+  explainSteps: (values) => {
+    const kf = parseFloat(values.kf);
+    let molality = parseFloat(values.molality);
+    const i = parseFloat(values.vanthoff) || 1;
+    const soluteMass = parseFloat(values.soluteMass);
+    const solventMass = parseFloat(values.solventMass);
+    const molarMass = parseFloat(values.molarMass);
+    const fp0 = values.solventFp !== undefined && values.solventFp !== '' ? parseFloat(values.solventFp) : 0;
+    if (!Number.isFinite(kf) || kf <= 0 || !Number.isFinite(fp0)) return [];
+    const steps: ExplainStep[] = [];
+    if (!isNaN(soluteMass) && !isNaN(solventMass) && !isNaN(molarMass) && soluteMass > 0 && solventMass > 0 && molarMass > 0) {
+      const moles = soluteMass / molarMass;
+      molality = moles / (solventMass / 1000);
+      steps.push({ label: 'Moles of solute', expr: `${fmt(soluteMass)} g ÷ ${fmt(molarMass)} g/mol = ${fmt(moles)} mol` });
+      steps.push({ label: 'Molality = moles ÷ kg of solvent', expr: `${fmt(moles)} mol ÷ (${fmt(solventMass)} g ÷ 1000) = ${fmt(molality)} mol/kg`, note: 'The masses override the molality field when all three are filled in.' });
+    }
+    if (!Number.isFinite(molality) || molality < 0 || !Number.isFinite(i) || i <= 0) return [];
+    const deltaTf = kf * molality * i;
+    steps.push({ label: 'Freezing point depression', expr: `ΔTf = Kf × m × i = ${kf} × ${fmt(molality)} × ${i} = ${fmt(deltaTf)}°C`, note: "i is the van 't Hoff factor, the number of particles each formula unit splits into." });
+    steps.push({ label: 'Subtract from the pure-solvent freezing point', expr: `${fp0}°C − ${fmt(deltaTf)}°C = ${fmt(fp0 - deltaTf)}°C`, note: 'An ideal-solution estimate; it is least accurate for concentrated solutions.' });
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

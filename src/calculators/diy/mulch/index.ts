@@ -1,8 +1,10 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MulchPanel from './MulchPanel';
-import { mulchVolume } from '../shared/mulchMath';
+import { mulchVolume, CU_FT_PER_CU_YD, MULCH_BUFFER_PCT } from '../shared/mulchMath';
 import { roundStr2 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const mulchConfig: CalculatorConfig = {
   inputs: [
@@ -180,6 +182,24 @@ const mulchConfig: CalculatorConfig = {
     ];
 
     return results;
+  },
+  explainSteps: (values) => {
+    const length = parseFloat(values.length);
+    const width = parseFloat(values.width);
+    const depthIn = parseFloat(values.depth || '2');
+    const shape = values.shape || 'rect';
+    if ([length, width, depthIn].some(isNaN) || length <= 0 || width <= 0 || depthIn <= 0) return [];
+    const circle = shape === 'circle';
+    const area = circle ? Math.PI * (length / 2) * (length / 2) : length * width;
+    const vol = mulchVolume(area, depthIn);
+    const f1 = (n: number) => parseFloat(n.toFixed(1)).toString();
+    return finiteSteps([
+      { label: 'Bed area', expr: circle ? `π × (${length} ft ÷ 2)² = ${f1(area)} sq ft` : `${length} ft × ${width} ft = ${f1(area)} sq ft` },
+      { label: 'Volume in cubic feet', expr: `${f1(area)} sq ft × (${depthIn} in ÷ 12) = ${fmt(vol.rawCuFt)} cu ft`, note: 'The depth is divided by 12 to turn inches into feet.' },
+      { label: 'Convert to cubic yards', expr: `${fmt(vol.rawCuFt)} ÷ ${CU_FT_PER_CU_YD} = ${fmt(vol.rawCuYd)} cu yd` },
+      { label: `Add a ${MULCH_BUFFER_PCT}% buffer for settling and spillage`, expr: `${fmt(vol.rawCuFt)} × ${1 + MULCH_BUFFER_PCT / 100} = ${fmt(vol.orderCuFt)} cu ft = ${fmt(vol.orderCuYd)} cu yd` },
+      { label: 'What to buy', expr: `${fmt(vol.orderCuFt)} ÷ 2 = ${vol.bags2} bags of 2 cu ft, or ÷ 3 = ${vol.bags3} bags of 3 cu ft, or ${vol.bulkYards} cu yd in bulk`, note: 'Bags round up; bulk rounds up to the next half yard.' },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

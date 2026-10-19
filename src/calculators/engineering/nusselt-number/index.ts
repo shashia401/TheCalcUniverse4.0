@@ -1,5 +1,6 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { sigFig4 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const nusseltConfig: CalculatorConfig = {
   inputs: [
@@ -57,6 +58,19 @@ calculate: (values) => {
       { id: 'formula', label: 'Formula Used', value: `Nu = (${h} × ${L}) / ${k} = ${fmt(nu)}`, color: 'neutral' },
       { id: 'interpretation', label: 'Interpretation', value: nu > 1 ? 'Convection enhances heat transfer beyond pure conduction' : nu === 1 ? 'Equivalent to pure conduction across a layer of thickness L (Nu = 1)' : 'Nu < 1: heat transfer is poorer than conduction across a stagnant layer of thickness L — check the characteristic length and h', color: nu > 1 ? 'positive' : 'neutral' },
     ];
+  },
+
+  explainSteps: (values) => {
+    const h = parseFloat(values.heatTransferCoeff);
+    const L = parseFloat(values.characteristicLength);
+    const k = parseFloat(values.thermalConductivity);
+    if (![h, L, k].every(Number.isFinite) || h <= 0 || L <= 0 || k <= 0) return [];
+    const nu = Number(((h * L) / k).toPrecision(6));
+    return finiteSteps([
+      { label: 'Multiply the heat transfer coefficient by the length', expr: `h × L = ${h} × ${L} = ${fmt(h * L)} W/m·K` },
+      { label: 'Divide by the fluid conductivity', expr: `Nu = ${fmt(h * L)} ÷ ${k} = ${fmt(nu)}`, note: 'Nu compares convection with pure conduction through the same layer.' },
+      { label: 'Compare with 1', expr: nu > 1 ? `Nu = ${fmt(nu)} > 1: convection beats pure conduction` : nu === 1 ? 'Nu = 1: same as pure conduction' : `Nu = ${fmt(nu)} < 1: worse than conduction through a still layer, so check h and L` },
+    ]);
   },
 
   extraPanel: (values, results) => {

@@ -1,5 +1,6 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { sigFig4 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const prandtlConfig: CalculatorConfig = {
   inputs: [
@@ -67,6 +68,19 @@ calculate: (values) => {
       { id: 'category', label: 'Fluid Category', value: category, color: 'neutral' },
       { id: 'formula', label: 'Formula Used', value: `Pr = (${mu} × ${cp}) / ${k} = ${fmt(pr)}`, color: 'neutral' },
     ];
+  },
+
+  explainSteps: (values) => {
+    const mu = parseFloat(values.dynamicViscosity);
+    const cp = parseFloat(values.specificHeat);
+    const k = parseFloat(values.thermalConductivity);
+    if (![mu, cp, k].every(Number.isFinite) || mu <= 0 || cp <= 0 || k <= 0) return [];
+    const pr = Number(((mu * cp) / k).toPrecision(4));
+    return finiteSteps([
+      { label: 'Multiply viscosity by specific heat', expr: `μ × cp = ${mu} × ${cp} = ${fmt(mu * cp)}` },
+      { label: 'Divide by thermal conductivity', expr: `Pr = ${fmt(mu * cp)} ÷ ${k} = ${fmt(pr)}`, note: 'Pr compares how fast momentum diffuses with how fast heat diffuses.' },
+      { label: 'Read the result', expr: pr < 0.1 ? 'Pr < 0.1: liquid-metal range, heat diffuses far faster than momentum' : pr < 1 ? 'Pr < 1: gas range, heat diffuses a little faster than momentum' : pr < 10 ? '1 ≤ Pr < 10: water-like, momentum diffuses a little faster than heat' : 'Pr ≥ 10: viscous liquid, momentum diffuses much faster than heat' },
+    ]);
   },
 
   extraPanel: (values, results) => {

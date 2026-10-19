@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BTUPanel from './BTUPanel';
-import { btu, CLIMATE_LABELS } from './btuMath';
+import { btu, CLIMATE_LABELS, BTU_PER_TON, BTU_PER_EXTRA_PERSON, FREE_OCCUPANTS, KITCHEN_BTU } from './btuMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 function fmtNum(n: number): string {
   return Math.round(n).toLocaleString(undefined);
@@ -57,6 +59,32 @@ function calculate(values: Record<string, string>): CalculatorResult[] {
       value: details,
     },
   ];
+}
+
+function explainSteps(values: Record<string, string>): ExplainStep[] {
+  const r = btu(values);
+  if (!r) return [];
+  const heating = r.purpose === 'heating';
+  const n = (x: number) => Math.round(x).toLocaleString(undefined);
+  const factors: string[] = [`ceiling ${r.ceilingFactor}`];
+  if (!heating) factors.push(`sun ${r.sunFactor}`);
+  factors.push(`insulation ${r.insulationFactor}`);
+  if (!heating && r.roomFactor !== 1) factors.push(`room ${r.roomFactor}`);
+  const base = r.area * r.perSqFt;
+  const adjusted = r.totalBTU - r.extraBtu;
+  const steps: ExplainStep[] = [
+    { label: `Base ${r.purpose} load for the climate zone`, expr: `${n(r.area)} sq ft × ${r.perSqFt} BTU/h per sq ft = ${n(base)} BTU/h`, note: `Planning value for ${CLIMATE_LABELS[values.climateZone] || 'your zone'}; this is a room-sizing estimate, not a full Manual J load calculation.` },
+    { label: 'Adjust for the room', expr: `${n(base)} × ${factors.join(' × ')} = ${n(adjusted)} BTU/h`, note: heating ? 'Sun, room type and people do not change a heating estimate.' : 'More sun, taller ceilings and poor insulation raise the load; a basement lowers it.' },
+  ];
+  if (!heating) {
+    const parts: string[] = [];
+    if (values.roomType === 'kitchen') parts.push(`${n(KITCHEN_BTU)} kitchen`);
+    const extraPeople = Math.max(0, r.occupants - FREE_OCCUPANTS);
+    if (extraPeople > 0) parts.push(`${extraPeople} extra ${extraPeople === 1 ? 'person' : 'people'} × ${n(BTU_PER_EXTRA_PERSON)}`);
+    steps.push({ label: 'Add heat from people and the kitchen', expr: parts.length ? `${n(adjusted)} + ${parts.join(' + ')} = ${n(r.totalBTU)} BTU/h` : `${n(adjusted)} + 0 (two people or fewer, no kitchen) = ${n(r.totalBTU)} BTU/h`, note: `The first ${FREE_OCCUPANTS} people are already in the base figure.` });
+  }
+  steps.push({ label: 'Convert to tons and round up to a standard size', expr: `${n(r.totalBTU)} ÷ ${n(BTU_PER_TON)} = ${r.tons.toFixed(1)} ton, so ${r.recommendedTons.toFixed(1)} ton (${n(r.recommendedBTU)} BTU/h)`, note: 'Units come in half-ton steps, so round up rather than down.' });
+  return finiteSteps(steps);
 }
 
 // ─── Config ──────────────────────────────────────────────────────────────────────
@@ -156,6 +184,7 @@ const btuConfig: CalculatorConfig = {
   ],
 
   calculate,
+  explainSteps,
 
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { closingCosts, parseClosing } from './closingMath';
 import ClosingCostsPanel from './ClosingCostsPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const closingCostsConfig: CalculatorConfig = {
   inputs: [
@@ -104,6 +106,25 @@ const closingCostsConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const parsed = parseClosing(values);
+    if (!parsed) return [];
+    const { homePrice, downPct, annualRate, party } = parsed;
+    const { loanAmount, buyerGroups, totalBuyer, sellerLines, totalSeller } = closingCosts(homePrice, downPct, annualRate);
+    const fmt = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    const steps: ExplainStep[] = [];
+    if (party === 'buyer' || party === 'both') {
+      steps.push({ label: 'Loan amount', expr: `${fmt(homePrice)} × (1 − ${parseFloat(downPct.toFixed(2))}% down) = ${fmt(loanAmount)}`, note: 'Several lender and title fees are a percentage of the loan or the price.' });
+      for (const g of buyerGroups) {
+        steps.push({ label: g.label.charAt(0) + g.label.slice(1).toLowerCase(), expr: `${g.lines.map((l) => fmt(l.amount)).join(' + ')} = ${fmt(g.total)}`, note: g.lines.map((l) => l.label.trim()).join('; ') + '.' });
+      }
+      steps.push({ label: 'Total buyer closing costs', expr: `${buyerGroups.map((g) => fmt(g.total)).join(' + ')} = ${fmt(totalBuyer)} (${((totalBuyer / homePrice) * 100).toFixed(1)}% of price)`, note: 'The rates are national-average assumptions, so your Loan Estimate is the number to trust.' });
+    }
+    if (party === 'seller' || party === 'both') {
+      steps.push({ label: 'Total seller closing costs', expr: `${sellerLines.map((l) => fmt(l.amount)).join(' + ')} = ${fmt(totalSeller)} (${((totalSeller / homePrice) * 100).toFixed(1)}% of price)`, note: sellerLines.map((l) => l.label.trim()).join('; ') + '.' });
+    }
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

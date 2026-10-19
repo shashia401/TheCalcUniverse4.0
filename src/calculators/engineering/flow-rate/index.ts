@@ -2,6 +2,7 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import FlowRatePanel from './FlowRatePanel';
 import { roundStr4 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const flowRateConfig: CalculatorConfig = {
   inputs: [
@@ -101,6 +102,51 @@ const flowRateConfig: CalculatorConfig = {
       ];
     }
 
+    return [];
+  },
+  explainSteps: (values) => {
+    const r6 = (n: number) => parseFloat(n.toFixed(6)).toString();
+    const mode = values.mode || 'velocity';
+    const diamIn = parseFloat(values.pipeDiameter);
+    const flowGPM = parseFloat(values.flowRate);
+    const velocityFps = parseFloat(values.velocity);
+    const areaLine = (d: number) => {
+      const areaSqFt = Math.PI * Math.pow(d / 12 / 2, 2);
+      return { areaSqFt, step: { label: 'Cross-section area of the pipe', expr: `A = π × (${fmt(d)} in ÷ 12 ÷ 2)² = ${r6(areaSqFt)} ft² (${fmt(areaSqFt * 144)} in²)`, note: 'Diameter is converted from inches to feet first.' } };
+    };
+    if (mode === 'velocity') {
+      if (!Number.isFinite(diamIn) || !Number.isFinite(flowGPM) || diamIn <= 0 || flowGPM < 0) return [];
+      const a = areaLine(diamIn);
+      const flowCFS = flowGPM / 448.83;
+      const velFps = flowCFS / a.areaSqFt;
+      return finiteSteps([
+        a.step,
+        { label: 'Convert gallons per minute to cubic feet per second', expr: `${fmt(flowGPM)} GPM ÷ 448.83 = ${r6(flowCFS)} ft³/s` },
+        { label: 'Velocity = flow ÷ area', expr: `v = ${r6(flowCFS)} ÷ ${r6(a.areaSqFt)} = ${fmt(velFps)} ft/s (${fmt(velFps * 0.3048)} m/s)` },
+      ]);
+    }
+    if (mode === 'flowrate') {
+      if (!Number.isFinite(diamIn) || !Number.isFinite(velocityFps) || diamIn <= 0 || velocityFps < 0) return [];
+      const a = areaLine(diamIn);
+      const flowCFS = a.areaSqFt * velocityFps;
+      const gpm = flowCFS * 448.83;
+      return finiteSteps([
+        a.step,
+        { label: 'Flow = area × velocity', expr: `Q = ${r6(a.areaSqFt)} ft² × ${fmt(velocityFps)} ft/s = ${r6(flowCFS)} ft³/s` },
+        { label: 'Convert to gallons per minute', expr: `${r6(flowCFS)} × 448.83 = ${fmt(gpm)} GPM (${fmt(gpm * 3.78541)} L/min)` },
+      ]);
+    }
+    if (mode === 'diameter') {
+      if (!Number.isFinite(flowGPM) || !Number.isFinite(velocityFps) || velocityFps <= 0 || flowGPM < 0) return [];
+      const flowCFS = flowGPM / 448.83;
+      const areaSqFt = flowCFS / velocityFps;
+      const dIn = 2 * Math.sqrt(areaSqFt / Math.PI) * 12;
+      return finiteSteps([
+        { label: 'Convert gallons per minute to cubic feet per second', expr: `${fmt(flowGPM)} GPM ÷ 448.83 = ${r6(flowCFS)} ft³/s` },
+        { label: 'Required area = flow ÷ velocity', expr: `A = ${r6(flowCFS)} ÷ ${fmt(velocityFps)} = ${r6(areaSqFt)} ft² (${fmt(areaSqFt * 144)} in²)` },
+        { label: 'Diameter from area', expr: `d = 2 × √(A ÷ π) × 12 = ${fmt(dIn)} inches`, note: 'Pick the next standard pipe size at or above this inside diameter.' },
+      ]);
+    }
     return [];
   },
   extraPanel: (values, results) => {

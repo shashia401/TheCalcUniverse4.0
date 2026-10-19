@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import SquareFootagePanel from './SquareFootagePanel';
-import { area } from './areaMath';
+import { area, SQFT_PER_SQM } from './areaMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const SHAPE_OPTIONS = [
   { label: 'Rectangle', value: 'rectangle' },
@@ -179,6 +181,21 @@ const squareFootageConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const r = area(values);
+    if (!r) return [];
+    const d = r.dimensions;
+    const u = r.unit;
+    const steps: ExplainStep[] = [];
+    if (r.shape === 'rectangle') steps.push({ label: 'Area of the rectangle', expr: `${fmt(d.length!)} × ${fmt(d.width!)} ${u} = ${fmt(r.area)} ${u}²` });
+    else if (r.shape === 'circle') steps.push({ label: 'Area of the circle', expr: `π × ${fmt(d.radius!)}² = ${fmt(r.area)} ${u}²`, note: 'Radius is half the diameter.' });
+    else steps.push({ label: 'Add the two rectangles of the L-shape', expr: `(${fmt(d.length!)} × ${fmt(d.width!)}) + (${fmt(d.length2!)} × ${fmt(d.width2!)}) = ${fmt(r.area)} ${u}²` });
+    if (u === 'm') steps.push({ label: 'Convert square meters to square feet', expr: `${fmt(r.area)} m² × ${SQFT_PER_SQM} = ${fmt(r.sqft)} ft²` });
+    else steps.push({ label: 'Convert square feet to square meters', expr: `${fmt(r.area)} ft² ÷ ${SQFT_PER_SQM} = ${fmt(r.sqm)} m²` });
+    if (r.wastagePct > 0) steps.push({ label: 'Add the wastage allowance', expr: `${fmt(r.sqft)} ft² × (1 + ${r.wastagePct}%) = ${fmt(r.withWaste)} ft²`, note: 'Extra material for cuts, mistakes and uneven edges.' });
+    if (r.cost !== null) steps.push({ label: 'Material cost', expr: `${fmt(r.withWaste)} ft² × $${parseFloat(values.pricePerSqFt)} = $${r.cost.toFixed(2)}`, note: 'The price is per square foot, charged on the waste-adjusted area.' });
+    return finiteSteps(steps);
   },
   extraPanel: (_values, results) => {
     if (!results.length) return null;

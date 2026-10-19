@@ -2,6 +2,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import LumberPanel from './LumberPanel';
 import { lumber } from './lumberMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const lumberConfig: CalculatorConfig = {
   inputs: [
@@ -94,6 +96,19 @@ const lumberConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const l = lumber(values);
+    if (!l) return [];
+    const price = parseFloat(values.pricePerBdFt);
+    const q = l.quantity;
+    const steps: ExplainStep[] = [
+      { label: 'Board feet in one board (nominal size)', expr: `${l.thickness}" × ${l.width}" × ${l.length} ft ÷ 12 = ${l.perBoard.toFixed(2)} bd ft`, note: 'A board foot is 1 inch thick, 12 inches wide and 1 foot long; lumber is sold by nominal size.' },
+      { label: 'Total board feet to buy', expr: `${l.perBoard.toFixed(2)} × ${q} boards = ${l.totalBdFt.toFixed(2)} bd ft` },
+      { label: 'Actual size after milling', expr: `${l.thickness}" × ${l.width}" nominal is about ${l.actualT.toFixed(1)}" × ${l.actualW.toFixed(1)}" actual; ${l.actualT.toFixed(2)} × ${l.actualW.toFixed(2)} × ${l.length} ÷ 12 × ${q} = ${l.actualBdFt.toFixed(2)} bd ft of real wood`, note: 'Surfaced (S4S) softwood is smaller than its nominal name.' },
+    ];
+    if (!isNaN(price) && price > 0) steps.push({ label: 'Cost', expr: `${l.totalBdFt.toFixed(2)} bd ft × $${price} = $${(l.totalBdFt * price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, note: 'Lumber is priced on nominal board feet.' });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

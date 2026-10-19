@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RateLimitPanel from './RateLimitPanel';
 import { computeThroughput } from './rateLimitMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const rateLimitConfig: CalculatorConfig = {
   inputs: [
@@ -92,6 +94,25 @@ const rateLimitConfig: CalculatorConfig = {
       });
     }
     return results;
+  },
+  explainSteps: (values) => {
+    const rpm = parseFloat(values.maxRpm);
+    const payloadSizeKB = parseFloat(values.avgPayloadSize);
+    const peakConcurrent = parseFloat(values.peakConcurrentUsers);
+    if (![rpm, payloadSizeKB].every(Number.isFinite) || rpm <= 0 || payloadSizeKB <= 0) return [];
+    const t = computeThroughput(rpm, payloadSizeKB);
+    const loc = (n: number, d: number) => n.toLocaleString(undefined, { maximumFractionDigits: d });
+    const steps: ExplainStep[] = [
+      { label: 'Requests per second', expr: `${loc(rpm, 0)} RPM ÷ 60 = ${loc(t.rps, 1)} req/s` },
+      { label: 'Payload throughput', expr: `${loc(t.rps, 1)} req/s × ${loc(payloadSizeKB, 2)} KB = ${loc(t.kBps, 1)} KB/s`, note: 'Here 1 KB is 1,024 bytes.' },
+      { label: 'Convert to megabits per second', expr: `${loc(t.kBps, 1)} KB/s × 1,024 bytes × 8 bits ÷ 1,000,000 = ${loc(t.mbps, 2)} Mbps` },
+      { label: 'Data moved in a 30-day month at this sustained rate', expr: `${loc(t.kBps, 1)} KB/s × 1,024 × 86,400 s × 30 ÷ 10¹² = ${loc(t.tbPerMonth, 2)} TB`, note: 'Decimal terabytes, assuming the limit is hit around the clock.' },
+      { label: 'Requests in a day', expr: `${loc(rpm, 0)} × 60 × 24 = ${loc(t.requestsPerDay, 0)} req/day` },
+    ];
+    if (Number.isFinite(peakConcurrent) && peakConcurrent > 0) {
+      steps.push({ label: 'Share per concurrent user', expr: `${loc(rpm, 0)} RPM ÷ ${loc(peakConcurrent, 0)} users = ${(rpm / peakConcurrent).toFixed(2)} RPM/user` });
+    }
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

@@ -1,5 +1,6 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { sigFig4 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const bufferConfig: CalculatorConfig = {
   inputs: [
@@ -80,6 +81,26 @@ calculate: (values) => {
       };
     }
     return results;
+  },
+
+  explainSteps: (values) => {
+    const pKa = parseFloat(values.pKa);
+    const pH = parseFloat(values.pH);
+    const C = parseFloat(values.concentration);
+    if (![pKa, pH, C].every(Number.isFinite) || C <= 0) return [];
+    const Ka = Math.pow(10, -pKa);
+    const H = Math.pow(10, -pH);
+    const OH = 1e-14 / H;
+    const bufferTerm = (C * Ka * H) / Math.pow(Ka + H, 2);
+    const beta = Math.LN10 * (H + OH + bufferTerm);
+    const basePct = 100 / (1 + Math.pow(10, pKa - pH));
+    const e = (x: number) => x.toExponential(3);
+    return finiteSteps([
+      { label: 'Convert pKa and pH to concentrations', expr: `Ka = 10^(−${pKa}) = ${e(Ka)}; [H⁺] = 10^(−${pH}) = ${e(H)} M; [OH⁻] = 1e−14 ÷ [H⁺] = ${e(OH)} M` },
+      { label: 'Weak-acid buffer term', expr: `C·Ka·[H⁺] ÷ (Ka + [H⁺])² = ${C} × ${e(Ka)} × ${e(H)} ÷ (${e(Ka + H)})² = ${e(bufferTerm)}`, note: 'This term peaks when pH = pKa.' },
+      { label: 'Add the free H⁺ and OH⁻ terms and scale by ln 10', expr: `β = 2.3026 × (${e(H)} + ${e(OH)} + ${e(bufferTerm)}) = ${fmt(beta)} mol/L·pH`, note: 'The H⁺ and OH⁻ terms only matter below about pH 2 or above 12.' },
+      { label: 'Share of buffer present as base A⁻', expr: `1 ÷ (1 + 10^(${pKa} − ${pH})) = ${basePct.toFixed(1)}% base / ${(100 - parseFloat(basePct.toFixed(1))).toFixed(1)}% acid` },
+    ]);
   },
 
   extraPanel: (values, results) => {

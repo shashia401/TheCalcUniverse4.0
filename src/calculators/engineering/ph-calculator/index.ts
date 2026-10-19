@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PHPanel from './PHPanel';
 import { classifyPh } from './phMath';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 function formatConcentration(value: number): string {
   if (value === 0) return '0 M';
@@ -150,6 +151,48 @@ const phCalculatorConfig: CalculatorConfig = {
       ];
     }
 
+    return [];
+  },
+  explainSteps: (values) => {
+    const mode = values.mode || 'ph-to-conc';
+    const p2 = (x: number) => x.toFixed(2);
+    if (mode === 'ph-to-conc') {
+      const ph = parseFloat(values.ph);
+      if (!Number.isFinite(ph) || ph < 0 || ph > 14) return [];
+      const poh = 14 - ph;
+      return finiteSteps([
+        { label: 'Hydrogen ion concentration', expr: `[H⁺] = 10^(−pH) = 10^(−${p2(ph)}) = ${formatConcentration(Math.pow(10, -ph))}` },
+        { label: 'Find pOH', expr: `pOH = 14 − ${p2(ph)} = ${p2(poh)}`, note: 'pH + pOH = 14 at 25 °C.' },
+        { label: 'Hydroxide ion concentration', expr: `[OH⁻] = 10^(−${p2(poh)}) = ${formatConcentration(Math.pow(10, -poh))}` },
+        { label: 'Classify', expr: `pH ${p2(ph)} → ${classifyPh(ph)}` },
+      ]);
+    }
+    if (mode === 'h-to-ph') {
+      const h = parseFloat(values.hConcentration);
+      if (!Number.isFinite(h) || h <= 0) return [];
+      const ph = -Math.log10(h);
+      if (ph < -2 || ph > 16) return [];
+      const poh = 14 - ph;
+      return finiteSteps([
+        { label: 'Take the negative log of [H⁺]', expr: `pH = −log₁₀(${formatConcentration(h)}) = ${p2(ph)}` },
+        { label: 'Find pOH', expr: `pOH = 14 − ${p2(ph)} = ${p2(poh)}`, note: 'pH + pOH = 14 at 25 °C.' },
+        { label: 'Hydroxide ion concentration', expr: `[OH⁻] = 10^(−${p2(poh)}) = ${formatConcentration(Math.pow(10, -poh))}` },
+        { label: 'Classify', expr: `pH ${p2(ph)} → ${classifyPh(ph)}` },
+      ]);
+    }
+    if (mode === 'oh-to-poh') {
+      const oh = parseFloat(values.ohConcentration);
+      if (!Number.isFinite(oh) || oh <= 0) return [];
+      const poh = -Math.log10(oh);
+      if (poh < -2 || poh > 16) return [];
+      const ph = 14 - poh;
+      return finiteSteps([
+        { label: 'Take the negative log of [OH⁻]', expr: `pOH = −log₁₀(${formatConcentration(oh)}) = ${p2(poh)}` },
+        { label: 'Find pH', expr: `pH = 14 − ${p2(poh)} = ${p2(ph)}`, note: 'pH + pOH = 14 at 25 °C.' },
+        { label: 'Hydrogen ion concentration', expr: `[H⁺] = 10^(−${p2(ph)}) = ${formatConcentration(Math.pow(10, -ph))}` },
+        { label: 'Classify', expr: `pH ${p2(ph)} → ${classifyPh(ph)}` },
+      ]);
+    }
     return [];
   },
   extraPanel: (values, results) => {

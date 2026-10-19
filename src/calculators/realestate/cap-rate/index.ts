@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import CapRatePanel from './CapRatePanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import type { ExplainStep } from '../../../types/calculator';
 
 const capRateConfig: CalculatorConfig = {
   inputs: [
@@ -216,6 +218,33 @@ const capRateConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
     ];
+  },
+  explainSteps: (values) => {
+    const propertyValue = parseFloat(values.propertyValue);
+    const grossRent = parseFloat(values.annualRent);
+    const vacancyPct = parseFloat(values.vacancyRate) / 100;
+    if ([propertyValue, grossRent, vacancyPct].some(isNaN)) return [];
+    if (propertyValue <= 0 || grossRent <= 0) return [];
+    const propertyTax = parseFloat(values.propertyTax) || 0;
+    const insurance = parseFloat(values.insurance) || 0;
+    const hoa = parseFloat(values.hoa) || 0;
+    const maintenance = parseFloat(values.maintenance) || 0;
+    const management = parseFloat(values.propertyManagement) || 0;
+    const other = parseFloat(values.otherExpenses) || 0;
+    const totalExpenses = propertyTax + insurance + hoa + maintenance + management + other;
+    const egi = grossRent * (1 - vacancyPct);
+    const noi = egi - totalExpenses;
+    const capRate = Math.round((noi / propertyValue) * 1e4) / 1e2 || 0;
+    const fmt = (n: number) => Math.round(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const money = (n: number) => `${n < 0 && Math.round(n) !== 0 ? '-' : ''}$${fmt(Math.abs(n))}`;
+    const steps: ExplainStep[] = [
+      { label: 'Take off the vacancy allowance', expr: `$${fmt(grossRent)} × (1 − ${parseFloat((vacancyPct * 100).toFixed(2))}%) = $${fmt(egi)} effective income`, note: 'Rent you expect to actually collect.' },
+      { label: 'Add up the operating expenses', expr: `$${fmt(propertyTax)} tax + $${fmt(insurance)} insurance + $${fmt(hoa)} HOA + $${fmt(maintenance)} maintenance + $${fmt(management)} management + $${fmt(other)} other = $${fmt(totalExpenses)}`, note: 'Mortgage payments are left out on purpose: cap rate ignores financing.' },
+      { label: 'Net operating income (NOI)', expr: `$${fmt(egi)} − $${fmt(totalExpenses)} = ${money(noi)} a year` },
+      { label: 'Cap rate = NOI ÷ property value', expr: `${money(noi)} ÷ $${fmt(propertyValue)} = ${capRate.toFixed(2)}%` },
+    ];
+    if (egi > 0) steps.push({ label: 'Break-even occupancy', expr: `$${fmt(totalExpenses)} ÷ $${fmt(grossRent)} = ${Math.min(100, (totalExpenses / grossRent) * 100).toFixed(1)}%`, note: 'The share of the year the unit must be rented just to cover expenses.' });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

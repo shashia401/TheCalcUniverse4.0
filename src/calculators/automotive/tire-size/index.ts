@@ -3,6 +3,7 @@ import { createElement } from 'react';
 import TireSizePanel from './TireSizePanel';
 import { roundStr2 as fmt } from '../../../lib/format';
 import { compareTires } from './tireMath';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const tireSizeConfig: CalculatorConfig = {
   inputs: [
@@ -128,6 +129,18 @@ const tireSizeConfig: CalculatorConfig = {
         color: 'neutral',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const t = compareTires(values);
+    if (!t) return [];
+    const [ow, oa, or, nw, na, nr] = ['origWidth', 'origAspect', 'origRim', 'newWidth', 'newAspect', 'newRim'].map((k) => parseFloat(values[k]));
+    const shown = parseFloat(t.diamDiffPct.toFixed(2));
+    return finiteSteps([
+      { label: 'Original overall diameter', expr: `${or}" × 25.4 + 2 × ${ow} mm × ${oa}% = ${fmt(t.origDiamMm)} mm (${fmt(t.origDiamMm / 25.4)}")`, note: 'Rim diameter plus two sidewalls; each sidewall is width × aspect ratio.' },
+      { label: 'New overall diameter', expr: `${nr}" × 25.4 + 2 × ${nw} mm × ${na}% = ${fmt(t.newDiamMm)} mm (${fmt(t.newDiamMm / 25.4)}")` },
+      { label: 'Difference in diameter', expr: `(${fmt(t.newDiamMm)} − ${fmt(t.origDiamMm)}) ÷ ${fmt(t.origDiamMm)} = ${fmt(t.diamDiffPct)}%`, note: 'Circumference scales with diameter, so this is also the speedometer and odometer error.' },
+      { label: 'True speed when the speedometer reads 60 mph', expr: `60 × ${fmt(t.newDiamMm)} ÷ ${fmt(t.origDiamMm)} = ${fmt(t.actualAtIndicated60)} mph`, note: shown === 0 ? 'No change in diameter, so the speedometer stays accurate.' : `The speedometer reads ${shown > 0 ? 'lower' : 'higher'} than your real speed.` },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

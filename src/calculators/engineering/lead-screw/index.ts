@@ -1,5 +1,6 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { roundStr4 as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const leadScrewConfig: CalculatorConfig = {
   inputs: [
@@ -75,6 +76,22 @@ calculate: (values) => {
       { id: 'power', label: 'Power at 1 rev/sec', value: `${fmt(powerAt1RPS)} W`, color: 'neutral' },
       { id: 'formula', label: 'Formula Used', value: `T = (F × p) / (2π × η)`, color: 'neutral' },
     ];
+  },
+
+  explainSteps: (values) => {
+    const F = parseFloat(values.axialForce);
+    const p = parseFloat(values.lead);
+    const etaPct = parseFloat(values.efficiency);
+    const eta = etaPct / 100;
+    const sf = parseFloat(values.safetyFactor) || 1;
+    if (![F, p, eta].every(Number.isFinite) || F < 0 || p <= 0 || eta <= 0 || eta > 1) return [];
+    const torque = (F * p) / (2 * Math.PI * eta);
+    return finiteSteps([
+      { label: 'Torque to push the load', expr: `T = (F × p) ÷ (2π × η) = (${fmt(F)} N × ${fmt(p)} m) ÷ (2π × ${fmt(eta)}) = ${fmt(torque)} N·m`, note: 'One revolution moves the load one lead; efficiency η covers thread friction.' },
+      { label: 'Apply the safety factor', expr: `${fmt(torque)} N·m × ${sf} = ${fmt(torque * sf)} N·m` },
+      { label: 'Mechanical advantage', expr: `2π × η ÷ p = 2π × ${fmt(eta)} ÷ ${fmt(p)} = ${fmt((2 * Math.PI * eta) / p)} : 1` },
+      { label: 'Power at 1 revolution per second', expr: `P = T × 2π × 1 rev/s = ${fmt(torque)} × 2π = ${fmt(torque * 2 * Math.PI)} W` },
+    ]);
   },
 
   extraPanel: (values, results) => {

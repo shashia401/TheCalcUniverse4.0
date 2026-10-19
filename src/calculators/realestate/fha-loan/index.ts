@@ -3,6 +3,8 @@ import { CalculatorConfig } from '../../../types/calculator';
 import FHAMIPPanel from './FHAMIPPanel';
 
 import { parseFha, FHA_LIMIT_FLOOR_2026, FHA_LIMIT_CEILING_2026 } from './fhaMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { UFMIP_RATE } from './fhaMath';
 
 const fhaLoanConfig: CalculatorConfig = {
   inputs: [
@@ -111,6 +113,19 @@ const fhaLoanConfig: CalculatorConfig = {
         color: lifeOfLoan ? 'negative' : 'neutral',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const m = parseFha(values);
+    if (!m) return [];
+    const fmt = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pct = (x: number, d: number) => `${parseFloat((x * 100).toFixed(d))}%`;
+    return finiteSteps([
+      { label: 'Base loan after the down payment', expr: `${fmt(m.homePrice)} − ${fmt(m.downPayment)} (${parseFloat(m.downPct.toFixed(2))}% down) = ${fmt(m.baseLoan)}` },
+      { label: 'Add the upfront mortgage insurance premium', expr: `${fmt(m.baseLoan)} × ${pct(UFMIP_RATE, 2)} = ${fmt(m.upfrontMIP)}, so the loan is ${fmt(m.totalLoan)}`, note: 'FHA lets you roll the upfront premium into the loan.' },
+      { label: 'Principal and interest', expr: `${fmt(m.totalLoan)} at ${pct(m.annualRate, 3)} over ${m.numPayments} payments = ${fmt(m.monthlyPI)}/month` },
+      { label: 'Monthly mortgage insurance (year one)', expr: `${fmt(m.baseLoan)} × ${pct(m.annualMipRate, 2)} ÷ 12 = ${fmt(m.monthlyMIP)}/month`, note: m.lifeOfLoan ? 'With under 10% down the premium lasts for the life of the loan.' : 'With 10% or more down the premium ends after 11 years.' },
+      { label: 'Total monthly payment', expr: `${fmt(m.monthlyPI)} + ${fmt(m.monthlyMIP)} = ${fmt(m.totalMonthly)}/month`, note: 'Excludes property tax and homeowners insurance.' },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;
