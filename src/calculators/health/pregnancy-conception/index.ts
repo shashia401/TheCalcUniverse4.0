@@ -1,7 +1,28 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ConceptionPanel from './ConceptionPanel';
-import { parseIsoDate, toIsoDate } from '../../../utils/dates';
+import { parseIsoDate, toIsoDate, addDays as addCalendarDays } from '../../../utils/dates';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer } from '../../../utils/explainResults';
+
+// The calculator's day offsets, shared by calculate and explainSteps.
+const FERTILE_DAYS_BEFORE = 5; // fertile window opens this many days before ovulation
+const PEAK_DAYS_BEFORE = 2; // peak fertility: ovulation - 2 days through ovulation day
+const IMPLANT_FROM = 6; // implantation window: days after ovulation
+const IMPLANT_TO = 12;
+const OVULATION_TO_LMP = 14; // LMP is 14 days before ovulation
+const TERM_DAYS = 280; // 40 weeks from LMP
+const CONCEPTION_TO_DUE = 266; // 280 - 14
+
+/** Days from the reference date (last period, next period, or today) to ovulation. */
+const ovulationOffset = (method: string, cycleLength: number): number =>
+  method === 'nextPeriod' ? -OVULATION_TO_LMP : cycleLength - OVULATION_TO_LMP;
+
+/** Days from embryo transfer to the due date: Day 5 transfer 261, Day 3 transfer 263 (266 minus the embryo's age). */
+const ivfDueDays = (embryoDays: number): number => CONCEPTION_TO_DUE - embryoDays;
+
+const fmtLong = (d: Date) =>
+  d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
 const conceptionConfig: CalculatorConfig = {
   inputs: [
@@ -76,6 +97,78 @@ const conceptionConfig: CalculatorConfig = {
       showWhen: (v) => v.method === 'dueDate',
     },
   ],
+  explainSteps: (values) => {
+    // Absolute dates are printed only for methods whose dates come from the input; the "cycle" method counts
+    // from today, so its steps use offsets from "today" instead of dates.
+    const rows = conceptionConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const method = values.method || 'lmp';
+    const cycleLength = parseFloat(values.cycleLength) || 28;
+
+    if (method === 'ivf') {
+      const transfer = parseIsoDate(values.ivfDate);
+      if (!transfer) return [];
+      const embryoDays = values.embryoType === 'day3' ? 3 : 5;
+      const dueDays = ivfDueDays(embryoDays);
+      return finiteSteps([
+        {
+          label: `Days from transfer to due date (${embryoDays === 5 ? 'Day 5 blastocyst' : 'Day 3 cleavage stage'})`,
+          expr: `${CONCEPTION_TO_DUE} − ${embryoDays} = ${dueDays} days`,
+          note: 'The calculator subtracts the embryo\u2019s age at transfer from the 266 days between conception and the due date.',
+        },
+        { label: 'Add them to the transfer date', expr: `${fmtLong(transfer)} + ${dueDays} days = ${fmtLong(addCalendarDays(transfer, dueDays))}` },
+        { label: 'Estimated egg retrieval date', expr: `${fmtLong(transfer)} − ${embryoDays} days = ${fmtLong(addCalendarDays(transfer, -embryoDays))}` },
+      ]);
+    }
+
+    if (method === 'dueDate') {
+      const due = parseIsoDate(values.targetDueDate);
+      if (!due) return [];
+      const conception = addCalendarDays(due, -CONCEPTION_TO_DUE);
+      return finiteSteps([
+        { label: 'Count back from the target due date to conception', expr: `${fmtLong(due)} − ${CONCEPTION_TO_DUE} days = ${fmtLong(conception)}` },
+        {
+          label: `Conception window: ${FERTILE_DAYS_BEFORE} days before the conception date through that date`,
+          expr: `${fmtLong(conception)} − ${FERTILE_DAYS_BEFORE} days = ${fmtLong(addCalendarDays(conception, -FERTILE_DAYS_BEFORE))} → ${fmtLong(conception)}`,
+        },
+        { label: 'Estimated first day of the last period', expr: `${fmtLong(conception)} − ${OVULATION_TO_LMP} days = ${fmtLong(addCalendarDays(conception, -OVULATION_TO_LMP))}` },
+      ]);
+    }
+
+    let reference: Date | null = null;
+    if (method === 'nextPeriod') reference = parseIsoDate(values.nextPeriodDate);
+    else if (method !== 'cycle') reference = parseIsoDate(values.lmpDate);
+    if (method !== 'cycle' && !reference) return [];
+    const ovOff = ovulationOffset(method, cycleLength);
+    const at = (n: number): string =>
+      reference ? fmtLong(addCalendarDays(reference, n)) : n === 0 ? 'today' : n > 0 ? `today + ${n} days` : `today − ${-n} days`;
+    const anchor = reference ? fmtLong(reference) : 'today';
+    const ovExpr =
+      method === 'nextPeriod'
+        ? `${anchor} − ${OVULATION_TO_LMP} days = ${at(ovOff)}`
+        : `${anchor} + (${cycleLength} − ${OVULATION_TO_LMP}) days = ${at(ovOff)}`;
+    return finiteSteps([
+      {
+        label: method === 'cycle' ? 'Estimated ovulation (this method treats today as day 1 of the cycle)' : 'Estimated ovulation',
+        expr: ovExpr,
+      },
+      {
+        label: `Fertile window: ${FERTILE_DAYS_BEFORE} days before ovulation through ovulation day`,
+        expr: `${at(ovOff - FERTILE_DAYS_BEFORE)} → ${at(ovOff)}`,
+        note: `The peak days are ovulation − ${PEAK_DAYS_BEFORE} days through ovulation: ${at(ovOff - PEAK_DAYS_BEFORE)} → ${at(ovOff)}.`,
+      },
+      {
+        label: `Implantation window: ${IMPLANT_FROM} to ${IMPLANT_TO} days after ovulation`,
+        expr: `${at(ovOff + IMPLANT_FROM)} → ${at(ovOff + IMPLANT_TO)}`,
+      },
+      {
+        label: 'Due date if conceived this cycle: 14 days before ovulation is the start, plus 280 days',
+        expr: !reference && ovOff - OVULATION_TO_LMP === 0
+          ? `today + ${TERM_DAYS} days`
+          : `${at(ovOff - OVULATION_TO_LMP)} + ${TERM_DAYS} days = ${at(ovOff - OVULATION_TO_LMP + TERM_DAYS)}`,
+      },
+    ]);
+  },
   calculate: (values) => {
     const method = values.method || 'lmp';
     const cycleLength = parseFloat(values.cycleLength) || 28;
@@ -87,8 +180,7 @@ const conceptionConfig: CalculatorConfig = {
       return r;
     };
 
-    const fmt = (d: Date) =>
-      d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const fmt = fmtLong;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -101,7 +193,7 @@ const conceptionConfig: CalculatorConfig = {
 
       const embryoDays = values.embryoType === 'day3' ? 3 : 5;
       // Due date: Day 5 transfer → +261 days, Day 3 transfer → +263 days
-      const ivfDueDateDays = embryoDays === 5 ? 261 : 263;
+      const ivfDueDateDays = ivfDueDays(embryoDays);
       const estDueDate = addDays(transferDate, ivfDueDateDays);
 
       // Estimated "ovulation" (retrieval) date — Day 0 is the retrieval/fertilization
@@ -178,13 +270,13 @@ const conceptionConfig: CalculatorConfig = {
       if (!targetDue) return [];
 
       // Conception ≈ due date - 266 days
-      const conceptionDate = addDays(targetDue, -266);
+      const conceptionDate = addDays(targetDue, -CONCEPTION_TO_DUE);
       // Ovulation ≈ conception date (ovulation is when conception happens)
       const ovulationDate = conceptionDate;
       // LMP ≈ conception - 14 days
-      const lmpDate = addDays(conceptionDate, -14);
+      const lmpDate = addDays(conceptionDate, -OVULATION_TO_LMP);
       // Fertile window: 5 days before ovulation
-      const fertileStart = addDays(ovulationDate, -5);
+      const fertileStart = addDays(ovulationDate, -FERTILE_DAYS_BEFORE);
 
       // Current pregnancy progress
       const daysFromLmp = Math.round((today.getTime() - lmpDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -252,32 +344,24 @@ const conceptionConfig: CalculatorConfig = {
       referenceDate = ld;
     }
 
-    let ovulationDate: Date;
-
-    if (method === 'nextPeriod') {
-      ovulationDate = addDays(referenceDate, -14);
-    } else if (method === 'cycle') {
-      // No dates are entered, so the cycle is anchored on today as cycle day 1 (the old code anchored it
-      // one full cycle ago, which always reported ovulation as exactly 14 days in the past).
-      ovulationDate = addDays(today, cycleLength - 14);
-    } else {
-      ovulationDate = addDays(referenceDate, cycleLength - 14);
-    }
+    // The cycle method anchors on today as cycle day 1 (no dates are entered), so ovulation is
+    // today + (cycle length - 14); the other methods count from the entered date.
+    const ovulationDate = addDays(referenceDate, ovulationOffset(method, cycleLength));
 
     // Fertile window: 5 days before ovulation + day of ovulation
-    const fertileStart = addDays(ovulationDate, -5);
+    const fertileStart = addDays(ovulationDate, -FERTILE_DAYS_BEFORE);
     const fertileEnd = ovulationDate;
 
     // Peak fertility: 2 days before ovulation through ovulation day
-    const peakStart = addDays(ovulationDate, -2);
+    const peakStart = addDays(ovulationDate, -PEAK_DAYS_BEFORE);
 
     // Implantation window: 6-12 days after ovulation
-    const implantStart = addDays(ovulationDate, 6);
-    const implantEnd = addDays(ovulationDate, 12);
+    const implantStart = addDays(ovulationDate, IMPLANT_FROM);
+    const implantEnd = addDays(ovulationDate, IMPLANT_TO);
 
     // Due date if conception occurs
-    const estLmp = addDays(ovulationDate, -14);
-    const estDueDate = addDays(estLmp, 280);
+    const estLmp = addDays(ovulationDate, -OVULATION_TO_LMP);
+    const estDueDate = addDays(estLmp, TERM_DAYS);
 
     ovulationDate.setHours(0, 0, 0, 0);
 

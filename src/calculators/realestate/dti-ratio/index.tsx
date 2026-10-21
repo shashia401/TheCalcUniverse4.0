@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import { DTIGauge } from './DtiPanel';
 import { backEndBand, frontEndBand, shown } from './dtiMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 /* ── Shared parsing helpers (used by calculate and extraPanel) ── */
 function parseIncome(values: Record<string, string>) {
@@ -129,6 +131,39 @@ const dtiRatioConfig: CalculatorConfig = {
       step: 25,
     },
   ],
+  explainSteps: (values) => {
+    const rows = dtiRatioConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const inc = parseIncome(values);
+    const debt = parseDebts(values);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const plus = (xs: number[]) => xs.map(m).join(' + ');
+    return finiteSteps([
+      {
+        label: 'Add up gross monthly income',
+        expr: `${plus([inc.salary, inc.bonus, inc.other])} = ${resultValue(rows, 'totalIncome')}`,
+        note: 'Salary, bonus / overtime and other income, all before tax.',
+      },
+      {
+        label: 'Add up monthly debt payments',
+        expr: `${plus([debt.housing, debt.car, debt.student, debt.cc, debt.childSupport, debt.otherDebt])} = ${resultValue(rows, 'totalDebt')}`,
+        note: 'Housing payment, auto, student loans, card minimums, child support / alimony and other debt.',
+      },
+      {
+        label: 'Front-end DTI: housing payment as a share of income',
+        expr: `${m(debt.housing)} ÷ ${m(inc.totalIncome)} × 100 = ${resultValue(rows, 'frontEndDTI')}`,
+      },
+      {
+        label: 'Back-end DTI: all debt as a share of income',
+        expr: `${m(debt.totalDebt)} ÷ ${m(inc.totalIncome)} × 100 = ${resultValue(rows, 'backEndDTI')}`,
+      },
+      {
+        label: 'Spending limits at the thresholds named in the results',
+        expr: `${m(inc.totalIncome)} × 0.28 = ${resultValue(rows, 'maxHousingFor28')} housing · × 0.36 = ${resultValue(rows, 'maxDebtFor36')} debt · × 0.43 = ${resultValue(rows, 'maxDebtFor43')} debt`,
+        note: `Against the 43% limit: ${resultValue(rows, 'debtHeadroom')}.`,
+      },
+    ]);
+  },
   calculate: (values) => {
     const { totalIncome } = parseIncome(values);
     const { housing, totalDebt } = parseDebts(values);

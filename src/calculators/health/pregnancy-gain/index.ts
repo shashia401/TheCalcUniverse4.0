@@ -1,6 +1,8 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PregnancyGainPanel from './PregnancyGainPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const IOM_BY_BMI: Record<string, { label: string; totalMin: number; totalMax: number; t1Min: number; t1Max: number; weeklyMin: number; weeklyMax: number }> = {
   underweight: { label: 'Underweight (< 18.5)', totalMin: 28, totalMax: 40, t1Min: 1.1, t1Max: 4.4, weeklyMin: 1, weeklyMax: 1.3 },
@@ -8,6 +10,67 @@ const IOM_BY_BMI: Record<string, { label: string; totalMin: number; totalMax: nu
   overweight: { label: 'Overweight (25–29.9)', totalMin: 15, totalMax: 25, t1Min: 1.1, t1Max: 4.4, weeklyMin: 0.5, weeklyMax: 0.7 },
   obese: { label: 'Obese (≥ 30)', totalMin: 11, totalMax: 20, t1Min: 1.1, t1Max: 4.4, weeklyMin: 0.4, weeklyMax: 0.6 },
 };
+
+/** The calculator's own arithmetic (metric conversion, pre-pregnancy BMI and category, gain so far, projection), shared with explainSteps. */
+function gainCore(values: Record<string, string>) {
+  const unit = values.unit || 'imperial';
+  const preWeight = parseFloat(values.prepregnancyWeight);
+  const curWeight = parseFloat(values.currentWeight);
+  const currentWeek = parseFloat(values.currentWeek);
+
+  // BMI calculation
+  let heightM: number;
+  let preWeightKg: number;
+  let curWeightKg: number;
+  let totalInches = 0;
+
+  if (unit === 'imperial') {
+    const ft = parseFloat(values.heightFt) || 0;
+    const inches = parseFloat(values.heightIn) || 0;
+    totalInches = ft * 12 + inches;
+    if (totalInches <= 0) return null;
+    heightM = totalInches * 0.0254;
+    preWeightKg = preWeight * 0.45359237;
+    curWeightKg = curWeight * 0.45359237;
+  } else {
+    heightM = (parseFloat(values.heightCm) || 0) / 100;
+    if (heightM <= 0) return null;
+    preWeightKg = preWeight;
+    curWeightKg = curWeight;
+  }
+
+  if ([preWeightKg, curWeightKg, currentWeek].some(isNaN) || preWeightKg <= 0 || curWeightKg <= 0 || currentWeek < 0) return null;
+
+  // Categorise on the DISPLAYED (1-decimal) BMI so 24.96 -> "25.0" lands in Overweight, never "25.0 — Normal".
+  const preBmi = Math.round((preWeightKg / (heightM * heightM)) * 10) / 10;
+
+  let bmiCategory: string;
+  if (preBmi < 18.5) bmiCategory = 'underweight';
+  else if (preBmi < 25) bmiCategory = 'normal';
+  else if (preBmi < 30) bmiCategory = 'overweight';
+  else bmiCategory = 'obese';
+
+  const iom = IOM_BY_BMI[bmiCategory];
+  const gainSoFar = curWeightKg - preWeightKg;
+  const gainSoFarDisplay = unit === 'imperial' ? (gainSoFar / 0.45359237).toFixed(1) + ' lbs' : gainSoFar.toFixed(1) + ' kg';
+
+  // Projected gain: extrapolate the actual rate of gain so far (kg) to a full-term
+  // pregnancy (week 40). The previous formula mixed lbs-based IOM constants into a
+  // variable labeled "Kg" and then converted it a second time on display (dividing
+  // by 0.45359237 for imperial, and skipping the conversion entirely for metric),
+  // which inflated imperial results and could even project a *smaller* total gain
+  // than the mother had already gained. Before any weeks have elapsed there is no
+  // rate to extrapolate, so fall back to the IOM's midpoint total estimate.
+  const iomMidpointTotalLbs = (iom.totalMin + iom.totalMax) / 2;
+  const projectedGainKg = currentWeek >= 40
+    ? gainSoFar // already at term: nothing left to extrapolate (a week-42 rate would project BELOW the gain so far)
+    : currentWeek > 0
+    ? (gainSoFar / currentWeek) * 40
+    : iomMidpointTotalLbs * 0.45359237;
+  const projectedGainDisplay = unit === 'imperial' ? (projectedGainKg / 0.45359237).toFixed(0) + ' lbs' : projectedGainKg.toFixed(1) + ' kg';
+
+  return { totalInches, unit, currentWeek, preWeight, curWeight, heightM, preWeightKg, curWeightKg, preBmi, bmiCategory, iom, iomMidpointTotalLbs, gainSoFar, gainSoFarDisplay, projectedGainKg, projectedGainDisplay };
+}
 
 const pregnancyGainConfig: CalculatorConfig = {
   inputs: [
@@ -99,61 +162,55 @@ const pregnancyGainConfig: CalculatorConfig = {
       helpText: 'Gestational week to determine trimester and track progress',
     },
   ],
+  explainSteps: (values) => {
+    const rows = pregnancyGainConfig.calculate(values);
+    const c = gainCore(values);
+    if (!hasAnswer(rows) || !c) return [];
+    const imperial = c.unit === 'imperial';
+    const w = (n: number) => `${+n.toFixed(2)}`;
+    const unitLabel = imperial ? 'lb' : 'kg';
+    const projection =
+      c.currentWeek >= 40
+        ? { label: 'Projected total gain: already at week 40 or later, so nothing is extrapolated', expr: `gain so far = ${resultValue(rows, 'projectedGain')}` }
+        : c.currentWeek > 0
+        ? {
+            label: 'Projected total gain: your average rate so far continued to week 40',
+            expr: `${c.gainSoFarDisplay} ÷ ${c.currentWeek} weeks × 40 = ${resultValue(rows, 'projectedGain')}`,
+            note: c.currentWeek < 14
+              ? 'Early-pregnancy gain is small and uneven, so a straight-line projection before week 14 is unreliable; compare the first-trimester target instead.'
+              : 'A straight-line projection of your average gain so far to week 40; real gain is rarely linear.',
+          }
+        : {
+            label: 'Projected total gain: week 0 has no rate yet, so the midpoint of the total range is used',
+            expr: `(${c.iom.totalMin} + ${c.iom.totalMax}) ÷ 2 = ${c.iomMidpointTotalLbs} lb = ${resultValue(rows, 'projectedGain')}`,
+          };
+    return finiteSteps([
+      {
+        label: imperial ? 'Convert weights and height to metric' : 'Height in metres',
+        expr: imperial
+          ? `${c.preWeight} lb × 0.45359237 = ${w(c.preWeightKg)} kg · ${c.curWeight} lb × 0.45359237 = ${w(c.curWeightKg)} kg · ${c.totalInches} in × 0.0254 = ${+c.heightM.toFixed(4)} m`
+          : `${values.heightCm} cm ÷ 100 = ${+c.heightM.toFixed(4)} m`,
+      },
+      {
+        label: 'Pre-pregnancy BMI and its category',
+        expr: `${w(c.preWeightKg)} kg ÷ ${+c.heightM.toFixed(4)} m² = ${(c.preWeightKg / (c.heightM * c.heightM)).toFixed(2)} → ${resultValue(rows, 'bmiCategory')}`,
+        note: 'The BMI is rounded to 1 decimal before the category is chosen.',
+      },
+      {
+        label: 'Recommended total gain for that category (looked up in the calculator’s IOM table)',
+        expr: `${c.iom.label} → ${resultValue(rows, 'totalRange')}`,
+      },
+      {
+        label: 'Weight gained so far',
+        expr: `${c.curWeight} ${unitLabel} − ${c.preWeight} ${unitLabel} = ${resultValue(rows, 'gainSoFar')}`,
+      },
+      projection,
+    ]);
+  },
   calculate: (values) => {
-    const unit = values.unit || 'imperial';
-    const preWeight = parseFloat(values.prepregnancyWeight);
-    const curWeight = parseFloat(values.currentWeight);
-    const currentWeek = parseFloat(values.currentWeek);
-
-    // BMI calculation
-    let heightM: number;
-    let preWeightKg: number;
-    let curWeightKg: number;
-
-    if (unit === 'imperial') {
-      const ft = parseFloat(values.heightFt) || 0;
-      const inches = parseFloat(values.heightIn) || 0;
-      const totalInches = ft * 12 + inches;
-      if (totalInches <= 0) return [];
-      heightM = totalInches * 0.0254;
-      preWeightKg = preWeight * 0.45359237;
-      curWeightKg = curWeight * 0.45359237;
-    } else {
-      heightM = (parseFloat(values.heightCm) || 0) / 100;
-      if (heightM <= 0) return [];
-      preWeightKg = preWeight;
-      curWeightKg = curWeight;
-    }
-
-    if ([preWeightKg, curWeightKg, currentWeek].some(isNaN) || preWeightKg <= 0 || curWeightKg <= 0 || currentWeek < 0) return [];
-
-    // Categorise on the DISPLAYED (1-decimal) BMI so 24.96 -> "25.0" lands in Overweight, never "25.0 — Normal".
-    const preBmi = Math.round((preWeightKg / (heightM * heightM)) * 10) / 10;
-
-    let bmiCategory: string;
-    if (preBmi < 18.5) bmiCategory = 'underweight';
-    else if (preBmi < 25) bmiCategory = 'normal';
-    else if (preBmi < 30) bmiCategory = 'overweight';
-    else bmiCategory = 'obese';
-
-    const iom = IOM_BY_BMI[bmiCategory];
-    const gainSoFar = curWeightKg - preWeightKg;
-    const gainSoFarDisplay = unit === 'imperial' ? (gainSoFar / 0.45359237).toFixed(1) + ' lbs' : gainSoFar.toFixed(1) + ' kg';
-
-    // Projected gain: extrapolate the actual rate of gain so far (kg) to a full-term
-    // pregnancy (week 40). The previous formula mixed lbs-based IOM constants into a
-    // variable labeled "Kg" and then converted it a second time on display (dividing
-    // by 0.45359237 for imperial, and skipping the conversion entirely for metric),
-    // which inflated imperial results and could even project a *smaller* total gain
-    // than the mother had already gained. Before any weeks have elapsed there is no
-    // rate to extrapolate, so fall back to the IOM's midpoint total estimate.
-    const iomMidpointTotalLbs = (iom.totalMin + iom.totalMax) / 2;
-    const projectedGainKg = currentWeek >= 40
-      ? gainSoFar // already at term: nothing left to extrapolate (a week-42 rate would project BELOW the gain so far)
-      : currentWeek > 0
-      ? (gainSoFar / currentWeek) * 40
-      : iomMidpointTotalLbs * 0.45359237;
-    const projectedGainDisplay = unit === 'imperial' ? (projectedGainKg / 0.45359237).toFixed(0) + ' lbs' : projectedGainKg.toFixed(1) + ' kg';
+    const core = gainCore(values);
+    if (!core) return [];
+    const { unit, currentWeek, preBmi, bmiCategory, iom, gainSoFar, gainSoFarDisplay, projectedGainDisplay } = core;
 
     const gainStatus = (gainSoFarKg: number) => {
       // Convert to lbs for IOM comparison

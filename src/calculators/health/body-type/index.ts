@@ -1,29 +1,41 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import BodyTypePanel from './BodyTypePanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
-/** Determine fashion body shape from bust/waist/hip circumference */
+/** A ratio shown to 2 dp, widened to 4 dp only when rounding would flip a comparison with `threshold`. */
+const ratioText = (x: number, threshold: number): string => {
+  const s = x.toFixed(2);
+  return (Number(s) >= threshold) === (x >= threshold) ? s : x.toFixed(4);
+};
+
+/** Determine fashion body shape from bust/waist/hip circumference. `rule` quotes the test that fired, with the user's numbers. */
 function getFashionShape(
   bust: number, waist: number, hip: number, unit: string = 'imperial',
-): { label: string; value: string; description: string } {
+): { label: string; value: string; description: string; rule: string } {
   // Ratio-based classification
   const bustWaistRatio = bust / waist;
   const hipWaistRatio = hip / waist;
   const bustHipDiff = bust - hip;
+  const bw = ratioText(bustWaistRatio, 1.15);
+  const hw = ratioText(hipWaistRatio, 1.15);
+  const diffLimit = unit === 'metric' ? 12.7 : 5;
+  const diffUnit = unit === 'metric' ? 'cm' : 'in';
 
   if (hipWaistRatio >= 1.15 && bustWaistRatio < 1.15) {
-    return { label: 'Pear (Triangle)', value: 'pear', description: 'Hips wider than shoulders and bust. Weight tends to gather below the waist — thighs, hips, and lower body.' };
+    return { label: 'Pear (Triangle)', value: 'pear', rule: `hip ÷ waist = ${hw} (at least 1.15) and bust ÷ waist = ${bw} (under 1.15)`, description: 'Hips wider than shoulders and bust. Weight tends to gather below the waist — thighs, hips, and lower body.' };
   }
-  if (bustWaistRatio >= 1.15 && hipWaistRatio < 1.15 && bustHipDiff > (unit === 'metric' ? 12.7 : 5)) {
-    return { label: 'Inverted Triangle', value: 'invertedTriangle', description: 'Shoulders and bust wider than hips. Weight tends to gather in the upper body — chest, shoulders, and arms.' };
+  if (bustWaistRatio >= 1.15 && hipWaistRatio < 1.15 && bustHipDiff > diffLimit) {
+    return { label: 'Inverted Triangle', value: 'invertedTriangle', rule: `bust ÷ waist = ${bw} (at least 1.15), hip ÷ waist = ${hw} (under 1.15) and bust − hip = ${parseFloat(bustHipDiff.toFixed(2))} ${diffUnit} (more than ${diffLimit} ${diffUnit})`, description: 'Shoulders and bust wider than hips. Weight tends to gather in the upper body — chest, shoulders, and arms.' };
   }
   if (bustWaistRatio >= 1.15 && hipWaistRatio >= 1.15) {
-    return { label: 'Hourglass', value: 'hourglass', description: 'Bust and hips are similarly proportioned with a well-defined, narrower waist. The waist is significantly smaller than both bust and hips.' };
+    return { label: 'Hourglass', value: 'hourglass', rule: `bust ÷ waist = ${bw} and hip ÷ waist = ${hw}, both at least 1.15`, description: 'Bust and hips are similarly proportioned with a well-defined, narrower waist. The waist is significantly smaller than both bust and hips.' };
   }
   if (waist >= bust * 0.90 || waist >= hip * 0.90) {
-    return { label: 'Apple (Round)', value: 'apple', description: 'Weight gathers primarily around the midsection. Bust, waist, and hips are similar in circumference with less waist definition.' };
+    return { label: 'Apple (Round)', value: 'apple', rule: `waist (${waist}) is at least 90% of bust (${parseFloat((bust * 0.9).toFixed(3))}) or of hip (${parseFloat((hip * 0.9).toFixed(3))})`, description: 'Weight gathers primarily around the midsection. Bust, waist, and hips are similar in circumference with less waist definition.' };
   }
-  return { label: 'Rectangle (Straight)', value: 'rectangle', description: 'Bust, waist, and hips are fairly similar in circumference with minimal waist definition. A balanced, athletic silhouette.' };
+  return { label: 'Rectangle (Straight)', value: 'rectangle', rule: 'none of the Pear, Inverted Triangle, Hourglass or Apple tests matched', description: 'Bust, waist, and hips are fairly similar in circumference with minimal waist definition. A balanced, athletic silhouette.' };
 }
 
 const bodyTypeConfig: CalculatorConfig = {
@@ -76,6 +88,31 @@ const bodyTypeConfig: CalculatorConfig = {
       helpText: 'WHO protocol (2008): around the widest part of the buttocks, tape level with the floor.',
     },
   ],
+  explainSteps: (values) => {
+    const rows = bodyTypeConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const unit = values.unit || 'imperial';
+    const bust = parseFloat(values.bust);
+    const waist = parseFloat(values.waist);
+    const hip = parseFloat(values.hip);
+    const shape = getFashionShape(bust, waist, hip, unit);
+    return finiteSteps([
+      {
+        label: 'Compare bust and hip with the waist',
+        expr: `bust ÷ waist = ${bust} ÷ ${waist} = ${(bust / waist).toFixed(2)} · hip ÷ waist = ${hip} ÷ ${waist} = ${(hip / waist).toFixed(2)}`,
+        note: 'The shape rules below are built from these two ratios.',
+      },
+      {
+        label: 'Waist-to-hip and waist-to-bust ratios',
+        expr: `${waist} ÷ ${hip} = ${resultValue(rows, 'waistHipRatio')} · ${waist} ÷ ${bust} = ${resultValue(rows, 'waistBustRatio')}`,
+      },
+      {
+        label: 'Apply the calculator’s shape rules in order',
+        expr: `${shape.rule} → ${resultValue(rows, 'bodyShape')}`,
+        note: 'Pear is tested first, then Inverted Triangle, Hourglass and Apple; Rectangle is what is left.',
+      },
+    ]);
+  },
   calculate: (values) => {
     const unit = values.unit || 'imperial';
     const bust = parseFloat(values.bust);

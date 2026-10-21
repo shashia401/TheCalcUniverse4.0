@@ -1,5 +1,7 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import { parseIsoDate } from '../../../utils/dates';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const addDays = (d: Date, n: number): Date => {
   const r = new Date(d);
@@ -7,6 +9,16 @@ const addDays = (d: Date, n: number): Date => {
   return r;
 };
 const fmtDate = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+/**
+ * Planned gestation in days: base 114, +1 for heritage / large breeds, +1 for sows with 6+ previous litters.
+ * Breed and parity combine as deltas so a heritage-breed older sow gets both.
+ */
+function gestationPlan(breedType: string, parity: string) {
+  const breedDelta = breedType === 'large' ? 1 : 0;
+  const parityDelta = parity === 'olderSow' ? 1 : 0;
+  return { breedDelta, parityDelta, days: 114 + breedDelta + parityDelta };
+}
 
 const pigGestationConfig: CalculatorConfig = {
   inputs: [
@@ -43,6 +55,31 @@ const pigGestationConfig: CalculatorConfig = {
       helpText: 'Sows with 6 or more previous litters are planned one day longer (115 days); all other parities use 114. This is a planning offset, not a measured effect.',
 },
 ],
+  explainSteps: (values) => {
+    // Date arithmetic only: the progress row depends on today's date, so it is left out.
+    const rows = pigGestationConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const breedType = values.breedType || 'commercial';
+    const parity = values.parity || 'gilt';
+    const plan = gestationPlan(breedType, parity);
+    const breedingDate = parseIsoDate(values.breedingDate);
+    if (!breedingDate) return [];
+    return finiteSteps([
+      {
+        label: 'Gestation length: base days plus the breed and parity adjustments',
+        expr: `114 + ${plan.breedDelta} (${plan.breedDelta ? 'heritage / large breed' : 'other breed types'}) + ${plan.parityDelta} (${plan.parityDelta ? 'sow with 6+ previous litters' : 'other parities'}) = ${plan.days} days`,
+        note: 'These one-day adjustments are planning offsets, not measured effects.',
+      },
+      {
+        label: 'Add the gestation length to the breeding date',
+        expr: `${fmtDate(breedingDate)} + ${plan.days} days = ${resultValue(rows, 'dueDate')}`,
+      },
+      {
+        label: 'Farrowing window: 112 to 116 days after breeding',
+        expr: `${fmtDate(breedingDate)} + 112 days = ${resultValue(rows, 'earlyWindow')} · + 116 days = ${resultValue(rows, 'lateWindow')}`,
+      },
+    ]);
+  },
 calculate: (values): CalculatorResult[] => {
     const breedingStr = values.breedingDate;
     const breedType = values.breedType || 'commercial';
@@ -52,18 +89,8 @@ calculate: (values): CalculatorResult[] => {
     const breedingDate = parseIsoDate(breedingStr);
     if (!breedingDate) return [];
 
-    // Base gestation: 114 days (3-3-3 rule). Breed and parity adjustments
-    // must combine (a heritage-breed gilt should still get the heritage
-    // adjustment), so they're applied as deltas rather than absolute
-    // overwrites — the previous version let a later assignment silently
-    // erase an earlier one for any breed+parity combination.
-    let gestationDays = 114;
-
-    // Heritage/large breeds sometimes go ~1 day longer
-    if (breedType === 'large') gestationDays += 1;
-
-    // Older, more mature sows may carry slightly longer
-    if (parity === 'olderSow') gestationDays += 1;
+    // Base 114 days plus the breed and parity deltas (see gestationPlan).
+    const gestationDays = gestationPlan(breedType, parity).days;
 
     const dueDate = addDays(breedingDate, gestationDays);
 

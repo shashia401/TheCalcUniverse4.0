@@ -1,7 +1,33 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import FatIntakePanel from './FatIntakePanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import { plainLocale as fmt } from '../../../lib/format';
+
+// Fat percentage ranges by goal
+const FAT_PCT_RANGE: Record<string, { low: number; high: number }> = {
+  loss: { low: 0.20, high: 0.25 },
+  maintain: { low: 0.25, high: 0.35 },
+  keto: { low: 0.65, high: 0.80 },
+  heart: { low: 0.25, high: 0.30 },
+};
+
+/** Weight in kg, the goal's fat share of calories and the daily gram figures (fat = 9 kcal/g), shared with explainSteps. */
+function fatCore(values: Record<string, string>) {
+  const weight = parseFloat(values.weight);
+  const calories = parseFloat(values.calories);
+  if ([weight, calories].some(isNaN) || weight <= 0 || calories <= 0) return null;
+  const weightKg = values.unit === 'metric' ? weight : weight * 0.45359237; // 1 lb = 0.45359237 kg exactly
+  const range = FAT_PCT_RANGE[values.goal || 'maintain'] || FAT_PCT_RANGE.maintain;
+  const midPct = (range.low + range.high) / 2;
+  return {
+    weight, calories, weightKg, range, midPct,
+    totalLowG: Math.round((calories * range.low) / 9),
+    totalHighG: Math.round((calories * range.high) / 9),
+    midG: Math.round((calories * midPct) / 9),
+  };
+}
 
 const fatIntakeConfig: CalculatorConfig = {
   inputs: [
@@ -52,30 +78,41 @@ const fatIntakeConfig: CalculatorConfig = {
       helpText: 'Your TDEE or target daily calorie intake',
     },
   ],
+  explainSteps: (values) => {
+    const rows = fatIntakeConfig.calculate(values);
+    const c = fatCore(values);
+    if (!hasAnswer(rows) || !c) return [];
+    const pct = (x: number) => `${+(x * 100).toFixed(1)}%`;
+    return finiteSteps([
+      {
+        label: 'Convert your weight to kilograms',
+        expr: values.unit === 'metric' ? `${c.weight} kg` : `${c.weight} lb × 0.45359237 = ${c.weightKg.toFixed(2)} kg`,
+        note: 'Weight is only used for the grams-per-kilogram figure; the gram totals come from your calories.',
+      },
+      {
+        label: 'Share of calories from fat for your goal',
+        expr: `${pct(c.range.low)} to ${pct(c.range.high)} of ${fmt(c.calories)} kcal (midpoint ${pct(c.midPct)})`,
+      },
+      {
+        label: 'Convert calories to grams of fat (9 kcal per gram)',
+        expr: `${fmt(c.calories)} × ${c.range.low} ÷ 9 = ${fmt(c.totalLowG)} g · ${fmt(c.calories)} × ${c.range.high} ÷ 9 = ${fmt(c.totalHighG)} g`,
+        note: 'Fat provides 9 kcal per gram.',
+      },
+      {
+        label: 'Recommended fat target (the midpoint)',
+        expr: `${fmt(c.calories)} × ${+c.midPct.toFixed(4)} ÷ 9 = ${fmt(c.midG)} g/day`,
+      },
+      {
+        label: 'Express the range per kilogram of body weight',
+        expr: `${fmt(c.totalLowG)} g and ${fmt(c.totalHighG)} g ÷ ${+c.weightKg.toFixed(1)} kg = ${resultValue(rows, 'fatPerKg')}`,
+      },
+    ]);
+  },
   calculate: (values) => {
-    const weight = parseFloat(values.weight);
-    const calories = parseFloat(values.calories);
+    const core = fatCore(values);
+    if (!core) return [];
+    const { calories, weightKg, range, midPct, totalLowG, totalHighG, midG } = core;
     const goal = values.goal || 'maintain';
-
-    if ([weight, calories].some(isNaN) || weight <= 0 || calories <= 0) return [];
-
-    const weightKg = values.unit === 'metric' ? weight : weight * 0.45359237; // 1 lb = 0.45359237 kg exactly
-
-    // Fat percentage ranges by goal
-    const fatPctRange: Record<string, { low: number; high: number }> = {
-      loss: { low: 0.20, high: 0.25 },
-      maintain: { low: 0.25, high: 0.35 },
-      keto: { low: 0.65, high: 0.80 },
-      heart: { low: 0.25, high: 0.30 },
-    };
-
-    const range = fatPctRange[goal] || fatPctRange.maintain;
-    const midPct = (range.low + range.high) / 2;
-
-    // Total fat in grams (fat = 9 kcal/g)
-    const totalLowG = Math.round((calories * range.low) / 9);
-    const totalHighG = Math.round((calories * range.high) / 9);
-    const midG = Math.round((calories * midPct) / 9);
 
     // AHA (Sacks 2017): saturated fat ≤ 5–6% of daily calories
     const satPctAHA = 0.06; // upper limit per AHA

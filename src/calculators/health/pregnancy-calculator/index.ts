@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PregnancyPanel from './PregnancyPanel';
 import { parseIsoDate } from '../../../utils/dates';
+import { finiteSteps } from '../../../utils/explainGuard';
 
 const addDays = (d: Date, n: number): Date => {
   const r = new Date(d);
@@ -14,6 +15,23 @@ const fmtDate = (d: Date): string =>
 
 const fmtShort = (d: Date): string =>
   d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+/** Naegele's rule dates from an LMP and cycle length: every date is counted from the cycle-adjusted LMP. */
+function pregnancyDates(lmpDate: Date, cycleLength: number) {
+  const cycleOffset = cycleLength - 28;
+  // Naegele's rule for a non-28-day cycle: shift the LMP by the cycle difference, then date everything
+  // (due date, gestational age, trimester, milestones) from that adjusted LMP so they cannot disagree.
+  const adjLmp = addDays(lmpDate, cycleOffset);
+  return {
+    cycleOffset,
+    adjLmp,
+    dueDate: addDays(adjLmp, 280), // 40 weeks
+    conceptionDate: addDays(adjLmp, 14), // approximate
+    endFirstTrimester: addDays(adjLmp, 91), // 13 weeks
+    viabilityDate: addDays(adjLmp, 168), // 24 weeks
+    fullTermDate: addDays(adjLmp, 259), // 37 weeks (early term begins)
+  };
+}
 
 const pregnancyConfig: CalculatorConfig = {
   inputs: [
@@ -36,6 +54,41 @@ const pregnancyConfig: CalculatorConfig = {
       helpText: 'Default 28 days. Adjust if your cycle is consistently shorter or longer.',
     },
   ],
+  explainSteps: (values) => {
+    // Date arithmetic only: gestational age, trimester and days-to-go depend on today's date, so they are left out.
+    const lmpDate = parseIsoDate(values.lmpDate);
+    if (!lmpDate) return [];
+    const entered = values.cycleLength?.trim();
+    let cycleLength = 28;
+    if (entered) {
+      const parsed = parseFloat(entered);
+      // A fractional cycle length is silently truncated by the date arithmetic, so no worked solution is offered for it.
+      if (isNaN(parsed) || parsed < 20 || parsed > 45 || !Number.isInteger(parsed)) return [];
+      cycleLength = parsed;
+    }
+    const d = pregnancyDates(lmpDate, cycleLength);
+    return finiteSteps([
+      {
+        label: 'Adjust the last period for your cycle length',
+        expr: d.cycleOffset === 0
+          ? `${cycleLength} − 28 = 0, so the adjusted LMP is ${fmtShort(lmpDate)}`
+          : `${cycleLength} − 28 = ${d.cycleOffset < 0 ? '−' : ''}${Math.abs(d.cycleOffset)} days: ${fmtShort(lmpDate)} ${d.cycleOffset < 0 ? '−' : '+'} ${Math.abs(d.cycleOffset)} days = ${fmtShort(d.adjLmp)}`,
+        note: "Naegele's rule assumes a 28-day cycle; a longer or shorter cycle shifts the dates by the difference.",
+      },
+      {
+        label: 'Add 280 days (40 weeks) for the estimated due date',
+        expr: `${fmtShort(d.adjLmp)} + 280 days = ${fmtDate(d.dueDate)}`,
+      },
+      {
+        label: 'Estimated conception date (14 days after the adjusted LMP)',
+        expr: `${fmtShort(d.adjLmp)} + 14 days = ${fmtShort(d.conceptionDate)}`,
+      },
+      {
+        label: 'Milestone dates counted from the adjusted LMP',
+        expr: `+ 91 days (13 weeks) = ${fmtShort(d.endFirstTrimester)} · + 168 days (24 weeks) = ${fmtShort(d.viabilityDate)} · + 259 days (37 weeks) = ${fmtShort(d.fullTermDate)}`,
+      },
+    ]);
+  },
   calculate: (values) => {
     const lmpStr = values.lmpDate;
     const cycleLengthStr = values.cycleLength;
@@ -54,19 +107,13 @@ const pregnancyConfig: CalculatorConfig = {
       }
     }
 
-    const cycleOffset = cycleLength - 28;
-    // Naegele's rule for a non-28-day cycle: shift the LMP by the cycle difference, then date everything
-    // (due date, gestational age, trimester, milestones) from that adjusted LMP so they cannot disagree.
-    const adjLmp = addDays(lmpDate, cycleOffset);
+    const { adjLmp, dueDate, conceptionDate, endFirstTrimester, viabilityDate, fullTermDate } = pregnancyDates(lmpDate, cycleLength);
 
     // Today normalized
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     // --- Core Calculations ---
-
-    // Due date: LMP + 280 days (40 weeks), adjusted for cycle length
-    const dueDate = addDays(adjLmp, 280);
 
     // Gestational age (days since the adjusted LMP)
     const totalDaysPreg = Math.round(
@@ -106,14 +153,6 @@ const pregnancyConfig: CalculatorConfig = {
     } else {
       trimesterLabel = '3rd Trimester (Weeks 28-40)';
     }
-
-    // Estimated conception date: adjusted LMP + 14 days (approximate)
-    const conceptionDate = addDays(adjLmp, 14);
-
-    // Key milestones
-    const endFirstTrimester = addDays(adjLmp, 91); // 13 weeks
-    const viabilityDate = addDays(adjLmp, 168); // 24 weeks
-    const fullTermDate = addDays(adjLmp, 259); // 37 weeks (early term begins)
 
     // Progress percentage
     const progressPct = Math.min(100, Math.max(0, (totalDaysPreg / 280) * 100));

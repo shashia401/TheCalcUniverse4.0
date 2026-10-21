@@ -1,5 +1,7 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { roundLocale as fmt } from '../../../lib/format';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 const DIET_PRESETS: Record<string, { label: string; proteinPct: number; carbPct: number; fatPct: number }> = {
   standard: { label: 'Standard (Balanced)', proteinPct: 20, carbPct: 50, fatPct: 30 },
@@ -10,6 +12,77 @@ const DIET_PRESETS: Record<string, { label: string; proteinPct: number; carbPct:
 };
 
 const CAL_PER_G: Record<string, number> = { protein: 4, carbs: 4, fat: 9 };
+
+const GOAL_ADJUST: Record<string, number> = {
+  maintain: 0,
+  mildLoss: -250,
+  moderateLoss: -500,
+  leanGain: 250,
+  aggressiveGain: 500,
+};
+
+/** The calculator's own arithmetic (BMR, TDEE, goal adjustment, daily macro grams), shared with explainSteps. */
+function macroPlan(values: Record<string, string>) {
+  const unit = values.unit || 'imperial';
+  const sex = values.sex || 'male';
+  const age = parseFloat(values.age);
+  const activityFactor = parseFloat(values.activityLevel || '1.55');
+  const goal = values.goal || 'maintain';
+  const dietKey = values.diet || 'standard';
+  const bodyFatPct = parseFloat(values.bodyFatPct);
+
+  let weightKg: number;
+  let heightCm: number;
+
+  if (unit === 'imperial') {
+    weightKg = parseFloat(values.weight) * 0.45359237;
+    const ft = parseFloat(values.heightFt) || 0;
+    const inches = parseFloat(values.heightIn) || 0;
+    heightCm = (ft * 12 + inches) * 2.54;
+  } else {
+    weightKg = parseFloat(values.weight);
+    heightCm = parseFloat(values.heightCm) || 0;
+  }
+
+  if ([weightKg, heightCm, age, activityFactor].some(isNaN) || weightKg <= 0 || heightCm <= 0) return null;
+
+  // BMR
+  let bmr: number;
+  let bmrMethod: string;
+  let leanMass = 0;
+  const usingKatch = !isNaN(bodyFatPct) && bodyFatPct > 0 && values.bodyFatPct !== '';
+  if (usingKatch) {
+    leanMass = weightKg * (1 - bodyFatPct / 100);
+    bmr = 370 + 21.6 * leanMass;
+    bmrMethod = 'Katch-McArdle';
+  } else if (sex === 'male') {
+    bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
+    bmrMethod = 'Mifflin-St Jeor';
+  } else {
+    bmr = 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+    bmrMethod = 'Mifflin-St Jeor';
+  }
+
+  const tdee = bmr * activityFactor;
+
+  // Adjust calories based on goal
+  const calAdj = GOAL_ADJUST[goal] ?? 0;
+  const adjustedCalories = tdee + calAdj;
+  const safeMin = sex === 'female' ? 1200 : 1500;
+  // The safety minimum only stops a DEFICIT from going too low; it never pushes a
+  // maintain/gain target above TDEE, and never forces a deficit-free TDEE below itself.
+  const finalCalories = calAdj < 0 ? Math.max(adjustedCalories, Math.min(safeMin, tdee)) : adjustedCalories;
+  const limitedByMin = calAdj < 0 && finalCalories > adjustedCalories;
+  const actualAdj = Math.round(finalCalories - tdee);
+
+  // Calculate macros
+  const diet = DIET_PRESETS[dietKey] ?? DIET_PRESETS.standard;
+  const proteinG = Math.round((finalCalories * diet.proteinPct / 100) / CAL_PER_G.protein);
+  const carbG = Math.round((finalCalories * diet.carbPct / 100) / CAL_PER_G.carbs);
+  const fatG = Math.round((finalCalories * diet.fatPct / 100) / CAL_PER_G.fat);
+
+  return { unit, sex, age, activityFactor, bodyFatPct, usingKatch, leanMass, weightKg, heightCm, bmr, bmrMethod, tdee, calAdj, adjustedCalories, safeMin, finalCalories, limitedByMin, actualAdj, diet, proteinG, carbG, fatG };
+}
 
 const macroConfig: CalculatorConfig = {
   inputs: [
@@ -148,69 +221,50 @@ const macroConfig: CalculatorConfig = {
       helpText: 'Switches BMR formula to Katch-McArdle for more accuracy',
     },
   ],
+  explainSteps: (values) => {
+    const rows = macroConfig.calculate(values);
+    const p = macroPlan(values);
+    if (!hasAnswer(rows) || !p) return [];
+    const one = (n: number) => n.toFixed(1);
+    const steps = [];
+    if (p.unit === 'imperial') {
+      steps.push({
+        label: 'Convert weight and height to metric',
+        expr: `${values.weight} lb × 0.45359237 = ${one(p.weightKg)} kg · height = ${one(p.heightCm)} cm`,
+        note: 'The BMR equations are defined in kilograms and centimeters.',
+      });
+    }
+    if (p.usingKatch) {
+      steps.push({
+        label: 'Find lean body mass, then the Katch-McArdle BMR (body fat % was given)',
+        expr: `${one(p.weightKg)} kg × (1 − ${p.bodyFatPct}/100) = ${one(p.leanMass)} kg → 370 + 21.6 × ${one(p.leanMass)} = ${fmt(p.bmr)} kcal/day`,
+      });
+    } else {
+      steps.push({
+        label: `Mifflin-St Jeor BMR (${p.sex})`,
+        expr: `10×${one(p.weightKg)} + 6.25×${one(p.heightCm)} − 5×${p.age} ${p.sex === 'male' ? '+ 5' : '− 161'} = ${fmt(p.bmr)} kcal/day`,
+      });
+    }
+    steps.push({
+      label: 'Multiply by your activity factor to get maintenance calories (TDEE)',
+      expr: `${one(p.bmr)} × ${p.activityFactor} = ${fmt(p.tdee)} kcal/day`,
+    });
+    steps.push({
+      label: 'Adjust for your goal',
+      expr: `${fmt(p.tdee)} ${p.calAdj < 0 ? '−' : '+'} ${Math.abs(p.calAdj)} = ${fmt(p.adjustedCalories)}${p.limitedByMin ? ` → raised to the ${fmt(p.safeMin)} kcal safety minimum` : ''} → ${resultValue(rows, 'dailyCalories')}`,
+      note: p.calAdj < 0 ? 'The safety minimum only stops a deficit from going too low.' : undefined,
+    });
+    steps.push({
+      label: `Split the calories by your diet pattern (${p.diet.proteinPct}% protein, ${p.diet.carbPct}% carbs, ${p.diet.fatPct}% fat)`,
+      expr: `protein ${fmt(p.finalCalories)} × ${p.diet.proteinPct}% ÷ 4 = ${p.proteinG} g · carbs ${fmt(p.finalCalories)} × ${p.diet.carbPct}% ÷ 4 = ${p.carbG} g · fat ${fmt(p.finalCalories)} × ${p.diet.fatPct}% ÷ 9 = ${p.fatG} g`,
+      note: 'Protein and carbohydrate provide 4 kcal per gram, fat 9.',
+    });
+    return finiteSteps(steps);
+  },
   calculate: (values) => {
-    const unit = values.unit || 'imperial';
-    const sex = values.sex || 'male';
-    const age = parseFloat(values.age);
-    const activityFactor = parseFloat(values.activityLevel || '1.55');
-    const goal = values.goal || 'maintain';
-    const dietKey = values.diet || 'standard';
-    const bodyFatPct = parseFloat(values.bodyFatPct);
-
-    let weightKg: number;
-    let heightCm: number;
-
-    if (unit === 'imperial') {
-      weightKg = parseFloat(values.weight) * 0.45359237;
-      const ft = parseFloat(values.heightFt) || 0;
-      const inches = parseFloat(values.heightIn) || 0;
-      heightCm = (ft * 12 + inches) * 2.54;
-    } else {
-      weightKg = parseFloat(values.weight);
-      heightCm = parseFloat(values.heightCm) || 0;
-    }
-
-    if ([weightKg, heightCm, age, activityFactor].some(isNaN) || weightKg <= 0 || heightCm <= 0) return [];
-
-    // BMR
-    let bmr: number;
-    let bmrMethod: string;
-    if (!isNaN(bodyFatPct) && bodyFatPct > 0 && values.bodyFatPct !== '') {
-      const leanMass = weightKg * (1 - bodyFatPct / 100);
-      bmr = 370 + 21.6 * leanMass;
-      bmrMethod = 'Katch-McArdle';
-    } else if (sex === 'male') {
-      bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
-      bmrMethod = 'Mifflin-St Jeor';
-    } else {
-      bmr = 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
-      bmrMethod = 'Mifflin-St Jeor';
-    }
-
-    const tdee = bmr * activityFactor;
-
-    // Adjust calories based on goal
-    const goalAdjust: Record<string, number> = {
-      maintain: 0,
-      mildLoss: -250,
-      moderateLoss: -500,
-      leanGain: 250,
-      aggressiveGain: 500,
-    };
-    const calAdj = goalAdjust[goal] ?? 0;
-    const adjustedCalories = tdee + calAdj;
-    const safeMin = sex === 'female' ? 1200 : 1500;
-    // The safety minimum only stops a DEFICIT from going too low; it never pushes a
-    // maintain/gain target above TDEE, and never forces a deficit-free TDEE below itself.
-    const finalCalories = calAdj < 0 ? Math.max(adjustedCalories, Math.min(safeMin, tdee)) : adjustedCalories;
-    const limitedByMin = calAdj < 0 && finalCalories > adjustedCalories;
-    const actualAdj = Math.round(finalCalories - tdee);
-
-    // Calculate macros
-    const diet = DIET_PRESETS[dietKey] ?? DIET_PRESETS.standard;
-    const proteinG = Math.round((finalCalories * diet.proteinPct / 100) / CAL_PER_G.protein);
-    const carbG = Math.round((finalCalories * diet.carbPct / 100) / CAL_PER_G.carbs);
-    const fatG = Math.round((finalCalories * diet.fatPct / 100) / CAL_PER_G.fat);
+    const plan = macroPlan(values);
+    if (!plan) return [];
+    const { weightKg, bmr, bmrMethod, tdee, safeMin, finalCalories, limitedByMin, actualAdj, diet, proteinG, carbG, fatG } = plan;
 
     // Gram-range recommendations
     const proteinRange = `${Math.round(weightKg * 1.6)}–${Math.round(weightKg * 2.2)} g`;

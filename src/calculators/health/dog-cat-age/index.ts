@@ -1,6 +1,8 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import DogCatAgePanel from './DogCatAgePanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // 1st year = 15, 2nd year = 9, each later year = perYear (linear within years 1-2 so age 1 -> 15, age 2 -> 24).
 // AVMA (as quoted by the AKC): dogs +5 per year after year 2; cats +4 per year after year 2.
@@ -46,6 +48,43 @@ const dogCatAgeConfig: CalculatorConfig = {
       helpText: 'Enter your pet age in years (e.g., 1.5 for 18 months)',
     },
   ],
+  explainSteps: (values) => {
+    const rows = dogCatAgeConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const age = parseFloat(values.petAgeYears);
+    const isDog = values.species === 'dog';
+    const perYear = isDog ? 5 : 4;
+    const human = traditionalHumanYears(age, perYear);
+    const band =
+      age < 1
+        ? { label: 'Under 1 year', expr: `${age} × 15 = ${parseFloat(human.toFixed(2))}` }
+        : age < 2
+        ? { label: 'Between 1 and 2 years', expr: `15 + (${age} − 1) × 9 = ${parseFloat(human.toFixed(2))}` }
+        : { label: 'Age 2 and over', expr: `24 + (${age} − 2) × ${perYear} = ${parseFloat(human.toFixed(2))}` };
+    const steps = [
+      {
+        label: `Traditional method for a ${isDog ? 'dog' : 'cat'}: first year 15, second year 9 more, then ${perYear} per year (${band.label.toLowerCase()})`,
+        expr: band.expr,
+      },
+      {
+        label: 'Round to whole human years',
+        expr: `${parseFloat(human.toFixed(2))} rounds to ${resultValue(rows, isDog ? 'traditionalAge' : 'catHumanAge')}`,
+      },
+    ];
+    if (isDog && age >= 1) {
+      steps.push({
+        label: 'Epigenetic method (dogs aged 1 year and older)',
+        expr: `16 × ln(${age}) + 31 = ${resultValue(rows, 'epigeneticAge')}`,
+      });
+    }
+    if (!isDog) {
+      steps.push({
+        label: 'Traditional ×7 method, for comparison',
+        expr: `${age} × 7 = ${parseFloat((age * 7).toFixed(2))}, which rounds to ${resultValue(rows, 'traditionalSeven')}`,
+      });
+    }
+    return finiteSteps(steps);
+  },
   calculate: (values) => {
     const species = values.species;
     const dogSize = values.dogSize || 'medium';

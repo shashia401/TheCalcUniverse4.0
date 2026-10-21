@@ -1,7 +1,20 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import PeriodOvulationPanel from './PeriodOvulationPanel';
-import { parseIsoDate, toIsoDate } from '../../../utils/dates';
+import { parseIsoDate, toIsoDate, addDays as addCalendarDays } from '../../../utils/dates';
+import { finiteSteps } from '../../../utils/explainGuard';
+
+/** The fertile window opens this many days before ovulation (and closes on ovulation day). */
+const FERTILE_DAYS_BEFORE = 5;
+
+/** Day offsets from the first day of a period (day 0): ovulation, fertile window start, last period day. */
+function cycleOffsets(cycleLength: number, periodLength: number, lutealPhase: number) {
+  const ovulation = cycleLength - lutealPhase;
+  return { ovulation, fertileStart: ovulation - FERTILE_DAYS_BEFORE, periodEnd: periodLength - 1 };
+}
+
+const fmtLong = (d: Date) =>
+  d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
 const periodOvulationConfig: CalculatorConfig = {
   inputs: [
@@ -54,6 +67,37 @@ const periodOvulationConfig: CalculatorConfig = {
       helpText: 'Default is 14 days. Usually 12–16 days. The luteal phase is relatively constant for each person.',
     },
   ],
+  explainSteps: (values) => {
+    // The page shows the cycle that contains today; these steps use only the entered date, so they never depend on today.
+    const lmp = parseIsoDate(values.lmpDate?.trim());
+    const cycleLength = parseInt(values.cycleLength) || 28;
+    const periodLength = parseInt(values.periodLength) || 5;
+    const lutealPhase = parseInt(values.lutealPhase) || 14;
+    if (!lmp || cycleLength < 20 || cycleLength > 45) return [];
+    const off = cycleOffsets(cycleLength, periodLength, lutealPhase);
+    if (off.ovulation < 1 || off.periodEnd < 0) return [];
+    const at = (n: number) => fmtLong(addCalendarDays(lmp, n));
+    return finiteSteps([
+      {
+        label: 'Ovulation day: cycle length minus luteal phase',
+        expr: `${cycleLength} − ${lutealPhase} = ${off.ovulation} days after the first day of the period`,
+        note: values.lutealPhase?.trim() ? undefined : 'No luteal phase entered, so the default of 14 days is used.',
+      },
+      {
+        label: `Fertile window: ${FERTILE_DAYS_BEFORE} days before ovulation through ovulation day`,
+        expr: `${off.ovulation} − ${FERTILE_DAYS_BEFORE} = ${off.fertileStart} to ${off.ovulation} days after the first day of the period`,
+      },
+      {
+        label: 'Last day of the period',
+        expr: `${periodLength} − 1 = ${off.periodEnd} days after the first day`,
+      },
+      {
+        label: 'Dates for the cycle that starts on the date you entered',
+        expr: `ovulation ${at(off.ovulation)} · fertile window ${at(off.fertileStart)} → ${at(off.ovulation)} · period ends ${at(off.periodEnd)} · next period ${at(cycleLength)}`,
+        note: `Every later cycle starts ${cycleLength} days after the one before, so add ${cycleLength} days per cycle.`,
+      },
+    ]);
+  },
   calculate: (values) => {
     const lmpStr = values.lmpDate?.trim();
     const cycleLength = parseInt(values.cycleLength) || 28;
@@ -89,9 +133,10 @@ const periodOvulationConfig: CalculatorConfig = {
     const predictions: { periodStart: Date; periodEnd: Date; ovulation: Date; fertileStart: Date; fertileEnd: Date }[] = [];
     for (let m = cyclesElapsed; m < cyclesElapsed + 3; m++) {
       const periodStart = addDays(lmp, m * cycleLength);
-      const periodEnd = addDays(periodStart, periodLength - 1);
-      const ovulation = addDays(periodStart, cycleLength - lutealPhase);
-      const fertileStart = addDays(ovulation, -5);
+      const off = cycleOffsets(cycleLength, periodLength, lutealPhase);
+      const periodEnd = addDays(periodStart, off.periodEnd);
+      const ovulation = addDays(periodStart, off.ovulation);
+      const fertileStart = addDays(periodStart, off.fertileStart);
       const fertileEnd = ovulation;
       predictions.push({ periodStart, periodEnd, ovulation, fertileStart, fertileEnd });
     }

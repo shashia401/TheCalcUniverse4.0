@@ -1,6 +1,8 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import DogCatPregnancyPanel from './DogCatPregnancyPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString('en-US', {
@@ -8,6 +10,13 @@ function formatDate(date: Date): string {
     month: 'long',
     day: 'numeric',
   });
+}
+
+/** Gestation length and range in days for the two species (the calculator's own constants). */
+function gestationFor(species: string) {
+  return species === 'dog'
+    ? { days: 63, range: [58, 68] as [number, number] }
+    : { days: 65, range: [63, 67] as [number, number] };
 }
 
 const dogCatPregnancyConfig: CalculatorConfig = {
@@ -31,6 +40,28 @@ const dogCatPregnancyConfig: CalculatorConfig = {
       helpText: 'Enter the date when mating occurred',
     },
   ],
+  explainSteps: (values) => {
+    // Only the date arithmetic is shown: the days-remaining and trimester rows depend on today's date.
+    const rows = dogCatPregnancyConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const { days, range } = gestationFor(values.species);
+    const breeding = new Date(values.breedingDate + 'T00:00:00');
+    return finiteSteps([
+      {
+        label: `Gestation length used for a ${values.species}`,
+        expr: `${days} days (typical range ${range[0]}–${range[1]} days)`,
+        note: 'These are the calculator’s fixed figures for each species.',
+      },
+      {
+        label: 'Add the gestation length to the breeding date',
+        expr: `${formatDate(breeding)} + ${days} days = ${resultValue(rows, 'dueDate')}`,
+      },
+      {
+        label: 'Expected range',
+        expr: `${formatDate(breeding)} + ${range[0]} to ${range[1]} days = ${resultValue(rows, 'dueDateRange')}`,
+      },
+    ]);
+  },
   calculate: (values) => {
     const species = values.species;
     const breedingStr = values.breedingDate;
@@ -41,8 +72,7 @@ const dogCatPregnancyConfig: CalculatorConfig = {
     const breeding = new Date(breedingStr + 'T00:00:00');
     if (isNaN(breeding.getTime())) return [];
 
-    const gestationDays = species === 'dog' ? 63 : 65;
-    const gestationRange: [number, number] = species === 'dog' ? [58, 68] : [63, 67];
+    const { days: gestationDays, range: gestationRange } = gestationFor(species);
 
     const dueDate = new Date(breeding);
     dueDate.setDate(dueDate.getDate() + gestationDays);

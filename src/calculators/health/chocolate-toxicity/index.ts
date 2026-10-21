@@ -1,6 +1,8 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import ChocolateToxicityPanel from './ChocolateToxicityPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 interface ChocolateTypeInfo {
   label: string;
@@ -22,6 +24,29 @@ const CHOCOLATE_TYPES: Record<string, ChocolateTypeInfo> = {
 // Weight conversions
 const LB_TO_KG = 2.20462;
 const OZ_TO_G = 28.3495;
+
+const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 1 });
+
+/** The calculator's own arithmetic (unit conversions, mg of theobromine and caffeine, mg per kg), shared with explainSteps. */
+function chocolateMath(values: Record<string, string>) {
+  const dogWeight = parseFloat(values.dogWeight);
+  const weightUnit = values.weightUnit || 'lbs';
+  const chocolateType = values.chocolateType || 'Milk';
+  const amountEaten = parseFloat(values.amountEaten);
+  const amountUnit = values.amountUnit || 'g';
+
+  if (isNaN(dogWeight) || isNaN(amountEaten) || dogWeight <= 0 || amountEaten <= 0) return null;
+
+  const typeInfo = CHOCOLATE_TYPES[chocolateType] || CHOCOLATE_TYPES.Milk;
+  const dogWeightKg = weightUnit === 'lbs' ? dogWeight / LB_TO_KG : dogWeight;
+  const dogWeightLbs = weightUnit === 'lbs' ? dogWeight : dogWeight * LB_TO_KG;
+  const amountGrams = amountUnit === 'oz' ? amountEaten * OZ_TO_G : amountEaten;
+  const theobromineMg = typeInfo.theobrominePerGram * amountGrams;
+  const caffeineMg = typeInfo.caffeinePerGram * amountGrams;
+  const totalMethylxanthines = theobromineMg + caffeineMg;
+  const mgPerKg = dogWeightKg > 0 ? totalMethylxanthines / dogWeightKg : 0;
+  return { dogWeight, weightUnit, amountEaten, amountUnit, typeInfo, dogWeightKg, dogWeightLbs, amountGrams, theobromineMg, caffeineMg, totalMethylxanthines, mgPerKg };
+}
 
 const chocolateConfig: CalculatorConfig = {
   inputs: [
@@ -84,29 +109,40 @@ const chocolateConfig: CalculatorConfig = {
       ],
     },
   ],
+  explainSteps: (values) => {
+    const rows = chocolateConfig.calculate(values);
+    const m = chocolateMath(values);
+    if (!hasAnswer(rows) || !m) return [];
+    const { typeInfo } = m;
+    const r = (n: number) => parseFloat(n.toFixed(2));
+    return finiteSteps([
+      {
+        label: 'Convert the dog’s weight to kilograms',
+        expr: m.weightUnit === 'lbs' ? `${m.dogWeight} lb ÷ 2.20462 = ${r(m.dogWeightKg)} kg` : `${m.dogWeight} kg`,
+      },
+      {
+        label: 'Convert the amount eaten to grams',
+        expr: m.amountUnit === 'oz' ? `${m.amountEaten} oz × 28.3495 = ${r(m.amountGrams)} g` : `${m.amountEaten} g`,
+      },
+      {
+        label: `Theobromine and caffeine eaten (the calculator’s per-gram figures for ${typeInfo.label.toLowerCase()})`,
+        expr: `${r(m.amountGrams)} g × ${typeInfo.theobrominePerGram} mg/g = ${resultValue(rows, 'theobromineMg')} · ${r(m.amountGrams)} g × ${typeInfo.caffeinePerGram} mg/g = ${resultValue(rows, 'caffeineMg')}`,
+      },
+      {
+        label: 'Add them together',
+        expr: `${resultValue(rows, 'theobromineMg')} + ${resultValue(rows, 'caffeineMg')} = ${resultValue(rows, 'totalMethylxanthines')}`,
+      },
+      {
+        label: 'Divide by the dog’s weight',
+        expr: `${resultValue(rows, 'totalMethylxanthines')} ÷ ${r(m.dogWeightKg)} kg = ${resultValue(rows, 'mgPerKg')}`,
+        note: 'This tool is not a substitute for veterinary advice; if you’re at all unsure, call your vet or the ASPCA Poison Control line rather than waiting to see symptoms.',
+      },
+    ]);
+  },
   calculate: (values) => {
-    const dogWeight = parseFloat(values.dogWeight);
-    const weightUnit = values.weightUnit || 'lbs';
-    const chocolateType = values.chocolateType || 'Milk';
-    const amountEaten = parseFloat(values.amountEaten);
-    const amountUnit = values.amountUnit || 'g';
-
-    if (isNaN(dogWeight) || isNaN(amountEaten) || dogWeight <= 0 || amountEaten <= 0) return [];
-
-    const typeInfo = CHOCOLATE_TYPES[chocolateType] || CHOCOLATE_TYPES.Milk;
-
-    // Convert weight to kg
-    const dogWeightKg = weightUnit === 'lbs' ? dogWeight / LB_TO_KG : dogWeight;
-    const dogWeightLbs = weightUnit === 'lbs' ? dogWeight : dogWeight * LB_TO_KG;
-
-    // Convert amount to grams
-    const amountGrams = amountUnit === 'oz' ? amountEaten * OZ_TO_G : amountEaten;
-
-    // Calculate total methylxanthines
-    const theobromineMg = typeInfo.theobrominePerGram * amountGrams;
-    const caffeineMg = typeInfo.caffeinePerGram * amountGrams;
-    const totalMethylxanthines = theobromineMg + caffeineMg;
-    const mgPerKg = dogWeightKg > 0 ? totalMethylxanthines / dogWeightKg : 0;
+    const m = chocolateMath(values);
+    if (!m) return [];
+    const { dogWeightKg, dogWeightLbs, theobromineMg, caffeineMg, totalMethylxanthines, mgPerKg } = m;
 
     // Severity
     let severity: string;
@@ -128,8 +164,6 @@ const chocolateConfig: CalculatorConfig = {
     // Thresholds
     const vomitingThreshold = 20 * dogWeightKg;
     const seizureThreshold = 60 * dogWeightKg;
-
-    const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 1 });
 
     return [
       { id: 'severity', label: 'Toxicity Level', value: severity, highlight: true, color: severityColor === 'red' ? 'negative' : severityColor === 'yellow' ? 'neutral' : 'positive', interpretation: `This estimates toxicity from theobromine and caffeine at ${mgPerKg.toFixed(1)} mg/kg of body weight — darker, more concentrated chocolate (baking chocolate, cocoa powder) is far more dangerous per ounce than milk chocolate. This tool is not a substitute for veterinary advice; if you're at all unsure, call your vet or the ASPCA Poison Control line below rather than waiting to see symptoms.` },

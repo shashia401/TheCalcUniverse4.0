@@ -1,6 +1,8 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import MacroPointPanel from './MacroPointPanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 /*
  * This calculator provides a nutritional scoring system similar to popular
@@ -13,9 +15,11 @@ import MacroPointPanel from './MacroPointPanel';
  * "SmartPoints" are registered trademarks of WW International, Inc.
  */
 
+/** The calculator's own coefficients, one per term. */
+const K = { calories: 0.0305, satFat: 0.275, sugar: 0.12, protein: 0.098 };
+
 function calculateMacroPoints(calories: number, satFat: number, sugar: number, protein: number): number {
-  // Modern macro-based scoring formula
-  const points = (calories * 0.0305) + (satFat * 0.275) + (sugar * 0.12) - (protein * 0.098);
+  const points = (calories * K.calories) + (satFat * K.satFat) + (sugar * K.sugar) - (protein * K.protein);
   return Math.max(0, Math.round(points * 10) / 10);
 }
 
@@ -102,6 +106,30 @@ const macroPointConfig: CalculatorConfig = {
       helpText: 'Shown for reference only — fibre is not part of this score',
     },
   ],
+  explainSteps: (values) => {
+    const rows = macroPointConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const calories = parseFloat(values.calories);
+    const satFat = parseFloat(values.satFat);
+    const sugar = parseFloat(values.sugar);
+    const protein = parseFloat(values.protein);
+    const t = (x: number) => +x.toFixed(4);
+    const calPts = calories * K.calories;
+    const satPts = satFat * K.satFat;
+    const sugarPts = sugar * K.sugar;
+    const protPts = protein * K.protein;
+    const raw = calPts + satPts + sugarPts - protPts;
+    return finiteSteps([
+      { label: 'Points from calories', expr: `${calories} × ${K.calories} = ${t(calPts)}`, note: 'Each term uses the calculator’s own coefficient.' },
+      { label: 'Points from saturated fat', expr: `${satFat} g × ${K.satFat} = ${t(satPts)}` },
+      { label: 'Points from sugar', expr: `${sugar} g × ${K.sugar} = ${t(sugarPts)}` },
+      { label: 'Protein credit (subtracted)', expr: `${protein} g × ${K.protein} = ${t(protPts)}` },
+      {
+        label: 'Add the three terms, subtract the credit, floor at 0 and round to 1 decimal',
+        expr: `max(0, ${t(calPts)} + ${t(satPts)} + ${t(sugarPts)} − ${t(protPts)}) = max(0, ${t(raw)}) → ${resultValue(rows, 'macroPoints')}`,
+      },
+    ]);
+  },
   calculate: (values) => {
     const foodName = values.foodName?.trim();
     const calories = parseFloat(values.calories);
@@ -118,10 +146,10 @@ const macroPointConfig: CalculatorConfig = {
     const category = getPointsCategory(points);
 
     // Per-serving per-macro contribution
-    const calPoints = calories * 0.0305;
-    const satFatPoints = satFat * 0.275;
-    const sugarPoints = sugar * 0.12;
-    const proteinCredit = protein * 0.098;
+    const calPoints = calories * K.calories;
+    const satFatPoints = satFat * K.satFat;
+    const sugarPoints = sugar * K.sugar;
+    const proteinCredit = protein * K.protein;
 
     const results: CalculatorResult[] = [
       {
@@ -147,25 +175,25 @@ const macroPointConfig: CalculatorConfig = {
       {
         id: 'caloriePoints',
         label: 'From Calories',
-        value: `${calPoints.toFixed(1)} pts (${Math.round(calories)} kcal × 0.0305)`,
+        value: `${calPoints.toFixed(1)} pts (${Math.round(calories)} kcal × ${K.calories})`,
         color: 'neutral',
       },
       {
         id: 'satFatPoints',
         label: 'From Saturated Fat',
-        value: `${satFatPoints.toFixed(1)} pts (${satFat.toFixed(1)} g × 0.275)`,
+        value: `${satFatPoints.toFixed(1)} pts (${satFat.toFixed(1)} g × ${K.satFat})`,
         color: 'negative',
       },
       {
         id: 'sugarPoints',
         label: 'From Sugar',
-        value: `${sugarPoints.toFixed(1)} pts (${sugar.toFixed(1)} g × 0.12)`,
+        value: `${sugarPoints.toFixed(1)} pts (${sugar.toFixed(1)} g × ${K.sugar})`,
         color: 'negative',
       },
       {
         id: 'proteinCredit',
         label: 'Protein Credit (reduces points)',
-        value: `−${proteinCredit.toFixed(1)} pts (${protein.toFixed(1)} g × 0.098)`,
+        value: `−${proteinCredit.toFixed(1)} pts (${protein.toFixed(1)} g × ${K.protein})`,
         color: 'positive',
       },
       {

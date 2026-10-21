@@ -1,6 +1,8 @@
 ﻿import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import CarbohydratePanel from './CarbohydratePanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import { plainLocale as fmt } from '../../../lib/format';
 
 const GOAL_RANGES: Record<string, { label: string; minG: number; maxG: number }> = {
@@ -10,6 +12,30 @@ const GOAL_RANGES: Record<string, { label: string; minG: number; maxG: number }>
   fatLoss: { label: 'Fat Loss / Cutting', minG: 2, maxG: 4 },
   ketosis: { label: 'Ketosis / Very Low Carb', minG: 0.5, maxG: 1 },
 };
+
+/** The calculator's own arithmetic (weight in kg, mass the g/kg range applies to, daily grams), shared with explainSteps. */
+function carbPlan(values: Record<string, string>) {
+  const unit = values.unit || 'imperial';
+  const weight = parseFloat(values.weight);
+  const bodyFatPct = parseFloat(values.bodyFatPct);
+  const ranges = GOAL_RANGES[values.goal || 'moderate'] ?? GOAL_RANGES.moderate;
+
+  const weightKg = unit === 'imperial' ? weight * 0.45359237 : weight;
+  if (isNaN(weightKg) || weightKg <= 0) return null;
+
+  // Calculate from body weight or lean mass
+  const useLean = !isNaN(bodyFatPct) && bodyFatPct > 0 && values.bodyFatPct !== '';
+  const massForCalculation = useLean ? weightKg * (1 - bodyFatPct / 100) : weightKg;
+  const massLabel = useLean ? 'per kg lean mass' : 'per kg body weight';
+
+  const dailyMin = Math.round(massForCalculation * ranges.minG);
+  const dailyMax = Math.round(massForCalculation * ranges.maxG);
+  const dailyAvg = Math.round((dailyMin + dailyMax) / 2);
+  return { unit, weight, bodyFatPct, useLean, weightKg, massForCalculation, ranges, massLabel, dailyMin, dailyMax, dailyAvg, calMin: dailyMin * 4, calMax: dailyMax * 4 };
+}
+
+/** Glycogen-loading grams per day: the calculator's fixed 8 g/kg target on total body weight. */
+const LOAD_G_PER_KG = 8;
 
 const carbohydrateConfig: CalculatorConfig = {
   inputs: [
@@ -68,37 +94,53 @@ const carbohydrateConfig: CalculatorConfig = {
       helpText: 'For race/carb-loading timeline. Optional.',
     },
   ],
-  calculate: (values) => {
-    const unit = values.unit || 'imperial';
-    const weight = parseFloat(values.weight);
-    const bodyFatPct = parseFloat(values.bodyFatPct);
-    const goal = values.goal || 'moderate';
-    const eventDateStr = values.eventDate?.trim();
-
-    const weightKg = unit === 'imperial' ? weight * 0.45359237 : weight;
-    if (isNaN(weightKg) || weightKg <= 0) return [];
-
-    const ranges = GOAL_RANGES[goal] ?? GOAL_RANGES.moderate;
-
-    // Calculate from body weight or lean mass
-    let massForCalculation: number;
-    let massLabel: string;
-    if (!isNaN(bodyFatPct) && bodyFatPct > 0 && values.bodyFatPct !== '') {
-      const leanMass = weightKg * (1 - bodyFatPct / 100);
-      massForCalculation = leanMass;
-      massLabel = 'per kg lean mass';
-    } else {
-      massForCalculation = weightKg;
-      massLabel = 'per kg body weight';
+  explainSteps: (values) => {
+    const rows = carbohydrateConfig.calculate(values);
+    const plan = carbPlan(values);
+    if (!hasAnswer(rows) || !plan) return [];
+    const { unit, weight, bodyFatPct, useLean, weightKg, massForCalculation, ranges, dailyMin, dailyMax, dailyAvg } = plan;
+    const kg = weightKg.toFixed(2);
+    const steps = [
+      {
+        label: 'Convert your weight to kilograms',
+        expr: unit === 'imperial' ? `${weight} lb × 0.45359237 = ${kg} kg` : `${weight} kg`,
+      },
+      ...(useLean
+        ? [{
+            label: 'Apply the range to lean mass (body fat % was entered)',
+            expr: `${kg} kg × (1 − ${bodyFatPct}/100) = ${massForCalculation.toFixed(2)} kg`,
+            note: 'Leave body fat blank to apply the range to total body weight instead.',
+          }]
+        : []),
+      {
+        label: `Daily carbohydrate range for ${ranges.label}`,
+        expr: `${massForCalculation.toFixed(2)} kg × ${ranges.minG} = ${fmt(dailyMin)} g · ${massForCalculation.toFixed(2)} kg × ${ranges.maxG} = ${fmt(dailyMax)} g`,
+      },
+      {
+        label: 'Average daily target',
+        expr: `(${fmt(dailyMin)} + ${fmt(dailyMax)}) ÷ 2 = ${fmt(dailyAvg)} g/day`,
+      },
+      {
+        label: 'Calories from that carbohydrate',
+        expr: `${fmt(dailyAvg)} g × 4 kcal/g = ${fmt(dailyAvg * 4)} kcal`,
+        note: 'Carbohydrate provides 4 kcal per gram.',
+      },
+    ];
+    if (resultValue(rows, 'glycogenLoading')) {
+      const loadG = Math.round(weightKg * LOAD_G_PER_KG);
+      steps.push({
+        label: 'Glycogen loading amount (event date entered)',
+        expr: `${kg} kg × ${LOAD_G_PER_KG} g/kg = ${fmt(loadG)} g/day · ${fmt(loadG)} g × 4 = ${fmt(loadG * 4)} kcal`,
+        note: 'The calculator applies a fixed 8 g/kg to total body weight for the 3 days before the event.',
+      });
     }
-
-    const dailyMin = Math.round(massForCalculation * ranges.minG);
-    const dailyMax = Math.round(massForCalculation * ranges.maxG);
-    const dailyAvg = Math.round((dailyMin + dailyMax) / 2);
-
-    // Calories from carbs
-    const calMin = dailyMin * 4;
-    const calMax = dailyMax * 4;
+    return finiteSteps(steps);
+  },
+  calculate: (values) => {
+    const plan = carbPlan(values);
+    if (!plan) return [];
+    const { weightKg, ranges, massLabel, dailyMin, dailyMax, dailyAvg, calMin, calMax } = plan;
+    const eventDateStr = values.eventDate?.trim();
 
     // Glycogen loading timeline (if event date provided)
     const glycogenLoadDate = eventDateStr && /^\d{4}-\d{2}-\d{2}$/.test(eventDateStr)
@@ -135,8 +177,7 @@ const carbohydrateConfig: CalculatorConfig = {
     ];
 
     if (glycogenLoadDate) {
-      const loadGPerKg = 8; // moderate loading target (sports-nutrition guidance spans 8–12 g/kg/day)
-      const loadG = Math.round(weightKg * loadGPerKg);
+      const loadG = Math.round(weightKg * LOAD_G_PER_KG); // moderate loading target (sports-nutrition guidance spans 8–12 g/kg/day)
       results.push({
         id: 'glycogenLoading',
         label: 'Glycogen Loading Protocol',

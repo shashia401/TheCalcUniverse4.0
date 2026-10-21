@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import BloodTypePanel from './BloodTypePanel';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 type AboGenotype = 'AA' | 'AO' | 'BB' | 'BO' | 'AB' | 'OO';
 type RhGenotype = 'RR' | 'Rr' | 'rr';
@@ -61,6 +63,55 @@ function combineRhAlleles(a1: string, a2: string): string {
   return alleles;
 }
 
+interface Tally { counts: Record<string, number>; total: number }
+
+/** Every child ABO genotype from every possible parent genotype pair x 4 allele pairings. */
+function aboTally(p1Blood: string, p2Blood: string): Tally {
+  const counts: Record<string, number> = { A: 0, B: 0, AB: 0, O: 0 };
+  let total = 0;
+  for (const g1 of getPossibleAboGenotypes(p1Blood)) {
+    for (const g2 of getPossibleAboGenotypes(p2Blood)) {
+      for (const al1 of getAboAlleles(g1)) {
+        for (const al2 of getAboAlleles(g2)) {
+          const childBt = aboGenotypeToBloodType(combineAboAlleles(al1, al2));
+          counts[childBt] = (counts[childBt] || 0) + 1;
+          total++;
+        }
+      }
+    }
+  }
+  return { counts, total };
+}
+
+/** Same enumeration for the Rh locus. */
+function rhTally(p1Rh: string, p2Rh: string): Tally {
+  const counts: Record<string, number> = { '+': 0, '-': 0 };
+  let total = 0;
+  for (const g1 of getPossibleRhGenotypes(p1Rh)) {
+    for (const g2 of getPossibleRhGenotypes(p2Rh)) {
+      for (const al1 of getRhAlleles(g1)) {
+        for (const al2 of getRhAlleles(g2)) {
+          const childRh = rhGenotypeToFactor(combineRhAlleles(al1, al2));
+          counts[childRh] = (counts[childRh] || 0) + 1;
+          total++;
+        }
+      }
+    }
+  }
+  return { counts, total };
+}
+
+/** ABO x Rh combinations, most likely first (ties keep A, B, AB, O then + before -). */
+function combinedOutcomes(abo: Tally, rh: Tally): { label: string; pct: number; aboN: number; rhN: number }[] {
+  const out: { label: string; pct: number; aboN: number; rhN: number }[] = [];
+  for (const bt of ['A', 'B', 'AB', 'O'].filter((b) => abo.counts[b] > 0)) {
+    for (const rf of ['+', '-'].filter((r) => rh.counts[r] > 0)) {
+      out.push({ label: `Type ${bt}${rf}`, pct: (abo.counts[bt] / abo.total) * (rh.counts[rf] / rh.total) * 100, aboN: abo.counts[bt], rhN: rh.counts[rf] });
+    }
+  }
+  return out.sort((a, b) => b.pct - a.pct);
+}
+
 const bloodTypeConfig: CalculatorConfig = {
   inputs: [
     {
@@ -112,6 +163,46 @@ const bloodTypeConfig: CalculatorConfig = {
       ],
     },
   ],
+  explainSteps: (values) => {
+    const rows = bloodTypeConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const { parent1Blood: b1, parent1Rh: r1, parent2Blood: b2, parent2Rh: r2 } = values;
+    const abo = aboTally(b1, b2);
+    const rh = rhTally(r1, r2);
+    if (!abo.total || !rh.total) return [];
+    const g1 = getPossibleAboGenotypes(b1);
+    const g2 = getPossibleAboGenotypes(b2);
+    const h1 = getPossibleRhGenotypes(r1);
+    const h2 = getPossibleRhGenotypes(r2);
+    const aboTypes = ['A', 'B', 'AB', 'O'].filter((t) => abo.counts[t] > 0);
+    const rhTypes = ['+', '-'].filter((t) => rh.counts[t] > 0);
+    const rhName = (t: string) => (t === '+' ? 'Rh+' : 'Rh-');
+    const top = combinedOutcomes(abo, rh)[0];
+    return finiteSteps([
+      {
+        label: 'List each parent’s possible genotypes',
+        expr: `Parent 1 (${b1}${r1}): ${g1.join(' or ')} · ${h1.join(' or ')}   Parent 2 (${b2}${r2}): ${g2.join(' or ')} · ${h2.join(' or ')}`,
+        note: 'Each possible genotype is treated as equally likely, as the calculator assumes.',
+      },
+      {
+        label: 'Count the ABO outcomes',
+        expr: `${g1.length} × ${g2.length} genotype pairs × 4 allele pairings = ${abo.total} combinations: ${aboTypes.map((t) => `${t} ${abo.counts[t]}`).join(' · ')}`,
+      },
+      {
+        label: 'Turn the ABO counts into percentages',
+        expr: aboTypes.map((t) => `${t}: ${abo.counts[t]} ÷ ${abo.total} = ${resultValue(rows, `abo${t}`)}`).join(' · '),
+      },
+      {
+        label: 'Count and convert the Rh outcomes',
+        expr: `${h1.length} × ${h2.length} × 4 = ${rh.total} combinations: ${rhTypes.map((t) => `${rhName(t)} ${rh.counts[t]} ÷ ${rh.total} = ${resultValue(rows, `rh${t === '+' ? 'Positive' : 'Negative'}`)}`).join(' · ')}`,
+      },
+      {
+        label: 'Multiply the ABO and Rh chances (the two systems are treated as independent)',
+        expr: `Most likely, ${top.label}: ${top.aboN}/${abo.total} × ${top.rhN}/${rh.total} × 100 = ${top.pct.toFixed(1)}%`,
+        note: 'These are probabilities from possible genotype combinations, not guarantees.',
+      },
+    ]);
+  },
   calculate: (values) => {
     const p1Blood = values.parent1Blood;
     const p1Rh = values.parent1Rh;
@@ -120,48 +211,8 @@ const bloodTypeConfig: CalculatorConfig = {
 
     if (!p1Blood || !p1Rh || !p2Blood || !p2Rh) return [];
 
-    const p1AboGenos = getPossibleAboGenotypes(p1Blood);
-    const p2AboGenos = getPossibleAboGenotypes(p2Blood);
-    const p1RhGenos = getPossibleRhGenotypes(p1Rh);
-    const p2RhGenos = getPossibleRhGenotypes(p2Rh);
-
-    // ── ABO probabilities ──
-    const aboCounts: Record<string, number> = { A: 0, B: 0, AB: 0, O: 0 };
-    let aboTotal = 0;
-
-    for (const g1 of p1AboGenos) {
-      for (const g2 of p2AboGenos) {
-        const a1Alleles = getAboAlleles(g1);
-        const a2Alleles = getAboAlleles(g2);
-        for (const al1 of a1Alleles) {
-          for (const al2 of a2Alleles) {
-            const childGenotype = combineAboAlleles(al1, al2);
-            const childBt = aboGenotypeToBloodType(childGenotype);
-            aboCounts[childBt] = (aboCounts[childBt] || 0) + 1;
-            aboTotal++;
-          }
-        }
-      }
-    }
-
-    // ── Rh probabilities ──
-    const rhCounts: Record<string, number> = { '+': 0, '-': 0 };
-    let rhTotal = 0;
-
-    for (const g1 of p1RhGenos) {
-      for (const g2 of p2RhGenos) {
-        const r1Alleles = getRhAlleles(g1);
-        const r2Alleles = getRhAlleles(g2);
-        for (const al1 of r1Alleles) {
-          for (const al2 of r2Alleles) {
-            const childGenotype = combineRhAlleles(al1, al2);
-            const childRh = rhGenotypeToFactor(childGenotype);
-            rhCounts[childRh] = (rhCounts[childRh] || 0) + 1;
-            rhTotal++;
-          }
-        }
-      }
-    }
+    const { counts: aboCounts, total: aboTotal } = aboTally(p1Blood, p2Blood);
+    const { counts: rhCounts, total: rhTotal } = rhTally(p1Rh, p2Rh);
 
     const aboPercentages: Record<string, string> = {};
     for (const bt of ['A', 'B', 'AB', 'O']) {
@@ -199,17 +250,7 @@ const bloodTypeConfig: CalculatorConfig = {
     }
 
     // Combined probabilities (top combinations)
-    const combined: { label: string; pct: number }[] = [];
-    for (const bt of aboEntries) {
-      for (const rf of rhEntries) {
-        const combinedPct = (aboCounts[bt] / aboTotal) * (rhCounts[rf] / rhTotal) * 100;
-        combined.push({
-          label: `Type ${bt}${rf === '+' ? '+' : '-'}`,
-          pct: combinedPct,
-        });
-      }
-    }
-    combined.sort((a, b) => b.pct - a.pct);
+    const combined = combinedOutcomes({ counts: aboCounts, total: aboTotal }, { counts: rhCounts, total: rhTotal });
 
     results.push({
       id: 'combinedHeader',
