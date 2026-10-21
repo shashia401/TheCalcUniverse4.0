@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import AnnuityPanel from './AnnuityPanel';
 
 const annuitySvg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto">
@@ -105,6 +107,110 @@ const annuityPayoutConfig: CalculatorConfig = {
       helpText: 'Toggle whether results account for 3% annual inflation erosion.',
     },
   ],
+
+  explainSteps: (values) => {
+    const rows = annuityPayoutConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const solveFor = values.solveFor || 'payout';
+    const principal = parseFloat(values.principal);
+    const annualReturn = parseFloat(values.annualReturn) / 100;
+    const monthly = (values.payoutFrequency || 'monthly') === 'monthly';
+    const periodsPerYear = monthly ? 12 : 1;
+    const unit = monthly ? 'month' : 'year';
+    const freqLabel = monthly ? '/mo' : '/yr';
+    const rPeriod = annualReturn / periodsPerYear;
+    const d2 = (n: number) => new Decimal(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const pctStr = (x: number, dp: number) => `${+(x * 100).toFixed(dp)}%`;
+    const steps: ExplainStep[] = [
+      {
+        label: `Convert the annual return to a rate per ${unit}`,
+        expr: `r = ${pctStr(annualReturn, 4)} ÷ ${periodsPerYear} = ${pctStr(rPeriod, 6)} per ${unit}`,
+        note: 'The balance that has not been paid out yet keeps earning this rate every period.',
+      },
+    ];
+
+    if (solveFor === 'payout') {
+      const desiredYears = parseFloat(values.desiredYears) || 0;
+      const n = desiredYears * periodsPerYear;
+      steps.push({
+        label: 'Count the payments',
+        expr: `n = ${desiredYears} years × ${periodsPerYear} = ${n} payments`,
+      });
+      if (rPeriod === 0) {
+        steps.push({
+          label: 'With a 0% return, share the principal evenly',
+          expr: `PMT = $${d2(principal)} ÷ ${n} = ${resultValue(rows, 'pmt')}`,
+        });
+      } else {
+        const rD = new Decimal(rPeriod);
+        const denom = new Decimal(1).minus(new Decimal(1).plus(rD).pow(-n));
+        steps.push({
+          label: 'Solve the annuity formula for the payment',
+          expr: `PMT = P × r ÷ (1 − (1 + r)^−n) = $${d2(principal)} × ${rPeriod.toFixed(8)} ÷ (1 − (1 + ${rPeriod.toFixed(8)})^−${n}) = $${d2(principal)} × ${rPeriod.toFixed(8)} ÷ ${denom.toFixed(8)} = ${resultValue(rows, 'pmt')}`,
+          note: 'This is the level payment that uses up the principal and its earnings exactly at the last payment.',
+        });
+      }
+      steps.push({
+        label: 'Add up what you receive and how much of it is interest',
+        expr: `PMT × ${n} = ${resultValue(rows, 'totalPayout')} received · minus the ${resultValue(rows, 'principal')} principal = ${resultValue(rows, 'interest')} of interest (${resultValue(rows, 'interestBoost')} of the total)`,
+      });
+      const inf = resultValue(rows, 'infAdjPmt');
+      if (inf) {
+        steps.push({
+          label: "Deflate the payout to today's dollars",
+          expr: `PMT ÷ 1.03^${desiredYears} = ${inf}`,
+          note: 'The calculator assumes a constant 3% annual inflation, for illustration only.',
+        });
+      }
+      return finiteSteps(steps);
+    }
+
+    // How long will the money last
+    const payoutAmount = parseFloat(values.payoutAmount) || 0;
+    const interestPerPeriod = principal * rPeriod;
+    if (rows[0].id === 'infinite') {
+      steps.push({
+        label: 'Compare the interest earned each period with the payout',
+        expr: `$${d2(principal)} × ${rPeriod.toFixed(8)} = $${d2(interestPerPeriod)}${freqLabel} of interest ≥ $${d2(payoutAmount)}${freqLabel} payout`,
+        note: 'The payout never eats into the principal, so the money lasts indefinitely.',
+      });
+      return finiteSteps(steps);
+    }
+    if (rPeriod === 0) {
+      steps.push({
+        label: 'With a 0% return, divide the principal by the payout',
+        expr: `n = $${d2(principal)} ÷ $${d2(payoutAmount)} = ${+(principal / payoutAmount).toFixed(4)} payments → ${resultValue(rows, 'duration')}`,
+      });
+    } else {
+      const rD = new Decimal(rPeriod);
+      const pD = new Decimal(payoutAmount);
+      const nExact = Decimal.ln(pD.div(pD.minus(new Decimal(principal).times(rPeriod)))).div(Decimal.ln(new Decimal(1).plus(rPeriod)));
+      steps.push({
+        label: 'First check that the payout beats the interest',
+        expr: `Interest per ${unit}: $${d2(principal)} × ${rPeriod.toFixed(8)} = $${d2(interestPerPeriod)} < $${d2(payoutAmount)} payout`,
+        note: 'If the payout were no larger than the interest, the principal would never shrink.',
+      });
+      steps.push({
+        label: 'Solve the annuity formula for the number of payments',
+        expr: `n = ln(PMT ÷ (PMT − P × r)) ÷ ln(1 + r) = ln($${d2(payoutAmount)} ÷ ($${d2(payoutAmount)} − $${d2(interestPerPeriod)})) ÷ ln(1 + ${rPeriod.toFixed(8)}) = ${nExact.toFixed(4)} payments → ${resultValue(rows, 'duration')}`,
+      });
+      const full = Math.floor(nExact.toNumber());
+      const g = new Decimal(1).plus(rD);
+      const balance = new Decimal(principal).times(g.pow(full)).minus(pD.times(g.pow(full).minus(1)).div(rD));
+      const finalPmt = Decimal.max(balance, 0).times(g);
+      steps.push({
+        label: 'Add up everything you receive',
+        expr: `${full} full payments of $${d2(payoutAmount)} + a final payment of $${d2(finalPmt.toNumber())} = ${resultValue(rows, 'totalPayout')} · minus the ${resultValue(rows, 'principal')} principal = ${resultValue(rows, 'interest')} of interest`,
+        note: 'The last payment only needs to cover the balance that is left plus one period of interest.',
+      });
+      return finiteSteps(steps);
+    }
+    steps.push({
+      label: 'Add up everything you receive',
+      expr: `${resultValue(rows, 'totalPayout')} received · ${resultValue(rows, 'principal')} principal · ${resultValue(rows, 'interest')} of interest`,
+    });
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const solveFor = values.solveFor || 'payout';

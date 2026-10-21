@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import DepreciationPanel from './DepreciationPanel';
 
 function calcStraightLine(cost: number, salvage: number, life: number) {
@@ -114,6 +116,76 @@ const depreciationConfig: CalculatorConfig = {
       helpText: 'Straight Line spreads deductions evenly; MACRS accelerates them for greater tax savings early on.',
     },
   ],
+
+  explainSteps: (values) => {
+    const rows = depreciationConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const cost = parseFloat(values.assetCost);
+    const salvage = parseFloat(values.salvageValue) || 0;
+    const life = parseInt(values.usefulLife, 10);
+    const method = values.method || 'straight-line';
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (method === 'straight-line') {
+      const { annualDep, schedule } = calcStraightLine(cost, salvage, life);
+      return finiteSteps([
+        {
+          label: 'Find the amount that can be depreciated',
+          expr: `${m(cost)} cost − ${m(salvage)} salvage = ${resultValue(rows, 'depreciableBasis')}`,
+          note: 'The asset is never written down below its salvage value.',
+        },
+        {
+          label: 'Spread it evenly over the useful life',
+          expr: `${resultValue(rows, 'depreciableBasis')} ÷ ${life} years = ${resultValue(rows, 'annualDepreciation')}`,
+        },
+        {
+          label: 'Year 1 expense and book value',
+          expr: `Book value after year 1 = ${m(cost)} − ${m(annualDep)} = ${m(schedule[0].bookValue)}`,
+        },
+        {
+          label: 'Add up every year',
+          expr: `${m(annualDep)} × ${life} years = ${resultValue(rows, 'totalDepreciation')} in total → ending book value ${resultValue(rows, 'bookValue')}`,
+        },
+      ]);
+    }
+    const { schedule, firstYearDep } = calcMACRS(cost, life);
+    const straightLine = life >= 25;
+    const factor = straightLine ? 1 : life > 10 ? 1.5 : 2;
+    const rate = factor / life;
+    const pct = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const steps: ExplainStep[] = [
+      {
+        label: 'MACRS ignores salvage, so the whole cost is depreciated',
+        expr: `Basis = ${resultValue(rows, 'depreciableBasis')}${salvage > 0 ? ` (the ${m(salvage)} salvage you entered has no effect)` : ''}`,
+      },
+      {
+        label: 'Find the yearly rate',
+        expr: straightLine
+          ? `Straight line: 1 ÷ ${life} = ${pct(rate)} per year (${resultValue(rows, 'method')})`
+          : `${factor * 100}% declining balance: ${factor} ÷ ${life} = ${pct(rate)} of the remaining book value (${resultValue(rows, 'method')})`,
+        note: 'Declining balance switches to straight line over the remaining years as soon as that gives a larger deduction.',
+      },
+      {
+        label: 'Year 1 uses the half-year convention',
+        expr: `${m(cost)} × ${pct(rate)} × ½ = ${m(firstYearDep)} → ${resultValue(rows, 'annualDepreciation')}`,
+        note: 'The asset is treated as placed in service mid-year, so year 1 gets half a year of depreciation.',
+      },
+    ];
+    if (schedule.length > 1) {
+      const y2 = schedule[1];
+      const bv1 = schedule[0].bookValue;
+      steps.push({
+        label: 'Year 2 uses the larger of the two methods',
+        expr: straightLine
+          ? `${m(cost)} × ${pct(rate)} = ${m(y2.depreciationExpense)}`
+          : `Declining balance: ${m(bv1)} × ${pct(rate)} = ${m(bv1 * rate)} · straight line on what is left: ${m(bv1)} ÷ (${life} − 2 + 1.5) = ${m(bv1 / (life - 2 + 1.5))} → ${m(y2.depreciationExpense)}${y2.depreciationExpense < Math.max(bv1 * rate, bv1 / (life - 2 + 1.5)) - 0.005 ? ' (limited to the remaining book value)' : ''}`,
+      });
+    }
+    steps.push({
+      label: 'Run the schedule to the end',
+      expr: `${schedule.length} tax year${schedule.length === 1 ? '' : 's'} (${life} + 1 for the half-year convention) · total ${resultValue(rows, 'totalDepreciation')} · ending book value ${resultValue(rows, 'bookValue')}`,
+    });
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const assetCost = parseFloat(values.assetCost);

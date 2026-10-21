@@ -1,8 +1,10 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import FIREPanel from './FIREPanel';
 
-import { parseFireInputs, computeFire, COAST_RETIREMENT_AGE } from './fireMath';
+import { parseFireInputs, computeFire, COAST_RETIREMENT_AGE, FAT_FIRE_MULTIPLIER } from './fireMath';
 
 const fireCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -107,6 +109,58 @@ const fireCalculatorConfig: CalculatorConfig = {
       helpText: 'Different FIRE styles target different retirement lifestyles. Lean and Standard use your expenses as entered; Fat adds a 1.5x cushion; Coast solves for when you can stop contributing and let investing carry you to the target by age 65.',
     },
   ],
+  explainSteps: (values) => {
+    const i = parseFireInputs(values);
+    if (!i) return [];
+    const rows = fireCalculatorConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const f = computeFire(i);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    const pct = (x: number) => `${+x.toFixed(4)}%`;
+    const coast = i.fireType === 'coast';
+    const steps: ExplainStep[] = [
+      {
+        label: 'Work out how much you save each year',
+        expr: i.savingsRatePct !== undefined
+          ? `${m(i.income)} × ${pct(i.savingsRatePct)} savings rate = ${resultValue(rows, 'annualSavings')} (${resultValue(rows, 'monthlySavings')} a month)`
+          : `${m(i.income)} income − ${m(i.expenses)} expenses = ${resultValue(rows, 'annualSavings')}${i.income - i.expenses < 0 ? ' (spending exceeds income, so savings are $0)' : ''} (${resultValue(rows, 'savingsRate')} savings rate)`,
+        note: 'A savings rate you enter overrides income minus expenses.',
+      },
+      {
+        label: 'Find the portfolio that covers your spending',
+        expr: i.fireType === 'fat'
+          ? `${m(i.expenses)} ÷ ${pct(i.withdrawalPct)} × ${FAT_FIRE_MULTIPLIER} cushion = ${resultValue(rows, 'fireNumber')}`
+          : `${m(i.expenses)} ÷ ${pct(i.withdrawalPct)} = ${resultValue(rows, 'fireNumber')}`,
+        note: 'Dividing yearly spending by the safe withdrawal rate gives the nest egg that could fund it.',
+      },
+    ];
+    if (coast && f.coastFireNumber !== null) {
+      const yrs = Math.max(0, COAST_RETIREMENT_AGE - i.currentAge);
+      steps.push({
+        label: `Discount that number back from age ${COAST_RETIREMENT_AGE} to today`,
+        expr: `${resultValue(rows, 'fireNumber')} ÷ (1 + ${pct(i.returnPct)})^${yrs} = ${resultValue(rows, 'coastFireNumber')}`,
+        note: 'Coast FIRE is the amount that grows to your FIRE number by itself, with no further contributions.',
+      });
+    }
+    if (!f.achievable) {
+      steps.push({
+        label: 'Grow your savings year by year',
+        expr: `Each year: balance × (1 + ${pct(i.returnPct)}) + ${m(f.annualSavings)} — the target of ${m(f.target)} is not reached within 100 years → ${resultValue(rows, 'fireAge')}`,
+      });
+      return finiteSteps(steps);
+    }
+    steps.push({
+      label: 'Grow your savings year by year until they reach the target',
+      expr: `Start ${m(i.netWorth)}; each year balance × (1 + ${pct(i.returnPct)}) + ${m(f.annualSavings)}, repeated until it reaches ${m(f.target)}${coast ? ' (the Coast number)' : ''} → ${resultValue(rows, 'yearsToFire')}`,
+      note: 'Contributions are added at the end of each year.',
+    });
+    steps.push({
+      label: coast ? 'Age you can stop contributing' : 'Age you reach financial independence',
+      expr: `${i.currentAge} + ${f.yearsToFire} years = ${resultValue(rows, 'fireAge')} · balance then ${resultValue(rows, 'nwAtRetirement')} · total contributed (including today's net worth) ${resultValue(rows, 'totalContributions')}`,
+    });
+    return finiteSteps(steps);
+  },
+
   calculate: (values) => {
     const inputs = parseFireInputs(values);
     if (!inputs) return [];

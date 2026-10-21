@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import { pmt } from '../../../utils/financial';
 import CanadianMortgagePanel from './CanadianMortgagePanel';
 import { money2dp as fmt } from '../../../lib/format';
@@ -259,6 +261,95 @@ const canadianMortgageConfig: CalculatorConfig = {
       helpText: 'B-20 stress test: qualify at greater of contract rate + 2% OR 5.25%. This affects max affordable price.',
     },
   ],
+
+  explainSteps: (values) => {
+    const rows = canadianMortgageConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const price = parseFloat(values.price);
+    const down = parseFloat(values.downPayment);
+    const years = parseInt(values.amortization, 10) || 25;
+    const annualRate = parseFloat(values.rate);
+    const freq = values.frequency || 'monthly';
+    const m = (n: number) => `$${fmt(n)}`;
+    const baseLoan = price - down;
+    const ltv = baseLoan / price;
+    const r = annualRate / 100;
+    const effectiveAnnual = Math.pow(1 + r / 2, 2) - 1;
+    const monthlyRate = Math.pow(1 + effectiveAnnual, 1 / 12) - 1;
+    const n = years * 12;
+    const insured = ltv > 0.8;
+    const cmhcRate = insured ? cmhcPremiumRate(ltv) + (years > 25 ? 0.002 : 0) : 0;
+    const principal = baseLoan + baseLoan * cmhcRate;
+    const monthlyPayment = pmt(principal, monthlyRate, n);
+    const growth = Math.pow(1 + monthlyRate, n);
+    const steps: ExplainStep[] = [
+      {
+        label: 'Find the base mortgage and loan-to-value',
+        expr: `${m(price)} − ${m(down)} down = ${m(baseLoan)} · LTV = ${m(baseLoan)} ÷ ${m(price)} = ${(ltv * 100).toFixed(1)}%`,
+        note: 'Less than 20% down (LTV above 80%) means the mortgage must be insured.',
+      },
+      insured
+        ? {
+            label: 'Add the mortgage insurance premium to the principal',
+            expr: `${m(baseLoan)} × ${(cmhcRate * 100).toFixed(2)}% (tier for ${(ltv * 100).toFixed(1)}% LTV${years > 25 ? ', +0.20% for an amortization over 25 years' : ''}) = ${resultValue(rows, 'cmhc')} → principal ${resultValue(rows, 'principal')}`,
+          }
+        : { label: 'Check whether mortgage insurance applies', expr: `${(ltv * 100).toFixed(1)}% LTV is 80% or less → ${resultValue(rows, 'cmhc')} · principal ${resultValue(rows, 'principal')}` },
+      {
+        label: 'Convert the quoted rate (compounded semi-annually, as Canadian law requires)',
+        expr: `Effective annual rate = (1 + ${annualRate}% ÷ 2)² − 1 = ${resultValue(rows, 'effRate')}`,
+        note: 'US mortgages compound monthly; Canadian fixed-rate mortgages compound twice a year.',
+      },
+      {
+        label: 'Turn the effective rate into a monthly rate',
+        expr: `i = (1 + ${(effectiveAnnual * 100).toFixed(4)}%)^(1/12) − 1 = ${(monthlyRate * 100).toFixed(6)}% per month`,
+      },
+      {
+        label: 'Solve for the monthly payment',
+        expr: monthlyRate === 0
+          ? `M = ${m(principal)} ÷ ${n} = ${m(monthlyPayment)}`
+          : `M = P × i(1 + i)ⁿ ÷ ((1 + i)ⁿ − 1) = ${m(principal)} × ${monthlyRate.toFixed(8)} × ${growth.toFixed(6)} ÷ (${growth.toFixed(6)} − 1) = ${m(monthlyPayment)} (n = ${years} × 12 = ${n})`,
+      },
+      {
+        label: 'Convert it to your payment frequency',
+        expr:
+          freq === 'monthly' ? `Monthly: ${m(monthlyPayment)}`
+          : freq === 'semimonthly' ? `Semi-monthly: ${m(monthlyPayment)} ÷ 2 = ${resultValue(rows, 'payment')}`
+          : freq === 'biweekly' ? `Bi-weekly: ${m(monthlyPayment)} × 12 ÷ 26 = ${resultValue(rows, 'payment')}`
+          : `Accelerated bi-weekly: ${m(monthlyPayment)} ÷ 2 = ${resultValue(rows, 'payment')} (26 payments = 13 monthly payments a year)`,
+      },
+      {
+        label: 'Run the payments to the end to total the interest',
+        expr: `Interest ${resultValue(rows, 'totalInterest')} · total paid ${resultValue(rows, 'totalPaid')} · paid off in ${resultValue(rows, 'yearsActual')}`,
+        note: 'Each payment first covers the interest on the balance, and the rest reduces the principal.',
+      },
+    ];
+    const savedInterest = resultValue(rows, 'savedInterest');
+    if (savedInterest) {
+      steps.push({
+        label: 'Compare with a standard monthly schedule',
+        expr: `Interest saved ${savedInterest} · years saved ${resultValue(rows, 'savedYears')}`,
+      });
+    }
+    const stress = resultValue(rows, 'stressTestQualifying');
+    if (stress) {
+      const maxPrice = resultValue(rows, 'stressTestMaxPrice');
+      steps.push({
+        label: 'Stress test: re-price the same mortgage at the qualifying rate',
+        expr: `${stress}${maxPrice ? ` · largest home that payment would support at that rate: ${maxPrice}` : ''}`,
+        note: 'Lenders check that you could still pay if rates were higher.',
+      });
+    }
+    const lttTotal = rows.find((x) => x.id === 'lttTotal');
+    if (lttTotal) {
+      const detail = rows.filter((x) => x.id.startsWith('ltt_')).map((x) => `${x.label.replace('LTT Detail:', '').trim()} ${x.value}`);
+      steps.push({
+        label: 'Add the land transfer tax due at closing',
+        expr: detail.length ? `${detail.join(' · ')} → ${lttTotal.value}` : lttTotal.value,
+        note: "Taken from the calculator's own provincial tax bands; it is a closing cost, not part of the mortgage.",
+      });
+    }
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const price = parseFloat(values.price);

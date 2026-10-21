@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { money2dp as m2 } from '../../../lib/format';
 import Panel401k from './Panel401k';
 
 const k401Svg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto">
@@ -15,6 +18,55 @@ const k401Svg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" s
   <text x="225" y="102" font-size="9" fill="var(--svg-ef4444)" font-weight="bold" font-family="system-ui,sans-serif">Investment Returns</text>
   <text x="160" y="185" text-anchor="middle" font-size="8" fill="var(--svg-64748b)" font-family="system-ui,sans-serif">FV = PV(1+r)^t + PMT((1+r)^t-1)/r  |  Time in Years</text>
 </svg>`;
+
+interface K401Inputs {
+  currentAge: number; retirementAge: number; currentBalance: number; annualSalary: number;
+  salaryIncrease: number; yourContrib: number; employerMatch: number; employerMatchLimit: number; rate: number;
+}
+
+/** Parse the form once for calculate() and explainSteps(); null when required inputs are missing or the dates make no sense. */
+function parse401k(values: Record<string, string>): K401Inputs | null {
+  const currentAge = parseFloat(values.currentAge);
+  const retirementAge = parseFloat(values.retirementAge);
+  const currentBalance = parseFloat(values.currentBalance) || 0;
+  const annualSalary = parseFloat(values.annualSalary);
+  // Blank -> 3% default; an explicit 0 must stay 0 (0% raise)
+  const rawRaise = parseFloat(values.salaryIncrease);
+  const salaryIncrease = (isNaN(rawRaise) ? 3 : rawRaise) / 100;
+  const yourContrib = parseFloat(values.yourContribution) / 100;
+  const employerMatch = (parseFloat(values.employerMatch) || 0) / 100;
+  const employerMatchLimit = (parseFloat(values.employerMatchLimit) || 0) / 100;
+  const rate = parseFloat(values.rateOfReturn) / 100;
+
+  if ([currentAge, retirementAge, annualSalary, yourContrib, rate].some(isNaN)) return null;
+  if (retirementAge <= currentAge) return null;
+  return { currentAge, retirementAge, currentBalance, annualSalary, salaryIncrease, yourContrib, employerMatch, employerMatchLimit, rate };
+}
+
+/** Year-by-year, month-by-month accumulation (Decimal.js): shared by calculate() and explainSteps(). */
+function project401k(p: K401Inputs) {
+  const years = p.retirementAge - p.currentAge;
+  const monthlyRate = p.rate / 12;
+  let balance = new Decimal(p.currentBalance);
+  let totalYourContribs = new Decimal(0);
+  let totalEmployerContribs = new Decimal(0);
+  let salary = new Decimal(p.annualSalary);
+
+  for (let y = 0; y < years; y++) {
+    const yourAnnual = salary.mul(p.yourContrib);
+    const eligibleForMatch = Math.min(p.yourContrib, p.employerMatchLimit);
+    const employerAnnual = salary.mul(eligibleForMatch).mul(p.employerMatch);
+    totalYourContribs = totalYourContribs.add(yourAnnual);
+    totalEmployerContribs = totalEmployerContribs.add(employerAnnual);
+
+    const monthlyContrib = (yourAnnual.add(employerAnnual)).div(12);
+    for (let m = 0; m < 12; m++) {
+      balance = balance.mul(1 + monthlyRate).add(monthlyContrib);
+    }
+    salary = salary.mul(1 + p.salaryIncrease);
+  }
+  return { years, monthlyRate, balance, totalYourContribs, totalEmployerContribs };
+}
 
 const k401Config: CalculatorConfig = {
   inputs: [
@@ -131,44 +183,63 @@ const k401Config: CalculatorConfig = {
       helpText: 'Historical S&P 500 inflation-adjusted average: ~7%',
     },
   ],
+  explainSteps: (values) => {
+    const p = parse401k(values);
+    if (!p) return [];
+    const rows = k401Config.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const { years, monthlyRate, totalYourContribs, totalEmployerContribs } = project401k(p);
+    const pct = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const eligible = Math.min(p.yourContrib, p.employerMatchLimit);
+    const yourY1 = p.annualSalary * p.yourContrib;
+    const employerY1 = p.annualSalary * eligible * p.employerMatch;
+    const yrs = Math.ceil(years); // the simulation runs whole contribution years: a part-year counts as a full one
+    const lastSalary = p.annualSalary * Math.pow(1 + p.salaryIncrease, yrs - 1);
+    const steps: ExplainStep[] = [
+      {
+        label: 'Count the years and the growth rate per month',
+        expr: `${p.retirementAge} − ${p.currentAge} = ${years} years${yrs !== years ? ` → ${yrs} (a part-year counts as a full year)` : ''} (${yrs * 12} months) · r = ${pct(p.rate)} ÷ 12 = ${pct(monthlyRate)} per month`,
+        note: 'Returns are compounded monthly, and contributions go in every month.',
+      },
+      {
+        label: 'Work out your year-1 contribution',
+        expr: `$${m2(p.annualSalary)} × ${pct(p.yourContrib)} = $${m2(yourY1)} a year`,
+      },
+      {
+        label: 'Work out the employer match for year 1',
+        expr: p.employerMatch > 0
+          ? `min(${pct(p.yourContrib)}, ${pct(p.employerMatchLimit)} limit) = ${pct(eligible)} of salary matched at ${pct(p.employerMatch)} → $${m2(p.annualSalary)} × ${pct(eligible)} × ${pct(p.employerMatch)} = $${m2(employerY1)} a year`
+          : 'No employer match entered, so the employer adds $0.00',
+        note: 'The match only applies to the part of your contribution up to the match limit.',
+      },
+      {
+        label: 'Spread the combined contribution over 12 months',
+        expr: `($${m2(yourY1)} + $${m2(employerY1)}) ÷ 12 = $${m2((yourY1 + employerY1) / 12)} per month in year 1`,
+        note: p.salaryIncrease > 0
+          ? `Each year the salary rises ${pct(p.salaryIncrease)}, so contributions rise with it (final-year salary: $${m2(lastSalary)}).`
+          : 'With a 0% raise the monthly contribution stays the same every year.',
+      },
+      {
+        label: 'Compound month by month to retirement',
+        expr: `Each month: balance × (1 + ${monthlyRate.toFixed(6)}) + contribution, repeated ${yrs * 12} times from $${m2(p.currentBalance)} → ${resultValue(rows, 'totalBalance')} at age ${p.retirementAge}`,
+      },
+      {
+        label: 'Split the result into what you put in and what it earned',
+        expr: `You: ${resultValue(rows, 'yourContribs')} (exactly $${m2(totalYourContribs.toNumber())}) · Employer: ${resultValue(rows, 'employerContribs')} (exactly $${m2(totalEmployerContribs.toNumber())}) · Growth: ${resultValue(rows, 'investmentReturns')} = ${resultValue(rows, 'returnsPct')} of the balance`,
+      },
+      {
+        label: 'Turn the balance into a monthly withdrawal',
+        expr: `Balance × 4% ÷ 12 = ${resultValue(rows, 'monthlyRetirement')}`,
+        note: 'The 4% rule is a rule of thumb, not a guarantee.',
+      },
+    ];
+    return finiteSteps(steps);
+  },
   calculate: (values) => {
-    const currentAge = parseFloat(values.currentAge);
-    const retirementAge = parseFloat(values.retirementAge);
-    const currentBalance = parseFloat(values.currentBalance) || 0;
-    const annualSalary = parseFloat(values.annualSalary);
-    // Blank -> 3% default; an explicit 0 must stay 0 (0% raise)
-    const rawRaise = parseFloat(values.salaryIncrease);
-    const salaryIncrease = (isNaN(rawRaise) ? 3 : rawRaise) / 100;
-    const yourContrib = parseFloat(values.yourContribution) / 100;
-    const employerMatch = (parseFloat(values.employerMatch) || 0) / 100;
-    const employerMatchLimit = (parseFloat(values.employerMatchLimit) || 0) / 100;
-    const rate = parseFloat(values.rateOfReturn) / 100;
-
-    if ([currentAge, retirementAge, annualSalary, yourContrib, rate].some(isNaN)) return [];
-    if (retirementAge <= currentAge) return [];
-
-    const years = retirementAge - currentAge;
-    const monthlyRate = rate / 12;
-
-    // Use Decimal.js for precise monetary accumulation
-    let balance = new Decimal(currentBalance);
-    let totalYourContribs = new Decimal(0);
-    let totalEmployerContribs = new Decimal(0);
-    let salary = new Decimal(annualSalary);
-
-    for (let y = 0; y < years; y++) {
-      const yourAnnual = salary.mul(yourContrib);
-      const eligibleForMatch = Math.min(yourContrib, employerMatchLimit);
-      const employerAnnual = salary.mul(eligibleForMatch).mul(employerMatch);
-      totalYourContribs = totalYourContribs.add(yourAnnual);
-      totalEmployerContribs = totalEmployerContribs.add(employerAnnual);
-
-      const monthlyContrib = (yourAnnual.add(employerAnnual)).div(12);
-      for (let m = 0; m < 12; m++) {
-        balance = balance.mul(1 + monthlyRate).add(monthlyContrib);
-      }
-      salary = salary.mul(1 + salaryIncrease);
-    }
+    const p = parse401k(values);
+    if (!p) return [];
+    const { currentAge, retirementAge, currentBalance, employerMatch, employerMatchLimit } = p;
+    const { balance, totalYourContribs, totalEmployerContribs } = project401k(p);
 
     const balanceNum = balance.toNumber();
     const totalYourContribsNum = totalYourContribs.toNumber();

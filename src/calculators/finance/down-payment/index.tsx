@@ -1,8 +1,10 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import { pmt } from '../../../utils/financial';
 
-const PMI_ANNUAL_RATE = 0.008; // assumed PMI cost, share of the original loan per year
-const DEFAULT_MORTGAGE_RATE = 6.8; // % APR, 30-year fixed
+export const PMI_ANNUAL_RATE = 0.008; // assumed PMI cost, share of the original loan per year
+export const DEFAULT_MORTGAGE_RATE = 6.8; // % APR, 30-year fixed
 
 /**
  * Months of scheduled payments until the balance falls to 80% of the purchase price
@@ -19,6 +21,22 @@ export function monthsToEightyPercentLtv(price: number, loan: number, annualRate
     if (balance <= 0.8 * price + 1e-9) return m;
   }
   return n;
+}
+
+/**
+ * Months until savings (compounded monthly, contributions at the end of each month) reach the target:
+ * 0 when already there, Infinity when not reachable within 50 years or with nothing being saved or earned.
+ */
+export function monthsToReachGoal(currentSavings: number, monthlySavings: number, annualReturn: number, target: number): number {
+  if (target - currentSavings <= 0) return 0;
+  if (!(monthlySavings > 0 || annualReturn > 0)) return Infinity;
+  const monthlyRate = annualReturn / 12;
+  let balance = currentSavings;
+  for (let m = 1; m <= 600; m++) {
+    balance = balance * (1 + monthlyRate) + monthlySavings;
+    if (balance >= target) return m;
+  }
+  return Infinity;
 }
 
 const downPaymentConfig: CalculatorConfig = {
@@ -98,6 +116,60 @@ const downPaymentConfig: CalculatorConfig = {
       helpText: 'Used for the estimated monthly payment and how long PMI lasts (30-year fixed). Blank = 6.8%.',
     },
   ],
+  explainSteps: (values) => {
+    const rows = downPaymentConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const homePrice = parseFloat(values.homePrice);
+    const pctDown = parseFloat(values.targetDownPct || '20') / 100;
+    const savings = parseFloat(values.currentSavings);
+    const monthly = parseFloat(values.monthlySavings) || 0;
+    const annualReturn = parseFloat(values.expectedReturn) / 100 || 0;
+    const rawRate = parseFloat(values.mortgageRate);
+    const ratePct = isNaN(rawRate) ? DEFAULT_MORTGAGE_RATE : rawRate;
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const target = homePrice * pctDown;
+    const loan = homePrice - target;
+    const gap = Math.max(0, target - savings);
+    const r = annualReturn / 12;
+    const months = monthsToReachGoal(savings, monthly, annualReturn, target);
+    const needsPmi = pctDown < 0.2;
+    const annualPmi = needsPmi ? loan * PMI_ANNUAL_RATE : 0;
+    const pmiMonths = needsPmi ? monthsToEightyPercentLtv(homePrice, loan, ratePct) : 0;
+    const steps: ExplainStep[] = [
+      { label: 'Find the down payment you need', expr: `${m(homePrice)} × ${+(pctDown * 100).toFixed(2)}% = ${resultValue(rows, 'targetDownPayment')}` },
+      {
+        label: 'Subtract what you have saved',
+        expr: gap > 0 ? `${m(target)} − ${m(savings)} = ${resultValue(rows, 'savingsGap')} still to save` : `${m(savings)} saved already covers the ${m(target)} needed`,
+      },
+    ];
+    if (gap > 0) {
+      steps.push({
+        label: 'Count the months to reach the goal',
+        expr: months === Infinity
+          ? `At ${m(monthly)} a month${annualReturn > 0 ? ` and ${+(annualReturn * 100).toFixed(4)}% a year` : ''} the goal is not reached within 50 years → ${resultValue(rows, 'monthsToGoal')}`
+          : r === 0
+            ? `${m(gap)} ÷ ${m(monthly)} per month, rounded up = ${months} months`
+            : `Each month: balance × (1 + ${r.toFixed(6)}) + ${m(monthly)}, starting from ${m(savings)}, until it reaches ${m(target)} → month ${months} (${(months / 12).toFixed(1)} years)`,
+        note: 'Returns are compounded monthly and each deposit is made at the end of the month.',
+      });
+    }
+    steps.push(
+      needsPmi
+        ? {
+            label: 'Estimate PMI because you are under 20% down',
+            expr: `${m(loan)} loan × ${+(PMI_ANNUAL_RATE * 100).toFixed(2)}% = ${m(annualPmi)} a year · until the balance falls to 80% of the price (${pmiMonths} months of scheduled payments at ${ratePct}%) = ${resultValue(rows, 'totalPmiCost')}`,
+            note: 'PMI is assumed to be a fixed share of the original loan per year; the real rate depends on your credit and loan.',
+          }
+        : { label: 'Check whether PMI applies', expr: `${+(pctDown * 100).toFixed(2)}% down is 20% or more, so no PMI` },
+    );
+    steps.push({
+      label: 'Estimate the monthly payment on the loan',
+      expr: `${m(loan)} over 30 years at ${ratePct}% → ${resultValue(rows, 'monthlyPayment')} (principal and interest only)`,
+      note: 'The mortgage rate is your own entry, or the calculator default when left blank.',
+    });
+    return finiteSteps(steps);
+  },
+
   calculate: (values) => {
     const homePrice = parseFloat(values.homePrice);
     const targetDownPct = parseFloat(values.targetDownPct || '20') / 100;
@@ -113,21 +185,7 @@ const downPaymentConfig: CalculatorConfig = {
     const currentDownPct = (currentSavings / homePrice) * 100;
     const savingsGap = Math.max(0, targetDownPayment - currentSavings);
 
-    // Calculate months to reach goal (compounding monthly savings)
-    let monthsToGoal = Infinity;
-    if (savingsGap > 0 && (monthlySavings > 0 || annualReturn > 0)) {
-      const monthlyRate = annualReturn / 12; // contributions are made at the end of each month
-      let balance = currentSavings;
-      for (let m = 1; m <= 600; m++) {
-        balance = balance * (1 + monthlyRate) + monthlySavings;
-        if (balance >= targetDownPayment) {
-          monthsToGoal = m;
-          break;
-        }
-      }
-    } else if (savingsGap <= 0) {
-      monthsToGoal = 0;
-    }
+    const monthsToGoal = monthsToReachGoal(currentSavings, monthlySavings, annualReturn, targetDownPayment);
 
     const isPmiRequired = targetDownPct < 0.2;
     const loanAmount = homePrice - targetDownPayment;

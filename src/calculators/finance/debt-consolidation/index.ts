@@ -1,5 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { money2dp as m2 } from '../../../lib/format';
 import { pmt } from '../../../utils/financial';
 import { debtsFromValues, simulateCurrentPlan, MAX_MONTHS } from './debtMath';
 import DebtConsolidationPanel from './DebtConsolidationPanel';
@@ -60,6 +63,58 @@ const debtConsolidationConfig: CalculatorConfig = {
       helpText: 'Upfront fee charged by the lender, typically 1-5% of the loan amount. Some lenders deduct this from the disbursement; others add it to the loan balance. Enter 0 if there is no origination fee. Always check the loan disclosure for this figure before signing.',
     },
   ],
+
+  explainSteps: (values) => {
+    const rows = debtConsolidationConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const debts = debtsFromValues(values);
+    const newRate = parseFloat(values.newRate);
+    const newTermMonths = parseInt(values.newTermMonths) || 60;
+    const feePct = parseFloat(values.originationFee) || 0;
+    const totalBalance = debts.reduce((s, d) => s + d.balance, 0);
+    const totalPayment = debts.reduce((s, d) => s + d.payment, 0);
+    const fee = totalBalance * (feePct / 100);
+    const principal = totalBalance + fee;
+    const rMonth = newRate / 100 / 12;
+    const newPayment = pmt(principal, rMonth, newTermMonths);
+    const growth = Math.pow(1 + rMonth, newTermMonths);
+    const steps: ExplainStep[] = [
+      {
+        label: 'Add up what you owe and what you pay now',
+        expr: `${debts.map((d) => `${d.name} $${m2(d.balance)} at ${d.rate}%`).join(' + ')} = $${m2(totalBalance)} · payments ${debts.map((d) => `$${m2(d.payment)}`).join(' + ')} = ${resultValue(rows, 'currentPayment')}`,
+      },
+      {
+        label: 'Run each debt on its own payment until it is cleared',
+        expr: `Each month: balance + balance × (APR ÷ 12) − payment, per debt → interest ${resultValue(rows, 'currentInterest')} over ${resultValue(rows, 'currentTimeline')} (total cost ${resultValue(rows, 'currentTotalCost')})`,
+        note: 'Payments freed up when a debt is cleared are not redirected, matching what most people actually do.',
+      },
+      {
+        label: 'Add the origination fee to the new loan',
+        expr: `$${m2(totalBalance)} × ${feePct}% = $${m2(fee)} fee → loan principal $${m2(principal)}`,
+        note: 'The fee is rolled into the loan, so you borrow it and pay interest on it.',
+      },
+      {
+        label: 'Find the new monthly payment',
+        expr: rMonth === 0
+          ? `$${m2(principal)} ÷ ${newTermMonths} months = ${resultValue(rows, 'newPayment')}`
+          : `M = P × r(1 + r)ⁿ ÷ ((1 + r)ⁿ − 1) = $${m2(principal)} × ${rMonth.toFixed(8)} × ${growth.toFixed(6)} ÷ (${growth.toFixed(6)} − 1) = $${m2(newPayment)} → ${resultValue(rows, 'newPayment')} (r = ${newRate}% ÷ 12, n = ${newTermMonths})`,
+      },
+      {
+        label: 'Total the cost of the consolidation loan',
+        expr: `$${m2(newPayment)} × ${newTermMonths} = ${resultValue(rows, 'newTotalCost')} · minus the $${m2(principal)} principal = ${resultValue(rows, 'newInterest')} of interest`,
+      },
+      {
+        label: 'Compare the monthly payments',
+        expr: `${resultValue(rows, 'currentPayment')} − ${resultValue(rows, 'newPayment')} = ${resultValue(rows, 'monthlySavings')} ${(totalPayment - newPayment) >= 0 ? 'saved' : 'extra'} per month`,
+      },
+      {
+        label: 'Compare the lifetime cost after the fee',
+        expr: `Interest now ${resultValue(rows, 'currentInterest')} − interest after ${resultValue(rows, 'newInterest')} − fee $${m2(fee)} = ${resultValue(rows, 'lifetimeSaved')} ${rows.find((r) => r.id === 'lifetimeSaved')?.color === 'positive' ? 'saved overall' : 'more overall'}`,
+        note: 'A lower payment over a longer term can still cost more in total, so judge it on this line.',
+      },
+    ];
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const debts = debtsFromValues(values);

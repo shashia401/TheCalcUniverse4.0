@@ -1,8 +1,10 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import EstateTaxPanel from './EstateTaxPanel';
 
-import { computeEstate, FEDERAL_EXEMPTION, TAX_YEAR, STATE_EXEMPTIONS } from './estateMath';
+import { computeEstate, FEDERAL_EXEMPTION, TAX_YEAR, STATE_EXEMPTIONS, STATE_AVG_RATE_FACTOR } from './estateMath';
 
 const estateTaxSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="16" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Estate Tax: Only Above Exemption</text><rect x="30" y="30" width="260" height="28" rx="4" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1.5"/><text x="160" y="49" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-1e40af)">Gross Estate: $20M</text><line x1="160" y1="58" x2="160" y2="66" stroke="var(--svg-64748b)" stroke-width="1.5"/><rect x="30" y="66" width="25" height="22" rx="3" fill="var(--svg-f59e0b)"/><text x="42" y="82" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Debts</text><rect x="58" y="66" width="170" height="22" rx="3" fill="var(--svg-22c55e)"/><text x="143" y="82" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-ffffff)">Federal Exemption: $15M</text><rect x="232" y="66" width="58" height="22" rx="3" fill="var(--svg-ef4444)"/><text x="261" y="82" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-ffffff)">Taxable</text><text x="160" y="105" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-ef4444)">Taxable = $20M - $0.2M - $15M = $4.8M</text><rect x="30" y="114" width="260" height="36" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="130" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">40% on the portion above the exemption</text><text x="160" y="146" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Est. Tax ~$1.9M | Net to Heirs ~$17.9M</text><rect x="30" y="158" width="260" height="28" rx="6" fill="var(--svg-dbeafe)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="160" y="172" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e40af)">99.9% of estates pay $0 federal estate tax</text><text x="160" y="184" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">State taxes may apply at much lower thresholds ($1M-$7M)</text></svg>';
 
@@ -75,6 +77,55 @@ const estateTaxConfig: CalculatorConfig = {
       helpText: '12 states plus DC levy estate taxes with exemptions from about $1M to $15M (Connecticut). Most states have no estate tax.',
     },
   ],
+  explainSteps: (values) => {
+    const rows = estateTaxConfig.calculate(values);
+    const totalAssets = parseFloat(values.totalAssets) || 0;
+    if (!rows.length || totalAssets <= 0) return [];
+    const married = (values.filingStatus || 'single') === 'married';
+    const debts = Math.max(0, parseFloat(values.debtsDeductions) || 0);
+    const spouseEstate = Math.max(0, parseFloat(values.spouseEstate) || 0);
+    const est = computeEstate({ totalAssets, debts, married, spouseEstate: parseFloat(values.spouseEstate) || 0, stateKey: values.stateResidence || 'none' });
+    const m = (n: number) => `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Add up the gross estate and subtract debts',
+        expr: `${m(totalAssets)}${married && spouseEstate > 0 ? ` + ${m(spouseEstate)} surviving spouse's estate` : ''} − ${m(debts)} debts and deductions = ${m(est.adjusted)}`,
+        note: married ? 'For a married couple the tax is assessed on the combined estate at the second death.' : undefined,
+      },
+      {
+        label: `Find the ${TAX_YEAR} federal exemption`,
+        expr: `${m(FEDERAL_EXEMPTION)}${married ? ` × 2 spouses (portability) = ${m(est.exemption)}` : ' for one person'}`,
+        note: 'Only the part of the estate above the exemption is taxed. Exemptions are set by current law and can change.',
+      },
+    ];
+    if (est.state.topRate > 0) {
+      steps.push({
+        label: `Estimate ${est.state.name} estate tax`,
+        expr: `max(0, ${m(est.adjusted)} − ${m(est.state.exemption)} state exemption) × ${est.state.topRate}% top rate × ${STATE_AVG_RATE_FACTOR} = ${m(est.stateTax)}`,
+        note: 'State schedules are graduated, so the calculator uses half the top rate as a planning approximation.',
+      });
+    }
+    steps.push({
+      label: 'Subtract state tax, then the exemption, to get the federal taxable estate',
+      expr: `${m(est.adjusted)} − ${m(est.stateTax)} state tax = ${m(est.federalBase)} · ${m(est.federalBase)} − ${m(est.exemption)} exemption = ${m(est.federalTaxable)}`,
+      note: 'State death taxes paid are deductible from the federal estate.',
+    });
+    steps.push(
+      est.federalTaxable > 0
+        ? {
+            label: 'Apply the federal rate to the amount over the exemption',
+            expr: `${m(est.federalTaxable)} × 40% = ${m(est.federalTax)}`,
+            note: 'The unified credit cancels the lower rate bands, leaving the top 40% rate on the excess.',
+          }
+        : { label: 'Apply the federal rate to the amount over the exemption', expr: `Nothing is above the exemption, so federal estate tax = $0` },
+    );
+    steps.push({
+      label: 'Total tax and what heirs receive',
+      expr: `${m(est.federalTax)} federal + ${m(est.stateTax)} state = ${m(est.totalTax)}${est.totalTax > 0 ? ` (shown as ${resultValue(rows, 'totalTax')})` : ''} · ${m(est.adjusted)} − ${m(est.totalTax)} = ${m(est.netToHeirs)} to heirs (${resultValue(rows, 'netToHeirs')})`,
+    });
+    return finiteSteps(steps);
+  },
+
   calculate: (values) => {
     const totalAssets = parseFloat(values.totalAssets) || 0;
     const filingStatus = values.filingStatus || 'single';

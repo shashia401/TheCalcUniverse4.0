@@ -1,5 +1,7 @@
 import { createElement, useMemo, useState } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import { ShoppingCart, Trash2, Plus } from 'lucide-react';
 
 interface CartItem {
@@ -241,6 +243,44 @@ const discountConfig: CalculatorConfig = {
       helpText: 'Sales tax percentage applied to the final price after all discounts.',
     },
   ],
+
+  explainSteps: (values) => {
+    const price = parseFloat(values.originalPrice);
+    const d1 = parseFloat(values.discount1) / 100;
+    const d2 = parseFloat(values.discount2) / 100 || 0;
+    const tax = parseFloat(values.salesTaxRate) / 100 || 0;
+    if (isNaN(price) || isNaN(d1) || price <= 0 || d1 < 0 || d1 > 1 || d2 < 0 || d2 > 1 || tax < 0) return [];
+    const rows = discountConfig.calculate(values);
+    if (!rows.length) return [];
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pct = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const afterD1 = price * (1 - d1);
+    const steps: ExplainStep[] = [
+      { label: 'Apply the first discount', expr: `${m(price)} × (1 − ${pct(d1)}) = ${m(afterD1)}` },
+    ];
+    if (d2 > 0) {
+      steps.push({
+        label: 'Apply the second discount to the already-reduced price',
+        expr: `${m(afterD1)} × (1 − ${pct(d2)}) = ${resultValue(rows, 'afterDiscount')}`,
+        note: `Stacked discounts multiply, they do not add: ${pct(d1)} + ${pct(d2)} is ${pct(1 - (1 - d1) * (1 - d2))} off, not ${pct(d1 + d2)}.`,
+      });
+    }
+    if (tax > 0) {
+      steps.push({
+        label: 'Add sales tax to the discounted price',
+        expr: `${resultValue(rows, 'afterDiscount')} × (1 + ${pct(tax)}) = ${resultValue(rows, 'finalPrice')}`,
+        note: 'Sales tax is normally charged on the price after store discounts.',
+      });
+    } else {
+      steps.push({ label: 'Final price', expr: `No sales tax entered, so you pay ${resultValue(rows, 'finalPrice')}` });
+    }
+    steps.push({
+      label: 'See how much you saved',
+      expr: `${m(price)} − ${resultValue(rows, 'afterDiscount')} = ${resultValue(rows, 'totalSavings')}`,
+      note: 'The saving is measured before tax.',
+    });
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const price = parseFloat(values.originalPrice);

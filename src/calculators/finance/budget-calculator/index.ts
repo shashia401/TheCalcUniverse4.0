@@ -1,5 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import BudgetPanel from './BudgetPanel';
 
 const budgetSvg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto">
@@ -234,6 +237,46 @@ const budgetCalculatorConfig: CalculatorConfig = {
       showWhen: (v) => parseFloat(v.monthlyIncome) > 0,
     },
   ],
+
+  explainSteps: (values) => {
+    // Quote the calculator's own totals (the _budgetData row) so the steps cannot drift from the answer.
+    const rows = budgetCalculatorConfig.calculate(values);
+    const raw = resultValue(rows, '_budgetData');
+    if (!raw) return [];
+    const d = JSON.parse(raw) as {
+      monthlyIncome: number; totalNeeds: number; totalWants: number; totalSavings: number; totalSpending: number;
+      leftover: number; targetNeeds: number; targetWants: number; targetSavings: number;
+      needsPct: number; wantsPct: number; savingsPct: number;
+    };
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const sum = (ids: string[]) => {
+      const parts = ids.map((id) => parseFloat(values[id]) || 0).filter((v) => v !== 0);
+      return parts.length ? parts.map(m).join(' + ') : '$0.00';
+    };
+    const needs = ['rent', 'utilities', 'groceries', 'autoGas', 'insurance', 'childcare', 'otherNeeds'];
+    const wants = ['diningOut', 'entertainment', 'subscriptions', 'shopping', 'travel', 'otherWants'];
+    const savings = ['emergencyFund', 'retirement401k', 'investmentBrokerage', 'extraDebtPayoff', 'otherSavings'];
+    const steps: ExplainStep[] = [
+      { label: 'Add up your needs', expr: `${sum(needs)} = ${m(d.totalNeeds)}`, note: 'Housing, bills, groceries, transport, insurance, childcare and minimum debt payments.' },
+      { label: 'Add up your wants', expr: `${sum(wants)} = ${m(d.totalWants)}` },
+      { label: 'Add up your savings and extra debt payoff', expr: `${sum(savings)} = ${m(d.totalSavings)}` },
+      {
+        label: 'Total spending and what is left',
+        expr: `${m(d.totalNeeds)} + ${m(d.totalWants)} + ${m(d.totalSavings)} = ${m(d.totalSpending)} · ${m(d.monthlyIncome)} − ${m(d.totalSpending)} = ${resultValue(rows, 'leftover')}`,
+        note: d.leftover >= 0 ? 'A surplus is money not yet assigned to a job.' : 'A negative number means you spend more than you earn each month.',
+      },
+      {
+        label: 'Turn each group into a share of income',
+        expr: `Needs ${m(d.totalNeeds)} ÷ ${m(d.monthlyIncome)} = ${d.needsPct.toFixed(1)}% · Wants ${d.wantsPct.toFixed(1)}% · Savings ${d.savingsPct.toFixed(1)}%`,
+      },
+      {
+        label: 'Compare with the 50/30/20 guideline',
+        expr: `Targets on ${m(d.monthlyIncome)}: needs 50% = ${m(d.targetNeeds)}, wants 30% = ${m(d.targetWants)}, savings 20% = ${m(d.targetSavings)}`,
+        note: '50/30/20 is a common starting guideline, not a rule that fits every budget.',
+      },
+    ];
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const parse = (key: string) => parseFloat(values[key]) || 0;

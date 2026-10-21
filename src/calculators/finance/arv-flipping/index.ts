@@ -1,5 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import ArvFlippingPanel from './ArvFlippingPanel';
 
 const arvFlippingConfig: CalculatorConfig = {
@@ -50,6 +53,44 @@ const arvFlippingConfig: CalculatorConfig = {
       helpText: 'Your desired profit as a percentage of the ARV (sale price), e.g. 20% of a $300,000 ARV = $60,000 (typical: 15-25%)',
     },
   ],
+
+  explainSteps: (values) => {
+    const rows = arvFlippingConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const arv = parseFloat(values.afterRepairValue);
+    const repair = parseFloat(values.repairCosts);
+    const holding = parseFloat(values.holdingCosts);
+    const margin = parseFloat(values.targetProfitMargin);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    const keep = arv * (1 - margin / 100);
+    const raw = keep - repair - holding;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Reserve your profit target out of the ARV',
+        expr: `${m(arv)} × (1 − ${margin}%) = ${m(keep)} left for the purchase and the project costs`,
+        note: 'The profit margin is a share of the after-repair value, so it is taken off the top first.',
+      },
+      {
+        label: 'Subtract repairs and holding costs',
+        expr: `${m(keep)} − ${m(repair)} repairs − ${m(holding)} holding = ${raw < 0 ? '−' : ''}${m(Math.abs(raw))} → Maximum Allowable Offer ${resultValue(rows, 'mao')}`,
+        note: raw < 0 ? 'A negative result means no purchase price reaches your margin, so the offer is shown as $0.' : 'This is a ceiling for your offer, not a target.',
+      },
+      {
+        label: 'Add up the total project cost and the profit at that offer',
+        expr: `${resultValue(rows, 'maxAllowableOffer')} + ${m(repair)} + ${m(holding)} = ${resultValue(rows, 'totalCosts')} cost · ${m(arv)} − ${resultValue(rows, 'totalCosts')} = ${resultValue(rows, 'estimatedProfit')} profit`,
+      },
+      {
+        label: 'Express the profit as a return on cost',
+        expr: `Profit ÷ total cost = ${resultValue(rows, 'roiPercent')}`,
+      },
+      {
+        label: 'Cross-check with the 70% rule',
+        expr: `${m(arv)} × 70% − ${m(repair)} repairs = ${resultValue(rows, 'seventyPercentRule')}`,
+        note: 'A rougher rule of thumb that ignores holding costs and your own margin.',
+      },
+    ];
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const arv = parseFloat(values.afterRepairValue);

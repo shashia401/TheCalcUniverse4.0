@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import DebtPayoffPanel from './DebtPayoffPanel';
 import { parseCards, simulatePayoff } from './payoffSim';
 
@@ -150,6 +152,45 @@ const debtPayoffConfig: CalculatorConfig = {
       helpText: 'The minimum monthly payment required by your card issuer.',
     },
   ],
+  explainSteps: (values) => {
+    const cards = parseCards(values);
+    if (cards.length === 0) return [];
+    const extra = Math.max(0, parseFloat(values.extraPayment) || 0);
+    const snowball = simulatePayoff(cards, extra, 'snowball');
+    const avalanche = simulatePayoff(cards, extra, 'avalanche');
+    if (!snowball.paidOff || !avalanche.paidOff) return [];
+    const rows = debtPayoffConfig.calculate(values);
+    const money = (n: number) => `$${new Decimal(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    const monthWord = (mo: number | null) => (mo === null ? 'never' : `month ${mo}`);
+    const order = (r: typeof snowball) => r.perCard.map((c) => `${c.name} (${monthWord(c.month)})`).join(' → ');
+    const steps: ExplainStep[] = [
+      {
+        label: 'Add up your debts and the monthly power you have',
+        expr: `${cards.map((c) => `${c.name} ${money(c.balance)} at ${c.rate}%`).join(' + ')} = ${resultValue(rows, 'totalDebt')} · minimums ${resultValue(rows, 'totalMin')} + ${money(extra)} extra = ${money(cards.reduce((s, c) => s + c.min, 0) + extra)} to put toward debt each month`,
+      },
+      {
+        label: 'Charge interest each month',
+        expr: cards.map((c) => `${c.name}: ${c.rate}% ÷ 12 = ${+(c.rate / 12).toFixed(4)}% per month`).join(' · '),
+        note: 'Every month interest is added to each balance first, then payments come off.',
+      },
+      {
+        label: 'Snowball: pay the smallest balance first, rolling freed-up payments forward',
+        expr: `Order (month each card is cleared): ${order(snowball)} → debt-free in ${resultValue(rows, 'snowballTime')} with ${resultValue(rows, 'snowballInterest')} interest`,
+        note: 'Every minimum is paid; the extra payment plus the minimums of cleared cards go to the next card in line.',
+      },
+      {
+        label: 'Avalanche: pay the highest interest rate first',
+        expr: `Order (month each card is cleared): ${order(avalanche)} → debt-free in ${resultValue(rows, 'avalancheTime')} with ${resultValue(rows, 'avalancheInterest')} interest`,
+      },
+      {
+        label: 'Compare the two strategies',
+        expr: `Snowball interest − Avalanche interest = ${resultValue(rows, 'interestSaved')}`,
+        note: 'Avalanche never costs more interest; snowball trades a little interest for early wins.',
+      },
+    ];
+    return finiteSteps(steps);
+  },
+
   calculate: (values) => {
     const extraPayment = parseFloat(values.extraPayment) || 0;
 

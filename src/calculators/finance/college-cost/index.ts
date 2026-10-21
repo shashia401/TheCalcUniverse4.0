@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { money2dp as m2 } from '../../../lib/format';
 import CollegeCostPanel from './CollegeCostPanel';
 
 /*
@@ -143,6 +146,69 @@ const collegeCostConfig: CalculatorConfig = {
       helpText: 'Typical undergraduate programs are 4 years. Some programs may be 2 or 5 years.',
     },
   ],
+
+  explainSteps: (values) => {
+    const rows = collegeCostConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const childAge = parseFloat(values.childAge);
+    const currentSavings = parseFloat(values.currentSavings);
+    const monthlyContribution = parseFloat(values.monthlyContribution) || 0;
+    const institutionType = values.institutionType || 'in-state';
+    const includeRoomBoard = (values.includeRoomBoard || 'yes') === 'yes';
+    const tuitionInflation = parseFloat(values.tuitionInflation) / 100;
+    const growthRate = parseFloat(values.growthRate) / 100;
+    const collegeYears = parseFloat(values.collegeYears) || 4;
+    const additionalCosts = parseFloat(values.additionalCosts) || 0;
+    const financialAid = parseFloat(values.financialAid) || 0;
+    const costData = TUITION_DATA[institutionType] || TUITION_DATA['in-state'];
+    const n = Math.max(0, 18 - childAge);
+    const annualCostNow = Math.max(0, costData.tuition + (includeRoomBoard ? costData.roomBoard : 0) + additionalCosts - financialAid);
+    const monthlyRate = growthRate / 12;
+    const months = n * 12;
+    const growth = Math.pow(1 + monthlyRate, months);
+    const pct = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const steps: ExplainStep[] = [
+      {
+        label: "Find today's annual cost",
+        expr: `$${m2(costData.tuition)} tuition${includeRoomBoard ? ` + $${m2(costData.roomBoard)} room & board` : ''}${additionalCosts > 0 ? ` + $${m2(additionalCosts)} additional` : ''}${financialAid > 0 ? ` − $${m2(financialAid)} aid` : ''} = ${resultValue(rows, 'currentAnnualCost')}`,
+        note: `Tuition and housing figures are the College Board 2025-26 averages stored in this calculator (${INSTITUTION_LABELS[institutionType]}).`,
+      },
+      {
+        label: 'Count the years until enrollment',
+        expr: `18 − ${childAge} = ${n} years (${months} months) — the calculator assumes the student enrolls at 18`,
+      },
+      {
+        label: 'Inflate the cost to the first year of college',
+        expr: `$${m2(annualCostNow)} × (1 + ${pct(tuitionInflation)})^${n} = ${resultValue(rows, 'costAtStart')}`,
+      },
+      {
+        label: `Add up all ${collegeYears} years, each one inflated a year more`,
+        expr: `Σ $${m2(annualCostNow)} × (1 + ${pct(tuitionInflation)})^(${n} + year − 1), years 1 to ${collegeYears} = ${resultValue(rows, 'projectedCost')}`,
+        note: 'Tuition keeps rising while the student is enrolled, so each later year costs more than the first.',
+      },
+      {
+        label: 'Grow your savings to the first day of college',
+        expr: monthlyRate === 0
+          ? `$${m2(currentSavings)} + $${m2(monthlyContribution)} × ${months} months = ${resultValue(rows, 'savingsAtCollege')}`
+          : `$${m2(currentSavings)} × (1 + ${monthlyRate.toFixed(6)})^${months} + $${m2(monthlyContribution)} × ((1 + ${monthlyRate.toFixed(6)})^${months} − 1) ÷ ${monthlyRate.toFixed(6)} = $${m2(currentSavings)} × ${growth.toFixed(4)} + $${m2(monthlyContribution)} × ${((growth - 1) / monthlyRate).toFixed(4)} = ${resultValue(rows, 'savingsAtCollege')}`,
+        note: `Monthly rate = ${pct(growthRate)} ÷ 12 = ${pct(monthlyRate)}; contributions are made at the end of each month.`,
+      },
+      {
+        label: 'Compare savings with the cost',
+        expr: `Gap = max(0, cost − savings) = ${resultValue(rows, 'fundingGap')} · covered: ${resultValue(rows, 'pctFunded')}`,
+      },
+    ];
+    const needed = resultValue(rows, 'monthlyNeeded');
+    if (needed) {
+      steps.push({
+        label: 'Find the extra monthly saving that closes the gap',
+        expr: monthlyRate === 0
+          ? `${resultValue(rows, 'fundingGap')} ÷ ${months} months = ${needed} extra per month (${resultValue(rows, 'totalMonthly')} in total with your current contribution)`
+          : `${resultValue(rows, 'fundingGap')} × ${monthlyRate.toFixed(6)} ÷ ((1 + ${monthlyRate.toFixed(6)})^${months} − 1) = ${resultValue(rows, 'fundingGap')} × ${monthlyRate.toFixed(6)} ÷ ${(growth - 1).toFixed(4)} = ${needed} extra per month (${resultValue(rows, 'totalMonthly')} in total with your current contribution)`,
+      });
+    }
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const childAge = parseFloat(values.childAge);

@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
 import { CalculatorConfig } from '../../../types/calculator';
+import { ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import CAMortgagePanel from './CAMortgagePanel';
 
 const caMortgageConfig: CalculatorConfig = {
@@ -66,6 +69,60 @@ const caMortgageConfig: CalculatorConfig = {
       helpText: 'A new buyer is taxed on the purchase price: the 1% Prop 13 base rate plus local voter-approved levies, so most areas land a little above 1%. Check the rate for your address with the county. (The statewide average of about 0.7% reflects long-time owners with low assessed values.)',
     },
   ],
+  explainSteps: (values) => {
+    const rows = caMortgageConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const raw = resultValue(rows, '_caData');
+    if (!raw) return [];
+    const d = JSON.parse(raw) as { loanAmount: number; downPct: string; hasPmi: boolean; monthlyTax: number; term: number };
+    const homePrice = parseFloat(values.homePrice);
+    const downPayment = parseFloat(values.downPayment) || 0;
+    const ratePct = parseFloat(values.interestRate) || 0;
+    const taxPct = parseFloat(values.propertyTaxRate) || 0;
+    const months = d.term * 12;
+    const r = ratePct / 100 / 12;
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const growth = new Decimal(1).add(r).pow(months);
+    const monthlyPmi = d.hasPmi ? (d.loanAmount * 0.005) / 12 : 0;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Find the loan amount',
+        expr: `${m(homePrice)} − ${m(downPayment)} down (${d.downPct}%) = ${m(d.loanAmount)}`,
+      },
+      {
+        label: 'Convert the rate and term to months',
+        expr: `r = ${ratePct}% ÷ 12 = ${(r * 100).toFixed(4)}% per month · n = ${d.term} × 12 = ${months} payments`,
+      },
+      r === 0
+        ? { label: 'With a 0% rate, split the loan evenly', expr: `${m(d.loanAmount)} ÷ ${months} = ${resultValue(rows, 'monthlyPayment')}` }
+        : {
+            label: 'Apply the mortgage payment formula',
+            expr: `M = P × r(1 + r)ⁿ ÷ ((1 + r)ⁿ − 1) = ${m(d.loanAmount)} × ${r.toFixed(8)} × ${growth.toFixed(6)} ÷ (${growth.toFixed(6)} − 1) = ${resultValue(rows, 'monthlyPayment')}`,
+            note: '(1 + r)ⁿ is how much $1 grows over the whole loan; the formula finds the level payment that repays the loan exactly.',
+          },
+      {
+        label: 'Add property tax on the purchase price',
+        expr: `${m(homePrice)} × ${taxPct}% ÷ 12 = ${m(d.monthlyTax)} per month (${resultValue(rows, 'propertyTaxNote')})`,
+        note: 'A new California buyer is taxed on the purchase price, so the tax rate is applied to the full price.',
+      },
+      d.hasPmi
+        ? {
+            label: 'Add estimated PMI (less than 20% down)',
+            expr: `${m(d.loanAmount)} × 0.5% ÷ 12 = ${m(monthlyPmi)} per month`,
+            note: 'The calculator assumes PMI costs 0.5% of the loan a year until you reach 20% down.',
+          }
+        : { label: 'Check whether PMI applies', expr: `${d.downPct}% down is at least 20%, so no PMI is added` },
+      {
+        label: 'Total monthly cost',
+        expr: `${resultValue(rows, 'monthlyPayment')} + ${m(d.monthlyTax)} tax${d.hasPmi ? ` + ${m(monthlyPmi)} PMI` : ''} = ${resultValue(rows, 'totalMonthly')}`,
+      },
+      {
+        label: 'Total interest over the life of the loan',
+        expr: `Payment × ${months} − ${m(d.loanAmount)} = ${resultValue(rows, 'totalInterest')} of interest (total cost of loan ${resultValue(rows, 'totalCost')})`,
+      },
+    ];
+    return finiteSteps(steps);
+  },
   calculate: (values) => {
     const homePrice = parseFloat(values.homePrice);
     const downPayment = parseFloat(values.downPayment) || 0;

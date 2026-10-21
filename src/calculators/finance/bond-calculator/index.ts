@@ -1,5 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import BondPanel from './BondPanel';
 
 function calcYTM(faceValue: number, couponRate: number, marketPrice: number, yearsToMaturity: number, frequency: number): number {
@@ -92,6 +95,55 @@ const bondCalculatorConfig: CalculatorConfig = {
       helpText: 'How often the bond pays interest. US bonds typically pay semi-annually.',
     },
   ],
+
+  explainSteps: (values) => {
+    const rows = bondCalculatorConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const faceValue = parseFloat(values.faceValue);
+    const couponRate = parseFloat(values.couponRate);
+    const marketPrice = parseFloat(values.marketPrice);
+    const frequency = parseInt(values.paymentFrequency) || 2;
+    const years = parseFloat(values.yearsToMaturity);
+    const periods = Math.max(1, Math.round(years * frequency));
+    const termYears = periods / frequency;
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const annualCoupon = faceValue * (couponRate / 100);
+    const perPeriod = annualCoupon / frequency;
+    // Price every cash flow at the solved yield: it should land on the market price.
+    const y = calcYTM(faceValue, couponRate, marketPrice, termYears, frequency) / 100 / frequency;
+    let pv = faceValue / Math.pow(1 + y, periods);
+    for (let t = 1; t <= periods; t++) pv += perPeriod / Math.pow(1 + y, t);
+    const steps: ExplainStep[] = [
+      {
+        label: 'Count the coupon payments',
+        expr: `${years} years × ${frequency} per year = ${periods} coupon payments${termYears !== years ? ` (rounded to whole coupon dates = ${termYears} years)` : ''}`,
+        note: 'Cash only arrives on whole coupon dates, so the term is rounded to a whole number of payments.',
+      },
+      {
+        label: 'Find the coupon income',
+        expr: `${m(faceValue)} × ${couponRate}% = ${m(annualCoupon)} a year ÷ ${frequency} = ${m(perPeriod)} per payment`,
+      },
+      {
+        label: 'Compare the coupon with the price you pay (current yield)',
+        expr: `${m(annualCoupon)} ÷ ${m(marketPrice)} × 100 = ${resultValue(rows, 'currentYield')}`,
+        note: 'Current yield ignores the gain or loss when the bond is repaid at face value.',
+      },
+      {
+        label: 'Solve for the yield that prices all the cash flows at the market price',
+        expr: `${m(marketPrice)} = Σ ${m(perPeriod)} ÷ (1 + y)^t (t = 1…${periods}) + ${m(faceValue)} ÷ (1 + y)^${periods} → y = ${(y * 100).toFixed(4)}% per period × ${frequency} = ${resultValue(rows, 'ytm')} (YTM)`,
+        note: 'There is no closed form, so the calculator searches for the yield that makes the present value match the price.',
+      },
+      {
+        label: 'Check: discount every payment at that yield',
+        expr: `Present value at y = ${m(pv)} ≈ market price ${m(marketPrice)}`,
+      },
+      {
+        label: 'Add up coupons and the gain or loss at maturity',
+        expr: `Coupons ${m(perPeriod)} × ${periods} = ${resultValue(rows, 'totalCoupons')} · ${m(faceValue)} − ${m(marketPrice)} = ${resultValue(rows, 'capitalGainLoss')} · total = ${resultValue(rows, 'totalReturn')}`,
+      },
+    ];
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const faceValue = parseFloat(values.faceValue);

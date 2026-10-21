@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import { FEDERAL_BRACKETS } from '../../../utils/taxData';
 import CapitalGainsPanel from './CapitalGainsPanel';
 
@@ -69,7 +71,8 @@ function stackedBracketTax(
   gainAmount: number,
   ordinaryIncome: number,
   brackets: { ceiling: number; rate: number }[]
-): { tax: number; topRate: number } {
+): { tax: number; topRate: number; slices: { amount: number; rate: number }[] } {
+  const slices: { amount: number; rate: number }[] = [];
   let remaining = gainAmount;
   let floor = ordinaryIncome;
   let prevCeiling = 0;
@@ -81,6 +84,7 @@ function stackedBracketTax(
       const amountInBracket = Math.min(remaining, b.ceiling - Math.max(floor, prevCeiling));
       if (amountInBracket > 0) {
         tax += amountInBracket * (b.rate / 100);
+        slices.push({ amount: amountInBracket, rate: b.rate });
         topRate = b.rate;
         remaining -= amountInBracket;
         floor += amountInBracket;
@@ -88,8 +92,32 @@ function stackedBracketTax(
     }
     prevCeiling = b.ceiling;
   }
-  return { tax, topRate };
+  return { tax, topRate, slices };
 }
+
+/**
+ * Federal tax on a positive gain: short-term gains and collectibles use the ordinary brackets
+ * (collectibles capped at 28%), long-term gains use the LTCG brackets. Shared by calculate() and explainSteps().
+ */
+function federalGainTax(gain: number, annualIncome: number, filingStatus: string, assetType: string, isShortTerm: boolean) {
+  if (isShortTerm || assetType === 'Collectibles') {
+    // Pull the filing-status brackets from the shared, actively-maintained utils/taxData.ts (same fix as
+    // income-tax/taxData.ts) instead of a local hardcoded copy.
+    const ST_STATUS_MAP: Record<string, keyof typeof FEDERAL_BRACKETS> = {
+      Single: 'single',
+      'Married Filing Jointly': 'mfj',
+      'Head of Household': 'hoh',
+    };
+    const bracketSet = FEDERAL_BRACKETS[ST_STATUS_MAP[filingStatus] || 'single']
+      .map((b) => ({ threshold: b.to, rate: isShortTerm ? b.rate * 100 : Math.min(b.rate * 100, 28) }));
+    // Short-term gains stack on top of ordinary income and are taxed bracket-by-bracket like ordinary income.
+    return { ...stackedBracketTax(gain, annualIncome, bracketSet.map((b) => ({ ceiling: b.threshold, rate: b.rate }))), kind: isShortTerm ? 'ordinary' as const : 'collectibles' as const };
+  }
+  // Long-term: only the slice of the gain in each LTCG bracket is taxed at that bracket's rate.
+  const brackets = getLTCGBrackets(filingStatus);
+  return { ...stackedBracketTax(gain, annualIncome, brackets.map((b) => ({ ceiling: b.max, rate: b.rate }))), kind: 'ltcg' as const };
+}
+
 
 const capitalGainsTaxConfig: CalculatorConfig = {
   inputs: [
@@ -176,6 +204,72 @@ const capitalGainsTaxConfig: CalculatorConfig = {
       helpText: 'Your state\'s capital gains tax rate. Enter 0 if your state has no income tax.',
     },
   ],
+  explainSteps: (values) => {
+    const rows = capitalGainsTaxConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const costBasis = parseFloat(values.costBasis);
+    const saleProceeds = parseFloat(values.saleProceeds);
+    const annualIncome = parseFloat(values.annualIncome);
+    const filingStatus = values.filingStatus || 'Single';
+    const assetType = values.assetType || 'Stocks';
+    const stateTaxRate = parseFloat(values.stateTaxRate) || 0;
+    const gain = saleProceeds - costBasis;
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const isShortTerm = !isLongTerm(new Date(values.purchaseDate), new Date(values.saleDate));
+    const holding = {
+      label: 'Count the holding period',
+      expr: `${values.purchaseDate} → ${values.saleDate} = ${resultValue(rows, 'holdingPeriod')} → ${isShortTerm ? 'short-term (held one year or less)' : 'long-term (held more than one year)'}`,
+      note: 'The IRS counts a year from the day after you acquired the asset: only a sale after the next anniversary is long-term.',
+    };
+    const gainStep = {
+      label: gain >= 0 ? 'Work out the capital gain' : 'Work out the capital loss',
+      expr: `${m(saleProceeds)} proceeds − ${m(costBasis)} cost basis = ${gain < 0 ? '−' : ''}${m(Math.abs(gain))}`,
+    };
+    if (gain <= 0) {
+      return finiteSteps([
+        gainStep,
+        holding,
+        {
+          label: 'No tax is due on this sale',
+          expr: gain === 0 ? 'A $0.00 gain is nothing to tax' : 'A loss creates no capital gains tax; it can offset other capital gains',
+          note: 'See the capital loss note under the result for how losses carry over.',
+        },
+      ]);
+    }
+    const { tax, slices, kind } = federalGainTax(gain, annualIncome, filingStatus, assetType, isShortTerm);
+    const basisLabel =
+      kind === 'ltcg' ? `the 2026 long-term capital gains brackets for ${filingStatus} (0% / 15% / 20%)`
+      : kind === 'collectibles' ? `the 2026 ordinary brackets for ${filingStatus}, capped at 28% for collectibles`
+      : `the 2026 ordinary income brackets for ${filingStatus}`;
+    const steps: ExplainStep[] = [
+      gainStep,
+      holding,
+      {
+        label: 'Stack the gain on top of your ordinary income and tax each slice',
+        expr: `${slices.map((x) => `${m(x.amount)} × ${x.rate}%`).join(' + ')} = ${resultValue(rows, 'federalTax')} (${m(tax)}) — using ${basisLabel}, with ${m(annualIncome)} of ordinary income filling the lower brackets first`,
+        note: 'Only the part of the gain that falls inside each bracket is taxed at the rate of the bracket it falls in, not the whole gain at one rate.',
+      },
+    ];
+    const modifiedAGI = gain + annualIncome;
+    const niitThreshold = getNIITThreshold(filingStatus);
+    const niit = resultValue(rows, 'niitTax');
+    steps.push({
+      label: 'Check the 3.8% Net Investment Income Tax',
+      expr: niit
+        ? `Income + gain = ${m(modifiedAGI)} is over the ${m(niitThreshold)} threshold → 3.8% × min(${m(gain)}, ${m(modifiedAGI - niitThreshold)}) = ${niit}`
+        : `Income + gain = ${m(modifiedAGI)} does not exceed the ${m(niitThreshold)} threshold → $0.00`,
+      note: 'The threshold depends on filing status and is not adjusted for inflation.',
+    });
+    if (stateTaxRate > 0) {
+      steps.push({ label: 'Add state tax', expr: `${m(gain)} × ${stateTaxRate}% = ${resultValue(rows, 'stateTax')}` });
+    }
+    steps.push({
+      label: 'Add everything up',
+      expr: `Federal + NIIT + state = ${resultValue(rows, 'totalTax')} · ÷ ${m(gain)} gain = ${resultValue(rows, 'effectiveRate')} effective rate · you keep ${resultValue(rows, 'afterTaxProceeds')}`,
+    });
+    return finiteSteps(steps);
+  },
+
   calculate: (values) => {
     const purchaseDateStr = values.purchaseDate;
     const saleDateStr = values.saleDate;
@@ -240,46 +334,7 @@ const capitalGainsTaxConfig: CalculatorConfig = {
       ];
     }
 
-    let federalTaxRate: number;
-    let federalTax: number;
-
-    if (isShortTerm || assetType === 'Collectibles') {
-      // Short-term: taxed as ordinary income. Long-term collectibles gains (art, coins,
-      // bullion, etc.) are also taxed at ordinary rates but capped at 28% (IRC 1(h)(4)). Pull the filing-status brackets
-      // from the shared, actively-maintained utils/taxData.ts (same fix as
-      // income-tax/taxData.ts) instead of a local hardcoded copy — the old
-      // local copy here was stuck on stale 2025 thresholds (e.g. Single
-      // 22% starting at $103,350) after the IRS's 2026 inflation adjustment
-      // moved that threshold to $105,700.
-      const ST_STATUS_MAP: Record<string, keyof typeof FEDERAL_BRACKETS> = {
-        Single: 'single',
-        'Married Filing Jointly': 'mfj',
-        'Head of Household': 'hoh',
-      };
-      const bracketSet = FEDERAL_BRACKETS[ST_STATUS_MAP[filingStatus] || 'single']
-        .map((b) => ({ threshold: b.to, rate: isShortTerm ? b.rate * 100 : Math.min(b.rate * 100, 28) }));
-      // Short-term gains stack on top of ordinary income and are taxed
-      // bracket-by-bracket like ordinary income, not at one flat rate.
-      const { tax, topRate } = stackedBracketTax(
-        gain,
-        annualIncome,
-        bracketSet.map((b) => ({ ceiling: b.threshold, rate: b.rate }))
-      );
-      federalTaxRate = topRate;
-      federalTax = tax;
-    } else {
-      // Long-term: gains stack on top of ordinary income across the LTCG
-      // brackets — only the slice of the gain in each bracket is taxed at
-      // that bracket's rate, not the whole gain at one rate.
-      const brackets = getLTCGBrackets(filingStatus);
-      const { tax, topRate } = stackedBracketTax(
-        gain,
-        annualIncome,
-        brackets.map((b) => ({ ceiling: b.max, rate: b.rate }))
-      );
-      federalTaxRate = topRate;
-      federalTax = tax;
-    }
+    const { tax: federalTax, topRate: federalTaxRate } = federalGainTax(gain, annualIncome, filingStatus, assetType, isShortTerm);
 
     // Net Investment Income Tax (NIIT)
     const modifiedAGI = gain + annualIncome;
