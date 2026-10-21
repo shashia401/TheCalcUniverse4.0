@@ -1,5 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { fvAnnuity, fvLumpSum } from '../../../utils/financial';
 import PensionPanel from './PensionPanel';
 import { buildProjection } from './pensionMath';
 
@@ -176,6 +179,54 @@ const pensionConfig: CalculatorConfig = {
     });
 
     return results;
+  },
+
+  explainSteps: (values) => {
+    const rows = pensionConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const currentAge = parseFloat(values.currentAge);
+    const retirementAge = parseFloat(values.retirementAge);
+    const balance = parseFloat(values.currentBalance);
+    const monthly = parseFloat(values.monthlyContribution);
+    const growth = parseFloat(values.growthRate) || 0;
+    const n = Math.round((retirementAge - currentAge) * 12);
+    const years = n / 12;
+    const r = growth / 100 / 12;
+    const m = (x: number) => `$${fmtD(x)}`;
+    const steps: ExplainStep[] = [
+      { label: 'Count the months to retirement', expr: `n = (${retirementAge} − ${currentAge}) × 12 = ${n} months (${years} years)` },
+      { label: 'Convert the growth rate to a monthly rate', expr: `r = ${growth}% ÷ 12 = ${r.toFixed(8)}` },
+      { label: 'Grow the current balance', expr: `${m(balance)} × (1 + ${r.toFixed(8)})^${n} = ${m(fvLumpSum(balance, r, n))}` },
+      {
+        label: 'Grow the monthly contributions',
+        expr: r === 0
+          ? `${m(monthly)} × ${n} = ${m(fvAnnuity(monthly, r, n))}`
+          : `${m(monthly)} × [((1 + ${r.toFixed(8)})^${n} − 1) ÷ ${r.toFixed(8)}] = ${m(fvAnnuity(monthly, r, n))}`,
+        note: 'Each contribution is made at the end of its month.',
+      },
+      {
+        label: 'Add them for the projected balance',
+        expr: `${m(fvLumpSum(balance, r, n))} + ${m(fvAnnuity(monthly, r, n))} = ${resultValue(rows, 'projectedBalance')}`,
+      },
+      {
+        label: 'Separate what you put in from the growth',
+        expr: `${m(balance)} + ${m(monthly)} × ${n} = ${resultValue(rows, 'totalContributions')} contributed · growth = ${resultValue(rows, 'totalGrowth')} (${resultValue(rows, 'growthPct')} of the balance)`,
+      },
+    ];
+    if (resultValue(rows, 'inflationAdjusted')) {
+      steps.push({
+        label: `Adjust for ${(inflationRate * 100).toFixed(0)}% a year inflation`,
+        expr: `${resultValue(rows, 'projectedBalance')} ÷ (1 + ${inflationRate})^${years} = ${resultValue(rows, 'inflationAdjusted')}`,
+        note: `The ${(inflationRate * 100).toFixed(0)}% inflation rate is this calculator's own assumption.`,
+      });
+    }
+    steps.push({
+      label: 'Estimate a monthly payout with the 4% rule',
+      expr: `${resultValue(rows, 'projectedBalance')} × 4% ÷ 12 = ${resultValue(rows, 'monthlyPayout4pct')}${
+        resultValue(rows, 'monthlyPayoutAdj') ? ` (in today's money: ${resultValue(rows, 'monthlyPayoutAdj')})` : ''
+      }`,
+    });
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, _results) => {

@@ -1,6 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
-import { STANDARD_DEDUCTION, FICA } from '../../../utils/taxData';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { STANDARD_DEDUCTION, FICA, TAX_YEAR } from '../../../utils/taxData';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import { STATE_INCOME_TAX, STATE_INCOME_TAX_YEAR, hasNoWageTax } from '../../../utils/stateTax';
 import PaycheckPanel from './PaycheckPanel';
 import { computePaycheck, PAY_FREQUENCIES } from './paycheckMath';
@@ -214,6 +216,60 @@ const paycheckConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+
+  explainSteps: (values) => {
+    const c = computePaycheck(values);
+    if (!c) return [];
+    const rows = paycheckConfig.calculate(values);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pc = (x: number) => `${+(x * 100).toFixed(2)}%`;
+    const hourly = values.payMode === 'hourly';
+    const slices = c.fed.brackets
+      .filter((b) => b.incomeInBracket > 0)
+      .map((b) => `${pc(b.rate)} × ${m(b.incomeInBracket)} = ${m(b.tax)}`)
+      .join(' + ');
+    const addlThreshold = c.status === 'mfj' ? FICA.additionalMedicareThreshold.mfj : FICA.additionalMedicareThreshold.single;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Start from annual gross pay',
+        expr: hourly
+          ? `${m(parseFloat(values.hourlyWage))} × ${parseFloat(values.hoursPerWeek)} hours × 52 weeks = ${m(c.grossAnnual)}`
+          : `Annual salary = ${m(c.grossAnnual)}`,
+        note: hourly ? 'Overtime is not included.' : undefined,
+      },
+      {
+        label: 'Take out pre-tax benefits and retirement deferrals',
+        expr: `FICA wages = ${m(c.grossAnnual)} − ${m(c.benefits)} benefits = ${m(c.ficaWages)} · income-tax wages = ${m(c.ficaWages)} − ${m(c.retirement)} 401(k) = ${m(c.ficaWages - c.retirement)}`,
+        note: c.retirementClamped
+          ? `You entered ${m(c.retirementRequested)}; the deferral was reduced so that net pay is not negative.`
+          : 'Benefits lower income tax and FICA; retirement deferrals lower income tax only.',
+      },
+      {
+        label: `Subtract the ${TAX_YEAR} standard deduction`,
+        expr: `max(0, ${m(c.ficaWages - c.retirement)} − ${m(STANDARD_DEDUCTION[c.status])}) = ${m(c.taxableIncome)} taxable income`,
+      },
+      {
+        label: `Tax each ${TAX_YEAR} federal bracket slice`,
+        expr: slices ? `${slices} = ${m(c.fed.totalTax)} (top bracket ${pc(c.fed.marginalRate)})` : `No taxable income = ${m(0)}`,
+      },
+      {
+        label: 'Social Security and Medicare (FICA)',
+        expr: `Social Security: min(${m(c.ficaWages)}, ${m(FICA.socialSecurityWageBase)}) × ${pc(FICA.socialSecurityRate)} = ${m(c.ss)} · Medicare: ${m(c.ficaWages)} × ${pc(FICA.medicareRate)} = ${m(c.medicare)} · Additional Medicare: max(0, ${m(c.ficaWages)} − ${m(addlThreshold)}) × ${pc(FICA.additionalMedicareRate)} = ${m(c.additionalMedicare)} → ${m(c.fica)}`,
+      },
+      {
+        label: 'State income tax',
+        expr: c.noStateTax
+          ? `${c.stateName} does not tax wages → ${m(0)}`
+          : `${c.stateName} schedule applied to state wages → ${m(c.stateTax)} a year (${resultValue(rows, 'statePerPaycheck')} per paycheck)`,
+        note: c.noStateTax ? undefined : 'Method only: the calculator applies its own state rate schedule and standard deduction; the schedule is not itemised here.',
+      },
+      {
+        label: 'Subtract everything, then divide by pay periods',
+        expr: `${m(c.grossAnnual)} − ${m(c.fed.totalTax)} federal − ${m(c.fica)} FICA − ${m(c.stateTax)} state − ${m(c.benefits)} benefits − ${m(c.retirement)} retirement = ${resultValue(rows, 'netAnnual')} · ÷ ${c.periods} pay periods = ${resultValue(rows, 'netPaycheck')}`,
+      },
+    ];
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

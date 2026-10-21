@@ -1,5 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { fvAnnuity, fvLumpSum } from '../../../utils/financial';
 import { IRA_LIMITS, ROTH_IRA_INCOME_LIMITS, DEDUCTIBLE_IRA_LIMITS, FEDERAL_BRACKETS, TAX_YEAR } from '../../../utils/taxData';
 import IraPanel from './IraPanel';
 import { iraProjection, rateOr } from './iraMath';
@@ -17,6 +20,28 @@ const MARGINAL_OPTIONS = FEDERAL_BRACKETS.single.map((s, i) => {
     : `Single $${k(s.from)}–$${k(s.to)} / MFJ up to $${k(m.to)}`;
   return { label: `${pct}% — ${range}`, value: String(pct) };
 });
+
+/** Shared by calculate() and explainSteps(): parsed inputs, the IRS cap and the projection; null for incomplete input. */
+function parseIra(values: Record<string, string>) {
+  const currentAge = parseInt(values.currentAge);
+  const retirementAge = parseInt(values.retirementAge);
+  const currentBalance = Math.max(0, parseFloat(values.currentBalance) || 0);
+  const annualContribution = Math.max(0, parseFloat(values.annualContribution) || 0);
+  const annualReturn = parseFloat(values.expectedReturn) / 100;
+  const marginalRate = rateOr(values.marginalTaxRate, 0.22);
+  const retireRate = rateOr(values.retirementTaxRate, 0.12); // "0%" is a real option
+
+  if (isNaN(currentAge) || isNaN(retirementAge) || retirementAge <= currentAge || isNaN(annualReturn)) return null;
+
+  const years = retirementAge - currentAge;
+  const isCatchup = currentAge >= 50;
+  const maxContrib = isCatchup ? IRA_LIMITS.totalAge50Plus : IRA_LIMITS.base;
+  const contrib = Math.min(annualContribution, maxContrib);
+  const overLimit = annualContribution > maxContrib;
+
+  const p = iraProjection({ years, currentBalance, contribution: contrib, annualReturn, marginalRate, retireRate });
+  return { years, currentBalance, annualContribution, annualReturn, marginalRate, retireRate, isCatchup, maxContrib, contrib, overLimit, p };
+}
 
 const iraCalculatorConfig: CalculatorConfig = {
   inputs: [
@@ -103,23 +128,10 @@ const iraCalculatorConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const currentAge = parseInt(values.currentAge);
-    const retirementAge = parseInt(values.retirementAge);
-    const currentBalance = Math.max(0, parseFloat(values.currentBalance) || 0);
-    const annualContribution = Math.max(0, parseFloat(values.annualContribution) || 0);
-    const annualReturn = parseFloat(values.expectedReturn) / 100;
-    const marginalRate = rateOr(values.marginalTaxRate, 0.22);
-    const retireRate = rateOr(values.retirementTaxRate, 0.12); // "0%" is a real option
+    const parsed = parseIra(values);
+    if (!parsed) return [];
+    const { annualContribution, marginalRate, retireRate, isCatchup, maxContrib, contrib, overLimit, p } = parsed;
 
-    if (isNaN(currentAge) || isNaN(retirementAge) || retirementAge <= currentAge || isNaN(annualReturn)) return [];
-
-    const years = retirementAge - currentAge;
-    const isCatchup = currentAge >= 50;
-    const maxContrib = isCatchup ? IRA_LIMITS.totalAge50Plus : IRA_LIMITS.base;
-    const contrib = Math.min(annualContribution, maxContrib);
-    const overLimit = annualContribution > maxContrib;
-
-    const p = iraProjection({ years, currentBalance, contribution: contrib, annualReturn, marginalRate, retireRate });
     const { rothBalance, tradBalance, tradAfterTax, rothAdvantage, rothEarnings, breakevenRate, totalContribs } = p;
     const tradTaxSavingsInvested = p.taxSavingsInvested;
     const yearlyDeductionSavings = contrib * marginalRate;
@@ -192,6 +204,47 @@ const iraCalculatorConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+
+  explainSteps: (values) => {
+    const parsed = parseIra(values);
+    if (!parsed) return [];
+    const rows = iraCalculatorConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const { years, currentBalance, annualReturn, marginalRate, retireRate, maxContrib, contrib, overLimit, p } = parsed;
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pc = (x: number) => `${+(x * 100).toFixed(2)}%`;
+    const mr = annualReturn / 12;
+    const steps: ExplainStep[] = [];
+    if (overLimit) {
+      steps.push({
+        label: `Cap the contribution at the ${TAX_YEAR} IRS limit`,
+        expr: `min(${m(parseFloat(values.annualContribution))}, ${m(maxContrib)}) = ${m(contrib)} a year`,
+        note: "The limit is the calculator's own figure for your age group, applied to Traditional and Roth combined.",
+      });
+    }
+    steps.push(
+      {
+        label: 'Grow the Roth account (monthly contributions, tax-free)',
+        expr: `Rate per month = ${pc(annualReturn)} ÷ 12 = ${mr.toFixed(8)} · n = ${years} years × 12 = ${years * 12} months · starting balance ${m(currentBalance)} × (1 + ${mr.toFixed(8)})^${years * 12} = ${m(fvLumpSum(currentBalance, mr, years * 12))} · contributions ${m(contrib / 12)}/month → ${m(fvAnnuity(contrib / 12, mr, years * 12))} · total ${m(p.rothBalance)}`,
+      },
+      {
+        label: 'Take withdrawal tax off the new Traditional contributions',
+        expr: `Traditional pre-tax balance ${m(p.tradBalance)} → after ${pc(retireRate)} tax on the new money = ${m(p.tradAfterTax)}`,
+        note: 'The starting balance is treated the same in both scenarios, so only new contributions are taxed in this comparison.',
+      },
+      {
+        label: 'Invest the Traditional tax refund on the side',
+        expr: `${m(contrib)} × ${pc(marginalRate)} = ${m(contrib * marginalRate)} a year → ${m((contrib * marginalRate) / 12)}/month grows to ${m(p.taxSavingsInvested)}`,
+        note: 'Simplification: the side account is treated as tax-free.',
+      },
+      {
+        label: 'Compare Roth with Traditional plus the side account',
+        expr: `Roth ${m(p.rothBalance)} vs Traditional ${m(p.tradAfterTax)} + ${m(p.taxSavingsInvested)} = ${m(p.tradTotal)} → ${resultValue(rows, 'winner')}`,
+        note: `Because both start from the same balance, the breakeven retirement tax rate is exactly your current marginal rate (${pc(marginalRate)}).`,
+      },
+    );
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

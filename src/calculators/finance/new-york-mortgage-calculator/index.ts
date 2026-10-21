@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import NYMortgagePanel from './NYMortgagePanel';
 
 /**
@@ -34,6 +36,11 @@ export function mortgageRecordingTax(loan: number, region: string) {
 /** NY State mansion tax (Tax Law 1402-a): 1% of the consideration, paid by the buyer, on residential sales of $1,000,000 or more. */
 export const MANSION_TAX_THRESHOLD = 1_000_000;
 export const MANSION_TAX_RATE = 0.01;
+
+/** This calculator's own assumptions (kept as named constants so the worked solution quotes the same numbers). */
+const PMI_ANNUAL_RATE = 0.005;
+const SCHOOL_TAX_SHARE = 0.6;
+const STAR_EXEMPT: Record<string, number> = { basic: 30000, enhanced: 88500 };
 
 const nyMortgageConfig: CalculatorConfig = {
   inputs: [
@@ -146,22 +153,22 @@ const nyMortgageConfig: CalculatorConfig = {
     const monthlyTax = homePrice.mul(taxRate).div(12);
     // Exact comparison: a 19.96% down payment displays as "20.0%" but is still under 20%.
     const hasPmi = downPayment.div(homePrice).lt(0.2);
-    const monthlyPmi = hasPmi ? loanAmount.mul(0.005).div(12) : new Decimal(0);
+    const monthlyPmi = hasPmi ? loanAmount.mul(PMI_ANNUAL_RATE).div(12) : new Decimal(0);
     const totalMonthly = basePayment.plus(monthlyTax).plus(monthlyPmi);
     const totalInterest = basePayment.mul(months).minus(loanAmount);
     const totalCost = loanAmount.plus(totalInterest);
 
     // STAR savings (assumes school tax is ~60% of total property tax; exempt full value per tax.ny.gov, 2026-27)
-    const annualSchoolTax = monthlyTax.mul(12).mul(0.6);
+    const annualSchoolTax = monthlyTax.mul(12).mul(SCHOOL_TAX_SHARE);
     let starSavings = new Decimal(0);
     if (star === 'basic') {
       // Basic STAR: $30K off assessed value. Multiply by the school tax rate.
       // School tax rate = annual school tax / home price
       const schoolTaxRate = annualSchoolTax.div(homePrice);
-      starSavings = new Decimal(30000).mul(schoolTaxRate);
+      starSavings = new Decimal(STAR_EXEMPT.basic).mul(schoolTaxRate);
     } else if (star === 'enhanced') {
       const schoolTaxRate = annualSchoolTax.div(homePrice);
-      starSavings = new Decimal(88500).mul(schoolTaxRate);
+      starSavings = new Decimal(STAR_EXEMPT.enhanced).mul(schoolTaxRate);
     }
 
     // Mortgage Recording Tax (paid at closing, not monthly): borrower's share, see mortgageRecordingTax().
@@ -201,6 +208,59 @@ const nyMortgageConfig: CalculatorConfig = {
       },
       { id: '_nyData', label: '', value: JSON.stringify({ loanAmount: loanAmount.toNumber(), downPct, hasPmi, monthlyTax: monthlyTax.toNumber(), monthlyPmi: monthlyPmi.toNumber(), term }) },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = nyMortgageConfig.calculate(values);
+    const raw = resultValue(rows, '_nyData');
+    if (!raw) return [];
+    const d = JSON.parse(raw) as { loanAmount: number; downPct: string; hasPmi: boolean; monthlyTax: number; monthlyPmi: number; term: number };
+    if (Object.values(d).some((x) => x === null)) return []; // JSON turns Infinity into null
+    const price = parseFloat(values.homePrice);
+    const down = parseFloat(values.downPayment);
+    const rate = parseFloat(values.interestRate);
+    const taxRate = isNaN(parseFloat(values.propertyTaxRate)) ? 0 : parseFloat(values.propertyTaxRate);
+    const star = values.starEligible || 'none';
+    const region = values.mrtRegion || 'nyc';
+    const n = d.term * 12;
+    const r = rate / 100 / 12;
+    const m = (x: number) => `$${x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pc = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const steps: ExplainStep[] = [
+      { label: 'Work out the loan', expr: `${m(price)} − ${m(down)} down = ${resultValue(rows, 'loanAmount')} (down payment ${resultValue(rows, 'downPercent')})` },
+      {
+        label: 'Monthly principal and interest',
+        expr: r === 0
+          ? `M = ${m(d.loanAmount)} ÷ ${n} = ${resultValue(rows, 'monthlyPayment')}`
+          : `r = ${rate}% ÷ 12 = ${r.toFixed(8)} · n = ${n} · M = L × r(1+r)ⁿ ÷ ((1+r)ⁿ − 1) = ${resultValue(rows, 'monthlyPayment')}`,
+      },
+      {
+        label: 'Add property tax and, under 20% down, PMI',
+        expr: `Tax: ${m(price)} × ${taxRate}% ÷ 12 = ${m(d.monthlyTax)} · PMI: ${
+          d.hasPmi ? `${m(d.loanAmount)} × ${pc(PMI_ANNUAL_RATE)} ÷ 12 = ${m(d.monthlyPmi)}` : `${m(0)} (20% or more down)`
+        } → ${resultValue(rows, 'totalMonthly')}`,
+        note: `PMI uses this calculator's assumed ${pc(PMI_ANNUAL_RATE)} a year; your lender's rate will differ.`,
+      },
+      { label: 'Total interest over the term', expr: `M × ${n} − loan = ${resultValue(rows, 'totalInterest')}` },
+    ];
+    if (STAR_EXEMPT[star]) {
+      steps.push({
+        label: 'Estimate the STAR saving',
+        expr: `School tax ≈ ${pc(SCHOOL_TAX_SHARE)} of ${m(d.monthlyTax * 12)} = ${m(d.monthlyTax * 12 * SCHOOL_TAX_SHARE)} a year · school rate = ${m(d.monthlyTax * 12 * SCHOOL_TAX_SHARE)} ÷ ${m(price)} = ${pc((d.monthlyTax * 12 * SCHOOL_TAX_SHARE) / price)} · × ${m(STAR_EXEMPT[star])} exempt = ${resultValue(rows, 'starSavings')}`,
+        note: 'An estimate: the real school share of your tax bill varies by district.',
+      });
+    }
+    const mrt = mortgageRecordingTax(d.loanAmount, region);
+    const base = Math.round(d.loanAmount / 100) * 100;
+    steps.push({
+      label: 'Mortgage recording tax (your share, paid at closing)',
+      expr: `${m(base)} (loan rounded to $100) × ${pc(mrt.total / (base || 1))} = ${m(mrt.total)} total − lender's ${pc(MRT_LENDER_SHARE)} (${m(mrt.lender)}) = ${resultValue(rows, 'recordingTax')}`,
+      note: (MRT_REGIONS[region] ?? MRT_REGIONS.nyc).label,
+    });
+    steps.push({
+      label: 'Mansion tax check',
+      expr: price >= MANSION_TAX_THRESHOLD ? `${m(price)} × ${pc(MANSION_TAX_RATE)} = ${resultValue(rows, 'mansionTax')}` : `Price is under ${m(MANSION_TAX_THRESHOLD)} → ${m(0)}`,
+    });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

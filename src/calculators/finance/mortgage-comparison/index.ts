@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import MortgageComparePanel from './MortgageComparePanel';
 import { money2dp as fmt } from '../../../lib/format';
 import { pmt } from '../../../utils/financial';
@@ -210,6 +212,71 @@ const mortgageComparisonConfig: CalculatorConfig = {
         }),
       },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = mortgageComparisonConfig.calculate(values);
+    const raw = resultValue(rows, '_breakdown');
+    if (!raw) return [];
+    const b = JSON.parse(raw) as {
+      loanAmount: number; downPaymentPct: string; hasPmi: boolean; monthlyPmi: number; monthlyTax: number;
+      monthlyInsurance: number; basePayment15: number; basePayment30: number; pmiMonths15: number; pmiMonths30: number;
+    };
+    if (Object.values(b).some((x) => x === null)) return []; // JSON turns Infinity into null
+    const homePrice = parseFloat(values.homePrice);
+    const downPayment = parseFloat(values.downPayment);
+    const rate15 = parseFloat(values.rate15);
+    const rate30 = parseFloat(values.rate30);
+    const taxRate = parseFloat(values.propertyTaxRate) || 0;
+    const insurance = parseFloat(values.annualInsurance) || 0;
+    const pmiRate = parseFloat(values.pmiRate) || 0;
+    const m = (n: number) => `$${fmt(n)}`;
+    const f8 = (x: number) => x.toFixed(8);
+    const loanStep = (years: number, rate: number, payment: number): ExplainStep => {
+      const r = rate / 100 / 12;
+      const n = years * 12;
+      return {
+        label: `Principal and interest payment on the ${years}-year loan`,
+        expr: r === 0
+          ? `M = ${m(b.loanAmount)} ÷ ${n} = ${m(payment)}`
+          : `r = ${rate}% ÷ 12 = ${f8(r)} · n = ${n} · M = ${m(b.loanAmount)} × r(1+r)ⁿ ÷ ((1+r)ⁿ − 1) = ${m(payment)}`,
+      };
+    };
+    const steps: ExplainStep[] = [
+      {
+        label: 'Work out the loan',
+        expr: `${m(homePrice)} − ${m(downPayment)} down = ${m(b.loanAmount)} (down payment ${b.downPaymentPct}%)`,
+      },
+      {
+        label: 'Add the monthly extras that do not depend on the term',
+        expr: `Property tax: ${m(homePrice)} × ${taxRate}% ÷ 12 = ${m(b.monthlyTax)} · Insurance: ${m(insurance)} ÷ 12 = ${m(b.monthlyInsurance)} · PMI: ${
+          b.hasPmi ? `${m(b.loanAmount)} × ${pmiRate}% ÷ 12 = ${m(b.monthlyPmi)} (down payment under 20%)` : `${m(0)} (20% or more down)`
+        }`,
+      },
+      loanStep(15, rate15, b.basePayment15),
+      loanStep(30, rate30, b.basePayment30),
+      {
+        label: 'Add the extras to each payment',
+        expr: `15-year: ${m(b.basePayment15)} + ${m(b.monthlyTax)} + ${m(b.monthlyInsurance)} + ${m(b.monthlyPmi)} = ${resultValue(rows, 'monthly15')} · 30-year: ${m(b.basePayment30)} + ${m(b.monthlyTax)} + ${m(b.monthlyInsurance)} + ${m(b.monthlyPmi)} = ${resultValue(rows, 'monthly30')}`,
+        note: 'PMI is shown at its full monthly amount while it applies, then it drops (see below).',
+      },
+      {
+        label: 'Total interest over each full term',
+        expr: `15-year: ${m(b.basePayment15)} × 180 − ${m(b.loanAmount)} = ${resultValue(rows, 'interest15')} · 30-year: ${m(b.basePayment30)} × 360 − ${m(b.loanAmount)} = ${resultValue(rows, 'interest30')}`,
+      },
+    ];
+    if (b.hasPmi) {
+      steps.push({
+        label: 'Count the months of PMI',
+        expr: `Balance reaches 80% of ${m(homePrice)} = ${m(homePrice * 0.8)} after ${b.pmiMonths15} months (15-year) and ${b.pmiMonths30} months (30-year) → ${resultValue(rows, 'pmiDuration')}`,
+        note: 'PMI is dropped once the scheduled balance reaches 80% of the home price.',
+      });
+    }
+    steps.push({
+      label: 'Compare the two loans',
+      expr: `Savings = (30-year interest + PMI paid) − (15-year interest + PMI paid) = ${resultValue(rows, 'savings')} · extra monthly cost of the 15-year = ${m(b.basePayment15 + b.monthlyPmi)} − ${m(b.basePayment30 + b.monthlyPmi)} = ${resultValue(rows, 'extraMonthly')}`,
+      note: 'Property tax and insurance are owed under either loan, so they are left out of the savings.',
+    });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

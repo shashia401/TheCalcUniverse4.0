@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
-import { fmtCurrency } from '../../../utils/financial';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { fmtCurrency, fvAnnuity, fvLumpSum } from '../../../utils/financial';
 import MutualFundPanel from './MutualFundPanel';
 import { fundBalance } from './fundMath';
 
@@ -99,6 +101,47 @@ const mutualFundConfig: CalculatorConfig = {
       { id: 'netReturn', label: 'Net Annual Return After Fees', value: `${(netAnnualReturn * 100).toFixed(2)}%`, color: 'neutral' as const },
       { id: 'contributionPct', label: 'Contributions as % of Final Balance', value: `${contributionPct.toFixed(0)}%`, color: 'neutral' as const },
     ];
+  },
+
+  explainSteps: (values) => {
+    const rows = mutualFundConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const initial = parseFloat(values.initialInvestment);
+    const monthly = parseFloat(values.monthlyContribution) || 0;
+    const ret = parseFloat(values.expectedReturn) / 100;
+    const fee = parseFloat(values.expenseRatio) / 100;
+    const years = parseFloat(values.investmentYears);
+    const months = years * 12;
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pc = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const grow = (rate: number) => {
+      const i = rate / 12;
+      return `${m(initial)} × (1 + ${i.toFixed(8)})^${months} = ${m(fvLumpSum(initial, i, months))} + ${m(monthly)} × [((1 + ${i.toFixed(8)})^${months} − 1) ÷ ${i.toFixed(8)}] = ${m(fvAnnuity(monthly, i, months))}`;
+    };
+    return finiteSteps([
+      {
+        label: 'Subtract the expense ratio from the return',
+        expr: `Net return = ${pc(ret)} − ${pc(fee)} = ${resultValue(rows, 'netReturn')} · monthly rate = ${pc(ret - fee)} ÷ 12 = ${((ret - fee) / 12).toFixed(8)}`,
+        note: 'The fee is taken out of the return every year, so it compounds against you too.',
+      },
+      {
+        label: 'Grow the balance with the fee',
+        expr: `n = ${years} years × 12 = ${months} months · ${grow(ret - fee)} → ${m(fundBalance(initial, monthly, ret, fee, months))} (shown as ${resultValue(rows, 'withFees')})`,
+        note: 'Contributions are added at the end of each month.',
+      },
+      {
+        label: 'Grow the same money with no fee',
+        expr: `Monthly rate = ${pc(ret)} ÷ 12 = ${(ret / 12).toFixed(8)} · ${grow(ret)} → ${m(fundBalance(initial, monthly, ret, 0, months))} (shown as ${resultValue(rows, 'withoutFees')})`,
+      },
+      {
+        label: 'The difference is the cost of the fee',
+        expr: `${m(fundBalance(initial, monthly, ret, 0, months))} − ${m(fundBalance(initial, monthly, ret, fee, months))} = ${resultValue(rows, 'feeImpact')}`,
+      },
+      {
+        label: 'Compare with what you put in',
+        expr: `${m(initial)} + ${m(monthly)} × ${months} = ${resultValue(rows, 'totalContributions')} contributed · growth after fees = ${resultValue(rows, 'earningsWith')}`,
+      },
+    ]);
   },
 
   extraPanel: (values, results) => {

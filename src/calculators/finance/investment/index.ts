@@ -1,7 +1,10 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+import { fvAnnuity, fvLumpSum } from '../../../utils/financial';
 import InvestmentPanel from './InvestmentPanel';
-import { investmentFV, annualContribution, parseVariance, type ContributionFreq } from './investMath';
+import { investmentFV, annualContribution, parseVariance, PERIODS_PER_YEAR, type ContributionFreq } from './investMath';
 
 const investmentSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="14" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Compound Growth Over Time</text><text x="160" y="28" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">$10K + $500/mo @ 8% for 20 years</text><g transform="translate(15,35)"><line x1="25" y1="5" x2="25" y2="108" stroke="var(--svg-cbd5e1)" stroke-width="1"/><line x1="25" y1="108" x2="290" y2="108" stroke="var(--svg-cbd5e1)" stroke-width="1"/><text x="20" y="9" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$300K</text><text x="20" y="33" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$200K</text><text x="20" y="57" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$100K</text><text x="20" y="83" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$50K</text><text x="20" y="112" text-anchor="end" font-size="7" fill="var(--svg-64748b)">$0</text><line x1="25" y1="5" x2="290" y2="5" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="25" y1="30" x2="290" y2="30" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="25" y1="55" x2="290" y2="55" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><line x1="25" y1="80" x2="290" y2="80" stroke="var(--svg-e2e8f0)" stroke-width="0.5"/><path d="M 40,110 L 80,107 L 120,100 L 160,85 Q 200,65 240,38 Q 265,22 290,10" fill="none" stroke="var(--svg-22c55e)" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="110" x2="290" y2="52" stroke="var(--svg-3b82f6)" stroke-width="2" stroke-dasharray="5,3" stroke-linecap="round"/><path d="M 40,110 L 80,107 L 120,100 L 160,85 Q 200,65 240,38 Q 265,22 290,10 L 290,52 L 240,60 Q 200,72 160,88 L 120,100 L 80,107 L 40,110 Z" fill="var(--svg-22c55e)" opacity="0.1"/><text x="40" y="120" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">0</text><text x="120" y="120" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">5yr</text><text x="200" y="120" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">10yr</text><text x="280" y="120" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">20yr</text></g><rect x="195" y="146" width="110" height="18" rx="3" fill="var(--svg-22c55e)" opacity="0.2"/><rect x="195" y="146" width="10" height="10" rx="2" fill="var(--svg-22c55e)"/><text x="210" y="155" font-size="7" fill="var(--svg-475569)">Market Returns</text><rect x="195" y="160" width="110" height="18" rx="3" fill="var(--svg-3b82f6)" opacity="0.2"/><rect x="195" y="160" width="10" height="10" rx="2" fill="var(--svg-3b82f6)"/><text x="210" y="169" font-size="7" fill="var(--svg-475569)">Your Contributions</text><rect x="15" y="173" width="170" height="22" rx="6" fill="var(--svg-f1f5f9)"/><text x="100" y="188" text-anchor="middle" font-size="6" font-weight="bold" fill="var(--svg-22c55e)">FV = P(1+r)^n + C[(1+r)^n - 1]/r</text><text x="260" y="188" font-size="6" fill="var(--svg-64748b)">Compounding = exponential</text></svg>';
 
@@ -89,6 +92,51 @@ const investmentConfig: CalculatorConfig = {
       helpText: 'Creates optimistic/pessimistic scenarios. Default +/-2% is realistic for a diversified portfolio.',
     },
   ],
+  explainSteps: (values) => {
+    const rows = investmentConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const P = Math.max(0, parseFloat(values.startingAmount) || 0);
+    const contribution = Math.max(0, parseFloat(values.contribution) || 0);
+    const freq = (values.contributionFrequency || 'monthly') as ContributionFreq;
+    const years = parseFloat(values.years);
+    const rate = parseFloat(values.returnRate) / 100;
+    const k = PERIODS_PER_YEAR[freq];
+    if (!k) return [];
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const monthly = rate / 12;
+    const lump = fvLumpSum(P, monthly, 12 * years);
+    const periodRate = Math.pow(1 + monthly, 12 / k) - 1;
+    const stream = fvAnnuity(contribution, periodRate, k * years);
+    const label = freq === 'weekly' ? 'week' : freq === 'monthly' ? 'month' : 'year';
+    const steps: ExplainStep[] = [
+      { label: 'Find the monthly growth rate', expr: `r = ${+(rate * 100).toFixed(4)}% ÷ 12 = ${monthly.toFixed(8)}`, note: 'The balance compounds monthly.' },
+      { label: 'Grow the starting amount', expr: `${m(P)} × (1 + ${monthly.toFixed(8)})^${12 * years} = ${m(lump)}` },
+    ];
+    if (contribution > 0) {
+      steps.push(
+        {
+          label: `Find the growth rate for one ${label}`,
+          expr: `i = (1 + ${monthly.toFixed(8)})^(12/${k}) − 1 = ${periodRate.toFixed(8)}`,
+          note: 'Each deposit lands at the end of its own period, so it earns growth only for the periods after it.',
+        },
+        {
+          label: `Grow the ${freq === 'annually' ? 'yearly' : freq} deposits`,
+          expr: periodRate === 0
+            ? `${m(contribution)} × ${k * years} = ${m(stream)}`
+            : `${m(contribution)} × [((1 + ${periodRate.toFixed(8)})^${k * years} − 1) ÷ ${periodRate.toFixed(8)}] = ${m(stream)}`,
+        },
+      );
+    }
+    steps.push({
+      label: 'Add the pieces for the expected value',
+      expr: `${m(lump)} + ${m(stream)} = ${m(lump + stream)} (shown as ${resultValue(rows, 'expected')})`,
+    });
+    steps.push({
+      label: 'Compare with what you put in',
+      expr: `${m(P)} + ${m(annualContribution(contribution, freq))} a year × ${years} years = ${resultValue(rows, 'totalContributed')} invested · growth = ${resultValue(rows, 'totalReturns')}`,
+    });
+    return finiteSteps(steps);
+  },
   calculate: (values) => {
     const P = Math.max(0, parseFloat(values.startingAmount) || 0);
     const contribution = Math.max(0, parseFloat(values.contribution) || 0);

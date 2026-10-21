@@ -1,5 +1,7 @@
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const MAX_LTV_BY_CREDIT: Record<string, { label: string; maxLtv: number }> = {
   excellent: { label: 'Excellent (740+)', maxLtv: 0.85 },
@@ -181,6 +183,49 @@ const homeEquityLoanConfig: CalculatorConfig = {
       formatValue: (n: number) => `$${Math.round(n).toLocaleString()}`,
       caption: 'Cumulative principal repaid vs interest paid over the loan term. Hover to read any point.',
     };
+  },
+  explainSteps: (values) => {
+    const loan = computeLoan(values);
+    if (!loan || loan.actualLoan <= 0) return [];
+    const rows = homeEquityLoanConfig.calculate(values);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const f8 = (x: number) => x.toFixed(8);
+    const { homeValue, currentMortgage, maxLtvPct, maxHeloc, actualLoan, actualClosingCosts, financedAmount, monthlyRate, loanTermMonths, annualRate } = loan;
+    const cap = homeValue * maxLtvPct;
+    const payment = pmtDecimal(financedAmount, monthlyRate, loanTermMonths);
+    const steps: ExplainStep[] = [
+      {
+        label: 'Apply the combined loan-to-value (CLTV) cap for your credit profile',
+        expr: `${m(homeValue)} × ${+(maxLtvPct * 100).toFixed(2)}% = ${m(cap)} allowed in total · ${m(cap)} − ${m(currentMortgage)} mortgage = ${m(maxHeloc)} available`,
+        note: "The cap per credit profile is this calculator's own illustrative assumption, not a lender standard.",
+      },
+      {
+        label: 'Cap the loan at what is available',
+        expr: `min(${m(parseFloat(values.desiredLoan) || 0)}, ${m(maxHeloc)}) = ${m(actualLoan)} approved`,
+      },
+    ];
+    if (actualClosingCosts > 0) {
+      steps.push({
+        label: 'Roll the closing costs into the balance',
+        expr: `${m(actualLoan)} + ${m(actualClosingCosts)} = ${m(financedAmount)} financed`,
+      });
+    }
+    steps.push({
+      label: 'Convert the rate to a monthly rate and count the payments',
+      expr: `r = ${annualRate}% ÷ 12 = ${f8(monthlyRate)} · n = ${loanTermMonths} months`,
+    });
+    steps.push({
+      label: 'Solve for the fixed monthly payment',
+      expr:
+        monthlyRate === 0
+          ? `M = ${m(financedAmount)} ÷ ${loanTermMonths} = ${m(payment)}`
+          : `M = P × r(1+r)ⁿ ÷ ((1+r)ⁿ − 1) = ${m(financedAmount)} × ${f8(monthlyRate)} × (1 + ${f8(monthlyRate)})^${loanTermMonths} ÷ ((1 + ${f8(monthlyRate)})^${loanTermMonths} − 1) = ${m(payment)}`,
+    });
+    steps.push({
+      label: 'Total interest over the full term',
+      expr: `${m(payment)} × ${loanTermMonths} − ${m(financedAmount)} = ${resultValue(rows, 'totalInterest')}`,
+    });
+    return finiteSteps(steps);
   },
   calculate: (values) => {
     const loan = computeLoan(values);

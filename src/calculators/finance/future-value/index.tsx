@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { fvAnnuity, fvLumpSum } from '../../../utils/financial';
 import { futureValue, COMPOUNDING_LABELS } from './fvMath';
 import FutureValuePanel from './FutureValuePanel';
 
@@ -69,6 +71,42 @@ const futureValueConfig: CalculatorConfig = {
       helpText: 'Deposited at the end of each month. Contributions earn the same effective annual rate as the principal, whichever compounding frequency you choose.',
     },
   ],
+  explainSteps: (values) => {
+    const pv = parseFloat(values.presentValue);
+    const rate = parseFloat(values.annualRate) / 100;
+    const years = parseFloat(values.years);
+    const m = parseInt(values.compounding || '12');
+    const pmt = parseFloat(values.monthlyContribution) || 0;
+    if (isNaN(pv) || isNaN(rate) || isNaN(years) || pv <= 0 || years <= 0 || !(m > 0)) return [];
+
+    const money = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const r = rate / m;
+    const periods = years * m;
+    const lump = fvLumpSum(pv, r, periods);
+    const total = futureValue(pv, rate, m, pmt, years);
+    const steps: ExplainStep[] = [
+      { label: 'Find the rate for one compounding period', expr: `r = ${(rate * 100).toFixed(4)}% ÷ ${m} = ${(r * 100).toFixed(4)}% = ${r.toFixed(8)}` },
+      { label: 'Count the compounding periods', expr: `N = ${years} years × ${m} = ${periods}` },
+      {
+        label: 'Grow the starting amount',
+        expr: `${money(pv)} × (1 + ${r.toFixed(8)})^${periods} = ${money(lump)}`,
+      },
+    ];
+    if (pmt > 0) {
+      const i = Math.pow(1 + r, m / 12) - 1;
+      const months = years * 12;
+      steps.push({
+        label: 'Grow the monthly deposits',
+        expr: `i = (1 + ${r.toFixed(8)})^(${m}/12) − 1 = ${i.toFixed(8)} · ${money(pmt)} × [((1 + i)^${months} − 1) ÷ i] = ${money(fvAnnuity(pmt, i, months))}`,
+        note: 'Deposits land at the end of each month and earn the same effective annual rate as the principal.',
+      });
+    }
+    steps.push({
+      label: 'Add the pieces for the future value',
+      expr: pmt > 0 ? `${money(lump)} + ${money(fvAnnuity(pmt, Math.pow(1 + r, m / 12) - 1, years * 12))} = ${money(total)} (shown as $${Math.round(total).toLocaleString()})` : `${money(total)} (shown as $${Math.round(total).toLocaleString()})`,
+    });
+    return finiteSteps(steps);
+  },
   calculate: (values) => {
     const presentValue = parseFloat(values.presentValue);
     const annualRate = parseFloat(values.annualRate) / 100;

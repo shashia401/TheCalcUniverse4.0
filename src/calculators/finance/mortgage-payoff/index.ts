@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import MortgagePayoffPanel from './MortgagePayoffPanel';
 import { simulatePayoff, payoffDateLabel, MAX_PAYOFF_MONTHS } from './payoffSim';
 
@@ -184,6 +186,55 @@ const mortgagePayoffConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  // Only the parts fixed by the inputs (months, interest, savings); the payoff DATE depends on today's date, so it has no step.
+  explainSteps: (values) => {
+    const rows = mortgagePayoffConfig.calculate(values);
+    if (!hasAnswer(rows) || !resultValue(rows, 'standardInterest')) return [];
+    const balance = parseFloat(values.currentBalance);
+    const annualRate = parseFloat(values.interestRate);
+    const basePayment = parseFloat(values.monthlyPayment);
+    const extraMonthly = parseFloat(values.extraMonthly) || 0;
+    const yearlyLumpSum = parseFloat(values.yearlyLumpSum) || 0;
+    const singleLumpSum = parseFloat(values.singleLumpSum) || 0;
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const dur = (mo: number) => [Math.floor(mo / 12) > 0 ? `${Math.floor(mo / 12)} yr` : '', mo % 12 > 0 ? `${mo % 12} mo` : ''].filter(Boolean).join(' ') || '0 mo';
+    const r = annualRate / 100 / 12;
+    const std = simulatePayoff(balance, r, basePayment);
+    const hasExtra = extraMonthly > 0 || yearlyLumpSum > 0 || singleLumpSum > 0;
+    const interest1 = balance * r;
+    const steps: ExplainStep[] = [
+      { label: 'Convert the rate to a monthly rate', expr: `r = ${annualRate}% ÷ 12 = ${r.toFixed(8)}` },
+      {
+        label: 'Split the first payment into interest and principal',
+        expr: `Interest = ${m(balance)} × ${r.toFixed(8)} = ${m(interest1)} · principal = ${m(basePayment)} − ${m(interest1)} = ${m(basePayment - interest1)}`,
+        note: 'Each month the interest is charged on the balance left, so the principal share grows as the balance falls.',
+      },
+      {
+        label: 'Repeat month by month on the standard schedule',
+        expr: `Paid off after ${std.months} payments (${dur(std.months)}) · total interest = ${resultValue(rows, 'standardInterest')}`,
+        note: "The payoff date itself depends on today's date, so only the length is shown.",
+      },
+    ];
+    if (hasExtra) {
+      const parts = [
+        singleLumpSum > 0 ? `${m(singleLumpSum)} lump sum today (balance becomes ${m(Math.max(0, balance - singleLumpSum))})` : '',
+        extraMonthly > 0 ? `${m(extraMonthly)} extra every month` : '',
+        yearlyLumpSum > 0 ? `${m(yearlyLumpSum)} with payments 13, 25, 37, …` : '',
+      ].filter(Boolean);
+      const accel = simulatePayoff(balance, r, basePayment, extraMonthly, yearlyLumpSum, singleLumpSum);
+      steps.push(
+        {
+          label: 'Add your extra payments to principal and run the schedule again',
+          expr: `${parts.join(' + ')} → paid off after ${accel.months} payments (${dur(accel.months)}) · total interest = ${resultValue(rows, 'newTotalInterest')}`,
+        },
+        {
+          label: 'Compare the two schedules',
+          expr: `Time saved: ${std.months} − ${accel.months} = ${std.months - accel.months} months (${resultValue(rows, 'timeSaved')}) · interest saved: ${resultValue(rows, 'standardInterest')} − ${resultValue(rows, 'newTotalInterest')} = ${resultValue(rows, 'interestSaved')}`,
+        },
+      );
+    }
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     const balance = parseFloat(values.currentBalance);

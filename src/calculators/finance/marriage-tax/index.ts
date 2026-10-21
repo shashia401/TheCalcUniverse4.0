@@ -1,6 +1,9 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
-import { FEDERAL_BRACKETS, STANDARD_DEDUCTION } from '../../../utils/taxData';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { FEDERAL_BRACKETS, STANDARD_DEDUCTION, TAX_YEAR } from '../../../utils/taxData';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
+import { bracketSlices } from '../../../utils/bracketSteps';
 import MarriageTaxPanel from './MarriageTaxPanel';
 
 // Derived from the shared, actively-maintained bracket data (utils/taxData.ts) —
@@ -25,6 +28,42 @@ function calcTax(taxableIncome: number, brackets: [number, number][]): number {
     }
   }
   return tax;
+}
+
+/** Shared by calculate() and explainSteps(): both partners' tax as singles vs. jointly. 'incomplete' = no result, 'itemized' = missing itemized amounts. */
+function computeMarriage(values: Record<string, string>) {
+  const i1 = parseFloat(values.income1);
+  const i2 = parseFloat(values.income2);
+  const dType = values.deductionType || 'standard';
+
+  if (isNaN(i1) || isNaN(i2) || i1 < 0 || i2 < 0) return 'incomplete' as const;
+
+  let ded1: number, ded2: number, dedJoint: number;
+  if (dType === 'itemized') {
+    const it1 = parseFloat(values.itemized1);
+    const it2 = parseFloat(values.itemized2);
+    const itJ = parseFloat(values.itemizedJoint);
+    if (isNaN(it1) || isNaN(it2) || isNaN(itJ) || it1 < 0 || it2 < 0 || itJ < 0) return 'itemized' as const;
+    // A taxpayer takes the LARGER of itemized and standard, so a low itemized figure
+    // never raises the tax above the standard-deduction result.
+    ded1 = Math.max(it1, STD_DEDUCTION_SINGLE_2026);
+    ded2 = Math.max(it2, STD_DEDUCTION_SINGLE_2026);
+    dedJoint = Math.max(itJ, STD_DEDUCTION_MFJ_2026);
+  } else {
+    ded1 = STD_DEDUCTION_SINGLE_2026;
+    ded2 = STD_DEDUCTION_SINGLE_2026;
+    dedJoint = STD_DEDUCTION_MFJ_2026;
+  }
+
+  const taxable1 = Math.max(0, i1 - ded1);
+  const taxable2 = Math.max(0, i2 - ded2);
+  const tax1 = calcTax(taxable1, SINGLE_BRACKETS_2026);
+  const tax2 = calcTax(taxable2, SINGLE_BRACKETS_2026);
+  const totalSingleTax = tax1 + tax2;
+
+  const taxableJoint = Math.max(0, i1 + i2 - dedJoint);
+  const taxJoint = calcTax(taxableJoint, MFJ_BRACKETS_2026);
+  return { i1, i2, ded1, ded2, dedJoint, taxable1, taxable2, tax1, tax2, totalSingleTax, taxableJoint, taxJoint };
 }
 
 const marriageTaxConfig: CalculatorConfig = {
@@ -90,44 +129,17 @@ const marriageTaxConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const i1 = parseFloat(values.income1);
-    const i2 = parseFloat(values.income2);
-    const dType = values.deductionType || 'standard';
-
-    if (isNaN(i1) || isNaN(i2) || i1 < 0 || i2 < 0) return [];
-
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-    let ded1: number, ded2: number, dedJoint: number;
-    if (dType === 'itemized') {
-      const it1 = parseFloat(values.itemized1);
-      const it2 = parseFloat(values.itemized2);
-      const itJ = parseFloat(values.itemizedJoint);
-      if (isNaN(it1) || isNaN(it2) || isNaN(itJ) || it1 < 0 || it2 < 0 || itJ < 0) {
-        return [
-          { id: 'err', label: 'Itemized Deduction Inputs Required', value: 'Enter all three itemized deduction amounts (Partner 1 single, Partner 2 single, and combined joint), or switch to Standard Deduction.', color: 'negative' as const, highlight: true },
-        ];
-      }
-      // A taxpayer takes the LARGER of itemized and standard, so a low itemized figure
-      // never raises the tax above the standard-deduction result.
-      ded1 = Math.max(it1, STD_DEDUCTION_SINGLE_2026);
-      ded2 = Math.max(it2, STD_DEDUCTION_SINGLE_2026);
-      dedJoint = Math.max(itJ, STD_DEDUCTION_MFJ_2026);
-    } else {
-      ded1 = STD_DEDUCTION_SINGLE_2026;
-      ded2 = STD_DEDUCTION_SINGLE_2026;
-      dedJoint = STD_DEDUCTION_MFJ_2026;
+    const mt = computeMarriage(values);
+    if (mt === 'incomplete') return [];
+    if (mt === 'itemized') {
+      return [
+        { id: 'err', label: 'Itemized Deduction Inputs Required', value: 'Enter all three itemized deduction amounts (Partner 1 single, Partner 2 single, and combined joint), or switch to Standard Deduction.', color: 'negative' as const, highlight: true },
+      ];
     }
-
-    const taxable1 = Math.max(0, i1 - ded1);
-    const taxable2 = Math.max(0, i2 - ded2);
-    const tax1 = calcTax(taxable1, SINGLE_BRACKETS_2026);
-    const tax2 = calcTax(taxable2, SINGLE_BRACKETS_2026);
-    const totalSingleTax = tax1 + tax2;
-
-    const taxableJoint = Math.max(0, i1 + i2 - dedJoint);
-    const taxJoint = calcTax(taxableJoint, MFJ_BRACKETS_2026);
+    const { i1, i2, ded1, ded2, dedJoint, tax1, tax2, totalSingleTax, taxJoint } = mt;
 
     const totalIncome = i1 + i2;
     const pct = (t: number) => (totalIncome > 0 ? ((t / totalIncome) * 100).toFixed(2) : '0.00');
@@ -163,6 +175,41 @@ const marriageTaxConfig: CalculatorConfig = {
       { id: 'effMarried', label: 'Effective Tax Rate — Filing Jointly', value: `${pct(taxJoint)}%`, color: 'neutral' as const },
       { id: 'year', label: 'Tax Year Used', value: '2026 IRS brackets and standard deductions', color: 'neutral' as const },
     ];
+  },
+
+  explainSteps: (values) => {
+    const mt = computeMarriage(values);
+    if (mt === 'incomplete' || mt === 'itemized') return [];
+    const rows = marriageTaxConfig.calculate(values);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const tc = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    const sl = (taxable: number, status: 'single' | 'mfj') => bracketSlices(taxable, FEDERAL_BRACKETS[status], m) || `no taxable income = ${m(0)}`;
+    const itemized = (values.deductionType || 'standard') === 'itemized';
+    const steps: ExplainStep[] = [
+      {
+        label: `Subtract the deduction (${TAX_YEAR} brackets and standard deductions)`,
+        expr: `Partner 1: ${m(mt.i1)} − ${m(mt.ded1)} = ${m(mt.taxable1)} · Partner 2: ${m(mt.i2)} − ${m(mt.ded2)} = ${m(mt.taxable2)} · Together: ${m(mt.i1 + mt.i2)} − ${m(mt.dedJoint)} = ${m(mt.taxableJoint)}`,
+        note: itemized
+          ? 'Each filer takes the larger of the itemized amount and the standard deduction.'
+          : `Standard deductions: ${m(STD_DEDUCTION_SINGLE_2026)} single, ${m(STD_DEDUCTION_MFJ_2026)} married filing jointly.`,
+      },
+      { label: 'Tax Partner 1 as a single filer', expr: `${sl(mt.taxable1, 'single')} = ${m(mt.tax1)}` },
+      { label: 'Tax Partner 2 as a single filer', expr: `${sl(mt.taxable2, 'single')} = ${m(mt.tax2)}` },
+      {
+        label: 'Add the two single returns',
+        expr: `${m(mt.tax1)} + ${m(mt.tax2)} = ${m(mt.totalSingleTax)} (shown as ${resultValue(rows, 'unmarriedTotal')})`,
+      },
+      {
+        label: 'Tax the joint return (married filing jointly brackets)',
+        expr: `${sl(mt.taxableJoint, 'mfj')} = ${m(mt.taxJoint)} (shown as ${resultValue(rows, 'marriedTotal')})`,
+      },
+      {
+        label: 'Compare married with unmarried',
+        expr: `${tc(mt.taxJoint)} joint − ${tc(mt.totalSingleTax)} as two singles = ${mt.taxJoint < mt.totalSingleTax ? '−' : ''}${m(Math.abs(mt.taxJoint - mt.totalSingleTax))} → ${resultValue(rows, 'hero')}`,
+        note: 'A positive difference is a marriage penalty, a negative one is a bonus.',
+      },
+    ];
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

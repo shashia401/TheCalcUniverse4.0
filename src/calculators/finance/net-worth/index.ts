@@ -1,5 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import NetWorthPanel from './NetWorthPanel';
 
 const netWorthConfig: CalculatorConfig = {
@@ -163,6 +165,34 @@ const netWorthConfig: CalculatorConfig = {
         color: debtToAssetRatio !== null && debtToAssetRatio > 50 ? 'negative' : 'neutral',
       },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = netWorthConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const list = (items: [string, string][]) => {
+      const used = items.map(([name, id]) => [name, parseFloat(values[id]) || 0] as const).filter(([, v]) => v !== 0);
+      return used.length ? used.map(([name, v]) => `${name} ${m(v)}`).join(' + ') : m(0);
+    };
+    return finiteSteps([
+      {
+        label: 'Add up everything you own',
+        expr: `${list([['Cash', 'cash'], ['Investments', 'investments'], ['Retirement', 'retirement'], ['Real estate', 'realEstate'], ['Other assets', 'otherAssets']])} = ${resultValue(rows, 'totalAssets')}`,
+      },
+      {
+        label: 'Add up everything you owe',
+        expr: `${list([['Mortgage', 'mortgage'], ['Car loans', 'carLoans'], ['Student loans', 'studentLoans'], ['Credit cards', 'creditCardDebt'], ['Other debts', 'otherDebts']])} = ${resultValue(rows, 'totalLiabilities')}`,
+      },
+      {
+        label: 'Subtract liabilities from assets',
+        expr: `Net worth = ${resultValue(rows, 'totalAssets')} − ${resultValue(rows, 'totalLiabilities')} = ${resultValue(rows, 'netWorth')}`,
+      },
+      {
+        label: 'Compare debt with assets',
+        expr: `Debt-to-asset ratio = liabilities ÷ assets = ${resultValue(rows, 'debtToAsset')}`,
+        note: 'Undefined when no assets are entered.',
+      },
+    ]);
   },
   extraPanel: (values, results) => {
     if (!results.length) return null;

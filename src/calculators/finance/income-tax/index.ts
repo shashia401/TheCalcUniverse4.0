@@ -1,11 +1,17 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
+import { bracketSlices } from '../../../utils/bracketSteps';
+import { TAX_YEAR } from '../../../utils/taxData';
 import IncomeTaxPanel from './IncomeTaxPanel';
 import {
   FilingStatus,
   STANDARD_DEDUCTIONS_2025,
   STATE_RATES_2025,
   computeIncomeTax,
+  FICA_2025,
+  FEDERAL_BRACKETS_2025,
   RETIREMENT_LIMITS_2025,
 } from './taxData';
 
@@ -82,6 +88,58 @@ const incomeTaxConfig: CalculatorConfig = {
       helpText: 'Payroll-deducted HSA contributions, health FSA and dependent care FSA. These reduce both income tax and FICA. (A deductible IRA contribution only reduces income tax and is not included here.)',
     },
   ],
+  explainSteps: (values) => {
+    const gross = parseFloat(values.grossIncome);
+    const status = (values.filingStatus || 'single') as FilingStatus;
+    const stateCode = values.state || 'TX';
+    const retirement401k = parseFloat(values.retirement401k) || 0;
+    const health = parseFloat(values.healthInsurance) || 0;
+    const otherPreTax = parseFloat(values.otherPreTax) || 0;
+    if (isNaN(gross) || gross <= 0 || !FEDERAL_BRACKETS_2025[status]) return [];
+
+    const t = computeIncomeTax({ gross, status, stateCode, retirement401k, health, otherPreTax });
+    const rows = incomeTaxConfig.calculate(values);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pc = (x: number) => `${+(x * 100).toFixed(2)}%`;
+    const slices = bracketSlices(t.taxableIncome, FEDERAL_BRACKETS_2025[status], m);
+    const wageBase = FICA_2025.socialSecurityWageBase;
+    const addlThreshold = FICA_2025.additionalMedicareThreshold[status];
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Take pre-tax deductions off your pay',
+        expr: `Income-tax wages = ${m(gross)} − ${m(retirement401k)} 401(k) − ${m(health)} health − ${m(otherPreTax)} other = ${m(t.federalAGI)} · FICA wages = ${m(gross)} − ${m(health)} − ${m(otherPreTax)} = ${m(t.ficaWages)}`,
+        note: '401(k) deferrals lower income tax but not Social Security or Medicare wages.',
+      },
+      {
+        label: `Subtract the ${TAX_YEAR} standard deduction`,
+        expr: `max(0, ${m(t.federalAGI)} − ${m(t.standardDeduction)}) = ${m(t.taxableIncome)} taxable income`,
+      },
+      {
+        label: `Tax each ${TAX_YEAR} bracket slice`,
+        expr: slices ? `${slices} = ${m(t.federalTax)} (top bracket ${pc(t.marginalRate)})` : `No taxable income, federal tax = ${m(0)}`,
+        note: 'Each rate applies only to the part of your income inside that bracket.',
+      },
+      {
+        label: 'Add up Social Security and Medicare (FICA)',
+        expr: `Social Security: min(${m(t.ficaWages)}, ${m(wageBase)}) × ${pc(FICA_2025.socialSecurityRate)} = ${m(t.ss)} · Medicare: ${m(t.ficaWages)} × ${pc(FICA_2025.medicareRate)} = ${m(t.medicare)} · Additional Medicare: max(0, ${m(t.ficaWages)} − ${m(addlThreshold)}) × ${pc(FICA_2025.additionalMedicareRate)} = ${m(t.additionalMedicare)} → ${m(t.ficaTotal)}`,
+      },
+      {
+        label: 'Estimate state income tax',
+        expr: t.stateInfo?.noIncomeTax
+          ? `${t.stateInfo.name} has no state income tax → ${m(0)}`
+          : `${m(t.federalAGI)} × ${pc(t.stateRate)} = ${m(t.stateTax)}`,
+        note: t.stateInfo && !t.stateInfo.noIncomeTax && t.stateInfo.rate === 'graduated'
+          ? 'This state uses graduated rates; the calculator applies one rough effective rate, so treat the state figure as an estimate.'
+          : undefined,
+      },
+      {
+        label: 'Subtract everything from your gross pay',
+        expr: `${m(gross)} − ${m(t.federalTax)} federal − ${m(t.ficaTotal)} FICA − ${m(t.stateTax)} state − ${m(t.preTaxTotal)} pre-tax deductions = ${resultValue(rows, 'netPay')}`,
+      },
+    ];
+    return finiteSteps(steps);
+  },
   calculate: (values) => {
     const gross = parseFloat(values.grossIncome);
     const status = (values.filingStatus || 'single') as FilingStatus;

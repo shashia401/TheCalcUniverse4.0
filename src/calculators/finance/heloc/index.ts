@@ -1,4 +1,6 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import { createElement } from 'react';
 import HELOCPanel from './HELOCPanel';
 
@@ -61,6 +63,44 @@ const helocCalculatorConfig: CalculatorConfig = {
         'Optional: Enter how much you plan to borrow for a specific project to see your exact interest payment.',
     },
   ],
+
+  explainSteps: (values) => {
+    // Quote the calculator's own rows (calculate() holds the math) so the steps can never drift from the answer.
+    const rows = helocCalculatorConfig.calculate(values);
+    const raw = resultValue(rows, '_helocData');
+    if (!raw) return [];
+    const d = JSON.parse(raw) as {
+      homeValue: number; mortgageBalance: number; maxLTV: number; maxBorrowable: number; totalEquity: number;
+      currentLTV: number; helocRate: number; actualDraw: number; drawAmount: number; monthlyInterestOnDraw: number;
+    };
+    if (Object.values(d).some((x) => x === null)) return []; // JSON turns Infinity into null
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const cap = d.homeValue * (d.maxLTV / 100);
+    const steps: ExplainStep[] = [
+      {
+        label: 'Work out your current equity and loan-to-value',
+        expr: `Equity = ${m(d.homeValue)} − ${m(d.mortgageBalance)} = ${resultValue(rows, 'totalEquityResult')} · LTV = ${m(d.mortgageBalance)} ÷ ${m(d.homeValue)} = ${resultValue(rows, 'currentLTVResult')}`,
+      },
+      {
+        label: "Apply the lender's combined loan-to-value (CLTV) limit",
+        expr: `${m(d.homeValue)} × ${d.maxLTV}% = ${m(cap)} may be owed in total`,
+        note: "The lender lets mortgage plus HELOC add up to this share of the home's value.",
+      },
+      {
+        label: 'Subtract the mortgage to get the maximum credit line',
+        expr: `max(0, ${m(cap)} − ${m(d.mortgageBalance)}) = ${resultValue(rows, 'maxCreditLine')}`,
+      },
+    ];
+    steps.push({
+      label: 'Find the monthly interest-only payment',
+      expr:
+        d.drawAmount > 0
+          ? `Draw = min(${m(d.drawAmount)}, ${m(d.maxBorrowable)}) = ${m(d.actualDraw)} · ${m(d.actualDraw)} × (${d.helocRate}% ÷ 12) = ${resultValue(rows, 'monthlyInterestPayment')}`
+          : `No draw entered, so the full line: ${m(d.actualDraw)} × (${d.helocRate}% ÷ 12) = ${resultValue(rows, 'monthlyInterestPayment')}`,
+      note: 'Interest-only during the draw period: the balance does not go down.',
+    });
+    return finiteSteps(steps);
+  },
 
   calculate: (values) => {
     const homeValue = parseFloat(values.homeValue);

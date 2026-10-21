@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
 import InterestRatePanel from './InterestRatePanel';
 
 const interestRateSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="16" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">Compound Interest Rate Solver</text><rect x="15" y="28" width="290" height="50" rx="6" fill="var(--svg-eff6ff)" stroke="var(--svg-3b82f6)" stroke-width="1"/><text x="160" y="44" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-1e40af)">Solving for the Rate</text><text x="160" y="60" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-3b82f6)">A = P(1 + r/n)^(nt)</text><text x="160" y="73" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">r = n[(A/P)^(1/nt) - 1]</text><g transform="translate(15,88)"><rect x="10" y="0" width="100" height="28" rx="4" fill="var(--svg-3b82f6)"/><text x="60" y="19" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">P = $10,000</text><text x="60" y="36" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Principal</text><text x="125" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-64748b)">+</text><rect x="145" y="0" width="80" height="28" rx="4" fill="var(--svg-22c55e)"/><text x="185" y="19" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--svg-ffffff)">$4,500</text><text x="185" y="36" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Interest</text><text x="235" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-64748b)">=</text><rect x="255" y="0" width="45" height="28" rx="4" fill="var(--svg-8b5cf6)"/><text x="277" y="19" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-ffffff)">A</text><text x="277" y="36" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">$14.5K</text></g><rect x="15" y="132" width="290" height="30" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="146" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-1e293b)">Compounding Frequency (n)</text><text x="55" y="158" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Monthly (12/yr)</text><text x="125" y="158" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Daily (365/yr)</text><text x="195" y="158" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Quarterly (4/yr)</text><text x="265" y="158" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Annual (1/yr)</text><rect x="15" y="170" width="290" height="24" rx="6" fill="var(--svg-fef3c7)" stroke="var(--svg-f59e0b)" stroke-width="0.5"/><text x="160" y="186" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-b45309)">EAR = (1 + r/n)^n - 1  = true annual rate after compounding</text></svg>';
@@ -67,6 +69,52 @@ const interestRateConfig: CalculatorConfig = {
       ],
     },
   ],
+  explainSteps: (values) => {
+    const rows = interestRateConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const P = parseFloat(values.principal);
+    const A = parseFloat(values.finalAmount);
+    const tRaw = parseFloat(values.timePeriod);
+    const unit = values.timeUnit || 'years';
+    const n = parseFloat(values.compoundFrequency || '12');
+    const t = unit === 'months' ? tRaw / 12 : unit === 'days' ? tRaw / 365 : tRaw;
+    const m = (x: number) => `$${x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Put the time period in years',
+        expr: unit === 'years' ? `t = ${tRaw} years` : `t = ${tRaw} ${unit} ÷ ${unit === 'months' ? 12 : 365} = ${+t.toFixed(6)} years`,
+      },
+    ];
+    if (n === 0) {
+      steps.push(
+        { label: 'Find the interest earned', expr: `A − P = ${m(A)} − ${m(P)} = ${resultValue(rows, 'totalInterest')}` },
+        {
+          label: 'Divide by principal times years (simple interest)',
+          expr: `r = (A − P) ÷ (P × t) = ${m(A - P)} ÷ (${m(P)} × ${+t.toFixed(6)}) = ${resultValue(rows, 'nominalRate')}`,
+          note: 'Simple interest never compounds, so this is also the effective annual rate.',
+        },
+      );
+    } else {
+      steps.push(
+        { label: 'Find the growth factor', expr: `A ÷ P = ${m(A)} ÷ ${m(P)} = ${(A / P).toFixed(6)}` },
+        {
+          label: 'Take the root for one compounding period',
+          expr: `(A/P)^(1/(n×t)) = ${(A / P).toFixed(6)}^(1/(${n} × ${+t.toFixed(6)})) = ${Math.pow(A / P, 1 / (n * t)).toFixed(8)}`,
+          note: `n = ${n} compounding periods a year.`,
+        },
+        {
+          label: 'Turn the per-period growth into the nominal annual rate',
+          expr: `r = n × [(A/P)^(1/nt) − 1] = ${n} × ${(Math.pow(A / P, 1 / (n * t)) - 1).toFixed(8)} = ${resultValue(rows, 'nominalRate')}`,
+        },
+        {
+          label: 'Convert to the effective annual rate',
+          expr: `EAR = (1 + r/n)^n − 1 = ${resultValue(rows, 'ear')}`,
+          note: 'Compare products by this effective rate, not the nominal one.',
+        },
+      );
+    }
+    return finiteSteps(steps);
+  },
   calculate: (values) => {
     const P = parseFloat(values.principal);
     const A = parseFloat(values.finalAmount);

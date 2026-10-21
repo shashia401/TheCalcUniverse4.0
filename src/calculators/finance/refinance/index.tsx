@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import RefinancePanel from './RefinancePanel';
 import { computeRefi } from './refinanceMath';
 
@@ -192,6 +194,55 @@ const refinanceConfig: CalculatorConfig = {
         color: monthlySavings > 0 && plannedStay >= breakEvenMonths ? 'positive' as const : 'neutral' as const,
       },
     ];
+  },
+
+  explainSteps: (values) => {
+    const c = computeRefi(values);
+    if (!c) return [];
+    const rows = refinanceConfig.calculate(values);
+    const m = (n: number) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const m2 = (n: number) => `${n < 0 ? '−' : ''}$${Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const f8 = (x: number) => x.toFixed(8);
+    const pay = (rate: number, term: number) => {
+      const r = rate / 12;
+      return r === 0
+        ? `${m2(c.currentBalance)} ÷ ${term}`
+        : `${m2(c.currentBalance)} × r(1+r)ⁿ ÷ ((1+r)ⁿ − 1) with r = ${+(rate * 100).toFixed(4)}% ÷ 12 = ${f8(r)}, n = ${term}`;
+    };
+    const steps: ExplainStep[] = [
+      {
+        label: 'Payment on your current loan',
+        expr: `${pay(c.currentRate, c.currentTerm)} = ${resultValue(rows, 'oldPayment')}`,
+        note: 'Basis: the new loan starts at the same balance as today, and closing costs are paid in cash, not added to the loan.',
+      },
+      { label: 'Payment on the new loan', expr: `${pay(c.newRate, c.newTerm)} = ${resultValue(rows, 'newPayment')}` },
+      {
+        label: 'Monthly saving',
+        expr: `${m2(c.oldPayment)} − ${m2(c.newPayment)} = ${m2(c.monthlySavings)} (shown as ${resultValue(rows, 'monthlySavings')})`,
+        note: 'Negative means the payment goes up, for example with a shorter term.',
+      },
+      {
+        label: 'Break-even: months of saving to cover the closing costs',
+        expr: c.breakEvenMonths < Infinity
+          ? `${m2(c.closingCosts)} ÷ ${m2(c.monthlySavings)} = ${+(c.closingCosts / c.monthlySavings).toFixed(2)}, rounded up → ${resultValue(rows, 'breakEven')}`
+          : `The payment does not fall, so the closing costs are never paid back → ${resultValue(rows, 'breakEven')}`,
+      },
+      {
+        label: 'Lifetime interest on each loan',
+        expr: `Current: ${m2(c.oldPayment)} × ${c.currentTerm} − ${m2(c.currentBalance)} · new: ${m2(c.newPayment)} × ${c.newTerm} − ${m2(c.currentBalance)} → ${resultValue(rows, 'lifetimeInterest')} · saved before closing costs: ${resultValue(rows, 'totalInterestSaved')}`,
+        note: 'A longer new term lowers the payment but can raise lifetime interest.',
+      },
+      {
+        label: `Like-for-like: new-loan interest over the ${c.horizonMonths} months the current loan has left`,
+        expr: resultValue(rows, 'sameHorizonInterest') ?? '',
+      },
+      {
+        label: 'Net benefit over the months you plan to stay',
+        expr: `${m2(c.monthlySavings)} × ${c.plannedStay} months − ${m2(c.closingCosts)} closing costs = ${m2(c.netOverStay)} · shown: ${resultValue(rows, 'netBenefit')}`,
+      },
+      { label: 'The verdict', expr: resultValue(rows, 'recommendation') ?? '' },
+    ];
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

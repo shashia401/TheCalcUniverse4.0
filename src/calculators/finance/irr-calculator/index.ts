@@ -1,8 +1,11 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
+import type { IRRData } from './irrTypes';
 import IRRPanel from './IRRPanel';
 
-import { findIRRs, signChanges, paybackYears } from './irrMath';
+import { findIRRs, signChanges, paybackYears, npvAt } from './irrMath';
 
 const irrSvg = '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="4"/><text x="160" y="14" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--svg-1e293b)">IRR &amp; NPV: Cash Flow Timeline</text><line x1="20" y1="50" x2="300" y2="50" stroke="var(--svg-cbd5e1)" stroke-width="1.5"/><text x="35" y="40" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Yr0</text><circle cx="35" cy="50" r="3" fill="var(--svg-cbd5e1)"/><text x="85" y="40" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Yr1</text><circle cx="85" cy="50" r="3" fill="var(--svg-cbd5e1)"/><text x="135" y="40" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Yr2</text><circle cx="135" cy="50" r="3" fill="var(--svg-cbd5e1)"/><text x="185" y="40" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Yr3</text><circle cx="185" cy="50" r="3" fill="var(--svg-cbd5e1)"/><text x="235" y="40" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Yr4</text><circle cx="235" cy="50" r="3" fill="var(--svg-cbd5e1)"/><text x="285" y="40" text-anchor="middle" font-size="7" fill="var(--svg-64748b)">Yr5</text><circle cx="285" cy="50" r="3" fill="var(--svg-cbd5e1)"/><line x1="35" y1="50" x2="35" y2="80" stroke="var(--svg-ef4444)" stroke-width="2.5" stroke-linecap="round"/><polygon points="35,85 29,77 41,77" fill="var(--svg-ef4444)"/><rect x="10" y="88" width="50" height="28" rx="4" fill="var(--svg-fee2e2)" stroke="var(--svg-ef4444)" stroke-width="1"/><text x="35" y="102" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-dc2626)">-$100K</text><text x="35" y="114" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">Investment</text><line x1="85" y1="50" x2="85" y2="28" stroke="var(--svg-22c55e)" stroke-width="2" stroke-linecap="round"/><polygon points="85,24 80,32 90,32" fill="var(--svg-22c55e)"/><text x="85" y="21" text-anchor="middle" font-size="7" fill="var(--svg-16a34a)" font-weight="bold">$25K</text><line x1="135" y1="50" x2="135" y2="22" stroke="var(--svg-22c55e)" stroke-width="2" stroke-linecap="round"/><polygon points="135,18 130,26 140,26" fill="var(--svg-22c55e)"/><text x="135" y="15" text-anchor="middle" font-size="7" fill="var(--svg-16a34a)" font-weight="bold">$30K</text><line x1="185" y1="50" x2="185" y2="15" stroke="var(--svg-22c55e)" stroke-width="2" stroke-linecap="round"/><polygon points="185,11 180,19 190,19" fill="var(--svg-22c55e)"/><text x="185" y="8" text-anchor="middle" font-size="7" fill="var(--svg-16a34a)" font-weight="bold">$35K</text><line x1="235" y1="50" x2="235" y2="20" stroke="var(--svg-22c55e)" stroke-width="2" stroke-linecap="round"/><polygon points="235,16 230,24 240,24" fill="var(--svg-22c55e)"/><text x="235" y="13" text-anchor="middle" font-size="7" fill="var(--svg-16a34a)" font-weight="bold">$40K</text><line x1="285" y1="50" x2="285" y2="12" stroke="var(--svg-22c55e)" stroke-width="2" stroke-linecap="round"/><polygon points="285,8 280,16 290,16" fill="var(--svg-22c55e)"/><text x="285" y="5" text-anchor="middle" font-size="7" fill="var(--svg-16a34a)" font-weight="bold">$45K</text><rect x="50" y="124" width="220" height="26" rx="6" fill="var(--svg-f3e8ff)" stroke="var(--svg-8b5cf6)" stroke-width="1"/><text x="160" y="138" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--svg-7c3aed)">NPV = $Sigma CFt / (1+IRR)^t = 0</text><text x="160" y="149" text-anchor="middle" font-size="6" fill="var(--svg-64748b)">IRR solves for the breakeven discount rate</text><rect x="15" y="158" width="290" height="22" rx="6" fill="var(--svg-f1f5f9)"/><text x="160" y="172" text-anchor="middle" font-size="7" font-weight="bold" fill="var(--svg-1e293b)">Decision Rule</text><text x="70" y="178" text-anchor="middle" font-size="6" fill="var(--svg-22c55e)">IRR &gt; Cost of Capital = Accept</text><text x="232" y="178" text-anchor="middle" font-size="6" fill="var(--svg-ef4444)">IRR &lt; Cost of Capital = Reject</text></svg>';
 
@@ -280,6 +283,58 @@ const irrCalculatorConfig: CalculatorConfig = {
     });
 
     return results;
+  },
+
+  explainSteps: (values) => {
+    const rows = irrCalculatorConfig.calculate(values);
+    const raw = resultValue(rows, '_irrData');
+    if (!raw) return [];
+    const d = JSON.parse(raw) as IRRData;
+    const hasIrr = d.irr !== null;
+    if (!hasIrr && d.npv === null) return [];
+    const m = (n: number) => `${n < 0 ? '−' : ''}$${Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const zero = (n: number) => (Math.abs(n) < 0.005 ? 0 : n);
+    const steps: ExplainStep[] = [
+      {
+        label: 'List the cash flows by year',
+        expr: d.cashFlows.map((cf, t) => `Year ${t}: ${m(cf)}`).join(' · '),
+        note: 'Year 0 is the initial investment, treated as an outflow.',
+      },
+    ];
+    if (hasIrr) {
+      const irr = d.irr as number;
+      steps.push({
+        label: 'Find the rate that makes the net present value zero',
+        expr: `Solve Σ CF_t ÷ (1 + r)^t = 0 → r = ${resultValue(rows, 'irrResult')} · check: NPV at ${(irr * 100).toFixed(2)}% = ${m(zero(npvAt(irr, d.cashFlows)))}`,
+        note: d.allIrrs && d.allIrrs.length > 1
+          ? `The cash flows change sign ${d.signChanges} times, so several IRRs exist (${d.allIrrs.map((r) => `${(r * 100).toFixed(2)}%`).join(', ')}); the one closest to zero is shown. Decide with NPV instead.`
+          : 'There is no closed formula: the calculator scans NPV for a sign change and bisects it, so it cannot land on the wrong root.',
+      });
+    }
+    if (d.npv !== null && d.discountRate !== null) {
+      steps.push({
+        label: `Discount each cash flow at ${d.discountRate}%`,
+        expr: d.presentValues.map((p) => `Year ${p.year}: ${m(p.cashFlow)} ÷ (1 + ${+(d.discountRate! / 100).toFixed(6)})^${p.year} = ${m(p.presentValue)}`).join(' · '),
+      });
+      steps.push({
+        label: 'Add the present values for the NPV',
+        expr: `${d.presentValues.map((p) => m(p.presentValue)).join(' + ')} = ${resultValue(rows, 'npvResult')}`,
+        note: 'Positive NPV means the project beats the discount rate you entered.',
+      });
+    }
+    if (d.paybackPeriod !== null) {
+      let cum = 0;
+      let t = 0;
+      for (; t < d.cashFlows.length; t++) {
+        if (cum + d.cashFlows[t] >= 0) break;
+        cum += d.cashFlows[t];
+      }
+      steps.push({
+        label: 'Find the payback year (undiscounted)',
+        expr: `Still ${m(cum)} after year ${t - 1}; year ${t} brings ${m(d.cashFlows[t])} → ${t - 1} + ${m(-cum)} ÷ ${m(d.cashFlows[t])} = ${resultValue(rows, 'paybackPeriodResult')}`,
+      });
+    }
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

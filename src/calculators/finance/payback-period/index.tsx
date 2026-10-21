@@ -1,4 +1,32 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { hasAnswer, resultValue } from '../../../utils/explainResults';
+
+/** Cash received in year y (end-of-year convention). A fractional project life (e.g. 2.5 years) gets a pro-rated final year. */
+const cashInYear = (annualCashFlow: number, projectLife: number, y: number) =>
+  projectLife > 0 ? annualCashFlow * Math.max(0, Math.min(1, projectLife - (y - 1))) : annualCashFlow;
+
+/** Discounted payback with linear interpolation inside the recovery year (Infinity when never recovered). Shared by calculate() and explainSteps(). */
+function discountedPayback(initialInvestment: number, annualCashFlow: number, discountRate: number, projectLife: number) {
+  const maxYears = projectLife > 0 ? Math.ceil(projectLife) : 50;
+  let years = Infinity;
+  let cumulativeDcf = 0;
+  let recoveryYear = 0;
+  let prevCum = 0;
+  let annualDcf = 0;
+  for (let y = 1; y <= maxYears; y++) {
+    annualDcf = annualCashFlow / Math.pow(1 + discountRate, y);
+    const dcf = cashInYear(annualCashFlow, projectLife, y) / Math.pow(1 + discountRate, y);
+    cumulativeDcf += dcf;
+    if (cumulativeDcf >= initialInvestment) {
+      prevCum = cumulativeDcf - dcf;
+      years = y - 1 + (initialInvestment - prevCum) / annualDcf;
+      recoveryYear = y;
+      break;
+    }
+  }
+  return { years, recoveryYear, prevCum, annualDcf };
+}
 
 const paybackPeriodConfig: CalculatorConfig = {
   inputs: [
@@ -63,6 +91,54 @@ const paybackPeriodConfig: CalculatorConfig = {
       helpText: 'If the project has a limited life, enter it here. Leave blank for ongoing investments.',
     },
   ],
+  explainSteps: (values) => {
+    const rows = paybackPeriodConfig.calculate(values);
+    if (!hasAnswer(rows)) return [];
+    const I = parseFloat(values.initialInvestment);
+    const cf = parseFloat(values.annualCashFlow);
+    const discounted = values.useDiscounted === 'discounted';
+    const rate = discounted ? (parseFloat(values.discountRate) / 100 || 0) : 0;
+    const life = parseFloat(values.projectLife) || 0;
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Divide the investment by the yearly cash flow (simple payback)',
+        expr: `${m(I)} ÷ ${m(cf)} = ${resultValue(rows, 'simplePayback')}`,
+        note: 'Simple payback treats every dollar as equal, whenever it arrives.',
+      },
+    ];
+    if (discounted) {
+      const d = discountedPayback(I, cf, rate, life);
+      steps.push({
+        label: "Discount each year's cash flow",
+        expr: `Year y: ${m(cf)} ÷ (1 + ${+(rate * 100).toFixed(4)}%)^y (year 1 = ${m(cf / (1 + rate))}, year 2 = ${m(cf / Math.pow(1 + rate, 2))}, …)`,
+        note: 'Money received later is worth less today, so each year counts for less.',
+      });
+      steps.push({
+        label: 'Find the year the discounted cash flows recover the investment',
+        expr: d.recoveryYear > 0
+          ? `After year ${d.recoveryYear - 1} the running total is ${m(d.prevCum)}; year ${d.recoveryYear} adds ${m(d.annualDcf)} → ${d.recoveryYear - 1} + (${m(I)} − ${m(d.prevCum)}) ÷ ${m(d.annualDcf)} = ${resultValue(rows, 'discountedPayback')}`
+          : resultValue(rows, 'discountedPayback') ?? '',
+      });
+      if (life > 0) {
+        steps.push({
+          label: 'Net present value over the project life',
+          expr: `NPV = −${m(I)} + discounted cash flows over ${life} years = ${resultValue(rows, 'npv')} · profitability index = ${resultValue(rows, 'profitIndex')}`,
+        });
+      }
+    } else if (life > 0) {
+      steps.push({
+        label: 'Compare total cash with the investment',
+        expr: `${m(cf)} × ${life} years = ${resultValue(rows, 'totalReturn')} ÷ ${m(I)} = ${resultValue(rows, 'profitIndex')}`,
+      });
+    } else {
+      steps.push({
+        label: 'Express the cash flow as a yield on the investment',
+        expr: `${m(cf)} ÷ ${m(I)} = ${resultValue(rows, 'profitIndex')}`,
+      });
+    }
+    return finiteSteps(steps);
+  },
   calculate: (values) => {
     const initialInvestment = parseFloat(values.initialInvestment);
     const annualCashFlow = parseFloat(values.annualCashFlow);
@@ -78,29 +154,13 @@ const paybackPeriodConfig: CalculatorConfig = {
     const simplePaybackYears = initialInvestment / annualCashFlow;
     const simplePaybackExceedsLife = projectLife > 0 && simplePaybackYears > projectLife;
 
-    // Cash received in year y (end-of-year convention). A fractional project life (e.g. 2.5 years)
-    // gets a pro-rated final year, so payback, NPV and "total return" all describe the same cash flows.
-    const cashInYear = (y: number) =>
-      projectLife > 0 ? annualCashFlow * Math.max(0, Math.min(1, projectLife - (y - 1))) : annualCashFlow;
-
-    // Discounted payback (linear interpolation inside the recovery year)
-    let discountedPaybackYears = Infinity;
-    let cumulativeDcf = 0;
-    for (let y = 1; y <= maxYears; y++) {
-      const annualDcf = annualCashFlow / Math.pow(1 + discountRate, y);
-      const dcf = cashInYear(y) / Math.pow(1 + discountRate, y);
-      cumulativeDcf += dcf;
-      if (cumulativeDcf >= initialInvestment) {
-        const prevCum = cumulativeDcf - dcf;
-        discountedPaybackYears = y - 1 + (initialInvestment - prevCum) / annualDcf;
-        break;
-      }
-    }
+    const cashIn = (y: number) => cashInYear(annualCashFlow, projectLife, y);
+    const discountedPaybackYears = discountedPayback(initialInvestment, annualCashFlow, discountRate, projectLife).years;
 
     // NPV at end of project life
     let npv = -initialInvestment;
     for (let y = 1; y <= maxYears; y++) {
-      if (useDiscounted) npv += cashInYear(y) / Math.pow(1 + discountRate, y);
+      if (useDiscounted) npv += cashIn(y) / Math.pow(1 + discountRate, y);
     }
 
     // Total return ratio
