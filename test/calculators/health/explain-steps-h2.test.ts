@@ -632,6 +632,6 @@ describe('dog-cat-age float noise', () => {
   it('a 2.3-year-old dog is 25.5 traditional years, which rounds up to 26', async () => {
     const cfg = (await import('../../../src/calculators/health/dog-cat-age')).default;
     const rows = cfg.calculate({ species: 'dog', dogSize: 'medium', petAgeYears: '2.3' });
-    expect(rows.find((r) => r.id === 'traditionalAge')?.value).toMatch(/^26/);
+    expect(rows.find((r) => r.id === 'traditionalAge')?.value).toBe('26 human years');
   });
 });
