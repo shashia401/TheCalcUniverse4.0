@@ -17,6 +17,14 @@ export interface Correction {
 
 export const corrections: Correction[] = [
   {
+    date: "2026-10-20",
+    calculator: { id: "dog-cat-age", category: "health", title: "Dog and Cat Age Calculator" },
+    summary: "Half-way results were rounded down by floating-point noise: a 2.3-year-old dog is 24 + 0.3 × 5 = 25.5 human years, but the stored number was 25.499999999999996, so the page showed 25 instead of 26. The value is now rounded to 6 places before it is rounded to whole years.",
+    before: "2.3-year-old dog: 25 human years",
+    after: "26 human years (25.5 rounds up)",
+    howVerified: "25.5 checked by hand and with Python Decimal (ROUND_HALF_UP); pinned in test/calculators/health/explain-steps-h2.test.ts.",
+  },
+  {
     date: "2026-10-19",
     calculator: { id: "resistor", category: "math", title: "Resistor Calculator" },
     summary: "The minimum and maximum values rounded the stored binary number instead of the decimal digits, so exact halves went the wrong way: a 4.7 kΩ resistor at ±5% showed 4.46 and 4.93 kΩ instead of 4.47 and 4.94 kΩ. Values now round half up.",

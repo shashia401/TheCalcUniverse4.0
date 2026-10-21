@@ -6,8 +6,11 @@ import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 // 1st year = 15, 2nd year = 9, each later year = perYear (linear within years 1-2 so age 1 -> 15, age 2 -> 24).
 // AVMA (as quoted by the AKC): dogs +5 per year after year 2; cats +4 per year after year 2.
-const traditionalHumanYears = (age: number, perYear: number): number =>
-  age < 1 ? age * 15 : age < 2 ? 15 + (age - 1) * 9 : 24 + (age - 2) * perYear;
+// Rounded to 6 places so float noise (2.3 gives 25.499999999999996) cannot tip a .5 down when the page rounds to whole years.
+const traditionalHumanYears = (age: number, perYear: number): number => {
+  const years = age < 1 ? age * 15 : age < 2 ? 15 + (age - 1) * 9 : 24 + (age - 2) * perYear;
+  return Math.round(years * 1e6) / 1e6;
+};
 
 const dogCatAgeConfig: CalculatorConfig = {
   inputs: [
