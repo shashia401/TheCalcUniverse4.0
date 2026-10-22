@@ -7,7 +7,8 @@ import { resultValue } from '../../../utils/explainResults';
 function formatGasMark(gasMark: number): string {
   if (gasMark === 0.25) return 'Gas Mark 1/4';
   if (gasMark === 0.5) return 'Gas Mark 1/2';
-  return `Gas Mark ${Math.round(gasMark)}`;
+  // Interpolated marks keep their half (3.5), rather than rounding to the next whole mark.
+  return `Gas Mark ${Number.isInteger(gasMark) ? gasMark : parseFloat(gasMark.toFixed(1))}`;
 }
 
 function parseGasMarkInput(value: string): number | null {

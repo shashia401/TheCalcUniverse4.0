@@ -654,3 +654,17 @@ describe('word-count', () => {
     expect(steps(wordCount, { text: 'hello', wordsPerMinute: '0' })).toEqual([]);
   });
 });
+
+describe('wording fixes found while writing the steps', () => {
+  it('an interpolated gas mark keeps its half instead of rounding to the next mark', async () => {
+    const oven = (await import('../../../src/calculators/everyday/oven-temperature-converter')).default;
+    const rows = oven.calculate({ temperature: '3.5', fromUnit: 'Gas Mark' });
+    expect(rows.find((r) => r.id === 'gasMark')?.value).toBe('Gas Mark 3.5');
+  });
+
+  it('one Schengen day is "1 day", not "1 days"', async () => {
+    const schengen = (await import('../../../src/calculators/everyday/schengen-visa')).default;
+    const rows = schengen.calculate({ checkDate: '2026-03-15', trip1Start: '2026-03-01', trip1End: '2026-03-01' });
+    expect(rows.find((r) => r.id === 'totalDaysUsed')?.value).toBe('1 day');
+  });
+});

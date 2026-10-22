@@ -103,7 +103,7 @@ const schengenVisaConfig: CalculatorConfig = {
     results.push({
       id: 'totalDaysUsed',
       label: 'Total Days Used (180-day window)',
-      value: `${used} days`,
+      value: `${used} ${used === 1 ? 'day' : 'days'}`,
       highlight: true,
       color: overstay ? 'negative' : used > 70 ? 'neutral' : 'positive',
       interpretation: `Days in the Schengen area from ${fd(info.windowStart)} to ${fd(info.checkDay)} inclusive (the 180 days ending on the check date). Entry and exit days count; a day covered by two trips counts once.`,
@@ -112,7 +112,7 @@ const schengenVisaConfig: CalculatorConfig = {
     results.push({
       id: 'daysRemaining',
       label: overstay ? 'Days Over Limit' : 'Days Remaining',
-      value: overstay ? `${Math.abs(remaining)} days over` : `${remaining} days`,
+      value: overstay ? `${Math.abs(remaining)} ${Math.abs(remaining) === 1 ? 'day' : 'days'} over` : `${remaining} ${remaining === 1 ? 'day' : 'days'}`,
       color: overstay ? 'negative' : remaining <= 10 ? 'neutral' : 'positive',
     });
 
