@@ -1,4 +1,4 @@
-# ── General crawlers ──────────────────────────────────────────────
+# ----- General crawlers -----
 User-agent: *
 Allow: /
 # /search/ and /embed/ are kept OUT of the index with <meta name="robots" content="noindex">.
@@ -7,7 +7,7 @@ Allow: /
 Disallow: /*?utm_*
 Disallow: /*?fbclid=*
 
-# ── AI search/reference crawlers (allowed) ───────────────────────
+# ----- AI search/reference crawlers (allowed) -----
 User-agent: GPTBot
 Allow: /
 
@@ -23,7 +23,7 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
-# ── AI training crawlers (blocked) ───────────────────────────────
+# ----- AI training crawlers (blocked) -----
 User-agent: Google-Extended
 Disallow: /
 
@@ -36,7 +36,7 @@ Disallow: /
 User-agent: cohere-ai
 Disallow: /
 
-# ── AI reference files ───────────────────────────────────────────
+# ----- AI reference files -----
 # See https://thecalcuniverse.com/llms.txt for AI-friendly site summary
 
 Sitemap: https://thecalcuniverse.com/sitemap-index.xml
