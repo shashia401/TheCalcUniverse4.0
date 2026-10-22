@@ -1,5 +1,6 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
 import RothIRAPanel from './RothIRAPanel';
 import { IRA_LIMITS, ROTH_IRA_INCOME_LIMITS, TAX_YEAR } from '../../../utils/taxData';
 import { parseRothInputs, rothProjection } from './rothMath';
@@ -9,6 +10,10 @@ const ROTH_CATCHUP_2026 = IRA_LIMITS.catchup;
 const $ = (n: number) => `$${n.toLocaleString()}`;
 const SINGLE = ROTH_IRA_INCOME_LIMITS.single;
 const MFJ = ROTH_IRA_INCOME_LIMITS.mfj;
+
+/** The calculator's own money format: whole dollars, or $x.xxM from a million up. */
+const fmt = (n: number) =>
+  n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
 const rothIRAConfig: CalculatorConfig = {
   inputs: [
@@ -110,8 +115,6 @@ const rothIRAConfig: CalculatorConfig = {
     const taxSavingsVsTraditional = p.taxOnGrowthAvoided;
     const totalContributions = contributed - currentBalance;
 
-    const fmt = (n: number) =>
-      n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
     const hasCompare = Number.isFinite(p.traditionalAfterTax);
     const advantage = taxFreeTotal - p.traditionalAfterTax;
@@ -189,6 +192,62 @@ const rothIRAConfig: CalculatorConfig = {
     });
 
     return results;
+  },
+
+  explainSteps: (values) => {
+    const inp = parseRothInputs(values);
+    if (isNaN(inp.currentAge) || isNaN(inp.retirementAge) || isNaN(inp.annualReturn) || inp.retirementAge <= inp.currentAge) return [];
+    const p = rothProjection(inp);
+    const d2 = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pct = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const growth = Math.pow(1 + inp.annualReturn, p.years);
+    const lump = inp.currentBalance * growth;
+    const annuity = Math.abs(inp.annualReturn) < 1e-10 ? p.contribution * p.years : p.contribution * ((growth - 1) / inp.annualReturn);
+    const steps: ExplainStep[] = [
+      {
+        label: 'Years of saving and the yearly contribution you can make',
+        expr: `${inp.retirementAge} − ${inp.currentAge} = ${p.years} years · Limit at age ${inp.currentAge}: ${$(p.maxContrib)} (${TAX_YEAR}) · Contribution = min(${$(inp.annualContribution)}, ${$(p.maxContrib)}) = ${$(p.contribution)} a year`,
+        note: 'The limit for your current age is applied to every year, which is conservative because limits rise over time.',
+      },
+      {
+        label: 'Growth factor over the whole period',
+        expr: `(1 + ${pct(inp.annualReturn)})^${p.years} = ${growth.toFixed(4)}`,
+        note: 'Annual compounding, with each contribution made at the end of the year.',
+      },
+      {
+        label: 'What your current balance grows to',
+        expr: `${d2(inp.currentBalance)} × ${growth.toFixed(4)} = ${d2(lump)}`,
+      },
+      {
+        label: 'What the yearly contributions grow to',
+        expr: Math.abs(inp.annualReturn) < 1e-10
+          ? `${d2(p.contribution)} × ${p.years} years = ${d2(annuity)}`
+          : `${d2(p.contribution)} × (${growth.toFixed(4)} − 1) ÷ ${pct(inp.annualReturn)} = ${d2(annuity)}`,
+      },
+      {
+        label: 'Tax-free balance at retirement',
+        expr: `${d2(lump)} + ${d2(annuity)} = ${d2(p.balance)} (shown as ${fmt(p.balance)})`,
+        note: 'Qualified Roth withdrawals are tax-free, so all of this is yours to spend.',
+      },
+      {
+        label: 'How much is your money and how much is growth',
+        expr: `Contributed = ${d2(inp.currentBalance)} + ${d2(p.contribution)} × ${p.years} = ${d2(p.contributed)} · Growth = ${d2(p.balance)} − ${d2(p.contributed)} = ${d2(p.earnings)}`,
+      },
+      {
+        label: 'Tax on that growth you avoid',
+        expr: `${d2(p.earnings)} × ${pct(inp.retirementRate)} expected retirement tax rate = ${fmt(p.taxOnGrowthAvoided)}`,
+        note: 'This is what the same growth would owe if it came out of a taxable or Traditional account taxed at that rate.',
+      },
+    ];
+    if (Number.isFinite(p.traditionalAfterTax)) {
+      const adv = p.balance - p.traditionalAfterTax;
+      steps.push({
+        label: 'Against a Traditional IRA with the same after-tax cost',
+        expr: `${d2(p.balance)} × (1 − ${pct(inp.retirementRate)}) ÷ (1 − ${pct(inp.marginalRate)}) = ${d2(p.traditionalAfterTax)} after tax · Roth minus Traditional = ${adv >= 0 ? '+' : '−'}${d2(Math.abs(adv))}`,
+        note: 'The Traditional account gets a deduction now at your current marginal rate, so the same out-of-pocket cost buys a larger pre-tax contribution that is taxed on the way out.',
+      });
+    }
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

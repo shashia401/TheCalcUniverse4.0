@@ -1,7 +1,9 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import SwpPanel from './SwpPanel';
-import { simulateSwp } from './swpMath';
+import { monthsToDepletion, simulateSwp } from './swpMath';
 
 function fmt(n: number): string {
   const abs = Math.abs(n);
@@ -112,6 +114,79 @@ const swpConfig: CalculatorConfig = {
 
     return results;
   },
+  explainSteps: (values) => {
+    const corpus = parseFloat(values.corpus) || 0;
+    const r = parseFloat(values.expectedReturn) / 100;
+    const monthlyW = parseFloat(values.monthlyWithdrawal) || 0;
+    const t = parseFloat(values.withdrawalPeriod);
+    if (corpus <= 0 || monthlyW <= 0 || isNaN(r) || isNaN(t) || t <= 0) return [];
+    const targetMonths = Math.round(t * 12);
+    if (targetMonths < 1) return [];
+    const rows = swpConfig.calculate(values);
+    if (!rows.length) return [];
+    const sim = simulateSwp(corpus, r, monthlyW, targetMonths);
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const i = r / 12;
+    const firstMonth = corpus * (1 + i);
+    const monthlyGrowth = corpus * i;
+    const rupees = (n: number) => `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Monthly return and number of withdrawals',
+        expr: `i = ${+(r * 100).toFixed(4)}% ÷ 12 = ${(i * 100).toFixed(4)}% per month · ${t} years × 12 = ${targetMonths} months`,
+        note: 'Each month the balance first earns i, then the withdrawal is paid at month end.',
+      },
+      {
+        label: 'Walk through the first month',
+        expr: `${rupees(corpus)} × (1 + ${i.toFixed(6)}) = ${rupees(firstMonth)} · ${rupees(firstMonth)} − ${rupees(monthlyW)} withdrawal = ${rupees(firstMonth - monthlyW)}`,
+        note: 'The same two moves repeat every month on the new balance.',
+      },
+      {
+        label: 'Does the return cover the withdrawal?',
+        expr: `${rupees(corpus)} × ${i.toFixed(6)} = ${rupees(monthlyGrowth)} growth in month 1 ${monthlyGrowth >= monthlyW ? '≥' : '<'} ${rupees(monthlyW)} withdrawal → the balance ${monthlyGrowth >= monthlyW ? 'does not shrink at first' : 'shrinks from the start'}`,
+        note: 'If the monthly growth is at least the withdrawal, the corpus can last indefinitely at that return.',
+      },
+    ];
+    if (sim.depleted) {
+      const months = monthsToDepletion(corpus, r, monthlyW);
+      const lastPay = sim.totalWithdrawn - monthlyW * (sim.monthsPaid - 1);
+      steps.push(
+        {
+          label: 'When the fund runs out',
+          expr: i === 0
+            ? `n = ${rupees(corpus)} ÷ ${rupees(monthlyW)} = ${months.toFixed(2)} months`
+            : `n = −ln(1 − ${i.toFixed(6)} × ${rupees(corpus)} ÷ ${rupees(monthlyW)}) ÷ ln(1 + ${i.toFixed(6)}) = ${months.toFixed(2)} months`,
+          note: 'The closed form gives the point of depletion; the month-by-month run pays out the remainder in the month the balance hits zero.',
+        },
+        {
+          label: 'Total withdrawn before it ran out',
+          expr: lastPay >= monthlyW - 0.005
+            ? `${rupees(monthlyW)} × ${sim.monthsPaid} months = ${val('totalWithdrawn')}`
+            : `${rupees(monthlyW)} × ${sim.monthsPaid - 1} full months + a final payment of ${rupees(lastPay)} (all that was left) = ${val('totalWithdrawn')}`,
+          note: `The fund lasts ${val('monthsLasted')} against the ${targetMonths} months you asked for.`,
+        },
+      );
+    } else {
+      const growth = Math.pow(1 + i, targetMonths);
+      const left = i === 0 ? corpus - monthlyW * targetMonths : corpus * growth - monthlyW * ((growth - 1) / i);
+      steps.push(
+        {
+          label: 'Total withdrawn',
+          expr: `${rupees(monthlyW)} × ${targetMonths} months = ${val('totalWithdrawn')}`,
+        },
+        {
+          label: 'Corpus left after the last withdrawal',
+          expr: i === 0
+            ? `${rupees(corpus)} − ${rupees(monthlyW)} × ${targetMonths} = ${rupees(left)} (shown as ${val('finalValue')})`
+            : `C(1 + i)ⁿ − W × ((1 + i)ⁿ − 1) ÷ i = ${rupees(corpus)} × ${growth.toFixed(4)} − ${rupees(monthlyW)} × ${((growth - 1) / i).toFixed(4)} = ${rupees(left)} (shown as ${val('finalValue')})`,
+          note: 'While the fund never runs dry, growing the corpus and paying the withdrawals combine into this closed form; it matches the month-by-month run.',
+        },
+      );
+    }
+    return finiteSteps(steps);
+  },
+
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(SwpPanel, { values, results });

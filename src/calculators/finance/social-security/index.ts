@@ -1,8 +1,10 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import SocialSecurityPanel from './SocialSecurityPanel';
-import { BEND_POINTS, estimatePIA, fraLabel, getFRA, monthlyBenefit } from './ssMath';
+import { BEND_POINTS, claimFactor, delayedCreditPerYear, estimatePIA, fraLabel, getFRA, MAX_BENEFIT_AT_FRA, monthlyBenefit } from './ssMath';
 import { FICA } from '../../../utils/taxData';
 
 const ssSvg = `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><rect width="320" height="200" fill="var(--svg-f8fafc)" rx="8"/><text x="160" y="20" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--svg-1e293b)">PIA: Progressive Benefit Formula</text><rect x="10" y="35" width="300" height="155" rx="8" fill="var(--svg-f1f5f9)"/><rect x="20" y="50" width="80" height="50" rx="5" fill="var(--svg-22c55e)" opacity="0.85"/><text x="60" y="72" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-ffffff)">90%</text><text x="60" y="88" text-anchor="middle" font-size="8" fill="var(--svg-052e16)">of AIME up to $1,286</text><rect x="110" y="50" width="90" height="50" rx="5" fill="var(--svg-3b82f6)" opacity="0.85"/><text x="155" y="72" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-ffffff)">32%</text><text x="155" y="88" text-anchor="middle" font-size="8" fill="var(--svg-1e3a5f)">of AIME $1,286-$7,749</text><rect x="210" y="50" width="90" height="50" rx="5" fill="var(--svg-ef4444)" opacity="0.85"/><text x="255" y="72" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--svg-ffffff)">15%</text><text x="255" y="88" text-anchor="middle" font-size="8" fill="var(--svg-450a0a)">of AIME above $7,749</text><text x="160" y="115" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">Example: $5,000 AIME</text><text x="160" y="133" text-anchor="middle" font-size="9" fill="var(--svg-22c55e)">$1,286 x 90% = $1,157.40</text><text x="160" y="149" text-anchor="middle" font-size="9" fill="var(--svg-3b82f6)">$3,714 x 32% = $1,188.48</text><line x1="50" y1="156" x2="270" y2="156" stroke="var(--svg-cbd5e1)" stroke-width="0.8"/><text x="160" y="172" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--svg-1e293b)">PIA = $2,345.80/mo (rounded down to 10c)</text><text x="160" y="186" text-anchor="middle" font-size="8" fill="var(--svg-64748b)">The formula replaces more of lower incomes — a progressive design</text></svg>`;
@@ -173,6 +175,85 @@ const socialSecurityConfig: CalculatorConfig = {
 
     return results;
   },
+  explainSteps: (values) => {
+    const rows = socialSecurityConfig.calculate(values);
+    if (!rows.length) return [];
+    const birthYear = parseInt(values.birthYear);
+    const annualIncome = parseFloat(values.annualIncome);
+    const claimAge = parseFloat(values.retirementAge);
+    const maritalStatus = values.maritalStatus || 'single';
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const fra = getFRA(birthYear);
+    const pia = estimatePIA(annualIncome);
+    const m2 = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const { first, second, year } = BEND_POINTS;
+    const capped = Math.max(0, Math.min(annualIncome, FICA.socialSecurityWageBase));
+    const aime = capped / 12;
+    const part1 = 0.9 * Math.min(aime, first);
+    const part2 = 0.32 * Math.max(0, Math.min(aime, second) - first);
+    const part3 = 0.15 * Math.max(0, aime - second);
+    const rawPia = part1 + part2 + part3;
+    const f = claimFactor(claimAge, fra, birthYear);
+    const rate = delayedCreditPerYear(birthYear);
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Turn your income into average monthly earnings',
+        expr: `min(${m2(annualIncome)}, ${m2(FICA.socialSecurityWageBase)} taxable maximum) ÷ 12 = ${m2(aime)} a month`,
+        note: 'A simplification: your current income stands in for all 35 of your highest-earning years, in today\'s dollars. Your real record will differ.',
+      },
+      {
+        label: `Apply the ${year} bend points to get your full-retirement-age benefit (PIA)`,
+        expr: `90% × ${m2(Math.min(aime, first))} + 32% × ${m2(Math.max(0, Math.min(aime, second) - first))} + 15% × ${m2(Math.max(0, aime - second))} = ${m2(part1)} + ${m2(part2)} + ${m2(part3)} = ${m2(rawPia)} → ${m2(pia)}`,
+        note: `The bands are the first ${m2(first)}, the next ${m2(second - first)} up to ${m2(second)}, and the rest. The result is cut down to a whole 10 cents${rawPia > MAX_BENEFIT_AT_FRA ? ` and capped at the maximum of ${m2(MAX_BENEFIT_AT_FRA)}` : ''}.`,
+      },
+      {
+        label: 'Your full retirement age',
+        expr: `Born in ${birthYear} → full retirement age ${fraLabel(fra)}`,
+      },
+    ];
+    if (f.monthsFromFra < 0) {
+      const first36 = Math.min(f.early, 36);
+      const rest = Math.max(0, f.early - 36);
+      steps.push({
+        label: `Claiming ${f.early} months early cuts the benefit`,
+        expr: `${first36} months × 5/9% ${rest > 0 ? `+ ${rest} months × 5/12% ` : ''}= ${+((1 - f.factor) * 100).toFixed(4)}% less → factor ${+(f.factor * 100).toFixed(4)}% of the PIA`,
+        note: 'The cut is 5/9 of 1% for each of the first 36 months before full retirement age and 5/12 of 1% for each month beyond that.',
+      });
+    } else if (f.credited > 0) {
+      steps.push({
+        label: `Waiting ${f.credited} months past full retirement age adds credits`,
+        expr: `${f.credited} months × ${+(rate * 100).toFixed(4)}% ÷ 12 = +${+((f.factor - 1) * 100).toFixed(4)}% → factor ${+(f.factor * 100).toFixed(4)}% of the PIA`,
+        note: 'Delayed credits stop at age 70.',
+      });
+    } else {
+      steps.push({ label: 'Claiming at full retirement age pays the full PIA', expr: 'No reduction and no credit → factor 100% of the PIA' });
+    }
+    steps.push({
+      label: `Monthly benefit at age ${claimAge}`,
+      expr: `${m2(pia)} × ${+f.factor.toFixed(6)} = ${m2(pia * f.factor)} → rounded down to ${val('chosen')} · ×12 = ${val('annual')} a year`,
+    });
+    steps.push({
+      label: 'The same math at the other claiming ages',
+      expr: `At 62: ${val('at62')} · At full retirement age: ${val('fra').split(' — ')[1] ?? ''} · At 70: ${val('at70')}`,
+    });
+    if (rows.some((r) => r.id === 'breakeven')) {
+      steps.push({
+        label: 'Break-even age against claiming at 62',
+        expr: `Claiming at ${claimAge} pays ${val('vs62')} compared with age 62 (share of the full-retirement-age benefit, then the monthly gain) → ${val('breakeven')}`,
+        note: 'Break-even is when the extra monthly amount has repaid the checks you gave up by waiting; it ignores inflation adjustments and investment returns.',
+      });
+    }
+    if (rows.some((r) => r.id === 'spousal')) {
+      steps.push({
+        label: maritalStatus === 'divorced' ? 'Ex-spousal benefit' : 'Spousal benefit',
+        expr: `50% × ${m2(pia)} = ${m2(pia * 0.5)} → ${val('spousal')}`,
+        note: 'A spouse receives the larger of their own benefit or half of yours at their own full retirement age.',
+      });
+    }
+    return finiteSteps(steps);
+  },
+
   extraPanel: (values, results) => {
     const birthYear = parseInt(values.birthYear);
     const annualIncome = parseFloat(values.annualIncome);

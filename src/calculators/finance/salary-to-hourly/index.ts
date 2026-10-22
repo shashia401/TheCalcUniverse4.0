@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import SalaryToHourlyPanel from './SalaryToHourlyPanel';
-import { payRates } from '../salary-hourly/salaryHourlyMath';
+import { payRates, WORK_DAYS_PER_WEEK } from '../salary-hourly/salaryHourlyMath';
 
 const salaryToHourlyConfig: CalculatorConfig = {
   inputs: [
@@ -84,6 +86,37 @@ const salaryToHourlyConfig: CalculatorConfig = {
       },
     ];
   },
+  explainSteps: (values) => {
+    const rows = salaryToHourlyConfig.calculate(values);
+    if (!rows.length) return [];
+    const salary = parseFloat(values.salary);
+    const hoursPerWeek = parseFloat(values.hoursPerWeek);
+    const weeksPerYear = parseFloat(values.weeksPerYear || '52');
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const r = payRates(salary, hoursPerWeek, weeksPerYear);
+    return finiteSteps([
+      {
+        label: 'Count the hours you work in a year',
+        expr: `${hoursPerWeek} hours a week × ${weeksPerYear} weeks = ${+r.annualHours.toFixed(4)} hours`,
+      },
+      {
+        label: 'Divide the salary by those hours',
+        expr: `${m(salary)} ÷ ${+r.annualHours.toFixed(4)} = ${val('hourlyRate')} per hour`,
+        note: 'Only the weeks you work count, so unpaid time off raises the hourly rate for the same salary.',
+      },
+      {
+        label: 'Daily rate for a 5-day week',
+        expr: `${val('hourlyRate')} × ${hoursPerWeek} hours ÷ ${WORK_DAYS_PER_WEEK} days = ${val('dailyRate')}`,
+      },
+      {
+        label: 'Weekly and monthly rate',
+        expr: `Weekly = ${m(salary)} ÷ ${weeksPerYear} weeks = ${val('weeklyRate')} · Monthly = ${m(salary)} ÷ 12 = ${val('monthlyRate')}`,
+        note: 'The weekly figure is per week worked; the monthly figure always divides the salary by 12.',
+      },
+    ]);
+  },
+
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(SalaryToHourlyPanel, { values, results });

@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import TVMPanel from './TVMPanel';
 import { tvmFV, tvmN, tvmPMT, tvmPV, tvmRate } from './tvmMath';
 
@@ -310,6 +312,141 @@ const tvmConfig: CalculatorConfig = {
       { source: 'HP 12C Financial Calculator Manual', url: 'https://www.hp.com' },
     ],
   },
+  explainSteps: (values) => {
+    const rows = tvmConfig.calculate(values);
+    if (!rows.length || rows[0].id !== 'result') return [];
+    const solveFor = values.solveFor || 'FV';
+    const due = (values.timing || 'end') === 'begin';
+    const num = (v: string | undefined) => (v !== '' && v !== undefined ? parseFloat(v) : NaN);
+    const n = num(values.n);
+    const rate = num(values.rate) / 100;
+    const pv = num(values.pv);
+    const fv = num(values.fv);
+    const pmt = isNaN(num(values.pmt)) ? 0 : num(values.pmt);
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const money = (x: number) => `${x < 0 ? '-' : ''}$${new Decimal(Math.abs(x)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    const result = val('result');
+    const timing = due ? 'beginning of each period (annuity due)' : 'end of each period (ordinary annuity)';
+    const one = new Decimal(1);
+    const r = new Decimal(Number.isFinite(rate) ? rate : 0);
+    const D = Number.isFinite(rate) && Number.isFinite(n) ? one.plus(r).pow(n) : one;
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Set up the time-value equation',
+        expr: `PV × (1 + r)ᴺ + PMT × k × ((1 + r)ᴺ − 1) ÷ r + FV = 0, with k = ${due ? '1 + r (payments at the start of each period)' : '1 (payments at the end of each period)'} · Timing: ${timing}`,
+        note: 'Money paid out and money received carry opposite signs; the answer comes out with whichever sign balances the equation.',
+      },
+    ];
+
+    if (solveFor === 'RATE') {
+      const periodRate = tvmRate(pv, fv, pmt, n, due);
+      steps.push(
+        {
+          label: 'The rate has no closed form, so it is found by trial',
+          expr: `Known: N = ${n}, PV = ${money(pv)}, PMT = ${money(pmt)}, FV = ${money(fv)} · Newton-Raphson adjusts r until the equation balances`,
+          note: 'The calculator tries several starting guesses and accepts only a rate that reproduces the future value you entered.',
+        },
+        {
+          label: 'Check the answer by plugging it back in',
+          expr: `r = ${+(periodRate * 100).toFixed(6)}% per period → FV = ${money(tvmFV(pv, pmt, periodRate, n, due))} (target ${money(fv)})`,
+        },
+        {
+          label: 'Interest rate per period',
+          expr: `${result} per period · ${val('annualRate')} nominal per year (×12) · ${val('effectiveRate')} effective per year`,
+          note: 'The nominal annual rate multiplies the period rate by 12; the effective rate compounds it.',
+        },
+      );
+      return finiteSteps(steps);
+    }
+
+    if (solveFor === 'N') {
+      const k = due ? one.plus(r) : one;
+      if (rate === 0) {
+        steps.push({ label: 'With no interest, periods are just a division', expr: `N = −(PV + FV) ÷ PMT = −(${money(pv)} + ${money(fv)}) ÷ ${money(pmt)} = ${result}` });
+      } else {
+        const numer = new Decimal(-fv).times(r).plus(new Decimal(pmt).times(k));
+        const denom = new Decimal(pv).times(r).plus(new Decimal(pmt).times(k));
+        steps.push(
+          {
+            label: 'Top and bottom of the ratio',
+            expr: `Top = −FV × r + PMT × k = ${numer.toFixed(4)} · Bottom = PV × r + PMT × k = ${denom.toFixed(4)} · ratio = ${numer.div(denom).toFixed(6)}`,
+          },
+          {
+            label: 'Solve for the number of periods',
+            expr: `N = ln(${numer.div(denom).toFixed(6)}) ÷ ln(1 + ${r.toFixed(6)}) = ${result}${val('inYears') ? ` (${val('inYears')})` : ''}`,
+            note: 'Taking logarithms pulls the unknown exponent down to a division.',
+          },
+        );
+      }
+      return finiteSteps(steps);
+    }
+
+    if (rate === 0) {
+      steps.push({
+        label: 'With a 0% rate nothing compounds',
+        expr: solveFor === 'FV'
+          ? `FV = −(PV + PMT × N) = −(${money(pv)} + ${money(pmt)} × ${n}) = ${result}`
+          : solveFor === 'PV'
+            ? `PV = −(FV + PMT × N) = −(${money(fv)} + ${money(pmt)} × ${n}) = ${result}`
+            : `PMT = −(PV + FV) ÷ N = −(${money(pv)} + ${money(fv)}) ÷ ${n} = ${result}`,
+      });
+      return finiteSteps(steps);
+    }
+
+    steps.push(
+      {
+        label: 'Rate per period',
+        expr: `r = ${+(rate * 100).toFixed(6)}% ÷ 100 = ${r.toFixed(8)} · N = ${n}`,
+      },
+      {
+        label: 'Growth factor',
+        expr: `(1 + r)ᴺ = (1 + ${r.toFixed(8)})^${n} = ${D.toFixed(6)}`,
+      },
+    );
+    if (solveFor === 'FV') {
+      const annuity = due ? D.minus(1).div(r).times(one.plus(r)) : D.minus(1).div(r);
+      steps.push(
+        {
+          label: due ? 'Annuity factor (payments at the start of each period)' : 'Annuity factor (payments at the end of each period)',
+          expr: `((1 + r)ᴺ − 1) ÷ r${due ? ' × (1 + r)' : ''} = ${annuity.toFixed(6)}`,
+          note: 'This is what $1 paid every period grows to.',
+        },
+        {
+          label: 'Future value',
+          expr: `FV = −(PV × ${D.toFixed(6)} + PMT × ${annuity.toFixed(6)}) = −(${money(pv)} × ${D.toFixed(6)} + ${money(pmt)} × ${annuity.toFixed(6)}) = ${result} · Total of payments = ${money(pmt)} × ${n} = ${val('totalPayments')} · Interest = FV + PV + PMT × N = ${val('totalInterest')}`,
+        },
+      );
+    } else if (solveFor === 'PV') {
+      const base = one.minus(one.div(D)).div(r);
+      const annuity = due ? base.times(one.plus(r)) : base;
+      steps.push(
+        {
+          label: due ? 'Present-value annuity factor (start of period)' : 'Present-value annuity factor (end of period)',
+          expr: `(1 − 1 ÷ (1 + r)ᴺ) ÷ r${due ? ' × (1 + r)' : ''} = ${annuity.toFixed(6)}`,
+          note: 'This is what $1 paid every period is worth today.',
+        },
+        {
+          label: 'Present value',
+          expr: `PV = −(FV ÷ ${D.toFixed(6)} + PMT × ${annuity.toFixed(6)}) = −(${money(fv)} ÷ ${D.toFixed(6)} + ${money(pmt)} × ${annuity.toFixed(6)}) = ${result}`,
+        },
+      );
+    } else {
+      const annuity = D.minus(1).div(r);
+      steps.push(
+        {
+          label: 'Annuity factor',
+          expr: `((1 + r)ᴺ − 1) ÷ r = ${annuity.toFixed(6)}${due ? ' · for payments at the start of the period the payment is also divided by (1 + r)' : ''}`,
+        },
+        {
+          label: 'Payment per period',
+          expr: `PMT = −(PV × ${D.toFixed(6)} + FV) ÷ ${annuity.toFixed(6)}${due ? ' ÷ (1 + r)' : ''} = −(${money(pv)} × ${D.toFixed(6)} + ${money(fv)}) ÷ ${annuity.toFixed(6)}${due ? ' ÷ (1 + r)' : ''} = ${result} · Total of payments = ${val('totalPayments')} · Interest = ${val('totalInterest')}`,
+        },
+      );
+    }
+    return finiteSteps(steps);
+  },
+
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(TVMPanel, { values, results });

@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import { pmt } from '../../../utils/financial';
 import VAPanel from './VAPanel';
 
@@ -16,6 +18,59 @@ function getVAFundingFeeRate(downPaymentPct: number, useType: string): number {
   } else {
     return 0.0125;
   }
+}
+
+/** Every figure behind the result rows and the worked solution (single source of truth). Null when the inputs are unusable. */
+export function vaFigures(values: Record<string, string>) {
+  const homePrice = parseFloat(values.homePrice);
+  const interestRate = parseFloat(values.interestRate);
+  const loanTerm = parseInt(values.loanTerm || '30');
+
+  if (isNaN(homePrice) || homePrice <= 0) return null;
+  if (isNaN(interestRate) || interestRate < 0) return null;
+
+  const downPaymentType = values.downPaymentType || 'dollar';
+  const downPaymentRaw = parseFloat(values.downPaymentValue) || 0;
+
+  const downPaymentDollars =
+    downPaymentType === 'dollar'
+      ? downPaymentRaw
+      : homePrice * (downPaymentRaw / 100);
+
+  if (downPaymentDollars < 0 || downPaymentDollars >= homePrice) return null;
+  const downPaymentPct = (downPaymentDollars / homePrice) * 100;
+  const baseLoanAmount = homePrice - downPaymentDollars;
+
+  const isExempt = values.fundingFeeExempt === 'yes';
+  const fundingFeeRate = isExempt
+    ? 0
+    : getVAFundingFeeRate(downPaymentPct, values.vaUseType || 'first');
+
+  const fundingFeeAmount = baseLoanAmount * fundingFeeRate;
+  const isRolled = (values.fundingFeePaidUpfront || 'rolled') === 'rolled';
+  const totalLoanAmount = isRolled
+    ? baseLoanAmount + fundingFeeAmount
+    : baseLoanAmount;
+
+  const monthlyRate = interestRate / 100 / 12;
+  const n = loanTerm * 12;
+
+  const principalAndInterest = totalLoanAmount <= 0 ? 0 : pmt(totalLoanAmount, monthlyRate, n);
+
+  const annualPropertyTax = parseFloat(values.annualPropertyTax) || 0;
+  const annualInsurance = parseFloat(values.annualInsurance) || 0;
+  const monthlyHOA = parseFloat(values.monthlyHOA) || 0;
+
+  const monthlyTax = annualPropertyTax / 12;
+  const monthlyInsurance = annualInsurance / 12;
+  const totalMonthlyPayment =
+    principalAndInterest + monthlyTax + monthlyInsurance + monthlyHOA;
+
+  return {
+    homePrice, interestRate, loanTerm, downPaymentDollars, downPaymentPct, baseLoanAmount, isExempt, fundingFeeRate,
+    fundingFeeAmount, isRolled, totalLoanAmount, monthlyRate, n, principalAndInterest, annualPropertyTax, annualInsurance,
+    monthlyHOA, monthlyTax, monthlyInsurance, totalMonthlyPayment,
+  };
 }
 
 const vaMortgageConfig: CalculatorConfig = {
@@ -128,49 +183,12 @@ const vaMortgageConfig: CalculatorConfig = {
   ],
 
   calculate: (values) => {
-    const homePrice = parseFloat(values.homePrice);
-    const interestRate = parseFloat(values.interestRate);
-    const loanTerm = parseInt(values.loanTerm || '30');
-
-    if (isNaN(homePrice) || homePrice <= 0) return [];
-    if (isNaN(interestRate) || interestRate < 0) return [];
-
-    const downPaymentType = values.downPaymentType || 'dollar';
-    const downPaymentRaw = parseFloat(values.downPaymentValue) || 0;
-
-    const downPaymentDollars =
-      downPaymentType === 'dollar'
-        ? downPaymentRaw
-        : homePrice * (downPaymentRaw / 100);
-
-    if (downPaymentDollars < 0 || downPaymentDollars >= homePrice) return [];
-    const downPaymentPct = (downPaymentDollars / homePrice) * 100;
-    const baseLoanAmount = homePrice - downPaymentDollars;
-
-    const isExempt = values.fundingFeeExempt === 'yes';
-    const fundingFeeRate = isExempt
-      ? 0
-      : getVAFundingFeeRate(downPaymentPct, values.vaUseType || 'first');
-
-    const fundingFeeAmount = baseLoanAmount * fundingFeeRate;
-    const isRolled = (values.fundingFeePaidUpfront || 'rolled') === 'rolled';
-    const totalLoanAmount = isRolled
-      ? baseLoanAmount + fundingFeeAmount
-      : baseLoanAmount;
-
-    const monthlyRate = interestRate / 100 / 12;
-    const n = loanTerm * 12;
-
-    const principalAndInterest = totalLoanAmount <= 0 ? 0 : pmt(totalLoanAmount, monthlyRate, n);
-
-    const annualPropertyTax = parseFloat(values.annualPropertyTax) || 0;
-    const annualInsurance = parseFloat(values.annualInsurance) || 0;
-    const monthlyHOA = parseFloat(values.monthlyHOA) || 0;
-
-    const monthlyTax = annualPropertyTax / 12;
-    const monthlyInsurance = annualInsurance / 12;
-    const totalMonthlyPayment =
-      principalAndInterest + monthlyTax + monthlyInsurance + monthlyHOA;
+    const f = vaFigures(values);
+    if (!f) return [];
+    const {
+      homePrice, interestRate, loanTerm, downPaymentDollars, downPaymentPct, baseLoanAmount, isExempt, fundingFeeRate,
+      fundingFeeAmount, totalLoanAmount, principalAndInterest, monthlyHOA, monthlyTax, monthlyInsurance, totalMonthlyPayment,
+    } = f;
 
     const fmt = (n: number) =>
       n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -244,6 +262,70 @@ const vaMortgageConfig: CalculatorConfig = {
         }),
       },
     ];
+  },
+
+  explainSteps: (values) => {
+    const f = vaFigures(values);
+    if (!f) return [];
+    const rows = vaMortgageConfig.calculate(values);
+    if (!rows.length) return [];
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const useType = values.vaUseType || 'first';
+    const downIsPct = (values.downPaymentType || 'dollar') !== 'dollar';
+    const downRaw = parseFloat(values.downPaymentValue) || 0;
+    const tier = f.downPaymentPct < 5 ? 'under 5% down' : f.downPaymentPct < 10 ? '5% to under 10% down' : '10% or more down';
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Down payment and base loan',
+        expr: `${downIsPct ? `${m(f.homePrice)} × ${downRaw}% = ${m(f.downPaymentDollars)} down` : `Down payment = ${m(f.downPaymentDollars)}`} (${+f.downPaymentPct.toFixed(4)}% of the price) · Base loan = ${m(f.homePrice)} − ${m(f.downPaymentDollars)} = ${m(f.baseLoanAmount)}`,
+        note: 'VA loans allow 0% down for eligible borrowers.',
+      },
+    ];
+    if (f.isExempt) {
+      steps.push({
+        label: 'VA funding fee: exempt',
+        expr: `Exempt (service-connected disability or surviving-spouse exemption) → ${val('fundingFeeResult')}`,
+      });
+    } else {
+      steps.push({
+        label: 'VA funding fee',
+        expr: `${tier}, ${useType === 'first' ? 'first use' : 'subsequent use'} → fee rate ${+(f.fundingFeeRate * 100).toFixed(4)}% · ${m(f.baseLoanAmount)} × ${+(f.fundingFeeRate * 100).toFixed(4)}% = ${val('fundingFeeResult')}`,
+        note: 'The fee rate steps down as the down payment grows past 5% and 10%; using the benefit again with less than 5% down costs more.',
+      });
+    }
+    steps.push({
+      label: f.isRolled ? 'Roll the fee into the loan' : 'Pay the fee in cash at closing',
+      expr: f.isRolled
+        ? `${m(f.baseLoanAmount)} + ${m(f.fundingFeeAmount)} = ${val('totalLoanAmountResult')} total loan`
+        : `The loan stays at ${val('totalLoanAmountResult')}; the ${m(f.fundingFeeAmount)} fee is paid up front instead`,
+      note: f.isRolled ? 'Rolling the fee in keeps cash in your pocket but you pay interest on it.' : undefined,
+    });
+    if (f.totalLoanAmount > 0 && Math.abs(f.monthlyRate) >= 1e-10) {
+      const growth = Math.pow(1 + f.monthlyRate, f.n);
+      steps.push({
+        label: 'Principal and interest payment',
+        expr: `r = ${+f.interestRate.toFixed(4)}% ÷ 12 = ${f.monthlyRate.toFixed(6)} · n = ${f.loanTerm} × 12 = ${f.n} · (1 + r)ⁿ = ${growth.toFixed(4)} · P&I = ${m(f.totalLoanAmount)} × (r × (1 + r)ⁿ) ÷ ((1 + r)ⁿ − 1) = ${val('principalAndInterest')}`,
+      });
+    } else {
+      steps.push({
+        label: 'Principal and interest payment',
+        expr: `${m(f.totalLoanAmount)} ÷ ${f.n} payments (no interest) = ${val('principalAndInterest')}`,
+      });
+    }
+    steps.push(
+      {
+        label: 'Taxes, insurance and HOA each month',
+        expr: `Tax ${m(f.annualPropertyTax)} ÷ 12 = ${val('monthlyTaxResult')} · Insurance ${m(f.annualInsurance)} ÷ 12 = ${val('monthlyInsuranceResult')} · HOA = ${m(f.monthlyHOA)}`,
+      },
+      {
+        label: 'Total monthly payment',
+        expr: `${val('principalAndInterest')} + ${val('monthlyTaxResult')} + ${val('monthlyInsuranceResult')} + ${m(f.monthlyHOA)} = ${val('totalMonthlyPayment')}`,
+        note: 'VA loans have no private mortgage insurance, so none is added.',
+      },
+    );
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

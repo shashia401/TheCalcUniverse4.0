@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import RMDPanel from './RMDPanel';
 import { TAX_YEAR } from '../../../utils/taxData';
 import {
@@ -173,6 +175,52 @@ const rmdConfig: CalculatorConfig = {
         color: 'neutral',
       },
     ];
+  },
+
+  explainSteps: (values) => {
+    const rows = rmdConfig.calculate(values);
+    if (!rows.length || rows[0].id !== 'currentRmd') return [];
+    const birthYear = parseInt(values.birthYear, 10);
+    const balance = new Decimal(String(values.accountBalance || '0').replace(/,/g, '') || '0');
+    const useJoint = values.spouseToggle === 'yes';
+    const spouseAge = parseInt(values.spouseAge, 10);
+    const age = TAX_YEAR - birthYear;
+    const startAge = getRmdStartAge(birthYear);
+    const joint = useJoint && jointTableApplies(age, spouseAge);
+    const factor = getDistributionPeriod(age, useJoint ? spouseAge : null);
+    const dollars = (d: Decimal) => `$${d.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    const rmd = resultValue(rows, 'currentRmd') ?? '';
+    const penalty = (resultValue(rows, 'penaltyWarning') ?? '').replace('Potential penalty: ', '');
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Your age this year and your RMD start age',
+        expr: `${TAX_YEAR} − ${birthYear} = age ${age} · born in ${birthYear}, RMDs start at age ${startAge} (SECURE 2.0), so a withdrawal is required for ${TAX_YEAR}`,
+        note: 'The start age depends only on the birth year: 72 if born 1950 or earlier, 73 for 1951-1959, 75 for 1960 or later.',
+      },
+      joint
+        ? {
+            label: 'Find your factor in the IRS joint-life table',
+            expr: `Table II (Joint Life and Last Survivor), owner age ${age}, spouse age ${spouseAge}: distribution period ${factor.toFixed(1)}`,
+            note: 'Table II applies only when your sole beneficiary is a spouse more than 10 years younger.',
+          }
+        : {
+            label: 'Find your factor in the IRS Uniform Lifetime table',
+            expr: `Table III (Uniform Lifetime), age ${age >= 120 ? '120 and over' : age}: distribution period ${factor.toFixed(1)}${useJoint ? ` · Table II did not apply (the spouse must be more than 10 years younger and at least ${JOINT_SPOUSE_MIN_AGE})` : ''}`,
+            note: 'The distribution period is the IRS life-expectancy divisor for your age.',
+          },
+      {
+        label: 'Divide the balance by the distribution period',
+        expr: `${dollars(balance)} ÷ ${factor.toFixed(1)} = ${rmd}`,
+        note: 'The balance is the account value on December 31 of the prior year.',
+      },
+      {
+        label: 'As a share of the balance, and the cost of missing it',
+        expr: `${rmd} ÷ ${dollars(balance)} × 100 = ${resultValue(rows, 'rmdPct') ?? ''} · Missed-RMD penalty: 25% × ${rmd} = ${penalty}`,
+        note: 'The calculator uses the 25% penalty (10% if corrected within two years).',
+      },
+    ];
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

@@ -1,6 +1,9 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
-import { TAX_YEAR } from '../../../utils/taxData';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
+import { bracketSlices } from '../../../utils/bracketSteps';
+import { FEDERAL_BRACKETS, TAX_YEAR } from '../../../utils/taxData';
 import TaxCalculatorPanel from './TaxCalculatorPanel';
 import { computeFederalTax } from './taxCalcMath';
 
@@ -98,6 +101,41 @@ const taxCalculatorConfig: CalculatorConfig = {
         color: isRefund ? 'positive' : 'negative',
       },
     ];
+  },
+
+  explainSteps: (values) => {
+    const c = computeFederalTax(values);
+    if (!c) return [];
+    const rows = taxCalculatorConfig.calculate(values);
+    if (!rows.length) return [];
+    const m = fmtMoney;
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const preTax = Math.max(0, parseFloat(values.preTaxDeductions) || 0);
+    const slices = bracketSlices(c.taxableIncome, FEDERAL_BRACKETS[c.status], m);
+    const statusLabel = { single: 'single', mfj: 'married filing jointly', hoh: 'head of household', mfs: 'married filing separately' }[c.status];
+    const steps: ExplainStep[] = [
+      {
+        label: `Subtract the ${TAX_YEAR} standard deduction and your pre-tax deductions`,
+        expr: `max(0, ${m(c.income)} − ${m(c.standardDeduction)} standard deduction (${statusLabel}) − ${m(preTax)} pre-tax) = ${val('taxableIncome')} taxable income`,
+        note: 'Only the income left after deductions is taxed.',
+      },
+      {
+        label: `Tax each ${TAX_YEAR} bracket slice`,
+        expr: slices ? `${slices} = ${val('totalTax')}` : `No taxable income, tax = ${val('totalTax')}`,
+        note: 'Each rate applies only to the part of your taxable income inside that bracket, never to all of it.',
+      },
+      {
+        label: 'Effective and marginal rate',
+        expr: `Effective = ${val('totalTax')} ÷ ${m(c.income)} × 100 = ${val('effectiveRate')} of your income · Marginal = rate of the top bracket reached = ${val('marginalRate')}`,
+        note: 'The marginal rate applies to your next dollar; the effective rate is what you pay on average.',
+      },
+      {
+        label: c.balance < 0 ? 'Compare with tax already paid: a refund' : 'Compare with tax already paid: a balance due',
+        expr: `${val('totalTax')} − ${m(c.withholding)} withheld = ${c.balance < 0 ? '−' : ''}${val('taxAfterWithholding')}`,
+        note: c.balance < 0 ? 'A negative result means you paid more than you owe.' : 'A positive result is the extra tax still owed.',
+      },
+    ];
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

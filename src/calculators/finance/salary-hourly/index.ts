@@ -1,7 +1,9 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import { createElement } from 'react';
 import SalaryHourlyPanel from './SalaryHourlyPanel';
-import { payRates, trueHourly as computeTrueHourly } from './salaryHourlyMath';
+import { payRates, trueHourly as computeTrueHourly, WORK_DAYS_PER_WEEK } from './salaryHourlyMath';
 
 const salaryHourlyConfig: CalculatorConfig = {
   inputs: [
@@ -186,6 +188,61 @@ const salaryHourlyConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+
+  explainSteps: (values) => {
+    const rows = salaryHourlyConfig.calculate(values);
+    if (!rows.length) return [];
+    const salary = parseFloat(values.annualSalary);
+    const hoursPerWeek = parseFloat(values.hoursPerWeek);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const r = payRates(salary, hoursPerWeek);
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Count the hours you work in a year',
+        expr: `${hoursPerWeek} hours a week × 52 weeks = ${+r.annualHours.toFixed(4)} hours`,
+      },
+      {
+        label: 'Divide the salary by those hours',
+        expr: `${m(salary)} ÷ ${+r.annualHours.toFixed(4)} = ${val('standardHourly')} per hour`,
+        note: 'This is the standard rate: it spreads the whole salary over paid working hours only.',
+      },
+      {
+        label: 'Weekly, bi-weekly and monthly pay',
+        expr: `Weekly = ${m(salary)} ÷ 52 = ${val('weeklyPay')} · Bi-weekly = ${m(salary)} ÷ 26 = ${val('biweeklyPay')} · Monthly = ${m(salary)} ÷ 12 = ${val('monthlyPay')}`,
+      },
+    ];
+
+    if (rows.some((x) => x.id === 'trueHourly')) {
+      const commuteHours = parseFloat(values.commuteHoursPerDay || '0') || 0;
+      const commuteCost = parseFloat(values.commuteCostPerDay || '0') || 0;
+      const overtime = parseFloat(values.unpaidOvertimeHours || '0') || 0;
+      const pto = parseFloat(values.paidTimeOff || '0') || 0;
+      const t = computeTrueHourly({ salary, hoursPerWeek, commuteHoursPerDay: commuteHours, commuteCostPerDay: commuteCost, unpaidOvertimeHours: overtime, ptoDays: pto });
+      steps.push(
+        {
+          label: 'Weeks you actually work',
+          expr: `52 − ${pto} PTO days ÷ ${WORK_DAYS_PER_WEEK} = ${+t.workingWeeks.toFixed(4)} working weeks`,
+          note: 'Paid days off remove working weeks (days ÷ 5) from the 52 paid weeks.',
+        },
+        {
+          label: 'Hours the job really takes each week',
+          expr: `${hoursPerWeek} work + ${commuteHours} commute × ${WORK_DAYS_PER_WEEK} days + ${overtime} unpaid overtime = ${+t.effectiveHoursPerWeek.toFixed(4)} hours · × ${+t.workingWeeks.toFixed(4)} weeks = ${val('effectiveAnnualHours')}`,
+        },
+        {
+          label: 'Subtract what commuting costs you',
+          expr: `${m(commuteCost)} × ${WORK_DAYS_PER_WEEK} days × ${+t.workingWeeks.toFixed(4)} weeks = ${val('commuteCostsAnnual')} a year`,
+        },
+        {
+          label: 'True hourly rate',
+          expr: `(${m(salary)} − ${val('commuteCostsAnnual')}) ÷ ${+t.effectiveAnnualHours.toFixed(4)} hours = ${val('trueHourly')} per hour`,
+          note: 'The true rate counts commute and unpaid overtime as time the job takes from you, and commuting as a cost of earning the salary.',
+        },
+      );
+    }
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

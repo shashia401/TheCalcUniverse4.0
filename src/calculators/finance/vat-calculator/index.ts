@@ -1,4 +1,6 @@
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import { VAT_COUNTRY_LIST, VAT_RATES } from '../../../utils/taxData';
 import { salesTaxFigures } from '../sales-tax/salesTaxMath';
 import { createElement } from 'react';
@@ -101,6 +103,60 @@ const vatConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
     ];
+  },
+
+  explainSteps: (values) => {
+    const rows = vatConfig.calculate(values);
+    if (!rows.length) return [];
+    const mode = values.calcMode === 'remove' ? 'remove' : 'add';
+    const amount = parseFloat(values.amount);
+    const typed = parseFloat(values.vatRate);
+    const country = VAT_RATES[values.country];
+    const vatRate = (Number.isFinite(typed) ? typed : country?.standard ?? NaN) / 100;
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const ratePct = +(vatRate * 100).toFixed(4);
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Pick the VAT rate',
+        expr: Number.isFinite(typed)
+          ? `Rate typed in = ${ratePct}% → ${+vatRate.toFixed(8)} as a decimal`
+          : `${country?.name ?? 'Selected country'} standard rate in the calculator's table = ${ratePct}% → ${+vatRate.toFixed(8)} as a decimal`,
+        note: 'A rate you type overrides the country; use it for a reduced rate. Check the current rate with your tax authority, as rates change.',
+      },
+    ];
+    if (mode === 'add') {
+      steps.push(
+        {
+          label: 'Work out the VAT on the net price',
+          expr: `${m(amount)} × ${+vatRate.toFixed(8)} = $${(amount * vatRate).toFixed(4)} → rounded to the cent = ${val('vatAmount')}`,
+          note: 'VAT is rounded to the cent, as on an invoice, so net plus VAT always equals gross.',
+        },
+        {
+          label: 'Add the VAT to get the gross amount',
+          expr: `${m(amount)} + ${val('vatAmount')} = ${val('grossAmount')}`,
+        },
+      );
+    } else {
+      steps.push(
+        {
+          label: 'Take the VAT out of the gross total',
+          expr: `${m(amount)} ÷ (1 + ${+vatRate.toFixed(8)}) = $${(amount / (1 + vatRate)).toFixed(4)} → rounded to the cent = ${val('netAmount')} net`,
+          note: 'The gross total already contains the VAT, so you divide by 1 plus the rate.',
+        },
+        {
+          label: 'The VAT is what is left over',
+          expr: `${m(amount)} − ${val('netAmount')} = ${val('vatAmount')}`,
+        },
+      );
+    }
+    steps.push({
+      label: 'VAT as a share of the gross amount',
+      expr: `${val('vatAmount')} ÷ ${mode === 'add' ? val('grossAmount') : m(amount)} × 100 = ${val('vatShare')}`,
+      note: 'The share of the gross is lower than the VAT rate, because the rate applies to the net price.',
+    });
+    return finiteSteps(steps);
   },
 
   extraPanel: (_values, results) => {

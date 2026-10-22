@@ -47,19 +47,26 @@ export function estimatePIA(annualIncome: number): number {
 }
 
 /**
- * Monthly benefit when claiming at `claimAge` (62-70): early claiming loses 5/9 of 1% per month for the first 36
+ * The share of the PIA paid when claiming at `claimAge` (62-70): early claiming loses 5/9 of 1% per month for the first 36
  * months and 5/12 of 1% beyond; delayed credits add (yearly credit / 12) per month past FRA, up to age 70.
- * Rounded down to the next lower dollar.
+ * `monthsFromFra` is negative when claiming early; `credited` / `early` are the months that earn a credit / take a cut.
  */
-export function monthlyBenefit(pia: number, claimAge: number, fra: number, birthYear: number): number {
+export function claimFactor(claimAge: number, fra: number, birthYear: number) {
   const monthsFromFra = Math.round((claimAge - fra) * 12);
   let factor: number;
+  let credited = 0;
+  let early = 0;
   if (monthsFromFra >= 0) {
-    const credited = Math.min(monthsFromFra, Math.round((70 - fra) * 12));
+    credited = Math.min(monthsFromFra, Math.round((70 - fra) * 12));
     factor = 1 + (credited * delayedCreditPerYear(birthYear)) / 12;
   } else {
-    const early = -monthsFromFra;
+    early = -monthsFromFra;
     factor = 1 - (Math.min(early, 36) * 5) / 9 / 100 - (Math.max(0, early - 36) * 5) / 12 / 100;
   }
-  return Math.floor(pia * factor + 1e-9);
+  return { monthsFromFra, factor, credited, early };
+}
+
+/** Monthly benefit when claiming at `claimAge`: the PIA times the claiming factor, rounded down to the next lower dollar. */
+export function monthlyBenefit(pia: number, claimAge: number, fra: number, birthYear: number): number {
+  return Math.floor(pia * claimFactor(claimAge, fra, birthYear).factor + 1e-9);
 }

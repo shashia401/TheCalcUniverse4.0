@@ -1,7 +1,10 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
+import { FICA } from '../../../utils/taxData';
 import SelfEmploymentTaxPanel from './SelfEmploymentTaxPanel';
-import { computeSeTax, parseSeInput, SE_MIN_EARNINGS } from './seTaxMath';
+import { computeSeTax, MEDICARE_RATE, parseSeInput, QBI_ASSUMED_RATE, SE_MIN_EARNINGS, SE_MULTIPLIER, SS_RATE } from './seTaxMath';
 
 
 const selfEmploymentTaxConfig: CalculatorConfig = {
@@ -119,6 +122,67 @@ const selfEmploymentTaxConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
     ];
+  },
+
+  explainSteps: (values) => {
+    const input = parseSeInput(values);
+    if (isNaN(input.netProfit) || input.netProfit <= 0) return [];
+    const rows = selfEmploymentTaxConfig.calculate(values);
+    if (!rows.length) return [];
+    const c = computeSeTax(input);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pc = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const val = (id: string) => resultValue(rows, id) ?? '';
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Find the earnings that are subject to the tax',
+        expr: `${m(input.netProfit)} × ${pc(SE_MULTIPLIER)} = ${m(c.seEarnings)}`,
+        note: 'Only 92.35% of net profit counts, which stands in for the employer half you can deduct.',
+      },
+    ];
+    if (!c.owes) {
+      steps.push({
+        label: 'Check the minimum',
+        expr: `${m(c.seEarnings)} is under ${m(SE_MIN_EARNINGS)}, so no self-employment tax is due → ${val('secaTax')}`,
+      });
+      return finiteSteps(steps);
+    }
+    steps.push(
+      {
+        label: 'Social Security part',
+        expr: `Wage base left = ${m(FICA.socialSecurityWageBase)} − ${m(input.w2Income)} W-2 wages = ${m(c.remainingSSBase)} · min(${m(c.seEarnings)}, ${m(c.remainingSSBase)}) × ${pc(SS_RATE)} = ${val('socialSecurityPortion')}`,
+        note: 'W-2 wages use up part of the Social Security wage base first; Social Security tax stops once the base is reached.',
+      },
+      {
+        label: 'Medicare part',
+        expr: `${m(c.seEarnings)} × ${pc(MEDICARE_RATE)} = ${val('medicarePortion')}`,
+        note: 'Medicare has no wage base, so it applies to all of the earnings.',
+      },
+      {
+        label: 'Total self-employment (SECA) tax',
+        expr: `${val('socialSecurityPortion')} + ${val('medicarePortion')} = ${val('secaTax')} · ${val('secaTax')} ÷ ${m(input.netProfit)} net profit = ${val('effectiveRate')}`,
+        note: 'Self-employed people pay both the employee and employer halves.',
+      },
+      {
+        label: 'Additional Medicare Tax (0.9%)',
+        expr: `max(0, ${m(c.seEarnings)} − max(0, ${m(c.threshold)} − ${m(input.w2Income)})) × ${pc(FICA.additionalMedicareRate)} = ${m(c.additionalMedicare)}`,
+        note: 'This is separate from the SECA tax and is not deductible; W-2 wages use up the filing-status threshold first.',
+      },
+      {
+        label: 'Deductible half of the SECA tax',
+        expr: `${val('secaTax')} ÷ 2 = ${val('deductiblePortion')}`,
+        note: 'You deduct this half on Form 1040 as an adjustment to income.',
+      },
+    );
+    if (input.qbi) {
+      steps.push({
+        label: 'Estimated QBI deduction savings',
+        expr: `(${m(input.netProfit)} − ${val('deductiblePortion')}) × 20% = ${m(c.qbiDeduction)} deduction · × ${pc(QBI_ASSUMED_RATE)} assumed bracket = ${val('qbiSavings')}`,
+        note: 'A simplified estimate: it ignores the taxable-income limit, and the 22% bracket is an assumption, not your own rate.',
+      });
+    }
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

@@ -1,5 +1,7 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import SalesTaxPanel from './SalesTaxPanel';
 import { salesTaxFigures } from './salesTaxMath';
 
@@ -115,6 +117,57 @@ const salesTaxConfig: CalculatorConfig = {
       ];
     }
   },
+  explainSteps: (values) => {
+    const rows = salesTaxConfig.calculate(values);
+    if (!rows.length) return [];
+    const mode = !values.mode || values.mode === 'add' ? 'add' : 'extract';
+    const amount = parseFloat(values.amount);
+    const rate = parseFloat(values.taxRate) / 100;
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const ratePct = +(rate * 100).toFixed(4);
+    const f = salesTaxFigures(mode, amount, rate);
+
+    if (mode === 'add') {
+      const raw = amount * rate;
+      return finiteSteps([
+        {
+          label: 'Turn the rate into a decimal',
+          expr: `${ratePct}% ÷ 100 = ${+rate.toFixed(8)}`,
+        },
+        {
+          label: 'Work out the tax on the pre-tax price',
+          expr: `${m(amount)} × ${+rate.toFixed(8)} = $${raw.toFixed(4)} → rounded to the cent = ${val('taxAmount')}`,
+          note: 'Retailers round the tax to the cent, so pre-tax price plus tax always equals the total.',
+        },
+        {
+          label: 'Add the tax to the price',
+          expr: `${m(amount)} + ${val('taxAmount')} = ${val('grossPrice')} total`,
+        },
+      ]);
+    }
+    const raw = amount / (1 + rate);
+    return finiteSteps([
+      {
+        label: 'Turn the rate into a decimal',
+        expr: `${ratePct}% ÷ 100 = ${+rate.toFixed(8)}`,
+      },
+      {
+        label: 'Take the tax out of the total to find the pre-tax price',
+        expr: `${m(amount)} ÷ (1 + ${+rate.toFixed(8)}) = $${raw.toFixed(4)} → rounded to the cent = ${val('netPrice')}`,
+        note: 'The total already contains the tax, so you divide by 1 plus the rate; subtracting the rate from the total would be wrong.',
+      },
+      {
+        label: 'The tax is what is left over',
+        expr: `${m(amount)} − ${val('netPrice')} = ${val('taxAmount')} tax to remit`,
+      },
+      {
+        label: 'Check the tax as a share of the total',
+        expr: `${val('taxAmount')} ÷ ${m(f.gross)} × 100 = ${val('effectiveRate')} of the total (a bit less than the ${ratePct}% rate, because the rate applies to the pre-tax price)`,
+      },
+    ]);
+  },
+
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(SalesTaxPanel, { values, results });

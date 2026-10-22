@@ -1,6 +1,67 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
 import RetirementPanel from './RetirementPanel';
+
+/** Safe-withdrawal share of the nest egg a year (the "4% rule") the goal check uses. */
+const SAFE_WITHDRAWAL_RATE = 0.04;
+
+/** Every figure behind the result rows and the worked solution (single source of truth). Null when the inputs are unusable. */
+export function retirementFigures(values: Record<string, string>) {
+  const currentAge = parseFloat(values.currentAge);
+  const retirementAge = parseFloat(values.retirementAge);
+  const currentSavings = parseFloat(values.currentSavings) || 0;
+  const monthlyContribution = parseFloat(values.monthlyContribution) || 0;
+  const annualReturn = parseFloat(values.annualReturn) / 100;
+  const inflationInput = parseFloat(values.inflationRate);
+  const inflationRate = isNaN(inflationInput) ? 0.03 : inflationInput / 100;
+  const desiredIncome = parseFloat(values.desiredIncome) || 0;
+
+  if ([currentAge, retirementAge, annualReturn].some(isNaN)) return null;
+  if (retirementAge <= currentAge) return null;
+
+  const years = retirementAge - currentAge;
+  const monthlyRate = annualReturn / 12;
+  const months = years * 12;
+
+  let futureValue: number;
+  if (monthlyRate === 0) {
+    futureValue = currentSavings + monthlyContribution * months;
+  } else {
+    futureValue =
+      currentSavings * Math.pow(1 + monthlyRate, months) +
+      monthlyContribution * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+  }
+
+  const totalContributed = currentSavings + monthlyContribution * months;
+  const totalGrowth = futureValue - totalContributed;
+  const realReturn = annualReturn - inflationRate;
+  const inflationAdjustedValue = futureValue / Math.pow(1 + inflationRate, years);
+
+  // Goal side (the 4% rule): the income wanted in today's dollars, grown to retirement-day prices, must be 4% of the nest egg.
+  const futureDesiredIncome = desiredIncome * Math.pow(1 + inflationRate, years);
+  const requiredNestEgg = futureDesiredIncome / SAFE_WITHDRAWAL_RATE;
+  const isOnTrack = futureValue >= requiredNestEgg;
+  const gap = Math.abs(futureValue - requiredNestEgg);
+  const requiredMonthly = monthlyRate === 0
+    ? (requiredNestEgg - currentSavings * 1) / months
+    : (requiredNestEgg - currentSavings * Math.pow(1 + monthlyRate, months)) /
+      ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+
+  return {
+    currentAge, retirementAge, currentSavings, monthlyContribution, annualReturn, inflationRate, desiredIncome, years, monthlyRate,
+    months, futureValue, totalContributed, totalGrowth, realReturn, inflationAdjustedValue, futureDesiredIncome, requiredNestEgg,
+    isOnTrack, gap, requiredMonthly,
+  };
+}
+
+/** The calculator's own money formats: whole dollars, or $x.xxM from a million up. */
+const fmt = (n: number) =>
+  n >= 1_000_000
+    ? `$${(n / 1_000_000).toFixed(2)}M`
+    : `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+const fmtFull = (n: number) =>
+  n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
 const retirementConfig: CalculatorConfig = {
   inputs: [
@@ -98,45 +159,13 @@ const retirementConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const currentAge = parseFloat(values.currentAge);
-    const retirementAge = parseFloat(values.retirementAge);
-    const currentSavings = parseFloat(values.currentSavings) || 0;
-    const monthlyContribution = parseFloat(values.monthlyContribution) || 0;
-    const annualReturn = parseFloat(values.annualReturn) / 100;
-    const inflationInput = parseFloat(values.inflationRate);
-    const inflationRate = isNaN(inflationInput) ? 0.03 : inflationInput / 100;
-    const desiredIncome = parseFloat(values.desiredIncome) || 0;
-
-    if ([currentAge, retirementAge, annualReturn].some(isNaN)) return [];
-    if (retirementAge <= currentAge) return [];
-
-    const years = retirementAge - currentAge;
-    const monthlyRate = annualReturn / 12;
-    const months = years * 12;
-
-    let futureValue: number;
-    if (monthlyRate === 0) {
-      futureValue = currentSavings + monthlyContribution * months;
-    } else {
-      futureValue =
-        currentSavings * Math.pow(1 + monthlyRate, months) +
-        monthlyContribution * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
-    }
-
-    const totalContributed = currentSavings + monthlyContribution * months;
-    const totalGrowth = futureValue - totalContributed;
-    const realReturn = annualReturn - inflationRate;
-    if (realReturn < 0) {
+    const f = retirementFigures(values);
+    if (!f) return [];
+    const { retirementAge, desiredIncome, inflationRate, futureValue, totalContributed, totalGrowth, inflationAdjustedValue } = f;
+    if (f.realReturn < 0) {
       console.warn('Retirement: Real return is negative — purchasing power is eroding over time.');
     }
-    const inflationAdjustedValue = futureValue / Math.pow(1 + inflationRate, years);
 
-    const fmt = (n: number) =>
-      n >= 1_000_000
-        ? `$${(n / 1_000_000).toFixed(2)}M`
-        : `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-    const fmtFull = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
     const results: CalculatorResult[] = [
       {
@@ -174,10 +203,7 @@ const retirementConfig: CalculatorConfig = {
     ];
 
     if (desiredIncome > 0) {
-      const futureDesiredIncome = desiredIncome * Math.pow(1 + inflationRate, years);
-      const requiredNestEgg = futureDesiredIncome / 0.04;
-      const isOnTrack = futureValue >= requiredNestEgg;
-      const gap = Math.abs(futureValue - requiredNestEgg);
+      const { isOnTrack, gap, requiredMonthly } = f;
 
       results.push({
         id: 'goalStatus',
@@ -187,11 +213,6 @@ const retirementConfig: CalculatorConfig = {
         value: isOnTrack ? `Surplus: ${fmt(gap)}` : `Gap: ${fmt(gap)}`,
         color: isOnTrack ? 'positive' as const : 'negative' as const,
       });
-
-      const requiredMonthly = monthlyRate === 0
-        ? (requiredNestEgg - currentSavings * 1) / months
-        : (requiredNestEgg - currentSavings * Math.pow(1 + monthlyRate, months)) /
-          ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
 
       if (!isOnTrack && requiredMonthly > 0) {
         results.push({
@@ -204,6 +225,74 @@ const retirementConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+  explainSteps: (values) => {
+    const f = retirementFigures(values);
+    if (!f) return [];
+    const d2 = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pct = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const growth = Math.pow(1 + f.monthlyRate, f.months);
+    const steps: ExplainStep[] = [
+      {
+        label: 'Years to retirement and the monthly rate',
+        expr: `${f.retirementAge} − ${f.currentAge} = ${f.years} years = ${f.months} months · r = ${pct(f.annualReturn)} ÷ 12 = ${(f.monthlyRate * 100).toFixed(4)}% per month`,
+        note: 'The return is applied as a nominal rate, compounded monthly, with contributions added at the end of each month.',
+      },
+    ];
+    if (f.monthlyRate === 0) {
+      steps.push({
+        label: 'No growth, so balances simply add up',
+        expr: `${d2(f.currentSavings)} + ${d2(f.monthlyContribution)} × ${f.months} months = ${fmt(f.futureValue)}`,
+      });
+    } else {
+      steps.push({
+        label: 'Growth factor over the whole period',
+        expr: `(1 + r)ⁿ = (1 + ${f.monthlyRate.toFixed(6)})^${f.months} = ${growth.toFixed(4)}`,
+      });
+      steps.push({
+        label: 'What today\'s savings grow to',
+        expr: `${d2(f.currentSavings)} × ${growth.toFixed(4)} = ${d2(f.currentSavings * growth)}`,
+      });
+      steps.push({
+        label: 'What the monthly contributions grow to',
+        expr: `${d2(f.monthlyContribution)} × (${growth.toFixed(4)} − 1) ÷ ${f.monthlyRate.toFixed(6)} = ${d2(f.monthlyContribution * ((growth - 1) / f.monthlyRate))}`,
+        note: 'The fraction is the future value of $1 deposited every month for the full period.',
+      });
+      steps.push({
+        label: 'Balance at retirement (future dollars)',
+        expr: `${d2(f.currentSavings * growth)} + ${d2(f.monthlyContribution * ((growth - 1) / f.monthlyRate))} = ${d2(f.futureValue)} (shown as ${fmt(f.futureValue)})`,
+      });
+    }
+    steps.push({
+      label: 'How much is yours and how much is growth',
+      expr: `Contributed = ${d2(f.currentSavings)} + ${d2(f.monthlyContribution)} × ${f.months} = ${d2(f.totalContributed)} · Growth = ${d2(f.futureValue)} − ${d2(f.totalContributed)} = ${d2(f.totalGrowth)}`,
+    });
+    steps.push({
+      label: 'Convert to today\'s dollars',
+      expr: `Real return ≈ ${pct(f.annualReturn)} − ${pct(f.inflationRate)} inflation = ${pct(f.realReturn)} · ${d2(f.futureValue)} ÷ (1 + ${pct(f.inflationRate)})^${f.years} = ${fmt(f.inflationAdjustedValue)}`,
+      note: 'This calculator works in nominal (future) dollars and then deflates by the inflation rate you entered (blank means 3%). The "Am I saving enough to retire?" decision tool works in today\'s dollars throughout, so the two can differ.',
+    });
+    if (f.desiredIncome > 0) {
+      steps.push({
+        label: 'The nest egg your income goal needs (4% rule)',
+        expr: `${d2(f.desiredIncome)} × (1 + ${pct(f.inflationRate)})^${f.years} = ${d2(f.futureDesiredIncome)} a year at retirement prices · ${d2(f.futureDesiredIncome)} ÷ ${pct(SAFE_WITHDRAWAL_RATE)} = ${d2(f.requiredNestEgg)}`,
+        note: 'The 4% rule assumes you can withdraw about 4% of the balance in the first year and adjust for inflation afterwards; it is a rule of thumb, not a guarantee.',
+      });
+      steps.push({
+        label: f.isOnTrack ? 'Compare with your projected balance: on track' : 'Compare with your projected balance: a shortfall',
+        expr: `${d2(f.futureValue)} − ${d2(f.requiredNestEgg)} = ${f.isOnTrack ? '+' : '−'}${d2(f.gap)} (${f.isOnTrack ? 'surplus' : 'gap'} shown as ${fmt(f.gap)})`,
+      });
+      if (!f.isOnTrack && f.requiredMonthly > 0) {
+        const need = f.monthlyRate === 0
+          ? `(${d2(f.requiredNestEgg)} − ${d2(f.currentSavings)}) ÷ ${f.months}`
+          : `(${d2(f.requiredNestEgg)} − ${d2(f.currentSavings)} × ${growth.toFixed(4)}) ÷ ((${growth.toFixed(4)} − 1) ÷ ${f.monthlyRate.toFixed(6)})`;
+        steps.push({
+          label: 'Monthly contribution that closes the gap',
+          expr: `${need} = ${d2(f.requiredMonthly)} → rounded up to $${Math.ceil(f.requiredMonthly).toLocaleString(undefined, { maximumFractionDigits: 0 })}/month`,
+        });
+      }
+    }
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     const currentAge = parseFloat(values.currentAge);

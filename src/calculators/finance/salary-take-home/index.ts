@@ -1,7 +1,10 @@
 import { createElement } from 'react';
-import { CalculatorConfig, SelectOption } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep, SelectOption } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
+import { bracketSlices } from '../../../utils/bracketSteps';
 import { STATE_INCOME_TAX, STATE_INCOME_TAX_YEAR } from '../../../utils/stateTax';
-import { TAX_YEAR } from '../../../utils/taxData';
+import { FEDERAL_BRACKETS, FICA, STANDARD_DEDUCTION, TAX_YEAR } from '../../../utils/taxData';
 import { RETIREMENT_LIMITS_2025 } from '../income-tax/taxData';
 import SalaryTakeHomePanel from './SalaryTakeHomePanel';
 import { computeTakeHome, PAY_PERIODS } from './takeHomeMath';
@@ -166,6 +169,64 @@ const salaryTakeHomeConfig: CalculatorConfig = {
         color: 'neutral' as const,
       },
     ];
+  },
+
+  explainSteps: (values) => {
+    const t = computeTakeHome(values);
+    if (!t) return [];
+    const rows = salaryTakeHomeConfig.calculate(values);
+    if (!rows.length) return [];
+    const { calc: c, preTaxAmount, noState } = t;
+    const m = (n: number) => `$${fmt(n)}`;
+    const pc = (x: number) => `${+(x * 100).toFixed(2)}%`;
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const payFreq = values.payFrequency in PAY_PERIODS ? values.payFrequency : 'monthly';
+    const wages = c.ficaWages - preTaxAmount;
+    const slices = bracketSlices(c.taxableIncome, FEDERAL_BRACKETS[c.status], m);
+    const fedThreshold = c.status === 'mfj' ? FICA.additionalMedicareThreshold.mfj : FICA.additionalMedicareThreshold.single;
+    const stateWages = c.stateCode === 'PA' ? c.ficaWages : wages;
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Take your pre-tax savings off the wages that are taxed',
+        expr: preTaxAmount > 0
+          ? `${m(c.grossAnnual)} salary × ${+(preTaxAmount / c.grossAnnual * 100).toFixed(4)}% pre-tax = ${m(preTaxAmount)} · Income-tax wages = ${m(c.grossAnnual)} − ${m(preTaxAmount)} = ${m(wages)}`
+          : `No pre-tax deductions, so income-tax wages = ${m(c.grossAnnual)}`,
+        note: 'A traditional 401(k)-style deferral lowers income-tax wages but not Social Security or Medicare wages.',
+      },
+      {
+        label: `Subtract the ${TAX_YEAR} standard deduction (${c.status === 'mfj' ? 'married filing jointly' : c.status === 'hoh' ? 'head of household' : 'single'})`,
+        expr: `max(0, ${m(wages)} − ${m(STANDARD_DEDUCTION[c.status])}) = ${val('taxableIncome')} federal taxable income`,
+      },
+      {
+        label: `Tax each ${TAX_YEAR} federal bracket slice`,
+        expr: slices ? `${slices} = ${val('totalFederalTax')} (top bracket ${pc(c.fed.marginalRate)})` : `No taxable income, federal tax = ${val('totalFederalTax')}`,
+        note: 'Each rate applies only to the part of your taxable income inside that bracket.',
+      },
+      {
+        label: 'Add up Social Security and Medicare (FICA)',
+        expr: `Social Security: min(${m(c.ficaWages)}, ${m(FICA.socialSecurityWageBase)}) × ${pc(FICA.socialSecurityRate)} = ${m(c.ss)} · Medicare: ${m(c.ficaWages)} × ${pc(FICA.medicareRate)} = ${m(c.medicare)} · Additional Medicare: max(0, ${m(c.ficaWages)} − ${m(fedThreshold)}) × ${pc(FICA.additionalMedicareRate)} = ${m(c.additionalMedicare)} → ${val('totalFICA')}`,
+      },
+      {
+        label: noState ? 'State income tax' : `${c.stateName} income tax`,
+        expr: noState
+          ? `No state wage tax applied → ${val('totalStateTax')}`
+          : `${c.stateName}'s ${STATE_INCOME_TAX_YEAR} rate schedule and standard deduction applied to ${m(stateWages)} of wages = ${val('totalStateTax')}`,
+        note: noState
+          ? undefined
+          : 'The calculator applies each state\'s published schedule to your wages without local taxes, credits or exemptions; treat the state figure as an estimate.',
+      },
+      {
+        label: 'Subtract everything from your salary',
+        expr: `${m(c.grossAnnual)} − ${val('totalFederalTax')} federal − ${val('totalFICA')} FICA − ${noState ? '$0.00' : val('totalStateTax')} state − ${val('preTaxDeductions')} pre-tax savings = ${val('netAnnual')} a year`,
+        note: `Total tax is ${val('totalTax')}, an effective rate of ${val('effectiveTaxRate')} of salary.`,
+      },
+      {
+        label: 'Divide by your pay periods',
+        expr: `${val('netAnnual')} ÷ ${PAY_PERIODS[payFreq]} = ${val('perPaycheck')}`,
+      },
+    ];
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import StudentLoanPanel from './StudentLoanPanel';
 import { computeStudentLoan } from './studentLoanMath';
 
@@ -169,6 +171,67 @@ const studentLoanConfig: CalculatorConfig = {
     }
 
     return results;
+  },
+
+  explainSteps: (values) => {
+    const c = computeStudentLoan(values);
+    if (!c) return [];
+    const rows = studentLoanConfig.calculate(values);
+    if (!rows.length) return [];
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const ratePct = +(c.annualRate * 100).toFixed(4);
+    const steps: ExplainStep[] = [];
+
+    if (c.inSchool && c.totalDeferMonths > 0) {
+      const accrued = c.principal * c.monthlyRate * c.totalDeferMonths;
+      steps.push({
+        label: 'Interest that builds up while you are in school and in the grace period',
+        expr: `${m(c.principal)} × (${ratePct}% ÷ 12) × (${c.monthsUntilGrad} months in school + ${c.gracePeriod} grace) = ${m(accrued)}`,
+        note: 'Simple interest on the full balance, assuming it was all paid out on day one.',
+      });
+      steps.push(
+        c.loanType === 'subsidized'
+          ? {
+              label: 'Subsidized loan: the government pays that interest',
+              expr: `${m(accrued)} is covered, so repayment starts from ${m(c.principal)} (${val('subsidyBenefit')})`,
+            }
+          : {
+              label: 'Unsubsidized loan: the interest is added to the balance when repayment starts',
+              expr: `${m(c.principal)} + ${m(c.capitalizedInterest)} = ${m(c.effectivePrincipal)} (shown as ${val('effectivePrincipal')})`,
+              note: 'This is called capitalization: from now on you pay interest on the interest too.',
+            },
+      );
+    }
+
+    steps.push({
+      label: 'Monthly rate and number of payments',
+      expr: `r = ${ratePct}% ÷ 12 = ${(c.monthlyRate * 100).toFixed(4)}% per month = ${c.monthlyRate.toFixed(6)} · n = ${c.repaymentYears} years × 12 = ${c.n} payments`,
+    });
+    if (Math.abs(c.monthlyRate) < 1e-10) {
+      steps.push({
+        label: 'No interest, so divide the loan evenly',
+        expr: `M = ${m(c.effectivePrincipal)} ÷ ${c.n} = ${val('monthlyPayment')}`,
+      });
+    } else {
+      const growth = Math.pow(1 + c.monthlyRate, c.n);
+      steps.push({
+        label: 'Apply the amortization formula',
+        expr: `(1 + r)ⁿ = ${growth.toFixed(4)} · M = ${m(c.effectivePrincipal)} × (r × (1 + r)ⁿ) ÷ ((1 + r)ⁿ − 1) = ${val('monthlyPayment')}`,
+        note: 'The one fixed payment that pays the interest and retires the balance exactly at the last month. Income-driven plans are not modeled.',
+      });
+    }
+    steps.push(
+      {
+        label: 'Total paid and total interest in repayment',
+        expr: `${val('monthlyPayment')} (unrounded) × ${c.n} = ${m(c.totalPaid)} · ${m(c.totalPaid)} − ${m(c.effectivePrincipal)} = ${m(c.totalInterestRepayment)} (shown as ${val('totalInterestRepayment')})`,
+      },
+      {
+        label: 'Lifetime cost of the loan',
+        expr: `${m(c.principal)} + ${m(c.capitalizedInterest)} capitalized + ${m(c.totalInterestRepayment)} repayment interest = ${val('totalLifetimeCost')}`,
+      },
+    );
+    return finiteSteps(steps);
   },
 
   extraPanel: (values, results) => {

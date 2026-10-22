@@ -1,6 +1,8 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 import TexasMortgagePanel from './TexasMortgagePanel';
 
 /** Texas school-district homestead exemptions (Prop. 13 and Prop. 11, approved Nov 4, 2025): $140,000 general, +$60,000 age 65+/disabled. */
@@ -10,6 +12,60 @@ const HOMESTEAD_SENIOR = 200000;
 const SCHOOL_TAX_SHARE = 0.55;
 /** Estimated PMI as a share of the loan per year when the down payment is under 20% - an ESTIMATE; quotes vary with credit score. */
 const PMI_RATE = 0.005;
+
+/** Every figure behind the result rows and the worked solution (single source of truth). Null when the inputs are unusable. */
+export function texasFigures(values: Record<string, string>) {
+  const homePriceNum = parseFloat(values.homePrice);
+  const downPaymentNum = parseFloat(values.downPayment);
+  const interestRateNum = parseFloat(values.interestRate);
+  const taxRateNum = parseFloat(values.propertyTaxRate);
+  if (isNaN(homePriceNum) || isNaN(interestRateNum)) return null;
+  if (homePriceNum <= 0 || isNaN(downPaymentNum) || downPaymentNum < 0 || downPaymentNum >= homePriceNum) return null;
+
+  const homePrice = new Decimal(homePriceNum);
+  const downPayment = new Decimal(downPaymentNum);
+  const rate = new Decimal(interestRateNum).div(100);
+  const term = parseInt(values.loanTerm) || 30;
+  const taxRate = isNaN(taxRateNum) ? new Decimal(0) : new Decimal(taxRateNum).div(100);
+  const homestead = values.homesteadType || 'none';
+
+  const loanAmount = homePrice.minus(downPayment);
+  const downPct = downPayment.div(homePrice).mul(100).toFixed(1);
+  const months = term * 12;
+  const monthlyRate = rate.div(12);
+
+  let basePayment: Decimal;
+  if (monthlyRate.gt(0)) {
+    const factor = monthlyRate.plus(1).pow(months);
+    basePayment = loanAmount.mul(monthlyRate.mul(factor)).div(factor.minus(1));
+  } else {
+    basePayment = loanAmount.div(months);
+  }
+
+  // School-district share of the tax bill is an estimate; the exemption cannot exceed the home's value.
+  const annualTaxBeforeExemption = homePrice.mul(taxRate);
+  const schoolTaxRate = taxRate.mul(SCHOOL_TAX_SHARE);
+  const exemptionAmount = homestead === 'senior' ? HOMESTEAD_SENIOR : homestead === 'general' ? HOMESTEAD_GENERAL : 0;
+  const exemptedValue = Decimal.min(new Decimal(exemptionAmount), homePrice);
+  const annualTaxAfterExemption = annualTaxBeforeExemption.minus(exemptedValue.mul(schoolTaxRate));
+
+  const monthlyTaxBefore = annualTaxBeforeExemption.div(12);
+  const monthlyTaxAfter = annualTaxAfterExemption.div(12);
+
+  const hasPmi = parseFloat(downPct) < 20;
+  const monthlyPmi = hasPmi ? loanAmount.mul(PMI_RATE).div(12) : new Decimal(0);
+  const insuranceAnnual = Math.max(0, parseFloat(values.homeInsurance) || 0);
+  const monthlyInsurance = new Decimal(insuranceAnnual).div(12);
+  const totalMonthly = basePayment.plus(monthlyTaxAfter).plus(monthlyPmi).plus(monthlyInsurance);
+  const totalInterest = basePayment.mul(months).minus(loanAmount);
+  const totalCost = loanAmount.plus(totalInterest);
+
+  return {
+    homePrice, downPayment, rate, term, taxRate, homestead, loanAmount, downPct, months, monthlyRate, basePayment,
+    annualTaxBeforeExemption, schoolTaxRate, exemptionAmount, exemptedValue, annualTaxAfterExemption, monthlyTaxBefore,
+    monthlyTaxAfter, hasPmi, monthlyPmi, insuranceAnnual, monthlyInsurance, totalMonthly, totalInterest, totalCost,
+  };
+}
 
 const texasMortgageConfig: CalculatorConfig = {
   inputs: [
@@ -96,50 +152,12 @@ const texasMortgageConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const homePriceNum = parseFloat(values.homePrice);
-    const downPaymentNum = parseFloat(values.downPayment);
-    const interestRateNum = parseFloat(values.interestRate);
-    const taxRateNum = parseFloat(values.propertyTaxRate);
-    if (isNaN(homePriceNum) || isNaN(interestRateNum)) return [];
-    if (homePriceNum <= 0 || isNaN(downPaymentNum) || downPaymentNum < 0 || downPaymentNum >= homePriceNum) return [];
-
-    const homePrice = new Decimal(homePriceNum);
-    const downPayment = new Decimal(downPaymentNum);
-    const rate = new Decimal(interestRateNum).div(100);
-    const term = parseInt(values.loanTerm) || 30;
-    const taxRate = isNaN(taxRateNum) ? new Decimal(0) : new Decimal(taxRateNum).div(100);
-    const homestead = values.homesteadType || 'none';
-
-    const loanAmount = homePrice.minus(downPayment);
-    const downPct = downPayment.div(homePrice).mul(100).toFixed(1);
-    const months = term * 12;
-    const monthlyRate = rate.div(12);
-
-    let basePayment: Decimal;
-    if (monthlyRate.gt(0)) {
-      const factor = monthlyRate.plus(1).pow(months);
-      basePayment = loanAmount.mul(monthlyRate.mul(factor)).div(factor.minus(1));
-    } else {
-      basePayment = loanAmount.div(months);
-    }
-
-    // School-district share of the tax bill is an estimate; the exemption cannot exceed the home's value.
-    const annualTaxBeforeExemption = homePrice.mul(taxRate);
-    const schoolTaxRate = taxRate.mul(SCHOOL_TAX_SHARE);
-    const exemptionAmount = homestead === 'senior' ? HOMESTEAD_SENIOR : homestead === 'general' ? HOMESTEAD_GENERAL : 0;
-    const exemptedValue = Decimal.min(new Decimal(exemptionAmount), homePrice);
-    const annualTaxAfterExemption = annualTaxBeforeExemption.minus(exemptedValue.mul(schoolTaxRate));
-
-    const monthlyTaxBefore = annualTaxBeforeExemption.div(12);
-    const monthlyTaxAfter = annualTaxAfterExemption.div(12);
-
-    const hasPmi = parseFloat(downPct) < 20;
-    const monthlyPmi = hasPmi ? loanAmount.mul(PMI_RATE).div(12) : new Decimal(0);
-    const insuranceAnnual = Math.max(0, parseFloat(values.homeInsurance) || 0);
-    const monthlyInsurance = new Decimal(insuranceAnnual).div(12);
-    const totalMonthly = basePayment.plus(monthlyTaxAfter).plus(monthlyPmi).plus(monthlyInsurance);
-    const totalInterest = basePayment.mul(months).minus(loanAmount);
-    const totalCost = loanAmount.plus(totalInterest);
+    const f = texasFigures(values);
+    if (!f) return [];
+    const {
+      downPayment, loanAmount, downPct, hasPmi, homestead, basePayment, totalMonthly, insuranceAnnual, totalInterest, totalCost,
+      annualTaxBeforeExemption, annualTaxAfterExemption, monthlyTaxAfter, term, rate,
+    } = f;
 
     const fmtDollar = (d: Decimal, decimals = 2): string =>
       `$${d.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
@@ -216,6 +234,83 @@ const texasMortgageConfig: CalculatorConfig = {
       },
     ];
   },
+  explainSteps: (values) => {
+    const f = texasFigures(values);
+    if (!f) return [];
+    const rows = texasMortgageConfig.calculate(values);
+    if (!rows.length) return [];
+    const val = (id: string) => resultValue(rows, id) ?? '';
+    const m = (d: Decimal): string => `$${d.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    const pc = (d: Decimal, dp = 4) => `${+d.mul(100).toFixed(dp)}%`;
+
+    const steps: ExplainStep[] = [
+      {
+        label: 'Loan amount and down payment',
+        expr: `${m(f.homePrice)} − ${m(f.downPayment)} = ${m(f.loanAmount)} · ${m(f.downPayment)} ÷ ${m(f.homePrice)} = ${f.downPct}% down`,
+        note: f.hasPmi ? 'Under 20% down, so the calculator adds an estimated PMI below.' : '20% or more down, so no PMI is added.',
+      },
+      {
+        label: 'Monthly rate and number of payments',
+        expr: `r = ${pc(f.rate)} ÷ 12 = ${f.monthlyRate.mul(100).toFixed(4)}% per month · n = ${f.term} years × 12 = ${f.months} payments`,
+      },
+    ];
+    if (f.monthlyRate.gt(0)) {
+      const factor = f.monthlyRate.plus(1).pow(f.months);
+      steps.push({
+        label: 'Principal and interest payment',
+        expr: `(1 + r)ⁿ = ${factor.toFixed(4)} · M = ${m(f.loanAmount)} × (r × (1 + r)ⁿ) ÷ ((1 + r)ⁿ − 1) = ${val('monthlyPayment')}`,
+        note: 'The one fixed payment that pays the interest and retires the loan exactly at the last month.',
+      });
+    } else {
+      steps.push({ label: 'No interest, so divide the loan evenly', expr: `M = ${m(f.loanAmount)} ÷ ${f.months} = ${val('monthlyPayment')}` });
+    }
+    steps.push({
+      label: 'Property tax before any exemption',
+      expr: `${m(f.homePrice)} × ${pc(f.taxRate)} = ${m(f.annualTaxBeforeExemption)} a year`,
+      note: 'Texas has no state income tax, so property tax is the big recurring tax on the house. Use your county appraisal district\'s rate for an exact figure.',
+    });
+    if (f.homestead === 'none') {
+      steps.push({
+        label: 'No homestead exemption applied',
+        expr: `${m(f.annualTaxBeforeExemption)} ÷ 12 = ${m(f.monthlyTaxAfter)} a month`,
+      });
+    } else {
+      steps.push(
+        {
+          label: 'Estimate the school-district part of the tax',
+          expr: `${pc(f.taxRate)} × ${pc(new Decimal(SCHOOL_TAX_SHARE), 2)} school share = ${pc(f.schoolTaxRate, 5)} school tax rate`,
+          note: 'The school share is an estimate (about half of a typical bill); your own taxing units decide the real split.',
+        },
+        {
+          label: `Homestead exemption (${f.homestead === 'senior' ? 'age 65+ / disabled' : 'general'})`,
+          expr: `min(${m(new Decimal(f.exemptionAmount))}, ${m(f.homePrice)}) = ${m(f.exemptedValue)} exempt × ${pc(f.schoolTaxRate, 5)} = ${m(f.exemptedValue.mul(f.schoolTaxRate))} saved → ${m(f.annualTaxBeforeExemption)} − ${m(f.exemptedValue.mul(f.schoolTaxRate))} = ${m(f.annualTaxAfterExemption)} a year · ÷ 12 = ${m(f.monthlyTaxAfter)} a month`,
+          note: 'The exemption removes part of the home\'s value from the school-district tax only, and cannot exceed the home\'s value.',
+        },
+      );
+    }
+    if (f.hasPmi) {
+      steps.push({
+        label: 'Estimated PMI',
+        expr: `${m(f.loanAmount)} × ${pc(new Decimal(PMI_RATE), 2)} ÷ 12 = ${m(f.monthlyPmi)} a month`,
+        note: 'The 0.5% a year is an estimate; real quotes vary with credit score.',
+      });
+    }
+    if (f.insuranceAnnual > 0) {
+      steps.push({ label: 'Homeowners insurance', expr: `${m(new Decimal(f.insuranceAnnual))} ÷ 12 = ${m(f.monthlyInsurance)} a month` });
+    }
+    steps.push(
+      {
+        label: 'Total monthly payment',
+        expr: `${val('monthlyPayment')} + ${m(f.monthlyTaxAfter)} tax${f.hasPmi ? ` + ${m(f.monthlyPmi)} PMI` : ''}${f.insuranceAnnual > 0 ? ` + ${m(f.monthlyInsurance)} insurance` : ''} = ${val('totalMonthly')}`,
+      },
+      {
+        label: 'Total interest and total cost of the loan',
+        expr: `${val('monthlyPayment')} × ${f.months} − ${m(f.loanAmount)} = ${m(f.totalInterest)} (shown as ${val('totalInterest')}) · ${m(f.loanAmount)} + ${m(f.totalInterest)} = ${val('totalCost')}`,
+      },
+    );
+    return finiteSteps(steps);
+  },
+
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(TexasMortgagePanel, { values, results });

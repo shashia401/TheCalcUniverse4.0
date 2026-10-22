@@ -1,6 +1,10 @@
 import { createElement } from 'react';
 import Decimal from 'decimal.js';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
+import { bracketSlices } from '../../../utils/bracketSteps';
+import { calcFICA, FICA_2025, STANDARD_DEDUCTIONS_2025 } from '../income-tax/taxData';
 import SalaryPanel from './SalaryPanel';
 import { TAX_YEAR } from '../../../utils/taxData';
 import { annualFromRate, estimateTakeHome, WEEKS_PER_YEAR } from './salaryCalcMath';
@@ -155,6 +159,69 @@ const salaryConfig: CalculatorConfig = {
         color: 'positive' as const,
       },
     ];
+  },
+  explainSteps: (values) => {
+    const rows = salaryConfig.calculate(values);
+    if (!rows.length) return [];
+    const amount = parseFloat(values.salaryAmount);
+    const freq = values.payFrequency || 'hourly';
+    const hoursPerWeek = parseFloat(values.hoursPerWeek) || 40;
+    const daysPerWeek = parseFloat(values.daysPerWeek) || 5;
+    const annual = annualFromRate(amount, freq, hoursPerWeek, daysPerWeek);
+    const m = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const pc = (x: number) => `${+(x * 100).toFixed(2)}%`;
+    const val = (id: string) => resultValue(rows, id) ?? '';
+
+    const toAnnual: Record<string, string> = {
+      hourly: `${m(amount)} × ${hoursPerWeek} hours × ${WEEKS_PER_YEAR} weeks`,
+      daily: `${m(amount)} × ${daysPerWeek} days × ${WEEKS_PER_YEAR} weeks`,
+      weekly: `${m(amount)} × 52 weeks`,
+      biweekly: `${m(amount)} × 26 pay periods`,
+      semimonthly: `${m(amount)} × 24 pay periods`,
+      monthly: `${m(amount)} × 12 months`,
+      annually: `${m(amount)} is already a yearly figure`,
+    };
+    const steps: ExplainStep[] = [
+      {
+        label: 'Turn your pay into a yearly amount',
+        expr: freq === 'annually' ? `${toAnnual.annually} = ${m(annual)}` : `${toAnnual[freq] ?? toAnnual.annually} = ${m(annual)}`,
+        note: 'Hourly and daily pay use your weekly hours or days over 52 weeks; the other frequencies use their number of pay periods a year.',
+      },
+      {
+        label: 'Hourly and daily rate',
+        expr: `Hourly = ${m(annual)} ÷ (${hoursPerWeek} hours × ${WEEKS_PER_YEAR} weeks) = ${val('hourly')} · Daily = ${m(annual)} ÷ (${daysPerWeek} days × ${WEEKS_PER_YEAR} weeks) = ${val('daily')}`,
+      },
+      {
+        label: 'Weekly, bi-weekly and monthly pay',
+        expr: `Weekly = ${m(annual)} ÷ 52 = ${val('weekly')} · Bi-weekly = ${m(annual)} ÷ 26 = ${val('biweekly')} · Monthly = ${m(annual)} ÷ 12 = ${val('monthly')}`,
+      },
+    ];
+
+    const t = estimateTakeHome(annual);
+    const fica = calcFICA(annual, 'single');
+    const slices = bracketSlices(t.taxableIncome, t.brackets, m);
+    const wageBase = FICA_2025.socialSecurityWageBase;
+    steps.push(
+      {
+        label: `Subtract the ${TAX_YEAR} standard deduction (single filer)`,
+        expr: `max(0, ${m(annual)} − ${m(STANDARD_DEDUCTIONS_2025.single)}) = ${m(t.taxableIncome)} taxable income`,
+        note: 'The take-home estimate assumes a single filer with no other deductions, and no state or local tax.',
+      },
+      {
+        label: `Tax each ${TAX_YEAR} federal bracket slice`,
+        expr: slices ? `${slices} = ${m(t.federalTax)} (top bracket ${pc(t.marginalRate)})` : `No taxable income, federal tax = ${m(0)}`,
+        note: 'Each rate applies only to the part of your income inside that bracket.',
+      },
+      {
+        label: 'Add up Social Security and Medicare (FICA)',
+        expr: `Social Security: min(${m(annual)}, ${m(wageBase)}) × ${pc(FICA_2025.socialSecurityRate)} = ${m(fica.ss)} · Medicare: ${m(annual)} × ${pc(FICA_2025.medicareRate)} = ${m(fica.medicare)} · Additional Medicare: max(0, ${m(annual)} − ${m(FICA_2025.additionalMedicareThreshold.single)}) × ${pc(FICA_2025.additionalMedicareRate)} = ${m(fica.additionalMedicare)} → ${m(t.fica)}`,
+      },
+      {
+        label: 'Estimated take-home pay',
+        expr: `${m(annual)} − ${m(t.federalTax)} federal − ${m(t.fica)} FICA = ${m(t.net)} → ${val('netAnnual')} · ÷ 26 = ${val('netBiweekly')} (bi-weekly)`,
+      },
+    );
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => {
     const amount = parseFloat(values.salaryAmount);

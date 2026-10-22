@@ -1,9 +1,82 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
+import { finiteSteps } from '../../../utils/explainGuard';
 import RentalWaterfallPanel from './RentalWaterfallPanel';
 import { STATE_TAX_RATES } from './utils';
 import { pmt } from '../../../utils/financial';
 import { numOr } from '../rent-vs-buy/model';
+
+const fmt = (n: number) =>
+  n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtInt = (n: number) =>
+  n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+/** Every figure behind the result rows and the worked solution (single source of truth). Null when the inputs are unusable. */
+export function rentalFigures(values: Record<string, string>) {
+  const purchasePrice = parseFloat(values.purchasePrice);
+  const downPayment = parseFloat(values.downPayment) || 0;
+  const closingCosts = parseFloat(values.closingCosts) || 0;
+  const annualRate = parseFloat(values.interestRate) / 100;
+  const years = parseFloat(values.loanTerm || '30');
+  const monthlyRent = parseFloat(values.monthlyRent);
+  const vacancyRate = numOr(values.vacancyRate, 5) / 100; // blank -> 5%, an explicit 0 stays 0
+
+  // State-based property tax: if state is selected (not custom), auto-calculate
+  const stateKey = values.propertyTaxState || 'custom';
+  const stateData = STATE_TAX_RATES[stateKey];
+  const manualPropTax = parseFloat(values.propertyTax);
+  let annualPropertyTax: number;
+  let stateRateUsed = 0;
+  if (stateKey !== 'custom' && stateData && stateData.rate > 0 && (!manualPropTax || isNaN(manualPropTax) || manualPropTax === 0)) {
+    stateRateUsed = stateData.rate;
+    annualPropertyTax = purchasePrice * stateRateUsed;
+  } else {
+    annualPropertyTax = manualPropTax || 0;
+  }
+
+  const annualInsurance = parseFloat(values.insurance) || 0;
+  const monthlyHOA = parseFloat(values.hoaFees) || 0;
+  const annualHOA = monthlyHOA * 12;
+  const maintenancePct = numOr(values.maintenancePct, 10) / 100; // blank -> 10%, an explicit 0 stays 0
+  const mgmtPct = parseFloat(values.propertyMgmtPct) / 100 || 0;
+
+  if (isNaN(purchasePrice) || isNaN(monthlyRent) || isNaN(annualRate) || purchasePrice <= 0 || monthlyRent <= 0) return null;
+  if (downPayment > purchasePrice) return null; // cannot put down more than the price
+
+  const loanAmount = purchasePrice - downPayment;
+  const totalCashInvested = downPayment + closingCosts;
+  const monthlyRate = annualRate / 12;
+  const numPayments = years * 12;
+
+  const monthlyMortgage = loanAmount > 0 ? pmt(loanAmount, monthlyRate, numPayments) : 0;
+
+  const annualGrossRent = monthlyRent * 12;
+  const annualVacancyLoss = annualGrossRent * vacancyRate;
+  const effectiveGrossRent = annualGrossRent - annualVacancyLoss;
+
+  const annualMaintenance = annualGrossRent * maintenancePct;
+  const annualMgmtFee = effectiveGrossRent * mgmtPct;
+  const totalAnnualOpEx =
+    annualPropertyTax + annualInsurance + annualHOA + annualMaintenance + annualMgmtFee;
+
+  const noi = effectiveGrossRent - totalAnnualOpEx;
+  const annualDebtService = monthlyMortgage * 12;
+  const annualCashFlow = noi - annualDebtService;
+  const monthlyCashFlow = annualCashFlow / 12;
+
+  const capRate = purchasePrice > 0 ? (noi / purchasePrice) * 100 : 0;
+  const cashOnCash = totalCashInvested > 0 ? (annualCashFlow / totalCashInvested) * 100 : 0;
+  const grossRentMultiplier = monthlyRent > 0 ? purchasePrice / annualGrossRent : 0;
+  const dscr = annualDebtService > 0 ? noi / annualDebtService : 0;
+
+  return {
+    purchasePrice, downPayment, closingCosts, annualRate, years, monthlyRent, vacancyRate, stateKey, stateData, stateRateUsed,
+    annualPropertyTax, annualInsurance, monthlyHOA, annualHOA, maintenancePct, mgmtPct, loanAmount, totalCashInvested,
+    monthlyRate, numPayments, monthlyMortgage, annualGrossRent, annualVacancyLoss, effectiveGrossRent, annualMaintenance,
+    annualMgmtFee, totalAnnualOpEx, noi, annualDebtService, annualCashFlow, monthlyCashFlow, capRate, cashOnCash,
+    grossRentMultiplier, dscr,
+  };
+}
 
 const rentalPropertyConfig: CalculatorConfig = {
   inputs: [
@@ -163,66 +236,13 @@ const rentalPropertyConfig: CalculatorConfig = {
     },
   ],
   calculate: (values) => {
-    const purchasePrice = parseFloat(values.purchasePrice);
-    const downPayment = parseFloat(values.downPayment) || 0;
-    const closingCosts = parseFloat(values.closingCosts) || 0;
-    const annualRate = parseFloat(values.interestRate) / 100;
-    const years = parseFloat(values.loanTerm || '30');
-    const monthlyRent = parseFloat(values.monthlyRent);
-    const vacancyRate = numOr(values.vacancyRate, 5) / 100; // blank -> 5%, an explicit 0 stays 0
-
-    // State-based property tax: if state is selected (not custom), auto-calculate
-    const stateKey = values.propertyTaxState || 'custom';
-    const stateData = STATE_TAX_RATES[stateKey];
-    const manualPropTax = parseFloat(values.propertyTax);
-    let annualPropertyTax: number;
-    let stateRateUsed = 0;
-    if (stateKey !== 'custom' && stateData && stateData.rate > 0 && (!manualPropTax || isNaN(manualPropTax) || manualPropTax === 0)) {
-      stateRateUsed = stateData.rate;
-      annualPropertyTax = purchasePrice * stateRateUsed;
-    } else {
-      annualPropertyTax = manualPropTax || 0;
-    }
-
-    const annualInsurance = parseFloat(values.insurance) || 0;
-    const monthlyHOA = parseFloat(values.hoaFees) || 0;
-    const annualHOA = monthlyHOA * 12;
-    const maintenancePct = numOr(values.maintenancePct, 10) / 100; // blank -> 10%, an explicit 0 stays 0
-    const mgmtPct = parseFloat(values.propertyMgmtPct) / 100 || 0;
-
-    if (isNaN(purchasePrice) || isNaN(monthlyRent) || isNaN(annualRate) || purchasePrice <= 0 || monthlyRent <= 0) return [];
-    if (downPayment > purchasePrice) return []; // cannot put down more than the price
-
-    const loanAmount = purchasePrice - downPayment;
-    const totalCashInvested = downPayment + closingCosts;
-    const monthlyRate = annualRate / 12;
-    const numPayments = years * 12;
-
-    const monthlyMortgage = loanAmount > 0 ? pmt(loanAmount, monthlyRate, numPayments) : 0;
-
-    const annualGrossRent = monthlyRent * 12;
-    const annualVacancyLoss = annualGrossRent * vacancyRate;
-    const effectiveGrossRent = annualGrossRent - annualVacancyLoss;
-
-    const annualMaintenance = annualGrossRent * maintenancePct;
-    const annualMgmtFee = effectiveGrossRent * mgmtPct;
-    const totalAnnualOpEx =
-      annualPropertyTax + annualInsurance + annualHOA + annualMaintenance + annualMgmtFee;
-
-    const noi = effectiveGrossRent - totalAnnualOpEx;
-    const annualDebtService = monthlyMortgage * 12;
-    const annualCashFlow = noi - annualDebtService;
-    const monthlyCashFlow = annualCashFlow / 12;
-
-    const capRate = purchasePrice > 0 ? (noi / purchasePrice) * 100 : 0;
-    const cashOnCash = totalCashInvested > 0 ? (annualCashFlow / totalCashInvested) * 100 : 0;
-    const grossRentMultiplier = monthlyRent > 0 ? purchasePrice / annualGrossRent : 0;
-    const dscr = annualDebtService > 0 ? noi / annualDebtService : 0;
-
-    const fmt = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const fmtInt = (n: number) =>
-      n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    const f = rentalFigures(values);
+    if (!f) return [];
+    const {
+      purchasePrice, stateData, stateKey, stateRateUsed, monthlyRent, annualCashFlow, monthlyCashFlow, cashOnCash, capRate, noi,
+      dscr, grossRentMultiplier, monthlyMortgage, annualDebtService, annualVacancyLoss, effectiveGrossRent, totalAnnualOpEx,
+      totalCashInvested, monthlyHOA,
+    } = f;
 
     return [
       {
@@ -303,6 +323,62 @@ const rentalPropertyConfig: CalculatorConfig = {
         color: 'neutral' as const,
       }] : []),
     ];
+  },
+  explainSteps: (values) => {
+    const f = rentalFigures(values);
+    if (!f) return [];
+    const usd = (n: number) => `${n < 0 ? '-' : ''}$${fmt(Math.abs(n))}`;
+    const pctOf = (x: number) => `${+(x * 100).toFixed(4)}%`;
+    const steps: ExplainStep[] = [
+      {
+        label: 'What you borrow and what you put in',
+        expr: `Loan = $${fmt(f.purchasePrice)} price − $${fmt(f.downPayment)} down = $${fmt(f.loanAmount)} · Cash invested = $${fmt(f.downPayment)} down + $${fmt(f.closingCosts)} closing and repairs = $${fmt(f.totalCashInvested)}`,
+      },
+    ];
+    if (f.loanAmount <= 0) {
+      steps.push({ label: 'No loan, so no mortgage payment', expr: 'Loan = $0.00, so the monthly mortgage payment is $0.00' });
+    } else if (Math.abs(f.monthlyRate) < 1e-10) {
+      steps.push({
+        label: 'Spread the loan evenly (0% interest)',
+        expr: `M = $${fmt(f.loanAmount)} ÷ ${f.numPayments} payments = $${fmt(f.monthlyMortgage)}/month`,
+      });
+    } else {
+      const growth = Math.pow(1 + f.monthlyRate, f.numPayments);
+      steps.push({
+        label: 'Monthly mortgage payment',
+        expr: `r = ${+(f.annualRate * 100).toFixed(4)}% ÷ 12 = ${f.monthlyRate.toFixed(6)} · n = ${f.years} years × 12 = ${f.numPayments} · (1 + r)ⁿ = ${growth.toFixed(4)} · M = $${fmt(f.loanAmount)} × (r × (1 + r)ⁿ) ÷ ((1 + r)ⁿ − 1) = $${fmt(f.monthlyMortgage)}/month`,
+        note: 'Principal and interest only; the property tax, insurance, HOA and upkeep below are counted as operating expenses, not as part of the loan.',
+      });
+    }
+    steps.push({
+      label: 'Rent you actually collect',
+      expr: `Gross rent = $${fmt(f.monthlyRent)} × 12 = $${fmt(f.annualGrossRent)} · Vacancy ${pctOf(f.vacancyRate)} × $${fmt(f.annualGrossRent)} = −$${fmt(f.annualVacancyLoss)} · Effective rent = $${fmt(f.effectiveGrossRent)}`,
+      note: 'Vacancy is the share of the year the unit sits empty; a blank vacancy rate uses 5%, an explicit 0 means none.',
+    });
+    const taxPart = f.stateRateUsed > 0
+      ? `Property tax = $${fmt(f.purchasePrice)} × ${pctOf(f.stateRateUsed)} (${f.stateData?.label ?? 'state'} average rate) = $${fmt(f.annualPropertyTax)}`
+      : `Property tax (as entered) = $${fmt(f.annualPropertyTax)}`;
+    steps.push({
+      label: 'Operating expenses for the year',
+      expr: `${taxPart} · Insurance = $${fmt(f.annualInsurance)} · HOA = $${fmt(f.monthlyHOA)} × 12 = $${fmt(f.annualHOA)} · Maintenance = ${pctOf(f.maintenancePct)} × $${fmt(f.annualGrossRent)} gross rent = $${fmt(f.annualMaintenance)} · Management = ${pctOf(f.mgmtPct)} × $${fmt(f.effectiveGrossRent)} effective rent = $${fmt(f.annualMgmtFee)} · Total = $${fmt(f.totalAnnualOpEx)}`,
+      note: 'Operating expenses leave out the mortgage; maintenance is charged on gross rent and management on the rent you collect.',
+    });
+    steps.push({
+      label: 'Net operating income and cap rate',
+      expr: `NOI = $${fmt(f.effectiveGrossRent)} − $${fmt(f.totalAnnualOpEx)} = ${usd(f.noi)}/yr · Cap rate = ${usd(f.noi)} ÷ $${fmt(f.purchasePrice)} × 100 = ${f.capRate.toFixed(2)}%`,
+      note: 'Cap rate ignores financing, so it compares properties as if each were bought for cash.',
+    });
+    steps.push({
+      label: 'Debt coverage and rent multiple',
+      expr: `${f.annualDebtService > 0 ? `DSCR = ${usd(f.noi)} ÷ ($${fmt(f.monthlyMortgage)} × 12 = $${fmt(f.annualDebtService)}) = ${f.dscr.toFixed(2)}x` : 'DSCR: not defined without a loan'} · GRM = $${fmt(f.purchasePrice)} ÷ $${fmt(f.annualGrossRent)} = ${f.grossRentMultiplier.toFixed(1)}x`,
+      note: 'A DSCR above 1.00 means the property earns more than the loan costs.',
+    });
+    steps.push({
+      label: 'Cash flow and cash-on-cash return',
+      expr: `Annual cash flow = ${usd(f.noi)} − $${fmt(f.annualDebtService)} debt service = ${usd(f.annualCashFlow)} · ÷ 12 = ${usd(f.monthlyCashFlow)}/month · ${f.totalCashInvested > 0 ? `Cash-on-cash = ${usd(f.annualCashFlow)} ÷ $${fmt(f.totalCashInvested)} × 100 = ${f.cashOnCash.toFixed(2)}%` : 'Cash-on-cash: no cash invested, shown as 0.00%'}`,
+      note: 'Cash flow is what is left after every cost and the mortgage; cash-on-cash divides it by the cash you actually put in.',
+    });
+    return finiteSteps(steps);
   },
   extraPanel: (values, results) => createElement(RentalWaterfallPanel, { values, results }),
   educational: {
