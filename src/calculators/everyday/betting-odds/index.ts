@@ -1,7 +1,9 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import BettingOddsPanel from './BettingOddsPanel';
 import { decimalToAmerican, decimalToFraction, oddsInfo } from './oddsMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const bettingOddsConfig: CalculatorConfig = {
   inputs: [
@@ -104,6 +106,49 @@ const bettingOddsConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(BettingOddsPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const o = oddsInfo(values);
+    if (!o) return [];
+    const results = bettingOddsConfig.calculate(values);
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
+    const format = values.oddsFormat || 'American';
+    const dec = o.decimal.toFixed(3);
+    let conversion: string;
+    if (format === 'American') {
+      const a = Number(values.americanOdds);
+      conversion = a > 0 ? `+${a} → ${a} ÷ 100 + 1 = ${dec}` : `${a} → 100 ÷ ${Math.abs(a)} + 1 = ${dec}`;
+    } else if (format === 'Fractional') {
+      const [num, den] = values.fractionalOdds.split('/').map((s) => Number(s.trim()));
+      conversion = `${num}/${den} → ${num} ÷ ${den} + 1 = ${dec}`;
+    } else {
+      conversion = `${Number(values.decimalOdds)} is already decimal odds (shown as ${dec})`;
+    }
+    const steps: ExplainStep[] = [
+      {
+        label: 'Convert the odds to decimal odds',
+        expr: conversion,
+        note: Math.abs(o.decimal - Number(dec)) > 1e-9 ? 'Decimal odds are shown to 3 places; the calculation keeps full precision.' : undefined,
+      },
+      { label: 'Implied probability', expr: `1 ÷ ${dec} = ${val('impliedProbability')}`, note: 'Includes the bookmaker margin.' },
+      {
+        label: 'Payout and profit on your stake',
+        expr: `${val('stakeReturned')} × ${dec} = ${val('payout')}; profit = ${val('payout')} − ${val('stakeReturned')} = ${val('profit')}`,
+      },
+    ];
+    if (o.otherImplied !== null && o.fairProb !== null) {
+      const total = o.implied + o.otherImplied;
+      steps.push(
+        {
+          label: 'Add the implied probability of the opposite outcome',
+          expr: `${pct(o.implied)} + ${pct(o.otherImplied)} = ${pct(total)}, so the overround is ${val('overround')}`,
+          note: 'The excess over 100% is the bookmaker margin.',
+        },
+        { label: 'Remove the margin proportionally', expr: `${pct(o.implied)} ÷ ${pct(total)} = ${val('fairProbability')}` },
+      );
+    }
+    return finiteSteps(steps);
   },
   educational: {
     formula:

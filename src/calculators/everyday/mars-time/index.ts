@@ -1,5 +1,19 @@
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
-import { SOL_SECONDS, hms, lmstHours, marsSolDate, mtcHours, parseUtc } from './marsMath';
+import { MSD_CORRECTION, MSD_EPOCH_JD, MSD_EPOCH_OFFSET, SOL_DAYS, SOL_SECONDS, TT_MINUS_TAI, UNIX_EPOCH_JD, hms, jdTTOf, jdUtcOf, lmstHours, marsSolDate, mtcHours, parseUtc, taiMinusUtc } from './marsMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
+
+const LANDING_DATES: Record<string, string> = {
+  curiosity: '2012-08-06T05:17:57Z',
+  perseverance: '2021-02-18T20:55:00Z',
+  insight: '2018-11-26T19:52:59Z',
+};
+
+const ROVER_NAMES: Record<string, string> = {
+  curiosity: 'Curiosity (MSL) — Gale Crater',
+  perseverance: 'Perseverance (Mars 2020) — Jezero Crater',
+  insight: 'InSight — Elysium Planitia',
+};
 
 const marsTimeConfig: CalculatorConfig = {
   inputs: [
@@ -127,26 +141,14 @@ const marsTimeConfig: CalculatorConfig = {
       const sol = parseFloat(values.missionSols);
       if (!Number.isFinite(sol) || sol < 0) return [];
 
-      const landingDates: Record<string, string> = {
-        curiosity: '2012-08-06T05:17:57Z',
-        perseverance: '2021-02-18T20:55:00Z',
-        insight: '2018-11-26T19:52:59Z',
-      };
-
-      const roverNames: Record<string, string> = {
-        curiosity: 'Curiosity (MSL) — Gale Crater',
-        perseverance: 'Perseverance (Mars 2020) — Jezero Crater',
-        insight: 'InSight — Elysium Planitia',
-      };
-
-      const rover = values.rover && landingDates[values.rover] ? values.rover : 'curiosity';
-      const landingDate = new Date(landingDates[rover]);
+      const rover = values.rover && LANDING_DATES[values.rover] ? values.rover : 'curiosity';
+      const landingDate = new Date(LANDING_DATES[rover]);
       const earthElapsed = sol * SOL_SECONDS * 1000;
       const earthDate = new Date(landingDate.getTime() + earthElapsed);
 
       results.push(
         { id: 'earthDate', label: `Sol ${sol} on Earth`, value: earthDate.toISOString().split('T')[0], highlight: true, color: 'positive', interpretation: 'Same time of sol as the landing, counted from the landing instant (Sol 0).' },
-        { id: 'rover', label: 'Rover', value: roverNames[rover], color: 'neutral' },
+        { id: 'rover', label: 'Rover', value: ROVER_NAMES[rover], color: 'neutral' },
         { id: 'landing', label: 'Landed', value: landingDate.toISOString().split('T')[0], color: 'neutral' },
         { id: 'totalDays', label: 'Earth Days Since Landing', value: Math.floor(earthElapsed / 86400000).toLocaleString('en-US'), color: 'neutral' },
       );
@@ -155,6 +157,61 @@ const marsTimeConfig: CalculatorConfig = {
     return results;
   },
 
+  explainSteps: (values) => {
+    const results = marsTimeConfig.calculate(values);
+    if (!results.length) return [];
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const n = (x: number, d = 4) => x.toLocaleString('en-US', { maximumFractionDigits: d });
+    const mode = values.mode || 'earthToMars';
+
+    if (mode === 'earthToMars') {
+      const earthDate = parseUtc(values.earthDate);
+      if (!earthDate) return [];
+      const lon = parseFloat(values.marsLongitude);
+      const jdUtc = jdUtcOf(earthDate);
+      const jdTT = jdTTOf(earthDate);
+      const msd = marsSolDate(earthDate);
+      const mtcH = mtcHours(msd);
+      return finiteSteps([
+        { label: 'Convert the UTC time to a Julian Date', expr: `JD(UTC) = ${n(earthDate.getTime() / 86400000, 6)} days since 1970-01-01 + ${UNIX_EPOCH_JD} = ${n(jdUtc, 6)}` },
+        {
+          label: 'Add the leap seconds and 32.184 s to reach Terrestrial Time',
+          expr: `JD(TT) = ${n(jdUtc, 6)} + (${taiMinusUtc(earthDate.getTime())} + ${TT_MINUS_TAI}) ÷ 86,400 = ${n(jdTT, 6)}`,
+        },
+        {
+          label: 'Mars Sol Date',
+          expr: `MSD = (JD(TT) − ${MSD_EPOCH_JD}) ÷ ${SOL_DAYS} + ${MSD_EPOCH_OFFSET} − ${MSD_CORRECTION} = ${val('msd')}`,
+          note: 'Mars24 algorithm (Allison & McEwen 2000).',
+        },
+        {
+          label: 'Coordinated Mars Time (mean solar time at the prime meridian)',
+          expr: `24 × fractional part of MSD (${n(msd - Math.floor(msd), 6)}) = ${n(mtcH, 4)} h = ${val('mtc')}`,
+        },
+        {
+          label: 'Local Mean Solar Time at your longitude',
+          expr: `${n(mtcH, 4)} h + ${lon}° ÷ 15 = ${n(mtcH + lon / 15, 4)} h, wrapped into 0–24 h = ${val('lmst')}`,
+          note: 'Dividing the east longitude by 15 turns degrees into hours.',
+        },
+      ]);
+    }
+
+    if (mode === 'solToEarth') {
+      const sols = parseFloat(values.sols);
+      return finiteSteps([
+        { label: 'Multiply the sols by the length of a sol', expr: `${n(sols)} sols × ${n(SOL_SECONDS, 3)} s = ${n(sols * SOL_SECONDS, 3)} s`, note: `1 sol = ${val('solSeconds')}` },
+        { label: 'Divide by the seconds in an Earth day', expr: `${n(sols * SOL_SECONDS, 3)} s ÷ 86,400 = ${val('earthDays')}` },
+        { label: 'Split into days, hours and minutes', expr: `${val('earthDays')} = ${val('earthTime')}` },
+      ]);
+    }
+
+    const sol = parseFloat(values.missionSols);
+    const rover = values.rover && LANDING_DATES[values.rover] ? values.rover : 'curiosity';
+    return finiteSteps([
+      { label: 'Take the rover landing instant as Sol 0', expr: `${ROVER_NAMES[rover]} landed ${LANDING_DATES[rover]}` },
+      { label: 'Convert the sol number to Earth time', expr: `${n(sol)} sols × ${n(SOL_SECONDS, 3)} s = ${n(sol * SOL_SECONDS, 3)} s = ${n((sol * SOL_SECONDS) / 86400, 4)} Earth days` },
+      { label: 'Add it to the landing instant', expr: `landing + ${n((sol * SOL_SECONDS) / 86400, 4)} days = ${val('earthDate')}`, note: `${val('totalDays')} whole Earth days since landing.` },
+    ]);
+  },
   educational: {
     formula: '1 sol = 24h 39m 35.244s = 88,775.244 seconds',
     formulaDescription: 'A Mars solar day (sol) is 39 minutes and 35 seconds longer than an Earth day. This is because Mars rotates slightly slower — its sidereal rotation period is 24h 37m 22.7s, but the orbital motion adds ~2 minutes to the solar day. A Mars year (686.98 Earth days) is about 668.6 sols.',

@@ -1,7 +1,9 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import ReadingTimePanel from './ReadingTimePanel';
 import { readingInfo } from './readingMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const readingTimeConfig: CalculatorConfig = {
   inputs: [
@@ -94,6 +96,26 @@ const readingTimeConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(ReadingTimePanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const r = readingInfo(values);
+    if (!r) return [];
+    const results = readingTimeConfig.calculate(values);
+    const n = (x: number) => x.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    const base = r.wordCount / r.wpm;
+    const steps: ExplainStep[] = [{ label: 'Divide the words by your reading speed', expr: `${n(r.wordCount)} words ÷ ${r.wpm} wpm = ${n(base)} min` }];
+    if (r.multiplier !== 1) {
+      steps.push({
+        label: `Apply the ${r.contentType} content multiplier`,
+        expr: `${n(base)} min × ${r.multiplier} = ${n(r.readingMinutes)} min`,
+        note: 'The x1.3 and x1.5 multipliers are rules of thumb, not a published standard.',
+      });
+    }
+    if (r.breakMinutes > 0) {
+      steps.push({ label: 'Add the breaks', expr: `${n(r.readingMinutes)} min + ${r.breakMinutes} min (${r.breakItems.join(', ')}) = ${n(r.totalMinutes)} min` });
+    }
+    steps.push({ label: 'Round to a readable time', expr: `${n(r.totalMinutes)} min = ${resultValue(results, 'readingTime')}` });
+    return finiteSteps(steps);
   },
   educational: {
     formula:

@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import SchengenVisaPanel from './SchengenVisaPanel';
-import { fromDayNum, schengenInfo } from './schengenMath';
+import { MAX_DAYS, WINDOW_DAYS, fromDayNum, schengenInfo, toIsoDate } from './schengenMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString('en-US', {
@@ -172,6 +174,41 @@ const schengenVisaConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(SchengenVisaPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    // Without a check date the window would end today; steps must depend only on the dates the user typed.
+    if (!values.checkDate?.trim()) return [];
+    const info = schengenInfo(values);
+    if (!info) return [];
+    const results = schengenVisaConfig.calculate(values);
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const iso = (day: number) => toIsoDate(fromDayNum(day));
+    const sum = info.tripDays.reduce((a, b) => a + b, 0);
+    return finiteSteps([
+      {
+        label: 'Set the 180-day window that ends on the check date',
+        expr: `${iso(info.checkDay)} − ${WINDOW_DAYS - 1} days = ${iso(info.windowStart)}, so the window is ${iso(info.windowStart)} to ${iso(info.checkDay)}`,
+        note: 'The check date itself is the last day of the window.',
+      },
+      {
+        label: 'Count each trip’s days inside the window',
+        expr: info.trips.map((t, i) => `Trip ${i + 1} (${iso(t.start)} to ${iso(t.end)}): ${info.tripDays[i]} ${info.tripDays[i] === 1 ? 'day' : 'days'}`).join(' · '),
+        note: 'Entry and exit days both count.',
+      },
+      {
+        label: 'Count every calendar day once',
+        expr: info.overlapping
+          ? `${info.tripDays.join(' + ')} = ${sum}, minus ${sum - info.used} overlapping = ${val('totalDaysUsed')}`
+          : info.tripDays.length > 1
+            ? `${info.tripDays.join(' + ')} = ${val('totalDaysUsed')}`
+            : val('totalDaysUsed'),
+        note: info.overlapping ? 'A day covered by two trips counts once.' : undefined,
+      },
+      {
+        label: `Compare with the ${MAX_DAYS}-day limit`,
+        expr: info.overstay ? `${info.used} − ${MAX_DAYS} = ${val('daysRemaining')}` : `${MAX_DAYS} − ${info.used} = ${val('daysRemaining')}`,
+      },
+    ]);
   },
   educational: {
     formula: 'Total Days in Schengen Area (within any rolling 180-day window) ≤ 90',

@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WeddingAlcoholPanel from './WeddingAlcoholPanel';
-import { alcoholPlan } from './weddingMath';
+import { BEER_PER_HOUR, COCKTAILS_PER_HOUR, GLASSES_PER_WINE_BOTTLE, SHOTS_PER_LIQUOR_BOTTLE, WINE_PER_HOUR, alcoholPlan } from './weddingMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const weddingAlcoholConfig: CalculatorConfig = {
   inputs: [
@@ -119,6 +121,35 @@ const weddingAlcoholConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(WeddingAlcoholPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const p = alcoholPlan(values);
+    if (!p) return [];
+    const results = weddingAlcoholConfig.calculate(values);
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const n = (x: number) => x.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    return finiteSteps([
+      {
+        label: 'Drinking guests',
+        expr: `${n(p.guests)} guests × ${n(p.drinkersPct)}% = ${n(p.drinkingGuests)} (shown rounded up as ${val('drinkingGuests')})`,
+        note: results.find((r) => r.id === 'drinkingGuests')?.warning,
+      },
+      {
+        label: 'Beer',
+        expr: `${n(p.drinkingGuests)} × ${n(p.beerPct)}% × ${n(p.duration)} h × ${BEER_PER_HOUR} beers/h = ${n(p.beer)} → ${val('beerTotal')}`,
+        note: 'Rule of thumb, not measured data; rounded up.',
+      },
+      {
+        label: 'Wine',
+        expr: `${n(p.drinkingGuests)} × ${n(p.winePct)}% × ${n(p.duration)} h × ${WINE_PER_HOUR} glass/h = ${n(p.wineGlasses)} glasses; ÷ ${GLASSES_PER_WINE_BOTTLE} per bottle = ${n(p.wineBottles)} → ${val('wineBottles')}`,
+        note: 'Rule of thumb, not measured data; rounded up.',
+      },
+      {
+        label: 'Liquor',
+        expr: `${n(p.drinkingGuests)} × ${n(p.liquorPct)}% × ${n(p.duration)} h × ${COCKTAILS_PER_HOUR} cocktails/h = ${n(p.liquorDrinks)} cocktails; ÷ ${SHOTS_PER_LIQUOR_BOTTLE} per bottle = ${n(p.liquorBottles)} → ${val('liquorBottles')}`,
+        note: 'Rule of thumb, not measured data; rounded up.',
+      },
+    ]);
   },
   educational: {
     formula: 'Drinking Guests = Total Guests x (Drinkers % / 100) | Beer = Drinking Guests x (Beer % / 100) x Hours x 1.5/hr | Wine (bottles) = (Drinking Guests x Wine % / 100 x Hours x 1.0/hr) / 5 | Liquor (bottles) = (Drinking Guests x Liquor % / 100 x Hours x 0.75/hr) / 17',

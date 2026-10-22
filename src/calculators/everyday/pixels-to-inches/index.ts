@@ -1,7 +1,9 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import { createElement } from 'react';
 import PixelsToInchesPanel from './PixelsToInchesPanel';
 import { pixelInfo } from './pixelsMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const pixelsToInchesConfig: CalculatorConfig = {
   inputs: [
@@ -117,6 +119,29 @@ const pixelsToInchesConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(PixelsToInchesPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const p = pixelInfo(values);
+    if (!p) return [];
+    const results = pixelsToInchesConfig.calculate(values);
+    const f2 = (x: number) => x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const n = (x: number) => x.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    const units = values.outputUnits || 'all';
+    const steps: ExplainStep[] = [{ label: 'Divide the pixels by the DPI', expr: `${n(p.pixels)} px ÷ ${n(p.dpi)} DPI = ${f2(p.inches)}"` }];
+    if (units !== 'imperial') {
+      steps.push({ label: 'Convert inches to centimetres and millimetres', expr: `${f2(p.inches)}" × 2.54 = ${f2(p.cm)} cm; × 25.4 = ${f2(p.mm)} mm` });
+    }
+    if (p.pixelsB !== null && p.inchesB !== null && p.cmB !== null) {
+      steps.push({ label: 'Do the same for the other side', expr: `${n(p.pixelsB)} px ÷ ${n(p.dpi)} DPI = ${f2(p.inchesB)}" (${f2(p.cmB)} cm)` });
+      steps.push({ label: 'Megapixels', expr: `${n(p.pixels)} × ${n(p.pixelsB)} ÷ 1,000,000 = ${resultValue(results, 'megapixels')}` });
+    } else {
+      steps.push({
+        label: 'Megapixels (square image assumed)',
+        expr: `${n(p.pixels)} × ${n(p.pixels)} ÷ 1,000,000 = ${resultValue(results, 'megapixels')}`,
+        note: 'Only one side was entered, so the image is assumed to be square.',
+      });
+    }
+    return finiteSteps(steps);
   },
   educational: {
     formula: 'Inches = Pixels ÷ DPI | cm = Inches × 2.54 | mm = Inches × 25.4 | MP = Width px × Height px ÷ 1,000,000',

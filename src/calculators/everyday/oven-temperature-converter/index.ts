@@ -1,7 +1,8 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import OvenTempPanel from './OvenTempPanel';
-import { closestGasMark, cToF, fToC, gasMarkToTemps, MAX_GAS_MARK, MIN_GAS_MARK } from '../../../utils/ovenTemp';
+import { closestGasMark, cToF, fToC, GAS_MARK_TABLE, gasMarkToTemps, MAX_GAS_MARK, MIN_GAS_MARK } from '../../../utils/ovenTemp';
+import { resultValue } from '../../../utils/explainResults';
 
 function formatGasMark(gasMark: number): string {
   if (gasMark === 0.25) return 'Gas Mark 1/4';
@@ -117,6 +118,56 @@ const ovenTempConverterConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(OvenTempPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const results = ovenTempConverterConfig.calculate(values);
+    if (!results.length || results.some((r) => r.id === 'gasMarkRange')) return [];
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const n = (x: number, d = 2) => x.toLocaleString('en-US', { maximumFractionDigits: d });
+    const fromUnit = values.fromUnit || '°F';
+    const text = (values.temperature ?? '').trim();
+
+    if (fromUnit === 'Gas Mark') {
+      const mark = parseGasMarkInput(text);
+      const temps = mark === null ? null : gasMarkToTemps(mark);
+      if (mark === null || !temps) return [];
+      const steps: ExplainStep[] = [];
+      if (temps.exact) {
+        steps.push({ label: 'Look the gas mark up in the table', expr: `${val('gasMark')} = ${val('fahrenheit')} / ${val('celsius')}`, note: 'An exact table entry.' });
+      } else {
+        const hiIdx = GAS_MARK_TABLE.findIndex((r) => r.mark > mark);
+        const lo = GAS_MARK_TABLE[hiIdx - 1];
+        const hi = GAS_MARK_TABLE[hiIdx];
+        steps.push(
+          {
+            label: 'Find the two neighbouring gas marks',
+            expr: `Gas Mark ${lo.mark} = ${lo.fahrenheit}°F / ${lo.celsius}°C and Gas Mark ${hi.mark} = ${hi.fahrenheit}°F / ${hi.celsius}°C`,
+          },
+          {
+            label: 'Interpolate between them',
+            expr: `t = (${n(mark, 4)} − ${lo.mark}) ÷ (${hi.mark} − ${lo.mark}) = ${n((mark - lo.mark) / (hi.mark - lo.mark), 4)}; ${lo.fahrenheit} + t × (${hi.fahrenheit} − ${lo.fahrenheit}) = ${val('fahrenheit')}, ${lo.celsius} + t × (${hi.celsius} − ${lo.celsius}) = ${val('celsius')}`,
+            note: 'Linear interpolation between the two neighbouring gas marks.',
+          },
+        );
+      }
+      steps.push({ label: 'Describe the heat', expr: val('cookingDescription') });
+      return steps;
+    }
+
+    const x = Number(text);
+    const celsius = fromUnit === '°F' ? fToC(x) : x;
+    const closest = closestGasMark(celsius);
+    const gasRow = results.find((r) => r.id === 'gasMark');
+    return [
+      fromUnit === '°F'
+        ? { label: 'Convert °F to °C', expr: `(${n(x)}°F − 32) × 5 ÷ 9 = ${n(celsius)}°C ≈ ${val('celsius')}` }
+        : { label: 'Convert °C to °F', expr: `${n(x)}°C × 9 ÷ 5 + 32 = ${n(cToF(x))}°F ≈ ${val('fahrenheit')}` },
+      {
+        label: 'Match the nearest gas mark',
+        expr: closest ? `${Math.round(celsius)}°C is nearest to ${closest.celsius}°C / ${closest.fahrenheit}°F in the table → ${val('gasMark')}` : `${Math.round(celsius)}°C → ${val('gasMark')}`,
+        note: gasRow?.interpretation,
+      },
+    ];
   },
   educational: {
     formula: '°C = (°F − 32) × 5/9  |  °F = °C × 9/5 + 32',

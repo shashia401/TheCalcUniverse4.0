@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import BpmTapperPanel from './BpmTapperPanel';
 import { NOTES, bpmFromDelay, delayMs, noteFactor } from './bpmMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const bpmTapperConfig: CalculatorConfig = {
   inputs: [
@@ -122,6 +124,28 @@ const bpmTapperConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(BpmTapperPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const results = bpmTapperConfig.calculate(values);
+    if (!results.length) return [];
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const n = (x: number, d = 2) => x.toLocaleString('en-US', { maximumFractionDigits: d });
+    const note = NOTES.find((x) => x.id === (values.noteValue || 'quarter')) ?? NOTES[2];
+    const factorNote = "A note's factor is its length in quarter-note beats (a whole note is 4).";
+    if ((values.mode || 'bpm-to-ms') === 'bpm-to-ms') {
+      const bpm = parseFloat(values.bpm);
+      return finiteSteps([
+        { label: 'Length of one beat (a quarter note)', expr: `60,000 ms ÷ ${n(bpm)} BPM = ${n(60000 / bpm)} ms` },
+        { label: `Scale to the ${note.label} note`, expr: `${n(60000 / bpm)} ms × ${n(note.factor, 4)} = ${val('delayMs')}`, note: factorNote },
+        { label: 'Frequency of that delay', expr: `1000 ÷ ${val('delayMs')} = ${val('frequencyHz')}` },
+      ]);
+    }
+    const targetMs = parseFloat(values.targetMs);
+    return finiteSteps([
+      { label: 'Tempo if the delay were one quarter-note beat', expr: `60,000 ms ÷ ${n(targetMs)} ms = ${n(60000 / targetMs)} BPM` },
+      { label: `Scale for the ${note.label} note`, expr: `${n(60000 / targetMs)} × ${n(note.factor, 4)} = ${val('calculatedBpm')}`, note: factorNote },
+      { label: 'Frequency of that delay', expr: `1000 ÷ ${n(targetMs)} ms = ${val('frequencyHz')}` },
+    ]);
   },
   educational: {
     formula: 'Delay (ms) = 60,000 / BPM x Divisor Factor | BPM = 60,000 / Delay (ms) x Divisor Factor',

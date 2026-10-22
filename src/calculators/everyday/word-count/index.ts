@@ -1,7 +1,9 @@
 import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WordCountPanel from './WordCountPanel';
-import { analyzeText, formatDuration } from './wordCountMath';
+import { SPEAKING_WPM, analyzeText, formatDuration } from './wordCountMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const wordCountConfig: CalculatorConfig = {
   inputs: [
@@ -54,6 +56,26 @@ const wordCountConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(WordCountPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const wpm = parseFloat(values.wordsPerMinute || '238');
+    const st = analyzeText(values.text || '', wpm);
+    if (!st) return [];
+    const results = wordCountConfig.calculate(values);
+    const n = (x: number, d = 0) => x.toLocaleString('en-US', { maximumFractionDigits: d });
+    return finiteSteps([
+      {
+        label: 'Count the words',
+        expr: `${n(st.wordCount)} whitespace-separated ${st.wordCount === 1 ? 'word' : 'words'}`,
+        note: results.find((r) => r.id === 'wordCount')?.interpretation,
+      },
+      { label: 'Reading time', expr: `${n(st.wordCount)} ${st.wordCount === 1 ? 'word' : 'words'} ÷ ${wpm} wpm × 60 = ${n(st.readingSeconds, 1)} s = ${formatDuration(st.readingSeconds)}` },
+      { label: 'Speaking time', expr: `${n(st.wordCount)} ${st.wordCount === 1 ? 'word' : 'words'} ÷ ${SPEAKING_WPM} wpm × 60 = ${n(st.speakingSeconds, 1)} s = ${formatDuration(st.speakingSeconds)}` },
+      {
+        label: 'Average word length',
+        expr: `${n(st.charNoSpaces)} characters without spaces ÷ ${n(st.wordCount)} ${st.wordCount === 1 ? 'word' : 'words'} = ${resultValue(results, 'avgWordLength')}`,
+      },
+    ]);
   },
   educational: {
     formula: 'Words = text.split(/\\s+/).length | Reading Time = Words / WPM | Speaking Time = Words / 150 wpm | FKGL = 0.39×(W/S) + 11.8×(Syl/W) - 15.59',

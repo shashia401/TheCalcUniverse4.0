@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import RecipeScalerPanel from './RecipeScalerPanel';
 import { formatQty, scaleRecipe, toKitchenFraction } from './recipeMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const unitOptions = [
   { label: 'cups', value: 'cups' },
@@ -110,6 +112,27 @@ const recipeScalerConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(RecipeScalerPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const r = scaleRecipe(values);
+    if (!r || r.ingredients.length === 0) return [];
+    const results = recipeScalerConfig.calculate(values);
+    const steps = [
+      {
+        label: 'Scale factor',
+        expr: `${r.desired} desired servings ÷ ${r.original} original servings = ${resultValue(results, 'scaleFactor')}`,
+        note: results.find((x) => x.id === 'scaleFactor')?.interpretation,
+      },
+    ];
+    for (const ing of r.ingredients) {
+      const unit = ing.unit ? ` ${ing.unit}` : '';
+      steps.push({
+        label: `Scale ${ing.name || 'the ingredient'}`,
+        expr: `${formatQty(ing.original)}${unit} × ${r.desired} ÷ ${r.original} = ${resultValue(results, ing.id)}`,
+        note: results.find((x) => x.id === ing.id)?.interpretation,
+      });
+    }
+    return finiteSteps(steps);
   },
   educational: {
     formula: 'Scale Factor = Desired Servings / Original Servings | Scaled Qty = Original Qty x Scale Factor',

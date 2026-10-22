@@ -1,7 +1,9 @@
 import { createElement } from 'react';
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
 import YarnYardagePanel from './YarnYardagePanel';
-import { K_STITCH, WASTE, yarnPlan } from './yarnMath';
+import { BASELINE_ROWS, K_STITCH, WASTE, yarnPlan } from './yarnMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const YARN_WEIGHT_DESCRIPTIONS: Record<string, string> = {
   'Lace/Fingering': 'Lightest weight, used for delicate shawls and socks',
@@ -176,6 +178,35 @@ const yarnYardageConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(YarnYardagePanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const p = yarnPlan(values);
+    if (!p) return [];
+    const results = yarnYardageConfig.calculate(values);
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const n = (x: number) => x.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    const steps: ExplainStep[] = [];
+    if (p.projectType === 'Custom') {
+      steps.push(
+        {
+          label: 'Yarn for the piece before waste',
+          expr: `${K_STITCH} × ${n(parseFloat(values.customWidth))} in × ${n(parseFloat(values.customLength))} in × (${p.rows} ÷ 4 rows per inch) ÷ 36 = ${n(p.baseYardage)} yards`,
+          note: 'A row uses about 3.5 times its width in yarn (an estimate for stockinette or single crochet).',
+        },
+        { label: 'Add waste', expr: `${n(p.baseYardage)} yards × ${WASTE} = ${val('yardageNeeded')}`, note: p.gaugeWarning ?? undefined },
+      );
+    } else {
+      steps.push(
+        {
+          label: `Base yardage for a ${p.projectType}, size ${p.size}`,
+          expr: `${n(p.baseYardage)} yards`,
+          note: `Preset yardages are for worsted weight at ${BASELINE_ROWS} rows per 4 in.`,
+        },
+        { label: 'Scale by your row gauge', expr: `${n(p.baseYardage)} × (${p.rows} ÷ ${BASELINE_ROWS}) = ${val('yardageNeeded')}`, note: p.gaugeWarning ?? undefined },
+      );
+    }
+    steps.push({ label: 'Convert to metres', expr: `${n(p.yards)} yards × 0.9144 = ${val('metersNeeded')}` });
+    return finiteSteps(steps);
   },
   educational: {
     formula: 'Preset: Yards = Base × (Rows per 4" ÷ 24)  |  Custom: Yards = 3.5 × Width × Length × (Rows per inch) ÷ 36 × 1.2  |  Meters = Yards × 0.9144',

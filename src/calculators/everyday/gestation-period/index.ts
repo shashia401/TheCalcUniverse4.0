@@ -1,5 +1,6 @@
-import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
-import { addDays, daysBetween, parseIsoDate } from '../../../utils/dates';
+import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/calculator';
+import { addDays, daysBetween, parseIsoDate, toIsoDate } from '../../../utils/dates';
+import { resultValue } from '../../../utils/explainResults';
 
 // periodDays is the commonly quoted figure; fromBreeding overrides it when the due date is counted from a breeding/conception date
 // (human 280 days is counted from the last menstrual period, 266 days from conception).
@@ -50,6 +51,9 @@ const GESTATION_DATA: { animal: string; periodDays: number; fromBreeding?: numbe
 
 const sortedGestation = GESTATION_DATA.sort((a, b) => a.animal.localeCompare(b.animal));
 
+const weeksOf = (days: number) => (days / 7).toFixed(1);
+const monthsOf = (days: number) => (days / 30.44).toFixed(1);
+
 const gestationConfig: CalculatorConfig = {
   inputs: [
     {
@@ -83,7 +87,7 @@ calculate: (values): CalculatorResult[] => {
 
     const results: CalculatorResult[] = [
       { id: 'animal', label: 'Animal', value: entry.animal, highlight: true, color: 'positive' },
-      { id: 'gestDays', label: 'Gestation / Incubation Period', value: `${entry.periodDays} days (${(entry.periodDays / 7).toFixed(1)} weeks / ${(entry.periodDays / 30.44).toFixed(1)} months)`, color: 'positive' },
+      { id: 'gestDays', label: 'Gestation / Incubation Period', value: `${entry.periodDays} days (${weeksOf(entry.periodDays)} weeks / ${monthsOf(entry.periodDays)} months)`, color: 'positive' },
       { id: 'category', label: 'Animal Category', value: entry.category, color: 'neutral' },
       { id: 'fact', label: 'Did You Know?', value: entry.fact, color: 'neutral' },
     ];
@@ -124,6 +128,26 @@ calculate: (values): CalculatorResult[] => {
     return results;
   },
 
+  explainSteps: (values) => {
+    const results = gestationConfig.calculate(values);
+    if (!results.length || results.some((r) => r.id === 'dateError')) return [];
+    const entry = sortedGestation.find((e) => e.animal === values.animal);
+    if (!entry) return [];
+    const steps: ExplainStep[] = [
+      { label: 'Look up the typical period', expr: `${entry.animal}: ${entry.periodDays} days (${entry.category})` },
+      { label: 'Convert to weeks and months', expr: `${entry.periodDays} ÷ 7 = ${weeksOf(entry.periodDays)} weeks, ${entry.periodDays} ÷ 30.44 = ${monthsOf(entry.periodDays)} months` },
+    ];
+    const breeding = values.breedingDate?.trim() ? parseIsoDate(values.breedingDate) : null;
+    if (breeding) {
+      const days = entry.fromBreeding ?? entry.periodDays;
+      steps.push({
+        label: 'Add the period to the breeding date',
+        expr: `${toIsoDate(breeding)} + ${days} days = ${resultValue(results, 'dueDate')}`,
+        note: entry.fromBreeding ? `From a breeding date this uses ${days} days rather than the ${entry.periodDays} counted from the usual starting point.` : 'An average: individual animals vary by several percent.',
+      });
+    }
+    return steps;
+  },
   educational: {
     formula: 'Gestation period = species-specific constant. Due date = Breeding date + Gestation period.',
     formulaDescription: 'Gestation periods vary enormously across the animal kingdom — from about 12 days (opossum) to 645 days (African elephant) to an estimated 3.5 years (frilled shark). Marsupials have extremely short gestations with extended pouch development. Birds incubate externally. Fish and reptiles show remarkable diversity including male pregnancy (seahorses).',

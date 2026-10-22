@@ -2,6 +2,11 @@
 
 export const SOL_DAYS = 1.0274912517; // Earth days per sol
 export const SOL_SECONDS = 88775.244; // 24h 39m 35.244s
+export const UNIX_EPOCH_JD = 2440587.5; // Julian Date of 1970-01-01T00:00:00Z
+export const TT_MINUS_TAI = 32.184; // seconds
+export const MSD_EPOCH_JD = 2451549.5; // JD(TT) at the Mars Sol Date epoch
+export const MSD_EPOCH_OFFSET = 44796.0;
+export const MSD_CORRECTION = 0.0009626;
 
 /** TAI-UTC in seconds, effective on the given UTC date (1972 leap-second table, IERS/IANA). */
 const LEAP: [number, number][] = [
@@ -47,11 +52,10 @@ export function parseUtc(s: string | undefined): Date | null {
 }
 
 /** Mars Sol Date: MSD = (JD_TT - 2451549.5) / 1.0274912517 + 44796.0 - 0.0009626 (JD_TT = JD_UTC + (TAI-UTC + 32.184 s)). */
+export const jdUtcOf = (utc: Date): number => utc.getTime() / 86400000 + UNIX_EPOCH_JD;
+export const jdTTOf = (utc: Date): number => jdUtcOf(utc) + (taiMinusUtc(utc.getTime()) + TT_MINUS_TAI) / 86400;
 export function marsSolDate(utc: Date): number {
-  const ms = utc.getTime();
-  const jdUtc = ms / 86400000 + 2440587.5;
-  const jdTT = jdUtc + (taiMinusUtc(ms) + 32.184) / 86400;
-  return (jdTT - 2451549.5) / SOL_DAYS + 44796.0 - 0.0009626;
+  return (jdTTOf(utc) - MSD_EPOCH_JD) / SOL_DAYS + MSD_EPOCH_OFFSET - MSD_CORRECTION;
 }
 
 /** Coordinated Mars Time (mean solar time at the prime meridian) as hours 0..24. */

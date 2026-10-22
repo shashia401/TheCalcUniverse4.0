@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import WpmTypingPanel from './WpmTypingPanel';
 import { typingStats } from './wpmMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const wpmTypingTestConfig: CalculatorConfig = {
   inputs: [
@@ -53,6 +55,25 @@ const wpmTypingTestConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(WpmTypingPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    if (values.mode === 'practice') return [];
+    const t = typingStats(values);
+    if (!t) return [];
+    const results = wpmTypingTestConfig.calculate(values);
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const n = (x: number) => x.toLocaleString('en-US');
+    return finiteSteps([
+      { label: 'Count the characters you typed', expr: `${n(t.totalChars)} characters` },
+      { label: 'Gross speed', expr: `${n(t.totalChars)} ÷ 5 ÷ ${t.minutes} min = ${val('grossWpm')}`, note: 'One "word" is 5 characters, including spaces and punctuation.' },
+      {
+        label: 'Count the correct characters',
+        expr: `${n(t.correctChars)} of ${n(t.totalChars)} match the source, so ${val('errorCount')} ${t.errorCount === 1 ? 'error' : 'errors'}`,
+        note: 'One extra or missing letter counts as a single error.',
+      },
+      { label: 'Accuracy', expr: `${n(t.correctChars)} ÷ ${n(t.totalChars)} × 100 = ${val('accuracy')}` },
+      { label: 'Net speed', expr: `${n(t.correctChars)} ÷ 5 ÷ ${t.minutes} min = ${val('netWpm')}`, note: 'Only correctly typed characters count.' },
+    ]);
   },
   educational: {
     formula: 'Gross WPM = Characters Typed / 5 / Minutes | Accuracy (%) = Correct Characters / Characters Typed x 100 | Net WPM = Correct Characters / 5 / Minutes',

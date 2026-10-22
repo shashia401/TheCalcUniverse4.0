@@ -3,6 +3,8 @@ import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import NumerologyPanel from './NumerologyPanel';
 import { LIFE_PATH_DESCRIPTIONS } from './numerologyData';
 import { lifePathInfo } from './numerologyMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const MONTHS = [
   { label: 'January', value: '1' },
@@ -124,6 +126,27 @@ const numerologyConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(NumerologyPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const info = lifePathInfo(values);
+    if (!info || info === 'invalid') return [];
+    const results = numerologyConfig.calculate(values);
+    const reduce = (s: number[]) => {
+      const tail = s[s.length - 1] > 9 ? ' (master number, kept)' : '';
+      if (s.length === 1) return s[0] > 9 ? `${s[0]}${tail}` : `${s[0]} (already a single digit)`;
+      return `${s.slice(0, -1).map((v, i) => `${[...String(v)].join(' + ')} = ${s[i + 1]}`).join(', ')}${tail}`;
+    };
+    const monthName = MONTHS[info.month - 1]?.label ?? `month ${info.month}`;
+    return finiteSteps([
+      { label: 'Reduce the birth month', expr: `${monthName} = ${info.month}: ${reduce(info.monthSteps)}` },
+      { label: 'Reduce the birth day', expr: `${info.day}: ${reduce(info.daySteps)}` },
+      { label: 'Reduce the birth year', expr: `${info.year}: ${reduce(info.yearSteps)}` },
+      {
+        label: 'Add the three reduced numbers and reduce again',
+        expr: `${info.monthReduced} + ${info.dayReduced} + ${info.yearReduced} = ${info.sum}${info.sumSteps.length > 1 ? `, then ${reduce(info.sumSteps)}` : ''} → Life Path ${resultValue(results, 'lifePathNumber')}`,
+        note: 'Master numbers 11, 22 and 33 are kept instead of being reduced further.',
+      },
+    ]);
   },
   educational: {
     formula: 'Life Path = reduce(MM) + reduce(DD) + reduce(YYYY) → single digit (except 11, 22, 33)',

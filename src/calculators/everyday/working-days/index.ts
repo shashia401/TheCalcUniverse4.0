@@ -1,7 +1,9 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import WorkingDaysPanel from './WorkingDaysPanel';
 import { workingDaysInfo } from './workingDaysMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const workingDaysConfig: CalculatorConfig = {
   inputs: [
@@ -75,6 +77,38 @@ const workingDaysConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(WorkingDaysPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const w = workingDaysInfo(values);
+    if (!w) return [];
+    const results = workingDaysConfig.calculate(values);
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const iso = (day: number) => new Date(day * 86400000).toISOString().slice(0, 10);
+    const method = w.method === 'both' ? 'both end dates counted' : w.method === 'end' ? 'start excluded, end included' : 'both end dates excluded';
+    const weekdays = w.calendarDays - w.weekendDays;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Choose the days to count',
+        expr: w.countedFirst <= w.countedLast
+          ? `${iso(w.start)} to ${iso(w.end)} (${method}) → ${iso(w.countedFirst)} to ${iso(w.countedLast)} = ${val('calendarDays')} calendar days`
+          : `${iso(w.start)} to ${iso(w.end)} (${method}) → no days are counted`,
+      },
+      { label: 'Remove Saturdays and Sundays', expr: `${w.calendarDays} − ${w.weekendDays} weekend days = ${weekdays} weekdays` },
+    ];
+    steps.push(
+      w.excludeHolidays
+        ? {
+            label: 'Remove US federal holidays that fall on weekdays',
+            expr: `${weekdays} − ${w.holidayDays} = ${val('workingDays')} working days`,
+            note: results.find((r) => r.id === 'holidays')?.interpretation ?? 'No weekday holidays in the range.',
+          }
+        : {
+            label: 'Holidays are not excluded',
+            expr: `${weekdays} weekdays = ${val('workingDays')} working days`,
+            note: 'Choose "Exclude US federal holidays" to remove them.',
+          },
+    );
+    return finiteSteps(steps);
   },
   educational: {
     formula: 'Working Days = Calendar Days − Weekend Days − Public Holidays',

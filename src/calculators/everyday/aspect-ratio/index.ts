@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import AspectRatioPanel from './AspectRatioPanel';
 import { aspectInfo } from './aspectMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const aspectRatioConfig: CalculatorConfig = {
   inputs: [
@@ -135,6 +137,39 @@ const aspectRatioConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(AspectRatioPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const a = aspectInfo(values);
+    if (!a) return [];
+    const results = aspectRatioConfig.calculate(values);
+    const n = (x: number) => x.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    if (a.mode === 'calculate-ratio') {
+      return finiteSteps([
+        {
+          label: 'Find the greatest common divisor of the width and the height',
+          expr: `GCD(${n(a.width)}, ${n(a.height)}) = ${n(a.g)}`,
+          note: 'The GCD is the biggest number that divides both sides evenly.',
+        },
+        {
+          label: 'Divide both sides by the GCD',
+          expr: `${n(a.width)} ÷ ${n(a.g)} = ${a.ratioW} and ${n(a.height)} ÷ ${n(a.g)} = ${a.ratioH}, so the ratio is ${resultValue(results, 'simplifiedRatio')}`,
+          note: a.preset ? `Closest common preset: ${a.preset.label}${a.exactPreset ? '' : ' (within 2%, not exact)'}.` : undefined,
+        },
+      ]);
+    }
+    const ratioA = parseFloat(values.ratioA);
+    const ratioB = parseFloat(values.ratioB);
+    const known = parseFloat(values.knownValue);
+    const wasWidth = a.knownDimension === 'width';
+    const missing = resultValue(results, 'missingDimension');
+    return finiteSteps([
+      { label: 'Read the ratio and the side you know', expr: `ratio ${n(ratioA)}:${n(ratioB)}, known ${a.knownDimension} = ${n(known)} px` },
+      {
+        label: `Scale the known ${a.knownDimension} to find the other side`,
+        expr: wasWidth ? `height = ${n(known)} × ${n(ratioB)} ÷ ${n(ratioA)} = ${missing}` : `width = ${n(known)} × ${n(ratioA)} ÷ ${n(ratioB)} = ${missing}`,
+        note: results.find((r) => r.id === 'missingDimension')?.interpretation,
+      },
+    ]);
   },
   educational: {
     formula: 'Simplified Ratio = W÷GCD(W,H) : H÷GCD(W,H) | Missing = (Known × RatioB) ÷ RatioA',

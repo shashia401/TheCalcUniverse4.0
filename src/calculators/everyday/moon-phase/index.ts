@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { CalculatorConfig } from '../../../types/calculator';
 import MoonPhasePanel from './MoonPhasePanel';
 import { SYNODIC_MONTH, moonInfo } from './moonMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const fmtDay = (ms: number) =>
   new Date(ms).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
@@ -47,6 +49,39 @@ const moonPhaseConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(MoonPhasePanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const m = moonInfo(values);
+    if (!m) return [];
+    const results = moonPhaseConfig.calculate(values);
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const n = (x: number, d = 1) => x.toLocaleString('en-US', { maximumFractionDigits: d });
+    return finiteSteps([
+      {
+        label: 'Fix the instant to evaluate',
+        expr: `${new Date(m.dayMs).toISOString().slice(0, 10)} 12:00 UTC`,
+        note: 'Every date is evaluated at 12:00 UTC.',
+      },
+      {
+        label: 'Sun-Moon elongation',
+        expr: `Moon ecliptic longitude − Sun ecliptic longitude = ${n(m.elongation)}°`,
+        note: '0° is new, 90° first quarter, 180° full and 270° last quarter (Meeus, Astronomical Algorithms ch. 47).',
+      },
+      {
+        label: 'Position in the cycle',
+        expr: `${n(m.elongation)}° ÷ 360 = ${n(m.fraction, 4)} of the cycle; × ${SYNODIC_MONTH} days = ${n(m.ageDays)} days old`,
+      },
+      { label: 'Illumination', expr: `(1 − cos ${n(m.elongation)}°) ÷ 2 = ${val('illumination')}` },
+      {
+        label: 'Name the phase',
+        expr: `${n(m.fraction, 4)} of the cycle → ${m.phase.name}`,
+        note: 'Each principal phase owns half a day either side of its instant.',
+      },
+      {
+        label: 'Next full moon',
+        expr: `next elongation of 180° after this date: ${val('nextFullMoon')}, ${val('daysUntilNextFull')} days later`,
+      },
+    ]);
   },
   educational: {
     formula: 'Elongation = Moon longitude − Sun longitude;  Illumination = (1 − cos elongation) ÷ 2',

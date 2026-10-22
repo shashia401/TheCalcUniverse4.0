@@ -1,7 +1,9 @@
 import { createElement } from 'react';
-import { CalculatorConfig } from '../../../types/calculator';
+import { CalculatorConfig, ExplainStep } from '../../../types/calculator';
 import DepthOfFieldPanel from './DepthOfFieldPanel';
 import { FT_PER_M, dofInfo } from './dofMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const depthOfFieldConfig: CalculatorConfig = {
   inputs: [
@@ -127,6 +129,53 @@ const depthOfFieldConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(DepthOfFieldPanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const d = dofInfo(values);
+    if (!d || d.tooClose) return [];
+    const results = depthOfFieldConfig.calculate(values);
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const n = (x: number) => x.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const f = parseFloat(values.focalLength);
+    const N = parseFloat(values.aperture);
+    const raw = parseFloat(values.subjectDistance);
+    const H = d.hyperfocal * 1000;
+    const s = d.distance * 1000;
+    const steps: ExplainStep[] = [
+      {
+        label: 'Pick the circle of confusion for your sensor',
+        expr: `${d.sensorKey}: c = ${d.coc} mm`,
+        note: results.find((r) => r.id === 'cocValue')?.interpretation,
+      },
+      {
+        label: 'Hyperfocal distance',
+        expr: `H = f² ÷ (N × c) + f = ${f}² ÷ (${N} × ${d.coc}) + ${f} = ${n(H)} mm = ${val('hyperfocalDistance')}`,
+      },
+      {
+        label: 'Subject distance in millimetres',
+        expr: d.unit === 'feet' ? `${raw} ft × 304.8 = ${n(s)} mm` : `${raw} m × 1000 = ${n(s)} mm`,
+      },
+      {
+        label: 'Near focus limit',
+        expr: `s × (H − f) ÷ (H + s − 2f) = ${n(s)} × (${n(H)} − ${f}) ÷ (${n(H)} + ${n(s)} − 2 × ${f}) = ${n(d.near * 1000)} mm = ${val('nearLimit')}`,
+      },
+    ];
+    if (d.far === null || d.dof === null) {
+      steps.push({
+        label: 'Far focus limit',
+        expr: `s = ${n(s)} mm is at or beyond H = ${n(H)} mm, so the far limit is infinity`,
+        note: 'Everything from the near limit to infinity is acceptably sharp.',
+      });
+    } else {
+      steps.push(
+        {
+          label: 'Far focus limit',
+          expr: `s × (H − f) ÷ (H − s) = ${n(s)} × (${n(H)} − ${f}) ÷ (${n(H)} − ${n(s)}) = ${n(d.far * 1000)} mm = ${val('farLimit')}`,
+        },
+        { label: 'Total depth of field', expr: `far − near = ${n(d.far * 1000)} − ${n(d.near * 1000)} = ${n(d.dof * 1000)} mm = ${val('totalDOF')}` },
+      );
+    }
+    return finiteSteps(steps);
   },
   educational: {
     formula: 'H = f² ÷ (N × c) + f  |  Near = s(H − f) ÷ (H + s − 2f)  |  Far = s(H − f) ÷ (H − s) when s < H',

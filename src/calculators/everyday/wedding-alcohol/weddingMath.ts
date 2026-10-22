@@ -11,6 +11,7 @@ export const SHOTS_PER_LIQUOR_BOTTLE = 17;
 
 export interface AlcoholPlan {
   guests: number;
+  drinkersPct: number;
   drinkingGuests: number;
   duration: number;
   beerPct: number;
@@ -42,7 +43,7 @@ export function alcoholPlan(values: Record<string, string>): AlcoholPlan | null 
   const wineGlasses = drinkingGuests * (winePct / 100) * duration * WINE_PER_HOUR;
   const liquorDrinks = drinkingGuests * (liquorPct / 100) * duration * COCKTAILS_PER_HOUR;
   return {
-    guests, drinkingGuests, duration, beerPct, winePct, liquorPct,
+    guests, drinkersPct, drinkingGuests, duration, beerPct, winePct, liquorPct,
     splitTotal: beerPct + winePct + liquorPct,
     beer, wineGlasses, wineBottles: wineGlasses / GLASSES_PER_WINE_BOTTLE,
     liquorDrinks, liquorBottles: liquorDrinks / SHOTS_PER_LIQUOR_BOTTLE,

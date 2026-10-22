@@ -1,7 +1,9 @@
 import { CalculatorConfig } from '../../../types/calculator';
 import { createElement } from 'react';
 import StudyTimePanel from './StudyTimePanel';
-import { studyPlan, studyHoursRows } from './studyMath';
+import { DIFFICULTY_MULTIPLIERS, studyPlan, studyHoursRows } from './studyMath';
+import { finiteSteps } from '../../../utils/explainGuard';
+import { resultValue } from '../../../utils/explainResults';
 
 const studyTimeConfig: CalculatorConfig = {
   inputs: [
@@ -97,6 +99,31 @@ const studyTimeConfig: CalculatorConfig = {
   extraPanel: (values, results) => {
     if (!results.length) return null;
     return createElement(StudyTimePanel, { values, results });
+  },
+  explainSteps: (values) => {
+    const p = studyPlan(values);
+    if (!p) return [];
+    const results = studyTimeConfig.calculate(values);
+    const val = (id: string) => resultValue(results, id) ?? '';
+    const n = (x: number) => x.toFixed(2);
+    return finiteSteps([
+      { label: 'Reading time', expr: `${p.totalPages} pages ÷ ${p.pagesPerHour} pages/hour = ${n(p.readingHours)} h` },
+      {
+        label: 'Stretch for difficulty',
+        expr: `${n(p.readingHours)} h × ${p.multiplier} (${p.difficulty}) = ${val('totalHoursNeeded')} h`,
+        note: `Multipliers (${Object.entries(DIFFICULTY_MULTIPLIERS).map(([k, v]) => `${k} x${v}`).join(', ')}) are rules of thumb, not measured values.`,
+      },
+      { label: 'Weeks until the exam', expr: `${p.daysUntilExam} days ÷ 7 = ${p.weeksAvailable.toFixed(1)} weeks` },
+      { label: 'Hours needed per week', expr: `${val('totalHoursNeeded')} h ÷ ${p.weeksAvailable.toFixed(1)} weeks = ${val('hoursPerWeek')} h` },
+      {
+        label: 'Hours per session and per day',
+        expr: `${val('hoursPerWeek')} h ÷ ${p.sessionsPerWeek} sessions = ${val('hoursPerSession')} h per session; ÷ 7 days = ${val('recommendedDaily')} h per day`,
+      },
+      {
+        label: 'Check your weekly capacity',
+        expr: `${p.sessionsPerWeek} sessions × ${parseFloat(values.sessionLength)} min ÷ 60 = ${val('weeklyCapacity')} h per week; needed ${val('hoursPerWeek')} h → ${val('scheduleFeasible')}`,
+      },
+    ]);
   },
   educational: {
     formula: 'Study Hours = (Total Pages / Pages Per Hour) x Difficulty Multiplier | Weekly Hours = Study Hours / Weeks Available',
