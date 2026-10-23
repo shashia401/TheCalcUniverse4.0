@@ -16,7 +16,7 @@ const lcmConfig: CalculatorConfig = {
   inputs: [
     {
       id: 'numbers',
-      label: 'Numbers or fractions (comma-separated)',
+      label: 'Numbers or fractions',
       type: 'text',
       placeholder: '12, 18, 24',
       inputMode: 'numeric',
