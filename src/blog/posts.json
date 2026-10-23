@@ -5992,8 +5992,7 @@
     "relatedCalculators": [
       "loan-calculator",
       "amortization-calculator",
-      "personal-loan-calculator",
-      "payment-calculator"
+      "personal-loan-calculator"
     ],
     "author": {
       "name": "TheCalcUniverse Editorial",
@@ -12627,7 +12626,7 @@
       "role": "Content Team"
     },
     "relatedCalculatorId": "percentage-calculator",
-    "relatedCalculatorPath": "/math/percentage-calculator",
+    "relatedCalculatorPath": "/everyday/percentage-calculator/",
     "relatedCalculatorLabel": "Free Percentage Calculator",
     "sections": [
       {
@@ -12736,7 +12735,7 @@
         "heading": "Try the Percentage Calculator",
         "body": "Calculate percentage increases, decreases, and differences instantly. No signup required.",
         "buttonLabel": "Open Calculator",
-        "path": "/math/percentage-calculator"
+        "path": "/everyday/percentage-calculator/"
       }
     ]
   },
@@ -19896,7 +19895,6 @@
       "amortization-calculator",
       "loan-calculator",
       "mortgage-calculator",
-      "payment-calculator",
       "mortgage-payoff-calculator"
     ],
     "author": {
@@ -20699,12 +20697,12 @@
     "categorySlug": "math",
     "excerpt": "Percentages are everywhere — discounts, tips, taxes, grades, and statistics. This guide shows you how to calculate percentages for everyday situations and how our calculator makes it instant.",
     "relatedCalculators": [
-      "math-percentage-calculator",
+      "percentage-calculator",
       "percent-off-calculator",
       "tip-calculator"
     ],
-    "relatedCalculatorId": "math-percentage-calculator",
-    "relatedCalculatorPath": "/math/math-percentage-calculator",
+    "relatedCalculatorId": "percentage-calculator",
+    "relatedCalculatorPath": "/everyday/percentage-calculator/",
     "relatedCalculatorLabel": "Free Percentage Calculator",
     "author": {
       "name": "TheCalcUniverse Editorial",
@@ -20755,7 +20753,7 @@
         "heading": "Calculate Percentages Instantly",
         "body": "Use our free percentage calculator for discounts, tips, tax, and any percentage math.",
         "buttonLabel": "Calculate Now",
-        "path": "/math/math-percentage-calculator"
+        "path": "/everyday/percentage-calculator/"
       }
     ]
   },
@@ -21354,12 +21352,12 @@
     "categorySlug": "math",
     "excerpt": "Calculate percentages in your head with these simple mental math tricks. No calculator needed for tips, discounts, taxes, and everyday math.",
     "relatedCalculators": [
-      "math-percentage-calculator",
+      "percentage-calculator",
       "percent-off-calculator",
       "tip-calculator"
     ],
-    "relatedCalculatorId": "math-percentage-calculator",
-    "relatedCalculatorPath": "/math/math-percentage-calculator",
+    "relatedCalculatorId": "percentage-calculator",
+    "relatedCalculatorPath": "/everyday/percentage-calculator/",
     "relatedCalculatorLabel": "Percentage Calculator",
     "author": {
       "name": "TheCalcUniverse Editorial",
@@ -21398,7 +21396,7 @@
         "heading": "Check Your Mental Math",
         "body": "Use our percentage calculator to verify your mental math and learn from the instant results.",
         "buttonLabel": "Verify Now",
-        "path": "/math/math-percentage-calculator"
+        "path": "/everyday/percentage-calculator/"
       }
     ]
   },

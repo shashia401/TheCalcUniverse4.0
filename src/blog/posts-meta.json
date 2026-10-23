@@ -311,8 +311,7 @@
     "relatedCalculators": [
       "loan-calculator",
       "amortization-calculator",
-      "personal-loan-calculator",
-      "payment-calculator"
+      "personal-loan-calculator"
     ],
     "author": {
       "name": "TheCalcUniverse Editorial",
@@ -2976,7 +2975,6 @@
       "amortization-calculator",
       "loan-calculator",
       "mortgage-calculator",
-      "payment-calculator",
       "mortgage-payoff-calculator"
     ],
     "author": {
@@ -3196,12 +3194,12 @@
     "categorySlug": "math",
     "excerpt": "The six percentage problems (percent of, what percent, change, add, subtract, reverse) with formulas, computed answers and common mistakes.",
     "relatedCalculators": [
-      "math-percentage-calculator",
+      "percentage-calculator",
       "percent-off-calculator",
       "tip-calculator"
     ],
-    "relatedCalculatorId": "math-percentage-calculator",
-    "relatedCalculatorPath": "/math/math-percentage-calculator/",
+    "relatedCalculatorId": "percentage-calculator",
+    "relatedCalculatorPath": "/everyday/percentage-calculator/",
     "relatedCalculatorLabel": "Free Percentage Calculator",
     "author": {
       "name": "TheCalcUniverse Editorial",
@@ -3367,12 +3365,12 @@
     "categorySlug": "math",
     "excerpt": "Exact mental shortcuts built from 10%, 1% and 50%, each checked on 200,000 random amounts, plus tip and discount examples and where they break down.",
     "relatedCalculators": [
-      "math-percentage-calculator",
+      "percentage-calculator",
       "percent-off-calculator",
       "tip-calculator"
     ],
-    "relatedCalculatorId": "math-percentage-calculator",
-    "relatedCalculatorPath": "/math/math-percentage-calculator/",
+    "relatedCalculatorId": "percentage-calculator",
+    "relatedCalculatorPath": "/everyday/percentage-calculator/",
     "relatedCalculatorLabel": "Percentage Calculator",
     "author": {
       "name": "TheCalcUniverse Editorial",

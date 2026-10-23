@@ -59,6 +59,12 @@ ErrorDocument 404 /404.html
   # Moved between categories (also reachable as /en/<path> and /en/methodology/<cat>/<id>).
   RewriteRule ^(?:en/(?:methodology/)?)?math/(love-calculator|dice-roller)/?$ /everyday/$1/ [R=301,L]
   RewriteRule ^(?:en/(?:methodology/)?)?math/percentage-calculator/?$ /everyday/percentage-calculator/ [R=301,L]
+  # Duplicate calculators merged into the surviving page (their extra modes now live there). Each form,
+  # with or without /en/, /en/methodology/ and the trailing slash, is a single hop; embeds follow.
+  RewriteRule ^(?:en/(?:methodology/)?)?math/math-percentage-calculator/?$ /everyday/percentage-calculator/ [R=301,L]
+  RewriteRule ^(?:en/(?:methodology/)?)?finance/payment-calculator/?$ /finance/loan-calculator/ [R=301,L]
+  RewriteRule ^(?:en/)?embed/math/math-percentage-calculator/?$ /embed/everyday/percentage-calculator/ [R=301,L]
+  RewriteRule ^(?:en/)?embed/finance/payment-calculator/?$ /embed/finance/loan-calculator/ [R=301,L]
   RewriteRule ^(?:en/(?:methodology/)?)?industrial/concrete-slab-calculator/?$ /diy/concrete-slab-calculator/ [R=301,L]
   RewriteRule ^calculators/?$ / [R=301,L]
   RewriteRule ^(?:en/)?authors/thecalcuniverse-editorial/?$ /about/ [R=301,L]

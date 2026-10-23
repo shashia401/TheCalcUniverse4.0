@@ -11,7 +11,7 @@ import creditCard from '../../../src/calculators/finance/credit-card-payoff';
 import sip from '../../../src/calculators/finance/sip-calculator';
 import averageReturn from '../../../src/calculators/finance/average-return';
 import inflation from '../../../src/calculators/finance/inflation';
-import paymentCalc from '../../../src/calculators/finance/payment-calculator';
+import loanSolve from '../../../src/calculators/finance/loan-calculator';
 import repayment from '../../../src/calculators/finance/repayment';
 import boatLoan from '../../../src/calculators/finance/boat-loan';
 import businessLoan from '../../../src/calculators/finance/business-loan';
@@ -454,38 +454,30 @@ const printsClean = (c: CalculatorConfig, v: Record<string, string>) =>
   JSON.stringify(steps(c, v)).match(/NaN|Infinity|∞|undefined/) === null;
 
 describe('explainSteps — finance batch 2', () => {
-  describe('payment-calculator', () => {
+  describe('loan-calculator solve-for modes (moved from the retired payment-calculator)', () => {
     const pay = { solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'years', loanTerm: '5' };
-    it('payment mode: pins intermediates and ends on the displayed numbers', () => {
-      expectSteps(paymentCalc, pay, [
-        ['r = 7% ÷ 12', '0.005833'],
-        ['n = 5 years × 12 = 60 monthly payments'],
-        ['= 1.4176'],
-        ['$25,000.00 ×', '= $495.03'],
-        ['$495.03 × 60 = $29,701.80', '(interest: $4,701.80)'],
-      ]);
-      expect(resultValue(paymentCalc, pay, 'payment')).toBe('$495.03');
-      expect(resultValue(paymentCalc, pay, 'totalInterest')).toBe('$4,701.80');
-    });
     it('loan-amount mode', () => {
       const v = { solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '7', termUnit: 'years', loanTerm: '5' };
-      expectSteps(paymentCalc, v, [['0.005833'], ['n = 5 years × 12 = 60'], ['= 50.5020'], ['P = $500.00 × 50.5020 = $25,251.00']]);
-      expect(steps(paymentCalc, v).at(-1)!.expr).toContain(resultValue(paymentCalc, v, 'loanAmount'));
+      expectSteps(loanSolve, v, [['0.005833'], ['n = 5 years × 12 = 60'], ['= 50.5020'], ['P = $500.00 × 50.5020 = $25,251.00']]);
+      expect(steps(loanSolve, v).at(-1)!.expr).toContain(resultValue(loanSolve, v, 'loanAmount'));
     });
     it('term mode', () => {
       const v = { solveFor: 'term', loanAmount: '25000', monthlyPayment: '600', interestRate: '7' };
-      expectSteps(paymentCalc, v, [['0.005833'], ['$25,000.00 × 0.005833 = $145.83'], ['= 47.88'], ['⌈47.88⌉ = 48 payments = 4 years']]);
-      expect(steps(paymentCalc, v).at(-1)!.expr).toContain(resultValue(paymentCalc, v, 'term'));
+      expectSteps(loanSolve, v, [['0.005833'], ['$25,000.00 × 0.005833 = $145.83'], ['= 47.88'], ['⌈47.88⌉ = 48 payments = 4 years']]);
+      expect(steps(loanSolve, v).at(-1)!.expr).toContain(resultValue(loanSolve, v, 'term'));
     });
-    it('0% rate divides evenly', () => {
-      const v = { solveFor: 'payment', loanAmount: '1200', interestRate: '0', termUnit: 'months', loanTerm: '12' };
-      expectSteps(paymentCalc, v, [['0.000000'], ['n = 12 monthly payments'], ['M = $1,200.00 ÷ 12 = $100.00/month'], ['$100.00 × 12 = $1,200.00']]);
+    it('0% rate: loan amount is payment x months, term is loan / payment', () => {
+      expectSteps(loanSolve, { solveFor: 'loanAmount', monthlyPayment: '250', interestRate: '0', termUnit: 'months', loanTerm: '48' },
+        [['0.000000'], ['n = 48 monthly payments'], ['factor = n = 48'], ['P = $250.00 × 48.0000 = $12,000.00']]);
+      expectSteps(loanSolve, { solveFor: 'term', loanAmount: '10000', monthlyPayment: '250', interestRate: '0' },
+        [['0.000000'], ['n = $10,000.00 ÷ $250.00 = 40.00 payments'], ['⌈40.00⌉ = 40 payments']]);
     });
-    it('returns [] for blank, invalid, or an impossible payment', () => {
-      expect(steps(paymentCalc, blank(paymentCalc))).toEqual([]);
-      expect(steps(paymentCalc, { ...pay, loanTerm: '0' })).toEqual([]);
-      expect(steps(paymentCalc, { solveFor: 'term', loanAmount: '25000', monthlyPayment: '100', interestRate: '7' })).toEqual([]);
-      expect(printsClean(paymentCalc, { ...pay, loanAmount: '1e999' })).toBe(true);
+    it('returns [] for blank, invalid, or an impossible payment; the default payment mode keeps its own steps', () => {
+      expect(steps(loanSolve, { solveFor: 'loanAmount', monthlyPayment: '', interestRate: '7', loanTerm: '5' })).toEqual([]);
+      expect(steps(loanSolve, { solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '7', loanTerm: '0' })).toEqual([]);
+      expect(steps(loanSolve, { solveFor: 'term', loanAmount: '25000', monthlyPayment: '100', interestRate: '7' })).toEqual([]);
+      expect(printsClean(loanSolve, { solveFor: 'term', loanAmount: '1e999', monthlyPayment: '500', interestRate: '7' })).toBe(true);
+      expect(steps(loanSolve, pay)[0].expr).toContain('r = 7.00% ÷ 12');
     });
   });
 

@@ -29,6 +29,28 @@
 /en/methodology/math/dice-roller /everyday/dice-roller/ 301
 /en/methodology/math/dice-roller/ /everyday/dice-roller/ 301
 
+# Duplicate calculators merged into the surviving page (their extra modes now live there); one hop for every form.
+/math/math-percentage-calculator /everyday/percentage-calculator/ 301
+/math/math-percentage-calculator/ /everyday/percentage-calculator/ 301
+/en/math/math-percentage-calculator /everyday/percentage-calculator/ 301
+/en/math/math-percentage-calculator/ /everyday/percentage-calculator/ 301
+/en/methodology/math/math-percentage-calculator /everyday/percentage-calculator/ 301
+/en/methodology/math/math-percentage-calculator/ /everyday/percentage-calculator/ 301
+/embed/math/math-percentage-calculator /embed/everyday/percentage-calculator/ 301
+/embed/math/math-percentage-calculator/ /embed/everyday/percentage-calculator/ 301
+/en/embed/math/math-percentage-calculator /embed/everyday/percentage-calculator/ 301
+/en/embed/math/math-percentage-calculator/ /embed/everyday/percentage-calculator/ 301
+/finance/payment-calculator /finance/loan-calculator/ 301
+/finance/payment-calculator/ /finance/loan-calculator/ 301
+/en/finance/payment-calculator /finance/loan-calculator/ 301
+/en/finance/payment-calculator/ /finance/loan-calculator/ 301
+/en/methodology/finance/payment-calculator /finance/loan-calculator/ 301
+/en/methodology/finance/payment-calculator/ /finance/loan-calculator/ 301
+/embed/finance/payment-calculator /embed/finance/loan-calculator/ 301
+/embed/finance/payment-calculator/ /embed/finance/loan-calculator/ 301
+/en/embed/finance/payment-calculator /embed/finance/loan-calculator/ 301
+/en/embed/finance/payment-calculator/ /embed/finance/loan-calculator/ 301
+
 # Old comparison pages: nearest surviving content is the category listing (non-/en/ form too).
 /compare/:category/* /:category/ 301
 

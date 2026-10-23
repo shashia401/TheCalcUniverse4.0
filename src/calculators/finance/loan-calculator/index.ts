@@ -3,12 +3,30 @@ import { CalculatorConfig } from '../../../types/calculator';
 import AmortizationPanel from '../../../components/calculator/AmortizationPanel';
 import { pmt } from '../../../utils/financial';
 import { loanTermRows } from './termComparison';
+import SolveForPanel from './SolveForPanel';
+import { solveForResults, solveForSteps, type SolveFor } from './solveFor';
 
 /** Longest term the calculator will model: 50 years of monthly payments. */
 const MAX_MONTHS = 600;
 
+/** Which unknown the visitor is solving for. Anything but 'loanAmount' / 'term' is the default payment mode. */
+const solveMode = (values: Record<string, string>): SolveFor | null =>
+  values.solveFor === 'loanAmount' || values.solveFor === 'term' ? values.solveFor : null;
+
 const loanCalculatorConfig: CalculatorConfig = {
   inputs: [
+    {
+      id: 'solveFor',
+      label: 'What do you want to calculate?',
+      type: 'select',
+      required: true,
+      defaultValue: 'payment',
+      options: [
+        { label: 'Monthly payment', value: 'payment' },
+        { label: 'Loan amount (how much can I borrow?)', value: 'loanAmount' },
+        { label: 'Loan term (how long will it take to pay off?)', value: 'term' },
+      ],
+    },
     {
       id: 'loanAmount',
       label: 'Loan Amount',
@@ -21,6 +39,18 @@ const loanCalculatorConfig: CalculatorConfig = {
       required: true,
       helpText: 'Principal amount borrowed',
       slider: { min: 1000, max: 100000, step: 500 },
+      showWhen: (v) => v.solveFor !== 'loanAmount',
+    },
+    {
+      id: 'monthlyPayment',
+      label: 'Monthly Payment',
+      type: 'number',
+      placeholder: '500',
+      prefix: '$',
+      min: 0,
+      step: 10,
+      helpText: 'How much you can afford to pay per month',
+      showWhen: (v) => v.solveFor === 'loanAmount' || v.solveFor === 'term',
     },
     {
       id: 'interestRate',
@@ -45,6 +75,7 @@ const loanCalculatorConfig: CalculatorConfig = {
         { label: 'Years', value: 'years' },
         { label: 'Months', value: 'months' },
       ],
+      showWhen: (v) => v.solveFor !== 'term',
     },
     {
       id: 'loanTerm',
@@ -58,9 +89,12 @@ const loanCalculatorConfig: CalculatorConfig = {
       required: true,
       helpText: 'Personal loans are often 24–60 months. Enter years or months using the toggle above.',
       slider: { min: 1, max: 30, step: 1 },
+      showWhen: (v) => v.solveFor !== 'term',
     },
   ],
   explainSteps: (values) => {
+    const mode = solveMode(values);
+    if (mode) return solveForSteps(mode, values);
     const principal = parseFloat(values.loanAmount);
     const annualRate = parseFloat(values.interestRate) / 100;
     const termUnit = values.termUnit || 'years';
@@ -117,6 +151,7 @@ const loanCalculatorConfig: CalculatorConfig = {
     ];
   },
   chart: (values) => {
+    if (solveMode(values)) return null;
     const principal = parseFloat(values.loanAmount);
     const annualRate = parseFloat(values.interestRate) / 100;
     const termUnit = values.termUnit || 'years';
@@ -160,6 +195,7 @@ const loanCalculatorConfig: CalculatorConfig = {
   },
   // Living Answer donut — the user's actual principal vs total interest.
   donut: (values) => {
+    if (solveMode(values)) return null;
     const principal = parseFloat(values.loanAmount);
     const annualRate = parseFloat(values.interestRate) / 100;
     const termUnit = values.termUnit || 'years';
@@ -183,6 +219,7 @@ const loanCalculatorConfig: CalculatorConfig = {
   },
   // Living Answer gauge — how heavy the interest is as a share of total cost.
   gauge: (values) => {
+    if (solveMode(values)) return null;
     const principal = parseFloat(values.loanAmount);
     const annualRate = parseFloat(values.interestRate) / 100;
     const termUnit = values.termUnit || 'years';
@@ -209,6 +246,8 @@ const loanCalculatorConfig: CalculatorConfig = {
     };
   },
   calculate: (values) => {
+    const mode = solveMode(values);
+    if (mode) return solveForResults(mode, values);
     const principal = parseFloat(values.loanAmount);
     const annualRate = parseFloat(values.interestRate) / 100;
     const termUnit = values.termUnit || 'years';
@@ -270,6 +309,7 @@ const loanCalculatorConfig: CalculatorConfig = {
     ];
   },
   extraPanel: (values, results) => {
+    if (solveMode(values)) return results.length ? createElement(SolveForPanel, { values, results }) : null;
     const principal = parseFloat(values.loanAmount);
     const annualRate = parseFloat(values.interestRate) / 100;
     const termUnit = values.termUnit || 'years';
@@ -296,9 +336,9 @@ const loanCalculatorConfig: CalculatorConfig = {
     });
   },
   educational: {
-    formula: 'M = P × [r(1+r)^n] / [(1+r)^n − 1]',
+    formula: 'Payment: M = P × [r(1+r)^n] / [(1+r)^n − 1] | Loan amount: P = M × [(1+r)^n − 1] / [r(1+r)^n] | Term: n = −ln(1 − rP/M) / ln(1+r)',
     formulaDescription:
-      'Monthly payment is calculated using the standard loan amortization formula — the same math used for auto loans, personal loans, and mortgages. This formula ensures each payment is exactly the same amount throughout the life of the loan, with the proportion allocated to interest decreasing over time as the principal balance shrinks.',
+      'Monthly payment is calculated using the standard loan amortization formula — the same math used for auto loans, personal loans, and mortgages. This formula ensures each payment is exactly the same amount throughout the life of the loan, with the proportion allocated to interest decreasing over time as the principal balance shrinks. The same equation can be rearranged to solve for the loan amount you can afford at a given payment, or for the number of payments needed to clear a loan at a given payment.',
     diagram: {
       svg: '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif"><path d="M 150,50 A 100,100 0 1,1 91,231 Z" fill="var(--svg-3b82f6)"/><path d="M 91,231 A 100,100 0 0,1 150,50 Z" fill="var(--svg-ef4444)"/><text x="150" y="148" font-size="14" fill="var(--svg-1e293b)" text-anchor="middle" font-weight="600">Total Cost</text><text x="150" y="163" font-size="11" fill="var(--svg-64748b)" text-anchor="middle">of Loan</text><text x="201" y="164" font-size="13" fill="var(--svg-ffffff)" text-anchor="middle" font-weight="600">Principal</text><text x="201" y="179" font-size="12" fill="var(--svg-ffffff)" text-anchor="middle">~60%</text><text x="99" y="132" font-size="13" fill="var(--svg-ffffff)" text-anchor="middle" font-weight="600">Interest</text><text x="99" y="147" font-size="12" fill="var(--svg-ffffff)" text-anchor="middle">~40%</text></svg>',
       alt: 'Illustrative pie chart of a long-term loan: roughly 60% principal in blue and 40% interest in red. Short personal loans usually carry a much smaller interest share.',
@@ -311,17 +351,22 @@ const loanCalculatorConfig: CalculatorConfig = {
     ],
     quickReference: loanTermRows(),
     howToUse: [
-      'Enter the loan amount, annual interest rate (APR), and choose between years or months for the term.',
+      'Choose what to calculate: the monthly payment (default), the loan amount you can afford, or how long a loan takes to pay off.',
+      'Monthly payment: enter the loan amount, annual interest rate (APR), and choose between years or months for the term.',
       'Enter the term duration and review your monthly payment, total interest, and total cost.',
       'Scroll down to view the full amortization schedule showing each payment split month by month.',
+      'Loan amount: enter the monthly payment you can afford, the rate and the term. The "+$50/month" line shows how much extra borrowing power a small increase gives you.',
+      'Loan term: enter the loan amount, your monthly payment and the rate to see how many payments it takes. The last payment may be smaller than the others.',
     ],
     commonUses: [
+      'Work backwards from a budget: enter the payment you can afford and see how much you can borrow. At 7% APR, $600/month supports about $30,300 over 5 years or about $35,200 over 6 years.',
+      'See how long a loan takes to pay off at your current payment, and what a slightly higher payment saves: $25,000 at 7% takes 61 payments at $495 but 54 at $545.',
       'Compare monthly payments across different loan terms to find the best balance between affordable payments and total interest cost.',
       'Calculate the true total cost of a loan including all principal and interest payments over the full amortization period.',
       'Experiment with extra payments to see how much interest you can save and how early you can become debt-free.',
     ],
     explanation:
-      'Every loan payment is split between interest and principal repayment. Early in the loan term, most of each payment goes toward interest because the outstanding balance is largest. Over time, as the principal shrinks, less interest accrues and more of each payment goes toward reducing the balance. This is called amortization. The amortization schedule below shows exactly how each payment is allocated month by month and year by year. Use it to understand the true cost of your loan, see how much interest you will pay over the full term, and experiment with extra payments to see how much you could save by paying off the loan early.',
+      'Every loan payment is split between interest and principal repayment. Early in the loan term, most of each payment goes toward interest because the outstanding balance is largest. Over time, as the principal shrinks, less interest accrues and more of each payment goes toward reducing the balance. This is called amortization. The amortization schedule below shows exactly how each payment is allocated month by month and year by year. Use it to understand the true cost of your loan, see how much interest you will pay over the full term, and experiment with extra payments to see how much you could save by paying off the loan early. If you start from a budget rather than a loan size, switch the calculator to "Loan amount" to see how much a given monthly payment can borrow, or to "Loan term" to see how long a loan lasts at that payment. A payment that only covers the monthly interest never pays the loan off, and the term mode warns you when that is the case.',
     faqs: [
       {
         question: 'What is the difference between interest rate and APR?',
@@ -342,6 +387,26 @@ const loanCalculatorConfig: CalculatorConfig = {
       {
         question: 'What is amortization and why does it matter?',
         answer: 'Amortization is the process of spreading out a loan into fixed payments over time. Early payments are mostly interest because the outstanding balance is largest. Over time, as principal shrinks, more of each payment goes toward the balance. On a 30-year mortgage at 6.5%, about 85% of the first year\'s payments go to interest and about 15% to principal. Understanding amortization shows why extra payments early in the loan term save the most money.',
+      },
+      {
+        question: 'How much can I afford to borrow at $500 a month?',
+        answer: 'Switch the calculator to "Loan amount," enter $500 as the monthly payment, your expected APR and the term. At 7% APR, $500 a month supports about $16,200 over 3 years, $25,250 over 5 years and $33,100 over 7 years. A longer term raises how much you can borrow but costs more interest in total.',
+      },
+      {
+        question: 'How much more can I borrow if I add $50 to my monthly payment?',
+        answer: 'In "Loan amount" mode the calculator shows a "+$50/month" line. At 7% APR over 60 months, $500 a month supports about $25,250 and $550 a month about $27,800, roughly $2,500 more. Over 72 months at the same rate, $500 supports about $29,300 and $550 about $32,300.',
+      },
+      {
+        question: 'I know the loan amount and my payment. How long will it take to pay off?',
+        answer: 'Switch to "Loan term" and enter the loan amount, the monthly payment and the rate. The calculator solves n = −ln(1 − rP/M) / ln(1+r) and rounds up to whole payments; the final payment is usually smaller than the rest. For example, $25,000 at 7% with a $545 payment takes 54 payments (4 years and 6 months).',
+      },
+      {
+        question: 'What happens if my payment only covers the interest?',
+        answer: 'If the monthly payment equals the monthly interest (loan amount times the monthly rate), none of it reduces the balance and the loan never ends. On $25,000 at 7% that floor is about $145.83 a month. The "Loan term" mode shows this minimum and warns you when your payment is at or below it. Credit card minimum payments can sit close to this level.',
+      },
+      {
+        question: 'What is the best way to compare a car loan with a mortgage?',
+        answer: 'Car loans are short and the car loses value quickly, so a shorter term is usually better: a $35,000 loan at 7% costs $838 a month over 48 months with $5,230 in interest, against $597 a month over 72 months with $7,963 in interest, about $2,734 more. A mortgage is larger and longer: $250,000 at 6.5% costs about $2,178 a month over 15 years ($142,000 interest) against about $1,580 over 30 years ($318,900 interest), roughly $176,900 more interest for a payment about $598 a month lower. Choose by whether monthly cash flow or total cost matters more to you.',
       },
     ],
   citations: [

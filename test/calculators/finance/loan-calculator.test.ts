@@ -154,3 +154,43 @@ describe('loan-calculator audit', () => {
     expect(g.valueLabel).toBe('Interest is 11% of total cost — Low');
   });
 });
+
+describe('loan-calculator solve-for modes (absorbed from the retired payment-calculator page)', () => {
+  const visible = (v: Record<string, string>) =>
+    config.inputs.filter((i) => !i.showWhen || i.showWhen(v)).map((i) => i.id);
+
+  it('defaults to monthly payment and shows only the payment inputs', () => {
+    expect(config.inputs.find((i) => i.id === 'solveFor')!.defaultValue).toBe('payment');
+    expect(visible({})).toEqual(['solveFor', 'loanAmount', 'interestRate', 'termUnit', 'loanTerm']);
+    expect(visible({ solveFor: 'payment' })).toEqual(['solveFor', 'loanAmount', 'interestRate', 'termUnit', 'loanTerm']);
+  });
+  it('loan-amount mode hides the loan amount and asks for a payment', () => {
+    expect(visible({ solveFor: 'loanAmount' })).toEqual(['solveFor', 'monthlyPayment', 'interestRate', 'termUnit', 'loanTerm']);
+  });
+  it('term mode hides the term and asks for a payment', () => {
+    expect(visible({ solveFor: 'term' })).toEqual(['solveFor', 'loanAmount', 'monthlyPayment', 'interestRate']);
+  });
+  it('loan amount: $500/mo at 7% for 5 years borrows $25,251.00 and shows the +$50 line', () => {
+    const r = config.calculate({ solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '7', termUnit: 'years', loanTerm: '5' });
+    expect(getValue(r, 'loanAmount')).toBe('$25,251.00');
+    expect(getValue(r, 'increaseBy50')).toContain('more');
+  });
+  it('loan amount at 0% is payment x months', () => {
+    near(parseMoney(getValue(config.calculate({ solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '0', termUnit: 'years', loanTerm: '5' }), 'loanAmount')), 30000);
+  });
+  it('term: $12,000 at 0% paying $500 takes exactly 2 years; $50 on $25,000 at 7% never pays off', () => {
+    expect(getValue(config.calculate({ solveFor: 'term', loanAmount: '12000', monthlyPayment: '500', interestRate: '0' }), 'term')).toBe('2 years');
+    expect(getValue(config.calculate({ solveFor: 'term', loanAmount: '25000', monthlyPayment: '50', interestRate: '7' }), 'error')).toContain('Monthly payment must exceed');
+  });
+  it('the chart, donut and gauge only describe the payment scenario', () => {
+    const v = { solveFor: 'term', loanAmount: '25000', monthlyPayment: '600', interestRate: '7', termUnit: 'years', loanTerm: '5' };
+    expect(config.chart!(v)).toBeNull();
+    expect(config.donut!(v)).toBeNull();
+    expect(config.gauge!(v)).toBeNull();
+    expect(config.chart!({ ...v, solveFor: 'payment' })).not.toBeNull();
+  });
+  it('the educational content documents all three directions', () => {
+    expect(config.educational.formula).toContain('n = −ln');
+    expect(config.educational.faqs!.some((f) => /afford to borrow/i.test(f.question))).toBe(true);
+  });
+});

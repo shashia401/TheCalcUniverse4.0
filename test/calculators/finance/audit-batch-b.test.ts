@@ -8,7 +8,6 @@ import personalLoan from '../../../src/calculators/finance/personal-loan';
 import apr from '../../../src/calculators/finance/apr-calculator';
 import rentVsBuy from '../../../src/calculators/finance/rent-vs-buy';
 import presentValue from '../../../src/calculators/finance/present-value';
-import payment from '../../../src/calculators/finance/payment-calculator';
 import compound from '../../../src/calculators/finance/compound-interest';
 import creditCard from '../../../src/calculators/finance/credit-card-payoff';
 import netWorth from '../../../src/calculators/finance/net-worth';
@@ -379,18 +378,18 @@ describe('present-value-calculator audit', () => {
   });
 });
 
-describe('payment-calculator audit', () => {
-  const run = (v: Record<string, string>) => payment.calculate(v);
+describe('loan-calculator audit: solve-for modes and payment cases (moved from the retired payment-calculator)', () => {
+  const run = (v: Record<string, string>) => loan.calculate(v);
   // Oracle: M = P r g/(g-1); P = M (1 - (1+r)^-n)/r; n = -ln(1 - rP/M)/ln(1+r) rounded up, last payment smaller.
   it('payment: $25k at 7% for 5y = $495.03, $4,701.80 interest; 36 months = $771.93', () => {
-    expect(all(run({ solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'years', loanTerm: '5' }), ['payment', 'totalInterest', 'totalCost', 'termInfo', 'interestPct'])).toEqual({
-      payment: '$495.03', totalInterest: '$4,701.80', totalCost: '$29,701.80', termInfo: '60 payments (5.0 years)', interestPct: '15.8%',
+    expect(all(run({ solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'years', loanTerm: '5' }), ['monthlyPayment', 'totalInterest', 'totalCost', 'termMonths', 'interestRatio'])).toEqual({
+      monthlyPayment: '$495.03', totalInterest: '$4,701.80', totalCost: '$29,701.80', termMonths: '5 years (60 payments)', interestRatio: '15.8%',
     });
-    expect(all(run({ solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'months', loanTerm: '36' }), ['payment', 'totalInterest'])).toEqual({ payment: '$771.93', totalInterest: '$2,789.39' });
+    expect(all(run({ solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'months', loanTerm: '36' }), ['monthlyPayment', 'totalInterest'])).toEqual({ monthlyPayment: '$771.93', totalInterest: '$2,789.39' });
   });
   it('payment: $250k at 6.5% for 15y = $2,177.77, $141,998.31 interest; 0% rate $12k/48m = $250', () => {
-    expect(all(run({ solveFor: 'payment', loanAmount: '250000', interestRate: '6.5', termUnit: 'years', loanTerm: '15' }), ['payment', 'totalInterest'])).toEqual({ payment: '$2,177.77', totalInterest: '$141,998.31' });
-    expect(val(run({ solveFor: 'payment', loanAmount: '12000', interestRate: '0', termUnit: 'months', loanTerm: '48' }), 'payment')).toBe('$250.00');
+    expect(all(run({ solveFor: 'payment', loanAmount: '250000', interestRate: '6.5', termUnit: 'years', loanTerm: '15' }), ['monthlyPayment', 'totalInterest'])).toEqual({ monthlyPayment: '$2,177.77', totalInterest: '$141,998.31' });
+    expect(val(run({ solveFor: 'payment', loanAmount: '12000', interestRate: '0', termUnit: 'months', loanTerm: '48' }), 'monthlyPayment')).toBe('$250.00');
   });
   it('loan amount: $600/mo at 7% for 5y borrows $30,301.20; +$50 adds $2,525.10', () => {
     const r = run({ solveFor: 'loanAmount', monthlyPayment: '600', interestRate: '7', termUnit: 'years', loanTerm: '5' });
@@ -426,9 +425,26 @@ describe('payment-calculator audit', () => {
     expect(val(i('7', '35000', '48'), 'totalInterest')).toBe('$5,229.69');
     expect(val(i('7', '35000', '72'), 'totalInterest')).toBe('$7,963.50');
   });
-  it('overlong terms and sub-month terms return nothing', () => {
+  it('overlong terms return nothing in every mode; a sub-month loan term rounds to 0 payments in loan-amount mode', () => {
     expect(run({ solveFor: 'payment', loanAmount: '12000', interestRate: '5', termUnit: 'years', loanTerm: '51' })).toEqual([]);
-    expect(run({ solveFor: 'payment', loanAmount: '12000', interestRate: '5', termUnit: 'years', loanTerm: '0.01' })).toEqual([]);
+    expect(run({ solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '5', termUnit: 'years', loanTerm: '51' })).toEqual([]);
+    expect(run({ solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '7', termUnit: 'years', loanTerm: '0.0001' })).toEqual([]);
+  });
+  it('solve-for modes: missing rate or payment returns nothing, and no output carries NaN/Infinity', () => {
+    expect(run({ solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '', loanTerm: '5' })).toEqual([]);
+    expect(run({ solveFor: 'term', loanAmount: '25000', monthlyPayment: '', interestRate: '7' })).toEqual([]);
+    for (const v of [
+      { solveFor: 'loanAmount', monthlyPayment: '500', interestRate: '7', termUnit: 'years', loanTerm: '5' },
+      { solveFor: 'term', loanAmount: '25000', monthlyPayment: '500', interestRate: '7' },
+    ]) expect(JSON.stringify(run(v))).not.toMatch(/NaN|Infinity|∞/);
+  });
+  it('the three solve-for results agree with each other: payment -> loan amount -> term round trip', () => {
+    const p = parseFloat(String(val(run({ solveFor: 'payment', loanAmount: '25000', interestRate: '7', termUnit: 'years', loanTerm: '5' }), 'monthlyPayment')).replace(/[$,]/g, ''));
+    expect(val(run({ solveFor: 'loanAmount', monthlyPayment: String(p), interestRate: '7', termUnit: 'years', loanTerm: '5' }), 'loanAmount')).toBe('$25,000.00');
+    expect(val(run({ solveFor: 'term', loanAmount: '25000', monthlyPayment: String(p), interestRate: '7' }), 'term')).toBe('5 years');
+  });
+  it('the default (no solveFor) is the monthly-payment mode', () => {
+    expect(val(run({ loanAmount: '25000', interestRate: '7', termUnit: 'years', loanTerm: '5' }), 'monthlyPayment')).toBe('$495.03');
   });
 });
 

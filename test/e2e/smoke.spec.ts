@@ -49,6 +49,17 @@ test.describe('calculator island', () => {
     await expect(page.getByText('5 years × 12 = 60 monthly payments')).toBeVisible();
   });
 
+  test('loan calculator solves for the loan amount (mode absorbed from the retired payment calculator)', async ({ page }) => {
+    await page.goto('/finance/loan-calculator/');
+    await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.selectOption('#solveFor', 'loanAmount');
+    await page.fill('#monthlyPayment', '500');
+    await page.fill('#interestRate', '7');
+    await page.fill('#loanTerm', '5');
+    await expect(page.getByText('$25,251.00').locator('visible=true').first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('#loanAmount')).toHaveCount(0);
+  });
+
   test('Living Answer: dragging a slider changes the result live', async ({ page }) => {
     await page.goto('/finance/loan-calculator/');
     await page.locator('[data-calc-ready="true"]').waitFor({ timeout: 15_000 });

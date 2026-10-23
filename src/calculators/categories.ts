@@ -78,7 +78,7 @@ export const CATEGORY_ICONS: Record<string, string> = {
 };
 
 /** Static total — guarded against registry drift by categories-sync test */
-export const TOTAL_CALCULATOR_COUNT = 344;
+export const TOTAL_CALCULATOR_COUNT = 342;
 
 /** Category list without per-category counts (no registry dependency). */
 export const getCategoryList = (): Omit<CategoryInfo, 'count'>[] =>

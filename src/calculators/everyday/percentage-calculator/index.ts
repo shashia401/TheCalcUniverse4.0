@@ -125,7 +125,7 @@ const percentageCalculatorConfig: CalculatorConfig = {
     }
 
     if (mode === 'whatpct') {
-      if (y === 0) return [];
+      if (y === 0) return [{ id: 'error', label: 'Cannot divide by zero', value: 'Undefined', color: 'negative' as const }];
       const result = (x / y) * 100;
       return [
         { id: 'result', label: `${fmt(x)} is what % of ${fmt(y)}`, value: `${fmt(result)}%`, highlight: true, color: 'positive' as const },
@@ -133,7 +133,12 @@ const percentageCalculatorConfig: CalculatorConfig = {
     }
 
     if (mode === 'change') {
-      if (x === 0) return [];
+      if (x === 0) {
+        return [
+          { id: 'error', label: 'Cannot calculate percent change from zero', value: 'Undefined', color: 'negative' as const },
+          { id: 'explanation', label: 'Why?', value: 'Percent change divides by the original value (X). When X = 0, division by zero is mathematically undefined.', color: 'neutral' as const },
+        ];
+      }
       const change = ((y - x) / Math.abs(x)) * 100;
       return [
         { id: 'result', label: `% Change from ${fmt(x)} to ${fmt(y)}`, value: `${change >= 0 ? '+' : ''}${fmt(change)}%`, highlight: true, color: change >= 0 ? 'positive' as const : 'negative' as const },
@@ -184,6 +189,7 @@ const percentageCalculatorConfig: CalculatorConfig = {
       'Determining percentage change between two values for investment returns, price changes, or grade improvements',
       'Figuring out what percentage one number is of another for budget breakdowns or survey results',
       'Adding or subtracting a percentage from a number for scenarios like markup, discount, or tax-inclusive pricing',
+      'Converting a test score to a grade by finding what percent the correct answers are of the total questions',
     ],
     howToUse: [
       'Select the type of percentage calculation you need from five common modes.',
@@ -218,6 +224,14 @@ const percentageCalculatorConfig: CalculatorConfig = {
       { label: 'Subtract X% from Y', value: 'Y × (1 − X ÷ 100)' },
       { label: '1% of $100', value: '$1.00' },
       { label: '10% of $50', value: '$5.00' },
+      { label: '25% of 80', value: '20' },
+      { label: '50 is what % of 200?', value: '25%' },
+      { label: 'Change from 50 to 75', value: '+50%' },
+      { label: 'Change from 75 to 50', value: '-33.3333%' },
+      { label: '100 increased by 25%', value: '125' },
+      { label: '100 decreased by 25%', value: '75' },
+      { label: 'Decimal form of 35%', value: '0.35' },
+      { label: 'Fraction form of 25%', value: '1/4' },
     ],
     faqs: [
       {
@@ -239,6 +253,22 @@ const percentageCalculatorConfig: CalculatorConfig = {
       {
         question: 'How do I reverse-calculate a percentage?',
         answer: 'If you know the final price and the discount percentage, you can find the original price. For example, if an item costs $68 after a 20% discount, the original price was $68 divided by 0.80 (100% minus 20%), which equals $85. Use the "X is what percent of Y" mode to verify your reverse calculations.',
+      },
+      {
+        question: 'How do I calculate a percentage of a number?',
+        answer: 'Multiply the number by the percentage divided by 100. For example, 15% of 200 is 200 × (15 ÷ 100) = 200 × 0.15 = 30. "Percent" literally means "per hundred," so you are taking that many parts out of every 100.',
+      },
+      {
+        question: 'How do I calculate a percentage without a calculator?',
+        answer: '10% is easy: divide by 10. Then build from it: 20% is 2 × 10%, 5% is half of 10%, and 1% is dividing by 100. Combine them, so 15% = 10% + 5%. This works for most common percentages.',
+      },
+      {
+        question: 'Why does a percent change not reverse symmetrically?',
+        answer: 'The second percentage is applied to a different base. A 25% increase followed by a 25% decrease does not return to the start: 100 → 125 → 93.75. To undo a 25% increase you need a 20% decrease (25 ÷ 125 = 0.2).',
+      },
+      {
+        question: 'What is the difference between a markup and a margin?',
+        answer: 'Markup is the profit as a percentage of cost; margin is the profit as a percentage of the selling price. If an item costs $50 and sells for $100, the markup is 100% ($50 ÷ $50) but the margin is 50% ($50 ÷ $100). The two are often confused in business.',
       },
     ],
   

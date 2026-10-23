@@ -769,16 +769,17 @@ describe('percentage-calculator audit (worked examples + modes, hand-derived)', 
     expect(getValue(r, 'result')).toBe('30');
     expect(getValue(r, 'remainder')).toBe('170');
   });
-  it('whatpct: 30 is 15% of 200; y=0 -> []', () => {
+  it('whatpct: 30 is 15% of 200; y=0 -> an explicit "Undefined" row', () => {
     expect(getValue(run('whatpct', '30', '200'), 'result')).toBe('15%');
-    expect(run('whatpct', '30', '0')).toEqual([]);
+    expect(getValue(run('whatpct', '30', '0'), 'error')).toBe('Undefined');
+    expect(run('whatpct', '30', '0').find((x) => x.id === 'result')).toBeUndefined();
   });
-  it('change: 2000 -> 2600 = +30% (+600); falling value is negative; base 0 -> []', () => {
+  it('change: 2000 -> 2600 = +30% (+600); falling value is negative; base 0 -> "Undefined" row', () => {
     const r = run('change', '2000', '2600');
     expect(getValue(r, 'result')).toBe('+30%');
     expect(getValue(r, 'absolute')).toBe('+600');
     expect(getValue(run('change', '200', '150'), 'result')).toBe('-25%');
-    expect(run('change', '0', '5')).toEqual([]);
+    expect(getValue(run('change', '0', '5'), 'error')).toBe('Undefined');
   });
   it('change from a negative base divides by |old|: -50 -> -25 is +50%', () => {
     expect(getValue(run('change', '-50', '-25'), 'result')).toBe('+50%');
