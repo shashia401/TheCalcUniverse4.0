@@ -97,3 +97,73 @@ export function ladderMethod(nums: bigint[], maxRows = 24): { start: number[]; r
   }
   return { start, rows };
 }
+
+export type LcmFractionParse =
+  | { kind: 'none' }
+  | { kind: 'incomplete' }
+  | { kind: 'invalid'; message: string }
+  | { kind: 'ok'; fractions: { n: bigint; d: bigint }[]; reduced: boolean };
+
+/**
+ * "1/2, 3/4" -> two fractions in lowest terms. Fraction mode starts as soon as any token contains "/". Whole numbers in the
+ * same list count as n/1. Mixed numbers are not read ("1 1/2" would be two tokens), so the help text says to write 3/2.
+ */
+export function parseLcmFractionInput(raw: string | undefined): LcmFractionParse {
+  if (!(raw ?? '').includes('/')) return { kind: 'none' };
+  const tokens = (raw ?? '').split(/[,;\s]+/).filter(Boolean);
+  if (tokens.length < 2) return { kind: 'incomplete' };
+  if (tokens.length > LCM_MAX_COUNT) return { kind: 'invalid', message: `Enter at most ${LCM_MAX_COUNT} fractions.` };
+  const fractions: { n: bigint; d: bigint }[] = [];
+  let reduced = false;
+  for (const t of tokens) {
+    const m = /^(\d+)(?:\/(\d+))?$/.exec(t);
+    if (!m) return { kind: 'invalid', message: `"${t.slice(0, 20)}" is not a fraction like 3/4 or a whole number. Write mixed numbers as improper fractions (1 1/2 = 3/2).` };
+    if (m[1].length > LCM_MAX_DIGITS || (m[2] ?? '').length > LCM_MAX_DIGITS) return { kind: 'invalid', message: `Numbers are limited to ${LCM_MAX_DIGITS} digits.` };
+    let n = BigInt(m[1]);
+    let d = BigInt(m[2] ?? '1');
+    if (d === 0n) return { kind: 'invalid', message: `"${t.slice(0, 20)}" has a denominator of zero.` };
+    if (n === 0n) return { kind: 'invalid', message: 'Zero has no least common multiple with other numbers; enter positive fractions.' };
+    const g = gcdBig(n, d);
+    if (g > 1n) { n /= g; d /= g; reduced = true; }
+    fractions.push({ n, d });
+  }
+  return { kind: 'ok', fractions, reduced };
+}
+
+export interface LcmFractionAnalysis {
+  /** LCM of the numerators (fractions in lowest terms). */
+  lcmNum: bigint;
+  /** GCD of the denominators. */
+  gcdDen: bigint;
+  /** LCM of the fractions = lcmNum / gcdDen, already in lowest terms. */
+  lcm: { n: bigint; d: bigint };
+  /** Least common denominator: the LCM of the denominators, used to add or compare the fractions. */
+  lcd: bigint;
+  /** Each fraction rewritten over the LCD. */
+  overLcd: { n: bigint; d: bigint }[];
+  /** How many times each fraction goes into the LCM (always a whole number). */
+  times: bigint[];
+}
+
+export function analyzeLcmFractions(fractions: { n: bigint; d: bigint }[]): LcmFractionAnalysis {
+  let lcmNum = fractions[0].n;
+  let gcdDen = fractions[0].d;
+  let lcd = fractions[0].d;
+  for (const f of fractions.slice(1)) {
+    lcmNum = (lcmNum / gcdBig(lcmNum, f.n)) * f.n;
+    gcdDen = gcdBig(gcdDen, f.d);
+    lcd = (lcd / gcdBig(lcd, f.d)) * f.d;
+  }
+  // A prime dividing every denominator cannot divide any numerator (each fraction is in lowest terms), so this is reduced.
+  const lcm = { n: lcmNum, d: gcdDen };
+  return {
+    lcmNum,
+    gcdDen,
+    lcm,
+    lcd,
+    overLcd: fractions.map((f) => ({ n: f.n * (lcd / f.d), d: lcd })),
+    times: fractions.map((f) => (lcm.n * f.d) / (lcm.d * f.n)),
+  };
+}
+
+export const fractionText = (f: { n: bigint; d: bigint }): string => (f.d === 1n ? f.n.toString() : `${f.n}/${f.d}`);

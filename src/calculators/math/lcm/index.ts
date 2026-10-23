@@ -1,23 +1,44 @@
 import { createElement } from 'react';
 import { CalculatorConfig, CalculatorResult } from '../../../types/calculator';
 import LCMPanel from './LCMPanel';
-import { LCM_MAX_COUNT, analyzeLcm, parseLcmInput } from './lcmMath';
+import { LCM_MAX_COUNT, analyzeLcm, analyzeLcmFractions, fractionText, parseLcmFractionInput, parseLcmInput } from './lcmMath';
 
 // Pairs people look up most; the answers come from the calculator's own helper, never typed in by hand.
-const COMMON_PAIRS: Array<[number, number]> = [[4, 6], [6, 8], [8, 12], [9, 12], [12, 18], [15, 20], [14, 21], [18, 24], [20, 30], [24, 36]];
+const COMMON_SETS: number[][] = [
+  [4, 6], [6, 8], [8, 12], [9, 12], [12, 18], [15, 20], [14, 21], [18, 24], [20, 30], [24, 36],
+  [5, 8], [7, 4], [7, 12], [24, 35], [24, 42], [3, 8, 12], [24, 36, 48], [60, 72, 80],
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [2, 3, 4, 5, 6, 7],
+];
+const isRun = (xs: number[]): boolean => xs.length > 4 && xs.every((x, i) => i === 0 || x === xs[i - 1] + 1);
+const setLabel = (xs: number[]): string => (isRun(xs) ? `LCM of ${xs[0]} to ${xs[xs.length - 1]}` : `LCM(${xs.join(', ')})`);
 
 const lcmConfig: CalculatorConfig = {
   inputs: [
     {
       id: 'numbers',
-      label: 'Numbers (comma-separated)',
+      label: 'Numbers or fractions (comma-separated)',
       type: 'text',
       placeholder: '12, 18, 24',
       inputMode: 'numeric',
-      helpText: `Enter two or more positive whole numbers (up to ${LCM_MAX_COUNT}) separated by commas or spaces`,
+      helpText: `Enter two or more positive whole numbers (up to ${LCM_MAX_COUNT}) separated by commas or spaces. For fractions use a/b, like 1/2, 3/4 (write 1 1/2 as 3/2).`,
     },
   ],
   calculate: (values): CalculatorResult[] => {
+    const frac = parseLcmFractionInput(values.numbers);
+    if (frac.kind === 'invalid') return [{ id: 'error', label: 'Error', value: frac.message, color: 'negative' }];
+    if (frac.kind === 'incomplete') return [];
+    if (frac.kind === 'ok') {
+      const a = analyzeLcmFractions(frac.fractions);
+      const shown = frac.fractions.length > 6 ? `${frac.fractions.slice(0, 6).map(fractionText).join(', ')}, …` : frac.fractions.map(fractionText).join(', ');
+      const approx = Number(a.lcm.n) / Number(a.lcm.d);
+      return [
+        { id: 'result', label: `LCM of ${shown}`, value: fractionText(a.lcm), highlight: true, color: 'positive' },
+        ...(a.lcm.d !== 1n && Number.isFinite(approx) ? [{ id: 'lcmDecimal', label: 'As a decimal', value: String(parseFloat(approx.toPrecision(10))) }] : []),
+        { id: 'lcd', label: 'Least common denominator (LCD)', value: a.lcd.toString() },
+        { id: 'overLcd', label: 'Fractions over the LCD', value: a.overLcd.map(fractionText).join(', ') },
+        { id: 'lcmFormula', label: 'LCM of fractions', value: 'LCM(a/b, c/d) = LCM(a, c) / GCD(b, d)' },
+      ];
+    }
     const parsed = parseLcmInput(values.numbers);
     if (parsed.kind === 'invalid') return [{ id: 'error', label: 'Error', value: parsed.message, color: 'negative' }];
     if (parsed.kind !== 'ok') return [];
@@ -35,6 +56,21 @@ const lcmConfig: CalculatorConfig = {
     ];
   },
   explainSteps: (values) => {
+    const frac = parseLcmFractionInput(values.numbers);
+    if (frac.kind === 'invalid' || frac.kind === 'incomplete') return [];
+    if (frac.kind === 'ok') {
+      const a = analyzeLcmFractions(frac.fractions);
+      const fs = frac.fractions;
+      const list = (xs: bigint[]) => xs.join(', ');
+      return [
+        { label: frac.reduced ? 'Write every fraction in lowest terms' : 'The fractions are already in lowest terms', expr: fs.map(fractionText).join(', ') },
+        { label: 'Use LCM(a/b, c/d) = LCM(a, c) ÷ GCD(b, d)', expr: `LCM(${fs.map(fractionText).join(', ')})` },
+        { label: 'LCM of the numerators', expr: `LCM(${list(fs.map((f) => f.n))}) = ${a.lcmNum}` },
+        { label: 'GCD of the denominators', expr: `GCD(${list(fs.map((f) => f.d))}) = ${a.gcdDen}` },
+        { label: 'Divide', expr: `${a.lcmNum} ÷ ${a.gcdDen} = ${fractionText(a.lcm)}` },
+        { label: 'Check: the LCM is a whole number of each fraction', expr: fs.map((f, i) => `${fractionText(a.lcm)} = ${a.times[i]} × ${fractionText(f)}`).join(', ') },
+      ];
+    }
     const parsed = parseLcmInput(values.numbers);
     if (parsed.kind !== 'ok') return [];
     const { nums } = parsed;
@@ -92,7 +128,7 @@ const lcmConfig: CalculatorConfig = {
       { label: 'With 1 or itself', value: 'LCM(a, 1) = a and LCM(a, a) = a' },
       { label: 'Scaling', value: 'LCM(k·a, k·b) = k · LCM(a, b)' },
       { label: 'Common multiples', value: 'Every common multiple of the numbers is a multiple of their LCM' },
-      ...COMMON_PAIRS.map(([a, b]) => ({ label: `LCM(${a}, ${b})`, value: analyzeLcm([BigInt(a), BigInt(b)]).lcm.toString() })),
+      ...COMMON_SETS.map((xs) => ({ label: setLabel(xs), value: analyzeLcm(xs.map(BigInt)).lcm.toString() })),
     ],
     diagram: {
       svg: '<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="max-width:320px;height:auto"><text x="160" y="18" text-anchor="middle" fill="var(--svg-374151)" font-size="11" font-weight="bold">LCM(12, 18) = 36</text><text x="50" y="38" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="10">Multiples of 12:</text><text x="30" y="55" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="11">12</text><text x="65" y="55" text-anchor="middle" fill="var(--svg-3b82f6)" font-size="11">24</text><rect x="85" y="44" width="30" height="20" fill="var(--svg-bfdbfe)" stroke="var(--svg-3b82f6)" stroke-width="2" rx="4"/><text x="100" y="58" text-anchor="middle" fill="var(--svg-1e3a5f)" font-size="11" font-weight="bold">36</text><text x="135" y="55" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">48</text><text x="170" y="55" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">60</text><text x="50" y="78" text-anchor="middle" fill="var(--svg-ef4444)" font-size="10">Multiples of 18:</text><text x="30" y="95" text-anchor="middle" fill="var(--svg-ef4444)" font-size="11">18</text><rect x="50" y="84" width="30" height="20" fill="var(--svg-fecaca)" stroke="var(--svg-ef4444)" stroke-width="2" rx="4"/><text x="65" y="98" text-anchor="middle" fill="var(--svg-991b1b)" font-size="11" font-weight="bold">36</text><text x="105" y="95" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">54</text><text x="140" y="95" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">72</text><text x="175" y="95" text-anchor="middle" fill="var(--svg-9ca3af)" font-size="11">90</text><text x="160" y="125" text-anchor="middle" fill="var(--svg-059669)" font-size="11" font-weight="bold">36 is the smallest common multiple</text><rect x="20" y="138" width="280" height="50" fill="var(--svg-f3f4f6)" stroke="var(--svg-d1d5db)" stroke-width="1" rx="6"/><text x="160" y="155" text-anchor="middle" fill="var(--svg-374151)" font-size="10">Prime Factorization:</text><text x="160" y="172" text-anchor="middle" fill="var(--svg-374151)" font-size="10">12 = 2&sup2; &times; 3, 18 = 2 &times; 3&sup2;</text><text x="160" y="186" text-anchor="middle" fill="var(--svg-374151)" font-size="10">LCM = 2&sup2; &times; 3&sup2; = 4 &times; 9 = 36</text></svg>',
@@ -129,6 +165,12 @@ const lcmConfig: CalculatorConfig = {
         inputs: { numbers: '24, 300' },
         result: 'LCM(24, 300) = 600',
         insight: 'Divide by 2 (12, 150), by 2 (6, 75), by 2 (3, 75), by 3 (1, 25), by 5 (1, 5), by 5 (1, 1). The divisors 2 × 2 × 2 × 3 × 5 × 5 multiply to 600.',
+      },
+      {
+        scenario: 'Find the LCM of the fractions 1/2 and 3/4 (also see the least common denominator you would use to add them).',
+        inputs: { numbers: '1/2, 3/4' },
+        result: 'LCM(1/2, 3/4) = 3/2',
+        insight: 'LCM(1, 3) = 3 and GCD(2, 4) = 2, so the LCM is 3 ÷ 2 = 3/2. Check: 3/2 is 3 × 1/2 and 2 × 3/4. The least common denominator is a different number, LCM(2, 4) = 4, which turns the fractions into 2/4 and 3/4 so they can be added.',
       },
     ],
     proTips: [
@@ -169,6 +211,38 @@ const lcmConfig: CalculatorConfig = {
         answer: 'Write each number as a product of primes with exponents. Then, for each distinct prime factor, take the LARGEST exponent that appears in any factorization — this is the key difference from GCF, which takes the smallest exponent. For 12 = 2²×3 and 18 = 2×3², we take 2² and 3², giving LCM = 4×9 = 36.',
       },
       {
+        question: 'How do I find the LCM of fractions?',
+        answer: 'Write each fraction in lowest terms, then divide the LCM of the numerators by the GCD of the denominators: LCM(a/b, c/d) = LCM(a, c) / GCD(b, d). For 1/2 and 3/4 that is LCM(1, 3) / GCD(2, 4) = 3/2, which is 3 × 1/2 and 2 × 3/4. Type fractions like 1/2, 3/4 into the calculator above.',
+      },
+      {
+        question: 'Is the LCM of fractions the same as the least common denominator (LCD)?',
+        answer: 'No. The LCM of fractions is the smallest number that is a whole number of each fraction (3/2 for 1/2 and 3/4). The least common denominator is the LCM of the denominators only (4 for 1/2 and 3/4), and it is what you use to add, subtract or compare fractions. The calculator shows both when you enter fractions.',
+      },
+      {
+        question: 'How do I find the LCM step by step?',
+        answer: 'Pick a method. Listing: write multiples of each number until one appears in every list. Prime factorization: write each number as primes and multiply the highest power of each prime. Ladder (cake): divide the row of numbers by primes until every entry is 1, then multiply the divisors. Or use the GCD: LCM(a, b) = a × b ÷ GCD(a, b). The steps panel above shows your numbers worked out these ways.',
+      },
+      {
+        question: 'What is the fastest way to find the LCM?',
+        answer: 'For two numbers, find the GCD and use LCM = a × b ÷ GCD: LCM(24, 36) = 24 × 36 ÷ 12 = 72. For three or more numbers, the ladder (cake) method keeps everything in one table. Listing multiples is only quick when the numbers are small or one divides the other.',
+      },
+      {
+        question: 'What is the LCM of the numbers 1 to 10?',
+        answer: '2,520. Take the highest power of each prime up to 10: 2³ × 3² × 5 × 7 = 8 × 9 × 5 × 7 = 2,520. It is the smallest number divisible by every whole number from 1 to 10.',
+      },
+      {
+        question: 'What is the 7 × 11 × 13 trick?',
+        answer: '7 × 11 × 13 = 1,001, and repeating a three-digit number to make a six-digit one multiplies it by 1,001 (123 becomes 123,123 = 123 × 1,001). So any number written as abcabc is divisible by 7, 11 and 13. Because 7, 11 and 13 share no factors, their LCM is also 1,001.',
+      },
+      {
+        question: 'What is the sum of the HCF and LCM of 8 and 12?',
+        answer: 'The HCF (GCD) of 8 and 12 is 4 and their LCM is 24, so the sum is 28. As a check, HCF × LCM = 4 × 24 = 96 = 8 × 12.',
+      },
+      {
+        question: 'What are the common multiples of 6 and 9?',
+        answer: 'The common multiples are 18, 36, 54, 72, 90 and so on. They are all multiples of the LCM, 18, which is the smallest one.',
+      },
+      {
         question: 'Is GCF the same as GCD?',
         answer: 'Yes. Greatest common factor (GCF), greatest common divisor (GCD) and highest common factor (HCF) are three names for the same number: the largest whole number that divides every number in the list. This calculator shows the GCD next to the LCM because the two are linked by LCM(a, b) × GCD(a, b) = a × b.',
       },
@@ -198,7 +272,7 @@ const lcmConfig: CalculatorConfig = {
       },
       {
         question: 'What is the division (ladder) method for LCM?',
-        answer: 'Write the numbers in a row. Divide by any prime that divides at least one of them, bring down the numbers it does not divide, and repeat until every number is 1. The LCM is the product of all the divisors. For 12 and 18: divide by 2 (6 and 9), by 2 again (3 and 9), by 3 (1 and 3), then by 3 (1 and 1). The divisors 2 × 2 × 3 × 3 give 36.',
+        answer: 'Also called the cake method. Write the numbers in a row. Divide by any prime that divides at least one of them, bring down the numbers it does not divide, and repeat until every number is 1. The LCM is the product of all the divisors. For 12 and 18: divide by 2 (6 and 9), by 2 again (3 and 9), by 3 (1 and 3), then by 3 (1 and 1). The divisors 2 × 2 × 3 × 3 give 36.',
       },
       {
         question: 'What is the LCM of 12 and 18?',

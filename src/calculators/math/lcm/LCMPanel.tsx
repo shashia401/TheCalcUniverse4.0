@@ -111,7 +111,7 @@ export default function LCMPanel({ values, results }: Props) {
         {/* Method 3: Division (ladder) method */}
         {ladder && ladder.rows.length > 0 && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-amber-700 mb-2">Method 3 — Division (Ladder) Method</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-700 mb-2">Method 3 — Division (Ladder or Cake) Method</p>
             <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Division ladder table">
               <table className="text-sm font-mono text-amber-900">
                 <tbody>
