@@ -3,7 +3,7 @@ import { CalculatorConfig, ExplainStep, SelectOption } from '../../../types/calc
 import { finiteSteps } from '../../../utils/explainGuard';
 import { resultValue } from '../../../utils/explainResults';
 import { bracketSlices } from '../../../utils/bracketSteps';
-import { STATE_INCOME_TAX, STATE_INCOME_TAX_YEAR } from '../../../utils/stateTax';
+import { STATE_INCOME_TAX, STATE_INCOME_TAX_YEAR, stateTaxBasis, verifiedStateNames } from '../../../utils/stateTax';
 import { FEDERAL_BRACKETS, FICA, STANDARD_DEDUCTION, TAX_YEAR } from '../../../utils/taxData';
 import { RETIREMENT_LIMITS_2025 } from '../income-tax/taxData';
 import SalaryTakeHomePanel from './SalaryTakeHomePanel';
@@ -136,6 +136,7 @@ const salaryTakeHomeConfig: CalculatorConfig = {
         label: noState ? 'State Income Tax' : `${c.stateName} Income Tax`,
         value: noState ? '$0.00 (No state tax)' : `$${fmt(c.stateTax)}`,
         color: noState ? 'positive' as const : 'negative' as const,
+        interpretation: noState ? undefined : `State figure: ${stateTaxBasis(c.stateCode)}.`,
       },
       {
         id: 'totalTax',
@@ -214,7 +215,7 @@ const salaryTakeHomeConfig: CalculatorConfig = {
           : `${c.stateName}'s ${STATE_INCOME_TAX_YEAR} rate schedule and standard deduction applied to ${m(stateWages)} of wages = ${val('totalStateTax')}`,
         note: noState
           ? undefined
-          : 'The calculator applies each state\'s published schedule to your wages without local taxes, credits or exemptions; treat the state figure as an estimate.',
+          : `State figure: ${stateTaxBasis(c.stateCode)}. The calculator applies the state schedule to your wages without local taxes, credits or exemptions.`,
       },
       {
         label: 'Subtract everything from your salary',
@@ -309,7 +310,8 @@ const salaryTakeHomeConfig: CalculatorConfig = {
       },
       {
         question: 'How accurate are the state tax rates used here?',
-        answer: 'State tax is computed from each state\'s 2026 rate schedule and standard deduction, applied to your wages after pre-tax deductions (Tax Foundation compilation; a few states had not published 2026 inflation adjustments, so some thresholds are the 2025 amounts). It leaves out personal exemptions and credits, local income taxes (for example New York City or Maryland counties) and state payroll taxes such as California SDI, so your actual withholding can differ. States like Texas, Florida, Washington, and Tennessee do not tax wages.',
+        answer: 'State tax is computed from each state\'s 2026 rate schedule and standard deduction, applied to your wages after pre-tax deductions (Tax Foundation compilation; a few states had not published 2026 inflation adjustments, so some thresholds are the 2025 amounts). It leaves out personal exemptions and credits, local income taxes (for example New York City or Maryland counties) and state payroll taxes such as California SDI, so your actual withholding can differ. States like Texas, Florida, Washington, and Tennessee do not tax wages.' +
+          ` Schedules for ${verifiedStateNames().join(', ')} were checked against each state's own revenue department or legislature (the page names the source and date next to the state figure); every other state is an estimate.`,
       },
     ],
     citations: [

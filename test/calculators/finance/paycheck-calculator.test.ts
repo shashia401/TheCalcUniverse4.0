@@ -98,11 +98,11 @@ describe('paycheck audit (tax year 2026: Rev. Proc. 2025-32, SSA wage base $184,
     expect(getValue(r, 'ficaPerPaycheck')).toBe('$205.96'); // 5,355 / 26
   });
   // James: $52,000 CA single. fed taxable 35,900 -> 1,240 + 2,820 = 4,060; FICA 3,978;
-  // CA (TF 2026): taxable 52,000-5,540 = 46,460 -> 110.79 + 303.70 + 607.52 + 300.48 = 1,322.49 -> net 42,639.51 -> /52 = 819.99
-  it("James: California bracketed tax is $1,322.49/yr (about $25.43/week), not a flat 9.3%", () => {
+  // CA (FTB 2026 Schedule X): taxable 52,000-5,900 = 46,100 -> 1,251.08 (python Decimal, FTB base + rate form) -> net 42,710.92 -> /52 = 821.36
+  it("James: California bracketed tax is $1,251.08/yr (about $24.06/week), not a flat 9.3%", () => {
     const r = config.calculate({ payMode: 'hourly', hourlyWage: '25', hoursPerWeek: '40', payFrequency: 'weekly', filingStatus: 'single', state: 'CA' });
-    expect(getValue(r, 'statePerPaycheck')).toBe('$25.43');
-    expect(getValue(r, 'netPaycheck')).toBe('$819.99');
+    expect(getValue(r, 'statePerPaycheck')).toBe('$24.06');
+    expect(getValue(r, 'netPaycheck')).toBe('$821.36');
     expect(getValue(r, 'fedPerPaycheck')).toBe('$78.08');
   });
   // $300,000 single: SS 184,500*6.2% = 11,439; Medicare 4,350; Additional Medicare (300,000-200,000)*0.9% = 900 -> 16,689

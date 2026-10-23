@@ -3,7 +3,7 @@ import { CalculatorConfig, CalculatorResult, ExplainStep } from '../../../types/
 import { STANDARD_DEDUCTION, FICA, TAX_YEAR } from '../../../utils/taxData';
 import { finiteSteps } from '../../../utils/explainGuard';
 import { resultValue } from '../../../utils/explainResults';
-import { STATE_INCOME_TAX, STATE_INCOME_TAX_YEAR, hasNoWageTax } from '../../../utils/stateTax';
+import { STATE_INCOME_TAX, STATE_INCOME_TAX_YEAR, hasNoWageTax, stateTaxBasis, verifiedStateNames } from '../../../utils/stateTax';
 import PaycheckPanel from './PaycheckPanel';
 import { computePaycheck, PAY_FREQUENCIES } from './paycheckMath';
 
@@ -169,6 +169,7 @@ const paycheckConfig: CalculatorConfig = {
         label: c.noStateTax ? `State Income Tax / ${c.freq}` : `${c.stateName} Tax / ${c.freq}`,
         value: c.noStateTax ? '$0.00 (No state income tax on wages)' : `$${fmt(per(c.stateTax))}`,
         color: c.noStateTax ? 'positive' as const : 'negative' as const,
+        interpretation: c.noStateTax ? undefined : `State figure: ${stateTaxBasis(c.stateCode)}.`,
       },
       {
         id: 'marginalRate',
@@ -262,7 +263,9 @@ const paycheckConfig: CalculatorConfig = {
         expr: c.noStateTax
           ? `${c.stateName} does not tax wages → ${m(0)}`
           : `${c.stateName} schedule applied to state wages → ${m(c.stateTax)} a year (${resultValue(rows, 'statePerPaycheck')} per paycheck)`,
-        note: c.noStateTax ? undefined : 'Method only: the calculator applies its own state rate schedule and standard deduction; the schedule is not itemised here.',
+        note: c.noStateTax
+          ? undefined
+          : `State figure: ${stateTaxBasis(c.stateCode)}. The calculator applies the state rate schedule and standard deduction; the schedule is not itemised here.${c.stateCode === 'PA' && c.benefits > 0 ? ' Pennsylvania excludes health-plan and HSA contributions made through an employer Section 125 cafeteria plan from compensation (PA Department of Revenue letter ruling PIT-06-005); contributions made outside a cafeteria plan are not excluded here.' : ''}`,
       },
       {
         label: 'Subtract everything, then divide by pay periods',
@@ -330,7 +333,7 @@ const paycheckConfig: CalculatorConfig = {
     limitations: [
       'Method: this is an annualised estimate, not IRS Publication 15-T per-period withholding. Annual federal tax is computed from annual wages, the standard deduction and the 2026 brackets, then divided by the number of pay periods; it does not apply the Pub. 15-T percentage-method or wage-bracket tables, W-4 Step 2-4 adjustments, or per-period rounding, so a paycheck stub can differ.',
       'A retirement deferral larger than the pay that can fund it is reduced automatically (shown in the results) so net pay is never negative.',
-      'Pennsylvania taxes 401(k) deferrals (they are not excluded from PA taxable compensation per the PA Department of Revenue), so for Pennsylvania the state tax is computed on wages before retirement deferrals; payroll health premiums under a Section 125 plan are excluded, but dependent-care contributions are not. Other state schedules are applied to wages after deferrals and have not been individually verified for deferral treatment.',
+      'Pennsylvania taxes 401(k) deferrals (they are not excluded from PA taxable compensation per the PA Department of Revenue), so for Pennsylvania the state tax is computed on wages before retirement deferrals; payroll health premiums and HSA contributions made through an employer Section 125 cafeteria plan are excluded from PA compensation (PA Department of Revenue letter ruling PIT-06-005, 2006), but HSA contributions made outside a cafeteria plan and dependent-care contributions are not, so enter only cafeteria-plan amounts in the benefits field. Other state schedules are applied to wages after deferrals and have not been individually verified for deferral treatment.',
       'When not to use: do not rely on this calculator for exact tax filing amounts — use your employer payroll system or the IRS Tax Withholding Estimator for official withholding figures.',
       `State income tax applies each state's ${STATE_INCOME_TAX_YEAR} rate schedule and standard deduction to your wages. State personal exemptions, credits, standard-deduction phase-outs, and state payroll taxes (CA/NJ/NY disability insurance, WA Paid Family Leave) are not included, and head-of-household uses the single schedule, so real withholding can differ.`,
       'This calculator does not account for local/city income taxes (e.g., New York City, Philadelphia, Maryland counties, and certain Ohio cities impose additional local income taxes).',
@@ -375,7 +378,8 @@ const paycheckConfig: CalculatorConfig = {
       },
       {
         question: 'Is the state tax rate accurate for my specific situation?',
-        answer: 'The calculator applies each state\'s 2026 rate schedule and standard deduction (Tax Foundation, as of January 1, 2026) to your wages after pre-tax deductions, using the joint schedule for married filing jointly and the single schedule otherwise. Progressive states such as California (1%–13.3%), New York (3.9%–10.9%), Minnesota (5.35%–9.85%), and Hawaii (1.4%–11%) are taxed bracket by bracket. It does not include personal exemptions and credits, local income taxes, or state disability/family-leave payroll taxes, and an employer\'s withholding tables work differently from your final tax return, so treat the result as an estimate and use your employer\'s payroll system or a CPA for exact figures.',
+        answer: 'The calculator applies each state\'s 2026 rate schedule and standard deduction (Tax Foundation, as of January 1, 2026) to your wages after pre-tax deductions, using the joint schedule for married filing jointly and the single schedule otherwise. Progressive states such as California (1%–13.3%), New York (3.9%–10.9%), Minnesota (5.35%–9.85%), and Hawaii (1.4%–11%) are taxed bracket by bracket. It does not include personal exemptions and credits, local income taxes, or state disability/family-leave payroll taxes, and an employer\'s withholding tables work differently from your final tax return, so treat the result as an estimate and use your employer\'s payroll system or a CPA for exact figures.' +
+          ` Schedules for ${verifiedStateNames().join(', ')} were checked against each state's own revenue department or legislature (the page names the source and date next to the state figure); every other state is an estimate from the Tax Foundation table.`,
       },
       {
         question: 'How does my W-4 affect my withholding?',

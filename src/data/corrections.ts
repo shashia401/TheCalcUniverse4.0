@@ -17,6 +17,46 @@ export interface Correction {
 
 export const corrections: Correction[] = [
   {
+    date: "2026-10-22",
+    calculator: { id: "paycheck-calculator", category: "finance", title: "Paycheck Calculator" },
+    summary: "Arizona state tax used a standard deduction of $8,350 (single) and $16,700 (joint). The Arizona Department of Revenue publishes $15,750 and $31,500, and tells 2026 estimated-tax filers to use those amounts until the 2026 figures are out. The same state engine feeds the Salary Take-Home calculator.",
+    before: "Arizona single, $80,000 of wages: $1,791.25 state tax",
+    after: "$1,606.25 (2.5% x (80,000 - 15,750))",
+    howVerified: "Arizona Department of Revenue 2026 Form 140ES booklet (https://azdor.gov/sites/default/files/document/FORMS_INDIVIDUAL_2026_140ESBooklet.pdf) and Individual Income Update, February 2026 (https://azdor.gov/sites/default/files/document/IND_Updates-2602.pdf), read 2026-10-22. Value checked with Python Decimal; pinned in test/calculators/finance/state-tax-util.test.ts.",
+  },
+  {
+    date: "2026-10-22",
+    calculator: { id: "paycheck-calculator", category: "finance", title: "Paycheck Calculator" },
+    summary: "Massachusetts state tax started its 4% surtax at the 2025 threshold of $1,083,150. For tax year 2026 the Department of Revenue lists $1,107,750. The same state engine feeds the Salary Take-Home calculator.",
+    before: "Massachusetts, $1,200,000 of wages: $64,674.00 state tax",
+    after: "$63,690.00 (5% x 1,200,000 + 4% x (1,200,000 - 1,107,750))",
+    howVerified: "Massachusetts Department of Revenue Tax Rates page, updated December 30, 2025 (https://www.mass.gov/info-details/tax-rates), read 2026-10-22. Value checked with Python Decimal; pinned in test/calculators/finance/state-tax-util.test.ts.",
+  },
+  {
+    date: "2026-10-22",
+    calculator: { id: "paycheck-calculator", category: "finance", title: "Paycheck Calculator" },
+    summary: "Ohio state tax left out the fixed $332 that the statute adds once income passes $26,050 (the 2026 schedule is $332 plus 2.75% of the excess, with no tax at or below $26,050). Ohio income above the threshold was under-taxed by $332. The same state engine feeds the Salary Take-Home calculator.",
+    before: "Ohio, $76,050 of wages: $1,375.00 state tax",
+    after: "$1,707.00 ($332 + 2.75% x 50,000)",
+    howVerified: "Ohio Revised Code section 5747.02(A)(3)(c), as amended by House Bill 96 (https://codes.ohio.gov/ohio-revised-code/section-5747.02; authenticated PDF dated 9-30-2025), read 2026-10-22. Value checked with Python Decimal; pinned in test/calculators/finance/state-tax-util.test.ts.",
+  },
+  {
+    date: "2026-10-22",
+    calculator: { id: "paycheck-calculator", category: "finance", title: "Paycheck Calculator" },
+    summary: "Georgia state tax used the 2025 flat rate of 5.19% and a $12,000 / $24,000 standard deduction. Georgia's 2026 law (HB 463) cut the rate to 4.99% and raised the standard deduction to $15,000 single / $30,000 joint, retroactive to January 1, 2026. The same state engine feeds the Salary Take-Home calculator.",
+    before: "Georgia single, $75,000 of wages: $3,269.70 state tax",
+    after: "$2,994.00 (4.99% x (75,000 - 15,000))",
+    howVerified: "Georgia Department of Revenue 2026 Employer's Tax Guide, updated June 2026, section What's new for tax year 2026 (https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download), read 2026-10-22. Value checked with Python Decimal; pinned in test/calculators/finance/state-tax-util.test.ts.",
+  },
+  {
+    date: "2026-10-22",
+    calculator: { id: "paycheck-calculator", category: "finance", title: "Paycheck Calculator" },
+    summary: "California state tax used bracket thresholds from 2025 and a standard deduction of $5,540 / $11,080 (the 2024 amounts). The Franchise Tax Board's 2026 schedules start the 2% bracket at $11,456 (single) and $22,912 (joint) and the standard deduction is $5,900 / $11,800. The same state engine feeds the Salary Take-Home calculator.",
+    before: "California single, $52,000 of wages: $1,322.49 state tax",
+    after: "$1,251.08 (FTB 2026 Schedule X on taxable income 52,000 - 5,900)",
+    howVerified: "Franchise Tax Board 2026 indexing announcement with the 2026 Schedules X and Y (https://www.ftb.ca.gov/about-ftb/newsroom/tax-news/index.html), read 2026-10-22; the FTB says the complete 2026 tables follow in late December. Value checked with Python Decimal using the FTB's printed base-plus-rate form; pinned in test/calculators/finance/state-tax-util.test.ts.",
+  },
+  {
     date: "2026-10-20",
     calculator: { id: "dog-cat-age", category: "health", title: "Dog and Cat Age Calculator" },
     summary: "Half-way results were rounded down by floating-point noise: a 2.3-year-old dog is 24 + 0.3 × 5 = 25.5 human years, but the stored number was 25.499999999999996, so the page showed 25 instead of 26. The value is now rounded to 6 places before it is rounded to whole years.",
