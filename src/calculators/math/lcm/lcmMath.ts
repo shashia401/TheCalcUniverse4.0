@@ -67,3 +67,33 @@ export function multiplesOf(n: bigint, count: number): number[] | null {
   if (n * BigInt(count) > BigInt(Number.MAX_SAFE_INTEGER)) return null;
   return Array.from({ length: count }, (_, i) => Number(n) * (i + 1));
 }
+
+export interface LadderRow {
+  /** The prime every divisible entry was divided by on this row. */
+  divisor: number;
+  /** The row of numbers after dividing (entries the prime did not divide are brought down unchanged). */
+  values: number[];
+}
+
+/**
+ * Division (ladder / cake) method: divide by a prime that divides at least one entry, bring down the entries it does not
+ * divide, and repeat until every entry is 1. The LCM is the product of the divisors. Null when a number is too big to factor
+ * exactly, or when the ladder would be longer than `maxRows` (the table would stop being readable).
+ */
+export function ladderMethod(nums: bigint[], maxRows = 24): { start: number[]; rows: LadderRow[] } | null {
+  const limit = BigInt(MAX_FACTOR_INPUT);
+  if (nums.some((n) => n > limit)) return null;
+  const start = nums.map(Number);
+  const primes = new Set<number>();
+  for (const n of start) for (const [p] of factorize(n)) primes.add(p);
+  let current = start.slice();
+  const rows: LadderRow[] = [];
+  for (const p of [...primes].sort((a, b) => a - b)) {
+    while (current.some((v) => v % p === 0)) {
+      current = current.map((v) => (v % p === 0 ? v / p : v));
+      rows.push({ divisor: p, values: current });
+      if (rows.length > maxRows) return null;
+    }
+  }
+  return { start, rows };
+}

@@ -87,6 +87,11 @@ const lcmConfig: CalculatorConfig = {
       { label: 'Co-prime numbers', value: 'LCM(a,b) = a × b (e.g. 7 and 8 → 56)' },
       { label: 'Multiple relationship', value: 'LCM(a,b) = a if b divides a evenly' },
       { label: 'Common denominator', value: 'LCM of denominators for fraction addition' },
+      { label: 'Commutative', value: 'LCM(a, b) = LCM(b, a)' },
+      { label: 'Associative', value: 'LCM(a, LCM(b, c)) = LCM(LCM(a, b), c)' },
+      { label: 'With 1 or itself', value: 'LCM(a, 1) = a and LCM(a, a) = a' },
+      { label: 'Scaling', value: 'LCM(k·a, k·b) = k · LCM(a, b)' },
+      { label: 'Common multiples', value: 'Every common multiple of the numbers is a multiple of their LCM' },
       ...COMMON_PAIRS.map(([a, b]) => ({ label: `LCM(${a}, ${b})`, value: analyzeLcm([BigInt(a), BigInt(b)]).lcm.toString() })),
     ],
     diagram: {
@@ -112,6 +117,18 @@ const lcmConfig: CalculatorConfig = {
         inputs: { numbers: '88, 225, 365' },
         result: 'LCM(88, 225, 365) = 1,445,400',
         insight: '88 = 2³×11, 225 = 3²×5², 365 = 5×73, so the LCM is 2³×3²×5²×11×73 = 1,445,400 days, about 3,957 years (1,445,400 ÷ 365.25) with these rounded periods. In practice, orbital mechanics has perturbations, but the LCM gives the theoretical recurrence period.',
+      },
+      {
+        scenario: 'Find the LCM of three numbers: 12, 18 and 30 (for example, three machines that restart every 12, 18 and 30 minutes).',
+        inputs: { numbers: '12, 18, 30' },
+        result: 'LCM(12, 18, 30) = 180',
+        insight: '12 = 2² × 3, 18 = 2 × 3², 30 = 2 × 3 × 5. The highest powers are 2², 3² and 5, so the LCM is 4 × 9 × 5 = 180. Chained with the GCD formula: LCM(12, 18) = 36, then LCM(36, 30) = 180.',
+      },
+      {
+        scenario: 'Find the LCM of 24 and 300 with the division (ladder) method.',
+        inputs: { numbers: '24, 300' },
+        result: 'LCM(24, 300) = 600',
+        insight: 'Divide by 2 (12, 150), by 2 (6, 75), by 2 (3, 75), by 3 (1, 25), by 5 (1, 5), by 5 (1, 1). The divisors 2 × 2 × 2 × 3 × 5 × 5 multiply to 600.',
       },
     ],
     proTips: [
@@ -150,6 +167,26 @@ const lcmConfig: CalculatorConfig = {
       {
         question: 'How does the prime factorization method work for LCM?',
         answer: 'Write each number as a product of primes with exponents. Then, for each distinct prime factor, take the LARGEST exponent that appears in any factorization — this is the key difference from GCF, which takes the smallest exponent. For 12 = 2²×3 and 18 = 2×3², we take 2² and 3², giving LCM = 4×9 = 36.',
+      },
+      {
+        question: 'Is GCF the same as GCD?',
+        answer: 'Yes. Greatest common factor (GCF), greatest common divisor (GCD) and highest common factor (HCF) are three names for the same number: the largest whole number that divides every number in the list. This calculator shows the GCD next to the LCM because the two are linked by LCM(a, b) × GCD(a, b) = a × b.',
+      },
+      {
+        question: 'Why does GCF × LCM = a × b only work for two numbers?',
+        answer: 'The identity comes from adding the smaller and larger exponent of each prime, which is only a complete accounting for two numbers. For three numbers, LCM(12, 18, 30) × GCD(12, 18, 30) = 180 × 6 = 1,080, but 12 × 18 × 30 = 6,480. For more than two numbers, chain the LCM pair by pair instead.',
+      },
+      {
+        question: 'What is the LCM of a number and 1, or of a number and itself?',
+        answer: 'The LCM of any number and 1 is the number itself, and the LCM of a number with itself is also that number. More generally, if one number divides the other, the LCM is the larger one: LCM(6, 18) = 18.',
+      },
+      {
+        question: 'How do I find the LCM of decimals?',
+        answer: 'Multiply every decimal by the same power of 10 until they are all whole numbers, find the LCM of the whole numbers, then divide by that power of 10. For 1.2 and 0.8, multiply by 10 to get 12 and 8, whose LCM is 24, so the LCM of 1.2 and 0.8 is 2.4 (it is 2 × 1.2 and 3 × 0.8). This calculator takes whole numbers, so scale first.',
+      },
+      {
+        question: 'How does the Venn diagram method find the LCM?',
+        answer: 'Write the prime factors of each number in two overlapping circles, with the primes they share in the overlap. The LCM is the product of every prime in the diagram, counting the overlap once. For 12 = 2 × 2 × 3 and 18 = 2 × 3 × 3 the overlap holds 2 and 3, 12 adds another 2, and 18 adds another 3, so the LCM is 2 × 3 × 2 × 3 = 36.',
       },
       {
         question: 'Is the lowest common multiple the same as the least common multiple?',
