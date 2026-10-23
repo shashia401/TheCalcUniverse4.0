@@ -97,10 +97,9 @@ export default function MacroPointPanel({ results }: Props) {
           <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-1">Trademark Notice</p>
           <p className="text-xs text-amber-800 leading-relaxed">
             This calculator is <strong>not affiliated with, endorsed by, or connected to WW International, Inc.</strong>
-            "Weight Watchers" and "SmartPoints" are registered trademarks of WW International, Inc. The scoring
-            formula used here employs a publicly known macronutrient-weighting approach that is structurally
-            similar to popular point-based systems. We do not represent this as identical to any branded or
-            proprietary scoring system.
+            "Weight Watchers" and "SmartPoints" are registered trademarks of WW International, Inc. The score is
+            calculated from calories, saturated fat, sugar and protein using the coefficients shown on this
+            page. It is not based on, and does not claim to match, any branded or proprietary scoring system.
           </p>
         </div>
       </div>

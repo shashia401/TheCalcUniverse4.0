@@ -5,9 +5,9 @@ import { finiteSteps } from '../../../utils/explainGuard';
 import { hasAnswer, resultValue } from '../../../utils/explainResults';
 
 /*
- * This calculator provides a nutritional scoring system similar to popular
- * point-based diet programs. The formula aligns with common macronutrient
- * scoring approaches: points increase with calories, saturated fat, and sugar,
+ * This calculator computes a points score from calories, saturated fat, sugar and
+ * protein using the coefficients in K below. It makes no claim to be based on, or to
+ * match, any diet program. Points increase with calories, saturated fat and sugar,
  * and decrease with protein.
  *
  * IMPORTANT: This tool is not affiliated with, endorsed by, or connected to
@@ -243,11 +243,11 @@ const macroPointConfig: CalculatorConfig = {
       'Use the score to compare different food choices — lower points generally mean more nutrient-dense options.',
     ],
     explanation:
-      "This Macro Point Calculator provides a nutrition scoring system aligned with popular point-based diet approaches. The formula assigns higher scores to foods high in calories, saturated fat, and sugar, while giving a credit for protein — incentivizing lean proteins, vegetables, and whole foods over processed options. This is not an official Weight Watchers or SmartPoints calculator but uses a similar macronutrient-weighted approach. Keep in mind that all point-based systems are simplifications — a food's healthfulness also depends on micronutrient density, fibre content, food matrix effects, and individual health needs. Use points as one of several decision-making tools, not the sole arbiter of food quality. For instance, a 95-calorie apple (0g saturated fat, 19g sugar, 0.5g protein) scores 5.1 points (2.9 from calories and 2.3 from sugar, less a 0.05 protein credit), while a 200-calorie serving of cheese crackers (3g saturated fat, 2g sugar, 4g protein) scores 6.8 points (6.1 from calories, 0.8 from saturated fat and 0.2 from sugar, less a 0.4 protein credit). The formula counts every food's calories and sugar, so even an apple is not a zero-point food here. The apple's fibre, vitamin C, and polyphenols are not captured by the point formula — a reminder that points are a useful tool but not a complete picture of nutritional quality.",
+      "This Macro Point Calculator provides a points score from calories, saturated fat, sugar and protein, using the coefficients shown on this page. The formula assigns higher scores to foods high in calories, saturated fat, and sugar, while giving a credit for protein — incentivizing lean proteins, vegetables, and whole foods over processed options. This is not an official Weight Watchers or SmartPoints calculator, and it is not affiliated with any diet program. Keep in mind that all point-based systems are simplifications — a food's healthfulness also depends on micronutrient density, fibre content, food matrix effects, and individual health needs. Use points as one of several decision-making tools, not the sole arbiter of food quality. For instance, a 95-calorie apple (0g saturated fat, 19g sugar, 0.5g protein) scores 5.1 points (2.9 from calories and 2.3 from sugar, less a 0.05 protein credit), while a 200-calorie serving of cheese crackers (3g saturated fat, 2g sugar, 4g protein) scores 6.8 points (6.1 from calories, 0.8 from saturated fat and 0.2 from sugar, less a 0.4 protein credit). The formula counts every food's calories and sugar, so even an apple is not a zero-point food here. The apple's fibre, vitamin C, and polyphenols are not captured by the point formula — a reminder that points are a useful tool but not a complete picture of nutritional quality.",
     faqs: [
       {
         question: 'Is this the official Weight Watchers SmartPoints formula?',
-        answer: 'No. This calculator is not affiliated with, endorsed by, or connected to WW International, Inc. "Weight Watchers" and "SmartPoints" are registered trademarks. The formula used here is a publicly known macro-weighted scoring system that is similar in structure to popular point-based systems. We do not claim this is identical to any branded system.',
+        answer: 'No. This calculator is not affiliated with, endorsed by, or connected to WW International, Inc. "Weight Watchers" and "SmartPoints" are registered trademarks. It is a points score from calories, saturated fat, sugar and protein using the coefficients shown on this page, and it makes no claim to match any branded system or to be based on one.',
       },
       {
         question: 'What is a good daily point budget?',
@@ -308,7 +308,7 @@ const macroPointConfig: CalculatorConfig = {
       'Don\'t chase zero points at the expense of balanced nutrition. Some nutritious foods like nuts, avocados, and olive oil score moderately due to their calorie density and fat content, but they provide essential nutrients (vitamin E, monounsaturated fats, fiber) that zero-point lean proteins lack. Use points as a guide, not a straitjacket.',
     ],
     limitations: [
-      'This calculator is not affiliated with Weight Watchers, WW International, Inc., or any branded point-based diet program. The formula is a publicly available macronutrient-weighted scoring method. Do not use this to claim SmartPoints values for official WW programs.',
+      'This calculator is not affiliated with Weight Watchers, WW International, Inc., or any branded point-based diet program. The formula is the points score described above, with the coefficients shown on this page. Do not use this to claim SmartPoints values for official WW programs.',
       'The point formula only considers 4 macronutrients: calories, saturated fat, sugar, and protein. It ignores dietary fiber (which most point systems credit), sodium, trans fat, cholesterol, micronutrient density (vitamins, minerals, phytonutrients), food processing level, glycemic load, and ingredient quality. A diet soda may score 0 points while being nutritionally empty, and almonds may score moderate points while being nutrient-dense.',
       'Individual nutritional needs vary based on age, sex, activity level, metabolic health, food sensitivities, and medical history. The point system provides a generic heuristic that may not align with your specific needs — especially for individuals with diabetes (who need to consider glycemic impact beyond sugar grams), kidney disease (who need to limit protein), or eating disorders (where point tracking can be counterproductive).',
       'There is no official daily budget for this formula. Any budget you set should scale with your own energy needs, which can vary by 500+ calories/day based on activity level, lean body mass, and non-exercise activity thermogenesis (NEAT).',

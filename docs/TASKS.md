@@ -16,10 +16,10 @@ crawled in August under the old client-rendered site, so the verdict predates th
 - [x] A1 Redirect patch (`public/.htaccess` + `public/_redirects`). `/en/methodology/<cat>/<id>/` (~257 old indexed URLs) used to 404 on Apache; now one hop. Also moved calculators, `/calculators/`, author page, `/compare/...`; 410 for `/report/`, `/bookmarks/` and dead `/<cat>/<id>/data/` pages. Simulated: of the 1,000 exported URLs 0 are 404 and none takes more than one hop; of the old 793-URL sitemap 790 reach a 200 page in one hop, 2 are 410, 1 is the homepage. **Simulated only: verify on the live host after deploy**
 - [x] A2 `/en/` redirects collapsed to one hop (retired blog slugs, trailing slash, methodology, compare)
 - [x] A3 Calculator form and its default answer are in the static HTML (same change as B1)
-- [ ] A4 After deploy: request indexing for the top ~20 calculators and the new /decisions/ page, then monitor 2-3 weeks
+- [ ] A4 (owner requested 15 of the 20 on 2026-10-22; 5 left: see the list in chat, pages 16-20) After deploy: request indexing for the top ~20 calculators and the new /decisions/ page, then monitor 2-3 weeks
 - [x] A5 (owner clicked "Validate Fix" 2026-10-19) Click "Validate Fix" only after the fixes are deployed and every URL in the bucket is a 200 page
 - [x] A6 `?ND ?NA ?MA ?MD ?SA ?SD` are the host's directory-listing sort links (57 of the exported URLs) and `?expression={...}` is an unfilled template from an older build (22; the current build emits none). `.htaccess` now has `Options -Indexes` and 301s both shapes to the clean URL (79 of the 81 query URLs; real `?loanAmount=...` links untouched). Verify on the live host after deploy
-- [owner] A7 Cutover checklist in `DEPLOYMENT.md` (submit `sitemap-index.xml`, check `robots.txt`, `llms.txt`)
+- [x] A7 (owner confirmed done 2026-10-22; live host verified: .htaccess active, redirects, 410, 404 page, sitemap) Cutover checklist in `DEPLOYMENT.md` (submit `sitemap-index.xml`, check `robots.txt`, `llms.txt`)
 - [x] A8 (2026-10-19: all redirects, 410, 404, sitemap 529, robots, canonical verified live; weekly indexed-count comparison continues) Re-run redirect checks against the live host (`/math/love-calculator/`, `/en/methodology/finance/loan-calculator/`, `/report/` should be 301, 301, 410) and compare indexed-page counts weekly
 
 ## B. Page and UI
@@ -37,7 +37,7 @@ crawled in August under the old client-rendered site, so the verdict predates th
   - [x] B6d Live step-by-step solutions (`explainSteps`): **325 of 343 calculators have them (2026-10-21; was 12)**. Every block reads the calculator's own helpers or result rows, returns [] on bad input, and is pinned to independent Python values (~2,000 tests). The 18 left are deliberate: not formula-driven (base64, url-encode, dice-roller, password-generator, random-number, love-calculator, bra-size, character-token, ip-subnet, cookie-consent, crypto-hash, the 14 devtools tools), volatile data (currency, eth-gas-fee, robux-converter, ai-token-pricing, time-zone), date-of-today dependent (countdown-calculator), lookup charts (shoe-size, clothing-size-converter), safety-sensitive (bac), free-form evaluator (scientific), ambiguous case (law-of-sines), duplicate folder (math/mulch). Note: `grep` must include `index.tsx`, several calculators keep `explainSteps` there
   - [x] B6e (2026-10-19: BMI healthy weight by height, TDEE by activity level for the default person, loan 3/5/7/10-year comparison, compound growth at 5/7/9%, study-hours by pace and difficulty, LCM common pairs; eDPI already had a table. Asian BMI cut-offs left out: only the 23 threshold is sourced) Reference tables and edge-case comparisons on the highest-traffic calculators (e.g. BMI categories, loan terms side by side)
 - [x] B8 Removed the unused `compact` / `visibleInputIds` mode from `CalculatorForm` (dead since the new hero); typecheck and the e2e suites pass
-- [ ] B9 Mobile: confirm the answer strip, 44px inputs and collapsed sections on a real phone after deploy
+- [x] B9 (owner checked on a real phone 2026-10-22) Mobile: confirm the answer strip, 44px inputs and collapsed sections on a real phone after deploy
 
 ## C. Decision tools (the traffic strategy)
 
