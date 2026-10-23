@@ -22,6 +22,7 @@ export const decisionTools: DecisionToolInfo[] = [
     blurb: 'Your monthly payment, debt-to-income, the cash to close, and whether buying beats renting, in one flow.',
     calculatorIds: [
       'house-affordability-calculator',
+      'mortgage-calculator',
       'home-affordability-calculator',
       'dti-ratio-calculator',
       'closing-costs-calculator',
